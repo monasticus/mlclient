@@ -1,4 +1,5 @@
 from abc import ABCMeta, abstractmethod
+from client import constants
 
 
 class ResourceCall(metaclass=ABCMeta):
@@ -10,15 +11,16 @@ class ResourceCall(metaclass=ABCMeta):
                 callable(subclass.endpoint) or
                 NotImplemented)
 
-    def __init__(self, params: dict = None, headers: dict = None, body=None,
-                 accept: str = None, content_type: str = None):
+    def __init__(self, method: str = constants.METHOD_GET, params: dict = None, headers: dict = None,
+                 body=None, accept: str = None, content_type: str = None):
+        self.__method = method
         self.__params = params or {}
         self.__headers = headers or {}
         self.__body = body
         if accept:
-            self.__headers["accept"] = accept
+            self.__headers[constants.HEADER_ACCEPT] = accept
         if content_type:
-            self.__headers["content-type"] = content_type
+            self.__headers[constants.HEADER_CONTENT_TYPE] = content_type
 
     @abstractmethod
     def endpoint(self):
@@ -36,6 +38,9 @@ class ResourceCall(metaclass=ABCMeta):
 
     def set_body(self, body):
         self.__body = body
+
+    def method(self):
+        return self.__method
 
     def params(self):
         return self.__params.copy()

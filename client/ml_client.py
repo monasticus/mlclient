@@ -1,4 +1,6 @@
+from client import constants
 from client.rest_resources.client_api.eval_call import EvalCall
+from client.rest_resources.management_api.logs_call import LogsCall
 from client.rest_resources.resource_call import ResourceCall
 from requests import Session
 from requests.auth import HTTPBasicAuth, HTTPDigestAuth
@@ -53,7 +55,7 @@ class MLClient:
                 headers = {}
             if not params:
                 params = {}
-            if headers["content-type"] == "application/json":
+            if headers[constants.HEADER_CONTENT_TYPE] == constants.HEADER_CONTENT_TYPE_JSON:
                 return self.sess.post(url, auth=self.auth, params=params, headers=headers, json=body)
             else:
                 return self.sess.post(url, auth=self.auth, params=params, headers=headers, data=body)
@@ -65,7 +67,7 @@ class MLClient:
                 headers = {}
             if not params:
                 params = {}
-            if headers["content-type"] == "application/json":
+            if headers[constants.HEADER_CONTENT_TYPE] == constants.HEADER_CONTENT_TYPE_JSON:
                 return self.sess.put(url, auth=self.auth, params=params, headers=headers, json=body)
             else:
                 return self.sess.put(url, auth=self.auth, params=params, headers=headers, data=body)
@@ -82,8 +84,29 @@ class MLResourceClient(MLClient):
                         txid=txid)
         return self.call(call)
 
+    def get_logs(self, data_format: str = "html", filename: str = None, host: str = None,
+                 start_time: str = None, end_time: str = None, regex: str = None):
+        call = LogsCall(data_format=data_format,
+                        filename=filename,
+                        host=host,
+                        start_time=start_time,
+                        end_time=end_time,
+                        regex=regex)
+        return self.call(call)
+
     def call(self, call: ResourceCall):
-        return self.post(endpoint=call.endpoint(),
-                         params=call.params(),
-                         headers=call.headers(),
-                         body=call.body())
+        method = call.method()
+        if method == constants.METHOD_GET:
+            return self.get(endpoint=call.endpoint(),
+                            params=call.params(),
+                            headers=call.headers())
+        elif method == constants.METHOD_POST:
+            return self.post(endpoint=call.endpoint(),
+                             params=call.params(),
+                             headers=call.headers(),
+                             body=call.body())
+        elif method == constants.METHOD_PUT:
+            return self.put(endpoint=call.endpoint(),
+                            params=call.params(),
+                            headers=call.headers(),
+                            body=call.body())

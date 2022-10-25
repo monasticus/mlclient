@@ -1,3 +1,5 @@
+from client.rest_resources.client_api.eval_call import EvalCall
+from client.rest_resources.resource_call import ResourceCall
 from requests import Session
 from requests.auth import HTTPBasicAuth, HTTPDigestAuth
 import logging
@@ -67,3 +69,21 @@ class MLClient:
                 return self.sess.put(url, auth=self.auth, params=params, headers=headers, json=body)
             else:
                 return self.sess.put(url, auth=self.auth, params=params, headers=headers, data=body)
+
+
+class MLResourceClient(MLClient):
+
+    def eval(self, xquery: str = None, javascript: str = None, variables: dict = None,
+             database: str = None, txid: str = None):
+        call = EvalCall(xquery=xquery,
+                        javascript=javascript,
+                        variables=variables,
+                        database=database,
+                        txid=txid)
+        return self.call(call)
+
+    def call(self, call: ResourceCall):
+        return self.post(endpoint=call.endpoint(),
+                         params=call.params(),
+                         headers=call.headers(),
+                         body=call.body())

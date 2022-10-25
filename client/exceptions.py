@@ -1,0 +1,2 @@
+class WrongParameters(Exception):
+    pass

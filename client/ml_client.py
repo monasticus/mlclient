@@ -58,7 +58,7 @@ class MLClient:
                 headers = {}
             if not params:
                 params = {}
-            if headers[constants.HEADER_CONTENT_TYPE] == constants.HEADER_CONTENT_TYPE_JSON:
+            if headers.get(constants.HEADER_CONTENT_TYPE) == constants.HEADER_CONTENT_TYPE_JSON:
                 return self.__sess.post(url, auth=self.__auth, params=params, headers=headers, json=body)
             else:
                 return self.__sess.post(url, auth=self.__auth, params=params, headers=headers, data=body)
@@ -70,7 +70,7 @@ class MLClient:
                 headers = {}
             if not params:
                 params = {}
-            if headers[constants.HEADER_CONTENT_TYPE] == constants.HEADER_CONTENT_TYPE_JSON:
+            if headers.get(constants.HEADER_CONTENT_TYPE) == constants.HEADER_CONTENT_TYPE_JSON:
                 return self.__sess.put(url, auth=self.__auth, params=params, headers=headers, json=body)
             else:
                 return self.__sess.put(url, auth=self.__auth, params=params, headers=headers, data=body)

@@ -64,7 +64,7 @@ def test_body_with_variables(default_eval_call):
 
 def test_body_is_normalized():
     xquery = """
-    xquery version '1.0-ml'
+    xquery version '1.0-ml';
     
     declare variable $data as xs:string? external;
     
@@ -79,7 +79,7 @@ def test_body_is_normalized():
                     variables={"data": "custom-value"})
 
     assert {  # No new line in the xquery code
-        "xquery": "xquery version '1.0-ml' "
+        "xquery": "xquery version '1.0-ml'; "
                   "declare variable $data as xs:string? external; "
                   "let $a = if (fn:empty($data)) then 'default' else $data "
                   "return $a",

@@ -27,3 +27,5 @@ def test_get_accept_header_for_text_format():
 def test_get_accept_header_for_unsupported_format():
     with pytest.raises(exceptions.UnsupportedFormat) as err:
         utils.get_accept_header_for_format("xxx")
+
+    assert err.value.args[0] == "Provided format [xxx] is not supported."

@@ -49,4 +49,7 @@ class ResourceCall(metaclass=ABCMeta):
         return self.__headers.copy()
 
     def body(self):
-        return self.__body
+        if isinstance(self.__body, str):
+            return self.__body
+        elif isinstance(self.__body, dict):
+            return self.__body.copy()

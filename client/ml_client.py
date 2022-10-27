@@ -87,10 +87,10 @@ class MLResourceClient(MLClient):
                         txid=txid)
         return self.call(call)
 
-    def get_logs(self, data_format: str = None, filename: str = None, host: str = None,
+    def get_logs(self, filename: str, data_format: str = None, host: str = None,
                  start_time: str = None, end_time: str = None, regex: str = None) -> Response:
-        call = LogsCall(data_format=data_format,
-                        filename=filename,
+        call = LogsCall(filename=filename,
+                        data_format=data_format,
                         host=host,
                         start_time=start_time,
                         end_time=end_time,

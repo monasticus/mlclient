@@ -19,9 +19,9 @@ class ResourceCall(metaclass=ABCMeta):
         self.__headers = headers or {}
         self.__body = body
         if accept:
-            self.__headers[constants.HEADER_ACCEPT] = accept
+            self.__headers[constants.HEADER_NAME_ACCEPT] = accept
         if content_type:
-            self.__headers[constants.HEADER_CONTENT_TYPE] = content_type
+            self.__headers[constants.HEADER_NAME_CONTENT_TYPE] = content_type
 
     @abstractmethod
     def endpoint(self):

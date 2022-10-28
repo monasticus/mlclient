@@ -19,8 +19,8 @@ class EvalCall(ResourceCall):
         self.__validate_params(xquery, javascript)
 
         super().__init__(method=constants.METHOD_POST,
-                         accept=constants.HEADER_ACCEPT_MULTIPART_MIXED,
-                         content_type=constants.HEADER_CONTENT_TYPE_X_WWW_FORM_URLENCODED)
+                         accept=constants.HEADER_MULTIPART_MIXED,
+                         content_type=constants.HEADER_X_WWW_FORM_URLENCODED)
         self.add_param(EvalCall.__DATABASE_PARAM, database)
         self.add_param(EvalCall.__TXID_PARAM, txid)
         self.set_body(self.__build_body(xquery, javascript, variables))

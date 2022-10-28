@@ -1,4 +1,4 @@
-from client.rest_resources.resource_call import ResourceCall
+from mlclient.calls import ResourceCall
 
 
 class ResourceCallTestImpl(ResourceCall):

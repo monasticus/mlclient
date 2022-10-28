@@ -1,6 +1,7 @@
-from client.ml_client import MLResourceClient
-from client.rest_resources.client_api.eval_call import EvalCall
 import pytest
+
+from mlclient import MLResourceClient
+from mlclient.calls.clientapi import EvalCall
 
 
 @pytest.fixture

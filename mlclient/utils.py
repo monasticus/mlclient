@@ -1,5 +1,4 @@
-from client import constants
-from client import exceptions
+from mlclient import constants, exceptions
 
 
 def get_accept_header_for_format(data_format: str):

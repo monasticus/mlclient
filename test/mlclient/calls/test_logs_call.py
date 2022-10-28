@@ -1,7 +1,9 @@
-from client import exceptions
-from client.rest_resources.management_api.logs_call import LogsCall
 from datetime import datetime
+
 import pytest
+
+from mlclient import exceptions
+from mlclient.calls.managementapi import LogsCall
 
 
 @pytest.fixture

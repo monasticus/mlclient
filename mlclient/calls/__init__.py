@@ -1,5 +1,6 @@
 from abc import ABCMeta, abstractmethod
-from client import constants
+
+from mlclient import constants
 
 
 class ResourceCall(metaclass=ABCMeta):

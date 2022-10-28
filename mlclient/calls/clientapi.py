@@ -1,8 +1,7 @@
-from client.rest_resources.resource_call import ResourceCall
-import client.exceptions as exc
-import client.constants as constants
-
 from json import dumps
+
+from mlclient import constants, exceptions
+from mlclient.calls import ResourceCall
 
 
 class EvalCall(ResourceCall):
@@ -32,9 +31,9 @@ class EvalCall(ResourceCall):
     @staticmethod
     def __validate_params(xquery: str, javascript: str):
         if not xquery and not javascript:
-            raise exc.WrongParameters("You must include either the xquery or the javascript parameter!")
+            raise exceptions.WrongParameters("You must include either the xquery or the javascript parameter!")
         elif xquery and javascript:
-            raise exc.WrongParameters("You cannot include both the xquery and the javascript parameter!")
+            raise exceptions.WrongParameters("You cannot include both the xquery and the javascript parameter!")
 
     @staticmethod
     def __build_body(xquery: str, javascript: str, variables: dict):

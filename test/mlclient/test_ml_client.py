@@ -1,5 +1,6 @@
-from client.ml_client import MLClient
 import pytest
+
+from mlclient import MLClient
 
 
 def test_connection():

@@ -1,6 +1,7 @@
-from client import exceptions
-from client.rest_resources.management_api.databases_call import DatabasesCall
 import pytest
+
+from mlclient import exceptions
+from mlclient.calls.managementapi import DatabasesCall
 
 
 @pytest.fixture
@@ -20,14 +21,15 @@ def test_validation_format_param():
     with pytest.raises(exceptions.WrongParameters) as err:
         DatabasesCall(method="GET", resp_format="text")
 
-    assert err.value.args[0] == "The supported formats are xml, json or html!"
+    assert err.value.args[0] == "The supported formats are: xml, json, html"
 
 
 def test_validation_view_param():
     with pytest.raises(exceptions.WrongParameters) as err:
         DatabasesCall(method="GET", view="X")
 
-    assert err.value.args[0] == "The supported views are: describe, default, metrics, package, schema, properties-schema"
+    assert err.value.args[0] == "The supported views are: " \
+                                "describe, default, metrics, package, schema, properties-schema"
 
 
 def test_endpoint(default_databases_call):

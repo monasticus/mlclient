@@ -1,7 +1,6 @@
 import pytest
 
-from client import utils
-from client import exceptions
+from mlclient import exceptions, utils
 
 
 def test_get_accept_header_for_xml_format():

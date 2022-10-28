@@ -1,17 +1,18 @@
-from client import constants
-from client.rest_resources.client_api.eval_call import EvalCall
-from client.rest_resources.management_api.logs_call import LogsCall
-from client.rest_resources.management_api.databases_call import DatabasesCall
-from client.rest_resources.resource_call import ResourceCall
-from requests import Session, Response
-from requests.auth import HTTPBasicAuth, HTTPDigestAuth
 import logging
+
+from requests import Response, Session
+from requests.auth import HTTPBasicAuth, HTTPDigestAuth
+
+from mlclient import constants
+from mlclient.calls import ResourceCall
+from mlclient.calls.clientapi import EvalCall
+from mlclient.calls.managementapi import DatabasesCall, LogsCall
 
 
 class MLClient:
 
     def __init__(self, protocol: str = "http", host: str = "localhost", port: int = 8002,
-                auth: str = "basic", username: str = "admin", password: str = "admin"):
+                 auth: str = "basic", username: str = "admin", password: str = "admin"):
         self.__protocol = protocol
         self.__host = host
         self.__port = port

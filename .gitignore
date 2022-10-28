@@ -1,4 +1,8 @@
 # Python
 /**/__pycache__/
 
+# PyCharm
 .idea
+
+# Internal
+main.py

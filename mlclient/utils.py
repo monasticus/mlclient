@@ -1,3 +1,5 @@
+import json
+
 from mlclient import constants, exceptions
 
 
@@ -12,3 +14,14 @@ def get_accept_header_for_format(data_format: str):
         return constants.HEADER_CONTENT_TYPE_PLAIN_TEXT
     else:
         raise exceptions.UnsupportedFormat(f"Provided format [{data_format}] is not supported.")
+
+
+def get_content_type_header_for_data(data):
+    try:
+        if isinstance(data, dict):
+            content_type = "application/json"
+        else:
+            body = json.loads(data)
+            content_type = "application/json"
+    except ValueError:
+        content_type = "application/xml"

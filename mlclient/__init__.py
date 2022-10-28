@@ -101,7 +101,7 @@ class MLResourceClient(MLClient):
 
     def databases(self, method: str, resp_format: str = None, view: str = None) -> Response:
         call = DatabasesCall(method=method,
-                             resp_format=resp_format,
+                             data_format=resp_format,
                              view=view)
         return self.call(call)
 

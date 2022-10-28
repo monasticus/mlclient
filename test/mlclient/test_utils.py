@@ -28,3 +28,18 @@ def test_get_accept_header_for_unsupported_format():
         utils.get_accept_header_for_format("xxx")
 
     assert err.value.args[0] == "Provided format [xxx] is not supported."
+
+
+def test_get_content_type_header_for_xml_data():
+    xml_content_type_header = utils.get_content_type_header_for_data("<root></root>")
+    assert xml_content_type_header == "application/xml"
+
+
+def test_get_content_type_header_for_json_data():
+    json_content_type_header = utils.get_content_type_header_for_data({"key": "value"})
+    assert json_content_type_header == "application/json"
+
+
+def test_get_content_type_header_for_stringified_json_data():
+    json_content_type_header = utils.get_content_type_header_for_data('{"key": "value"}')
+    assert json_content_type_header == "application/json"

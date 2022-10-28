@@ -1,6 +1,8 @@
+import json
+
 from dateutil import parser
 
-from mlclient import exceptions, utils
+from mlclient import constants, exceptions, utils
 from mlclient.calls import ResourceCall
 
 
@@ -14,28 +16,60 @@ class DatabasesCall(ResourceCall):
     __SUPPORTED_FORMATS = ["xml", "json", "html"]
     __SUPPORTED_VIEWS = ["describe", "default", "metrics", "package", "schema", "properties-schema"]
 
-    def __init__(self, method: str, resp_format: str = "xml", view: str = "default"):
-        resp_format = resp_format if resp_format is not None else "xml"
-        view = view if view is not None else "default"
-        DatabasesCall.__validate_params(method, resp_format, view)
+    def __init__(self, method: str, data_format: str = "xml", view: str = "default", body=None):
+        data_format = data_format if data_format is not None else "xml"
+        if data_format not in DatabasesCall.__SUPPORTED_FORMATS:
+            raise exceptions.WrongParameters("The supported formats are: " + ", ".join(DatabasesCall.__SUPPORTED_FORMATS))
 
-        super().__init__(method=method,
-                         accept=utils.get_accept_header_for_format(resp_format))
-        self.__resp_format = resp_format
-        self.add_param(DatabasesCall.__FORMAT_PARAM, resp_format)
-        self.add_param(DatabasesCall.__VIEW_PARAM, view)
+        if method == constants.METHOD_GET:
+            self.__init_get(method, data_format, view)
+        elif method == constants.METHOD_POST:
+            self.__init_post(method, data_format, body)
+        else:
+            raise exceptions.WrongParameters("Method not allowed: the supported methods are GET and POST!")
+
+        self.add_param(DatabasesCall.__FORMAT_PARAM, data_format)
 
     def endpoint(self):
         return DatabasesCall.ENDPOINT
 
+    def __init_get(self, method: str, data_format: str, view: str):
+        view = view if view is not None else "default"
+        if view not in DatabasesCall.__SUPPORTED_VIEWS:
+            raise exceptions.WrongParameters("The supported views are: " + ", ".join(DatabasesCall.__SUPPORTED_VIEWS))
+
+        super().__init__(method=method,
+                         accept=utils.get_accept_header_for_format(data_format))
+        self.add_param(DatabasesCall.__VIEW_PARAM, view)
+
+    def __init_post(self, method: str, data_format: str, body):
+        if body is None:
+            raise exceptions.WrongParameters("No request body provided for POST /manage/v2/databases!")
+
+        try:
+            if isinstance(body, dict):
+                content_type = "application/json"
+            else:
+                body = json.loads(body)
+                content_type = "application/json"
+        except ValueError:
+            content_type = "application/xml"
+
+        super().__init__(method=method,
+                         accept=utils.get_accept_header_for_format(data_format),
+                         content_type=content_type,
+                         body=body)
+
     @staticmethod
-    def __validate_params(method, resp_format, view):
-        if method not in ["GET", "POST"]:
-            raise exceptions.WrongParameters("Method not allowed: the supported methods are GET and POST!")
-        if resp_format not in DatabasesCall.__SUPPORTED_FORMATS:
+    def __validate_params(method, data_format, view, body):
+        # if method not in ["GET", "POST"]:
+        #     raise exceptions.WrongParameters("Method not allowed: the supported methods are GET and POST!")
+        if data_format not in DatabasesCall.__SUPPORTED_FORMATS:
             raise exceptions.WrongParameters("The supported formats are: " + ", ".join(DatabasesCall.__SUPPORTED_FORMATS))
         if view not in DatabasesCall.__SUPPORTED_VIEWS:
             raise exceptions.WrongParameters("The supported views are: " + ", ".join(DatabasesCall.__SUPPORTED_VIEWS))
+        if method == "POST" and body is None:
+            raise exceptions.WrongParameters("No request body provided for POST /manage/v2/databases!")
 
 
 class LogsCall(ResourceCall):

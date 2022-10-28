@@ -1,6 +1,7 @@
 from client import constants
 from client.rest_resources.client_api.eval_call import EvalCall
 from client.rest_resources.management_api.logs_call import LogsCall
+from client.rest_resources.management_api.databases_call import DatabasesCall
 from client.rest_resources.resource_call import ResourceCall
 from requests import Session, Response
 from requests.auth import HTTPBasicAuth, HTTPDigestAuth
@@ -95,6 +96,12 @@ class MLResourceClient(MLClient):
                         start_time=start_time,
                         end_time=end_time,
                         regex=regex)
+        return self.call(call)
+
+    def databases(self, method: str, resp_format: str = None, view: str = None) -> Response:
+        call = DatabasesCall(method=method,
+                             resp_format=resp_format,
+                             view=view)
         return self.call(call)
 
     def call(self, call: ResourceCall) -> Response:

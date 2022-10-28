@@ -39,3 +39,13 @@ def test_get_logs():
 
     assert resp.status_code == 200
     assert "logfile" in resp.json()
+
+
+@pytest.mark.ml_access
+def test_databases_get():
+    with MLResourceClient(auth="digest") as client:
+        resp = client.databases(method="GET",
+                                resp_format="json")
+
+    assert resp.status_code == 200
+    assert "/manage/v2/databases?view=default" == resp.json()["database-default-list"]["meta"]["uri"]

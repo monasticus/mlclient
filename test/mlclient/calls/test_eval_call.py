@@ -1,7 +1,7 @@
 import pytest
 
 from mlclient import exceptions
-from mlclient.calls.clientapi import EvalCall
+from mlclient.calls import EvalCall
 
 
 @pytest.fixture

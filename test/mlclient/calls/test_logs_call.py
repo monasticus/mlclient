@@ -3,7 +3,7 @@ from datetime import datetime
 import pytest
 
 from mlclient import exceptions
-from mlclient.calls.managementapi import LogsCall
+from mlclient.calls import LogsCall
 
 
 @pytest.fixture

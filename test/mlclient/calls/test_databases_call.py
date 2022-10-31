@@ -1,7 +1,7 @@
 import pytest
 
 from mlclient import exceptions
-from mlclient.calls.managementapi import DatabasesCall
+from mlclient.calls import DatabasesCall
 
 
 @pytest.fixture

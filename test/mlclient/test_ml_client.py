@@ -23,7 +23,7 @@ def test_context_mng():
 
 @pytest.mark.ml_access
 def test_get():
-    with MLClient(auth="digest") as client:
+    with MLClient(auth_method="digest") as client:
         resp = client.get("/manage/v2/servers")
 
     assert resp.request.method == "GET"
@@ -33,7 +33,7 @@ def test_get():
 
 @pytest.mark.ml_access
 def test_get_with_customized_params_and_headers():
-    with MLClient(auth="digest") as client:
+    with MLClient(auth_method="digest") as client:
         resp = client.get("/manage/v2/servers",
                           params={"format": "json"},
                           headers={"custom-header": "custom-value"})
@@ -47,7 +47,7 @@ def test_get_with_customized_params_and_headers():
 
 @pytest.mark.ml_access
 def test_post():
-    with MLClient(auth="digest") as client:
+    with MLClient(auth_method="digest") as client:
         resp = client.post("/manage/v2/databases/Documents")
 
     assert resp.request.method == "POST"
@@ -58,7 +58,7 @@ def test_post():
 
 @pytest.mark.ml_access
 def test_post_with_customized_params_and_headers_and_body_different_than_json():
-    with MLClient(auth="digest") as client:
+    with MLClient(auth_method="digest") as client:
         resp = client.post("/v1/eval",
                            body={"xquery": "()"},
                            params={"database": "Documents"},
@@ -74,7 +74,7 @@ def test_post_with_customized_params_and_headers_and_body_different_than_json():
 
 @pytest.mark.ml_access
 def test_post_with_customized_params_and_headers_and_json_body():
-    with MLClient(auth="digest") as client:
+    with MLClient(auth_method="digest") as client:
         resp = client.post("/manage/v2/databases/Documents",
                            body={"operation": "clear-database"},
                            params={"format": "json"},
@@ -90,7 +90,7 @@ def test_post_with_customized_params_and_headers_and_json_body():
 
 @pytest.mark.ml_access
 def test_post():
-    with MLClient(auth="digest") as client:
+    with MLClient(auth_method="digest") as client:
         resp = client.put("/v1/documents")
 
     assert resp.request.method == "PUT"
@@ -101,7 +101,7 @@ def test_post():
 
 @pytest.mark.ml_access
 def test_put_with_customized_params_and_headers_and_body_different_than_json():
-    with MLClient(auth="digest") as client:
+    with MLClient(auth_method="digest") as client:
         resp = client.put("/v1/documents",
                           body="<document/>",
                           params={"database": "Documents"},
@@ -117,7 +117,7 @@ def test_put_with_customized_params_and_headers_and_body_different_than_json():
 
 @pytest.mark.ml_access
 def test_put_with_customized_params_and_headers_and_json_body():
-    with MLClient(auth="digest") as client:
+    with MLClient(auth_method="digest") as client:
         resp = client.put("/v1/documents",
                           body={"document": {}},
                           params={"database": "Documents"},

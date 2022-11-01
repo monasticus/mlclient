@@ -17,7 +17,7 @@ def xquery():
 @pytest.mark.ml_access
 def test_call(xquery):
     eval_call = EvalCall(xquery=xquery, variables={"element": "<parent><child/></parent>"})
-    with MLResourceClient(auth="digest") as client:
+    with MLResourceClient(auth_method="digest") as client:
         resp = client.call(eval_call)
 
     assert resp.status_code == 200
@@ -26,7 +26,7 @@ def test_call(xquery):
 
 @pytest.mark.ml_access
 def test_eval(xquery):
-    with MLResourceClient(auth="digest") as client:
+    with MLResourceClient(auth_method="digest") as client:
         resp = client.eval(xquery=xquery, variables={"element": "<parent><child/></parent>"})
 
     assert resp.status_code == 200
@@ -35,7 +35,7 @@ def test_eval(xquery):
 
 @pytest.mark.ml_access
 def test_get_logs():
-    with MLResourceClient(auth="digest") as client:
+    with MLResourceClient(auth_method="digest") as client:
         resp = client.get_logs(filename="ErrorLog.txt", data_format="json")
 
     assert resp.status_code == 200
@@ -44,7 +44,7 @@ def test_get_logs():
 
 @pytest.mark.ml_access
 def test_databases_get():
-    with MLResourceClient(auth="digest") as client:
+    with MLResourceClient(auth_method="digest") as client:
         resp = client.databases(method="GET",
                                 resp_format="json")
 

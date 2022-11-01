@@ -1,4 +1,5 @@
 import logging
+from typing import NoReturn, Union
 
 from requests import Response, Session
 from requests.auth import HTTPBasicAuth, HTTPDigestAuth
@@ -33,17 +34,17 @@ class MLClient:
 
     Methods
     -------
-    connect()
+    connect() -> NoReturn
         Starts an HTTP session
-    disconnect()
+    disconnect() -> NoReturn
         Closes an HTTP session
-    is_connected()
+    is_connected() -> bool
         Returns True if the client has started a connection; otherwise False
     get(endpoint: str, params: dict = None, headers: dict = None) -> Response
         Sends a GET request
-    post(endpoint: str, params: dict = None, headers: dict = None, body=None) -> Response:
+    post(endpoint: str, params: dict = None, headers: dict = None, body: Union[str, dict] = None) -> Response:
         Sends a POST request
-    put(endpoint: str, params: dict = None, headers: dict = None, body=None) -> Response:
+    put(endpoint: str, params: dict = None, headers: dict = None, body: Union[str, dict] = None) -> Response:
         Sends a PUT request
     """
 
@@ -85,13 +86,13 @@ class MLClient:
         self.disconnect()
         return None
 
-    def connect(self):
+    def connect(self) -> NoReturn:
         """Starts an HTTP session"""
 
         self.__logger.debug("Initiating a connection")
         self.__sess = Session()
 
-    def disconnect(self):
+    def disconnect(self) -> NoReturn:
         """Closes an HTTP session"""
 
         if self.__sess:
@@ -139,7 +140,7 @@ class MLClient:
         else:
             self.__logger.warning(f"A request attempt failure: GET {endpoint} -- MLClient is not connected")
 
-    def post(self, endpoint: str, params: dict = None, headers: dict = None, body=None) -> Response:
+    def post(self, endpoint: str, params: dict = None, headers: dict = None, body: Union[str, dict] = None) -> Response:
         """Sends a POST request
 
         Parameters
@@ -173,7 +174,7 @@ class MLClient:
         else:
             self.__logger.warning(f"A request attempt failure: POST {endpoint} -- MLClient is not connected")
 
-    def put(self, endpoint: str, params: dict = None, headers: dict = None, body=None) -> Response:
+    def put(self, endpoint: str, params: dict = None, headers: dict = None, body: Union[str, dict] = None) -> Response:
         """Sends a PUT request
 
         Parameters

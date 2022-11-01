@@ -114,21 +114,21 @@ def test_formatting_datetime_year_only():
     params = LogsCall(filename="ErrorLog.txt",
                       start_time="2020").params()
     now = datetime.now()
-    assert params["start"] == f"2020-{now.month}-{now.day}T00:00:00"
+    assert params["start"] == f"2020-{now.month:02d}-{now.day:02d}T00:00:00"
 
 
 def test_formatting_datetime_partial_year_only():
     params = LogsCall(filename="ErrorLog.txt",
                       start_time="32").params()
     now = datetime.now()
-    assert params["start"] == f"2032-{now.month}-{now.day}T00:00:00"
+    assert params["start"] == f"2032-{now.month:02d}-{now.day:02d}T00:00:00"
 
 
 def test_formatting_datetime_day_only():
     params = LogsCall(filename="ErrorLog.txt",
                       start_time="28").params()
     now = datetime.now()
-    assert params["start"] == f"{now.year}-{now.month}-28T00:00:00"
+    assert params["start"] == f"{now.year}-{now.month:02d}-28T00:00:00"
 
 
 def test_formatting_datetime_month_and_day():
@@ -148,21 +148,21 @@ def test_formatting_datetime_time_only():
     params = LogsCall(filename="ErrorLog.txt",
                       start_time="01:01").params()
     now = datetime.now()
-    assert params["start"] == f"{now.year}-{now.month}-{now.day}T01:01:00"
+    assert params["start"] == f"{now.year}-{now.month:02d}-{now.day:02d}T01:01:00"
 
 
 def test_formatting_datetime_time_only_with_seconds():
     params = LogsCall(filename="ErrorLog.txt",
                       start_time="01:01:01").params()
     now = datetime.now()
-    assert params["start"] == f"{now.year}-{now.month}-{now.day}T01:01:01"
+    assert params["start"] == f"{now.year}-{now.month:02d}-{now.day:02d}T01:01:01"
 
 
 def test_formatting_datetime_time_only_with_seconds_and_millis():
     params = LogsCall(filename="ErrorLog.txt",
                       start_time="01:01:01.001").params()
     now = datetime.now()
-    assert params["start"] == f"{now.year}-{now.month}-{now.day}T01:01:01"
+    assert params["start"] == f"{now.year}-{now.month:02d}-{now.day:02d}T01:01:01"
 
 
 def test_formatting_datetime_date_and_hour_only():

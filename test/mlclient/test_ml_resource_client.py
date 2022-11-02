@@ -43,10 +43,18 @@ def test_get_logs():
 
 
 @pytest.mark.ml_access
-def test_databases_get():
+def test_get_databases():
     with MLResourceClient(auth_method="digest") as client:
-        resp = client.databases(method="GET",
-                                resp_format="json")
+        resp = client.get_databases(resp_format="json")
 
     assert resp.status_code == 200
     assert "/manage/v2/databases?view=default" == resp.json()["database-default-list"]["meta"]["uri"]
+
+
+@pytest.mark.ml_access
+def test_post_databases():
+    with MLResourceClient(auth_method="digest") as client:
+        resp = client.post_databases(body='<database-properties xmlns="http://marklogic.com/manage" />')
+
+    assert resp.status_code == 400
+    assert "Payload has errors in structure, content-type or values. Database name missing." in resp.text

@@ -1,7 +1,10 @@
+from typing import Union
+
 from requests import Response
 
 from mlclient import MLClient, constants
-from mlclient.calls import DatabasesCall, EvalCall, LogsCall, ResourceCall
+from mlclient.calls import (DatabasesGetCall, DatabasesPostCall, EvalCall,
+                            LogsCall, ResourceCall)
 
 
 class MLResourceClient(MLClient):
@@ -25,10 +28,13 @@ class MLResourceClient(MLClient):
                         regex=regex)
         return self.call(call)
 
-    def databases(self, method: str, resp_format: str = None, view: str = None) -> Response:
-        call = DatabasesCall(method=method,
-                             data_format=resp_format,
-                             view=view)
+    def get_databases(self, resp_format: str = None, view: str = None) -> Response:
+        call = DatabasesGetCall(data_format=resp_format,
+                                view=view)
+        return self.call(call)
+
+    def post_databases(self, body: Union[str, dict] = None) -> Response:
+        call = DatabasesPostCall(body=body)
         return self.call(call)
 
     def call(self, call: ResourceCall) -> Response:

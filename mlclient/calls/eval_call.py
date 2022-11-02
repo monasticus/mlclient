@@ -5,6 +5,22 @@ from mlclient.calls import ResourceCall
 
 
 class EvalCall(ResourceCall):
+    """
+    A ResourceCall implementation representing a single request to the /v1/eval REST Resource
+
+    Evaluate an ad-hoc query expressed using XQuery or server-side JavaScript.
+    Documentation of the REST Resource API: https://docs.marklogic.com/REST/POST/v1/eval
+
+    Attributes
+    ----------
+    ENDPOINT
+        a static constant storing the Eval endpoint value
+
+    Methods
+    -------
+    All public methods are inherited from the ResourceCall abstract class.
+    This class implements the endpoint() abstract method to return an endpoint for the specific call.
+    """
 
     ENDPOINT = "/v1/eval"
 
@@ -16,6 +32,28 @@ class EvalCall(ResourceCall):
 
     def __init__(self, xquery: str = None, javascript: str = None, variables: dict = None,
                  database: str = None, txid: str = None):
+        """
+        Parameters
+        ----------
+        xquery : str
+            The query to evaluate, expressed using XQuery.
+            You must include either this parameter or the javascript parameter,
+            but not both.
+        javascript : str
+            The query to evaluate, expressed using server-side JavaScript.
+            You must include either this parameter or the xquery parameter,
+            but not both.
+        variables
+            External variables to pass to the query during evaluation
+        database
+            Perform this operation on the named content database
+            instead of the default content database associated with the REST API instance.
+            The database can be identified by name or by database id.
+        txid
+            The transaction identifier of the multi-statement transaction
+            in which to service this request.
+        """
+
         self.__validate_params(xquery, javascript)
 
         super().__init__(method=constants.METHOD_POST,
@@ -26,6 +64,14 @@ class EvalCall(ResourceCall):
         self.set_body(self.__build_body(xquery, javascript, variables))
 
     def endpoint(self):
+        """Implementation of an abstract method returning an endpoint for the Eval call
+
+        Returns
+        -------
+        str
+            an Eval call endpoint
+        """
+
         return EvalCall.ENDPOINT
 
     @staticmethod

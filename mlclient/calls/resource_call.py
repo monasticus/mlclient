@@ -58,8 +58,7 @@ class ResourceCall(metaclass=ABCMeta):
 
     @classmethod
     def __subclasshook__(cls, subclass):
-        return (hasattr(subclass, 'ENDPOINT') and
-                hasattr(subclass, 'endpoint') and
+        return (hasattr(subclass, 'endpoint') and
                 callable(subclass.endpoint) or
                 NotImplemented)
 

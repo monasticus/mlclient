@@ -5,6 +5,22 @@ from mlclient.calls import ResourceCall
 
 
 class LogsCall(ResourceCall):
+    """
+    A ResourceCall implementation representing a single request to the /manage/v2/logs REST Resource
+
+    Returns the content of server log files.
+    Documentation of the REST Resource API: https://docs.marklogic.com/REST/GET/manage/v2/logs
+
+    Attributes
+    ----------
+    ENDPOINT
+        a static constant storing the Logs endpoint value
+
+    Methods
+    -------
+    All public methods are inherited from the ResourceCall abstract class.
+    This class implements the endpoint() abstract method to return an endpoint for the specific call.
+    """
 
     ENDPOINT = "/manage/v2/logs"
 
@@ -17,6 +33,23 @@ class LogsCall(ResourceCall):
 
     def __init__(self, filename: str, data_format: str = "html", host: str = None,
                  start_time: str = None, end_time: str = None, regex: str = None):
+        """
+        Parameters
+        ----------
+        filename : str
+            The log file to be returned.
+        data_format : str
+            The format of the data in the log file. The supported formats are xml, json or html.
+        host : str
+            The host from which to return the log data.
+        start_time : str
+            The start time for the log data.
+        end_time : str
+            The end time for the log data.
+        regex : str
+            Filters the log data, based on a regular expression.
+        """
+
         data_format = data_format if data_format is not None else "html"
         LogsCall.__validate_params(data_format, start_time, end_time)
 
@@ -29,6 +62,14 @@ class LogsCall(ResourceCall):
         self.add_param(LogsCall.__REGEX_PARAM, regex)
 
     def endpoint(self):
+        """Implementation of an abstract method returning an endpoint for the Logs call
+
+        Returns
+        -------
+        str
+            an Logs call endpoint
+        """
+
         return LogsCall.ENDPOINT
 
     @staticmethod

@@ -70,7 +70,7 @@ def test_get_database():
 
 
 @pytest.mark.ml_access
-def test_post_databases():
+def test_post_database():
     with MLResourceClient(auth_method="digest") as client:
         resp = client.post_database(database_name="Documents", body={"operation": "clear-database"})
 
@@ -85,3 +85,22 @@ def test_delete_database():
 
     assert resp.status_code == 204
     assert not resp.text
+
+
+@pytest.mark.ml_access
+def test_get_database_properties():
+    with MLResourceClient(auth_method="digest") as client:
+        resp = client.get_database_properties(database_name="Documents", data_format="json")
+
+    assert resp.status_code == 200
+    assert "Documents" == resp.json()["database-name"]
+
+
+@pytest.mark.ml_access
+def test_put_database_properties():
+    with MLResourceClient(auth_method="digest") as client:
+        resp = client.put_database_properties(database_name="non-existing-db", body={"database-name": "custom-db"})
+
+    print(resp.text)
+    assert resp.status_code == 404
+    assert "XDMP-NOSUCHDB" == resp.json()["errorResponse"]["messageCode"]

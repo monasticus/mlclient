@@ -4,7 +4,8 @@ from requests import Response
 
 from mlclient import MLClient, constants
 from mlclient.calls import (DatabaseDeleteCall, DatabaseGetCall,
-                            DatabasePostCall, DatabasesGetCall,
+                            DatabasePostCall, DatabasePropertiesGetCall,
+                            DatabasePropertiesPutCall, DatabasesGetCall,
                             DatabasesPostCall, EvalCall, LogsCall,
                             ResourceCall)
 
@@ -59,6 +60,20 @@ class MLResourceClient(MLClient):
         call = DatabaseDeleteCall(database_id=database_id,
                                   database_name=database_name,
                                   forest_delete=forest_delete)
+        return self.call(call)
+
+    def get_database_properties(self, database_id: str = None, database_name: str = None,
+                                data_format: str = None) -> Response:
+        call = DatabasePropertiesGetCall(database_id=database_id,
+                                         database_name=database_name,
+                                         data_format=data_format)
+        return self.call(call)
+
+    def put_database_properties(self, database_id: str = None, database_name: str = None,
+                                body: Union[str, dict] = None) -> Response:
+        call = DatabasePropertiesPutCall(database_id=database_id,
+                                         database_name=database_name,
+                                         body=body)
         return self.call(call)
 
     def call(self, call: ResourceCall) -> Response:

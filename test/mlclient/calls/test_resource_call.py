@@ -35,82 +35,82 @@ def test_method_encapsulation():
 
 # params()
 def test_default_params():
-    assert len(ResourceCallTestImpl().params().keys()) == 0
+    assert ResourceCallTestImpl().params() == {}
 
 
 def test_custom_params():
     call_with_custom_param = ResourceCallTestImpl(params={"custom-param": "custom-value"})
-    assert {"custom-param": "custom-value"} == call_with_custom_param.params()
+    assert call_with_custom_param.params() == {"custom-param": "custom-value"}
 
 
 def test_params_encapsulation():
     call = ResourceCallTestImpl()
     params = call.params()
-    assert len(params.keys()) == 0
+    assert {} == params
 
     params["custom-param"] = "custom-value"
-    assert len(params.keys()) == 1
+    assert {"custom-param": "custom-value"} == params
 
-    assert len(call.params().keys()) == 0
+    assert call.params() == {}
 
 
 # headers()
 def test_default_headers():
-    assert len(ResourceCallTestImpl().headers().keys()) == 0
+    assert ResourceCallTestImpl().headers() == {}
 
 
 def test_custom_headers():
     call_with_custom_header = ResourceCallTestImpl(headers={"custom-header": "custom-value"})
-    assert {"custom-header": "custom-value"} == call_with_custom_header.headers()
+    assert call_with_custom_header.headers() == {"custom-header": "custom-value"}
 
 
 def test_headers_with_accept():
     call_with_accept = ResourceCallTestImpl(accept="application/xml")
-    assert {"accept": "application/xml"} == call_with_accept.headers()
+    assert call_with_accept.headers() == {"accept": "application/xml"}
 
 
 def test_headers_with_content_type():
     call_with_content_type = ResourceCallTestImpl(content_type="application/xml")
-    assert {"content-type": "application/xml"} == call_with_content_type.headers()
+    assert call_with_content_type.headers() == {"content-type": "application/xml"}
 
 
 def test_mixed_headers():
     call_with_mixed_headers = ResourceCallTestImpl(headers={"custom-header": "custom-value"},
                                                    accept="application/xml",
                                                    content_type="application/xml")
-    assert {
-               "custom-header": "custom-value",
-               "accept": "application/xml",
-               "content-type": "application/xml"
-           } == call_with_mixed_headers.headers()
+    assert call_with_mixed_headers.headers() == {
+        "custom-header": "custom-value",
+        "accept": "application/xml",
+        "content-type": "application/xml"
+    }
 
 
 def test_headers_when_accept_exists_and_is_provided():
     call_with_custom_header = ResourceCallTestImpl(headers={"accept": "application/xml"},
                                                    accept="application/json")
-    assert {"accept": "application/json"} == call_with_custom_header.headers()
+    assert call_with_custom_header.headers() == {"accept": "application/json"}
 
 
 def test_headers_when_content_type_exists_and_is_provided():
     call_with_custom_header = ResourceCallTestImpl(headers={"content-type": "application/xml"},
                                                    content_type="application/json")
-    assert {"content-type": "application/json"} == call_with_custom_header.headers()
+    assert call_with_custom_header.headers() == {"content-type": "application/json"}
 
 
 def test_headers_encapsulation():
     call = ResourceCallTestImpl()
     headers = call.headers()
-    assert len(headers.keys()) == 0
+    assert {} == headers
 
     headers["custom-header"] = "custom-value"
-    assert len(headers.keys()) == 1
+    assert headers == {"custom-header": "custom-value"}
 
-    assert len(call.headers().keys()) == 0
+    assert call.headers() == {}
 
 
 # body()
 def test_default_body():
-    assert ResourceCallTestImpl().body() is None
+    assert not ResourceCallTestImpl().body()
 
 
 def test_custom_string_body():
@@ -135,12 +135,12 @@ def test_string_body_encapsulation():
 def test_dict_body_encapsulation():
     call = ResourceCallTestImpl(body={})
     body = call.body()
-    assert len(body.keys()) == 0
+    assert body == {}
 
     body["custom-key"] = "custom-value"
-    assert len(body.keys()) == 1
+    assert body == {"custom-key": "custom-value"}
 
-    assert len(call.body().keys()) == 0
+    assert call.body() == {}
 
 
 # add_param()

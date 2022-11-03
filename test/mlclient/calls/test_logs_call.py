@@ -43,39 +43,45 @@ def test_method(default_logs_call):
     assert default_logs_call.method() == "GET"
 
 
-def test_headers_for_default_format():
-    call = LogsCall(filename="ErrorLog.txt")
-    assert {
+def test_parameters(default_logs_call):
+    assert default_logs_call.params() == {
+        "filename": "ErrorLog.txt",
+        "format": "html"
+    }
+
+
+def test_headers(default_logs_call):
+    assert default_logs_call.headers() == {
         "accept": "text/html"
-    } == call.headers()
+    }
 
 
 def test_headers_for_none_format():
     call = LogsCall(filename="ErrorLog.txt", data_format=None)
-    assert {
+    assert call.headers() == {
         "accept": "text/html"
-    } == call.headers()
+    }
 
 
 def test_headers_for_html_format():
     call = LogsCall(filename="ErrorLog.txt", data_format="html")
-    assert {
+    assert call.headers() == {
         "accept": "text/html"
-    } == call.headers()
+    }
 
 
 def test_headers_for_xml_format():
     call = LogsCall(filename="ErrorLog.txt", data_format="xml")
-    assert {
+    assert call.headers() == {
         "accept": "application/xml"
-    } == call.headers()
+    }
 
 
 def test_headers_for_json_format():
     call = LogsCall(filename="ErrorLog.txt", data_format="json")
-    assert {
+    assert call.headers() == {
         "accept": "application/json"
-    } == call.headers()
+    }
 
 
 def test_body(default_logs_call):
@@ -90,17 +96,17 @@ def test_fully_parametrized_call():
                     end_time="2022-01-01 01:02:02",
                     regex="some-re")
     assert call.method() == "GET"
-    assert {
+    assert call.headers() == {
         "accept": "application/json"
-    } == call.headers()
-    assert {
-         "filename": "ErrorLog.txt",
-         "format": "json",
-         "host": "localhost",
-         "start": "2022-01-01T01:01:01",
-         "end": "2022-01-01T01:02:02",
-         "regex": "some-re"
-    } == call.params()
+    }
+    assert call.params() == {
+        "filename": "ErrorLog.txt",
+        "format": "json",
+        "host": "localhost",
+        "start": "2022-01-01T01:01:01",
+        "end": "2022-01-01T01:02:02",
+        "regex": "some-re"
+    }
     assert call.body() is None
 
 

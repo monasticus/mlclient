@@ -31,32 +31,38 @@ def test_validation_blank_body_param():
     assert err.value.args[0] == "No request body provided for PUT /manage/v2/databases/Documents/properties!"
 
 
-def test_endpoint(default_database_properties_put_call):
+def test_endpoint():
+    expected__id_endpoint = "/manage/v2/databases/1/properties"
+    expected__name_endpoint = "/manage/v2/databases/Documents/properties"
     assert DatabasePropertiesPutCall(database_id="1",
-                                     body={"database-name": "custom-db"}).endpoint() == "/manage/v2/databases/1/properties"
+                                     body={"database-name": "custom-db"}).endpoint() == expected__id_endpoint
     assert DatabasePropertiesPutCall(database_name="Documents",
-                                     body={"database-name": "custom-db"}).endpoint() == "/manage/v2/databases/Documents/properties"
+                                     body={"database-name": "custom-db"}).endpoint() == expected__name_endpoint
     assert DatabasePropertiesPutCall(database_id="1",
                                      database_name="Documents",
-                                     body={"database-name": "custom-db"}).endpoint() == "/manage/v2/databases/1/properties"
+                                     body={"database-name": "custom-db"}).endpoint() == expected__id_endpoint
 
 
 def test_method(default_database_properties_put_call):
     assert default_database_properties_put_call.method() == "PUT"
 
 
+def test_parameters(default_database_properties_put_call):
+    assert default_database_properties_put_call.params() == {}
+
+
 def test_headers_for_dict_body():
     call = DatabasePropertiesPutCall(database_name="Documents", body={"database-name": "custom-db"})
-    assert {
+    assert call.headers() == {
         "content-type": "application/json"
-    } == call.headers()
+    }
 
 
 def test_headers_for_stringified_dict_body():
     call = DatabasePropertiesPutCall(database_name="Documents", body='{"database-name": "custom-db"}')
-    assert {
+    assert call.headers() == {
         "content-type": "application/json"
-    } == call.headers()
+    }
 
 
 def test_headers_for_xml_body():
@@ -64,9 +70,9 @@ def test_headers_for_xml_body():
            '  <database-name>custom-db</database-name>' \
            '</database-properties>'
     call = DatabasePropertiesPutCall(database_name="Documents", body=body)
-    assert {
+    assert call.headers() == {
         "content-type": "application/xml"
-    } == call.headers()
+    }
 
 
 def test_dict_body():
@@ -85,13 +91,3 @@ def test_xml_body():
            '</database-properties>'
     call = DatabasePropertiesPutCall(database_name="Documents", body=body)
     assert call.body() == body
-
-
-def test_fully_parametrized_call():
-    call = DatabasePropertiesPutCall(database_name="Documents", body={"database-name": "custom-db"})
-    assert call.method() == "PUT"
-    assert {
-        "content-type": "application/json"
-    } == call.headers()
-    assert {} == call.params()
-    assert call.body() == {"database-name": "custom-db"}

@@ -36,53 +36,58 @@ def test_method(default_database_properties_get_call):
     assert default_database_properties_get_call.method() == "GET"
 
 
-def test_headers_for_default_format():
-    call = DatabasePropertiesGetCall(database_name="Documents")
-    assert {
+def test_parameters(default_database_properties_get_call):
+    assert default_database_properties_get_call.params() == {
+        "format": "xml"
+    }
+
+
+def test_headers(default_database_properties_get_call):
+    assert default_database_properties_get_call.headers() == {
         "accept": "application/xml"
-    } == call.headers()
+    }
 
 
 def test_headers_for_none_format():
     call = DatabasePropertiesGetCall(database_name="Documents", data_format=None)
-    assert {
+    assert call.headers() == {
         "accept": "application/xml"
-    } == call.headers()
+    }
 
 
 def test_headers_for_html_format():
     call = DatabasePropertiesGetCall(database_name="Documents", data_format="html")
-    assert {
+    assert call.headers() == {
         "accept": "text/html"
-    } == call.headers()
+    }
 
 
 def test_headers_for_xml_format():
     call = DatabasePropertiesGetCall(database_name="Documents", data_format="xml")
-    assert {
+    assert call.headers() == {
         "accept": "application/xml"
-    } == call.headers()
+    }
 
 
 def test_headers_for_json_format():
     call = DatabasePropertiesGetCall(database_name="Documents", data_format="json")
-    assert {
+    assert call.headers() == {
         "accept": "application/json"
-    } == call.headers()
+    }
 
 
 def test_body(default_database_properties_get_call):
-    assert not default_database_properties_get_call.body()
+    assert default_database_properties_get_call.body() is None
 
 
 def test_fully_parametrized_call():
     call = DatabasePropertiesGetCall(database_name="Documents",
                                      data_format="json")
     assert call.method() == "GET"
-    assert {
+    assert call.headers() == {
         "accept": "application/json"
-    } == call.headers()
-    assert {
-         "format": "json"
-    } == call.params()
+    }
+    assert call.params() == {
+        "format": "json"
+    }
     assert call.body() is None

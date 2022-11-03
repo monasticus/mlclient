@@ -34,18 +34,22 @@ def test_method(default_databases_post_call):
     assert default_databases_post_call.method() == "POST"
 
 
+def test_parameters(default_databases_post_call):
+    assert default_databases_post_call.params() == {}
+
+
 def test_headers_for_dict_body():
     call = DatabasesPostCall(body={"database-name": "custom-db"})
-    assert {
+    assert call.headers() == {
         "content-type": "application/json"
-    } == call.headers()
+    }
 
 
 def test_headers_for_stringified_dict_body():
     call = DatabasesPostCall(body='{"database-name": "custom-db"}')
-    assert {
+    assert call.headers() == {
         "content-type": "application/json"
-    } == call.headers()
+    }
 
 
 def test_headers_for_xml_body():
@@ -53,9 +57,9 @@ def test_headers_for_xml_body():
            '  <database-name>custom-db</database-name>' \
            '</database-properties>'
     call = DatabasesPostCall(body=body)
-    assert {
+    assert call.headers() == {
         "content-type": "application/xml"
-    } == call.headers()
+    }
 
 
 def test_dict_body():
@@ -74,13 +78,3 @@ def test_xml_body():
            '</database-properties>'
     call = DatabasesPostCall(body=body)
     assert call.body() == body
-
-
-def test_fully_parametrized_call():
-    call = DatabasesPostCall(body={"database-name": "custom-db"})
-    assert call.method() == "POST"
-    assert {
-        "content-type": "application/json"
-    } == call.headers()
-    assert {} == call.params()
-    assert call.body() == {"database-name": "custom-db"}

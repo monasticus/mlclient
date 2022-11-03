@@ -35,33 +35,30 @@ def test_method(default_database_delete_call):
     assert default_database_delete_call.method() == "DELETE"
 
 
-def test_headers():
-    call = DatabaseDeleteCall(database_name="Documents")
-    assert {} == call.headers()
+def test_parameters(default_database_delete_call):
+    assert default_database_delete_call.params() == {}
 
 
-def test_parameters_for_no_forest_delete():
-    call = DatabaseDeleteCall(database_name="Documents")
-    assert {} == call.params()
-
-
-def test_parameters_for_some_forest_delete():
+def test_parameters_for_forest_delete():
     call = DatabaseDeleteCall(database_name="Documents", forest_delete="configuration")
-    assert {
+    assert call.params() == {
         "forest-delete": "configuration"
-    } == call.params()
+    }
 
 
-def test_body():
-    call = DatabaseDeleteCall(database_name="Documents")
-    assert not call.body()
+def test_headers(default_database_delete_call):
+    assert default_database_delete_call.headers() == {}
+
+
+def test_body(default_database_delete_call):
+    assert default_database_delete_call.body() is None
 
 
 def test_fully_parametrized_call():
     call = DatabaseDeleteCall(database_name="Documents", forest_delete="data")
     assert call.method() == "DELETE"
-    assert {} == call.headers()
-    assert {
+    assert call.headers() == {}
+    assert call.params() == {
         "forest-delete": "data"
-    } == call.params()
-    assert not call.body()
+    }
+    assert call.body() is None

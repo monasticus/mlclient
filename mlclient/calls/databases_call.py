@@ -116,7 +116,7 @@ class DatabasesPostCall(ResourceCall):
             an Databases call endpoint
         """
 
-        return DatabasesGetCall.ENDPOINT
+        return DatabasesPostCall.ENDPOINT
 
     @staticmethod
     def __validate_params(body: Union[str, dict]):

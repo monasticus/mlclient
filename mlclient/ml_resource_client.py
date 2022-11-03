@@ -7,7 +7,7 @@ from mlclient.calls import (DatabaseDeleteCall, DatabaseGetCall,
                             DatabasePostCall, DatabasePropertiesGetCall,
                             DatabasePropertiesPutCall, DatabasesGetCall,
                             DatabasesPostCall, EvalCall, LogsCall,
-                            ResourceCall)
+                            ResourceCall, ServersGetCall, ServersPostCall)
 
 
 class MLResourceClient(MLClient):
@@ -74,6 +74,20 @@ class MLResourceClient(MLClient):
         call = DatabasePropertiesPutCall(database_id=database_id,
                                          database_name=database_name,
                                          body=body)
+        return self.call(call)
+
+    def get_servers(self, data_format: str = None, group_id: str = None, view: str = None,
+                    full_refs: bool = None) -> Response:
+        call = ServersGetCall(data_format=data_format,
+                              group_id=group_id,
+                              view=view,
+                              full_refs=full_refs)
+        return self.call(call)
+
+    def post_servers(self, group_id: str = None, server_type: str = None, body: Union[str, dict] = None) -> Response:
+        call = ServersPostCall(group_id=group_id,
+                               server_type=server_type,
+                               body=body)
         return self.call(call)
 
     def call(self, call: ResourceCall) -> Response:

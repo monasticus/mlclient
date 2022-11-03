@@ -104,3 +104,23 @@ def test_put_database_properties():
     print(resp.text)
     assert resp.status_code == 404
     assert "XDMP-NOSUCHDB" == resp.json()["errorResponse"]["messageCode"]
+
+
+@pytest.mark.ml_access
+def test_get_servers():
+    with MLResourceClient(auth_method="digest") as client:
+        resp = client.get_servers(data_format="json")
+
+    assert resp.status_code == 200
+    assert "/manage/v2/servers?view=default" == resp.json()["server-default-list"]["meta"]["uri"]
+
+
+@pytest.mark.ml_access
+def test_post_servers():
+    with MLResourceClient(auth_method="digest") as client:
+        resp = client.post_servers(group_id="Default",
+                                   server_type="http",
+                                   body='<http-server-properties xmlns="http://marklogic.com/manage" />')
+
+    assert resp.status_code == 400
+    assert "Payload has errors in structure, content-type or values. Server name missing." in resp.text

@@ -45,7 +45,7 @@ def test_get_logs():
 @pytest.mark.ml_access
 def test_get_databases():
     with MLResourceClient(auth_method="digest") as client:
-        resp = client.get_databases(resp_format="json")
+        resp = client.get_databases(data_format="json")
 
     assert resp.status_code == 200
     assert "/manage/v2/databases?view=default" == resp.json()["database-default-list"]["meta"]["uri"]
@@ -58,3 +58,21 @@ def test_post_databases():
 
     assert resp.status_code == 400
     assert "Payload has errors in structure, content-type or values. Database name missing." in resp.text
+
+
+@pytest.mark.ml_access
+def test_get_database():
+    with MLResourceClient(auth_method="digest") as client:
+        resp = client.get_database(database_name="Documents", data_format="json")
+
+    assert resp.status_code == 200
+    assert "/manage/v2/databases/Documents?view=default" == resp.json()["database-default"]["meta"]["uri"]
+
+
+@pytest.mark.ml_access
+def test_post_databases():
+    with MLResourceClient(auth_method="digest") as client:
+        resp = client.post_database(database_name="Documents", body={"operation": "clear-database"})
+
+    assert resp.status_code == 200
+    assert not resp.text

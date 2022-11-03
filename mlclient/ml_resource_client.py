@@ -4,7 +4,7 @@ from requests import Response
 
 from mlclient import MLClient, constants
 from mlclient.calls import (DatabasesGetCall, DatabasesPostCall, EvalCall,
-                            LogsCall, ResourceCall)
+                            LogsCall, ResourceCall, DatabaseGetCall, DatabasePostCall)
 
 
 class MLResourceClient(MLClient):
@@ -28,13 +28,28 @@ class MLResourceClient(MLClient):
                         regex=regex)
         return self.call(call)
 
-    def get_databases(self, resp_format: str = None, view: str = None) -> Response:
-        call = DatabasesGetCall(data_format=resp_format,
+    def get_databases(self, data_format: str = None, view: str = None) -> Response:
+        call = DatabasesGetCall(data_format=data_format,
                                 view=view)
         return self.call(call)
 
     def post_databases(self, body: Union[str, dict] = None) -> Response:
         call = DatabasesPostCall(body=body)
+        return self.call(call)
+
+    def get_database(self, database_id: str = None, database_name: str = None,
+                     data_format: str = None, view: str = None) -> Response:
+        call = DatabaseGetCall(database_id=database_id,
+                               database_name=database_name,
+                               data_format=data_format,
+                               view=view)
+        return self.call(call)
+
+    def post_database(self, database_id: str = None, database_name: str = None,
+                      body: Union[str, dict] = None) -> Response:
+        call = DatabasePostCall(database_id=database_id,
+                                database_name=database_name,
+                                body=body)
         return self.call(call)
 
     def call(self, call: ResourceCall) -> Response:

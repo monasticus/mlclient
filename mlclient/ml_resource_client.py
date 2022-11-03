@@ -3,8 +3,10 @@ from typing import Union
 from requests import Response
 
 from mlclient import MLClient, constants
-from mlclient.calls import (DatabasesGetCall, DatabasesPostCall, EvalCall,
-                            LogsCall, ResourceCall, DatabaseGetCall, DatabasePostCall)
+from mlclient.calls import (DatabaseDeleteCall, DatabaseGetCall,
+                            DatabasePostCall, DatabasesGetCall,
+                            DatabasesPostCall, EvalCall, LogsCall,
+                            ResourceCall)
 
 
 class MLResourceClient(MLClient):
@@ -50,6 +52,13 @@ class MLResourceClient(MLClient):
         call = DatabasePostCall(database_id=database_id,
                                 database_name=database_name,
                                 body=body)
+        return self.call(call)
+
+    def delete_database(self, database_id: str = None, database_name: str = None,
+                        forest_delete: str = None) -> Response:
+        call = DatabaseDeleteCall(database_id=database_id,
+                                  database_name=database_name,
+                                  forest_delete=forest_delete)
         return self.call(call)
 
     def call(self, call: ResourceCall) -> Response:

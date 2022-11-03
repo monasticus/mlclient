@@ -2,7 +2,7 @@ import json
 import re
 from typing import Union
 
-from mlclient import exceptions, utils, constants
+from mlclient import constants, exceptions, utils
 from mlclient.calls import ResourceCall
 
 
@@ -139,3 +139,67 @@ class DatabasePostCall(ResourceCall):
         if not body or body is None or isinstance(body, str) and re.search("^\\s*$", body):
             endpoint = DatabasePostCall.__ENDPOINT_TEMPLATE.format(database_id if database_id else database_name)
             raise exceptions.WrongParameters(f"No request body provided for POST {endpoint}!")
+
+
+class DatabaseDeleteCall(ResourceCall):
+    """
+    A ResourceCall implementation representing a single DELETE request
+    to the /manage/v2/databases/{id|name} REST Resource
+
+    This resource address deletes the named database from the cluster.
+    The database can be identified either by id or name.
+    Documentation of the REST Resource API: https://docs.marklogic.com/REST/DELETE/manage/v2/databases/[id-or-name]
+
+    Methods
+    -------
+    All public methods are inherited from the ResourceCall abstract class.
+    This class implements the endpoint() abstract method to return an endpoint for the specific call.
+    """
+
+    __ENDPOINT_TEMPLATE = "/manage/v2/databases/{}"
+
+    __FOREST_DELETE_PARAM = "forest-delete"
+
+    __SUPPORTED_FOREST_DELETE_OPTS = ["configuration", "data"]
+
+    def __init__(self, database_id: str = None, database_name: str = None, forest_delete: str = None):
+        """
+        Parameters
+        ----------
+        database_id : str
+            A database ID. You must include either this parameter or the database_name parameter.
+            When included both, the database_name is ignored.
+        database_name : str
+            A database name. You must include either this parameter or the database_id parameter.
+            When included both, the database_name is ignored.
+        forest_delete : str
+            Specifies to delete the forests attached to the database.
+            If unspecified, the forests will not be affected.
+            If "configuration" is specified, the forest configuration will be removed
+            but public forest data will remain.
+            If "data" is specified, the forest configuration and data will be removed.
+        """
+        DatabaseDeleteCall.__validate_params(database_id, database_name, forest_delete)
+        super().__init__(method="DELETE")
+        self.add_param(DatabaseDeleteCall.__FOREST_DELETE_PARAM, forest_delete)
+        self.__id = database_id
+        self.__name = database_name
+
+    def endpoint(self):
+        """Implementation of an abstract method returning an endpoint for the Database call
+
+        Returns
+        -------
+        str
+            an Database call endpoint
+        """
+
+        return DatabaseDeleteCall.__ENDPOINT_TEMPLATE.format(self.__id if self.__id else self.__name)
+
+    @staticmethod
+    def __validate_params(database_id: str, database_name: str, forest_delete: str):
+        if not database_id and not database_name:
+            raise exceptions.WrongParameters("You must include either the database_id or the database_name parameter!")
+        if forest_delete and forest_delete not in DatabaseDeleteCall.__SUPPORTED_FOREST_DELETE_OPTS:
+            joined_supported_opts = ", ".join(DatabaseDeleteCall.__SUPPORTED_FOREST_DELETE_OPTS)
+            raise exceptions.WrongParameters("The supported forest_delete options are: " + joined_supported_opts)

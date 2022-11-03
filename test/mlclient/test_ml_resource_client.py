@@ -76,3 +76,12 @@ def test_post_databases():
 
     assert resp.status_code == 200
     assert not resp.text
+
+
+@pytest.mark.ml_access
+def test_delete_database():
+    with MLResourceClient(auth_method="digest") as client:
+        resp = client.delete_database(database_name="custom-db")
+
+    assert resp.status_code == 204
+    assert not resp.text

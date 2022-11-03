@@ -6,3 +6,9 @@ imports:
 
 test:
 	pytest test/
+
+ml-start:
+	sudo /etc/init.d/MarkLogic start
+
+ml-stop:
+	sudo /etc/init.d/MarkLogic stop

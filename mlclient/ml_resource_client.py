@@ -68,3 +68,7 @@ class MLResourceClient(MLClient):
                             params=call.params(),
                             headers=call.headers(),
                             body=call.body())
+        elif method == constants.METHOD_DELETE:
+            return self.delete(endpoint=call.endpoint(),
+                               params=call.params(),
+                               headers=call.headers())

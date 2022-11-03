@@ -46,6 +46,8 @@ class MLClient:
         Sends a POST request
     put(endpoint: str, params: dict = None, headers: dict = None, body: Union[str, dict] = None) -> Response:
         Sends a PUT request
+    delete(endpoint: str, params: dict = None, headers: dict = None) -> Response:
+        Sends a DELETE request
     """
 
     def __init__(self, protocol: str = "http", host: str = "localhost", port: int = 8002,
@@ -207,3 +209,32 @@ class MLClient:
                 return self.__sess.put(url, auth=self.__auth, params=params, headers=headers, data=body)
         else:
             self.__logger.warning(f"A request attempt failure: PUT {endpoint} -- MLClient is not connected")
+
+    def delete(self, endpoint: str, params: dict = None, headers: dict = None) -> Response:
+        """Sends a DELETE request
+
+        Parameters
+        ----------
+        endpoint : str
+            a REST endpoint to call
+        params : dict
+            request parameters
+        headers : dict
+            request headers
+
+        Returns
+        -------
+        Response
+            an HTTP response
+        """
+
+        if self.is_connected():
+            url = self.base_url + endpoint
+            if not headers:
+                headers = {}
+            if not params:
+                params = {}
+            self.__logger.debug(f"Sending a request... DELETE {endpoint}")
+            return self.__sess.delete(url, auth=self.__auth, params=params, headers=headers)
+        else:
+            self.__logger.warning(f"A request attempt failure: DELETE {endpoint} -- MLClient is not connected")

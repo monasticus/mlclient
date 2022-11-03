@@ -89,7 +89,7 @@ def test_post_with_customized_params_and_headers_and_json_body():
 
 
 @pytest.mark.ml_access
-def test_post():
+def test_put():
     with MLClient(auth_method="digest") as client:
         resp = client.put("/v1/documents")
 
@@ -129,3 +129,29 @@ def test_put_with_customized_params_and_headers_and_json_body():
     assert resp.request.headers["content-type"] == "application/json"
     assert resp.request.body == b'{"document": {}}'
     assert resp.status_code == 400
+
+
+@pytest.mark.ml_access
+def test_delete():
+    with MLClient(auth_method="digest") as client:
+        resp = client.delete("/manage/v2/databases/custom-db")
+
+    assert resp.request.method == "DELETE"
+    assert "?" not in resp.request.url
+    assert resp.status_code == 204
+    assert not resp.text
+
+
+@pytest.mark.ml_access
+def test_delete_with_customized_params_and_headers():
+    with MLClient(auth_method="digest") as client:
+        resp = client.delete("/manage/v2/databases/custom-db",
+                             params={"format": "json"},
+                             headers={"custom-header": "custom-value"})
+
+    assert resp.request.method == "DELETE"
+    assert "?format=json" in resp.request.url
+    assert "custom-header" in resp.request.headers
+    assert resp.request.headers["custom-header"] == "custom-value"
+    assert resp.status_code == 204
+    assert not resp.text

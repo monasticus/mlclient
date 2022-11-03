@@ -40,39 +40,29 @@ class MLResourceClient(MLClient):
         call = DatabasesPostCall(body=body)
         return self.call(call)
 
-    def get_database(self, database_id: str = None, database_name: str = None,
-                     data_format: str = None, view: str = None) -> Response:
-        call = DatabaseGetCall(database_id=database_id,
-                               database_name=database_name,
+    def get_database(self, database: str, data_format: str = None, view: str = None) -> Response:
+        call = DatabaseGetCall(database=database,
                                data_format=data_format,
                                view=view)
         return self.call(call)
 
-    def post_database(self, database_id: str = None, database_name: str = None,
-                      body: Union[str, dict] = None) -> Response:
-        call = DatabasePostCall(database_id=database_id,
-                                database_name=database_name,
+    def post_database(self, database: str, body: Union[str, dict] = None) -> Response:
+        call = DatabasePostCall(database=database,
                                 body=body)
         return self.call(call)
 
-    def delete_database(self, database_id: str = None, database_name: str = None,
-                        forest_delete: str = None) -> Response:
-        call = DatabaseDeleteCall(database_id=database_id,
-                                  database_name=database_name,
+    def delete_database(self, database: str, forest_delete: str = None) -> Response:
+        call = DatabaseDeleteCall(database=database,
                                   forest_delete=forest_delete)
         return self.call(call)
 
-    def get_database_properties(self, database_id: str = None, database_name: str = None,
-                                data_format: str = None) -> Response:
-        call = DatabasePropertiesGetCall(database_id=database_id,
-                                         database_name=database_name,
+    def get_database_properties(self, database: str, data_format: str = None) -> Response:
+        call = DatabasePropertiesGetCall(database=database,
                                          data_format=data_format)
         return self.call(call)
 
-    def put_database_properties(self, database_id: str = None, database_name: str = None,
-                                body: Union[str, dict] = None) -> Response:
-        call = DatabasePropertiesPutCall(database_id=database_id,
-                                         database_name=database_name,
+    def put_database_properties(self, database: str, body: Union[str, dict] = None) -> Response:
+        call = DatabasePropertiesPutCall(database=database,
                                          body=body)
         return self.call(call)
 

@@ -29,17 +29,12 @@ class DatabaseGetCall(ResourceCall):
     __SUPPORTED_VIEWS = ["describe", "default", "config", "counts", "edit",
                          "package", "status", "forest-storage", "properties-schema"]
 
-    def __init__(self, database_id: str = None, database_name: str = None,
-                 data_format: str = "xml", view: str = "default"):
+    def __init__(self, database: str, data_format: str = "xml", view: str = "default"):
         """
         Parameters
         ----------
-        database_id : str
-            A database ID. You must include either this parameter or the database_name parameter.
-            When included both, the database_name is ignored.
-        database_name : str
-            A database name. You must include either this parameter or the database_id parameter.
-            When included both, the database_name is ignored.
+        database : str
+            A database identifier. The database can be identified either by ID or name.
         data_format : str
             The format of the returned data. Can be either html, json, or xml (default).
             This parameter is not meaningful with view=edit.
@@ -50,12 +45,11 @@ class DatabaseGetCall(ResourceCall):
 
         data_format = data_format if data_format is not None else "xml"
         view = view if view is not None else "default"
-        DatabaseGetCall.__validate_params(database_id, database_name, data_format, view)
+        DatabaseGetCall.__validate_params(data_format, view)
 
         super().__init__(method="GET",
                          accept=utils.get_accept_header_for_format(data_format))
-        self.__id = database_id
-        self.__name = database_name
+        self.__database = database
         self.add_param(DatabaseGetCall.__FORMAT_PARAM, data_format)
         self.add_param(DatabaseGetCall.__VIEW_PARAM, view)
 
@@ -68,12 +62,10 @@ class DatabaseGetCall(ResourceCall):
             an Database call endpoint
         """
 
-        return DatabaseGetCall.__ENDPOINT_TEMPLATE.format(self.__id if self.__id else self.__name)
+        return DatabaseGetCall.__ENDPOINT_TEMPLATE.format(self.__database)
 
     @staticmethod
-    def __validate_params(database_id: str, database_name: str, data_format: str, view: str):
-        if not database_id and not database_name:
-            raise exceptions.WrongParameters("You must include either the database_id or the database_name parameter!")
+    def __validate_params(data_format: str, view: str):
         if data_format not in DatabaseGetCall.__SUPPORTED_FORMATS:
             joined_supported_formats = ", ".join(DatabaseGetCall.__SUPPORTED_FORMATS)
             raise exceptions.WrongParameters("The supported formats are: " + joined_supported_formats)
@@ -99,27 +91,22 @@ class DatabasePostCall(ResourceCall):
 
     __ENDPOINT_TEMPLATE = "/manage/v2/databases/{}"
 
-    def __init__(self, database_id: str = None, database_name: str = None, body: Union[str, dict] = None):
+    def __init__(self, database: str, body: Union[str, dict] = None):
         """
         Parameters
         ----------
-        database_id : str
-            A database ID. You must include either this parameter or the database_name parameter.
-            When included both, the database_name is ignored.
-        database_name : str
-            A database name. You must include either this parameter or the database_id parameter.
-            When included both, the database_name is ignored.
+        database : str
+            A database identifier. The database can be identified either by ID or name.
         body : Union[str, dict]
             A database properties in XML or JSON format.
         """
-        DatabasePostCall.__validate_params(database_id, database_name, body)
+        DatabasePostCall.__validate_params(body)
         content_type = utils.get_content_type_header_for_data(body)
         body = body if content_type != constants.HEADER_JSON or not isinstance(body, str) else json.loads(body)
         super().__init__(method="POST",
                          content_type=content_type,
                          body=body)
-        self.__id = database_id
-        self.__name = database_name
+        self.__database = database
 
     def endpoint(self):
         """Implementation of an abstract method returning an endpoint for the Database call
@@ -130,15 +117,12 @@ class DatabasePostCall(ResourceCall):
             an Database call endpoint
         """
 
-        return DatabasePostCall.__ENDPOINT_TEMPLATE.format(self.__id if self.__id else self.__name)
+        return DatabasePostCall.__ENDPOINT_TEMPLATE.format(self.__database)
 
     @staticmethod
-    def __validate_params(database_id: str, database_name: str, body: Union[str, dict]):
-        if not database_id and not database_name:
-            raise exceptions.WrongParameters("You must include either the database_id or the database_name parameter!")
+    def __validate_params(body: Union[str, dict]):
         if not body or body is None or isinstance(body, str) and re.search("^\\s*$", body):
-            endpoint = DatabasePostCall.__ENDPOINT_TEMPLATE.format(database_id if database_id else database_name)
-            raise exceptions.WrongParameters(f"No request body provided for POST {endpoint}!")
+            raise exceptions.WrongParameters("No request body provided for POST /manage/v2/databases/{id|name}!")
 
 
 class DatabaseDeleteCall(ResourceCall):
@@ -162,16 +146,12 @@ class DatabaseDeleteCall(ResourceCall):
 
     __SUPPORTED_FOREST_DELETE_OPTS = ["configuration", "data"]
 
-    def __init__(self, database_id: str = None, database_name: str = None, forest_delete: str = None):
+    def __init__(self, database: str, forest_delete: str = None):
         """
         Parameters
         ----------
-        database_id : str
-            A database ID. You must include either this parameter or the database_name parameter.
-            When included both, the database_name is ignored.
-        database_name : str
-            A database name. You must include either this parameter or the database_id parameter.
-            When included both, the database_name is ignored.
+        database : str
+            A database identifier. The database can be identified either by ID or name.
         forest_delete : str
             Specifies to delete the forests attached to the database.
             If unspecified, the forests will not be affected.
@@ -179,11 +159,10 @@ class DatabaseDeleteCall(ResourceCall):
             but public forest data will remain.
             If "data" is specified, the forest configuration and data will be removed.
         """
-        DatabaseDeleteCall.__validate_params(database_id, database_name, forest_delete)
+        DatabaseDeleteCall.__validate_params(forest_delete)
         super().__init__(method="DELETE")
         self.add_param(DatabaseDeleteCall.__FOREST_DELETE_PARAM, forest_delete)
-        self.__id = database_id
-        self.__name = database_name
+        self.__database = database
 
     def endpoint(self):
         """Implementation of an abstract method returning an endpoint for the Database call
@@ -194,12 +173,10 @@ class DatabaseDeleteCall(ResourceCall):
             an Database call endpoint
         """
 
-        return DatabaseDeleteCall.__ENDPOINT_TEMPLATE.format(self.__id if self.__id else self.__name)
+        return DatabaseDeleteCall.__ENDPOINT_TEMPLATE.format(self.__database)
 
     @staticmethod
-    def __validate_params(database_id: str, database_name: str, forest_delete: str):
-        if not database_id and not database_name:
-            raise exceptions.WrongParameters("You must include either the database_id or the database_name parameter!")
+    def __validate_params(forest_delete: str):
         if forest_delete and forest_delete not in DatabaseDeleteCall.__SUPPORTED_FOREST_DELETE_OPTS:
             joined_supported_opts = ", ".join(DatabaseDeleteCall.__SUPPORTED_FOREST_DELETE_OPTS)
             raise exceptions.WrongParameters("The supported forest_delete options are: " + joined_supported_opts)

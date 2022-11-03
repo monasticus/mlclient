@@ -63,7 +63,7 @@ def test_post_databases():
 @pytest.mark.ml_access
 def test_get_database():
     with MLResourceClient(auth_method="digest") as client:
-        resp = client.get_database(database_name="Documents", data_format="json")
+        resp = client.get_database(database="Documents", data_format="json")
 
     assert resp.status_code == 200
     assert "/manage/v2/databases/Documents?view=default" == resp.json()["database-default"]["meta"]["uri"]
@@ -72,7 +72,7 @@ def test_get_database():
 @pytest.mark.ml_access
 def test_post_database():
     with MLResourceClient(auth_method="digest") as client:
-        resp = client.post_database(database_name="Documents", body={"operation": "clear-database"})
+        resp = client.post_database(database="Documents", body={"operation": "clear-database"})
 
     assert resp.status_code == 200
     assert not resp.text
@@ -81,7 +81,7 @@ def test_post_database():
 @pytest.mark.ml_access
 def test_delete_database():
     with MLResourceClient(auth_method="digest") as client:
-        resp = client.delete_database(database_name="custom-db")
+        resp = client.delete_database(database="custom-db")
 
     assert resp.status_code == 204
     assert not resp.text
@@ -90,7 +90,7 @@ def test_delete_database():
 @pytest.mark.ml_access
 def test_get_database_properties():
     with MLResourceClient(auth_method="digest") as client:
-        resp = client.get_database_properties(database_name="Documents", data_format="json")
+        resp = client.get_database_properties(database="Documents", data_format="json")
 
     assert resp.status_code == 200
     assert "Documents" == resp.json()["database-name"]
@@ -99,7 +99,7 @@ def test_get_database_properties():
 @pytest.mark.ml_access
 def test_put_database_properties():
     with MLResourceClient(auth_method="digest") as client:
-        resp = client.put_database_properties(database_name="non-existing-db", body={"database-name": "custom-db"})
+        resp = client.put_database_properties(database="non-existing-db", body={"database-name": "custom-db"})
 
     print(resp.text)
     assert resp.status_code == 404

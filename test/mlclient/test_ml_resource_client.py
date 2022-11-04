@@ -124,3 +124,22 @@ def test_post_servers():
 
     assert resp.status_code == 400
     assert "Payload has errors in structure, content-type or values. Server name missing." in resp.text
+
+
+@pytest.mark.ml_access
+def test_get_server():
+    with MLResourceClient(auth_method="digest") as client:
+        resp = client.get_server(server="App-Services", group_id="Default", data_format="json")
+
+    assert resp.status_code == 200
+    assert "/manage/v2/servers/App-Services?group-id=Default&view=default" == resp.json()["server-default"]["meta"]["uri"]
+
+
+@pytest.mark.ml_access
+def test_delete_server():
+    with MLResourceClient(auth_method="digest") as client:
+        resp = client.delete_server(server="Non-existing-server",
+                                    group_id="Non-existing-group")
+
+    assert resp.status_code == 404
+    assert "No such group Non-existing-group" in resp.text

@@ -47,8 +47,9 @@ def test_get_databases():
     with MLResourceClient(auth_method="digest") as client:
         resp = client.get_databases(data_format="json")
 
+    expected_uri = "/manage/v2/databases?view=default"
     assert resp.status_code == 200
-    assert "/manage/v2/databases?view=default" == resp.json()["database-default-list"]["meta"]["uri"]
+    assert resp.json()["database-default-list"]["meta"]["uri"] == expected_uri
 
 
 @pytest.mark.ml_access
@@ -65,8 +66,9 @@ def test_get_database():
     with MLResourceClient(auth_method="digest") as client:
         resp = client.get_database(database="Documents", data_format="json")
 
+    expected_uri = "/manage/v2/databases/Documents?view=default"
     assert resp.status_code == 200
-    assert "/manage/v2/databases/Documents?view=default" == resp.json()["database-default"]["meta"]["uri"]
+    assert resp.json()["database-default"]["meta"]["uri"] == expected_uri
 
 
 @pytest.mark.ml_access
@@ -93,7 +95,7 @@ def test_get_database_properties():
         resp = client.get_database_properties(database="Documents", data_format="json")
 
     assert resp.status_code == 200
-    assert "Documents" == resp.json()["database-name"]
+    assert resp.json()["database-name"] == "Documents"
 
 
 @pytest.mark.ml_access
@@ -101,9 +103,8 @@ def test_put_database_properties():
     with MLResourceClient(auth_method="digest") as client:
         resp = client.put_database_properties(database="non-existing-db", body={"database-name": "custom-db"})
 
-    print(resp.text)
     assert resp.status_code == 404
-    assert "XDMP-NOSUCHDB" == resp.json()["errorResponse"]["messageCode"]
+    assert resp.json()["errorResponse"]["messageCode"] == "XDMP-NOSUCHDB"
 
 
 @pytest.mark.ml_access
@@ -111,8 +112,9 @@ def test_get_servers():
     with MLResourceClient(auth_method="digest") as client:
         resp = client.get_servers(data_format="json")
 
+    expected_uri = "/manage/v2/servers?view=default"
     assert resp.status_code == 200
-    assert "/manage/v2/servers?view=default" == resp.json()["server-default-list"]["meta"]["uri"]
+    assert resp.json()["server-default-list"]["meta"]["uri"] == expected_uri
 
 
 @pytest.mark.ml_access
@@ -131,8 +133,9 @@ def test_get_server():
     with MLResourceClient(auth_method="digest") as client:
         resp = client.get_server(server="App-Services", group_id="Default", data_format="json")
 
+    expected_uri = "/manage/v2/servers/App-Services?group-id=Default&view=default"
     assert resp.status_code == 200
-    assert "/manage/v2/servers/App-Services?group-id=Default&view=default" == resp.json()["server-default"]["meta"]["uri"]
+    assert resp.json()["server-default"]["meta"]["uri"] == expected_uri
 
 
 @pytest.mark.ml_access

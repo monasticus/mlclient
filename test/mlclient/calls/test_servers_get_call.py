@@ -84,7 +84,7 @@ def test_fully_parametrized_call():
     call = ServersGetCall(data_format="json",
                           group_id="Default",
                           view="schema",
-                          full_refs=True)
+                          full_refs=False)
     assert call.method() == "GET"
     assert call.headers() == {
         "accept": "application/json"
@@ -93,6 +93,6 @@ def test_fully_parametrized_call():
         "format": "json",
         "group-id": "Default",
         "view": "schema",
-        "fullrefs": "true"
+        "fullrefs": "false"
     }
     assert call.body() is None

@@ -64,7 +64,7 @@ class ServersGetCall(ResourceCall):
         self.add_param(ServersGetCall.__FORMAT_PARAM, data_format)
         self.add_param(ServersGetCall.__GROUP_ID_PARAM, group_id)
         self.add_param(ServersGetCall.__VIEW_PARAM, view)
-        self.add_param(ServersGetCall.__FULL_REFS_PARAM, str(full_refs).lower() if full_refs else None)
+        self.add_param(ServersGetCall.__FULL_REFS_PARAM, str(full_refs).lower() if full_refs is not None else None)
 
     def endpoint(self):
         """Implementation of an abstract method returning an endpoint for the Servers call

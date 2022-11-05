@@ -116,6 +116,8 @@ class ServersPostCall(ResourceCall):
         """
         Parameters
         ----------
+        body : Union[str, dict]
+            A database properties in XML or JSON format.
         group_id : str
             The id or name of the group to which the App Server belongs.
             The group must be specified by this parameter or by the group-name property in the request payload.
@@ -125,8 +127,6 @@ class ServersPostCall(ResourceCall):
             The App Server type must be specified by this parameter or in the request payload.
             If it is specified in both places, the values must be the same.
             The valid types are: http, odbc, xdbc, or webdav.
-        body : Union[str, dict]
-            A database properties in XML or JSON format.
         """
         ServersPostCall.__validate_params(server_type, body)
         content_type = utils.get_content_type_header_for_data(body)

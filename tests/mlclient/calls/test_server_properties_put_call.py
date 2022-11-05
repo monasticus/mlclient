@@ -12,7 +12,7 @@ def default_server_properties_put_call():
 
 def test_validation_body_param():
     with pytest.raises(exceptions.WrongParameters) as err:
-        ServerPropertiesPutCall(server="App-Services", group_id="Default")
+        ServerPropertiesPutCall(server="App-Services", group_id="Default", body=None)
 
     assert err.value.args[0] == "No request body provided for PUT /manage/v2/servers/{id|name}/properties!"
 

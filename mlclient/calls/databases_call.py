@@ -93,7 +93,7 @@ class DatabasesPostCall(ResourceCall):
 
     ENDPOINT = "/manage/v2/databases"
 
-    def __init__(self, body: Union[str, dict] = None):
+    def __init__(self, body: Union[str, dict]):
         """
         Parameters
         ----------
@@ -120,5 +120,5 @@ class DatabasesPostCall(ResourceCall):
 
     @staticmethod
     def __validate_params(body: Union[str, dict]):
-        if not body or body is None or isinstance(body, str) and re.search("^\\s*$", body):
+        if body is None or isinstance(body, str) and re.search("^\\s*$", body):
             raise exceptions.WrongParameters("No request body provided for POST /manage/v2/databases!")

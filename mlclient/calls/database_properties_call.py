@@ -84,7 +84,7 @@ class DatabasePropertiesPutCall(ResourceCall):
 
     __ENDPOINT_TEMPLATE = "/manage/v2/databases/{}/properties"
 
-    def __init__(self, database: str, body: Union[str, dict] = None):
+    def __init__(self, database: str, body: Union[str, dict]):
         """
         Parameters
         ----------
@@ -114,6 +114,6 @@ class DatabasePropertiesPutCall(ResourceCall):
 
     @staticmethod
     def __validate_params(body: Union[str, dict]):
-        if not body or body is None or isinstance(body, str) and re.search("^\\s*$", body):
+        if body is None or isinstance(body, str) and re.search("^\\s*$", body):
             raise exceptions.WrongParameters("No request body provided for "
                                              "PUT /manage/v2/databases/{id|name}/properties!")

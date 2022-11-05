@@ -12,7 +12,7 @@ def default_database_properties_put_call():
 
 def test_validation_body_param():
     with pytest.raises(exceptions.WrongParameters) as err:
-        DatabasePropertiesPutCall(database="Documents")
+        DatabasePropertiesPutCall(database="Documents", body=None)
 
     assert err.value.args[0] == "No request body provided for PUT /manage/v2/databases/{id|name}/properties!"
 

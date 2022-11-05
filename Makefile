@@ -5,7 +5,7 @@ imports:
 	isort .
 
 test:
-	pytest test/
+	pytest tests/
 
 ml-start:
 	sudo /etc/init.d/MarkLogic start

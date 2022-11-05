@@ -38,7 +38,7 @@ class MLResourceClient(MLClient):
                                 view=view)
         return self.call(call)
 
-    def post_databases(self, body: Union[str, dict] = None) -> Response:
+    def post_databases(self, body: Union[str, dict]) -> Response:
         call = DatabasesPostCall(body=body)
         return self.call(call)
 
@@ -48,7 +48,7 @@ class MLResourceClient(MLClient):
                                view=view)
         return self.call(call)
 
-    def post_database(self, database: str, body: Union[str, dict] = None) -> Response:
+    def post_database(self, database: str, body: Union[str, dict]) -> Response:
         call = DatabasePostCall(database=database,
                                 body=body)
         return self.call(call)
@@ -63,7 +63,7 @@ class MLResourceClient(MLClient):
                                          data_format=data_format)
         return self.call(call)
 
-    def put_database_properties(self, database: str, body: Union[str, dict] = None) -> Response:
+    def put_database_properties(self, database: str, body: Union[str, dict]) -> Response:
         call = DatabasePropertiesPutCall(database=database,
                                          body=body)
         return self.call(call)
@@ -76,10 +76,10 @@ class MLResourceClient(MLClient):
                               full_refs=full_refs)
         return self.call(call)
 
-    def post_servers(self, group_id: str = None, server_type: str = None, body: Union[str, dict] = None) -> Response:
-        call = ServersPostCall(group_id=group_id,
-                               server_type=server_type,
-                               body=body)
+    def post_servers(self, body: Union[str, dict], group_id: str = None, server_type: str = None) -> Response:
+        call = ServersPostCall(body=body,
+                               group_id=group_id,
+                               server_type=server_type)
         return self.call(call)
 
     def get_server(self, server: str, group_id: str, data_format: str = None, view: str = None,
@@ -104,7 +104,7 @@ class MLResourceClient(MLClient):
                                        data_format=data_format)
         return self.call(call)
 
-    def put_server_properties(self, server: str, group_id: str, body: Union[str, dict] = None):
+    def put_server_properties(self, server: str, group_id: str, body: Union[str, dict]):
         call = ServerPropertiesPutCall(server=server,
                                        group_id=group_id,
                                        body=body)

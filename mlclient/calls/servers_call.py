@@ -112,7 +112,7 @@ class ServersPostCall(ResourceCall):
 
     __SUPPORTED_SERVER_TYPES = ["http", "odbc", "xdbc", "webdav"]
 
-    def __init__(self, group_id: str = None, server_type: str = None, body: Union[str, dict] = None):
+    def __init__(self, body: Union[str, dict], group_id: str = None, server_type: str = None):
         """
         Parameters
         ----------
@@ -153,5 +153,5 @@ class ServersPostCall(ResourceCall):
         if server_type and server_type not in ServersPostCall.__SUPPORTED_SERVER_TYPES:
             joined_supported_server_types = ", ".join(ServersPostCall.__SUPPORTED_SERVER_TYPES)
             raise exceptions.WrongParameters("The supported server types are: " + joined_supported_server_types)
-        if not body or body is None or isinstance(body, str) and re.search("^\\s*$", body):
+        if body is None or isinstance(body, str) and re.search("^\\s*$", body):
             raise exceptions.WrongParameters("No request body provided for POST /manage/v2/servers!")

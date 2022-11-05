@@ -12,7 +12,7 @@ def default_database_post_call():
 
 def test_validation_body_param():
     with pytest.raises(exceptions.WrongParameters) as err:
-        DatabasePostCall(database="Documents")
+        DatabasePostCall(database="Documents", body=None)
 
     assert err.value.args[0] == "No request body provided for POST /manage/v2/databases/{id|name}!"
 

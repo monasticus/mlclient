@@ -8,6 +8,7 @@ from mlclient.calls import (DatabaseDeleteCall, DatabaseGetCall,
                             DatabasePropertiesPutCall, DatabasesGetCall,
                             DatabasesPostCall, EvalCall, LogsCall,
                             ResourceCall, ServerDeleteCall, ServerGetCall,
+                            ServerPropertiesGetCall, ServerPropertiesPutCall,
                             ServersGetCall, ServersPostCall)
 
 
@@ -95,6 +96,18 @@ class MLResourceClient(MLClient):
     def delete_server(self, server: str, group_id: str) -> Response:
         call = ServerDeleteCall(server=server,
                                 group_id=group_id)
+        return self.call(call)
+
+    def get_server_properties(self, server: str, group_id: str, data_format: str = None):
+        call = ServerPropertiesGetCall(server=server,
+                                       group_id=group_id,
+                                       data_format=data_format)
+        return self.call(call)
+
+    def put_server_properties(self, server: str, group_id: str, body: Union[str, dict] = None):
+        call = ServerPropertiesPutCall(server=server,
+                                       group_id=group_id,
+                                       body=body)
         return self.call(call)
 
     def call(self, call: ResourceCall) -> Response:

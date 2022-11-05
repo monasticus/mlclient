@@ -146,3 +146,23 @@ def test_delete_server():
 
     assert resp.status_code == 404
     assert "No such group Non-existing-group" in resp.text
+
+
+@pytest.mark.ml_access
+def test_get_server_properties():
+    with MLResourceClient(auth_method="digest") as client:
+        resp = client.get_server_properties(server="App-Services", group_id="Default", data_format="json")
+
+    assert resp.status_code == 200
+    assert resp.json()["server-name"] == "App-Services"
+
+
+@pytest.mark.ml_access
+def test_put_server_properties():
+    with MLResourceClient(auth_method="digest") as client:
+        resp = client.put_server_properties(server="non-existing-server",
+                                            group_id="non-existing-group",
+                                            body={"server-name": "non-existing-server"})
+
+    assert resp.status_code == 404
+    assert resp.json()["errorResponse"]["messageCode"] == "XDMP-NOSUCHGROUP"

@@ -6,7 +6,8 @@ from mlclient import MLClient, constants
 from mlclient.calls import (DatabaseDeleteCall, DatabaseGetCall,
                             DatabasePostCall, DatabasePropertiesGetCall,
                             DatabasePropertiesPutCall, DatabasesGetCall,
-                            DatabasesPostCall, EvalCall, LogsCall,
+                            DatabasesPostCall, EvalCall, ForestsGetCall,
+                            ForestsPostCall, ForestsPutCall, LogsCall,
                             ResourceCall, ServerDeleteCall, ServerGetCall,
                             ServerPropertiesGetCall, ServerPropertiesPutCall,
                             ServersGetCall, ServersPostCall)
@@ -71,6 +72,13 @@ class MLResourceClient(MLClient):
     put_server_properties(server: str, group_id: str, body: Union[str, dict]) -> Response
         Sends a request to the /manage/v2/servers/{id|name}/properties REST Resource
         using ServerPropertiesPutCall class
+    get_forests(data_format: str = None, view: str = None, database: str = None,
+                group: str = None, host: str = None, full_refs: bool = None) -> Response
+        Sends a request to the /manage/v2/forests REST Resource using ForestsGetCall class
+    post_forests(body: Union[str, dict], wait_for_forest_to_mount: bool = None) -> Response
+        Sends a request to the /manage/v2/forests REST Resource using ForestsPostCall class
+    put_forests(body: Union[str, dict]) -> Response
+        Sends a request to the /manage/v2/forests REST Resource using ForestsPutCall class
     call(call: ResourceCall) -> Response
         Sends a custom request to a MarkLogic endpoint using a ResourceCall implementation
     """
@@ -479,6 +487,85 @@ class MLResourceClient(MLClient):
         call = ServerPropertiesPutCall(server=server,
                                        group_id=group_id,
                                        body=body)
+        return self.call(call)
+
+    def get_forests(self, data_format: str = None, view: str = None, database: str = None,
+                    group: str = None, host: str = None, full_refs: bool = None) -> Response:
+        """
+        Sends a request to the /manage/v2/forests REST Resource using ForestsGetCall class
+
+        Parameters
+        ----------
+        data_format : str
+            The format of the returned data. Can be either html, json, or xml (default).
+        view : str
+            A specific view of the returned data.
+            Can be either describe, default, status, metrics, schema, storage, or properties-schema.
+        database : str
+            Returns a summary of the forests for the specified database.
+            The database can be identified either by id or name.
+        group : str
+            Returns a summary of the forests for the specified group.
+            The group can be identified either by id or name.
+        host : str
+            Returns a summary of the forests for the specified host.
+            The host can be identified either by id or name.
+        full_refs : bool
+            If set to true, full detail is returned for all relationship references.
+            A value of false (the default) indicates to return detail only for first references.
+
+        Returns
+        -------
+        Response
+            an HTTP response
+        """
+
+        call = ForestsGetCall(data_format=data_format,
+                              view=view,
+                              database=database,
+                              group=group,
+                              host=host,
+                              full_refs=full_refs)
+        return self.call(call)
+
+    def post_forests(self, body: Union[str, dict], wait_for_forest_to_mount: bool = None) -> Response:
+        """
+        Sends a request to the /manage/v2/forests REST Resource using ForestsPostCall class
+
+        Parameters
+        ----------
+        body : Union[str, dict]
+            A database properties in XML or JSON format.
+        wait_for_forest_to_mount : bool
+            Whether to wait for the new forest to mount before sending a response to this request.
+            Allowed values: true (default) or false.
+
+        Returns
+        -------
+        Response
+            an HTTP response
+        """
+
+        call = ForestsPostCall(body=body,
+                               wait_for_forest_to_mount=wait_for_forest_to_mount)
+        return self.call(call)
+
+    def put_forests(self, body: Union[str, dict]) -> Response:
+        """
+        Sends a request to the /manage/v2/forests REST Resource using ForestsPutCall class
+
+        Parameters
+        ----------
+        body : Union[str, dict]
+            A database properties in XML or JSON format.
+
+        Returns
+        -------
+        Response
+            an HTTP response
+        """
+
+        call = ForestsPutCall(body=body)
         return self.call(call)
 
     def call(self, call: ResourceCall) -> Response:

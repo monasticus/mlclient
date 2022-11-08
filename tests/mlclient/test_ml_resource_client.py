@@ -166,3 +166,31 @@ def test_put_server_properties():
 
     assert resp.status_code == 404
     assert resp.json()["errorResponse"]["messageCode"] == "XDMP-NOSUCHGROUP"
+
+
+@pytest.mark.ml_access
+def test_get_forests():
+    with MLResourceClient(auth_method="digest") as client:
+        resp = client.get_forests(data_format="json", database="Documents")
+
+    expected_uri = "/manage/v2/forests?view=default&database-id=Documents"
+    assert resp.status_code == 200
+    assert resp.json()["forest-default-list"]["meta"]["uri"] == expected_uri
+
+
+@pytest.mark.ml_access
+def test_post_forests():
+    with MLResourceClient(auth_method="digest") as client:
+        resp = client.post_forests(body='<forest-create xmlns="http://marklogic.com/manage" />')
+
+    assert resp.status_code == 500
+
+
+@pytest.mark.ml_access
+def test_put_forests():
+    with MLResourceClient(auth_method="digest") as client:
+        resp = client.put_forests(body='<forest-migrate xmlns="http://marklogic.com/manage" />')
+
+    assert resp.status_code == 400
+    assert "Payload has errors in structure, content-type or values. " \
+           "Cannot validate payload, no forests specified." in resp.text

@@ -5,6 +5,8 @@ from .database_properties_call import (DatabasePropertiesGetCall,
                                        DatabasePropertiesPutCall)
 from .databases_call import DatabasesGetCall, DatabasesPostCall
 from .eval_call import EvalCall
+from .forests_call import (ForestsGetCall, ForestsPostCall,
+                           ForestsPutCall)
 from .logs_call import LogsCall
 from .server_call import ServerDeleteCall, ServerGetCall
 from .server_properties_call import (ServerPropertiesGetCall,

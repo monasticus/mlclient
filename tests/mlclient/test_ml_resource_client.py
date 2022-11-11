@@ -194,3 +194,32 @@ def test_put_forests():
     assert resp.status_code == 400
     assert "Payload has errors in structure, content-type or values. " \
            "Cannot validate payload, no forests specified." in resp.text
+
+
+@pytest.mark.ml_access
+def test_get_forest():
+    with MLResourceClient(auth_method="digest") as client:
+        resp = client.get_forest(forest="Documents", data_format="json")
+
+    expected_uri = "/manage/v2/forests/Documents?view=default"
+    assert resp.status_code == 200
+    assert resp.json()["forest-default"]["meta"]["uri"] == expected_uri
+
+
+@pytest.mark.ml_access
+def test_post_forest():
+    with MLResourceClient(auth_method="digest") as client:
+        resp = client.post_forest(forest="aaa", body={"state": "clear"})
+
+    assert resp.status_code == 404
+    assert "XDMP-NOSUCHFOREST" in resp.text
+
+
+@pytest.mark.ml_access
+def test_delete_forest():
+    with MLResourceClient(auth_method="digest") as client:
+        client.post_forests(body={"forest-name": "aaa"})
+        resp = client.delete_forest(forest="aaa", level="full")
+
+    assert resp.status_code == 204
+    assert not resp.text

@@ -6,7 +6,8 @@ from mlclient import MLClient, constants
 from mlclient.calls import (DatabaseDeleteCall, DatabaseGetCall,
                             DatabasePostCall, DatabasePropertiesGetCall,
                             DatabasePropertiesPutCall, DatabasesGetCall,
-                            DatabasesPostCall, EvalCall, ForestsGetCall,
+                            DatabasesPostCall, EvalCall, ForestDeleteCall,
+                            ForestGetCall, ForestPostCall, ForestsGetCall,
                             ForestsPostCall, ForestsPutCall, LogsCall,
                             ResourceCall, ServerDeleteCall, ServerGetCall,
                             ServerPropertiesGetCall, ServerPropertiesPutCall,
@@ -79,6 +80,12 @@ class MLResourceClient(MLClient):
         Sends a request to the /manage/v2/forests REST Resource using ForestsPostCall class
     put_forests(body: Union[str, dict]) -> Response
         Sends a request to the /manage/v2/forests REST Resource using ForestsPutCall class
+    get_forest(forest: str, data_format: str = None, view: str = None) -> Response
+        Sends a request to the /manage/v2/forests/{id|name} REST Resource using ForestGetCall class
+    post_forest(forest: str, body: Union[str, dict]) -> Response
+        Sends a request to the /manage/v2/forests/{id|name} REST Resource using ForestPostCall class
+    delete_forest(forest: str, level: str, replicas: str = None) -> Response
+        Sends a request to the /manage/v2/forests/{id|name} REST Resource using ForestDeleteCall class
     call(call: ResourceCall) -> Response
         Sends a custom request to a MarkLogic endpoint using a ResourceCall implementation
     """
@@ -566,6 +573,81 @@ class MLResourceClient(MLClient):
         """
 
         call = ForestsPutCall(body=body)
+        return self.call(call)
+
+    def get_forest(self, forest: str, data_format: str = None, view: str = None) -> Response:
+        """
+        Sends a request to the /manage/v2/forests/{id|name} REST Resource using ForestGetCall class
+
+        Parameters
+        ----------
+        forest : str
+            A forest identifier. The forest can be identified either by ID or name.
+        data_format : str
+            The format of the returned data. Can be either html, json, or xml (default).
+        view : str
+            A specific view of the returned data.
+            Can be properties-schema, config, edit, package, describe, status, xdmp:server-status or default.
+
+        Returns
+        -------
+        Response
+            an HTTP response
+        """
+
+        call = ForestGetCall(forest=forest,
+                             data_format=data_format,
+                             view=view)
+        return self.call(call)
+
+    def post_forest(self, forest: str, body: Union[str, dict]) -> Response:
+        """
+        Sends a request to the /manage/v2/forests/{id|name} REST Resource using ForestPostCall class
+
+        Parameters
+        ----------
+        forest : str
+            A forest identifier. The forest can be identified either by ID or name.
+        body : dict
+            A list of properties. Need to include the 'state' property (the type of state change to initiate).
+            Allowed values: clear, merge, restart, attach, detach, retire, employ.
+
+        Returns
+        -------
+        Response
+            an HTTP response
+        """
+
+        call = ForestPostCall(forest=forest,
+                              body=body)
+        return self.call(call)
+
+    def delete_forest(self, forest: str, level: str, replicas: str = None) -> Response:
+        """
+        Sends a request to the /manage/v2/forests/{id|name} REST Resource using ForestDeleteCall class
+
+        Parameters
+        ----------
+        forest : str
+            A forest identifier. The forest can be identified either by ID or name.
+        level : str
+            The type of state change to initiate. Allowed values: full, config-only.
+            A config-only deletion removes only the forest configuration;
+            the data contained in the forest remains on disk.
+            A full deletion removes both the forest configuration and the data.
+        replicas : str
+            Determines how to process the replicas.
+            Allowed values: detach to detach the replica but keep it; delete to detach and delete the replica.
+
+        Returns
+        -------
+        Response
+            an HTTP response
+        """
+
+        call = ForestDeleteCall(forest=forest,
+                                level=level,
+                                replicas=replicas)
         return self.call(call)
 
     def call(self, call: ResourceCall) -> Response:

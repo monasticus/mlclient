@@ -223,3 +223,21 @@ def test_delete_forest():
 
     assert resp.status_code == 204
     assert not resp.text
+
+
+@pytest.mark.ml_access
+def test_get_forest_properties():
+    with MLResourceClient(auth_method="digest") as client:
+        resp = client.get_forest_properties(forest="Documents", data_format="json")
+
+    assert resp.status_code == 200
+    assert resp.json()["forest-name"] == "Documents"
+
+
+@pytest.mark.ml_access
+def test_put_forest_properties():
+    with MLResourceClient(auth_method="digest") as client:
+        resp = client.put_forest_properties(forest="non-existing-forest", body={"forest-name": "custom-forest"})
+
+    assert resp.status_code == 404
+    assert resp.json()["errorResponse"]["messageCode"] == "XDMP-NOSUCHFOREST"

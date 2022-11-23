@@ -7,11 +7,13 @@ from mlclient.calls import (DatabaseDeleteCall, DatabaseGetCall,
                             DatabasePostCall, DatabasePropertiesGetCall,
                             DatabasePropertiesPutCall, DatabasesGetCall,
                             DatabasesPostCall, EvalCall, ForestDeleteCall,
-                            ForestGetCall, ForestPostCall, ForestsGetCall,
-                            ForestsPostCall, ForestsPutCall, LogsCall,
-                            ResourceCall, ServerDeleteCall, ServerGetCall,
-                            ServerPropertiesGetCall, ServerPropertiesPutCall,
-                            ServersGetCall, ServersPostCall)
+                            ForestGetCall, ForestPostCall,
+                            ForestPropertiesGetCall, ForestPropertiesPutCall,
+                            ForestsGetCall, ForestsPostCall, ForestsPutCall,
+                            LogsCall, ResourceCall, ServerDeleteCall,
+                            ServerGetCall, ServerPropertiesGetCall,
+                            ServerPropertiesPutCall, ServersGetCall,
+                            ServersPostCall)
 
 
 class MLResourceClient(MLClient):
@@ -86,6 +88,12 @@ class MLResourceClient(MLClient):
         Sends a request to the /manage/v2/forests/{id|name} REST Resource using ForestPostCall class
     delete_forest(forest: str, level: str, replicas: str = None) -> Response
         Sends a request to the /manage/v2/forests/{id|name} REST Resource using ForestDeleteCall class
+    get_forest_properties(forest: str, data_format: str = None) -> Response
+        Sends a request to the /manage/v2/forests/{id|name}/properties REST Resource
+        using ForestPropertiesGetCall class
+    put_forest_properties(forest: str, body: Union[str, dict]) -> Response
+        Sends a request to the /manage/v2/forests/{id|name}/properties REST Resource
+        using ForestPropertiesPutCall class
     call(call: ResourceCall) -> Response
         Sends a custom request to a MarkLogic endpoint using a ResourceCall implementation
     """
@@ -648,6 +656,51 @@ class MLResourceClient(MLClient):
         call = ForestDeleteCall(forest=forest,
                                 level=level,
                                 replicas=replicas)
+        return self.call(call)
+
+    def get_forest_properties(self, forest: str, data_format: str = None) -> Response:
+        """
+        Sends a request to the /manage/v2/forests/{id|name}/properties REST Resource
+        using ForestPropertiesGetCall class
+
+        Parameters
+        ----------
+        forest : str
+            A forest identifier. The forest can be identified either by ID or name.
+        data_format : str
+            The format of the returned data. Can be either json or xml (default).
+            This parameter overrides the Accept header if both are present.
+
+        Returns
+        -------
+        Response
+            an HTTP response
+        """
+
+        call = ForestPropertiesGetCall(forest=forest,
+                                       data_format=data_format)
+        return self.call(call)
+
+    def put_forest_properties(self, forest: str, body: Union[str, dict]) -> Response:
+        """
+        Sends a request to the /manage/v2/databases/{id|name}/properties REST Resource
+        using ForestPropertiesPutCall class
+
+        Parameters
+        ----------
+        forest : str
+            A forest identifier. The forest can be identified either by ID or name.
+        body : Union[str, dict]
+            A forest properties in XML or JSON format.
+
+        Returns
+        -------
+        Response
+            an HTTP response
+        """
+
+        call = ForestPropertiesPutCall(forest=forest,
+                                       body=body)
         return self.call(call)
 
     def call(self, call: ResourceCall) -> Response:

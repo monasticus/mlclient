@@ -10,8 +10,9 @@ from mlclient.calls import (DatabaseDeleteCall, DatabaseGetCall,
                             ForestGetCall, ForestPostCall,
                             ForestPropertiesGetCall, ForestPropertiesPutCall,
                             ForestsGetCall, ForestsPostCall, ForestsPutCall,
-                            LogsCall, ResourceCall, RolesGetCall,
-                            RolesPostCall, ServerDeleteCall, ServerGetCall,
+                            LogsCall, ResourceCall, RoleDeleteCall,
+                            RoleGetCall, RolesGetCall, RolesPostCall,
+                            ServerDeleteCall, ServerGetCall,
                             ServerPropertiesGetCall, ServerPropertiesPutCall,
                             ServersGetCall, ServersPostCall)
 
@@ -98,6 +99,10 @@ class MLResourceClient(MLClient):
         Sends a request to the /manage/v2/roles REST Resource using RolesGetCall class
     post_roles(body: Union[str, dict]) -> Response
         Sends a request to the /manage/v2/roles REST Resource using RolesPostCall class
+    get_role(database: str, data_format: str = None, view: str = None) -> Response
+        Sends a request to the /manage/v2/roles/{id|name} REST Resource using RoleGetCall class
+    delete_role(database: str) -> Response
+        Sends a request to the /manage/v2/roles/{id|name} REST Resource using RoleDeleteCall class
     call(call: ResourceCall) -> Response
         Sends a custom request to a MarkLogic endpoint using a ResourceCall implementation
     """
@@ -744,6 +749,48 @@ class MLResourceClient(MLClient):
         """
 
         call = RolesPostCall(body=body)
+        return self.call(call)
+
+    def get_role(self, role: str, data_format: str = None, view: str = None) -> Response:
+        """
+        Sends a request to the /manage/v2/roles/{id|name} REST Resource using RoleGetCall class
+
+        Parameters
+        ----------
+        role : str
+            A role identifier. The role can be identified either by ID or name.
+        data_format : str
+            The format of the returned data. Can be either html, json, or xml (default).
+        view : str
+            A specific view of the returned data. Can be: describe, or default.
+
+        Returns
+        -------
+        Response
+            an HTTP response
+        """
+
+        call = RoleGetCall(role=role,
+                           data_format=data_format,
+                           view=view)
+        return self.call(call)
+
+    def delete_role(self, role: str) -> Response:
+        """
+        Sends a request to the /manage/v2/roles/{id|name} REST Resource using RoleDeleteCall class
+
+        Parameters
+        ----------
+        role : str
+            A role identifier. The role can be identified either by ID or name.
+
+        Returns
+        -------
+        Response
+            an HTTP response
+        """
+
+        call = RoleDeleteCall(role=role)
         return self.call(call)
 
     def call(self, call: ResourceCall) -> Response:

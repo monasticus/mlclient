@@ -260,3 +260,22 @@ def test_post_roles():
 
     assert resp.status_code == 400
     assert "Payload has errors in structure, content-type or values." in resp.text
+
+
+@pytest.mark.ml_access
+def test_get_role():
+    with MLResourceClient(auth_method="digest") as client:
+        resp = client.get_role(role="admin", data_format="json")
+
+    expected_uri = "/manage/v2/roles/admin?view=default"
+    assert resp.status_code == 200
+    assert resp.json()["role-default"]["meta"]["uri"] == expected_uri
+
+
+@pytest.mark.ml_access
+def test_delete_role():
+    with MLResourceClient(auth_method="digest") as client:
+        resp = client.delete_role(role="custom-role")
+
+    assert resp.status_code == 204
+    assert not resp.text

@@ -248,7 +248,7 @@ def test_get_roles():
     with MLResourceClient(auth_method="digest") as client:
         resp = client.get_roles(data_format="json")
 
-    expected_uri = "/manage/v2/roles"
+    expected_uri = "/manage/v2/roles?view=default"
     assert resp.status_code == 200
     assert resp.json()["role-default-list"]["meta"]["uri"] == expected_uri
 

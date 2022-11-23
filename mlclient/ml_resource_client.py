@@ -94,7 +94,7 @@ class MLResourceClient(MLClient):
     put_forest_properties(forest: str, body: Union[str, dict]) -> Response
         Sends a request to the /manage/v2/forests/{id|name}/properties REST Resource
         using ForestPropertiesPutCall class
-    get_roles(data_format: str = None) -> Response
+    get_roles(data_format: str = None, view: str = None) -> Response
         Sends a request to the /manage/v2/roles REST Resource using RolesGetCall class
     post_roles(body: Union[str, dict]) -> Response
         Sends a request to the /manage/v2/roles REST Resource using RolesPostCall class
@@ -707,7 +707,7 @@ class MLResourceClient(MLClient):
                                        body=body)
         return self.call(call)
 
-    def get_roles(self, data_format: str = None) -> Response:
+    def get_roles(self, data_format: str = None, view: str = None) -> Response:
         """
         Sends a request to the /manage/v2/roles REST Resource using RolesGetCall class
 
@@ -715,6 +715,8 @@ class MLResourceClient(MLClient):
         ----------
         data_format : str
             The format of the returned data. Can be either html, json, or xml (default).
+        view : str
+            A specific view of the returned data. Can be: describe, or default.
 
         Returns
         -------
@@ -722,7 +724,8 @@ class MLResourceClient(MLClient):
             an HTTP response
         """
 
-        call = RolesGetCall(data_format=data_format)
+        call = RolesGetCall(data_format=data_format,
+                            view=view)
         return self.call(call)
 
     def post_roles(self, body: Union[str, dict]) -> Response:

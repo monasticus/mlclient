@@ -27,23 +27,29 @@ class RolesGetCall(ResourceCall):
     ENDPOINT = "/manage/v2/roles"
 
     __FORMAT_PARAM = "format"
+    __VIEW_PARAM = "view"
 
     __SUPPORTED_FORMATS = ["xml", "json", "html"]
+    __SUPPORTED_VIEWS = ["describe", "default"]
 
-    def __init__(self, data_format: str = "xml"):
+    def __init__(self, data_format: str = "xml", view: str = "default"):
         """
         Parameters
         ----------
         data_format : str
             The format of the returned data. Can be either html, json, or xml (default).
+        view : str
+            A specific view of the returned data. Can be: describe, or default.
         """
 
         data_format = data_format if data_format is not None else "xml"
-        RolesGetCall.__validate_params(data_format)
+        view = view if view is not None else "default"
+        RolesGetCall.__validate_params(data_format, view)
 
         super().__init__(method="GET",
                          accept=utils.get_accept_header_for_format(data_format))
         self.add_param(RolesGetCall.__FORMAT_PARAM, data_format)
+        self.add_param(RolesGetCall.__VIEW_PARAM, view)
 
     def endpoint(self):
         """Implementation of an abstract method returning an endpoint for the Roles call
@@ -57,10 +63,13 @@ class RolesGetCall(ResourceCall):
         return RolesGetCall.ENDPOINT
 
     @staticmethod
-    def __validate_params(data_format: str):
+    def __validate_params(data_format: str, view: str):
         if data_format not in RolesGetCall.__SUPPORTED_FORMATS:
             joined_supported_formats = ", ".join(RolesGetCall.__SUPPORTED_FORMATS)
             raise exceptions.WrongParameters("The supported formats are: " + joined_supported_formats)
+        if view not in RolesGetCall.__SUPPORTED_VIEWS:
+            joined_supported_views = ", ".join(RolesGetCall.__SUPPORTED_VIEWS)
+            raise exceptions.WrongParameters("The supported views are: " + joined_supported_views)
 
 
 class RolesPostCall(ResourceCall):

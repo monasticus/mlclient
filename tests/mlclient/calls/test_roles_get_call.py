@@ -17,6 +17,14 @@ def test_validation_format_param():
     assert err.value.args[0] == "The supported formats are: xml, json, html"
 
 
+def test_validation_view_param():
+    with pytest.raises(exceptions.WrongParameters) as err:
+        RolesGetCall(view="X")
+
+    assert err.value.args[0] == "The supported views are: " \
+                                "describe, default"
+
+
 def test_endpoint(default_roles_get_call):
     assert default_roles_get_call.endpoint() == "/manage/v2/roles"
     assert default_roles_get_call.ENDPOINT == "/manage/v2/roles"
@@ -29,7 +37,8 @@ def test_method(default_roles_get_call):
 
 def test_parameters(default_roles_get_call):
     assert default_roles_get_call.params() == {
-        "format": "xml"
+        "format": "xml",
+        "view": "default"
     }
 
 
@@ -69,3 +78,17 @@ def test_headers_for_json_format():
 
 def test_body(default_roles_get_call):
     assert default_roles_get_call.body() is None
+
+
+def test_fully_parametrized_call():
+    call = RolesGetCall(data_format="json",
+                        view="describe")
+    assert call.method() == "GET"
+    assert call.headers() == {
+        "accept": "application/json"
+    }
+    assert call.params() == {
+        "format": "json",
+        "view": "describe"
+    }
+    assert call.body() is None

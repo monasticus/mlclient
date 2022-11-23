@@ -279,3 +279,22 @@ def test_delete_role():
 
     assert resp.status_code == 204
     assert not resp.text
+
+
+@pytest.mark.ml_access
+def test_get_role_properties():
+    with MLResourceClient(auth_method="digest") as client:
+        resp = client.get_role_properties(role="admin", data_format="json")
+
+    assert resp.status_code == 200
+    assert resp.json()["role-name"] == "admin"
+
+
+@pytest.mark.ml_access
+def test_put_role_properties():
+    with MLResourceClient(auth_method="digest") as client:
+        resp = client.put_role_properties(role="non-existing-role", body={"role-name": "custom-db"})
+
+    assert resp.status_code == 400
+    assert "Payload has errors in structure, content-type or values. " \
+           "Role non-existing-role does not exist or is not accessible" in resp.text

@@ -11,7 +11,8 @@ from mlclient.calls import (DatabaseDeleteCall, DatabaseGetCall,
                             ForestPropertiesGetCall, ForestPropertiesPutCall,
                             ForestsGetCall, ForestsPostCall, ForestsPutCall,
                             LogsCall, ResourceCall, RoleDeleteCall,
-                            RoleGetCall, RolesGetCall, RolesPostCall,
+                            RoleGetCall, RolePropertiesGetCall,
+                            RolePropertiesPutCall, RolesGetCall, RolesPostCall,
                             ServerDeleteCall, ServerGetCall,
                             ServerPropertiesGetCall, ServerPropertiesPutCall,
                             ServersGetCall, ServersPostCall)
@@ -103,6 +104,12 @@ class MLResourceClient(MLClient):
         Sends a request to the /manage/v2/roles/{id|name} REST Resource using RoleGetCall class
     delete_role(database: str) -> Response
         Sends a request to the /manage/v2/roles/{id|name} REST Resource using RoleDeleteCall class
+    get_role_properties(role: str, data_format: str = None) -> Response
+        Sends a request to the /manage/v2/roles/{id|name}/properties REST Resource
+        using RolePropertiesGetCall class
+    put_role_properties(role: str, body: Union[str, dict]) -> Response
+        Sends a request to the /manage/v2/roles/{id|name}/properties REST Resource
+        using RolePropertiesPutCall class
     call(call: ResourceCall) -> Response
         Sends a custom request to a MarkLogic endpoint using a ResourceCall implementation
     """
@@ -791,6 +798,51 @@ class MLResourceClient(MLClient):
         """
 
         call = RoleDeleteCall(role=role)
+        return self.call(call)
+
+    def get_role_properties(self, role: str, data_format: str = None) -> Response:
+        """
+        Sends a request to the /manage/v2/roles/{id|name}/properties REST Resource
+        using RolePropertiesGetCall class
+
+        Parameters
+        ----------
+        role : str
+            A role identifier. The role can be identified either by ID or name.
+        data_format : str
+            The format of the returned data. Can be either json or xml (default).
+            This parameter overrides the Accept header if both are present.
+
+        Returns
+        -------
+        Response
+            an HTTP response
+        """
+
+        call = RolePropertiesGetCall(role=role,
+                                     data_format=data_format)
+        return self.call(call)
+
+    def put_role_properties(self, role: str, body: Union[str, dict]) -> Response:
+        """
+        Sends a request to the /manage/v2/roles/{id|name}/properties REST Resource
+        using RolePropertiesPutCall class
+
+        Parameters
+        ----------
+        role : str
+            A role identifier. The role can be identified either by ID or name.
+        body : Union[str, dict]
+            A role properties in XML or JSON format.
+
+        Returns
+        -------
+        Response
+            an HTTP response
+        """
+
+        call = RolePropertiesPutCall(role=role,
+                                     body=body)
         return self.call(call)
 
     def call(self, call: ResourceCall) -> Response:

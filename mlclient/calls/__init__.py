@@ -4,6 +4,7 @@ from .database_call import (DatabaseDeleteCall, DatabaseGetCall,
 from .database_properties_call import (DatabasePropertiesGetCall,
                                        DatabasePropertiesPutCall)
 from .databases_call import DatabasesGetCall, DatabasesPostCall
+from .documents_call import DocumentsGetCall
 from .eval_call import EvalCall
 from .forest_call import (ForestDeleteCall, ForestGetCall,
                           ForestPostCall)

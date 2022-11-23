@@ -15,7 +15,9 @@ from mlclient.calls import (DatabaseDeleteCall, DatabaseGetCall,
                             RolePropertiesPutCall, RolesGetCall, RolesPostCall,
                             ServerDeleteCall, ServerGetCall,
                             ServerPropertiesGetCall, ServerPropertiesPutCall,
-                            ServersGetCall, ServersPostCall)
+                            ServersGetCall, ServersPostCall, UserDeleteCall,
+                            UserGetCall, UserPropertiesGetCall,
+                            UserPropertiesPutCall, UsersGetCall, UsersPostCall)
 
 
 class MLResourceClient(MLClient):
@@ -110,6 +112,20 @@ class MLResourceClient(MLClient):
     put_role_properties(role: str, body: Union[str, dict]) -> Response
         Sends a request to the /manage/v2/roles/{id|name}/properties REST Resource
         using RolePropertiesPutCall class
+    get_users(data_format: str = None, view: str = None) -> Response
+        Sends a request to the /manage/v2/users REST Resource using UsersGetCall class
+    post_users(body: Union[str, dict]) -> Response
+        Sends a request to the /manage/v2/users REST Resource using UsersPostCall class
+    get_user(database: str, data_format: str = None, view: str = None) -> Response
+        Sends a request to the /manage/v2/users/{id|name} REST Resource using UserGetCall class
+    delete_user(database: str) -> Response
+        Sends a request to the /manage/v2/users/{id|name} REST Resource using UserDeleteCall class
+    get_user_properties(user: str, data_format: str = None) -> Response
+        Sends a request to the /manage/v2/users/{id|name}/properties REST Resource
+        using UserPropertiesGetCall class
+    put_user_properties(user: str, body: Union[str, dict]) -> Response
+        Sends a request to the /manage/v2/users/{id|name}/properties REST Resource
+        using UserPropertiesPutCall class
     call(call: ResourceCall) -> Response
         Sends a custom request to a MarkLogic endpoint using a ResourceCall implementation
     """
@@ -842,6 +858,132 @@ class MLResourceClient(MLClient):
         """
 
         call = RolePropertiesPutCall(role=role,
+                                     body=body)
+        return self.call(call)
+
+    def get_users(self, data_format: str = None, view: str = None) -> Response:
+        """
+        Sends a request to the /manage/v2/users REST Resource using UsersGetCall class
+
+        Parameters
+        ----------
+        data_format : str
+            The format of the returned data. Can be either html, json, or xml (default).
+        view : str
+            A specific view of the returned data. Can be: describe, or default.
+
+        Returns
+        -------
+        Response
+            an HTTP response
+        """
+
+        call = UsersGetCall(data_format=data_format,
+                            view=view)
+        return self.call(call)
+
+    def post_users(self, body: Union[str, dict]) -> Response:
+        """
+        Sends a request to the /manage/v2/users REST Resource using UsersPostCall class
+
+        Parameters
+        ----------
+        body : Union[str, dict]
+            A user properties in XML or JSON format.
+
+        Returns
+        -------
+        Response
+            an HTTP response
+        """
+
+        call = UsersPostCall(body=body)
+        return self.call(call)
+
+    def get_user(self, user: str, data_format: str = None, view: str = None) -> Response:
+        """
+        Sends a request to the /manage/v2/users/{id|name} REST Resource using UserGetCall class
+
+        Parameters
+        ----------
+        user : str
+            A user identifier. The user can be identified either by ID or name.
+        data_format : str
+            The format of the returned data. Can be either html, json, or xml (default).
+        view : str
+            A specific view of the returned data. Can be: describe, or default.
+
+        Returns
+        -------
+        Response
+            an HTTP response
+        """
+
+        call = UserGetCall(user=user,
+                           data_format=data_format,
+                           view=view)
+        return self.call(call)
+
+    def delete_user(self, user: str) -> Response:
+        """
+        Sends a request to the /manage/v2/users/{id|name} REST Resource using UserDeleteCall class
+
+        Parameters
+        ----------
+        user : str
+            A user identifier. The user can be identified either by ID or name.
+
+        Returns
+        -------
+        Response
+            an HTTP response
+        """
+
+        call = UserDeleteCall(user=user)
+        return self.call(call)
+
+    def get_user_properties(self, user: str, data_format: str = None) -> Response:
+        """
+        Sends a request to the /manage/v2/users/{id|name}/properties REST Resource
+        using UserPropertiesGetCall class
+
+        Parameters
+        ----------
+        user : str
+            A user identifier. The user can be identified either by ID or name.
+        data_format : str
+            The format of the returned data. Can be either json or xml (default).
+            This parameter overrides the Accept header if both are present.
+
+        Returns
+        -------
+        Response
+            an HTTP response
+        """
+
+        call = UserPropertiesGetCall(user=user,
+                                     data_format=data_format)
+        return self.call(call)
+
+    def put_user_properties(self, user: str, body: Union[str, dict]) -> Response:
+        """
+        Sends a request to the /manage/v2/users/{id|name}/properties REST Resource
+        using UserPropertiesPutCall class
+
+        Parameters
+        ----------
+        user : str
+            A user identifier. The user can be identified either by ID or name.
+        body : Union[str, dict]
+            A user properties in XML or JSON format.
+
+        Returns
+        -------
+        Response
+            an HTTP response
+        """
+
+        call = UserPropertiesPutCall(user=user,
                                      body=body)
         return self.call(call)
 

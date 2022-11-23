@@ -298,3 +298,59 @@ def test_put_role_properties():
     assert resp.status_code == 400
     assert "Payload has errors in structure, content-type or values. " \
            "Role non-existing-role does not exist or is not accessible" in resp.text
+
+
+@pytest.mark.ml_access
+def test_get_users():
+    with MLResourceClient(auth_method="digest") as client:
+        resp = client.get_users(data_format="json")
+
+    expected_uri = "/manage/v2/users?view=default"
+    assert resp.status_code == 200
+    assert resp.json()["user-default-list"]["meta"]["uri"] == expected_uri
+
+
+@pytest.mark.ml_access
+def test_post_users():
+    with MLResourceClient(auth_method="digest") as client:
+        resp = client.post_databases(body='<user-properties xmlns="http://marklogic.com/manage/user/properties" />')
+
+    assert resp.status_code == 400
+    assert "Payload has errors in structure, content-type or values." in resp.text
+
+
+@pytest.mark.ml_access
+def test_get_user():
+    with MLResourceClient(auth_method="digest") as client:
+        resp = client.get_user(user="admin", data_format="json")
+
+    expected_uri = "/manage/v2/users/admin?view=default"
+    assert resp.status_code == 200
+    assert resp.json()["user-default"]["meta"]["uri"] == expected_uri
+
+
+@pytest.mark.ml_access
+def test_delete_user():
+    with MLResourceClient(auth_method="digest") as client:
+        resp = client.delete_user(user="custom-user")
+
+    assert resp.status_code == 404
+    assert "User does not exist: custom-user" in resp.text
+
+
+@pytest.mark.ml_access
+def test_get_user_properties():
+    with MLResourceClient(auth_method="digest") as client:
+        resp = client.get_user_properties(user="admin", data_format="json")
+
+    assert resp.status_code == 200
+    assert resp.json()["user-name"] == "admin"
+
+
+@pytest.mark.ml_access
+def test_put_user_properties():
+    with MLResourceClient(auth_method="digest") as client:
+        resp = client.put_user_properties(user="non-existing-user", body={"user-name": "custom-db"})
+
+    assert resp.status_code == 404
+    assert resp.json()["errorResponse"]["messageCode"] == "SEC-USERDNE"

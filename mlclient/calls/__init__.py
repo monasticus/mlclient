@@ -13,6 +13,8 @@ from .forests_call import (ForestsGetCall, ForestsPostCall,
                            ForestsPutCall)
 from .logs_call import LogsCall
 from .role_call import RoleDeleteCall, RoleGetCall
+from .role_properties_call import (RolePropertiesGetCall,
+                                   RolePropertiesPutCall)
 from .roles_call import RolesGetCall, RolesPostCall
 from .server_call import ServerDeleteCall, ServerGetCall
 from .server_properties_call import (ServerPropertiesGetCall,

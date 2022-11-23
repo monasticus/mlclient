@@ -10,10 +10,10 @@ from mlclient.calls import (DatabaseDeleteCall, DatabaseGetCall,
                             ForestGetCall, ForestPostCall,
                             ForestPropertiesGetCall, ForestPropertiesPutCall,
                             ForestsGetCall, ForestsPostCall, ForestsPutCall,
-                            LogsCall, ResourceCall, ServerDeleteCall,
-                            ServerGetCall, ServerPropertiesGetCall,
-                            ServerPropertiesPutCall, ServersGetCall,
-                            ServersPostCall)
+                            LogsCall, ResourceCall, RolesGetCall,
+                            RolesPostCall, ServerDeleteCall, ServerGetCall,
+                            ServerPropertiesGetCall, ServerPropertiesPutCall,
+                            ServersGetCall, ServersPostCall)
 
 
 class MLResourceClient(MLClient):
@@ -94,6 +94,10 @@ class MLResourceClient(MLClient):
     put_forest_properties(forest: str, body: Union[str, dict]) -> Response
         Sends a request to the /manage/v2/forests/{id|name}/properties REST Resource
         using ForestPropertiesPutCall class
+    get_roles(data_format: str = None) -> Response
+        Sends a request to the /manage/v2/roles REST Resource using RolesGetCall class
+    post_roles(body: Union[str, dict]) -> Response
+        Sends a request to the /manage/v2/roles REST Resource using RolesPostCall class
     call(call: ResourceCall) -> Response
         Sends a custom request to a MarkLogic endpoint using a ResourceCall implementation
     """
@@ -701,6 +705,42 @@ class MLResourceClient(MLClient):
 
         call = ForestPropertiesPutCall(forest=forest,
                                        body=body)
+        return self.call(call)
+
+    def get_roles(self, data_format: str = None) -> Response:
+        """
+        Sends a request to the /manage/v2/roles REST Resource using RolesGetCall class
+
+        Parameters
+        ----------
+        data_format : str
+            The format of the returned data. Can be either html, json, or xml (default).
+
+        Returns
+        -------
+        Response
+            an HTTP response
+        """
+
+        call = RolesGetCall(data_format=data_format)
+        return self.call(call)
+
+    def post_roles(self, body: Union[str, dict]) -> Response:
+        """
+        Sends a request to the /manage/v2/roles REST Resource using RolesPostCall class
+
+        Parameters
+        ----------
+        body : Union[str, dict]
+            A role properties in XML or JSON format.
+
+        Returns
+        -------
+        Response
+            an HTTP response
+        """
+
+        call = RolesPostCall(body=body)
         return self.call(call)
 
     def call(self, call: ResourceCall) -> Response:

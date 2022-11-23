@@ -241,3 +241,22 @@ def test_put_forest_properties():
 
     assert resp.status_code == 404
     assert resp.json()["errorResponse"]["messageCode"] == "XDMP-NOSUCHFOREST"
+
+
+@pytest.mark.ml_access
+def test_get_roles():
+    with MLResourceClient(auth_method="digest") as client:
+        resp = client.get_roles(data_format="json")
+
+    expected_uri = "/manage/v2/roles"
+    assert resp.status_code == 200
+    assert resp.json()["role-default-list"]["meta"]["uri"] == expected_uri
+
+
+@pytest.mark.ml_access
+def test_post_roles():
+    with MLResourceClient(auth_method="digest") as client:
+        resp = client.post_databases(body='<role-properties xmlns="http://marklogic.com/manage/role/properties" />')
+
+    assert resp.status_code == 400
+    assert "Payload has errors in structure, content-type or values." in resp.text

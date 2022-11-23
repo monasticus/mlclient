@@ -16,6 +16,10 @@ from .role_call import RoleDeleteCall, RoleGetCall
 from .role_properties_call import (RolePropertiesGetCall,
                                    RolePropertiesPutCall)
 from .roles_call import RolesGetCall, RolesPostCall
+from .user_call import UserDeleteCall, UserGetCall
+from .user_properties_call import (UserPropertiesGetCall,
+                                   UserPropertiesPutCall)
+from .users_call import UsersGetCall, UsersPostCall
 from .server_call import ServerDeleteCall, ServerGetCall
 from .server_properties_call import (ServerPropertiesGetCall,
                                      ServerPropertiesPutCall)

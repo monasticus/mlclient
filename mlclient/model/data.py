@@ -12,6 +12,22 @@ class Metadata:
     __QUALITY_KEY = "quality"
     __METADATA_VALUES_KEY = "metadataValues"
 
+    __METADATA_TAG = "rapi:metadata"
+    __COLLECTIONS_TAG = "rapi:collections"
+    __COLLECTION_TAG = "rapi:collection"
+    __PERMISSIONS_TAG = "rapi:permissions"
+    __PERMISSION_TAG = "rapi:permission"
+    __PROPERTIES_TAG = "prop:properties"
+    __QUALITY_TAG = "rapi:quality"
+    __METADATA_VALUES_TAG = "rapi:metadata-values"
+    __METADATA_VALUE_TAG = "rapi:metadata-value"
+    __KEY_ATTR = "key"
+
+    __RAPI_NS_PREFIX = "xmlns:rapi"
+    __PROP_NS_PREFIX = "xmlns:prop"
+    __RAPI_NS_URI = "http://marklogic.com/rest-api"
+    __PROP_NS_URI = "http://marklogic.com/xdmp/property"
+
     def __init__(self, collections: set = None, permissions: set = None, properties: dict = None,
                  quality: int = None, metadata_values: dict = None) -> None:
         self.__metadata = {
@@ -88,29 +104,32 @@ class Metadata:
         return json.dumps(self.__metadata, cls=SetEncoder, indent=indent)
 
     def to_xml(self) -> ElemTree.ElementTree:
-        root = ElemTree.Element("rapi:metadata", attrib={"xmlns:rapi": "http://marklogic.com/rest-api"})
+        root = ElemTree.Element(self.__METADATA_TAG,
+                                attrib={self.__RAPI_NS_PREFIX: self.__RAPI_NS_URI})
 
-        collections_element = ElemTree.SubElement(root, "rapi:collections")
+        collections_element = ElemTree.SubElement(root, self.__COLLECTIONS_TAG)
         for collection in self.collections():
-            collection_element = ElemTree.SubElement(collections_element, "rapi:collection")
+            collection_element = ElemTree.SubElement(collections_element, self.__COLLECTION_TAG)
             collection_element.text = collection
 
-        permissions_element = ElemTree.SubElement(root, "rapi:permissions")
+        permissions_element = ElemTree.SubElement(root, self.__PERMISSIONS_TAG)
         for permission in self.permissions():
-            permission_element = ElemTree.SubElement(permissions_element, "rapi:permission")
+            permission_element = ElemTree.SubElement(permissions_element, self.__PERMISSION_TAG)
             permission_element.text = permission
 
-        properties_element = ElemTree.SubElement(root, "prop:properties", attrib={"xmlns:prop": "http://marklogic.com/xdmp/property"})
+        properties_element = ElemTree.SubElement(root, self.__PROPERTIES_TAG,
+                                                 attrib={self.__PROP_NS_PREFIX: self.__PROP_NS_URI})
         for property_name, property_value in self.properties().items():
             property_element = ElemTree.SubElement(properties_element, property_name)
             property_element.text = property_value
 
-        quality_element = ElemTree.SubElement(root, "rapi:quality")
+        quality_element = ElemTree.SubElement(root, self.__QUALITY_TAG)
         quality_element.text = str(self.quality())
 
-        metadata_values_element = ElemTree.SubElement(root, "rapi:metadata-values")
+        metadata_values_element = ElemTree.SubElement(root, self.__METADATA_VALUES_TAG)
         for metadata_name, metadata_value in self.metadata_values().items():
-            metadata_element = ElemTree.SubElement(metadata_values_element, "rapi:metadata-value", attrib={"key": metadata_name})
+            metadata_element = ElemTree.SubElement(metadata_values_element, self.__METADATA_VALUE_TAG,
+                                                   attrib={self.__KEY_ATTR: metadata_name})
             metadata_element.text = metadata_value
 
         return ElemTree.ElementTree(root)

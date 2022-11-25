@@ -1,1 +1,1 @@
-from .documents import Metadata
+from .data import Metadata

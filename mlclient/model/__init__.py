@@ -1,1 +1,1 @@
-from .documents import DocumentMetadata
+from .documents import Metadata

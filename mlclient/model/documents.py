@@ -4,7 +4,7 @@ import xml.etree.ElementTree as ElemTree
 from xml.dom import minidom
 
 
-class DocumentMetadata:
+class Metadata:
 
     __COLLECTIONS_KEY = "collections"
     __PERMISSIONS_KEY = "permissions"

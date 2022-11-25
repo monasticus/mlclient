@@ -1,6 +1,6 @@
 import pytest
 
-from mlclient.model import DocumentMetadata
+from mlclient.model import Metadata
 
 
 @pytest.fixture
@@ -11,70 +11,70 @@ def metadata():
     quality = 1
     metadata_values = {"meta-name-1": "meta-value-1", "meta-name-2": "meta-value-2"}
 
-    return DocumentMetadata(collections=collections,
-                            permissions=permissions,
-                            properties=properties,
-                            quality=quality,
-                            metadata_values=metadata_values)
+    return Metadata(collections=collections,
+                    permissions=permissions,
+                    properties=properties,
+                    quality=quality,
+                    metadata_values=metadata_values)
 
 
 def test_get_collections_when_exists():
     collections = {"collection-1", "collection-2"}
-    metadata = DocumentMetadata(collections=collections)
+    metadata = Metadata(collections=collections)
     assert metadata.collections() == collections
 
 
 def test_get_collections_when_empty():
-    metadata = DocumentMetadata()
+    metadata = Metadata()
     assert metadata.collections() == set()
 
 
 def test_get_permissions_when_exists():
     permissions = {"permission-1", "permission-2"}
-    metadata = DocumentMetadata(permissions=permissions)
+    metadata = Metadata(permissions=permissions)
     assert metadata.permissions() == permissions
 
 
 def test_get_permissions_when_empty():
-    metadata = DocumentMetadata()
+    metadata = Metadata()
     assert metadata.permissions() == set()
 
 
 def test_get_properties_when_exists():
     properties = {"prop-name-1": "prop-value-1", "prop-name-2": "prop-value-2"}
-    metadata = DocumentMetadata(properties=properties)
+    metadata = Metadata(properties=properties)
     assert metadata.properties() == properties
 
 
 def test_get_properties_when_empty():
-    metadata = DocumentMetadata()
+    metadata = Metadata()
     assert metadata.properties() == {}
 
 
 def test_get_quality_when_exists():
     quality = 1
-    metadata = DocumentMetadata(quality=quality)
+    metadata = Metadata(quality=quality)
     assert metadata.quality() == quality
 
 
 def test_get_quality_when_empty():
-    metadata = DocumentMetadata()
+    metadata = Metadata()
     assert metadata.quality() is None
 
 
 def test_get_metadata_values_when_exists():
     metadata_values = {"meta-name-1": "meta-value-1", "meta-name-2": "meta-value-2"}
-    metadata = DocumentMetadata(metadata_values=metadata_values)
+    metadata = Metadata(metadata_values=metadata_values)
     assert metadata.metadata_values() == metadata_values
 
 
 def test_get_metadata_values_when_empty():
-    metadata = DocumentMetadata()
+    metadata = Metadata()
     assert metadata.metadata_values() == {}
 
 
 def test_set_quality():
-    metadata = DocumentMetadata()
+    metadata = Metadata()
     success = metadata.set_quality(1)
     assert success is True
     assert metadata.quality() == 1
@@ -85,14 +85,14 @@ def test_set_quality():
 
 
 def test_set_quality_when_not_int():
-    metadata = DocumentMetadata()
+    metadata = Metadata()
     success = metadata.set_quality("1")
     assert success is False
     assert metadata.quality() is None
 
 
 def test_add_collection():
-    metadata = DocumentMetadata()
+    metadata = Metadata()
     success = metadata.add_collection("collection-1")
     assert success is True
     assert metadata.collections() == {"collection-1"}
@@ -103,28 +103,28 @@ def test_add_collection():
 
 
 def test_add_collection_when_exists():
-    metadata = DocumentMetadata(collections={"collection-1"})
+    metadata = Metadata(collections={"collection-1"})
     success = metadata.add_collection("collection-1")
     assert success is False
     assert metadata.collections() == {"collection-1"}
 
 
 def test_add_none_collection():
-    metadata = DocumentMetadata(collections={"collection-1"})
+    metadata = Metadata(collections={"collection-1"})
     success = metadata.add_collection(None)
     assert success is False
     assert metadata.collections() == {"collection-1"}
 
 
 def test_add_blank_collection():
-    metadata = DocumentMetadata(collections={"collection-1"})
+    metadata = Metadata(collections={"collection-1"})
     success = metadata.add_collection(" \n")
     assert success is False
     assert metadata.collections() == {"collection-1"}
 
 
 def test_add_permission():
-    metadata = DocumentMetadata()
+    metadata = Metadata()
     success = metadata.add_permission("permission-1")
     assert success is True
     assert metadata.permissions() == {"permission-1"}
@@ -135,28 +135,28 @@ def test_add_permission():
 
 
 def test_add_permission_when_exists():
-    metadata = DocumentMetadata(permissions={"permission-1"})
+    metadata = Metadata(permissions={"permission-1"})
     success = metadata.add_permission("permission-1")
     assert success is False
     assert metadata.permissions() == {"permission-1"}
 
 
 def test_add_none_permission():
-    metadata = DocumentMetadata(permissions={"permission-1"})
+    metadata = Metadata(permissions={"permission-1"})
     success = metadata.add_permission(None)
     assert success is False
     assert metadata.permissions() == {"permission-1"}
 
 
 def test_add_blank_permission():
-    metadata = DocumentMetadata(permissions={"permission-1"})
+    metadata = Metadata(permissions={"permission-1"})
     success = metadata.add_permission(" \n")
     assert success is False
     assert metadata.permissions() == {"permission-1"}
 
 
 def test_put_property():
-    metadata = DocumentMetadata()
+    metadata = Metadata()
     metadata.put_property("prop-name-1", "prop-value-1")
     assert metadata.properties() == {
         "prop-name-1": "prop-value-1"
@@ -170,7 +170,7 @@ def test_put_property():
 
 
 def test_put_property_when_exists():
-    metadata = DocumentMetadata(properties={"prop-name-1": "prop-value-1"})
+    metadata = Metadata(properties={"prop-name-1": "prop-value-1"})
     metadata.put_property("prop-name-1", "prop-value-2")
     assert metadata.properties() == {
         "prop-name-1": "prop-value-2"
@@ -178,7 +178,7 @@ def test_put_property_when_exists():
 
 
 def test_put_none_property():
-    metadata = DocumentMetadata(properties={"prop-name-1": "prop-value-1"})
+    metadata = Metadata(properties={"prop-name-1": "prop-value-1"})
     metadata.put_property("prop-name-1", None)
     assert metadata.properties() == {
         "prop-name-1": "prop-value-1"
@@ -186,7 +186,7 @@ def test_put_none_property():
 
 
 def test_put_metadata_value():
-    metadata = DocumentMetadata()
+    metadata = Metadata()
     metadata.put_metadata_value("meta-name-1", "meta-value-1")
     assert metadata.metadata_values() == {
         "meta-name-1": "meta-value-1"
@@ -200,7 +200,7 @@ def test_put_metadata_value():
 
 
 def test_put_metadata_value_when_exists():
-    metadata = DocumentMetadata(metadata_values={"meta-name-1": "meta-value-1"})
+    metadata = Metadata(metadata_values={"meta-name-1": "meta-value-1"})
     metadata.put_metadata_value("meta-name-1", "meta-value-2")
     assert metadata.metadata_values() == {
         "meta-name-1": "meta-value-2"
@@ -208,7 +208,7 @@ def test_put_metadata_value_when_exists():
 
 
 def test_put_none_metadata_value():
-    metadata = DocumentMetadata(metadata_values={"meta-name-1": "meta-value-1"})
+    metadata = Metadata(metadata_values={"meta-name-1": "meta-value-1"})
     metadata.put_metadata_value("meta-name-1", None)
     assert metadata.metadata_values() == {
         "meta-name-1": "meta-value-1"
@@ -216,7 +216,7 @@ def test_put_none_metadata_value():
 
 
 def test_remove_collection():
-    metadata = DocumentMetadata(collections={"collection-1", "collection-2"})
+    metadata = Metadata(collections={"collection-1", "collection-2"})
     success = metadata.remove_collection("collection-1")
     assert success is True
     assert metadata.collections() == {"collection-2"}
@@ -227,14 +227,14 @@ def test_remove_collection():
 
 
 def test_remove_collection_when_does_not_exist():
-    metadata = DocumentMetadata(collections={"collection-1"})
+    metadata = Metadata(collections={"collection-1"})
     success = metadata.remove_collection("collection-2")
     assert success is False
     assert metadata.collections() == {"collection-1"}
 
 
 def test_remove_permission():
-    metadata = DocumentMetadata(permissions={"permission-1", "permission-2"})
+    metadata = Metadata(permissions={"permission-1", "permission-2"})
     success = metadata.remove_permission("permission-1")
     assert success is True
     assert metadata.permissions() == {"permission-2"}
@@ -245,14 +245,14 @@ def test_remove_permission():
 
 
 def test_remove_permission_when_does_not_exist():
-    metadata = DocumentMetadata(permissions={"permission-1"})
+    metadata = Metadata(permissions={"permission-1"})
     success = metadata.remove_permission("permission-2")
     assert success is False
     assert metadata.permissions() == {"permission-1"}
 
 
 def test_remove_property():
-    metadata = DocumentMetadata(properties={"prop-name-1": "prop-value-1", "prop-name-2": "prop-value-2"})
+    metadata = Metadata(properties={"prop-name-1": "prop-value-1", "prop-name-2": "prop-value-2"})
     success = metadata.remove_property("prop-name-1")
     assert success is True
     assert metadata.properties() == {
@@ -265,7 +265,7 @@ def test_remove_property():
 
 
 def test_remove_property_when_does_not_exist():
-    metadata = DocumentMetadata(properties={"prop-name-1": "prop-value-1"})
+    metadata = Metadata(properties={"prop-name-1": "prop-value-1"})
     success = metadata.remove_property("prop-name-2")
     assert success is False
     assert metadata.properties() == {
@@ -274,7 +274,7 @@ def test_remove_property_when_does_not_exist():
 
 
 def test_remove_metadata_value():
-    metadata = DocumentMetadata(metadata_values={"meta-name-1": "meta-value-1", "meta-name-2": "meta-value-2"})
+    metadata = Metadata(metadata_values={"meta-name-1": "meta-value-1", "meta-name-2": "meta-value-2"})
     success = metadata.remove_metadata_value("meta-name-1")
     assert success is True
     assert metadata.metadata_values() == {
@@ -287,7 +287,7 @@ def test_remove_metadata_value():
 
 
 def test_remove_metadata_value_when_does_not_exist():
-    metadata = DocumentMetadata(metadata_values={"meta-name-1": "meta-value-1"})
+    metadata = Metadata(metadata_values={"meta-name-1": "meta-value-1"})
     success = metadata.remove_metadata_value("meta-name-2")
     assert success is False
     assert metadata.metadata_values() == {
@@ -302,7 +302,7 @@ def test_properties_with_none_values():
         "prop-name-3": "prop-value-1",
         "prop-name-4": None
     }
-    metadata = DocumentMetadata(properties=properties)
+    metadata = Metadata(properties=properties)
     assert metadata.properties() == {
         "prop-name-1": "prop-value-1",
         "prop-name-3": "prop-value-1"
@@ -316,7 +316,7 @@ def test_metadata_values_with_none_values():
         "meta-name-3": "meta-value-1",
         "meta-name-4": None
     }
-    metadata = DocumentMetadata(metadata_values=metadata_values)
+    metadata = Metadata(metadata_values=metadata_values)
     assert metadata.metadata_values() == {
         "meta-name-1": "meta-value-1",
         "meta-name-3": "meta-value-1"

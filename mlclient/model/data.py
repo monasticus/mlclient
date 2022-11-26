@@ -151,6 +151,42 @@ class Metadata:
         return {k: v for k, v in source_dict.items() if v is not None}
 
 
+class Permission:
+
+    READ = "read"
+    INSERT = "insert"
+    UPDATE = "update"
+    UPDATE_NODE = "update-node"
+    EXECUTE = "execute"
+
+    __ROLE_NAME_KEY = "role-name"
+    __CAPABILITIES_KEY = "capabilities"
+
+    __CAPABILITIES = {READ, INSERT, UPDATE, UPDATE_NODE, EXECUTE}
+
+    def __init__(self, role_name: str, capabilities: set):
+        self.__role_name = role_name
+        self.__capabilities = {cap for cap in capabilities if cap in self.__CAPABILITIES}
+
+    def role_name(self):
+        return self.__role_name
+
+    def capabilities(self):
+        return self.__capabilities.copy()
+
+    def add_capability(self, capability):
+        allow = capability is not None and capability in self.__CAPABILITIES and capability not in self.capabilities()
+        if allow:
+            self.__capabilities.add(capability)
+        return allow
+
+    def remove_capability(self, capability: str) -> bool:
+        allow = capability is not None and capability in self.capabilities()
+        if allow:
+            self.__capabilities.remove(capability)
+        return allow
+
+
 class SetEncoder(json.JSONEncoder):
 
     def default(self, obj):

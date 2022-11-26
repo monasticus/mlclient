@@ -1,1 +1,1 @@
-from .data import Metadata
+from .data import Metadata, Permission

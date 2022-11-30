@@ -40,6 +40,22 @@ class Metadata:
         self.__quality = quality
         self.__metadata_values = self.__get_clean_dict(metadata_values) if metadata_values else dict()
 
+    def __eq__(self, other):
+        return (isinstance(other, Metadata) and
+                set(self.__collections).difference(set(other.collections())) == set() and
+                set(self.__permissions).difference(set(other.permissions())) == set() and
+                self.__properties == other.properties() and
+                self.__quality == other.quality() and
+                self.__metadata_values == other.metadata_values())
+
+    def __hash__(self):
+        items = self.collections()
+        items.extend(self.permissions())
+        items.append(self.quality())
+        items.append(frozenset(self.properties().items()))
+        items.append(frozenset(self.metadata_values().items()))
+        return hash(tuple(items))
+
     def collections(self) -> list:
         return self.__collections.copy()
 
@@ -192,7 +208,7 @@ class Metadata:
 
     @staticmethod
     def __get_clean_dict(source_dict: dict):
-        return {k: v for k, v in source_dict.items() if v is not None}
+        return {k: str(v) for k, v in source_dict.items() if v is not None}
 
 
 class Permission:

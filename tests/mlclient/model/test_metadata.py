@@ -25,6 +25,96 @@ def metadata():
                     metadata_values=metadata_values)
 
 
+def test_equal():
+    metadata_1 = Metadata(collections=["collection-1", "collection-2"],
+                          permissions=[Permission("role-1", {Permission.READ})],
+                          properties={"prop-name-1": "prop-value-1", "prop-name-2": "prop-value-2"},
+                          quality=1,
+                          metadata_values={"meta-name-1": "meta-value-1", "meta-name-2": "meta-value-2"})
+    metadata_2 = Metadata(collections=["collection-1", "collection-2"],
+                          permissions=[Permission("role-1", {Permission.READ})],
+                          properties={"prop-name-1": "prop-value-1", "prop-name-2": "prop-value-2"},
+                          quality=1,
+                          metadata_values={"meta-name-1": "meta-value-1", "meta-name-2": "meta-value-2"})
+    assert metadata_1 == metadata_2
+    assert metadata_1.__hash__() == metadata_2.__hash__()
+
+
+def test_not_equal_when_collections_differ():
+    metadata_1 = Metadata(collections=["collection-1", "collection-2"],
+                          permissions=[Permission("role-1", {Permission.READ})],
+                          properties={"prop-name-1": "prop-value-1", "prop-name-2": "prop-value-2"},
+                          quality=1,
+                          metadata_values={"meta-name-1": "meta-value-1", "meta-name-2": "meta-value-2"})
+    metadata_2 = Metadata(collections=["collection-1", "collection-3"],
+                          permissions=[Permission("role-1", {Permission.READ})],
+                          properties={"prop-name-1": "prop-value-1", "prop-name-2": "prop-value-2"},
+                          quality=1,
+                          metadata_values={"meta-name-1": "meta-value-1", "meta-name-2": "meta-value-2"})
+    assert metadata_1 != metadata_2
+    assert metadata_1.__hash__() != metadata_2.__hash__()
+
+
+def test_not_equal_when_permissions_differ():
+    metadata_1 = Metadata(collections=["collection-1", "collection-2"],
+                          permissions=[Permission("role-1", {Permission.READ})],
+                          properties={"prop-name-1": "prop-value-1", "prop-name-2": "prop-value-2"},
+                          quality=1,
+                          metadata_values={"meta-name-1": "meta-value-1", "meta-name-2": "meta-value-2"})
+    metadata_2 = Metadata(collections=["collection-1", "collection-2"],
+                          permissions=[Permission("role-1", {Permission.UPDATE})],
+                          properties={"prop-name-1": "prop-value-1", "prop-name-2": "prop-value-2"},
+                          quality=1,
+                          metadata_values={"meta-name-1": "meta-value-1", "meta-name-2": "meta-value-2"})
+    assert metadata_1 != metadata_2
+    assert metadata_1.__hash__() != metadata_2.__hash__()
+
+
+def test_not_equal_when_properties_differ():
+    metadata_1 = Metadata(collections=["collection-1", "collection-2"],
+                          permissions=[Permission("role-1", {Permission.READ})],
+                          properties={"prop-name-1": "prop-value-1", "prop-name-2": "prop-value-2"},
+                          quality=1,
+                          metadata_values={"meta-name-1": "meta-value-1", "meta-name-2": "meta-value-2"})
+    metadata_2 = Metadata(collections=["collection-1", "collection-2"],
+                          permissions=[Permission("role-1", {Permission.READ})],
+                          properties={"prop-name-1": "prop-value-1", "prop-name-2": "prop-value-3"},
+                          quality=1,
+                          metadata_values={"meta-name-1": "meta-value-1", "meta-name-2": "meta-value-2"})
+    assert metadata_1 != metadata_2
+    assert metadata_1.__hash__() != metadata_2.__hash__()
+
+
+def test_not_equal_when_qualities_differ():
+    metadata_1 = Metadata(collections=["collection-1", "collection-2"],
+                          permissions=[Permission("role-1", {Permission.READ})],
+                          properties={"prop-name-1": "prop-value-1", "prop-name-2": "prop-value-2"},
+                          quality=1,
+                          metadata_values={"meta-name-1": "meta-value-1", "meta-name-2": "meta-value-2"})
+    metadata_2 = Metadata(collections=["collection-1", "collection-2"],
+                          permissions=[Permission("role-1", {Permission.READ})],
+                          properties={"prop-name-1": "prop-value-1", "prop-name-2": "prop-value-2"},
+                          quality=2,
+                          metadata_values={"meta-name-1": "meta-value-1", "meta-name-2": "meta-value-2"})
+    assert metadata_1 != metadata_2
+    assert metadata_1.__hash__() != metadata_2.__hash__()
+
+
+def test_not_equal_when_metadata_values_differ():
+    metadata_1 = Metadata(collections=["collection-1", "collection-2"],
+                          permissions=[Permission("role-1", {Permission.READ})],
+                          properties={"prop-name-1": "prop-value-1", "prop-name-2": "prop-value-2"},
+                          quality=1,
+                          metadata_values={"meta-name-1": "meta-value-1", "meta-name-2": "meta-value-2"})
+    metadata_2 = Metadata(collections=["collection-1", "collection-2"],
+                          permissions=[Permission("role-1", {Permission.READ})],
+                          properties={"prop-name-1": "prop-value-1", "prop-name-2": "prop-value-2"},
+                          quality=1,
+                          metadata_values={"meta-name-1": "meta-value-1", "meta-name-2": "meta-value-3"})
+    assert metadata_1 != metadata_2
+    assert metadata_1.__hash__() != metadata_2.__hash__()
+
+
 def test_get_collections_when_exists():
     collections = ["collection-1", "collection-2"]
     metadata = Metadata(collections=collections)
@@ -357,17 +447,49 @@ def test_properties_with_none_values():
     }
 
 
+def test_properties_with_non_string_values():
+    properties = {
+        "prop-name-1": [1, 2, 3],
+        "prop-name-2": {"nested-key": 0.5},
+        "prop-name-3": Permission("custom-role", {Permission.READ}),
+        "prop-name-4": True
+    }
+    metadata = Metadata(properties=properties)
+    assert metadata.properties() == {
+        "prop-name-1": "[1, 2, 3]",
+        "prop-name-2": "{'nested-key': 0.5}",
+        "prop-name-3": "Permission(role_name='custom-role', capabilities={'read'})",
+        "prop-name-4": "True"
+    }
+
+
 def test_metadata_values_with_none_values():
     metadata_values = {
         "meta-name-1": "meta-value-1",
         "meta-name-2": None,
-        "meta-name-3": "meta-value-1",
+        "meta-name-3": "meta-value-3",
         "meta-name-4": None
     }
     metadata = Metadata(metadata_values=metadata_values)
     assert metadata.metadata_values() == {
         "meta-name-1": "meta-value-1",
-        "meta-name-3": "meta-value-1"
+        "meta-name-3": "meta-value-3"
+    }
+
+
+def test_metadata_values_with_none_values():
+    metadata_values = {
+        "meta-name-1": [1, 2, 3],
+        "meta-name-2": {"nested-key": 0.5},
+        "meta-name-3": Permission("custom-role", {Permission.READ}),
+        "meta-name-4": True
+    }
+    metadata = Metadata(metadata_values=metadata_values)
+    assert metadata.metadata_values() == {
+        "meta-name-1": "[1, 2, 3]",
+        "meta-name-2": "{'nested-key': 0.5}",
+        "meta-name-3": "Permission(role_name='custom-role', capabilities={'read'})",
+        "meta-name-4": "True"
     }
 
 

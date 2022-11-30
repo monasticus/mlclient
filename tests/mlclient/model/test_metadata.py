@@ -1,12 +1,15 @@
 import pytest
 
-from mlclient.model import Metadata
+from mlclient.model import Metadata, Permission
 
 
 @pytest.fixture
 def metadata():
-    collections = {"collection-1", "collection-2"}
-    permissions = {"permission-1", "permission-2"}
+    collections = ["collection-1", "collection-2"]
+    permissions = [
+        Permission("role-1", {Permission.READ}),
+        Permission("role-2", {Permission.READ, Permission.UPDATE})
+    ]
     properties = {"prop-name-1": "prop-value-1", "prop-name-2": "prop-value-2"}
     quality = 1
     metadata_values = {"meta-name-1": "meta-value-1", "meta-name-2": "meta-value-2"}
@@ -19,25 +22,26 @@ def metadata():
 
 
 def test_get_collections_when_exists():
-    collections = {"collection-1", "collection-2"}
+    collections = ["collection-1", "collection-2"]
     metadata = Metadata(collections=collections)
-    assert metadata.collections() == collections
+    assert metadata.collections().sort() == collections.sort()
 
 
 def test_get_collections_when_empty():
     metadata = Metadata()
-    assert metadata.collections() == set()
+    assert metadata.collections() == list()
 
 
 def test_get_permissions_when_exists():
-    permissions = {"permission-1", "permission-2"}
-    metadata = Metadata(permissions=permissions)
-    assert metadata.permissions() == permissions
+    permission_1 = Permission("role-1", {Permission.READ})
+    permission_2 = Permission("role-2", {Permission.READ, Permission.UPDATE})
+    metadata = Metadata(permissions=[permission_1, permission_2])
+    assert metadata.permissions() == [permission_1.to_json(), permission_2.to_json()]
 
 
 def test_get_permissions_when_empty():
     metadata = Metadata()
-    assert metadata.permissions() == set()
+    assert metadata.permissions() == list()
 
 
 def test_get_properties_when_exists():
@@ -95,64 +99,71 @@ def test_add_collection():
     metadata = Metadata()
     success = metadata.add_collection("collection-1")
     assert success is True
-    assert metadata.collections() == {"collection-1"}
+    assert metadata.collections() == ["collection-1"]
 
     success = metadata.add_collection("collection-2")
     assert success is True
-    assert metadata.collections() == {"collection-1", "collection-2"}
+    assert metadata.collections() == ["collection-1", "collection-2"]
 
 
 def test_add_collection_when_exists():
-    metadata = Metadata(collections={"collection-1"})
+    metadata = Metadata(collections=["collection-1"])
     success = metadata.add_collection("collection-1")
     assert success is False
-    assert metadata.collections() == {"collection-1"}
+    assert metadata.collections() == ["collection-1"]
 
 
 def test_add_none_collection():
-    metadata = Metadata(collections={"collection-1"})
+    metadata = Metadata(collections=["collection-1"])
     success = metadata.add_collection(None)
     assert success is False
-    assert metadata.collections() == {"collection-1"}
+    assert metadata.collections() == ["collection-1"]
 
 
 def test_add_blank_collection():
-    metadata = Metadata(collections={"collection-1"})
+    metadata = Metadata(collections=["collection-1"])
     success = metadata.add_collection(" \n")
     assert success is False
-    assert metadata.collections() == {"collection-1"}
+    assert metadata.collections() == ["collection-1"]
 
 
 def test_add_permission():
+    permission_1 = Permission("role-1", {Permission.READ})
+    permission_2 = Permission("role-2", {Permission.READ, Permission.UPDATE})
     metadata = Metadata()
-    success = metadata.add_permission("permission-1")
+    success = metadata.add_permission("role-1", Permission.READ)
     assert success is True
-    assert metadata.permissions() == {"permission-1"}
+    assert metadata.permissions() == [permission_1.to_json()]
 
-    success = metadata.add_permission("permission-2")
+    success = metadata.add_permission("role-2", Permission.READ)
     assert success is True
-    assert metadata.permissions() == {"permission-1", "permission-2"}
+    success = metadata.add_permission("role-2", Permission.UPDATE)
+    assert success is True
+    assert metadata.permissions() == [permission_1.to_json(), permission_2.to_json()]
 
 
 def test_add_permission_when_exists():
-    metadata = Metadata(permissions={"permission-1"})
-    success = metadata.add_permission("permission-1")
+    permission = Permission("role-1", {Permission.READ})
+    metadata = Metadata(permissions=[permission])
+    success = metadata.add_permission("role-1", Permission.READ)
     assert success is False
-    assert metadata.permissions() == {"permission-1"}
+    assert metadata.permissions() == [permission.to_json()]
 
 
-def test_add_none_permission():
-    metadata = Metadata(permissions={"permission-1"})
-    success = metadata.add_permission(None)
+def test_add_permission_with_none_role():
+    permission = Permission("role-1", {Permission.READ})
+    metadata = Metadata(permissions=[permission])
+    success = metadata.add_permission(None, Permission.UPDATE)
     assert success is False
-    assert metadata.permissions() == {"permission-1"}
+    assert metadata.permissions() == [permission.to_json()]
 
 
-def test_add_blank_permission():
-    metadata = Metadata(permissions={"permission-1"})
-    success = metadata.add_permission(" \n")
+def test_add_permission_with_none_capability():
+    permission = Permission("role-1", {Permission.READ})
+    metadata = Metadata(permissions=[permission])
+    success = metadata.add_permission("role-1", None)
     assert success is False
-    assert metadata.permissions() == {"permission-1"}
+    assert metadata.permissions() == [permission.to_json()]
 
 
 def test_put_property():
@@ -216,39 +227,57 @@ def test_put_none_metadata_value():
 
 
 def test_remove_collection():
-    metadata = Metadata(collections={"collection-1", "collection-2"})
+    metadata = Metadata(collections=["collection-1", "collection-2"])
     success = metadata.remove_collection("collection-1")
     assert success is True
-    assert metadata.collections() == {"collection-2"}
+    assert metadata.collections() == ["collection-2"]
 
     success = metadata.remove_collection("collection-2")
     assert success is True
-    assert metadata.collections() == set()
+    assert metadata.collections() == list()
 
 
 def test_remove_collection_when_does_not_exist():
-    metadata = Metadata(collections={"collection-1"})
+    metadata = Metadata(collections=["collection-1"])
     success = metadata.remove_collection("collection-2")
     assert success is False
-    assert metadata.collections() == {"collection-1"}
+    assert metadata.collections() == ["collection-1"]
 
 
 def test_remove_permission():
-    metadata = Metadata(permissions={"permission-1", "permission-2"})
-    success = metadata.remove_permission("permission-1")
+    permissions = [
+        Permission("role-1", {Permission.READ}),
+        Permission("role-2", {Permission.READ, Permission.UPDATE})
+    ]
+    metadata = Metadata(permissions=permissions)
+    success = metadata.remove_permission("role-2", Permission.READ)
     assert success is True
-    assert metadata.permissions() == {"permission-2"}
+    assert metadata.permissions() == [
+        Permission("role-1", {Permission.READ}).to_json(),
+        Permission("role-2", {Permission.UPDATE}).to_json()
+    ]
 
-    success = metadata.remove_permission("permission-2")
+    success = metadata.remove_permission("role-2", Permission.UPDATE)
     assert success is True
-    assert metadata.permissions() == set()
+    assert metadata.permissions() == [
+        Permission("role-1", {Permission.READ}).to_json()
+    ]
+
+    success = metadata.remove_permission("role-1", Permission.READ)
+    assert success is True
+    assert metadata.permissions() == list()
 
 
 def test_remove_permission_when_does_not_exist():
-    metadata = Metadata(permissions={"permission-1"})
-    success = metadata.remove_permission("permission-2")
+    permission = Permission("role-1", {Permission.READ})
+    metadata = Metadata(permissions=[permission])
+    success = metadata.remove_permission("role-2", Permission.READ)
     assert success is False
-    assert metadata.permissions() == {"permission-1"}
+    assert metadata.permissions() == [permission.to_json()]
+
+    success = metadata.remove_permission("role-1", Permission.UPDATE)
+    assert success is False
+    assert metadata.permissions() == [permission.to_json()]
 
 
 def test_remove_property():
@@ -295,6 +324,23 @@ def test_remove_metadata_value_when_does_not_exist():
     }
 
 
+def test_duplicated_collections():
+    collections = ["collection-1", "collection-1"]
+    metadata = Metadata(collections=collections)
+    assert metadata.collections() == ["collection-1"]
+
+
+def test_duplicated_permissions():
+    permission_1 = Permission("role-1", {Permission.READ})
+    permission_2 = Permission("role-1", {Permission.READ})
+    permission_3 = Permission("role-1", {Permission.READ, Permission.UPDATE})
+    permission_4 = Permission("role-2", {Permission.READ, Permission.UPDATE})
+    metadata = Metadata(permissions=[permission_1, permission_2, permission_3, permission_4])
+    assert len(metadata.permissions()) == 2
+    assert permission_1.to_json() in metadata.permissions()
+    assert permission_4.to_json() in metadata.permissions()
+
+
 def test_properties_with_none_values():
     properties = {
         "prop-name-1": "prop-value-1",
@@ -325,19 +371,27 @@ def test_metadata_values_with_none_values():
 
 def test_to_json(metadata):
     metadata_json = metadata.to_json()
-    assert metadata_json == {
-        "collections": {"collection-1", "collection-2"},
-        "permissions": {"permission-1", "permission-2"},
-        "properties": {
-            "prop-name-1": "prop-value-1",
-            "prop-name-2": "prop-value-2"
-        },
-        "quality": 1,
-        "metadataValues": {
-            "meta-name-1": "meta-value-1",
-            "meta-name-2": "meta-value-2"
-        }
-    }
+    collections = metadata_json.get("collections")
+    permissions = metadata_json.get("permissions")
+    properties = metadata_json.get("properties")
+    quality = metadata_json.get("quality")
+    metadata_values = metadata_json.get("metadataValues")
+
+    assert list(metadata_json.keys()) == ["collections", "permissions", "properties", "quality", "metadataValues"]
+    assert collections.sort() == ["collection-1", "collection-2"].sort()
+    assert permissions in [
+        [{"role-name": "role-1", "capabilities": [Permission.READ]},
+         {"role-name": "role-2", "capabilities": [Permission.READ, Permission.UPDATE]}],
+        [{"role-name": "role-1", "capabilities": [Permission.READ]},
+         {"role-name": "role-2", "capabilities": [Permission.UPDATE, Permission.READ]}],
+        [{"role-name": "role-2", "capabilities": [Permission.READ, Permission.UPDATE]},
+         {"role-name": "role-1", "capabilities": [Permission.READ]}],
+        [{"role-name": "role-2", "capabilities": [Permission.UPDATE, Permission.READ]},
+         {"role-name": "role-1", "capabilities": [Permission.READ]}]
+    ]
+    assert properties == {"prop-name-1": "prop-value-1", "prop-name-2": "prop-value-2"}
+    assert quality == 1
+    assert metadata_values == {"meta-name-1": "meta-value-1", "meta-name-2": "meta-value-2"}
 
 
 def test_to_json_string(metadata):
@@ -345,8 +399,14 @@ def test_to_json_string(metadata):
     assert "\n" not in metadata_json_string
     assert ('"collections": ["collection-1", "collection-2"]' in metadata_json_string or
             '"collections": ["collection-2", "collection-1"]' in metadata_json_string)
-    assert ('"permissions": ["permission-1", "permission-2"]' in metadata_json_string or
-            '"permissions": ["permission-2", "permission-1"]' in metadata_json_string)
+    assert ('"permissions": [{"role-name": "role-2", "capabilities": ["read", "update"]}, '
+            '{"role-name": "role-1", "capabilities": ["read"]}]' in metadata_json_string or
+            '"permissions": [{"role-name": "role-1", "capabilities": ["read"]}, '
+            '{"role-name": "role-2", "capabilities": ["read", "update"]}]' in metadata_json_string or
+            '"permissions": [{"role-name": "role-2", "capabilities": ["update", "read"]}, '
+            '{"role-name": "role-1", "capabilities": ["read"]}]' in metadata_json_string or
+            '"permissions": [{"role-name": "role-1", "capabilities": ["read"]}, '
+            '{"role-name": "role-2", "capabilities": ["update", "read"]}]' in metadata_json_string)
     assert ('"properties": {"prop-name-1": "prop-value-1", "prop-name-2": "prop-value-2"}' in metadata_json_string or
             '"properties": {"prop-name-2": "prop-value-2", "prop-name-1": "prop-value-1"}' in metadata_json_string)
     assert '"quality": 1' in metadata_json_string
@@ -364,8 +424,19 @@ def test_to_json_string_with_indent(metadata):
     assert '        "collection-2"\n' in metadata_json_string or '        "collection-2",\n' in metadata_json_string
     assert '    ],\n' in metadata_json_string
     assert '    "permissions": [\n' in metadata_json_string
-    assert '        "permission-1"\n' in metadata_json_string or '        "permission-1",\n' in metadata_json_string
-    assert '        "permission-2"\n' in metadata_json_string or '        "permission-2",\n' in metadata_json_string
+    assert '        {\n' in metadata_json_string
+    assert '            "role-name": "role-1"\n' in metadata_json_string or '            "role-name": "role-1",\n' in metadata_json_string
+    assert '            "capabilities": [\n' in metadata_json_string
+    assert '                "read"\n' in metadata_json_string
+    assert '            ]\n' in metadata_json_string or '            "],\n' in metadata_json_string
+    assert '        }\n' in metadata_json_string or '        "},\n' in metadata_json_string
+    assert '        {\n' in metadata_json_string
+    assert '            "role-name": "role-2"\n' in metadata_json_string or '            "role-name": "role-2",\n' in metadata_json_string
+    assert '            "capabilities": [\n' in metadata_json_string
+    assert '                "read"\n' in metadata_json_string or '                "read",\n' in metadata_json_string
+    assert '                "update"\n' in metadata_json_string or '                "update",\n' in metadata_json_string
+    assert '            ]\n' in metadata_json_string or '            "],\n' in metadata_json_string
+    assert '        }\n' in metadata_json_string or '        "},\n' in metadata_json_string
     assert '    ],\n' in metadata_json_string
     assert '"properties": {\n' in metadata_json_string
     assert ('        "prop-name-1": "prop-value-1"\n' in metadata_json_string or
@@ -404,12 +475,26 @@ def test_to_xml(metadata):
     permission_elements = list(permissions_element)
     assert permissions_element is not None
     assert permissions_element.attrib == {}
-    assert len(permission_elements) == 2
+    assert len(permission_elements) == 3
     for permission_element in permission_elements:
         assert permission_element.tag == "rapi:permission"
         assert permission_element.attrib == {}
-        assert len(list(permission_element)) == 0
-        assert permission_element.text in ["permission-1", "permission-2"]
+        assert len(list(permission_element)) == 2
+
+        permission_role_name = permission_element.find("rapi:role-name")
+        assert permission_role_name is not None
+        assert permission_role_name.attrib == {}
+        assert len(list(permission_role_name)) == 0
+        assert permission_role_name.text in ["role-1", "role-2"]
+
+        permission_capability = permission_element.find("rapi:capability")
+        assert permission_capability is not None
+        assert permission_capability.attrib == {}
+        assert len(list(permission_capability)) == 0
+        if permission_role_name.tag == "role-1":
+            assert permission_capability.text == "read"
+        else:
+            assert permission_capability.text in ["read", "update"]
 
     properties_element = root.find("prop:properties")
     property_elements = list(properties_element)
@@ -449,8 +534,15 @@ def test_to_xml_string(metadata):
     assert '<rapi:collection>collection-2</rapi:collection>' in metadata_xml_string
     assert '</rapi:collections>' in metadata_xml_string
     assert '<rapi:permissions>' in metadata_xml_string
-    assert '<rapi:permission>permission-1</rapi:permission>' in metadata_xml_string
-    assert '<rapi:permission>permission-2</rapi:permission>' in metadata_xml_string
+    assert '<rapi:permission>' in metadata_xml_string
+    assert '<rapi:role-name>role-1</rapi:role-name><rapi:capability>read</rapi:capability>' in metadata_xml_string
+    assert '</rapi:permission>' in metadata_xml_string
+    assert '<rapi:permission>' in metadata_xml_string
+    assert '<rapi:role-name>role-2</rapi:role-name><rapi:capability>read</rapi:capability>' in metadata_xml_string
+    assert '</rapi:permission>' in metadata_xml_string
+    assert '<rapi:permission>' in metadata_xml_string
+    assert '<rapi:role-name>role-2</rapi:role-name><rapi:capability>update</rapi:capability>' in metadata_xml_string
+    assert '</rapi:permission>' in metadata_xml_string
     assert '</rapi:permissions>' in metadata_xml_string
     assert '<prop:properties xmlns:prop="http://marklogic.com/xdmp/property">' in metadata_xml_string
     assert '<prop-name-1>prop-value-1</prop-name-1>' in metadata_xml_string
@@ -473,8 +565,18 @@ def test_to_xml_string_with_indent(metadata):
     assert '        <rapi:collection>collection-2</rapi:collection>\n' in metadata_xml_string
     assert '    </rapi:collections>\n' in metadata_xml_string
     assert '    <rapi:permissions>\n' in metadata_xml_string
-    assert '        <rapi:permission>permission-1</rapi:permission>\n' in metadata_xml_string
-    assert '        <rapi:permission>permission-2</rapi:permission>\n' in metadata_xml_string
+    assert '        <rapi:permission>\n' in metadata_xml_string
+    assert '            <rapi:role-name>role-1</rapi:role-name>\n' in metadata_xml_string
+    assert '            <rapi:capability>read</rapi:capability>\n' in metadata_xml_string
+    assert '        </rapi:permission>\n' in metadata_xml_string
+    assert '        <rapi:permission>\n' in metadata_xml_string
+    assert '            <rapi:role-name>role-2</rapi:role-name>\n' in metadata_xml_string
+    assert '            <rapi:capability>read</rapi:capability>\n' in metadata_xml_string
+    assert '        </rapi:permission>\n' in metadata_xml_string
+    assert '        <rapi:permission>\n' in metadata_xml_string
+    assert '            <rapi:role-name>role-2</rapi:role-name>\n' in metadata_xml_string
+    assert '            <rapi:capability>update</rapi:capability>\n' in metadata_xml_string
+    assert '        </rapi:permission>\n' in metadata_xml_string
     assert '    </rapi:permissions>\n' in metadata_xml_string
     assert '    <prop:properties xmlns:prop="http://marklogic.com/xdmp/property">\n' in metadata_xml_string
     assert '        <prop-name-1>prop-value-1</prop-name-1>\n' in metadata_xml_string

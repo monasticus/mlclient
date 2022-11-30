@@ -279,3 +279,24 @@ class MetadataEncoder(json.JSONEncoder):
         elif isinstance(obj, Permission):
             return obj.to_json()
         return json.JSONEncoder.default(self, obj)
+
+
+class Document:
+
+    def __init__(self, uri: str = None, metadata: Metadata = None, is_temporal: bool = False):
+        self.__uri = self.__get_non_blank_uri(uri)
+        self.__metadata = metadata
+        self.__is_temporal = is_temporal
+
+    def uri(self):
+        return self.__uri
+
+    def metadata(self):
+        return copy.copy(self.__metadata)
+
+    def is_temporal(self):
+        return self.__is_temporal
+
+    @staticmethod
+    def __get_non_blank_uri(uri):
+        return uri if uri is not None and not re.search("^\\s*$", uri) else None

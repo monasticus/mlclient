@@ -44,7 +44,7 @@ class Metadata:
         return self.__collections.copy()
 
     def permissions(self) -> list:
-        return [p.to_json() for p in self.__permissions]
+        return self.__permissions.copy()
 
     def properties(self) -> dict:
         return self.__properties.copy()
@@ -114,7 +114,7 @@ class Metadata:
     def to_json(self) -> dict:
         return {
             self.__COLLECTIONS_KEY: self.collections(),
-            self.__PERMISSIONS_KEY: self.permissions(),
+            self.__PERMISSIONS_KEY: [p.to_json() for p in self.__permissions],
             self.__PROPERTIES_KEY: self.properties(),
             self.__QUALITY_KEY: self.quality(),
             self.__METADATA_VALUES_KEY: self.__metadata_values

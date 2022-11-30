@@ -3,6 +3,10 @@ import pytest
 from mlclient.model import Metadata, Permission
 
 
+def __assert_permissions_are_equal(this: list, that: list):
+    assert set(this).difference(set(that)) == set()
+
+
 @pytest.fixture
 def metadata():
     collections = ["collection-1", "collection-2"]
@@ -36,7 +40,7 @@ def test_get_permissions_when_exists():
     permission_1 = Permission("role-1", {Permission.READ})
     permission_2 = Permission("role-2", {Permission.READ, Permission.UPDATE})
     metadata = Metadata(permissions=[permission_1, permission_2])
-    assert metadata.permissions() == [permission_1.to_json(), permission_2.to_json()]
+    __assert_permissions_are_equal(metadata.permissions(), [permission_1, permission_2])
 
 
 def test_get_permissions_when_empty():
@@ -133,13 +137,13 @@ def test_add_permission():
     metadata = Metadata()
     success = metadata.add_permission("role-1", Permission.READ)
     assert success is True
-    assert metadata.permissions() == [permission_1.to_json()]
+    __assert_permissions_are_equal(metadata.permissions(), [permission_1])
 
     success = metadata.add_permission("role-2", Permission.READ)
     assert success is True
     success = metadata.add_permission("role-2", Permission.UPDATE)
     assert success is True
-    assert metadata.permissions() == [permission_1.to_json(), permission_2.to_json()]
+    __assert_permissions_are_equal(metadata.permissions(), [permission_1, permission_2])
 
 
 def test_add_permission_when_exists():
@@ -147,7 +151,7 @@ def test_add_permission_when_exists():
     metadata = Metadata(permissions=[permission])
     success = metadata.add_permission("role-1", Permission.READ)
     assert success is False
-    assert metadata.permissions() == [permission.to_json()]
+    __assert_permissions_are_equal(metadata.permissions(), [permission])
 
 
 def test_add_permission_with_none_role():
@@ -155,7 +159,7 @@ def test_add_permission_with_none_role():
     metadata = Metadata(permissions=[permission])
     success = metadata.add_permission(None, Permission.UPDATE)
     assert success is False
-    assert metadata.permissions() == [permission.to_json()]
+    __assert_permissions_are_equal(metadata.permissions(), [permission])
 
 
 def test_add_permission_with_none_capability():
@@ -163,7 +167,7 @@ def test_add_permission_with_none_capability():
     metadata = Metadata(permissions=[permission])
     success = metadata.add_permission("role-1", None)
     assert success is False
-    assert metadata.permissions() == [permission.to_json()]
+    __assert_permissions_are_equal(metadata.permissions(), [permission])
 
 
 def test_put_property():
@@ -252,16 +256,16 @@ def test_remove_permission():
     metadata = Metadata(permissions=permissions)
     success = metadata.remove_permission("role-2", Permission.READ)
     assert success is True
-    assert metadata.permissions() == [
-        Permission("role-1", {Permission.READ}).to_json(),
-        Permission("role-2", {Permission.UPDATE}).to_json()
-    ]
+    __assert_permissions_are_equal(metadata.permissions(), [
+        Permission("role-1", {Permission.READ}),
+        Permission("role-2", {Permission.UPDATE})
+    ])
 
     success = metadata.remove_permission("role-2", Permission.UPDATE)
     assert success is True
-    assert metadata.permissions() == [
-        Permission("role-1", {Permission.READ}).to_json()
-    ]
+    __assert_permissions_are_equal(metadata.permissions(), [
+        Permission("role-1", {Permission.READ})
+    ])
 
     success = metadata.remove_permission("role-1", Permission.READ)
     assert success is True
@@ -273,11 +277,11 @@ def test_remove_permission_when_does_not_exist():
     metadata = Metadata(permissions=[permission])
     success = metadata.remove_permission("role-2", Permission.READ)
     assert success is False
-    assert metadata.permissions() == [permission.to_json()]
+    __assert_permissions_are_equal(metadata.permissions(), [permission])
 
     success = metadata.remove_permission("role-1", Permission.UPDATE)
     assert success is False
-    assert metadata.permissions() == [permission.to_json()]
+    __assert_permissions_are_equal(metadata.permissions(), [permission])
 
 
 def test_remove_property():
@@ -336,9 +340,7 @@ def test_duplicated_permissions():
     permission_3 = Permission("role-1", {Permission.READ, Permission.UPDATE})
     permission_4 = Permission("role-2", {Permission.READ, Permission.UPDATE})
     metadata = Metadata(permissions=[permission_1, permission_2, permission_3, permission_4])
-    assert len(metadata.permissions()) == 2
-    assert permission_1.to_json() in metadata.permissions()
-    assert permission_4.to_json() in metadata.permissions()
+    __assert_permissions_are_equal(metadata.permissions(), [permission_1, permission_4])
 
 
 def test_properties_with_none_values():

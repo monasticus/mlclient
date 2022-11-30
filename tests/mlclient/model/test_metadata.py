@@ -1,6 +1,7 @@
 import pytest
 
 from mlclient.model import Metadata, Permission
+import copy
 
 
 def __assert_permissions_are_equal(this: list, that: list):
@@ -113,6 +114,12 @@ def test_not_equal_when_metadata_values_differ():
                           metadata_values={"meta-name-1": "meta-value-1", "meta-name-2": "meta-value-3"})
     assert metadata_1 != metadata_2
     assert metadata_1.__hash__() != metadata_2.__hash__()
+
+
+def test_copy(metadata):
+    cp = copy.copy(metadata)
+    assert cp is not metadata
+    assert cp == metadata
 
 
 def test_get_collections_when_exists():

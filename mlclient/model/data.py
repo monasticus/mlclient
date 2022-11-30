@@ -3,6 +3,7 @@ import logging
 import re
 import xml.etree.ElementTree as ElemTree
 from xml.dom import minidom
+import copy
 
 
 class Metadata:
@@ -56,11 +57,18 @@ class Metadata:
         items.append(frozenset(self.metadata_values().items()))
         return hash(tuple(items))
 
+    def __copy__(self):
+        return Metadata(collections=self.collections(),
+                        permissions=self.permissions(),
+                        properties=self.properties(),
+                        quality=self.quality(),
+                        metadata_values=self.metadata_values())
+
     def collections(self) -> list:
         return self.__collections.copy()
 
     def permissions(self) -> list:
-        return self.__permissions.copy()
+        return [copy.copy(perm) for perm in self.__permissions]
 
     def properties(self) -> dict:
         return self.__properties.copy()

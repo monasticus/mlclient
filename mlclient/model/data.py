@@ -159,9 +159,6 @@ class Permission:
     UPDATE_NODE = "update-node"
     EXECUTE = "execute"
 
-    __ROLE_NAME_KEY = "role-name"
-    __CAPABILITIES_KEY = "capabilities"
-
     __CAPABILITIES = {READ, INSERT, UPDATE, UPDATE_NODE, EXECUTE}
 
     def __init__(self, role_name: str, capabilities: set):
@@ -185,6 +182,16 @@ class Permission:
         if allow:
             self.__capabilities.remove(capability)
         return allow
+
+    def __eq__(self, other):
+        return (isinstance(other, Permission) and
+                self.__role_name == other.__role_name and
+                self.__capabilities == other.__capabilities)
+
+    def __hash__(self):
+        items = list(self.__capabilities)
+        items.append(self.__role_name)
+        return hash(tuple(items))
 
 
 class SetEncoder(json.JSONEncoder):

@@ -165,6 +165,16 @@ class Permission:
         self.__role_name = role_name
         self.__capabilities = {cap for cap in capabilities if cap in self.__CAPABILITIES}
 
+    def __eq__(self, other):
+        return (isinstance(other, Permission) and
+                self.__role_name == other.__role_name and
+                self.__capabilities == other.__capabilities)
+
+    def __hash__(self):
+        items = list(self.__capabilities)
+        items.append(self.__role_name)
+        return hash(tuple(items))
+
     def role_name(self):
         return self.__role_name
 
@@ -183,15 +193,11 @@ class Permission:
             self.__capabilities.remove(capability)
         return allow
 
-    def __eq__(self, other):
-        return (isinstance(other, Permission) and
-                self.__role_name == other.__role_name and
-                self.__capabilities == other.__capabilities)
-
-    def __hash__(self):
-        items = list(self.__capabilities)
-        items.append(self.__role_name)
-        return hash(tuple(items))
+    def to_json(self):
+        return {
+            "role-name": self.role_name(),
+            "capabilities": list(self.capabilities())
+        }
 
 
 class SetEncoder(json.JSONEncoder):
@@ -199,4 +205,6 @@ class SetEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, set):
             return list(obj)
+        elif isinstance(obj, Permission):
+            return obj.to_json()
         return json.JSONEncoder.default(self, obj)

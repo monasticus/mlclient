@@ -1,6 +1,26 @@
 from mlclient.model import Permission
 
 
+def test_permissions_are_equal():
+    assert Permission("role-1", {Permission.READ}) == Permission("role-1", {Permission.READ})
+
+
+def test_permissions_are_not_equal():
+    assert Permission("role-1", {Permission.READ}) != Permission("role-2", {Permission.READ})
+    assert Permission("role-1", {Permission.READ}) != Permission("role-1", {Permission.UPDATE})
+    assert Permission("role-1", {Permission.READ}) != Permission("role-2", {Permission.UPDATE})
+
+
+def test_permissions_hashes_are_equal():
+    assert Permission("role-1", {Permission.READ}).__hash__() == Permission("role-1", {Permission.READ}).__hash__()
+
+
+def test_permissions_hashes_are_not_equal():
+    assert Permission("role-1", {Permission.READ}).__hash__() != Permission("role-2", {Permission.READ}).__hash__()
+    assert Permission("role-1", {Permission.READ}).__hash__() != Permission("role-1", {Permission.UPDATE}).__hash__()
+    assert Permission("role-1", {Permission.READ}).__hash__() != Permission("role-2", {Permission.UPDATE}).__hash__()
+
+
 def test_role_name():
     permission = Permission("custom_role", {Permission.READ})
     assert permission.role_name() == "custom_role"
@@ -68,22 +88,11 @@ def test_remove_capability_when_does_dot_exist():
     assert permission.capabilities() == {Permission.READ}
 
 
-def test_permissions_are_equal():
-    assert Permission("role-1", {Permission.READ}) == Permission("role-1", {Permission.READ})
-
-
-def test_permissions_are_not_equal():
-    assert Permission("role-1", {Permission.READ}) != Permission("role-2", {Permission.READ})
-    assert Permission("role-1", {Permission.READ}) != Permission("role-1", {Permission.UPDATE})
-    assert Permission("role-1", {Permission.READ}) != Permission("role-2", {Permission.UPDATE})
-
-
-def test_permissions_hashes_are_equal():
-    assert Permission("role-1", {Permission.READ}).__hash__() == Permission("role-1", {Permission.READ}).__hash__()
-
-
-def test_permissions_hashes_are_not_equal():
-    assert Permission("role-1", {Permission.READ}).__hash__() != Permission("role-2", {Permission.READ}).__hash__()
-    assert Permission("role-1", {Permission.READ}).__hash__() != Permission("role-1", {Permission.UPDATE}).__hash__()
-    assert Permission("role-1", {Permission.READ}).__hash__() != Permission("role-2", {Permission.UPDATE}).__hash__()
-
+def test_to_json():
+    permission = Permission("custom_role", {Permission.READ})
+    assert permission.to_json() == {
+        "role-name": "custom_role",
+        "capabilities": [
+            Permission.READ
+        ]
+    }

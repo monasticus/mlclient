@@ -21,6 +21,11 @@ def test_permissions_hashes_are_not_equal():
     assert Permission("role-1", {Permission.READ}).__hash__() != Permission("role-2", {Permission.UPDATE}).__hash__()
 
 
+def test_str():
+    permission = Permission("custom-role", {Permission.READ})
+    assert str(permission) == "Permission(role_name='custom-role', capabilities={'read'})"
+
+
 def test_role_name():
     permission = Permission("custom_role", {Permission.READ})
     assert permission.role_name() == "custom_role"

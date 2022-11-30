@@ -175,6 +175,9 @@ class Permission:
         items.append(self.__role_name)
         return hash(tuple(items))
 
+    def __repr__(self):
+        return f"Permission(role_name='{self.__role_name}', capabilities={self.__capabilities})"
+
     def role_name(self):
         return self.__role_name
 

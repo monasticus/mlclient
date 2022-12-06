@@ -1,9 +1,10 @@
+import copy
 import json
 import logging
 import re
 import xml.etree.ElementTree as ElemTree
+from enum import Enum
 from xml.dom import minidom
-import copy
 
 
 class Metadata:
@@ -281,20 +282,32 @@ class MetadataEncoder(json.JSONEncoder):
         return json.JSONEncoder.default(self, obj)
 
 
+class DocumentType(Enum):
+    XML = "xml"
+    JSON = "json"
+    BINARY = "binary"
+    TEXT = "text"
+
+
 class Document:
 
-    def __init__(self, uri: str = None, metadata: Metadata = None, is_temporal: bool = False):
+    def __init__(self, uri: str = None, doc_type: DocumentType = DocumentType.XML,
+                 metadata: Metadata = None, is_temporal: bool = False):
         self.__uri = self.__get_non_blank_uri(uri)
+        self.__doc_type = doc_type
         self.__metadata = metadata
         self.__is_temporal = is_temporal
 
-    def uri(self):
+    def uri(self) -> str:
         return self.__uri
 
-    def metadata(self):
+    def doc_type(self) -> DocumentType:
+        return self.__doc_type
+
+    def metadata(self) -> Metadata:
         return copy.copy(self.__metadata)
 
-    def is_temporal(self):
+    def is_temporal(self) -> bool:
         return self.__is_temporal
 
     @staticmethod

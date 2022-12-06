@@ -1,7 +1,8 @@
+import copy
+
 import pytest
 
 from mlclient.model import Metadata, Permission
-import copy
 
 
 def __assert_permissions_are_equal(this: list, that: list):

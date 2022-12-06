@@ -1,4 +1,4 @@
-from mlclient.model import Document, Metadata, Permission
+from mlclient.model import Document, DocumentType, Metadata, Permission
 
 
 def test_document_uri():
@@ -14,6 +14,16 @@ def test_document_uri_when_none():
 def test_document_uri_when_blank():
     document = Document(uri=" \n")
     assert document.uri() is None
+
+
+def test_doc_type():
+    doc_type = DocumentType.JSON
+    document = Document(doc_type=doc_type)
+    assert document.doc_type() == doc_type
+
+
+def test_doc_type_when_none():
+    assert Document().doc_type() == DocumentType.XML
 
 
 def test_metadata():

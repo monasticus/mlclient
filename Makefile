@@ -1,14 +1,17 @@
 init:
-	pip install -r requirements.txt
+	@python -m pip install pip-tools
+	@pip-compile --extra dev pyproject.toml
+	@pip install -r requirements.txt
+	@pip install -e .
 
 imports:
-	isort .
+	@isort .
 
 test:
-	pytest tests/
+	@pytest --cov=mlclient tests/
 
 ml-start:
-	sudo /etc/init.d/MarkLogic start
+	@sudo /etc/init.d/MarkLogic start
 
 ml-stop:
-	sudo /etc/init.d/MarkLogic stop
+	@sudo /etc/init.d/MarkLogic stop

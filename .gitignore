@@ -1,8 +1,16 @@
 # Python
 /**/__pycache__/
+/**/*.egg-info/
+dist/
+build
+requirements.txt
+
+# PyTest
+/**/.pytest_cache/
+/**/.coverage
 
 # PyCharm
 .idea
 
-# Internal
+# Custom
 main.py

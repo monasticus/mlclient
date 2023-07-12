@@ -485,7 +485,7 @@ def test_metadata_values_with_none_values():
     }
 
 
-def test_metadata_values_with_none_values():
+def test_metadata_values_stringified():
     metadata_values = {
         "meta-name-1": [1, 2, 3],
         "meta-name-2": {"nested-key": 0.5},

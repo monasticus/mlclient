@@ -25,3 +25,23 @@ from .server_call import ServerDeleteCall, ServerGetCall
 from .server_properties_call import (ServerPropertiesGetCall,
                                      ServerPropertiesPutCall)
 from .servers_call import ServersGetCall, ServersPostCall
+
+__all__ = ["ResourceCall",
+           "DatabaseDeleteCall", "DatabaseGetCall", "DatabasePostCall",
+           "DatabasePropertiesGetCall", "DatabasePropertiesPutCall",
+           "DatabasesGetCall", "DatabasesPostCall",
+           "DocumentsGetCall",
+           "EvalCall",
+           "ForestDeleteCall", "ForestGetCall", "ForestPostCall",
+           "ForestPropertiesGetCall", "ForestPropertiesPutCall",
+           "ForestsGetCall", "ForestsPostCall", "ForestsPutCall",
+           "LogsCall",
+           "RoleDeleteCall", "RoleGetCall",
+           "RolePropertiesGetCall", "RolePropertiesPutCall",
+           "RolesGetCall", "RolesPostCall",
+           "UserDeleteCall", "UserGetCall",
+           "UserPropertiesGetCall", "UserPropertiesPutCall",
+           "UsersGetCall", "UsersPostCall",
+           "ServerDeleteCall", "ServerGetCall",
+           "ServerPropertiesGetCall", "ServerPropertiesPutCall",
+           "ServersGetCall", "ServersPostCall"]

@@ -38,7 +38,7 @@ dependencies = [
 ]
 
 [project.urls]
-GitHub = "https://github.com/TomaszAniolowski/ml-py"
+GitHub = "https://github.com/monasticus/ml-py"
 
 [project.optional-dependencies]
 dev = [

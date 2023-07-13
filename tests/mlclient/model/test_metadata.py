@@ -28,91 +28,119 @@ def metadata():
 
 
 def test_equal():
-    metadata_1 = Metadata(collections=["collection-1", "collection-2"],
-                          permissions=[Permission("role-1", {Permission.READ})],
-                          properties={"prop-name-1": "prop-value-1", "prop-name-2": "prop-value-2"},
+    collections = ["collection-1", "collection-2"]
+    permissions = [Permission("role-1", {Permission.READ})]
+    properties = {"prop-name-1": "prop-value-1", "prop-name-2": "prop-value-2"}
+    metadata_values = {"meta-name-1": "meta-value-1", "meta-name-2": "meta-value-2"}
+    metadata_1 = Metadata(collections=collections,
+                          permissions=permissions,
+                          properties=properties,
                           quality=1,
-                          metadata_values={"meta-name-1": "meta-value-1", "meta-name-2": "meta-value-2"})
-    metadata_2 = Metadata(collections=["collection-1", "collection-2"],
-                          permissions=[Permission("role-1", {Permission.READ})],
-                          properties={"prop-name-1": "prop-value-1", "prop-name-2": "prop-value-2"},
+                          metadata_values=metadata_values)
+    metadata_2 = Metadata(collections=collections,
+                          permissions=permissions,
+                          properties=properties,
                           quality=1,
-                          metadata_values={"meta-name-1": "meta-value-1", "meta-name-2": "meta-value-2"})
+                          metadata_values=metadata_values)
     assert metadata_1 == metadata_2
     assert metadata_1.__hash__() == metadata_2.__hash__()
 
 
 def test_not_equal_when_collections_differ():
-    metadata_1 = Metadata(collections=["collection-1", "collection-2"],
-                          permissions=[Permission("role-1", {Permission.READ})],
-                          properties={"prop-name-1": "prop-value-1", "prop-name-2": "prop-value-2"},
+    collections_1 = ["collection-1", "collection-2"]
+    collections_2 = ["collection-1", "collection-3"]
+    permissions = [Permission("role-1", {Permission.READ})]
+    properties = {"prop-name-1": "prop-value-1", "prop-name-2": "prop-value-2"}
+    metadata_values = {"meta-name-1": "meta-value-1", "meta-name-2": "meta-value-2"}
+    metadata_1 = Metadata(collections=collections_1,
+                          permissions=permissions,
+                          properties=properties,
                           quality=1,
-                          metadata_values={"meta-name-1": "meta-value-1", "meta-name-2": "meta-value-2"})
-    metadata_2 = Metadata(collections=["collection-1", "collection-3"],
-                          permissions=[Permission("role-1", {Permission.READ})],
-                          properties={"prop-name-1": "prop-value-1", "prop-name-2": "prop-value-2"},
+                          metadata_values=metadata_values)
+    metadata_2 = Metadata(collections=collections_2,
+                          permissions=permissions,
+                          properties=properties,
                           quality=1,
-                          metadata_values={"meta-name-1": "meta-value-1", "meta-name-2": "meta-value-2"})
+                          metadata_values=metadata_values)
     assert metadata_1 != metadata_2
     assert metadata_1.__hash__() != metadata_2.__hash__()
 
 
 def test_not_equal_when_permissions_differ():
-    metadata_1 = Metadata(collections=["collection-1", "collection-2"],
-                          permissions=[Permission("role-1", {Permission.READ})],
-                          properties={"prop-name-1": "prop-value-1", "prop-name-2": "prop-value-2"},
+    collections = ["collection-1", "collection-2"]
+    permissions_1 = [Permission("role-1", {Permission.READ})]
+    permissions_2 = [Permission("role-1", {Permission.UPDATE})]
+    properties = {"prop-name-1": "prop-value-1", "prop-name-2": "prop-value-2"}
+    metadata_values = {"meta-name-1": "meta-value-1", "meta-name-2": "meta-value-2"}
+    metadata_1 = Metadata(collections=collections,
+                          permissions=permissions_1,
+                          properties=properties,
                           quality=1,
-                          metadata_values={"meta-name-1": "meta-value-1", "meta-name-2": "meta-value-2"})
-    metadata_2 = Metadata(collections=["collection-1", "collection-2"],
-                          permissions=[Permission("role-1", {Permission.UPDATE})],
-                          properties={"prop-name-1": "prop-value-1", "prop-name-2": "prop-value-2"},
+                          metadata_values=metadata_values)
+    metadata_2 = Metadata(collections=collections,
+                          permissions=permissions_2,
+                          properties=properties,
                           quality=1,
-                          metadata_values={"meta-name-1": "meta-value-1", "meta-name-2": "meta-value-2"})
+                          metadata_values=metadata_values)
     assert metadata_1 != metadata_2
     assert metadata_1.__hash__() != metadata_2.__hash__()
 
 
 def test_not_equal_when_properties_differ():
-    metadata_1 = Metadata(collections=["collection-1", "collection-2"],
-                          permissions=[Permission("role-1", {Permission.READ})],
-                          properties={"prop-name-1": "prop-value-1", "prop-name-2": "prop-value-2"},
+    collections = ["collection-1", "collection-2"]
+    permissions = [Permission("role-1", {Permission.READ})]
+    properties_1 = {"prop-name-1": "prop-value-1", "prop-name-2": "prop-value-2"}
+    properties_2 = {"prop-name-1": "prop-value-1", "prop-name-2": "prop-value-3"}
+    metadata_values = {"meta-name-1": "meta-value-1", "meta-name-2": "meta-value-2"}
+    metadata_1 = Metadata(collections=collections,
+                          permissions=permissions,
+                          properties=properties_1,
                           quality=1,
-                          metadata_values={"meta-name-1": "meta-value-1", "meta-name-2": "meta-value-2"})
-    metadata_2 = Metadata(collections=["collection-1", "collection-2"],
-                          permissions=[Permission("role-1", {Permission.READ})],
-                          properties={"prop-name-1": "prop-value-1", "prop-name-2": "prop-value-3"},
+                          metadata_values=metadata_values)
+    metadata_2 = Metadata(collections=collections,
+                          permissions=permissions,
+                          properties=properties_2,
                           quality=1,
-                          metadata_values={"meta-name-1": "meta-value-1", "meta-name-2": "meta-value-2"})
+                          metadata_values=metadata_values)
     assert metadata_1 != metadata_2
     assert metadata_1.__hash__() != metadata_2.__hash__()
 
 
 def test_not_equal_when_qualities_differ():
-    metadata_1 = Metadata(collections=["collection-1", "collection-2"],
-                          permissions=[Permission("role-1", {Permission.READ})],
-                          properties={"prop-name-1": "prop-value-1", "prop-name-2": "prop-value-2"},
+    collections = ["collection-1", "collection-2"]
+    permissions = [Permission("role-1", {Permission.READ})]
+    properties = {"prop-name-1": "prop-value-1", "prop-name-2": "prop-value-2"}
+    metadata_values = {"meta-name-1": "meta-value-1", "meta-name-2": "meta-value-2"}
+    metadata_1 = Metadata(collections=collections,
+                          permissions=permissions,
+                          properties=properties,
                           quality=1,
-                          metadata_values={"meta-name-1": "meta-value-1", "meta-name-2": "meta-value-2"})
-    metadata_2 = Metadata(collections=["collection-1", "collection-2"],
-                          permissions=[Permission("role-1", {Permission.READ})],
-                          properties={"prop-name-1": "prop-value-1", "prop-name-2": "prop-value-2"},
+                          metadata_values=metadata_values)
+    metadata_2 = Metadata(collections=collections,
+                          permissions=permissions,
+                          properties=properties,
                           quality=2,
-                          metadata_values={"meta-name-1": "meta-value-1", "meta-name-2": "meta-value-2"})
+                          metadata_values=metadata_values)
     assert metadata_1 != metadata_2
     assert metadata_1.__hash__() != metadata_2.__hash__()
 
 
 def test_not_equal_when_metadata_values_differ():
-    metadata_1 = Metadata(collections=["collection-1", "collection-2"],
-                          permissions=[Permission("role-1", {Permission.READ})],
-                          properties={"prop-name-1": "prop-value-1", "prop-name-2": "prop-value-2"},
+    collections = ["collection-1", "collection-2"]
+    permissions = [Permission("role-1", {Permission.READ})]
+    properties = {"prop-name-1": "prop-value-1", "prop-name-2": "prop-value-2"}
+    metadata_values_1 = {"meta-name-1": "meta-value-1", "meta-name-2": "meta-value-2"}
+    metadata_values_2 = {"meta-name-1": "meta-value-1", "meta-name-2": "meta-value-3"}
+    metadata_1 = Metadata(collections=collections,
+                          permissions=permissions,
+                          properties=properties,
                           quality=1,
-                          metadata_values={"meta-name-1": "meta-value-1", "meta-name-2": "meta-value-2"})
-    metadata_2 = Metadata(collections=["collection-1", "collection-2"],
-                          permissions=[Permission("role-1", {Permission.READ})],
-                          properties={"prop-name-1": "prop-value-1", "prop-name-2": "prop-value-2"},
+                          metadata_values=metadata_values_1)
+    metadata_2 = Metadata(collections=collections,
+                          permissions=permissions,
+                          properties=properties,
                           quality=1,
-                          metadata_values={"meta-name-1": "meta-value-1", "meta-name-2": "meta-value-3"})
+                          metadata_values=metadata_values_2)
     assert metadata_1 != metadata_2
     assert metadata_1.__hash__() != metadata_2.__hash__()
 
@@ -383,7 +411,8 @@ def test_remove_permission_when_does_not_exist():
 
 
 def test_remove_property():
-    metadata = Metadata(properties={"prop-name-1": "prop-value-1", "prop-name-2": "prop-value-2"})
+    properties = {"prop-name-1": "prop-value-1", "prop-name-2": "prop-value-2"}
+    metadata = Metadata(properties=properties)
     success = metadata.remove_property("prop-name-1")
     assert success is True
     assert metadata.properties() == {
@@ -405,7 +434,8 @@ def test_remove_property_when_does_not_exist():
 
 
 def test_remove_metadata_value():
-    metadata = Metadata(metadata_values={"meta-name-1": "meta-value-1", "meta-name-2": "meta-value-2"})
+    metadata_values = {"meta-name-1": "meta-value-1", "meta-name-2": "meta-value-2"}
+    metadata = Metadata(metadata_values=metadata_values)
     success = metadata.remove_metadata_value("meta-name-1")
     assert success is True
     assert metadata.metadata_values() == {
@@ -437,7 +467,8 @@ def test_duplicated_permissions():
     permission_2 = Permission("role-1", {Permission.READ})
     permission_3 = Permission("role-1", {Permission.READ, Permission.UPDATE})
     permission_4 = Permission("role-2", {Permission.READ, Permission.UPDATE})
-    metadata = Metadata(permissions=[permission_1, permission_2, permission_3, permission_4])
+    permissions = [permission_1, permission_2, permission_3, permission_4]
+    metadata = Metadata(permissions=permissions)
     __assert_permissions_are_equal(metadata.permissions(), [permission_1, permission_4])
 
 
@@ -509,7 +540,8 @@ def test_to_json(metadata):
     quality = metadata_json.get("quality")
     metadata_values = metadata_json.get("metadataValues")
 
-    assert list(metadata_json.keys()) == ["collections", "permissions", "properties", "quality", "metadataValues"]
+    assert list(metadata_json.keys()) == [
+        "collections", "permissions", "properties", "quality", "metadataValues"]
     assert collections.sort() == ["collection-1", "collection-2"].sort()
     assert permissions in [
         [{"role-name": "role-1", "capabilities": [Permission.READ]},
@@ -523,7 +555,10 @@ def test_to_json(metadata):
     ]
     assert properties == {"prop-name-1": "prop-value-1", "prop-name-2": "prop-value-2"}
     assert quality == 1
-    assert metadata_values == {"meta-name-1": "meta-value-1", "meta-name-2": "meta-value-2"}
+    assert metadata_values == {
+        "meta-name-1": "meta-value-1",
+        "meta-name-2": "meta-value-2",
+    }
 
 
 def test_to_json_string(metadata):
@@ -531,58 +566,89 @@ def test_to_json_string(metadata):
     assert "\n" not in metadata_json_string
     assert ('"collections": ["collection-1", "collection-2"]' in metadata_json_string or
             '"collections": ["collection-2", "collection-1"]' in metadata_json_string)
-    assert ('"permissions": [{"role-name": "role-2", "capabilities": ["read", "update"]}, '
-            '{"role-name": "role-1", "capabilities": ["read"]}]' in metadata_json_string or
-            '"permissions": [{"role-name": "role-1", "capabilities": ["read"]}, '
-            '{"role-name": "role-2", "capabilities": ["read", "update"]}]' in metadata_json_string or
-            '"permissions": [{"role-name": "role-2", "capabilities": ["update", "read"]}, '
-            '{"role-name": "role-1", "capabilities": ["read"]}]' in metadata_json_string or
-            '"permissions": [{"role-name": "role-1", "capabilities": ["read"]}, '
-            '{"role-name": "role-2", "capabilities": ["update", "read"]}]' in metadata_json_string)
-    assert ('"properties": {"prop-name-1": "prop-value-1", "prop-name-2": "prop-value-2"}' in metadata_json_string or
-            '"properties": {"prop-name-2": "prop-value-2", "prop-name-1": "prop-value-1"}' in metadata_json_string)
+    assert (('"permissions": ['
+             '{"role-name": "role-2", '
+             '"capabilities": ["read", "update"]}, '
+             '{"role-name": "role-1", '
+             '"capabilities": ["read"]}]') in metadata_json_string or
+            ('"permissions": ['
+             '{"role-name": "role-1", '
+             '"capabilities": ["read"]}, '
+             '{"role-name": "role-2", '
+             '"capabilities": ["read", "update"]}]') in metadata_json_string or
+            ('"permissions": ['
+             '{"role-name": "role-2", '
+             '"capabilities": ["update", "read"]}, '
+             '{"role-name": "role-1", '
+             '"capabilities": ["read"]}]') in metadata_json_string or
+            ('"permissions": ['
+             '{"role-name": "role-1", '
+             '"capabilities": ["read"]}, '
+             '{"role-name": "role-2", '
+             '"capabilities": ["update", "read"]}]') in metadata_json_string)
+    assert (('"properties": '
+             '{"prop-name-1": "prop-value-1", '
+             '"prop-name-2": "prop-value-2"}') in metadata_json_string or
+            ('"properties": '
+             '{"prop-name-2": "prop-value-2", '
+             '"prop-name-1": "prop-value-1"}') in metadata_json_string)
     assert '"quality": 1' in metadata_json_string
-    assert ('"metadataValues": {"meta-name-1": "meta-value-1", "meta-name-2": "meta-value-2"}'
-            in metadata_json_string or
-            '"metadataValues": {"meta-name-2": "meta-value-2", "meta-name-1": "meta-value-1"}'
-            in metadata_json_string)
+    assert (('"metadataValues": '
+             '{"meta-name-1": "meta-value-1", '
+             '"meta-name-2": "meta-value-2"}') in metadata_json_string or
+            ('"metadataValues": '
+             '{"meta-name-2": "meta-value-2", '
+             '"meta-name-1": "meta-value-1"}') in metadata_json_string)
 
 
 def test_to_json_string_with_indent(metadata):
     metadata_json_string = metadata.to_json_string(indent=4)
     assert '{\n' in metadata_json_string
     assert '    "collections": [\n' in metadata_json_string
-    assert '        "collection-1"\n' in metadata_json_string or '        "collection-1",\n' in metadata_json_string
-    assert '        "collection-2"\n' in metadata_json_string or '        "collection-2",\n' in metadata_json_string
+    assert ('        "collection-1"\n' in metadata_json_string or
+            '        "collection-1",\n' in metadata_json_string)
+    assert ('        "collection-2"\n' in metadata_json_string or
+            '        "collection-2",\n' in metadata_json_string)
     assert '    ],\n' in metadata_json_string
     assert '    "permissions": [\n' in metadata_json_string
     assert '        {\n' in metadata_json_string
-    assert '            "role-name": "role-1"\n' in metadata_json_string or '            "role-name": "role-1",\n' in metadata_json_string
+    assert ('            "role-name": "role-1"\n' in metadata_json_string or
+            '            "role-name": "role-1",\n' in metadata_json_string)
     assert '            "capabilities": [\n' in metadata_json_string
     assert '                "read"\n' in metadata_json_string
-    assert '            ]\n' in metadata_json_string or '            "],\n' in metadata_json_string
-    assert '        }\n' in metadata_json_string or '        "},\n' in metadata_json_string
+    assert ('            ]\n' in metadata_json_string or
+            '            "],\n' in metadata_json_string)
+    assert ('        }\n' in metadata_json_string or
+            '        "},\n' in metadata_json_string)
     assert '        {\n' in metadata_json_string
-    assert '            "role-name": "role-2"\n' in metadata_json_string or '            "role-name": "role-2",\n' in metadata_json_string
+    assert ('            "role-name": "role-2"\n' in metadata_json_string or
+            '            "role-name": "role-2",\n' in metadata_json_string)
     assert '            "capabilities": [\n' in metadata_json_string
-    assert '                "read"\n' in metadata_json_string or '                "read",\n' in metadata_json_string
-    assert '                "update"\n' in metadata_json_string or '                "update",\n' in metadata_json_string
-    assert '            ]\n' in metadata_json_string or '            "],\n' in metadata_json_string
-    assert '        }\n' in metadata_json_string or '        "},\n' in metadata_json_string
+    assert ('                "read"\n' in metadata_json_string or
+            '                "read",\n' in metadata_json_string)
+    assert ('                "update"\n' in metadata_json_string or
+            '                "update",\n' in metadata_json_string)
+    assert ('            ]\n' in metadata_json_string or
+            '            "],\n' in metadata_json_string)
+    assert ('        }\n' in metadata_json_string or
+            '        "},\n' in metadata_json_string)
     assert '    ],\n' in metadata_json_string
     assert '"properties": {\n' in metadata_json_string
     assert ('        "prop-name-1": "prop-value-1"\n' in metadata_json_string or
             '        "prop-name-1": "prop-value-1",\n' in metadata_json_string)
     assert ('        "prop-name-2": "prop-value-2"\n' in metadata_json_string or
             '        "prop-name-2": "prop-value-2",\n' in metadata_json_string)
-    assert '    },\n' in metadata_json_string or '    }\n' in metadata_json_string
-    assert '    "quality": 1\n' in metadata_json_string or '    "quality": 1,\n' in metadata_json_string
+    assert ('    },\n' in metadata_json_string or
+            '    }\n' in metadata_json_string)
+    assert ('    "quality": 1\n' in metadata_json_string or
+            '    "quality": 1,\n' in metadata_json_string)
     assert '    "metadataValues": {\n' in metadata_json_string
     assert ('        "meta-name-1": "meta-value-1"\n' in metadata_json_string or
             '        "meta-name-1": "meta-value-1",\n' in metadata_json_string)
     assert ('        "meta-name-2": "meta-value-2"\n' in metadata_json_string or
             '        "meta-name-2": "meta-value-2",\n' in metadata_json_string)
-    assert '    }\n' in metadata_json_string or '    },\n' in metadata_json_string
+    assert ('    }\n' in metadata_json_string or
+            '    },\n' in metadata_json_string)
     assert '}' in metadata_json_string
 
 
@@ -652,71 +718,84 @@ def test_to_xml(metadata):
     assert len(metadata_values_elements) == 2
     for metadata_value_element in metadata_values_elements:
         assert metadata_value_element.tag == "rapi:metadata-value"
-        assert metadata_value_element.attrib in [{"key": "meta-name-1"}, {"key": "meta-name-2"}]
+        assert metadata_value_element.attrib in [
+            {"key": "meta-name-1"},
+            {"key": "meta-name-2"}
+        ]
         assert len(list(metadata_value_element)) == 0
         assert metadata_value_element.text in ["meta-value-1", "meta-value-2"]
 
 
 def test_to_xml_string(metadata):
     metadata_xml_string = metadata.to_xml_string()
-    assert "<?xml version='1.0' encoding='utf-8'?>\n" in metadata_xml_string
-    assert '<rapi:metadata xmlns:rapi="http://marklogic.com/rest-api">' in metadata_xml_string
-    assert '<rapi:collections>' in metadata_xml_string
-    assert '<rapi:collection>collection-1</rapi:collection>' in metadata_xml_string
-    assert '<rapi:collection>collection-2</rapi:collection>' in metadata_xml_string
-    assert '</rapi:collections>' in metadata_xml_string
-    assert '<rapi:permissions>' in metadata_xml_string
-    assert '<rapi:permission>' in metadata_xml_string
-    assert '<rapi:role-name>role-1</rapi:role-name><rapi:capability>read</rapi:capability>' in metadata_xml_string
-    assert '</rapi:permission>' in metadata_xml_string
-    assert '<rapi:permission>' in metadata_xml_string
-    assert '<rapi:role-name>role-2</rapi:role-name><rapi:capability>read</rapi:capability>' in metadata_xml_string
-    assert '</rapi:permission>' in metadata_xml_string
-    assert '<rapi:permission>' in metadata_xml_string
-    assert '<rapi:role-name>role-2</rapi:role-name><rapi:capability>update</rapi:capability>' in metadata_xml_string
-    assert '</rapi:permission>' in metadata_xml_string
-    assert '</rapi:permissions>' in metadata_xml_string
-    assert '<prop:properties xmlns:prop="http://marklogic.com/xdmp/property">' in metadata_xml_string
-    assert '<prop-name-1>prop-value-1</prop-name-1>' in metadata_xml_string
-    assert '<prop-name-2>prop-value-2</prop-name-2>' in metadata_xml_string
-    assert '</prop:properties>' in metadata_xml_string
-    assert '<rapi:quality>1</rapi:quality>' in metadata_xml_string
-    assert '<rapi:metadata-values>' in metadata_xml_string
-    assert '<rapi:metadata-value key="meta-name-1">meta-value-1</rapi:metadata-value>' in metadata_xml_string
-    assert '<rapi:metadata-value key="meta-name-2">meta-value-2</rapi:metadata-value>' in metadata_xml_string
-    assert '</rapi:metadata-values>' in metadata_xml_string
-    assert '</rapi:metadata>' in metadata_xml_string
+    expected_lines = [
+        "<?xml version='1.0' encoding='utf-8'?>\n",
+        '<rapi:metadata xmlns:rapi="http://marklogic.com/rest-api">',
+        '<rapi:collections>',
+        '<rapi:collection>collection-1</rapi:collection>',
+        '<rapi:collection>collection-2</rapi:collection>',
+        '</rapi:collections>',
+        '<rapi:permissions>',
+        '<rapi:permission>',
+        '<rapi:role-name>role-1</rapi:role-name><rapi:capability>read</rapi:capability>',
+        '</rapi:permission>',
+        '<rapi:permission>',
+        '<rapi:role-name>role-2</rapi:role-name><rapi:capability>read</rapi:capability>',
+        '</rapi:permission>',
+        '<rapi:permission>',
+        '<rapi:role-name>role-2</rapi:role-name><rapi:capability>update</rapi:capability>',
+        '</rapi:permission>',
+        '</rapi:permissions>',
+        '<prop:properties xmlns:prop="http://marklogic.com/xdmp/property">',
+        '<prop-name-1>prop-value-1</prop-name-1>',
+        '<prop-name-2>prop-value-2</prop-name-2>',
+        '</prop:properties>',
+        '<rapi:quality>1</rapi:quality>',
+        '<rapi:metadata-values>',
+        '<rapi:metadata-value key="meta-name-1">meta-value-1</rapi:metadata-value>',
+        '<rapi:metadata-value key="meta-name-2">meta-value-2</rapi:metadata-value>',
+        '</rapi:metadata-values>',
+        '</rapi:metadata>',
+    ]
+    for line in expected_lines:
+        assert line in metadata_xml_string
 
 
 def test_to_xml_string_with_indent(metadata):
     metadata_xml_string = metadata.to_xml_string(indent=4)
-    assert '<?xml version="1.0" encoding="utf-8"?>\n' in metadata_xml_string
-    assert '<rapi:metadata xmlns:rapi="http://marklogic.com/rest-api">\n' in metadata_xml_string
-    assert '    <rapi:collections>\n' in metadata_xml_string
-    assert '        <rapi:collection>collection-1</rapi:collection>\n' in metadata_xml_string
-    assert '        <rapi:collection>collection-2</rapi:collection>\n' in metadata_xml_string
-    assert '    </rapi:collections>\n' in metadata_xml_string
-    assert '    <rapi:permissions>\n' in metadata_xml_string
-    assert '        <rapi:permission>\n' in metadata_xml_string
-    assert '            <rapi:role-name>role-1</rapi:role-name>\n' in metadata_xml_string
-    assert '            <rapi:capability>read</rapi:capability>\n' in metadata_xml_string
-    assert '        </rapi:permission>\n' in metadata_xml_string
-    assert '        <rapi:permission>\n' in metadata_xml_string
-    assert '            <rapi:role-name>role-2</rapi:role-name>\n' in metadata_xml_string
-    assert '            <rapi:capability>read</rapi:capability>\n' in metadata_xml_string
-    assert '        </rapi:permission>\n' in metadata_xml_string
-    assert '        <rapi:permission>\n' in metadata_xml_string
-    assert '            <rapi:role-name>role-2</rapi:role-name>\n' in metadata_xml_string
-    assert '            <rapi:capability>update</rapi:capability>\n' in metadata_xml_string
-    assert '        </rapi:permission>\n' in metadata_xml_string
-    assert '    </rapi:permissions>\n' in metadata_xml_string
-    assert '    <prop:properties xmlns:prop="http://marklogic.com/xdmp/property">\n' in metadata_xml_string
-    assert '        <prop-name-1>prop-value-1</prop-name-1>\n' in metadata_xml_string
-    assert '        <prop-name-2>prop-value-2</prop-name-2>\n' in metadata_xml_string
-    assert '    </prop:properties>\n' in metadata_xml_string
-    assert '    <rapi:quality>1</rapi:quality>\n' in metadata_xml_string
-    assert '    <rapi:metadata-values>\n' in metadata_xml_string
-    assert '        <rapi:metadata-value key="meta-name-1">meta-value-1</rapi:metadata-value>\n' in metadata_xml_string
-    assert '        <rapi:metadata-value key="meta-name-2">meta-value-2</rapi:metadata-value>\n' in metadata_xml_string
-    assert '    </rapi:metadata-values>\n' in metadata_xml_string
-    assert '</rapi:metadata>\n' in metadata_xml_string
+    expected_lines = [
+        '<?xml version="1.0" encoding="utf-8"?>\n',
+        '<rapi:metadata xmlns:rapi="http://marklogic.com/rest-api">\n',
+        '    <rapi:collections>\n',
+        '        <rapi:collection>collection-1</rapi:collection>\n',
+        '        <rapi:collection>collection-2</rapi:collection>\n',
+        '    </rapi:collections>\n',
+        '    <rapi:permissions>\n',
+        '        <rapi:permission>\n',
+        '            <rapi:role-name>role-1</rapi:role-name>\n',
+        '            <rapi:capability>read</rapi:capability>\n',
+        '        </rapi:permission>\n',
+        '        <rapi:permission>\n',
+        '            <rapi:role-name>role-2</rapi:role-name>\n',
+        '            <rapi:capability>read</rapi:capability>\n',
+        '        </rapi:permission>\n',
+        '        <rapi:permission>\n',
+        '            <rapi:role-name>role-2</rapi:role-name>\n',
+        '            <rapi:capability>update</rapi:capability>\n',
+        '        </rapi:permission>\n',
+        '    </rapi:permissions>\n',
+        '    <prop:properties xmlns:prop="http://marklogic.com/xdmp/property">\n',
+        '        <prop-name-1>prop-value-1</prop-name-1>\n',
+        '        <prop-name-2>prop-value-2</prop-name-2>\n',
+        '    </prop:properties>\n',
+        '    <rapi:quality>1</rapi:quality>\n',
+        '    <rapi:metadata-values>\n',
+        ('        <rapi:metadata-value key="meta-name-1">meta-value-1'
+         '</rapi:metadata-value>\n'),
+        ('        <rapi:metadata-value key="meta-name-2">meta-value-2'
+         '</rapi:metadata-value>\n'),
+        '    </rapi:metadata-values>\n',
+        '</rapi:metadata>\n',
+    ]
+    for line in expected_lines:
+        assert line in metadata_xml_string

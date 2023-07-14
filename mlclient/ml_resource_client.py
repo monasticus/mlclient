@@ -22,7 +22,8 @@ from mlclient.calls import (DatabaseDeleteCall, DatabaseGetCall,
 
 class MLResourceClient(MLClient):
     """
-    This class extends the MLClient superclass to support internal REST Resources of the MarkLogic server.
+    This class extends the MLClient superclass to support internal REST Resources
+    of the MarkLogic server.
 
     It can connect with the MarkLogic Server as a Context Manager or explicitly by
     using the connect method.
@@ -31,8 +32,8 @@ class MLResourceClient(MLClient):
     - by using defined methods corresponding to a resource (e.g. /v1/eval -> eval())
     - by using a general method call() accepting a ResourceCall implementation classes.
 
-    This class can be treated as an example of MLClient class extension for your own dedicated APIs
-    or as a superclass for your client.
+    This class can be treated as an example of MLClient class extension for your own
+    dedicated APIs or as a superclass for your client.
 
     Attributes
     -------
@@ -40,100 +41,101 @@ class MLResourceClient(MLClient):
 
     Methods
     -------
-    MLResourceClient inherits all MLClient methods: connect, disconnect, is_connected, get, post, put, delete.
+    MLResourceClient inherits all MLClient methods:
+    connect, disconnect, is_connected, get, post, put, delete.
 
     eval(xquery: str = None, javascript: str = None, variables: dict = None,
          database: str = None, txid: str = None) -> Response
-        Sends a request to the /v1/eval REST Resource using EvalCall class
-    get_logs(filename: str, data_format: str = None, host: str = None,
-             start_time: str = None, end_time: str = None, regex: str = None) -> Response
-        Sends a request to the /manage/v2/logs REST Resource using LogsCall class
+        Send a request to the /v1/eval REST Resource.
+    get_logs(
+        filename: str,data_format: str = None,
+        host: str = None,
+        start_time: str = None,
+        end_time: str = None,
+        regex: str = None
+    ) -> Response
+        Send a request to the /manage/v2/logs REST Resource.
     get_databases(data_format: str = None, view: str = None) -> Response
-        Sends a request to the /manage/v2/databases REST Resource using DatabasesGetCall class
+        Send a request to the /manage/v2/databases REST Resource.
     post_databases(body: Union[str, dict]) -> Response
-        Sends a request to the /manage/v2/databases REST Resource using DatabasesPostCall class
+        Send a request to the /manage/v2/databases REST Resource.
     get_database(database: str, data_format: str = None, view: str = None) -> Response
-        Sends a request to the /manage/v2/databases/{id|name} REST Resource using DatabaseGetCall class
+        Send a request to the /manage/v2/databases/{id|name} REST Resource.
     post_database(database: str, body: Union[str, dict]) -> Response
-        Sends a request to the /manage/v2/databases/{id|name} REST Resource using DatabasePostCall class
+        Send a request to the /manage/v2/databases/{id|name} REST Resource.
     delete_database(database: str, forest_delete: str = None) -> Response
-        Sends a request to the /manage/v2/databases/{id|name} REST Resource using DatabaseDeleteCall class
+        Send a request to the /manage/v2/databases/{id|name} REST Resource.
     get_database_properties(database: str, data_format: str = None) -> Response
-        Sends a request to the /manage/v2/databases/{id|name}/properties REST Resource
-        using DatabasePropertiesGetCall class
+        Send a request to the /manage/v2/databases/{id|name}/properties REST Resource.
     put_database_properties(database: str, body: Union[str, dict]) -> Response
-        Sends a request to the /manage/v2/databases/{id|name}/properties REST Resource
-        using DatabasePropertiesPutCall class
-    get_servers(data_format: str = None, group_id: str = None, view: str = None, full_refs: bool = None) -> Response
-        Sends a request to the /manage/v2/servers REST Resource using ServersGetCall class
-    post_servers(body: Union[str, dict], group_id: str = None, server_type: str = None) -> Response
-        Sends a request to the /manage/v2/servers REST Resource using ServersPostCall class
+        Send a request to the /manage/v2/databases/{id|name}/properties REST Resource.
+    get_servers(data_format: str = None, group_id: str = None, view: str = None,
+                full_refs: bool = None) -> Response
+        Send a request to the /manage/v2/servers REST Resource.
+    post_servers(body: Union[str, dict], group_id: str = None,
+                 server_type: str = None) -> Response
+        Send a request to the /manage/v2/servers REST Resource.
     get_server(server: str, group_id: str, data_format: str = None, view: str = None,
-               host_id: str = None, full_refs: bool = None, modules: bool = None) -> Response
-        Sends a request to the /manage/v2/servers/{id|name} REST Resource using ServerGetCall class
+               host_id: str = None, full_refs: bool = None,
+               modules: bool = None) -> Response
+        Send a request to the /manage/v2/servers/{id|name} REST Resource.
     delete_server(server: str, group_id: str) -> Response
-        Sends a request to the /manage/v2/servers/{id|name} REST Resource using ServerDeleteCall class
-    get_server_properties(server: str, group_id: str, data_format: str = None) -> Response
-        Sends a request to the /manage/v2/servers/{id|name}/properties REST Resource
-        using ServerPropertiesGetCall class
-    put_server_properties(server: str, group_id: str, body: Union[str, dict]) -> Response
-        Sends a request to the /manage/v2/servers/{id|name}/properties REST Resource
-        using ServerPropertiesPutCall class
+        Send a request to the /manage/v2/servers/{id|name} REST Resource.
+    get_server_properties(server: str, group_id: str,
+                          data_format: str = None) -> Response
+        Send a request to the /manage/v2/servers/{id|name}/properties REST Resource.
+    put_server_properties(server: str, group_id: str,
+                          body: Union[str, dict]) -> Response
+        Send a request to the /manage/v2/servers/{id|name}/properties REST Resource.
     get_forests(data_format: str = None, view: str = None, database: str = None,
                 group: str = None, host: str = None, full_refs: bool = None) -> Response
-        Sends a request to the /manage/v2/forests REST Resource using ForestsGetCall class
-    post_forests(body: Union[str, dict], wait_for_forest_to_mount: bool = None) -> Response
-        Sends a request to the /manage/v2/forests REST Resource using ForestsPostCall class
+        Send a request to the /manage/v2/forests REST Resource.
+    post_forests(body: Union[str, dict],
+                 wait_for_forest_to_mount: bool = None) -> Response
+        Send a request to the /manage/v2/forests REST Resource.
     put_forests(body: Union[str, dict]) -> Response
-        Sends a request to the /manage/v2/forests REST Resource using ForestsPutCall class
+        Send a request to the /manage/v2/forests REST Resource.
     get_forest(forest: str, data_format: str = None, view: str = None) -> Response
-        Sends a request to the /manage/v2/forests/{id|name} REST Resource using ForestGetCall class
+        Send a request to the /manage/v2/forests/{id|name} REST Resource.
     post_forest(forest: str, body: Union[str, dict]) -> Response
-        Sends a request to the /manage/v2/forests/{id|name} REST Resource using ForestPostCall class
+        Send a request to the /manage/v2/forests/{id|name} REST Resource.
     delete_forest(forest: str, level: str, replicas: str = None) -> Response
-        Sends a request to the /manage/v2/forests/{id|name} REST Resource using ForestDeleteCall class
+        Send a request to the /manage/v2/forests/{id|name} REST Resource.
     get_forest_properties(forest: str, data_format: str = None) -> Response
-        Sends a request to the /manage/v2/forests/{id|name}/properties REST Resource
-        using ForestPropertiesGetCall class
+        Send a request to the /manage/v2/forests/{id|name}/properties REST Resource.
     put_forest_properties(forest: str, body: Union[str, dict]) -> Response
-        Sends a request to the /manage/v2/forests/{id|name}/properties REST Resource
-        using ForestPropertiesPutCall class
+        Send a request to the /manage/v2/forests/{id|name}/properties REST Resource.
     get_roles(data_format: str = None, view: str = None) -> Response
-        Sends a request to the /manage/v2/roles REST Resource using RolesGetCall class
+        Send a request to the /manage/v2/roles REST Resource.
     post_roles(body: Union[str, dict]) -> Response
-        Sends a request to the /manage/v2/roles REST Resource using RolesPostCall class
+        Send a request to the /manage/v2/roles REST Resource.
     get_role(database: str, data_format: str = None, view: str = None) -> Response
-        Sends a request to the /manage/v2/roles/{id|name} REST Resource using RoleGetCall class
+        Send a request to the /manage/v2/roles/{id|name} REST Resource.
     delete_role(database: str) -> Response
-        Sends a request to the /manage/v2/roles/{id|name} REST Resource using RoleDeleteCall class
+        Send a request to the /manage/v2/roles/{id|name} REST Resource.
     get_role_properties(role: str, data_format: str = None) -> Response
-        Sends a request to the /manage/v2/roles/{id|name}/properties REST Resource
-        using RolePropertiesGetCall class
+        Send a request to the /manage/v2/roles/{id|name}/properties REST Resource.
     put_role_properties(role: str, body: Union[str, dict]) -> Response
-        Sends a request to the /manage/v2/roles/{id|name}/properties REST Resource
-        using RolePropertiesPutCall class
+        Send a request to the /manage/v2/roles/{id|name}/properties REST Resource.
     get_users(data_format: str = None, view: str = None) -> Response
-        Sends a request to the /manage/v2/users REST Resource using UsersGetCall class
+        Send a request to the /manage/v2/users REST Resource.
     post_users(body: Union[str, dict]) -> Response
-        Sends a request to the /manage/v2/users REST Resource using UsersPostCall class
+        Send a request to the /manage/v2/users REST Resource.
     get_user(database: str, data_format: str = None, view: str = None) -> Response
-        Sends a request to the /manage/v2/users/{id|name} REST Resource using UserGetCall class
+        Send a request to the /manage/v2/users/{id|name} REST Resource.
     delete_user(database: str) -> Response
-        Sends a request to the /manage/v2/users/{id|name} REST Resource using UserDeleteCall class
+        Send a request to the /manage/v2/users/{id|name} REST Resource.
     get_user_properties(user: str, data_format: str = None) -> Response
-        Sends a request to the /manage/v2/users/{id|name}/properties REST Resource
-        using UserPropertiesGetCall class
+        Send a request to the /manage/v2/users/{id|name}/properties REST Resource.
     put_user_properties(user: str, body: Union[str, dict]) -> Response
-        Sends a request to the /manage/v2/users/{id|name}/properties REST Resource
-        using UserPropertiesPutCall class
+        Send a request to the /manage/v2/users/{id|name}/properties REST Resource.
     call(call: ResourceCall) -> Response
-        Sends a custom request to a MarkLogic endpoint using a ResourceCall implementation
+        Send a custom request to a MarkLogic endpoint.
     """
 
     def eval(self, xquery: str = None, javascript: str = None, variables: dict = None,
              database: str = None, txid: str = None) -> Response:
-        """
-        Sends a request to the /v1/eval REST Resource using EvalCall class
+        """Send a request to the /v1/eval REST Resource.
 
         Parameters
         ----------
@@ -149,8 +151,8 @@ class MLResourceClient(MLClient):
             External variables to pass to the query during evaluation
         database
             Perform this operation on the named content database
-            instead of the default content database associated with the REST API instance.
-            The database can be identified by name or by database id.
+            instead of the default content database associated with the REST API
+            instance. The database can be identified by name or by database id.
         txid
             The transaction identifier of the multi-statement transaction
             in which to service this request.
@@ -170,15 +172,15 @@ class MLResourceClient(MLClient):
 
     def get_logs(self, filename: str, data_format: str = None, host: str = None,
                  start_time: str = None, end_time: str = None, regex: str = None) -> Response:
-        """
-        Sends a request to the /manage/v2/logs REST Resource using LogsCall class
+        """Send a request to the /manage/v2/logs REST Resource.
 
         Parameters
         ----------
         filename : str
             The log file to be returned.
         data_format : str
-            The format of the data in the log file. The supported formats are xml, json or html.
+            The format of the data in the log file. The supported formats are xml, json
+            or html.
         host : str
             The host from which to return the log data.
         start_time : str
@@ -203,8 +205,7 @@ class MLResourceClient(MLClient):
         return self.call(call)
 
     def get_databases(self, data_format: str = None, view: str = None) -> Response:
-        """
-        Sends a request to the /manage/v2/databases REST Resource using DatabasesGetCall class
+        """Send a request to the /manage/v2/databases REST Resource.
 
         Parameters
         ----------
@@ -225,8 +226,7 @@ class MLResourceClient(MLClient):
         return self.call(call)
 
     def post_databases(self, body: Union[str, dict]) -> Response:
-        """
-        Sends a request to the /manage/v2/databases REST Resource using DatabasesPostCall class
+        """Send a request to the /manage/v2/databases REST Resource.
 
         Parameters
         ----------
@@ -243,8 +243,7 @@ class MLResourceClient(MLClient):
         return self.call(call)
 
     def get_database(self, database: str, data_format: str = None, view: str = None) -> Response:
-        """
-        Sends a request to the /manage/v2/databases/{id|name} REST Resource using DatabaseGetCall class
+        """Send a request to the /manage/v2/databases/{id|name} REST Resource.
 
         Parameters
         ----------
@@ -255,7 +254,8 @@ class MLResourceClient(MLClient):
             This parameter is not meaningful with view=edit.
         view : str
             A specific view of the returned data.
-            Can be properties-schema, package, describe, config, counts, edit, status, forest-storage, or default.
+            Can be properties-schema, package, describe, config, counts, edit, status,
+            forest-storage, or default.
 
         Returns
         -------
@@ -269,8 +269,7 @@ class MLResourceClient(MLClient):
         return self.call(call)
 
     def post_database(self, database: str, body: Union[str, dict]) -> Response:
-        """
-        Sends a request to the /manage/v2/databases/{id|name} REST Resource using DatabasePostCall class
+        """Send a request to the /manage/v2/databases/{id|name} REST Resource.
 
         Parameters
         ----------
@@ -290,8 +289,7 @@ class MLResourceClient(MLClient):
         return self.call(call)
 
     def delete_database(self, database: str, forest_delete: str = None) -> Response:
-        """
-        Sends a request to the /manage/v2/databases/{id|name} REST Resource using DatabaseDeleteCall class
+        """Send a request to the /manage/v2/databases/{id|name} REST Resource.
 
         Parameters
         ----------
@@ -315,9 +313,7 @@ class MLResourceClient(MLClient):
         return self.call(call)
 
     def get_database_properties(self, database: str, data_format: str = None) -> Response:
-        """
-        Sends a request to the /manage/v2/databases/{id|name}/properties REST Resource
-        using DatabasePropertiesGetCall class
+        """Send a request to the /manage/v2/databases/{id|name}/properties REST Resource.
 
         Parameters
         ----------
@@ -338,9 +334,7 @@ class MLResourceClient(MLClient):
         return self.call(call)
 
     def put_database_properties(self, database: str, body: Union[str, dict]) -> Response:
-        """
-        Sends a request to the /manage/v2/databases/{id|name}/properties REST Resource
-        using DatabasePropertiesPutCall class
+        """Send a request to the /manage/v2/databases/{id|name}/properties REST Resource.
 
         Parameters
         ----------
@@ -361,8 +355,7 @@ class MLResourceClient(MLClient):
 
     def get_servers(self, data_format: str = None, group_id: str = None, view: str = None,
                     full_refs: bool = None) -> Response:
-        """
-        Sends a request to the /manage/v2/servers REST Resource using ServersGetCall class
+        """Send a request to the /manage/v2/servers REST Resource.
 
         Parameters
         ----------
@@ -377,8 +370,8 @@ class MLResourceClient(MLClient):
             Can be schema, properties-schema, metrics, package, describe, or default.
         full_refs : bool
             If set to true, full detail is returned for all relationship references.
-            A value of false (the default) indicates to return detail only for first references.
-            This parameter is not meaningful with view=package.
+            A value of false (the default) indicates to return detail only for first
+            references. This parameter is not meaningful with view=package.
 
         Returns
         -------
@@ -393,8 +386,7 @@ class MLResourceClient(MLClient):
         return self.call(call)
 
     def post_servers(self, body: Union[str, dict], group_id: str = None, server_type: str = None) -> Response:
-        """
-        Sends a request to the /manage/v2/servers REST Resource using ServersPostCall class
+        """Send a request to the /manage/v2/servers REST Resource.
 
         Parameters
         ----------
@@ -402,12 +394,13 @@ class MLResourceClient(MLClient):
             A database properties in XML or JSON format.
         group_id : str
             The id or name of the group to which the App Server belongs.
-            The group must be specified by this parameter or by the group-name property in the request payload.
-            If it is specified in both places, the values must be the same.
+            The group must be specified by this parameter or by the group-name property
+            in the request payload. If it is specified in both places, the values
+            must be the same.
         server_type : str
             The type of App Server to create.
-            The App Server type must be specified by this parameter or in the request payload.
-            If it is specified in both places, the values must be the same.
+            The App Server type must be specified by this parameter or in the request
+            payload. If it is specified in both places, the values must be the same.
             The valid types are: http, odbc, xdbc, or webdav.
 
         Returns
@@ -423,31 +416,34 @@ class MLResourceClient(MLClient):
 
     def get_server(self, server: str, group_id: str, data_format: str = None, view: str = None,
                    host_id: str = None, full_refs: bool = None, modules: bool = None) -> Response:
-        """
-        Sends a request to the /manage/v2/servers/{id|name} REST Resource using ServerGetCall class
+        """Send a request to the /manage/v2/servers/{id|name} REST Resource.
 
         Parameters
         ----------
         server : str
             A server identifier. The server can be identified either by ID or name.
         group_id : str
-            The id or name of the group to which the App Server belongs. This parameter is required.
+            The id or name of the group to which the App Server belongs.
+            This parameter is required.
         data_format : str
             The format of the returned data. Can be either html, json, or xml (default).
         view : str
             A specific view of the returned data.
-            Can be properties-schema, config, edit, package, describe, status, xdmp:server-status or default.
+            Can be properties-schema, config, edit, package, describe, status,
+            xdmp:server-status or default.
         host_id : str
-            Meaningful only when view=status. Specifies to return the status for the server in the specified host.
-            The host can be identified either by id or name.
+            Meaningful only when view=status. Specifies to return the status
+            for the server in the specified host. The host can be identified
+            either by id or name.
         full_refs : bool
             If set to true, full detail is returned for all relationship references.
-            A value of false (the default) indicates to return detail only for first references.
-            This parameter is not meaningful with view=package.
+            A value of false (the default) indicates to return detail only for first
+            references. This parameter is not meaningful with view=package.
         modules : bool
-            Meaningful only with view=package. Whether to include a manifest of the modules database
-            for the App Server in the results, if one exists. It is an error to request
-            a modules database manifest for an App Server that uses the filesystem for modules. Default: false.
+            Meaningful only with view=package. Whether to include a manifest
+            of the modules database for the App Server in the results, if one exists.
+            It is an error to request a modules database manifest for an App Server
+            that uses the filesystem for modules. Default: false.
 
         Returns
         -------
@@ -465,15 +461,15 @@ class MLResourceClient(MLClient):
         return self.call(call)
 
     def delete_server(self, server: str, group_id: str) -> Response:
-        """
-        Sends a request to the /manage/v2/servers/{id|name} REST Resource using ServerDeleteCall class
+        """Send a request to the /manage/v2/servers/{id|name} REST Resource.
 
         Parameters
         ----------
         server : str
             A server identifier. The server can be identified either by ID or name.
         group_id : str
-            The id or name of the group to which the App Server belongs. This parameter is required.
+            The id or name of the group to which the App Server belongs.
+            This parameter is required.
 
         Returns
         -------
@@ -486,16 +482,15 @@ class MLResourceClient(MLClient):
         return self.call(call)
 
     def get_server_properties(self, server: str, group_id: str, data_format: str = None):
-        """
-        Sends a request to the /manage/v2/servers/{id|name}/properties REST Resource
-        using ServerPropertiesGetCall class
+        """Send a request to the /manage/v2/servers/{id|name}/properties REST Resource.
 
         Parameters
         ----------
         server : str
             A server identifier. The server can be identified either by ID or name.
         group_id : str
-            The id or name of the group to which the App Server belongs. This parameter is required.
+            The id or name of the group to which the App Server belongs.
+            This parameter is required.
         data_format : str
             The format of the returned data. Can be either json or xml (default).
             This parameter overrides the Accept header if both are present.
@@ -512,16 +507,15 @@ class MLResourceClient(MLClient):
         return self.call(call)
 
     def put_server_properties(self, server: str, group_id: str, body: Union[str, dict]):
-        """
-        Sends a request to the /manage/v2/servers/{id|name}/properties REST Resource
-        using ServerPropertiesPutCall class
+        """Send a request to the /manage/v2/servers/{id|name}/properties REST Resource.
 
         Parameters
         ----------
         server : str
             A server identifier. The server can be identified either by ID or name.
         group_id : str
-            The id or name of the group to which the App Server belongs. This parameter is required.
+            The id or name of the group to which the App Server belongs.
+            This parameter is required.
         body : Union[str, dict]
             A database properties in XML or JSON format.
 
@@ -538,8 +532,7 @@ class MLResourceClient(MLClient):
 
     def get_forests(self, data_format: str = None, view: str = None, database: str = None,
                     group: str = None, host: str = None, full_refs: bool = None) -> Response:
-        """
-        Sends a request to the /manage/v2/forests REST Resource using ForestsGetCall class
+        """Send a request to the /manage/v2/forests REST Resource.
 
         Parameters
         ----------
@@ -547,7 +540,8 @@ class MLResourceClient(MLClient):
             The format of the returned data. Can be either html, json, or xml (default).
         view : str
             A specific view of the returned data.
-            Can be either describe, default, status, metrics, schema, storage, or properties-schema.
+            Can be either describe, default, status, metrics, schema, storage,
+            or properties-schema.
         database : str
             Returns a summary of the forests for the specified database.
             The database can be identified either by id or name.
@@ -559,7 +553,8 @@ class MLResourceClient(MLClient):
             The host can be identified either by id or name.
         full_refs : bool
             If set to true, full detail is returned for all relationship references.
-            A value of false (the default) indicates to return detail only for first references.
+            A value of false (the default) indicates to return detail only for first
+            references.
 
         Returns
         -------
@@ -576,16 +571,15 @@ class MLResourceClient(MLClient):
         return self.call(call)
 
     def post_forests(self, body: Union[str, dict], wait_for_forest_to_mount: bool = None) -> Response:
-        """
-        Sends a request to the /manage/v2/forests REST Resource using ForestsPostCall class
+        """Send a request to the /manage/v2/forests REST Resource.
 
         Parameters
         ----------
         body : Union[str, dict]
             A database properties in XML or JSON format.
         wait_for_forest_to_mount : bool
-            Whether to wait for the new forest to mount before sending a response to this request.
-            Allowed values: true (default) or false.
+            Whether to wait for the new forest to mount before sending a response
+            to this request. Allowed values: true (default) or false.
 
         Returns
         -------
@@ -598,8 +592,7 @@ class MLResourceClient(MLClient):
         return self.call(call)
 
     def put_forests(self, body: Union[str, dict]) -> Response:
-        """
-        Sends a request to the /manage/v2/forests REST Resource using ForestsPutCall class
+        """Send a request to the /manage/v2/forests REST Resource.
 
         Parameters
         ----------
@@ -616,8 +609,7 @@ class MLResourceClient(MLClient):
         return self.call(call)
 
     def get_forest(self, forest: str, data_format: str = None, view: str = None) -> Response:
-        """
-        Sends a request to the /manage/v2/forests/{id|name} REST Resource using ForestGetCall class
+        """Send a request to the /manage/v2/forests/{id|name} REST Resource.
 
         Parameters
         ----------
@@ -627,7 +619,8 @@ class MLResourceClient(MLClient):
             The format of the returned data. Can be either html, json, or xml (default).
         view : str
             A specific view of the returned data.
-            Can be properties-schema, config, edit, package, describe, status, xdmp:server-status or default.
+            Can be properties-schema, config, edit, package, describe, status,
+            xdmp:server-status or default.
 
         Returns
         -------
@@ -641,15 +634,15 @@ class MLResourceClient(MLClient):
         return self.call(call)
 
     def post_forest(self, forest: str, body: Union[str, dict]) -> Response:
-        """
-        Sends a request to the /manage/v2/forests/{id|name} REST Resource using ForestPostCall class
+        """Send a request to the /manage/v2/forests/{id|name} REST Resource.
 
         Parameters
         ----------
         forest : str
             A forest identifier. The forest can be identified either by ID or name.
         body : dict
-            A list of properties. Need to include the 'state' property (the type of state change to initiate).
+            A list of properties. Need to include the 'state' property
+            (the type of state change to initiate).
             Allowed values: clear, merge, restart, attach, detach, retire, employ.
 
         Returns
@@ -663,8 +656,7 @@ class MLResourceClient(MLClient):
         return self.call(call)
 
     def delete_forest(self, forest: str, level: str, replicas: str = None) -> Response:
-        """
-        Sends a request to the /manage/v2/forests/{id|name} REST Resource using ForestDeleteCall class
+        """Send a request to the /manage/v2/forests/{id|name} REST Resource.
 
         Parameters
         ----------
@@ -677,7 +669,8 @@ class MLResourceClient(MLClient):
             A full deletion removes both the forest configuration and the data.
         replicas : str
             Determines how to process the replicas.
-            Allowed values: detach to detach the replica but keep it; delete to detach and delete the replica.
+            Allowed values: detach to detach the replica but keep it;
+            delete to detach and delete the replica.
 
         Returns
         -------
@@ -691,9 +684,7 @@ class MLResourceClient(MLClient):
         return self.call(call)
 
     def get_forest_properties(self, forest: str, data_format: str = None) -> Response:
-        """
-        Sends a request to the /manage/v2/forests/{id|name}/properties REST Resource
-        using ForestPropertiesGetCall class
+        """Send a request to the /manage/v2/forests/{id|name}/properties REST Resource.
 
         Parameters
         ----------
@@ -714,9 +705,8 @@ class MLResourceClient(MLClient):
         return self.call(call)
 
     def put_forest_properties(self, forest: str, body: Union[str, dict]) -> Response:
-        """
-        Sends a request to the /manage/v2/databases/{id|name}/properties REST Resource
-        using ForestPropertiesPutCall class
+        """Send a request to the /manage/v2/databases/{id|name}/properties
+        REST Resource.
 
         Parameters
         ----------
@@ -736,8 +726,7 @@ class MLResourceClient(MLClient):
         return self.call(call)
 
     def get_roles(self, data_format: str = None, view: str = None) -> Response:
-        """
-        Sends a request to the /manage/v2/roles REST Resource using RolesGetCall class
+        """Send a request to the /manage/v2/roles REST Resource.
 
         Parameters
         ----------
@@ -757,8 +746,7 @@ class MLResourceClient(MLClient):
         return self.call(call)
 
     def post_roles(self, body: Union[str, dict]) -> Response:
-        """
-        Sends a request to the /manage/v2/roles REST Resource using RolesPostCall class
+        """Send a request to the /manage/v2/roles REST Resource.
 
         Parameters
         ----------
@@ -775,8 +763,7 @@ class MLResourceClient(MLClient):
         return self.call(call)
 
     def get_role(self, role: str, data_format: str = None, view: str = None) -> Response:
-        """
-        Sends a request to the /manage/v2/roles/{id|name} REST Resource using RoleGetCall class
+        """Send a request to the /manage/v2/roles/{id|name} REST Resource.
 
         Parameters
         ----------
@@ -799,8 +786,7 @@ class MLResourceClient(MLClient):
         return self.call(call)
 
     def delete_role(self, role: str) -> Response:
-        """
-        Sends a request to the /manage/v2/roles/{id|name} REST Resource using RoleDeleteCall class
+        """Send a request to the /manage/v2/roles/{id|name} REST Resource.
 
         Parameters
         ----------
@@ -817,9 +803,7 @@ class MLResourceClient(MLClient):
         return self.call(call)
 
     def get_role_properties(self, role: str, data_format: str = None) -> Response:
-        """
-        Sends a request to the /manage/v2/roles/{id|name}/properties REST Resource
-        using RolePropertiesGetCall class
+        """Send a request to the /manage/v2/roles/{id|name}/properties REST Resource.
 
         Parameters
         ----------
@@ -840,9 +824,7 @@ class MLResourceClient(MLClient):
         return self.call(call)
 
     def put_role_properties(self, role: str, body: Union[str, dict]) -> Response:
-        """
-        Sends a request to the /manage/v2/roles/{id|name}/properties REST Resource
-        using RolePropertiesPutCall class
+        """Send a request to the /manage/v2/roles/{id|name}/properties REST Resource.
 
         Parameters
         ----------
@@ -862,8 +844,7 @@ class MLResourceClient(MLClient):
         return self.call(call)
 
     def get_users(self, data_format: str = None, view: str = None) -> Response:
-        """
-        Sends a request to the /manage/v2/users REST Resource using UsersGetCall class
+        """Send a request to the /manage/v2/users REST Resource.
 
         Parameters
         ----------
@@ -883,8 +864,7 @@ class MLResourceClient(MLClient):
         return self.call(call)
 
     def post_users(self, body: Union[str, dict]) -> Response:
-        """
-        Sends a request to the /manage/v2/users REST Resource using UsersPostCall class
+        """Send a request to the /manage/v2/users REST Resource.
 
         Parameters
         ----------
@@ -901,8 +881,7 @@ class MLResourceClient(MLClient):
         return self.call(call)
 
     def get_user(self, user: str, data_format: str = None, view: str = None) -> Response:
-        """
-        Sends a request to the /manage/v2/users/{id|name} REST Resource using UserGetCall class
+        """Send a request to the /manage/v2/users/{id|name} REST Resource.
 
         Parameters
         ----------
@@ -925,8 +904,7 @@ class MLResourceClient(MLClient):
         return self.call(call)
 
     def delete_user(self, user: str) -> Response:
-        """
-        Sends a request to the /manage/v2/users/{id|name} REST Resource using UserDeleteCall class
+        """Send a request to the /manage/v2/users/{id|name} REST Resource.
 
         Parameters
         ----------
@@ -943,9 +921,7 @@ class MLResourceClient(MLClient):
         return self.call(call)
 
     def get_user_properties(self, user: str, data_format: str = None) -> Response:
-        """
-        Sends a request to the /manage/v2/users/{id|name}/properties REST Resource
-        using UserPropertiesGetCall class
+        """Send a request to the /manage/v2/users/{id|name}/properties REST Resource.
 
         Parameters
         ----------
@@ -966,9 +942,7 @@ class MLResourceClient(MLClient):
         return self.call(call)
 
     def put_user_properties(self, user: str, body: Union[str, dict]) -> Response:
-        """
-        Sends a request to the /manage/v2/users/{id|name}/properties REST Resource
-        using UserPropertiesPutCall class
+        """Send a request to the /manage/v2/users/{id|name}/properties REST Resource.
 
         Parameters
         ----------
@@ -988,8 +962,7 @@ class MLResourceClient(MLClient):
         return self.call(call)
 
     def call(self, call: ResourceCall) -> Response:
-        """
-        Sends a custom request to a MarkLogic endpoint using a ResourceCall implementation
+        """Send a custom request to a MarkLogic endpoint.
 
         Parameters
         ----------

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import copy
 import json
 import logging
@@ -33,19 +35,25 @@ class Metadata:
     __RAPI_NS_URI = "http://marklogic.com/rest-api"
     __PROP_NS_URI = "http://marklogic.com/xdmp/property"
 
-    def __init__(self, collections: list = None, permissions: list = None, properties: dict = None,
-                 quality: int = None, metadata_values: dict = None) -> None:
+    def __init__(self,
+                 collections: list = None,
+                 permissions: list = None,
+                 properties: dict = None,
+                 quality: int = None,
+                 metadata_values: dict = None) -> None:
         self.__logger = logging.getLogger(__name__)
         self.__collections = list(set(collections)) if collections else list()
         self.__permissions = self.__get_clean_permissions(permissions)
-        self.__properties = self.__get_clean_dict(properties) if properties else dict()
+        self.__properties = self.__get_clean_dict(properties)
         self.__quality = quality
-        self.__metadata_values = self.__get_clean_dict(metadata_values) if metadata_values else dict()
+        self.__metadata_values = self.__get_clean_dict(metadata_values)
 
     def __eq__(self, other):
+        collections_diff = set(self.__collections).difference(set(other.collections()))
+        permissions_diff = set(self.__permissions).difference(set(other.permissions()))
         return (isinstance(other, Metadata) and
-                set(self.__collections).difference(set(other.collections())) == set() and
-                set(self.__permissions).difference(set(other.permissions())) == set() and
+                collections_diff == set() and
+                permissions_diff == set() and
                 self.__properties == other.properties() and
                 self.__quality == other.quality() and
                 self.__metadata_values == other.metadata_values())
@@ -87,7 +95,9 @@ class Metadata:
         return allow
 
     def add_collection(self, collection: str) -> bool:
-        allow = collection is not None and not re.search("^\\s*$", collection) and collection not in self.collections()
+        allow = (collection is not None and
+                 not re.search("^\\s*$", collection) and
+                 collection not in self.collections())
         if allow:
             self.__collections.append(collection)
         return allow
@@ -154,20 +164,26 @@ class Metadata:
 
         collections_element = ElemTree.SubElement(root, self.__COLLECTIONS_TAG)
         for collection in self.collections():
-            collection_element = ElemTree.SubElement(collections_element, self.__COLLECTION_TAG)
+            collection_element = ElemTree.SubElement(
+                collections_element, self.__COLLECTION_TAG)
             collection_element.text = collection
 
         permissions_element = ElemTree.SubElement(root, self.__PERMISSIONS_TAG)
         for permission in self.__permissions:
             for capability in permission.capabilities():
-                permission_element = ElemTree.SubElement(permissions_element, self.__PERMISSION_TAG)
-                role_name_element = ElemTree.SubElement(permission_element, self.__ROLE_NAME_TAG)
+                permission_element = ElemTree.SubElement(
+                    permissions_element, self.__PERMISSION_TAG)
+                role_name_element = ElemTree.SubElement(
+                    permission_element, self.__ROLE_NAME_TAG)
                 role_name_element.text = permission.role_name()
-                capability_element = ElemTree.SubElement(permission_element, self.__CAPABILITY_TAG)
+                capability_element = ElemTree.SubElement(
+                    permission_element, self.__CAPABILITY_TAG)
                 capability_element.text = capability
 
-        properties_element = ElemTree.SubElement(root, self.__PROPERTIES_TAG,
-                                                 attrib={self.__PROP_NS_PREFIX: self.__PROP_NS_URI})
+        properties_element = ElemTree.SubElement(
+            root,
+            self.__PROPERTIES_TAG,
+            attrib={self.__PROP_NS_PREFIX: self.__PROP_NS_URI})
         for property_name, property_value in self.properties().items():
             property_element = ElemTree.SubElement(properties_element, property_name)
             property_element.text = property_value
@@ -177,8 +193,10 @@ class Metadata:
 
         metadata_values_element = ElemTree.SubElement(root, self.__METADATA_VALUES_TAG)
         for metadata_name, metadata_value in self.metadata_values().items():
-            metadata_element = ElemTree.SubElement(metadata_values_element, self.__METADATA_VALUE_TAG,
-                                                   attrib={self.__KEY_ATTR: metadata_name})
+            metadata_element = ElemTree.SubElement(
+                metadata_values_element,
+                self.__METADATA_VALUE_TAG,
+                attrib={self.__KEY_ATTR: metadata_name})
             metadata_element.text = metadata_value
 
         return ElemTree.ElementTree(root)
@@ -186,17 +204,24 @@ class Metadata:
     def to_xml_string(self, indent: int = None) -> str:
         metadata_xml = self.to_xml().getroot()
         if indent is None:
-            return ElemTree.tostring(metadata_xml,
-                                     encoding="utf-8",
-                                     method="xml",
-                                     xml_declaration=True).decode('ascii')
+            metadata_str = ElemTree.tostring(
+                metadata_xml,
+                encoding="utf-8",
+                method="xml",
+                xml_declaration=True)
         else:
             metadata_xml_string = ElemTree.tostring(metadata_xml)
-            return minidom.parseString(metadata_xml_string).toprettyxml(indent=" " * indent,
-                                                                        encoding="utf-8").decode('ascii')
+            metadata_xml_minidom = minidom.parseString(metadata_xml_string)
+            metadata_str = metadata_xml_minidom.toprettyxml(
+                indent=" " * indent,
+                encoding="utf-8")
+        return metadata_str.decode("ascii")
 
     def __get_permission_for_role(self, role_name: str):
-        return next((perm for perm in self.__permissions if perm.role_name() == role_name), None)
+        role_permissions = (perm
+                            for perm in self.__permissions
+                            if perm.role_name() == role_name)
+        return next(role_permissions, None)
 
     def __get_clean_permissions(self, source_permissions: list):
         if source_permissions is None:
@@ -209,14 +234,19 @@ class Metadata:
                 roles.append(role_name)
                 permissions.append(permission)
             else:
-                self.__logger.warning("Ignoring permission [%s]: role [%s] is already used in [%s]",
-                                      permission,
-                                      role_name,
-                                      next(filter(lambda p: p.role_name() == role_name, permissions)))
+                existing_permission = next(
+                    filter(lambda p: p.role_name() == role_name, permissions))
+                self.__logger.warning(
+                    "Ignoring permission [%s]: role [%s] is already used in [%s]",
+                    permission,
+                    role_name,
+                    existing_permission)
         return permissions
 
     @staticmethod
-    def __get_clean_dict(source_dict: dict):
+    def __get_clean_dict(source_dict: dict | None):
+        if not source_dict:
+            return dict()
         return {k: str(v) for k, v in source_dict.items() if v is not None}
 
 
@@ -232,7 +262,9 @@ class Permission:
 
     def __init__(self, role_name: str, capabilities: set):
         self.__role_name = role_name
-        self.__capabilities = {cap for cap in capabilities if cap in self.__CAPABILITIES}
+        self.__capabilities = {cap
+                               for cap in capabilities
+                               if cap in self.__CAPABILITIES}
 
     def __eq__(self, other):
         return (isinstance(other, Permission) and
@@ -245,7 +277,9 @@ class Permission:
         return hash(tuple(items))
 
     def __repr__(self):
-        return f"Permission(role_name='{self.__role_name}', capabilities={self.__capabilities})"
+        return (f"Permission("
+                f"role_name='{self.__role_name}', "
+                f"capabilities={self.__capabilities})")
 
     def role_name(self):
         return self.__role_name
@@ -254,7 +288,9 @@ class Permission:
         return self.__capabilities.copy()
 
     def add_capability(self, capability):
-        allow = capability is not None and capability in self.__CAPABILITIES and capability not in self.capabilities()
+        allow = (capability is not None and
+                 capability in self.__CAPABILITIES and
+                 capability not in self.capabilities())
         if allow:
             self.__capabilities.add(capability)
         return allow

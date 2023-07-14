@@ -59,10 +59,11 @@ def test_post():
 @pytest.mark.ml_access
 def test_post_with_customized_params_and_headers_and_body_different_than_json():
     with MLClient(auth_method="digest") as client:
-        resp = client.post("/v1/eval",
-                           body={"xquery": "()"},
-                           params={"database": "Documents"},
-                           headers={"content-type": "application/x-www-form-urlencoded"})
+        resp = client.post(
+            "/v1/eval",
+            body={"xquery": "()"},
+            params={"database": "Documents"},
+            headers={"content-type": "application/x-www-form-urlencoded"})
 
     assert resp.request.method == "POST"
     assert "?database=Documents" in resp.request.url

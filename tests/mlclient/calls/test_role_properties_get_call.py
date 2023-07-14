@@ -14,7 +14,8 @@ def test_validation_format_param():
     with pytest.raises(exceptions.WrongParameters) as err:
         RolePropertiesGetCall(role="admin", data_format="text")
 
-    assert err.value.args[0] == "The supported formats are: xml, json, html"
+    expected_msg = "The supported formats are: xml, json, html"
+    assert err.value.args[0] == expected_msg
 
 
 def test_endpoint():

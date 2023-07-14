@@ -16,7 +16,9 @@ def xquery():
 
 @pytest.mark.ml_access
 def test_call(xquery):
-    eval_call = EvalCall(xquery=xquery, variables={"element": "<parent><child/></parent>"})
+    eval_call = EvalCall(
+        xquery=xquery,
+        variables={"element": "<parent><child/></parent>"})
     with MLResourceClient(auth_method="digest") as client:
         resp = client.call(eval_call)
 
@@ -27,7 +29,9 @@ def test_call(xquery):
 @pytest.mark.ml_access
 def test_eval(xquery):
     with MLResourceClient(auth_method="digest") as client:
-        resp = client.eval(xquery=xquery, variables={"element": "<parent><child/></parent>"})
+        resp = client.eval(
+            xquery=xquery,
+            variables={"element": "<parent><child/></parent>"})
 
     assert resp.status_code == 200
     assert "<new-parent><child/></new-parent>" in resp.text
@@ -54,11 +58,13 @@ def test_get_databases():
 
 @pytest.mark.ml_access
 def test_post_databases():
+    body = '<database-properties xmlns="http://marklogic.com/manage" />'
     with MLResourceClient(auth_method="digest") as client:
-        resp = client.post_databases(body='<database-properties xmlns="http://marklogic.com/manage" />')
+        resp = client.post_databases(body=body)
 
     assert resp.status_code == 400
-    assert "Payload has errors in structure, content-type or values. Database name missing." in resp.text
+    assert ("Payload has errors in structure, content-type or values. "
+            "Database name missing.") in resp.text
 
 
 @pytest.mark.ml_access
@@ -74,7 +80,9 @@ def test_get_database():
 @pytest.mark.ml_access
 def test_post_database():
     with MLResourceClient(auth_method="digest") as client:
-        resp = client.post_database(database="Documents", body={"operation": "clear-database"})
+        resp = client.post_database(
+            database="Documents",
+            body={"operation": "clear-database"})
 
     assert resp.status_code == 200
     assert not resp.text
@@ -101,7 +109,9 @@ def test_get_database_properties():
 @pytest.mark.ml_access
 def test_put_database_properties():
     with MLResourceClient(auth_method="digest") as client:
-        resp = client.put_database_properties(database="non-existing-db", body={"database-name": "custom-db"})
+        resp = client.put_database_properties(
+            database="non-existing-db",
+            body={"database-name": "custom-db"})
 
     assert resp.status_code == 404
     assert resp.json()["errorResponse"]["messageCode"] == "XDMP-NOSUCHDB"
@@ -120,18 +130,23 @@ def test_get_servers():
 @pytest.mark.ml_access
 def test_post_servers():
     with MLResourceClient(auth_method="digest") as client:
-        resp = client.post_servers(group_id="Default",
-                                   server_type="http",
-                                   body='<http-server-properties xmlns="http://marklogic.com/manage" />')
+        resp = client.post_servers(
+            group_id="Default",
+            server_type="http",
+            body='<http-server-properties xmlns="http://marklogic.com/manage" />')
 
     assert resp.status_code == 400
-    assert "Payload has errors in structure, content-type or values. Server name missing." in resp.text
+    assert ("Payload has errors in structure, content-type or values. "
+            "Server name missing.") in resp.text
 
 
 @pytest.mark.ml_access
 def test_get_server():
     with MLResourceClient(auth_method="digest") as client:
-        resp = client.get_server(server="App-Services", group_id="Default", data_format="json")
+        resp = client.get_server(
+            server="App-Services",
+            group_id="Default",
+            data_format="json")
 
     expected_uri = "/manage/v2/servers/App-Services?group-id=Default&view=default"
     assert resp.status_code == 200
@@ -151,7 +166,10 @@ def test_delete_server():
 @pytest.mark.ml_access
 def test_get_server_properties():
     with MLResourceClient(auth_method="digest") as client:
-        resp = client.get_server_properties(server="App-Services", group_id="Default", data_format="json")
+        resp = client.get_server_properties(
+            server="App-Services",
+            group_id="Default",
+            data_format="json")
 
     assert resp.status_code == 200
     assert resp.json()["server-name"] == "App-Services"
@@ -180,16 +198,18 @@ def test_get_forests():
 
 @pytest.mark.ml_access
 def test_post_forests():
+    body = '<forest-create xmlns="http://marklogic.com/manage" />'
     with MLResourceClient(auth_method="digest") as client:
-        resp = client.post_forests(body='<forest-create xmlns="http://marklogic.com/manage" />')
+        resp = client.post_forests(body=body)
 
     assert resp.status_code == 500
 
 
 @pytest.mark.ml_access
 def test_put_forests():
+    body = '<forest-migrate xmlns="http://marklogic.com/manage" />'
     with MLResourceClient(auth_method="digest") as client:
-        resp = client.put_forests(body='<forest-migrate xmlns="http://marklogic.com/manage" />')
+        resp = client.put_forests(body=body)
 
     assert resp.status_code == 400
     assert "Payload has errors in structure, content-type or values. " \
@@ -237,7 +257,9 @@ def test_get_forest_properties():
 @pytest.mark.ml_access
 def test_put_forest_properties():
     with MLResourceClient(auth_method="digest") as client:
-        resp = client.put_forest_properties(forest="non-existing-forest", body={"forest-name": "custom-forest"})
+        resp = client.put_forest_properties(
+            forest="non-existing-forest",
+            body={"forest-name": "custom-forest"})
 
     assert resp.status_code == 404
     assert resp.json()["errorResponse"]["messageCode"] == "XDMP-NOSUCHFOREST"
@@ -255,8 +277,9 @@ def test_get_roles():
 
 @pytest.mark.ml_access
 def test_post_roles():
+    body = '<role-properties xmlns="http://marklogic.com/manage/role/properties" />'
     with MLResourceClient(auth_method="digest") as client:
-        resp = client.post_databases(body='<role-properties xmlns="http://marklogic.com/manage/role/properties" />')
+        resp = client.post_databases(body=body)
 
     assert resp.status_code == 400
     assert "Payload has errors in structure, content-type or values." in resp.text
@@ -293,7 +316,9 @@ def test_get_role_properties():
 @pytest.mark.ml_access
 def test_put_role_properties():
     with MLResourceClient(auth_method="digest") as client:
-        resp = client.put_role_properties(role="non-existing-role", body={"role-name": "custom-db"})
+        resp = client.put_role_properties(
+            role="non-existing-role",
+            body={"role-name": "custom-db"})
 
     assert resp.status_code == 400
     assert "Payload has errors in structure, content-type or values. " \
@@ -312,8 +337,9 @@ def test_get_users():
 
 @pytest.mark.ml_access
 def test_post_users():
+    body = '<user-properties xmlns="http://marklogic.com/manage/user/properties" />'
     with MLResourceClient(auth_method="digest") as client:
-        resp = client.post_databases(body='<user-properties xmlns="http://marklogic.com/manage/user/properties" />')
+        resp = client.post_databases(body=body)
 
     assert resp.status_code == 400
     assert "Payload has errors in structure, content-type or values." in resp.text
@@ -341,7 +367,9 @@ def test_delete_user():
 @pytest.mark.ml_access
 def test_get_user_properties():
     with MLResourceClient(auth_method="digest") as client:
-        resp = client.get_user_properties(user="admin", data_format="json")
+        resp = client.get_user_properties(
+            user="admin",
+            data_format="json")
 
     assert resp.status_code == 200
     assert resp.json()["user-name"] == "admin"
@@ -350,7 +378,9 @@ def test_get_user_properties():
 @pytest.mark.ml_access
 def test_put_user_properties():
     with MLResourceClient(auth_method="digest") as client:
-        resp = client.put_user_properties(user="non-existing-user", body={"user-name": "custom-db"})
+        resp = client.put_user_properties(
+            user="non-existing-user",
+            body={"user-name": "custom-db"})
 
     assert resp.status_code == 404
     assert resp.json()["errorResponse"]["messageCode"] == "SEC-USERDNE"

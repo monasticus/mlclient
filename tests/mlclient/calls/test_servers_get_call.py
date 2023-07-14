@@ -14,15 +14,18 @@ def test_validation_format_param():
     with pytest.raises(exceptions.WrongParameters) as err:
         ServersGetCall(data_format="text")
 
-    assert err.value.args[0] == "The supported formats are: xml, json, html"
+    expected_msg = "The supported formats are: xml, json, html"
+    assert err.value.args[0] == expected_msg
 
 
 def test_validation_view_param():
     with pytest.raises(exceptions.WrongParameters) as err:
         ServersGetCall(view="X")
 
-    assert err.value.args[0] == "The supported views are: " \
-                                "describe, default, status, metrics, package, schema, properties-schema"
+    expected_msg = ("The supported views are: "
+                    "describe, default, status, metrics, "
+                    "package, schema, properties-schema")
+    assert err.value.args[0] == expected_msg
 
 
 def test_endpoint(default_servers_get_call):

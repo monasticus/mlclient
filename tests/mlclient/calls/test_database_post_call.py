@@ -7,28 +7,34 @@ from mlclient.calls import DatabasePostCall
 @pytest.fixture
 def default_database_post_call():
     """Returns an DatabasePostCall instance"""
-    return DatabasePostCall(database="Documents", body={"operation": "clear-database"})
+    body = {"operation": "clear-database"}
+    return DatabasePostCall(database="Documents", body=body)
 
 
 def test_validation_body_param():
     with pytest.raises(exceptions.WrongParameters) as err:
         DatabasePostCall(database="Documents", body=None)
 
-    assert err.value.args[0] == "No request body provided for POST /manage/v2/databases/{id|name}!"
+    expected_msg = ("No request body provided for "
+                    "POST /manage/v2/databases/{id|name}!")
+    assert err.value.args[0] == expected_msg
 
 
 def test_validation_blank_body_param():
     with pytest.raises(exceptions.WrongParameters) as err:
         DatabasePostCall(database="Documents", body=" \n")
 
-    assert err.value.args[0] == "No request body provided for POST /manage/v2/databases/{id|name}!"
+    expected_msg = ("No request body provided for "
+                    "POST /manage/v2/databases/{id|name}!")
+    assert err.value.args[0] == expected_msg
 
 
 def test_endpoint():
+    body = {"operation": "clear-database"}
     assert DatabasePostCall(database="1",
-                            body={"operation": "clear-database"}).endpoint() == "/manage/v2/databases/1"
+                            body=body).endpoint() == "/manage/v2/databases/1"
     assert DatabasePostCall(database="Documents",
-                            body={"operation": "clear-database"}).endpoint() == "/manage/v2/databases/Documents"
+                            body=body).endpoint() == "/manage/v2/databases/Documents"
 
 
 def test_method(default_database_post_call):
@@ -40,23 +46,25 @@ def test_parameters(default_database_post_call):
 
 
 def test_headers_for_dict_body():
-    call = DatabasePostCall(database="Documents", body={"operation": "clear-database"})
+    body = {"operation": "clear-database"}
+    call = DatabasePostCall(database="Documents", body=body)
     assert call.headers() == {
         "content-type": "application/json"
     }
 
 
 def test_headers_for_stringified_dict_body():
-    call = DatabasePostCall(database="Documents", body='{"operation": "clear-database"}')
+    body ='{"operation": "clear-database"}'
+    call = DatabasePostCall(database="Documents", body=body)
     assert call.headers() == {
         "content-type": "application/json"
     }
 
 
 def test_headers_for_xml_body():
-    body = '<clear-database-operation xmlns="http://marklogic.com/manage">' \
-           '    <operation>clear-database</operation>' \
-           '</clear-database-operation>'
+    body = ('<clear-database-operation xmlns="http://marklogic.com/manage">'
+            '    <operation>clear-database</operation>'
+            '</clear-database-operation>')
     call = DatabasePostCall(database="Documents", body=body)
     assert call.headers() == {
         "content-type": "application/xml"
@@ -64,18 +72,20 @@ def test_headers_for_xml_body():
 
 
 def test_dict_body():
-    call = DatabasePostCall(database="Documents", body={"operation": "clear-database"})
+    body = {"operation": "clear-database"}
+    call = DatabasePostCall(database="Documents", body=body)
     assert call.body() == {"operation": "clear-database"}
 
 
 def test_stringified_dict_body():
-    call = DatabasePostCall(database="Documents", body='{"operation": "clear-database"}')
+    body = '{"operation": "clear-database"}'
+    call = DatabasePostCall(database="Documents", body=body)
     assert call.body() == {"operation": "clear-database"}
 
 
 def test_xml_body():
-    body = '<clear-database-operation xmlns="http://marklogic.com/manage">' \
-           '    <operation>clear-database</operation>' \
-           '</clear-database-operation>'
+    body = ('<clear-database-operation xmlns="http://marklogic.com/manage">'
+            '    <operation>clear-database</operation>'
+            '</clear-database-operation>')
     call = DatabasePostCall(database="Documents", body=body)
     assert call.body() == body

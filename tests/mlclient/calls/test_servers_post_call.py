@@ -22,21 +22,26 @@ def test_validation_server_type_param():
     with pytest.raises(exceptions.WrongParameters) as err:
         ServersPostCall(server_type="X", body={})
 
-    assert err.value.args[0] == "The supported server types are: http, odbc, xdbc, webdav"
+    expected_msg = "The supported server types are: http, odbc, xdbc, webdav"
+    assert err.value.args[0] == expected_msg
 
 
 def test_validation_body_param():
     with pytest.raises(exceptions.WrongParameters) as err:
         ServersPostCall(body=None)
 
-    assert err.value.args[0] == "No request body provided for POST /manage/v2/servers!"
+    expected_msg = ("No request body provided for "
+                    "POST /manage/v2/servers!")
+    assert err.value.args[0] == expected_msg
 
 
 def test_validation_blank_body_param():
     with pytest.raises(exceptions.WrongParameters) as err:
         ServersPostCall(body=" \n")
 
-    assert err.value.args[0] == "No request body provided for POST /manage/v2/servers!"
+    expected_msg = ("No request body provided for "
+                    "POST /manage/v2/servers!")
+    assert err.value.args[0] == expected_msg
 
 
 def test_endpoint(default_servers_post_call):

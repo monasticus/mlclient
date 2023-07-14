@@ -14,23 +14,29 @@ def test_validation_body_param():
     with pytest.raises(exceptions.WrongParameters) as err:
         UserPropertiesPutCall(user="admin", body=None)
 
-    assert err.value.args[0] == "No request body provided for PUT /manage/v2/users/{id|name}/properties!"
+    expected_msg = ("No request body provided for "
+                    "PUT /manage/v2/users/{id|name}/properties!")
+    assert err.value.args[0] == expected_msg
 
 
 def test_validation_blank_body_param():
     with pytest.raises(exceptions.WrongParameters) as err:
         UserPropertiesPutCall(user="admin", body=" \n")
 
-    assert err.value.args[0] == "No request body provided for PUT /manage/v2/users/{id|name}/properties!"
+    expected_msg = ("No request body provided for "
+                    "PUT /manage/v2/users/{id|name}/properties!")
+    assert err.value.args[0] == expected_msg
 
 
 def test_endpoint():
     expected__id_endpoint = "/manage/v2/users/1/properties"
     expected__name_endpoint = "/manage/v2/users/admin/properties"
-    assert UserPropertiesPutCall(user="1",
-                                 body={"user-name": "custom-user"}).endpoint() == expected__id_endpoint
-    assert UserPropertiesPutCall(user="admin",
-                                 body={"user-name": "custom-user"}).endpoint() == expected__name_endpoint
+    assert UserPropertiesPutCall(
+        user="1",
+        body={"user-name": "custom-user"}).endpoint() == expected__id_endpoint
+    assert UserPropertiesPutCall(
+        user="admin",
+        body={"user-name": "custom-user"}).endpoint() == expected__name_endpoint
 
 
 def test_method(default_user_properties_put_call):

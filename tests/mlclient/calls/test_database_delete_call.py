@@ -14,12 +14,17 @@ def test_validation_forest_delete_param():
     with pytest.raises(exceptions.WrongParameters) as err:
         DatabaseDeleteCall(database="Documents", forest_delete="X")
 
-    assert err.value.args[0] == "The supported forest_delete options are: configuration, data"
+    expected_msg = "The supported forest_delete options are: configuration, data"
+    assert err.value.args[0] == expected_msg
 
 
 def test_endpoint(default_database_delete_call):
-    assert DatabaseDeleteCall(database="1").endpoint() == "/manage/v2/databases/1"
-    assert DatabaseDeleteCall(database="Documents").endpoint() == "/manage/v2/databases/Documents"
+    expected__id_endpoint = "/manage/v2/databases/1"
+    expected__name_endpoint = "/manage/v2/databases/Documents"
+    assert DatabaseDeleteCall(
+        database="1").endpoint() == expected__id_endpoint
+    assert DatabaseDeleteCall(
+        database="Documents").endpoint() == expected__name_endpoint
 
 
 def test_method(default_database_delete_call):

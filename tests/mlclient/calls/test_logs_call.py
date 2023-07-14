@@ -8,7 +8,7 @@ from mlclient.calls import LogsCall
 
 @pytest.fixture
 def default_logs_call():
-    """Returns an LogsCall instance with a required parameter without any custom details"""
+    """Return a LogsCall instance with a required parameter only."""
     return LogsCall(filename="ErrorLog.txt")
 
 
@@ -16,21 +16,24 @@ def test_validation_unsupported_format():
     with pytest.raises(exceptions.WrongParameters) as err:
         LogsCall(filename="", data_format="text")
 
-    assert err.value.args[0] == "The supported formats are xml, json or html!"
+    expected_msg = "The supported formats are xml, json or html!"
+    assert err.value.args[0] == expected_msg
 
 
 def test_validation_start_time_is_not_datetime_value():
     with pytest.raises(exceptions.WrongParameters) as err:
         assert LogsCall(filename="", start_time="a").params() == {}
 
-    assert err.value.args[0] == "The start parameter is not a dateTime value!"
+    expected_msg = "The start parameter is not a dateTime value!"
+    assert err.value.args[0] == expected_msg
 
 
 def test_validation_end_time_is_not_datetime_value():
     with pytest.raises(exceptions.WrongParameters) as err:
         assert LogsCall(filename="", end_time="a").params() == {}
 
-    assert err.value.args[0] == "The end parameter is not a dateTime value!"
+    expected_msg = "The end parameter is not a dateTime value!"
+    assert err.value.args[0] == expected_msg
 
 
 def test_endpoint(default_logs_call):
@@ -200,7 +203,8 @@ def test_formatting_datetime_impossible_to_parse_as_month_and_day():
         assert LogsCall(filename="ErrorLog.txt",
                         start_time="13-01").params() == {}
 
-    assert err.value.args[0] == "The start parameter is not a dateTime value!"
+    expected_msg = "The start parameter is not a dateTime value!"
+    assert err.value.args[0] == expected_msg
 
 
 def test_formatting_datetime_impossible_to_parse_as_time_1():
@@ -208,7 +212,8 @@ def test_formatting_datetime_impossible_to_parse_as_time_1():
         assert LogsCall(filename="ErrorLog.txt",
                         start_time="25:01").params() == {}
 
-    assert err.value.args[0] == "The start parameter is not a dateTime value!"
+    expected_msg = "The start parameter is not a dateTime value!"
+    assert err.value.args[0] == expected_msg
 
 
 def test_formatting_datetime_impossible_to_parse_as_time_2():
@@ -216,7 +221,8 @@ def test_formatting_datetime_impossible_to_parse_as_time_2():
         assert LogsCall(filename="ErrorLog.txt",
                         start_time="24:00").params() == {}
 
-    assert err.value.args[0] == "The start parameter is not a dateTime value!"
+    expected_msg = "The start parameter is not a dateTime value!"
+    assert err.value.args[0] == expected_msg
 
 
 def test_formatting_datetime_impossible_to_parse_as_time_3():
@@ -224,4 +230,5 @@ def test_formatting_datetime_impossible_to_parse_as_time_3():
         assert LogsCall(filename="ErrorLog.txt",
                         start_time="01:60").params() == {}
 
-    assert err.value.args[0] == "The start parameter is not a dateTime value!"
+    expected_msg = "The start parameter is not a dateTime value!"
+    assert err.value.args[0] == expected_msg

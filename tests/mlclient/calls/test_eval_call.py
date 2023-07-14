@@ -6,7 +6,7 @@ from mlclient.calls import EvalCall
 
 @pytest.fixture
 def default_eval_call():
-    """Returns an EvalCall instance with a required parameter without any custom details"""
+    """Return an EvalCall instance with a required parameter only."""
     return EvalCall(xquery="()")
 
 
@@ -14,21 +14,24 @@ def test_validation_neither_xquery_nor_javascript_param():
     with pytest.raises(exceptions.WrongParameters) as err:
         EvalCall()
 
-    assert err.value.args[0] == "You must include either the xquery or the javascript parameter!"
+    expected_msg = "You must include either the xquery or the javascript parameter!"
+    assert err.value.args[0] == expected_msg
 
 
 def test_validation_xquery_and_javascript_param_are_none():
     with pytest.raises(exceptions.WrongParameters) as err:
         EvalCall(xquery=None, javascript=None)
 
-    assert err.value.args[0] == "You must include either the xquery or the javascript parameter!"
+    expected_msg = "You must include either the xquery or the javascript parameter!"
+    assert err.value.args[0] == expected_msg
 
 
 def test_validation_xquery_and_javascript_param():
     with pytest.raises(exceptions.WrongParameters) as err:
         EvalCall(xquery="()", javascript="[]")
 
-    assert err.value.args[0] == "You cannot include both the xquery and the javascript parameter!"
+    expected_msg = "You cannot include both the xquery and the javascript parameter!"
+    assert err.value.args[0] == expected_msg
 
 
 def test_endpoint(default_eval_call):

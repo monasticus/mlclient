@@ -21,14 +21,18 @@ def test_validation_body_param():
     with pytest.raises(exceptions.WrongParameters) as err:
         ForestsPutCall(body=None)
 
-    assert err.value.args[0] == "No request body provided for PUT /manage/v2/forests!"
+    expected_msg = ("No request body provided for "
+                    "PUT /manage/v2/forests!")
+    assert err.value.args[0] == expected_msg
 
 
 def test_validation_blank_body_param():
     with pytest.raises(exceptions.WrongParameters) as err:
         ForestsPutCall(body=" \n")
 
-    assert err.value.args[0] == "No request body provided for PUT /manage/v2/forests!"
+    expected_msg = ("No request body provided for "
+                    "PUT /manage/v2/forests!")
+    assert err.value.args[0] == expected_msg
 
 
 def test_endpoint(default_forests_put_call):

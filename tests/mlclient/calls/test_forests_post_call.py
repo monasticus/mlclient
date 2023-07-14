@@ -19,14 +19,18 @@ def test_validation_body_param():
     with pytest.raises(exceptions.WrongParameters) as err:
         ForestsPostCall(body=None)
 
-    assert err.value.args[0] == "No request body provided for POST /manage/v2/forests!"
+    expected_msg = ("No request body provided for "
+                    "POST /manage/v2/forests!")
+    assert err.value.args[0] == expected_msg
 
 
 def test_validation_blank_body_param():
     with pytest.raises(exceptions.WrongParameters) as err:
         ForestsPostCall(body=" \n")
 
-    assert err.value.args[0] == "No request body provided for POST /manage/v2/forests!"
+    expected_msg = ("No request body provided for "
+                    "POST /manage/v2/forests!")
+    assert err.value.args[0] == expected_msg
 
 
 def test_endpoint(default_forests_post_call):
@@ -79,7 +83,8 @@ def test_dict_body():
 
 
 def test_stringified_dict_body():
-    call = ForestsPostCall(body='{"forest-name": "custom-forest", "host": "custom-host"}')
+    call = ForestsPostCall(
+        body='{"forest-name": "custom-forest", "host": "custom-host"}')
     assert call.body() == {
         "forest-name": "custom-forest",
         "host": "custom-host"
@@ -101,8 +106,9 @@ def test_fully_parametrized_call():
       "host": "custom-host",
       "database": "custom-database"
     }
-    call = ForestsPostCall(body=body,
-                           wait_for_forest_to_mount=False)
+    call = ForestsPostCall(
+        body=body,
+        wait_for_forest_to_mount=False)
     assert call.method() == "POST"
     assert call.headers() == {
         "content-type": "application/json"

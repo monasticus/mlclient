@@ -6,12 +6,18 @@ from mlclient.calls import ServerDeleteCall
 @pytest.fixture
 def default_server_delete_call():
     """Returns an ServerDeleteCall instance"""
-    return ServerDeleteCall(server="App-Services", group_id="Default")
+    return ServerDeleteCall(
+        server="App-Services",
+        group_id="Default")
 
 
 def test_endpoint(default_server_delete_call):
-    assert ServerDeleteCall(server="1", group_id="Default").endpoint() == "/manage/v2/servers/1"
-    assert ServerDeleteCall(server="App-Services", group_id="Default").endpoint() == "/manage/v2/servers/App-Services"
+    assert ServerDeleteCall(
+        server="1",
+        group_id="Default").endpoint() == "/manage/v2/servers/1"
+    assert ServerDeleteCall(
+        server="App-Services",
+        group_id="Default").endpoint() == "/manage/v2/servers/App-Services"
 
 
 def test_method(default_server_delete_call):
@@ -33,7 +39,9 @@ def test_body(default_server_delete_call):
 
 
 def test_fully_parametrized_call():
-    call = ServerDeleteCall(server="App-Services", group_id="Default")
+    call = ServerDeleteCall(
+        server="App-Services",
+        group_id="Default")
     assert call.method() == "DELETE"
     assert call.headers() == {}
     assert call.params() == {

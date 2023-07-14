@@ -14,14 +14,17 @@ def test_validation_format_param():
     with pytest.raises(exceptions.WrongParameters) as err:
         DatabasePropertiesGetCall(database="Documents", data_format="text")
 
-    assert err.value.args[0] == "The supported formats are: xml, json, html"
+    expected_msg = "The supported formats are: xml, json, html"
+    assert err.value.args[0] == expected_msg
 
 
 def test_endpoint():
     expected__id_endpoint = "/manage/v2/databases/1/properties"
     expected__name_endpoint = "/manage/v2/databases/Documents/properties"
-    assert DatabasePropertiesGetCall(database="1").endpoint() == expected__id_endpoint
-    assert DatabasePropertiesGetCall(database="Documents").endpoint() == expected__name_endpoint
+    assert DatabasePropertiesGetCall(
+        database="1").endpoint() == expected__id_endpoint
+    assert DatabasePropertiesGetCall(
+        database="Documents").endpoint() == expected__name_endpoint
 
 
 def test_method(default_database_properties_get_call):

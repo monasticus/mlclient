@@ -14,23 +14,29 @@ def test_validation_body_param():
     with pytest.raises(exceptions.WrongParameters) as err:
         RolePropertiesPutCall(role="admin", body=None)
 
-    assert err.value.args[0] == "No request body provided for PUT /manage/v2/roles/{id|name}/properties!"
+    expected_msg = ("No request body provided for "
+                    "PUT /manage/v2/roles/{id|name}/properties!")
+    assert err.value.args[0] == expected_msg
 
 
 def test_validation_blank_body_param():
     with pytest.raises(exceptions.WrongParameters) as err:
         RolePropertiesPutCall(role="admin", body=" \n")
 
-    assert err.value.args[0] == "No request body provided for PUT /manage/v2/roles/{id|name}/properties!"
+    expected_msg = ("No request body provided for "
+                    "PUT /manage/v2/roles/{id|name}/properties!")
+    assert err.value.args[0] == expected_msg
 
 
 def test_endpoint():
     expected__id_endpoint = "/manage/v2/roles/1/properties"
     expected__name_endpoint = "/manage/v2/roles/admin/properties"
-    assert RolePropertiesPutCall(role="1",
-                                 body={"role-name": "custom-role"}).endpoint() == expected__id_endpoint
-    assert RolePropertiesPutCall(role="admin",
-                                 body={"role-name": "custom-role"}).endpoint() == expected__name_endpoint
+    assert RolePropertiesPutCall(
+        role="1",
+        body={"role-name": "custom-role"}).endpoint() == expected__id_endpoint
+    assert RolePropertiesPutCall(
+        role="admin",
+        body={"role-name": "custom-role"}).endpoint() == expected__name_endpoint
 
 
 def test_method(default_role_properties_put_call):

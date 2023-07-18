@@ -11,7 +11,7 @@ class RolesGetCall(ResourceCall):
     A ResourceCall implementation representing a single GET request
     to the /manage/v2/roles REST Resource
 
-    This resource address returns a summary of the roles in the security database. 
+    This resource address returns a summary of the roles in the security database.
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/GET/manage/v2/roles
 
     Attributes

@@ -7,9 +7,9 @@ from mlclient.calls import EvalCall
 @pytest.fixture
 def xquery():
     return """xquery version '1.0-ml';
-    
+
     declare variable $element as element() external;
-    
+
     <new-parent>{$element/child::element()}</new-parent>
     """
 

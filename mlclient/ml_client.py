@@ -1,4 +1,5 @@
 import logging
+from types import TracebackType
 from typing import NoReturn, Union
 
 from requests import Response, Session
@@ -30,28 +31,59 @@ class MLClient:
     password : str
         a password
     base_url : str
-        a base url constructed based on the protocol, the host name and the port provided
+        a base url built based on the protocol, the host name and the port provided
 
     Methods
     -------
     connect() -> NoReturn
         Starts an HTTP session
+
     disconnect() -> NoReturn
         Closes an HTTP session
+
     is_connected() -> bool
         Returns True if the client has started a connection; otherwise False
-    get(endpoint: str, params: dict = None, headers: dict = None) -> Response
+
+    get(
+        endpoint: str,
+        params: dict = None,
+        headers: dict = None,
+    ) -> Response
         Sends a GET request
-    post(endpoint: str, params: dict = None, headers: dict = None, body: Union[str, dict] = None) -> Response:
+
+    post(
+        endpoint: str,
+        params: dict = None,
+        headers: dict = None,
+        body: Union[str, dict] = None,
+    ) -> Response:
         Sends a POST request
-    put(endpoint: str, params: dict = None, headers: dict = None, body: Union[str, dict] = None) -> Response:
+
+    put(
+        endpoint: str,
+        params: dict = None,
+        headers: dict = None,
+        body: Union[str, dict] = None,
+    ) -> Response:
         Sends a PUT request
-    delete(endpoint: str, params: dict = None, headers: dict = None) -> Response:
+
+    delete(
+        endpoint: str,
+        params: dict = None,
+        headers: dict = None,
+    ) -> Response:
         Sends a DELETE request
     """
 
-    def __init__(self, protocol: str = "http", host: str = "localhost", port: int = 8002,
-                 auth_method: str = "basic", username: str = "admin", password: str = "admin"):
+    def __init__(
+            self,
+            protocol: str = "http",
+            host: str = "localhost",
+            port: int = 8002,
+            auth_method: str = "basic",
+            username: str = "admin",
+            password: str = "admin"
+    ):
         """
         Parameters
         ----------
@@ -77,24 +109,36 @@ class MLClient:
         self.password = password
         self.base_url = f'{protocol}://{host}:{port}'
         self.__sess = None
-        self.__auth = HTTPBasicAuth(username, password) if auth_method == "basic" else HTTPDigestAuth(username, password)
+        auth_impl = HTTPBasicAuth if auth_method == "basic" else HTTPDigestAuth
+        self.__auth = auth_impl(username, password)
         self.__logger = logging.getLogger(__name__)
 
-    def __enter__(self):
+    def __enter__(
+            self
+    ):
         self.connect()
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(
+            self,
+            exc_type: type,
+            exc_val: BaseException,
+            exc_tb: TracebackType,
+    ):
         self.disconnect()
         return None
 
-    def connect(self) -> NoReturn:
+    def connect(
+            self
+    ) -> NoReturn:
         """Starts an HTTP session"""
 
         self.__logger.debug("Initiating a connection")
         self.__sess = Session()
 
-    def disconnect(self) -> NoReturn:
+    def disconnect(
+            self
+    ) -> NoReturn:
         """Closes an HTTP session"""
 
         if self.__sess:
@@ -102,7 +146,9 @@ class MLClient:
             self.__sess.close()
             self.__sess = None
 
-    def is_connected(self) -> bool:
+    def is_connected(
+            self
+    ) -> bool:
         """Returns True if the client has started a connection; otherwise False
 
         Returns
@@ -113,7 +159,12 @@ class MLClient:
 
         return self.__sess is not None
 
-    def get(self, endpoint: str, params: dict = None, headers: dict = None) -> Response:
+    def get(
+            self,
+            endpoint: str,
+            params: dict = None,
+            headers: dict = None
+    ) -> Response:
         """Sends a GET request
 
         Parameters
@@ -138,11 +189,22 @@ class MLClient:
             if not params:
                 params = {}
             self.__logger.debug(f"Sending a request... GET {endpoint}")
-            return self.__sess.get(url, auth=self.__auth, params=params, headers=headers)
+            return self.__sess.get(
+                url,
+                auth=self.__auth,
+                params=params,
+                headers=headers)
         else:
-            self.__logger.warning(f"A request attempt failure: GET {endpoint} -- MLClient is not connected")
+            self.__logger.warning(f"A request attempt failure: GET {endpoint}"
+                                  " -- MLClient is not connected")
 
-    def post(self, endpoint: str, params: dict = None, headers: dict = None, body: Union[str, dict] = None) -> Response:
+    def post(
+            self,
+            endpoint: str,
+            params: dict = None,
+            headers: dict = None,
+            body: Union[str, dict] = None
+    ) -> Response:
         """Sends a POST request
 
         Parameters
@@ -170,13 +232,30 @@ class MLClient:
                 params = {}
             self.__logger.debug(f"Sending a request... POST {endpoint}")
             if headers.get(constants.HEADER_NAME_CONTENT_TYPE) == constants.HEADER_JSON:
-                return self.__sess.post(url, auth=self.__auth, params=params, headers=headers, json=body)
+                return self.__sess.post(
+                    url,
+                    auth=self.__auth,
+                    params=params,
+                    headers=headers,
+                    json=body)
             else:
-                return self.__sess.post(url, auth=self.__auth, params=params, headers=headers, data=body)
+                return self.__sess.post(
+                    url,
+                    auth=self.__auth,
+                    params=params,
+                    headers=headers,
+                    data=body)
         else:
-            self.__logger.warning(f"A request attempt failure: POST {endpoint} -- MLClient is not connected")
+            self.__logger.warning(f"A request attempt failure: POST {endpoint}"
+                                  " -- MLClient is not connected")
 
-    def put(self, endpoint: str, params: dict = None, headers: dict = None, body: Union[str, dict] = None) -> Response:
+    def put(
+            self,
+            endpoint: str,
+            params: dict = None,
+            headers: dict = None,
+            body: Union[str, dict] = None
+    ) -> Response:
         """Sends a PUT request
 
         Parameters
@@ -204,13 +283,29 @@ class MLClient:
                 params = {}
             self.__logger.debug(f"Sending a request... PUT {endpoint}")
             if headers.get(constants.HEADER_NAME_CONTENT_TYPE) == constants.HEADER_JSON:
-                return self.__sess.put(url, auth=self.__auth, params=params, headers=headers, json=body)
+                return self.__sess.put(
+                    url,
+                    auth=self.__auth,
+                    params=params,
+                    headers=headers,
+                    json=body)
             else:
-                return self.__sess.put(url, auth=self.__auth, params=params, headers=headers, data=body)
+                return self.__sess.put(
+                    url,
+                    auth=self.__auth,
+                    params=params,
+                    headers=headers,
+                    data=body)
         else:
-            self.__logger.warning(f"A request attempt failure: PUT {endpoint} -- MLClient is not connected")
+            self.__logger.warning(f"A request attempt failure: PUT {endpoint}"
+                                  " -- MLClient is not connected")
 
-    def delete(self, endpoint: str, params: dict = None, headers: dict = None) -> Response:
+    def delete(
+            self,
+            endpoint: str,
+            params: dict = None,
+            headers: dict = None
+    ) -> Response:
         """Sends a DELETE request
 
         Parameters
@@ -235,6 +330,11 @@ class MLClient:
             if not params:
                 params = {}
             self.__logger.debug(f"Sending a request... DELETE {endpoint}")
-            return self.__sess.delete(url, auth=self.__auth, params=params, headers=headers)
+            return self.__sess.delete(
+                url,
+                auth=self.__auth,
+                params=params,
+                headers=headers)
         else:
-            self.__logger.warning(f"A request attempt failure: DELETE {endpoint} -- MLClient is not connected")
+            self.__logger.warning(f"A request attempt failure: DELETE {endpoint}"
+                                  " -- MLClient is not connected")

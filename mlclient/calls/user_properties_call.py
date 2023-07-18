@@ -18,7 +18,8 @@ class UserPropertiesGetCall(ResourceCall):
     Methods
     -------
     All public methods are inherited from the ResourceCall abstract class.
-    This class implements the endpoint() abstract method to return an endpoint for the specific call.
+    This class implements the endpoint() abstract method to return an endpoint
+    for the specific call.
     """
 
     __ENDPOINT_TEMPLATE = "/manage/v2/users/{}/properties"
@@ -27,7 +28,11 @@ class UserPropertiesGetCall(ResourceCall):
 
     __SUPPORTED_FORMATS = ["xml", "json", "html"]
 
-    def __init__(self, user: str, data_format: str = "xml"):
+    def __init__(
+            self,
+            user: str,
+            data_format: str = "xml"
+    ):
         """
         Parameters
         ----------
@@ -46,8 +51,10 @@ class UserPropertiesGetCall(ResourceCall):
         self.__user = user
         self.add_param(UserPropertiesGetCall.__FORMAT_PARAM, data_format)
 
-    def endpoint(self):
-        """Implementation of an abstract method returning an endpoint for the User Properties call
+    def endpoint(
+            self
+    ):
+        """Return an endpoint for the User Properties call.
 
         Returns
         -------
@@ -57,11 +64,15 @@ class UserPropertiesGetCall(ResourceCall):
 
         return UserPropertiesGetCall.__ENDPOINT_TEMPLATE.format(self.__user)
 
-    @staticmethod
-    def __validate_params(data_format: str):
-        if data_format not in UserPropertiesGetCall.__SUPPORTED_FORMATS:
-            joined_supported_formats = ", ".join(UserPropertiesGetCall.__SUPPORTED_FORMATS)
-            raise exceptions.WrongParameters("The supported formats are: " + joined_supported_formats)
+    @classmethod
+    def __validate_params(
+            cls,
+            data_format: str
+    ):
+        if data_format not in cls.__SUPPORTED_FORMATS:
+            joined_supported_formats = ", ".join(cls.__SUPPORTED_FORMATS)
+            msg = f"The supported formats are: {joined_supported_formats}"
+            raise exceptions.WrongParameters(msg)
 
 
 class UserPropertiesPutCall(ResourceCall):
@@ -76,12 +87,17 @@ class UserPropertiesPutCall(ResourceCall):
     Methods
     -------
     All public methods are inherited from the ResourceCall abstract class.
-    This class implements the endpoint() abstract method to return an endpoint for the specific call.
+    This class implements the endpoint() abstract method to return an endpoint
+    for the specific call.
     """
 
     __ENDPOINT_TEMPLATE = "/manage/v2/users/{}/properties"
 
-    def __init__(self, user: str, body: Union[str, dict]):
+    def __init__(
+            self,
+            user: str,
+            body: Union[str, dict]
+    ):
         """
         Parameters
         ----------
@@ -92,14 +108,17 @@ class UserPropertiesPutCall(ResourceCall):
         """
         UserPropertiesPutCall.__validate_params(body)
         content_type = utils.get_content_type_header_for_data(body)
-        body = body if content_type != constants.HEADER_JSON or not isinstance(body, str) else json.loads(body)
+        if content_type == constants.HEADER_JSON and isinstance(body, str):
+            body = json.loads(body)
         super().__init__(method="PUT",
                          content_type=content_type,
                          body=body)
         self.__user = user
 
-    def endpoint(self):
-        """Implementation of an abstract method returning an endpoint for the User Properties call
+    def endpoint(
+            self
+    ):
+        """Return an endpoint for the User Properties call.
 
         Returns
         -------
@@ -109,8 +128,12 @@ class UserPropertiesPutCall(ResourceCall):
 
         return UserPropertiesPutCall.__ENDPOINT_TEMPLATE.format(self.__user)
 
-    @staticmethod
-    def __validate_params(body: Union[str, dict]):
+    @classmethod
+    def __validate_params(
+            cls,
+            body: Union[str, dict]
+    ):
         if body is None or isinstance(body, str) and re.search("^\\s*$", body):
-            raise exceptions.WrongParameters("No request body provided for "
-                                             "PUT /manage/v2/users/{id|name}/properties!")
+            msg = ("No request body provided for "
+                   "PUT /manage/v2/users/{id|name}/properties!")
+            raise exceptions.WrongParameters(msg)

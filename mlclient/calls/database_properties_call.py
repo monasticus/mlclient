@@ -19,7 +19,8 @@ class DatabasePropertiesGetCall(ResourceCall):
     Methods
     -------
     All public methods are inherited from the ResourceCall abstract class.
-    This class implements the endpoint() abstract method to return an endpoint for the specific call.
+    This class implements the endpoint() abstract method to return an endpoint
+    for the specific call.
     """
 
     __ENDPOINT_TEMPLATE = "/manage/v2/databases/{}/properties"
@@ -28,7 +29,11 @@ class DatabasePropertiesGetCall(ResourceCall):
 
     __SUPPORTED_FORMATS = ["xml", "json", "html"]
 
-    def __init__(self, database: str, data_format: str = "xml"):
+    def __init__(
+            self,
+            database: str,
+            data_format: str = "xml"
+    ):
         """
         Parameters
         ----------
@@ -47,8 +52,10 @@ class DatabasePropertiesGetCall(ResourceCall):
         self.__database = database
         self.add_param(DatabasePropertiesGetCall.__FORMAT_PARAM, data_format)
 
-    def endpoint(self):
-        """Implementation of an abstract method returning an endpoint for the Database Properties call
+    def endpoint(
+            self
+    ):
+        """Return an endpoint for the Database Properties call.
 
         Returns
         -------
@@ -58,11 +65,15 @@ class DatabasePropertiesGetCall(ResourceCall):
 
         return DatabasePropertiesGetCall.__ENDPOINT_TEMPLATE.format(self.__database)
 
-    @staticmethod
-    def __validate_params(data_format: str):
-        if data_format not in DatabasePropertiesGetCall.__SUPPORTED_FORMATS:
-            joined_supported_formats = ", ".join(DatabasePropertiesGetCall.__SUPPORTED_FORMATS)
-            raise exceptions.WrongParameters("The supported formats are: " + joined_supported_formats)
+    @classmethod
+    def __validate_params(
+            cls,
+            data_format: str
+    ):
+        if data_format not in cls.__SUPPORTED_FORMATS:
+            joined_supported_formats = ", ".join(cls.__SUPPORTED_FORMATS)
+            msg = f"The supported formats are: {joined_supported_formats}"
+            raise exceptions.WrongParameters(msg)
 
 
 class DatabasePropertiesPutCall(ResourceCall):
@@ -71,20 +82,25 @@ class DatabasePropertiesPutCall(ResourceCall):
     to the /manage/v2/databases/{id|name}/properties REST Resource
 
     This resource address modifies the properties of the named database.
-    The list of modifiable properties can be returned by the GET version of this endpoint.
-    The database can be identified either by id or name.
+    The list of modifiable properties can be returned by the GET version
+    of this endpoint. The database can be identified either by id or name.
     Documentation of the REST Resource API:
     https://docs.marklogic.com/REST/PUT/manage/v2/databases/[id-or-name]/properties
 
     Methods
     -------
     All public methods are inherited from the ResourceCall abstract class.
-    This class implements the endpoint() abstract method to return an endpoint for the specific call.
+    This class implements the endpoint() abstract method to return an endpoint
+    for the specific call.
     """
 
     __ENDPOINT_TEMPLATE = "/manage/v2/databases/{}/properties"
 
-    def __init__(self, database: str, body: Union[str, dict]):
+    def __init__(
+            self,
+            database: str,
+            body: Union[str, dict]
+    ):
         """
         Parameters
         ----------
@@ -95,14 +111,17 @@ class DatabasePropertiesPutCall(ResourceCall):
         """
         DatabasePropertiesPutCall.__validate_params(body)
         content_type = utils.get_content_type_header_for_data(body)
-        body = body if content_type != constants.HEADER_JSON or not isinstance(body, str) else json.loads(body)
+        if content_type == constants.HEADER_JSON and isinstance(body, str):
+            body = json.loads(body)
         super().__init__(method="PUT",
                          content_type=content_type,
                          body=body)
         self.__database = database
 
-    def endpoint(self):
-        """Implementation of an abstract method returning an endpoint for the Database Properties call
+    def endpoint(
+            self
+    ):
+        """Return an endpoint for the Database Properties call.
 
         Returns
         -------
@@ -112,8 +131,12 @@ class DatabasePropertiesPutCall(ResourceCall):
 
         return DatabasePropertiesPutCall.__ENDPOINT_TEMPLATE.format(self.__database)
 
-    @staticmethod
-    def __validate_params(body: Union[str, dict]):
+    @classmethod
+    def __validate_params(
+            cls,
+            body: Union[str, dict]
+    ):
         if body is None or isinstance(body, str) and re.search("^\\s*$", body):
-            raise exceptions.WrongParameters("No request body provided for "
-                                             "PUT /manage/v2/databases/{id|name}/properties!")
+            msg = ("No request body provided for "
+                   "PUT /manage/v2/databases/{id|name}/properties!")
+            raise exceptions.WrongParameters(msg)

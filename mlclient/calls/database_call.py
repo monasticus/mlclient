@@ -8,16 +8,19 @@ from mlclient.calls import ResourceCall
 
 class DatabaseGetCall(ResourceCall):
     """
-    A ResourceCall implementation representing a single GET request to the /manage/v2/databases/{id|name} REST Resource
+    A ResourceCall implementation representing a single GET request
+    to the /manage/v2/databases/{id|name} REST Resource
 
     This resource address returns information on the specified database.
     The database can be identified either by ID or name.
-    Documentation of the REST Resource API: https://docs.marklogic.com/REST/GET/manage/v2/databases/[id-or-name]
+    Documentation of the REST Resource API:
+    https://docs.marklogic.com/REST/GET/manage/v2/databases/[id-or-name]
 
     Methods
     -------
     All public methods are inherited from the ResourceCall abstract class.
-    This class implements the endpoint() abstract method to return an endpoint for the specific call.
+    This class implements the endpoint() abstract method to return an endpoint
+    for the specific call.
     """
 
     __ENDPOINT_TEMPLATE = "/manage/v2/databases/{}"
@@ -29,7 +32,12 @@ class DatabaseGetCall(ResourceCall):
     __SUPPORTED_VIEWS = ["describe", "default", "config", "counts", "edit",
                          "package", "status", "forest-storage", "properties-schema"]
 
-    def __init__(self, database: str, data_format: str = "xml", view: str = "default"):
+    def __init__(
+            self,
+            database: str,
+            data_format: str = "xml",
+            view: str = "default"
+    ):
         """
         Parameters
         ----------
@@ -40,7 +48,8 @@ class DatabaseGetCall(ResourceCall):
             This parameter is not meaningful with view=edit.
         view : str
             A specific view of the returned data.
-            Can be properties-schema, package, describe, config, counts, edit, status, forest-storage, or default.
+            Can be: properties-schema, package, describe, config, counts, edit, status,
+            forest-storage, or default.
         """
 
         data_format = data_format if data_format is not None else "xml"
@@ -53,8 +62,10 @@ class DatabaseGetCall(ResourceCall):
         self.add_param(DatabaseGetCall.__FORMAT_PARAM, data_format)
         self.add_param(DatabaseGetCall.__VIEW_PARAM, view)
 
-    def endpoint(self):
-        """Implementation of an abstract method returning an endpoint for the Database call
+    def endpoint(
+            self
+    ):
+        """Return an endpoint for the Database call.
 
         Returns
         -------
@@ -64,19 +75,26 @@ class DatabaseGetCall(ResourceCall):
 
         return DatabaseGetCall.__ENDPOINT_TEMPLATE.format(self.__database)
 
-    @staticmethod
-    def __validate_params(data_format: str, view: str):
-        if data_format not in DatabaseGetCall.__SUPPORTED_FORMATS:
-            joined_supported_formats = ", ".join(DatabaseGetCall.__SUPPORTED_FORMATS)
-            raise exceptions.WrongParameters("The supported formats are: " + joined_supported_formats)
-        if view not in DatabaseGetCall.__SUPPORTED_VIEWS:
-            joined_supported_views = ", ".join(DatabaseGetCall.__SUPPORTED_VIEWS)
-            raise exceptions.WrongParameters("The supported views are: " + joined_supported_views)
+    @classmethod
+    def __validate_params(
+            cls,
+            data_format: str,
+            view: str
+    ):
+        if data_format not in cls.__SUPPORTED_FORMATS:
+            joined_supported_formats = ", ".join(cls.__SUPPORTED_FORMATS)
+            raise exceptions.WrongParameters(
+                f"The supported formats are: {joined_supported_formats}")
+        if view not in cls.__SUPPORTED_VIEWS:
+            joined_supported_views = ", ".join(cls.__SUPPORTED_VIEWS)
+            raise exceptions.WrongParameters(
+                f"The supported views are: {joined_supported_views}")
 
 
 class DatabasePostCall(ResourceCall):
     """
-    A ResourceCall implementation representing a single POST request to the /manage/v2/databases/{id|name} REST Resource
+    A ResourceCall implementation representing a single POST request
+    to the /manage/v2/databases/{id|name} REST Resource
 
     This resource address can be used to clear the contents of the named database
     and to perform various configuration operations on the database.
@@ -86,12 +104,17 @@ class DatabasePostCall(ResourceCall):
     Methods
     -------
     All public methods are inherited from the ResourceCall abstract class.
-    This class implements the endpoint() abstract method to return an endpoint for the specific call.
+    This class implements the endpoint() abstract method to return an endpoint
+    for the specific call.
     """
 
     __ENDPOINT_TEMPLATE = "/manage/v2/databases/{}"
 
-    def __init__(self, database: str, body: Union[str, dict]):
+    def __init__(
+            self,
+            database: str,
+            body: Union[str, dict]
+    ):
         """
         Parameters
         ----------
@@ -102,14 +125,17 @@ class DatabasePostCall(ResourceCall):
         """
         DatabasePostCall.__validate_params(body)
         content_type = utils.get_content_type_header_for_data(body)
-        body = body if content_type != constants.HEADER_JSON or not isinstance(body, str) else json.loads(body)
+        if content_type == constants.HEADER_JSON and isinstance(body, str):
+            body = json.loads(body)
         super().__init__(method="POST",
                          content_type=content_type,
                          body=body)
         self.__database = database
 
-    def endpoint(self):
-        """Implementation of an abstract method returning an endpoint for the Database call
+    def endpoint(
+            self
+    ):
+        """Return an endpoint for the Database call.
 
         Returns
         -------
@@ -119,10 +145,14 @@ class DatabasePostCall(ResourceCall):
 
         return DatabasePostCall.__ENDPOINT_TEMPLATE.format(self.__database)
 
-    @staticmethod
-    def __validate_params(body: Union[str, dict]):
+    @classmethod
+    def __validate_params(
+            cls,
+            body: Union[str, dict]
+    ):
         if body is None or isinstance(body, str) and re.search("^\\s*$", body):
-            raise exceptions.WrongParameters("No request body provided for POST /manage/v2/databases/{id|name}!")
+            raise exceptions.WrongParameters(
+                "No request body provided for POST /manage/v2/databases/{id|name}!")
 
 
 class DatabaseDeleteCall(ResourceCall):
@@ -137,7 +167,8 @@ class DatabaseDeleteCall(ResourceCall):
     Methods
     -------
     All public methods are inherited from the ResourceCall abstract class.
-    This class implements the endpoint() abstract method to return an endpoint for the specific call.
+    This class implements the endpoint() abstract method to return an endpoint
+    for the specific call.
     """
 
     __ENDPOINT_TEMPLATE = "/manage/v2/databases/{}"
@@ -146,7 +177,11 @@ class DatabaseDeleteCall(ResourceCall):
 
     __SUPPORTED_FOREST_DELETE_OPTS = ["configuration", "data"]
 
-    def __init__(self, database: str, forest_delete: str = None):
+    def __init__(
+            self,
+            database: str,
+            forest_delete: str = None
+    ):
         """
         Parameters
         ----------
@@ -160,12 +195,14 @@ class DatabaseDeleteCall(ResourceCall):
             If "data" is specified, the forest configuration and data will be removed.
         """
         DatabaseDeleteCall.__validate_params(forest_delete)
-        super().__init__(method="DELETE")
+        super().__init__(method=constants.METHOD_DELETE)
         self.add_param(DatabaseDeleteCall.__FOREST_DELETE_PARAM, forest_delete)
         self.__database = database
 
-    def endpoint(self):
-        """Implementation of an abstract method returning an endpoint for the Database call
+    def endpoint(
+            self
+    ):
+        """Return an endpoint for the Database call.
 
         Returns
         -------
@@ -175,8 +212,12 @@ class DatabaseDeleteCall(ResourceCall):
 
         return DatabaseDeleteCall.__ENDPOINT_TEMPLATE.format(self.__database)
 
-    @staticmethod
-    def __validate_params(forest_delete: str):
-        if forest_delete and forest_delete not in DatabaseDeleteCall.__SUPPORTED_FOREST_DELETE_OPTS:
-            joined_supported_opts = ", ".join(DatabaseDeleteCall.__SUPPORTED_FOREST_DELETE_OPTS)
-            raise exceptions.WrongParameters("The supported forest_delete options are: " + joined_supported_opts)
+    @classmethod
+    def __validate_params(
+            cls,
+            forest_delete: str
+    ):
+        if forest_delete and forest_delete not in cls.__SUPPORTED_FOREST_DELETE_OPTS:
+            joined_supported_opts = ", ".join(cls.__SUPPORTED_FOREST_DELETE_OPTS)
+            raise exceptions.WrongParameters(
+                f"The supported forest_delete options are: {joined_supported_opts}")

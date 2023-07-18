@@ -28,8 +28,15 @@ class ResourceCall(metaclass=ABCMeta):
         Returns a request body
     """
 
-    def __init__(self, method: str = constants.METHOD_GET, params: dict = None, headers: dict = None,
-                 body: Union[str, dict] = None, accept: str = None, content_type: str = None):
+    def __init__(
+            self,
+            method: str = constants.METHOD_GET,
+            params: dict = None,
+            headers: dict = None,
+            body: Union[str, dict] = None,
+            accept: str = None,
+            content_type: str = None
+    ):
         """
         Parameters
         ----------
@@ -57,14 +64,19 @@ class ResourceCall(metaclass=ABCMeta):
             self.__headers[constants.HEADER_NAME_CONTENT_TYPE] = content_type
 
     @classmethod
-    def __subclasshook__(cls, subclass):
+    def __subclasshook__(
+            cls,
+            subclass
+    ):
         return (hasattr(subclass, 'endpoint') and
                 callable(subclass.endpoint) or
                 NotImplemented)
 
     @abstractmethod
-    def endpoint(self) -> str:
-        """An abstract method returning an endpoint for a specific resource call
+    def endpoint(
+            self
+    ) -> str:
+        """Return an endpoint for a specific resource call.
 
         Returns
         -------
@@ -74,7 +86,11 @@ class ResourceCall(metaclass=ABCMeta):
 
         raise NotImplementedError
 
-    def add_param(self, param_name: str, param_value: Any) -> NoReturn:
+    def add_param(
+            self,
+            param_name: str,
+            param_value: Any
+    ) -> NoReturn:
         """Puts a request parameter if it's name and value exist
 
         Parameters
@@ -88,7 +104,11 @@ class ResourceCall(metaclass=ABCMeta):
         if param_name and param_value:
             self.__params[param_name] = param_value
 
-    def add_header(self, header_name: str, header_value: Any) -> NoReturn:
+    def add_header(
+            self,
+            header_name: str,
+            header_value: Any
+    ) -> NoReturn:
         """Puts a request header if it's name and value exist
 
         Parameters
@@ -102,7 +122,10 @@ class ResourceCall(metaclass=ABCMeta):
         if header_name and header_value:
             self.__headers[header_name] = header_value
 
-    def set_body(self, body: Union[str, dict]) -> NoReturn:
+    def set_body(
+            self,
+            body: Union[str, dict]
+    ) -> NoReturn:
         """Sets a request body
 
         Parameters
@@ -113,7 +136,9 @@ class ResourceCall(metaclass=ABCMeta):
 
         self.__body = body
 
-    def method(self) -> str:
+    def method(
+            self
+    ) -> str:
         """Returns a request method
 
         Returns
@@ -124,7 +149,9 @@ class ResourceCall(metaclass=ABCMeta):
 
         return self.__method
 
-    def params(self) -> dict:
+    def params(
+            self
+    ) -> dict:
         """Returns request parameters
 
         Returns
@@ -135,7 +162,9 @@ class ResourceCall(metaclass=ABCMeta):
 
         return self.__params.copy()
 
-    def headers(self) -> dict:
+    def headers(
+            self
+    ) -> dict:
         """Returns request headers
 
         Returns
@@ -146,7 +175,9 @@ class ResourceCall(metaclass=ABCMeta):
 
         return self.__headers.copy()
 
-    def body(self) -> Union[str, dict]:
+    def body(
+            self
+    ) -> Union[str, dict]:
         """Returns a request body
 
         Returns

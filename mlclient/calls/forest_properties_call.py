@@ -11,14 +11,16 @@ class ForestPropertiesGetCall(ResourceCall):
     A ResourceCall implementation representing a single GET request
     to the /manage/v2/forests/{id|name}/properties REST Resource
 
-    Retrieve the current state of modifiable properties of the forest identified by {id|name}.
+    Retrieve the current state of modifiable properties of the forest identified
+    by {id|name}.
     Documentation of the REST Resource API:
     https://docs.marklogic.com/REST/GET/manage/v2/forests/[id-or-name]/properties
 
     Methods
     -------
     All public methods are inherited from the ResourceCall abstract class.
-    This class implements the endpoint() abstract method to return an endpoint for the specific call.
+    This class implements the endpoint() abstract method to return an endpoint
+    for the specific call.
     """
 
     __ENDPOINT_TEMPLATE = "/manage/v2/forests/{}/properties"
@@ -27,7 +29,11 @@ class ForestPropertiesGetCall(ResourceCall):
 
     __SUPPORTED_FORMATS = ["xml", "json", "html"]
 
-    def __init__(self, forest: str, data_format: str = "xml"):
+    def __init__(
+            self,
+            forest: str,
+            data_format: str = "xml"
+    ):
         """
         Parameters
         ----------
@@ -46,8 +52,10 @@ class ForestPropertiesGetCall(ResourceCall):
         self.__forest = forest
         self.add_param(ForestPropertiesGetCall.__FORMAT_PARAM, data_format)
 
-    def endpoint(self):
-        """Implementation of an abstract method returning an endpoint for the Forest Properties call
+    def endpoint(
+            self
+    ):
+        """Return an endpoint for the Forest Properties call.
 
         Returns
         -------
@@ -57,11 +65,15 @@ class ForestPropertiesGetCall(ResourceCall):
 
         return ForestPropertiesGetCall.__ENDPOINT_TEMPLATE.format(self.__forest)
 
-    @staticmethod
-    def __validate_params(data_format: str):
-        if data_format not in ForestPropertiesGetCall.__SUPPORTED_FORMATS:
-            joined_supported_formats = ", ".join(ForestPropertiesGetCall.__SUPPORTED_FORMATS)
-            raise exceptions.WrongParameters("The supported formats are: " + joined_supported_formats)
+    @classmethod
+    def __validate_params(
+            cls,
+            data_format: str
+    ):
+        if data_format not in cls.__SUPPORTED_FORMATS:
+            joined_supported_formats = ", ".join(cls.__SUPPORTED_FORMATS)
+            msg = f"The supported formats are: {joined_supported_formats}"
+            raise exceptions.WrongParameters(msg)
 
 
 class ForestPropertiesPutCall(ResourceCall):
@@ -76,12 +88,17 @@ class ForestPropertiesPutCall(ResourceCall):
     Methods
     -------
     All public methods are inherited from the ResourceCall abstract class.
-    This class implements the endpoint() abstract method to return an endpoint for the specific call.
+    This class implements the endpoint() abstract method to return an endpoint
+    for the specific call.
     """
 
     __ENDPOINT_TEMPLATE = "/manage/v2/forests/{}/properties"
 
-    def __init__(self, forest: str, body: Union[str, dict]):
+    def __init__(
+            self,
+            forest: str,
+            body: Union[str, dict]
+    ):
         """
         Parameters
         ----------
@@ -92,14 +109,17 @@ class ForestPropertiesPutCall(ResourceCall):
         """
         ForestPropertiesPutCall.__validate_params(body)
         content_type = utils.get_content_type_header_for_data(body)
-        body = body if content_type != constants.HEADER_JSON or not isinstance(body, str) else json.loads(body)
+        if content_type == constants.HEADER_JSON and isinstance(body, str):
+            body = json.loads(body)
         super().__init__(method="PUT",
                          content_type=content_type,
                          body=body)
         self.__forest = forest
 
-    def endpoint(self):
-        """Implementation of an abstract method returning an endpoint for the Forest Properties call
+    def endpoint(
+            self
+    ):
+        """Return an endpoint for the Forest Properties call.
 
         Returns
         -------
@@ -109,8 +129,12 @@ class ForestPropertiesPutCall(ResourceCall):
 
         return ForestPropertiesPutCall.__ENDPOINT_TEMPLATE.format(self.__forest)
 
-    @staticmethod
-    def __validate_params(body: Union[str, dict]):
+    @classmethod
+    def __validate_params(
+            cls,
+            body: Union[str, dict]
+    ):
         if body is None or isinstance(body, str) and re.search("^\\s*$", body):
-            raise exceptions.WrongParameters("No request body provided for "
-                                             "PUT /manage/v2/forests/{id|name}/properties!")
+            msg = ("No request body provided for "
+                   "PUT /manage/v2/forests/{id|name}/properties!")
+            raise exceptions.WrongParameters(msg)

@@ -13,7 +13,7 @@ def default_forest_properties_put_call():
 
 
 def test_validation_body_param():
-    with pytest.raises(exceptions.WrongParameters) as err:
+    with pytest.raises(exceptions.WrongParametersError) as err:
         ForestPropertiesPutCall(
             forest="forest-1",
             body=None)
@@ -24,7 +24,7 @@ def test_validation_body_param():
 
 
 def test_validation_blank_body_param():
-    with pytest.raises(exceptions.WrongParameters) as err:
+    with pytest.raises(exceptions.WrongParametersError) as err:
         ForestPropertiesPutCall(
             forest="forest-1",
             body=" \n")

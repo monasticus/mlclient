@@ -95,7 +95,7 @@ class LogsCall(ResourceCall):
     ):
         if data_format and data_format not in ["xml", "json", "html"]:
             msg = "The supported formats are xml, json or html!"
-            raise exceptions.WrongParameters(msg)
+            raise exceptions.WrongParametersError(msg)
         LogsCall.__validate_datetime_param("start", start_time)
         LogsCall.__validate_datetime_param("end", end_time)
 
@@ -109,7 +109,7 @@ class LogsCall(ResourceCall):
                 parser.parse(param_value)
         except ValueError:
             msg = f"The {param_name} parameter is not a dateTime value!"
-            raise exceptions.WrongParameters(msg)
+            raise exceptions.WrongParametersError(msg)
 
     @staticmethod
     def __reformat_datetime_param(

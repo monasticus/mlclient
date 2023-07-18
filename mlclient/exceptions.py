@@ -1,6 +1,6 @@
-class WrongParameters(Exception):
+class WrongParametersError(Exception):
     pass
 
 
-class UnsupportedFormat(Exception):
+class UnsupportedFormatError(Exception):
     pass

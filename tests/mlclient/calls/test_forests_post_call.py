@@ -16,7 +16,7 @@ def default_forests_post_call():
 
 
 def test_validation_body_param():
-    with pytest.raises(exceptions.WrongParameters) as err:
+    with pytest.raises(exceptions.WrongParametersError) as err:
         ForestsPostCall(body=None)
 
     expected_msg = ("No request body provided for "
@@ -25,7 +25,7 @@ def test_validation_body_param():
 
 
 def test_validation_blank_body_param():
-    with pytest.raises(exceptions.WrongParameters) as err:
+    with pytest.raises(exceptions.WrongParametersError) as err:
         ForestsPostCall(body=" \n")
 
     expected_msg = ("No request body provided for "

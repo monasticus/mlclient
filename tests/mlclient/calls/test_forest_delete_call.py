@@ -13,7 +13,7 @@ def default_forest_delete_call():
 
 
 def test_validation_level_param():
-    with pytest.raises(exceptions.WrongParameters) as err:
+    with pytest.raises(exceptions.WrongParametersError) as err:
         ForestDeleteCall(
             forest="custom-forest",
             level="X")
@@ -23,7 +23,7 @@ def test_validation_level_param():
 
 
 def test_validation_replicas_param():
-    with pytest.raises(exceptions.WrongParameters) as err:
+    with pytest.raises(exceptions.WrongParametersError) as err:
         ForestDeleteCall(
             forest="custom-forest",
             level="full",

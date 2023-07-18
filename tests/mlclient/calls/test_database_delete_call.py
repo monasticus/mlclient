@@ -11,7 +11,7 @@ def default_database_delete_call():
 
 
 def test_validation_forest_delete_param():
-    with pytest.raises(exceptions.WrongParameters) as err:
+    with pytest.raises(exceptions.WrongParametersError) as err:
         DatabaseDeleteCall(database="Documents", forest_delete="X")
 
     expected_msg = "The supported forest_delete options are: configuration, data"

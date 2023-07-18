@@ -11,7 +11,7 @@ def default_eval_call():
 
 
 def test_validation_neither_xquery_nor_javascript_param():
-    with pytest.raises(exceptions.WrongParameters) as err:
+    with pytest.raises(exceptions.WrongParametersError) as err:
         EvalCall()
 
     expected_msg = "You must include either the xquery or the javascript parameter!"
@@ -19,7 +19,7 @@ def test_validation_neither_xquery_nor_javascript_param():
 
 
 def test_validation_xquery_and_javascript_param_are_none():
-    with pytest.raises(exceptions.WrongParameters) as err:
+    with pytest.raises(exceptions.WrongParametersError) as err:
         EvalCall(xquery=None, javascript=None)
 
     expected_msg = "You must include either the xquery or the javascript parameter!"
@@ -27,7 +27,7 @@ def test_validation_xquery_and_javascript_param_are_none():
 
 
 def test_validation_xquery_and_javascript_param():
-    with pytest.raises(exceptions.WrongParameters) as err:
+    with pytest.raises(exceptions.WrongParametersError) as err:
         EvalCall(xquery="()", javascript="[]")
 
     expected_msg = "You cannot include both the xquery and the javascript parameter!"

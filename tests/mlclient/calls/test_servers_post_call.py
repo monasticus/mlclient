@@ -19,7 +19,7 @@ def default_servers_post_call():
 
 
 def test_validation_server_type_param():
-    with pytest.raises(exceptions.WrongParameters) as err:
+    with pytest.raises(exceptions.WrongParametersError) as err:
         ServersPostCall(server_type="X", body={})
 
     expected_msg = "The supported server types are: http, odbc, xdbc, webdav"
@@ -27,7 +27,7 @@ def test_validation_server_type_param():
 
 
 def test_validation_body_param():
-    with pytest.raises(exceptions.WrongParameters) as err:
+    with pytest.raises(exceptions.WrongParametersError) as err:
         ServersPostCall(body=None)
 
     expected_msg = ("No request body provided for "
@@ -36,7 +36,7 @@ def test_validation_body_param():
 
 
 def test_validation_blank_body_param():
-    with pytest.raises(exceptions.WrongParameters) as err:
+    with pytest.raises(exceptions.WrongParametersError) as err:
         ServersPostCall(body=" \n")
 
     expected_msg = ("No request body provided for "

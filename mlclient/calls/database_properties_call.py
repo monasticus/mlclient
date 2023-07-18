@@ -73,7 +73,7 @@ class DatabasePropertiesGetCall(ResourceCall):
         if data_format not in cls.__SUPPORTED_FORMATS:
             joined_supported_formats = ", ".join(cls.__SUPPORTED_FORMATS)
             msg = f"The supported formats are: {joined_supported_formats}"
-            raise exceptions.WrongParameters(msg)
+            raise exceptions.WrongParametersError(msg)
 
 
 class DatabasePropertiesPutCall(ResourceCall):
@@ -139,4 +139,4 @@ class DatabasePropertiesPutCall(ResourceCall):
         if body is None or isinstance(body, str) and re.search("^\\s*$", body):
             msg = ("No request body provided for "
                    "PUT /manage/v2/databases/{id|name}/properties!")
-            raise exceptions.WrongParameters(msg)
+            raise exceptions.WrongParametersError(msg)

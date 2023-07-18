@@ -11,7 +11,7 @@ def default_user_properties_get_call():
 
 
 def test_validation_format_param():
-    with pytest.raises(exceptions.WrongParameters) as err:
+    with pytest.raises(exceptions.WrongParametersError) as err:
         UserPropertiesGetCall(user="admin", data_format="text")
 
     expected_msg = "The supported formats are: xml, json, html"

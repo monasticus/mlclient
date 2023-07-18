@@ -79,11 +79,11 @@ class UsersGetCall(ResourceCall):
         if data_format not in cls.__SUPPORTED_FORMATS:
             joined_supported_formats = ", ".join(cls.__SUPPORTED_FORMATS)
             msg = f"The supported formats are: {joined_supported_formats}"
-            raise exceptions.WrongParameters(msg)
+            raise exceptions.WrongParametersError(msg)
         if view not in cls.__SUPPORTED_VIEWS:
             joined_supported_views = ", ".join(cls.__SUPPORTED_VIEWS)
             msg = f"The supported views are: {joined_supported_views}"
-            raise exceptions.WrongParameters(msg)
+            raise exceptions.WrongParametersError(msg)
 
 
 class UsersPostCall(ResourceCall):
@@ -146,4 +146,4 @@ class UsersPostCall(ResourceCall):
     ):
         if body is None or isinstance(body, str) and re.search("^\\s*$", body):
             msg = "No request body provided for POST /manage/v2/users!"
-            raise exceptions.WrongParameters(msg)
+            raise exceptions.WrongParametersError(msg)

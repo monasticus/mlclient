@@ -13,7 +13,7 @@ def default_forest_post_call():
 
 
 def test_validation_no_state_param_in_body():
-    with pytest.raises(exceptions.WrongParameters) as err:
+    with pytest.raises(exceptions.WrongParametersError) as err:
         ForestPostCall(
             forest="custom-forest",
             body={})
@@ -23,7 +23,7 @@ def test_validation_no_state_param_in_body():
 
 
 def test_validation_blank_body_param():
-    with pytest.raises(exceptions.WrongParameters) as err:
+    with pytest.raises(exceptions.WrongParametersError) as err:
         ForestPostCall(
             forest="custom-forest",
             body={"state": "XXX"})

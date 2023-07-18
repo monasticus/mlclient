@@ -14,7 +14,7 @@ def get_accept_header_for_format(data_format: str):
         return constants.HEADER_PLAIN_TEXT
     else:
         msg = f"Provided format [{data_format}] is not supported."
-        raise exceptions.UnsupportedFormat(msg)
+        raise exceptions.UnsupportedFormatError(msg)
 
 
 def get_content_type_header_for_data(data):

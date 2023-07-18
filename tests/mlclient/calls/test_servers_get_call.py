@@ -11,7 +11,7 @@ def default_servers_get_call():
 
 
 def test_validation_format_param():
-    with pytest.raises(exceptions.WrongParameters) as err:
+    with pytest.raises(exceptions.WrongParametersError) as err:
         ServersGetCall(data_format="text")
 
     expected_msg = "The supported formats are: xml, json, html"
@@ -19,7 +19,7 @@ def test_validation_format_param():
 
 
 def test_validation_view_param():
-    with pytest.raises(exceptions.WrongParameters) as err:
+    with pytest.raises(exceptions.WrongParametersError) as err:
         ServersGetCall(view="X")
 
     expected_msg = ("The supported views are: "

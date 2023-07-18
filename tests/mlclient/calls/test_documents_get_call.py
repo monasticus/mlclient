@@ -11,7 +11,7 @@ def default_documents_get_call():
 
 
 def test_validation_category_param():
-    with pytest.raises(exceptions.WrongParameters) as err:
+    with pytest.raises(exceptions.WrongParametersError) as err:
         DocumentsGetCall(
             uri="/a.xml",
             category="X")
@@ -23,7 +23,7 @@ def test_validation_category_param():
 
 
 def test_validation_format_param():
-    with pytest.raises(exceptions.WrongParameters) as err:
+    with pytest.raises(exceptions.WrongParametersError) as err:
         DocumentsGetCall(
             uri="/a.xml",
             data_format="html")
@@ -33,7 +33,7 @@ def test_validation_format_param():
 
 
 def test_validation_format_param_for_metadata_categories():
-    with pytest.raises(exceptions.WrongParameters) as err:
+    with pytest.raises(exceptions.WrongParametersError) as err:
         DocumentsGetCall(
             uri="/a.xml",
             category="collections",

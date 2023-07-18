@@ -78,11 +78,11 @@ class ForestGetCall(ResourceCall):
         if data_format not in cls.__SUPPORTED_FORMATS:
             joined_supported_formats = ", ".join(cls.__SUPPORTED_FORMATS)
             msg = f"The supported formats are: {joined_supported_formats}"
-            raise exceptions.WrongParameters(msg)
+            raise exceptions.WrongParametersError(msg)
         if view not in cls.__SUPPORTED_VIEWS:
             joined_supported_views = ", ".join(cls.__SUPPORTED_VIEWS)
             msg = f"The supported views are: {joined_supported_views}"
-            raise exceptions.WrongParameters(msg)
+            raise exceptions.WrongParametersError(msg)
 
 
 class ForestPostCall(ResourceCall):
@@ -153,11 +153,11 @@ class ForestPostCall(ResourceCall):
     ):
         if state is None:
             msg = "You must include the 'state' parameter within a body!"
-            raise exceptions.WrongParameters(msg)
+            raise exceptions.WrongParametersError(msg)
         elif state not in cls.__SUPPORTED_STATES:
             joined_supported_states = ", ".join(cls.__SUPPORTED_STATES)
             msg = f"The supported states are: {joined_supported_states}"
-            raise exceptions.WrongParameters(msg)
+            raise exceptions.WrongParametersError(msg)
 
 
 class ForestDeleteCall(ResourceCall):
@@ -232,8 +232,8 @@ class ForestDeleteCall(ResourceCall):
         if level not in cls.__SUPPORTED_LEVELS:
             joined_supported_levels = ", ".join(cls.__SUPPORTED_LEVELS)
             msg = f"The supported levels are: {joined_supported_levels}"
-            raise exceptions.WrongParameters(msg)
+            raise exceptions.WrongParametersError(msg)
         if replicas and replicas not in cls.__SUPPORTED_REPLICAS_OPTS:
             joined_supported_opts = ", ".join(cls.__SUPPORTED_REPLICAS_OPTS)
             msg = f"The supported replicas options are: {joined_supported_opts}"
-            raise exceptions.WrongParameters(msg)
+            raise exceptions.WrongParametersError(msg)

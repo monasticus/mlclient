@@ -11,7 +11,7 @@ def default_role_properties_get_call():
 
 
 def test_validation_format_param():
-    with pytest.raises(exceptions.WrongParameters) as err:
+    with pytest.raises(exceptions.WrongParametersError) as err:
         RolePropertiesGetCall(role="admin", data_format="text")
 
     expected_msg = "The supported formats are: xml, json, html"

@@ -125,16 +125,16 @@ class DocumentsGetCall(ResourceCall):
         if category and category not in cls.__SUPPORTED_CATEGORIES:
             joined_supported_categories = ", ".join(cls.__SUPPORTED_CATEGORIES)
             msg = f"The supported categories are: {joined_supported_categories}"
-            raise exceptions.WrongParameters(msg)
+            raise exceptions.WrongParametersError(msg)
         if data_format and data_format not in cls.__SUPPORTED_FORMATS:
             joined_supported_formats = ", ".join(cls.__SUPPORTED_FORMATS)
             msg = f"The supported formats are: {joined_supported_formats}"
-            raise exceptions.WrongParameters(msg)
+            raise exceptions.WrongParametersError(msg)
         if (category and category != "content" and
                 data_format and data_format not in cls.__SUPPORTED_METADATA_FORMATS):
             joined_supported_formats = ", ".join(cls.__SUPPORTED_METADATA_FORMATS)
             msg = f"The supported metadata formats are: {joined_supported_formats}"
-            raise exceptions.WrongParameters(msg)
+            raise exceptions.WrongParametersError(msg)
 
     @staticmethod
     def __get_accept_header(

@@ -13,7 +13,7 @@ def default_logs_call():
 
 
 def test_validation_unsupported_format():
-    with pytest.raises(exceptions.WrongParameters) as err:
+    with pytest.raises(exceptions.WrongParametersError) as err:
         LogsCall(filename="", data_format="text")
 
     expected_msg = "The supported formats are xml, json or html!"
@@ -21,7 +21,7 @@ def test_validation_unsupported_format():
 
 
 def test_validation_start_time_is_not_datetime_value():
-    with pytest.raises(exceptions.WrongParameters) as err:
+    with pytest.raises(exceptions.WrongParametersError) as err:
         assert LogsCall(filename="", start_time="a").params() == {}
 
     expected_msg = "The start parameter is not a dateTime value!"
@@ -29,7 +29,7 @@ def test_validation_start_time_is_not_datetime_value():
 
 
 def test_validation_end_time_is_not_datetime_value():
-    with pytest.raises(exceptions.WrongParameters) as err:
+    with pytest.raises(exceptions.WrongParametersError) as err:
         assert LogsCall(filename="", end_time="a").params() == {}
 
     expected_msg = "The end parameter is not a dateTime value!"
@@ -199,7 +199,7 @@ def test_formatting_datetime_date_and_time_with_seconds_and_millis():
 
 
 def test_formatting_datetime_impossible_to_parse_as_month_and_day():
-    with pytest.raises(exceptions.WrongParameters) as err:
+    with pytest.raises(exceptions.WrongParametersError) as err:
         assert LogsCall(filename="ErrorLog.txt",
                         start_time="13-01").params() == {}
 
@@ -208,7 +208,7 @@ def test_formatting_datetime_impossible_to_parse_as_month_and_day():
 
 
 def test_formatting_datetime_impossible_to_parse_as_time_1():
-    with pytest.raises(exceptions.WrongParameters) as err:
+    with pytest.raises(exceptions.WrongParametersError) as err:
         assert LogsCall(filename="ErrorLog.txt",
                         start_time="25:01").params() == {}
 
@@ -217,7 +217,7 @@ def test_formatting_datetime_impossible_to_parse_as_time_1():
 
 
 def test_formatting_datetime_impossible_to_parse_as_time_2():
-    with pytest.raises(exceptions.WrongParameters) as err:
+    with pytest.raises(exceptions.WrongParametersError) as err:
         assert LogsCall(filename="ErrorLog.txt",
                         start_time="24:00").params() == {}
 
@@ -226,7 +226,7 @@ def test_formatting_datetime_impossible_to_parse_as_time_2():
 
 
 def test_formatting_datetime_impossible_to_parse_as_time_3():
-    with pytest.raises(exceptions.WrongParameters) as err:
+    with pytest.raises(exceptions.WrongParametersError) as err:
         assert LogsCall(filename="ErrorLog.txt",
                         start_time="01:60").params() == {}
 

@@ -12,7 +12,7 @@ def default_database_properties_put_call():
 
 
 def test_validation_body_param():
-    with pytest.raises(exceptions.WrongParameters) as err:
+    with pytest.raises(exceptions.WrongParametersError) as err:
         DatabasePropertiesPutCall(database="Documents", body=None)
 
     expected_msg = ("No request body provided for "
@@ -21,7 +21,7 @@ def test_validation_body_param():
 
 
 def test_validation_blank_body_param():
-    with pytest.raises(exceptions.WrongParameters) as err:
+    with pytest.raises(exceptions.WrongParametersError) as err:
         DatabasePropertiesPutCall(database="Documents", body=" \n")
 
     expected_msg = ("No request body provided for "

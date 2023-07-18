@@ -13,7 +13,7 @@ def default_server_properties_get_call():
 
 
 def test_validation_format_param():
-    with pytest.raises(exceptions.WrongParameters) as err:
+    with pytest.raises(exceptions.WrongParametersError) as err:
         ServerPropertiesGetCall(
             server="App-Services",
             group_id="Default",

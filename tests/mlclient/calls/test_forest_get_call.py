@@ -11,7 +11,7 @@ def default_forest_get_call():
 
 
 def test_validation_format_param():
-    with pytest.raises(exceptions.WrongParameters) as err:
+    with pytest.raises(exceptions.WrongParametersError) as err:
         ForestGetCall(
             forest="custom-forest",
             data_format="text")
@@ -21,7 +21,7 @@ def test_validation_format_param():
 
 
 def test_validation_view_param():
-    with pytest.raises(exceptions.WrongParameters) as err:
+    with pytest.raises(exceptions.WrongParametersError) as err:
         ForestGetCall(
             forest="custom-forest",
             view="X")

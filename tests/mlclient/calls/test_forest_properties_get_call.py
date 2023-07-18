@@ -11,7 +11,7 @@ def default_forest_properties_get_call():
 
 
 def test_validation_format_param():
-    with pytest.raises(exceptions.WrongParameters) as err:
+    with pytest.raises(exceptions.WrongParametersError) as err:
         ForestPropertiesGetCall(
             forest="custom-forest",
             data_format="text")

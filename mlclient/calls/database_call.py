@@ -83,11 +83,11 @@ class DatabaseGetCall(ResourceCall):
     ):
         if data_format not in cls.__SUPPORTED_FORMATS:
             joined_supported_formats = ", ".join(cls.__SUPPORTED_FORMATS)
-            raise exceptions.WrongParameters(
+            raise exceptions.WrongParametersError(
                 f"The supported formats are: {joined_supported_formats}")
         if view not in cls.__SUPPORTED_VIEWS:
             joined_supported_views = ", ".join(cls.__SUPPORTED_VIEWS)
-            raise exceptions.WrongParameters(
+            raise exceptions.WrongParametersError(
                 f"The supported views are: {joined_supported_views}")
 
 
@@ -151,7 +151,7 @@ class DatabasePostCall(ResourceCall):
             body: Union[str, dict]
     ):
         if body is None or isinstance(body, str) and re.search("^\\s*$", body):
-            raise exceptions.WrongParameters(
+            raise exceptions.WrongParametersError(
                 "No request body provided for POST /manage/v2/databases/{id|name}!")
 
 
@@ -219,5 +219,5 @@ class DatabaseDeleteCall(ResourceCall):
     ):
         if forest_delete and forest_delete not in cls.__SUPPORTED_FOREST_DELETE_OPTS:
             joined_supported_opts = ", ".join(cls.__SUPPORTED_FOREST_DELETE_OPTS)
-            raise exceptions.WrongParameters(
+            raise exceptions.WrongParametersError(
                 f"The supported forest_delete options are: {joined_supported_opts}")

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import json
 import re
 from typing import Union
@@ -9,7 +11,7 @@ from mlclient.calls import ResourceCall
 class ForestsGetCall(ResourceCall):
     """
     A ResourceCall implementation representing a single GET request
-    to the /manage/v2/forests REST Resource
+    to the /manage/v2/forests REST Resource.
 
     This resource address returns data about the forests in the cluster.
     The data returned depends on the view.
@@ -74,7 +76,6 @@ class ForestsGetCall(ResourceCall):
             A value of false (the default) indicates to return detail only for first
             references.
         """
-
         data_format = data_format if data_format is not None else "xml"
         view = view if view is not None else "default"
         ForestsGetCall.__validate_params(data_format, view)
@@ -100,7 +101,6 @@ class ForestsGetCall(ResourceCall):
         str
             an Forests call endpoint
         """
-
         return ForestsGetCall.ENDPOINT
 
     @classmethod
@@ -122,7 +122,7 @@ class ForestsGetCall(ResourceCall):
 class ForestsPostCall(ResourceCall):
     """
     A ResourceCall implementation representing a single POST request
-    to the /manage/v2/forests REST Resource
+    to the /manage/v2/forests REST Resource.
 
     Create a new forest, including replicas if specified.
     If a database id or database is included, attach the new forest(s) to the database.
@@ -180,7 +180,6 @@ class ForestsPostCall(ResourceCall):
         str
             an Forests call endpoint
         """
-
         return ForestsPostCall.ENDPOINT
 
     @classmethod
@@ -196,7 +195,7 @@ class ForestsPostCall(ResourceCall):
 class ForestsPutCall(ResourceCall):
     """
     A ResourceCall implementation representing a single PUT request
-    to the /manage/v2/forests REST Resource
+    to the /manage/v2/forests REST Resource.
 
     Perform an operation on one or more forests, such as combining multiple forests
     into a single new one, or migrating the data in the forests to a new data directory.
@@ -244,7 +243,6 @@ class ForestsPutCall(ResourceCall):
         str
             an Forests call endpoint
         """
-
         return ForestsPostCall.ENDPOINT
 
     @classmethod

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from json import dumps
 
 from mlclient import constants, exceptions
@@ -7,7 +9,7 @@ from mlclient.calls import ResourceCall
 class EvalCall(ResourceCall):
     """
     A ResourceCall implementation representing a single request
-    to the /v1/eval REST Resource
+    to the /v1/eval REST Resource.
 
     Evaluate an ad-hoc query expressed using XQuery or server-side JavaScript.
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/POST/v1/eval
@@ -61,7 +63,6 @@ class EvalCall(ResourceCall):
             The transaction identifier of the multi-statement transaction
             in which to service this request.
         """
-
         self.__validate_params(xquery, javascript)
 
         super().__init__(method=constants.METHOD_POST,
@@ -81,7 +82,6 @@ class EvalCall(ResourceCall):
         str
             an Eval call endpoint
         """
-
         return EvalCall.ENDPOINT
 
     @classmethod

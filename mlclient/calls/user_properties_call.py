@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import json
 import re
 from typing import Union
@@ -9,7 +11,7 @@ from mlclient.calls import ResourceCall
 class UserPropertiesGetCall(ResourceCall):
     """
     A ResourceCall implementation representing a single GET request
-    to the /manage/v2/users/{id|name}/properties REST Resource
+    to the /manage/v2/users/{id|name}/properties REST Resource.
 
     This resource address returns the properties of the specified user.
     Documentation of the REST Resource API:
@@ -42,7 +44,6 @@ class UserPropertiesGetCall(ResourceCall):
             The format of the returned data. Can be either json or xml (default).
             This parameter overrides the Accept header if both are present.
         """
-
         data_format = data_format if data_format is not None else "xml"
         UserPropertiesGetCall.__validate_params(data_format)
 
@@ -61,7 +62,6 @@ class UserPropertiesGetCall(ResourceCall):
         str
             an User Properties call endpoint
         """
-
         return UserPropertiesGetCall.__ENDPOINT_TEMPLATE.format(self.__user)
 
     @classmethod
@@ -78,7 +78,7 @@ class UserPropertiesGetCall(ResourceCall):
 class UserPropertiesPutCall(ResourceCall):
     """
     A ResourceCall implementation representing a single PUT request
-    to the /manage/v2/users/{id|name}/properties REST Resource
+    to the /manage/v2/users/{id|name}/properties REST Resource.
 
     This resource address can be used to update the properties for the specified user.
     Documentation of the REST Resource API:
@@ -125,7 +125,6 @@ class UserPropertiesPutCall(ResourceCall):
         str
             an User Properties call endpoint
         """
-
         return UserPropertiesPutCall.__ENDPOINT_TEMPLATE.format(self.__user)
 
     @classmethod

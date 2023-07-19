@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Union
 
 from mlclient import constants, exceptions, utils
@@ -7,7 +9,7 @@ from mlclient.calls import ResourceCall
 class DocumentsGetCall(ResourceCall):
     """
     A ResourceCall implementation representing a single GET request
-    to the /manage/v2/documents REST Resource
+    to the /manage/v2/documents REST Resource.
 
     Retrieve document content and/or metadata from the database.
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/GET/v1/documents
@@ -85,7 +87,6 @@ class DocumentsGetCall(ResourceCall):
             to service this request. Use the /transactions service to create and manage
             multi-statement transactions.
         """
-
         DocumentsGetCall.__validate_params(category, data_format)
 
         super().__init__(method="GET")
@@ -113,7 +114,6 @@ class DocumentsGetCall(ResourceCall):
         str
             an Documents call endpoint
         """
-
         return DocumentsGetCall.ENDPOINT
 
     @classmethod

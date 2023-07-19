@@ -1,11 +1,13 @@
-from mlclient import exceptions, utils, constants
+from __future__ import annotations
+
+from mlclient import constants, exceptions, utils
 from mlclient.calls import ResourceCall
 
 
 class ServerGetCall(ResourceCall):
     """
     A ResourceCall implementation representing a single GET request
-    to the /manage/v2/servers/{id|name} REST Resource
+    to the /manage/v2/servers/{id|name} REST Resource.
 
     This resource address returns data about a specific App Server.
     The server can be identified either by id or name.
@@ -70,7 +72,6 @@ class ServerGetCall(ResourceCall):
             It is an error to request a modules database manifest for an App Server
             that uses the filesystem for modules. Default: false.
         """
-
         data_format = data_format if data_format is not None else "xml"
         view = view if view is not None else "default"
         ServerGetCall.__validate_params(data_format, view)
@@ -99,7 +100,6 @@ class ServerGetCall(ResourceCall):
         str
             an Server call endpoint
         """
-
         return ServerGetCall.__ENDPOINT_TEMPLATE.format(self.__server)
 
     @classmethod
@@ -121,7 +121,7 @@ class ServerGetCall(ResourceCall):
 class ServerDeleteCall(ResourceCall):
     """
     A ResourceCall implementation representing a single DELETE request
-    to the /manage/v2/servers/{id|name} REST Resource
+    to the /manage/v2/servers/{id|name} REST Resource.
 
     This resource address deletes the specified App Server from the specified group.
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/DELETE/manage/v2/servers/[id-or-name]
@@ -165,5 +165,4 @@ class ServerDeleteCall(ResourceCall):
         str
             an Server call endpoint
         """
-
         return ServerDeleteCall.__ENDPOINT_TEMPLATE.format(self.__server)

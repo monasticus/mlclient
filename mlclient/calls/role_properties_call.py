@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import json
 import re
 from typing import Union
@@ -9,7 +11,7 @@ from mlclient.calls import ResourceCall
 class RolePropertiesGetCall(ResourceCall):
     """
     A ResourceCall implementation representing a single GET request
-    to the /manage/v2/roles/{id|name}/properties REST Resource
+    to the /manage/v2/roles/{id|name}/properties REST Resource.
 
     This resource address returns the properties of the specified role.
     Documentation of the REST Resource API:
@@ -42,7 +44,6 @@ class RolePropertiesGetCall(ResourceCall):
             The format of the returned data. Can be either json or xml (default).
             This parameter overrides the Accept header if both are present.
         """
-
         data_format = data_format if data_format is not None else "xml"
         RolePropertiesGetCall.__validate_params(data_format)
 
@@ -61,7 +62,6 @@ class RolePropertiesGetCall(ResourceCall):
         str
             an Role Properties call endpoint
         """
-
         return RolePropertiesGetCall.__ENDPOINT_TEMPLATE.format(self.__role)
 
     @classmethod
@@ -78,7 +78,7 @@ class RolePropertiesGetCall(ResourceCall):
 class RolePropertiesPutCall(ResourceCall):
     """
     A ResourceCall implementation representing a single PUT request
-    to the /manage/v2/roles/{id|name}/properties REST Resource
+    to the /manage/v2/roles/{id|name}/properties REST Resource.
 
     This resource address can be used to update the properties for the specified role.
     Documentation of the REST Resource API:
@@ -125,7 +125,6 @@ class RolePropertiesPutCall(ResourceCall):
         str
             an Role Properties call endpoint
         """
-
         return RolePropertiesPutCall.__ENDPOINT_TEMPLATE.format(self.__role)
 
     @classmethod

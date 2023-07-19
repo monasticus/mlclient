@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from mlclient import constants, exceptions, utils
 from mlclient.calls import ResourceCall
 
@@ -5,7 +7,7 @@ from mlclient.calls import ResourceCall
 class ForestGetCall(ResourceCall):
     """
     A ResourceCall implementation representing a single GET request
-    to the /manage/v2/forests/{id|name} REST Resource
+    to the /manage/v2/forests/{id|name} REST Resource.
 
     Retrieve information about a forest. The forest can be identified either by id
     or name.
@@ -45,7 +47,6 @@ class ForestGetCall(ResourceCall):
             Can be properties-schema, config, edit, package, describe, status,
             xdmp:server-status or default.
         """
-
         data_format = data_format if data_format is not None else "xml"
         view = view if view is not None else "default"
         ForestGetCall.__validate_params(data_format, view)
@@ -66,7 +67,6 @@ class ForestGetCall(ResourceCall):
         str
             an Forest call endpoint
         """
-
         return ForestGetCall.__ENDPOINT_TEMPLATE.format(self.__forest)
 
     @classmethod
@@ -88,7 +88,7 @@ class ForestGetCall(ResourceCall):
 class ForestPostCall(ResourceCall):
     """
     A ResourceCall implementation representing a single POST request
-    to the /manage/v2/forests/{id|name} REST Resource
+    to the /manage/v2/forests/{id|name} REST Resource.
 
     Initiate a state change on a forest, such as a merge, restart, or attach.
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/POST/manage/v2/forests/[id-or-name]
@@ -143,7 +143,6 @@ class ForestPostCall(ResourceCall):
         str
             an Forests call endpoint
         """
-
         return ForestPostCall.__ENDPOINT_TEMPLATE.format(self.__forest)
 
     @classmethod
@@ -163,7 +162,7 @@ class ForestPostCall(ResourceCall):
 class ForestDeleteCall(ResourceCall):
     """
     A ResourceCall implementation representing a single DELETE request
-    to the /manage/v2/forests/{id|name} REST Resource
+    to the /manage/v2/forests/{id|name} REST Resource.
 
     Delete a forest.
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/DELETE/manage/v2/forests/[id-or-name]
@@ -220,7 +219,6 @@ class ForestDeleteCall(ResourceCall):
         str
             an Forest call endpoint
         """
-
         return ForestDeleteCall.__ENDPOINT_TEMPLATE.format(self.__forest)
 
     @classmethod

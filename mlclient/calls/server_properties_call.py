@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import json
 import re
 from typing import Union
@@ -9,7 +11,7 @@ from mlclient.calls import ResourceCall
 class ServerPropertiesGetCall(ResourceCall):
     """
     A ResourceCall implementation representing a single GET request
-    to the /manage/v2/servers/{id|name}/properties REST Resource
+    to the /manage/v2/servers/{id|name}/properties REST Resource.
 
     This resource address returns the current state of modifiable properties
     of the specified App Server.
@@ -48,7 +50,6 @@ class ServerPropertiesGetCall(ResourceCall):
             The format of the returned data. Can be either json or xml (default).
             This parameter overrides the Accept header if both are present.
         """
-
         data_format = data_format if data_format is not None else "xml"
         ServerPropertiesGetCall.__validate_params(data_format)
 
@@ -68,7 +69,6 @@ class ServerPropertiesGetCall(ResourceCall):
         str
             a Server Properties call endpoint
         """
-
         return ServerPropertiesGetCall.__ENDPOINT_TEMPLATE.format(self.__server)
 
     @classmethod
@@ -85,7 +85,7 @@ class ServerPropertiesGetCall(ResourceCall):
 class ServerPropertiesPutCall(ResourceCall):
     """
     A ResourceCall implementation representing a single PUT request
-    to the /manage/v2/servers/{id|name}/properties REST Resource
+    to the /manage/v2/servers/{id|name}/properties REST Resource.
 
     Initiate a properties change on the specified App Server.
     Documentation of the REST Resource API:
@@ -139,7 +139,6 @@ class ServerPropertiesPutCall(ResourceCall):
         str
             a Server Properties call endpoint
         """
-
         return ServerPropertiesPutCall.__ENDPOINT_TEMPLATE.format(self.__server)
 
     @classmethod

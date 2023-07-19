@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import json
 import re
 from typing import Union
@@ -9,7 +11,7 @@ from mlclient.calls import ResourceCall
 class ForestPropertiesGetCall(ResourceCall):
     """
     A ResourceCall implementation representing a single GET request
-    to the /manage/v2/forests/{id|name}/properties REST Resource
+    to the /manage/v2/forests/{id|name}/properties REST Resource.
 
     Retrieve the current state of modifiable properties of the forest identified
     by {id|name}.
@@ -43,7 +45,6 @@ class ForestPropertiesGetCall(ResourceCall):
             The format of the returned data. Can be either json or xml (default).
             This parameter overrides the Accept header if both are present.
         """
-
         data_format = data_format if data_format is not None else "xml"
         ForestPropertiesGetCall.__validate_params(data_format)
 
@@ -62,7 +63,6 @@ class ForestPropertiesGetCall(ResourceCall):
         str
             a Forest Properties call endpoint
         """
-
         return ForestPropertiesGetCall.__ENDPOINT_TEMPLATE.format(self.__forest)
 
     @classmethod
@@ -79,7 +79,7 @@ class ForestPropertiesGetCall(ResourceCall):
 class ForestPropertiesPutCall(ResourceCall):
     """
     A ResourceCall implementation representing a single PUT request
-    to the /manage/v2/forests/{id|name}/properties REST Resource
+    to the /manage/v2/forests/{id|name}/properties REST Resource.
 
     Modify the configuration of the forest identified by {id|name}.
     Documentation of the REST Resource API:
@@ -126,7 +126,6 @@ class ForestPropertiesPutCall(ResourceCall):
         str
             a Forest Properties call endpoint
         """
-
         return ForestPropertiesPutCall.__ENDPOINT_TEMPLATE.format(self.__forest)
 
     @classmethod

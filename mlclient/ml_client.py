@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 from types import TracebackType
 from typing import NoReturn, Union
@@ -10,7 +12,7 @@ from mlclient import constants
 
 class MLClient:
     """
-    A class used to send simple HTTP requests to a MarkLogic instance
+    A class used to send simple HTTP requests to a MarkLogic instance.
 
     Using configuration details provided it allows you to hit MarkLogic's endpoints.
     It can connect with the MarkLogic Server as a Context Manager or explicitly by
@@ -100,7 +102,6 @@ class MLClient:
         password : str
             a password
         """
-
         self.protocol = protocol
         self.host = host
         self.port = port
@@ -131,16 +132,14 @@ class MLClient:
     def connect(
             self
     ) -> NoReturn:
-        """Starts an HTTP session"""
-
+        """Starts an HTTP session."""
         self.__logger.debug("Initiating a connection")
         self.__sess = Session()
 
     def disconnect(
             self
     ) -> NoReturn:
-        """Closes an HTTP session"""
-
+        """Closes an HTTP session."""
         if self.__sess:
             self.__logger.debug("Closing a connection")
             self.__sess.close()
@@ -149,14 +148,13 @@ class MLClient:
     def is_connected(
             self
     ) -> bool:
-        """Returns True if the client has started a connection; otherwise False
+        """Returns True if the client has started a connection; otherwise False.
 
         Returns
         -------
         bool
             a boolean value representing client's connection status
         """
-
         return self.__sess is not None
 
     def get(
@@ -165,7 +163,7 @@ class MLClient:
             params: dict = None,
             headers: dict = None
     ) -> Response:
-        """Sends a GET request
+        """Sends a GET request.
 
         Parameters
         ----------
@@ -181,7 +179,6 @@ class MLClient:
         Response
             an HTTP response
         """
-
         if self.is_connected():
             url = self.base_url + endpoint
             if not headers:
@@ -205,7 +202,7 @@ class MLClient:
             headers: dict = None,
             body: Union[str, dict] = None
     ) -> Response:
-        """Sends a POST request
+        """Sends a POST request.
 
         Parameters
         ----------
@@ -223,7 +220,6 @@ class MLClient:
         Response
             an HTTP response
         """
-
         if self.is_connected():
             url = self.base_url + endpoint
             if not headers:
@@ -256,7 +252,7 @@ class MLClient:
             headers: dict = None,
             body: Union[str, dict] = None
     ) -> Response:
-        """Sends a PUT request
+        """Sends a PUT request.
 
         Parameters
         ----------
@@ -274,7 +270,6 @@ class MLClient:
         Response
             an HTTP response
         """
-
         if self.is_connected():
             url = self.base_url + endpoint
             if not headers:
@@ -306,7 +301,7 @@ class MLClient:
             params: dict = None,
             headers: dict = None
     ) -> Response:
-        """Sends a DELETE request
+        """Sends a DELETE request.
 
         Parameters
         ----------
@@ -322,7 +317,6 @@ class MLClient:
         Response
             an HTTP response
         """
-
         if self.is_connected():
             url = self.base_url + endpoint
             if not headers:

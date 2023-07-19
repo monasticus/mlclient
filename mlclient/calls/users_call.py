@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import json
 import re
 from typing import Union
@@ -9,7 +11,7 @@ from mlclient.calls import ResourceCall
 class UsersGetCall(ResourceCall):
     """
     A ResourceCall implementation representing a single GET request
-    to the /manage/v2/users REST Resource
+    to the /manage/v2/users REST Resource.
 
     This resource address returns a summary of the users in the cluster.
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/GET/manage/v2/users
@@ -47,7 +49,6 @@ class UsersGetCall(ResourceCall):
         view : str
             A specific view of the returned data. Can be: describe, or default.
         """
-
         data_format = data_format if data_format is not None else "xml"
         view = view if view is not None else "default"
         UsersGetCall.__validate_params(data_format, view)
@@ -67,7 +68,6 @@ class UsersGetCall(ResourceCall):
         str
             an Users call endpoint
         """
-
         return UsersGetCall.ENDPOINT
 
     @classmethod
@@ -89,7 +89,7 @@ class UsersGetCall(ResourceCall):
 class UsersPostCall(ResourceCall):
     """
     A ResourceCall implementation representing a single POST request
-    to the /manage/v2/users REST Resource
+    to the /manage/v2/users REST Resource.
 
     This resource address creates a new user in the security database.
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/POST/manage/v2/users
@@ -136,7 +136,6 @@ class UsersPostCall(ResourceCall):
         str
             an Users call endpoint
         """
-
         return UsersPostCall.ENDPOINT
 
     @classmethod

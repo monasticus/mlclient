@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import json
 import re
 from typing import Union
@@ -9,7 +11,7 @@ from mlclient.calls import ResourceCall
 class DatabaseGetCall(ResourceCall):
     """
     A ResourceCall implementation representing a single GET request
-    to the /manage/v2/databases/{id|name} REST Resource
+    to the /manage/v2/databases/{id|name} REST Resource.
 
     This resource address returns information on the specified database.
     The database can be identified either by ID or name.
@@ -51,7 +53,6 @@ class DatabaseGetCall(ResourceCall):
             Can be: properties-schema, package, describe, config, counts, edit, status,
             forest-storage, or default.
         """
-
         data_format = data_format if data_format is not None else "xml"
         view = view if view is not None else "default"
         DatabaseGetCall.__validate_params(data_format, view)
@@ -72,7 +73,6 @@ class DatabaseGetCall(ResourceCall):
         str
             an Database call endpoint
         """
-
         return DatabaseGetCall.__ENDPOINT_TEMPLATE.format(self.__database)
 
     @classmethod
@@ -94,7 +94,7 @@ class DatabaseGetCall(ResourceCall):
 class DatabasePostCall(ResourceCall):
     """
     A ResourceCall implementation representing a single POST request
-    to the /manage/v2/databases/{id|name} REST Resource
+    to the /manage/v2/databases/{id|name} REST Resource.
 
     This resource address can be used to clear the contents of the named database
     and to perform various configuration operations on the database.
@@ -142,7 +142,6 @@ class DatabasePostCall(ResourceCall):
         str
             an Database call endpoint
         """
-
         return DatabasePostCall.__ENDPOINT_TEMPLATE.format(self.__database)
 
     @classmethod
@@ -158,7 +157,7 @@ class DatabasePostCall(ResourceCall):
 class DatabaseDeleteCall(ResourceCall):
     """
     A ResourceCall implementation representing a single DELETE request
-    to the /manage/v2/databases/{id|name} REST Resource
+    to the /manage/v2/databases/{id|name} REST Resource.
 
     This resource address deletes the named database from the cluster.
     The database can be identified either by id or name.
@@ -209,7 +208,6 @@ class DatabaseDeleteCall(ResourceCall):
         str
             an Database call endpoint
         """
-
         return DatabaseDeleteCall.__ENDPOINT_TEMPLATE.format(self.__database)
 
     @classmethod

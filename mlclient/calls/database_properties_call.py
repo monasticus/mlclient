@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import json
 import re
 from typing import Union
@@ -9,7 +11,7 @@ from mlclient.calls import ResourceCall
 class DatabasePropertiesGetCall(ResourceCall):
     """
     A ResourceCall implementation representing a single GET request
-    to the /manage/v2/databases/{id|name}/properties REST Resource
+    to the /manage/v2/databases/{id|name}/properties REST Resource.
 
     This resource address returns the modifiable properties of the named database.
     The database can be identified either by ID or name.
@@ -43,7 +45,6 @@ class DatabasePropertiesGetCall(ResourceCall):
             The format of the returned data. Can be either json or xml (default).
             This parameter overrides the Accept header if both are present.
         """
-
         data_format = data_format if data_format is not None else "xml"
         DatabasePropertiesGetCall.__validate_params(data_format)
 
@@ -62,7 +63,6 @@ class DatabasePropertiesGetCall(ResourceCall):
         str
             an Database Properties call endpoint
         """
-
         return DatabasePropertiesGetCall.__ENDPOINT_TEMPLATE.format(self.__database)
 
     @classmethod
@@ -79,7 +79,7 @@ class DatabasePropertiesGetCall(ResourceCall):
 class DatabasePropertiesPutCall(ResourceCall):
     """
     A ResourceCall implementation representing a single PUT request
-    to the /manage/v2/databases/{id|name}/properties REST Resource
+    to the /manage/v2/databases/{id|name}/properties REST Resource.
 
     This resource address modifies the properties of the named database.
     The list of modifiable properties can be returned by the GET version
@@ -128,7 +128,6 @@ class DatabasePropertiesPutCall(ResourceCall):
         str
             an Database Properties call endpoint
         """
-
         return DatabasePropertiesPutCall.__ENDPOINT_TEMPLATE.format(self.__database)
 
     @classmethod

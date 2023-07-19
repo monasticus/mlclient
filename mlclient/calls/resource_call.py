@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from abc import ABCMeta, abstractmethod
 from typing import Any, NoReturn, Union
 
@@ -6,7 +8,7 @@ from mlclient import constants
 
 class ResourceCall(metaclass=ABCMeta):
     """
-    An abstract class representing a single request to a MarkLogic REST Resource
+    An abstract class representing a single request to a MarkLogic REST Resource.
 
     Methods
     -------
@@ -53,7 +55,6 @@ class ResourceCall(metaclass=ABCMeta):
         content_type : str
             a Content-Type header value
         """
-
         self.__method = method
         self.__params = params or {}
         self.__headers = headers or {}
@@ -83,7 +84,6 @@ class ResourceCall(metaclass=ABCMeta):
         str
             an endpoint
         """
-
         raise NotImplementedError
 
     def add_param(
@@ -91,7 +91,7 @@ class ResourceCall(metaclass=ABCMeta):
             param_name: str,
             param_value: Any
     ) -> NoReturn:
-        """Puts a request parameter if it's name and value exist
+        """Puts a request parameter if it's name and value exist.
 
         Parameters
         ----------
@@ -100,7 +100,6 @@ class ResourceCall(metaclass=ABCMeta):
         param_value : Any
             a request parameter value
         """
-
         if param_name and param_value:
             self.__params[param_name] = param_value
 
@@ -109,7 +108,7 @@ class ResourceCall(metaclass=ABCMeta):
             header_name: str,
             header_value: Any
     ) -> NoReturn:
-        """Puts a request header if it's name and value exist
+        """Puts a request header if it's name and value exist.
 
         Parameters
         ----------
@@ -118,7 +117,6 @@ class ResourceCall(metaclass=ABCMeta):
         header_value : Any
             a request header value
         """
-
         if header_name and header_value:
             self.__headers[header_name] = header_value
 
@@ -126,66 +124,61 @@ class ResourceCall(metaclass=ABCMeta):
             self,
             body: Union[str, dict]
     ) -> NoReturn:
-        """Sets a request body
+        """Sets a request body.
 
         Parameters
         ----------
         body : Union[str, dict]
             a request body
         """
-
         self.__body = body
 
     def method(
             self
     ) -> str:
-        """Returns a request method
+        """Returns a request method.
 
         Returns
         -------
         str
             a request method
         """
-
         return self.__method
 
     def params(
             self
     ) -> dict:
-        """Returns request parameters
+        """Returns request parameters.
 
         Returns
         -------
         dict
             request parameters
         """
-
         return self.__params.copy()
 
     def headers(
             self
     ) -> dict:
-        """Returns request headers
+        """Returns request headers.
 
         Returns
         -------
         dict
             request headers
         """
-
         return self.__headers.copy()
 
     def body(
             self
     ) -> Union[str, dict]:
-        """Returns a request body
+        """Returns a request body.
 
         Returns
         -------
         Union[str, dict, None]
             a request body
         """
-
         if isinstance(self.__body, str):
             return self.__body
         elif isinstance(self.__body, dict):

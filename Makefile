@@ -6,6 +6,7 @@ init:
 
 imports:
 	@isort .
+	@isort -a "from __future__ import annotations" mlclient
 
 test:
 	@pytest --cov=mlclient tests/

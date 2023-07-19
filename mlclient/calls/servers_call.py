@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import json
 import re
 from typing import Union
@@ -9,7 +11,7 @@ from mlclient.calls import ResourceCall
 class ServersGetCall(ResourceCall):
     """
     A ResourceCall implementation representing a single GET request
-    to the /manage/v2/servers REST Resource
+    to the /manage/v2/servers REST Resource.
 
     This resource address returns data about the App Servers in the cluster.
     The data returned depends on the setting of the view request parameter.
@@ -63,7 +65,6 @@ class ServersGetCall(ResourceCall):
             A value of false (the default) indicates to return detail only for first
             references. This parameter is not meaningful with view=package.
         """
-
         data_format = data_format if data_format is not None else "xml"
         view = view if view is not None else "default"
         ServersGetCall.__validate_params(data_format, view)
@@ -87,7 +88,6 @@ class ServersGetCall(ResourceCall):
         str
             an Servers call endpoint
         """
-
         return ServersGetCall.ENDPOINT
 
     @classmethod
@@ -109,7 +109,7 @@ class ServersGetCall(ResourceCall):
 class ServersPostCall(ResourceCall):
     """
     A ResourceCall implementation representing a single POST request
-    to the /manage/v2/servers REST Resource
+    to the /manage/v2/servers REST Resource.
 
     This resource address is used to create a new App Server in the specified group.
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/POST/manage/v2/servers
@@ -175,7 +175,6 @@ class ServersPostCall(ResourceCall):
         str
             an Servers call endpoint
         """
-
         return ServersPostCall.ENDPOINT
 
     @classmethod

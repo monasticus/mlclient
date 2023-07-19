@@ -1,12 +1,14 @@
 
-from mlclient import exceptions, utils, constants
+from __future__ import annotations
+
+from mlclient import constants, exceptions, utils
 from mlclient.calls import ResourceCall
 
 
 class UserGetCall(ResourceCall):
     """
     A ResourceCall implementation representing a single GET request
-    to the /manage/v2/users/{id|name} REST Resource
+    to the /manage/v2/users/{id|name} REST Resource.
 
     This resource address returns the configuration for the specified user.
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/GET/manage/v2/users/[id-or-name]
@@ -43,7 +45,6 @@ class UserGetCall(ResourceCall):
         view : str
             A specific view of the returned data. Can be: describe, or default.
         """
-
         data_format = data_format if data_format is not None else "xml"
         view = view if view is not None else "default"
         UserGetCall.__validate_params(data_format, view)
@@ -64,7 +65,6 @@ class UserGetCall(ResourceCall):
         str
             an User call endpoint
         """
-
         return UserGetCall.__ENDPOINT_TEMPLATE.format(self.__user)
 
     @classmethod
@@ -86,7 +86,7 @@ class UserGetCall(ResourceCall):
 class UserDeleteCall(ResourceCall):
     """
     A ResourceCall implementation representing a single DELETE request
-    to the /manage/v2/users/{id|name} REST Resource
+    to the /manage/v2/users/{id|name} REST Resource.
 
     This resource address deletes the named user from the named security database.
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/DELETE/manage/v2/users/[id-or-name]
@@ -123,5 +123,4 @@ class UserDeleteCall(ResourceCall):
         str
             an User call endpoint
         """
-
         return UserDeleteCall.__ENDPOINT_TEMPLATE.format(self.__user)

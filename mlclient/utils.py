@@ -1,9 +1,13 @@
+from __future__ import annotations
+
 import json
 
 from mlclient import constants, exceptions
 
 
-def get_accept_header_for_format(data_format: str):
+def get_accept_header_for_format(
+        data_format: str
+):
     if data_format in ["xml"]:
         return constants.HEADER_XML
     elif data_format in ["json"]:
@@ -17,7 +21,9 @@ def get_accept_header_for_format(data_format: str):
         raise exceptions.UnsupportedFormatError(msg)
 
 
-def get_content_type_header_for_data(data):
+def get_content_type_header_for_data(
+        data
+):
     try:
         if isinstance(data, dict):
             return constants.HEADER_JSON

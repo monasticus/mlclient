@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Union
 
 from requests import Response
@@ -36,7 +38,7 @@ class MLResourceClient(MLClient):
     dedicated APIs or as a superclass for your client.
 
     Attributes
-    -------
+    ----------
     All attributes are inherited from the MLClient superclass.
 
     Methods
@@ -314,7 +316,6 @@ class MLResourceClient(MLClient):
         Response
             an HTTP response
         """
-
         call = EvalCall(xquery=xquery,
                         javascript=javascript,
                         variables=variables,
@@ -354,7 +355,6 @@ class MLResourceClient(MLClient):
         Response
             an HTTP response
         """
-
         call = LogsCall(filename=filename,
                         data_format=data_format,
                         host=host,
@@ -383,7 +383,6 @@ class MLResourceClient(MLClient):
         Response
             an HTTP response
         """
-
         call = DatabasesGetCall(data_format=data_format,
                                 view=view)
         return self.call(call)
@@ -404,7 +403,6 @@ class MLResourceClient(MLClient):
         Response
             an HTTP response
         """
-
         call = DatabasesPostCall(body=body)
         return self.call(call)
 
@@ -433,7 +431,6 @@ class MLResourceClient(MLClient):
         Response
             an HTTP response
         """
-
         call = DatabaseGetCall(database=database,
                                data_format=data_format,
                                view=view)
@@ -458,7 +455,6 @@ class MLResourceClient(MLClient):
         Response
             an HTTP response
         """
-
         call = DatabasePostCall(database=database,
                                 body=body)
         return self.call(call)
@@ -486,7 +482,6 @@ class MLResourceClient(MLClient):
         Response
             an HTTP response
         """
-
         call = DatabaseDeleteCall(database=database,
                                   forest_delete=forest_delete)
         return self.call(call)
@@ -511,7 +506,6 @@ class MLResourceClient(MLClient):
         Response
             an HTTP response
         """
-
         call = DatabasePropertiesGetCall(database=database,
                                          data_format=data_format)
         return self.call(call)
@@ -535,7 +529,6 @@ class MLResourceClient(MLClient):
         Response
             an HTTP response
         """
-
         call = DatabasePropertiesPutCall(database=database,
                                          body=body)
         return self.call(call)
@@ -570,7 +563,6 @@ class MLResourceClient(MLClient):
         Response
             an HTTP response
         """
-
         call = ServersGetCall(data_format=data_format,
                               group_id=group_id,
                               view=view,
@@ -605,7 +597,6 @@ class MLResourceClient(MLClient):
         Response
             an HTTP response
         """
-
         call = ServersPostCall(body=body,
                                group_id=group_id,
                                server_type=server_type)
@@ -655,7 +646,6 @@ class MLResourceClient(MLClient):
         Response
             an HTTP response
         """
-
         call = ServerGetCall(server=server,
                              group_id=group_id,
                              data_format=data_format,
@@ -685,7 +675,6 @@ class MLResourceClient(MLClient):
         Response
             an HTTP response
         """
-
         call = ServerDeleteCall(server=server,
                                 group_id=group_id)
         return self.call(call)
@@ -714,7 +703,6 @@ class MLResourceClient(MLClient):
         Response
             an HTTP response
         """
-
         call = ServerPropertiesGetCall(server=server,
                                        group_id=group_id,
                                        data_format=data_format)
@@ -743,7 +731,6 @@ class MLResourceClient(MLClient):
         Response
             an HTTP response
         """
-
         call = ServerPropertiesPutCall(server=server,
                                        group_id=group_id,
                                        body=body)
@@ -787,7 +774,6 @@ class MLResourceClient(MLClient):
         Response
             an HTTP response
         """
-
         call = ForestsGetCall(data_format=data_format,
                               view=view,
                               database=database,
@@ -816,7 +802,6 @@ class MLResourceClient(MLClient):
         Response
             an HTTP response
         """
-
         call = ForestsPostCall(body=body,
                                wait_for_forest_to_mount=wait_for_forest_to_mount)
         return self.call(call)
@@ -837,7 +822,6 @@ class MLResourceClient(MLClient):
         Response
             an HTTP response
         """
-
         call = ForestsPutCall(body=body)
         return self.call(call)
 
@@ -865,7 +849,6 @@ class MLResourceClient(MLClient):
         Response
             an HTTP response
         """
-
         call = ForestGetCall(forest=forest,
                              data_format=data_format,
                              view=view)
@@ -892,7 +875,6 @@ class MLResourceClient(MLClient):
         Response
             an HTTP response
         """
-
         call = ForestPostCall(forest=forest,
                               body=body)
         return self.call(call)
@@ -924,7 +906,6 @@ class MLResourceClient(MLClient):
         Response
             an HTTP response
         """
-
         call = ForestDeleteCall(forest=forest,
                                 level=level,
                                 replicas=replicas)
@@ -950,7 +931,6 @@ class MLResourceClient(MLClient):
         Response
             an HTTP response
         """
-
         call = ForestPropertiesGetCall(forest=forest,
                                        data_format=data_format)
         return self.call(call)
@@ -974,7 +954,6 @@ class MLResourceClient(MLClient):
         Response
             an HTTP response
         """
-
         call = ForestPropertiesPutCall(forest=forest,
                                        body=body)
         return self.call(call)
@@ -998,7 +977,6 @@ class MLResourceClient(MLClient):
         Response
             an HTTP response
         """
-
         call = RolesGetCall(data_format=data_format,
                             view=view)
         return self.call(call)
@@ -1019,7 +997,6 @@ class MLResourceClient(MLClient):
         Response
             an HTTP response
         """
-
         call = RolesPostCall(body=body)
         return self.call(call)
 
@@ -1045,7 +1022,6 @@ class MLResourceClient(MLClient):
         Response
             an HTTP response
         """
-
         call = RoleGetCall(role=role,
                            data_format=data_format,
                            view=view)
@@ -1067,7 +1043,6 @@ class MLResourceClient(MLClient):
         Response
             an HTTP response
         """
-
         call = RoleDeleteCall(role=role)
         return self.call(call)
 
@@ -1091,7 +1066,6 @@ class MLResourceClient(MLClient):
         Response
             an HTTP response
         """
-
         call = RolePropertiesGetCall(role=role,
                                      data_format=data_format)
         return self.call(call)
@@ -1115,7 +1089,6 @@ class MLResourceClient(MLClient):
         Response
             an HTTP response
         """
-
         call = RolePropertiesPutCall(role=role,
                                      body=body)
         return self.call(call)
@@ -1139,7 +1112,6 @@ class MLResourceClient(MLClient):
         Response
             an HTTP response
         """
-
         call = UsersGetCall(data_format=data_format,
                             view=view)
         return self.call(call)
@@ -1160,7 +1132,6 @@ class MLResourceClient(MLClient):
         Response
             an HTTP response
         """
-
         call = UsersPostCall(body=body)
         return self.call(call)
 
@@ -1186,7 +1157,6 @@ class MLResourceClient(MLClient):
         Response
             an HTTP response
         """
-
         call = UserGetCall(user=user,
                            data_format=data_format,
                            view=view)
@@ -1208,7 +1178,6 @@ class MLResourceClient(MLClient):
         Response
             an HTTP response
         """
-
         call = UserDeleteCall(user=user)
         return self.call(call)
 
@@ -1232,7 +1201,6 @@ class MLResourceClient(MLClient):
         Response
             an HTTP response
         """
-
         call = UserPropertiesGetCall(user=user,
                                      data_format=data_format)
         return self.call(call)
@@ -1256,7 +1224,6 @@ class MLResourceClient(MLClient):
         Response
             an HTTP response
         """
-
         call = UserPropertiesPutCall(user=user,
                                      body=body)
         return self.call(call)
@@ -1277,7 +1244,6 @@ class MLResourceClient(MLClient):
         Response
             an HTTP response
         """
-
         method = call.method()
         if method == constants.METHOD_GET:
             return self.get(endpoint=call.endpoint(),

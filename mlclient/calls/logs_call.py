@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from dateutil import parser
 
 from mlclient import exceptions, utils
@@ -7,7 +9,7 @@ from mlclient.calls import ResourceCall
 class LogsCall(ResourceCall):
     """
     A ResourceCall implementation representing a single GET request
-    to the /manage/v2/logs REST Resource
+    to the /manage/v2/logs REST Resource.
 
     Returns the content of server log files.
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/GET/manage/v2/logs
@@ -59,7 +61,6 @@ class LogsCall(ResourceCall):
         regex : str
             Filters the log data, based on a regular expression.
         """
-
         data_format = data_format if data_format is not None else "html"
         LogsCall.__validate_params(data_format, start_time, end_time)
 
@@ -83,7 +84,6 @@ class LogsCall(ResourceCall):
         str
             an Logs call endpoint
         """
-
         return LogsCall.ENDPOINT
 
     @classmethod

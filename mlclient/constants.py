@@ -1,5 +1,7 @@
 
 # Request methods
+from __future__ import annotations
+
 METHOD_GET = "GET"
 METHOD_POST = "POST"
 METHOD_PUT = "PUT"

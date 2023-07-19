@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import json
 import re
 from typing import Union
@@ -9,7 +11,7 @@ from mlclient.calls import ResourceCall
 class DatabasesGetCall(ResourceCall):
     """
     A ResourceCall implementation representing a single GET request
-    to the /manage/v2/databases REST Resource
+    to the /manage/v2/databases REST Resource.
 
     This resource address returns a summary of the databases in the cluster.
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/GET/manage/v2/databases
@@ -49,7 +51,6 @@ class DatabasesGetCall(ResourceCall):
             A specific view of the returned data.
             Can be schema, properties-schema, metrics, package, describe, or default.
         """
-
         data_format = data_format if data_format is not None else "xml"
         view = view if view is not None else "default"
         DatabasesGetCall.__validate_params(data_format, view)
@@ -69,7 +70,6 @@ class DatabasesGetCall(ResourceCall):
         str
             an Databases call endpoint
         """
-
         return DatabasesGetCall.ENDPOINT
 
     @classmethod
@@ -91,7 +91,7 @@ class DatabasesGetCall(ResourceCall):
 class DatabasesPostCall(ResourceCall):
     """
     A ResourceCall implementation representing a single POST request
-    to the /manage/v2/databases REST Resource
+    to the /manage/v2/databases REST Resource.
 
     This resource address creates a new database in the cluster.
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/POST/manage/v2/databases
@@ -138,7 +138,6 @@ class DatabasesPostCall(ResourceCall):
         str
             an Databases call endpoint
         """
-
         return DatabasesPostCall.ENDPOINT
 
     @classmethod

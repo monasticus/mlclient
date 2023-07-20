@@ -14,6 +14,7 @@ class WrongParametersError(Exception):
 
     Raised when attempting to call a REST Resource with incorrect parameters.
     """
+
     pass
 
 
@@ -22,4 +23,5 @@ class UnsupportedFormatError(Exception):
 
     Raised when getting an accept header for a format.
     """
+
     pass

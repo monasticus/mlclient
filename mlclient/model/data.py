@@ -11,6 +11,55 @@ from xml.dom import minidom
 logger = logging.getLogger(__name__)
 
 
+class DocumentType(Enum):
+
+    XML = "xml"
+    JSON = "json"
+    BINARY = "binary"
+    TEXT = "text"
+
+
+class Document:
+
+    def __init__(
+            self,
+            uri: str | None = None,
+            doc_type: DocumentType = DocumentType.XML,
+            metadata: Metadata | None = None,
+            is_temporal: bool = False,
+    ):
+        self._uri = self._get_non_blank_uri(uri)
+        self._doc_type = doc_type
+        self._metadata = metadata
+        self._is_temporal = is_temporal
+
+    def uri(
+            self,
+    ) -> str:
+        return self._uri
+
+    def doc_type(
+            self,
+    ) -> DocumentType:
+        return self._doc_type
+
+    def metadata(
+            self,
+    ) -> Metadata:
+        return copy.copy(self._metadata)
+
+    def is_temporal(
+            self,
+    ) -> bool:
+        return self._is_temporal
+
+    @staticmethod
+    def _get_non_blank_uri(
+            uri: str
+    ):
+        return uri if uri is not None and not re.search("^\\s*$", uri) else None
+
+
 class Metadata:
 
     _COLLECTIONS_KEY = "collections"
@@ -211,7 +260,7 @@ class Metadata:
 
     def to_json_string(
             self,
-            indent: int = None,
+            indent: int | None = None,
     ) -> str:
         return json.dumps(self.to_json(), cls=MetadataEncoder, indent=indent)
 
@@ -337,50 +386,72 @@ class Permission:
     UPDATE_NODE = "update-node"
     EXECUTE = "execute"
 
-    __CAPABILITIES = {READ, INSERT, UPDATE, UPDATE_NODE, EXECUTE}
+    _CAPABILITIES = {READ, INSERT, UPDATE, UPDATE_NODE, EXECUTE}
 
-    def __init__(self, role_name: str, capabilities: set):
-        self.__role_name = role_name
-        self.__capabilities = {cap
-                               for cap in capabilities
-                               if cap in self.__CAPABILITIES}
+    def __init__(
+            self,
+            role_name: str,
+            capabilities: set,
+    ):
+        self._role_name = role_name
+        self._capabilities = {cap for cap in capabilities if cap in self._CAPABILITIES}
 
-    def __eq__(self, other):
+    def __eq__(
+            self,
+            other,
+    ) -> bool:
         return (isinstance(other, Permission) and
-                self.__role_name == other.__role_name and
-                self.__capabilities == other.__capabilities)
+                self._role_name == other._role_name and
+                self._capabilities == other._capabilities)
 
-    def __hash__(self):
-        items = list(self.__capabilities)
-        items.append(self.__role_name)
+    def __hash__(
+            self,
+    ) -> int:
+        items = list(self._capabilities)
+        items.append(self._role_name)
         return hash(tuple(items))
 
-    def __repr__(self):
+    def __repr__(
+            self,
+    ) -> str:
         return (f"Permission("
-                f"role_name='{self.__role_name}', "
-                f"capabilities={self.__capabilities})")
+                f"role_name='{self._role_name}', "
+                f"capabilities={self._capabilities})")
 
-    def role_name(self):
-        return self.__role_name
+    def role_name(
+            self,
+    ) -> str:
+        return self._role_name
 
-    def capabilities(self):
-        return self.__capabilities.copy()
+    def capabilities(
+            self,
+    ) -> set:
+        return self._capabilities.copy()
 
-    def add_capability(self, capability):
+    def add_capability(
+            self,
+            capability: str,
+    ) -> bool:
         allow = (capability is not None and
-                 capability in self.__CAPABILITIES and
+                 capability in self._CAPABILITIES and
                  capability not in self.capabilities())
         if allow:
-            self.__capabilities.add(capability)
+            self._capabilities.add(capability)
         return allow
 
-    def remove_capability(self, capability: str) -> bool:
-        allow = capability is not None and capability in self.capabilities()
+    def remove_capability(
+            self,
+            capability: str,
+    ) -> bool:
+        allow = (capability is not None and
+                 capability in self.capabilities())
         if allow:
-            self.__capabilities.remove(capability)
+            self._capabilities.remove(capability)
         return allow
 
-    def to_json(self):
+    def to_json(
+            self,
+    ):
         return {
             "role-name": self.role_name(),
             "capabilities": list(self.capabilities())
@@ -395,36 +466,3 @@ class MetadataEncoder(json.JSONEncoder):
         elif isinstance(obj, Permission):
             return obj.to_json()
         return json.JSONEncoder.default(self, obj)
-
-
-class DocumentType(Enum):
-    XML = "xml"
-    JSON = "json"
-    BINARY = "binary"
-    TEXT = "text"
-
-
-class Document:
-
-    def __init__(self, uri: str = None, doc_type: DocumentType = DocumentType.XML,
-                 metadata: Metadata = None, is_temporal: bool = False):
-        self.__uri = self.__get_non_blank_uri(uri)
-        self.__doc_type = doc_type
-        self.__metadata = metadata
-        self.__is_temporal = is_temporal
-
-    def uri(self) -> str:
-        return self.__uri
-
-    def doc_type(self) -> DocumentType:
-        return self.__doc_type
-
-    def metadata(self) -> Metadata:
-        return copy.copy(self.__metadata)
-
-    def is_temporal(self) -> bool:
-        return self.__is_temporal
-
-    @staticmethod
-    def __get_non_blank_uri(uri):
-        return uri if uri is not None and not re.search("^\\s*$", uri) else None

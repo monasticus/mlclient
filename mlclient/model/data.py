@@ -8,57 +8,65 @@ import xml.etree.ElementTree as ElemTree
 from enum import Enum
 from xml.dom import minidom
 
+logger = logging.getLogger(__name__)
+
 
 class Metadata:
 
-    __COLLECTIONS_KEY = "collections"
-    __PERMISSIONS_KEY = "permissions"
-    __PROPERTIES_KEY = "properties"
-    __QUALITY_KEY = "quality"
-    __METADATA_VALUES_KEY = "metadataValues"
+    _COLLECTIONS_KEY = "collections"
+    _PERMISSIONS_KEY = "permissions"
+    _PROPERTIES_KEY = "properties"
+    _QUALITY_KEY = "quality"
+    _METADATA_VALUES_KEY = "metadataValues"
 
-    __METADATA_TAG = "rapi:metadata"
-    __COLLECTIONS_TAG = "rapi:collections"
-    __COLLECTION_TAG = "rapi:collection"
-    __PERMISSIONS_TAG = "rapi:permissions"
-    __PERMISSION_TAG = "rapi:permission"
-    __ROLE_NAME_TAG = "rapi:role-name"
-    __CAPABILITY_TAG = "rapi:capability"
-    __PROPERTIES_TAG = "prop:properties"
-    __QUALITY_TAG = "rapi:quality"
-    __METADATA_VALUES_TAG = "rapi:metadata-values"
-    __METADATA_VALUE_TAG = "rapi:metadata-value"
-    __KEY_ATTR = "key"
+    _METADATA_TAG = "rapi:metadata"
+    _COLLECTIONS_TAG = "rapi:collections"
+    _COLLECTION_TAG = "rapi:collection"
+    _PERMISSIONS_TAG = "rapi:permissions"
+    _PERMISSION_TAG = "rapi:permission"
+    _ROLE_NAME_TAG = "rapi:role-name"
+    _CAPABILITY_TAG = "rapi:capability"
+    _PROPERTIES_TAG = "prop:properties"
+    _QUALITY_TAG = "rapi:quality"
+    _METADATA_VALUES_TAG = "rapi:metadata-values"
+    _METADATA_VALUE_TAG = "rapi:metadata-value"
+    _KEY_ATTR = "key"
 
-    __RAPI_NS_PREFIX = "xmlns:rapi"
-    __PROP_NS_PREFIX = "xmlns:prop"
-    __RAPI_NS_URI = "http://marklogic.com/rest-api"
-    __PROP_NS_URI = "http://marklogic.com/xdmp/property"
+    _RAPI_NS_PREFIX = "xmlns:rapi"
+    _PROP_NS_PREFIX = "xmlns:prop"
+    _RAPI_NS_URI = "http://marklogic.com/rest-api"
+    _PROP_NS_URI = "http://marklogic.com/xdmp/property"
 
-    def __init__(self,
-                 collections: list = None,
-                 permissions: list = None,
-                 properties: dict = None,
-                 quality: int = None,
-                 metadata_values: dict = None) -> None:
-        self.__logger = logging.getLogger(__name__)
-        self.__collections = list(set(collections)) if collections else list()
-        self.__permissions = self.__get_clean_permissions(permissions)
-        self.__properties = self.__get_clean_dict(properties)
-        self.__quality = quality
-        self.__metadata_values = self.__get_clean_dict(metadata_values)
+    def __init__(
+            self,
+            collections: list | None = None,
+            permissions: list | None = None,
+            properties: dict | None = None,
+            quality: int | None = None,
+            metadata_values: dict | None = None,
+    ):
+        self._collections = list(set(collections)) if collections else list()
+        self._permissions = self._get_clean_permissions(permissions)
+        self._properties = self._get_clean_dict(properties)
+        self._quality = quality
+        self._metadata_values = self._get_clean_dict(metadata_values)
 
-    def __eq__(self, other):
-        collections_diff = set(self.__collections).difference(set(other.collections()))
-        permissions_diff = set(self.__permissions).difference(set(other.permissions()))
+    def __eq__(
+            self,
+            other,
+    ) -> bool:
+        collections_diff = set(self._collections).difference(set(other.collections()))
+        permissions_diff = set(self._permissions).difference(set(other.permissions()))
         return (isinstance(other, Metadata) and
                 collections_diff == set() and
                 permissions_diff == set() and
-                self.__properties == other.properties() and
-                self.__quality == other.quality() and
-                self.__metadata_values == other.metadata_values())
+                self._properties == other.properties() and
+                self._quality == other.quality() and
+                self._metadata_values == other.metadata_values())
 
-    def __hash__(self):
+    def __hash__(
+            self,
+    ) -> int:
         items = self.collections()
         items.extend(self.permissions())
         items.append(self.quality())
@@ -66,140 +74,146 @@ class Metadata:
         items.append(frozenset(self.metadata_values().items()))
         return hash(tuple(items))
 
-    def __copy__(self):
-        return Metadata(collections=self.collections(),
-                        permissions=self.permissions(),
-                        properties=self.properties(),
-                        quality=self.quality(),
-                        metadata_values=self.metadata_values())
+    def __copy__(
+            self,
+    ) -> Metadata:
+        return Metadata(
+            collections=self.collections(),
+            permissions=self.permissions(),
+            properties=self.properties(),
+            quality=self.quality(),
+            metadata_values=self.metadata_values())
 
-    def collections(self) -> list:
-        return self.__collections.copy()
+    def collections(
+            self,
+    ) -> list:
+        return self._collections.copy()
 
-    def permissions(self) -> list:
-        return [copy.copy(perm) for perm in self.__permissions]
+    def permissions(
+            self,
+    ) -> list:
+        return [copy.copy(perm) for perm in self._permissions]
 
-    def properties(self) -> dict:
-        return self.__properties.copy()
+    def properties(
+            self,
+    ) -> dict:
+        return self._properties.copy()
 
-    def quality(self) -> int:
-        return self.__quality
+    def quality(
+            self,
+    ) -> int:
+        return self._quality
 
-    def metadata_values(self) -> dict:
-        return self.__metadata_values.copy()
+    def metadata_values(
+            self,
+    ) -> dict:
+        return self._metadata_values.copy()
 
-    def set_quality(self, quality: int) -> bool:
+    def set_quality(
+            self,
+            quality: int,
+    ) -> bool:
         allow = isinstance(quality, int)
         if allow:
-            self.__quality = quality
+            self._quality = quality
         return allow
 
-    def add_collection(self, collection: str) -> bool:
+    def add_collection(
+            self,
+            collection: str,
+    ) -> bool:
         allow = (collection is not None and
                  not re.search("^\\s*$", collection) and
                  collection not in self.collections())
         if allow:
-            self.__collections.append(collection)
+            self._collections.append(collection)
         return allow
 
-    def add_permission(self, role_name: str, capability: str) -> bool:
+    def add_permission(
+            self,
+            role_name: str,
+            capability: str,
+    ) -> bool:
         allow = role_name is not None and capability is not None
         if allow:
-            permission = self.__get_permission_for_role(role_name)
+            permission = self._get_permission_for_role(self._permissions, role_name)
             if permission is not None:
                 return permission.add_capability(capability)
             else:
-                self.__permissions.append(Permission(role_name, {capability}))
+                self._permissions.append(Permission(role_name, {capability}))
                 return True
         return allow
 
-    def put_property(self, property_name: str, property_value: str) -> None:
+    def put_property(
+            self,
+            property_name: str,
+            property_value: str,
+    ):
         if property_name and property_value:
-            self.__properties[property_name] = property_value
+            self._properties[property_name] = property_value
 
-    def put_metadata_value(self, name: str, value: str) -> None:
+    def put_metadata_value(
+            self,
+            name: str,
+            value: str,
+    ):
         if name and value:
-            self.__metadata_values[name] = value
+            self._metadata_values[name] = value
 
-    def remove_collection(self, collection: str) -> bool:
+    def remove_collection(
+            self,
+            collection: str,
+    ) -> bool:
         allow = collection is not None and collection in self.collections()
         if allow:
-            self.__collections.remove(collection)
+            self._collections.remove(collection)
         return allow
 
-    def remove_permission(self, role_name: str, capability: str = None) -> bool:
+    def remove_permission(
+            self,
+            role_name: str,
+            capability: str = None,
+    ) -> bool:
         allow = role_name is not None and capability is not None
         if allow:
-            permission = self.__get_permission_for_role(role_name)
+            permission = self._get_permission_for_role(self._permissions, role_name)
             allow = permission is not None
             if allow:
                 success = permission.remove_capability(capability)
                 if len(permission.capabilities()) == 0:
-                    self.__permissions.remove(permission)
+                    self._permissions.remove(permission)
                 return success
             return allow
         return allow
 
-    def remove_property(self, property_name: str) -> bool:
-        return self.__properties.pop(property_name, None) is not None
+    def remove_property(
+            self,
+            property_name: str,
+    ) -> bool:
+        return self._properties.pop(property_name, None) is not None
 
-    def remove_metadata_value(self, name: str) -> bool:
-        return self.__metadata_values.pop(name, None) is not None
+    def remove_metadata_value(
+            self,
+            name: str,
+    ) -> bool:
+        return self._metadata_values.pop(name, None) is not None
 
-    def to_json(self) -> dict:
+    def to_json(
+            self,
+    ) -> dict:
         return {
-            self.__COLLECTIONS_KEY: self.collections(),
-            self.__PERMISSIONS_KEY: [p.to_json() for p in self.__permissions],
-            self.__PROPERTIES_KEY: self.properties(),
-            self.__QUALITY_KEY: self.quality(),
-            self.__METADATA_VALUES_KEY: self.__metadata_values
+            self._COLLECTIONS_KEY: self.collections(),
+            self._PERMISSIONS_KEY: [p.to_json() for p in self._permissions],
+            self._PROPERTIES_KEY: self.properties(),
+            self._QUALITY_KEY: self.quality(),
+            self._METADATA_VALUES_KEY: self._metadata_values
         }
 
-    def to_json_string(self, indent: int = None) -> str:
+    def to_json_string(
+            self,
+            indent: int = None,
+    ) -> str:
         return json.dumps(self.to_json(), cls=MetadataEncoder, indent=indent)
-
-    def to_xml(self) -> ElemTree.ElementTree:
-        root = ElemTree.Element(self.__METADATA_TAG,
-                                attrib={self.__RAPI_NS_PREFIX: self.__RAPI_NS_URI})
-
-        collections_element = ElemTree.SubElement(root, self.__COLLECTIONS_TAG)
-        for collection in self.collections():
-            collection_element = ElemTree.SubElement(
-                collections_element, self.__COLLECTION_TAG)
-            collection_element.text = collection
-
-        permissions_element = ElemTree.SubElement(root, self.__PERMISSIONS_TAG)
-        for permission in self.__permissions:
-            for capability in permission.capabilities():
-                permission_element = ElemTree.SubElement(
-                    permissions_element, self.__PERMISSION_TAG)
-                role_name_element = ElemTree.SubElement(
-                    permission_element, self.__ROLE_NAME_TAG)
-                role_name_element.text = permission.role_name()
-                capability_element = ElemTree.SubElement(
-                    permission_element, self.__CAPABILITY_TAG)
-                capability_element.text = capability
-
-        properties_element = ElemTree.SubElement(
-            root,
-            self.__PROPERTIES_TAG,
-            attrib={self.__PROP_NS_PREFIX: self.__PROP_NS_URI})
-        for property_name, property_value in self.properties().items():
-            property_element = ElemTree.SubElement(properties_element, property_name)
-            property_element.text = property_value
-
-        quality_element = ElemTree.SubElement(root, self.__QUALITY_TAG)
-        quality_element.text = str(self.quality())
-
-        metadata_values_element = ElemTree.SubElement(root, self.__METADATA_VALUES_TAG)
-        for metadata_name, metadata_value in self.metadata_values().items():
-            metadata_element = ElemTree.SubElement(
-                metadata_values_element,
-                self.__METADATA_VALUE_TAG,
-                attrib={self.__KEY_ATTR: metadata_name})
-            metadata_element.text = metadata_value
-
-        return ElemTree.ElementTree(root)
 
     def to_xml_string(self, indent: int = None) -> str:
         metadata_xml = self.to_xml().getroot()
@@ -217,34 +231,99 @@ class Metadata:
                 encoding="utf-8")
         return metadata_str.decode("ascii")
 
-    def __get_permission_for_role(self, role_name: str):
-        role_permissions = (perm
-                            for perm in self.__permissions
-                            if perm.role_name() == role_name)
-        return next(role_permissions, None)
+    def to_xml(
+            self,
+    ) -> ElemTree.ElementTree:
+        attrs = {self._RAPI_NS_PREFIX: self._RAPI_NS_URI}
+        root = ElemTree.Element(self._METADATA_TAG, attrib=attrs)
 
-    def __get_clean_permissions(self, source_permissions: list):
-        if source_permissions is None:
-            return []
+        self._to_xml_collections(root)
+        self._to_xml_permissions(root)
+        self._to_xml_properties(root)
+        self._to_xml_quality(root)
+        self._to_xml_metadata_values(root)
+        return ElemTree.ElementTree(root)
+
+    def _to_xml_collections(
+            self,
+            root: ElemTree.Element,
+    ):
+        parent = ElemTree.SubElement(root, self._COLLECTIONS_TAG)
+        for collection in self.collections():
+            child = ElemTree.SubElement(parent, self._COLLECTION_TAG)
+            child.text = collection
+
+    def _to_xml_permissions(
+            self,
+            root: ElemTree.Element,
+    ):
+        permissions = ElemTree.SubElement(root, self._PERMISSIONS_TAG)
+        for perm in self._permissions:
+            for cap in perm.capabilities():
+                permission = ElemTree.SubElement(permissions, self._PERMISSION_TAG)
+                role_name = ElemTree.SubElement(permission, self._ROLE_NAME_TAG)
+                capability = ElemTree.SubElement(permission, self._CAPABILITY_TAG)
+                role_name.text = perm.role_name()
+                capability.text = cap
+
+    def _to_xml_properties(
+            self,
+            root: ElemTree.Element,
+    ):
+        attrs = {self._PROP_NS_PREFIX: self._PROP_NS_URI}
+        properties = ElemTree.SubElement(root, self._PROPERTIES_TAG, attrib=attrs)
+        for prop_name, prop_value in self.properties().items():
+            property_ = ElemTree.SubElement(properties, prop_name)
+            property_.text = prop_value
+
+    def _to_xml_quality(
+            self,
+            root: ElemTree.Element,
+    ):
+        quality = ElemTree.SubElement(root, self._QUALITY_TAG)
+        quality.text = str(self.quality())
+
+    def _to_xml_metadata_values(
+            self,
+            root: ElemTree.Element,
+    ):
+        values = ElemTree.SubElement(root, self._METADATA_VALUES_TAG)
+        for metadata_name, metadata_value in self.metadata_values().items():
+            attrs = {self._KEY_ATTR: metadata_name}
+            child = ElemTree.SubElement(values, self._METADATA_VALUE_TAG, attrib=attrs)
+            child.text = metadata_value
+
+    @classmethod
+    def _get_clean_permissions(
+            cls,
+            source_permissions: list | None,
+    ):
         permissions = []
-        roles = []
+        if source_permissions is None:
+            return permissions
+
         for permission in source_permissions:
             role_name = permission.role_name()
-            if role_name not in roles:
-                roles.append(role_name)
+            existing_perm = cls._get_permission_for_role(permissions, role_name)
+            if existing_perm is None:
                 permissions.append(permission)
             else:
-                existing_permission = next(
-                    filter(lambda p: p.role_name() == role_name, permissions))
-                self.__logger.warning(
+                logger.warning(
                     "Ignoring permission [%s]: role [%s] is already used in [%s]",
-                    permission,
-                    role_name,
-                    existing_permission)
+                    permission, role_name, existing_perm)
         return permissions
 
     @staticmethod
-    def __get_clean_dict(source_dict: dict | None):
+    def _get_permission_for_role(
+            permissions: list,
+            role_name: str,
+    ):
+        return next(filter(lambda p: p.role_name() == role_name, permissions), None)
+
+    @staticmethod
+    def _get_clean_dict(
+            source_dict: dict | None,
+    ):
         if not source_dict:
             return dict()
         return {k: str(v) for k, v in source_dict.items() if v is not None}

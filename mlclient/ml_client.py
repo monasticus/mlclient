@@ -1,3 +1,11 @@
+"""The ML Client module.
+
+It exports 2 classes:
+* MLClient
+    A low-level class used to send simple HTTP requests to a MarkLogic instance.
+* MLResourceClient
+    An MLClient subclass supporting internal REST Resources of the MarkLogic server.
+"""
 from __future__ import annotations
 
 import logging
@@ -26,8 +34,7 @@ from mlclient.calls import (DatabaseDeleteCall, DatabaseGetCall,
 
 
 class MLClient:
-    """
-    A class used to send simple HTTP requests to a MarkLogic instance.
+    """A low-level class used to send simple HTTP requests to a MarkLogic instance.
 
     Using configuration details provided it allows you to hit MarkLogic's endpoints.
     It can connect with the MarkLogic Server as a Context Manager or explicitly by
@@ -53,20 +60,20 @@ class MLClient:
     Methods
     -------
     connect() -> NoReturn
-        Starts an HTTP session
+        Start an HTTP session.
 
     disconnect() -> NoReturn
-        Closes an HTTP session
+        Close an HTTP session.
 
     is_connected() -> bool
-        Returns True if the client has started a connection; otherwise False
+        Return a connection status.
 
     get(
         endpoint: str,
         params: dict = None,
         headers: dict = None,
     ) -> Response
-        Sends a GET request
+        Send a GET request.
 
     post(
         endpoint: str,
@@ -74,7 +81,7 @@ class MLClient:
         headers: dict = None,
         body: Union[str, dict] = None,
     ) -> Response:
-        Sends a POST request
+        Send a POST request.
 
     put(
         endpoint: str,
@@ -82,14 +89,14 @@ class MLClient:
         headers: dict = None,
         body: Union[str, dict] = None,
     ) -> Response:
-        Sends a PUT request
+        Send a PUT request.
 
     delete(
         endpoint: str,
         params: dict = None,
         headers: dict = None,
     ) -> Response:
-        Sends a DELETE request
+        Send a DELETE request.
     """
 
     def __init__(
@@ -101,7 +108,8 @@ class MLClient:
             username: str = "admin",
             password: str = "admin"
     ):
-        """
+        """Initialize MLClient instance.
+
         Parameters
         ----------
         protocol : str
@@ -132,6 +140,15 @@ class MLClient:
     def __enter__(
             self
     ):
+        """Enter the MLClient instance.
+
+        It starts an HTTP session.
+
+        Returns
+        -------
+        self : MLClient
+            A MLClient instance
+        """
         self.connect()
         return self
 
@@ -141,20 +158,33 @@ class MLClient:
             exc_val: BaseException,
             exc_tb: TracebackType,
     ):
+        """Exit the MLClient instance.
+
+        It closes an HTTP session.
+
+        Parameters
+        ----------
+        exc_type : type | None
+            An exception's type
+        exc_val : BaseException | None
+            An exception's value
+        exc_tb  TracebackType | None
+            An exception's traceback
+        """
         self.disconnect()
         return None
 
     def connect(
             self
     ) -> NoReturn:
-        """Starts an HTTP session."""
+        """Start an HTTP session."""
         self.__logger.debug("Initiating a connection")
         self.__sess = Session()
 
     def disconnect(
             self
     ) -> NoReturn:
-        """Closes an HTTP session."""
+        """Close an HTTP session."""
         if self.__sess:
             self.__logger.debug("Closing a connection")
             self.__sess.close()
@@ -163,12 +193,12 @@ class MLClient:
     def is_connected(
             self
     ) -> bool:
-        """Returns True if the client has started a connection; otherwise False.
+        """Return a connection status.
 
         Returns
         -------
         bool
-            a boolean value representing client's connection status
+            True if the client has started a connection; otherwise False
         """
         return self.__sess is not None
 
@@ -178,7 +208,7 @@ class MLClient:
             params: dict = None,
             headers: dict = None
     ) -> Response:
-        """Sends a GET request.
+        """Send a GET request.
 
         Parameters
         ----------
@@ -217,7 +247,7 @@ class MLClient:
             headers: dict = None,
             body: Union[str, dict] = None
     ) -> Response:
-        """Sends a POST request.
+        """Send a POST request.
 
         Parameters
         ----------
@@ -267,7 +297,7 @@ class MLClient:
             headers: dict = None,
             body: Union[str, dict] = None
     ) -> Response:
-        """Sends a PUT request.
+        """Send a PUT request.
 
         Parameters
         ----------
@@ -316,7 +346,7 @@ class MLClient:
             params: dict = None,
             headers: dict = None
     ) -> Response:
-        """Sends a DELETE request.
+        """Send a DELETE request.
 
         Parameters
         ----------
@@ -1586,20 +1616,24 @@ class MLResourceClient(MLClient):
         """
         method = call.method()
         if method == constants.METHOD_GET:
-            return self.get(endpoint=call.endpoint(),
-                            params=call.params(),
-                            headers=call.headers())
+            return self.get(
+                endpoint=call.endpoint(),
+                params=call.params(),
+                headers=call.headers())
         elif method == constants.METHOD_POST:
-            return self.post(endpoint=call.endpoint(),
-                             params=call.params(),
-                             headers=call.headers(),
-                             body=call.body())
+            return self.post(
+                endpoint=call.endpoint(),
+                params=call.params(),
+                headers=call.headers(),
+                body=call.body())
         elif method == constants.METHOD_PUT:
-            return self.put(endpoint=call.endpoint(),
-                            params=call.params(),
-                            headers=call.headers(),
-                            body=call.body())
+            return self.put(
+                endpoint=call.endpoint(),
+                params=call.params(),
+                headers=call.headers(),
+                body=call.body())
         elif method == constants.METHOD_DELETE:
-            return self.delete(endpoint=call.endpoint(),
-                               params=call.params(),
-                               headers=call.headers())
+            return self.delete(
+                endpoint=call.endpoint(),
+                params=call.params(),
+                headers=call.headers())

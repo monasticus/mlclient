@@ -12,6 +12,19 @@ logger = logging.getLogger(__name__)
 
 
 class DocumentType(Enum):
+    """An enumeration class representing document types.
+
+    Attributes
+    ----------
+    XML : str
+        XML document type
+    JSON : str
+        JSON document type
+    BINARY : str
+        Binary document type
+    TEXT : str
+        Text document type
+    """
 
     XML = "xml"
     JSON = "json"
@@ -20,6 +33,19 @@ class DocumentType(Enum):
 
 
 class Document:
+    """A class representing a single MarkLogic document.
+
+    Methods
+    -------
+    uri() -> str
+        Return a document URI.
+    doc_type() -> DocumentType
+        Return a document type.
+    metadata() -> Metadata
+        Return a document metadata.
+    is_temporal() -> bool
+        Return the temporal flag.
+    """
 
     def __init__(
             self,
@@ -28,6 +54,19 @@ class Document:
             metadata: Metadata | None = None,
             is_temporal: bool = False,
     ):
+        """Initialize Document instance.
+
+        Parameters
+        ----------
+        uri : str
+            A document URI
+        doc_type : DocumentType
+            A document type
+        metadata : Metadata
+            A document metadata
+        is_temporal : bool
+            The temporal flag
+        """
         self._uri = self._get_non_blank_uri(uri)
         self._doc_type = doc_type
         self._metadata = metadata
@@ -36,27 +75,32 @@ class Document:
     def uri(
             self,
     ) -> str:
+        """Return a document URI."""
         return self._uri
 
     def doc_type(
             self,
     ) -> DocumentType:
+        """Return a document type."""
         return self._doc_type
 
     def metadata(
             self,
     ) -> Metadata:
+        """Return a document metadata."""
         return copy.copy(self._metadata)
 
     def is_temporal(
             self,
     ) -> bool:
+        """Return the temporal flag."""
         return self._is_temporal
 
     @staticmethod
     def _get_non_blank_uri(
             uri: str
-    ):
+    ) -> str | None:
+        """Return URI or None when blank."""
         return uri if uri is not None and not re.search("^\\s*$", uri) else None
 
 

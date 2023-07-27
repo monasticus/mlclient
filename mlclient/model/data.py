@@ -105,6 +105,47 @@ class Document:
 
 
 class Metadata:
+    """A class representing MarkLogic's document metadata.
+
+    Methods
+    -------
+    collections() -> list
+        Return document's collections.
+    permissions() -> list
+        Return document's permissions.
+    properties() -> dict
+        Return document's properties.
+    quality() -> int
+        Return document's quality.
+    metadata_values() -> dict
+        Return document's metadata values.
+    set_quality(quality: int) -> bool
+        Set document's quality.
+    add_collection(collection: str) -> bool
+        Assign a new collection to document.
+    add_permission(role_name: str, capability: str) -> bool
+        Assign a new permission to document.
+    put_property(name: str, value: str)
+        Assign a new property to document.
+    put_metadata_value(name: str, value: str)
+        Assign a new metadata value to document.
+    remove_collection(collection: str) -> bool
+        Remove a collection from document.
+    remove_permission(role_name: str, capability: str) -> bool
+        Remove a permission from document.
+    remove_property(name: str) -> bool
+        Remove a property from document.
+    remove_metadata_value(name: str) -> bool
+        Remove a metadata value from document.
+    to_json_string(indent: int | None = None) -> str
+        Return a stringified JSON representation of the Metadata instance.
+    to_json() -> dict
+        Return a JSON representation of the Metadata instance.
+    to_xml_string(indent: int = None) -> str
+        Return a stringified XML representation of the Metadata instance.
+    to_xml() -> ElemTree.ElementTree
+        Return an XML representation of the Metadata instance.
+    """
 
     _COLLECTIONS_KEY = "collections"
     _PERMISSIONS_KEY = "permissions"
@@ -138,6 +179,21 @@ class Metadata:
             quality: int | None = None,
             metadata_values: dict | None = None,
     ):
+        """Initialize Metadata instance.
+
+        Parameters
+        ----------
+        collections : list | None
+            Document collections' list
+        permissions : list | None
+            Document permissions' list
+        properties : dict | None
+            Document's properties
+        quality : int | None
+            Document's quality
+        metadata_values : dict | None
+            Document's metadata values
+        """
         self._collections = list(set(collections)) if collections else list()
         self._permissions = self._get_clean_permissions(permissions)
         self._properties = self._get_clean_dict(properties)
@@ -146,8 +202,21 @@ class Metadata:
 
     def __eq__(
             self,
-            other,
+            other: Metadata,
     ) -> bool:
+        """Verify if Metadata instances are equal.
+
+        Parameters
+        ----------
+        other : Metadata
+            A Metadata instance to compare
+
+        Returns
+        -------
+        bool
+            True if there's no difference between internal Metadata fields.
+            Otherwise, False.
+        """
         collections_diff = set(self._collections).difference(set(other.collections()))
         permissions_diff = set(self._permissions).difference(set(other.permissions()))
         return (isinstance(other, Metadata) and
@@ -160,6 +229,13 @@ class Metadata:
     def __hash__(
             self,
     ) -> int:
+        """Generate a hash value of a Metadata instance.
+
+        Returns
+        -------
+        int
+            A hash value generated using all internal Metadata fields.
+        """
         items = self.collections()
         items.extend(self.permissions())
         items.append(self.quality())
@@ -170,6 +246,7 @@ class Metadata:
     def __copy__(
             self,
     ) -> Metadata:
+        """Copy Metadata instance."""
         return Metadata(
             collections=self.collections(),
             permissions=self.permissions(),
@@ -180,32 +257,49 @@ class Metadata:
     def collections(
             self,
     ) -> list:
+        """Return document's collections."""
         return self._collections.copy()
 
     def permissions(
             self,
     ) -> list:
+        """Return document's permissions."""
         return [copy.copy(perm) for perm in self._permissions]
 
     def properties(
             self,
     ) -> dict:
+        """Return document's properties."""
         return self._properties.copy()
 
     def quality(
             self,
     ) -> int:
+        """Return document's quality."""
         return self._quality
 
     def metadata_values(
             self,
     ) -> dict:
+        """Return document's metadata values."""
         return self._metadata_values.copy()
 
     def set_quality(
             self,
             quality: int,
     ) -> bool:
+        """Set document's quality.
+
+        Parameters
+        ----------
+        quality : int
+            A document's new quality
+
+        Returns
+        -------
+        allow : bool
+            True if value provided is an integer. Otherwise, False.
+        """
         allow = isinstance(quality, int)
         if allow:
             self._quality = quality
@@ -215,6 +309,19 @@ class Metadata:
             self,
             collection: str,
     ) -> bool:
+        """Assign a new collection to document.
+
+        Parameters
+        ----------
+        collection : str
+            A document's new collection
+
+        Returns
+        -------
+        allow : bool
+            True if the collection is non-blank value, and it does not appear already
+            in document's collections. Otherwise, False.
+        """
         allow = (collection is not None and
                  not re.search("^\\s*$", collection) and
                  collection not in self.collections())
@@ -227,6 +334,21 @@ class Metadata:
             role_name: str,
             capability: str,
     ) -> bool:
+        """Assign a new permission to document.
+
+        Parameters
+        ----------
+        role_name : str
+            a permission's role name
+        capability : str
+            a permission's capability
+
+        Returns
+        -------
+        bool
+            True if there's no such capability assigned to this role already, and it is
+            a correct one. Otherwise, False.
+        """
         allow = role_name is not None and capability is not None
         if allow:
             permission = self._get_permission_for_role(self._permissions, role_name)
@@ -239,17 +361,35 @@ class Metadata:
 
     def put_property(
             self,
-            property_name: str,
-            property_value: str,
+            name: str,
+            value: str,
     ):
-        if property_name and property_value:
-            self._properties[property_name] = property_value
+        """Assign a new property to document.
+
+        Parameters
+        ----------
+        name : str
+            A property name
+        value : str
+            A property value
+        """
+        if name and value:
+            self._properties[name] = value
 
     def put_metadata_value(
             self,
             name: str,
             value: str,
     ):
+        """Assign a new metadata value to document.
+
+        Parameters
+        ----------
+        name : str
+            A metadata name
+        value : str
+            A metadata value
+        """
         if name and value:
             self._metadata_values[name] = value
 
@@ -257,6 +397,18 @@ class Metadata:
             self,
             collection: str,
     ) -> bool:
+        """Remove a collection from document.
+
+        Parameters
+        ----------
+        collection : str
+            A document's collection
+
+        Returns
+        -------
+        allow : bool
+            True if the collection is assigned to the document. Otherwise, False.
+        """
         allow = collection is not None and collection in self.collections()
         if allow:
             self._collections.remove(collection)
@@ -265,8 +417,23 @@ class Metadata:
     def remove_permission(
             self,
             role_name: str,
-            capability: str = None,
+            capability: str,
     ) -> bool:
+        """Remove a permission from document.
+
+        Parameters
+        ----------
+        role_name : str
+            A permission's role name
+        capability : str
+            A permission's capability
+
+        Returns
+        -------
+        bool
+            True if the capability is assigned to the role for a document.
+            Otherwise, False.
+        """
         allow = role_name is not None and capability is not None
         if allow:
             permission = self._get_permission_for_role(self._permissions, role_name)
@@ -281,34 +448,86 @@ class Metadata:
 
     def remove_property(
             self,
-            property_name: str,
+            name: str,
     ) -> bool:
-        return self._properties.pop(property_name, None) is not None
+        """Remove a property from document.
+
+        Parameters
+        ----------
+        name : str
+            A property name
+
+        Returns
+        -------
+        bool
+            True if the document has a property with such name. Otherwise, False.
+        """
+        return self._properties.pop(name, None) is not None
 
     def remove_metadata_value(
             self,
             name: str,
     ) -> bool:
-        return self._metadata_values.pop(name, None) is not None
+        """Remove a metadata value from document.
 
-    def to_json(
-            self,
-    ) -> dict:
-        return {
-            self._COLLECTIONS_KEY: self.collections(),
-            self._PERMISSIONS_KEY: [p.to_json() for p in self._permissions],
-            self._PROPERTIES_KEY: self.properties(),
-            self._QUALITY_KEY: self.quality(),
-            self._METADATA_VALUES_KEY: self._metadata_values
-        }
+        Parameters
+        ----------
+        name : str
+            A metadata name
+
+        Returns
+        -------
+        bool
+            True if the document has a metadata with such name. Otherwise, False.
+        """
+        return self._metadata_values.pop(name, None) is not None
 
     def to_json_string(
             self,
             indent: int | None = None,
     ) -> str:
+        """Return a stringified JSON representation of the Metadata instance.
+
+        Parameters
+        ----------
+        indent : int | None
+            A number of spaces per indent level
+
+        Returns
+        -------
+        str
+            Metadata in a stringified JSON representation
+        """
         return json.dumps(self.to_json(), cls=MetadataEncoder, indent=indent)
 
-    def to_xml_string(self, indent: int = None) -> str:
+    def to_json(
+            self,
+    ) -> dict:
+        """Return a JSON representation of the Metadata instance."""
+        return {
+            self._COLLECTIONS_KEY: self.collections(),
+            self._PERMISSIONS_KEY: [p.to_json() for p in self._permissions],
+            self._PROPERTIES_KEY: self.properties(),
+            self._QUALITY_KEY: self.quality(),
+            self._METADATA_VALUES_KEY: self._metadata_values,
+        }
+
+    def to_xml_string(
+            self,
+            indent: int = None,
+    ) -> str:
+        """Return a stringified XML representation of the Metadata instance.
+
+        Parameters
+        ----------
+        indent : int | None
+            A number of spaces per indent level
+
+        Returns
+        -------
+        str
+            Metadata in a stringified XML representation
+        """
         metadata_xml = self.to_xml().getroot()
         if indent is None:
             metadata_str = ElemTree.tostring(
@@ -327,6 +546,7 @@ class Metadata:
     def to_xml(
             self,
     ) -> ElemTree.ElementTree:
+        """Return an XML representation of the Metadata instance."""
         attrs = {self._RAPI_NS_PREFIX: self._RAPI_NS_URI}
         root = ElemTree.Element(self._METADATA_TAG, attrib=attrs)
 
@@ -341,6 +561,7 @@ class Metadata:
             self,
             root: ElemTree.Element,
     ):
+        """Add collections node to Metadata root."""
         parent = ElemTree.SubElement(root, self._COLLECTIONS_TAG)
         for collection in self.collections():
             child = ElemTree.SubElement(parent, self._COLLECTION_TAG)
@@ -350,6 +571,7 @@ class Metadata:
             self,
             root: ElemTree.Element,
     ):
+        """Add permissions node to Metadata root."""
         permissions = ElemTree.SubElement(root, self._PERMISSIONS_TAG)
         for perm in self._permissions:
             for cap in perm.capabilities():
@@ -363,6 +585,7 @@ class Metadata:
             self,
             root: ElemTree.Element,
     ):
+        """Add properties node to Metadata root."""
         attrs = {self._PROP_NS_PREFIX: self._PROP_NS_URI}
         properties = ElemTree.SubElement(root, self._PROPERTIES_TAG, attrib=attrs)
         for prop_name, prop_value in self.properties().items():
@@ -373,6 +596,7 @@ class Metadata:
             self,
             root: ElemTree.Element,
     ):
+        """Add quality node to Metadata root."""
         quality = ElemTree.SubElement(root, self._QUALITY_TAG)
         quality.text = str(self.quality())
 
@@ -380,6 +604,7 @@ class Metadata:
             self,
             root: ElemTree.Element,
     ):
+        """Add metadata values node to Metadata root."""
         values = ElemTree.SubElement(root, self._METADATA_VALUES_TAG)
         for metadata_name, metadata_value in self.metadata_values().items():
             attrs = {self._KEY_ATTR: metadata_name}
@@ -390,7 +615,21 @@ class Metadata:
     def _get_clean_permissions(
             cls,
             source_permissions: list | None,
-    ):
+    ) -> list:
+        """Return permissions list without duplicates.
+
+        If source permissions are None, it returns an empty list.
+
+        Parameters
+        ----------
+        source_permissions : list | None
+            Source permissions to clean out.
+
+        Returns
+        -------
+        permissions : list
+            A clean permissions list
+        """
         permissions = []
         if source_permissions is None:
             return permissions
@@ -410,13 +649,41 @@ class Metadata:
     def _get_permission_for_role(
             permissions: list,
             role_name: str,
-    ):
+    ) -> Permission | None:
+        """Return permissions assigned to the role provided.
+
+        Parameters
+        ----------
+        permissions : list
+            A permissions list
+        role_name : str
+            A role name
+
+        Returns
+        -------
+        Permission | None
+            A role's permission if exists. Otherwise, None.
+        """
         return next(filter(lambda p: p.role_name() == role_name, permissions), None)
 
     @staticmethod
     def _get_clean_dict(
             source_dict: dict | None,
-    ):
+    ) -> dict:
+        """Return a dictionary with stringified values and removed None values.
+
+        If source dictionary are None, it returns an empty one.
+
+        Parameters
+        ----------
+        source_dict : dict | None
+            A source dictionary to clean out.
+
+        Returns
+        -------
+        dict
+            A clean dictionary
+        """
         if not source_dict:
             return dict()
         return {k: str(v) for k, v in source_dict.items() if v is not None}

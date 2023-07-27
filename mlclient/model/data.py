@@ -6,6 +6,7 @@ import logging
 import re
 import xml.etree.ElementTree as ElemTree
 from enum import Enum
+from typing import Any
 from xml.dom import minidom
 
 logger = logging.getLogger(__name__)
@@ -844,8 +845,24 @@ class Permission:
 
 
 class MetadataEncoder(json.JSONEncoder):
+    """A JSONEncoder subclass to dump Metadata to JSON accordingly."""
 
-    def default(self, obj):
+    def default(
+            self,
+            obj: Any,
+    ) -> dict | list:
+        """Return a corresponding JSON representation of an object.
+
+        Parameters
+        ----------
+        obj : Any
+            An object to dump
+
+        Returns
+        -------
+        dict | list
+            A corresponding JSON representation of an object
+        """
         if isinstance(obj, set):
             return list(obj)
         elif isinstance(obj, Permission):

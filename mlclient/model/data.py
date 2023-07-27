@@ -690,6 +690,21 @@ class Metadata:
 
 
 class Permission:
+    """A class representing MarkLogic's document permission.
+
+    Methods
+    -------
+    role_name() -> str
+        Return permission's role name.
+    capabilities() -> set
+        Return permission's capabilities.
+    add_capability(capability: str -> bool
+        Assign a new capability to the role.
+    remove_capability(capability: str) -> bool
+        Remove a capability from the role.
+    to_json() -> dict
+        Return a JSON representation of the Permission instance.
+    """
 
     READ = "read"
     INSERT = "insert"
@@ -704,13 +719,35 @@ class Permission:
             role_name: str,
             capabilities: set,
     ):
+        """Initialize a Permission instance.
+
+        Parameters
+        ----------
+        role_name : str
+            A role name
+        capabilities : set
+            Capabilities set
+        """
         self._role_name = role_name
         self._capabilities = {cap for cap in capabilities if cap in self._CAPABILITIES}
 
     def __eq__(
             self,
-            other,
+            other: Permission,
     ) -> bool:
+        """Verify if Permission instances are equal.
+
+        Parameters
+        ----------
+        other : Permission
+            A Permission instance to compare
+
+        Returns
+        -------
+        bool
+            True if there's no difference between internal Permission fields.
+            Otherwise, False.
+        """
         return (isinstance(other, Permission) and
                 self._role_name == other._role_name and
                 self._capabilities == other._capabilities)
@@ -718,6 +755,13 @@ class Permission:
     def __hash__(
             self,
     ) -> int:
+        """Generate a hash value of a Permission instance.
+
+        Returns
+        -------
+        int
+            A hash value generated using all internal Permission fields.
+        """
         items = list(self._capabilities)
         items.append(self._role_name)
         return hash(tuple(items))
@@ -725,6 +769,7 @@ class Permission:
     def __repr__(
             self,
     ) -> str:
+        """Return a string representation of the Permission instance."""
         return (f"Permission("
                 f"role_name='{self._role_name}', "
                 f"capabilities={self._capabilities})")
@@ -732,17 +777,32 @@ class Permission:
     def role_name(
             self,
     ) -> str:
+        """Return permission's role name."""
         return self._role_name
 
     def capabilities(
             self,
     ) -> set:
+        """Return permission's capabilities."""
         return self._capabilities.copy()
 
     def add_capability(
             self,
             capability: str,
     ) -> bool:
+        """Assign a new capability to the role.
+
+        Parameters
+        ----------
+        capability : str
+            a permission's capability
+
+        Returns
+        -------
+        allow : bool
+            True if there's no such capability assigned to this role already, and it is
+            a correct one. Otherwise, False.
+        """
         allow = (capability is not None and
                  capability in self._CAPABILITIES and
                  capability not in self.capabilities())
@@ -754,6 +814,19 @@ class Permission:
             self,
             capability: str,
     ) -> bool:
+        """Remove a capability from the role.
+
+        Parameters
+        ----------
+        capability : str
+            a permission's capability
+
+        Returns
+        -------
+        allow : bool
+            True if the capability is assigned to the role.
+            Otherwise, False.
+        """
         allow = (capability is not None and
                  capability in self.capabilities())
         if allow:
@@ -762,7 +835,8 @@ class Permission:
 
     def to_json(
             self,
-    ):
+    ) -> dict:
+        """Return a JSON representation of the Permission instance."""
         return {
             "role-name": self.role_name(),
             "capabilities": list(self.capabilities())

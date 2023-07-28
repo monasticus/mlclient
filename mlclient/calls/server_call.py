@@ -1,3 +1,11 @@
+"""The ML Server Resource Calls module.
+
+It exports 2 classes:
+* ServerGetCall
+    A GET request to get app server details.
+* ServerDeleteCall
+    A DELETE request to remove an app server.
+"""
 from __future__ import annotations
 
 from mlclient import constants, exceptions, utils
@@ -45,7 +53,8 @@ class ServerGetCall(ResourceCall):
             full_refs: bool = None,
             modules: bool = None
     ):
-        """
+        """Initialize ServerGetCall instance.
+
         Parameters
         ----------
         server : str
@@ -144,7 +153,8 @@ class ServerDeleteCall(ResourceCall):
             server: str,
             group_id: str
     ):
-        """
+        """Initialize ServerDeleteCall instance.
+
         Parameters
         ----------
         server : str

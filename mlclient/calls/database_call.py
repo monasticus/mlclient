@@ -1,3 +1,13 @@
+"""The ML Database Resource Calls module.
+
+It exports 3 classes:
+* DatabaseGetCall
+    A GET request to get database details.
+* DatabasePostCall
+    A POST request to manage a database.
+* DatabaseDeleteCall
+    A DELETE request to remove a database from a cluster.
+"""
 from __future__ import annotations
 
 import json
@@ -41,7 +51,8 @@ class DatabaseGetCall(ResourceCall):
             data_format: str = "xml",
             view: str = "default"
     ):
-        """
+        """Initialize DatabaseGetCall instance.
+
         Parameters
         ----------
         database : str
@@ -118,7 +129,8 @@ class DatabasePostCall(ResourceCall):
             database: str,
             body: Union[str, dict]
     ):
-        """
+        """Initialize DatabasePostCall instance.
+
         Parameters
         ----------
         database : str
@@ -185,7 +197,8 @@ class DatabaseDeleteCall(ResourceCall):
             database: str,
             forest_delete: str = None
     ):
-        """
+        """Initialize DatabaseDeleteCall instance.
+
         Parameters
         ----------
         database : str

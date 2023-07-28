@@ -1,3 +1,9 @@
+"""The ML Eval Resource Call module.
+
+It exports 1 class:
+* EvalCall
+    A POST request to evaluate an ad-hoc query.
+"""
 from __future__ import annotations
 
 from json import dumps
@@ -43,7 +49,8 @@ class EvalCall(ResourceCall):
             database: str = None,
             txid: str = None
     ):
-        """
+        """Initialize EvalCall instance.
+
         Parameters
         ----------
         xquery : str

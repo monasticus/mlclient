@@ -1,3 +1,11 @@
+"""The ML Roles Resource Calls module.
+
+It exports 2 classes:
+* RolesGetCall
+    A GET request to get roles summary.
+* RolesPostCall
+    A POST request to create a new role.
+"""
 from __future__ import annotations
 
 import json
@@ -42,7 +50,8 @@ class RolesGetCall(ResourceCall):
             data_format: str = "xml",
             view: str = "default"
     ):
-        """
+        """Initialize RolesGetCall instance.
+
         Parameters
         ----------
         data_format : str
@@ -114,7 +123,8 @@ class RolesPostCall(ResourceCall):
             self,
             body: Union[str, dict]
     ):
-        """
+        """Initialize RolesPostCall instance.
+
         Parameters
         ----------
         body : Union[str, dict]

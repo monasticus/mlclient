@@ -1,3 +1,13 @@
+"""The ML Forests Resource Calls module.
+
+It exports 3 classes:
+* ForestsGetCall
+    A GET request to get forests summary.
+* ForestsPostCall
+    A POST request to create a new forest.
+* ForestsPutCall
+    A PUT request to perform an operation on forests.
+"""
 from __future__ import annotations
 
 import json
@@ -54,7 +64,8 @@ class ForestsGetCall(ResourceCall):
             host: str = None,
             full_refs: bool = None
     ):
-        """
+        """Initialize ForestsGetCall instance.
+
         Parameters
         ----------
         data_format : str
@@ -151,7 +162,8 @@ class ForestsPostCall(ResourceCall):
             body: Union[str, dict],
             wait_for_forest_to_mount: bool = None
     ):
-        """
+        """Initialize ForestsPostCall instance.
+
         Parameters
         ----------
         body : Union[str, dict]
@@ -222,7 +234,8 @@ class ForestsPutCall(ResourceCall):
             self,
             body: Union[str, dict]
     ):
-        """
+        """Initialize ForestsPutCall instance.
+
         Parameters
         ----------
         body : Union[str, dict]

@@ -1,3 +1,11 @@
+"""The ML Forest Properties Resource Calls module.
+
+It exports 2 classes:
+* ForestPropertiesGetCall
+    A GET request to get forest properties.
+* ForestPropertiesPutCall
+    A PUT request to modify forest properties.
+"""
 from __future__ import annotations
 
 import json
@@ -37,7 +45,8 @@ class ForestPropertiesGetCall(ResourceCall):
             forest: str,
             data_format: str = "xml"
     ):
-        """
+        """Initialize ForestPropertiesGetCall instance.
+
         Parameters
         ----------
         forest : str
@@ -101,7 +110,8 @@ class ForestPropertiesPutCall(ResourceCall):
             forest: str,
             body: Union[str, dict]
     ):
-        """
+        """Initialize ForestPropertiesPutCall instance.
+
         Parameters
         ----------
         forest : str

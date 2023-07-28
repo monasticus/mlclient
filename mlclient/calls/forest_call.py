@@ -1,3 +1,13 @@
+"""The ML Forest Resource Calls module.
+
+It exports 3 classes:
+* ForestGetCall
+    A GET request to get a forest details.
+* ForestPostCall
+    A POST request to change a forest's state.
+* ForestDeleteCall
+    A DELETE request to remove a forest.
+"""
 from __future__ import annotations
 
 from mlclient import constants, exceptions, utils
@@ -36,7 +46,8 @@ class ForestGetCall(ResourceCall):
             data_format: str = "xml",
             view: str = "default"
     ):
-        """
+        """Initialize ForestGetCall instance.
+
         Parameters
         ----------
         forest : str
@@ -119,7 +130,8 @@ class ForestPostCall(ResourceCall):
             forest: str,
             body: dict
     ):
-        """
+        """Initialize ForestPostCall instance.
+
         Parameters
         ----------
         forest : str
@@ -191,7 +203,8 @@ class ForestDeleteCall(ResourceCall):
             level: str,
             replicas: str = None
     ):
-        """
+        """Initialize ForestDeleteCall instance.
+
         Parameters
         ----------
         forest : str

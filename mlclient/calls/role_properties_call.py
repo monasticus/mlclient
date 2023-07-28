@@ -1,3 +1,11 @@
+"""The ML Role Properties Resource Calls module.
+
+It exports 2 classes:
+* RolePropertiesGetCall
+    A GET request to get role properties.
+* RolePropertiesPutCall
+    A PUT request to modify role properties.
+"""
 from __future__ import annotations
 
 import json
@@ -36,7 +44,8 @@ class RolePropertiesGetCall(ResourceCall):
             role: str,
             data_format: str = "xml"
     ):
-        """
+        """Initialize RolePropertiesGetCall instance.
+
         Parameters
         ----------
         role : str
@@ -100,7 +109,8 @@ class RolePropertiesPutCall(ResourceCall):
             role: str,
             body: Union[str, dict]
     ):
-        """
+        """Initialize RolePropertiesPutCall instance.
+
         Parameters
         ----------
         role : str

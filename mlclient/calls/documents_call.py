@@ -1,3 +1,9 @@
+"""The ML Documents Resource Calls module.
+
+It exports 1 class:
+* DocumentsGetCall
+    A GET request to retrieve documents' content or metadata.
+"""
 from __future__ import annotations
 
 from typing import Union
@@ -49,7 +55,8 @@ class DocumentsGetCall(ResourceCall):
             transform_params: dict = None,
             txid: str = None
     ):
-        """
+        """Initialize DocumentsGetCall instance.
+
         Parameters
         ----------
         uri : Union[str, list]

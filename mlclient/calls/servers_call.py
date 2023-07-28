@@ -1,3 +1,11 @@
+"""The ML Servers Resource Calls module.
+
+It exports 2 classes:
+* ServersGetCall
+    A GET request to get app servers summary.
+* ServersPostCall
+    A POST request to create a new app server.
+"""
 from __future__ import annotations
 
 import json
@@ -49,7 +57,8 @@ class ServersGetCall(ResourceCall):
             view: str = "default",
             full_refs: bool = None
     ):
-        """
+        """Initialize ServersGetCall instance.
+
         Parameters
         ----------
         data_format : str
@@ -141,7 +150,8 @@ class ServersPostCall(ResourceCall):
             group_id: str = None,
             server_type: str = None
                      ):
-        """
+        """Initialize ServersPostCall instance.
+
         Parameters
         ----------
         body : Union[str, dict]

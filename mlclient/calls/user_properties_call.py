@@ -1,3 +1,11 @@
+"""The ML User Properties Resource Calls module.
+
+It exports 2 classes:
+* UserPropertiesGetCall
+    A GET request to get user properties.
+* UserPropertiesPutCall
+    A PUT request to modify user properties.
+"""
 from __future__ import annotations
 
 import json
@@ -36,7 +44,8 @@ class UserPropertiesGetCall(ResourceCall):
             user: str,
             data_format: str = "xml"
     ):
-        """
+        """Initialize UserPropertiesGetCall instance.
+
         Parameters
         ----------
         user : str
@@ -100,7 +109,8 @@ class UserPropertiesPutCall(ResourceCall):
             user: str,
             body: Union[str, dict]
     ):
-        """
+        """Initialize UserPropertiesPutCall instance.
+
         Parameters
         ----------
         user : str

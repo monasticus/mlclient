@@ -1,3 +1,9 @@
+"""The ML Resource Call module.
+
+It exports 1 class:
+* ResourceCall
+    An abstract class representing a single request to a MarkLogic REST Resource.
+"""
 from __future__ import annotations
 
 from abc import ABCMeta, abstractmethod
@@ -38,7 +44,8 @@ class ResourceCall(metaclass=ABCMeta):
             accept: str = None,
             content_type: str = None
     ):
-        """
+        """Initialize ResourceCall implementation instance.
+
         Parameters
         ----------
         method : str
@@ -66,11 +73,22 @@ class ResourceCall(metaclass=ABCMeta):
     @classmethod
     def __subclasshook__(
             cls,
-            subclass
+            subclass: ResourceCall,
     ):
-        return (hasattr(subclass, 'endpoint') and
-                callable(subclass.endpoint) or
-                NotImplemented)
+        """Verify if a subclass implements all abstract methods.
+
+        Parameters
+        ----------
+        subclass : ResourceCall
+            A ResourceCall subclass
+
+        Returns
+        -------
+        bool
+            True if the subclass includes the generate and stringify
+            methods
+        """
+        return "endpoint" in subclass.__dict__ and callable(subclass.endpoint)
 
     @abstractmethod
     def endpoint(

@@ -1,3 +1,11 @@
+"""The ML Users Resource Calls module.
+
+It exports 2 classes:
+* UsersGetCall
+    A GET request to get users summary.
+* UsersPostCall
+    A POST request to create a new user.
+"""
 from __future__ import annotations
 
 import json
@@ -42,7 +50,8 @@ class UsersGetCall(ResourceCall):
             data_format: str = "xml",
             view: str = "default"
     ):
-        """
+        """Initialize UsersGetCall instance.
+
         Parameters
         ----------
         data_format : str
@@ -114,7 +123,8 @@ class UsersPostCall(ResourceCall):
             self,
             body: Union[str, dict]
     ):
-        """
+        """Initialize UsersPostCall instance.
+
         Parameters
         ----------
         body : Union[str, dict]

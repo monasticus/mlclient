@@ -1,3 +1,11 @@
+"""The ML Database Properties Resource Calls module.
+
+It exports 2 classes:
+* DatabasePropertiesGetCall
+    A GET request to get a database properties.
+* DatabasePropertiesPutCall
+    A PUT request to modify database properties.
+"""
 from __future__ import annotations
 
 import json
@@ -37,7 +45,8 @@ class DatabasePropertiesGetCall(ResourceCall):
             database: str,
             data_format: str = "xml"
     ):
-        """
+        """Initialize DatabasePropertiesGetCall instance.
+
         Parameters
         ----------
         database : str
@@ -103,7 +112,8 @@ class DatabasePropertiesPutCall(ResourceCall):
             database: str,
             body: Union[str, dict]
     ):
-        """
+        """Initialize DatabasePropertiesPutCall instance.
+
         Parameters
         ----------
         database : str

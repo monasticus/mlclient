@@ -1,4 +1,11 @@
+"""The ML Role Resource Calls module.
 
+It exports 2 classes:
+* RoleGetCall
+    A GET request to get a role details.
+* RoleDeleteCall
+    A DELETE request to remove a role.
+"""
 from __future__ import annotations
 
 from mlclient import constants, exceptions, utils
@@ -35,7 +42,8 @@ class RoleGetCall(ResourceCall):
             data_format: str = "xml",
             view: str = "default"
     ):
-        """
+        """Initialize RoleGetCall instance.
+
         Parameters
         ----------
         role : str
@@ -106,7 +114,8 @@ class RoleDeleteCall(ResourceCall):
             self,
             role: str
     ):
-        """
+        """Initialize RoleDeleteCall instance.
+
         Parameters
         ----------
         role : str

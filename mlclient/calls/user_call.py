@@ -1,4 +1,11 @@
+"""The ML User Resource Calls module.
 
+It exports 2 classes:
+* UserGetCall
+    A GET request to get user details.
+* UserDeleteCall
+    A DELETE request to remove a user.
+"""
 from __future__ import annotations
 
 from mlclient import constants, exceptions, utils
@@ -35,7 +42,8 @@ class UserGetCall(ResourceCall):
             data_format: str = "xml",
             view: str = "default"
     ):
-        """
+        """Initialize UserGetCall instance.
+
         Parameters
         ----------
         user : str
@@ -106,7 +114,8 @@ class UserDeleteCall(ResourceCall):
             self,
             user: str
     ):
-        """
+        """Initialize UserDeleteCall instance.
+
         Parameters
         ----------
         user : str

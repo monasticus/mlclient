@@ -1,3 +1,11 @@
+"""The ML Server Properties Resource Calls module.
+
+It exports 2 classes:
+* ServerPropertiesGetCall
+    A GET request to get app server properties.
+* ServerPropertiesPutCall
+    A PUT request to modify app server properties.
+"""
 from __future__ import annotations
 
 import json
@@ -39,7 +47,8 @@ class ServerPropertiesGetCall(ResourceCall):
             group_id: str,
             data_format: str = "xml"
     ):
-        """
+        """Initialize ServerPropertiesGetCall instance.
+
         Parameters
         ----------
         server : str
@@ -110,7 +119,8 @@ class ServerPropertiesPutCall(ResourceCall):
             group_id: str,
             body: Union[str, dict]
     ):
-        """
+        """Initialize ServerPropertiesPutCall instance.
+
         Parameters
         ----------
         server : str

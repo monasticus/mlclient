@@ -5,7 +5,8 @@ from mlclient.calls import ResourceCall
 
 
 class ServerGetCall(ResourceCall):
-    """
+    """A GET request to get app server details.
+
     A ResourceCall implementation representing a single GET request
     to the /manage/v2/servers/{id|name} REST Resource.
 
@@ -98,7 +99,7 @@ class ServerGetCall(ResourceCall):
         Returns
         -------
         str
-            an Server call endpoint
+            A Server call endpoint
         """
         return ServerGetCall.__ENDPOINT_TEMPLATE.format(self.__server)
 
@@ -119,7 +120,8 @@ class ServerGetCall(ResourceCall):
 
 
 class ServerDeleteCall(ResourceCall):
-    """
+    """A DELETE request to remove an app server.
+
     A ResourceCall implementation representing a single DELETE request
     to the /manage/v2/servers/{id|name} REST Resource.
 
@@ -163,6 +165,6 @@ class ServerDeleteCall(ResourceCall):
         Returns
         -------
         str
-            an Server call endpoint
+            A Server call endpoint
         """
         return ServerDeleteCall.__ENDPOINT_TEMPLATE.format(self.__server)

@@ -9,7 +9,8 @@ from mlclient.calls import ResourceCall
 
 
 class ForestsGetCall(ResourceCall):
-    """
+    """A GET request to get forests summary.
+
     A ResourceCall implementation representing a single GET request
     to the /manage/v2/forests REST Resource.
 
@@ -22,7 +23,7 @@ class ForestsGetCall(ResourceCall):
     Attributes
     ----------
     ENDPOINT
-        a static constant storing the Forests endpoint value
+        A static constant storing the Forests endpoint value
 
     Methods
     -------
@@ -99,7 +100,7 @@ class ForestsGetCall(ResourceCall):
         Returns
         -------
         str
-            an Forests call endpoint
+            A Forests call endpoint
         """
         return ForestsGetCall.ENDPOINT
 
@@ -120,7 +121,8 @@ class ForestsGetCall(ResourceCall):
 
 
 class ForestsPostCall(ResourceCall):
-    """
+    """A POST request to create a new forest.
+
     A ResourceCall implementation representing a single POST request
     to the /manage/v2/forests REST Resource.
 
@@ -131,7 +133,7 @@ class ForestsPostCall(ResourceCall):
     Attributes
     ----------
     ENDPOINT
-        a static constant storing the Forests endpoint value
+        A static constant storing the Forests endpoint value
 
     Methods
     -------
@@ -178,7 +180,7 @@ class ForestsPostCall(ResourceCall):
         Returns
         -------
         str
-            an Forests call endpoint
+            A Forests call endpoint
         """
         return ForestsPostCall.ENDPOINT
 
@@ -193,7 +195,8 @@ class ForestsPostCall(ResourceCall):
 
 
 class ForestsPutCall(ResourceCall):
-    """
+    """A PUT request to perform an operation on forests.
+
     A ResourceCall implementation representing a single PUT request
     to the /manage/v2/forests REST Resource.
 
@@ -204,7 +207,7 @@ class ForestsPutCall(ResourceCall):
     Attributes
     ----------
     ENDPOINT
-        a static constant storing the Forests endpoint value
+        A static constant storing the Forests endpoint value
 
     Methods
     -------
@@ -241,7 +244,7 @@ class ForestsPutCall(ResourceCall):
         Returns
         -------
         str
-            an Forests call endpoint
+            A Forests call endpoint
         """
         return ForestsPostCall.ENDPOINT
 

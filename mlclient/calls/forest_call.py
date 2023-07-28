@@ -5,7 +5,8 @@ from mlclient.calls import ResourceCall
 
 
 class ForestGetCall(ResourceCall):
-    """
+    """A GET request to get a forest details.
+
     A ResourceCall implementation representing a single GET request
     to the /manage/v2/forests/{id|name} REST Resource.
 
@@ -65,7 +66,7 @@ class ForestGetCall(ResourceCall):
         Returns
         -------
         str
-            an Forest call endpoint
+            A Forest call endpoint
         """
         return ForestGetCall.__ENDPOINT_TEMPLATE.format(self.__forest)
 
@@ -86,7 +87,8 @@ class ForestGetCall(ResourceCall):
 
 
 class ForestPostCall(ResourceCall):
-    """
+    """A POST request to change a forest's state.
+
     A ResourceCall implementation representing a single POST request
     to the /manage/v2/forests/{id|name} REST Resource.
 
@@ -141,7 +143,7 @@ class ForestPostCall(ResourceCall):
         Returns
         -------
         str
-            an Forests call endpoint
+            A Forests call endpoint
         """
         return ForestPostCall.__ENDPOINT_TEMPLATE.format(self.__forest)
 
@@ -160,7 +162,8 @@ class ForestPostCall(ResourceCall):
 
 
 class ForestDeleteCall(ResourceCall):
-    """
+    """A DELETE request to remove a forest.
+
     A ResourceCall implementation representing a single DELETE request
     to the /manage/v2/forests/{id|name} REST Resource.
 
@@ -217,7 +220,7 @@ class ForestDeleteCall(ResourceCall):
         Returns
         -------
         str
-            an Forest call endpoint
+            A Forest call endpoint
         """
         return ForestDeleteCall.__ENDPOINT_TEMPLATE.format(self.__forest)
 

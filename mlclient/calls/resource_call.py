@@ -1,33 +1,32 @@
 from __future__ import annotations
 
 from abc import ABCMeta, abstractmethod
-from typing import Any, NoReturn, Union
+from typing import Any, Union
 
 from mlclient import constants
 
 
 class ResourceCall(metaclass=ABCMeta):
-    """
-    An abstract class representing a single request to a MarkLogic REST Resource.
+    """An abstract class representing a single request to a MarkLogic REST Resource.
 
     Methods
     -------
     endpoint() -> str
         An abstract method returning an endpoint for a specific resource call
-    add_param(param_name: str, param_value: Any) -> NoReturn
-        Puts a request parameter if it's name and value exist
-    add_header(header_name: str, header_value: Any) -> NoReturn
-        Puts a request header if it's name and value exist
-    set_body(body: Union[str, dict]) -> NoReturn
-        Sets a request body
+    add_param(param_name: str, param_value: Any)
+        Put a request parameter if it's name and value exist
+    add_header(header_name: str, header_value: Any)
+        Put a request header if it's name and value exist
+    set_body(body: Union[str, dict])
+        Set a request body
     method() -> str
-        Returns a request method
+        Return a request method
     params() -> dict
-        Returns request parameters
+        Return request parameters
     headers() -> dict
-        Returns request headers
+        Return request headers
     body() -> Union[str, dict]
-        Returns a request body
+        Return a request body
     """
 
     def __init__(
@@ -82,7 +81,7 @@ class ResourceCall(metaclass=ABCMeta):
         Returns
         -------
         str
-            an endpoint
+            An endpoint
         """
         raise NotImplementedError
 
@@ -90,8 +89,8 @@ class ResourceCall(metaclass=ABCMeta):
             self,
             param_name: str,
             param_value: Any
-    ) -> NoReturn:
-        """Puts a request parameter if it's name and value exist.
+    ):
+        """Put a request parameter if it's name and value exist.
 
         Parameters
         ----------
@@ -107,8 +106,8 @@ class ResourceCall(metaclass=ABCMeta):
             self,
             header_name: str,
             header_value: Any
-    ) -> NoReturn:
-        """Puts a request header if it's name and value exist.
+    ):
+        """Put a request header if it's name and value exist.
 
         Parameters
         ----------
@@ -123,8 +122,8 @@ class ResourceCall(metaclass=ABCMeta):
     def set_body(
             self,
             body: Union[str, dict]
-    ) -> NoReturn:
-        """Sets a request body.
+    ):
+        """Set a request body.
 
         Parameters
         ----------
@@ -136,7 +135,7 @@ class ResourceCall(metaclass=ABCMeta):
     def method(
             self
     ) -> str:
-        """Returns a request method.
+        """Return a request method.
 
         Returns
         -------
@@ -148,7 +147,7 @@ class ResourceCall(metaclass=ABCMeta):
     def params(
             self
     ) -> dict:
-        """Returns request parameters.
+        """Return request parameters.
 
         Returns
         -------
@@ -160,7 +159,7 @@ class ResourceCall(metaclass=ABCMeta):
     def headers(
             self
     ) -> dict:
-        """Returns request headers.
+        """Return request headers.
 
         Returns
         -------
@@ -172,7 +171,7 @@ class ResourceCall(metaclass=ABCMeta):
     def body(
             self
     ) -> Union[str, dict]:
-        """Returns a request body.
+        """Return a request body.
 
         Returns
         -------

@@ -9,7 +9,8 @@ from mlclient.calls import ResourceCall
 
 
 class ForestPropertiesGetCall(ResourceCall):
-    """
+    """A GET request to get forest properties.
+
     A ResourceCall implementation representing a single GET request
     to the /manage/v2/forests/{id|name}/properties REST Resource.
 
@@ -61,7 +62,7 @@ class ForestPropertiesGetCall(ResourceCall):
         Returns
         -------
         str
-            a Forest Properties call endpoint
+            A Forest Properties call endpoint
         """
         return ForestPropertiesGetCall.__ENDPOINT_TEMPLATE.format(self.__forest)
 
@@ -77,7 +78,8 @@ class ForestPropertiesGetCall(ResourceCall):
 
 
 class ForestPropertiesPutCall(ResourceCall):
-    """
+    """A PUT request to modify forest properties.
+
     A ResourceCall implementation representing a single PUT request
     to the /manage/v2/forests/{id|name}/properties REST Resource.
 
@@ -124,7 +126,7 @@ class ForestPropertiesPutCall(ResourceCall):
         Returns
         -------
         str
-            a Forest Properties call endpoint
+            A Forest Properties call endpoint
         """
         return ForestPropertiesPutCall.__ENDPOINT_TEMPLATE.format(self.__forest)
 

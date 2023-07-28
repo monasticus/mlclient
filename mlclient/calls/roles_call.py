@@ -9,7 +9,8 @@ from mlclient.calls import ResourceCall
 
 
 class RolesGetCall(ResourceCall):
-    """
+    """A GET request to get roles summary.
+
     A ResourceCall implementation representing a single GET request
     to the /manage/v2/roles REST Resource.
 
@@ -19,7 +20,7 @@ class RolesGetCall(ResourceCall):
     Attributes
     ----------
     ENDPOINT
-        a static constant storing the Roles endpoint value
+        A static constant storing the Roles endpoint value
 
     Methods
     -------
@@ -66,7 +67,7 @@ class RolesGetCall(ResourceCall):
         Returns
         -------
         str
-            an Roles call endpoint
+            A Roles call endpoint
         """
         return RolesGetCall.ENDPOINT
 
@@ -87,7 +88,8 @@ class RolesGetCall(ResourceCall):
 
 
 class RolesPostCall(ResourceCall):
-    """
+    """A POST request to create a new role.
+
     A ResourceCall implementation representing a single POST request
     to the /manage/v2/roles REST Resource.
 
@@ -97,7 +99,7 @@ class RolesPostCall(ResourceCall):
     Attributes
     ----------
     ENDPOINT
-        a static constant storing the Roles endpoint value
+        A static constant storing the Roles endpoint value
 
     Methods
     -------
@@ -134,7 +136,7 @@ class RolesPostCall(ResourceCall):
         Returns
         -------
         str
-            an Roles call endpoint
+            A Roles call endpoint
         """
         return RolesPostCall.ENDPOINT
 

@@ -9,7 +9,8 @@ from mlclient.calls import ResourceCall
 
 
 class RolePropertiesGetCall(ResourceCall):
-    """
+    """A GET request to get role properties.
+
     A ResourceCall implementation representing a single GET request
     to the /manage/v2/roles/{id|name}/properties REST Resource.
 
@@ -60,7 +61,7 @@ class RolePropertiesGetCall(ResourceCall):
         Returns
         -------
         str
-            an Role Properties call endpoint
+            A Role Properties call endpoint
         """
         return RolePropertiesGetCall.__ENDPOINT_TEMPLATE.format(self.__role)
 
@@ -76,7 +77,8 @@ class RolePropertiesGetCall(ResourceCall):
 
 
 class RolePropertiesPutCall(ResourceCall):
-    """
+    """A PUT request to modify role properties.
+
     A ResourceCall implementation representing a single PUT request
     to the /manage/v2/roles/{id|name}/properties REST Resource.
 
@@ -123,7 +125,7 @@ class RolePropertiesPutCall(ResourceCall):
         Returns
         -------
         str
-            an Role Properties call endpoint
+            A Role Properties call endpoint
         """
         return RolePropertiesPutCall.__ENDPOINT_TEMPLATE.format(self.__role)
 

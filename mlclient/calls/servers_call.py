@@ -9,7 +9,8 @@ from mlclient.calls import ResourceCall
 
 
 class ServersGetCall(ResourceCall):
-    """
+    """A GET request to get app servers summary.
+
     A ResourceCall implementation representing a single GET request
     to the /manage/v2/servers REST Resource.
 
@@ -21,7 +22,7 @@ class ServersGetCall(ResourceCall):
     Attributes
     ----------
     ENDPOINT
-        a static constant storing the Servers endpoint value
+        A static constant storing the Servers endpoint value
 
     Methods
     -------
@@ -86,7 +87,7 @@ class ServersGetCall(ResourceCall):
         Returns
         -------
         str
-            an Servers call endpoint
+            A Servers call endpoint
         """
         return ServersGetCall.ENDPOINT
 
@@ -107,7 +108,8 @@ class ServersGetCall(ResourceCall):
 
 
 class ServersPostCall(ResourceCall):
-    """
+    """A POST request to create a new app server.
+
     A ResourceCall implementation representing a single POST request
     to the /manage/v2/servers REST Resource.
 
@@ -117,7 +119,7 @@ class ServersPostCall(ResourceCall):
     Attributes
     ----------
     ENDPOINT
-        a static constant storing the Servers endpoint value
+        A static constant storing the Servers endpoint value
 
     Methods
     -------
@@ -173,7 +175,7 @@ class ServersPostCall(ResourceCall):
         Returns
         -------
         str
-            an Servers call endpoint
+            A Servers call endpoint
         """
         return ServersPostCall.ENDPOINT
 

@@ -7,7 +7,8 @@ from mlclient.calls import ResourceCall
 
 
 class EvalCall(ResourceCall):
-    """
+    """A POST request to evaluate an ad-hoc query.
+
     A ResourceCall implementation representing a single request
     to the /v1/eval REST Resource.
 
@@ -17,7 +18,7 @@ class EvalCall(ResourceCall):
     Attributes
     ----------
     ENDPOINT
-        a static constant storing the Eval endpoint value
+        A static constant storing the Eval endpoint value
 
     Methods
     -------
@@ -80,7 +81,7 @@ class EvalCall(ResourceCall):
         Returns
         -------
         str
-            an Eval call endpoint
+            An Eval call endpoint
         """
         return EvalCall.ENDPOINT
 

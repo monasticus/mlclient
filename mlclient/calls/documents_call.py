@@ -7,7 +7,8 @@ from mlclient.calls import ResourceCall
 
 
 class DocumentsGetCall(ResourceCall):
-    """
+    """A GET request to retrieve documents' content or metadata.
+
     A ResourceCall implementation representing a single GET request
     to the /manage/v2/documents REST Resource.
 
@@ -112,7 +113,7 @@ class DocumentsGetCall(ResourceCall):
         Returns
         -------
         str
-            an Documents call endpoint
+            A Documents call endpoint
         """
         return DocumentsGetCall.ENDPOINT
 

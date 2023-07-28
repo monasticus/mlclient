@@ -9,7 +9,8 @@ from mlclient.calls import ResourceCall
 
 
 class ServerPropertiesGetCall(ResourceCall):
-    """
+    """A GET request to get app server properties.
+
     A ResourceCall implementation representing a single GET request
     to the /manage/v2/servers/{id|name}/properties REST Resource.
 
@@ -67,7 +68,7 @@ class ServerPropertiesGetCall(ResourceCall):
         Returns
         -------
         str
-            a Server Properties call endpoint
+            A Server Properties call endpoint
         """
         return ServerPropertiesGetCall.__ENDPOINT_TEMPLATE.format(self.__server)
 
@@ -83,7 +84,8 @@ class ServerPropertiesGetCall(ResourceCall):
 
 
 class ServerPropertiesPutCall(ResourceCall):
-    """
+    """A PUT request to modify app server properties.
+
     A ResourceCall implementation representing a single PUT request
     to the /manage/v2/servers/{id|name}/properties REST Resource.
 
@@ -137,7 +139,7 @@ class ServerPropertiesPutCall(ResourceCall):
         Returns
         -------
         str
-            a Server Properties call endpoint
+            A Server Properties call endpoint
         """
         return ServerPropertiesPutCall.__ENDPOINT_TEMPLATE.format(self.__server)
 

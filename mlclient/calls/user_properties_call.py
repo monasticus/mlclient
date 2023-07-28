@@ -9,7 +9,8 @@ from mlclient.calls import ResourceCall
 
 
 class UserPropertiesGetCall(ResourceCall):
-    """
+    """A GET request to get user properties.
+
     A ResourceCall implementation representing a single GET request
     to the /manage/v2/users/{id|name}/properties REST Resource.
 
@@ -60,7 +61,7 @@ class UserPropertiesGetCall(ResourceCall):
         Returns
         -------
         str
-            an User Properties call endpoint
+            An User Properties call endpoint
         """
         return UserPropertiesGetCall.__ENDPOINT_TEMPLATE.format(self.__user)
 
@@ -76,7 +77,8 @@ class UserPropertiesGetCall(ResourceCall):
 
 
 class UserPropertiesPutCall(ResourceCall):
-    """
+    """A PUT request to modify user properties.
+
     A ResourceCall implementation representing a single PUT request
     to the /manage/v2/users/{id|name}/properties REST Resource.
 
@@ -123,7 +125,7 @@ class UserPropertiesPutCall(ResourceCall):
         Returns
         -------
         str
-            an User Properties call endpoint
+            An User Properties call endpoint
         """
         return UserPropertiesPutCall.__ENDPOINT_TEMPLATE.format(self.__user)
 

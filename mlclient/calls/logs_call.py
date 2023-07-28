@@ -7,7 +7,8 @@ from mlclient.calls import ResourceCall
 
 
 class LogsCall(ResourceCall):
-    """
+    """A GET request to retrieve logs.
+
     A ResourceCall implementation representing a single GET request
     to the /manage/v2/logs REST Resource.
 
@@ -17,7 +18,7 @@ class LogsCall(ResourceCall):
     Attributes
     ----------
     ENDPOINT
-        a static constant storing the Logs endpoint value
+        A static constant storing the Logs endpoint value
 
     Methods
     -------
@@ -82,7 +83,7 @@ class LogsCall(ResourceCall):
         Returns
         -------
         str
-            an Logs call endpoint
+            A Logs call endpoint
         """
         return LogsCall.ENDPOINT
 

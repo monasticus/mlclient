@@ -9,7 +9,8 @@ from mlclient.calls import ResourceCall
 
 
 class DatabasePropertiesGetCall(ResourceCall):
-    """
+    """A GET request to get a database properties.
+
     A ResourceCall implementation representing a single GET request
     to the /manage/v2/databases/{id|name}/properties REST Resource.
 
@@ -61,7 +62,7 @@ class DatabasePropertiesGetCall(ResourceCall):
         Returns
         -------
         str
-            an Database Properties call endpoint
+            A Database Properties call endpoint
         """
         return DatabasePropertiesGetCall.__ENDPOINT_TEMPLATE.format(self.__database)
 
@@ -77,7 +78,8 @@ class DatabasePropertiesGetCall(ResourceCall):
 
 
 class DatabasePropertiesPutCall(ResourceCall):
-    """
+    """A PUT request to modify database properties.
+
     A ResourceCall implementation representing a single PUT request
     to the /manage/v2/databases/{id|name}/properties REST Resource.
 
@@ -126,7 +128,7 @@ class DatabasePropertiesPutCall(ResourceCall):
         Returns
         -------
         str
-            an Database Properties call endpoint
+            A Database Properties call endpoint
         """
         return DatabasePropertiesPutCall.__ENDPOINT_TEMPLATE.format(self.__database)
 

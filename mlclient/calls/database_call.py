@@ -9,7 +9,8 @@ from mlclient.calls import ResourceCall
 
 
 class DatabaseGetCall(ResourceCall):
-    """
+    """A GET request to get database details.
+
     A ResourceCall implementation representing a single GET request
     to the /manage/v2/databases/{id|name} REST Resource.
 
@@ -71,7 +72,7 @@ class DatabaseGetCall(ResourceCall):
         Returns
         -------
         str
-            an Database call endpoint
+            A Database call endpoint
         """
         return DatabaseGetCall.__ENDPOINT_TEMPLATE.format(self.__database)
 
@@ -92,14 +93,16 @@ class DatabaseGetCall(ResourceCall):
 
 
 class DatabasePostCall(ResourceCall):
-    """
+    """A POST request to manage a database.
+
     A ResourceCall implementation representing a single POST request
     to the /manage/v2/databases/{id|name} REST Resource.
 
     This resource address can be used to clear the contents of the named database
     and to perform various configuration operations on the database.
     The database can be identified either by id or name.
-    Documentation of the REST Resource API: https://docs.marklogic.com/REST/POST/manage/v2/databases/[id-or-name]
+    Documentation of the REST Resource API:
+    https://docs.marklogic.com/REST/POST/manage/v2/databases/[id-or-name]
 
     Methods
     -------
@@ -140,7 +143,7 @@ class DatabasePostCall(ResourceCall):
         Returns
         -------
         str
-            an Database call endpoint
+            A Database call endpoint
         """
         return DatabasePostCall.__ENDPOINT_TEMPLATE.format(self.__database)
 
@@ -155,7 +158,8 @@ class DatabasePostCall(ResourceCall):
 
 
 class DatabaseDeleteCall(ResourceCall):
-    """
+    """A DELETE request to remove a database from a cluster.
+
     A ResourceCall implementation representing a single DELETE request
     to the /manage/v2/databases/{id|name} REST Resource.
 
@@ -206,7 +210,7 @@ class DatabaseDeleteCall(ResourceCall):
         Returns
         -------
         str
-            an Database call endpoint
+            A Database call endpoint
         """
         return DatabaseDeleteCall.__ENDPOINT_TEMPLATE.format(self.__database)
 

@@ -6,7 +6,8 @@ from mlclient.calls import ResourceCall
 
 
 class UserGetCall(ResourceCall):
-    """
+    """A GET request to get user details.
+
     A ResourceCall implementation representing a single GET request
     to the /manage/v2/users/{id|name} REST Resource.
 
@@ -63,7 +64,7 @@ class UserGetCall(ResourceCall):
         Returns
         -------
         str
-            an User call endpoint
+            An User call endpoint
         """
         return UserGetCall.__ENDPOINT_TEMPLATE.format(self.__user)
 
@@ -84,7 +85,8 @@ class UserGetCall(ResourceCall):
 
 
 class UserDeleteCall(ResourceCall):
-    """
+    """A DELETE request to remove a user.
+
     A ResourceCall implementation representing a single DELETE request
     to the /manage/v2/users/{id|name} REST Resource.
 
@@ -121,6 +123,6 @@ class UserDeleteCall(ResourceCall):
         Returns
         -------
         str
-            an User call endpoint
+            An User call endpoint
         """
         return UserDeleteCall.__ENDPOINT_TEMPLATE.format(self.__user)

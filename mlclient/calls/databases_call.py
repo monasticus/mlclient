@@ -9,7 +9,8 @@ from mlclient.calls import ResourceCall
 
 
 class DatabasesGetCall(ResourceCall):
-    """
+    """A GET request to get databases summary.
+
     A ResourceCall implementation representing a single GET request
     to the /manage/v2/databases REST Resource.
 
@@ -19,7 +20,7 @@ class DatabasesGetCall(ResourceCall):
     Attributes
     ----------
     ENDPOINT
-        a static constant storing the Databases endpoint value
+        A static constant storing the Databases endpoint value
 
     Methods
     -------
@@ -68,7 +69,7 @@ class DatabasesGetCall(ResourceCall):
         Returns
         -------
         str
-            an Databases call endpoint
+            A Databases call endpoint
         """
         return DatabasesGetCall.ENDPOINT
 
@@ -89,7 +90,8 @@ class DatabasesGetCall(ResourceCall):
 
 
 class DatabasesPostCall(ResourceCall):
-    """
+    """A POST request to create a new database.
+
     A ResourceCall implementation representing a single POST request
     to the /manage/v2/databases REST Resource.
 
@@ -99,7 +101,7 @@ class DatabasesPostCall(ResourceCall):
     Attributes
     ----------
     ENDPOINT
-        a static constant storing the Databases endpoint value
+        A static constant storing the Databases endpoint value
 
     Methods
     -------
@@ -136,7 +138,7 @@ class DatabasesPostCall(ResourceCall):
         Returns
         -------
         str
-            an Databases call endpoint
+            A Databases call endpoint
         """
         return DatabasesPostCall.ENDPOINT
 

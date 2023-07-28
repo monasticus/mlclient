@@ -6,7 +6,8 @@ from mlclient.calls import ResourceCall
 
 
 class RoleGetCall(ResourceCall):
-    """
+    """A GET request to get a role details.
+
     A ResourceCall implementation representing a single GET request
     to the /manage/v2/roles/{id|name} REST Resource.
 
@@ -63,7 +64,7 @@ class RoleGetCall(ResourceCall):
         Returns
         -------
         str
-            an Role call endpoint
+            A Role call endpoint
         """
         return RoleGetCall.__ENDPOINT_TEMPLATE.format(self.__role)
 
@@ -84,7 +85,8 @@ class RoleGetCall(ResourceCall):
 
 
 class RoleDeleteCall(ResourceCall):
-    """
+    """A DELETE request to remove a role.
+
     A ResourceCall implementation representing a single DELETE request
     to the /manage/v2/roles/{id|name} REST Resource.
 
@@ -121,6 +123,6 @@ class RoleDeleteCall(ResourceCall):
         Returns
         -------
         str
-            an Role call endpoint
+            A Role call endpoint
         """
         return RoleDeleteCall.__ENDPOINT_TEMPLATE.format(self.__role)

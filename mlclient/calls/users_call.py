@@ -9,7 +9,8 @@ from mlclient.calls import ResourceCall
 
 
 class UsersGetCall(ResourceCall):
-    """
+    """A GET request to get users summary.
+
     A ResourceCall implementation representing a single GET request
     to the /manage/v2/users REST Resource.
 
@@ -19,7 +20,7 @@ class UsersGetCall(ResourceCall):
     Attributes
     ----------
     ENDPOINT
-        a static constant storing the Users endpoint value
+        A static constant storing the Users endpoint value
 
     Methods
     -------
@@ -66,7 +67,7 @@ class UsersGetCall(ResourceCall):
         Returns
         -------
         str
-            an Users call endpoint
+            An Users call endpoint
         """
         return UsersGetCall.ENDPOINT
 
@@ -87,7 +88,8 @@ class UsersGetCall(ResourceCall):
 
 
 class UsersPostCall(ResourceCall):
-    """
+    """A POST request to create a new user.
+
     A ResourceCall implementation representing a single POST request
     to the /manage/v2/users REST Resource.
 
@@ -97,7 +99,7 @@ class UsersPostCall(ResourceCall):
     Attributes
     ----------
     ENDPOINT
-        a static constant storing the Users endpoint value
+        A static constant storing the Users endpoint value
 
     Methods
     -------
@@ -134,7 +136,7 @@ class UsersPostCall(ResourceCall):
         Returns
         -------
         str
-            an Users call endpoint
+            An Users call endpoint
         """
         return UsersPostCall.ENDPOINT
 

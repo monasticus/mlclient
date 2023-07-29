@@ -10,7 +10,6 @@ from __future__ import annotations
 
 import json
 import re
-from typing import Union
 
 from mlclient import constants, exceptions, utils
 from mlclient.calls import ResourceCall
@@ -121,13 +120,13 @@ class UsersPostCall(ResourceCall):
 
     def __init__(
             self,
-            body: Union[str, dict]
+            body: str | dict
     ):
         """Initialize UsersPostCall instance.
 
         Parameters
         ----------
-        body : Union[str, dict]
+        body : str | dict
             A user properties in XML or JSON format.
         """
         UsersPostCall.__validate_params(body)
@@ -153,7 +152,7 @@ class UsersPostCall(ResourceCall):
     @classmethod
     def __validate_params(
             cls,
-            body: Union[str, dict]
+            body: str | dict
     ):
         if body is None or isinstance(body, str) and re.search("^\\s*$", body):
             msg = "No request body provided for POST /manage/v2/users!"

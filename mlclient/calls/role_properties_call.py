@@ -10,7 +10,6 @@ from __future__ import annotations
 
 import json
 import re
-from typing import Union
 
 from mlclient import constants, exceptions, utils
 from mlclient.calls import ResourceCall
@@ -107,7 +106,7 @@ class RolePropertiesPutCall(ResourceCall):
     def __init__(
             self,
             role: str,
-            body: Union[str, dict]
+            body: str | dict
     ):
         """Initialize RolePropertiesPutCall instance.
 
@@ -115,7 +114,7 @@ class RolePropertiesPutCall(ResourceCall):
         ----------
         role : str
             A role identifier. The role can be identified either by ID or name.
-        body : Union[str, dict]
+        body : str | dict
             A role properties in XML or JSON format.
         """
         RolePropertiesPutCall.__validate_params(body)
@@ -142,7 +141,7 @@ class RolePropertiesPutCall(ResourceCall):
     @classmethod
     def __validate_params(
             cls,
-            body: Union[str, dict]
+            body: str | dict
     ):
         if body is None or isinstance(body, str) and re.search("^\\s*$", body):
             msg = ("No request body provided for "

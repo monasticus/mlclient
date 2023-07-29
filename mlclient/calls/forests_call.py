@@ -12,7 +12,6 @@ from __future__ import annotations
 
 import json
 import re
-from typing import Union
 
 from mlclient import constants, exceptions, utils
 from mlclient.calls import ResourceCall
@@ -159,14 +158,14 @@ class ForestsPostCall(ResourceCall):
 
     def __init__(
             self,
-            body: Union[str, dict],
-            wait_for_forest_to_mount: bool = None
+            body: str | dict,
+            wait_for_forest_to_mount: bool = None,
     ):
         """Initialize ForestsPostCall instance.
 
         Parameters
         ----------
-        body : Union[str, dict]
+        body : str | dict
             A database properties in XML or JSON format.
         wait_for_forest_to_mount : bool
             Whether to wait for the new forest to mount before sending a response
@@ -199,7 +198,7 @@ class ForestsPostCall(ResourceCall):
     @classmethod
     def __validate_params(
             cls,
-            body: Union[str, dict]
+            body: str | dict
     ):
         if body is None or isinstance(body, str) and re.search("^\\s*$", body):
             msg = "No request body provided for POST /manage/v2/forests!"
@@ -232,13 +231,13 @@ class ForestsPutCall(ResourceCall):
 
     def __init__(
             self,
-            body: Union[str, dict]
+            body: str | dict
     ):
         """Initialize ForestsPutCall instance.
 
         Parameters
         ----------
-        body : Union[str, dict]
+        body : str | dict
             A database properties in XML or JSON format.
         """
         ForestsPutCall.__validate_params(body)
@@ -264,7 +263,7 @@ class ForestsPutCall(ResourceCall):
     @classmethod
     def __validate_params(
             cls,
-            body: Union[str, dict]
+            body: str | dict
     ):
         if body is None or isinstance(body, str) and re.search("^\\s*$", body):
             msg = "No request body provided for PUT /manage/v2/forests!"

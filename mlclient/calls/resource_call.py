@@ -7,7 +7,7 @@ It exports 1 class:
 from __future__ import annotations
 
 from abc import ABCMeta, abstractmethod
-from typing import Any, Union
+from typing import Any
 
 from mlclient import constants
 
@@ -23,7 +23,7 @@ class ResourceCall(metaclass=ABCMeta):
         Put a request parameter if it's name and value exist
     add_header(header_name: str, header_value: Any)
         Put a request header if it's name and value exist
-    set_body(body: Union[str, dict])
+    set_body(body: str | dict)
         Set a request body
     method() -> str
         Return a request method
@@ -31,7 +31,7 @@ class ResourceCall(metaclass=ABCMeta):
         Return request parameters
     headers() -> dict
         Return request headers
-    body() -> Union[str, dict]
+    body() -> str | dict
         Return a request body
     """
 
@@ -40,7 +40,7 @@ class ResourceCall(metaclass=ABCMeta):
             method: str = constants.METHOD_GET,
             params: dict = None,
             headers: dict = None,
-            body: Union[str, dict] = None,
+            body: str | dict = None,
             accept: str = None,
             content_type: str = None
     ):
@@ -54,7 +54,7 @@ class ResourceCall(metaclass=ABCMeta):
             request parameters
         headers : dict
             request headers
-        body : Union[str, dict]
+        body : str | dict
             a request body
         accept : str
             an Accept header value
@@ -139,13 +139,13 @@ class ResourceCall(metaclass=ABCMeta):
 
     def set_body(
             self,
-            body: Union[str, dict]
+            body: str | dict
     ):
         """Set a request body.
 
         Parameters
         ----------
-        body : Union[str, dict]
+        body : str | dict
             a request body
         """
         self.__body = body
@@ -188,12 +188,12 @@ class ResourceCall(metaclass=ABCMeta):
 
     def body(
             self
-    ) -> Union[str, dict]:
+    ) -> str | dict:
         """Return a request body.
 
         Returns
         -------
-        Union[str, dict, None]
+        str | dict
             a request body
         """
         if isinstance(self.__body, str):

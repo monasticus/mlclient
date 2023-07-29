@@ -10,7 +10,6 @@ from __future__ import annotations
 
 import json
 import re
-from typing import Union
 
 from mlclient import constants, exceptions, utils
 from mlclient.calls import ResourceCall
@@ -146,7 +145,7 @@ class ServersPostCall(ResourceCall):
 
     def __init__(
             self,
-            body: Union[str, dict],
+            body: str | dict,
             group_id: str = None,
             server_type: str = None
                      ):
@@ -154,7 +153,7 @@ class ServersPostCall(ResourceCall):
 
         Parameters
         ----------
-        body : Union[str, dict]
+        body : str | dict
             A database properties in XML or JSON format.
         group_id : str
             The id or name of the group to which the App Server belongs.
@@ -193,7 +192,7 @@ class ServersPostCall(ResourceCall):
     def __validate_params(
             cls,
             server_type: str,
-            body: Union[str, dict]
+            body: str | dict
     ):
         if server_type and server_type not in cls.__SUPPORTED_SERVER_TYPES:
             joined_supported_server_types = ", ".join(cls.__SUPPORTED_SERVER_TYPES)

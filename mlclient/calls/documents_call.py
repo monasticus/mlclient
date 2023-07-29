@@ -6,8 +6,6 @@ It exports 1 class:
 """
 from __future__ import annotations
 
-from typing import Union
-
 from mlclient import constants, exceptions, utils
 from mlclient.calls import ResourceCall
 
@@ -46,7 +44,7 @@ class DocumentsGetCall(ResourceCall):
 
     def __init__(
             self,
-            uri: Union[str, list],
+            uri: str | list,
             database: str = None,
             category: str = None,
             data_format: str = None,
@@ -59,7 +57,7 @@ class DocumentsGetCall(ResourceCall):
 
         Parameters
         ----------
-        uri : Union[str, list]
+        uri : str | list
             One or more URIs for documents in the database.
             If you specify multiple URIs, the Accept header must be multipart/mixed.
         database : str
@@ -146,7 +144,7 @@ class DocumentsGetCall(ResourceCall):
 
     @staticmethod
     def __get_accept_header(
-            uri: Union[str, list],
+            uri: str | list,
             category: str,
             data_format: str
     ):

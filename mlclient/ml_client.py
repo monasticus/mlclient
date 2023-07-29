@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import logging
 from types import TracebackType
-from typing import NoReturn, Union
+from typing import NoReturn
 
 from requests import Response, Session
 from requests.auth import HTTPBasicAuth, HTTPDigestAuth
@@ -79,7 +79,7 @@ class MLClient:
         endpoint: str,
         params: dict = None,
         headers: dict = None,
-        body: Union[str, dict] = None,
+        body: str | dict = None,
     ) -> Response:
         Send a POST request.
 
@@ -87,7 +87,7 @@ class MLClient:
         endpoint: str,
         params: dict = None,
         headers: dict = None,
-        body: Union[str, dict] = None,
+        body: str | dict = None,
     ) -> Response:
         Send a PUT request.
 
@@ -245,7 +245,7 @@ class MLClient:
             endpoint: str,
             params: dict = None,
             headers: dict = None,
-            body: Union[str, dict] = None
+            body: str | dict = None
     ) -> Response:
         """Send a POST request.
 
@@ -257,7 +257,7 @@ class MLClient:
             request parameters
         headers : dict
             request headers
-        body
+        body : str | dict
             a request body
 
         Returns
@@ -295,7 +295,7 @@ class MLClient:
             endpoint: str,
             params: dict = None,
             headers: dict = None,
-            body: Union[str, dict] = None
+            body: str | dict = None
     ) -> Response:
         """Send a PUT request.
 
@@ -307,7 +307,7 @@ class MLClient:
             request parameters
         headers : dict
             request headers
-        body
+        body : str | dict
             a request body
 
         Returns
@@ -426,7 +426,7 @@ class MLResourceClient(MLClient):
         Send a GET request to the /manage/v2/databases endpoint.
 
     post_databases(
-            body: Union[str, dict],
+            body: str | dict,
     ) -> Response
         Send a POST request to the /manage/v2/databases endpoint.
 
@@ -439,7 +439,7 @@ class MLResourceClient(MLClient):
 
     post_database(
             database: str,
-            body: Union[str, dict],
+            body: str | dict,
     ) -> Response
         Send a POST request to the /manage/v2/databases/{id|name} endpoint.
 
@@ -457,7 +457,7 @@ class MLResourceClient(MLClient):
 
     put_database_properties(
             database: str,
-            body: Union[str, dict],
+            body: str | dict,
     ) -> Response
         Send a PUT request to the /manage/v2/databases/{id|name}/properties endpoint.
 
@@ -470,7 +470,7 @@ class MLResourceClient(MLClient):
         Send a GET request to the /manage/v2/servers endpoint.
 
     post_servers(
-            body: Union[str, dict],
+            body: str | dict,
             group_id: str = None,
             server_type: str = None,
     ) -> Response
@@ -503,7 +503,7 @@ class MLResourceClient(MLClient):
     put_server_properties(
             server: str,
             group_id: str,
-            body: Union[str, dict],
+            body: str | dict,
     ) -> Response
         Send a PUT request to the /manage/v2/servers/{id|name}/properties endpoint.
 
@@ -518,13 +518,13 @@ class MLResourceClient(MLClient):
         Send a GET request to the /manage/v2/forests endpoint.
 
     post_forests(
-            body: Union[str, dict],
+            body: str | dict,
             wait_for_forest_to_mount: bool = None,
     ) -> Response
         Send a POST request to the /manage/v2/forests endpoint.
 
     put_forests(
-            body: Union[str, dict],
+            body: str | dict,
     ) -> Response
         Send a PUT request to the /manage/v2/forests endpoint.
 
@@ -537,7 +537,7 @@ class MLResourceClient(MLClient):
 
     post_forest(
             forest: str,
-            body: Union[str, dict],
+            body: str | dict,
     ) -> Response
         Send a POST request to the /manage/v2/forests/{id|name} endpoint.
 
@@ -556,7 +556,7 @@ class MLResourceClient(MLClient):
 
     put_forest_properties(
             forest: str,
-            body: Union[str, dict],
+            body: str | dict,
     ) -> Response
         Send a PUT request to the /manage/v2/forests/{id|name}/properties endpoint.
 
@@ -567,7 +567,7 @@ class MLResourceClient(MLClient):
         Send a GET request to the /manage/v2/roles endpoint.
 
     post_roles(
-            body: Union[str, dict],
+            body: str | dict,
     ) -> Response
         Send a POST request to the /manage/v2/roles endpoint.
 
@@ -591,7 +591,7 @@ class MLResourceClient(MLClient):
 
     put_role_properties(
             role: str,
-            body: Union[str, dict],
+            body: str | dict,
     ) -> Response
         Send a PUT request to the /manage/v2/roles/{id|name}/properties endpoint.
 
@@ -602,7 +602,7 @@ class MLResourceClient(MLClient):
         Send a GET request to the /manage/v2/users endpoint.
 
     post_users(
-            body: Union[str, dict],
+            body: str | dict,
     ) -> Response
         Send a POST request to the /manage/v2/users endpoint.
 
@@ -626,7 +626,7 @@ class MLResourceClient(MLClient):
 
     put_user_properties(
             user: str,
-            body: Union[str, dict],
+            body: str | dict,
     ) -> Response
         Send a PUT request to the /manage/v2/users/{id|name}/properties endpoint.
 
@@ -759,13 +759,13 @@ class MLResourceClient(MLClient):
 
     def post_databases(
             self,
-            body: Union[str, dict],
+            body: str | dict,
     ) -> Response:
         """Send a POST request to the /manage/v2/databases endpoint.
 
         Parameters
         ----------
-        body : Union[str, dict]
+        body : str | dict
             A database properties in XML or JSON format.
 
         Returns
@@ -809,7 +809,7 @@ class MLResourceClient(MLClient):
     def post_database(
             self,
             database: str,
-            body: Union[str, dict],
+            body: str | dict,
     ) -> Response:
         """Send a POST request to the /manage/v2/databases/{id|name} endpoint.
 
@@ -817,7 +817,7 @@ class MLResourceClient(MLClient):
         ----------
         database : str
             A database identifier. The database can be identified either by ID or name.
-        body : Union[str, dict]
+        body : str | dict
             A database properties in XML or JSON format.
 
         Returns
@@ -883,7 +883,7 @@ class MLResourceClient(MLClient):
     def put_database_properties(
             self,
             database: str,
-            body: Union[str, dict],
+            body: str | dict,
     ) -> Response:
         """Send a PUT request to the /manage/v2/databases/{id|name}/properties endpoint.
 
@@ -891,7 +891,7 @@ class MLResourceClient(MLClient):
         ----------
         database : str
             A database identifier. The database can be identified either by ID or name.
-        body : Union[str, dict]
+        body : str | dict
             A database properties in XML or JSON format.
 
         Returns
@@ -941,7 +941,7 @@ class MLResourceClient(MLClient):
 
     def post_servers(
             self,
-            body: Union[str, dict],
+            body: str | dict,
             group_id: str = None,
             server_type: str = None,
     ) -> Response:
@@ -949,7 +949,7 @@ class MLResourceClient(MLClient):
 
         Parameters
         ----------
-        body : Union[str, dict]
+        body : str | dict
             A database properties in XML or JSON format.
         group_id : str
             The id or name of the group to which the App Server belongs.
@@ -1082,7 +1082,7 @@ class MLResourceClient(MLClient):
             self,
             server: str,
             group_id: str,
-            body: Union[str, dict],
+            body: str | dict,
     ) -> Response:
         """Send a PUT request to the /manage/v2/servers/{id|name}/properties endpoint.
 
@@ -1093,7 +1093,7 @@ class MLResourceClient(MLClient):
         group_id : str
             The id or name of the group to which the App Server belongs.
             This parameter is required.
-        body : Union[str, dict]
+        body : str | dict
             A database properties in XML or JSON format.
 
         Returns
@@ -1154,14 +1154,14 @@ class MLResourceClient(MLClient):
 
     def post_forests(
             self,
-            body: Union[str, dict],
+            body: str | dict,
             wait_for_forest_to_mount: bool = None,
     ) -> Response:
         """Send a POST request to the /manage/v2/forests endpoint.
 
         Parameters
         ----------
-        body : Union[str, dict]
+        body : str | dict
             A database properties in XML or JSON format.
         wait_for_forest_to_mount : bool
             Whether to wait for the new forest to mount before sending a response
@@ -1178,13 +1178,13 @@ class MLResourceClient(MLClient):
 
     def put_forests(
             self,
-            body: Union[str, dict],
+            body: str | dict,
     ) -> Response:
         """Send a PUT request to the /manage/v2/forests endpoint.
 
         Parameters
         ----------
-        body : Union[str, dict]
+        body : str | dict
             A database properties in XML or JSON format.
 
         Returns
@@ -1227,7 +1227,7 @@ class MLResourceClient(MLClient):
     def post_forest(
             self,
             forest: str,
-            body: Union[str, dict],
+            body: str | dict,
     ) -> Response:
         """Send a POST request to the /manage/v2/forests/{id|name} endpoint.
 
@@ -1308,7 +1308,7 @@ class MLResourceClient(MLClient):
     def put_forest_properties(
             self,
             forest: str,
-            body: Union[str, dict],
+            body: str | dict,
     ) -> Response:
         """Send a PUT request to the /manage/v2/databases/{id|name}/properties endpoint.
 
@@ -1316,7 +1316,7 @@ class MLResourceClient(MLClient):
         ----------
         forest : str
             A forest identifier. The forest can be identified either by ID or name.
-        body : Union[str, dict]
+        body : str | dict
             A forest properties in XML or JSON format.
 
         Returns
@@ -1353,13 +1353,13 @@ class MLResourceClient(MLClient):
 
     def post_roles(
             self,
-            body: Union[str, dict],
+            body: str | dict,
     ) -> Response:
         """Send a POST request to the /manage/v2/roles endpoint.
 
         Parameters
         ----------
-        body : Union[str, dict]
+        body : str | dict
             A role properties in XML or JSON format.
 
         Returns
@@ -1443,7 +1443,7 @@ class MLResourceClient(MLClient):
     def put_role_properties(
             self,
             role: str,
-            body: Union[str, dict],
+            body: str | dict,
     ) -> Response:
         """Send a PUT request to the /manage/v2/roles/{id|name}/properties endpoint.
 
@@ -1451,7 +1451,7 @@ class MLResourceClient(MLClient):
         ----------
         role : str
             A role identifier. The role can be identified either by ID or name.
-        body : Union[str, dict]
+        body : str | dict
             A role properties in XML or JSON format.
 
         Returns
@@ -1488,13 +1488,13 @@ class MLResourceClient(MLClient):
 
     def post_users(
             self,
-            body: Union[str, dict],
+            body: str | dict,
     ) -> Response:
         """Send a POST request to the /manage/v2/users endpoint.
 
         Parameters
         ----------
-        body : Union[str, dict]
+        body : str | dict
             A user properties in XML or JSON format.
 
         Returns
@@ -1578,7 +1578,7 @@ class MLResourceClient(MLClient):
     def put_user_properties(
             self,
             user: str,
-            body: Union[str, dict],
+            body: str | dict,
     ) -> Response:
         """Send a PUT request to the /manage/v2/users/{id|name}/properties endpoint.
 
@@ -1586,7 +1586,7 @@ class MLResourceClient(MLClient):
         ----------
         user : str
             A user identifier. The user can be identified either by ID or name.
-        body : Union[str, dict]
+        body : str | dict
             A user properties in XML or JSON format.
 
         Returns

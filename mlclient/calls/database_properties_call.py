@@ -10,7 +10,6 @@ from __future__ import annotations
 
 import json
 import re
-from typing import Union
 
 from mlclient import constants, exceptions, utils
 from mlclient.calls import ResourceCall
@@ -110,7 +109,7 @@ class DatabasePropertiesPutCall(ResourceCall):
     def __init__(
             self,
             database: str,
-            body: Union[str, dict]
+            body: str | dict
     ):
         """Initialize DatabasePropertiesPutCall instance.
 
@@ -118,7 +117,7 @@ class DatabasePropertiesPutCall(ResourceCall):
         ----------
         database : str
             A database identifier. The database can be identified either by ID or name.
-        body : Union[str, dict]
+        body : str | dict
             A database properties in XML or JSON format.
         """
         DatabasePropertiesPutCall.__validate_params(body)
@@ -145,7 +144,7 @@ class DatabasePropertiesPutCall(ResourceCall):
     @classmethod
     def __validate_params(
             cls,
-            body: Union[str, dict]
+            body: str | dict
     ):
         if body is None or isinstance(body, str) and re.search("^\\s*$", body):
             msg = ("No request body provided for "

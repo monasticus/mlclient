@@ -42,7 +42,7 @@ class ForestPropertiesGetCall(ResourceCall):
     def __init__(
             self,
             forest: str,
-            data_format: str = "xml"
+            data_format: str = "xml",
     ):
         """Initialize ForestPropertiesGetCall instance.
 
@@ -63,7 +63,7 @@ class ForestPropertiesGetCall(ResourceCall):
         self.add_param(ForestPropertiesGetCall.__FORMAT_PARAM, data_format)
 
     def endpoint(
-            self
+            self,
     ):
         """Return an endpoint for the Forest Properties call.
 
@@ -77,7 +77,7 @@ class ForestPropertiesGetCall(ResourceCall):
     @classmethod
     def __validate_params(
             cls,
-            data_format: str
+            data_format: str,
     ):
         if data_format not in cls.__SUPPORTED_FORMATS:
             joined_supported_formats = ", ".join(cls.__SUPPORTED_FORMATS)
@@ -128,7 +128,7 @@ class ForestPropertiesPutCall(ResourceCall):
         self.__forest = forest
 
     def endpoint(
-            self
+            self,
     ):
         """Return an endpoint for the Forest Properties call.
 
@@ -142,7 +142,7 @@ class ForestPropertiesPutCall(ResourceCall):
     @classmethod
     def __validate_params(
             cls,
-            body: str | dict
+            body: str | dict,
     ):
         if body is None or isinstance(body, str) and re.search("^\\s*$", body):
             msg = ("No request body provided for "

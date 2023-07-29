@@ -38,7 +38,7 @@ def test_parameters(default_database_delete_call):
 def test_parameters_for_forest_delete():
     call = DatabaseDeleteCall(database="Documents", forest_delete="configuration")
     assert call.params() == {
-        "forest-delete": "configuration"
+        "forest-delete": "configuration",
     }
 
 
@@ -55,6 +55,6 @@ def test_fully_parametrized_call():
     assert call.method() == "DELETE"
     assert call.headers() == {}
     assert call.params() == {
-        "forest-delete": "data"
+        "forest-delete": "data",
     }
     assert call.body() is None

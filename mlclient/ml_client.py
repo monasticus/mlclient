@@ -106,7 +106,7 @@ class MLClient:
             port: int = 8002,
             auth_method: str = "basic",
             username: str = "admin",
-            password: str = "admin"
+            password: str = "admin",
     ):
         """Initialize MLClient instance.
 
@@ -138,7 +138,7 @@ class MLClient:
         self.__logger = logging.getLogger(__name__)
 
     def __enter__(
-            self
+            self,
     ):
         """Enter the MLClient instance.
 
@@ -175,14 +175,14 @@ class MLClient:
         return None
 
     def connect(
-            self
+            self,
     ) -> NoReturn:
         """Start an HTTP session."""
         self.__logger.debug("Initiating a connection")
         self.__sess = Session()
 
     def disconnect(
-            self
+            self,
     ) -> NoReturn:
         """Close an HTTP session."""
         if self.__sess:
@@ -191,7 +191,7 @@ class MLClient:
             self.__sess = None
 
     def is_connected(
-            self
+            self,
     ) -> bool:
         """Return a connection status.
 
@@ -206,7 +206,7 @@ class MLClient:
             self,
             endpoint: str,
             params: dict = None,
-            headers: dict = None
+            headers: dict = None,
     ) -> Response:
         """Send a GET request.
 
@@ -245,7 +245,7 @@ class MLClient:
             endpoint: str,
             params: dict = None,
             headers: dict = None,
-            body: str | dict = None
+            body: str | dict = None,
     ) -> Response:
         """Send a POST request.
 
@@ -295,7 +295,7 @@ class MLClient:
             endpoint: str,
             params: dict = None,
             headers: dict = None,
-            body: str | dict = None
+            body: str | dict = None,
     ) -> Response:
         """Send a PUT request.
 
@@ -344,7 +344,7 @@ class MLClient:
             self,
             endpoint: str,
             params: dict = None,
-            headers: dict = None
+            headers: dict = None,
     ) -> Response:
         """Send a DELETE request.
 

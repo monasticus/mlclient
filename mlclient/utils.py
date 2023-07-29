@@ -15,7 +15,7 @@ from mlclient import constants, exceptions
 
 
 def get_accept_header_for_format(
-        data_format: str
+        data_format: str,
 ) -> str:
     """Return an Accept header for data format.
 
@@ -48,7 +48,7 @@ def get_accept_header_for_format(
 
 
 def get_content_type_header_for_data(
-        data: str | dict
+        data: str | dict,
 ) -> str:
     """Return a Content-Type header for data provided.
 

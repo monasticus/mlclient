@@ -44,7 +44,7 @@ class ForestGetCall(ResourceCall):
             self,
             forest: str,
             data_format: str = "xml",
-            view: str = "default"
+            view: str = "default",
     ):
         """Initialize ForestGetCall instance.
 
@@ -70,7 +70,7 @@ class ForestGetCall(ResourceCall):
         self.add_param(ForestGetCall.__VIEW_PARAM, view)
 
     def endpoint(
-            self
+            self,
     ):
         """Return an endpoint for the Forest call.
 
@@ -85,7 +85,7 @@ class ForestGetCall(ResourceCall):
     def __validate_params(
             cls,
             data_format: str,
-            view: str
+            view: str,
     ):
         if data_format not in cls.__SUPPORTED_FORMATS:
             joined_supported_formats = ", ".join(cls.__SUPPORTED_FORMATS)
@@ -128,7 +128,7 @@ class ForestPostCall(ResourceCall):
     def __init__(
             self,
             forest: str,
-            body: dict
+            body: dict,
     ):
         """Initialize ForestPostCall instance.
 
@@ -148,7 +148,7 @@ class ForestPostCall(ResourceCall):
         self.__forest = forest
 
     def endpoint(
-            self
+            self,
     ):
         """Return an endpoint for the Forests call.
 
@@ -162,7 +162,7 @@ class ForestPostCall(ResourceCall):
     @classmethod
     def __validate_params(
             cls,
-            state: str
+            state: str,
     ):
         if state is None:
             msg = "You must include the 'state' parameter within a body!"
@@ -201,7 +201,7 @@ class ForestDeleteCall(ResourceCall):
             self,
             forest: str,
             level: str,
-            replicas: str = None
+            replicas: str = None,
     ):
         """Initialize ForestDeleteCall instance.
 
@@ -226,7 +226,7 @@ class ForestDeleteCall(ResourceCall):
         self.__forest = forest
 
     def endpoint(
-            self
+            self,
     ):
         """Return an endpoint for the Forest call.
 
@@ -241,7 +241,7 @@ class ForestDeleteCall(ResourceCall):
     def __validate_params(
             cls,
             level: str,
-            replicas: str
+            replicas: str,
     ):
         if level not in cls.__SUPPORTED_LEVELS:
             joined_supported_levels = ", ".join(cls.__SUPPORTED_LEVELS)

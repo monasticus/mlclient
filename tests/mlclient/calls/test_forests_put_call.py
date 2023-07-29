@@ -11,7 +11,7 @@ def default_forests_put_call():
       "operation": "forest-combine",
       "forest": ["forest-1", "forest-2"],
       "forest-name": "forest",
-      "host": "custom-host"
+      "host": "custom-host",
     }
 
     return ForestsPutCall(body=body)
@@ -52,14 +52,14 @@ def test_parameters(default_forests_put_call):
 def test_headers_for_dict_body():
     call = ForestsPutCall(body={"server-name": "custom-server"})
     assert call.headers() == {
-        "content-type": "application/json"
+        "content-type": "application/json",
     }
 
 
 def test_headers_for_stringified_dict_body():
     call = ForestsPutCall(body='{"server-name": "custom-server"}')
     assert call.headers() == {
-        "content-type": "application/json"
+        "content-type": "application/json",
     }
 
 
@@ -74,7 +74,7 @@ def test_headers_for_xml_body():
            '</forest-combine>'
     call = ForestsPutCall(body=body)
     assert call.headers() == {
-        "content-type": "application/xml"
+        "content-type": "application/xml",
     }
 
 
@@ -83,7 +83,7 @@ def test_dict_body():
       "operation": "forest-combine",
       "forest": ["forest-1", "forest-2"],
       "forest-name": "forest",
-      "host": "custom-host"
+      "host": "custom-host",
     }
 
     call = ForestsPutCall(body=body)
@@ -98,7 +98,7 @@ def test_stringified_dict_body():
       "operation": "forest-combine",
       "forest": ["forest-1", "forest-2"],
       "forest-name": "forest",
-      "host": "custom-host"
+      "host": "custom-host",
     }
 
 
@@ -120,12 +120,12 @@ def test_fully_parametrized_call():
       "operation": "forest-combine",
       "forest": ["forest-1", "forest-2"],
       "forest-name": "forest",
-      "host": "custom-host"
+      "host": "custom-host",
     }
     call = ForestsPutCall(body=body)
     assert call.method() == "PUT"
     assert call.headers() == {
-        "content-type": "application/json"
+        "content-type": "application/json",
     }
     assert call.params() == {}
     assert call.body() == body

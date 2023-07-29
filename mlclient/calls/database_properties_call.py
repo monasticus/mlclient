@@ -42,7 +42,7 @@ class DatabasePropertiesGetCall(ResourceCall):
     def __init__(
             self,
             database: str,
-            data_format: str = "xml"
+            data_format: str = "xml",
     ):
         """Initialize DatabasePropertiesGetCall instance.
 
@@ -63,7 +63,7 @@ class DatabasePropertiesGetCall(ResourceCall):
         self.add_param(DatabasePropertiesGetCall.__FORMAT_PARAM, data_format)
 
     def endpoint(
-            self
+            self,
     ):
         """Return an endpoint for the Database Properties call.
 
@@ -77,7 +77,7 @@ class DatabasePropertiesGetCall(ResourceCall):
     @classmethod
     def __validate_params(
             cls,
-            data_format: str
+            data_format: str,
     ):
         if data_format not in cls.__SUPPORTED_FORMATS:
             joined_supported_formats = ", ".join(cls.__SUPPORTED_FORMATS)
@@ -109,7 +109,7 @@ class DatabasePropertiesPutCall(ResourceCall):
     def __init__(
             self,
             database: str,
-            body: str | dict
+            body: str | dict,
     ):
         """Initialize DatabasePropertiesPutCall instance.
 
@@ -130,7 +130,7 @@ class DatabasePropertiesPutCall(ResourceCall):
         self.__database = database
 
     def endpoint(
-            self
+            self,
     ):
         """Return an endpoint for the Database Properties call.
 
@@ -144,7 +144,7 @@ class DatabasePropertiesPutCall(ResourceCall):
     @classmethod
     def __validate_params(
             cls,
-            body: str | dict
+            body: str | dict,
     ):
         if body is None or isinstance(body, str) and re.search("^\\s*$", body):
             msg = ("No request body provided for "

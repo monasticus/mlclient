@@ -55,13 +55,13 @@ def test_method(default_documents_get_call):
 
 def test_parameters_single_uri():
     assert DocumentsGetCall(uri="/a.xml").params() == {
-        "uri": "/a.xml"
+        "uri": "/a.xml",
     }
 
 
 def test_parameters_multiple_uris():
     assert DocumentsGetCall(uri=["/a.xml", "/b.xml"]).params() == {
-        "uri": ["/a.xml", "/b.xml"]
+        "uri": ["/a.xml", "/b.xml"],
     }
 
 
@@ -93,7 +93,7 @@ def test_headers_for_single_uri_metadata_category_and_json_format():
         uri="/a.xml",
         category="collections",
         data_format="json").headers() == {
-        "accept": "application/json"
+        "accept": "application/json",
     }
 
 
@@ -102,13 +102,13 @@ def test_headers_for_single_uri_metadata_category_and_xml_format():
         uri="/a.xml",
         category="collections",
         data_format="xml").headers() == {
-        "accept": "application/xml"
+        "accept": "application/xml",
     }
 
 
 def test_headers_for_multiple_uris_and_no_format():
     assert DocumentsGetCall(uri=["/a.xml", "/b.xml"]).headers() == {
-        "accept": "multipart/mixed"
+        "accept": "multipart/mixed",
     }
 
 
@@ -116,7 +116,7 @@ def test_headers_for_multiple_uris_and_none_format():
     assert DocumentsGetCall(
         uri=["/a.xml", "/b.xml"],
         data_format=None).headers() == {
-        "accept": "multipart/mixed"
+        "accept": "multipart/mixed",
     }
 
 
@@ -124,7 +124,7 @@ def test_headers_for_multiple_uris_no_category_and_format():
     assert DocumentsGetCall(
         uri=["/a.xml", "/b.xml"],
         data_format="json").headers() == {
-        "accept": "multipart/mixed"
+        "accept": "multipart/mixed",
     }
 
 
@@ -133,7 +133,7 @@ def test_headers_for_multiple_uris_content_category_and_format():
         uri=["/a.xml", "/b.xml"],
         category="content",
         data_format="json").headers() == {
-        "accept": "multipart/mixed"
+        "accept": "multipart/mixed",
     }
 
 
@@ -142,7 +142,7 @@ def test_headers_for_multiple_uris_metadata_category_and_json_format():
         uri=["/a.xml", "/b.xml"],
         category="collections",
         data_format="json").headers() == {
-        "accept": "multipart/mixed"
+        "accept": "multipart/mixed",
     }
 
 
@@ -151,7 +151,7 @@ def test_headers_for_multiple_uris_metadata_category_and_xml_format():
         uri=["/a.xml", "/b.xml"],
         category="collections",
         data_format="xml").headers() == {
-        "accept": "multipart/mixed"
+        "accept": "multipart/mixed",
     }
 
 
@@ -177,7 +177,7 @@ def test_fully_parametrized_call_for_single_uri_content():
         "transform": "custom-transformation",
         "trans:custom-param-1": "custom-value-1",
         "trans:custom-param-2": "custom-value-2",
-        "txid": "transaction"
+        "txid": "transaction",
     }
     assert call.body() is None
 
@@ -195,7 +195,7 @@ def test_fully_parametrized_call_for_single_uri_metadata():
         txid="transaction")
     assert call.method() == "GET"
     assert call.headers() == {
-        "accept": "application/xml"
+        "accept": "application/xml",
     }
     assert call.params() == {
         "uri": "/a.xml",
@@ -206,7 +206,7 @@ def test_fully_parametrized_call_for_single_uri_metadata():
         "transform": "custom-transformation",
         "trans:custom-param-1": "custom-value-1",
         "trans:custom-param-2": "custom-value-2",
-        "txid": "transaction"
+        "txid": "transaction",
     }
     assert call.body() is None
 
@@ -224,7 +224,7 @@ def test_fully_parametrized_call_for_multiple_uris_metadata():
         txid="transaction")
     assert call.method() == "GET"
     assert call.headers() == {
-        "accept": "multipart/mixed"
+        "accept": "multipart/mixed",
     }
     assert call.params() == {
         "uri": ["/a.xml", "/b.xml"],
@@ -235,6 +235,6 @@ def test_fully_parametrized_call_for_multiple_uris_metadata():
         "transform": "custom-transformation",
         "trans:custom-param-1": "custom-value-1",
         "trans:custom-param-2": "custom-value-2",
-        "txid": "transaction"
+        "txid": "transaction",
     }
     assert call.body() is None

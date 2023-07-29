@@ -51,13 +51,13 @@ def test_parameters(default_eval_call):
 def test_headers(default_eval_call):
     assert default_eval_call.headers() == {
         "accept": "multipart/mixed",
-        "content-type": "application/x-www-form-urlencoded"
+        "content-type": "application/x-www-form-urlencoded",
     }
 
 
 def test_body_without_variables(default_eval_call):
     assert default_eval_call.body() == {
-        "xquery": "()"
+        "xquery": "()",
     }
 
 
@@ -66,7 +66,7 @@ def test_body_with_variables(default_eval_call):
                     variables={"custom-variable": "custom-value"})
     assert call.body() == {
         "xquery": "()",
-        "vars": '{"custom-variable": "custom-value"}'
+        "vars": '{"custom-variable": "custom-value"}',
     }
 
 
@@ -91,7 +91,7 @@ def test_body_is_normalized():
                   "declare variable $data as xs:string? external; "
                   "let $a = if (fn:empty($data)) then 'default' else $data "
                   "return $a",
-        "vars": '{"data": "custom-value"}'
+        "vars": '{"data": "custom-value"}',
     }
 
 
@@ -103,15 +103,15 @@ def test_fully_parametrized_xquery_call():
     assert call.method() == "POST"
     assert call.headers() == {
         "accept": "multipart/mixed",
-        "content-type": "application/x-www-form-urlencoded"
+        "content-type": "application/x-www-form-urlencoded",
     }
     assert call.params() == {
         "database": "custom-db",
-        "txid": "custom-transaction-id"
+        "txid": "custom-transaction-id",
     }
     assert call.body() == {
         "xquery": "()",
-        "vars": '{"custom-variable": "custom-value"}'
+        "vars": '{"custom-variable": "custom-value"}',
     }
 
 
@@ -123,13 +123,13 @@ def test_fully_parametrized_javascript_call():
     assert call.method() == "POST"
     assert call.headers() == {
         "accept": "multipart/mixed",
-        "content-type": "application/x-www-form-urlencoded"
+        "content-type": "application/x-www-form-urlencoded",
     }
     assert call.params() == {
         "database": "custom-db",
-        "txid": "custom-transaction-id"
+        "txid": "custom-transaction-id",
     }
     assert call.body() == {
         "javascript": "[]",
-        "vars": '{"custom-variable": "custom-value"}'
+        "vars": '{"custom-variable": "custom-value"}',
     }

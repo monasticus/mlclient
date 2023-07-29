@@ -14,7 +14,7 @@ def metadata():
     collections = ["collection-1", "collection-2"]
     permissions = [
         Permission("role-1", {Permission.READ}),
-        Permission("role-2", {Permission.READ, Permission.UPDATE})
+        Permission("role-2", {Permission.READ, Permission.UPDATE}),
     ]
     properties = {"prop-name-1": "prop-value-1", "prop-name-2": "prop-value-2"}
     quality = 1
@@ -300,13 +300,13 @@ def test_put_property():
     metadata = Metadata()
     metadata.put_property("prop-name-1", "prop-value-1")
     assert metadata.properties() == {
-        "prop-name-1": "prop-value-1"
+        "prop-name-1": "prop-value-1",
     }
 
     metadata.put_property("prop-name-2", "prop-value-2")
     assert metadata.properties() == {
         "prop-name-1": "prop-value-1",
-        "prop-name-2": "prop-value-2"
+        "prop-name-2": "prop-value-2",
     }
 
 
@@ -314,7 +314,7 @@ def test_put_property_when_exists():
     metadata = Metadata(properties={"prop-name-1": "prop-value-1"})
     metadata.put_property("prop-name-1", "prop-value-2")
     assert metadata.properties() == {
-        "prop-name-1": "prop-value-2"
+        "prop-name-1": "prop-value-2",
     }
 
 
@@ -322,7 +322,7 @@ def test_put_none_property():
     metadata = Metadata(properties={"prop-name-1": "prop-value-1"})
     metadata.put_property("prop-name-1", None)
     assert metadata.properties() == {
-        "prop-name-1": "prop-value-1"
+        "prop-name-1": "prop-value-1",
     }
 
 
@@ -330,13 +330,13 @@ def test_put_metadata_value():
     metadata = Metadata()
     metadata.put_metadata_value("meta-name-1", "meta-value-1")
     assert metadata.metadata_values() == {
-        "meta-name-1": "meta-value-1"
+        "meta-name-1": "meta-value-1",
     }
 
     metadata.put_metadata_value("meta-name-2", "meta-value-2")
     assert metadata.metadata_values() == {
         "meta-name-1": "meta-value-1",
-        "meta-name-2": "meta-value-2"
+        "meta-name-2": "meta-value-2",
     }
 
 
@@ -344,7 +344,7 @@ def test_put_metadata_value_when_exists():
     metadata = Metadata(metadata_values={"meta-name-1": "meta-value-1"})
     metadata.put_metadata_value("meta-name-1", "meta-value-2")
     assert metadata.metadata_values() == {
-        "meta-name-1": "meta-value-2"
+        "meta-name-1": "meta-value-2",
     }
 
 
@@ -352,7 +352,7 @@ def test_put_none_metadata_value():
     metadata = Metadata(metadata_values={"meta-name-1": "meta-value-1"})
     metadata.put_metadata_value("meta-name-1", None)
     assert metadata.metadata_values() == {
-        "meta-name-1": "meta-value-1"
+        "meta-name-1": "meta-value-1",
     }
 
 
@@ -377,20 +377,20 @@ def test_remove_collection_when_does_not_exist():
 def test_remove_permission():
     permissions = [
         Permission("role-1", {Permission.READ}),
-        Permission("role-2", {Permission.READ, Permission.UPDATE})
+        Permission("role-2", {Permission.READ, Permission.UPDATE}),
     ]
     metadata = Metadata(permissions=permissions)
     success = metadata.remove_permission("role-2", Permission.READ)
     assert success is True
     __assert_permissions_are_equal(metadata.permissions(), [
         Permission("role-1", {Permission.READ}),
-        Permission("role-2", {Permission.UPDATE})
+        Permission("role-2", {Permission.UPDATE}),
     ])
 
     success = metadata.remove_permission("role-2", Permission.UPDATE)
     assert success is True
     __assert_permissions_are_equal(metadata.permissions(), [
-        Permission("role-1", {Permission.READ})
+        Permission("role-1", {Permission.READ}),
     ])
 
     success = metadata.remove_permission("role-1", Permission.READ)
@@ -416,7 +416,7 @@ def test_remove_property():
     success = metadata.remove_property("prop-name-1")
     assert success is True
     assert metadata.properties() == {
-        "prop-name-2": "prop-value-2"
+        "prop-name-2": "prop-value-2",
     }
 
     success = metadata.remove_property("prop-name-2")
@@ -429,7 +429,7 @@ def test_remove_property_when_does_not_exist():
     success = metadata.remove_property("prop-name-2")
     assert success is False
     assert metadata.properties() == {
-        "prop-name-1": "prop-value-1"
+        "prop-name-1": "prop-value-1",
     }
 
 
@@ -439,7 +439,7 @@ def test_remove_metadata_value():
     success = metadata.remove_metadata_value("meta-name-1")
     assert success is True
     assert metadata.metadata_values() == {
-        "meta-name-2": "meta-value-2"
+        "meta-name-2": "meta-value-2",
     }
 
     success = metadata.remove_metadata_value("meta-name-2")
@@ -452,7 +452,7 @@ def test_remove_metadata_value_when_does_not_exist():
     success = metadata.remove_metadata_value("meta-name-2")
     assert success is False
     assert metadata.metadata_values() == {
-        "meta-name-1": "meta-value-1"
+        "meta-name-1": "meta-value-1",
     }
 
 
@@ -477,12 +477,12 @@ def test_properties_with_none_values():
         "prop-name-1": "prop-value-1",
         "prop-name-2": None,
         "prop-name-3": "prop-value-1",
-        "prop-name-4": None
+        "prop-name-4": None,
     }
     metadata = Metadata(properties=properties)
     assert metadata.properties() == {
         "prop-name-1": "prop-value-1",
-        "prop-name-3": "prop-value-1"
+        "prop-name-3": "prop-value-1",
     }
 
 
@@ -491,14 +491,14 @@ def test_properties_with_non_string_values():
         "prop-name-1": [1, 2, 3],
         "prop-name-2": {"nested-key": 0.5},
         "prop-name-3": Permission("custom-role", {Permission.READ}),
-        "prop-name-4": True
+        "prop-name-4": True,
     }
     metadata = Metadata(properties=properties)
     assert metadata.properties() == {
         "prop-name-1": "[1, 2, 3]",
         "prop-name-2": "{'nested-key': 0.5}",
         "prop-name-3": "Permission(role_name='custom-role', capabilities={'read'})",
-        "prop-name-4": "True"
+        "prop-name-4": "True",
     }
 
 
@@ -507,12 +507,12 @@ def test_metadata_values_with_none_values():
         "meta-name-1": "meta-value-1",
         "meta-name-2": None,
         "meta-name-3": "meta-value-3",
-        "meta-name-4": None
+        "meta-name-4": None,
     }
     metadata = Metadata(metadata_values=metadata_values)
     assert metadata.metadata_values() == {
         "meta-name-1": "meta-value-1",
-        "meta-name-3": "meta-value-3"
+        "meta-name-3": "meta-value-3",
     }
 
 
@@ -521,14 +521,14 @@ def test_metadata_values_stringified():
         "meta-name-1": [1, 2, 3],
         "meta-name-2": {"nested-key": 0.5},
         "meta-name-3": Permission("custom-role", {Permission.READ}),
-        "meta-name-4": True
+        "meta-name-4": True,
     }
     metadata = Metadata(metadata_values=metadata_values)
     assert metadata.metadata_values() == {
         "meta-name-1": "[1, 2, 3]",
         "meta-name-2": "{'nested-key': 0.5}",
         "meta-name-3": "Permission(role_name='custom-role', capabilities={'read'})",
-        "meta-name-4": "True"
+        "meta-name-4": "True",
     }
 
 
@@ -551,7 +551,7 @@ def test_to_json(metadata):
         [{"role-name": "role-2", "capabilities": [Permission.READ, Permission.UPDATE]},
          {"role-name": "role-1", "capabilities": [Permission.READ]}],
         [{"role-name": "role-2", "capabilities": [Permission.UPDATE, Permission.READ]},
-         {"role-name": "role-1", "capabilities": [Permission.READ]}]
+         {"role-name": "role-1", "capabilities": [Permission.READ]}],
     ]
     assert properties == {"prop-name-1": "prop-value-1", "prop-name-2": "prop-value-2"}
     assert quality == 1
@@ -720,7 +720,7 @@ def test_to_xml(metadata):
         assert metadata_value_element.tag == "rapi:metadata-value"
         assert metadata_value_element.attrib in [
             {"key": "meta-name-1"},
-            {"key": "meta-name-2"}
+            {"key": "meta-name-2"},
         ]
         assert len(list(metadata_value_element)) == 0
         assert metadata_value_element.text in ["meta-value-1", "meta-value-2"]

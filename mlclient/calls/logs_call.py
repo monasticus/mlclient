@@ -49,7 +49,7 @@ class LogsCall(ResourceCall):
             host: str = None,
             start_time: str = None,
             end_time: str = None,
-            regex: str = None
+            regex: str = None,
     ):
         """Initialize LogsCall instance.
 
@@ -83,7 +83,7 @@ class LogsCall(ResourceCall):
         self.add_param(LogsCall.__REGEX_PARAM, regex)
 
     def endpoint(
-            self
+            self,
     ):
         """Return an endpoint for the Logs call.
 
@@ -99,7 +99,7 @@ class LogsCall(ResourceCall):
             cls,
             data_format: str,
             start_time: str,
-            end_time: str
+            end_time: str,
     ):
         if data_format and data_format not in ["xml", "json", "html"]:
             msg = "The supported formats are xml, json or html!"
@@ -110,18 +110,18 @@ class LogsCall(ResourceCall):
     @staticmethod
     def __validate_datetime_param(
             param_name: str,
-            param_value: str
+            param_value: str,
     ):
         try:
             if param_value:
                 parser.parse(param_value)
         except ValueError:
             msg = f"The {param_name} parameter is not a dateTime value!"
-            raise exceptions.WrongParametersError(msg)
+            raise exceptions.WrongParametersError(msg) from ValueError
 
     @staticmethod
     def __reformat_datetime_param(
-            datetime_param: str
+            datetime_param: str,
     ):
         if datetime_param:
             return parser.parse(datetime_param).strftime("%Y-%m-%dT%H:%M:%S")

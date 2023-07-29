@@ -48,7 +48,7 @@ def test_method(default_forest_delete_call):
 
 def test_parameters(default_forest_delete_call):
     assert default_forest_delete_call.params() == {
-        "level": "full"
+        "level": "full",
     }
 
 
@@ -69,6 +69,6 @@ def test_fully_parametrized_call():
     assert call.headers() == {}
     assert call.params() == {
         "level": "config-only",
-        "replicas": "delete"
+        "replicas": "delete",
     }
     assert call.body() is None

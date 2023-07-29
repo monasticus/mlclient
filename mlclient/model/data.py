@@ -113,7 +113,7 @@ class Document:
 
     @staticmethod
     def _get_non_blank_uri(
-            uri: str
+            uri: str,
     ) -> str | None:
         """Return URI or None when blank."""
         return uri if uri is not None and not re.search("^\\s*$", uri) else None
@@ -854,7 +854,7 @@ class Permission:
         """Return a JSON representation of the Permission instance."""
         return {
             "role-name": self.role_name(),
-            "capabilities": list(self.capabilities())
+            "capabilities": list(self.capabilities()),
         }
 
 

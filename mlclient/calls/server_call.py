@@ -51,7 +51,7 @@ class ServerGetCall(ResourceCall):
             view: str = "default",
             host_id: str = None,
             full_refs: bool = None,
-            modules: bool = None
+            modules: bool = None,
     ):
         """Initialize ServerGetCall instance.
 
@@ -101,7 +101,7 @@ class ServerGetCall(ResourceCall):
         self.add_param(ServerGetCall.__MODULES_PARAM, modules)
 
     def endpoint(
-            self
+            self,
     ):
         """Return an endpoint for the Server call.
 
@@ -116,7 +116,7 @@ class ServerGetCall(ResourceCall):
     def __validate_params(
             cls,
             data_format: str,
-            view: str
+            view: str,
     ):
         if data_format not in cls.__SUPPORTED_FORMATS:
             joined_supported_formats = ", ".join(cls.__SUPPORTED_FORMATS)
@@ -151,7 +151,7 @@ class ServerDeleteCall(ResourceCall):
     def __init__(
             self,
             server: str,
-            group_id: str
+            group_id: str,
     ):
         """Initialize ServerDeleteCall instance.
 
@@ -168,7 +168,7 @@ class ServerDeleteCall(ResourceCall):
         self.__server = server
 
     def endpoint(
-            self
+            self,
     ):
         """Return an endpoint for the Server call.
 

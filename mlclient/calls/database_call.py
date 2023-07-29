@@ -48,7 +48,7 @@ class DatabaseGetCall(ResourceCall):
             self,
             database: str,
             data_format: str = "xml",
-            view: str = "default"
+            view: str = "default",
     ):
         """Initialize DatabaseGetCall instance.
 
@@ -75,7 +75,7 @@ class DatabaseGetCall(ResourceCall):
         self.add_param(DatabaseGetCall.__VIEW_PARAM, view)
 
     def endpoint(
-            self
+            self,
     ):
         """Return an endpoint for the Database call.
 
@@ -90,7 +90,7 @@ class DatabaseGetCall(ResourceCall):
     def __validate_params(
             cls,
             data_format: str,
-            view: str
+            view: str,
     ):
         if data_format not in cls.__SUPPORTED_FORMATS:
             joined_supported_formats = ", ".join(cls.__SUPPORTED_FORMATS)
@@ -126,7 +126,7 @@ class DatabasePostCall(ResourceCall):
     def __init__(
             self,
             database: str,
-            body: str | dict
+            body: str | dict,
     ):
         """Initialize DatabasePostCall instance.
 
@@ -147,7 +147,7 @@ class DatabasePostCall(ResourceCall):
         self.__database = database
 
     def endpoint(
-            self
+            self,
     ):
         """Return an endpoint for the Database call.
 
@@ -161,7 +161,7 @@ class DatabasePostCall(ResourceCall):
     @classmethod
     def __validate_params(
             cls,
-            body: str | dict
+            body: str | dict,
     ):
         if body is None or isinstance(body, str) and re.search("^\\s*$", body):
             raise exceptions.WrongParametersError(
@@ -194,7 +194,7 @@ class DatabaseDeleteCall(ResourceCall):
     def __init__(
             self,
             database: str,
-            forest_delete: str = None
+            forest_delete: str = None,
     ):
         """Initialize DatabaseDeleteCall instance.
 
@@ -215,7 +215,7 @@ class DatabaseDeleteCall(ResourceCall):
         self.__database = database
 
     def endpoint(
-            self
+            self,
     ):
         """Return an endpoint for the Database call.
 
@@ -229,7 +229,7 @@ class DatabaseDeleteCall(ResourceCall):
     @classmethod
     def __validate_params(
             cls,
-            forest_delete: str
+            forest_delete: str,
     ):
         if forest_delete and forest_delete not in cls.__SUPPORTED_FOREST_DELETE_OPTS:
             joined_supported_opts = ", ".join(cls.__SUPPORTED_FOREST_DELETE_OPTS)

@@ -51,7 +51,7 @@ class DocumentsGetCall(ResourceCall):
             timestamp: str = None,
             transform: str = None,
             transform_params: dict = None,
-            txid: str = None
+            txid: str = None,
     ):
         """Initialize DocumentsGetCall instance.
 
@@ -111,7 +111,7 @@ class DocumentsGetCall(ResourceCall):
                 self.add_param(param, value)
 
     def endpoint(
-            self
+            self,
     ):
         """Return an endpoint for the Documents call.
 
@@ -126,7 +126,7 @@ class DocumentsGetCall(ResourceCall):
     def __validate_params(
             cls,
             category: str,
-            data_format: str
+            data_format: str,
     ):
         if category and category not in cls.__SUPPORTED_CATEGORIES:
             joined_supported_categories = ", ".join(cls.__SUPPORTED_CATEGORIES)
@@ -146,7 +146,7 @@ class DocumentsGetCall(ResourceCall):
     def __get_accept_header(
             uri: str | list,
             category: str,
-            data_format: str
+            data_format: str,
     ):
         if not isinstance(uri, str) and len(uri) > 1:
             return constants.HEADER_MULTIPART_MIXED

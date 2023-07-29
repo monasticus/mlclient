@@ -61,7 +61,7 @@ class ForestsGetCall(ResourceCall):
             database: str = None,
             group: str = None,
             host: str = None,
-            full_refs: bool = None
+            full_refs: bool = None,
     ):
         """Initialize ForestsGetCall instance.
 
@@ -103,7 +103,7 @@ class ForestsGetCall(ResourceCall):
         self.add_param(ForestsGetCall.__FULL_REFS_PARAM, full_refs)
 
     def endpoint(
-            self
+            self,
     ):
         """Return an endpoint for the Forests call.
 
@@ -118,7 +118,7 @@ class ForestsGetCall(ResourceCall):
     def __validate_params(
             cls,
             data_format: str,
-            view: str
+            view: str,
     ):
         if data_format not in cls.__SUPPORTED_FORMATS:
             joined_supported_formats = ", ".join(cls.__SUPPORTED_FORMATS)
@@ -184,7 +184,7 @@ class ForestsPostCall(ResourceCall):
                        wait_for_forest_to_mount)
 
     def endpoint(
-            self
+            self,
     ):
         """Return an endpoint for the Forests call.
 
@@ -198,7 +198,7 @@ class ForestsPostCall(ResourceCall):
     @classmethod
     def __validate_params(
             cls,
-            body: str | dict
+            body: str | dict,
     ):
         if body is None or isinstance(body, str) and re.search("^\\s*$", body):
             msg = "No request body provided for POST /manage/v2/forests!"
@@ -231,7 +231,7 @@ class ForestsPutCall(ResourceCall):
 
     def __init__(
             self,
-            body: str | dict
+            body: str | dict,
     ):
         """Initialize ForestsPutCall instance.
 
@@ -249,7 +249,7 @@ class ForestsPutCall(ResourceCall):
                          body=body)
 
     def endpoint(
-            self
+            self,
     ):
         """Return an endpoint for the Forests call.
 
@@ -263,7 +263,7 @@ class ForestsPutCall(ResourceCall):
     @classmethod
     def __validate_params(
             cls,
-            body: str | dict
+            body: str | dict,
     ):
         if body is None or isinstance(body, str) and re.search("^\\s*$", body):
             msg = "No request body provided for PUT /manage/v2/forests!"

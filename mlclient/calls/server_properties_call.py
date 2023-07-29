@@ -44,7 +44,7 @@ class ServerPropertiesGetCall(ResourceCall):
             self,
             server: str,
             group_id: str,
-            data_format: str = "xml"
+            data_format: str = "xml",
     ):
         """Initialize ServerPropertiesGetCall instance.
 
@@ -69,7 +69,7 @@ class ServerPropertiesGetCall(ResourceCall):
         self.add_param(ServerPropertiesGetCall.__FORMAT_PARAM, data_format)
 
     def endpoint(
-            self
+            self,
     ):
         """Return an endpoint for the Server Properties call.
 
@@ -83,7 +83,7 @@ class ServerPropertiesGetCall(ResourceCall):
     @classmethod
     def __validate_params(
             cls,
-            data_format: str
+            data_format: str,
     ):
         if data_format not in cls.__SUPPORTED_FORMATS:
             joined_supported_formats = ", ".join(cls.__SUPPORTED_FORMATS)
@@ -116,7 +116,7 @@ class ServerPropertiesPutCall(ResourceCall):
             self,
             server: str,
             group_id: str,
-            body: str | dict
+            body: str | dict,
     ):
         """Initialize ServerPropertiesPutCall instance.
 
@@ -141,7 +141,7 @@ class ServerPropertiesPutCall(ResourceCall):
         self.add_param(ServerPropertiesPutCall.__GROUP_ID_PARAM, group_id)
 
     def endpoint(
-            self
+            self,
     ):
         """Return an endpoint for the Server Properties call.
 
@@ -155,7 +155,7 @@ class ServerPropertiesPutCall(ResourceCall):
     @classmethod
     def __validate_params(
             cls,
-            body: str | dict
+            body: str | dict,
     ):
         if body is None or isinstance(body, str) and re.search("^\\s*$", body):
             msg = ("No request body provided for "

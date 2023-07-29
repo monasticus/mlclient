@@ -47,7 +47,7 @@ class UsersGetCall(ResourceCall):
     def __init__(
             self,
             data_format: str = "xml",
-            view: str = "default"
+            view: str = "default",
     ):
         """Initialize UsersGetCall instance.
 
@@ -68,7 +68,7 @@ class UsersGetCall(ResourceCall):
         self.add_param(UsersGetCall.__VIEW_PARAM, view)
 
     def endpoint(
-            self
+            self,
     ):
         """Return an endpoint for the Users call.
 
@@ -83,7 +83,7 @@ class UsersGetCall(ResourceCall):
     def __validate_params(
             cls,
             data_format: str,
-            view: str
+            view: str,
     ):
         if data_format not in cls.__SUPPORTED_FORMATS:
             joined_supported_formats = ", ".join(cls.__SUPPORTED_FORMATS)
@@ -120,7 +120,7 @@ class UsersPostCall(ResourceCall):
 
     def __init__(
             self,
-            body: str | dict
+            body: str | dict,
     ):
         """Initialize UsersPostCall instance.
 
@@ -138,7 +138,7 @@ class UsersPostCall(ResourceCall):
                          body=body)
 
     def endpoint(
-            self
+            self,
     ):
         """Return an endpoint for the Users call.
 
@@ -152,7 +152,7 @@ class UsersPostCall(ResourceCall):
     @classmethod
     def __validate_params(
             cls,
-            body: str | dict
+            body: str | dict,
     ):
         if body is None or isinstance(body, str) and re.search("^\\s*$", body):
             msg = "No request body provided for POST /manage/v2/users!"

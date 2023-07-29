@@ -40,7 +40,7 @@ class UserGetCall(ResourceCall):
             self,
             user: str,
             data_format: str = "xml",
-            view: str = "default"
+            view: str = "default",
     ):
         """Initialize UserGetCall instance.
 
@@ -65,7 +65,7 @@ class UserGetCall(ResourceCall):
         self.add_param(UserGetCall.__VIEW_PARAM, view)
 
     def endpoint(
-            self
+            self,
     ):
         """Return an endpoint for the User call.
 
@@ -80,7 +80,7 @@ class UserGetCall(ResourceCall):
     def __validate_params(
             cls,
             data_format: str,
-            view: str
+            view: str,
     ):
         if data_format not in cls.__SUPPORTED_FORMATS:
             joined_supported_formats = ", ".join(cls.__SUPPORTED_FORMATS)
@@ -112,7 +112,7 @@ class UserDeleteCall(ResourceCall):
 
     def __init__(
             self,
-            user: str
+            user: str,
     ):
         """Initialize UserDeleteCall instance.
 
@@ -125,7 +125,7 @@ class UserDeleteCall(ResourceCall):
         self.__user = user
 
     def endpoint(
-            self
+            self,
     ):
         """Return an endpoint for the User call.
 

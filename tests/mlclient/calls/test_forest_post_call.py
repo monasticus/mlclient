@@ -52,7 +52,7 @@ def test_parameters(default_forest_post_call):
 
 def test_headers(default_forest_post_call):
     assert default_forest_post_call.headers() == {
-        "content-type": "application/x-www-form-urlencoded"
+        "content-type": "application/x-www-form-urlencoded",
     }
 
 

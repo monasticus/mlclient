@@ -54,7 +54,7 @@ class ServersGetCall(ResourceCall):
             data_format: str = "xml",
             group_id: str = None,
             view: str = "default",
-            full_refs: bool = None
+            full_refs: bool = None,
     ):
         """Initialize ServersGetCall instance.
 
@@ -88,7 +88,7 @@ class ServersGetCall(ResourceCall):
         self.add_param(ServersGetCall.__FULL_REFS_PARAM, full_refs)
 
     def endpoint(
-            self
+            self,
     ):
         """Return an endpoint for the Servers call.
 
@@ -103,7 +103,7 @@ class ServersGetCall(ResourceCall):
     def __validate_params(
             cls,
             data_format: str,
-            view: str
+            view: str,
     ):
         if data_format not in cls.__SUPPORTED_FORMATS:
             joined_supported_formats = ", ".join(cls.__SUPPORTED_FORMATS)
@@ -147,7 +147,7 @@ class ServersPostCall(ResourceCall):
             self,
             body: str | dict,
             group_id: str = None,
-            server_type: str = None
+            server_type: str = None,
                      ):
         """Initialize ServersPostCall instance.
 
@@ -177,7 +177,7 @@ class ServersPostCall(ResourceCall):
         self.add_param(ServersPostCall.__SERVER_TYPE_PARAM, server_type)
 
     def endpoint(
-            self
+            self,
     ):
         """Return an endpoint for the Servers call.
 
@@ -192,7 +192,7 @@ class ServersPostCall(ResourceCall):
     def __validate_params(
             cls,
             server_type: str,
-            body: str | dict
+            body: str | dict,
     ):
         if server_type and server_type not in cls.__SUPPORTED_SERVER_TYPES:
             joined_supported_server_types = ", ".join(cls.__SUPPORTED_SERVER_TYPES)

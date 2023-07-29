@@ -26,7 +26,7 @@ def test_method(default_server_delete_call):
 
 def test_parameters(default_server_delete_call):
     assert default_server_delete_call.params() == {
-        "group-id": "Default"
+        "group-id": "Default",
     }
 
 
@@ -45,6 +45,6 @@ def test_fully_parametrized_call():
     assert call.method() == "DELETE"
     assert call.headers() == {}
     assert call.params() == {
-        "group-id": "Default"
+        "group-id": "Default",
     }
     assert call.body() is None

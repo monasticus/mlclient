@@ -13,7 +13,7 @@ def default_servers_post_call():
         "server-name": "custom-server",
         "root": "/",
         "port": 8090,
-        "content-database": "Documents"
+        "content-database": "Documents",
     }
     return ServersPostCall(body=body)
 
@@ -61,14 +61,14 @@ def test_parameters(default_servers_post_call):
 def test_headers_for_dict_body():
     call = ServersPostCall(body={"server-name": "custom-server"})
     assert call.headers() == {
-        "content-type": "application/json"
+        "content-type": "application/json",
     }
 
 
 def test_headers_for_stringified_dict_body():
     call = ServersPostCall(body='{"server-name": "custom-server"}')
     assert call.headers() == {
-        "content-type": "application/json"
+        "content-type": "application/json",
     }
 
 
@@ -78,7 +78,7 @@ def test_headers_for_xml_body():
            '</http-server-properties>'
     call = ServersPostCall(body=body)
     assert call.headers() == {
-        "content-type": "application/xml"
+        "content-type": "application/xml",
     }
 
 
@@ -105,17 +105,17 @@ def test_fully_parametrized_call():
         "server-name": "custom-server",
         "root": "/",
         "port": 8090,
-        "content-database": "Documents"
+        "content-database": "Documents",
     }
     call = ServersPostCall(group_id="Default",
                            server_type="http",
                            body=body)
     assert call.method() == "POST"
     assert call.headers() == {
-        "content-type": "application/json"
+        "content-type": "application/json",
     }
     assert call.params() == {
         "group-id": "Default",
-        "server-type": "http"
+        "server-type": "http",
     }
     assert call.body() == body

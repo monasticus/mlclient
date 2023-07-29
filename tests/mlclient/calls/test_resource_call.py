@@ -86,7 +86,7 @@ def test_mixed_headers():
     assert call_with_mixed_headers.headers() == {
         "custom-header": "custom-value",
         "accept": "application/xml",
-        "content-type": "application/xml"
+        "content-type": "application/xml",
     }
 
 

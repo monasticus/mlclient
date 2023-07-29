@@ -10,7 +10,7 @@ def default_forests_post_call():
     body = {
       "forest-name": "custom-forest",
       "host": "custom-host",
-      "database": "custom-database"
+      "database": "custom-database",
     }
     return ForestsPostCall(body=body)
 
@@ -50,14 +50,14 @@ def test_parameters(default_forests_post_call):
 def test_headers_for_dict_body():
     call = ForestsPostCall(body={"server-name": "custom-server"})
     assert call.headers() == {
-        "content-type": "application/json"
+        "content-type": "application/json",
     }
 
 
 def test_headers_for_stringified_dict_body():
     call = ForestsPostCall(body='{"server-name": "custom-server"}')
     assert call.headers() == {
-        "content-type": "application/json"
+        "content-type": "application/json",
     }
 
 
@@ -68,7 +68,7 @@ def test_headers_for_xml_body():
            '</forest-create>'
     call = ForestsPostCall(body=body)
     assert call.headers() == {
-        "content-type": "application/xml"
+        "content-type": "application/xml",
     }
 
 
@@ -87,7 +87,7 @@ def test_stringified_dict_body():
         body='{"forest-name": "custom-forest", "host": "custom-host"}')
     assert call.body() == {
         "forest-name": "custom-forest",
-        "host": "custom-host"
+        "host": "custom-host",
     }
 
 
@@ -104,16 +104,16 @@ def test_fully_parametrized_call():
     body = {
       "forest-name": "custom-forest",
       "host": "custom-host",
-      "database": "custom-database"
+      "database": "custom-database",
     }
     call = ForestsPostCall(
         body=body,
         wait_for_forest_to_mount=False)
     assert call.method() == "POST"
     assert call.headers() == {
-        "content-type": "application/json"
+        "content-type": "application/json",
     }
     assert call.params() == {
-        "wait-for-forest-to-mount": "false"
+        "wait-for-forest-to-mount": "false",
     }
     assert call.body() == body

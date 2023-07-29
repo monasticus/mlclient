@@ -31,41 +31,41 @@ def test_method(default_user_properties_get_call):
 
 def test_parameters(default_user_properties_get_call):
     assert default_user_properties_get_call.params() == {
-        "format": "xml"
+        "format": "xml",
     }
 
 
 def test_headers(default_user_properties_get_call):
     assert default_user_properties_get_call.headers() == {
-        "accept": "application/xml"
+        "accept": "application/xml",
     }
 
 
 def test_headers_for_none_format():
     call = UserPropertiesGetCall(user="admin", data_format=None)
     assert call.headers() == {
-        "accept": "application/xml"
+        "accept": "application/xml",
     }
 
 
 def test_headers_for_html_format():
     call = UserPropertiesGetCall(user="admin", data_format="html")
     assert call.headers() == {
-        "accept": "text/html"
+        "accept": "text/html",
     }
 
 
 def test_headers_for_xml_format():
     call = UserPropertiesGetCall(user="admin", data_format="xml")
     assert call.headers() == {
-        "accept": "application/xml"
+        "accept": "application/xml",
     }
 
 
 def test_headers_for_json_format():
     call = UserPropertiesGetCall(user="admin", data_format="json")
     assert call.headers() == {
-        "accept": "application/json"
+        "accept": "application/json",
     }
 
 

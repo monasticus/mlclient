@@ -109,6 +109,6 @@ def test_to_json():
     assert permission.to_json() == {
         "role-name": "custom_role",
         "capabilities": [
-            Permission.READ
-        ]
+            Permission.READ,
+        ],
     }

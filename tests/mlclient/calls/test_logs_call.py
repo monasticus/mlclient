@@ -49,41 +49,41 @@ def test_method(default_logs_call):
 def test_parameters(default_logs_call):
     assert default_logs_call.params() == {
         "filename": "ErrorLog.txt",
-        "format": "html"
+        "format": "html",
     }
 
 
 def test_headers(default_logs_call):
     assert default_logs_call.headers() == {
-        "accept": "text/html"
+        "accept": "text/html",
     }
 
 
 def test_headers_for_none_format():
     call = LogsCall(filename="ErrorLog.txt", data_format=None)
     assert call.headers() == {
-        "accept": "text/html"
+        "accept": "text/html",
     }
 
 
 def test_headers_for_html_format():
     call = LogsCall(filename="ErrorLog.txt", data_format="html")
     assert call.headers() == {
-        "accept": "text/html"
+        "accept": "text/html",
     }
 
 
 def test_headers_for_xml_format():
     call = LogsCall(filename="ErrorLog.txt", data_format="xml")
     assert call.headers() == {
-        "accept": "application/xml"
+        "accept": "application/xml",
     }
 
 
 def test_headers_for_json_format():
     call = LogsCall(filename="ErrorLog.txt", data_format="json")
     assert call.headers() == {
-        "accept": "application/json"
+        "accept": "application/json",
     }
 
 
@@ -100,7 +100,7 @@ def test_fully_parametrized_call():
                     regex="some-re")
     assert call.method() == "GET"
     assert call.headers() == {
-        "accept": "application/json"
+        "accept": "application/json",
     }
     assert call.params() == {
         "filename": "ErrorLog.txt",
@@ -108,7 +108,7 @@ def test_fully_parametrized_call():
         "host": "localhost",
         "start": "2022-01-01T01:01:01",
         "end": "2022-01-01T01:02:02",
-        "regex": "some-re"
+        "regex": "some-re",
     }
     assert call.body() is None
 

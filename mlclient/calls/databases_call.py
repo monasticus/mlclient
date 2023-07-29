@@ -48,7 +48,7 @@ class DatabasesGetCall(ResourceCall):
     def __init__(
             self,
             data_format: str = "xml",
-            view: str = "default"
+            view: str = "default",
     ):
         """Initialize DatabasesGetCall instance.
 
@@ -70,7 +70,7 @@ class DatabasesGetCall(ResourceCall):
         self.add_param(DatabasesGetCall.__VIEW_PARAM, view)
 
     def endpoint(
-            self
+            self,
     ):
         """Return an endpoint for the Databases call.
 
@@ -85,7 +85,7 @@ class DatabasesGetCall(ResourceCall):
     def __validate_params(
             cls,
             data_format: str,
-            view: str
+            view: str,
     ):
         if data_format not in cls.__SUPPORTED_FORMATS:
             joined_supported_formats = ", ".join(cls.__SUPPORTED_FORMATS)
@@ -122,7 +122,7 @@ class DatabasesPostCall(ResourceCall):
 
     def __init__(
             self,
-            body: str | dict
+            body: str | dict,
     ):
         """Initialize DatabasesPostCall instance.
 
@@ -140,7 +140,7 @@ class DatabasesPostCall(ResourceCall):
                          body=body)
 
     def endpoint(
-            self
+            self,
     ):
         """Return an endpoint for the Databases call.
 
@@ -154,7 +154,7 @@ class DatabasesPostCall(ResourceCall):
     @classmethod
     def __validate_params(
             cls,
-            body: str | dict
+            body: str | dict,
     ):
         if body is None or isinstance(body, str) and re.search("^\\s*$", body):
             msg = "No request body provided for POST /manage/v2/databases!"

@@ -42,7 +42,7 @@ class ResourceCall(metaclass=ABCMeta):
             headers: dict = None,
             body: str | dict = None,
             accept: str = None,
-            content_type: str = None
+            content_type: str = None,
     ):
         """Initialize ResourceCall implementation instance.
 
@@ -92,7 +92,7 @@ class ResourceCall(metaclass=ABCMeta):
 
     @abstractmethod
     def endpoint(
-            self
+            self,
     ) -> str:
         """Return an endpoint for a specific resource call.
 
@@ -106,7 +106,7 @@ class ResourceCall(metaclass=ABCMeta):
     def add_param(
             self,
             param_name: str,
-            param_value: Any
+            param_value: Any,
     ):
         """Put a request parameter if it's name and value exist.
 
@@ -123,7 +123,7 @@ class ResourceCall(metaclass=ABCMeta):
     def add_header(
             self,
             header_name: str,
-            header_value: Any
+            header_value: Any,
     ):
         """Put a request header if it's name and value exist.
 
@@ -139,7 +139,7 @@ class ResourceCall(metaclass=ABCMeta):
 
     def set_body(
             self,
-            body: str | dict
+            body: str | dict,
     ):
         """Set a request body.
 
@@ -151,7 +151,7 @@ class ResourceCall(metaclass=ABCMeta):
         self.__body = body
 
     def method(
-            self
+            self,
     ) -> str:
         """Return a request method.
 
@@ -163,7 +163,7 @@ class ResourceCall(metaclass=ABCMeta):
         return self.__method
 
     def params(
-            self
+            self,
     ) -> dict:
         """Return request parameters.
 
@@ -175,7 +175,7 @@ class ResourceCall(metaclass=ABCMeta):
         return self.__params.copy()
 
     def headers(
-            self
+            self,
     ) -> dict:
         """Return request headers.
 
@@ -187,7 +187,7 @@ class ResourceCall(metaclass=ABCMeta):
         return self.__headers.copy()
 
     def body(
-            self
+            self,
     ) -> str | dict:
         """Return a request body.
 

@@ -40,7 +40,7 @@ class RoleGetCall(ResourceCall):
             self,
             role: str,
             data_format: str = "xml",
-            view: str = "default"
+            view: str = "default",
     ):
         """Initialize RoleGetCall instance.
 
@@ -65,7 +65,7 @@ class RoleGetCall(ResourceCall):
         self.add_param(RoleGetCall.__VIEW_PARAM, view)
 
     def endpoint(
-            self
+            self,
     ):
         """Return an endpoint for the Role call.
 
@@ -80,7 +80,7 @@ class RoleGetCall(ResourceCall):
     def __validate_params(
             cls,
             data_format: str,
-            view: str
+            view: str,
     ):
         if data_format not in cls.__SUPPORTED_FORMATS:
             joined_supported_formats = ", ".join(cls.__SUPPORTED_FORMATS)
@@ -112,7 +112,7 @@ class RoleDeleteCall(ResourceCall):
 
     def __init__(
             self,
-            role: str
+            role: str,
     ):
         """Initialize RoleDeleteCall instance.
 
@@ -125,7 +125,7 @@ class RoleDeleteCall(ResourceCall):
         self.__role = role
 
     def endpoint(
-            self
+            self,
     ):
         """Return an endpoint for the Role call.
 

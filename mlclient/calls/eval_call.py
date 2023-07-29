@@ -47,7 +47,7 @@ class EvalCall(ResourceCall):
             javascript: str = None,
             variables: dict = None,
             database: str = None,
-            txid: str = None
+            txid: str = None,
     ):
         """Initialize EvalCall instance.
 
@@ -81,7 +81,7 @@ class EvalCall(ResourceCall):
         self.set_body(self.__build_body(xquery, javascript, variables))
 
     def endpoint(
-            self
+            self,
     ):
         """Return an endpoint for the Eval call.
 
@@ -96,7 +96,7 @@ class EvalCall(ResourceCall):
     def __validate_params(
             cls,
             xquery: str,
-            javascript: str
+            javascript: str,
     ):
         if not xquery and not javascript:
             msg = "You must include either the xquery or the javascript parameter!"
@@ -109,7 +109,7 @@ class EvalCall(ResourceCall):
     def __build_body(
             xquery: str,
             javascript: str,
-            variables: dict
+            variables: dict,
     ):
         code_lang = EvalCall.__XQ_PARAM if xquery else EvalCall.__JS_PARAM
         code_to_eval = EvalCall.__normalize_code(xquery if xquery else javascript)
@@ -120,7 +120,7 @@ class EvalCall(ResourceCall):
 
     @staticmethod
     def __normalize_code(
-            code: str
+            code: str,
     ):
         one_line_code = code.replace("\n", " ")
         return " ".join(one_line_code.split())

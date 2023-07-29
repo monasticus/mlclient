@@ -58,7 +58,7 @@ def test_headers_for_dict_body():
         forest="forest-1",
         body={"forest-name": "custom-forest"})
     assert call.headers() == {
-        "content-type": "application/json"
+        "content-type": "application/json",
     }
 
 
@@ -67,7 +67,7 @@ def test_headers_for_stringified_dict_body():
         forest="forest-1",
         body='{"forest-name": "custom-forest"}')
     assert call.headers() == {
-        "content-type": "application/json"
+        "content-type": "application/json",
     }
 
 
@@ -79,7 +79,7 @@ def test_headers_for_xml_body():
         forest="forest-1",
         body=body)
     assert call.headers() == {
-        "content-type": "application/xml"
+        "content-type": "application/xml",
     }
 
 

@@ -56,7 +56,7 @@ def test_method(default_server_properties_put_call):
 
 def test_parameters(default_server_properties_put_call):
     assert default_server_properties_put_call.params() == {
-        "group-id": "Default"
+        "group-id": "Default",
     }
 
 
@@ -66,7 +66,7 @@ def test_headers_for_dict_body():
         group_id="Default",
         body={"port": 8343})
     assert call.headers() == {
-        "content-type": "application/json"
+        "content-type": "application/json",
     }
 
 
@@ -76,7 +76,7 @@ def test_headers_for_stringified_dict_body():
         group_id="Default",
         body='{"port": 8343}')
     assert call.headers() == {
-        "content-type": "application/json"
+        "content-type": "application/json",
     }
 
 
@@ -89,7 +89,7 @@ def test_headers_for_xml_body():
         group_id="Default",
         body=body)
     assert call.headers() == {
-        "content-type": "application/xml"
+        "content-type": "application/xml",
     }
 
 

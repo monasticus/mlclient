@@ -150,5 +150,6 @@ class DocumentsGetCall(ResourceCall):
     ):
         if not isinstance(uri, str) and len(uri) > 1:
             return constants.HEADER_MULTIPART_MIXED
-        elif data_format is not None and category is not None and category != "content":
+        if data_format is not None and category is not None and category != "content":
             return utils.get_accept_header_for_format(data_format)
+        return None

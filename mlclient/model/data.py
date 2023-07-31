@@ -369,9 +369,9 @@ class Metadata:
             permission = self._get_permission_for_role(self._permissions, role_name)
             if permission is not None:
                 return permission.add_capability(capability)
-            else:
-                self._permissions.append(Permission(role_name, {capability}))
-                return True
+
+            self._permissions.append(Permission(role_name, {capability}))
+            return True
         return allow
 
     def put_property(
@@ -879,6 +879,6 @@ class MetadataEncoder(json.JSONEncoder):
         """
         if isinstance(obj, set):
             return list(obj)
-        elif isinstance(obj, Permission):
+        if isinstance(obj, Permission):
             return obj.to_json()
         return json.JSONEncoder.default(self, obj)

@@ -198,5 +198,6 @@ class ResourceCall(metaclass=ABCMeta):
         """
         if isinstance(self.__body, str):
             return self.__body
-        elif isinstance(self.__body, dict):
+        if isinstance(self.__body, dict):
             return self.__body.copy()
+        return None

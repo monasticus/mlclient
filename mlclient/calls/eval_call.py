@@ -101,7 +101,7 @@ class EvalCall(ResourceCall):
         if not xquery and not javascript:
             msg = "You must include either the xquery or the javascript parameter!"
             raise exceptions.WrongParametersError(msg)
-        elif xquery and javascript:
+        if xquery and javascript:
             msg = "You cannot include both the xquery and the javascript parameter!"
             raise exceptions.WrongParametersError(msg)
 

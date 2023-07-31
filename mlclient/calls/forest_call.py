@@ -167,7 +167,7 @@ class ForestPostCall(ResourceCall):
         if state is None:
             msg = "You must include the 'state' parameter within a body!"
             raise exceptions.WrongParametersError(msg)
-        elif state not in cls.__SUPPORTED_STATES:
+        if state not in cls.__SUPPORTED_STATES:
             joined_supported_states = ", ".join(cls.__SUPPORTED_STATES)
             msg = f"The supported states are: {joined_supported_states}"
             raise exceptions.WrongParametersError(msg)

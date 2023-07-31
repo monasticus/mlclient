@@ -125,5 +125,4 @@ class LogsCall(ResourceCall):
     ):
         if datetime_param:
             return parser.parse(datetime_param).strftime("%Y-%m-%dT%H:%M:%S")
-        else:
-            return datetime_param
+        return datetime_param

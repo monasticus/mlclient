@@ -603,24 +603,24 @@ def test_to_json_string(metadata):
 
 def test_to_json_string_with_indent(metadata):
     metadata_json_string = metadata.to_json_string(indent=4)
-    assert '{\n' in metadata_json_string
+    assert "{\n" in metadata_json_string
     assert '    "collections": [\n' in metadata_json_string
     assert ('        "collection-1"\n' in metadata_json_string or
             '        "collection-1",\n' in metadata_json_string)
     assert ('        "collection-2"\n' in metadata_json_string or
             '        "collection-2",\n' in metadata_json_string)
-    assert '    ],\n' in metadata_json_string
+    assert "    ],\n" in metadata_json_string
     assert '    "permissions": [\n' in metadata_json_string
-    assert '        {\n' in metadata_json_string
+    assert "        {\n" in metadata_json_string
     assert ('            "role-name": "role-1"\n' in metadata_json_string or
             '            "role-name": "role-1",\n' in metadata_json_string)
     assert '            "capabilities": [\n' in metadata_json_string
     assert '                "read"\n' in metadata_json_string
-    assert ('            ]\n' in metadata_json_string or
+    assert ("            ]\n" in metadata_json_string or
             '            "],\n' in metadata_json_string)
-    assert ('        }\n' in metadata_json_string or
+    assert ("        }\n" in metadata_json_string or
             '        "},\n' in metadata_json_string)
-    assert '        {\n' in metadata_json_string
+    assert "        {\n" in metadata_json_string
     assert ('            "role-name": "role-2"\n' in metadata_json_string or
             '            "role-name": "role-2",\n' in metadata_json_string)
     assert '            "capabilities": [\n' in metadata_json_string
@@ -628,18 +628,18 @@ def test_to_json_string_with_indent(metadata):
             '                "read",\n' in metadata_json_string)
     assert ('                "update"\n' in metadata_json_string or
             '                "update",\n' in metadata_json_string)
-    assert ('            ]\n' in metadata_json_string or
+    assert ("            ]\n" in metadata_json_string or
             '            "],\n' in metadata_json_string)
-    assert ('        }\n' in metadata_json_string or
+    assert ("        }\n" in metadata_json_string or
             '        "},\n' in metadata_json_string)
-    assert '    ],\n' in metadata_json_string
+    assert "    ],\n" in metadata_json_string
     assert '"properties": {\n' in metadata_json_string
     assert ('        "prop-name-1": "prop-value-1"\n' in metadata_json_string or
             '        "prop-name-1": "prop-value-1",\n' in metadata_json_string)
     assert ('        "prop-name-2": "prop-value-2"\n' in metadata_json_string or
             '        "prop-name-2": "prop-value-2",\n' in metadata_json_string)
-    assert ('    },\n' in metadata_json_string or
-            '    }\n' in metadata_json_string)
+    assert ("    },\n" in metadata_json_string or
+            "    }\n" in metadata_json_string)
     assert ('    "quality": 1\n' in metadata_json_string or
             '    "quality": 1,\n' in metadata_json_string)
     assert '    "metadataValues": {\n' in metadata_json_string
@@ -647,9 +647,9 @@ def test_to_json_string_with_indent(metadata):
             '        "meta-name-1": "meta-value-1",\n' in metadata_json_string)
     assert ('        "meta-name-2": "meta-value-2"\n' in metadata_json_string or
             '        "meta-name-2": "meta-value-2",\n' in metadata_json_string)
-    assert ('    }\n' in metadata_json_string or
-            '    },\n' in metadata_json_string)
-    assert '}' in metadata_json_string
+    assert ("    }\n" in metadata_json_string or
+            "    },\n" in metadata_json_string)
+    assert "}" in metadata_json_string
 
 
 def test_to_xml(metadata):
@@ -731,31 +731,31 @@ def test_to_xml_string(metadata):
     expected_lines = [
         "<?xml version='1.0' encoding='utf-8'?>\n",
         '<rapi:metadata xmlns:rapi="http://marklogic.com/rest-api">',
-        '<rapi:collections>',
-        '<rapi:collection>collection-1</rapi:collection>',
-        '<rapi:collection>collection-2</rapi:collection>',
-        '</rapi:collections>',
-        '<rapi:permissions>',
-        '<rapi:permission>',
-        '<rapi:role-name>role-1</rapi:role-name><rapi:capability>read</rapi:capability>',
-        '</rapi:permission>',
-        '<rapi:permission>',
-        '<rapi:role-name>role-2</rapi:role-name><rapi:capability>read</rapi:capability>',
-        '</rapi:permission>',
-        '<rapi:permission>',
-        '<rapi:role-name>role-2</rapi:role-name><rapi:capability>update</rapi:capability>',
-        '</rapi:permission>',
-        '</rapi:permissions>',
+        "<rapi:collections>",
+        "<rapi:collection>collection-1</rapi:collection>",
+        "<rapi:collection>collection-2</rapi:collection>",
+        "</rapi:collections>",
+        "<rapi:permissions>",
+        "<rapi:permission>",
+        "<rapi:role-name>role-1</rapi:role-name><rapi:capability>read</rapi:capability>",
+        "</rapi:permission>",
+        "<rapi:permission>",
+        "<rapi:role-name>role-2</rapi:role-name><rapi:capability>read</rapi:capability>",
+        "</rapi:permission>",
+        "<rapi:permission>",
+        "<rapi:role-name>role-2</rapi:role-name><rapi:capability>update</rapi:capability>",
+        "</rapi:permission>",
+        "</rapi:permissions>",
         '<prop:properties xmlns:prop="http://marklogic.com/xdmp/property">',
-        '<prop-name-1>prop-value-1</prop-name-1>',
-        '<prop-name-2>prop-value-2</prop-name-2>',
-        '</prop:properties>',
-        '<rapi:quality>1</rapi:quality>',
-        '<rapi:metadata-values>',
+        "<prop-name-1>prop-value-1</prop-name-1>",
+        "<prop-name-2>prop-value-2</prop-name-2>",
+        "</prop:properties>",
+        "<rapi:quality>1</rapi:quality>",
+        "<rapi:metadata-values>",
         '<rapi:metadata-value key="meta-name-1">meta-value-1</rapi:metadata-value>',
         '<rapi:metadata-value key="meta-name-2">meta-value-2</rapi:metadata-value>',
-        '</rapi:metadata-values>',
-        '</rapi:metadata>',
+        "</rapi:metadata-values>",
+        "</rapi:metadata>",
     ]
     for line in expected_lines:
         assert line in metadata_xml_string
@@ -766,36 +766,36 @@ def test_to_xml_string_with_indent(metadata):
     expected_lines = [
         '<?xml version="1.0" encoding="utf-8"?>\n',
         '<rapi:metadata xmlns:rapi="http://marklogic.com/rest-api">\n',
-        '    <rapi:collections>\n',
-        '        <rapi:collection>collection-1</rapi:collection>\n',
-        '        <rapi:collection>collection-2</rapi:collection>\n',
-        '    </rapi:collections>\n',
-        '    <rapi:permissions>\n',
-        '        <rapi:permission>\n',
-        '            <rapi:role-name>role-1</rapi:role-name>\n',
-        '            <rapi:capability>read</rapi:capability>\n',
-        '        </rapi:permission>\n',
-        '        <rapi:permission>\n',
-        '            <rapi:role-name>role-2</rapi:role-name>\n',
-        '            <rapi:capability>read</rapi:capability>\n',
-        '        </rapi:permission>\n',
-        '        <rapi:permission>\n',
-        '            <rapi:role-name>role-2</rapi:role-name>\n',
-        '            <rapi:capability>update</rapi:capability>\n',
-        '        </rapi:permission>\n',
-        '    </rapi:permissions>\n',
+        "    <rapi:collections>\n",
+        "        <rapi:collection>collection-1</rapi:collection>\n",
+        "        <rapi:collection>collection-2</rapi:collection>\n",
+        "    </rapi:collections>\n",
+        "    <rapi:permissions>\n",
+        "        <rapi:permission>\n",
+        "            <rapi:role-name>role-1</rapi:role-name>\n",
+        "            <rapi:capability>read</rapi:capability>\n",
+        "        </rapi:permission>\n",
+        "        <rapi:permission>\n",
+        "            <rapi:role-name>role-2</rapi:role-name>\n",
+        "            <rapi:capability>read</rapi:capability>\n",
+        "        </rapi:permission>\n",
+        "        <rapi:permission>\n",
+        "            <rapi:role-name>role-2</rapi:role-name>\n",
+        "            <rapi:capability>update</rapi:capability>\n",
+        "        </rapi:permission>\n",
+        "    </rapi:permissions>\n",
         '    <prop:properties xmlns:prop="http://marklogic.com/xdmp/property">\n',
-        '        <prop-name-1>prop-value-1</prop-name-1>\n',
-        '        <prop-name-2>prop-value-2</prop-name-2>\n',
-        '    </prop:properties>\n',
-        '    <rapi:quality>1</rapi:quality>\n',
-        '    <rapi:metadata-values>\n',
+        "        <prop-name-1>prop-value-1</prop-name-1>\n",
+        "        <prop-name-2>prop-value-2</prop-name-2>\n",
+        "    </prop:properties>\n",
+        "    <rapi:quality>1</rapi:quality>\n",
+        "    <rapi:metadata-values>\n",
         ('        <rapi:metadata-value key="meta-name-1">meta-value-1'
          '</rapi:metadata-value>\n'),
         ('        <rapi:metadata-value key="meta-name-2">meta-value-2'
          '</rapi:metadata-value>\n'),
-        '    </rapi:metadata-values>\n',
-        '</rapi:metadata>\n',
+        "    </rapi:metadata-values>\n",
+        "</rapi:metadata>\n",
     ]
     for line in expected_lines:
         assert line in metadata_xml_string

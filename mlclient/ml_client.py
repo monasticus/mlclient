@@ -131,7 +131,7 @@ class MLClient:
         self.auth_method = auth_method
         self.username = username
         self.password = password
-        self.base_url = f'{protocol}://{host}:{port}'
+        self.base_url = f"{protocol}://{host}:{port}"
         self.__sess = None
         auth_impl = HTTPBasicAuth if auth_method == "basic" else HTTPDigestAuth
         self.__auth = auth_impl(username, password)
@@ -172,7 +172,7 @@ class MLClient:
             An exception's traceback
         """
         self.disconnect()
-        return None
+        return
 
     def connect(
             self,
@@ -207,7 +207,7 @@ class MLClient:
             endpoint: str,
             params: dict = None,
             headers: dict = None,
-    ) -> Response:
+    ) -> Response | None:
         """Send a GET request.
 
         Parameters
@@ -236,9 +236,9 @@ class MLClient:
                 auth=self.__auth,
                 params=params,
                 headers=headers)
-        else:
-            self.__logger.warning("A request attempt failure: GET %s "
-                                  "-- MLClient is not connected", endpoint)
+        self.__logger.warning("A request attempt failure: GET %s "
+                              "-- MLClient is not connected", endpoint)
+        return None
 
     def post(
             self,
@@ -246,7 +246,7 @@ class MLClient:
             params: dict = None,
             headers: dict = None,
             body: str | dict = None,
-    ) -> Response:
+    ) -> Response | None:
         """Send a POST request.
 
         Parameters
@@ -279,16 +279,15 @@ class MLClient:
                     params=params,
                     headers=headers,
                     json=body)
-            else:
-                return self.__sess.post(
-                    url,
-                    auth=self.__auth,
-                    params=params,
-                    headers=headers,
-                    data=body)
-        else:
-            self.__logger.warning("A request attempt failure: POST %s"
-                                  " -- MLClient is not connected", endpoint)
+            return self.__sess.post(
+                url,
+                auth=self.__auth,
+                params=params,
+                headers=headers,
+                data=body)
+        self.__logger.warning("A request attempt failure: POST %s"
+                              " -- MLClient is not connected", endpoint)
+        return None
 
     def put(
             self,
@@ -296,7 +295,7 @@ class MLClient:
             params: dict = None,
             headers: dict = None,
             body: str | dict = None,
-    ) -> Response:
+    ) -> Response | None:
         """Send a PUT request.
 
         Parameters
@@ -329,23 +328,22 @@ class MLClient:
                     params=params,
                     headers=headers,
                     json=body)
-            else:
-                return self.__sess.put(
-                    url,
-                    auth=self.__auth,
-                    params=params,
-                    headers=headers,
-                    data=body)
-        else:
-            self.__logger.warning("A request attempt failure: PUT %s"
-                                  " -- MLClient is not connected", endpoint)
+            return self.__sess.put(
+                url,
+                auth=self.__auth,
+                params=params,
+                headers=headers,
+                data=body)
+        self.__logger.warning("A request attempt failure: PUT %s"
+                              " -- MLClient is not connected", endpoint)
+        return None
 
     def delete(
             self,
             endpoint: str,
             params: dict = None,
             headers: dict = None,
-    ) -> Response:
+    ) -> Response | None:
         """Send a DELETE request.
 
         Parameters
@@ -374,9 +372,9 @@ class MLClient:
                 auth=self.__auth,
                 params=params,
                 headers=headers)
-        else:
-            self.__logger.warning("A request attempt failure: DELETE %s"
-                                  " -- MLClient is not connected", endpoint)
+        self.__logger.warning("A request attempt failure: DELETE %s"
+                              " -- MLClient is not connected", endpoint)
+        return None
 
 
 class MLResourceClient(MLClient):
@@ -1593,6 +1591,11 @@ class MLResourceClient(MLClient):
         -------
         Response
             an HTTP response
+
+        Raises
+        ------
+        NotImplementedError
+            If the call's method is not GET, POST, PUT nor DELETE.
         """
         call = UserPropertiesPutCall(user=user,
                                      body=body)
@@ -1620,20 +1623,21 @@ class MLResourceClient(MLClient):
                 endpoint=call.endpoint(),
                 params=call.params(),
                 headers=call.headers())
-        elif method == constants.METHOD_POST:
+        if method == constants.METHOD_POST:
             return self.post(
                 endpoint=call.endpoint(),
                 params=call.params(),
                 headers=call.headers(),
                 body=call.body())
-        elif method == constants.METHOD_PUT:
+        if method == constants.METHOD_PUT:
             return self.put(
                 endpoint=call.endpoint(),
                 params=call.params(),
                 headers=call.headers(),
                 body=call.body())
-        elif method == constants.METHOD_DELETE:
+        if method == constants.METHOD_DELETE:
             return self.delete(
                 endpoint=call.endpoint(),
                 params=call.params(),
                 headers=call.headers())
+        raise NotImplementedError

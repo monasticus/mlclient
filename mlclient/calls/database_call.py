@@ -94,12 +94,12 @@ class DatabaseGetCall(ResourceCall):
     ):
         if data_format not in cls.__SUPPORTED_FORMATS:
             joined_supported_formats = ", ".join(cls.__SUPPORTED_FORMATS)
-            raise exceptions.WrongParametersError(
-                f"The supported formats are: {joined_supported_formats}")
+            msg = f"The supported formats are: {joined_supported_formats}"
+            raise exceptions.WrongParametersError(msg)
         if view not in cls.__SUPPORTED_VIEWS:
             joined_supported_views = ", ".join(cls.__SUPPORTED_VIEWS)
-            raise exceptions.WrongParametersError(
-                f"The supported views are: {joined_supported_views}")
+            msg = f"The supported views are: {joined_supported_views}"
+            raise exceptions.WrongParametersError(msg)
 
 
 class DatabasePostCall(ResourceCall):
@@ -164,8 +164,8 @@ class DatabasePostCall(ResourceCall):
             body: str | dict,
     ):
         if body is None or isinstance(body, str) and re.search("^\\s*$", body):
-            raise exceptions.WrongParametersError(
-                "No request body provided for POST /manage/v2/databases/{id|name}!")
+            msg = "No request body provided for POST /manage/v2/databases/{id|name}!"
+            raise exceptions.WrongParametersError(msg)
 
 
 class DatabaseDeleteCall(ResourceCall):
@@ -233,5 +233,5 @@ class DatabaseDeleteCall(ResourceCall):
     ):
         if forest_delete and forest_delete not in cls.__SUPPORTED_FOREST_DELETE_OPTS:
             joined_supported_opts = ", ".join(cls.__SUPPORTED_FOREST_DELETE_OPTS)
-            raise exceptions.WrongParametersError(
-                f"The supported forest_delete options are: {joined_supported_opts}")
+            msg = f"The supported forest_delete options are: {joined_supported_opts}"
+            raise exceptions.WrongParametersError(msg)

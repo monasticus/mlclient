@@ -209,7 +209,7 @@ class Metadata:
         metadata_values : dict | None
             Document's metadata values
         """
-        self._collections = list(set(collections)) if collections else list()
+        self._collections = list(set(collections)) if collections else []
         self._permissions = self._get_clean_permissions(permissions)
         self._properties = self._get_clean_dict(properties)
         self._quality = quality
@@ -700,7 +700,7 @@ class Metadata:
             A clean dictionary
         """
         if not source_dict:
-            return dict()
+            return {}
         return {k: str(v) for k, v in source_dict.items() if v is not None}
 
 

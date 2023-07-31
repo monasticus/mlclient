@@ -106,7 +106,8 @@ exclude = [
     ".venv",
     "__pycache__",
     "dist",
-    "venv"
+    "venv",
+    "meta"
 ]
 ignore-init-module-imports = true
 target-version = "py37"

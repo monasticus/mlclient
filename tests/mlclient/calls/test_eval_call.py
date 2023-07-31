@@ -61,7 +61,7 @@ def test_body_without_variables(default_eval_call):
     }
 
 
-def test_body_with_variables(default_eval_call):
+def test_body_with_variables():
     call = EvalCall(xquery="()",
                     variables={"custom-variable": "custom-value"})
     assert call.body() == {

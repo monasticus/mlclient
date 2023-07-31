@@ -18,7 +18,7 @@ def test_validation_forest_delete_param():
     assert err.value.args[0] == expected_msg
 
 
-def test_endpoint(default_database_delete_call):
+def test_endpoint():
     expected__id_endpoint = "/manage/v2/databases/1"
     expected__name_endpoint = "/manage/v2/databases/Documents"
     assert DatabaseDeleteCall(

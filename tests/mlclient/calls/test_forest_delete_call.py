@@ -33,7 +33,7 @@ def test_validation_replicas_param():
     assert err.value.args[0] == expected_msg
 
 
-def test_endpoint(default_forest_delete_call):
+def test_endpoint():
     assert ForestDeleteCall(
         forest="1",
         level="full").endpoint() == "/manage/v2/forests/1"

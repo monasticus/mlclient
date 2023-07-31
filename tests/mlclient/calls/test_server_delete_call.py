@@ -11,7 +11,7 @@ def default_server_delete_call():
         group_id="Default")
 
 
-def test_endpoint(default_server_delete_call):
+def test_endpoint():
     assert ServerDeleteCall(
         server="1",
         group_id="Default").endpoint() == "/manage/v2/servers/1"

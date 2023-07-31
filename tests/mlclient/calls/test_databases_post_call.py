@@ -57,9 +57,9 @@ def test_headers_for_stringified_dict_body():
 
 
 def test_headers_for_xml_body():
-    body = '<database-properties xmlns="http://marklogic.com/manage">' \
-           '  <database-name>custom-db</database-name>' \
-           '</database-properties>'
+    body = ('<database-properties xmlns="http://marklogic.com/manage">'
+            '  <database-name>custom-db</database-name>'
+            '</database-properties>')
     call = DatabasesPostCall(body=body)
     assert call.headers() == {
         "content-type": "application/xml",
@@ -77,8 +77,8 @@ def test_stringified_dict_body():
 
 
 def test_xml_body():
-    body = '<database-properties xmlns="http://marklogic.com/manage">' \
-           '  <database-name>custom-db</database-name>' \
-           '</database-properties>'
+    body = ('<database-properties xmlns="http://marklogic.com/manage">'
+            '  <database-name>custom-db</database-name>'
+            '</database-properties>')
     call = DatabasesPostCall(body=body)
     assert call.body() == body

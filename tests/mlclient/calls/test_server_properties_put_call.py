@@ -81,9 +81,9 @@ def test_headers_for_stringified_dict_body():
 
 
 def test_headers_for_xml_body():
-    body = '<http-server-properties xmlns="http://marklogic.com/manage">' \
-           '  <port>8343</port>' \
-           '</http-server-properties>'
+    body = ('<http-server-properties xmlns="http://marklogic.com/manage">'
+            '  <port>8343</port>'
+            '</http-server-properties>')
     call = ServerPropertiesPutCall(
         server="App-Services",
         group_id="Default",
@@ -110,9 +110,9 @@ def test_stringified_dict_body():
 
 
 def test_xml_body():
-    body = '<http-server-properties xmlns="http://marklogic.com/manage">' \
-           '  <port>8343</port>' \
-           '</http-server-properties>'
+    body = ('<http-server-properties xmlns="http://marklogic.com/manage">'
+            '  <port>8343</port>'
+            '</http-server-properties>')
     call = ServerPropertiesPutCall(
         server="App-Services",
         group_id="Default",

@@ -72,9 +72,9 @@ def test_headers_for_stringified_dict_body():
 
 
 def test_headers_for_xml_body():
-    body = '<forest-properties xmlns="http://marklogic.com/manage">' \
-           '  <forest-name>custom-forest</forest-name>' \
-           '</forest-properties>'
+    body = ('<forest-properties xmlns="http://marklogic.com/manage">'
+            '  <forest-name>custom-forest</forest-name>'
+            '</forest-properties>')
     call = ForestPropertiesPutCall(
         forest="forest-1",
         body=body)
@@ -98,9 +98,9 @@ def test_stringified_dict_body():
 
 
 def test_xml_body():
-    body = '<forest-properties xmlns="http://marklogic.com/manage">' \
-           '  <forest-name>custom-forest</forest-name>' \
-           '</forest-properties>'
+    body = ('<forest-properties xmlns="http://marklogic.com/manage">'
+            '  <forest-name>custom-forest</forest-name>'
+            '</forest-properties>')
     call = ForestPropertiesPutCall(
         forest="forest-1",
         body=body)

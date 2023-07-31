@@ -62,9 +62,9 @@ def test_headers_for_stringified_dict_body():
 
 
 def test_headers_for_xml_body():
-    body = '<role-properties xmlns="http://marklogic.com/manage/role/properties">' \
-           '  <role-name>custom-role</role-name>' \
-           '</role-properties>'
+    body = ('<role-properties xmlns="http://marklogic.com/manage/role/properties">'
+            '  <role-name>custom-role</role-name>'
+            '</role-properties>')
     call = RolePropertiesPutCall(role="admin", body=body)
     assert call.headers() == {
         "content-type": "application/xml",
@@ -82,8 +82,8 @@ def test_stringified_dict_body():
 
 
 def test_xml_body():
-    body = '<role-properties xmlns="http://marklogic.com/manage/role/properties">' \
-           '  <role-name>custom-role</role-name>' \
-           '</role-properties>'
+    body = ('<role-properties xmlns="http://marklogic.com/manage/role/properties">'
+            '  <role-name>custom-role</role-name>'
+            '</role-properties>')
     call = RolePropertiesPutCall(role="admin", body=body)
     assert call.body() == body

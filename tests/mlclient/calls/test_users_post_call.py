@@ -57,9 +57,9 @@ def test_headers_for_stringified_dict_body():
 
 
 def test_headers_for_xml_body():
-    body = '<user-properties xmlns="http://marklogic.com/manage/user/properties">' \
-           '  <user-name>custom-user</user-name>' \
-           '</user-properties>'
+    body = ('<user-properties xmlns="http://marklogic.com/manage/user/properties">'
+            '  <user-name>custom-user</user-name>'
+            '</user-properties>')
     call = UsersPostCall(body=body)
     assert call.headers() == {
         "content-type": "application/xml",
@@ -77,8 +77,8 @@ def test_stringified_dict_body():
 
 
 def test_xml_body():
-    body = '<user-properties xmlns="http://marklogic.com/manage/user/properties">' \
-           '  <user-name>custom-user</user-name>' \
-           '</user-properties>'
+    body = ('<user-properties xmlns="http://marklogic.com/manage/user/properties">'
+            '  <user-name>custom-user</user-name>'
+            '</user-properties>')
     call = UsersPostCall(body=body)
     assert call.body() == body

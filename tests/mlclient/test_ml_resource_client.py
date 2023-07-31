@@ -212,8 +212,8 @@ def test_put_forests():
         resp = client.put_forests(body=body)
 
     assert resp.status_code == 400
-    assert "Payload has errors in structure, content-type or values. " \
-           "Cannot validate payload, no forests specified." in resp.text
+    assert ("Payload has errors in structure, content-type or values. "
+            "Cannot validate payload, no forests specified.") in resp.text
 
 
 @pytest.mark.ml_access
@@ -321,8 +321,8 @@ def test_put_role_properties():
             body={"role-name": "custom-db"})
 
     assert resp.status_code == 400
-    assert "Payload has errors in structure, content-type or values. " \
-           "Role non-existing-role does not exist or is not accessible" in resp.text
+    assert ("Payload has errors in structure, content-type or values. "
+            "Role non-existing-role does not exist or is not accessible") in resp.text
 
 
 @pytest.mark.ml_access

@@ -159,7 +159,7 @@ def test_get_collections_when_exists():
 
 def test_get_collections_when_empty():
     metadata = Metadata()
-    assert metadata.collections() == list()
+    assert metadata.collections() == []
 
 
 def test_get_permissions_when_exists():
@@ -171,7 +171,7 @@ def test_get_permissions_when_exists():
 
 def test_get_permissions_when_empty():
     metadata = Metadata()
-    assert metadata.permissions() == list()
+    assert metadata.permissions() == []
 
 
 def test_get_properties_when_exists():
@@ -364,7 +364,7 @@ def test_remove_collection():
 
     success = metadata.remove_collection("collection-2")
     assert success is True
-    assert metadata.collections() == list()
+    assert metadata.collections() == []
 
 
 def test_remove_collection_when_does_not_exist():
@@ -395,7 +395,7 @@ def test_remove_permission():
 
     success = metadata.remove_permission("role-1", Permission.READ)
     assert success is True
-    assert metadata.permissions() == list()
+    assert metadata.permissions() == []
 
 
 def test_remove_permission_when_does_not_exist():

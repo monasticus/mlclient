@@ -172,7 +172,6 @@ class MLClient:
             An exception's traceback
         """
         self.disconnect()
-        return
 
     def connect(
             self,
@@ -205,8 +204,8 @@ class MLClient:
     def get(
             self,
             endpoint: str,
-            params: dict = None,
-            headers: dict = None,
+            params: dict | None = None,
+            headers: dict | None = None,
     ) -> Response | None:
         """Send a GET request.
 
@@ -243,9 +242,9 @@ class MLClient:
     def post(
             self,
             endpoint: str,
-            params: dict = None,
-            headers: dict = None,
-            body: str | dict = None,
+            params: dict | None = None,
+            headers: dict | None = None,
+            body: str | dict | None = None,
     ) -> Response | None:
         """Send a POST request.
 
@@ -292,9 +291,9 @@ class MLClient:
     def put(
             self,
             endpoint: str,
-            params: dict = None,
-            headers: dict = None,
-            body: str | dict = None,
+            params: dict | None = None,
+            headers: dict | None = None,
+            body: str | dict | None = None,
     ) -> Response | None:
         """Send a PUT request.
 
@@ -341,8 +340,8 @@ class MLClient:
     def delete(
             self,
             endpoint: str,
-            params: dict = None,
-            headers: dict = None,
+            params: dict | None = None,
+            headers: dict | None = None,
     ) -> Response | None:
         """Send a DELETE request.
 
@@ -651,11 +650,11 @@ class MLResourceClient(MLClient):
 
     def eval(
             self,
-            xquery: str = None,
-            javascript: str = None,
-            variables: dict = None,
-            database: str = None,
-            txid: str = None,
+            xquery: str | None = None,
+            javascript: str | None = None,
+            variables: dict | None = None,
+            database: str | None = None,
+            txid: str | None = None,
     ) -> Response:
         """Send a POST request to the /v1/eval endpoint.
 
@@ -694,11 +693,11 @@ class MLResourceClient(MLClient):
     def get_logs(
             self,
             filename: str,
-            data_format: str = None,
-            host: str = None,
-            start_time: str = None,
-            end_time: str = None,
-            regex: str = None,
+            data_format: str | None = None,
+            host: str | None = None,
+            start_time: str | None = None,
+            end_time: str | None = None,
+            regex: str | None = None,
     ) -> Response:
         """Send a GET request to the /manage/v2/logs endpoint.
 
@@ -733,8 +732,8 @@ class MLResourceClient(MLClient):
 
     def get_databases(
             self,
-            data_format: str = None,
-            view: str = None,
+            data_format: str | None = None,
+            view: str | None = None,
     ) -> Response:
         """Send a GET request to the /manage/v2/databases endpoint.
 
@@ -777,8 +776,8 @@ class MLResourceClient(MLClient):
     def get_database(
             self,
             database: str,
-            data_format: str = None,
-            view: str = None,
+            data_format: str | None = None,
+            view: str | None = None,
     ) -> Response:
         """Send a GET request to the /manage/v2/databases/{id|name} endpoint.
 
@@ -830,7 +829,7 @@ class MLResourceClient(MLClient):
     def delete_database(
             self,
             database: str,
-            forest_delete: str = None,
+            forest_delete: str | None = None,
     ) -> Response:
         """Send a DELETE request to the /manage/v2/databases/{id|name} endpoint.
 
@@ -857,7 +856,7 @@ class MLResourceClient(MLClient):
     def get_database_properties(
             self,
             database: str,
-            data_format: str = None,
+            data_format: str | None = None,
     ) -> Response:
         """Send a GET request to the /manage/v2/databases/{id|name}/properties endpoint.
 
@@ -903,10 +902,10 @@ class MLResourceClient(MLClient):
 
     def get_servers(
             self,
-            data_format: str = None,
-            group_id: str = None,
-            view: str = None,
-            full_refs: bool = None,
+            data_format: str | None = None,
+            group_id: str | None = None,
+            view: str | None = None,
+            full_refs: bool | None = None,
     ) -> Response:
         """Send a GET request to the /manage/v2/servers endpoint.
 
@@ -940,8 +939,8 @@ class MLResourceClient(MLClient):
     def post_servers(
             self,
             body: str | dict,
-            group_id: str = None,
-            server_type: str = None,
+            group_id: str | None = None,
+            server_type: str | None = None,
     ) -> Response:
         """Send a POST request to the /manage/v2/servers endpoint.
 
@@ -974,11 +973,11 @@ class MLResourceClient(MLClient):
             self,
             server: str,
             group_id: str,
-            data_format: str = None,
-            view: str = None,
-            host_id: str = None,
-            full_refs: bool = None,
-            modules: bool = None,
+            data_format: str | None = None,
+            view: str | None = None,
+            host_id: str | None = None,
+            full_refs: bool | None = None,
+            modules: bool | None = None,
     ) -> Response:
         """Send a GET request to the /manage/v2/servers/{id|name} endpoint.
 
@@ -1051,7 +1050,7 @@ class MLResourceClient(MLClient):
             self,
             server: str,
             group_id: str,
-            data_format: str = None,
+            data_format: str | None = None,
     ) -> Response:
         """Send a GET request to the /manage/v2/servers/{id|name}/properties endpoint.
 
@@ -1106,12 +1105,12 @@ class MLResourceClient(MLClient):
 
     def get_forests(
             self,
-            data_format: str = None,
-            view: str = None,
-            database: str = None,
-            group: str = None,
-            host: str = None,
-            full_refs: bool = None,
+            data_format: str | None = None,
+            view: str | None = None,
+            database: str | None = None,
+            group: str | None = None,
+            host: str | None = None,
+            full_refs: bool | None = None,
     ) -> Response:
         """Send a GET request to the /manage/v2/forests endpoint.
 
@@ -1153,7 +1152,7 @@ class MLResourceClient(MLClient):
     def post_forests(
             self,
             body: str | dict,
-            wait_for_forest_to_mount: bool = None,
+            wait_for_forest_to_mount: bool | None = None,
     ) -> Response:
         """Send a POST request to the /manage/v2/forests endpoint.
 
@@ -1196,8 +1195,8 @@ class MLResourceClient(MLClient):
     def get_forest(
             self,
             forest: str,
-            data_format: str = None,
-            view: str = None,
+            data_format: str | None = None,
+            view: str | None = None,
     ) -> Response:
         """Send a GET request to the /manage/v2/forests/{id|name} endpoint.
 
@@ -1251,7 +1250,7 @@ class MLResourceClient(MLClient):
             self,
             forest: str,
             level: str,
-            replicas: str = None,
+            replicas: str | None = None,
     ) -> Response:
         """Send a DELETE request to the /manage/v2/forests/{id|name} endpoint.
 
@@ -1282,7 +1281,7 @@ class MLResourceClient(MLClient):
     def get_forest_properties(
             self,
             forest: str,
-            data_format: str = None,
+            data_format: str | None = None,
     ) -> Response:
         """Send a GET request to the /manage/v2/forests/{id|name}/properties endpoint.
 
@@ -1328,8 +1327,8 @@ class MLResourceClient(MLClient):
 
     def get_roles(
             self,
-            data_format: str = None,
-            view: str = None,
+            data_format: str | None = None,
+            view: str | None = None,
     ) -> Response:
         """Send a GET request to the /manage/v2/roles endpoint.
 
@@ -1371,8 +1370,8 @@ class MLResourceClient(MLClient):
     def get_role(
             self,
             role: str,
-            data_format: str = None,
-            view: str = None,
+            data_format: str | None = None,
+            view: str | None = None,
     ) -> Response:
         """Send a GET request to the /manage/v2/roles/{id|name} endpoint.
 
@@ -1417,7 +1416,7 @@ class MLResourceClient(MLClient):
     def get_role_properties(
             self,
             role: str,
-            data_format: str = None,
+            data_format: str | None = None,
     ) -> Response:
         """Send a GET request to the /manage/v2/roles/{id|name}/properties endpoint.
 
@@ -1463,8 +1462,8 @@ class MLResourceClient(MLClient):
 
     def get_users(
             self,
-            data_format: str = None,
-            view: str = None,
+            data_format: str | None = None,
+            view: str | None = None,
     ) -> Response:
         """Send a GET request to the /manage/v2/users endpoint.
 
@@ -1506,8 +1505,8 @@ class MLResourceClient(MLClient):
     def get_user(
             self,
             user: str,
-            data_format: str = None,
-            view: str = None,
+            data_format: str | None = None,
+            view: str | None = None,
     ) -> Response:
         """Send a GET request to the /manage/v2/users/{id|name} endpoint.
 
@@ -1552,7 +1551,7 @@ class MLResourceClient(MLClient):
     def get_user_properties(
             self,
             user: str,
-            data_format: str = None,
+            data_format: str | None = None,
     ) -> Response:
         """Send a GET request to the /manage/v2/users/{id|name}/properties endpoint.
 

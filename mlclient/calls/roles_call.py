@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import json
 import re
+from typing import ClassVar
 
 from mlclient import constants, exceptions, utils
 from mlclient.calls import ResourceCall
@@ -36,13 +37,13 @@ class RolesGetCall(ResourceCall):
     for the specific call.
     """
 
-    ENDPOINT = "/manage/v2/roles"
+    ENDPOINT: str = "/manage/v2/roles"
 
-    _FORMAT_PARAM = "format"
-    _VIEW_PARAM = "view"
+    _FORMAT_PARAM: str = "format"
+    _VIEW_PARAM: str = "view"
 
-    _SUPPORTED_FORMATS = ["xml", "json", "html"]
-    _SUPPORTED_VIEWS = ["describe", "default"]
+    _SUPPORTED_FORMATS: ClassVar[list] = ["xml", "json", "html"]
+    _SUPPORTED_VIEWS: ClassVar[list] = ["describe", "default"]
 
     def __init__(
             self,
@@ -116,7 +117,7 @@ class RolesPostCall(ResourceCall):
     for the specific call.
     """
 
-    ENDPOINT = "/manage/v2/roles"
+    ENDPOINT: str = "/manage/v2/roles"
 
     def __init__(
             self,

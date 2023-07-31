@@ -62,10 +62,11 @@ def get_content_type_header_for_data(
     str
         A Content-Type header value
     """
-    try:
-        if isinstance(data, dict):
-            return constants.HEADER_JSON
-        json.loads(data)
+    if isinstance(data, dict):
         return constants.HEADER_JSON
+    try:
+        json.loads(data)
     except ValueError:
         return constants.HEADER_XML
+    else:
+        return constants.HEADER_JSON

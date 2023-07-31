@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import json
 import re
+from typing import ClassVar
 
 from mlclient import constants, exceptions, utils
 from mlclient.calls import ResourceCall
@@ -36,14 +37,14 @@ class DatabasesGetCall(ResourceCall):
     for the specific call.
     """
 
-    ENDPOINT = "/manage/v2/databases"
+    ENDPOINT: str = "/manage/v2/databases"
 
-    _FORMAT_PARAM = "format"
-    _VIEW_PARAM = "view"
+    _FORMAT_PARAM: str = "format"
+    _VIEW_PARAM: str = "view"
 
-    _SUPPORTED_FORMATS = ["xml", "json", "html"]
-    _SUPPORTED_VIEWS = ["describe", "default", "metrics", "package", "schema",
-                        "properties-schema"]
+    _SUPPORTED_FORMATS: ClassVar[list] = ["xml", "json", "html"]
+    _SUPPORTED_VIEWS: ClassVar[list] = ["describe", "default", "metrics", "package",
+                                        "schema", "properties-schema"]
 
     def __init__(
             self,
@@ -118,7 +119,7 @@ class DatabasesPostCall(ResourceCall):
     for the specific call.
     """
 
-    ENDPOINT = "/manage/v2/databases"
+    ENDPOINT: str = "/manage/v2/databases"
 
     def __init__(
             self,

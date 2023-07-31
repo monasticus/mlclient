@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import json
 import re
+from typing import ClassVar
 
 from mlclient import constants, exceptions, utils
 from mlclient.calls import ResourceCall
@@ -38,23 +39,23 @@ class ServersGetCall(ResourceCall):
     for the specific call.
     """
 
-    ENDPOINT = "/manage/v2/servers"
+    ENDPOINT: str = "/manage/v2/servers"
 
-    _FORMAT_PARAM = "format"
-    _GROUP_ID_PARAM = "group-id"
-    _VIEW_PARAM = "view"
-    _FULL_REFS_PARAM = "fullrefs"
+    _FORMAT_PARAM: str = "format"
+    _GROUP_ID_PARAM: str = "group-id"
+    _VIEW_PARAM: str = "view"
+    _FULL_REFS_PARAM: str = "fullrefs"
 
-    _SUPPORTED_FORMATS = ["xml", "json", "html"]
-    _SUPPORTED_VIEWS = ["describe", "default", "status", "metrics",
-                        "package", "schema", "properties-schema"]
+    _SUPPORTED_FORMATS: ClassVar[list] = ["xml", "json", "html"]
+    _SUPPORTED_VIEWS: ClassVar[list] = ["describe", "default", "status", "metrics",
+                                        "package", "schema", "properties-schema"]
 
     def __init__(
             self,
             data_format: str = "xml",
-            group_id: str = None,
+            group_id: str | None = None,
             view: str = "default",
-            full_refs: bool = None,
+            full_refs: bool | None = None,
     ):
         """Initialize ServersGetCall instance.
 
@@ -136,18 +137,18 @@ class ServersPostCall(ResourceCall):
     for the specific call.
     """
 
-    ENDPOINT = "/manage/v2/servers"
+    ENDPOINT: str = "/manage/v2/servers"
 
-    _GROUP_ID_PARAM = "group-id"
-    _SERVER_TYPE_PARAM = "server-type"
+    _GROUP_ID_PARAM: str = "group-id"
+    _SERVER_TYPE_PARAM: str = "server-type"
 
-    _SUPPORTED_SERVER_TYPES = ["http", "odbc", "xdbc", "webdav"]
+    _SUPPORTED_SERVER_TYPES: ClassVar[list] = ["http", "odbc", "xdbc", "webdav"]
 
     def __init__(
             self,
             body: str | dict,
-            group_id: str = None,
-            server_type: str = None,
+            group_id: str | None = None,
+            server_type: str | None = None,
                      ):
         """Initialize ServersPostCall instance.
 

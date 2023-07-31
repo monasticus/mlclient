@@ -8,6 +8,8 @@ It exports 2 classes:
 """
 from __future__ import annotations
 
+from typing import ClassVar
+
 from mlclient import constants, exceptions, utils
 from mlclient.calls import ResourceCall
 
@@ -28,13 +30,13 @@ class UserGetCall(ResourceCall):
     for the specific call.
     """
 
-    _ENDPOINT_TEMPLATE = "/manage/v2/users/{}"
+    _ENDPOINT_TEMPLATE: str = "/manage/v2/users/{}"
 
-    _FORMAT_PARAM = "format"
-    _VIEW_PARAM = "view"
+    _FORMAT_PARAM: str = "format"
+    _VIEW_PARAM: str = "view"
 
-    _SUPPORTED_FORMATS = ["xml", "json", "html"]
-    _SUPPORTED_VIEWS = ["describe", "default"]
+    _SUPPORTED_FORMATS: ClassVar[list] = ["xml", "json", "html"]
+    _SUPPORTED_VIEWS: ClassVar[list] = ["describe", "default"]
 
     def __init__(
             self,
@@ -108,7 +110,7 @@ class UserDeleteCall(ResourceCall):
     for the specific call.
     """
 
-    _ENDPOINT_TEMPLATE = "/manage/v2/users/{}"
+    _ENDPOINT_TEMPLATE: str = "/manage/v2/users/{}"
 
     def __init__(
             self,

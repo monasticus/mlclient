@@ -33,21 +33,21 @@ class EvalCall(ResourceCall):
     for the specific call.
     """
 
-    ENDPOINT = "/v1/eval"
+    ENDPOINT: str = "/v1/eval"
 
-    _XQ_PARAM = "xquery"
-    _JS_PARAM = "javascript"
-    _VARS_PARAM = "vars"
-    _DATABASE_PARAM = "database"
-    _TXID_PARAM = "txid"
+    _XQ_PARAM: str = "xquery"
+    _JS_PARAM: str = "javascript"
+    _VARS_PARAM: str = "vars"
+    _DATABASE_PARAM: str = "database"
+    _TXID_PARAM: str = "txid"
 
     def __init__(
             self,
-            xquery: str = None,
-            javascript: str = None,
-            variables: dict = None,
-            database: str = None,
-            txid: str = None,
+            xquery: str | None = None,
+            javascript: str | None = None,
+            variables: dict | None = None,
+            database: str | None = None,
+            txid: str | None = None,
     ):
         """Initialize EvalCall instance.
 

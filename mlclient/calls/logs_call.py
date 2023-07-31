@@ -33,23 +33,23 @@ class LogsCall(ResourceCall):
     for the specific call.
     """
 
-    ENDPOINT = "/manage/v2/logs"
+    ENDPOINT: str = "/manage/v2/logs"
 
-    _FORMAT_PARAM = "format"
-    _FILENAME_PARAM = "filename"
-    _HOST_PARAM = "host"
-    _START_PARAM = "start"
-    _END_PARAM = "end"
-    _REGEX_PARAM = "regex"
+    _FORMAT_PARAM: str = "format"
+    _FILENAME_PARAM: str = "filename"
+    _HOST_PARAM: str = "host"
+    _START_PARAM: str = "start"
+    _END_PARAM: str = "end"
+    _REGEX_PARAM: str = "regex"
 
     def __init__(
             self,
             filename: str,
             data_format: str = "html",
-            host: str = None,
-            start_time: str = None,
-            end_time: str = None,
-            regex: str = None,
+            host: str | None = None,
+            start_time: str | None = None,
+            end_time: str | None = None,
+            regex: str | None = None,
     ):
         """Initialize LogsCall instance.
 

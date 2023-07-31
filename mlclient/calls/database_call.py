@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import json
 import re
+from typing import ClassVar
 
 from mlclient import constants, exceptions, utils
 from mlclient.calls import ResourceCall
@@ -35,14 +36,15 @@ class DatabaseGetCall(ResourceCall):
     for the specific call.
     """
 
-    _ENDPOINT_TEMPLATE = "/manage/v2/databases/{}"
+    _ENDPOINT_TEMPLATE: str = "/manage/v2/databases/{}"
 
-    _FORMAT_PARAM = "format"
-    _VIEW_PARAM = "view"
+    _FORMAT_PARAM: str = "format"
+    _VIEW_PARAM: str = "view"
 
-    _SUPPORTED_FORMATS = ["xml", "json", "html"]
-    _SUPPORTED_VIEWS = ["describe", "default", "config", "counts", "edit",
-                        "package", "status", "forest-storage", "properties-schema"]
+    _SUPPORTED_FORMATS: ClassVar[list] = ["xml", "json", "html"]
+    _SUPPORTED_VIEWS: ClassVar[list] = ["describe", "default", "config", "counts",
+                                        "edit", "package", "status", "forest-storage",
+                                        "properties-schema"]
 
     def __init__(
             self,
@@ -121,7 +123,7 @@ class DatabasePostCall(ResourceCall):
     for the specific call.
     """
 
-    _ENDPOINT_TEMPLATE = "/manage/v2/databases/{}"
+    _ENDPOINT_TEMPLATE: str = "/manage/v2/databases/{}"
 
     def __init__(
             self,
@@ -185,16 +187,16 @@ class DatabaseDeleteCall(ResourceCall):
     for the specific call.
     """
 
-    _ENDPOINT_TEMPLATE = "/manage/v2/databases/{}"
+    _ENDPOINT_TEMPLATE: str = "/manage/v2/databases/{}"
 
-    _FOREST_DELETE_PARAM = "forest-delete"
+    _FOREST_DELETE_PARAM: str = "forest-delete"
 
-    _SUPPORTED_FOREST_DELETE_OPTS = ["configuration", "data"]
+    _SUPPORTED_FOREST_DELETE_OPTS: ClassVar[list] = ["configuration", "data"]
 
     def __init__(
             self,
             database: str,
-            forest_delete: str = None,
+            forest_delete: str | None = None,
     ):
         """Initialize DatabaseDeleteCall instance.
 

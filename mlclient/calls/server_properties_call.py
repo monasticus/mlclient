@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import json
 import re
+from typing import ClassVar
 
 from mlclient import constants, exceptions, utils
 from mlclient.calls import ResourceCall
@@ -33,12 +34,12 @@ class ServerPropertiesGetCall(ResourceCall):
     for the specific call.
     """
 
-    _ENDPOINT_TEMPLATE = "/manage/v2/servers/{}/properties"
+    _ENDPOINT_TEMPLATE: str = "/manage/v2/servers/{}/properties"
 
-    _GROUP_ID_PARAM = "group-id"
-    _FORMAT_PARAM = "format"
+    _GROUP_ID_PARAM: str = "group-id"
+    _FORMAT_PARAM: str = "format"
 
-    _SUPPORTED_FORMATS = ["xml", "json", "html"]
+    _SUPPORTED_FORMATS: ClassVar[list] = ["xml", "json", "html"]
 
     def __init__(
             self,
@@ -108,9 +109,9 @@ class ServerPropertiesPutCall(ResourceCall):
     for the specific call.
     """
 
-    _ENDPOINT_TEMPLATE = "/manage/v2/servers/{}/properties"
+    _ENDPOINT_TEMPLATE: str = "/manage/v2/servers/{}/properties"
 
-    _GROUP_ID_PARAM = "group-id"
+    _GROUP_ID_PARAM: str = "group-id"
 
     def __init__(
             self,

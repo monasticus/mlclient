@@ -6,6 +6,8 @@ It exports 1 class:
 """
 from __future__ import annotations
 
+from typing import ClassVar
+
 from mlclient import constants, exceptions, utils
 from mlclient.calls import ResourceCall
 
@@ -26,32 +28,33 @@ class DocumentsGetCall(ResourceCall):
     for the specific call.
     """
 
-    ENDPOINT = "/v1/documents"
+    ENDPOINT: str = "/v1/documents"
 
-    _URI_PARAM = "uri"
-    _DATABASE_PARAM = "database"
-    _CATEGORY_PARAM = "category"
-    _FORMAT_PARAM = "format"
-    _TIMESTAMP_PARAM = "timestamp"
-    _TRANSFORM_PARAM = "transform"
-    _TXID_PARAM = "txid"
-    _TRANS_PARAM_PREFIX = "trans:"
+    _URI_PARAM: str = "uri"
+    _DATABASE_PARAM: str = "database"
+    _CATEGORY_PARAM: str = "category"
+    _FORMAT_PARAM: str = "format"
+    _TIMESTAMP_PARAM: str = "timestamp"
+    _TRANSFORM_PARAM: str = "transform"
+    _TXID_PARAM: str = "txid"
+    _TRANS_PARAM_PREFIX: str = "trans:"
 
-    _SUPPORTED_FORMATS = ["binary", "json", "text", "xml"]
-    _SUPPORTED_METADATA_FORMATS = ["json", "xml"]
-    _SUPPORTED_CATEGORIES = ["content", "metadata", "metadata-values", "collections",
-                             "permissions", "properties", "quality"]
+    _SUPPORTED_FORMATS: ClassVar[list] = ["binary", "json", "text", "xml"]
+    _SUPPORTED_METADATA_FORMATS: ClassVar[list] = ["json", "xml"]
+    _SUPPORTED_CATEGORIES: ClassVar[list] = ["content", "metadata", "metadata-values",
+                                             "collections", "permissions", "properties",
+                                             "quality"]
 
     def __init__(
             self,
             uri: str | list,
-            database: str = None,
-            category: str = None,
-            data_format: str = None,
-            timestamp: str = None,
-            transform: str = None,
-            transform_params: dict = None,
-            txid: str = None,
+            database: str | None = None,
+            category: str | None = None,
+            data_format: str | None = None,
+            timestamp: str | None = None,
+            transform: str | None = None,
+            transform_params: dict | None = None,
+            txid: str | None = None,
     ):
         """Initialize DocumentsGetCall instance.
 

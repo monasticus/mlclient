@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import json
 import re
+from typing import ClassVar
 
 from mlclient import constants, exceptions, utils
 from mlclient.calls import ResourceCall
@@ -41,27 +42,27 @@ class ForestsGetCall(ResourceCall):
     for the specific call.
     """
 
-    ENDPOINT = "/manage/v2/forests"
+    ENDPOINT: str = "/manage/v2/forests"
 
-    _FORMAT_PARAM = "format"
-    _VIEW_PARAM = "view"
-    _DATABASE_ID_PARAM = "database-id"
-    _GROUP_ID_PARAM = "group-id"
-    _HOST_ID_PARAM = "host-id"
-    _FULL_REFS_PARAM = "fullrefs"
+    _FORMAT_PARAM: str = "format"
+    _VIEW_PARAM: str = "view"
+    _DATABASE_ID_PARAM: str = "database-id"
+    _GROUP_ID_PARAM: str = "group-id"
+    _HOST_ID_PARAM: str = "host-id"
+    _FULL_REFS_PARAM: str = "fullrefs"
 
-    _SUPPORTED_FORMATS = ["xml", "json", "html"]
-    _SUPPORTED_VIEWS = ["describe", "default", "status", "metrics", "schema",
-                        "storage", "properties-schema"]
+    _SUPPORTED_FORMATS: ClassVar[list] = ["xml", "json", "html"]
+    _SUPPORTED_VIEWS: ClassVar[list] = ["describe", "default", "status", "metrics",
+                                        "schema", "storage", "properties-schema"]
 
     def __init__(
             self,
             data_format: str = "xml",
             view: str = "default",
-            database: str = None,
-            group: str = None,
-            host: str = None,
-            full_refs: bool = None,
+            database: str | None = None,
+            group: str | None = None,
+            host: str | None = None,
+            full_refs: bool | None = None,
     ):
         """Initialize ForestsGetCall instance.
 
@@ -152,14 +153,14 @@ class ForestsPostCall(ResourceCall):
     for the specific call.
     """
 
-    ENDPOINT = "/manage/v2/forests"
+    ENDPOINT: str = "/manage/v2/forests"
 
-    _WAIT_FOR_FOREST_TO_MOUNT_PARAM = "wait-for-forest-to-mount"
+    _WAIT_FOR_FOREST_TO_MOUNT_PARAM: str = "wait-for-forest-to-mount"
 
     def __init__(
             self,
             body: str | dict,
-            wait_for_forest_to_mount: bool = None,
+            wait_for_forest_to_mount: bool | None = None,
     ):
         """Initialize ForestsPostCall instance.
 
@@ -227,7 +228,7 @@ class ForestsPutCall(ResourceCall):
     for the specific call.
     """
 
-    ENDPOINT = "/manage/v2/forests"
+    ENDPOINT: str = "/manage/v2/forests"
 
     def __init__(
             self,

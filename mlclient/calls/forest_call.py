@@ -10,6 +10,8 @@ It exports 3 classes:
 """
 from __future__ import annotations
 
+from typing import ClassVar
+
 from mlclient import constants, exceptions, utils
 from mlclient.calls import ResourceCall
 
@@ -31,14 +33,15 @@ class ForestGetCall(ResourceCall):
     for the specific call.
     """
 
-    _ENDPOINT_TEMPLATE = "/manage/v2/forests/{}"
+    _ENDPOINT_TEMPLATE: str = "/manage/v2/forests/{}"
 
-    _FORMAT_PARAM = "format"
-    _VIEW_PARAM = "view"
+    _FORMAT_PARAM: str = "format"
+    _VIEW_PARAM: str = "view"
 
-    _SUPPORTED_FORMATS = ["xml", "json", "html"]
-    _SUPPORTED_VIEWS = ["describe", "default", "config", "counts", "edit",
-                        "status", "storage", "xdmp:forest-status", "properties-schema"]
+    _SUPPORTED_FORMATS: ClassVar[list] = ["xml", "json", "html"]
+    _SUPPORTED_VIEWS: ClassVar[list] = ["describe", "default", "config", "counts",
+                                        "edit", "status", "storage",
+                                        "xdmp:forest-status", "properties-schema"]
 
     def __init__(
             self,
@@ -118,12 +121,12 @@ class ForestPostCall(ResourceCall):
     for the specific call.
     """
 
-    _ENDPOINT_TEMPLATE = "/manage/v2/forests/{}"
+    _ENDPOINT_TEMPLATE: str = "/manage/v2/forests/{}"
 
-    _STATE_PARAM = "state"
+    _STATE_PARAM: str = "state"
 
-    _SUPPORTED_STATES = ["clear", "merge", "restart", "attach", "detach", "retire",
-                         "employ"]
+    _SUPPORTED_STATES: ClassVar[list] = ["clear", "merge", "restart", "attach",
+                                         "detach", "retire", "employ"]
 
     def __init__(
             self,
@@ -189,19 +192,19 @@ class ForestDeleteCall(ResourceCall):
     for the specific call.
     """
 
-    _ENDPOINT_TEMPLATE = "/manage/v2/forests/{}"
+    _ENDPOINT_TEMPLATE: str = "/manage/v2/forests/{}"
 
-    _LEVEL_PARAM = "level"
-    _REPLICAS_PARAM = "replicas"
+    _LEVEL_PARAM: str = "level"
+    _REPLICAS_PARAM: str = "replicas"
 
-    _SUPPORTED_LEVELS = ["full", "config-only"]
-    _SUPPORTED_REPLICAS_OPTS = ["detach", "delete"]
+    _SUPPORTED_LEVELS: ClassVar[list] = ["full", "config-only"]
+    _SUPPORTED_REPLICAS_OPTS: ClassVar[list] = ["detach", "delete"]
 
     def __init__(
             self,
             forest: str,
             level: str,
-            replicas: str = None,
+            replicas: str | None = None,
     ):
         """Initialize ForestDeleteCall instance.
 

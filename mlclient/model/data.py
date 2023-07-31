@@ -20,7 +20,7 @@ import logging
 import re
 import xml.etree.ElementTree as ElemTree
 from enum import Enum
-from typing import Any
+from typing import Any, ClassVar
 from xml.dom import minidom
 
 logger = logging.getLogger(__name__)
@@ -41,10 +41,10 @@ class DocumentType(Enum):
         Text document type
     """
 
-    XML = "xml"
-    JSON = "json"
-    BINARY = "binary"
-    TEXT = "text"
+    XML: str = "xml"
+    JSON: str = "json"
+    BINARY: str = "binary"
+    TEXT: str = "text"
 
 
 class Document:
@@ -162,29 +162,29 @@ class Metadata:
         Return an XML representation of the Metadata instance.
     """
 
-    _COLLECTIONS_KEY = "collections"
-    _PERMISSIONS_KEY = "permissions"
-    _PROPERTIES_KEY = "properties"
-    _QUALITY_KEY = "quality"
-    _METADATA_VALUES_KEY = "metadataValues"
+    _COLLECTIONS_KEY: str = "collections"
+    _PERMISSIONS_KEY: str = "permissions"
+    _PROPERTIES_KEY: str = "properties"
+    _QUALITY_KEY: str = "quality"
+    _METADATA_VALUES_KEY: str = "metadataValues"
 
-    _METADATA_TAG = "rapi:metadata"
-    _COLLECTIONS_TAG = "rapi:collections"
-    _COLLECTION_TAG = "rapi:collection"
-    _PERMISSIONS_TAG = "rapi:permissions"
-    _PERMISSION_TAG = "rapi:permission"
-    _ROLE_NAME_TAG = "rapi:role-name"
-    _CAPABILITY_TAG = "rapi:capability"
-    _PROPERTIES_TAG = "prop:properties"
-    _QUALITY_TAG = "rapi:quality"
-    _METADATA_VALUES_TAG = "rapi:metadata-values"
-    _METADATA_VALUE_TAG = "rapi:metadata-value"
-    _KEY_ATTR = "key"
+    _METADATA_TAG: str = "rapi:metadata"
+    _COLLECTIONS_TAG: str = "rapi:collections"
+    _COLLECTION_TAG: str = "rapi:collection"
+    _PERMISSIONS_TAG: str = "rapi:permissions"
+    _PERMISSION_TAG: str = "rapi:permission"
+    _ROLE_NAME_TAG: str = "rapi:role-name"
+    _CAPABILITY_TAG: str = "rapi:capability"
+    _PROPERTIES_TAG: str = "prop:properties"
+    _QUALITY_TAG: str = "rapi:quality"
+    _METADATA_VALUES_TAG: str = "rapi:metadata-values"
+    _METADATA_VALUE_TAG: str = "rapi:metadata-value"
+    _KEY_ATTR: str = "key"
 
-    _RAPI_NS_PREFIX = "xmlns:rapi"
-    _PROP_NS_PREFIX = "xmlns:prop"
-    _RAPI_NS_URI = "http://marklogic.com/rest-api"
-    _PROP_NS_URI = "http://marklogic.com/xdmp/property"
+    _RAPI_NS_PREFIX: str = "xmlns:rapi"
+    _PROP_NS_PREFIX: str = "xmlns:prop"
+    _RAPI_NS_URI: str = "http://marklogic.com/rest-api"
+    _PROP_NS_URI: str = "http://marklogic.com/xdmp/property"
 
     def __init__(
             self,
@@ -529,7 +529,7 @@ class Metadata:
 
     def to_xml_string(
             self,
-            indent: int = None,
+            indent: int | None = None,
     ) -> str:
         """Return a stringified XML representation of the Metadata instance.
 
@@ -721,13 +721,13 @@ class Permission:
         Return a JSON representation of the Permission instance.
     """
 
-    READ = "read"
-    INSERT = "insert"
-    UPDATE = "update"
-    UPDATE_NODE = "update-node"
-    EXECUTE = "execute"
+    READ: str = "read"
+    INSERT: str = "insert"
+    UPDATE: str = "update"
+    UPDATE_NODE: str = "update-node"
+    EXECUTE: str = "execute"
 
-    _CAPABILITIES = {READ, INSERT, UPDATE, UPDATE_NODE, EXECUTE}
+    _CAPABILITIES: ClassVar[tuple] = {READ, INSERT, UPDATE, UPDATE_NODE, EXECUTE}
 
     def __init__(
             self,

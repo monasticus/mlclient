@@ -38,11 +38,11 @@ class ResourceCall(metaclass=ABCMeta):
     def __init__(
             self,
             method: str = constants.METHOD_GET,
-            params: dict = None,
-            headers: dict = None,
-            body: str | dict = None,
-            accept: str = None,
-            content_type: str = None,
+            params: dict | None = None,
+            headers: dict | None = None,
+            body: str | dict | None = None,
+            accept: str | None = None,
+            content_type: str | None = None,
     ):
         """Initialize ResourceCall implementation instance.
 

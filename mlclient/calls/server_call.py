@@ -8,6 +8,8 @@ It exports 2 classes:
 """
 from __future__ import annotations
 
+from typing import ClassVar
+
 from mlclient import constants, exceptions, utils
 from mlclient.calls import ResourceCall
 
@@ -31,27 +33,28 @@ class ServerGetCall(ResourceCall):
     for the specific call.
     """
 
-    _ENDPOINT_TEMPLATE = "/manage/v2/servers/{}"
+    _ENDPOINT_TEMPLATE: str = "/manage/v2/servers/{}"
 
-    _GROUP_ID_PARAM = "group-id"
-    _FORMAT_PARAM = "format"
-    _VIEW_PARAM = "view"
-    _HOST_ID_PARAM = "host-id"
-    _FULL_REFS_PARAM = "fullrefs"
-    _MODULES_PARAM = "modules"
+    _GROUP_ID_PARAM: str = "group-id"
+    _FORMAT_PARAM: str = "format"
+    _VIEW_PARAM: str = "view"
+    _HOST_ID_PARAM: str = "host-id"
+    _FULL_REFS_PARAM: str = "fullrefs"
+    _MODULES_PARAM: str = "modules"
 
-    _SUPPORTED_FORMATS = ["xml", "json", "html"]
-    _SUPPORTED_VIEWS = ["describe", "default", "config", "edit", "package",
-                        "status", "xdmp:server-status", "properties-schema"]
+    _SUPPORTED_FORMATS: ClassVar[list] = ["xml", "json", "html"]
+    _SUPPORTED_VIEWS: ClassVar[list] = ["describe", "default", "config", "edit",
+                                        "package", "status", "xdmp:server-status",
+                                        "properties-schema"]
 
     def __init__(
             self, server: str,
             group_id: str,
             data_format: str = "xml",
             view: str = "default",
-            host_id: str = None,
-            full_refs: bool = None,
-            modules: bool = None,
+            host_id: str | None = None,
+            full_refs: bool | None = None,
+            modules: bool | None = None,
     ):
         """Initialize ServerGetCall instance.
 
@@ -144,9 +147,9 @@ class ServerDeleteCall(ResourceCall):
     for the specific call.
     """
 
-    _ENDPOINT_TEMPLATE = "/manage/v2/servers/{}"
+    _ENDPOINT_TEMPLATE: str = "/manage/v2/servers/{}"
 
-    _GROUP_ID_PARAM = "group-id"
+    _GROUP_ID_PARAM: str = "group-id"
 
     def __init__(
             self,

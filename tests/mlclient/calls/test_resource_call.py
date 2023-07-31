@@ -8,12 +8,12 @@ class ResourceCallTestImpl(ResourceCall):
         return "/impl-endpoint"
 
 
-# ResourceCall.endpoint()
+# ResourceCall.endpoint
 def test_endpoint():
     assert ResourceCallTestImpl().endpoint() == "/impl-endpoint"
 
 
-# ResourceCall.method()
+# ResourceCall.method
 def test_default_method():
     assert ResourceCallTestImpl().method() == "GET"
 
@@ -33,7 +33,7 @@ def test_method_encapsulation():
     assert call.method() == "GET"
 
 
-# params()
+# params
 def test_default_params():
     assert ResourceCallTestImpl().params() == {}
 
@@ -55,7 +55,7 @@ def test_params_encapsulation():
     assert call.params() == {}
 
 
-# headers()
+# headers
 def test_default_headers():
     assert ResourceCallTestImpl().headers() == {}
 
@@ -115,7 +115,7 @@ def test_headers_encapsulation():
     assert call.headers() == {}
 
 
-# body()
+# body
 def test_default_body():
     assert not ResourceCallTestImpl().body()
 
@@ -150,7 +150,7 @@ def test_dict_body_encapsulation():
     assert call.body() == {}
 
 
-# add_param()
+# add_param
 def test_add_param():
     call = ResourceCallTestImpl()
     assert call.params() == {}
@@ -168,7 +168,7 @@ def test_add_param_when_exists():
     assert call.params() == {"custom-param": "custom-value-2"}
 
 
-# add_header()
+# add_header
 def test_add_header():
     call = ResourceCallTestImpl()
     assert call.headers() == {}
@@ -186,7 +186,7 @@ def test_add_header_when_exists():
     assert call.headers() == {"custom-header": "custom-value-2"}
 
 
-# set_body()
+# set_body
 def test_set_body():
     call = ResourceCallTestImpl()
     assert call.body() is None

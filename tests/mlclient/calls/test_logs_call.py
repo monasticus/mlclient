@@ -6,7 +6,7 @@ from mlclient import exceptions
 from mlclient.calls import LogsCall
 
 
-@pytest.fixture
+@pytest.fixture()
 def default_logs_call():
     """Return a LogsCall instance with a required parameter only."""
     return LogsCall(filename="ErrorLog.txt")

@@ -9,7 +9,7 @@ def __assert_permissions_are_equal(this: list, that: list):
     assert set(this).difference(set(that)) == set()
 
 
-@pytest.fixture
+@pytest.fixture()
 def metadata():
     collections = ["collection-1", "collection-2"]
     permissions = [

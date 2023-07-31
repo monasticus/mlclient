@@ -4,7 +4,7 @@ from mlclient import exceptions
 from mlclient.calls import ServersPostCall
 
 
-@pytest.fixture
+@pytest.fixture()
 def default_servers_post_call():
     """Returns a ServersPostCall instance"""
     body = {

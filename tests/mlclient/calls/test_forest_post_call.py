@@ -4,7 +4,7 @@ from mlclient import exceptions
 from mlclient.calls import ForestPostCall
 
 
-@pytest.fixture
+@pytest.fixture()
 def default_forest_post_call():
     """Returns an ForestPostCall instance"""
     return ForestPostCall(

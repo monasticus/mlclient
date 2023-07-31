@@ -4,7 +4,7 @@ from mlclient import exceptions
 from mlclient.calls import UserPropertiesGetCall
 
 
-@pytest.fixture
+@pytest.fixture()
 def default_user_properties_get_call():
     """Returns an UserPropertiesGetCall instance"""
     return UserPropertiesGetCall(user="admin")

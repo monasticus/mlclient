@@ -4,7 +4,7 @@ from mlclient import exceptions
 from mlclient.calls import RolesPostCall
 
 
-@pytest.fixture
+@pytest.fixture()
 def default_roles_post_call():
     """Returns an RolesPostCall instance"""
     return RolesPostCall(body={"role-name": "custom-role"})

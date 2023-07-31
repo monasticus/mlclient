@@ -4,7 +4,7 @@ from mlclient import exceptions
 from mlclient.calls import DocumentsGetCall
 
 
-@pytest.fixture
+@pytest.fixture()
 def default_documents_get_call():
     """Returns an DocumentsGetCall instance"""
     return DocumentsGetCall(uri="/a.xml")

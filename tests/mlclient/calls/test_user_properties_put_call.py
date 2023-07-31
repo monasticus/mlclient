@@ -4,7 +4,7 @@ from mlclient import exceptions
 from mlclient.calls import UserPropertiesPutCall
 
 
-@pytest.fixture
+@pytest.fixture()
 def default_user_properties_put_call():
     """Returns an UserPropertiesPutCall instance"""
     return UserPropertiesPutCall(user="admin", body={"user-name": "custom-user"})

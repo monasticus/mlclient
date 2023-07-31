@@ -4,7 +4,7 @@ from mlclient import exceptions
 from mlclient.calls import DatabasePropertiesGetCall
 
 
-@pytest.fixture
+@pytest.fixture()
 def default_database_properties_get_call():
     """Returns an DatabasePropertiesGetCall instance"""
     return DatabasePropertiesGetCall(database="Documents")

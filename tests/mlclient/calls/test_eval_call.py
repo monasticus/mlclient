@@ -4,7 +4,7 @@ from mlclient import exceptions
 from mlclient.calls import EvalCall
 
 
-@pytest.fixture
+@pytest.fixture()
 def default_eval_call():
     """Return an EvalCall instance with a required parameter only."""
     return EvalCall(xquery="()")

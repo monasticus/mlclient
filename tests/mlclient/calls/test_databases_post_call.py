@@ -4,7 +4,7 @@ from mlclient import exceptions
 from mlclient.calls import DatabasesPostCall
 
 
-@pytest.fixture
+@pytest.fixture()
 def default_databases_post_call():
     """Returns an DatabasesPostCall instance"""
     return DatabasesPostCall(body={"database-name": "custom-db"})

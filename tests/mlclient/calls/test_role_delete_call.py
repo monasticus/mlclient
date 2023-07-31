@@ -3,7 +3,7 @@ import pytest
 from mlclient.calls import RoleDeleteCall
 
 
-@pytest.fixture
+@pytest.fixture()
 def default_role_delete_call():
     """Returns an RoleDeleteCall instance"""
     return RoleDeleteCall(role="admin")

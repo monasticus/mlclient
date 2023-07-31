@@ -4,7 +4,7 @@ from mlclient import exceptions
 from mlclient.calls import ForestsPutCall
 
 
-@pytest.fixture
+@pytest.fixture()
 def default_forests_put_call():
     """Returns a ForestsPutCall instance"""
     body = {

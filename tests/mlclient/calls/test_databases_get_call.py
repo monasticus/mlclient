@@ -4,7 +4,7 @@ from mlclient import exceptions
 from mlclient.calls import DatabasesGetCall
 
 
-@pytest.fixture
+@pytest.fixture()
 def default_databases_get_call():
     """Returns an DatabasesGetCall instance"""
     return DatabasesGetCall()

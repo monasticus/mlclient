@@ -3,7 +3,7 @@ import pytest
 from mlclient.calls import UserDeleteCall
 
 
-@pytest.fixture
+@pytest.fixture()
 def default_user_delete_call():
     """Returns an UserDeleteCall instance"""
     return UserDeleteCall(user="admin")

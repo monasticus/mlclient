@@ -4,7 +4,7 @@ from mlclient import exceptions
 from mlclient.calls import ForestDeleteCall
 
 
-@pytest.fixture
+@pytest.fixture()
 def default_forest_delete_call():
     """Returns an ForestDeleteCall instance"""
     return ForestDeleteCall(

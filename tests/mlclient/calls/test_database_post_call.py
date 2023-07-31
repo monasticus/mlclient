@@ -4,7 +4,7 @@ from mlclient import exceptions
 from mlclient.calls import DatabasePostCall
 
 
-@pytest.fixture
+@pytest.fixture()
 def default_database_post_call():
     """Returns an DatabasePostCall instance"""
     body = {"operation": "clear-database"}

@@ -4,7 +4,7 @@ from mlclient import exceptions
 from mlclient.calls import DatabaseDeleteCall
 
 
-@pytest.fixture
+@pytest.fixture()
 def default_database_delete_call():
     """Returns an DatabaseDeleteCall instance"""
     return DatabaseDeleteCall(database="Documents")

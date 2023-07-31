@@ -4,7 +4,7 @@ from mlclient import exceptions
 from mlclient.calls import RolePropertiesGetCall
 
 
-@pytest.fixture
+@pytest.fixture()
 def default_role_properties_get_call():
     """Returns an RolePropertiesGetCall instance"""
     return RolePropertiesGetCall(role="admin")

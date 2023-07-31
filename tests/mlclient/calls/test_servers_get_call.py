@@ -4,7 +4,7 @@ from mlclient import exceptions
 from mlclient.calls import ServersGetCall
 
 
-@pytest.fixture
+@pytest.fixture()
 def default_servers_get_call():
     """Returns a ServersGetCall instance"""
     return ServersGetCall()

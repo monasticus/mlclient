@@ -4,7 +4,7 @@ from mlclient import exceptions
 from mlclient.calls import UsersGetCall
 
 
-@pytest.fixture
+@pytest.fixture()
 def default_users_get_call():
     """Returns an UsersGetCall instance"""
     return UsersGetCall()

@@ -4,7 +4,7 @@ from mlclient import exceptions
 from mlclient.calls import RolePropertiesPutCall
 
 
-@pytest.fixture
+@pytest.fixture()
 def default_role_properties_put_call():
     """Returns an RolePropertiesPutCall instance"""
     return RolePropertiesPutCall(role="admin", body={"role-name": "custom-role"})

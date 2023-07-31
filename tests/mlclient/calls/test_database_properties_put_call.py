@@ -4,7 +4,7 @@ from mlclient import exceptions
 from mlclient.calls import DatabasePropertiesPutCall
 
 
-@pytest.fixture
+@pytest.fixture()
 def default_database_properties_put_call():
     """Returns an DatabasePropertiesPutCall instance"""
     body = {"database-name": "custom-db"}

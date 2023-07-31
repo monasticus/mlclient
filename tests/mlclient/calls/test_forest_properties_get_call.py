@@ -4,7 +4,7 @@ from mlclient import exceptions
 from mlclient.calls import ForestPropertiesGetCall
 
 
-@pytest.fixture
+@pytest.fixture()
 def default_forest_properties_get_call():
     """Returns an ForestPropertiesGetCall instance"""
     return ForestPropertiesGetCall(forest="custom-forest")

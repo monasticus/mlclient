@@ -21,7 +21,7 @@ def test_context_mng():
     assert not client.is_connected()
 
 
-@pytest.mark.ml_access
+@pytest.mark.ml_access()
 def test_get():
     with MLClient(auth_method="digest") as client:
         resp = client.get("/manage/v2/servers")
@@ -31,7 +31,7 @@ def test_get():
     assert resp.status_code == 200
 
 
-@pytest.mark.ml_access
+@pytest.mark.ml_access()
 def test_get_with_customized_params_and_headers():
     with MLClient(auth_method="digest") as client:
         resp = client.get("/manage/v2/servers",
@@ -45,7 +45,7 @@ def test_get_with_customized_params_and_headers():
     assert resp.status_code == 200
 
 
-@pytest.mark.ml_access
+@pytest.mark.ml_access()
 def test_post():
     with MLClient(auth_method="digest") as client:
         resp = client.post("/manage/v2/databases/Documents")
@@ -56,7 +56,7 @@ def test_post():
     assert resp.status_code == 400
 
 
-@pytest.mark.ml_access
+@pytest.mark.ml_access()
 def test_post_with_customized_params_and_headers_and_body_different_than_json():
     with MLClient(auth_method="digest") as client:
         resp = client.post(
@@ -73,7 +73,7 @@ def test_post_with_customized_params_and_headers_and_body_different_than_json():
     assert resp.status_code == 200
 
 
-@pytest.mark.ml_access
+@pytest.mark.ml_access()
 def test_post_with_customized_params_and_headers_and_json_body():
     with MLClient(auth_method="digest") as client:
         resp = client.post("/manage/v2/databases/Documents",
@@ -89,7 +89,7 @@ def test_post_with_customized_params_and_headers_and_json_body():
     assert resp.status_code == 200
 
 
-@pytest.mark.ml_access
+@pytest.mark.ml_access()
 def test_put():
     with MLClient(auth_method="digest") as client:
         resp = client.put("/v1/documents")
@@ -100,7 +100,7 @@ def test_put():
     assert resp.status_code == 400
 
 
-@pytest.mark.ml_access
+@pytest.mark.ml_access()
 def test_put_with_customized_params_and_headers_and_body_different_than_json():
     with MLClient(auth_method="digest") as client:
         resp = client.put("/v1/documents",
@@ -116,7 +116,7 @@ def test_put_with_customized_params_and_headers_and_body_different_than_json():
     assert resp.status_code == 400
 
 
-@pytest.mark.ml_access
+@pytest.mark.ml_access()
 def test_put_with_customized_params_and_headers_and_json_body():
     with MLClient(auth_method="digest") as client:
         resp = client.put("/v1/documents",
@@ -132,7 +132,7 @@ def test_put_with_customized_params_and_headers_and_json_body():
     assert resp.status_code == 400
 
 
-@pytest.mark.ml_access
+@pytest.mark.ml_access()
 def test_delete():
     with MLClient(auth_method="digest") as client:
         resp = client.delete("/manage/v2/databases/custom-db")
@@ -143,7 +143,7 @@ def test_delete():
     assert not resp.text
 
 
-@pytest.mark.ml_access
+@pytest.mark.ml_access()
 def test_delete_with_customized_params_and_headers():
     with MLClient(auth_method="digest") as client:
         resp = client.delete("/manage/v2/databases/custom-db",

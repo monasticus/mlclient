@@ -4,7 +4,7 @@ from mlclient import exceptions
 from mlclient.calls import UsersPostCall
 
 
-@pytest.fixture
+@pytest.fixture()
 def default_users_post_call():
     """Returns an UsersPostCall instance"""
     return UsersPostCall(body={"user-name": "custom-user"})

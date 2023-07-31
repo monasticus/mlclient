@@ -230,15 +230,15 @@ class MLClient:
                 headers = {}
             if not params:
                 params = {}
-            self.__logger.debug(f"Sending a request... GET {endpoint}")
+            self.__logger.debug("Sending a request... GET %s", endpoint)
             return self.__sess.get(
                 url,
                 auth=self.__auth,
                 params=params,
                 headers=headers)
         else:
-            self.__logger.warning(f"A request attempt failure: GET {endpoint}"
-                                  " -- MLClient is not connected")
+            self.__logger.warning("A request attempt failure: GET %s "
+                                  "-- MLClient is not connected", endpoint)
 
     def post(
             self,
@@ -271,7 +271,7 @@ class MLClient:
                 headers = {}
             if not params:
                 params = {}
-            self.__logger.debug(f"Sending a request... POST {endpoint}")
+            self.__logger.debug("Sending a request... POST %s", endpoint)
             if headers.get(constants.HEADER_NAME_CONTENT_TYPE) == constants.HEADER_JSON:
                 return self.__sess.post(
                     url,
@@ -287,8 +287,8 @@ class MLClient:
                     headers=headers,
                     data=body)
         else:
-            self.__logger.warning(f"A request attempt failure: POST {endpoint}"
-                                  " -- MLClient is not connected")
+            self.__logger.warning("A request attempt failure: POST %s"
+                                  " -- MLClient is not connected", endpoint)
 
     def put(
             self,
@@ -321,7 +321,7 @@ class MLClient:
                 headers = {}
             if not params:
                 params = {}
-            self.__logger.debug(f"Sending a request... PUT {endpoint}")
+            self.__logger.debug("Sending a request... PUT %s", endpoint)
             if headers.get(constants.HEADER_NAME_CONTENT_TYPE) == constants.HEADER_JSON:
                 return self.__sess.put(
                     url,
@@ -337,8 +337,8 @@ class MLClient:
                     headers=headers,
                     data=body)
         else:
-            self.__logger.warning(f"A request attempt failure: PUT {endpoint}"
-                                  " -- MLClient is not connected")
+            self.__logger.warning("A request attempt failure: PUT %s"
+                                  " -- MLClient is not connected", endpoint)
 
     def delete(
             self,
@@ -368,15 +368,15 @@ class MLClient:
                 headers = {}
             if not params:
                 params = {}
-            self.__logger.debug(f"Sending a request... DELETE {endpoint}")
+            self.__logger.debug("Sending a request... DELETE %s", endpoint)
             return self.__sess.delete(
                 url,
                 auth=self.__auth,
                 params=params,
                 headers=headers)
         else:
-            self.__logger.warning(f"A request attempt failure: DELETE {endpoint}"
-                                  " -- MLClient is not connected")
+            self.__logger.warning("A request attempt failure: DELETE %s"
+                                  " -- MLClient is not connected", endpoint)
 
 
 class MLResourceClient(MLClient):

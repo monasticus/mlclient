@@ -10,10 +10,9 @@ from __future__ import annotations
 
 import logging
 from types import TracebackType
-from typing import NoReturn
 
 from requests import Response, Session
-from requests.auth import HTTPBasicAuth, HTTPDigestAuth
+from requests.auth import HTTPBasicAuth, HTTPDigestAuth, AuthBase
 
 from mlclient import constants
 from mlclient.calls import (DatabaseDeleteCall, DatabaseGetCall,
@@ -31,6 +30,8 @@ from mlclient.calls import (DatabaseDeleteCall, DatabaseGetCall,
                             ServersGetCall, ServersPostCall, UserDeleteCall,
                             UserGetCall, UserPropertiesGetCall,
                             UserPropertiesPutCall, UsersGetCall, UsersPostCall)
+
+logger = logging.getLogger(__name__)
 
 
 class MLClient:
@@ -59,10 +60,10 @@ class MLClient:
 
     Methods
     -------
-    connect() -> NoReturn
+    connect()
         Start an HTTP session.
 
-    disconnect() -> NoReturn
+    disconnect()
         Close an HTTP session.
 
     is_connected() -> bool
@@ -97,6 +98,15 @@ class MLClient:
         headers: dict = None,
     ) -> Response:
         Send a DELETE request.
+
+    request(
+        method: str,
+        endpoint: str,
+        params: dict = None,
+        headers: dict = None,
+        body: str | dict = None,
+    ) -> Response:
+        Send an HTTP request.
     """
 
     def __init__(
@@ -125,17 +135,16 @@ class MLClient:
         password : str
             a password
         """
-        self.protocol = protocol
-        self.host = host
-        self.port = port
-        self.auth_method = auth_method
-        self.username = username
-        self.password = password
-        self.base_url = f"{protocol}://{host}:{port}"
-        self.__sess = None
+        self.protocol: str = protocol
+        self.host: str = host
+        self.port: int = port
+        self.auth_method: str = auth_method
+        self.username: str = username
+        self.password: str = password
+        self.base_url: str = f"{protocol}://{host}:{port}"
+        self._sess: Session | None = None
         auth_impl = HTTPBasicAuth if auth_method == "basic" else HTTPDigestAuth
-        self.__auth = auth_impl(username, password)
-        self.__logger = logging.getLogger(__name__)
+        self._auth: AuthBase = auth_impl(username, password)
 
     def __enter__(
             self,
@@ -175,19 +184,19 @@ class MLClient:
 
     def connect(
             self,
-    ) -> NoReturn:
+    ):
         """Start an HTTP session."""
-        self.__logger.debug("Initiating a connection")
-        self.__sess = Session()
+        logger.debug("Initiating a connection")
+        self._sess = Session()
 
     def disconnect(
             self,
-    ) -> NoReturn:
+    ):
         """Close an HTTP session."""
-        if self.__sess:
-            self.__logger.debug("Closing a connection")
-            self.__sess.close()
-            self.__sess = None
+        if self._sess:
+            logger.debug("Closing a connection")
+            self._sess.close()
+            self._sess = None
 
     def is_connected(
             self,
@@ -199,7 +208,7 @@ class MLClient:
         bool
             True if the client has started a connection; otherwise False
         """
-        return self.__sess is not None
+        return self._sess is not None
 
     def get(
             self,
@@ -212,32 +221,18 @@ class MLClient:
         Parameters
         ----------
         endpoint : str
-            a REST endpoint to call
+            A REST endpoint to call
         params : dict
-            request parameters
+            Request parameters
         headers : dict
-            request headers
+            Request headers
 
         Returns
         -------
         Response
-            an HTTP response
+            An HTTP response
         """
-        if self.is_connected():
-            url = self.base_url + endpoint
-            if not headers:
-                headers = {}
-            if not params:
-                params = {}
-            self.__logger.debug("Sending a request... GET %s", endpoint)
-            return self.__sess.get(
-                url,
-                auth=self.__auth,
-                params=params,
-                headers=headers)
-        self.__logger.warning("A request attempt failure: GET %s "
-                              "-- MLClient is not connected", endpoint)
-        return None
+        return self.request("GET", endpoint, params, headers)
 
     def post(
             self,
@@ -251,42 +246,20 @@ class MLClient:
         Parameters
         ----------
         endpoint : str
-            a REST endpoint to call
+            A REST endpoint to call
         params : dict
-            request parameters
+            Request parameters
         headers : dict
-            request headers
+            Request headers
         body : str | dict
-            a request body
+            A request body
 
         Returns
         -------
         Response
-            an HTTP response
+            An HTTP response
         """
-        if self.is_connected():
-            url = self.base_url + endpoint
-            if not headers:
-                headers = {}
-            if not params:
-                params = {}
-            self.__logger.debug("Sending a request... POST %s", endpoint)
-            if headers.get(constants.HEADER_NAME_CONTENT_TYPE) == constants.HEADER_JSON:
-                return self.__sess.post(
-                    url,
-                    auth=self.__auth,
-                    params=params,
-                    headers=headers,
-                    json=body)
-            return self.__sess.post(
-                url,
-                auth=self.__auth,
-                params=params,
-                headers=headers,
-                data=body)
-        self.__logger.warning("A request attempt failure: POST %s"
-                              " -- MLClient is not connected", endpoint)
-        return None
+        return self.request("POST", endpoint, params, headers, body)
 
     def put(
             self,
@@ -300,42 +273,20 @@ class MLClient:
         Parameters
         ----------
         endpoint : str
-            a REST endpoint to call
+            A REST endpoint to call
         params : dict
-            request parameters
+            Request parameters
         headers : dict
-            request headers
+            Request headers
         body : str | dict
-            a request body
+            A request body
 
         Returns
         -------
         Response
-            an HTTP response
+            An HTTP response
         """
-        if self.is_connected():
-            url = self.base_url + endpoint
-            if not headers:
-                headers = {}
-            if not params:
-                params = {}
-            self.__logger.debug("Sending a request... PUT %s", endpoint)
-            if headers.get(constants.HEADER_NAME_CONTENT_TYPE) == constants.HEADER_JSON:
-                return self.__sess.put(
-                    url,
-                    auth=self.__auth,
-                    params=params,
-                    headers=headers,
-                    json=body)
-            return self.__sess.put(
-                url,
-                auth=self.__auth,
-                params=params,
-                headers=headers,
-                data=body)
-        self.__logger.warning("A request attempt failure: PUT %s"
-                              " -- MLClient is not connected", endpoint)
-        return None
+        return self.request("PUT", endpoint, params, headers, body)
 
     def delete(
             self,
@@ -348,16 +299,46 @@ class MLClient:
         Parameters
         ----------
         endpoint : str
-            a REST endpoint to call
+            A REST endpoint to call
         params : dict
-            request parameters
+            Request parameters
         headers : dict
-            request headers
+            Request headers
 
         Returns
         -------
         Response
-            an HTTP response
+            An HTTP response
+        """
+        return self.request("DELETE", endpoint, params, headers)
+
+    def request(
+            self,
+            method: str,
+            endpoint: str,
+            params: dict | None = None,
+            headers: dict | None = None,
+            body: str | dict | None = None,
+    ):
+        """Send an HTTP request.
+
+        Parameters
+        ----------
+        method : str
+            An HTTP request method
+        endpoint : str
+            A REST endpoint to call
+        params : dict
+            Request parameters
+        headers : dict
+            Request headers
+        body : str | dict
+            A request body
+
+        Returns
+        -------
+        Response
+            An HTTP response
         """
         if self.is_connected():
             url = self.base_url + endpoint
@@ -365,14 +346,24 @@ class MLClient:
                 headers = {}
             if not params:
                 params = {}
-            self.__logger.debug("Sending a request... DELETE %s", endpoint)
-            return self.__sess.delete(
-                url,
-                auth=self.__auth,
-                params=params,
-                headers=headers)
-        self.__logger.warning("A request attempt failure: DELETE %s"
-                              " -- MLClient is not connected", endpoint)
+            request = {
+                "auth": self._auth,
+                "params": params,
+                "headers": headers,
+            }
+            if body:
+                content_type = headers.get(constants.HEADER_NAME_CONTENT_TYPE)
+                if content_type == constants.HEADER_JSON:
+                    request["json"] = body
+                else:
+                    request["data"] = body
+
+            logger.debug("Sending a request... %s %s",
+                         method.upper(), endpoint)
+            return self._sess.request(method, url, **request)
+
+        logger.warning("A request attempt failure: %s %s -- MLClient is not connected",
+                       method.upper(), endpoint)
         return None
 
 
@@ -396,7 +387,7 @@ class MLResourceClient(MLClient):
     Methods
     -------
     MLResourceClient inherits all MLClient methods:
-    connect, disconnect, is_connected, get, post, put, delete.
+    connect, disconnect, is_connected, get, post, put, delete, request.
 
     eval(
         xquery: str = None,
@@ -681,7 +672,7 @@ class MLResourceClient(MLClient):
         Returns
         -------
         Response
-            an HTTP response
+            An HTTP response
         """
         call = EvalCall(xquery=xquery,
                         javascript=javascript,
@@ -720,7 +711,7 @@ class MLResourceClient(MLClient):
         Returns
         -------
         Response
-            an HTTP response
+            An HTTP response
         """
         call = LogsCall(filename=filename,
                         data_format=data_format,
@@ -748,7 +739,7 @@ class MLResourceClient(MLClient):
         Returns
         -------
         Response
-            an HTTP response
+            An HTTP response
         """
         call = DatabasesGetCall(data_format=data_format,
                                 view=view)
@@ -768,7 +759,7 @@ class MLResourceClient(MLClient):
         Returns
         -------
         Response
-            an HTTP response
+            An HTTP response
         """
         call = DatabasesPostCall(body=body)
         return self.call(call)
@@ -796,7 +787,7 @@ class MLResourceClient(MLClient):
         Returns
         -------
         Response
-            an HTTP response
+            An HTTP response
         """
         call = DatabaseGetCall(database=database,
                                data_format=data_format,
@@ -820,7 +811,7 @@ class MLResourceClient(MLClient):
         Returns
         -------
         Response
-            an HTTP response
+            An HTTP response
         """
         call = DatabasePostCall(database=database,
                                 body=body)
@@ -847,7 +838,7 @@ class MLResourceClient(MLClient):
         Returns
         -------
         Response
-            an HTTP response
+            An HTTP response
         """
         call = DatabaseDeleteCall(database=database,
                                   forest_delete=forest_delete)
@@ -871,7 +862,7 @@ class MLResourceClient(MLClient):
         Returns
         -------
         Response
-            an HTTP response
+            An HTTP response
         """
         call = DatabasePropertiesGetCall(database=database,
                                          data_format=data_format)
@@ -894,7 +885,7 @@ class MLResourceClient(MLClient):
         Returns
         -------
         Response
-            an HTTP response
+            An HTTP response
         """
         call = DatabasePropertiesPutCall(database=database,
                                          body=body)
@@ -928,7 +919,7 @@ class MLResourceClient(MLClient):
         Returns
         -------
         Response
-            an HTTP response
+            An HTTP response
         """
         call = ServersGetCall(data_format=data_format,
                               group_id=group_id,
@@ -962,7 +953,7 @@ class MLResourceClient(MLClient):
         Returns
         -------
         Response
-            an HTTP response
+            An HTTP response
         """
         call = ServersPostCall(body=body,
                                group_id=group_id,
@@ -1011,7 +1002,7 @@ class MLResourceClient(MLClient):
         Returns
         -------
         Response
-            an HTTP response
+            An HTTP response
         """
         call = ServerGetCall(server=server,
                              group_id=group_id,
@@ -1040,7 +1031,7 @@ class MLResourceClient(MLClient):
         Returns
         -------
         Response
-            an HTTP response
+            An HTTP response
         """
         call = ServerDeleteCall(server=server,
                                 group_id=group_id)
@@ -1068,7 +1059,7 @@ class MLResourceClient(MLClient):
         Returns
         -------
         Response
-            an HTTP response
+            An HTTP response
         """
         call = ServerPropertiesGetCall(server=server,
                                        group_id=group_id,
@@ -1096,7 +1087,7 @@ class MLResourceClient(MLClient):
         Returns
         -------
         Response
-            an HTTP response
+            An HTTP response
         """
         call = ServerPropertiesPutCall(server=server,
                                        group_id=group_id,
@@ -1139,7 +1130,7 @@ class MLResourceClient(MLClient):
         Returns
         -------
         Response
-            an HTTP response
+            An HTTP response
         """
         call = ForestsGetCall(data_format=data_format,
                               view=view,
@@ -1167,7 +1158,7 @@ class MLResourceClient(MLClient):
         Returns
         -------
         Response
-            an HTTP response
+            An HTTP response
         """
         call = ForestsPostCall(body=body,
                                wait_for_forest_to_mount=wait_for_forest_to_mount)
@@ -1187,7 +1178,7 @@ class MLResourceClient(MLClient):
         Returns
         -------
         Response
-            an HTTP response
+            An HTTP response
         """
         call = ForestsPutCall(body=body)
         return self.call(call)
@@ -1214,7 +1205,7 @@ class MLResourceClient(MLClient):
         Returns
         -------
         Response
-            an HTTP response
+            An HTTP response
         """
         call = ForestGetCall(forest=forest,
                              data_format=data_format,
@@ -1240,7 +1231,7 @@ class MLResourceClient(MLClient):
         Returns
         -------
         Response
-            an HTTP response
+            An HTTP response
         """
         call = ForestPostCall(forest=forest,
                               body=body)
@@ -1271,7 +1262,7 @@ class MLResourceClient(MLClient):
         Returns
         -------
         Response
-            an HTTP response
+            An HTTP response
         """
         call = ForestDeleteCall(forest=forest,
                                 level=level,
@@ -1296,7 +1287,7 @@ class MLResourceClient(MLClient):
         Returns
         -------
         Response
-            an HTTP response
+            An HTTP response
         """
         call = ForestPropertiesGetCall(forest=forest,
                                        data_format=data_format)
@@ -1319,7 +1310,7 @@ class MLResourceClient(MLClient):
         Returns
         -------
         Response
-            an HTTP response
+            An HTTP response
         """
         call = ForestPropertiesPutCall(forest=forest,
                                        body=body)
@@ -1342,7 +1333,7 @@ class MLResourceClient(MLClient):
         Returns
         -------
         Response
-            an HTTP response
+            An HTTP response
         """
         call = RolesGetCall(data_format=data_format,
                             view=view)
@@ -1362,7 +1353,7 @@ class MLResourceClient(MLClient):
         Returns
         -------
         Response
-            an HTTP response
+            An HTTP response
         """
         call = RolesPostCall(body=body)
         return self.call(call)
@@ -1387,7 +1378,7 @@ class MLResourceClient(MLClient):
         Returns
         -------
         Response
-            an HTTP response
+            An HTTP response
         """
         call = RoleGetCall(role=role,
                            data_format=data_format,
@@ -1408,7 +1399,7 @@ class MLResourceClient(MLClient):
         Returns
         -------
         Response
-            an HTTP response
+            An HTTP response
         """
         call = RoleDeleteCall(role=role)
         return self.call(call)
@@ -1431,7 +1422,7 @@ class MLResourceClient(MLClient):
         Returns
         -------
         Response
-            an HTTP response
+            An HTTP response
         """
         call = RolePropertiesGetCall(role=role,
                                      data_format=data_format)
@@ -1454,7 +1445,7 @@ class MLResourceClient(MLClient):
         Returns
         -------
         Response
-            an HTTP response
+            An HTTP response
         """
         call = RolePropertiesPutCall(role=role,
                                      body=body)
@@ -1477,7 +1468,7 @@ class MLResourceClient(MLClient):
         Returns
         -------
         Response
-            an HTTP response
+            An HTTP response
         """
         call = UsersGetCall(data_format=data_format,
                             view=view)
@@ -1497,7 +1488,7 @@ class MLResourceClient(MLClient):
         Returns
         -------
         Response
-            an HTTP response
+            An HTTP response
         """
         call = UsersPostCall(body=body)
         return self.call(call)
@@ -1522,7 +1513,7 @@ class MLResourceClient(MLClient):
         Returns
         -------
         Response
-            an HTTP response
+            An HTTP response
         """
         call = UserGetCall(user=user,
                            data_format=data_format,
@@ -1543,7 +1534,7 @@ class MLResourceClient(MLClient):
         Returns
         -------
         Response
-            an HTTP response
+            An HTTP response
         """
         call = UserDeleteCall(user=user)
         return self.call(call)
@@ -1566,7 +1557,7 @@ class MLResourceClient(MLClient):
         Returns
         -------
         Response
-            an HTTP response
+            An HTTP response
         """
         call = UserPropertiesGetCall(user=user,
                                      data_format=data_format)
@@ -1589,7 +1580,7 @@ class MLResourceClient(MLClient):
         Returns
         -------
         Response
-            an HTTP response
+            An HTTP response
 
         Raises
         ------
@@ -1614,29 +1605,11 @@ class MLResourceClient(MLClient):
         Returns
         -------
         Response
-            an HTTP response
+            An HTTP response
         """
-        method = call.method()
-        if method == constants.METHOD_GET:
-            return self.get(
-                endpoint=call.endpoint(),
-                params=call.params(),
-                headers=call.headers())
-        if method == constants.METHOD_POST:
-            return self.post(
-                endpoint=call.endpoint(),
-                params=call.params(),
-                headers=call.headers(),
-                body=call.body())
-        if method == constants.METHOD_PUT:
-            return self.put(
-                endpoint=call.endpoint(),
-                params=call.params(),
-                headers=call.headers(),
-                body=call.body())
-        if method == constants.METHOD_DELETE:
-            return self.delete(
-                endpoint=call.endpoint(),
-                params=call.params(),
-                headers=call.headers())
-        raise NotImplementedError
+        return self.request(
+            method=call.method(),
+            endpoint=call.endpoint(),
+            params=call.params(),
+            headers=call.headers(),
+            body=call.body())

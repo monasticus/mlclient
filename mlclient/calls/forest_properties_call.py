@@ -33,11 +33,11 @@ class ForestPropertiesGetCall(ResourceCall):
     for the specific call.
     """
 
-    __ENDPOINT_TEMPLATE = "/manage/v2/forests/{}/properties"
+    _ENDPOINT_TEMPLATE = "/manage/v2/forests/{}/properties"
 
-    __FORMAT_PARAM = "format"
+    _FORMAT_PARAM = "format"
 
-    __SUPPORTED_FORMATS = ["xml", "json", "html"]
+    _SUPPORTED_FORMATS = ["xml", "json", "html"]
 
     def __init__(
             self,
@@ -55,12 +55,12 @@ class ForestPropertiesGetCall(ResourceCall):
             This parameter overrides the Accept header if both are present.
         """
         data_format = data_format if data_format is not None else "xml"
-        ForestPropertiesGetCall.__validate_params(data_format)
+        self._validate_params(data_format)
 
         super().__init__(method="GET",
                          accept=utils.get_accept_header_for_format(data_format))
         self.__forest = forest
-        self.add_param(ForestPropertiesGetCall.__FORMAT_PARAM, data_format)
+        self.add_param(self._FORMAT_PARAM, data_format)
 
     def endpoint(
             self,
@@ -72,15 +72,15 @@ class ForestPropertiesGetCall(ResourceCall):
         str
             A Forest Properties call endpoint
         """
-        return ForestPropertiesGetCall.__ENDPOINT_TEMPLATE.format(self.__forest)
+        return self._ENDPOINT_TEMPLATE.format(self.__forest)
 
     @classmethod
-    def __validate_params(
+    def _validate_params(
             cls,
             data_format: str,
     ):
-        if data_format not in cls.__SUPPORTED_FORMATS:
-            joined_supported_formats = ", ".join(cls.__SUPPORTED_FORMATS)
+        if data_format not in cls._SUPPORTED_FORMATS:
+            joined_supported_formats = ", ".join(cls._SUPPORTED_FORMATS)
             msg = f"The supported formats are: {joined_supported_formats}"
             raise exceptions.WrongParametersError(msg)
 
@@ -102,7 +102,7 @@ class ForestPropertiesPutCall(ResourceCall):
     for the specific call.
     """
 
-    __ENDPOINT_TEMPLATE = "/manage/v2/forests/{}/properties"
+    _ENDPOINT_TEMPLATE = "/manage/v2/forests/{}/properties"
 
     def __init__(
             self,
@@ -118,7 +118,7 @@ class ForestPropertiesPutCall(ResourceCall):
         body : str | dict
             A forest properties in XML or JSON format.
         """
-        ForestPropertiesPutCall.__validate_params(body)
+        self._validate_params(body)
         content_type = utils.get_content_type_header_for_data(body)
         if content_type == constants.HEADER_JSON and isinstance(body, str):
             body = json.loads(body)
@@ -137,10 +137,10 @@ class ForestPropertiesPutCall(ResourceCall):
         str
             A Forest Properties call endpoint
         """
-        return ForestPropertiesPutCall.__ENDPOINT_TEMPLATE.format(self.__forest)
+        return self._ENDPOINT_TEMPLATE.format(self.__forest)
 
     @classmethod
-    def __validate_params(
+    def _validate_params(
             cls,
             body: str | dict,
     ):

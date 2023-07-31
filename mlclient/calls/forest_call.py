@@ -31,14 +31,14 @@ class ForestGetCall(ResourceCall):
     for the specific call.
     """
 
-    __ENDPOINT_TEMPLATE = "/manage/v2/forests/{}"
+    _ENDPOINT_TEMPLATE = "/manage/v2/forests/{}"
 
-    __FORMAT_PARAM = "format"
-    __VIEW_PARAM = "view"
+    _FORMAT_PARAM = "format"
+    _VIEW_PARAM = "view"
 
-    __SUPPORTED_FORMATS = ["xml", "json", "html"]
-    __SUPPORTED_VIEWS = ["describe", "default", "config", "counts", "edit",
-                         "status", "storage", "xdmp:forest-status", "properties-schema"]
+    _SUPPORTED_FORMATS = ["xml", "json", "html"]
+    _SUPPORTED_VIEWS = ["describe", "default", "config", "counts", "edit",
+                        "status", "storage", "xdmp:forest-status", "properties-schema"]
 
     def __init__(
             self,
@@ -61,13 +61,13 @@ class ForestGetCall(ResourceCall):
         """
         data_format = data_format if data_format is not None else "xml"
         view = view if view is not None else "default"
-        ForestGetCall.__validate_params(data_format, view)
+        self._validate_params(data_format, view)
 
         super().__init__(method="GET",
                          accept=utils.get_accept_header_for_format(data_format))
         self.__forest = forest
-        self.add_param(ForestGetCall.__FORMAT_PARAM, data_format)
-        self.add_param(ForestGetCall.__VIEW_PARAM, view)
+        self.add_param(self._FORMAT_PARAM, data_format)
+        self.add_param(self._VIEW_PARAM, view)
 
     def endpoint(
             self,
@@ -79,20 +79,20 @@ class ForestGetCall(ResourceCall):
         str
             A Forest call endpoint
         """
-        return ForestGetCall.__ENDPOINT_TEMPLATE.format(self.__forest)
+        return self._ENDPOINT_TEMPLATE.format(self.__forest)
 
     @classmethod
-    def __validate_params(
+    def _validate_params(
             cls,
             data_format: str,
             view: str,
     ):
-        if data_format not in cls.__SUPPORTED_FORMATS:
-            joined_supported_formats = ", ".join(cls.__SUPPORTED_FORMATS)
+        if data_format not in cls._SUPPORTED_FORMATS:
+            joined_supported_formats = ", ".join(cls._SUPPORTED_FORMATS)
             msg = f"The supported formats are: {joined_supported_formats}"
             raise exceptions.WrongParametersError(msg)
-        if view not in cls.__SUPPORTED_VIEWS:
-            joined_supported_views = ", ".join(cls.__SUPPORTED_VIEWS)
+        if view not in cls._SUPPORTED_VIEWS:
+            joined_supported_views = ", ".join(cls._SUPPORTED_VIEWS)
             msg = f"The supported views are: {joined_supported_views}"
             raise exceptions.WrongParametersError(msg)
 
@@ -118,12 +118,12 @@ class ForestPostCall(ResourceCall):
     for the specific call.
     """
 
-    __ENDPOINT_TEMPLATE = "/manage/v2/forests/{}"
+    _ENDPOINT_TEMPLATE = "/manage/v2/forests/{}"
 
-    __STATE_PARAM = "state"
+    _STATE_PARAM = "state"
 
-    __SUPPORTED_STATES = ["clear", "merge", "restart", "attach", "detach", "retire",
-                          "employ"]
+    _SUPPORTED_STATES = ["clear", "merge", "restart", "attach", "detach", "retire",
+                         "employ"]
 
     def __init__(
             self,
@@ -141,7 +141,7 @@ class ForestPostCall(ResourceCall):
             of state change to initiate).
             Allowed values: clear, merge, restart, attach, detach, retire, employ.
         """
-        ForestPostCall.__validate_params(body.get(ForestPostCall.__STATE_PARAM))
+        self._validate_params(body.get(self._STATE_PARAM))
         super().__init__(method="POST",
                          content_type=constants.HEADER_X_WWW_FORM_URLENCODED,
                          body=body)
@@ -157,18 +157,18 @@ class ForestPostCall(ResourceCall):
         str
             A Forests call endpoint
         """
-        return ForestPostCall.__ENDPOINT_TEMPLATE.format(self.__forest)
+        return self._ENDPOINT_TEMPLATE.format(self.__forest)
 
     @classmethod
-    def __validate_params(
+    def _validate_params(
             cls,
             state: str,
     ):
         if state is None:
             msg = "You must include the 'state' parameter within a body!"
             raise exceptions.WrongParametersError(msg)
-        if state not in cls.__SUPPORTED_STATES:
-            joined_supported_states = ", ".join(cls.__SUPPORTED_STATES)
+        if state not in cls._SUPPORTED_STATES:
+            joined_supported_states = ", ".join(cls._SUPPORTED_STATES)
             msg = f"The supported states are: {joined_supported_states}"
             raise exceptions.WrongParametersError(msg)
 
@@ -189,13 +189,13 @@ class ForestDeleteCall(ResourceCall):
     for the specific call.
     """
 
-    __ENDPOINT_TEMPLATE = "/manage/v2/forests/{}"
+    _ENDPOINT_TEMPLATE = "/manage/v2/forests/{}"
 
-    __LEVEL_PARAM = "level"
-    __REPLICAS_PARAM = "replicas"
+    _LEVEL_PARAM = "level"
+    _REPLICAS_PARAM = "replicas"
 
-    __SUPPORTED_LEVELS = ["full", "config-only"]
-    __SUPPORTED_REPLICAS_OPTS = ["detach", "delete"]
+    _SUPPORTED_LEVELS = ["full", "config-only"]
+    _SUPPORTED_REPLICAS_OPTS = ["detach", "delete"]
 
     def __init__(
             self,
@@ -219,10 +219,10 @@ class ForestDeleteCall(ResourceCall):
             Allowed values: detach to detach the replica but keep it; delete to detach
             and delete the replica.
         """
-        ForestDeleteCall.__validate_params(level, replicas)
+        self._validate_params(level, replicas)
         super().__init__(method=constants.METHOD_DELETE)
-        self.add_param(ForestDeleteCall.__LEVEL_PARAM, level)
-        self.add_param(ForestDeleteCall.__REPLICAS_PARAM, replicas)
+        self.add_param(self._LEVEL_PARAM, level)
+        self.add_param(self._REPLICAS_PARAM, replicas)
         self.__forest = forest
 
     def endpoint(
@@ -235,19 +235,19 @@ class ForestDeleteCall(ResourceCall):
         str
             A Forest call endpoint
         """
-        return ForestDeleteCall.__ENDPOINT_TEMPLATE.format(self.__forest)
+        return self._ENDPOINT_TEMPLATE.format(self.__forest)
 
     @classmethod
-    def __validate_params(
+    def _validate_params(
             cls,
             level: str,
             replicas: str,
     ):
-        if level not in cls.__SUPPORTED_LEVELS:
-            joined_supported_levels = ", ".join(cls.__SUPPORTED_LEVELS)
+        if level not in cls._SUPPORTED_LEVELS:
+            joined_supported_levels = ", ".join(cls._SUPPORTED_LEVELS)
             msg = f"The supported levels are: {joined_supported_levels}"
             raise exceptions.WrongParametersError(msg)
-        if replicas and replicas not in cls.__SUPPORTED_REPLICAS_OPTS:
-            joined_supported_opts = ", ".join(cls.__SUPPORTED_REPLICAS_OPTS)
+        if replicas and replicas not in cls._SUPPORTED_REPLICAS_OPTS:
+            joined_supported_opts = ", ".join(cls._SUPPORTED_REPLICAS_OPTS)
             msg = f"The supported replicas options are: {joined_supported_opts}"
             raise exceptions.WrongParametersError(msg)

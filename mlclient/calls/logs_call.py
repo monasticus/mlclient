@@ -35,12 +35,12 @@ class LogsCall(ResourceCall):
 
     ENDPOINT = "/manage/v2/logs"
 
-    __FORMAT_PARAM = "format"
-    __FILENAME_PARAM = "filename"
-    __HOST_PARAM = "host"
-    __START_PARAM = "start"
-    __END_PARAM = "end"
-    __REGEX_PARAM = "regex"
+    _FORMAT_PARAM = "format"
+    _FILENAME_PARAM = "filename"
+    _HOST_PARAM = "host"
+    _START_PARAM = "start"
+    _END_PARAM = "end"
+    _REGEX_PARAM = "regex"
 
     def __init__(
             self,
@@ -70,17 +70,17 @@ class LogsCall(ResourceCall):
             Filters the log data, based on a regular expression.
         """
         data_format = data_format if data_format is not None else "html"
-        LogsCall.__validate_params(data_format, start_time, end_time)
+        self._validate_params(data_format, start_time, end_time)
 
         super().__init__(accept=utils.get_accept_header_for_format(data_format))
-        self.add_param(LogsCall.__FORMAT_PARAM, data_format)
-        self.add_param(LogsCall.__FILENAME_PARAM, filename)
-        self.add_param(LogsCall.__HOST_PARAM, host)
-        self.add_param(LogsCall.__START_PARAM,
-                       LogsCall.__reformat_datetime_param(start_time))
-        self.add_param(LogsCall.__END_PARAM,
-                       LogsCall.__reformat_datetime_param(end_time))
-        self.add_param(LogsCall.__REGEX_PARAM, regex)
+        self.add_param(self._FORMAT_PARAM, data_format)
+        self.add_param(self._FILENAME_PARAM, filename)
+        self.add_param(self._HOST_PARAM, host)
+        self.add_param(self._START_PARAM,
+                       self._reformat_datetime_param(start_time))
+        self.add_param(self._END_PARAM,
+                       self._reformat_datetime_param(end_time))
+        self.add_param(self._REGEX_PARAM, regex)
 
     def endpoint(
             self,
@@ -92,10 +92,10 @@ class LogsCall(ResourceCall):
         str
             A Logs call endpoint
         """
-        return LogsCall.ENDPOINT
+        return self.ENDPOINT
 
     @classmethod
-    def __validate_params(
+    def _validate_params(
             cls,
             data_format: str,
             start_time: str,
@@ -104,11 +104,11 @@ class LogsCall(ResourceCall):
         if data_format and data_format not in ["xml", "json", "html"]:
             msg = "The supported formats are xml, json or html!"
             raise exceptions.WrongParametersError(msg)
-        LogsCall.__validate_datetime_param("start", start_time)
-        LogsCall.__validate_datetime_param("end", end_time)
+        cls._validate_datetime_param("start", start_time)
+        cls._validate_datetime_param("end", end_time)
 
     @staticmethod
-    def __validate_datetime_param(
+    def _validate_datetime_param(
             param_name: str,
             param_value: str,
     ):
@@ -120,7 +120,7 @@ class LogsCall(ResourceCall):
             raise exceptions.WrongParametersError(msg) from ValueError
 
     @staticmethod
-    def __reformat_datetime_param(
+    def _reformat_datetime_param(
             datetime_param: str,
     ):
         if datetime_param:

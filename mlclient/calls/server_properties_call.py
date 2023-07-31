@@ -33,12 +33,12 @@ class ServerPropertiesGetCall(ResourceCall):
     for the specific call.
     """
 
-    __ENDPOINT_TEMPLATE = "/manage/v2/servers/{}/properties"
+    _ENDPOINT_TEMPLATE = "/manage/v2/servers/{}/properties"
 
-    __GROUP_ID_PARAM = "group-id"
-    __FORMAT_PARAM = "format"
+    _GROUP_ID_PARAM = "group-id"
+    _FORMAT_PARAM = "format"
 
-    __SUPPORTED_FORMATS = ["xml", "json", "html"]
+    _SUPPORTED_FORMATS = ["xml", "json", "html"]
 
     def __init__(
             self,
@@ -60,13 +60,13 @@ class ServerPropertiesGetCall(ResourceCall):
             This parameter overrides the Accept header if both are present.
         """
         data_format = data_format if data_format is not None else "xml"
-        ServerPropertiesGetCall.__validate_params(data_format)
+        self._validate_params(data_format)
 
         super().__init__(method="GET",
                          accept=utils.get_accept_header_for_format(data_format))
         self.__server = server
-        self.add_param(ServerPropertiesGetCall.__GROUP_ID_PARAM, group_id)
-        self.add_param(ServerPropertiesGetCall.__FORMAT_PARAM, data_format)
+        self.add_param(self._GROUP_ID_PARAM, group_id)
+        self.add_param(self._FORMAT_PARAM, data_format)
 
     def endpoint(
             self,
@@ -78,15 +78,15 @@ class ServerPropertiesGetCall(ResourceCall):
         str
             A Server Properties call endpoint
         """
-        return ServerPropertiesGetCall.__ENDPOINT_TEMPLATE.format(self.__server)
+        return self._ENDPOINT_TEMPLATE.format(self.__server)
 
     @classmethod
-    def __validate_params(
+    def _validate_params(
             cls,
             data_format: str,
     ):
-        if data_format not in cls.__SUPPORTED_FORMATS:
-            joined_supported_formats = ", ".join(cls.__SUPPORTED_FORMATS)
+        if data_format not in cls._SUPPORTED_FORMATS:
+            joined_supported_formats = ", ".join(cls._SUPPORTED_FORMATS)
             msg = f"The supported formats are: {joined_supported_formats}"
             raise exceptions.WrongParametersError(msg)
 
@@ -108,9 +108,9 @@ class ServerPropertiesPutCall(ResourceCall):
     for the specific call.
     """
 
-    __ENDPOINT_TEMPLATE = "/manage/v2/servers/{}/properties"
+    _ENDPOINT_TEMPLATE = "/manage/v2/servers/{}/properties"
 
-    __GROUP_ID_PARAM = "group-id"
+    _GROUP_ID_PARAM = "group-id"
 
     def __init__(
             self,
@@ -130,7 +130,7 @@ class ServerPropertiesPutCall(ResourceCall):
         body : str | dict
             A database properties in XML or JSON format.
         """
-        ServerPropertiesPutCall.__validate_params(body)
+        self._validate_params(body)
         content_type = utils.get_content_type_header_for_data(body)
         if content_type == constants.HEADER_JSON and isinstance(body, str):
             body = json.loads(body)
@@ -138,7 +138,7 @@ class ServerPropertiesPutCall(ResourceCall):
                          content_type=content_type,
                          body=body)
         self.__server = server
-        self.add_param(ServerPropertiesPutCall.__GROUP_ID_PARAM, group_id)
+        self.add_param(self._GROUP_ID_PARAM, group_id)
 
     def endpoint(
             self,
@@ -150,10 +150,10 @@ class ServerPropertiesPutCall(ResourceCall):
         str
             A Server Properties call endpoint
         """
-        return ServerPropertiesPutCall.__ENDPOINT_TEMPLATE.format(self.__server)
+        return self._ENDPOINT_TEMPLATE.format(self.__server)
 
     @classmethod
-    def __validate_params(
+    def _validate_params(
             cls,
             body: str | dict,
     ):

@@ -43,16 +43,16 @@ class ForestsGetCall(ResourceCall):
 
     ENDPOINT = "/manage/v2/forests"
 
-    __FORMAT_PARAM = "format"
-    __VIEW_PARAM = "view"
-    __DATABASE_ID_PARAM = "database-id"
-    __GROUP_ID_PARAM = "group-id"
-    __HOST_ID_PARAM = "host-id"
-    __FULL_REFS_PARAM = "fullrefs"
+    _FORMAT_PARAM = "format"
+    _VIEW_PARAM = "view"
+    _DATABASE_ID_PARAM = "database-id"
+    _GROUP_ID_PARAM = "group-id"
+    _HOST_ID_PARAM = "host-id"
+    _FULL_REFS_PARAM = "fullrefs"
 
-    __SUPPORTED_FORMATS = ["xml", "json", "html"]
-    __SUPPORTED_VIEWS = ["describe", "default", "status", "metrics", "schema",
-                         "storage", "properties-schema"]
+    _SUPPORTED_FORMATS = ["xml", "json", "html"]
+    _SUPPORTED_VIEWS = ["describe", "default", "status", "metrics", "schema",
+                        "storage", "properties-schema"]
 
     def __init__(
             self,
@@ -89,18 +89,18 @@ class ForestsGetCall(ResourceCall):
         """
         data_format = data_format if data_format is not None else "xml"
         view = view if view is not None else "default"
-        ForestsGetCall.__validate_params(data_format, view)
+        self._validate_params(data_format, view)
 
         super().__init__(method="GET",
                          accept=utils.get_accept_header_for_format(data_format))
         if full_refs is not None:
             full_refs = str(full_refs).lower()
-        self.add_param(ForestsGetCall.__FORMAT_PARAM, data_format)
-        self.add_param(ForestsGetCall.__VIEW_PARAM, view)
-        self.add_param(ForestsGetCall.__DATABASE_ID_PARAM, database)
-        self.add_param(ForestsGetCall.__GROUP_ID_PARAM, group)
-        self.add_param(ForestsGetCall.__HOST_ID_PARAM, host)
-        self.add_param(ForestsGetCall.__FULL_REFS_PARAM, full_refs)
+        self.add_param(self._FORMAT_PARAM, data_format)
+        self.add_param(self._VIEW_PARAM, view)
+        self.add_param(self._DATABASE_ID_PARAM, database)
+        self.add_param(self._GROUP_ID_PARAM, group)
+        self.add_param(self._HOST_ID_PARAM, host)
+        self.add_param(self._FULL_REFS_PARAM, full_refs)
 
     def endpoint(
             self,
@@ -112,20 +112,20 @@ class ForestsGetCall(ResourceCall):
         str
             A Forests call endpoint
         """
-        return ForestsGetCall.ENDPOINT
+        return self.ENDPOINT
 
     @classmethod
-    def __validate_params(
+    def _validate_params(
             cls,
             data_format: str,
             view: str,
     ):
-        if data_format not in cls.__SUPPORTED_FORMATS:
-            joined_supported_formats = ", ".join(cls.__SUPPORTED_FORMATS)
+        if data_format not in cls._SUPPORTED_FORMATS:
+            joined_supported_formats = ", ".join(cls._SUPPORTED_FORMATS)
             msg = f"The supported formats are: {joined_supported_formats}"
             raise exceptions.WrongParametersError(msg)
-        if view not in cls.__SUPPORTED_VIEWS:
-            joined_supported_views = ", ".join(cls.__SUPPORTED_VIEWS)
+        if view not in cls._SUPPORTED_VIEWS:
+            joined_supported_views = ", ".join(cls._SUPPORTED_VIEWS)
             msg = f"The supported views are: {joined_supported_views}"
             raise exceptions.WrongParametersError(msg)
 
@@ -154,7 +154,7 @@ class ForestsPostCall(ResourceCall):
 
     ENDPOINT = "/manage/v2/forests"
 
-    __WAIT_FOR_FOREST_TO_MOUNT_PARAM = "wait-for-forest-to-mount"
+    _WAIT_FOR_FOREST_TO_MOUNT_PARAM = "wait-for-forest-to-mount"
 
     def __init__(
             self,
@@ -171,7 +171,7 @@ class ForestsPostCall(ResourceCall):
             Whether to wait for the new forest to mount before sending a response
             to this request. Allowed values: true (default) or false.
         """
-        ForestsPostCall.__validate_params(body)
+        self._validate_params(body)
         content_type = utils.get_content_type_header_for_data(body)
         if content_type == constants.HEADER_JSON and isinstance(body, str):
             body = json.loads(body)
@@ -180,7 +180,7 @@ class ForestsPostCall(ResourceCall):
                          body=body)
         if wait_for_forest_to_mount is not None:
             wait_for_forest_to_mount = str(wait_for_forest_to_mount).lower()
-        self.add_param(ForestsPostCall.__WAIT_FOR_FOREST_TO_MOUNT_PARAM,
+        self.add_param(self._WAIT_FOR_FOREST_TO_MOUNT_PARAM,
                        wait_for_forest_to_mount)
 
     def endpoint(
@@ -193,10 +193,10 @@ class ForestsPostCall(ResourceCall):
         str
             A Forests call endpoint
         """
-        return ForestsPostCall.ENDPOINT
+        return self.ENDPOINT
 
     @classmethod
-    def __validate_params(
+    def _validate_params(
             cls,
             body: str | dict,
     ):
@@ -240,7 +240,7 @@ class ForestsPutCall(ResourceCall):
         body : str | dict
             A database properties in XML or JSON format.
         """
-        ForestsPutCall.__validate_params(body)
+        self._validate_params(body)
         content_type = utils.get_content_type_header_for_data(body)
         if content_type == constants.HEADER_JSON and isinstance(body, str):
             body = json.loads(body)
@@ -258,10 +258,10 @@ class ForestsPutCall(ResourceCall):
         str
             A Forests call endpoint
         """
-        return ForestsPostCall.ENDPOINT
+        return self.ENDPOINT
 
     @classmethod
-    def __validate_params(
+    def _validate_params(
             cls,
             body: str | dict,
     ):

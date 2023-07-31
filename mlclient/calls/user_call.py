@@ -28,13 +28,13 @@ class UserGetCall(ResourceCall):
     for the specific call.
     """
 
-    __ENDPOINT_TEMPLATE = "/manage/v2/users/{}"
+    _ENDPOINT_TEMPLATE = "/manage/v2/users/{}"
 
-    __FORMAT_PARAM = "format"
-    __VIEW_PARAM = "view"
+    _FORMAT_PARAM = "format"
+    _VIEW_PARAM = "view"
 
-    __SUPPORTED_FORMATS = ["xml", "json", "html"]
-    __SUPPORTED_VIEWS = ["describe", "default"]
+    _SUPPORTED_FORMATS = ["xml", "json", "html"]
+    _SUPPORTED_VIEWS = ["describe", "default"]
 
     def __init__(
             self,
@@ -56,13 +56,13 @@ class UserGetCall(ResourceCall):
         """
         data_format = data_format if data_format is not None else "xml"
         view = view if view is not None else "default"
-        UserGetCall.__validate_params(data_format, view)
+        self._validate_params(data_format, view)
 
         super().__init__(method="GET",
                          accept=utils.get_accept_header_for_format(data_format))
         self.__user = user
-        self.add_param(UserGetCall.__FORMAT_PARAM, data_format)
-        self.add_param(UserGetCall.__VIEW_PARAM, view)
+        self.add_param(self._FORMAT_PARAM, data_format)
+        self.add_param(self._VIEW_PARAM, view)
 
     def endpoint(
             self,
@@ -74,20 +74,20 @@ class UserGetCall(ResourceCall):
         str
             An User call endpoint
         """
-        return UserGetCall.__ENDPOINT_TEMPLATE.format(self.__user)
+        return self._ENDPOINT_TEMPLATE.format(self.__user)
 
     @classmethod
-    def __validate_params(
+    def _validate_params(
             cls,
             data_format: str,
             view: str,
     ):
-        if data_format not in cls.__SUPPORTED_FORMATS:
-            joined_supported_formats = ", ".join(cls.__SUPPORTED_FORMATS)
+        if data_format not in cls._SUPPORTED_FORMATS:
+            joined_supported_formats = ", ".join(cls._SUPPORTED_FORMATS)
             msg = f"The supported formats are: {joined_supported_formats}"
             raise exceptions.WrongParametersError(msg)
-        if view not in cls.__SUPPORTED_VIEWS:
-            joined_supported_views = ", ".join(cls.__SUPPORTED_VIEWS)
+        if view not in cls._SUPPORTED_VIEWS:
+            joined_supported_views = ", ".join(cls._SUPPORTED_VIEWS)
             msg = f"The supported views are: {joined_supported_views}"
             raise exceptions.WrongParametersError(msg)
 
@@ -108,7 +108,7 @@ class UserDeleteCall(ResourceCall):
     for the specific call.
     """
 
-    __ENDPOINT_TEMPLATE = "/manage/v2/users/{}"
+    _ENDPOINT_TEMPLATE = "/manage/v2/users/{}"
 
     def __init__(
             self,
@@ -134,4 +134,4 @@ class UserDeleteCall(ResourceCall):
         str
             An User call endpoint
         """
-        return UserDeleteCall.__ENDPOINT_TEMPLATE.format(self.__user)
+        return self._ENDPOINT_TEMPLATE.format(self.__user)

@@ -33,11 +33,11 @@ class DatabasePropertiesGetCall(ResourceCall):
     for the specific call.
     """
 
-    __ENDPOINT_TEMPLATE = "/manage/v2/databases/{}/properties"
+    _ENDPOINT_TEMPLATE = "/manage/v2/databases/{}/properties"
 
-    __FORMAT_PARAM = "format"
+    _FORMAT_PARAM = "format"
 
-    __SUPPORTED_FORMATS = ["xml", "json", "html"]
+    _SUPPORTED_FORMATS = ["xml", "json", "html"]
 
     def __init__(
             self,
@@ -55,12 +55,12 @@ class DatabasePropertiesGetCall(ResourceCall):
             This parameter overrides the Accept header if both are present.
         """
         data_format = data_format if data_format is not None else "xml"
-        DatabasePropertiesGetCall.__validate_params(data_format)
+        self._validate_params(data_format)
 
         super().__init__(method="GET",
                          accept=utils.get_accept_header_for_format(data_format))
         self.__database = database
-        self.add_param(DatabasePropertiesGetCall.__FORMAT_PARAM, data_format)
+        self.add_param(self._FORMAT_PARAM, data_format)
 
     def endpoint(
             self,
@@ -72,15 +72,15 @@ class DatabasePropertiesGetCall(ResourceCall):
         str
             A Database Properties call endpoint
         """
-        return DatabasePropertiesGetCall.__ENDPOINT_TEMPLATE.format(self.__database)
+        return self._ENDPOINT_TEMPLATE.format(self.__database)
 
     @classmethod
-    def __validate_params(
+    def _validate_params(
             cls,
             data_format: str,
     ):
-        if data_format not in cls.__SUPPORTED_FORMATS:
-            joined_supported_formats = ", ".join(cls.__SUPPORTED_FORMATS)
+        if data_format not in cls._SUPPORTED_FORMATS:
+            joined_supported_formats = ", ".join(cls._SUPPORTED_FORMATS)
             msg = f"The supported formats are: {joined_supported_formats}"
             raise exceptions.WrongParametersError(msg)
 
@@ -104,7 +104,7 @@ class DatabasePropertiesPutCall(ResourceCall):
     for the specific call.
     """
 
-    __ENDPOINT_TEMPLATE = "/manage/v2/databases/{}/properties"
+    _ENDPOINT_TEMPLATE = "/manage/v2/databases/{}/properties"
 
     def __init__(
             self,
@@ -120,7 +120,7 @@ class DatabasePropertiesPutCall(ResourceCall):
         body : str | dict
             A database properties in XML or JSON format.
         """
-        DatabasePropertiesPutCall.__validate_params(body)
+        self.__validate_params(body)
         content_type = utils.get_content_type_header_for_data(body)
         if content_type == constants.HEADER_JSON and isinstance(body, str):
             body = json.loads(body)
@@ -139,7 +139,7 @@ class DatabasePropertiesPutCall(ResourceCall):
         str
             A Database Properties call endpoint
         """
-        return DatabasePropertiesPutCall.__ENDPOINT_TEMPLATE.format(self.__database)
+        return self._ENDPOINT_TEMPLATE.format(self.__database)
 
     @classmethod
     def __validate_params(

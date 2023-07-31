@@ -32,11 +32,11 @@ class RolePropertiesGetCall(ResourceCall):
     for the specific call.
     """
 
-    __ENDPOINT_TEMPLATE = "/manage/v2/roles/{}/properties"
+    _ENDPOINT_TEMPLATE = "/manage/v2/roles/{}/properties"
 
-    __FORMAT_PARAM = "format"
+    _FORMAT_PARAM = "format"
 
-    __SUPPORTED_FORMATS = ["xml", "json", "html"]
+    _SUPPORTED_FORMATS = ["xml", "json", "html"]
 
     def __init__(
             self,
@@ -54,12 +54,12 @@ class RolePropertiesGetCall(ResourceCall):
             This parameter overrides the Accept header if both are present.
         """
         data_format = data_format if data_format is not None else "xml"
-        RolePropertiesGetCall.__validate_params(data_format)
+        self._validate_params(data_format)
 
         super().__init__(method="GET",
                          accept=utils.get_accept_header_for_format(data_format))
         self.__role = role
-        self.add_param(RolePropertiesGetCall.__FORMAT_PARAM, data_format)
+        self.add_param(self._FORMAT_PARAM, data_format)
 
     def endpoint(
             self,
@@ -71,15 +71,15 @@ class RolePropertiesGetCall(ResourceCall):
         str
             A Role Properties call endpoint
         """
-        return RolePropertiesGetCall.__ENDPOINT_TEMPLATE.format(self.__role)
+        return self._ENDPOINT_TEMPLATE.format(self.__role)
 
     @classmethod
-    def __validate_params(
+    def _validate_params(
             cls,
             data_format: str,
     ):
-        if data_format not in cls.__SUPPORTED_FORMATS:
-            joined_supported_formats = ", ".join(cls.__SUPPORTED_FORMATS)
+        if data_format not in cls._SUPPORTED_FORMATS:
+            joined_supported_formats = ", ".join(cls._SUPPORTED_FORMATS)
             msg = f"The supported formats are: {joined_supported_formats}"
             raise exceptions.WrongParametersError(msg)
 
@@ -101,7 +101,7 @@ class RolePropertiesPutCall(ResourceCall):
     for the specific call.
     """
 
-    __ENDPOINT_TEMPLATE = "/manage/v2/roles/{}/properties"
+    _ENDPOINT_TEMPLATE = "/manage/v2/roles/{}/properties"
 
     def __init__(
             self,
@@ -117,7 +117,7 @@ class RolePropertiesPutCall(ResourceCall):
         body : str | dict
             A role properties in XML or JSON format.
         """
-        RolePropertiesPutCall.__validate_params(body)
+        self._validate_params(body)
         content_type = utils.get_content_type_header_for_data(body)
         if content_type == constants.HEADER_JSON and isinstance(body, str):
             body = json.loads(body)
@@ -136,10 +136,10 @@ class RolePropertiesPutCall(ResourceCall):
         str
             A Role Properties call endpoint
         """
-        return RolePropertiesPutCall.__ENDPOINT_TEMPLATE.format(self.__role)
+        return self._ENDPOINT_TEMPLATE.format(self.__role)
 
     @classmethod
-    def __validate_params(
+    def _validate_params(
             cls,
             body: str | dict,
     ):

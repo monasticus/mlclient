@@ -35,14 +35,14 @@ class DatabaseGetCall(ResourceCall):
     for the specific call.
     """
 
-    __ENDPOINT_TEMPLATE = "/manage/v2/databases/{}"
+    _ENDPOINT_TEMPLATE = "/manage/v2/databases/{}"
 
-    __FORMAT_PARAM = "format"
-    __VIEW_PARAM = "view"
+    _FORMAT_PARAM = "format"
+    _VIEW_PARAM = "view"
 
-    __SUPPORTED_FORMATS = ["xml", "json", "html"]
-    __SUPPORTED_VIEWS = ["describe", "default", "config", "counts", "edit",
-                         "package", "status", "forest-storage", "properties-schema"]
+    _SUPPORTED_FORMATS = ["xml", "json", "html"]
+    _SUPPORTED_VIEWS = ["describe", "default", "config", "counts", "edit",
+                        "package", "status", "forest-storage", "properties-schema"]
 
     def __init__(
             self,
@@ -66,13 +66,13 @@ class DatabaseGetCall(ResourceCall):
         """
         data_format = data_format if data_format is not None else "xml"
         view = view if view is not None else "default"
-        DatabaseGetCall.__validate_params(data_format, view)
+        self._validate_params(data_format, view)
 
         super().__init__(method="GET",
                          accept=utils.get_accept_header_for_format(data_format))
         self.__database = database
-        self.add_param(DatabaseGetCall.__FORMAT_PARAM, data_format)
-        self.add_param(DatabaseGetCall.__VIEW_PARAM, view)
+        self.add_param(self._FORMAT_PARAM, data_format)
+        self.add_param(self._VIEW_PARAM, view)
 
     def endpoint(
             self,
@@ -84,20 +84,20 @@ class DatabaseGetCall(ResourceCall):
         str
             A Database call endpoint
         """
-        return DatabaseGetCall.__ENDPOINT_TEMPLATE.format(self.__database)
+        return self._ENDPOINT_TEMPLATE.format(self.__database)
 
     @classmethod
-    def __validate_params(
+    def _validate_params(
             cls,
             data_format: str,
             view: str,
     ):
-        if data_format not in cls.__SUPPORTED_FORMATS:
-            joined_supported_formats = ", ".join(cls.__SUPPORTED_FORMATS)
+        if data_format not in cls._SUPPORTED_FORMATS:
+            joined_supported_formats = ", ".join(cls._SUPPORTED_FORMATS)
             msg = f"The supported formats are: {joined_supported_formats}"
             raise exceptions.WrongParametersError(msg)
-        if view not in cls.__SUPPORTED_VIEWS:
-            joined_supported_views = ", ".join(cls.__SUPPORTED_VIEWS)
+        if view not in cls._SUPPORTED_VIEWS:
+            joined_supported_views = ", ".join(cls._SUPPORTED_VIEWS)
             msg = f"The supported views are: {joined_supported_views}"
             raise exceptions.WrongParametersError(msg)
 
@@ -121,7 +121,7 @@ class DatabasePostCall(ResourceCall):
     for the specific call.
     """
 
-    __ENDPOINT_TEMPLATE = "/manage/v2/databases/{}"
+    _ENDPOINT_TEMPLATE = "/manage/v2/databases/{}"
 
     def __init__(
             self,
@@ -137,7 +137,7 @@ class DatabasePostCall(ResourceCall):
         body : str | dict
             A database properties in XML or JSON format.
         """
-        DatabasePostCall.__validate_params(body)
+        self._validate_params(body)
         content_type = utils.get_content_type_header_for_data(body)
         if content_type == constants.HEADER_JSON and isinstance(body, str):
             body = json.loads(body)
@@ -156,10 +156,10 @@ class DatabasePostCall(ResourceCall):
         str
             A Database call endpoint
         """
-        return DatabasePostCall.__ENDPOINT_TEMPLATE.format(self.__database)
+        return self._ENDPOINT_TEMPLATE.format(self.__database)
 
     @classmethod
-    def __validate_params(
+    def _validate_params(
             cls,
             body: str | dict,
     ):
@@ -185,11 +185,11 @@ class DatabaseDeleteCall(ResourceCall):
     for the specific call.
     """
 
-    __ENDPOINT_TEMPLATE = "/manage/v2/databases/{}"
+    _ENDPOINT_TEMPLATE = "/manage/v2/databases/{}"
 
-    __FOREST_DELETE_PARAM = "forest-delete"
+    _FOREST_DELETE_PARAM = "forest-delete"
 
-    __SUPPORTED_FOREST_DELETE_OPTS = ["configuration", "data"]
+    _SUPPORTED_FOREST_DELETE_OPTS = ["configuration", "data"]
 
     def __init__(
             self,
@@ -209,9 +209,9 @@ class DatabaseDeleteCall(ResourceCall):
             but public forest data will remain.
             If "data" is specified, the forest configuration and data will be removed.
         """
-        DatabaseDeleteCall.__validate_params(forest_delete)
+        self._validate_params(forest_delete)
         super().__init__(method=constants.METHOD_DELETE)
-        self.add_param(DatabaseDeleteCall.__FOREST_DELETE_PARAM, forest_delete)
+        self.add_param(self._FOREST_DELETE_PARAM, forest_delete)
         self.__database = database
 
     def endpoint(
@@ -224,14 +224,14 @@ class DatabaseDeleteCall(ResourceCall):
         str
             A Database call endpoint
         """
-        return DatabaseDeleteCall.__ENDPOINT_TEMPLATE.format(self.__database)
+        return self._ENDPOINT_TEMPLATE.format(self.__database)
 
     @classmethod
-    def __validate_params(
+    def _validate_params(
             cls,
             forest_delete: str,
     ):
-        if forest_delete and forest_delete not in cls.__SUPPORTED_FOREST_DELETE_OPTS:
-            joined_supported_opts = ", ".join(cls.__SUPPORTED_FOREST_DELETE_OPTS)
+        if forest_delete and forest_delete not in cls._SUPPORTED_FOREST_DELETE_OPTS:
+            joined_supported_opts = ", ".join(cls._SUPPORTED_FOREST_DELETE_OPTS)
             msg = f"The supported forest_delete options are: {joined_supported_opts}"
             raise exceptions.WrongParametersError(msg)

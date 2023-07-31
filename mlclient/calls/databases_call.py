@@ -38,12 +38,12 @@ class DatabasesGetCall(ResourceCall):
 
     ENDPOINT = "/manage/v2/databases"
 
-    __FORMAT_PARAM = "format"
-    __VIEW_PARAM = "view"
+    _FORMAT_PARAM = "format"
+    _VIEW_PARAM = "view"
 
-    __SUPPORTED_FORMATS = ["xml", "json", "html"]
-    __SUPPORTED_VIEWS = ["describe", "default", "metrics", "package", "schema",
-                         "properties-schema"]
+    _SUPPORTED_FORMATS = ["xml", "json", "html"]
+    _SUPPORTED_VIEWS = ["describe", "default", "metrics", "package", "schema",
+                        "properties-schema"]
 
     def __init__(
             self,
@@ -62,12 +62,12 @@ class DatabasesGetCall(ResourceCall):
         """
         data_format = data_format if data_format is not None else "xml"
         view = view if view is not None else "default"
-        DatabasesGetCall.__validate_params(data_format, view)
+        self._validate_params(data_format, view)
 
         super().__init__(method="GET",
                          accept=utils.get_accept_header_for_format(data_format))
-        self.add_param(DatabasesGetCall.__FORMAT_PARAM, data_format)
-        self.add_param(DatabasesGetCall.__VIEW_PARAM, view)
+        self.add_param(self._FORMAT_PARAM, data_format)
+        self.add_param(self._VIEW_PARAM, view)
 
     def endpoint(
             self,
@@ -79,20 +79,20 @@ class DatabasesGetCall(ResourceCall):
         str
             A Databases call endpoint
         """
-        return DatabasesGetCall.ENDPOINT
+        return self.ENDPOINT
 
     @classmethod
-    def __validate_params(
+    def _validate_params(
             cls,
             data_format: str,
             view: str,
     ):
-        if data_format not in cls.__SUPPORTED_FORMATS:
-            joined_supported_formats = ", ".join(cls.__SUPPORTED_FORMATS)
+        if data_format not in cls._SUPPORTED_FORMATS:
+            joined_supported_formats = ", ".join(cls._SUPPORTED_FORMATS)
             msg = f"The supported formats are: {joined_supported_formats}"
             raise exceptions.WrongParametersError(msg)
-        if view not in cls.__SUPPORTED_VIEWS:
-            joined_supported_views = ", ".join(cls.__SUPPORTED_VIEWS)
+        if view not in cls._SUPPORTED_VIEWS:
+            joined_supported_views = ", ".join(cls._SUPPORTED_VIEWS)
             msg = f"The supported views are: {joined_supported_views}"
             raise exceptions.WrongParametersError(msg)
 
@@ -131,7 +131,7 @@ class DatabasesPostCall(ResourceCall):
         body : str | dict
             A database properties in XML or JSON format.
         """
-        DatabasesPostCall.__validate_params(body)
+        self._validate_params(body)
         content_type = utils.get_content_type_header_for_data(body)
         if content_type == constants.HEADER_JSON and isinstance(body, str):
             body = json.loads(body)
@@ -149,10 +149,10 @@ class DatabasesPostCall(ResourceCall):
         str
             A Databases call endpoint
         """
-        return DatabasesPostCall.ENDPOINT
+        return self.ENDPOINT
 
     @classmethod
-    def __validate_params(
+    def _validate_params(
             cls,
             body: str | dict,
     ):

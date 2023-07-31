@@ -28,13 +28,13 @@ class RoleGetCall(ResourceCall):
     for the specific call.
     """
 
-    __ENDPOINT_TEMPLATE = "/manage/v2/roles/{}"
+    _ENDPOINT_TEMPLATE = "/manage/v2/roles/{}"
 
-    __FORMAT_PARAM = "format"
-    __VIEW_PARAM = "view"
+    _FORMAT_PARAM = "format"
+    _VIEW_PARAM = "view"
 
-    __SUPPORTED_FORMATS = ["xml", "json", "html"]
-    __SUPPORTED_VIEWS = ["describe", "default"]
+    _SUPPORTED_FORMATS = ["xml", "json", "html"]
+    _SUPPORTED_VIEWS = ["describe", "default"]
 
     def __init__(
             self,
@@ -56,13 +56,13 @@ class RoleGetCall(ResourceCall):
         """
         data_format = data_format if data_format is not None else "xml"
         view = view if view is not None else "default"
-        RoleGetCall.__validate_params(data_format, view)
+        self._validate_params(data_format, view)
 
         super().__init__(method="GET",
                          accept=utils.get_accept_header_for_format(data_format))
         self.__role = role
-        self.add_param(RoleGetCall.__FORMAT_PARAM, data_format)
-        self.add_param(RoleGetCall.__VIEW_PARAM, view)
+        self.add_param(self._FORMAT_PARAM, data_format)
+        self.add_param(self._VIEW_PARAM, view)
 
     def endpoint(
             self,
@@ -74,20 +74,20 @@ class RoleGetCall(ResourceCall):
         str
             A Role call endpoint
         """
-        return RoleGetCall.__ENDPOINT_TEMPLATE.format(self.__role)
+        return self._ENDPOINT_TEMPLATE.format(self.__role)
 
     @classmethod
-    def __validate_params(
+    def _validate_params(
             cls,
             data_format: str,
             view: str,
     ):
-        if data_format not in cls.__SUPPORTED_FORMATS:
-            joined_supported_formats = ", ".join(cls.__SUPPORTED_FORMATS)
+        if data_format not in cls._SUPPORTED_FORMATS:
+            joined_supported_formats = ", ".join(cls._SUPPORTED_FORMATS)
             msg = f"The supported formats are: {joined_supported_formats}"
             raise exceptions.WrongParametersError(msg)
-        if view not in cls.__SUPPORTED_VIEWS:
-            joined_supported_views = ", ".join(cls.__SUPPORTED_VIEWS)
+        if view not in cls._SUPPORTED_VIEWS:
+            joined_supported_views = ", ".join(cls._SUPPORTED_VIEWS)
             msg = f"The supported views are: {joined_supported_views}"
             raise exceptions.WrongParametersError(msg)
 
@@ -108,7 +108,7 @@ class RoleDeleteCall(ResourceCall):
     for the specific call.
     """
 
-    __ENDPOINT_TEMPLATE = "/manage/v2/roles/{}"
+    _ENDPOINT_TEMPLATE = "/manage/v2/roles/{}"
 
     def __init__(
             self,
@@ -134,4 +134,4 @@ class RoleDeleteCall(ResourceCall):
         str
             A Role call endpoint
         """
-        return RoleDeleteCall.__ENDPOINT_TEMPLATE.format(self.__role)
+        return self._ENDPOINT_TEMPLATE.format(self.__role)

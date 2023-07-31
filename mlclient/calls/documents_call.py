@@ -28,19 +28,19 @@ class DocumentsGetCall(ResourceCall):
 
     ENDPOINT = "/v1/documents"
 
-    __URI_PARAM = "uri"
-    __DATABASE_PARAM = "database"
-    __CATEGORY_PARAM = "category"
-    __FORMAT_PARAM = "format"
-    __TIMESTAMP_PARAM = "timestamp"
-    __TRANSFORM_PARAM = "transform"
-    __TXID_PARAM = "txid"
-    __TRANS_PARAM_PREFIX = "trans:"
+    _URI_PARAM = "uri"
+    _DATABASE_PARAM = "database"
+    _CATEGORY_PARAM = "category"
+    _FORMAT_PARAM = "format"
+    _TIMESTAMP_PARAM = "timestamp"
+    _TRANSFORM_PARAM = "transform"
+    _TXID_PARAM = "txid"
+    _TRANS_PARAM_PREFIX = "trans:"
 
-    __SUPPORTED_FORMATS = ["binary", "json", "text", "xml"]
-    __SUPPORTED_METADATA_FORMATS = ["json", "xml"]
-    __SUPPORTED_CATEGORIES = ["content", "metadata", "metadata-values", "collections",
-                              "permissions", "properties", "quality"]
+    _SUPPORTED_FORMATS = ["binary", "json", "text", "xml"]
+    _SUPPORTED_METADATA_FORMATS = ["json", "xml"]
+    _SUPPORTED_CATEGORIES = ["content", "metadata", "metadata-values", "collections",
+                             "permissions", "properties", "quality"]
 
     def __init__(
             self,
@@ -93,21 +93,21 @@ class DocumentsGetCall(ResourceCall):
             to service this request. Use the /transactions service to create and manage
             multi-statement transactions.
         """
-        DocumentsGetCall.__validate_params(category, data_format)
+        self._validate_params(category, data_format)
 
         super().__init__(method="GET")
-        accept_header = self.__get_accept_header(uri, category, data_format)
+        accept_header = self._get_accept_header(uri, category, data_format)
         self.add_header(constants.HEADER_NAME_ACCEPT, accept_header)
-        self.add_param(DocumentsGetCall.__URI_PARAM, uri)
-        self.add_param(DocumentsGetCall.__DATABASE_PARAM, database)
-        self.add_param(DocumentsGetCall.__CATEGORY_PARAM, category)
-        self.add_param(DocumentsGetCall.__FORMAT_PARAM, data_format)
-        self.add_param(DocumentsGetCall.__TIMESTAMP_PARAM, timestamp)
-        self.add_param(DocumentsGetCall.__TRANSFORM_PARAM, transform)
-        self.add_param(DocumentsGetCall.__TXID_PARAM, txid)
+        self.add_param(self._URI_PARAM, uri)
+        self.add_param(self._DATABASE_PARAM, database)
+        self.add_param(self._CATEGORY_PARAM, category)
+        self.add_param(self._FORMAT_PARAM, data_format)
+        self.add_param(self._TIMESTAMP_PARAM, timestamp)
+        self.add_param(self._TRANSFORM_PARAM, transform)
+        self.add_param(self._TXID_PARAM, txid)
         if transform_params:
             for trans_param_name, value in transform_params.items():
-                param = DocumentsGetCall.__TRANS_PARAM_PREFIX + trans_param_name
+                param = self._TRANS_PARAM_PREFIX + trans_param_name
                 self.add_param(param, value)
 
     def endpoint(
@@ -120,30 +120,30 @@ class DocumentsGetCall(ResourceCall):
         str
             A Documents call endpoint
         """
-        return DocumentsGetCall.ENDPOINT
+        return self.ENDPOINT
 
     @classmethod
-    def __validate_params(
+    def _validate_params(
             cls,
             category: str,
             data_format: str,
     ):
-        if category and category not in cls.__SUPPORTED_CATEGORIES:
-            joined_supported_categories = ", ".join(cls.__SUPPORTED_CATEGORIES)
+        if category and category not in cls._SUPPORTED_CATEGORIES:
+            joined_supported_categories = ", ".join(cls._SUPPORTED_CATEGORIES)
             msg = f"The supported categories are: {joined_supported_categories}"
             raise exceptions.WrongParametersError(msg)
-        if data_format and data_format not in cls.__SUPPORTED_FORMATS:
-            joined_supported_formats = ", ".join(cls.__SUPPORTED_FORMATS)
+        if data_format and data_format not in cls._SUPPORTED_FORMATS:
+            joined_supported_formats = ", ".join(cls._SUPPORTED_FORMATS)
             msg = f"The supported formats are: {joined_supported_formats}"
             raise exceptions.WrongParametersError(msg)
         if (category and category != "content" and
-                data_format and data_format not in cls.__SUPPORTED_METADATA_FORMATS):
-            joined_supported_formats = ", ".join(cls.__SUPPORTED_METADATA_FORMATS)
+                data_format and data_format not in cls._SUPPORTED_METADATA_FORMATS):
+            joined_supported_formats = ", ".join(cls._SUPPORTED_METADATA_FORMATS)
             msg = f"The supported metadata formats are: {joined_supported_formats}"
             raise exceptions.WrongParametersError(msg)
 
     @staticmethod
-    def __get_accept_header(
+    def _get_accept_header(
             uri: str | list,
             category: str,
             data_format: str,

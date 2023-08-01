@@ -20,6 +20,10 @@ jobs:
           MARKLOGIC_ADMIN_PASSWORD: admin
 
     steps:
+      - name: Sleep for 30 seconds
+        run: sleep 30s
+        shell: bash
+
       - uses: actions/checkout@v3
 
       - name: Set up Python ${{ matrix.python-version }}

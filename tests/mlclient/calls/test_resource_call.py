@@ -8,12 +8,12 @@ class ResourceCallTestImpl(ResourceCall):
         return "/impl-endpoint"
 
 
-# ResourceCall.endpoint()
+# ResourceCall.endpoint
 def test_endpoint():
     assert ResourceCallTestImpl().endpoint() == "/impl-endpoint"
 
 
-# ResourceCall.method()
+# ResourceCall.method
 def test_default_method():
     assert ResourceCallTestImpl().method() == "GET"
 
@@ -33,13 +33,14 @@ def test_method_encapsulation():
     assert call.method() == "GET"
 
 
-# params()
+# params
 def test_default_params():
     assert ResourceCallTestImpl().params() == {}
 
 
 def test_custom_params():
-    call_with_custom_param = ResourceCallTestImpl(params={"custom-param": "custom-value"})
+    call_with_custom_param = ResourceCallTestImpl(
+        params={"custom-param": "custom-value"})
     assert call_with_custom_param.params() == {"custom-param": "custom-value"}
 
 
@@ -54,46 +55,52 @@ def test_params_encapsulation():
     assert call.params() == {}
 
 
-# headers()
+# headers
 def test_default_headers():
     assert ResourceCallTestImpl().headers() == {}
 
 
 def test_custom_headers():
-    call_with_custom_header = ResourceCallTestImpl(headers={"custom-header": "custom-value"})
+    call_with_custom_header = ResourceCallTestImpl(
+        headers={"custom-header": "custom-value"})
     assert call_with_custom_header.headers() == {"custom-header": "custom-value"}
 
 
 def test_headers_with_accept():
-    call_with_accept = ResourceCallTestImpl(accept="application/xml")
+    call_with_accept = ResourceCallTestImpl(
+        accept="application/xml")
     assert call_with_accept.headers() == {"accept": "application/xml"}
 
 
 def test_headers_with_content_type():
-    call_with_content_type = ResourceCallTestImpl(content_type="application/xml")
+    call_with_content_type = ResourceCallTestImpl(
+        content_type="application/xml")
     assert call_with_content_type.headers() == {"content-type": "application/xml"}
 
 
 def test_mixed_headers():
-    call_with_mixed_headers = ResourceCallTestImpl(headers={"custom-header": "custom-value"},
-                                                   accept="application/xml",
-                                                   content_type="application/xml")
+    call_with_mixed_headers = ResourceCallTestImpl(
+        headers={"custom-header": "custom-value"},
+        accept="application/xml",
+        content_type="application/xml")
     assert call_with_mixed_headers.headers() == {
         "custom-header": "custom-value",
         "accept": "application/xml",
-        "content-type": "application/xml"
+        "content-type": "application/xml",
     }
 
 
 def test_headers_when_accept_exists_and_is_provided():
-    call_with_custom_header = ResourceCallTestImpl(headers={"accept": "application/xml"},
-                                                   accept="application/json")
+    call_with_custom_header = ResourceCallTestImpl(
+        headers={"accept": "application/xml"},
+        accept="application/json")
     assert call_with_custom_header.headers() == {"accept": "application/json"}
 
 
 def test_headers_when_content_type_exists_and_is_provided():
-    call_with_custom_header = ResourceCallTestImpl(headers={"content-type": "application/xml"},
-                                                   content_type="application/json")
+    call_with_custom_header = ResourceCallTestImpl(
+        headers={"content-type": "application/xml"},
+        content_type="application/json")
     assert call_with_custom_header.headers() == {"content-type": "application/json"}
 
 
@@ -108,7 +115,7 @@ def test_headers_encapsulation():
     assert call.headers() == {}
 
 
-# body()
+# body
 def test_default_body():
     assert not ResourceCallTestImpl().body()
 
@@ -143,7 +150,7 @@ def test_dict_body_encapsulation():
     assert call.body() == {}
 
 
-# add_param()
+# add_param
 def test_add_param():
     call = ResourceCallTestImpl()
     assert call.params() == {}
@@ -153,14 +160,15 @@ def test_add_param():
 
 
 def test_add_param_when_exists():
-    call = ResourceCallTestImpl(params={"custom-param": "custom-value-1"})
+    call = ResourceCallTestImpl(
+        params={"custom-param": "custom-value-1"})
     assert call.params() == {"custom-param": "custom-value-1"}
 
     call.add_param("custom-param", "custom-value-2")
     assert call.params() == {"custom-param": "custom-value-2"}
 
 
-# add_header()
+# add_header
 def test_add_header():
     call = ResourceCallTestImpl()
     assert call.headers() == {}
@@ -170,14 +178,15 @@ def test_add_header():
 
 
 def test_add_header_when_exists():
-    call = ResourceCallTestImpl(headers={"custom-header": "custom-value-1"})
+    call = ResourceCallTestImpl(
+        headers={"custom-header": "custom-value-1"})
     assert call.headers() == {"custom-header": "custom-value-1"}
 
     call.add_header("custom-header", "custom-value-2")
     assert call.headers() == {"custom-header": "custom-value-2"}
 
 
-# set_body()
+# set_body
 def test_set_body():
     call = ResourceCallTestImpl()
     assert call.body() is None

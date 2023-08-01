@@ -1,3 +1,11 @@
+"""The ML Eval Resource Call module.
+
+It exports 1 class:
+* EvalCall
+    A POST request to evaluate an ad-hoc query.
+"""
+from __future__ import annotations
+
 from json import dumps
 
 from mlclient import constants, exceptions
@@ -5,8 +13,10 @@ from mlclient.calls import ResourceCall
 
 
 class EvalCall(ResourceCall):
-    """
-    A ResourceCall implementation representing a single request to the /v1/eval REST Resource
+    """A POST request to evaluate an ad-hoc query.
+
+    A ResourceCall implementation representing a single request
+    to the /v1/eval REST Resource.
 
     Evaluate an ad-hoc query expressed using XQuery or server-side JavaScript.
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/POST/v1/eval
@@ -14,25 +24,33 @@ class EvalCall(ResourceCall):
     Attributes
     ----------
     ENDPOINT
-        a static constant storing the Eval endpoint value
+        A static constant storing the Eval endpoint value
 
     Methods
     -------
     All public methods are inherited from the ResourceCall abstract class.
-    This class implements the endpoint() abstract method to return an endpoint for the specific call.
+    This class implements the endpoint() abstract method to return an endpoint
+    for the specific call.
     """
 
-    ENDPOINT = "/v1/eval"
+    ENDPOINT: str = "/v1/eval"
 
-    __XQ_PARAM = "xquery"
-    __JS_PARAM = "javascript"
-    __VARS_PARAM = "vars"
-    __DATABASE_PARAM = "database"
-    __TXID_PARAM = "txid"
+    _XQ_PARAM: str = "xquery"
+    _JS_PARAM: str = "javascript"
+    _VARS_PARAM: str = "vars"
+    _DATABASE_PARAM: str = "database"
+    _TXID_PARAM: str = "txid"
 
-    def __init__(self, xquery: str = None, javascript: str = None, variables: dict = None,
-                 database: str = None, txid: str = None):
-        """
+    def __init__(
+            self,
+            xquery: str | None = None,
+            javascript: str | None = None,
+            variables: dict | None = None,
+            database: str | None = None,
+            txid: str | None = None,
+    ):
+        """Initialize EvalCall instance.
+
         Parameters
         ----------
         xquery : str
@@ -47,50 +65,63 @@ class EvalCall(ResourceCall):
             External variables to pass to the query during evaluation
         database
             Perform this operation on the named content database
-            instead of the default content database associated with the REST API instance.
-            The database can be identified by name or by database id.
+            instead of the default content database associated with the REST API
+            instance. The database can be identified by name or by database id.
         txid
             The transaction identifier of the multi-statement transaction
             in which to service this request.
         """
-
-        self.__validate_params(xquery, javascript)
+        self._validate_params(xquery, javascript)
 
         super().__init__(method=constants.METHOD_POST,
                          accept=constants.HEADER_MULTIPART_MIXED,
                          content_type=constants.HEADER_X_WWW_FORM_URLENCODED)
-        self.add_param(EvalCall.__DATABASE_PARAM, database)
-        self.add_param(EvalCall.__TXID_PARAM, txid)
-        self.set_body(self.__build_body(xquery, javascript, variables))
+        self.add_param(self._DATABASE_PARAM, database)
+        self.add_param(self._TXID_PARAM, txid)
+        self.set_body(self._build_body(xquery, javascript, variables))
 
-    def endpoint(self):
-        """Implementation of an abstract method returning an endpoint for the Eval call
+    def endpoint(
+            self,
+    ):
+        """Return an endpoint for the Eval call.
 
         Returns
         -------
         str
-            an Eval call endpoint
+            An Eval call endpoint
         """
+        return self.ENDPOINT
 
-        return EvalCall.ENDPOINT
-
-    @staticmethod
-    def __validate_params(xquery: str, javascript: str):
+    @classmethod
+    def _validate_params(
+            cls,
+            xquery: str,
+            javascript: str,
+    ):
         if not xquery and not javascript:
-            raise exceptions.WrongParameters("You must include either the xquery or the javascript parameter!")
-        elif xquery and javascript:
-            raise exceptions.WrongParameters("You cannot include both the xquery and the javascript parameter!")
+            msg = "You must include either the xquery or the javascript parameter!"
+            raise exceptions.WrongParametersError(msg)
+        if xquery and javascript:
+            msg = "You cannot include both the xquery and the javascript parameter!"
+            raise exceptions.WrongParametersError(msg)
 
-    @staticmethod
-    def __build_body(xquery: str, javascript: str, variables: dict):
-        code_lang = EvalCall.__XQ_PARAM if xquery else EvalCall.__JS_PARAM
-        code_to_eval = EvalCall.__normalize_code(xquery if xquery else javascript)
+    @classmethod
+    def _build_body(
+            cls,
+            xquery: str,
+            javascript: str,
+            variables: dict,
+    ):
+        code_lang = cls._XQ_PARAM if xquery else cls._JS_PARAM
+        code_to_eval = cls._normalize_code(xquery if xquery else javascript)
         body = {code_lang: code_to_eval}
         if variables:
-            body[EvalCall.__VARS_PARAM] = dumps(variables)
+            body[cls._VARS_PARAM] = dumps(variables)
         return body
 
     @staticmethod
-    def __normalize_code(code: str):
+    def _normalize_code(
+            code: str,
+    ):
         one_line_code = code.replace("\n", " ")
         return " ".join(one_line_code.split())

@@ -4,22 +4,27 @@ from mlclient import exceptions
 from mlclient.calls import DatabaseDeleteCall
 
 
-@pytest.fixture
+@pytest.fixture()
 def default_database_delete_call():
     """Returns an DatabaseDeleteCall instance"""
     return DatabaseDeleteCall(database="Documents")
 
 
 def test_validation_forest_delete_param():
-    with pytest.raises(exceptions.WrongParameters) as err:
+    with pytest.raises(exceptions.WrongParametersError) as err:
         DatabaseDeleteCall(database="Documents", forest_delete="X")
 
-    assert err.value.args[0] == "The supported forest_delete options are: configuration, data"
+    expected_msg = "The supported forest_delete options are: configuration, data"
+    assert err.value.args[0] == expected_msg
 
 
-def test_endpoint(default_database_delete_call):
-    assert DatabaseDeleteCall(database="1").endpoint() == "/manage/v2/databases/1"
-    assert DatabaseDeleteCall(database="Documents").endpoint() == "/manage/v2/databases/Documents"
+def test_endpoint():
+    expected__id_endpoint = "/manage/v2/databases/1"
+    expected__name_endpoint = "/manage/v2/databases/Documents"
+    assert DatabaseDeleteCall(
+        database="1").endpoint() == expected__id_endpoint
+    assert DatabaseDeleteCall(
+        database="Documents").endpoint() == expected__name_endpoint
 
 
 def test_method(default_database_delete_call):
@@ -33,7 +38,7 @@ def test_parameters(default_database_delete_call):
 def test_parameters_for_forest_delete():
     call = DatabaseDeleteCall(database="Documents", forest_delete="configuration")
     assert call.params() == {
-        "forest-delete": "configuration"
+        "forest-delete": "configuration",
     }
 
 
@@ -50,6 +55,6 @@ def test_fully_parametrized_call():
     assert call.method() == "DELETE"
     assert call.headers() == {}
     assert call.params() == {
-        "forest-delete": "data"
+        "forest-delete": "data",
     }
     assert call.body() is None

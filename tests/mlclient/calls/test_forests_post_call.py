@@ -4,29 +4,33 @@ from mlclient import exceptions
 from mlclient.calls import ForestsPostCall
 
 
-@pytest.fixture
+@pytest.fixture()
 def default_forests_post_call():
     """Returns a ForestsPostCall instance"""
     body = {
       "forest-name": "custom-forest",
       "host": "custom-host",
-      "database": "custom-database"
+      "database": "custom-database",
     }
     return ForestsPostCall(body=body)
 
 
 def test_validation_body_param():
-    with pytest.raises(exceptions.WrongParameters) as err:
+    with pytest.raises(exceptions.WrongParametersError) as err:
         ForestsPostCall(body=None)
 
-    assert err.value.args[0] == "No request body provided for POST /manage/v2/forests!"
+    expected_msg = ("No request body provided for "
+                    "POST /manage/v2/forests!")
+    assert err.value.args[0] == expected_msg
 
 
 def test_validation_blank_body_param():
-    with pytest.raises(exceptions.WrongParameters) as err:
+    with pytest.raises(exceptions.WrongParametersError) as err:
         ForestsPostCall(body=" \n")
 
-    assert err.value.args[0] == "No request body provided for POST /manage/v2/forests!"
+    expected_msg = ("No request body provided for "
+                    "POST /manage/v2/forests!")
+    assert err.value.args[0] == expected_msg
 
 
 def test_endpoint(default_forests_post_call):
@@ -46,25 +50,25 @@ def test_parameters(default_forests_post_call):
 def test_headers_for_dict_body():
     call = ForestsPostCall(body={"server-name": "custom-server"})
     assert call.headers() == {
-        "content-type": "application/json"
+        "content-type": "application/json",
     }
 
 
 def test_headers_for_stringified_dict_body():
     call = ForestsPostCall(body='{"server-name": "custom-server"}')
     assert call.headers() == {
-        "content-type": "application/json"
+        "content-type": "application/json",
     }
 
 
 def test_headers_for_xml_body():
-    body = '<forest-create xmlns="http://marklogic.com/manage">' \
-           '  <forest-name>custom-forest</forest-name>' \
-           '  <host>custom-host</host>' \
-           '</forest-create>'
+    body = ('<forest-create xmlns="http://marklogic.com/manage">'
+            '  <forest-name>custom-forest</forest-name>'
+            '  <host>custom-host</host>'
+            '</forest-create>')
     call = ForestsPostCall(body=body)
     assert call.headers() == {
-        "content-type": "application/xml"
+        "content-type": "application/xml",
     }
 
 
@@ -79,18 +83,19 @@ def test_dict_body():
 
 
 def test_stringified_dict_body():
-    call = ForestsPostCall(body='{"forest-name": "custom-forest", "host": "custom-host"}')
+    call = ForestsPostCall(
+        body='{"forest-name": "custom-forest", "host": "custom-host"}')
     assert call.body() == {
         "forest-name": "custom-forest",
-        "host": "custom-host"
+        "host": "custom-host",
     }
 
 
 def test_xml_body():
-    body = '<forest-create xmlns="http://marklogic.com/manage">' \
-           '  <forest-name>custom-forest</forest-name>' \
-           '  <host>custom-host</host>' \
-           '</forest-create>'
+    body = ('<forest-create xmlns="http://marklogic.com/manage">'
+            '  <forest-name>custom-forest</forest-name>'
+            '  <host>custom-host</host>'
+            '</forest-create>')
     call = ForestsPostCall(body=body)
     assert call.body() == body
 
@@ -99,15 +104,16 @@ def test_fully_parametrized_call():
     body = {
       "forest-name": "custom-forest",
       "host": "custom-host",
-      "database": "custom-database"
+      "database": "custom-database",
     }
-    call = ForestsPostCall(body=body,
-                           wait_for_forest_to_mount=False)
+    call = ForestsPostCall(
+        body=body,
+        wait_for_forest_to_mount=False)
     assert call.method() == "POST"
     assert call.headers() == {
-        "content-type": "application/json"
+        "content-type": "application/json",
     }
     assert call.params() == {
-        "wait-for-forest-to-mount": "false"
+        "wait-for-forest-to-mount": "false",
     }
     assert call.body() == body

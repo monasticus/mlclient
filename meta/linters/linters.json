@@ -1,0 +1,250 @@
+[
+  {
+    "prefix": "F",
+    "name": "Pyflakes"
+  },
+  {
+    "prefix": "",
+    "name": "pycodestyle",
+    "categories": [
+      {
+        "prefix": "E",
+        "name": "Error"
+      },
+      {
+        "prefix": "W",
+        "name": "Warning"
+      }
+    ]
+  },
+  {
+    "prefix": "C90",
+    "name": "mccabe"
+  },
+  {
+    "prefix": "I",
+    "name": "isort"
+  },
+  {
+    "prefix": "N",
+    "name": "pep8-naming"
+  },
+  {
+    "prefix": "D",
+    "name": "pydocstyle"
+  },
+  {
+    "prefix": "UP",
+    "name": "pyupgrade"
+  },
+  {
+    "prefix": "YTT",
+    "name": "flake8-2020"
+  },
+  {
+    "prefix": "ANN",
+    "name": "flake8-annotations"
+  },
+  {
+    "prefix": "ASYNC",
+    "name": "flake8-async"
+  },
+  {
+    "prefix": "S",
+    "name": "flake8-bandit"
+  },
+  {
+    "prefix": "BLE",
+    "name": "flake8-blind-except"
+  },
+  {
+    "prefix": "FBT",
+    "name": "flake8-boolean-trap"
+  },
+  {
+    "prefix": "B",
+    "name": "flake8-bugbear"
+  },
+  {
+    "prefix": "A",
+    "name": "flake8-builtins"
+  },
+  {
+    "prefix": "COM",
+    "name": "flake8-commas"
+  },
+  {
+    "prefix": "CPY",
+    "name": "flake8-copyright"
+  },
+  {
+    "prefix": "C4",
+    "name": "flake8-comprehensions"
+  },
+  {
+    "prefix": "DTZ",
+    "name": "flake8-datetimez"
+  },
+  {
+    "prefix": "T10",
+    "name": "flake8-debugger"
+  },
+  {
+    "prefix": "DJ",
+    "name": "flake8-django"
+  },
+  {
+    "prefix": "EM",
+    "name": "flake8-errmsg"
+  },
+  {
+    "prefix": "EXE",
+    "name": "flake8-executable"
+  },
+  {
+    "prefix": "FA",
+    "name": "flake8-future-annotations"
+  },
+  {
+    "prefix": "ISC",
+    "name": "flake8-implicit-str-concat"
+  },
+  {
+    "prefix": "ICN",
+    "name": "flake8-import-conventions"
+  },
+  {
+    "prefix": "G",
+    "name": "flake8-logging-format"
+  },
+  {
+    "prefix": "INP",
+    "name": "flake8-no-pep420"
+  },
+  {
+    "prefix": "PIE",
+    "name": "flake8-pie"
+  },
+  {
+    "prefix": "T20",
+    "name": "flake8-print"
+  },
+  {
+    "prefix": "PYI",
+    "name": "flake8-pyi"
+  },
+  {
+    "prefix": "PT",
+    "name": "flake8-pytest-style"
+  },
+  {
+    "prefix": "Q",
+    "name": "flake8-quotes"
+  },
+  {
+    "prefix": "RSE",
+    "name": "flake8-raise"
+  },
+  {
+    "prefix": "RET",
+    "name": "flake8-return"
+  },
+  {
+    "prefix": "SLF",
+    "name": "flake8-self"
+  },
+  {
+    "prefix": "SLOT",
+    "name": "flake8-slots"
+  },
+  {
+    "prefix": "SIM",
+    "name": "flake8-simplify"
+  },
+  {
+    "prefix": "TID",
+    "name": "flake8-tidy-imports"
+  },
+  {
+    "prefix": "TCH",
+    "name": "flake8-type-checking"
+  },
+  {
+    "prefix": "INT",
+    "name": "flake8-gettext"
+  },
+  {
+    "prefix": "ARG",
+    "name": "flake8-unused-arguments"
+  },
+  {
+    "prefix": "PTH",
+    "name": "flake8-use-pathlib"
+  },
+  {
+    "prefix": "TD",
+    "name": "flake8-todos"
+  },
+  {
+    "prefix": "FIX",
+    "name": "flake8-fixme"
+  },
+  {
+    "prefix": "ERA",
+    "name": "eradicate"
+  },
+  {
+    "prefix": "PD",
+    "name": "pandas-vet"
+  },
+  {
+    "prefix": "PGH",
+    "name": "pygrep-hooks"
+  },
+  {
+    "prefix": "PL",
+    "name": "Pylint",
+    "categories": [
+      {
+        "prefix": "PLC",
+        "name": "Convention"
+      },
+      {
+        "prefix": "PLE",
+        "name": "Error"
+      },
+      {
+        "prefix": "PLR",
+        "name": "Refactor"
+      },
+      {
+        "prefix": "PLW",
+        "name": "Warning"
+      }
+    ]
+  },
+  {
+    "prefix": "TRY",
+    "name": "tryceratops"
+  },
+  {
+    "prefix": "FLY",
+    "name": "flynt"
+  },
+  {
+    "prefix": "NPY",
+    "name": "NumPy-specific rules"
+  },
+  {
+    "prefix": "AIR",
+    "name": "Airflow"
+  },
+  {
+    "prefix": "PERF",
+    "name": "Perflint"
+  },
+  {
+    "prefix": "RUF",
+    "name": "Ruff-specific rules"
+  }
+]

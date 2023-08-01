@@ -4,24 +4,28 @@ from mlclient import exceptions
 from mlclient.calls import DatabasesPostCall
 
 
-@pytest.fixture
+@pytest.fixture()
 def default_databases_post_call():
     """Returns an DatabasesPostCall instance"""
     return DatabasesPostCall(body={"database-name": "custom-db"})
 
 
 def test_validation_body_param():
-    with pytest.raises(exceptions.WrongParameters) as err:
+    with pytest.raises(exceptions.WrongParametersError) as err:
         DatabasesPostCall(body=None)
 
-    assert err.value.args[0] == "No request body provided for POST /manage/v2/databases!"
+    expected_msg = ("No request body provided for "
+                    "POST /manage/v2/databases!")
+    assert err.value.args[0] == expected_msg
 
 
 def test_validation_blank_body_param():
-    with pytest.raises(exceptions.WrongParameters) as err:
+    with pytest.raises(exceptions.WrongParametersError) as err:
         DatabasesPostCall(body=" \n")
 
-    assert err.value.args[0] == "No request body provided for POST /manage/v2/databases!"
+    expected_msg = ("No request body provided for "
+                    "POST /manage/v2/databases!")
+    assert err.value.args[0] == expected_msg
 
 
 def test_endpoint(default_databases_post_call):
@@ -41,24 +45,24 @@ def test_parameters(default_databases_post_call):
 def test_headers_for_dict_body():
     call = DatabasesPostCall(body={"database-name": "custom-db"})
     assert call.headers() == {
-        "content-type": "application/json"
+        "content-type": "application/json",
     }
 
 
 def test_headers_for_stringified_dict_body():
     call = DatabasesPostCall(body='{"database-name": "custom-db"}')
     assert call.headers() == {
-        "content-type": "application/json"
+        "content-type": "application/json",
     }
 
 
 def test_headers_for_xml_body():
-    body = '<database-properties xmlns="http://marklogic.com/manage">' \
-           '  <database-name>custom-db</database-name>' \
-           '</database-properties>'
+    body = ('<database-properties xmlns="http://marklogic.com/manage">'
+            '  <database-name>custom-db</database-name>'
+            '</database-properties>')
     call = DatabasesPostCall(body=body)
     assert call.headers() == {
-        "content-type": "application/xml"
+        "content-type": "application/xml",
     }
 
 
@@ -73,8 +77,8 @@ def test_stringified_dict_body():
 
 
 def test_xml_body():
-    body = '<database-properties xmlns="http://marklogic.com/manage">' \
-           '  <database-name>custom-db</database-name>' \
-           '</database-properties>'
+    body = ('<database-properties xmlns="http://marklogic.com/manage">'
+            '  <database-name>custom-db</database-name>'
+            '</database-properties>')
     call = DatabasesPostCall(body=body)
     assert call.body() == body

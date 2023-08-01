@@ -24,22 +24,26 @@ def test_get_accept_header_for_text_format():
 
 
 def test_get_accept_header_for_unsupported_format():
-    with pytest.raises(exceptions.UnsupportedFormat) as err:
+    with pytest.raises(exceptions.UnsupportedFormatError) as err:
         utils.get_accept_header_for_format("xxx")
 
-    assert err.value.args[0] == "Provided format [xxx] is not supported."
+    expected_msg = "Provided format [xxx] is not supported."
+    assert err.value.args[0] == expected_msg
 
 
 def test_get_content_type_header_for_xml_data():
-    xml_content_type_header = utils.get_content_type_header_for_data("<root></root>")
+    data = "<root></root>"
+    xml_content_type_header = utils.get_content_type_header_for_data(data)
     assert xml_content_type_header == "application/xml"
 
 
 def test_get_content_type_header_for_json_data():
-    json_content_type_header = utils.get_content_type_header_for_data({"key": "value"})
+    data = {"key": "value"}
+    json_content_type_header = utils.get_content_type_header_for_data(data)
     assert json_content_type_header == "application/json"
 
 
 def test_get_content_type_header_for_stringified_json_data():
-    json_content_type_header = utils.get_content_type_header_for_data('{"key": "value"}')
+    data = '{"key": "value"}'
+    json_content_type_header = utils.get_content_type_header_for_data(data)
     assert json_content_type_header == "application/json"

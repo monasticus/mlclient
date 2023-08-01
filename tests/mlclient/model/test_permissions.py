@@ -2,28 +2,37 @@ from mlclient.model import Permission
 
 
 def test_permissions_are_equal():
-    assert Permission("role-1", {Permission.READ}) == Permission("role-1", {Permission.READ})
+    assert (Permission("role-1", {Permission.READ}) ==
+            Permission("role-1", {Permission.READ}))
 
 
 def test_permissions_are_not_equal():
-    assert Permission("role-1", {Permission.READ}) != Permission("role-2", {Permission.READ})
-    assert Permission("role-1", {Permission.READ}) != Permission("role-1", {Permission.UPDATE})
-    assert Permission("role-1", {Permission.READ}) != Permission("role-2", {Permission.UPDATE})
+    assert (Permission("role-1", {Permission.READ}) !=
+            Permission("role-2", {Permission.READ}))
+    assert (Permission("role-1", {Permission.READ}) !=
+            Permission("role-1", {Permission.UPDATE}))
+    assert (Permission("role-1", {Permission.READ}) !=
+            Permission("role-2", {Permission.UPDATE}))
 
 
 def test_permissions_hashes_are_equal():
-    assert Permission("role-1", {Permission.READ}).__hash__() == Permission("role-1", {Permission.READ}).__hash__()
+    assert (Permission("role-1", {Permission.READ}).__hash__() ==
+            Permission("role-1", {Permission.READ}).__hash__())
 
 
 def test_permissions_hashes_are_not_equal():
-    assert Permission("role-1", {Permission.READ}).__hash__() != Permission("role-2", {Permission.READ}).__hash__()
-    assert Permission("role-1", {Permission.READ}).__hash__() != Permission("role-1", {Permission.UPDATE}).__hash__()
-    assert Permission("role-1", {Permission.READ}).__hash__() != Permission("role-2", {Permission.UPDATE}).__hash__()
+    assert (Permission("role-1", {Permission.READ}).__hash__() !=
+            Permission("role-2", {Permission.READ}).__hash__())
+    assert (Permission("role-1", {Permission.READ}).__hash__() !=
+            Permission("role-1", {Permission.UPDATE}).__hash__())
+    assert (Permission("role-1", {Permission.READ}).__hash__() !=
+            Permission("role-2", {Permission.UPDATE}).__hash__())
 
 
 def test_str():
     permission = Permission("custom-role", {Permission.READ})
-    assert str(permission) == "Permission(role_name='custom-role', capabilities={'read'})"
+    expected_str = "Permission(role_name='custom-role', capabilities={'read'})"
+    assert str(permission) == expected_str
 
 
 def test_role_name():
@@ -32,7 +41,9 @@ def test_role_name():
 
 
 def test_capabilities():
-    capabilities = {Permission.READ, Permission.INSERT, Permission.UPDATE, Permission.UPDATE_NODE, Permission.EXECUTE}
+    capabilities = {Permission.READ, Permission.INSERT,
+                    Permission.UPDATE, Permission.UPDATE_NODE,
+                    Permission.EXECUTE}
     permission = Permission("custom_role", capabilities)
     assert permission.capabilities() == capabilities
 
@@ -98,6 +109,6 @@ def test_to_json():
     assert permission.to_json() == {
         "role-name": "custom_role",
         "capabilities": [
-            Permission.READ
-        ]
+            Permission.READ,
+        ],
     }

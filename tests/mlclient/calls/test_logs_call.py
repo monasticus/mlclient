@@ -6,31 +6,34 @@ from mlclient import exceptions
 from mlclient.calls import LogsCall
 
 
-@pytest.fixture
+@pytest.fixture()
 def default_logs_call():
-    """Returns an LogsCall instance with a required parameter without any custom details"""
+    """Return a LogsCall instance with a required parameter only."""
     return LogsCall(filename="ErrorLog.txt")
 
 
 def test_validation_unsupported_format():
-    with pytest.raises(exceptions.WrongParameters) as err:
+    with pytest.raises(exceptions.WrongParametersError) as err:
         LogsCall(filename="", data_format="text")
 
-    assert err.value.args[0] == "The supported formats are xml, json or html!"
+    expected_msg = "The supported formats are xml, json or html!"
+    assert err.value.args[0] == expected_msg
 
 
 def test_validation_start_time_is_not_datetime_value():
-    with pytest.raises(exceptions.WrongParameters) as err:
+    with pytest.raises(exceptions.WrongParametersError) as err:
         assert LogsCall(filename="", start_time="a").params() == {}
 
-    assert err.value.args[0] == "The start parameter is not a dateTime value!"
+    expected_msg = "The start parameter is not a dateTime value!"
+    assert err.value.args[0] == expected_msg
 
 
 def test_validation_end_time_is_not_datetime_value():
-    with pytest.raises(exceptions.WrongParameters) as err:
+    with pytest.raises(exceptions.WrongParametersError) as err:
         assert LogsCall(filename="", end_time="a").params() == {}
 
-    assert err.value.args[0] == "The end parameter is not a dateTime value!"
+    expected_msg = "The end parameter is not a dateTime value!"
+    assert err.value.args[0] == expected_msg
 
 
 def test_endpoint(default_logs_call):
@@ -46,41 +49,41 @@ def test_method(default_logs_call):
 def test_parameters(default_logs_call):
     assert default_logs_call.params() == {
         "filename": "ErrorLog.txt",
-        "format": "html"
+        "format": "html",
     }
 
 
 def test_headers(default_logs_call):
     assert default_logs_call.headers() == {
-        "accept": "text/html"
+        "accept": "text/html",
     }
 
 
 def test_headers_for_none_format():
     call = LogsCall(filename="ErrorLog.txt", data_format=None)
     assert call.headers() == {
-        "accept": "text/html"
+        "accept": "text/html",
     }
 
 
 def test_headers_for_html_format():
     call = LogsCall(filename="ErrorLog.txt", data_format="html")
     assert call.headers() == {
-        "accept": "text/html"
+        "accept": "text/html",
     }
 
 
 def test_headers_for_xml_format():
     call = LogsCall(filename="ErrorLog.txt", data_format="xml")
     assert call.headers() == {
-        "accept": "application/xml"
+        "accept": "application/xml",
     }
 
 
 def test_headers_for_json_format():
     call = LogsCall(filename="ErrorLog.txt", data_format="json")
     assert call.headers() == {
-        "accept": "application/json"
+        "accept": "application/json",
     }
 
 
@@ -97,7 +100,7 @@ def test_fully_parametrized_call():
                     regex="some-re")
     assert call.method() == "GET"
     assert call.headers() == {
-        "accept": "application/json"
+        "accept": "application/json",
     }
     assert call.params() == {
         "filename": "ErrorLog.txt",
@@ -105,7 +108,7 @@ def test_fully_parametrized_call():
         "host": "localhost",
         "start": "2022-01-01T01:01:01",
         "end": "2022-01-01T01:02:02",
-        "regex": "some-re"
+        "regex": "some-re",
     }
     assert call.body() is None
 
@@ -196,32 +199,36 @@ def test_formatting_datetime_date_and_time_with_seconds_and_millis():
 
 
 def test_formatting_datetime_impossible_to_parse_as_month_and_day():
-    with pytest.raises(exceptions.WrongParameters) as err:
+    with pytest.raises(exceptions.WrongParametersError) as err:
         assert LogsCall(filename="ErrorLog.txt",
                         start_time="13-01").params() == {}
 
-    assert err.value.args[0] == "The start parameter is not a dateTime value!"
+    expected_msg = "The start parameter is not a dateTime value!"
+    assert err.value.args[0] == expected_msg
 
 
 def test_formatting_datetime_impossible_to_parse_as_time_1():
-    with pytest.raises(exceptions.WrongParameters) as err:
+    with pytest.raises(exceptions.WrongParametersError) as err:
         assert LogsCall(filename="ErrorLog.txt",
                         start_time="25:01").params() == {}
 
-    assert err.value.args[0] == "The start parameter is not a dateTime value!"
+    expected_msg = "The start parameter is not a dateTime value!"
+    assert err.value.args[0] == expected_msg
 
 
 def test_formatting_datetime_impossible_to_parse_as_time_2():
-    with pytest.raises(exceptions.WrongParameters) as err:
+    with pytest.raises(exceptions.WrongParametersError) as err:
         assert LogsCall(filename="ErrorLog.txt",
                         start_time="24:00").params() == {}
 
-    assert err.value.args[0] == "The start parameter is not a dateTime value!"
+    expected_msg = "The start parameter is not a dateTime value!"
+    assert err.value.args[0] == expected_msg
 
 
 def test_formatting_datetime_impossible_to_parse_as_time_3():
-    with pytest.raises(exceptions.WrongParameters) as err:
+    with pytest.raises(exceptions.WrongParametersError) as err:
         assert LogsCall(filename="ErrorLog.txt",
                         start_time="01:60").params() == {}
 
-    assert err.value.args[0] == "The start parameter is not a dateTime value!"
+    expected_msg = "The start parameter is not a dateTime value!"
+    assert err.value.args[0] == expected_msg

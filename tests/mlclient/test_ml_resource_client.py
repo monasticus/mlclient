@@ -279,7 +279,7 @@ def test_get_roles():
 def test_post_roles():
     body = '<role-properties xmlns="http://marklogic.com/manage/role/properties" />'
     with MLResourceClient(auth_method="digest") as client:
-        resp = client.post_databases(body=body)
+        resp = client.post_roles(body=body)
 
     assert resp.status_code == 400
     assert "Payload has errors in structure, content-type or values." in resp.text
@@ -339,7 +339,7 @@ def test_get_users():
 def test_post_users():
     body = '<user-properties xmlns="http://marklogic.com/manage/user/properties" />'
     with MLResourceClient(auth_method="digest") as client:
-        resp = client.post_databases(body=body)
+        resp = client.post_users(body=body)
 
     assert resp.status_code == 400
     assert "Payload has errors in structure, content-type or values." in resp.text

@@ -29,5 +29,8 @@ linters:
 	poetry update ruff
 	@./meta/linters/look_for_new_linters.py
 
+publish:
+	@poetry --build publish
+
 update_linters:
 	@poetry run ruff linter --format=json > ./meta/linters/linters.json

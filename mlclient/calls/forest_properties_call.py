@@ -60,7 +60,7 @@ class ForestPropertiesGetCall(ResourceCall):
 
         super().__init__(method="GET",
                          accept=utils.get_accept_header_for_format(data_format))
-        self.__forest = forest
+        self._forest = forest
         self.add_param(self._FORMAT_PARAM, data_format)
 
     def endpoint(
@@ -73,7 +73,7 @@ class ForestPropertiesGetCall(ResourceCall):
         str
             A Forest Properties call endpoint
         """
-        return self._ENDPOINT_TEMPLATE.format(self.__forest)
+        return self._ENDPOINT_TEMPLATE.format(self._forest)
 
     @classmethod
     def _validate_params(
@@ -126,7 +126,7 @@ class ForestPropertiesPutCall(ResourceCall):
         super().__init__(method="PUT",
                          content_type=content_type,
                          body=body)
-        self.__forest = forest
+        self._forest = forest
 
     def endpoint(
             self,
@@ -138,7 +138,7 @@ class ForestPropertiesPutCall(ResourceCall):
         str
             A Forest Properties call endpoint
         """
-        return self._ENDPOINT_TEMPLATE.format(self.__forest)
+        return self._ENDPOINT_TEMPLATE.format(self._forest)
 
     @classmethod
     def _validate_params(

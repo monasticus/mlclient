@@ -59,7 +59,7 @@ class UserPropertiesGetCall(ResourceCall):
 
         super().__init__(method="GET",
                          accept=utils.get_accept_header_for_format(data_format))
-        self.__user = user
+        self._user = user
         self.add_param(self._FORMAT_PARAM, data_format)
 
     def endpoint(
@@ -72,7 +72,7 @@ class UserPropertiesGetCall(ResourceCall):
         str
             An User Properties call endpoint
         """
-        return self._ENDPOINT_TEMPLATE.format(self.__user)
+        return self._ENDPOINT_TEMPLATE.format(self._user)
 
     @classmethod
     def _validate_params(
@@ -125,7 +125,7 @@ class UserPropertiesPutCall(ResourceCall):
         super().__init__(method="PUT",
                          content_type=content_type,
                          body=body)
-        self.__user = user
+        self._user = user
 
     def endpoint(
             self,
@@ -137,7 +137,7 @@ class UserPropertiesPutCall(ResourceCall):
         str
             An User Properties call endpoint
         """
-        return self._ENDPOINT_TEMPLATE.format(self.__user)
+        return self._ENDPOINT_TEMPLATE.format(self._user)
 
     @classmethod
     def _validate_params(

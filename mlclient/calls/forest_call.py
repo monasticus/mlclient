@@ -68,7 +68,7 @@ class ForestGetCall(ResourceCall):
 
         super().__init__(method="GET",
                          accept=utils.get_accept_header_for_format(data_format))
-        self.__forest = forest
+        self._forest = forest
         self.add_param(self._FORMAT_PARAM, data_format)
         self.add_param(self._VIEW_PARAM, view)
 
@@ -82,7 +82,7 @@ class ForestGetCall(ResourceCall):
         str
             A Forest call endpoint
         """
-        return self._ENDPOINT_TEMPLATE.format(self.__forest)
+        return self._ENDPOINT_TEMPLATE.format(self._forest)
 
     @classmethod
     def _validate_params(
@@ -148,7 +148,7 @@ class ForestPostCall(ResourceCall):
         super().__init__(method="POST",
                          content_type=constants.HEADER_X_WWW_FORM_URLENCODED,
                          body=body)
-        self.__forest = forest
+        self._forest = forest
 
     def endpoint(
             self,
@@ -160,7 +160,7 @@ class ForestPostCall(ResourceCall):
         str
             A Forests call endpoint
         """
-        return self._ENDPOINT_TEMPLATE.format(self.__forest)
+        return self._ENDPOINT_TEMPLATE.format(self._forest)
 
     @classmethod
     def _validate_params(
@@ -226,7 +226,7 @@ class ForestDeleteCall(ResourceCall):
         super().__init__(method=constants.METHOD_DELETE)
         self.add_param(self._LEVEL_PARAM, level)
         self.add_param(self._REPLICAS_PARAM, replicas)
-        self.__forest = forest
+        self._forest = forest
 
     def endpoint(
             self,
@@ -238,7 +238,7 @@ class ForestDeleteCall(ResourceCall):
         str
             A Forest call endpoint
         """
-        return self._ENDPOINT_TEMPLATE.format(self.__forest)
+        return self._ENDPOINT_TEMPLATE.format(self._forest)
 
     @classmethod
     def _validate_params(

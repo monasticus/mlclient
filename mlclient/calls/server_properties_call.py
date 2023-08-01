@@ -65,7 +65,7 @@ class ServerPropertiesGetCall(ResourceCall):
 
         super().__init__(method="GET",
                          accept=utils.get_accept_header_for_format(data_format))
-        self.__server = server
+        self._server = server
         self.add_param(self._GROUP_ID_PARAM, group_id)
         self.add_param(self._FORMAT_PARAM, data_format)
 
@@ -79,7 +79,7 @@ class ServerPropertiesGetCall(ResourceCall):
         str
             A Server Properties call endpoint
         """
-        return self._ENDPOINT_TEMPLATE.format(self.__server)
+        return self._ENDPOINT_TEMPLATE.format(self._server)
 
     @classmethod
     def _validate_params(
@@ -138,7 +138,7 @@ class ServerPropertiesPutCall(ResourceCall):
         super().__init__(method="PUT",
                          content_type=content_type,
                          body=body)
-        self.__server = server
+        self._server = server
         self.add_param(self._GROUP_ID_PARAM, group_id)
 
     def endpoint(
@@ -151,7 +151,7 @@ class ServerPropertiesPutCall(ResourceCall):
         str
             A Server Properties call endpoint
         """
-        return self._ENDPOINT_TEMPLATE.format(self.__server)
+        return self._ENDPOINT_TEMPLATE.format(self._server)
 
     @classmethod
     def _validate_params(

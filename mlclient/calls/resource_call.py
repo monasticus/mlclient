@@ -61,14 +61,14 @@ class ResourceCall(metaclass=ABCMeta):
         content_type : str
             a Content-Type header value
         """
-        self.__method = method
-        self.__params = params or {}
-        self.__headers = headers or {}
-        self.__body = body
+        self._method = method
+        self._params = params or {}
+        self._headers = headers or {}
+        self._body = body
         if accept:
-            self.__headers[constants.HEADER_NAME_ACCEPT] = accept
+            self._headers[constants.HEADER_NAME_ACCEPT] = accept
         if content_type:
-            self.__headers[constants.HEADER_NAME_CONTENT_TYPE] = content_type
+            self._headers[constants.HEADER_NAME_CONTENT_TYPE] = content_type
 
     @classmethod
     def __subclasshook__(
@@ -118,7 +118,7 @@ class ResourceCall(metaclass=ABCMeta):
             a request parameter value
         """
         if param_name and param_value:
-            self.__params[param_name] = param_value
+            self._params[param_name] = param_value
 
     def add_header(
             self,
@@ -135,7 +135,7 @@ class ResourceCall(metaclass=ABCMeta):
             a request header value
         """
         if header_name and header_value:
-            self.__headers[header_name] = header_value
+            self._headers[header_name] = header_value
 
     def set_body(
             self,
@@ -148,7 +148,7 @@ class ResourceCall(metaclass=ABCMeta):
         body : str | dict
             a request body
         """
-        self.__body = body
+        self._body = body
 
     def method(
             self,
@@ -160,7 +160,7 @@ class ResourceCall(metaclass=ABCMeta):
         str
             a request method
         """
-        return self.__method
+        return self._method
 
     def params(
             self,
@@ -172,7 +172,7 @@ class ResourceCall(metaclass=ABCMeta):
         dict
             request parameters
         """
-        return self.__params.copy()
+        return self._params.copy()
 
     def headers(
             self,
@@ -184,7 +184,7 @@ class ResourceCall(metaclass=ABCMeta):
         dict
             request headers
         """
-        return self.__headers.copy()
+        return self._headers.copy()
 
     def body(
             self,
@@ -196,8 +196,8 @@ class ResourceCall(metaclass=ABCMeta):
         str | dict
             a request body
         """
-        if isinstance(self.__body, str):
-            return self.__body
-        if isinstance(self.__body, dict):
-            return self.__body.copy()
+        if isinstance(self._body, str):
+            return self._body
+        if isinstance(self._body, dict):
+            return self._body.copy()
         return None

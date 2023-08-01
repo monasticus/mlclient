@@ -60,7 +60,7 @@ class DatabasePropertiesGetCall(ResourceCall):
 
         super().__init__(method="GET",
                          accept=utils.get_accept_header_for_format(data_format))
-        self.__database = database
+        self._database = database
         self.add_param(self._FORMAT_PARAM, data_format)
 
     def endpoint(
@@ -73,7 +73,7 @@ class DatabasePropertiesGetCall(ResourceCall):
         str
             A Database Properties call endpoint
         """
-        return self._ENDPOINT_TEMPLATE.format(self.__database)
+        return self._ENDPOINT_TEMPLATE.format(self._database)
 
     @classmethod
     def _validate_params(
@@ -128,7 +128,7 @@ class DatabasePropertiesPutCall(ResourceCall):
         super().__init__(method="PUT",
                          content_type=content_type,
                          body=body)
-        self.__database = database
+        self._database = database
 
     def endpoint(
             self,
@@ -140,7 +140,7 @@ class DatabasePropertiesPutCall(ResourceCall):
         str
             A Database Properties call endpoint
         """
-        return self._ENDPOINT_TEMPLATE.format(self.__database)
+        return self._ENDPOINT_TEMPLATE.format(self._database)
 
     @classmethod
     def __validate_params(

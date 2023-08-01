@@ -95,7 +95,7 @@ class ServerGetCall(ResourceCall):
             full_refs = str(full_refs).lower()
         if modules is not None:
             modules = str(modules).lower()
-        self.__server = server
+        self._server = server
         self.add_param(self._GROUP_ID_PARAM, group_id)
         self.add_param(self._FORMAT_PARAM, data_format)
         self.add_param(self._VIEW_PARAM, view)
@@ -113,7 +113,7 @@ class ServerGetCall(ResourceCall):
         str
             A Server call endpoint
         """
-        return self._ENDPOINT_TEMPLATE.format(self.__server)
+        return self._ENDPOINT_TEMPLATE.format(self._server)
 
     @classmethod
     def _validate_params(
@@ -168,7 +168,7 @@ class ServerDeleteCall(ResourceCall):
         """
         super().__init__(method=constants.METHOD_DELETE)
         self.add_param(self._GROUP_ID_PARAM, group_id)
-        self.__server = server
+        self._server = server
 
     def endpoint(
             self,
@@ -180,4 +180,4 @@ class ServerDeleteCall(ResourceCall):
         str
             A Server call endpoint
         """
-        return self._ENDPOINT_TEMPLATE.format(self.__server)
+        return self._ENDPOINT_TEMPLATE.format(self._server)

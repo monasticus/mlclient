@@ -214,7 +214,7 @@ class DatabaseDeleteCall(ResourceCall):
         self._validate_params(forest_delete)
         super().__init__(method=constants.METHOD_DELETE)
         self.add_param(self._FOREST_DELETE_PARAM, forest_delete)
-        self.__database = database
+        self._database = database
 
     def endpoint(
             self,
@@ -226,7 +226,7 @@ class DatabaseDeleteCall(ResourceCall):
         str
             A Database call endpoint
         """
-        return self._ENDPOINT_TEMPLATE.format(self.__database)
+        return self._ENDPOINT_TEMPLATE.format(self._database)
 
     @classmethod
     def _validate_params(

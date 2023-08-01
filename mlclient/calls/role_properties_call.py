@@ -59,7 +59,7 @@ class RolePropertiesGetCall(ResourceCall):
 
         super().__init__(method="GET",
                          accept=utils.get_accept_header_for_format(data_format))
-        self.__role = role
+        self._role = role
         self.add_param(self._FORMAT_PARAM, data_format)
 
     def endpoint(
@@ -72,7 +72,7 @@ class RolePropertiesGetCall(ResourceCall):
         str
             A Role Properties call endpoint
         """
-        return self._ENDPOINT_TEMPLATE.format(self.__role)
+        return self._ENDPOINT_TEMPLATE.format(self._role)
 
     @classmethod
     def _validate_params(
@@ -125,7 +125,7 @@ class RolePropertiesPutCall(ResourceCall):
         super().__init__(method="PUT",
                          content_type=content_type,
                          body=body)
-        self.__role = role
+        self._role = role
 
     def endpoint(
             self,
@@ -137,7 +137,7 @@ class RolePropertiesPutCall(ResourceCall):
         str
             A Role Properties call endpoint
         """
-        return self._ENDPOINT_TEMPLATE.format(self.__role)
+        return self._ENDPOINT_TEMPLATE.format(self._role)
 
     @classmethod
     def _validate_params(

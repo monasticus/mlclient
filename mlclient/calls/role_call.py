@@ -62,7 +62,7 @@ class RoleGetCall(ResourceCall):
 
         super().__init__(method="GET",
                          accept=utils.get_accept_header_for_format(data_format))
-        self.__role = role
+        self._role = role
         self.add_param(self._FORMAT_PARAM, data_format)
         self.add_param(self._VIEW_PARAM, view)
 
@@ -76,7 +76,7 @@ class RoleGetCall(ResourceCall):
         str
             A Role call endpoint
         """
-        return self._ENDPOINT_TEMPLATE.format(self.__role)
+        return self._ENDPOINT_TEMPLATE.format(self._role)
 
     @classmethod
     def _validate_params(
@@ -124,7 +124,7 @@ class RoleDeleteCall(ResourceCall):
             A role identifier. The role can be identified either by ID or name.
         """
         super().__init__(method=constants.METHOD_DELETE)
-        self.__role = role
+        self._role = role
 
     def endpoint(
             self,
@@ -136,4 +136,4 @@ class RoleDeleteCall(ResourceCall):
         str
             A Role call endpoint
         """
-        return self._ENDPOINT_TEMPLATE.format(self.__role)
+        return self._ENDPOINT_TEMPLATE.format(self._role)

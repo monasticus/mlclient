@@ -62,7 +62,7 @@ class UserGetCall(ResourceCall):
 
         super().__init__(method="GET",
                          accept=utils.get_accept_header_for_format(data_format))
-        self.__user = user
+        self._user = user
         self.add_param(self._FORMAT_PARAM, data_format)
         self.add_param(self._VIEW_PARAM, view)
 
@@ -76,7 +76,7 @@ class UserGetCall(ResourceCall):
         str
             An User call endpoint
         """
-        return self._ENDPOINT_TEMPLATE.format(self.__user)
+        return self._ENDPOINT_TEMPLATE.format(self._user)
 
     @classmethod
     def _validate_params(
@@ -124,7 +124,7 @@ class UserDeleteCall(ResourceCall):
             A user identifier. The user can be identified either by ID or name.
         """
         super().__init__(method=constants.METHOD_DELETE)
-        self.__user = user
+        self._user = user
 
     def endpoint(
             self,
@@ -136,4 +136,4 @@ class UserDeleteCall(ResourceCall):
         str
             An User call endpoint
         """
-        return self._ENDPOINT_TEMPLATE.format(self.__user)
+        return self._ENDPOINT_TEMPLATE.format(self._user)

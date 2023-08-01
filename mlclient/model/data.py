@@ -20,7 +20,7 @@ import logging
 import re
 import xml.etree.ElementTree as ElemTree
 from enum import Enum
-from typing import Any, ClassVar
+from typing import ClassVar
 from xml.dom import minidom
 
 logger = logging.getLogger(__name__)
@@ -513,7 +513,7 @@ class Metadata:
         str
             Metadata in a stringified JSON representation
         """
-        return json.dumps(self.to_json(), cls=MetadataEncoder, indent=indent)
+        return json.dumps(self.to_json(), indent=indent)
 
     def to_json(
             self,
@@ -856,29 +856,3 @@ class Permission:
             "role-name": self.role_name(),
             "capabilities": list(self.capabilities()),
         }
-
-
-class MetadataEncoder(json.JSONEncoder):
-    """A JSONEncoder subclass to dump Metadata to JSON accordingly."""
-
-    def default(
-            self,
-            obj: Any,
-    ) -> dict | list:
-        """Return a corresponding JSON representation of an object.
-
-        Parameters
-        ----------
-        obj : Any
-            An object to dump
-
-        Returns
-        -------
-        dict | list
-            A corresponding JSON representation of an object
-        """
-        if isinstance(obj, set):
-            return list(obj)
-        if isinstance(obj, Permission):
-            return obj.to_json()
-        return json.JSONEncoder.default(self, obj)

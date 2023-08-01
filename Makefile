@@ -1,21 +1,23 @@
-init:
-	@python -m pip install pip-tools
-	@pip-compile --extra dev pyproject.toml
-	@pip install -r requirements.txt
-	@pip install -e .
+install:
+	@pip install poetry
+	@poetry install
+	@poetry self add poetry-bumpversion
+
+update:
+	@poetry update
 
 imports:
-	@isort .
-	@isort -a "from __future__ import annotations" mlclient
+	@poetry run isort .
+	@poetry run isort -a "from __future__ import annotations" mlclient
 
 lint:
-	@ruff .
+	@poetry run ruff .
 
 lint-fix:
-	@ruff . --fix
+	@poetry run ruff . --fix
 
 test:
-	@pytest --cov=mlclient tests/
+	@poetry run pytest --cov=mlclient tests/
 
 ml-start:
 	@sudo /etc/init.d/MarkLogic start
@@ -24,8 +26,11 @@ ml-stop:
 	@sudo /etc/init.d/MarkLogic stop
 
 linters:
-	@pip install --upgrade ruff
+	poetry update ruff
 	@./meta/linters/look_for_new_linters.py
 
-update-linters:
-	@ruff linter --format=json > ./meta/linters/linters.json
+publish:
+	@poetry --build publish
+
+update_linters:
+	@poetry run ruff linter --format=json > ./meta/linters/linters.json

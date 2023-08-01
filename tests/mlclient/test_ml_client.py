@@ -21,6 +21,13 @@ def test_context_mng():
     assert not client.is_connected()
 
 
+def test_request_when_disconnected():
+    client = MLClient()
+    resp = client.get("/manage/v2/servers")
+
+    assert resp is None
+
+
 @pytest.mark.ml_access()
 def test_get():
     with MLClient(auth_method="digest") as client:

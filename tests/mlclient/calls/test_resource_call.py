@@ -8,6 +8,18 @@ class ResourceCallTestImpl(ResourceCall):
         return "/impl-endpoint"
 
 
+class ResourceCallTestInvalidImpl(ResourceCall):
+    """A ResourceCall invalid implementation for testing purposes"""
+
+
+def test_issubclass_true():
+    assert issubclass(ResourceCallTestImpl, ResourceCall)
+
+
+def test_issubclass_false():
+    assert not issubclass(ResourceCallTestInvalidImpl, ResourceCall)
+
+
 # ResourceCall.endpoint
 def test_endpoint():
     assert ResourceCallTestImpl().endpoint() == "/impl-endpoint"

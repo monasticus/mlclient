@@ -410,6 +410,18 @@ def test_remove_permission_when_does_not_exist():
     __assert_permissions_are_equal(metadata.permissions(), [permission])
 
 
+def test_remove_permission_when_none():
+    permission = Permission("role-1", {Permission.READ})
+    metadata = Metadata(permissions=[permission])
+    success = metadata.remove_permission(None, Permission.READ)
+    assert success is False
+    __assert_permissions_are_equal(metadata.permissions(), [permission])
+
+    success = metadata.remove_permission("role-1", None)
+    assert success is False
+    __assert_permissions_are_equal(metadata.permissions(), [permission])
+
+
 def test_remove_property():
     properties = {"prop-name-1": "prop-value-1", "prop-name-2": "prop-value-2"}
     metadata = Metadata(properties=properties)

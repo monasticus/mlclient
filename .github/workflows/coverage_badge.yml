@@ -1,0 +1,62 @@
+name: Update a code coverage badge
+
+on:
+  push:
+    branches:
+      - main
+jobs:
+  update-badge:
+    runs-on: ubuntu-latest
+    services:
+      marklogic:
+        image: marklogicdb/marklogic-db:latest-10.0
+        ports:
+          - 8000:8000
+          - 8001:8001
+          - 8002:8002
+        env:
+          MARKLOGIC_INIT: true
+          MARKLOGIC_ADMIN_USERNAME: admin
+          MARKLOGIC_ADMIN_PASSWORD: admin
+
+    steps:
+      - name: Sleep for 30 seconds
+        run: sleep 30s
+        shell: bash
+
+      - uses: actions/checkout@v3
+
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.8"
+
+      - name: Install MLClient with poetry
+        run: |
+          make install
+
+      - name: Create test report
+        run: |
+          poetry run pytest --cov=mlclient tests | tee output.txt
+
+      - name: Parse Code Coverage
+        id: coverageComment
+        uses: MishaKav/pytest-coverage-comment@main
+        with:
+          hide-comment: true
+          pytest-coverage-path: output.txt
+
+      - name: Update README with Code Coverage Badge
+        run: |
+          sed -i -e "s/Code%20Coverage-[0-9]*%25-[a-z]*/Code%20Coverage-${{ steps.coverageComment.outputs.coverage }}25-${{ steps.coverageComment.outputs.color }}/g" ./README.md
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v5
+        with:
+            add-paths: "README.md"
+            author: "Tomasz Aniołowski <tomasz.maciej.aniolowski@gmail.com>"
+            committer: "Tomasz Aniołowski <tomasz.maciej.aniolowski@gmail.com>"
+            commit-message: "update code coverage badge"
+            title: "Update Code Coverage badge in README.md"
+            assignees: "monasticus"
+            body: "Code coverage updated to ${{ steps.coverageComment.outputs.coverage }}"

@@ -12,8 +12,8 @@ import logging
 from types import TracebackType
 
 from requests import Response, Session
-from requests.auth import AuthBase, HTTPBasicAuth, HTTPDigestAuth
 from requests.adapters import HTTPAdapter, Retry
+from requests.auth import AuthBase, HTTPBasicAuth, HTTPDigestAuth
 
 from mlclient import constants
 from mlclient.calls import (DatabaseDeleteCall, DatabaseGetCall,

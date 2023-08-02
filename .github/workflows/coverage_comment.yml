@@ -1,0 +1,58 @@
+name: Create a coverage report
+
+on: [pull_request]
+jobs:
+  comment:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    services:
+      marklogic:
+        image: marklogicdb/marklogic-db:latest-10.0
+        ports:
+          - 8000:8000
+          - 8001:8001
+          - 8002:8002
+        env:
+          MARKLOGIC_INIT: true
+          MARKLOGIC_ADMIN_USERNAME: admin
+          MARKLOGIC_ADMIN_PASSWORD: admin
+
+    steps:
+      - name: Sleep for 30 seconds
+        run: sleep 30s
+        shell: bash
+
+      - uses: actions/checkout@v3
+
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.8"
+
+      - name: Install MLClient with poetry
+        run: |
+          make install
+
+      - name: Create test reports
+        run: |
+          poetry run pytest --junitxml=pytest.xml --cov=mlclient tests | tee output.txt
+          poetry run pytest --cov=mlclient --cov-report=xml:coverage.xml tests
+
+      - name: Put an overall test & coverage comment
+        uses: MishaKav/pytest-coverage-comment@main
+        with:
+          title: Code Coverage Report
+          badge-title: Code Coverage
+          pytest-coverage-path: output.txt
+          junitxml-path: pytest.xml
+          junitxml-title: Test Results
+
+      - name: Put a detailed coverage comment
+        uses: orgoro/coverage@v3
+        with:
+          coverageFile: coverage.xml
+          token: ${{ secrets.GITHUB_TOKEN }}
+          thresholdAll: 0.99
+          thresholdNew: 0.99
+          thresholdModified: 0.99

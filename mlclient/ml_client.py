@@ -113,7 +113,7 @@ class MLClient:
     _DEFAULT_RETRY_STRATEGY = Retry(
         connect=5,
         allowed_methods=None,  # any
-        backoff_factor=0.5
+        backoff_factor=0.5,
     )
 
     def __init__(
@@ -130,18 +130,20 @@ class MLClient:
 
         Parameters
         ----------
-        protocol : str
-            a protocol used for HTTP requests (http / https)
-        host : str
-            a host name
-        port : int
-            an App Service port
-        auth_method : str
-            an authorization method (basic / digest)
-        username : str
-            a username
-        password : str
-            a password
+        protocol : str, default "http"
+            A protocol used for HTTP requests (http / https)
+        host : str, default "localhost"
+            A host name
+        port : int, default 8002
+            An App Service port
+        auth_method : str, default "basic"
+            An authorization method (basic / digest)
+        username : str, default "admin"
+            A username
+        password : str, default "admin"
+            A password
+        retry : Retry, default Retry(connect=5,allowed_methods=None,backoff_factor=0.5)
+            A retry strategy
         """
         self.protocol: str = protocol
         self.host: str = host

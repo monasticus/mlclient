@@ -1,0 +1,24 @@
+name: Lint MLClient
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: Install MLClient with poetry
+        run: |
+          make install
+
+      - name: Lint with Ruff
+        run: poetry run ruff --format=github .

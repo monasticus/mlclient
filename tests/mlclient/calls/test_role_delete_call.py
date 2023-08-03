@@ -10,8 +10,8 @@ def default_role_delete_call():
 
 
 def test_endpoint():
-    assert RoleDeleteCall(role="1").endpoint() == "/manage/v2/roles/1"
-    assert RoleDeleteCall(role="admin").endpoint() == "/manage/v2/roles/admin"
+    assert RoleDeleteCall(role="1").endpoint == "/manage/v2/roles/1"
+    assert RoleDeleteCall(role="admin").endpoint == "/manage/v2/roles/admin"
 
 
 def test_method(default_role_delete_call):

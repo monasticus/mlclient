@@ -4,6 +4,7 @@ from mlclient.calls import ResourceCall
 class ResourceCallTestImpl(ResourceCall):
     """A ResourceCall implementation for testing purposes"""
 
+    @property
     def endpoint(self):
         return "/impl-endpoint"
 
@@ -22,7 +23,7 @@ def test_issubclass_false():
 
 # endpoint
 def test_endpoint():
-    assert ResourceCallTestImpl().endpoint() == "/impl-endpoint"
+    assert ResourceCallTestImpl().endpoint == "/impl-endpoint"
 
 
 # method

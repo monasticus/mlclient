@@ -27,7 +27,7 @@ def test_validation_view_param():
 
 
 def test_endpoint(default_users_get_call):
-    assert default_users_get_call.endpoint() == "/manage/v2/users"
+    assert default_users_get_call.endpoint == "/manage/v2/users"
     assert default_users_get_call.ENDPOINT == "/manage/v2/users"
     assert UsersGetCall.ENDPOINT == "/manage/v2/users"
 

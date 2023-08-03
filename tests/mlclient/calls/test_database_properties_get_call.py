@@ -22,9 +22,9 @@ def test_endpoint():
     expected__id_endpoint = "/manage/v2/databases/1/properties"
     expected__name_endpoint = "/manage/v2/databases/Documents/properties"
     assert DatabasePropertiesGetCall(
-        database="1").endpoint() == expected__id_endpoint
+        database="1").endpoint == expected__id_endpoint
     assert DatabasePropertiesGetCall(
-        database="Documents").endpoint() == expected__name_endpoint
+        database="Documents").endpoint == expected__name_endpoint
 
 
 def test_method(default_database_properties_get_call):

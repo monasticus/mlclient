@@ -44,7 +44,7 @@ def test_validation_format_param_for_metadata_categories():
 
 
 def test_endpoint(default_documents_get_call):
-    assert default_documents_get_call.endpoint() == "/v1/documents"
+    assert default_documents_get_call.endpoint == "/v1/documents"
     assert default_documents_get_call.ENDPOINT == "/v1/documents"
     assert DocumentsGetCall.ENDPOINT == "/v1/documents"
 

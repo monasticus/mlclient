@@ -24,9 +24,9 @@ def test_endpoint():
     expected__id_endpoint = "/manage/v2/forests/1/properties"
     expected__name_endpoint = "/manage/v2/forests/custom-forest/properties"
     assert ForestPropertiesGetCall(
-        forest="1").endpoint() == expected__id_endpoint
+        forest="1").endpoint == expected__id_endpoint
     assert ForestPropertiesGetCall(
-        forest="custom-forest").endpoint() == expected__name_endpoint
+        forest="custom-forest").endpoint == expected__name_endpoint
 
 
 def test_method(default_forest_properties_get_call):

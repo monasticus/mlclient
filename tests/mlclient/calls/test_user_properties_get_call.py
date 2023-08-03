@@ -21,8 +21,8 @@ def test_validation_format_param():
 def test_endpoint():
     expected__id_endpoint = "/manage/v2/users/1/properties"
     expected__name_endpoint = "/manage/v2/users/admin/properties"
-    assert UserPropertiesGetCall(user="1").endpoint() == expected__id_endpoint
-    assert UserPropertiesGetCall(user="admin").endpoint() == expected__name_endpoint
+    assert UserPropertiesGetCall(user="1").endpoint == expected__id_endpoint
+    assert UserPropertiesGetCall(user="admin").endpoint == expected__name_endpoint
 
 
 def test_method(default_user_properties_get_call):

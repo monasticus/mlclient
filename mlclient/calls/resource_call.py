@@ -17,6 +17,8 @@ class ResourceCall(metaclass=ABCMeta):
 
     Attributes
     ----------
+    endpoint : str
+        A computed property implemented in a subclass
     method : str
         A request method
     params : dict
@@ -28,8 +30,6 @@ class ResourceCall(metaclass=ABCMeta):
 
     Methods
     -------
-    endpoint() -> str
-        An abstract method returning an endpoint for a specific resource call
     add_param(param_name: str, param_value: Any)
         Put a request parameter if it's name and value exist
     add_header(header_name: str, header_value: Any)
@@ -86,11 +86,11 @@ class ResourceCall(metaclass=ABCMeta):
         Returns
         -------
         bool
-            True if the subclass includes the generate and stringify
-            methods
+            True if the subclass includes the endpoint property
         """
-        return "endpoint" in subclass.__dict__ and callable(subclass.endpoint)
+        return "endpoint" in subclass.__dict__ and not callable(subclass.endpoint)
 
+    @property
     @abstractmethod
     def endpoint(
             self,

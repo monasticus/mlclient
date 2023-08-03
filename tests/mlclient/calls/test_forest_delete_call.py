@@ -36,10 +36,10 @@ def test_validation_replicas_param():
 def test_endpoint():
     assert ForestDeleteCall(
         forest="1",
-        level="full").endpoint() == "/manage/v2/forests/1"
+        level="full").endpoint == "/manage/v2/forests/1"
     assert ForestDeleteCall(
         forest="custom-forest",
-        level="full").endpoint() == "/manage/v2/forests/custom-forest"
+        level="full").endpoint == "/manage/v2/forests/custom-forest"
 
 
 def test_method(default_forest_delete_call):

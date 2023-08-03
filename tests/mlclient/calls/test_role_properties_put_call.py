@@ -33,10 +33,10 @@ def test_endpoint():
     expected__name_endpoint = "/manage/v2/roles/admin/properties"
     assert RolePropertiesPutCall(
         role="1",
-        body={"role-name": "custom-role"}).endpoint() == expected__id_endpoint
+        body={"role-name": "custom-role"}).endpoint == expected__id_endpoint
     assert RolePropertiesPutCall(
         role="admin",
-        body={"role-name": "custom-role"}).endpoint() == expected__name_endpoint
+        body={"role-name": "custom-role"}).endpoint == expected__name_endpoint
 
 
 def test_method(default_role_properties_put_call):

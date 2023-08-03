@@ -22,9 +22,9 @@ def test_endpoint():
     expected__id_endpoint = "/manage/v2/databases/1"
     expected__name_endpoint = "/manage/v2/databases/Documents"
     assert DatabaseDeleteCall(
-        database="1").endpoint() == expected__id_endpoint
+        database="1").endpoint == expected__id_endpoint
     assert DatabaseDeleteCall(
-        database="Documents").endpoint() == expected__name_endpoint
+        database="Documents").endpoint == expected__name_endpoint
 
 
 def test_method(default_database_delete_call):

@@ -10,8 +10,8 @@ def default_user_delete_call():
 
 
 def test_endpoint():
-    assert UserDeleteCall(user="1").endpoint() == "/manage/v2/users/1"
-    assert UserDeleteCall(user="admin").endpoint() == "/manage/v2/users/admin"
+    assert UserDeleteCall(user="1").endpoint == "/manage/v2/users/1"
+    assert UserDeleteCall(user="admin").endpoint == "/manage/v2/users/admin"
 
 
 def test_method(default_user_delete_call):

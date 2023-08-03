@@ -36,10 +36,10 @@ def test_validation_blank_body_param():
 def test_endpoint():
     assert ForestPostCall(
         forest="1",
-        body={"state": "clear"}).endpoint() == "/manage/v2/forests/1"
+        body={"state": "clear"}).endpoint == "/manage/v2/forests/1"
     assert ForestPostCall(
         forest="custom-forest",
-        body={"state": "clear"}).endpoint() == "/manage/v2/forests/custom-forest"
+        body={"state": "clear"}).endpoint == "/manage/v2/forests/custom-forest"
 
 
 def test_method(default_forest_post_call):

@@ -21,8 +21,8 @@ def test_validation_format_param():
 def test_endpoint():
     expected__id_endpoint = "/manage/v2/roles/1/properties"
     expected__name_endpoint = "/manage/v2/roles/admin/properties"
-    assert RolePropertiesGetCall(role="1").endpoint() == expected__id_endpoint
-    assert RolePropertiesGetCall(role="admin").endpoint() == expected__name_endpoint
+    assert RolePropertiesGetCall(role="1").endpoint == expected__id_endpoint
+    assert RolePropertiesGetCall(role="admin").endpoint == expected__name_endpoint
 
 
 def test_method(default_role_properties_get_call):

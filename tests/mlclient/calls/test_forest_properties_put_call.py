@@ -39,10 +39,10 @@ def test_endpoint():
     expected__name_endpoint = "/manage/v2/forests/forest-1/properties"
     assert ForestPropertiesPutCall(
         forest="1",
-        body={"forest-name": "custom-forest"}).endpoint() == expected__id_endpoint
+        body={"forest-name": "custom-forest"}).endpoint == expected__id_endpoint
     assert ForestPropertiesPutCall(
         forest="forest-1",
-        body={"forest-name": "custom-forest"}).endpoint() == expected__name_endpoint
+        body={"forest-name": "custom-forest"}).endpoint == expected__name_endpoint
 
 
 def test_method(default_forest_properties_put_call):

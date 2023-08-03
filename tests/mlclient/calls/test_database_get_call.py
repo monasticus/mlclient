@@ -31,8 +31,8 @@ def test_validation_view_param():
 def test_endpoint():
     expected__id_endpoint = "/manage/v2/databases/1"
     expected__name_endpoint = "/manage/v2/databases/Documents"
-    assert DatabaseGetCall(database="1").endpoint() == expected__id_endpoint
-    assert DatabaseGetCall(database="Documents").endpoint() == expected__name_endpoint
+    assert DatabaseGetCall(database="1").endpoint == expected__id_endpoint
+    assert DatabaseGetCall(database="Documents").endpoint == expected__name_endpoint
 
 
 def test_method(default_database_get_call):

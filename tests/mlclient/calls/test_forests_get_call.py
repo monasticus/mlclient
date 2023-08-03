@@ -29,7 +29,7 @@ def test_validation_view_param():
 
 
 def test_endpoint(default_forests_get_call):
-    assert default_forests_get_call.endpoint() == "/manage/v2/forests"
+    assert default_forests_get_call.endpoint == "/manage/v2/forests"
     assert default_forests_get_call.ENDPOINT == "/manage/v2/forests"
     assert ForestsGetCall.ENDPOINT == "/manage/v2/forests"
 

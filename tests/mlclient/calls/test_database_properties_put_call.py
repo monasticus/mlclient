@@ -34,9 +34,9 @@ def test_endpoint():
     expected__id_endpoint = "/manage/v2/databases/1/properties"
     expected__name_endpoint = "/manage/v2/databases/Documents/properties"
     assert DatabasePropertiesPutCall(database="1",
-                                     body=body).endpoint() == expected__id_endpoint
+                                     body=body).endpoint == expected__id_endpoint
     assert DatabasePropertiesPutCall(database="Documents",
-                                     body=body).endpoint() == expected__name_endpoint
+                                     body=body).endpoint == expected__name_endpoint
 
 
 def test_method(default_database_properties_put_call):

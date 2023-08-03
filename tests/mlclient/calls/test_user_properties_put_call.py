@@ -33,10 +33,10 @@ def test_endpoint():
     expected__name_endpoint = "/manage/v2/users/admin/properties"
     assert UserPropertiesPutCall(
         user="1",
-        body={"user-name": "custom-user"}).endpoint() == expected__id_endpoint
+        body={"user-name": "custom-user"}).endpoint == expected__id_endpoint
     assert UserPropertiesPutCall(
         user="admin",
-        body={"user-name": "custom-user"}).endpoint() == expected__name_endpoint
+        body={"user-name": "custom-user"}).endpoint == expected__name_endpoint
 
 
 def test_method(default_user_properties_put_call):

@@ -28,10 +28,10 @@ def test_endpoint():
     expected__name_endpoint = "/manage/v2/servers/App-Services/properties"
     assert ServerPropertiesGetCall(
         server="1",
-        group_id="Default").endpoint() == expected__id_endpoint
+        group_id="Default").endpoint == expected__id_endpoint
     assert ServerPropertiesGetCall(
         server="App-Services",
-        group_id="Default").endpoint() == expected__name_endpoint
+        group_id="Default").endpoint == expected__name_endpoint
 
 
 def test_method(default_server_properties_get_call):

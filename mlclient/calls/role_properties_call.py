@@ -26,11 +26,18 @@ class RolePropertiesGetCall(ResourceCall):
     Documentation of the REST Resource API:
     https://docs.marklogic.com/REST/GET/manage/v2/roles/[id-or-name]/properties
 
+    Attributes
+    -------
+    All attributes are inherited from the ResourceCall abstract class.
+    his class implements the endpoint computed property to return an endpoint
+    for the specific call.
+    
+    endpoint : str
+        An endpoint of the ResourceCall
+
     Methods
     -------
     All public methods are inherited from the ResourceCall abstract class.
-    This class implements the endpoint() abstract method to return an endpoint
-    for the specific call.
     """
 
     _ENDPOINT_TEMPLATE: str = "/manage/v2/roles/{}/properties"
@@ -62,6 +69,7 @@ class RolePropertiesGetCall(ResourceCall):
         self._role = role
         self.add_param(self._FORMAT_PARAM, data_format)
 
+    @property
     def endpoint(
             self,
     ):
@@ -95,11 +103,18 @@ class RolePropertiesPutCall(ResourceCall):
     Documentation of the REST Resource API:
     https://docs.marklogic.com/REST/PUT/manage/v2/roles/[id-or-name]/properties
 
+    Attributes
+    -------
+    All attributes are inherited from the ResourceCall abstract class.
+    his class implements the endpoint computed property to return an endpoint
+    for the specific call.
+    
+    endpoint : str
+        An endpoint of the ResourceCall
+
     Methods
     -------
     All public methods are inherited from the ResourceCall abstract class.
-    This class implements the endpoint() abstract method to return an endpoint
-    for the specific call.
     """
 
     _ENDPOINT_TEMPLATE: str = "/manage/v2/roles/{}/properties"
@@ -127,6 +142,7 @@ class RolePropertiesPutCall(ResourceCall):
                          body=body)
         self._role = role
 
+    @property
     def endpoint(
             self,
     ):

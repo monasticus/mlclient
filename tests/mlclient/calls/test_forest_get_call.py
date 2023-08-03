@@ -34,9 +34,9 @@ def test_validation_view_param():
 
 def test_endpoint():
     assert ForestGetCall(
-        forest="1").endpoint() == "/manage/v2/forests/1"
+        forest="1").endpoint == "/manage/v2/forests/1"
     assert ForestGetCall(
-        forest="custom-forest").endpoint() == "/manage/v2/forests/custom-forest"
+        forest="custom-forest").endpoint == "/manage/v2/forests/custom-forest"
 
 
 def test_method(default_forest_get_call):

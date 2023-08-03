@@ -21,11 +21,18 @@ class DocumentsGetCall(ResourceCall):
     Retrieve document content and/or metadata from the database.
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/GET/v1/documents
 
+    Attributes
+    -------
+    All attributes are inherited from the ResourceCall abstract class.
+    his class implements the endpoint computed property to return an endpoint
+    for the specific call.
+    
+    endpoint : str
+        An endpoint of the ResourceCall
+
     Methods
     -------
     All public methods are inherited from the ResourceCall abstract class.
-    This class implements the endpoint() abstract method to return an endpoint
-    for the specific call.
     """
 
     ENDPOINT: str = "/v1/documents"
@@ -113,6 +120,7 @@ class DocumentsGetCall(ResourceCall):
                 param = self._TRANS_PARAM_PREFIX + trans_param_name
                 self.add_param(param, value)
 
+    @property
     def endpoint(
             self,
     ):

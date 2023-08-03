@@ -29,7 +29,7 @@ def test_validation_blank_body_param():
 
 
 def test_endpoint(default_databases_post_call):
-    assert default_databases_post_call.endpoint() == "/manage/v2/databases"
+    assert default_databases_post_call.endpoint == "/manage/v2/databases"
     assert default_databases_post_call.ENDPOINT == "/manage/v2/databases"
     assert DatabasesPostCall.ENDPOINT == "/manage/v2/databases"
 

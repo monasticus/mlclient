@@ -45,7 +45,7 @@ def test_validation_blank_body_param():
 
 
 def test_endpoint(default_servers_post_call):
-    assert default_servers_post_call.endpoint() == "/manage/v2/servers"
+    assert default_servers_post_call.endpoint == "/manage/v2/servers"
     assert default_servers_post_call.ENDPOINT == "/manage/v2/servers"
     assert ServersPostCall.ENDPOINT == "/manage/v2/servers"
 

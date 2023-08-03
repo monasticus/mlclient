@@ -32,9 +32,9 @@ def test_validation_blank_body_param():
 def test_endpoint():
     body = {"operation": "clear-database"}
     assert DatabasePostCall(database="1",
-                            body=body).endpoint() == "/manage/v2/databases/1"
+                            body=body).endpoint == "/manage/v2/databases/1"
     assert DatabasePostCall(database="Documents",
-                            body=body).endpoint() == "/manage/v2/databases/Documents"
+                            body=body).endpoint == "/manage/v2/databases/Documents"
 
 
 def test_method(default_database_post_call):

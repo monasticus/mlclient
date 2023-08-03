@@ -1609,7 +1609,7 @@ class MLResourceClient(MLClient):
         """
         return self.request(
             method=call.method,
-            endpoint=call.endpoint(),
+            endpoint=call.endpoint,
             params=call.params,
             headers=call.headers,
             body=call.body)

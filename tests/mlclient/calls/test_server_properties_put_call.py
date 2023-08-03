@@ -43,11 +43,11 @@ def test_endpoint():
     assert ServerPropertiesPutCall(
         server="1",
         group_id="Default",
-        body={"port": 8343}).endpoint() == expected__id_endpoint
+        body={"port": 8343}).endpoint == expected__id_endpoint
     assert ServerPropertiesPutCall(
         server="App-Services",
         group_id="Default",
-        body={"port": 8343}).endpoint() == expected__name_endpoint
+        body={"port": 8343}).endpoint == expected__name_endpoint
 
 
 def test_method(default_server_properties_put_call):

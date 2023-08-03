@@ -14,10 +14,10 @@ def default_server_delete_call():
 def test_endpoint():
     assert ServerDeleteCall(
         server="1",
-        group_id="Default").endpoint() == "/manage/v2/servers/1"
+        group_id="Default").endpoint == "/manage/v2/servers/1"
     assert ServerDeleteCall(
         server="App-Services",
-        group_id="Default").endpoint() == "/manage/v2/servers/App-Services"
+        group_id="Default").endpoint == "/manage/v2/servers/App-Services"
 
 
 def test_method(default_server_delete_call):

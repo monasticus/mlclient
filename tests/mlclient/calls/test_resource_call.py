@@ -69,27 +69,35 @@ def test_params_encapsulation():
 def test_set_params():
     call = ResourceCallTestImpl()
     params = call.params
-    assert {} == params
+    assert params == {}
 
     call.params = {
         "custom-param": "custom-value",
     }
-
     assert call.params == {
         "custom-param": "custom-value",
     }
 
 
 def test_set_params_with_none_value():
+    call = ResourceCallTestImpl(
+        params={"custom-param-1": "custom-value"})
+    params = call.params
+    assert params == {"custom-param-1": "custom-value"}
+
+    call.params = None
+    assert call.params == {}
+
+
+def test_set_params_with_none_param():
     call = ResourceCallTestImpl()
     params = call.params
-    assert {} == params
+    assert params == {}
 
     call.params = {
         "custom-param-1": "custom-value",
         "custom-param-2": None,
     }
-
     assert call.params == {
         "custom-param-1": "custom-value",
     }
@@ -153,7 +161,7 @@ def test_headers_when_content_type_exists_and_is_provided():
 def test_headers_encapsulation():
     call = ResourceCallTestImpl()
     headers = call.headers
-    assert {} == headers
+    assert headers == {}
 
     headers["custom-header"] = "custom-value"
     assert headers == {"custom-header": "custom-value"}
@@ -165,30 +173,39 @@ def test_headers_encapsulation():
 def test_set_headers():
     call = ResourceCallTestImpl()
     headers = call.headers
-    assert {} == headers
+    assert headers == {}
 
     call.headers = {
         "custom-header": "custom-value",
     }
-
     assert call.headers == {
         "custom-header": "custom-value",
     }
 
 
 def test_set_headers_with_none_value():
+    call = ResourceCallTestImpl(
+        headers={"custom-header-1": "custom-value"})
+    headers = call.headers
+    assert headers == {"custom-header-1": "custom-value"}
+
+    call.headers = None
+    assert call.headers == {}
+
+
+def test_set_headers_with_none_header():
     call = ResourceCallTestImpl()
     headers = call.headers
-    assert {} == headers
+    assert headers == {}
 
     call.headers = {
         "custom-header-1": "custom-value",
         "custom-header-2": None,
     }
-
     assert call.headers == {
         "custom-header-1": "custom-value",
     }
+
 
 # body
 def test_default_body():

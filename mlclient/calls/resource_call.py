@@ -63,8 +63,8 @@ class ResourceCall(metaclass=ABCMeta):
             a Content-Type header value
         """
         self.method = method
-        self.params = params or {}
-        self.headers = headers or {}
+        self.params = params
+        self.headers = headers
         self.body = body
         if accept:
             self.add_header(constants.HEADER_NAME_ACCEPT, accept)
@@ -157,8 +157,9 @@ class ResourceCall(metaclass=ABCMeta):
             Request parameters
         """
         self._params = {}
-        for key, value in params.items():
-            self.add_param(key, value)
+        if params:
+            for key, value in params.items():
+                self.add_param(key, value)
 
     @property
     def headers(
@@ -186,8 +187,9 @@ class ResourceCall(metaclass=ABCMeta):
             Request headers
         """
         self._headers = {}
-        for key, value in headers.items():
-            self.add_header(key, value)
+        if headers:
+            for key, value in headers.items():
+                self.add_header(key, value)
 
     @property
     def body(

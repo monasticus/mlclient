@@ -26,11 +26,18 @@ class ServerGetCall(ResourceCall):
     The default view is a summary with links to additional data.
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/GET/manage/v2/servers/[id-or-name]
 
+    Attributes
+    ----------
+    All attributes are inherited from the ResourceCall abstract class.
+    This class implements the endpoint computed property to return an endpoint
+    for the specific call.
+
+    endpoint : str
+        An endpoint of the ResourceCall
+
     Methods
     -------
     All public methods are inherited from the ResourceCall abstract class.
-    This class implements the endpoint() abstract method to return an endpoint
-    for the specific call.
     """
 
     _ENDPOINT_TEMPLATE: str = "/manage/v2/servers/{}"
@@ -103,6 +110,7 @@ class ServerGetCall(ResourceCall):
         self.add_param(self._FULL_REFS_PARAM, full_refs)
         self.add_param(self._MODULES_PARAM, modules)
 
+    @property
     def endpoint(
             self,
     ):
@@ -140,11 +148,18 @@ class ServerDeleteCall(ResourceCall):
     This resource address deletes the specified App Server from the specified group.
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/DELETE/manage/v2/servers/[id-or-name]
 
+    Attributes
+    ----------
+    All attributes are inherited from the ResourceCall abstract class.
+    This class implements the endpoint computed property to return an endpoint
+    for the specific call.
+
+    endpoint : str
+        An endpoint of the ResourceCall
+
     Methods
     -------
     All public methods are inherited from the ResourceCall abstract class.
-    This class implements the endpoint() abstract method to return an endpoint
-    for the specific call.
     """
 
     _ENDPOINT_TEMPLATE: str = "/manage/v2/servers/{}"
@@ -170,6 +185,7 @@ class ServerDeleteCall(ResourceCall):
         self.add_param(self._GROUP_ID_PARAM, group_id)
         self._server = server
 
+    @property
     def endpoint(
             self,
     ):

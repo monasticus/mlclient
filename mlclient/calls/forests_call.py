@@ -35,11 +35,18 @@ class ForestsGetCall(ResourceCall):
     ENDPOINT
         A static constant storing the Forests endpoint value
 
+    Attributes
+    ----------
+    All attributes are inherited from the ResourceCall abstract class.
+    This class implements the endpoint computed property to return an endpoint
+    for the specific call.
+
+    endpoint : str
+        An endpoint of the ResourceCall
+
     Methods
     -------
     All public methods are inherited from the ResourceCall abstract class.
-    This class implements the endpoint() abstract method to return an endpoint
-    for the specific call.
     """
 
     ENDPOINT: str = "/manage/v2/forests"
@@ -103,6 +110,7 @@ class ForestsGetCall(ResourceCall):
         self.add_param(self._HOST_ID_PARAM, host)
         self.add_param(self._FULL_REFS_PARAM, full_refs)
 
+    @property
     def endpoint(
             self,
     ):
@@ -146,11 +154,18 @@ class ForestsPostCall(ResourceCall):
     ENDPOINT
         A static constant storing the Forests endpoint value
 
+    Attributes
+    ----------
+    All attributes are inherited from the ResourceCall abstract class.
+    This class implements the endpoint computed property to return an endpoint
+    for the specific call.
+
+    endpoint : str
+        An endpoint of the ResourceCall
+
     Methods
     -------
     All public methods are inherited from the ResourceCall abstract class.
-    This class implements the endpoint() abstract method to return an endpoint
-    for the specific call.
     """
 
     ENDPOINT: str = "/manage/v2/forests"
@@ -184,6 +199,7 @@ class ForestsPostCall(ResourceCall):
         self.add_param(self._WAIT_FOR_FOREST_TO_MOUNT_PARAM,
                        wait_for_forest_to_mount)
 
+    @property
     def endpoint(
             self,
     ):
@@ -221,11 +237,18 @@ class ForestsPutCall(ResourceCall):
     ENDPOINT
         A static constant storing the Forests endpoint value
 
+    Attributes
+    ----------
+    All attributes are inherited from the ResourceCall abstract class.
+    This class implements the endpoint computed property to return an endpoint
+    for the specific call.
+
+    endpoint : str
+        An endpoint of the ResourceCall
+
     Methods
     -------
     All public methods are inherited from the ResourceCall abstract class.
-    This class implements the endpoint() abstract method to return an endpoint
-    for the specific call.
     """
 
     ENDPOINT: str = "/manage/v2/forests"
@@ -249,6 +272,7 @@ class ForestsPutCall(ResourceCall):
                          content_type=content_type,
                          body=body)
 
+    @property
     def endpoint(
             self,
     ):

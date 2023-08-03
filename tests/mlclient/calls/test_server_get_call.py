@@ -39,18 +39,18 @@ def test_validation_view_param():
 def test_endpoint():
     assert ServerGetCall(
         server="1",
-        group_id="Default").endpoint() == "/manage/v2/servers/1"
+        group_id="Default").endpoint == "/manage/v2/servers/1"
     assert ServerGetCall(
         server="App-Services",
-        group_id="Default").endpoint() == "/manage/v2/servers/App-Services"
+        group_id="Default").endpoint == "/manage/v2/servers/App-Services"
 
 
 def test_method(default_server_get_call):
-    assert default_server_get_call.method() == "GET"
+    assert default_server_get_call.method == "GET"
 
 
 def test_parameters(default_server_get_call):
-    assert default_server_get_call.params() == {
+    assert default_server_get_call.params == {
         "group-id": "Default",
         "format": "xml",
         "view": "default",
@@ -58,7 +58,7 @@ def test_parameters(default_server_get_call):
 
 
 def test_headers(default_server_get_call):
-    assert default_server_get_call.headers() == {
+    assert default_server_get_call.headers == {
         "accept": "application/xml",
     }
 
@@ -68,7 +68,7 @@ def test_headers_for_none_format():
         server="App-Services",
         group_id="Default",
         data_format=None)
-    assert call.headers() == {
+    assert call.headers == {
         "accept": "application/xml",
     }
 
@@ -78,27 +78,27 @@ def test_headers_for_html_format():
         server="App-Services",
         group_id="Default",
         data_format="html")
-    assert call.headers() == {
+    assert call.headers == {
         "accept": "text/html",
     }
 
 
 def test_headers_for_xml_format():
     call = ServerGetCall(server="App-Services", group_id="Default", data_format="xml")
-    assert call.headers() == {
+    assert call.headers == {
         "accept": "application/xml",
     }
 
 
 def test_headers_for_json_format():
     call = ServerGetCall(server="App-Services", group_id="Default", data_format="json")
-    assert call.headers() == {
+    assert call.headers == {
         "accept": "application/json",
     }
 
 
 def test_body(default_server_get_call):
-    assert default_server_get_call.body() is None
+    assert default_server_get_call.body is None
 
 
 def test_fully_parametrized_call():
@@ -109,11 +109,11 @@ def test_fully_parametrized_call():
                          host_id="localhost",
                          full_refs=False,
                          modules=True)
-    assert call.method() == "GET"
-    assert call.headers() == {
+    assert call.method == "GET"
+    assert call.headers == {
         "accept": "application/json",
     }
-    assert call.params() == {
+    assert call.params == {
         "group-id": "Default",
         "format": "json",
         "view": "status",
@@ -121,4 +121,4 @@ def test_fully_parametrized_call():
         "fullrefs": "false",
         "modules": "true",
     }
-    assert call.body() is None
+    assert call.body is None

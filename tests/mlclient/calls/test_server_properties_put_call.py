@@ -43,19 +43,19 @@ def test_endpoint():
     assert ServerPropertiesPutCall(
         server="1",
         group_id="Default",
-        body={"port": 8343}).endpoint() == expected__id_endpoint
+        body={"port": 8343}).endpoint == expected__id_endpoint
     assert ServerPropertiesPutCall(
         server="App-Services",
         group_id="Default",
-        body={"port": 8343}).endpoint() == expected__name_endpoint
+        body={"port": 8343}).endpoint == expected__name_endpoint
 
 
 def test_method(default_server_properties_put_call):
-    assert default_server_properties_put_call.method() == "PUT"
+    assert default_server_properties_put_call.method == "PUT"
 
 
 def test_parameters(default_server_properties_put_call):
-    assert default_server_properties_put_call.params() == {
+    assert default_server_properties_put_call.params == {
         "group-id": "Default",
     }
 
@@ -65,7 +65,7 @@ def test_headers_for_dict_body():
         server="App-Services",
         group_id="Default",
         body={"port": 8343})
-    assert call.headers() == {
+    assert call.headers == {
         "content-type": "application/json",
     }
 
@@ -75,7 +75,7 @@ def test_headers_for_stringified_dict_body():
         server="App-Services",
         group_id="Default",
         body='{"port": 8343}')
-    assert call.headers() == {
+    assert call.headers == {
         "content-type": "application/json",
     }
 
@@ -88,7 +88,7 @@ def test_headers_for_xml_body():
         server="App-Services",
         group_id="Default",
         body=body)
-    assert call.headers() == {
+    assert call.headers == {
         "content-type": "application/xml",
     }
 
@@ -98,7 +98,7 @@ def test_dict_body():
         server="App-Services",
         group_id="Default",
         body={"port": 8343})
-    assert call.body() == {"port": 8343}
+    assert call.body == {"port": 8343}
 
 
 def test_stringified_dict_body():
@@ -106,7 +106,7 @@ def test_stringified_dict_body():
         server="App-Services",
         group_id="Default",
         body='{"port": 8343}')
-    assert call.body() == {"port": 8343}
+    assert call.body == {"port": 8343}
 
 
 def test_xml_body():
@@ -117,4 +117,4 @@ def test_xml_body():
         server="App-Services",
         group_id="Default",
         body=body)
-    assert call.body() == body
+    assert call.body == body

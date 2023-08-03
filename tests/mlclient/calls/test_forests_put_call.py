@@ -36,29 +36,29 @@ def test_validation_blank_body_param():
 
 
 def test_endpoint(default_forests_put_call):
-    assert default_forests_put_call.endpoint() == "/manage/v2/forests"
+    assert default_forests_put_call.endpoint == "/manage/v2/forests"
     assert default_forests_put_call.ENDPOINT == "/manage/v2/forests"
     assert ForestsPutCall.ENDPOINT == "/manage/v2/forests"
 
 
 def test_method(default_forests_put_call):
-    assert default_forests_put_call.method() == "PUT"
+    assert default_forests_put_call.method == "PUT"
 
 
 def test_parameters(default_forests_put_call):
-    assert default_forests_put_call.params() == {}
+    assert default_forests_put_call.params == {}
 
 
 def test_headers_for_dict_body():
     call = ForestsPutCall(body={"server-name": "custom-server"})
-    assert call.headers() == {
+    assert call.headers == {
         "content-type": "application/json",
     }
 
 
 def test_headers_for_stringified_dict_body():
     call = ForestsPutCall(body='{"server-name": "custom-server"}')
-    assert call.headers() == {
+    assert call.headers == {
         "content-type": "application/json",
     }
 
@@ -73,7 +73,7 @@ def test_headers_for_xml_body():
             '  <host>custom-host</host>'
             '</forest-combine>')
     call = ForestsPutCall(body=body)
-    assert call.headers() == {
+    assert call.headers == {
         "content-type": "application/xml",
     }
 
@@ -87,14 +87,14 @@ def test_dict_body():
     }
 
     call = ForestsPutCall(body=body)
-    assert call.body() == body
+    assert call.body == body
 
 
 def test_stringified_dict_body():
     body = ('{"operation": "forest-combine", "forest": ["forest-1", "forest-2"], '
             '"forest-name": "forest", "host": "custom-host"}')
     call = ForestsPutCall(body=body)
-    assert call.body() == {
+    assert call.body == {
       "operation": "forest-combine",
       "forest": ["forest-1", "forest-2"],
       "forest-name": "forest",
@@ -112,7 +112,7 @@ def test_xml_body():
             '  <host>custom-host</host>'
             '</forest-combine>')
     call = ForestsPutCall(body=body)
-    assert call.body() == body
+    assert call.body == body
 
 
 def test_fully_parametrized_call():
@@ -123,9 +123,9 @@ def test_fully_parametrized_call():
       "host": "custom-host",
     }
     call = ForestsPutCall(body=body)
-    assert call.method() == "PUT"
-    assert call.headers() == {
+    assert call.method == "PUT"
+    assert call.headers == {
         "content-type": "application/json",
     }
-    assert call.params() == {}
-    assert call.body() == body
+    assert call.params == {}
+    assert call.body == body

@@ -29,11 +29,18 @@ class DatabaseGetCall(ResourceCall):
     Documentation of the REST Resource API:
     https://docs.marklogic.com/REST/GET/manage/v2/databases/[id-or-name]
 
+    Attributes
+    ----------
+    All attributes are inherited from the ResourceCall abstract class.
+    This class implements the endpoint computed property to return an endpoint
+    for the specific call.
+
+    endpoint : str
+        An endpoint of the ResourceCall
+
     Methods
     -------
     All public methods are inherited from the ResourceCall abstract class.
-    This class implements the endpoint() abstract method to return an endpoint
-    for the specific call.
     """
 
     _ENDPOINT_TEMPLATE: str = "/manage/v2/databases/{}"
@@ -76,6 +83,7 @@ class DatabaseGetCall(ResourceCall):
         self.add_param(self._FORMAT_PARAM, data_format)
         self.add_param(self._VIEW_PARAM, view)
 
+    @property
     def endpoint(
             self,
     ):
@@ -116,11 +124,18 @@ class DatabasePostCall(ResourceCall):
     Documentation of the REST Resource API:
     https://docs.marklogic.com/REST/POST/manage/v2/databases/[id-or-name]
 
+    Attributes
+    ----------
+    All attributes are inherited from the ResourceCall abstract class.
+    This class implements the endpoint computed property to return an endpoint
+    for the specific call.
+
+    endpoint : str
+        An endpoint of the ResourceCall
+
     Methods
     -------
     All public methods are inherited from the ResourceCall abstract class.
-    This class implements the endpoint() abstract method to return an endpoint
-    for the specific call.
     """
 
     _ENDPOINT_TEMPLATE: str = "/manage/v2/databases/{}"
@@ -148,6 +163,7 @@ class DatabasePostCall(ResourceCall):
                          body=body)
         self.__database = database
 
+    @property
     def endpoint(
             self,
     ):
@@ -180,11 +196,18 @@ class DatabaseDeleteCall(ResourceCall):
     The database can be identified either by id or name.
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/DELETE/manage/v2/databases/[id-or-name]
 
+    Attributes
+    ----------
+    All attributes are inherited from the ResourceCall abstract class.
+    This class implements the endpoint computed property to return an endpoint
+    for the specific call.
+
+    endpoint : str
+        An endpoint of the ResourceCall
+
     Methods
     -------
     All public methods are inherited from the ResourceCall abstract class.
-    This class implements the endpoint() abstract method to return an endpoint
-    for the specific call.
     """
 
     _ENDPOINT_TEMPLATE: str = "/manage/v2/databases/{}"
@@ -216,6 +239,7 @@ class DatabaseDeleteCall(ResourceCall):
         self.add_param(self._FOREST_DELETE_PARAM, forest_delete)
         self._database = database
 
+    @property
     def endpoint(
             self,
     ):

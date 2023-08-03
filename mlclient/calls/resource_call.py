@@ -17,13 +17,13 @@ class ResourceCall(metaclass=ABCMeta):
 
     Attributes
     ----------
-    method -> str
+    method : str
         A request method
-    params -> dict
+    params : dict
         Request parameters
-    headers -> dict
+    headers : dict
         Request headers
-    body -> str | dict | None
+    body : str | dict | None
         A request body
 
     Methods
@@ -62,14 +62,14 @@ class ResourceCall(metaclass=ABCMeta):
         content_type : str
             a Content-Type header value
         """
-        self._method = method
-        self._params = params or {}
-        self._headers = headers or {}
-        self._body = body
+        self.method = method
+        self.params = params or {}
+        self.headers = headers or {}
+        self.body = body
         if accept:
-            self._headers[constants.HEADER_NAME_ACCEPT] = accept
+            self.add_header(constants.HEADER_NAME_ACCEPT, accept)
         if content_type:
-            self._headers[constants.HEADER_NAME_CONTENT_TYPE] = content_type
+            self.add_header(constants.HEADER_NAME_CONTENT_TYPE, content_type)
 
     @classmethod
     def __subclasshook__(
@@ -104,6 +104,122 @@ class ResourceCall(metaclass=ABCMeta):
         """
         raise NotImplementedError
 
+    @property
+    def method(
+            self,
+    ) -> str:
+        """Return a request method.
+
+        Returns
+        -------
+        str
+            a request method
+        """
+        return self._method
+
+    @method.setter
+    def method(
+            self,
+            method: str,
+    ):
+        """Set a request method.
+
+        Parameters
+        ----------
+        method : str
+            A request method
+        """
+        self._method = method
+
+    @property
+    def params(
+            self,
+    ) -> dict:
+        """Return request parameters.
+
+        Returns
+        -------
+        dict
+            request parameters
+        """
+        return self._params.copy()
+
+    @params.setter
+    def params(
+            self,
+            params: dict,
+    ):
+        """Set request parameters.
+
+        Parameters
+        ----------
+        params : dict
+            Request parameters
+        """
+        self._params = {}
+        for key, value in params.items():
+            self.add_param(key, value)
+
+    @property
+    def headers(
+            self,
+    ) -> dict:
+        """Return request headers.
+
+        Returns
+        -------
+        dict
+            request headers
+        """
+        return self._headers.copy()
+
+    @headers.setter
+    def headers(
+            self,
+            headers: dict,
+    ):
+        """Set request headers.
+
+        Parameters
+        ----------
+        headers : dict
+            Request headers
+        """
+        self._headers = {}
+        for key, value in headers.items():
+            self.add_header(key, value)
+
+    @property
+    def body(
+            self,
+    ) -> str | dict | None:
+        """Return a request body.
+
+        Returns
+        -------
+        str | dict
+            a request body
+        """
+        if isinstance(self._body, str):
+            return self._body
+        if isinstance(self._body, dict):
+            return self._body.copy()
+        return None
+
+    @body.setter
+    def body(
+            self,
+            body: str | dict,
+    ):
+        """Set a request body.
+
+        Parameters
+        ----------
+        body : str | dict
+            a request body
+        """
+        self._body = body
+
     def add_param(
             self,
             param_name: str,
@@ -137,73 +253,3 @@ class ResourceCall(metaclass=ABCMeta):
         """
         if header_name and header_value:
             self._headers[header_name] = header_value
-
-    @property
-    def method(
-            self,
-    ) -> str:
-        """Return a request method.
-
-        Returns
-        -------
-        str
-            a request method
-        """
-        return self._method
-
-    @property
-    def params(
-            self,
-    ) -> dict:
-        """Return request parameters.
-
-        Returns
-        -------
-        dict
-            request parameters
-        """
-        return self._params.copy()
-
-    @property
-    def headers(
-            self,
-    ) -> dict:
-        """Return request headers.
-
-        Returns
-        -------
-        dict
-            request headers
-        """
-        return self._headers.copy()
-
-    @property
-    def body(
-            self,
-    ) -> str | dict | None:
-        """Return a request body.
-
-        Returns
-        -------
-        str | dict
-            a request body
-        """
-        if isinstance(self._body, str):
-            return self._body
-        if isinstance(self._body, dict):
-            return self._body.copy()
-        return None
-
-    @body.setter
-    def body(
-            self,
-            body: str | dict,
-    ):
-        """Set a request body.
-
-        Parameters
-        ----------
-        body : str | dict
-            a request body
-        """
-        self._body = body

@@ -78,7 +78,7 @@ class EvalCall(ResourceCall):
                          content_type=constants.HEADER_X_WWW_FORM_URLENCODED)
         self.add_param(self._DATABASE_PARAM, database)
         self.add_param(self._TXID_PARAM, txid)
-        self.set_body(self._build_body(xquery, javascript, variables))
+        self.body = self._build_body(xquery, javascript, variables)
 
     def endpoint(
             self,

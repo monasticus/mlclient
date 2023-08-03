@@ -15,6 +15,17 @@ from mlclient import constants
 class ResourceCall(metaclass=ABCMeta):
     """An abstract class representing a single request to a MarkLogic REST Resource.
 
+    Attributes
+    ----------
+    method -> str
+        A request method
+    params -> dict
+        Request parameters
+    headers -> dict
+        Request headers
+    body -> str | dict | None
+        A request body
+
     Methods
     -------
     endpoint() -> str
@@ -23,16 +34,6 @@ class ResourceCall(metaclass=ABCMeta):
         Put a request parameter if it's name and value exist
     add_header(header_name: str, header_value: Any)
         Put a request header if it's name and value exist
-    set_body(body: str | dict)
-        Set a request body
-    method() -> str
-        Return a request method
-    params() -> dict
-        Return request parameters
-    headers() -> dict
-        Return request headers
-    body() -> str | dict
-        Return a request body
     """
 
     def __init__(
@@ -137,19 +138,7 @@ class ResourceCall(metaclass=ABCMeta):
         if header_name and header_value:
             self._headers[header_name] = header_value
 
-    def set_body(
-            self,
-            body: str | dict,
-    ):
-        """Set a request body.
-
-        Parameters
-        ----------
-        body : str | dict
-            a request body
-        """
-        self._body = body
-
+    @property
     def method(
             self,
     ) -> str:
@@ -162,6 +151,7 @@ class ResourceCall(metaclass=ABCMeta):
         """
         return self._method
 
+    @property
     def params(
             self,
     ) -> dict:
@@ -174,6 +164,7 @@ class ResourceCall(metaclass=ABCMeta):
         """
         return self._params.copy()
 
+    @property
     def headers(
             self,
     ) -> dict:
@@ -186,9 +177,10 @@ class ResourceCall(metaclass=ABCMeta):
         """
         return self._headers.copy()
 
+    @property
     def body(
             self,
-    ) -> str | dict:
+    ) -> str | dict | None:
         """Return a request body.
 
         Returns
@@ -201,3 +193,17 @@ class ResourceCall(metaclass=ABCMeta):
         if isinstance(self._body, dict):
             return self._body.copy()
         return None
+
+    @body.setter
+    def body(
+            self,
+            body: str | dict,
+    ):
+        """Set a request body.
+
+        Parameters
+        ----------
+        body : str | dict
+            a request body
+        """
+        self._body = body

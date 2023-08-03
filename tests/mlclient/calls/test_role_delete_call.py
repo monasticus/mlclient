@@ -15,16 +15,16 @@ def test_endpoint():
 
 
 def test_method(default_role_delete_call):
-    assert default_role_delete_call.method() == "DELETE"
+    assert default_role_delete_call.method == "DELETE"
 
 
 def test_parameters(default_role_delete_call):
-    assert default_role_delete_call.params() == {}
+    assert default_role_delete_call.params == {}
 
 
 def test_headers(default_role_delete_call):
-    assert default_role_delete_call.headers() == {}
+    assert default_role_delete_call.headers == {}
 
 
 def test_body(default_role_delete_call):
-    assert default_role_delete_call.body() is None
+    assert default_role_delete_call.body is None

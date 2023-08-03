@@ -21,30 +21,30 @@ def test_endpoint():
 
 
 def test_method(default_server_delete_call):
-    assert default_server_delete_call.method() == "DELETE"
+    assert default_server_delete_call.method == "DELETE"
 
 
 def test_parameters(default_server_delete_call):
-    assert default_server_delete_call.params() == {
+    assert default_server_delete_call.params == {
         "group-id": "Default",
     }
 
 
 def test_headers(default_server_delete_call):
-    assert default_server_delete_call.headers() == {}
+    assert default_server_delete_call.headers == {}
 
 
 def test_body(default_server_delete_call):
-    assert default_server_delete_call.body() is None
+    assert default_server_delete_call.body is None
 
 
 def test_fully_parametrized_call():
     call = ServerDeleteCall(
         server="App-Services",
         group_id="Default")
-    assert call.method() == "DELETE"
-    assert call.headers() == {}
-    assert call.params() == {
+    assert call.method == "DELETE"
+    assert call.headers == {}
+    assert call.params == {
         "group-id": "Default",
     }
-    assert call.body() is None
+    assert call.body is None

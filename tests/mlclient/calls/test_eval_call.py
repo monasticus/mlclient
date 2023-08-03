@@ -41,22 +41,22 @@ def test_endpoint(default_eval_call):
 
 
 def test_method(default_eval_call):
-    assert default_eval_call.method() == "POST"
+    assert default_eval_call.method == "POST"
 
 
 def test_parameters(default_eval_call):
-    assert default_eval_call.params() == {}
+    assert default_eval_call.params == {}
 
 
 def test_headers(default_eval_call):
-    assert default_eval_call.headers() == {
+    assert default_eval_call.headers == {
         "accept": "multipart/mixed",
         "content-type": "application/x-www-form-urlencoded",
     }
 
 
 def test_body_without_variables(default_eval_call):
-    assert default_eval_call.body() == {
+    assert default_eval_call.body == {
         "xquery": "()",
     }
 
@@ -64,7 +64,7 @@ def test_body_without_variables(default_eval_call):
 def test_body_with_variables():
     call = EvalCall(xquery="()",
                     variables={"custom-variable": "custom-value"})
-    assert call.body() == {
+    assert call.body == {
         "xquery": "()",
         "vars": '{"custom-variable": "custom-value"}',
     }
@@ -86,7 +86,7 @@ def test_body_is_normalized():
     call = EvalCall(xquery=xquery,
                     variables={"data": "custom-value"})
 
-    assert call.body() == {  # No new line in the xquery code
+    assert call.body == {  # No new line in the xquery code
         "xquery": "xquery version '1.0-ml'; "
                   "declare variable $data as xs:string? external; "
                   "let $a = if (fn:empty($data)) then 'default' else $data "
@@ -100,16 +100,16 @@ def test_fully_parametrized_xquery_call():
                     variables={"custom-variable": "custom-value"},
                     database="custom-db",
                     txid="custom-transaction-id")
-    assert call.method() == "POST"
-    assert call.headers() == {
+    assert call.method == "POST"
+    assert call.headers == {
         "accept": "multipart/mixed",
         "content-type": "application/x-www-form-urlencoded",
     }
-    assert call.params() == {
+    assert call.params == {
         "database": "custom-db",
         "txid": "custom-transaction-id",
     }
-    assert call.body() == {
+    assert call.body == {
         "xquery": "()",
         "vars": '{"custom-variable": "custom-value"}',
     }
@@ -120,16 +120,16 @@ def test_fully_parametrized_javascript_call():
                     variables={"custom-variable": "custom-value"},
                     database="custom-db",
                     txid="custom-transaction-id")
-    assert call.method() == "POST"
-    assert call.headers() == {
+    assert call.method == "POST"
+    assert call.headers == {
         "accept": "multipart/mixed",
         "content-type": "application/x-www-form-urlencoded",
     }
-    assert call.params() == {
+    assert call.params == {
         "database": "custom-db",
         "txid": "custom-transaction-id",
     }
-    assert call.body() == {
+    assert call.body == {
         "javascript": "[]",
         "vars": '{"custom-variable": "custom-value"}',
     }

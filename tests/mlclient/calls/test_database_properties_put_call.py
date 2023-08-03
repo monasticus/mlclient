@@ -40,17 +40,17 @@ def test_endpoint():
 
 
 def test_method(default_database_properties_put_call):
-    assert default_database_properties_put_call.method() == "PUT"
+    assert default_database_properties_put_call.method == "PUT"
 
 
 def test_parameters(default_database_properties_put_call):
-    assert default_database_properties_put_call.params() == {}
+    assert default_database_properties_put_call.params == {}
 
 
 def test_headers_for_dict_body():
     body = {"database-name": "custom-db"}
     call = DatabasePropertiesPutCall(database="Documents", body=body)
-    assert call.headers() == {
+    assert call.headers == {
         "content-type": "application/json",
     }
 
@@ -58,7 +58,7 @@ def test_headers_for_dict_body():
 def test_headers_for_stringified_dict_body():
     body = '{"database-name": "custom-db"}'
     call = DatabasePropertiesPutCall(database="Documents", body=body)
-    assert call.headers() == {
+    assert call.headers == {
         "content-type": "application/json",
     }
 
@@ -68,7 +68,7 @@ def test_headers_for_xml_body():
             '  <database-name>custom-db</database-name>'
             '</database-properties>')
     call = DatabasePropertiesPutCall(database="Documents", body=body)
-    assert call.headers() == {
+    assert call.headers == {
         "content-type": "application/xml",
     }
 
@@ -76,13 +76,13 @@ def test_headers_for_xml_body():
 def test_dict_body():
     body = {"database-name": "custom-db"}
     call = DatabasePropertiesPutCall(database="Documents", body=body)
-    assert call.body() == {"database-name": "custom-db"}
+    assert call.body == {"database-name": "custom-db"}
 
 
 def test_stringified_dict_body():
     body = '{"database-name": "custom-db"}'
     call = DatabasePropertiesPutCall(database="Documents", body=body)
-    assert call.body() == {"database-name": "custom-db"}
+    assert call.body == {"database-name": "custom-db"}
 
 
 def test_xml_body():
@@ -90,4 +90,4 @@ def test_xml_body():
             '  <database-name>custom-db</database-name>'
             '</database-properties>')
     call = DatabasePropertiesPutCall(database="Documents", body=body)
-    assert call.body() == body
+    assert call.body == body

@@ -1608,8 +1608,8 @@ class MLResourceClient(MLClient):
             An HTTP response
         """
         return self.request(
-            method=call.method(),
+            method=call.method,
             endpoint=call.endpoint(),
-            params=call.params(),
-            headers=call.headers(),
-            body=call.body())
+            params=call.params,
+            headers=call.headers,
+            body=call.body)

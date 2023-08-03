@@ -43,18 +43,18 @@ def test_endpoint():
 
 
 def test_method(default_forest_post_call):
-    assert default_forest_post_call.method() == "POST"
+    assert default_forest_post_call.method == "POST"
 
 
 def test_parameters(default_forest_post_call):
-    assert default_forest_post_call.params() == {}
+    assert default_forest_post_call.params == {}
 
 
 def test_headers(default_forest_post_call):
-    assert default_forest_post_call.headers() == {
+    assert default_forest_post_call.headers == {
         "content-type": "application/x-www-form-urlencoded",
     }
 
 
 def test_body(default_forest_post_call):
-    assert default_forest_post_call.body() == {"state": "clear"}
+    assert default_forest_post_call.body == {"state": "clear"}

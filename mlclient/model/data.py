@@ -19,8 +19,9 @@ import json
 import logging
 import re
 import xml.etree.ElementTree as ElemTree
+from abc import ABCMeta, abstractmethod
 from enum import Enum
-from typing import ClassVar
+from typing import ClassVar, Any
 from xml.dom import minidom
 
 logger = logging.getLogger(__name__)
@@ -47,7 +48,7 @@ class DocumentType(Enum):
     TEXT: str = "text"
 
 
-class Document:
+class Document(metaclass=ABCMeta):
     """A class representing a single MarkLogic document.
 
     Methods
@@ -86,6 +87,39 @@ class Document:
         self._doc_type = doc_type
         self._metadata = metadata
         self._is_temporal = is_temporal
+
+    @classmethod
+    def __subclasshook__(
+            cls,
+            subclass: Document,
+    ):
+        """Verify if a subclass implements all abstract methods.
+
+        Parameters
+        ----------
+        subclass : Document
+            A Document subclass
+
+        Returns
+        -------
+        bool
+            True if the subclass includes the content property
+        """
+        return "content" in subclass.__dict__ and not callable(subclass.content)
+
+    @property
+    @abstractmethod
+    def content(
+            self,
+    ) -> Any:
+        """Return a document's content.
+
+        Returns
+        -------
+        Any
+            A document's content
+        """
+        raise NotImplementedError
 
     def uri(
             self,

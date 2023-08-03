@@ -28,11 +28,11 @@ class ForestPropertiesGetCall(ResourceCall):
     https://docs.marklogic.com/REST/GET/manage/v2/forests/[id-or-name]/properties
 
     Attributes
-    -------
+    ----------
     All attributes are inherited from the ResourceCall abstract class.
-    his class implements the endpoint computed property to return an endpoint
+    This class implements the endpoint computed property to return an endpoint
     for the specific call.
-    
+
     endpoint : str
         An endpoint of the ResourceCall
 
@@ -105,11 +105,11 @@ class ForestPropertiesPutCall(ResourceCall):
     https://docs.marklogic.com/REST/PUT/manage/v2/forests/[id-or-name]/properties
 
     Attributes
-    -------
+    ----------
     All attributes are inherited from the ResourceCall abstract class.
-    his class implements the endpoint computed property to return an endpoint
+    This class implements the endpoint computed property to return an endpoint
     for the specific call.
-    
+
     endpoint : str
         An endpoint of the ResourceCall
 

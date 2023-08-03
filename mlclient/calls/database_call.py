@@ -30,11 +30,11 @@ class DatabaseGetCall(ResourceCall):
     https://docs.marklogic.com/REST/GET/manage/v2/databases/[id-or-name]
 
     Attributes
-    -------
+    ----------
     All attributes are inherited from the ResourceCall abstract class.
-    his class implements the endpoint computed property to return an endpoint
+    This class implements the endpoint computed property to return an endpoint
     for the specific call.
-    
+
     endpoint : str
         An endpoint of the ResourceCall
 
@@ -125,11 +125,11 @@ class DatabasePostCall(ResourceCall):
     https://docs.marklogic.com/REST/POST/manage/v2/databases/[id-or-name]
 
     Attributes
-    -------
+    ----------
     All attributes are inherited from the ResourceCall abstract class.
-    his class implements the endpoint computed property to return an endpoint
+    This class implements the endpoint computed property to return an endpoint
     for the specific call.
-    
+
     endpoint : str
         An endpoint of the ResourceCall
 
@@ -197,11 +197,11 @@ class DatabaseDeleteCall(ResourceCall):
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/DELETE/manage/v2/databases/[id-or-name]
 
     Attributes
-    -------
+    ----------
     All attributes are inherited from the ResourceCall abstract class.
-    his class implements the endpoint computed property to return an endpoint
+    This class implements the endpoint computed property to return an endpoint
     for the specific call.
-    
+
     endpoint : str
         An endpoint of the ResourceCall
 

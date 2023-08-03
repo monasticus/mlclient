@@ -27,11 +27,11 @@ class LogsCall(ResourceCall):
         A static constant storing the Logs endpoint value
 
     Attributes
-    -------
+    ----------
     All attributes are inherited from the ResourceCall abstract class.
-    his class implements the endpoint computed property to return an endpoint
+    This class implements the endpoint computed property to return an endpoint
     for the specific call.
-    
+
     endpoint : str
         An endpoint of the ResourceCall
 

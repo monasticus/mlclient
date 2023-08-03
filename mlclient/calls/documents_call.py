@@ -22,11 +22,11 @@ class DocumentsGetCall(ResourceCall):
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/GET/v1/documents
 
     Attributes
-    -------
+    ----------
     All attributes are inherited from the ResourceCall abstract class.
-    his class implements the endpoint computed property to return an endpoint
+    This class implements the endpoint computed property to return an endpoint
     for the specific call.
-    
+
     endpoint : str
         An endpoint of the ResourceCall
 

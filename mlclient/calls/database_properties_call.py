@@ -28,11 +28,11 @@ class DatabasePropertiesGetCall(ResourceCall):
     https://docs.marklogic.com/REST/GET/manage/v2/databases/[id-or-name]/properties
 
     Attributes
-    -------
+    ----------
     All attributes are inherited from the ResourceCall abstract class.
-    his class implements the endpoint computed property to return an endpoint
+    This class implements the endpoint computed property to return an endpoint
     for the specific call.
-    
+
     endpoint : str
         An endpoint of the ResourceCall
 
@@ -107,11 +107,11 @@ class DatabasePropertiesPutCall(ResourceCall):
     https://docs.marklogic.com/REST/PUT/manage/v2/databases/[id-or-name]/properties
 
     Attributes
-    -------
+    ----------
     All attributes are inherited from the ResourceCall abstract class.
-    his class implements the endpoint computed property to return an endpoint
+    This class implements the endpoint computed property to return an endpoint
     for the specific call.
-    
+
     endpoint : str
         An endpoint of the ResourceCall
 

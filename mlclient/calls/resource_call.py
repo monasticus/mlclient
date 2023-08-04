@@ -18,7 +18,7 @@ class ResourceCall(metaclass=ABCMeta):
     Attributes
     ----------
     endpoint : str
-        A computed property implemented in a subclass
+        An endpoint of the ResourceCall
     method : str
         A request method
     params : dict

@@ -51,6 +51,19 @@ class DocumentType(Enum):
 class Document(metaclass=ABCMeta):
     """A class representing a single MarkLogic document.
 
+    Attributes
+    ----------
+    content : str
+        A document content
+    uri : str
+        A document URI
+    doc_type : DocumentType
+        A document type
+    metadata : Metadata
+        A document metadata
+    is_temporal : bool
+        The temporal flag
+
     Methods
     -------
     uri() -> str
@@ -121,24 +134,28 @@ class Document(metaclass=ABCMeta):
         """
         raise NotImplementedError
 
+    @property
     def uri(
             self,
     ) -> str:
         """Return a document URI."""
         return self._uri
 
+    @property
     def doc_type(
             self,
     ) -> DocumentType:
         """Return a document type."""
         return self._doc_type
 
+    @property
     def metadata(
             self,
     ) -> Metadata:
         """Return a document metadata."""
         return copy.copy(self._metadata)
 
+    @property
     def is_temporal(
             self,
     ) -> bool:

@@ -12,6 +12,7 @@ import logging
 from types import TracebackType
 
 from requests import Response, Session
+from requests.adapters import HTTPAdapter, Retry
 from requests.auth import AuthBase, HTTPBasicAuth, HTTPDigestAuth
 
 from mlclient import constants
@@ -109,6 +110,12 @@ class MLClient:
         Send an HTTP request.
     """
 
+    _DEFAULT_RETRY_STRATEGY = Retry(
+        connect=5,
+        allowed_methods=None,  # any
+        backoff_factor=0.5,
+    )
+
     def __init__(
             self,
             protocol: str = "http",
@@ -117,23 +124,26 @@ class MLClient:
             auth_method: str = "basic",
             username: str = "admin",
             password: str = "admin",
+            retry: Retry = _DEFAULT_RETRY_STRATEGY,
     ):
         """Initialize MLClient instance.
 
         Parameters
         ----------
-        protocol : str
-            a protocol used for HTTP requests (http / https)
-        host : str
-            a host name
-        port : int
-            an App Service port
-        auth_method : str
-            an authorization method (basic / digest)
-        username : str
-            a username
-        password : str
-            a password
+        protocol : str, default "http"
+            A protocol used for HTTP requests (http / https)
+        host : str, default "localhost"
+            A host name
+        port : int, default 8002
+            An App Service port
+        auth_method : str, default "basic"
+            An authorization method (basic / digest)
+        username : str, default "admin"
+            A username
+        password : str, default "admin"
+            A password
+        retry : Retry, default Retry(connect=5,allowed_methods=None,backoff_factor=0.5)
+            A retry strategy
         """
         self.protocol: str = protocol
         self.host: str = host
@@ -142,6 +152,7 @@ class MLClient:
         self.username: str = username
         self.password: str = password
         self.base_url: str = f"{protocol}://{host}:{port}"
+        self._retry: Retry = retry
         self._sess: Session | None = None
         auth_impl = HTTPBasicAuth if auth_method == "basic" else HTTPDigestAuth
         self._auth: AuthBase = auth_impl(username, password)
@@ -188,6 +199,7 @@ class MLClient:
         """Start an HTTP session."""
         logger.debug("Initiating a connection")
         self._sess = Session()
+        self._sess.mount(self.base_url, HTTPAdapter(max_retries=self._retry))
 
     def disconnect(
             self,
@@ -1608,8 +1620,8 @@ class MLResourceClient(MLClient):
             An HTTP response
         """
         return self.request(
-            method=call.method(),
-            endpoint=call.endpoint(),
-            params=call.params(),
-            headers=call.headers(),
-            body=call.body())
+            method=call.method,
+            endpoint=call.endpoint,
+            params=call.params,
+            headers=call.headers,
+            body=call.body)

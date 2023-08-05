@@ -32,11 +32,18 @@ class ServersGetCall(ResourceCall):
     ENDPOINT
         A static constant storing the Servers endpoint value
 
+    Attributes
+    ----------
+    All attributes are inherited from the ResourceCall abstract class.
+    This class implements the endpoint computed property to return an endpoint
+    for the specific call.
+
+    endpoint : str
+        An endpoint of the ResourceCall
+
     Methods
     -------
     All public methods are inherited from the ResourceCall abstract class.
-    This class implements the endpoint() abstract method to return an endpoint
-    for the specific call.
     """
 
     ENDPOINT: str = "/manage/v2/servers"
@@ -88,6 +95,7 @@ class ServersGetCall(ResourceCall):
         self.add_param(self._VIEW_PARAM, view)
         self.add_param(self._FULL_REFS_PARAM, full_refs)
 
+    @property
     def endpoint(
             self,
     ):
@@ -130,11 +138,18 @@ class ServersPostCall(ResourceCall):
     ENDPOINT
         A static constant storing the Servers endpoint value
 
+    Attributes
+    ----------
+    All attributes are inherited from the ResourceCall abstract class.
+    This class implements the endpoint computed property to return an endpoint
+    for the specific call.
+
+    endpoint : str
+        An endpoint of the ResourceCall
+
     Methods
     -------
     All public methods are inherited from the ResourceCall abstract class.
-    This class implements the endpoint() abstract method to return an endpoint
-    for the specific call.
     """
 
     ENDPOINT: str = "/manage/v2/servers"
@@ -177,6 +192,7 @@ class ServersPostCall(ResourceCall):
         self.add_param(self._GROUP_ID_PARAM, group_id)
         self.add_param(self._SERVER_TYPE_PARAM, server_type)
 
+    @property
     def endpoint(
             self,
     ):

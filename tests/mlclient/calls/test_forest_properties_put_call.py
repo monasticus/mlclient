@@ -39,25 +39,25 @@ def test_endpoint():
     expected__name_endpoint = "/manage/v2/forests/forest-1/properties"
     assert ForestPropertiesPutCall(
         forest="1",
-        body={"forest-name": "custom-forest"}).endpoint() == expected__id_endpoint
+        body={"forest-name": "custom-forest"}).endpoint == expected__id_endpoint
     assert ForestPropertiesPutCall(
         forest="forest-1",
-        body={"forest-name": "custom-forest"}).endpoint() == expected__name_endpoint
+        body={"forest-name": "custom-forest"}).endpoint == expected__name_endpoint
 
 
 def test_method(default_forest_properties_put_call):
-    assert default_forest_properties_put_call.method() == "PUT"
+    assert default_forest_properties_put_call.method == "PUT"
 
 
 def test_parameters(default_forest_properties_put_call):
-    assert default_forest_properties_put_call.params() == {}
+    assert default_forest_properties_put_call.params == {}
 
 
 def test_headers_for_dict_body():
     call = ForestPropertiesPutCall(
         forest="forest-1",
         body={"forest-name": "custom-forest"})
-    assert call.headers() == {
+    assert call.headers == {
         "content-type": "application/json",
     }
 
@@ -66,7 +66,7 @@ def test_headers_for_stringified_dict_body():
     call = ForestPropertiesPutCall(
         forest="forest-1",
         body='{"forest-name": "custom-forest"}')
-    assert call.headers() == {
+    assert call.headers == {
         "content-type": "application/json",
     }
 
@@ -78,7 +78,7 @@ def test_headers_for_xml_body():
     call = ForestPropertiesPutCall(
         forest="forest-1",
         body=body)
-    assert call.headers() == {
+    assert call.headers == {
         "content-type": "application/xml",
     }
 
@@ -87,14 +87,14 @@ def test_dict_body():
     call = ForestPropertiesPutCall(
         forest="forest-1",
         body={"forest-name": "custom-forest"})
-    assert call.body() == {"forest-name": "custom-forest"}
+    assert call.body == {"forest-name": "custom-forest"}
 
 
 def test_stringified_dict_body():
     call = ForestPropertiesPutCall(
         forest="forest-1",
         body='{"forest-name": "custom-forest"}')
-    assert call.body() == {"forest-name": "custom-forest"}
+    assert call.body == {"forest-name": "custom-forest"}
 
 
 def test_xml_body():
@@ -104,4 +104,4 @@ def test_xml_body():
     call = ForestPropertiesPutCall(
         forest="forest-1",
         body=body)
-    assert call.body() == body
+    assert call.body == body

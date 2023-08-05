@@ -26,11 +26,18 @@ class EvalCall(ResourceCall):
     ENDPOINT
         A static constant storing the Eval endpoint value
 
+    Attributes
+    ----------
+    All attributes are inherited from the ResourceCall abstract class.
+    This class implements the endpoint computed property to return an endpoint
+    for the specific call.
+
+    endpoint : str
+        An endpoint of the ResourceCall
+
     Methods
     -------
     All public methods are inherited from the ResourceCall abstract class.
-    This class implements the endpoint() abstract method to return an endpoint
-    for the specific call.
     """
 
     ENDPOINT: str = "/v1/eval"
@@ -78,8 +85,9 @@ class EvalCall(ResourceCall):
                          content_type=constants.HEADER_X_WWW_FORM_URLENCODED)
         self.add_param(self._DATABASE_PARAM, database)
         self.add_param(self._TXID_PARAM, txid)
-        self.set_body(self._build_body(xquery, javascript, variables))
+        self.body = self._build_body(xquery, javascript, variables)
 
+    @property
     def endpoint(
             self,
     ):

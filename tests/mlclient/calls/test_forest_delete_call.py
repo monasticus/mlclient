@@ -36,28 +36,28 @@ def test_validation_replicas_param():
 def test_endpoint():
     assert ForestDeleteCall(
         forest="1",
-        level="full").endpoint() == "/manage/v2/forests/1"
+        level="full").endpoint == "/manage/v2/forests/1"
     assert ForestDeleteCall(
         forest="custom-forest",
-        level="full").endpoint() == "/manage/v2/forests/custom-forest"
+        level="full").endpoint == "/manage/v2/forests/custom-forest"
 
 
 def test_method(default_forest_delete_call):
-    assert default_forest_delete_call.method() == "DELETE"
+    assert default_forest_delete_call.method == "DELETE"
 
 
 def test_parameters(default_forest_delete_call):
-    assert default_forest_delete_call.params() == {
+    assert default_forest_delete_call.params == {
         "level": "full",
     }
 
 
 def test_headers(default_forest_delete_call):
-    assert default_forest_delete_call.headers() == {}
+    assert default_forest_delete_call.headers == {}
 
 
 def test_body(default_forest_delete_call):
-    assert default_forest_delete_call.body() is None
+    assert default_forest_delete_call.body is None
 
 
 def test_fully_parametrized_call():
@@ -65,10 +65,10 @@ def test_fully_parametrized_call():
         forest="custom-forest",
         level="config-only",
         replicas="delete")
-    assert call.method() == "DELETE"
-    assert call.headers() == {}
-    assert call.params() == {
+    assert call.method == "DELETE"
+    assert call.headers == {}
+    assert call.params == {
         "level": "config-only",
         "replicas": "delete",
     }
-    assert call.body() is None
+    assert call.body is None

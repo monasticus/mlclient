@@ -45,29 +45,29 @@ def test_validation_blank_body_param():
 
 
 def test_endpoint(default_servers_post_call):
-    assert default_servers_post_call.endpoint() == "/manage/v2/servers"
+    assert default_servers_post_call.endpoint == "/manage/v2/servers"
     assert default_servers_post_call.ENDPOINT == "/manage/v2/servers"
     assert ServersPostCall.ENDPOINT == "/manage/v2/servers"
 
 
 def test_method(default_servers_post_call):
-    assert default_servers_post_call.method() == "POST"
+    assert default_servers_post_call.method == "POST"
 
 
 def test_parameters(default_servers_post_call):
-    assert default_servers_post_call.params() == {}
+    assert default_servers_post_call.params == {}
 
 
 def test_headers_for_dict_body():
     call = ServersPostCall(body={"server-name": "custom-server"})
-    assert call.headers() == {
+    assert call.headers == {
         "content-type": "application/json",
     }
 
 
 def test_headers_for_stringified_dict_body():
     call = ServersPostCall(body='{"server-name": "custom-server"}')
-    assert call.headers() == {
+    assert call.headers == {
         "content-type": "application/json",
     }
 
@@ -77,19 +77,19 @@ def test_headers_for_xml_body():
             '  <server-name>custom-server</server-name>'
             '</http-server-properties>')
     call = ServersPostCall(body=body)
-    assert call.headers() == {
+    assert call.headers == {
         "content-type": "application/xml",
     }
 
 
 def test_dict_body():
     call = ServersPostCall(body={"server-name": "custom-server"})
-    assert call.body() == {"server-name": "custom-server"}
+    assert call.body == {"server-name": "custom-server"}
 
 
 def test_stringified_dict_body():
     call = ServersPostCall(body='{"server-name": "custom-server"}')
-    assert call.body() == {"server-name": "custom-server"}
+    assert call.body == {"server-name": "custom-server"}
 
 
 def test_xml_body():
@@ -97,7 +97,7 @@ def test_xml_body():
             '  <server-name>custom-server</server-name>'
             '</http-server-properties>')
     call = ServersPostCall(body=body)
-    assert call.body() == body
+    assert call.body == body
 
 
 def test_fully_parametrized_call():
@@ -110,12 +110,12 @@ def test_fully_parametrized_call():
     call = ServersPostCall(group_id="Default",
                            server_type="http",
                            body=body)
-    assert call.method() == "POST"
-    assert call.headers() == {
+    assert call.method == "POST"
+    assert call.headers == {
         "content-type": "application/json",
     }
-    assert call.params() == {
+    assert call.params == {
         "group-id": "Default",
         "server-type": "http",
     }
-    assert call.body() == body
+    assert call.body == body

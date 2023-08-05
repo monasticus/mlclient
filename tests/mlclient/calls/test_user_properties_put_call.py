@@ -33,30 +33,30 @@ def test_endpoint():
     expected__name_endpoint = "/manage/v2/users/admin/properties"
     assert UserPropertiesPutCall(
         user="1",
-        body={"user-name": "custom-user"}).endpoint() == expected__id_endpoint
+        body={"user-name": "custom-user"}).endpoint == expected__id_endpoint
     assert UserPropertiesPutCall(
         user="admin",
-        body={"user-name": "custom-user"}).endpoint() == expected__name_endpoint
+        body={"user-name": "custom-user"}).endpoint == expected__name_endpoint
 
 
 def test_method(default_user_properties_put_call):
-    assert default_user_properties_put_call.method() == "PUT"
+    assert default_user_properties_put_call.method == "PUT"
 
 
 def test_parameters(default_user_properties_put_call):
-    assert default_user_properties_put_call.params() == {}
+    assert default_user_properties_put_call.params == {}
 
 
 def test_headers_for_dict_body():
     call = UserPropertiesPutCall(user="admin", body={"user-name": "custom-user"})
-    assert call.headers() == {
+    assert call.headers == {
         "content-type": "application/json",
     }
 
 
 def test_headers_for_stringified_dict_body():
     call = UserPropertiesPutCall(user="admin", body='{"user-name": "custom-user"}')
-    assert call.headers() == {
+    assert call.headers == {
         "content-type": "application/json",
     }
 
@@ -66,19 +66,19 @@ def test_headers_for_xml_body():
             '  <user-name>custom-user</user-name>'
             '</user-properties>')
     call = UserPropertiesPutCall(user="admin", body=body)
-    assert call.headers() == {
+    assert call.headers == {
         "content-type": "application/xml",
     }
 
 
 def test_dict_body():
     call = UserPropertiesPutCall(user="admin", body={"user-name": "custom-user"})
-    assert call.body() == {"user-name": "custom-user"}
+    assert call.body == {"user-name": "custom-user"}
 
 
 def test_stringified_dict_body():
     call = UserPropertiesPutCall(user="admin", body='{"user-name": "custom-user"}')
-    assert call.body() == {"user-name": "custom-user"}
+    assert call.body == {"user-name": "custom-user"}
 
 
 def test_xml_body():
@@ -86,4 +86,4 @@ def test_xml_body():
             '  <user-name>custom-user</user-name>'
             '</user-properties>')
     call = UserPropertiesPutCall(user="admin", body=body)
-    assert call.body() == body
+    assert call.body == body

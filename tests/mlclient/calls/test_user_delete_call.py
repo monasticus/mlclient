@@ -10,21 +10,21 @@ def default_user_delete_call():
 
 
 def test_endpoint():
-    assert UserDeleteCall(user="1").endpoint() == "/manage/v2/users/1"
-    assert UserDeleteCall(user="admin").endpoint() == "/manage/v2/users/admin"
+    assert UserDeleteCall(user="1").endpoint == "/manage/v2/users/1"
+    assert UserDeleteCall(user="admin").endpoint == "/manage/v2/users/admin"
 
 
 def test_method(default_user_delete_call):
-    assert default_user_delete_call.method() == "DELETE"
+    assert default_user_delete_call.method == "DELETE"
 
 
 def test_parameters(default_user_delete_call):
-    assert default_user_delete_call.params() == {}
+    assert default_user_delete_call.params == {}
 
 
 def test_headers(default_user_delete_call):
-    assert default_user_delete_call.headers() == {}
+    assert default_user_delete_call.headers == {}
 
 
 def test_body(default_user_delete_call):
-    assert default_user_delete_call.body() is None
+    assert default_user_delete_call.body is None

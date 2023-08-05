@@ -26,11 +26,18 @@ class LogsCall(ResourceCall):
     ENDPOINT
         A static constant storing the Logs endpoint value
 
+    Attributes
+    ----------
+    All attributes are inherited from the ResourceCall abstract class.
+    This class implements the endpoint computed property to return an endpoint
+    for the specific call.
+
+    endpoint : str
+        An endpoint of the ResourceCall
+
     Methods
     -------
     All public methods are inherited from the ResourceCall abstract class.
-    This class implements the endpoint() abstract method to return an endpoint
-    for the specific call.
     """
 
     ENDPOINT: str = "/manage/v2/logs"
@@ -82,6 +89,7 @@ class LogsCall(ResourceCall):
                        self._reformat_datetime_param(end_time))
         self.add_param(self._REGEX_PARAM, regex)
 
+    @property
     def endpoint(
             self,
     ):

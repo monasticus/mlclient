@@ -44,55 +44,55 @@ def test_validation_format_param_for_metadata_categories():
 
 
 def test_endpoint(default_documents_get_call):
-    assert default_documents_get_call.endpoint() == "/v1/documents"
+    assert default_documents_get_call.endpoint == "/v1/documents"
     assert default_documents_get_call.ENDPOINT == "/v1/documents"
     assert DocumentsGetCall.ENDPOINT == "/v1/documents"
 
 
 def test_method(default_documents_get_call):
-    assert default_documents_get_call.method() == "GET"
+    assert default_documents_get_call.method == "GET"
 
 
 def test_parameters_single_uri():
-    assert DocumentsGetCall(uri="/a.xml").params() == {
+    assert DocumentsGetCall(uri="/a.xml").params == {
         "uri": "/a.xml",
     }
 
 
 def test_parameters_multiple_uris():
-    assert DocumentsGetCall(uri=["/a.xml", "/b.xml"]).params() == {
+    assert DocumentsGetCall(uri=["/a.xml", "/b.xml"]).params == {
         "uri": ["/a.xml", "/b.xml"],
     }
 
 
 def test_headers_for_single_uri_and_no_format():
-    assert DocumentsGetCall(uri="/a.xml").headers() == {}
+    assert DocumentsGetCall(uri="/a.xml").headers == {}
 
 
 def test_headers_for_single_uri_and_none_format():
     assert DocumentsGetCall(
         uri="/a.xml",
-        data_format=None).headers() == {}
+        data_format=None).headers == {}
 
 
 def test_headers_for_single_uri_no_category_and_format():
     assert DocumentsGetCall(
         uri="/a.xml",
-        data_format="json").headers() == {}
+        data_format="json").headers == {}
 
 
 def test_headers_for_single_uri_content_category_and_format():
     assert DocumentsGetCall(
         uri="/a.xml",
         category="content",
-        data_format="json").headers() == {}
+        data_format="json").headers == {}
 
 
 def test_headers_for_single_uri_metadata_category_and_json_format():
     assert DocumentsGetCall(
         uri="/a.xml",
         category="collections",
-        data_format="json").headers() == {
+        data_format="json").headers == {
         "accept": "application/json",
     }
 
@@ -101,13 +101,13 @@ def test_headers_for_single_uri_metadata_category_and_xml_format():
     assert DocumentsGetCall(
         uri="/a.xml",
         category="collections",
-        data_format="xml").headers() == {
+        data_format="xml").headers == {
         "accept": "application/xml",
     }
 
 
 def test_headers_for_multiple_uris_and_no_format():
-    assert DocumentsGetCall(uri=["/a.xml", "/b.xml"]).headers() == {
+    assert DocumentsGetCall(uri=["/a.xml", "/b.xml"]).headers == {
         "accept": "multipart/mixed",
     }
 
@@ -115,7 +115,7 @@ def test_headers_for_multiple_uris_and_no_format():
 def test_headers_for_multiple_uris_and_none_format():
     assert DocumentsGetCall(
         uri=["/a.xml", "/b.xml"],
-        data_format=None).headers() == {
+        data_format=None).headers == {
         "accept": "multipart/mixed",
     }
 
@@ -123,7 +123,7 @@ def test_headers_for_multiple_uris_and_none_format():
 def test_headers_for_multiple_uris_no_category_and_format():
     assert DocumentsGetCall(
         uri=["/a.xml", "/b.xml"],
-        data_format="json").headers() == {
+        data_format="json").headers == {
         "accept": "multipart/mixed",
     }
 
@@ -132,7 +132,7 @@ def test_headers_for_multiple_uris_content_category_and_format():
     assert DocumentsGetCall(
         uri=["/a.xml", "/b.xml"],
         category="content",
-        data_format="json").headers() == {
+        data_format="json").headers == {
         "accept": "multipart/mixed",
     }
 
@@ -141,7 +141,7 @@ def test_headers_for_multiple_uris_metadata_category_and_json_format():
     assert DocumentsGetCall(
         uri=["/a.xml", "/b.xml"],
         category="collections",
-        data_format="json").headers() == {
+        data_format="json").headers == {
         "accept": "multipart/mixed",
     }
 
@@ -150,13 +150,13 @@ def test_headers_for_multiple_uris_metadata_category_and_xml_format():
     assert DocumentsGetCall(
         uri=["/a.xml", "/b.xml"],
         category="collections",
-        data_format="xml").headers() == {
+        data_format="xml").headers == {
         "accept": "multipart/mixed",
     }
 
 
 def test_body(default_documents_get_call):
-    assert default_documents_get_call.body() is None
+    assert default_documents_get_call.body is None
 
 
 def test_fully_parametrized_call_for_single_uri_content():
@@ -168,9 +168,9 @@ def test_fully_parametrized_call_for_single_uri_content():
         transform_params={"custom-param-1": "custom-value-1",
                           "custom-param-2": "custom-value-2"},
         txid="transaction")
-    assert call.method() == "GET"
-    assert call.headers() == {}
-    assert call.params() == {
+    assert call.method == "GET"
+    assert call.headers == {}
+    assert call.params == {
         "uri": "/a.xml",
         "database": "Documents",
         "timestamp": "16692287403272560",
@@ -179,7 +179,7 @@ def test_fully_parametrized_call_for_single_uri_content():
         "trans:custom-param-2": "custom-value-2",
         "txid": "transaction",
     }
-    assert call.body() is None
+    assert call.body is None
 
 
 def test_fully_parametrized_call_for_single_uri_metadata():
@@ -193,11 +193,11 @@ def test_fully_parametrized_call_for_single_uri_metadata():
         transform_params={"custom-param-1": "custom-value-1",
                           "custom-param-2": "custom-value-2"},
         txid="transaction")
-    assert call.method() == "GET"
-    assert call.headers() == {
+    assert call.method == "GET"
+    assert call.headers == {
         "accept": "application/xml",
     }
-    assert call.params() == {
+    assert call.params == {
         "uri": "/a.xml",
         "database": "Documents",
         "category": "properties",
@@ -208,7 +208,7 @@ def test_fully_parametrized_call_for_single_uri_metadata():
         "trans:custom-param-2": "custom-value-2",
         "txid": "transaction",
     }
-    assert call.body() is None
+    assert call.body is None
 
 
 def test_fully_parametrized_call_for_multiple_uris_metadata():
@@ -222,11 +222,11 @@ def test_fully_parametrized_call_for_multiple_uris_metadata():
         transform_params={"custom-param-1": "custom-value-1",
                           "custom-param-2": "custom-value-2"},
         txid="transaction")
-    assert call.method() == "GET"
-    assert call.headers() == {
+    assert call.method == "GET"
+    assert call.headers == {
         "accept": "multipart/mixed",
     }
-    assert call.params() == {
+    assert call.params == {
         "uri": ["/a.xml", "/b.xml"],
         "database": "Documents",
         "category": "collections",
@@ -237,4 +237,4 @@ def test_fully_parametrized_call_for_multiple_uris_metadata():
         "trans:custom-param-2": "custom-value-2",
         "txid": "transaction",
     }
-    assert call.body() is None
+    assert call.body is None

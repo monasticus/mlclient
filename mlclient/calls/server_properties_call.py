@@ -27,11 +27,18 @@ class ServerPropertiesGetCall(ResourceCall):
     Documentation of the REST Resource API:
     https://docs.marklogic.com/REST/GET/manage/v2/servers/[id-or-name]/properties
 
+    Attributes
+    ----------
+    All attributes are inherited from the ResourceCall abstract class.
+    This class implements the endpoint computed property to return an endpoint
+    for the specific call.
+
+    endpoint : str
+        An endpoint of the ResourceCall
+
     Methods
     -------
     All public methods are inherited from the ResourceCall abstract class.
-    This class implements the endpoint() abstract method to return an endpoint
-    for the specific call.
     """
 
     _ENDPOINT_TEMPLATE: str = "/manage/v2/servers/{}/properties"
@@ -69,6 +76,7 @@ class ServerPropertiesGetCall(ResourceCall):
         self.add_param(self._GROUP_ID_PARAM, group_id)
         self.add_param(self._FORMAT_PARAM, data_format)
 
+    @property
     def endpoint(
             self,
     ):
@@ -102,11 +110,18 @@ class ServerPropertiesPutCall(ResourceCall):
     Documentation of the REST Resource API:
     https://docs.marklogic.com/REST/PUT/manage/v2/servers/[id-or-name]/properties
 
+    Attributes
+    ----------
+    All attributes are inherited from the ResourceCall abstract class.
+    This class implements the endpoint computed property to return an endpoint
+    for the specific call.
+
+    endpoint : str
+        An endpoint of the ResourceCall
+
     Methods
     -------
     All public methods are inherited from the ResourceCall abstract class.
-    This class implements the endpoint() abstract method to return an endpoint
-    for the specific call.
     """
 
     _ENDPOINT_TEMPLATE: str = "/manage/v2/servers/{}/properties"
@@ -141,6 +156,7 @@ class ServerPropertiesPutCall(ResourceCall):
         self._server = server
         self.add_param(self._GROUP_ID_PARAM, group_id)
 
+    @property
     def endpoint(
             self,
     ):

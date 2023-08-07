@@ -1,11 +1,4 @@
-"""The ML Server Properties Resource Calls module.
-
-It exports 2 classes:
-* ServerPropertiesGetCall
-    A GET request to get app server properties.
-* ServerPropertiesPutCall
-    A PUT request to modify app server properties.
-"""
+"""The ML Server Properties Resource Calls module."""
 from __future__ import annotations
 
 import json

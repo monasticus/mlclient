@@ -1,11 +1,4 @@
-"""The ML User Properties Resource Calls module.
-
-It exports 2 classes:
-* UserPropertiesGetCall
-    A GET request to get user properties.
-* UserPropertiesPutCall
-    A PUT request to modify user properties.
-"""
+"""The ML User Properties Resource Calls module."""
 from __future__ import annotations
 
 import json

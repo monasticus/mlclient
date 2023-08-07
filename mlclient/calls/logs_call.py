@@ -1,9 +1,4 @@
-"""The ML Logs Resource Call module.
-
-It exports 1 class:
-* LogsCall
-    A GET request to retrieve logs.
-"""
+"""The ML Logs Resource Call module."""
 from __future__ import annotations
 
 from dateutil import parser

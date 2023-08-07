@@ -1,17 +1,4 @@
-"""The ML Data module.
-
-It exports 5 classes:
-* DocumentType
-    An enumeration class representing document types.
-* Document
-    A class representing a single MarkLogic document.
-* Metadata
-    A class representing MarkLogic's document metadata.
-* Permission:
-    A class representing MarkLogic's document permission.
-* MetadataEncoder(json.JSONEncoder):
-    A JSONEncoder subclass to dump Metadata to JSON accordingly.
-"""
+"""The ML Data module."""
 from __future__ import annotations
 
 import copy

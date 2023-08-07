@@ -1,12 +1,4 @@
-"""The ML Client Utils module.
-
-It contains all useful functions shared in ML Client package and independent of
-all classes. It exports following functions:
-* get_accept_header_for_format(data_format: str) -> str
-    Return an Accept header for data format.
-* get_content_type_header_for_data(data: str | dict) -> str
-    Return a Content-Type header for data provided.
-"""
+"""The ML Client Utils module."""
 from __future__ import annotations
 
 import json

@@ -1,9 +1,4 @@
-"""The ML Resource Call module.
-
-It exports 1 class:
-* ResourceCall
-    An abstract class representing a single request to a MarkLogic REST Resource.
-"""
+"""The ML Resource Call module."""
 from __future__ import annotations
 
 from abc import ABCMeta, abstractmethod

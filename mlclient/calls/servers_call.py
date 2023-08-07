@@ -1,11 +1,4 @@
-"""The ML Servers Resource Calls module.
-
-It exports 2 classes:
-* ServersGetCall
-    A GET request to get app servers summary.
-* ServersPostCall
-    A POST request to create a new app server.
-"""
+"""The ML Servers Resource Calls module."""
 from __future__ import annotations
 
 import json

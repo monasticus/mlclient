@@ -1,11 +1,4 @@
-"""The ML Server Resource Calls module.
-
-It exports 2 classes:
-* ServerGetCall
-    A GET request to get app server details.
-* ServerDeleteCall
-    A DELETE request to remove an app server.
-"""
+"""The ML Server Resource Calls module."""
 from __future__ import annotations
 
 from typing import ClassVar

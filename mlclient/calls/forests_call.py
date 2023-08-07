@@ -32,24 +32,16 @@ class ForestsGetCall(ResourceCall):
 
     Attributes
     ----------
-    ENDPOINT
-        A static constant storing the Forests endpoint value
-
-    Attributes
-    ----------
     All attributes are inherited from the ResourceCall abstract class.
     This class implements the endpoint computed property to return an endpoint
     for the specific call.
-
-    endpoint : str
-        An endpoint of the ResourceCall
 
     Methods
     -------
     All public methods are inherited from the ResourceCall abstract class.
     """
 
-    ENDPOINT: str = "/manage/v2/forests"
+    _ENDPOINT: str = "/manage/v2/forests"
 
     _FORMAT_PARAM: str = "format"
     _VIEW_PARAM: str = "view"
@@ -121,7 +113,7 @@ class ForestsGetCall(ResourceCall):
         str
             A Forests call endpoint
         """
-        return self.ENDPOINT
+        return self._ENDPOINT
 
     @classmethod
     def _validate_params(
@@ -151,24 +143,16 @@ class ForestsPostCall(ResourceCall):
 
     Attributes
     ----------
-    ENDPOINT
-        A static constant storing the Forests endpoint value
-
-    Attributes
-    ----------
     All attributes are inherited from the ResourceCall abstract class.
     This class implements the endpoint computed property to return an endpoint
     for the specific call.
-
-    endpoint : str
-        An endpoint of the ResourceCall
 
     Methods
     -------
     All public methods are inherited from the ResourceCall abstract class.
     """
 
-    ENDPOINT: str = "/manage/v2/forests"
+    _ENDPOINT: str = "/manage/v2/forests"
 
     _WAIT_FOR_FOREST_TO_MOUNT_PARAM: str = "wait-for-forest-to-mount"
 
@@ -210,7 +194,7 @@ class ForestsPostCall(ResourceCall):
         str
             A Forests call endpoint
         """
-        return self.ENDPOINT
+        return self._ENDPOINT
 
     @classmethod
     def _validate_params(
@@ -234,24 +218,16 @@ class ForestsPutCall(ResourceCall):
 
     Attributes
     ----------
-    ENDPOINT
-        A static constant storing the Forests endpoint value
-
-    Attributes
-    ----------
     All attributes are inherited from the ResourceCall abstract class.
     This class implements the endpoint computed property to return an endpoint
     for the specific call.
-
-    endpoint : str
-        An endpoint of the ResourceCall
 
     Methods
     -------
     All public methods are inherited from the ResourceCall abstract class.
     """
 
-    ENDPOINT: str = "/manage/v2/forests"
+    _ENDPOINT: str = "/manage/v2/forests"
 
     def __init__(
             self,
@@ -283,7 +259,7 @@ class ForestsPutCall(ResourceCall):
         str
             A Forests call endpoint
         """
-        return self.ENDPOINT
+        return self._ENDPOINT
 
     @classmethod
     def _validate_params(

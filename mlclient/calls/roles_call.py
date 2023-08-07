@@ -27,24 +27,16 @@ class RolesGetCall(ResourceCall):
 
     Attributes
     ----------
-    ENDPOINT
-        A static constant storing the Roles endpoint value
-
-    Attributes
-    ----------
     All attributes are inherited from the ResourceCall abstract class.
     This class implements the endpoint computed property to return an endpoint
     for the specific call.
-
-    endpoint : str
-        An endpoint of the ResourceCall
 
     Methods
     -------
     All public methods are inherited from the ResourceCall abstract class.
     """
 
-    ENDPOINT: str = "/manage/v2/roles"
+    _ENDPOINT: str = "/manage/v2/roles"
 
     _FORMAT_PARAM: str = "format"
     _VIEW_PARAM: str = "view"
@@ -86,7 +78,7 @@ class RolesGetCall(ResourceCall):
         str
             A Roles call endpoint
         """
-        return self.ENDPOINT
+        return self._ENDPOINT
 
     @classmethod
     def _validate_params(
@@ -115,24 +107,16 @@ class RolesPostCall(ResourceCall):
 
     Attributes
     ----------
-    ENDPOINT
-        A static constant storing the Roles endpoint value
-
-    Attributes
-    ----------
     All attributes are inherited from the ResourceCall abstract class.
     This class implements the endpoint computed property to return an endpoint
     for the specific call.
-
-    endpoint : str
-        An endpoint of the ResourceCall
 
     Methods
     -------
     All public methods are inherited from the ResourceCall abstract class.
     """
 
-    ENDPOINT: str = "/manage/v2/roles"
+    _ENDPOINT: str = "/manage/v2/roles"
 
     def __init__(
             self,
@@ -164,7 +148,7 @@ class RolesPostCall(ResourceCall):
         str
             A Roles call endpoint
         """
-        return self.ENDPOINT
+        return self._ENDPOINT
 
     @classmethod
     def _validate_params(

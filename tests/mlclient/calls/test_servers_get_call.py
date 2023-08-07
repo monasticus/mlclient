@@ -30,8 +30,6 @@ def test_validation_view_param():
 
 def test_endpoint(default_servers_get_call):
     assert default_servers_get_call.endpoint == "/manage/v2/servers"
-    assert default_servers_get_call.ENDPOINT == "/manage/v2/servers"
-    assert ServersGetCall.ENDPOINT == "/manage/v2/servers"
 
 
 def test_method(default_servers_get_call):

@@ -29,9 +29,6 @@ class UserGetCall(ResourceCall):
     This class implements the endpoint computed property to return an endpoint
     for the specific call.
 
-    endpoint : str
-        An endpoint of the ResourceCall
-
     Methods
     -------
     All public methods are inherited from the ResourceCall abstract class.
@@ -116,9 +113,6 @@ class UserDeleteCall(ResourceCall):
     All attributes are inherited from the ResourceCall abstract class.
     This class implements the endpoint computed property to return an endpoint
     for the specific call.
-
-    endpoint : str
-        An endpoint of the ResourceCall
 
     Methods
     -------

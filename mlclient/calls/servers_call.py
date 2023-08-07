@@ -29,24 +29,16 @@ class ServersGetCall(ResourceCall):
 
     Attributes
     ----------
-    ENDPOINT
-        A static constant storing the Servers endpoint value
-
-    Attributes
-    ----------
     All attributes are inherited from the ResourceCall abstract class.
     This class implements the endpoint computed property to return an endpoint
     for the specific call.
-
-    endpoint : str
-        An endpoint of the ResourceCall
 
     Methods
     -------
     All public methods are inherited from the ResourceCall abstract class.
     """
 
-    ENDPOINT: str = "/manage/v2/servers"
+    _ENDPOINT: str = "/manage/v2/servers"
 
     _FORMAT_PARAM: str = "format"
     _GROUP_ID_PARAM: str = "group-id"
@@ -106,7 +98,7 @@ class ServersGetCall(ResourceCall):
         str
             A Servers call endpoint
         """
-        return self.ENDPOINT
+        return self._ENDPOINT
 
     @classmethod
     def _validate_params(
@@ -135,24 +127,16 @@ class ServersPostCall(ResourceCall):
 
     Attributes
     ----------
-    ENDPOINT
-        A static constant storing the Servers endpoint value
-
-    Attributes
-    ----------
     All attributes are inherited from the ResourceCall abstract class.
     This class implements the endpoint computed property to return an endpoint
     for the specific call.
-
-    endpoint : str
-        An endpoint of the ResourceCall
 
     Methods
     -------
     All public methods are inherited from the ResourceCall abstract class.
     """
 
-    ENDPOINT: str = "/manage/v2/servers"
+    _ENDPOINT: str = "/manage/v2/servers"
 
     _GROUP_ID_PARAM: str = "group-id"
     _SERVER_TYPE_PARAM: str = "server-type"
@@ -203,7 +187,7 @@ class ServersPostCall(ResourceCall):
         str
             A Servers call endpoint
         """
-        return self.ENDPOINT
+        return self._ENDPOINT
 
     @classmethod
     def _validate_params(

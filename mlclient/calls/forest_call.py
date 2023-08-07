@@ -32,9 +32,6 @@ class ForestGetCall(ResourceCall):
     This class implements the endpoint computed property to return an endpoint
     for the specific call.
 
-    endpoint : str
-        An endpoint of the ResourceCall
-
     Methods
     -------
     All public methods are inherited from the ResourceCall abstract class.
@@ -119,17 +116,9 @@ class ForestPostCall(ResourceCall):
 
     Attributes
     ----------
-    ENDPOINT
-        a static constant storing the Forests endpoint value
-
-    Attributes
-    ----------
     All attributes are inherited from the ResourceCall abstract class.
     This class implements the endpoint computed property to return an endpoint
     for the specific call.
-
-    endpoint : str
-        An endpoint of the ResourceCall
 
     Methods
     -------
@@ -206,9 +195,6 @@ class ForestDeleteCall(ResourceCall):
     All attributes are inherited from the ResourceCall abstract class.
     This class implements the endpoint computed property to return an endpoint
     for the specific call.
-
-    endpoint : str
-        An endpoint of the ResourceCall
 
     Methods
     -------

@@ -38,8 +38,6 @@ def test_validation_end_time_is_not_datetime_value():
 
 def test_endpoint(default_logs_call):
     assert default_logs_call.endpoint == "/manage/v2/logs"
-    assert default_logs_call.ENDPOINT == "/manage/v2/logs"
-    assert LogsCall.ENDPOINT == "/manage/v2/logs"
 
 
 def test_method(default_logs_call):

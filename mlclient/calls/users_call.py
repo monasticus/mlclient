@@ -27,24 +27,16 @@ class UsersGetCall(ResourceCall):
 
     Attributes
     ----------
-    ENDPOINT
-        A static constant storing the Users endpoint value
-
-    Attributes
-    ----------
     All attributes are inherited from the ResourceCall abstract class.
     This class implements the endpoint computed property to return an endpoint
     for the specific call.
-
-    endpoint : str
-        An endpoint of the ResourceCall
 
     Methods
     -------
     All public methods are inherited from the ResourceCall abstract class.
     """
 
-    ENDPOINT: str = "/manage/v2/users"
+    _ENDPOINT: str = "/manage/v2/users"
 
     _FORMAT_PARAM: str = "format"
     _VIEW_PARAM: str = "view"
@@ -86,7 +78,7 @@ class UsersGetCall(ResourceCall):
         str
             An Users call endpoint
         """
-        return self.ENDPOINT
+        return self._ENDPOINT
 
     @classmethod
     def _validate_params(
@@ -115,24 +107,16 @@ class UsersPostCall(ResourceCall):
 
     Attributes
     ----------
-    ENDPOINT
-        A static constant storing the Users endpoint value
-
-    Attributes
-    ----------
     All attributes are inherited from the ResourceCall abstract class.
     This class implements the endpoint computed property to return an endpoint
     for the specific call.
-
-    endpoint : str
-        An endpoint of the ResourceCall
 
     Methods
     -------
     All public methods are inherited from the ResourceCall abstract class.
     """
 
-    ENDPOINT: str = "/manage/v2/users"
+    _ENDPOINT: str = "/manage/v2/users"
 
     def __init__(
             self,
@@ -164,7 +148,7 @@ class UsersPostCall(ResourceCall):
         str
             An Users call endpoint
         """
-        return self.ENDPOINT
+        return self._ENDPOINT
 
     @classmethod
     def _validate_params(

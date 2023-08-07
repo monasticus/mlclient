@@ -23,24 +23,16 @@ class EvalCall(ResourceCall):
 
     Attributes
     ----------
-    ENDPOINT
-        A static constant storing the Eval endpoint value
-
-    Attributes
-    ----------
     All attributes are inherited from the ResourceCall abstract class.
     This class implements the endpoint computed property to return an endpoint
     for the specific call.
-
-    endpoint : str
-        An endpoint of the ResourceCall
 
     Methods
     -------
     All public methods are inherited from the ResourceCall abstract class.
     """
 
-    ENDPOINT: str = "/v1/eval"
+    _ENDPOINT: str = "/v1/eval"
 
     _XQ_PARAM: str = "xquery"
     _JS_PARAM: str = "javascript"
@@ -98,7 +90,7 @@ class EvalCall(ResourceCall):
         str
             An Eval call endpoint
         """
-        return self.ENDPOINT
+        return self._ENDPOINT
 
     @classmethod
     def _validate_params(

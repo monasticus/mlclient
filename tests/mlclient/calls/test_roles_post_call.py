@@ -30,8 +30,6 @@ def test_validation_blank_body_param():
 
 def test_endpoint(default_roles_post_call):
     assert default_roles_post_call.endpoint == "/manage/v2/roles"
-    assert default_roles_post_call.ENDPOINT == "/manage/v2/roles"
-    assert RolesPostCall.ENDPOINT == "/manage/v2/roles"
 
 
 def test_method(default_roles_post_call):

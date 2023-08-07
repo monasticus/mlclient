@@ -37,8 +37,6 @@ def test_validation_blank_body_param():
 
 def test_endpoint(default_forests_put_call):
     assert default_forests_put_call.endpoint == "/manage/v2/forests"
-    assert default_forests_put_call.ENDPOINT == "/manage/v2/forests"
-    assert ForestsPutCall.ENDPOINT == "/manage/v2/forests"
 
 
 def test_method(default_forests_put_call):

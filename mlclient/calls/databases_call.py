@@ -27,24 +27,16 @@ class DatabasesGetCall(ResourceCall):
 
     Attributes
     ----------
-    ENDPOINT
-        A static constant storing the Databases endpoint value
-
-    Attributes
-    ----------
     All attributes are inherited from the ResourceCall abstract class.
     This class implements the endpoint computed property to return an endpoint
     for the specific call.
-
-    endpoint : str
-        An endpoint of the ResourceCall
 
     Methods
     -------
     All public methods are inherited from the ResourceCall abstract class.
     """
 
-    ENDPOINT: str = "/manage/v2/databases"
+    _ENDPOINT: str = "/manage/v2/databases"
 
     _FORMAT_PARAM: str = "format"
     _VIEW_PARAM: str = "view"
@@ -88,7 +80,7 @@ class DatabasesGetCall(ResourceCall):
         str
             A Databases call endpoint
         """
-        return self.ENDPOINT
+        return self._ENDPOINT
 
     @classmethod
     def _validate_params(
@@ -117,24 +109,16 @@ class DatabasesPostCall(ResourceCall):
 
     Attributes
     ----------
-    ENDPOINT
-        A static constant storing the Databases endpoint value
-
-    Attributes
-    ----------
     All attributes are inherited from the ResourceCall abstract class.
     This class implements the endpoint computed property to return an endpoint
     for the specific call.
-
-    endpoint : str
-        An endpoint of the ResourceCall
 
     Methods
     -------
     All public methods are inherited from the ResourceCall abstract class.
     """
 
-    ENDPOINT: str = "/manage/v2/databases"
+    _ENDPOINT: str = "/manage/v2/databases"
 
     def __init__(
             self,
@@ -166,7 +150,7 @@ class DatabasesPostCall(ResourceCall):
         str
             A Databases call endpoint
         """
-        return self.ENDPOINT
+        return self._ENDPOINT
 
     @classmethod
     def _validate_params(

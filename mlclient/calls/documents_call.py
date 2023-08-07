@@ -27,15 +27,12 @@ class DocumentsGetCall(ResourceCall):
     This class implements the endpoint computed property to return an endpoint
     for the specific call.
 
-    endpoint : str
-        An endpoint of the ResourceCall
-
     Methods
     -------
     All public methods are inherited from the ResourceCall abstract class.
     """
 
-    ENDPOINT: str = "/v1/documents"
+    _ENDPOINT: str = "/v1/documents"
 
     _URI_PARAM: str = "uri"
     _DATABASE_PARAM: str = "database"
@@ -131,7 +128,7 @@ class DocumentsGetCall(ResourceCall):
         str
             A Documents call endpoint
         """
-        return self.ENDPOINT
+        return self._ENDPOINT
 
     @classmethod
     def _validate_params(

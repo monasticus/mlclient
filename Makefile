@@ -32,5 +32,8 @@ linters:
 publish:
 	@poetry --build publish
 
-update_linters:
+update-linters:
 	@poetry run ruff linter --format=json > ./meta/linters/linters.json
+
+activate-path:
+	@echo `poetry env info --path`/bin/activate

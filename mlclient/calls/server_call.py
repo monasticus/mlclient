@@ -25,12 +25,6 @@ class ServerGetCall(ResourceCall):
     The data returned depends on the value of the view request parameter.
     The default view is a summary with links to additional data.
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/GET/manage/v2/servers/[id-or-name]
-
-    Attributes
-    ----------
-    All attributes are inherited from the ResourceCall abstract class.
-    This class implements the endpoint computed property to return an endpoint
-    for the specific call.
     """
 
     _ENDPOINT_TEMPLATE: str = "/manage/v2/servers/{}"
@@ -107,7 +101,7 @@ class ServerGetCall(ResourceCall):
     def endpoint(
             self,
     ):
-        """Return an endpoint for the Server call.
+        """An endpoint for the Server call.
 
         Returns
         -------
@@ -140,12 +134,6 @@ class ServerDeleteCall(ResourceCall):
 
     This resource address deletes the specified App Server from the specified group.
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/DELETE/manage/v2/servers/[id-or-name]
-
-    Attributes
-    ----------
-    All attributes are inherited from the ResourceCall abstract class.
-    This class implements the endpoint computed property to return an endpoint
-    for the specific call.
     """
 
     _ENDPOINT_TEMPLATE: str = "/manage/v2/servers/{}"
@@ -175,7 +163,7 @@ class ServerDeleteCall(ResourceCall):
     def endpoint(
             self,
     ):
-        """Return an endpoint for the Server call.
+        """An endpoint for the Server call.
 
         Returns
         -------

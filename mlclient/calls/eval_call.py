@@ -20,12 +20,6 @@ class EvalCall(ResourceCall):
 
     Evaluate an ad-hoc query expressed using XQuery or server-side JavaScript.
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/POST/v1/eval
-
-    Attributes
-    ----------
-    All attributes are inherited from the ResourceCall abstract class.
-    This class implements the endpoint computed property to return an endpoint
-    for the specific call.
     """
 
     _ENDPOINT: str = "/v1/eval"
@@ -79,7 +73,7 @@ class EvalCall(ResourceCall):
     def endpoint(
             self,
     ):
-        """Return an endpoint for the Eval call.
+        """An endpoint for the Eval call.
 
         Returns
         -------

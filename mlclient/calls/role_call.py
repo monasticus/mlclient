@@ -22,12 +22,6 @@ class RoleGetCall(ResourceCall):
 
     This resource address returns the configuration for the specified role.
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/GET/manage/v2/roles/[id-or-name]
-
-    Attributes
-    ----------
-    All attributes are inherited from the ResourceCall abstract class.
-    This class implements the endpoint computed property to return an endpoint
-    for the specific call.
     """
 
     _ENDPOINT_TEMPLATE: str = "/manage/v2/roles/{}"
@@ -70,7 +64,7 @@ class RoleGetCall(ResourceCall):
     def endpoint(
             self,
     ):
-        """Return an endpoint for the Role call.
+        """An endpoint for the Role call.
 
         Returns
         -------
@@ -103,12 +97,6 @@ class RoleDeleteCall(ResourceCall):
 
     This resource address deletes the named role from the named security database.
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/DELETE/manage/v2/roles/[id-or-name]
-
-    Attributes
-    ----------
-    All attributes are inherited from the ResourceCall abstract class.
-    This class implements the endpoint computed property to return an endpoint
-    for the specific call.
     """
 
     _ENDPOINT_TEMPLATE: str = "/manage/v2/roles/{}"
@@ -131,7 +119,7 @@ class RoleDeleteCall(ResourceCall):
     def endpoint(
             self,
     ):
-        """Return an endpoint for the Role call.
+        """An endpoint for the Role call.
 
         Returns
         -------

@@ -24,12 +24,6 @@ class DatabasesGetCall(ResourceCall):
 
     This resource address returns a summary of the databases in the cluster.
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/GET/manage/v2/databases
-
-    Attributes
-    ----------
-    All attributes are inherited from the ResourceCall abstract class.
-    This class implements the endpoint computed property to return an endpoint
-    for the specific call.
     """
 
     _ENDPOINT: str = "/manage/v2/databases"
@@ -69,7 +63,7 @@ class DatabasesGetCall(ResourceCall):
     def endpoint(
             self,
     ):
-        """Return an endpoint for the Databases call.
+        """An endpoint for the Databases call.
 
         Returns
         -------
@@ -102,12 +96,6 @@ class DatabasesPostCall(ResourceCall):
 
     This resource address creates a new database in the cluster.
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/POST/manage/v2/databases
-
-    Attributes
-    ----------
-    All attributes are inherited from the ResourceCall abstract class.
-    This class implements the endpoint computed property to return an endpoint
-    for the specific call.
     """
 
     _ENDPOINT: str = "/manage/v2/databases"
@@ -135,7 +123,7 @@ class DatabasesPostCall(ResourceCall):
     def endpoint(
             self,
     ):
-        """Return an endpoint for the Databases call.
+        """An endpoint for the Databases call.
 
         Returns
         -------

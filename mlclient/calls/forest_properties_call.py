@@ -26,12 +26,6 @@ class ForestPropertiesGetCall(ResourceCall):
     by {id|name}.
     Documentation of the REST Resource API:
     https://docs.marklogic.com/REST/GET/manage/v2/forests/[id-or-name]/properties
-
-    Attributes
-    ----------
-    All attributes are inherited from the ResourceCall abstract class.
-    This class implements the endpoint computed property to return an endpoint
-    for the specific call.
     """
 
     _ENDPOINT_TEMPLATE: str = "/manage/v2/forests/{}/properties"
@@ -67,7 +61,7 @@ class ForestPropertiesGetCall(ResourceCall):
     def endpoint(
             self,
     ):
-        """Return an endpoint for the Forest Properties call.
+        """An endpoint for the Forest Properties call.
 
         Returns
         -------
@@ -96,12 +90,6 @@ class ForestPropertiesPutCall(ResourceCall):
     Modify the configuration of the forest identified by {id|name}.
     Documentation of the REST Resource API:
     https://docs.marklogic.com/REST/PUT/manage/v2/forests/[id-or-name]/properties
-
-    Attributes
-    ----------
-    All attributes are inherited from the ResourceCall abstract class.
-    This class implements the endpoint computed property to return an endpoint
-    for the specific call.
     """
 
     _ENDPOINT_TEMPLATE: str = "/manage/v2/forests/{}/properties"
@@ -133,7 +121,7 @@ class ForestPropertiesPutCall(ResourceCall):
     def endpoint(
             self,
     ):
-        """Return an endpoint for the Forest Properties call.
+        """An endpoint for the Forest Properties call.
 
         Returns
         -------

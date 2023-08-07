@@ -22,12 +22,6 @@ class UserGetCall(ResourceCall):
 
     This resource address returns the configuration for the specified user.
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/GET/manage/v2/users/[id-or-name]
-
-    Attributes
-    ----------
-    All attributes are inherited from the ResourceCall abstract class.
-    This class implements the endpoint computed property to return an endpoint
-    for the specific call.
     """
 
     _ENDPOINT_TEMPLATE: str = "/manage/v2/users/{}"
@@ -70,7 +64,7 @@ class UserGetCall(ResourceCall):
     def endpoint(
             self,
     ):
-        """Return an endpoint for the User call.
+        """An endpoint for the User call.
 
         Returns
         -------
@@ -103,12 +97,6 @@ class UserDeleteCall(ResourceCall):
 
     This resource address deletes the named user from the named security database.
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/DELETE/manage/v2/users/[id-or-name]
-
-    Attributes
-    ----------
-    All attributes are inherited from the ResourceCall abstract class.
-    This class implements the endpoint computed property to return an endpoint
-    for the specific call.
     """
 
     _ENDPOINT_TEMPLATE: str = "/manage/v2/users/{}"
@@ -131,7 +119,7 @@ class UserDeleteCall(ResourceCall):
     def endpoint(
             self,
     ):
-        """Return an endpoint for the User call.
+        """An endpoint for the User call.
 
         Returns
         -------

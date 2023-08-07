@@ -20,12 +20,6 @@ class LogsCall(ResourceCall):
 
     Returns the content of server log files.
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/GET/manage/v2/logs
-
-    Attributes
-    ----------
-    All attributes are inherited from the ResourceCall abstract class.
-    This class implements the endpoint computed property to return an endpoint
-    for the specific call.
     """
 
     _ENDPOINT: str = "/manage/v2/logs"
@@ -81,7 +75,7 @@ class LogsCall(ResourceCall):
     def endpoint(
             self,
     ):
-        """Return an endpoint for the Logs call.
+        """An endpoint for the Logs call.
 
         Returns
         -------

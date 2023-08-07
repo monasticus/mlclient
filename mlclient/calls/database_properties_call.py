@@ -26,12 +26,6 @@ class DatabasePropertiesGetCall(ResourceCall):
     The database can be identified either by ID or name.
     Documentation of the REST Resource API:
     https://docs.marklogic.com/REST/GET/manage/v2/databases/[id-or-name]/properties
-
-    Attributes
-    ----------
-    All attributes are inherited from the ResourceCall abstract class.
-    This class implements the endpoint computed property to return an endpoint
-    for the specific call.
     """
 
     _ENDPOINT_TEMPLATE: str = "/manage/v2/databases/{}/properties"
@@ -67,7 +61,7 @@ class DatabasePropertiesGetCall(ResourceCall):
     def endpoint(
             self,
     ):
-        """Return an endpoint for the Database Properties call.
+        """An endpoint for the Database Properties call.
 
         Returns
         -------
@@ -98,12 +92,6 @@ class DatabasePropertiesPutCall(ResourceCall):
     of this endpoint. The database can be identified either by id or name.
     Documentation of the REST Resource API:
     https://docs.marklogic.com/REST/PUT/manage/v2/databases/[id-or-name]/properties
-
-    Attributes
-    ----------
-    All attributes are inherited from the ResourceCall abstract class.
-    This class implements the endpoint computed property to return an endpoint
-    for the specific call.
     """
 
     _ENDPOINT_TEMPLATE: str = "/manage/v2/databases/{}/properties"
@@ -135,7 +123,7 @@ class DatabasePropertiesPutCall(ResourceCall):
     def endpoint(
             self,
     ):
-        """Return an endpoint for the Database Properties call.
+        """An endpoint for the Database Properties call.
 
         Returns
         -------

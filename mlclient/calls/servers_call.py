@@ -26,12 +26,6 @@ class ServersGetCall(ResourceCall):
     The data returned depends on the setting of the view request parameter.
     The default view provides a summary of the servers.
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/GET/manage/v2/servers
-
-    Attributes
-    ----------
-    All attributes are inherited from the ResourceCall abstract class.
-    This class implements the endpoint computed property to return an endpoint
-    for the specific call.
     """
 
     _ENDPOINT: str = "/manage/v2/servers"
@@ -87,7 +81,7 @@ class ServersGetCall(ResourceCall):
     def endpoint(
             self,
     ):
-        """Return an endpoint for the Servers call.
+        """An endpoint for the Servers call.
 
         Returns
         -------
@@ -120,12 +114,6 @@ class ServersPostCall(ResourceCall):
 
     This resource address is used to create a new App Server in the specified group.
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/POST/manage/v2/servers
-
-    Attributes
-    ----------
-    All attributes are inherited from the ResourceCall abstract class.
-    This class implements the endpoint computed property to return an endpoint
-    for the specific call.
     """
 
     _ENDPOINT: str = "/manage/v2/servers"
@@ -172,7 +160,7 @@ class ServersPostCall(ResourceCall):
     def endpoint(
             self,
     ):
-        """Return an endpoint for the Servers call.
+        """An endpoint for the Servers call.
 
         Returns
         -------

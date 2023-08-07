@@ -29,12 +29,6 @@ class ForestsGetCall(ResourceCall):
     If no view is specified, this request returns a summary of the forests
     in the cluster.
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/GET/manage/v2/forests
-
-    Attributes
-    ----------
-    All attributes are inherited from the ResourceCall abstract class.
-    This class implements the endpoint computed property to return an endpoint
-    for the specific call.
     """
 
     _ENDPOINT: str = "/manage/v2/forests"
@@ -102,7 +96,7 @@ class ForestsGetCall(ResourceCall):
     def endpoint(
             self,
     ):
-        """Return an endpoint for the Forests call.
+        """An endpoint for the Forests call.
 
         Returns
         -------
@@ -136,12 +130,6 @@ class ForestsPostCall(ResourceCall):
     Create a new forest, including replicas if specified.
     If a database id or database is included, attach the new forest(s) to the database.
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/POST/manage/v2/forests
-
-    Attributes
-    ----------
-    All attributes are inherited from the ResourceCall abstract class.
-    This class implements the endpoint computed property to return an endpoint
-    for the specific call.
     """
 
     _ENDPOINT: str = "/manage/v2/forests"
@@ -179,7 +167,7 @@ class ForestsPostCall(ResourceCall):
     def endpoint(
             self,
     ):
-        """Return an endpoint for the Forests call.
+        """An endpoint for the Forests call.
 
         Returns
         -------
@@ -207,12 +195,6 @@ class ForestsPutCall(ResourceCall):
     Perform an operation on one or more forests, such as combining multiple forests
     into a single new one, or migrating the data in the forests to a new data directory.
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/PUT/manage/v2/forests
-
-    Attributes
-    ----------
-    All attributes are inherited from the ResourceCall abstract class.
-    This class implements the endpoint computed property to return an endpoint
-    for the specific call.
     """
 
     _ENDPOINT: str = "/manage/v2/forests"
@@ -240,7 +222,7 @@ class ForestsPutCall(ResourceCall):
     def endpoint(
             self,
     ):
-        """Return an endpoint for the Forests call.
+        """An endpoint for the Forests call.
 
         Returns
         -------

@@ -25,12 +25,6 @@ class UserPropertiesGetCall(ResourceCall):
     This resource address returns the properties of the specified user.
     Documentation of the REST Resource API:
     https://docs.marklogic.com/REST/GET/manage/v2/users/[id-or-name]/properties
-
-    Attributes
-    ----------
-    All attributes are inherited from the ResourceCall abstract class.
-    This class implements the endpoint computed property to return an endpoint
-    for the specific call.
     """
 
     _ENDPOINT_TEMPLATE: str = "/manage/v2/users/{}/properties"
@@ -66,7 +60,7 @@ class UserPropertiesGetCall(ResourceCall):
     def endpoint(
             self,
     ):
-        """Return an endpoint for the User Properties call.
+        """An endpoint for the User Properties call.
 
         Returns
         -------
@@ -95,12 +89,6 @@ class UserPropertiesPutCall(ResourceCall):
     This resource address can be used to update the properties for the specified user.
     Documentation of the REST Resource API:
     https://docs.marklogic.com/REST/PUT/manage/v2/users/[id-or-name]/properties
-
-    Attributes
-    ----------
-    All attributes are inherited from the ResourceCall abstract class.
-    This class implements the endpoint computed property to return an endpoint
-    for the specific call.
     """
 
     _ENDPOINT_TEMPLATE: str = "/manage/v2/users/{}/properties"
@@ -132,7 +120,7 @@ class UserPropertiesPutCall(ResourceCall):
     def endpoint(
             self,
     ):
-        """Return an endpoint for the User Properties call.
+        """An endpoint for the User Properties call.
 
         Returns
         -------

@@ -13,21 +13,7 @@ from mlclient import constants
 
 
 class ResourceCall(metaclass=ABCMeta):
-    """An abstract class representing a single request to a MarkLogic REST Resource.
-
-    Attributes
-    ----------
-    endpoint : str
-        An endpoint of the ResourceCall
-    method : str
-        A request method
-    params : dict
-        Request parameters
-    headers : dict
-        Request headers
-    body : str | dict | None
-        A request body
-    """
+    """An abstract class representing a single request to a MarkLogic REST Resource."""
 
     def __init__(
             self,
@@ -88,7 +74,7 @@ class ResourceCall(metaclass=ABCMeta):
     def endpoint(
             self,
     ) -> str:
-        """Return an endpoint for a specific resource call.
+        """An endpoint of the ResourceCall.
 
         Returns
         -------
@@ -101,7 +87,7 @@ class ResourceCall(metaclass=ABCMeta):
     def method(
             self,
     ) -> str:
-        """Return a request method.
+        """A request method.
 
         Returns
         -------
@@ -128,7 +114,7 @@ class ResourceCall(metaclass=ABCMeta):
     def params(
             self,
     ) -> dict:
-        """Return request parameters.
+        """Request parameters.
 
         Returns
         -------
@@ -158,7 +144,7 @@ class ResourceCall(metaclass=ABCMeta):
     def headers(
             self,
     ) -> dict:
-        """Return request headers.
+        """Request headers.
 
         Returns
         -------
@@ -188,7 +174,7 @@ class ResourceCall(metaclass=ABCMeta):
     def body(
             self,
     ) -> str | dict | None:
-        """Return a request body.
+        """A request body.
 
         Returns
         -------

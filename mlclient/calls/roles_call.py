@@ -24,12 +24,6 @@ class RolesGetCall(ResourceCall):
 
     This resource address returns a summary of the roles in the security database.
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/GET/manage/v2/roles
-
-    Attributes
-    ----------
-    All attributes are inherited from the ResourceCall abstract class.
-    This class implements the endpoint computed property to return an endpoint
-    for the specific call.
     """
 
     _ENDPOINT: str = "/manage/v2/roles"
@@ -67,7 +61,7 @@ class RolesGetCall(ResourceCall):
     def endpoint(
             self,
     ):
-        """Return an endpoint for the Roles call.
+        """An endpoint for the Roles call.
 
         Returns
         -------
@@ -100,12 +94,6 @@ class RolesPostCall(ResourceCall):
 
     This resource address creates a new role in the security database.
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/POST/manage/v2/roles
-
-    Attributes
-    ----------
-    All attributes are inherited from the ResourceCall abstract class.
-    This class implements the endpoint computed property to return an endpoint
-    for the specific call.
     """
 
     _ENDPOINT: str = "/manage/v2/roles"
@@ -133,7 +121,7 @@ class RolesPostCall(ResourceCall):
     def endpoint(
             self,
     ):
-        """Return an endpoint for the Roles call.
+        """An endpoint for the Roles call.
 
         Returns
         -------

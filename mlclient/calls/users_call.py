@@ -24,12 +24,6 @@ class UsersGetCall(ResourceCall):
 
     This resource address returns a summary of the users in the cluster.
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/GET/manage/v2/users
-
-    Attributes
-    ----------
-    All attributes are inherited from the ResourceCall abstract class.
-    This class implements the endpoint computed property to return an endpoint
-    for the specific call.
     """
 
     _ENDPOINT: str = "/manage/v2/users"
@@ -67,7 +61,7 @@ class UsersGetCall(ResourceCall):
     def endpoint(
             self,
     ):
-        """Return an endpoint for the Users call.
+        """An endpoint for the Users call.
 
         Returns
         -------
@@ -100,12 +94,6 @@ class UsersPostCall(ResourceCall):
 
     This resource address creates a new user in the security database.
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/POST/manage/v2/users
-
-    Attributes
-    ----------
-    All attributes are inherited from the ResourceCall abstract class.
-    This class implements the endpoint computed property to return an endpoint
-    for the specific call.
     """
 
     _ENDPOINT: str = "/manage/v2/users"
@@ -133,7 +121,7 @@ class UsersPostCall(ResourceCall):
     def endpoint(
             self,
     ):
-        """Return an endpoint for the Users call.
+        """An endpoint for the Users call.
 
         Returns
         -------

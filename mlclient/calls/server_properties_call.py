@@ -26,12 +26,6 @@ class ServerPropertiesGetCall(ResourceCall):
     of the specified App Server.
     Documentation of the REST Resource API:
     https://docs.marklogic.com/REST/GET/manage/v2/servers/[id-or-name]/properties
-
-    Attributes
-    ----------
-    All attributes are inherited from the ResourceCall abstract class.
-    This class implements the endpoint computed property to return an endpoint
-    for the specific call.
     """
 
     _ENDPOINT_TEMPLATE: str = "/manage/v2/servers/{}/properties"
@@ -73,7 +67,7 @@ class ServerPropertiesGetCall(ResourceCall):
     def endpoint(
             self,
     ):
-        """Return an endpoint for the Server Properties call.
+        """An endpoint for the Server Properties call.
 
         Returns
         -------
@@ -102,12 +96,6 @@ class ServerPropertiesPutCall(ResourceCall):
     Initiate a properties change on the specified App Server.
     Documentation of the REST Resource API:
     https://docs.marklogic.com/REST/PUT/manage/v2/servers/[id-or-name]/properties
-
-    Attributes
-    ----------
-    All attributes are inherited from the ResourceCall abstract class.
-    This class implements the endpoint computed property to return an endpoint
-    for the specific call.
     """
 
     _ENDPOINT_TEMPLATE: str = "/manage/v2/servers/{}/properties"
@@ -146,7 +134,7 @@ class ServerPropertiesPutCall(ResourceCall):
     def endpoint(
             self,
     ):
-        """Return an endpoint for the Server Properties call.
+        """An endpoint for the Server Properties call.
 
         Returns
         -------

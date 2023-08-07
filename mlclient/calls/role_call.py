@@ -21,10 +21,6 @@ class RoleGetCall(ResourceCall):
     All attributes are inherited from the ResourceCall abstract class.
     This class implements the endpoint computed property to return an endpoint
     for the specific call.
-
-    Methods
-    -------
-    All public methods are inherited from the ResourceCall abstract class.
     """
 
     _ENDPOINT_TEMPLATE: str = "/manage/v2/roles/{}"
@@ -106,10 +102,6 @@ class RoleDeleteCall(ResourceCall):
     All attributes are inherited from the ResourceCall abstract class.
     This class implements the endpoint computed property to return an endpoint
     for the specific call.
-
-    Methods
-    -------
-    All public methods are inherited from the ResourceCall abstract class.
     """
 
     _ENDPOINT_TEMPLATE: str = "/manage/v2/roles/{}"

@@ -50,17 +50,6 @@ class Document(metaclass=ABCMeta):
         A document metadata
     is_temporal : bool
         The temporal flag
-
-    Methods
-    -------
-    uri() -> str
-        Return a document URI.
-    doc_type() -> DocumentType
-        Return a document type.
-    metadata() -> Metadata
-        Return a document metadata.
-    is_temporal() -> bool
-        Return the temporal flag.
     """
 
     def __init__(
@@ -158,47 +147,7 @@ class Document(metaclass=ABCMeta):
 
 
 class Metadata:
-    """A class representing MarkLogic's document metadata.
-
-    Methods
-    -------
-    collections() -> list
-        Return document's collections.
-    permissions() -> list
-        Return document's permissions.
-    properties() -> dict
-        Return document's properties.
-    quality() -> int
-        Return document's quality.
-    metadata_values() -> dict
-        Return document's metadata values.
-    set_quality(quality: int) -> bool
-        Set document's quality.
-    add_collection(collection: str) -> bool
-        Assign a new collection to document.
-    add_permission(role_name: str, capability: str) -> bool
-        Assign a new permission to document.
-    put_property(name: str, value: str)
-        Assign a new property to document.
-    put_metadata_value(name: str, value: str)
-        Assign a new metadata value to document.
-    remove_collection(collection: str) -> bool
-        Remove a collection from document.
-    remove_permission(role_name: str, capability: str) -> bool
-        Remove a permission from document.
-    remove_property(name: str) -> bool
-        Remove a property from document.
-    remove_metadata_value(name: str) -> bool
-        Remove a metadata value from document.
-    to_json_string(indent: int | None = None) -> str
-        Return a stringified JSON representation of the Metadata instance.
-    to_json() -> dict
-        Return a JSON representation of the Metadata instance.
-    to_xml_string(indent: int = None) -> str
-        Return a stringified XML representation of the Metadata instance.
-    to_xml() -> ElemTree.ElementTree
-        Return an XML representation of the Metadata instance.
-    """
+    """A class representing MarkLogic's document metadata."""
 
     _COLLECTIONS_KEY: str = "collections"
     _PERMISSIONS_KEY: str = "permissions"
@@ -743,21 +692,7 @@ class Metadata:
 
 
 class Permission:
-    """A class representing MarkLogic's document permission.
-
-    Methods
-    -------
-    role_name() -> str
-        Return permission's role name.
-    capabilities() -> set
-        Return permission's capabilities.
-    add_capability(capability: str -> bool
-        Assign a new capability to the role.
-    remove_capability(capability: str) -> bool
-        Remove a capability from the role.
-    to_json() -> dict
-        Return a JSON representation of the Permission instance.
-    """
+    """A class representing MarkLogic's document permission."""
 
     READ: str = "read"
     INSERT: str = "insert"

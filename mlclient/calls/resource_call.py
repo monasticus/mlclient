@@ -22,13 +22,6 @@ class ResourceCall(metaclass=ABCMeta):
         Request headers
     body : str | dict | None
         A request body
-
-    Methods
-    -------
-    add_param(param_name: str, param_value: Any)
-        Put a request parameter if it's name and value exist
-    add_header(header_name: str, header_value: Any)
-        Put a request header if it's name and value exist
     """
 
     def __init__(

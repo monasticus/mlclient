@@ -1,4 +1,9 @@
-"""The ML Documents Resource Calls module."""
+"""The ML Documents Resource Calls module.
+
+It exports 1 class:
+* DocumentsGetCall
+    A GET request to retrieve documents' content or metadata.
+"""
 from __future__ import annotations
 
 from typing import ClassVar

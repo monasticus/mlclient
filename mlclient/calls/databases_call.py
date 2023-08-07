@@ -1,4 +1,11 @@
-"""The ML Databases Resource Calls module."""
+"""The ML Databases Resource Calls module.
+
+It exports 2 classes:
+* DatabasesGetCall
+    A GET request to get databases summary.
+* DatabasesPostCall
+    A POST request to create a new database.
+"""
 from __future__ import annotations
 
 import json

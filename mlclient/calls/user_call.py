@@ -1,4 +1,11 @@
-"""The ML User Resource Calls module."""
+"""The ML User Resource Calls module.
+
+It exports 2 classes:
+* UserGetCall
+    A GET request to get user details.
+* UserDeleteCall
+    A DELETE request to remove a user.
+"""
 from __future__ import annotations
 
 from typing import ClassVar

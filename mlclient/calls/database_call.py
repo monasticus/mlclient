@@ -1,4 +1,13 @@
-"""The ML Database Resource Calls module."""
+"""The ML Database Resource Calls module.
+
+It exports 3 classes:
+* DatabaseGetCall
+    A GET request to get database details.
+* DatabasePostCall
+    A POST request to manage a database.
+* DatabaseDeleteCall
+    A DELETE request to remove a database from a cluster.
+"""
 from __future__ import annotations
 
 import json

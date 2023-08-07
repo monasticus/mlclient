@@ -1,4 +1,9 @@
-"""The ML Eval Resource Call module."""
+"""The ML Eval Resource Call module.
+
+It exports 1 class:
+* EvalCall
+    A POST request to evaluate an ad-hoc query.
+"""
 from __future__ import annotations
 
 from json import dumps

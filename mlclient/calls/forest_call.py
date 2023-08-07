@@ -1,4 +1,13 @@
-"""The ML Forest Resource Calls module."""
+"""The ML Forest Resource Calls module.
+
+It exports 3 classes:
+* ForestGetCall
+    A GET request to get a forest details.
+* ForestPostCall
+    A POST request to change a forest's state.
+* ForestDeleteCall
+    A DELETE request to remove a forest.
+"""
 from __future__ import annotations
 
 from typing import ClassVar

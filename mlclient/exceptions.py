@@ -1,4 +1,11 @@
-"""The ML Client Exceptions module."""
+"""The ML Client Exceptions module.
+
+It contains all custom exceptions related to ML Client:
+    * WrongParametersError
+        A custom Exception class for wrong parameters.
+    * UnsupportedFormatError
+        A custom Exception class for an unsupported format.
+"""
 from __future__ import annotations
 
 

@@ -1,4 +1,11 @@
-"""The ML Role Resource Calls module."""
+"""The ML Role Resource Calls module.
+
+It exports 2 classes:
+* RoleGetCall
+    A GET request to get a role details.
+* RoleDeleteCall
+    A DELETE request to remove a role.
+"""
 from __future__ import annotations
 
 from typing import ClassVar

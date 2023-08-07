@@ -1,8 +1,8 @@
 """The ML Logs Resource Call module.
 
 It exports 1 class:
-* LogsCall
-    A GET request to retrieve logs.
+    * LogsCall
+        A GET request to retrieve logs.
 """
 from __future__ import annotations
 

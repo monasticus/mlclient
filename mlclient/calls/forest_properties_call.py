@@ -1,10 +1,10 @@
 """The ML Forest Properties Resource Calls module.
 
 It exports 2 classes:
-* ForestPropertiesGetCall
-    A GET request to get forest properties.
-* ForestPropertiesPutCall
-    A PUT request to modify forest properties.
+    * ForestPropertiesGetCall
+        A GET request to get forest properties.
+    * ForestPropertiesPutCall
+        A PUT request to modify forest properties.
 """
 from __future__ import annotations
 

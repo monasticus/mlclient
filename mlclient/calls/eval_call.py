@@ -1,8 +1,8 @@
 """The ML Eval Resource Call module.
 
 It exports 1 class:
-* EvalCall
-    A POST request to evaluate an ad-hoc query.
+    * EvalCall
+        A POST request to evaluate an ad-hoc query.
 """
 from __future__ import annotations
 

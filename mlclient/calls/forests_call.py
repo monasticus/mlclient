@@ -1,12 +1,12 @@
 """The ML Forests Resource Calls module.
 
 It exports 3 classes:
-* ForestsGetCall
-    A GET request to get forests summary.
-* ForestsPostCall
-    A POST request to create a new forest.
-* ForestsPutCall
-    A PUT request to perform an operation on forests.
+    * ForestsGetCall
+        A GET request to get forests summary.
+    * ForestsPostCall
+        A POST request to create a new forest.
+    * ForestsPutCall
+        A PUT request to perform an operation on forests.
 """
 from __future__ import annotations
 

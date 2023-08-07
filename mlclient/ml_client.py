@@ -1,10 +1,10 @@
 """The ML Client module.
 
 It exports 2 classes:
-* MLClient
-    A low-level class used to send simple HTTP requests to a MarkLogic instance.
-* MLResourceClient
-    An MLClient subclass supporting internal REST Resources of the MarkLogic server.
+    * MLClient
+        A low-level class used to send simple HTTP requests to a MarkLogic instance.
+    * MLResourceClient
+        An MLClient subclass supporting internal REST Resources of the MarkLogic server.
 """
 from __future__ import annotations
 

@@ -1,10 +1,10 @@
 """The ML Database Properties Resource Calls module.
 
 It exports 2 classes:
-* DatabasePropertiesGetCall
-    A GET request to get a database properties.
-* DatabasePropertiesPutCall
-    A PUT request to modify database properties.
+    * DatabasePropertiesGetCall
+        A GET request to get a database properties.
+    * DatabasePropertiesPutCall
+        A PUT request to modify database properties.
 """
 from __future__ import annotations
 

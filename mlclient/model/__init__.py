@@ -19,7 +19,7 @@ This package exports the following classes:
 
 Examples
 --------
-from mlclient.model import Document, DocumentType, Metadata
+>>> from mlclient.model import Document, DocumentType, Metadata
 """
 from __future__ import annotations
 

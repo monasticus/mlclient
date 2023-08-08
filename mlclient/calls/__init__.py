@@ -120,7 +120,7 @@ This package exports the following classes:
 
 Examples
 --------
-from mlclient.calls import DatabaseGetCall, EvalCall
+>>> from mlclient.calls import DatabaseGetCall, EvalCall
 """
 from .resource_call import ResourceCall
 from .database_call import (DatabaseDeleteCall, DatabaseGetCall,

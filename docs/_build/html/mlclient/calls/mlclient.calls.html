@@ -44,14 +44,51 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="reference internal" href="../../modules.html">mlclient</a><ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../../pythonapi.html">Python API</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="../mlclient.html">mlclient package</a><ul class="current">
-<li class="toctree-l3 current"><a class="reference internal" href="../mlclient.html#subpackages">Subpackages</a><ul class="current">
-<li class="toctree-l4 current"><a class="current reference internal" href="#">mlclient.calls package</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../model/mlclient.model.html">mlclient.model package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../mlclient.html#mlclient.MLClient"><code class="docutils literal notranslate"><span class="pre">MLClient</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../mlclient.html#mlclient.MLResourceClient"><code class="docutils literal notranslate"><span class="pre">MLResourceClient</span></code></a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">mlclient.calls package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.calls.DatabaseDeleteCall"><code class="docutils literal notranslate"><span class="pre">DatabaseDeleteCall</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.calls.DatabaseGetCall"><code class="docutils literal notranslate"><span class="pre">DatabaseGetCall</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.calls.DatabasePostCall"><code class="docutils literal notranslate"><span class="pre">DatabasePostCall</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.calls.DatabasePropertiesGetCall"><code class="docutils literal notranslate"><span class="pre">DatabasePropertiesGetCall</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.calls.DatabasePropertiesPutCall"><code class="docutils literal notranslate"><span class="pre">DatabasePropertiesPutCall</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.calls.DatabasesGetCall"><code class="docutils literal notranslate"><span class="pre">DatabasesGetCall</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.calls.DatabasesPostCall"><code class="docutils literal notranslate"><span class="pre">DatabasesPostCall</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.calls.DocumentsGetCall"><code class="docutils literal notranslate"><span class="pre">DocumentsGetCall</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.calls.EvalCall"><code class="docutils literal notranslate"><span class="pre">EvalCall</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.calls.ForestDeleteCall"><code class="docutils literal notranslate"><span class="pre">ForestDeleteCall</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.calls.ForestGetCall"><code class="docutils literal notranslate"><span class="pre">ForestGetCall</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.calls.ForestPostCall"><code class="docutils literal notranslate"><span class="pre">ForestPostCall</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.calls.ForestPropertiesGetCall"><code class="docutils literal notranslate"><span class="pre">ForestPropertiesGetCall</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.calls.ForestPropertiesPutCall"><code class="docutils literal notranslate"><span class="pre">ForestPropertiesPutCall</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.calls.ForestsGetCall"><code class="docutils literal notranslate"><span class="pre">ForestsGetCall</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.calls.ForestsPostCall"><code class="docutils literal notranslate"><span class="pre">ForestsPostCall</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.calls.ForestsPutCall"><code class="docutils literal notranslate"><span class="pre">ForestsPutCall</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.calls.LogsCall"><code class="docutils literal notranslate"><span class="pre">LogsCall</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.calls.ResourceCall"><code class="docutils literal notranslate"><span class="pre">ResourceCall</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.calls.RoleDeleteCall"><code class="docutils literal notranslate"><span class="pre">RoleDeleteCall</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.calls.RoleGetCall"><code class="docutils literal notranslate"><span class="pre">RoleGetCall</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.calls.RolePropertiesGetCall"><code class="docutils literal notranslate"><span class="pre">RolePropertiesGetCall</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.calls.RolePropertiesPutCall"><code class="docutils literal notranslate"><span class="pre">RolePropertiesPutCall</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.calls.RolesGetCall"><code class="docutils literal notranslate"><span class="pre">RolesGetCall</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.calls.RolesPostCall"><code class="docutils literal notranslate"><span class="pre">RolesPostCall</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.calls.ServerDeleteCall"><code class="docutils literal notranslate"><span class="pre">ServerDeleteCall</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.calls.ServerGetCall"><code class="docutils literal notranslate"><span class="pre">ServerGetCall</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.calls.ServerPropertiesGetCall"><code class="docutils literal notranslate"><span class="pre">ServerPropertiesGetCall</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.calls.ServerPropertiesPutCall"><code class="docutils literal notranslate"><span class="pre">ServerPropertiesPutCall</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.calls.ServersGetCall"><code class="docutils literal notranslate"><span class="pre">ServersGetCall</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.calls.ServersPostCall"><code class="docutils literal notranslate"><span class="pre">ServersPostCall</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.calls.UserDeleteCall"><code class="docutils literal notranslate"><span class="pre">UserDeleteCall</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.calls.UserGetCall"><code class="docutils literal notranslate"><span class="pre">UserGetCall</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.calls.UserPropertiesGetCall"><code class="docutils literal notranslate"><span class="pre">UserPropertiesGetCall</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.calls.UserPropertiesPutCall"><code class="docutils literal notranslate"><span class="pre">UserPropertiesPutCall</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.calls.UsersGetCall"><code class="docutils literal notranslate"><span class="pre">UsersGetCall</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.calls.UsersPostCall"><code class="docutils literal notranslate"><span class="pre">UsersPostCall</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="../mlclient.html#module-mlclient">mlclient exports</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../model/mlclient.model.html">mlclient.model package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../mlclient.html#module-mlclient.constants">mlclient.constants module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../mlclient.html#module-mlclient.exceptions">mlclient.exceptions module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../mlclient.html#module-mlclient.utils">mlclient.utils module</a></li>
@@ -75,7 +112,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
-          <li class="breadcrumb-item"><a href="../../modules.html">mlclient</a></li>
+          <li class="breadcrumb-item"><a href="../../pythonapi.html">Python API</a></li>
           <li class="breadcrumb-item"><a href="../mlclient.html">mlclient package</a></li>
       <li class="breadcrumb-item active">mlclient.calls package</li>
       <li class="wy-breadcrumbs-aside">
@@ -87,10 +124,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="mlclient-calls-package">
-<h1>mlclient.calls package<a class="headerlink" href="#mlclient-calls-package" title="Permalink to this heading"></a></h1>
-<section id="module-mlclient.calls">
-<span id="mlclient-calls-exports"></span><h2>mlclient.calls exports<a class="headerlink" href="#module-mlclient.calls" title="Permalink to this heading"></a></h2>
+  <section id="module-mlclient.calls">
+<span id="mlclient-calls-package"></span><h1>mlclient.calls package<a class="headerlink" href="#module-mlclient.calls" title="Permalink to this heading"></a></h1>
 <p>The ML Calls package.</p>
 <p>It contains modules dealing with MarkLogic REST Resources at the lowest level
 of HTTP requests:</p>
@@ -383,9 +418,9 @@ of HTTP requests:</p>
 </ul>
 </dd>
 </dl>
-<div class="admonition-examples admonition">
-<p class="admonition-title">Examples</p>
-<p>from mlclient.calls import DatabaseGetCall, EvalCall</p>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient.calls</span> <span class="kn">import</span> <span class="n">DatabaseGetCall</span><span class="p">,</span> <span class="n">EvalCall</span>
+</pre></div>
 </div>
 <dl class="py class">
 <dt class="sig sig-object py" id="mlclient.calls.DatabaseDeleteCall">
@@ -1424,7 +1459,6 @@ Documentation of the REST Resource API: <a class="reference external" href="http
 
 </dd></dl>
 
-</section>
 </section>
 
 

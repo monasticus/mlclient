@@ -1,22 +1,16 @@
 mlclient package
 ================
 
-Subpackages
------------
+.. automodule:: mlclient
+   :members:
+   :undoc-members:
+   :show-inheritance:
 
 .. toctree::
    :maxdepth: 1
 
    calls/mlclient.calls
    model/mlclient.model
-
-mlclient exports
-----------------
-
-.. automodule:: mlclient
-   :members:
-   :undoc-members:
-   :show-inheritance:
 
 mlclient.constants module
 -------------------------

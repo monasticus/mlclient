@@ -43,14 +43,18 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="reference internal" href="../../modules.html">mlclient</a><ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../../pythonapi.html">Python API</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="../mlclient.html">mlclient package</a><ul class="current">
-<li class="toctree-l3 current"><a class="reference internal" href="../mlclient.html#subpackages">Subpackages</a><ul class="current">
-<li class="toctree-l4"><a class="reference internal" href="../calls/mlclient.calls.html">mlclient.calls package</a></li>
-<li class="toctree-l4 current"><a class="current reference internal" href="#">mlclient.model package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../mlclient.html#mlclient.MLClient"><code class="docutils literal notranslate"><span class="pre">MLClient</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../mlclient.html#mlclient.MLResourceClient"><code class="docutils literal notranslate"><span class="pre">MLResourceClient</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../calls/mlclient.calls.html">mlclient.calls package</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">mlclient.model package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.Document"><code class="docutils literal notranslate"><span class="pre">Document</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.DocumentType"><code class="docutils literal notranslate"><span class="pre">DocumentType</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.Metadata"><code class="docutils literal notranslate"><span class="pre">Metadata</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.Permission"><code class="docutils literal notranslate"><span class="pre">Permission</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="../mlclient.html#module-mlclient">mlclient exports</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../mlclient.html#module-mlclient.constants">mlclient.constants module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../mlclient.html#module-mlclient.exceptions">mlclient.exceptions module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../mlclient.html#module-mlclient.utils">mlclient.utils module</a></li>
@@ -74,7 +78,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
-          <li class="breadcrumb-item"><a href="../../modules.html">mlclient</a></li>
+          <li class="breadcrumb-item"><a href="../../pythonapi.html">Python API</a></li>
           <li class="breadcrumb-item"><a href="../mlclient.html">mlclient package</a></li>
       <li class="breadcrumb-item active">mlclient.model package</li>
       <li class="wy-breadcrumbs-aside">
@@ -86,10 +90,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="mlclient-model-package">
-<h1>mlclient.model package<a class="headerlink" href="#mlclient-model-package" title="Permalink to this heading"></a></h1>
-<section id="module-mlclient.model">
-<span id="mlclient-model-exports"></span><h2>mlclient.model exports<a class="headerlink" href="#module-mlclient.model" title="Permalink to this heading"></a></h2>
+  <section id="module-mlclient.model">
+<span id="mlclient-model-package"></span><h1>mlclient.model package<a class="headerlink" href="#module-mlclient.model" title="Permalink to this heading"></a></h1>
 <p>The ML Model package.</p>
 <p>It contains modules with a corresponding Python representation of MarkLogic-related
 data structures:</p>
@@ -127,9 +129,9 @@ data structures:</p>
 </li>
 </ul>
 </div></blockquote>
-<div class="admonition-examples admonition">
-<p class="admonition-title">Examples</p>
-<p>from mlclient.model import Document, DocumentType, Metadata</p>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient.model</span> <span class="kn">import</span> <span class="n">Document</span><span class="p">,</span> <span class="n">DocumentType</span><span class="p">,</span> <span class="n">Metadata</span>
+</pre></div>
 </div>
 <dl class="py class">
 <dt class="sig sig-object py" id="mlclient.model.Document">
@@ -528,7 +530,6 @@ Otherwise, False.</p>
 
 </dd></dl>
 
-</section>
 </section>
 
 

@@ -10,7 +10,7 @@ Welcome to MLClient's documentation!
    :maxdepth: 2
    :caption: Contents:
 
-   modules
+   pythonapi
 
 
 

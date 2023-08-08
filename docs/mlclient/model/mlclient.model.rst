@@ -1,8 +1,8 @@
 mlclient.model package
 ======================
 
-Module contents
----------------
+mlclient.model exports
+----------------------
 
 .. automodule:: mlclient.model
    :members:

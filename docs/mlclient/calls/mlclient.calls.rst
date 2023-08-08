@@ -1,8 +1,8 @@
 mlclient.calls package
 ======================
 
-Module contents
----------------
+mlclient.calls exports
+----------------------
 
 .. automodule:: mlclient.calls
    :members:

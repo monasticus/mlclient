@@ -28,19 +28,7 @@ logger = logging.getLogger(__name__)
 
 
 class DocumentType(Enum):
-    """An enumeration class representing document types.
-
-    Attributes
-    ----------
-    XML : str
-        XML document type
-    JSON : str
-        JSON document type
-    BINARY : str
-        Binary document type
-    TEXT : str
-        Text document type
-    """
+    """An enumeration class representing document types."""
 
     XML: str = "xml"
     JSON: str = "json"
@@ -49,21 +37,7 @@ class DocumentType(Enum):
 
 
 class Document(metaclass=ABCMeta):
-    """A class representing a single MarkLogic document.
-
-    Attributes
-    ----------
-    content : str
-        A document content
-    uri : str
-        A document URI
-    doc_type : DocumentType
-        A document type
-    metadata : Metadata
-        A document metadata
-    is_temporal : bool
-        The temporal flag
-    """
+    """A class representing a single MarkLogic document."""
 
     def __init__(
             self,
@@ -114,7 +88,7 @@ class Document(metaclass=ABCMeta):
     def content(
             self,
     ) -> Any:
-        """Return a document's content.
+        """A document content.
 
         Returns
         -------
@@ -127,28 +101,28 @@ class Document(metaclass=ABCMeta):
     def uri(
             self,
     ) -> str:
-        """Return a document URI."""
+        """A document URI."""
         return self._uri
 
     @property
     def doc_type(
             self,
     ) -> DocumentType:
-        """Return a document type."""
+        """A document type."""
         return self._doc_type
 
     @property
     def metadata(
             self,
     ) -> Metadata:
-        """Return a document metadata."""
+        """A document metadata."""
         return copy.copy(self._metadata)
 
     @property
     def is_temporal(
             self,
     ) -> bool:
-        """Return the temporal flag."""
+        """The temporal flag."""
         return self._is_temporal
 
     @staticmethod

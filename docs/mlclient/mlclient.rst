@@ -5,10 +5,18 @@ Subpackages
 -----------
 
 .. toctree::
-   :maxdepth: 4
+   :maxdepth: 1
 
    mlclient.calls
    mlclient.model
+
+Module contents
+---------------
+
+.. automodule:: mlclient
+   :members:
+   :undoc-members:
+   :show-inheritance:
 
 Submodules
 ----------
@@ -29,26 +37,10 @@ mlclient.exceptions module
    :undoc-members:
    :show-inheritance:
 
-mlclient.ml\_client module
---------------------------
-
-.. automodule:: mlclient.ml_client
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 mlclient.utils module
 ---------------------
 
 .. automodule:: mlclient.utils
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-Module contents
----------------
-
-.. automodule:: mlclient
    :members:
    :undoc-members:
    :show-inheritance:

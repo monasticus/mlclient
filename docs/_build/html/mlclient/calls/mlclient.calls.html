@@ -1,0 +1,1461 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mlclient.calls package &mdash; MLClient 0.1.0 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=2389946f"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="mlclient.model package" href="../model/mlclient.model.html" />
+    <link rel="prev" title="mlclient package" href="../mlclient.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            MLClient
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../../modules.html">mlclient</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../mlclient.html">mlclient package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="../mlclient.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4 current"><a class="current reference internal" href="#">mlclient.calls package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../model/mlclient.model.html">mlclient.model package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../mlclient.html#module-mlclient">mlclient exports</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../mlclient.html#module-mlclient.constants">mlclient.constants module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../mlclient.html#module-mlclient.exceptions">mlclient.exceptions module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../mlclient.html#module-mlclient.utils">mlclient.utils module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">MLClient</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../modules.html">mlclient</a></li>
+          <li class="breadcrumb-item"><a href="../mlclient.html">mlclient package</a></li>
+      <li class="breadcrumb-item active">mlclient.calls package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/mlclient/calls/mlclient.calls.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="mlclient-calls-package">
+<h1>mlclient.calls package<a class="headerlink" href="#mlclient-calls-package" title="Permalink to this heading"></a></h1>
+<section id="module-mlclient.calls">
+<span id="mlclient-calls-exports"></span><h2>mlclient.calls exports<a class="headerlink" href="#module-mlclient.calls" title="Permalink to this heading"></a></h2>
+<p>The ML Calls package.</p>
+<p>It contains modules dealing with MarkLogic REST Resources at the lowest level
+of HTTP requests:</p>
+<blockquote>
+<div><ul class="simple">
+<li><dl class="simple">
+<dt>resource_call</dt><dd><p>An abstract class representing a single request to a MarkLogic REST Resource.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>database_call</dt><dd><p>The ML Database Resource Calls module.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>database_properties_call</dt><dd><p>The ML Database Properties Resource Calls module.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>databases_call</dt><dd><p>The ML Databases Resource Calls module.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>documents_call</dt><dd><p>The ML Documents Resource Calls module.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>eval_call</dt><dd><p>The ML Eval Resource Call module.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>forest_call</dt><dd><p>The ML Forest Resource Calls module.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>forest_properties_call</dt><dd><p>The ML Forest Properties Resource Calls module.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>forests_call</dt><dd><p>The ML Forests Resource Calls module.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>logs_call</dt><dd><p>The ML Logs Resource Call module.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>role_call</dt><dd><p>The ML Role Resource Calls module.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>role_properties_call</dt><dd><p>The ML Role Properties Resource Calls module.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>roles_call</dt><dd><p>The ML Roles Resource Calls module.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>server_call</dt><dd><p>The ML Server Resource Calls module.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>server_properties_call</dt><dd><p>The ML Server Properties Resource Calls module.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>servers_call</dt><dd><p>The ML Servers Resource Calls module.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>user_call</dt><dd><p>The ML User Resource Calls module.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>user_properties_call</dt><dd><p>The ML User Properties Resource Calls module.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>users_call</dt><dd><p>The ML Users Resource Calls module.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</div></blockquote>
+<dl class="simple">
+<dt>This package exports the following classes:</dt><dd><ul class="simple">
+<li><dl class="simple">
+<dt>ResourceCall</dt><dd><p>An abstract class representing a single request to a MarkLogic REST Resource.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>DatabaseGetCall</dt><dd><p>A GET request to get database details.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>DatabasePostCall</dt><dd><p>A POST request to manage a database.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>DatabaseDeleteCall</dt><dd><p>A DELETE request to remove a database from a cluster.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>DatabasePropertiesGetCall</dt><dd><p>A GET request to get a database properties.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>DatabasePropertiesPutCall</dt><dd><p>A PUT request to modify database properties.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>DatabasesGetCall</dt><dd><p>A GET request to get databases summary.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>DatabasesPostCall</dt><dd><p>A POST request to create a new database.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>DocumentsGetCall</dt><dd><p>A GET request to retrieve documents’ content or metadata.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>EvalCall</dt><dd><p>A POST request to evaluate an ad-hoc query.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>ForestGetCall</dt><dd><p>A GET request to get a forest details.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>ForestPostCall</dt><dd><p>A POST request to change a forest’s state.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>ForestDeleteCall</dt><dd><p>A DELETE request to remove a forest.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>ForestPropertiesGetCall</dt><dd><p>A GET request to get forest properties.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>ForestPropertiesPutCall</dt><dd><p>A PUT request to modify forest properties.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>ForestsGetCall</dt><dd><p>A GET request to get forests summary.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>ForestsPostCall</dt><dd><p>A POST request to create a new forest.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>ForestsPutCall</dt><dd><p>A PUT request to perform an operation on forests.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>LogsCall</dt><dd><p>A GET request to retrieve logs.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>RoleGetCall</dt><dd><p>A GET request to get a role details.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>RoleDeleteCall</dt><dd><p>A DELETE request to remove a role.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>RolePropertiesGetCall</dt><dd><p>A GET request to get role properties.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>RolePropertiesPutCall</dt><dd><p>A PUT request to modify role properties.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>RolesGetCall</dt><dd><p>A GET request to get roles summary.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>RolesPostCall</dt><dd><p>A POST request to create a new role.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>ServerGetCall</dt><dd><p>A GET request to get app server details.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>ServerDeleteCall</dt><dd><p>A DELETE request to remove an app server.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>ServerPropertiesGetCall</dt><dd><p>A GET request to get app server properties.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>ServerPropertiesPutCall</dt><dd><p>A PUT request to modify app server properties.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>ServersGetCall</dt><dd><p>A GET request to get app servers summary.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>ServersPostCall</dt><dd><p>A POST request to create a new app server.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>UserGetCall</dt><dd><p>A GET request to get user details.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>UserDeleteCall</dt><dd><p>A DELETE request to remove a user.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>UserPropertiesGetCall</dt><dd><p>A GET request to get user properties.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>UserPropertiesPutCall</dt><dd><p>A PUT request to modify user properties.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>UsersGetCall</dt><dd><p>A GET request to get users summary.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>UsersPostCall</dt><dd><p>A POST request to create a new user.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+<div class="admonition-examples admonition">
+<p class="admonition-title">Examples</p>
+<p>from mlclient.calls import DatabaseGetCall, EvalCall</p>
+</div>
+<dl class="py class">
+<dt class="sig sig-object py" id="mlclient.calls.DatabaseDeleteCall">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mlclient.calls.</span></span><span class="sig-name descname"><span class="pre">DatabaseDeleteCall</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">database</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">forest_delete</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mlclient/calls/database_call.html#DatabaseDeleteCall"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.calls.DatabaseDeleteCall" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mlclient.calls.ResourceCall" title="mlclient.calls.resource_call.ResourceCall"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResourceCall</span></code></a></p>
+<p>A DELETE request to remove a database from a cluster.</p>
+<p>A ResourceCall implementation representing a single DELETE request
+to the /manage/v2/databases/{id|name} REST Resource.</p>
+<p>This resource address deletes the named database from the cluster.
+The database can be identified either by id or name.
+Documentation of the REST Resource API: <a class="reference external" href="https://docs.marklogic.com/REST/DELETE/manage/v2/databases/[id-or-name">https://docs.marklogic.com/REST/DELETE/manage/v2/databases/[id-or-name</a>]</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="mlclient.calls.DatabaseDeleteCall.endpoint">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">endpoint</span></span><a class="headerlink" href="#mlclient.calls.DatabaseDeleteCall.endpoint" title="Permalink to this definition"></a></dt>
+<dd><p>An endpoint for the Database call.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A Database call endpoint</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mlclient.calls.DatabaseGetCall">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mlclient.calls.</span></span><span class="sig-name descname"><span class="pre">DatabaseGetCall</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">database</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_format</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'xml'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">view</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'default'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mlclient/calls/database_call.html#DatabaseGetCall"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.calls.DatabaseGetCall" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mlclient.calls.ResourceCall" title="mlclient.calls.resource_call.ResourceCall"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResourceCall</span></code></a></p>
+<p>A GET request to get database details.</p>
+<p>A ResourceCall implementation representing a single GET request
+to the /manage/v2/databases/{id|name} REST Resource.</p>
+<p>This resource address returns information on the specified database.
+The database can be identified either by ID or name.
+Documentation of the REST Resource API:
+<a class="reference external" href="https://docs.marklogic.com/REST/GET/manage/v2/databases/[id-or-name">https://docs.marklogic.com/REST/GET/manage/v2/databases/[id-or-name</a>]</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="mlclient.calls.DatabaseGetCall.endpoint">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">endpoint</span></span><a class="headerlink" href="#mlclient.calls.DatabaseGetCall.endpoint" title="Permalink to this definition"></a></dt>
+<dd><p>An endpoint for the Database call.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A Database call endpoint</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mlclient.calls.DatabasePostCall">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mlclient.calls.</span></span><span class="sig-name descname"><span class="pre">DatabasePostCall</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">database</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">body</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mlclient/calls/database_call.html#DatabasePostCall"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.calls.DatabasePostCall" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mlclient.calls.ResourceCall" title="mlclient.calls.resource_call.ResourceCall"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResourceCall</span></code></a></p>
+<p>A POST request to manage a database.</p>
+<p>A ResourceCall implementation representing a single POST request
+to the /manage/v2/databases/{id|name} REST Resource.</p>
+<p>This resource address can be used to clear the contents of the named database
+and to perform various configuration operations on the database.
+The database can be identified either by id or name.
+Documentation of the REST Resource API:
+<a class="reference external" href="https://docs.marklogic.com/REST/POST/manage/v2/databases/[id-or-name">https://docs.marklogic.com/REST/POST/manage/v2/databases/[id-or-name</a>]</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="mlclient.calls.DatabasePostCall.endpoint">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">endpoint</span></span><a class="headerlink" href="#mlclient.calls.DatabasePostCall.endpoint" title="Permalink to this definition"></a></dt>
+<dd><p>An endpoint for the Database call.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A Database call endpoint</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mlclient.calls.DatabasePropertiesGetCall">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mlclient.calls.</span></span><span class="sig-name descname"><span class="pre">DatabasePropertiesGetCall</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">database</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_format</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'xml'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mlclient/calls/database_properties_call.html#DatabasePropertiesGetCall"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.calls.DatabasePropertiesGetCall" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mlclient.calls.ResourceCall" title="mlclient.calls.resource_call.ResourceCall"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResourceCall</span></code></a></p>
+<p>A GET request to get a database properties.</p>
+<p>A ResourceCall implementation representing a single GET request
+to the /manage/v2/databases/{id|name}/properties REST Resource.</p>
+<p>This resource address returns the modifiable properties of the named database.
+The database can be identified either by ID or name.
+Documentation of the REST Resource API:
+<a class="reference external" href="https://docs.marklogic.com/REST/GET/manage/v2/databases/[id-or-name]/properties">https://docs.marklogic.com/REST/GET/manage/v2/databases/[id-or-name]/properties</a></p>
+<dl class="py property">
+<dt class="sig sig-object py" id="mlclient.calls.DatabasePropertiesGetCall.endpoint">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">endpoint</span></span><a class="headerlink" href="#mlclient.calls.DatabasePropertiesGetCall.endpoint" title="Permalink to this definition"></a></dt>
+<dd><p>An endpoint for the Database Properties call.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A Database Properties call endpoint</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mlclient.calls.DatabasePropertiesPutCall">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mlclient.calls.</span></span><span class="sig-name descname"><span class="pre">DatabasePropertiesPutCall</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">database</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">body</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mlclient/calls/database_properties_call.html#DatabasePropertiesPutCall"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.calls.DatabasePropertiesPutCall" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mlclient.calls.ResourceCall" title="mlclient.calls.resource_call.ResourceCall"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResourceCall</span></code></a></p>
+<p>A PUT request to modify database properties.</p>
+<p>A ResourceCall implementation representing a single PUT request
+to the /manage/v2/databases/{id|name}/properties REST Resource.</p>
+<p>This resource address modifies the properties of the named database.
+The list of modifiable properties can be returned by the GET version
+of this endpoint. The database can be identified either by id or name.
+Documentation of the REST Resource API:
+<a class="reference external" href="https://docs.marklogic.com/REST/PUT/manage/v2/databases/[id-or-name]/properties">https://docs.marklogic.com/REST/PUT/manage/v2/databases/[id-or-name]/properties</a></p>
+<dl class="py property">
+<dt class="sig sig-object py" id="mlclient.calls.DatabasePropertiesPutCall.endpoint">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">endpoint</span></span><a class="headerlink" href="#mlclient.calls.DatabasePropertiesPutCall.endpoint" title="Permalink to this definition"></a></dt>
+<dd><p>An endpoint for the Database Properties call.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A Database Properties call endpoint</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mlclient.calls.DatabasesGetCall">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mlclient.calls.</span></span><span class="sig-name descname"><span class="pre">DatabasesGetCall</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_format</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'xml'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">view</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'default'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mlclient/calls/databases_call.html#DatabasesGetCall"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.calls.DatabasesGetCall" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mlclient.calls.ResourceCall" title="mlclient.calls.resource_call.ResourceCall"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResourceCall</span></code></a></p>
+<p>A GET request to get databases summary.</p>
+<p>A ResourceCall implementation representing a single GET request
+to the /manage/v2/databases REST Resource.</p>
+<p>This resource address returns a summary of the databases in the cluster.
+Documentation of the REST Resource API: <a class="reference external" href="https://docs.marklogic.com/REST/GET/manage/v2/databases">https://docs.marklogic.com/REST/GET/manage/v2/databases</a></p>
+<dl class="py property">
+<dt class="sig sig-object py" id="mlclient.calls.DatabasesGetCall.endpoint">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">endpoint</span></span><a class="headerlink" href="#mlclient.calls.DatabasesGetCall.endpoint" title="Permalink to this definition"></a></dt>
+<dd><p>An endpoint for the Databases call.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A Databases call endpoint</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mlclient.calls.DatabasesPostCall">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mlclient.calls.</span></span><span class="sig-name descname"><span class="pre">DatabasesPostCall</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">body</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mlclient/calls/databases_call.html#DatabasesPostCall"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.calls.DatabasesPostCall" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mlclient.calls.ResourceCall" title="mlclient.calls.resource_call.ResourceCall"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResourceCall</span></code></a></p>
+<p>A POST request to create a new database.</p>
+<p>A ResourceCall implementation representing a single POST request
+to the /manage/v2/databases REST Resource.</p>
+<p>This resource address creates a new database in the cluster.
+Documentation of the REST Resource API: <a class="reference external" href="https://docs.marklogic.com/REST/POST/manage/v2/databases">https://docs.marklogic.com/REST/POST/manage/v2/databases</a></p>
+<dl class="py property">
+<dt class="sig sig-object py" id="mlclient.calls.DatabasesPostCall.endpoint">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">endpoint</span></span><a class="headerlink" href="#mlclient.calls.DatabasesPostCall.endpoint" title="Permalink to this definition"></a></dt>
+<dd><p>An endpoint for the Databases call.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A Databases call endpoint</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mlclient.calls.DocumentsGetCall">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mlclient.calls.</span></span><span class="sig-name descname"><span class="pre">DocumentsGetCall</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">uri</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">database</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">category</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_format</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timestamp</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transform</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transform_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">txid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mlclient/calls/documents_call.html#DocumentsGetCall"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.calls.DocumentsGetCall" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mlclient.calls.ResourceCall" title="mlclient.calls.resource_call.ResourceCall"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResourceCall</span></code></a></p>
+<p>A GET request to retrieve documents’ content or metadata.</p>
+<p>A ResourceCall implementation representing a single GET request
+to the /manage/v2/documents REST Resource.</p>
+<p>Retrieve document content and/or metadata from the database.
+Documentation of the REST Resource API: <a class="reference external" href="https://docs.marklogic.com/REST/GET/v1/documents">https://docs.marklogic.com/REST/GET/v1/documents</a></p>
+<dl class="py property">
+<dt class="sig sig-object py" id="mlclient.calls.DocumentsGetCall.endpoint">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">endpoint</span></span><a class="headerlink" href="#mlclient.calls.DocumentsGetCall.endpoint" title="Permalink to this definition"></a></dt>
+<dd><p>An endpoint for the Documents call.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A Documents call endpoint</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mlclient.calls.EvalCall">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mlclient.calls.</span></span><span class="sig-name descname"><span class="pre">EvalCall</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xquery</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">javascript</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">variables</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">database</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">txid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mlclient/calls/eval_call.html#EvalCall"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.calls.EvalCall" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mlclient.calls.ResourceCall" title="mlclient.calls.resource_call.ResourceCall"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResourceCall</span></code></a></p>
+<p>A POST request to evaluate an ad-hoc query.</p>
+<p>A ResourceCall implementation representing a single request
+to the /v1/eval REST Resource.</p>
+<p>Evaluate an ad-hoc query expressed using XQuery or server-side JavaScript.
+Documentation of the REST Resource API: <a class="reference external" href="https://docs.marklogic.com/REST/POST/v1/eval">https://docs.marklogic.com/REST/POST/v1/eval</a></p>
+<dl class="py property">
+<dt class="sig sig-object py" id="mlclient.calls.EvalCall.endpoint">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">endpoint</span></span><a class="headerlink" href="#mlclient.calls.EvalCall.endpoint" title="Permalink to this definition"></a></dt>
+<dd><p>An endpoint for the Eval call.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>An Eval call endpoint</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mlclient.calls.ForestDeleteCall">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mlclient.calls.</span></span><span class="sig-name descname"><span class="pre">ForestDeleteCall</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">forest</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">level</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">replicas</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mlclient/calls/forest_call.html#ForestDeleteCall"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.calls.ForestDeleteCall" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mlclient.calls.ResourceCall" title="mlclient.calls.resource_call.ResourceCall"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResourceCall</span></code></a></p>
+<p>A DELETE request to remove a forest.</p>
+<p>A ResourceCall implementation representing a single DELETE request
+to the /manage/v2/forests/{id|name} REST Resource.</p>
+<p>Delete a forest.
+Documentation of the REST Resource API: <a class="reference external" href="https://docs.marklogic.com/REST/DELETE/manage/v2/forests/[id-or-name">https://docs.marklogic.com/REST/DELETE/manage/v2/forests/[id-or-name</a>]</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="mlclient.calls.ForestDeleteCall.endpoint">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">endpoint</span></span><a class="headerlink" href="#mlclient.calls.ForestDeleteCall.endpoint" title="Permalink to this definition"></a></dt>
+<dd><p>An endpoint for the Forest call.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A Forest call endpoint</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mlclient.calls.ForestGetCall">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mlclient.calls.</span></span><span class="sig-name descname"><span class="pre">ForestGetCall</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">forest</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_format</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'xml'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">view</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'default'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mlclient/calls/forest_call.html#ForestGetCall"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.calls.ForestGetCall" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mlclient.calls.ResourceCall" title="mlclient.calls.resource_call.ResourceCall"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResourceCall</span></code></a></p>
+<p>A GET request to get a forest details.</p>
+<p>A ResourceCall implementation representing a single GET request
+to the /manage/v2/forests/{id|name} REST Resource.</p>
+<p>Retrieve information about a forest. The forest can be identified either by id
+or name.
+Documentation of the REST Resource API: <a class="reference external" href="https://docs.marklogic.com/REST/GET/manage/v2/forests/[id-or-name">https://docs.marklogic.com/REST/GET/manage/v2/forests/[id-or-name</a>]</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="mlclient.calls.ForestGetCall.endpoint">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">endpoint</span></span><a class="headerlink" href="#mlclient.calls.ForestGetCall.endpoint" title="Permalink to this definition"></a></dt>
+<dd><p>An endpoint for the Forest call.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A Forest call endpoint</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mlclient.calls.ForestPostCall">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mlclient.calls.</span></span><span class="sig-name descname"><span class="pre">ForestPostCall</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">forest</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">body</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mlclient/calls/forest_call.html#ForestPostCall"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.calls.ForestPostCall" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mlclient.calls.ResourceCall" title="mlclient.calls.resource_call.ResourceCall"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResourceCall</span></code></a></p>
+<p>A POST request to change a forest’s state.</p>
+<p>A ResourceCall implementation representing a single POST request
+to the /manage/v2/forests/{id|name} REST Resource.</p>
+<p>Initiate a state change on a forest, such as a merge, restart, or attach.
+Documentation of the REST Resource API: <a class="reference external" href="https://docs.marklogic.com/REST/POST/manage/v2/forests/[id-or-name">https://docs.marklogic.com/REST/POST/manage/v2/forests/[id-or-name</a>]</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="mlclient.calls.ForestPostCall.endpoint">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">endpoint</span></span><a class="headerlink" href="#mlclient.calls.ForestPostCall.endpoint" title="Permalink to this definition"></a></dt>
+<dd><p>An endpoint for the Forests call.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A Forests call endpoint</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mlclient.calls.ForestPropertiesGetCall">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mlclient.calls.</span></span><span class="sig-name descname"><span class="pre">ForestPropertiesGetCall</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">forest</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_format</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'xml'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mlclient/calls/forest_properties_call.html#ForestPropertiesGetCall"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.calls.ForestPropertiesGetCall" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mlclient.calls.ResourceCall" title="mlclient.calls.resource_call.ResourceCall"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResourceCall</span></code></a></p>
+<p>A GET request to get forest properties.</p>
+<p>A ResourceCall implementation representing a single GET request
+to the /manage/v2/forests/{id|name}/properties REST Resource.</p>
+<p>Retrieve the current state of modifiable properties of the forest identified
+by {id|name}.
+Documentation of the REST Resource API:
+<a class="reference external" href="https://docs.marklogic.com/REST/GET/manage/v2/forests/[id-or-name]/properties">https://docs.marklogic.com/REST/GET/manage/v2/forests/[id-or-name]/properties</a></p>
+<dl class="py property">
+<dt class="sig sig-object py" id="mlclient.calls.ForestPropertiesGetCall.endpoint">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">endpoint</span></span><a class="headerlink" href="#mlclient.calls.ForestPropertiesGetCall.endpoint" title="Permalink to this definition"></a></dt>
+<dd><p>An endpoint for the Forest Properties call.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A Forest Properties call endpoint</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mlclient.calls.ForestPropertiesPutCall">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mlclient.calls.</span></span><span class="sig-name descname"><span class="pre">ForestPropertiesPutCall</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">forest</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">body</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mlclient/calls/forest_properties_call.html#ForestPropertiesPutCall"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.calls.ForestPropertiesPutCall" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mlclient.calls.ResourceCall" title="mlclient.calls.resource_call.ResourceCall"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResourceCall</span></code></a></p>
+<p>A PUT request to modify forest properties.</p>
+<p>A ResourceCall implementation representing a single PUT request
+to the /manage/v2/forests/{id|name}/properties REST Resource.</p>
+<p>Modify the configuration of the forest identified by {id|name}.
+Documentation of the REST Resource API:
+<a class="reference external" href="https://docs.marklogic.com/REST/PUT/manage/v2/forests/[id-or-name]/properties">https://docs.marklogic.com/REST/PUT/manage/v2/forests/[id-or-name]/properties</a></p>
+<dl class="py property">
+<dt class="sig sig-object py" id="mlclient.calls.ForestPropertiesPutCall.endpoint">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">endpoint</span></span><a class="headerlink" href="#mlclient.calls.ForestPropertiesPutCall.endpoint" title="Permalink to this definition"></a></dt>
+<dd><p>An endpoint for the Forest Properties call.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A Forest Properties call endpoint</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mlclient.calls.ForestsGetCall">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mlclient.calls.</span></span><span class="sig-name descname"><span class="pre">ForestsGetCall</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_format</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'xml'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">view</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'default'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">database</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">host</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">full_refs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mlclient/calls/forests_call.html#ForestsGetCall"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.calls.ForestsGetCall" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mlclient.calls.ResourceCall" title="mlclient.calls.resource_call.ResourceCall"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResourceCall</span></code></a></p>
+<p>A GET request to get forests summary.</p>
+<p>A ResourceCall implementation representing a single GET request
+to the /manage/v2/forests REST Resource.</p>
+<p>This resource address returns data about the forests in the cluster.
+The data returned depends on the view.
+If no view is specified, this request returns a summary of the forests
+in the cluster.
+Documentation of the REST Resource API: <a class="reference external" href="https://docs.marklogic.com/REST/GET/manage/v2/forests">https://docs.marklogic.com/REST/GET/manage/v2/forests</a></p>
+<dl class="py property">
+<dt class="sig sig-object py" id="mlclient.calls.ForestsGetCall.endpoint">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">endpoint</span></span><a class="headerlink" href="#mlclient.calls.ForestsGetCall.endpoint" title="Permalink to this definition"></a></dt>
+<dd><p>An endpoint for the Forests call.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A Forests call endpoint</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mlclient.calls.ForestsPostCall">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mlclient.calls.</span></span><span class="sig-name descname"><span class="pre">ForestsPostCall</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">body</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wait_for_forest_to_mount</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mlclient/calls/forests_call.html#ForestsPostCall"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.calls.ForestsPostCall" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mlclient.calls.ResourceCall" title="mlclient.calls.resource_call.ResourceCall"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResourceCall</span></code></a></p>
+<p>A POST request to create a new forest.</p>
+<p>A ResourceCall implementation representing a single POST request
+to the /manage/v2/forests REST Resource.</p>
+<p>Create a new forest, including replicas if specified.
+If a database id or database is included, attach the new forest(s) to the database.
+Documentation of the REST Resource API: <a class="reference external" href="https://docs.marklogic.com/REST/POST/manage/v2/forests">https://docs.marklogic.com/REST/POST/manage/v2/forests</a></p>
+<dl class="py property">
+<dt class="sig sig-object py" id="mlclient.calls.ForestsPostCall.endpoint">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">endpoint</span></span><a class="headerlink" href="#mlclient.calls.ForestsPostCall.endpoint" title="Permalink to this definition"></a></dt>
+<dd><p>An endpoint for the Forests call.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A Forests call endpoint</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mlclient.calls.ForestsPutCall">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mlclient.calls.</span></span><span class="sig-name descname"><span class="pre">ForestsPutCall</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">body</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mlclient/calls/forests_call.html#ForestsPutCall"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.calls.ForestsPutCall" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mlclient.calls.ResourceCall" title="mlclient.calls.resource_call.ResourceCall"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResourceCall</span></code></a></p>
+<p>A PUT request to perform an operation on forests.</p>
+<p>A ResourceCall implementation representing a single PUT request
+to the /manage/v2/forests REST Resource.</p>
+<p>Perform an operation on one or more forests, such as combining multiple forests
+into a single new one, or migrating the data in the forests to a new data directory.
+Documentation of the REST Resource API: <a class="reference external" href="https://docs.marklogic.com/REST/PUT/manage/v2/forests">https://docs.marklogic.com/REST/PUT/manage/v2/forests</a></p>
+<dl class="py property">
+<dt class="sig sig-object py" id="mlclient.calls.ForestsPutCall.endpoint">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">endpoint</span></span><a class="headerlink" href="#mlclient.calls.ForestsPutCall.endpoint" title="Permalink to this definition"></a></dt>
+<dd><p>An endpoint for the Forests call.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A Forests call endpoint</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mlclient.calls.LogsCall">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mlclient.calls.</span></span><span class="sig-name descname"><span class="pre">LogsCall</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_format</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'html'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">host</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_time</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_time</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">regex</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mlclient/calls/logs_call.html#LogsCall"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.calls.LogsCall" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mlclient.calls.ResourceCall" title="mlclient.calls.resource_call.ResourceCall"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResourceCall</span></code></a></p>
+<p>A GET request to retrieve logs.</p>
+<p>A ResourceCall implementation representing a single GET request
+to the /manage/v2/logs REST Resource.</p>
+<p>Returns the content of server log files.
+Documentation of the REST Resource API: <a class="reference external" href="https://docs.marklogic.com/REST/GET/manage/v2/logs">https://docs.marklogic.com/REST/GET/manage/v2/logs</a></p>
+<dl class="py property">
+<dt class="sig sig-object py" id="mlclient.calls.LogsCall.endpoint">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">endpoint</span></span><a class="headerlink" href="#mlclient.calls.LogsCall.endpoint" title="Permalink to this definition"></a></dt>
+<dd><p>An endpoint for the Logs call.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A Logs call endpoint</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mlclient.calls.ResourceCall">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mlclient.calls.</span></span><span class="sig-name descname"><span class="pre">ResourceCall</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'GET'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">headers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">body</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">accept</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">content_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mlclient/calls/resource_call.html#ResourceCall"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.calls.ResourceCall" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>An abstract class representing a single request to a MarkLogic REST Resource.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="mlclient.calls.ResourceCall.add_header">
+<span class="sig-name descname"><span class="pre">add_header</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">header_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">header_value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mlclient/calls/resource_call.html#ResourceCall.add_header"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.calls.ResourceCall.add_header" title="Permalink to this definition"></a></dt>
+<dd><p>Put a request header if it’s name and value exist.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>header_name</strong> (<em>str</em>) – a request header name</p></li>
+<li><p><strong>header_value</strong> (<em>Any</em>) – a request header value</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mlclient.calls.ResourceCall.add_param">
+<span class="sig-name descname"><span class="pre">add_param</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">param_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param_value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mlclient/calls/resource_call.html#ResourceCall.add_param"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.calls.ResourceCall.add_param" title="Permalink to this definition"></a></dt>
+<dd><p>Put a request parameter if it’s name and value exist.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>param_name</strong> (<em>str</em>) – a request parameter name</p></li>
+<li><p><strong>param_value</strong> (<em>Any</em>) – a request parameter value</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mlclient.calls.ResourceCall.body">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">body</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#mlclient.calls.ResourceCall.body" title="Permalink to this definition"></a></dt>
+<dd><p>A request body.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>a request body</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str | dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mlclient.calls.ResourceCall.endpoint">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">endpoint</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#mlclient.calls.ResourceCall.endpoint" title="Permalink to this definition"></a></dt>
+<dd><p>An endpoint of the ResourceCall.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>An endpoint</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mlclient.calls.ResourceCall.headers">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">headers</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span></em><a class="headerlink" href="#mlclient.calls.ResourceCall.headers" title="Permalink to this definition"></a></dt>
+<dd><p>Request headers.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>request headers</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mlclient.calls.ResourceCall.method">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">method</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#mlclient.calls.ResourceCall.method" title="Permalink to this definition"></a></dt>
+<dd><p>A request method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>a request method</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mlclient.calls.ResourceCall.params">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">params</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span></em><a class="headerlink" href="#mlclient.calls.ResourceCall.params" title="Permalink to this definition"></a></dt>
+<dd><p>Request parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>request parameters</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mlclient.calls.RoleDeleteCall">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mlclient.calls.</span></span><span class="sig-name descname"><span class="pre">RoleDeleteCall</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">role</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mlclient/calls/role_call.html#RoleDeleteCall"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.calls.RoleDeleteCall" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mlclient.calls.ResourceCall" title="mlclient.calls.resource_call.ResourceCall"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResourceCall</span></code></a></p>
+<p>A DELETE request to remove a role.</p>
+<p>A ResourceCall implementation representing a single DELETE request
+to the /manage/v2/roles/{id|name} REST Resource.</p>
+<p>This resource address deletes the named role from the named security database.
+Documentation of the REST Resource API: <a class="reference external" href="https://docs.marklogic.com/REST/DELETE/manage/v2/roles/[id-or-name">https://docs.marklogic.com/REST/DELETE/manage/v2/roles/[id-or-name</a>]</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="mlclient.calls.RoleDeleteCall.endpoint">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">endpoint</span></span><a class="headerlink" href="#mlclient.calls.RoleDeleteCall.endpoint" title="Permalink to this definition"></a></dt>
+<dd><p>An endpoint for the Role call.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A Role call endpoint</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mlclient.calls.RoleGetCall">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mlclient.calls.</span></span><span class="sig-name descname"><span class="pre">RoleGetCall</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">role</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_format</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'xml'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">view</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'default'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mlclient/calls/role_call.html#RoleGetCall"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.calls.RoleGetCall" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mlclient.calls.ResourceCall" title="mlclient.calls.resource_call.ResourceCall"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResourceCall</span></code></a></p>
+<p>A GET request to get a role details.</p>
+<p>A ResourceCall implementation representing a single GET request
+to the /manage/v2/roles/{id|name} REST Resource.</p>
+<p>This resource address returns the configuration for the specified role.
+Documentation of the REST Resource API: <a class="reference external" href="https://docs.marklogic.com/REST/GET/manage/v2/roles/[id-or-name">https://docs.marklogic.com/REST/GET/manage/v2/roles/[id-or-name</a>]</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="mlclient.calls.RoleGetCall.endpoint">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">endpoint</span></span><a class="headerlink" href="#mlclient.calls.RoleGetCall.endpoint" title="Permalink to this definition"></a></dt>
+<dd><p>An endpoint for the Role call.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A Role call endpoint</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mlclient.calls.RolePropertiesGetCall">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mlclient.calls.</span></span><span class="sig-name descname"><span class="pre">RolePropertiesGetCall</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">role</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_format</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'xml'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mlclient/calls/role_properties_call.html#RolePropertiesGetCall"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.calls.RolePropertiesGetCall" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mlclient.calls.ResourceCall" title="mlclient.calls.resource_call.ResourceCall"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResourceCall</span></code></a></p>
+<p>A GET request to get role properties.</p>
+<p>A ResourceCall implementation representing a single GET request
+to the /manage/v2/roles/{id|name}/properties REST Resource.</p>
+<p>This resource address returns the properties of the specified role.
+Documentation of the REST Resource API:
+<a class="reference external" href="https://docs.marklogic.com/REST/GET/manage/v2/roles/[id-or-name]/properties">https://docs.marklogic.com/REST/GET/manage/v2/roles/[id-or-name]/properties</a></p>
+<dl class="py property">
+<dt class="sig sig-object py" id="mlclient.calls.RolePropertiesGetCall.endpoint">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">endpoint</span></span><a class="headerlink" href="#mlclient.calls.RolePropertiesGetCall.endpoint" title="Permalink to this definition"></a></dt>
+<dd><p>An endpoint for the Role Properties call.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A Role Properties call endpoint</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mlclient.calls.RolePropertiesPutCall">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mlclient.calls.</span></span><span class="sig-name descname"><span class="pre">RolePropertiesPutCall</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">role</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">body</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mlclient/calls/role_properties_call.html#RolePropertiesPutCall"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.calls.RolePropertiesPutCall" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mlclient.calls.ResourceCall" title="mlclient.calls.resource_call.ResourceCall"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResourceCall</span></code></a></p>
+<p>A PUT request to modify role properties.</p>
+<p>A ResourceCall implementation representing a single PUT request
+to the /manage/v2/roles/{id|name}/properties REST Resource.</p>
+<p>This resource address can be used to update the properties for the specified role.
+Documentation of the REST Resource API:
+<a class="reference external" href="https://docs.marklogic.com/REST/PUT/manage/v2/roles/[id-or-name]/properties">https://docs.marklogic.com/REST/PUT/manage/v2/roles/[id-or-name]/properties</a></p>
+<dl class="py property">
+<dt class="sig sig-object py" id="mlclient.calls.RolePropertiesPutCall.endpoint">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">endpoint</span></span><a class="headerlink" href="#mlclient.calls.RolePropertiesPutCall.endpoint" title="Permalink to this definition"></a></dt>
+<dd><p>An endpoint for the Role Properties call.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A Role Properties call endpoint</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mlclient.calls.RolesGetCall">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mlclient.calls.</span></span><span class="sig-name descname"><span class="pre">RolesGetCall</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_format</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'xml'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">view</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'default'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mlclient/calls/roles_call.html#RolesGetCall"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.calls.RolesGetCall" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mlclient.calls.ResourceCall" title="mlclient.calls.resource_call.ResourceCall"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResourceCall</span></code></a></p>
+<p>A GET request to get roles summary.</p>
+<p>A ResourceCall implementation representing a single GET request
+to the /manage/v2/roles REST Resource.</p>
+<p>This resource address returns a summary of the roles in the security database.
+Documentation of the REST Resource API: <a class="reference external" href="https://docs.marklogic.com/REST/GET/manage/v2/roles">https://docs.marklogic.com/REST/GET/manage/v2/roles</a></p>
+<dl class="py property">
+<dt class="sig sig-object py" id="mlclient.calls.RolesGetCall.endpoint">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">endpoint</span></span><a class="headerlink" href="#mlclient.calls.RolesGetCall.endpoint" title="Permalink to this definition"></a></dt>
+<dd><p>An endpoint for the Roles call.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A Roles call endpoint</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mlclient.calls.RolesPostCall">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mlclient.calls.</span></span><span class="sig-name descname"><span class="pre">RolesPostCall</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">body</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mlclient/calls/roles_call.html#RolesPostCall"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.calls.RolesPostCall" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mlclient.calls.ResourceCall" title="mlclient.calls.resource_call.ResourceCall"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResourceCall</span></code></a></p>
+<p>A POST request to create a new role.</p>
+<p>A ResourceCall implementation representing a single POST request
+to the /manage/v2/roles REST Resource.</p>
+<p>This resource address creates a new role in the security database.
+Documentation of the REST Resource API: <a class="reference external" href="https://docs.marklogic.com/REST/POST/manage/v2/roles">https://docs.marklogic.com/REST/POST/manage/v2/roles</a></p>
+<dl class="py property">
+<dt class="sig sig-object py" id="mlclient.calls.RolesPostCall.endpoint">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">endpoint</span></span><a class="headerlink" href="#mlclient.calls.RolesPostCall.endpoint" title="Permalink to this definition"></a></dt>
+<dd><p>An endpoint for the Roles call.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A Roles call endpoint</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mlclient.calls.ServerDeleteCall">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mlclient.calls.</span></span><span class="sig-name descname"><span class="pre">ServerDeleteCall</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">server</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mlclient/calls/server_call.html#ServerDeleteCall"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.calls.ServerDeleteCall" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mlclient.calls.ResourceCall" title="mlclient.calls.resource_call.ResourceCall"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResourceCall</span></code></a></p>
+<p>A DELETE request to remove an app server.</p>
+<p>A ResourceCall implementation representing a single DELETE request
+to the /manage/v2/servers/{id|name} REST Resource.</p>
+<p>This resource address deletes the specified App Server from the specified group.
+Documentation of the REST Resource API: <a class="reference external" href="https://docs.marklogic.com/REST/DELETE/manage/v2/servers/[id-or-name">https://docs.marklogic.com/REST/DELETE/manage/v2/servers/[id-or-name</a>]</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="mlclient.calls.ServerDeleteCall.endpoint">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">endpoint</span></span><a class="headerlink" href="#mlclient.calls.ServerDeleteCall.endpoint" title="Permalink to this definition"></a></dt>
+<dd><p>An endpoint for the Server call.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A Server call endpoint</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mlclient.calls.ServerGetCall">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mlclient.calls.</span></span><span class="sig-name descname"><span class="pre">ServerGetCall</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">server</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_format</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'xml'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">view</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'default'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">host_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">full_refs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">modules</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mlclient/calls/server_call.html#ServerGetCall"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.calls.ServerGetCall" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mlclient.calls.ResourceCall" title="mlclient.calls.resource_call.ResourceCall"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResourceCall</span></code></a></p>
+<p>A GET request to get app server details.</p>
+<p>A ResourceCall implementation representing a single GET request
+to the /manage/v2/servers/{id|name} REST Resource.</p>
+<p>This resource address returns data about a specific App Server.
+The server can be identified either by id or name.
+The data returned depends on the value of the view request parameter.
+The default view is a summary with links to additional data.
+Documentation of the REST Resource API: <a class="reference external" href="https://docs.marklogic.com/REST/GET/manage/v2/servers/[id-or-name">https://docs.marklogic.com/REST/GET/manage/v2/servers/[id-or-name</a>]</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="mlclient.calls.ServerGetCall.endpoint">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">endpoint</span></span><a class="headerlink" href="#mlclient.calls.ServerGetCall.endpoint" title="Permalink to this definition"></a></dt>
+<dd><p>An endpoint for the Server call.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A Server call endpoint</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mlclient.calls.ServerPropertiesGetCall">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mlclient.calls.</span></span><span class="sig-name descname"><span class="pre">ServerPropertiesGetCall</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">server</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_format</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'xml'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mlclient/calls/server_properties_call.html#ServerPropertiesGetCall"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.calls.ServerPropertiesGetCall" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mlclient.calls.ResourceCall" title="mlclient.calls.resource_call.ResourceCall"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResourceCall</span></code></a></p>
+<p>A GET request to get app server properties.</p>
+<p>A ResourceCall implementation representing a single GET request
+to the /manage/v2/servers/{id|name}/properties REST Resource.</p>
+<p>This resource address returns the current state of modifiable properties
+of the specified App Server.
+Documentation of the REST Resource API:
+<a class="reference external" href="https://docs.marklogic.com/REST/GET/manage/v2/servers/[id-or-name]/properties">https://docs.marklogic.com/REST/GET/manage/v2/servers/[id-or-name]/properties</a></p>
+<dl class="py property">
+<dt class="sig sig-object py" id="mlclient.calls.ServerPropertiesGetCall.endpoint">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">endpoint</span></span><a class="headerlink" href="#mlclient.calls.ServerPropertiesGetCall.endpoint" title="Permalink to this definition"></a></dt>
+<dd><p>An endpoint for the Server Properties call.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A Server Properties call endpoint</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mlclient.calls.ServerPropertiesPutCall">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mlclient.calls.</span></span><span class="sig-name descname"><span class="pre">ServerPropertiesPutCall</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">server</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">body</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mlclient/calls/server_properties_call.html#ServerPropertiesPutCall"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.calls.ServerPropertiesPutCall" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mlclient.calls.ResourceCall" title="mlclient.calls.resource_call.ResourceCall"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResourceCall</span></code></a></p>
+<p>A PUT request to modify app server properties.</p>
+<p>A ResourceCall implementation representing a single PUT request
+to the /manage/v2/servers/{id|name}/properties REST Resource.</p>
+<p>Initiate a properties change on the specified App Server.
+Documentation of the REST Resource API:
+<a class="reference external" href="https://docs.marklogic.com/REST/PUT/manage/v2/servers/[id-or-name]/properties">https://docs.marklogic.com/REST/PUT/manage/v2/servers/[id-or-name]/properties</a></p>
+<dl class="py property">
+<dt class="sig sig-object py" id="mlclient.calls.ServerPropertiesPutCall.endpoint">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">endpoint</span></span><a class="headerlink" href="#mlclient.calls.ServerPropertiesPutCall.endpoint" title="Permalink to this definition"></a></dt>
+<dd><p>An endpoint for the Server Properties call.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A Server Properties call endpoint</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mlclient.calls.ServersGetCall">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mlclient.calls.</span></span><span class="sig-name descname"><span class="pre">ServersGetCall</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_format</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'xml'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">view</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'default'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">full_refs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mlclient/calls/servers_call.html#ServersGetCall"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.calls.ServersGetCall" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mlclient.calls.ResourceCall" title="mlclient.calls.resource_call.ResourceCall"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResourceCall</span></code></a></p>
+<p>A GET request to get app servers summary.</p>
+<p>A ResourceCall implementation representing a single GET request
+to the /manage/v2/servers REST Resource.</p>
+<p>This resource address returns data about the App Servers in the cluster.
+The data returned depends on the setting of the view request parameter.
+The default view provides a summary of the servers.
+Documentation of the REST Resource API: <a class="reference external" href="https://docs.marklogic.com/REST/GET/manage/v2/servers">https://docs.marklogic.com/REST/GET/manage/v2/servers</a></p>
+<dl class="py property">
+<dt class="sig sig-object py" id="mlclient.calls.ServersGetCall.endpoint">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">endpoint</span></span><a class="headerlink" href="#mlclient.calls.ServersGetCall.endpoint" title="Permalink to this definition"></a></dt>
+<dd><p>An endpoint for the Servers call.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A Servers call endpoint</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mlclient.calls.ServersPostCall">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mlclient.calls.</span></span><span class="sig-name descname"><span class="pre">ServersPostCall</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">body</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">server_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mlclient/calls/servers_call.html#ServersPostCall"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.calls.ServersPostCall" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mlclient.calls.ResourceCall" title="mlclient.calls.resource_call.ResourceCall"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResourceCall</span></code></a></p>
+<p>A POST request to create a new app server.</p>
+<p>A ResourceCall implementation representing a single POST request
+to the /manage/v2/servers REST Resource.</p>
+<p>This resource address is used to create a new App Server in the specified group.
+Documentation of the REST Resource API: <a class="reference external" href="https://docs.marklogic.com/REST/POST/manage/v2/servers">https://docs.marklogic.com/REST/POST/manage/v2/servers</a></p>
+<dl class="py property">
+<dt class="sig sig-object py" id="mlclient.calls.ServersPostCall.endpoint">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">endpoint</span></span><a class="headerlink" href="#mlclient.calls.ServersPostCall.endpoint" title="Permalink to this definition"></a></dt>
+<dd><p>An endpoint for the Servers call.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A Servers call endpoint</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mlclient.calls.UserDeleteCall">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mlclient.calls.</span></span><span class="sig-name descname"><span class="pre">UserDeleteCall</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mlclient/calls/user_call.html#UserDeleteCall"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.calls.UserDeleteCall" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mlclient.calls.ResourceCall" title="mlclient.calls.resource_call.ResourceCall"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResourceCall</span></code></a></p>
+<p>A DELETE request to remove a user.</p>
+<p>A ResourceCall implementation representing a single DELETE request
+to the /manage/v2/users/{id|name} REST Resource.</p>
+<p>This resource address deletes the named user from the named security database.
+Documentation of the REST Resource API: <a class="reference external" href="https://docs.marklogic.com/REST/DELETE/manage/v2/users/[id-or-name">https://docs.marklogic.com/REST/DELETE/manage/v2/users/[id-or-name</a>]</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="mlclient.calls.UserDeleteCall.endpoint">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">endpoint</span></span><a class="headerlink" href="#mlclient.calls.UserDeleteCall.endpoint" title="Permalink to this definition"></a></dt>
+<dd><p>An endpoint for the User call.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>An User call endpoint</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mlclient.calls.UserGetCall">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mlclient.calls.</span></span><span class="sig-name descname"><span class="pre">UserGetCall</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_format</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'xml'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">view</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'default'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mlclient/calls/user_call.html#UserGetCall"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.calls.UserGetCall" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mlclient.calls.ResourceCall" title="mlclient.calls.resource_call.ResourceCall"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResourceCall</span></code></a></p>
+<p>A GET request to get user details.</p>
+<p>A ResourceCall implementation representing a single GET request
+to the /manage/v2/users/{id|name} REST Resource.</p>
+<p>This resource address returns the configuration for the specified user.
+Documentation of the REST Resource API: <a class="reference external" href="https://docs.marklogic.com/REST/GET/manage/v2/users/[id-or-name">https://docs.marklogic.com/REST/GET/manage/v2/users/[id-or-name</a>]</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="mlclient.calls.UserGetCall.endpoint">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">endpoint</span></span><a class="headerlink" href="#mlclient.calls.UserGetCall.endpoint" title="Permalink to this definition"></a></dt>
+<dd><p>An endpoint for the User call.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>An User call endpoint</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mlclient.calls.UserPropertiesGetCall">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mlclient.calls.</span></span><span class="sig-name descname"><span class="pre">UserPropertiesGetCall</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_format</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'xml'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mlclient/calls/user_properties_call.html#UserPropertiesGetCall"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.calls.UserPropertiesGetCall" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mlclient.calls.ResourceCall" title="mlclient.calls.resource_call.ResourceCall"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResourceCall</span></code></a></p>
+<p>A GET request to get user properties.</p>
+<p>A ResourceCall implementation representing a single GET request
+to the /manage/v2/users/{id|name}/properties REST Resource.</p>
+<p>This resource address returns the properties of the specified user.
+Documentation of the REST Resource API:
+<a class="reference external" href="https://docs.marklogic.com/REST/GET/manage/v2/users/[id-or-name]/properties">https://docs.marklogic.com/REST/GET/manage/v2/users/[id-or-name]/properties</a></p>
+<dl class="py property">
+<dt class="sig sig-object py" id="mlclient.calls.UserPropertiesGetCall.endpoint">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">endpoint</span></span><a class="headerlink" href="#mlclient.calls.UserPropertiesGetCall.endpoint" title="Permalink to this definition"></a></dt>
+<dd><p>An endpoint for the User Properties call.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>An User Properties call endpoint</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mlclient.calls.UserPropertiesPutCall">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mlclient.calls.</span></span><span class="sig-name descname"><span class="pre">UserPropertiesPutCall</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">body</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mlclient/calls/user_properties_call.html#UserPropertiesPutCall"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.calls.UserPropertiesPutCall" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mlclient.calls.ResourceCall" title="mlclient.calls.resource_call.ResourceCall"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResourceCall</span></code></a></p>
+<p>A PUT request to modify user properties.</p>
+<p>A ResourceCall implementation representing a single PUT request
+to the /manage/v2/users/{id|name}/properties REST Resource.</p>
+<p>This resource address can be used to update the properties for the specified user.
+Documentation of the REST Resource API:
+<a class="reference external" href="https://docs.marklogic.com/REST/PUT/manage/v2/users/[id-or-name]/properties">https://docs.marklogic.com/REST/PUT/manage/v2/users/[id-or-name]/properties</a></p>
+<dl class="py property">
+<dt class="sig sig-object py" id="mlclient.calls.UserPropertiesPutCall.endpoint">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">endpoint</span></span><a class="headerlink" href="#mlclient.calls.UserPropertiesPutCall.endpoint" title="Permalink to this definition"></a></dt>
+<dd><p>An endpoint for the User Properties call.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>An User Properties call endpoint</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mlclient.calls.UsersGetCall">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mlclient.calls.</span></span><span class="sig-name descname"><span class="pre">UsersGetCall</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_format</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'xml'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">view</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'default'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mlclient/calls/users_call.html#UsersGetCall"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.calls.UsersGetCall" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mlclient.calls.ResourceCall" title="mlclient.calls.resource_call.ResourceCall"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResourceCall</span></code></a></p>
+<p>A GET request to get users summary.</p>
+<p>A ResourceCall implementation representing a single GET request
+to the /manage/v2/users REST Resource.</p>
+<p>This resource address returns a summary of the users in the cluster.
+Documentation of the REST Resource API: <a class="reference external" href="https://docs.marklogic.com/REST/GET/manage/v2/users">https://docs.marklogic.com/REST/GET/manage/v2/users</a></p>
+<dl class="py property">
+<dt class="sig sig-object py" id="mlclient.calls.UsersGetCall.endpoint">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">endpoint</span></span><a class="headerlink" href="#mlclient.calls.UsersGetCall.endpoint" title="Permalink to this definition"></a></dt>
+<dd><p>An endpoint for the Users call.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>An Users call endpoint</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mlclient.calls.UsersPostCall">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mlclient.calls.</span></span><span class="sig-name descname"><span class="pre">UsersPostCall</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">body</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mlclient/calls/users_call.html#UsersPostCall"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.calls.UsersPostCall" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mlclient.calls.ResourceCall" title="mlclient.calls.resource_call.ResourceCall"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResourceCall</span></code></a></p>
+<p>A POST request to create a new user.</p>
+<p>A ResourceCall implementation representing a single POST request
+to the /manage/v2/users REST Resource.</p>
+<p>This resource address creates a new user in the security database.
+Documentation of the REST Resource API: <a class="reference external" href="https://docs.marklogic.com/REST/POST/manage/v2/users">https://docs.marklogic.com/REST/POST/manage/v2/users</a></p>
+<dl class="py property">
+<dt class="sig sig-object py" id="mlclient.calls.UsersPostCall.endpoint">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">endpoint</span></span><a class="headerlink" href="#mlclient.calls.UsersPostCall.endpoint" title="Permalink to this definition"></a></dt>
+<dd><p>An endpoint for the Users call.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>An Users call endpoint</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../mlclient.html" class="btn btn-neutral float-left" title="mlclient package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../model/mlclient.model.html" class="btn btn-neutral float-right" title="mlclient.model package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Tomasz Aniołowski.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mlclient.calls.server_call &mdash; MLClient 0.1.0 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=2389946f"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            MLClient
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">mlclient</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">MLClient</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">mlclient.calls.server_call</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for mlclient.calls.server_call</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;The ML Server Resource Calls module.</span>
+
+<span class="sd">It exports 2 classes:</span>
+<span class="sd">    * ServerGetCall</span>
+<span class="sd">        A GET request to get app server details.</span>
+<span class="sd">    * ServerDeleteCall</span>
+<span class="sd">        A DELETE request to remove an app server.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">ClassVar</span>
+
+<span class="kn">from</span> <span class="nn">mlclient</span> <span class="kn">import</span> <span class="n">constants</span><span class="p">,</span> <span class="n">exceptions</span><span class="p">,</span> <span class="n">utils</span>
+<span class="kn">from</span> <span class="nn">mlclient.calls</span> <span class="kn">import</span> <span class="n">ResourceCall</span>
+
+
+<div class="viewcode-block" id="ServerGetCall"><a class="viewcode-back" href="../../../mlclient/calls/mlclient.calls.html#mlclient.calls.ServerGetCall">[docs]</a><span class="k">class</span> <span class="nc">ServerGetCall</span><span class="p">(</span><span class="n">ResourceCall</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A GET request to get app server details.</span>
+
+<span class="sd">    A ResourceCall implementation representing a single GET request</span>
+<span class="sd">    to the /manage/v2/servers/{id|name} REST Resource.</span>
+
+<span class="sd">    This resource address returns data about a specific App Server.</span>
+<span class="sd">    The server can be identified either by id or name.</span>
+<span class="sd">    The data returned depends on the value of the view request parameter.</span>
+<span class="sd">    The default view is a summary with links to additional data.</span>
+<span class="sd">    Documentation of the REST Resource API: https://docs.marklogic.com/REST/GET/manage/v2/servers/[id-or-name]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">_ENDPOINT_TEMPLATE</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;/manage/v2/servers/</span><span class="si">{}</span><span class="s2">&quot;</span>
+
+    <span class="n">_GROUP_ID_PARAM</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;group-id&quot;</span>
+    <span class="n">_FORMAT_PARAM</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;format&quot;</span>
+    <span class="n">_VIEW_PARAM</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;view&quot;</span>
+    <span class="n">_HOST_ID_PARAM</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;host-id&quot;</span>
+    <span class="n">_FULL_REFS_PARAM</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;fullrefs&quot;</span>
+    <span class="n">_MODULES_PARAM</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;modules&quot;</span>
+
+    <span class="n">_SUPPORTED_FORMATS</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;xml&quot;</span><span class="p">,</span> <span class="s2">&quot;json&quot;</span><span class="p">,</span> <span class="s2">&quot;html&quot;</span><span class="p">]</span>
+    <span class="n">_SUPPORTED_VIEWS</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;describe&quot;</span><span class="p">,</span> <span class="s2">&quot;default&quot;</span><span class="p">,</span> <span class="s2">&quot;config&quot;</span><span class="p">,</span> <span class="s2">&quot;edit&quot;</span><span class="p">,</span>
+                                        <span class="s2">&quot;package&quot;</span><span class="p">,</span> <span class="s2">&quot;status&quot;</span><span class="p">,</span> <span class="s2">&quot;xdmp:server-status&quot;</span><span class="p">,</span>
+                                        <span class="s2">&quot;properties-schema&quot;</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">server</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+            <span class="n">group_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+            <span class="n">data_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;xml&quot;</span><span class="p">,</span>
+            <span class="n">view</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;default&quot;</span><span class="p">,</span>
+            <span class="n">host_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">full_refs</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">modules</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize ServerGetCall instance.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        server : str</span>
+<span class="sd">            A server identifier. The server can be identified either by ID or name.</span>
+<span class="sd">        group_id : str</span>
+<span class="sd">            The id or name of the group to which the App Server belongs.</span>
+<span class="sd">            This parameter is required.</span>
+<span class="sd">        data_format : str</span>
+<span class="sd">            The format of the returned data. Can be either html, json, or xml (default).</span>
+<span class="sd">        view : str</span>
+<span class="sd">            A specific view of the returned data.</span>
+<span class="sd">            Can be properties-schema, config, edit, package, describe, status,</span>
+<span class="sd">            xdmp:server-status or default.</span>
+<span class="sd">        host_id : str</span>
+<span class="sd">            Meaningful only when view=status. Specifies to return the status for</span>
+<span class="sd">            the server in the specified host. The host can be identified either by id</span>
+<span class="sd">            or name.</span>
+<span class="sd">        full_refs : bool</span>
+<span class="sd">            If set to true, full detail is returned for all relationship references.</span>
+<span class="sd">            A value of false (the default) indicates to return detail only for</span>
+<span class="sd">            first references. This parameter is not meaningful with view=package.</span>
+<span class="sd">        modules : bool</span>
+<span class="sd">            Meaningful only with view=package. Whether to include a manifest</span>
+<span class="sd">            of the modules database for the App Server in the results, if one exists.</span>
+<span class="sd">            It is an error to request a modules database manifest for an App Server</span>
+<span class="sd">            that uses the filesystem for modules. Default: false.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">data_format</span> <span class="o">=</span> <span class="n">data_format</span> <span class="k">if</span> <span class="n">data_format</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="s2">&quot;xml&quot;</span>
+        <span class="n">view</span> <span class="o">=</span> <span class="n">view</span> <span class="k">if</span> <span class="n">view</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="s2">&quot;default&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_validate_params</span><span class="p">(</span><span class="n">data_format</span><span class="p">,</span> <span class="n">view</span><span class="p">)</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="s2">&quot;GET&quot;</span><span class="p">,</span>
+                         <span class="n">accept</span><span class="o">=</span><span class="n">utils</span><span class="o">.</span><span class="n">get_accept_header_for_format</span><span class="p">(</span><span class="n">data_format</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">full_refs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">full_refs</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">full_refs</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">modules</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">modules</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">modules</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_server</span> <span class="o">=</span> <span class="n">server</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_param</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_GROUP_ID_PARAM</span><span class="p">,</span> <span class="n">group_id</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_param</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_FORMAT_PARAM</span><span class="p">,</span> <span class="n">data_format</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_param</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_VIEW_PARAM</span><span class="p">,</span> <span class="n">view</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_param</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_HOST_ID_PARAM</span><span class="p">,</span> <span class="n">host_id</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_param</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_FULL_REFS_PARAM</span><span class="p">,</span> <span class="n">full_refs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_param</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_MODULES_PARAM</span><span class="p">,</span> <span class="n">modules</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">endpoint</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;An endpoint for the Server call.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        str</span>
+<span class="sd">            A Server call endpoint</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ENDPOINT_TEMPLATE</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_server</span><span class="p">)</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">_validate_params</span><span class="p">(</span>
+            <span class="bp">cls</span><span class="p">,</span>
+            <span class="n">data_format</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+            <span class="n">view</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="k">if</span> <span class="n">data_format</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_SUPPORTED_FORMATS</span><span class="p">:</span>
+            <span class="n">joined_supported_formats</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">_SUPPORTED_FORMATS</span><span class="p">)</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;The supported formats are: </span><span class="si">{</span><span class="n">joined_supported_formats</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">WrongParametersError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">view</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_SUPPORTED_VIEWS</span><span class="p">:</span>
+            <span class="n">joined_supported_views</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">_SUPPORTED_VIEWS</span><span class="p">)</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;The supported views are: </span><span class="si">{</span><span class="n">joined_supported_views</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">WrongParametersError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ServerDeleteCall"><a class="viewcode-back" href="../../../mlclient/calls/mlclient.calls.html#mlclient.calls.ServerDeleteCall">[docs]</a><span class="k">class</span> <span class="nc">ServerDeleteCall</span><span class="p">(</span><span class="n">ResourceCall</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A DELETE request to remove an app server.</span>
+
+<span class="sd">    A ResourceCall implementation representing a single DELETE request</span>
+<span class="sd">    to the /manage/v2/servers/{id|name} REST Resource.</span>
+
+<span class="sd">    This resource address deletes the specified App Server from the specified group.</span>
+<span class="sd">    Documentation of the REST Resource API: https://docs.marklogic.com/REST/DELETE/manage/v2/servers/[id-or-name]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">_ENDPOINT_TEMPLATE</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;/manage/v2/servers/</span><span class="si">{}</span><span class="s2">&quot;</span>
+
+    <span class="n">_GROUP_ID_PARAM</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;group-id&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">server</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+            <span class="n">group_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize ServerDeleteCall instance.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        server : str</span>
+<span class="sd">            A server identifier. The server can be identified either by ID or name.</span>
+<span class="sd">        group_id : str</span>
+<span class="sd">            The id or name of the group to which the App Server belongs.</span>
+<span class="sd">            This parameter is required.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="n">constants</span><span class="o">.</span><span class="n">METHOD_DELETE</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_param</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_GROUP_ID_PARAM</span><span class="p">,</span> <span class="n">group_id</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_server</span> <span class="o">=</span> <span class="n">server</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">endpoint</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;An endpoint for the Server call.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        str</span>
+<span class="sd">            A Server call endpoint</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ENDPOINT_TEMPLATE</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_server</span><span class="p">)</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Tomasz Aniołowski.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

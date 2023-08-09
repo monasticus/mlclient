@@ -6,6 +6,10 @@
 MLClient - MarkLogic instance in your hands
 ===========================================
 
+.. image:: https://img.shields.io/badge/GitHub-monasticus%2Fmlclient-white?style=plastic&logo=github&color=white
+    :target: https://github.com/monasticus/mlclient
+    :alt: Tag Badge
+
 .. image:: https://img.shields.io/github/license/monasticus/mlclient?label=License&style=plastic
     :target: https://github.com/monasticus/mlclient/blob/main/LICENSE
     :alt: License Badge

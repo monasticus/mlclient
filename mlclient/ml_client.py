@@ -58,6 +58,27 @@ class MLClient:
         a password
     base_url : str
         a base url built based on the protocol, the host name and the port provided
+
+    Examples
+    --------
+    >>> from mlclient import MLClient
+    >>> config = {
+    ...     "host": "localhost",
+    ...     "port": 8002,
+    ...     "username": "admin",
+    ...     "password": "admin",
+    ... }
+    >>> with MLClient(**config) as client:
+    ...     resp = client.post(
+    ...         endpoint="/v1/eval",
+    ...         body={"xquery": "xdmp:database() => xdmp:database-name()"})
+    ...     print(resp.text)
+    ...
+    --6a5df7d535c71968
+    Content-Type: text/plain
+    X-Primitive: string
+    App-Services
+    --6a5df7d535c71968--
     """
 
     _DEFAULT_RETRY_STRATEGY = Retry(
@@ -345,6 +366,25 @@ class MLResourceClient(MLClient):
     Attributes
     ----------
     All attributes are inherited from the MLClient superclass.
+
+    Examples
+    --------
+    >>> from mlclient import MLResourceClient
+    >>> config = {
+    ...     "host": "localhost",
+    ...     "port": 8002,
+    ...     "username": "admin",
+    ...     "password": "admin",
+    ... }
+    >>> with MLResourceClient(**config) as client:
+    ...     resp = client.eval(xquery="xdmp:database() => xdmp:database-name()")
+    ...     print(resp.text)
+    ...
+    --6a5df7d535c71968
+    Content-Type: text/plain
+    X-Primitive: string
+    App-Services
+    --6a5df7d535c71968--
     """
 
     def eval(

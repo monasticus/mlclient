@@ -39,9 +39,9 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+              <p class="caption" role="heading"><span class="caption-text">Python API:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../modules.html">mlclient</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mlclient/mlclient.html">mlclient package</a></li>
 </ul>
 
         </div>
@@ -129,6 +129,27 @@
 <span class="sd">        a password</span>
 <span class="sd">    base_url : str</span>
 <span class="sd">        a base url built based on the protocol, the host name and the port provided</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; from mlclient import MLClient</span>
+<span class="sd">    &gt;&gt;&gt; config = {</span>
+<span class="sd">    ...     &quot;host&quot;: &quot;localhost&quot;,</span>
+<span class="sd">    ...     &quot;port&quot;: 8002,</span>
+<span class="sd">    ...     &quot;username&quot;: &quot;admin&quot;,</span>
+<span class="sd">    ...     &quot;password&quot;: &quot;admin&quot;,</span>
+<span class="sd">    ... }</span>
+<span class="sd">    &gt;&gt;&gt; with MLClient(**config) as client:</span>
+<span class="sd">    ...     resp = client.post(</span>
+<span class="sd">    ...         endpoint=&quot;/v1/eval&quot;,</span>
+<span class="sd">    ...         body={&quot;xquery&quot;: &quot;xdmp:database() =&gt; xdmp:database-name()&quot;})</span>
+<span class="sd">    ...     print(resp.text)</span>
+<span class="sd">    ...</span>
+<span class="sd">    --6a5df7d535c71968</span>
+<span class="sd">    Content-Type: text/plain</span>
+<span class="sd">    X-Primitive: string</span>
+<span class="sd">    App-Services</span>
+<span class="sd">    --6a5df7d535c71968--</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">_DEFAULT_RETRY_STRATEGY</span> <span class="o">=</span> <span class="n">Retry</span><span class="p">(</span>
@@ -416,6 +437,25 @@
 <span class="sd">    Attributes</span>
 <span class="sd">    ----------</span>
 <span class="sd">    All attributes are inherited from the MLClient superclass.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; from mlclient import MLResourceClient</span>
+<span class="sd">    &gt;&gt;&gt; config = {</span>
+<span class="sd">    ...     &quot;host&quot;: &quot;localhost&quot;,</span>
+<span class="sd">    ...     &quot;port&quot;: 8002,</span>
+<span class="sd">    ...     &quot;username&quot;: &quot;admin&quot;,</span>
+<span class="sd">    ...     &quot;password&quot;: &quot;admin&quot;,</span>
+<span class="sd">    ... }</span>
+<span class="sd">    &gt;&gt;&gt; with MLResourceClient(**config) as client:</span>
+<span class="sd">    ...     resp = client.eval(xquery=&quot;xdmp:database() =&gt; xdmp:database-name()&quot;)</span>
+<span class="sd">    ...     print(resp.text)</span>
+<span class="sd">    ...</span>
+<span class="sd">    --6a5df7d535c71968</span>
+<span class="sd">    Content-Type: text/plain</span>
+<span class="sd">    X-Primitive: string</span>
+<span class="sd">    App-Services</span>
+<span class="sd">    --6a5df7d535c71968--</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="MLResourceClient.eval"><a class="viewcode-back" href="../../mlclient/mlclient.html#mlclient.MLResourceClient.eval">[docs]</a>    <span class="k">def</span> <span class="nf">eval</span><span class="p">(</span>

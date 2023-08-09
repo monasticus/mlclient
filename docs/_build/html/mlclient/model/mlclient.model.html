@@ -41,25 +41,67 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+              <p class="caption" role="heading"><span class="caption-text">Python API:</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="reference internal" href="../../pythonapi.html">Python API</a><ul class="current">
-<li class="toctree-l2 current"><a class="reference internal" href="../mlclient.html">mlclient package</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="../mlclient.html#mlclient.MLClient"><code class="docutils literal notranslate"><span class="pre">MLClient</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="../mlclient.html#mlclient.MLResourceClient"><code class="docutils literal notranslate"><span class="pre">MLResourceClient</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="../calls/mlclient.calls.html">mlclient.calls package</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">mlclient.model package</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.Document"><code class="docutils literal notranslate"><span class="pre">Document</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.DocumentType"><code class="docutils literal notranslate"><span class="pre">DocumentType</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.Metadata"><code class="docutils literal notranslate"><span class="pre">Metadata</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.Permission"><code class="docutils literal notranslate"><span class="pre">Permission</span></code></a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../mlclient.html">mlclient package</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../mlclient.html#mlclient.MLClient"><code class="docutils literal notranslate"><span class="pre">MLClient</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../mlclient.html#mlclient.MLResourceClient"><code class="docutils literal notranslate"><span class="pre">MLResourceClient</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../calls/mlclient.calls.html">mlclient.calls package</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">mlclient.model package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#mlclient.model.Document"><code class="docutils literal notranslate"><span class="pre">Document</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.Document.content"><code class="docutils literal notranslate"><span class="pre">Document.content</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.Document.doc_type"><code class="docutils literal notranslate"><span class="pre">Document.doc_type</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.Document.is_temporal"><code class="docutils literal notranslate"><span class="pre">Document.is_temporal</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.Document.metadata"><code class="docutils literal notranslate"><span class="pre">Document.metadata</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.Document.uri"><code class="docutils literal notranslate"><span class="pre">Document.uri</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="../mlclient.html#module-mlclient.constants">mlclient.constants module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../mlclient.html#module-mlclient.exceptions">mlclient.exceptions module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../mlclient.html#module-mlclient.utils">mlclient.utils module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#mlclient.model.DocumentType"><code class="docutils literal notranslate"><span class="pre">DocumentType</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.DocumentType.BINARY"><code class="docutils literal notranslate"><span class="pre">DocumentType.BINARY</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.DocumentType.JSON"><code class="docutils literal notranslate"><span class="pre">DocumentType.JSON</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.DocumentType.TEXT"><code class="docutils literal notranslate"><span class="pre">DocumentType.TEXT</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.DocumentType.XML"><code class="docutils literal notranslate"><span class="pre">DocumentType.XML</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="#mlclient.model.Metadata"><code class="docutils literal notranslate"><span class="pre">Metadata</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.Metadata.add_collection"><code class="docutils literal notranslate"><span class="pre">Metadata.add_collection()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.Metadata.add_permission"><code class="docutils literal notranslate"><span class="pre">Metadata.add_permission()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.Metadata.collections"><code class="docutils literal notranslate"><span class="pre">Metadata.collections()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.Metadata.metadata_values"><code class="docutils literal notranslate"><span class="pre">Metadata.metadata_values()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.Metadata.permissions"><code class="docutils literal notranslate"><span class="pre">Metadata.permissions()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.Metadata.properties"><code class="docutils literal notranslate"><span class="pre">Metadata.properties()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.Metadata.put_metadata_value"><code class="docutils literal notranslate"><span class="pre">Metadata.put_metadata_value()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.Metadata.put_property"><code class="docutils literal notranslate"><span class="pre">Metadata.put_property()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.Metadata.quality"><code class="docutils literal notranslate"><span class="pre">Metadata.quality()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.Metadata.remove_collection"><code class="docutils literal notranslate"><span class="pre">Metadata.remove_collection()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.Metadata.remove_metadata_value"><code class="docutils literal notranslate"><span class="pre">Metadata.remove_metadata_value()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.Metadata.remove_permission"><code class="docutils literal notranslate"><span class="pre">Metadata.remove_permission()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.Metadata.remove_property"><code class="docutils literal notranslate"><span class="pre">Metadata.remove_property()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.Metadata.set_quality"><code class="docutils literal notranslate"><span class="pre">Metadata.set_quality()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.Metadata.to_json"><code class="docutils literal notranslate"><span class="pre">Metadata.to_json()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.Metadata.to_json_string"><code class="docutils literal notranslate"><span class="pre">Metadata.to_json_string()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.Metadata.to_xml"><code class="docutils literal notranslate"><span class="pre">Metadata.to_xml()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.Metadata.to_xml_string"><code class="docutils literal notranslate"><span class="pre">Metadata.to_xml_string()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#mlclient.model.Permission"><code class="docutils literal notranslate"><span class="pre">Permission</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.Permission.EXECUTE"><code class="docutils literal notranslate"><span class="pre">Permission.EXECUTE</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.Permission.INSERT"><code class="docutils literal notranslate"><span class="pre">Permission.INSERT</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.Permission.READ"><code class="docutils literal notranslate"><span class="pre">Permission.READ</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.Permission.UPDATE"><code class="docutils literal notranslate"><span class="pre">Permission.UPDATE</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.Permission.UPDATE_NODE"><code class="docutils literal notranslate"><span class="pre">Permission.UPDATE_NODE</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.Permission.add_capability"><code class="docutils literal notranslate"><span class="pre">Permission.add_capability()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.Permission.capabilities"><code class="docutils literal notranslate"><span class="pre">Permission.capabilities()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.Permission.remove_capability"><code class="docutils literal notranslate"><span class="pre">Permission.remove_capability()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.Permission.role_name"><code class="docutils literal notranslate"><span class="pre">Permission.role_name()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.Permission.to_json"><code class="docutils literal notranslate"><span class="pre">Permission.to_json()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../mlclient.html#module-mlclient.constants">mlclient.constants module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../mlclient.html#module-mlclient.exceptions">mlclient.exceptions module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../mlclient.html#module-mlclient.utils">mlclient.utils module</a></li>
 </ul>
 </li>
 </ul>
@@ -78,7 +120,6 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
-          <li class="breadcrumb-item"><a href="../../pythonapi.html">Python API</a></li>
           <li class="breadcrumb-item"><a href="../mlclient.html">mlclient package</a></li>
       <li class="breadcrumb-item active">mlclient.model package</li>
       <li class="wy-breadcrumbs-aside">

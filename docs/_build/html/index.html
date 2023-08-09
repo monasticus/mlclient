@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Welcome to MLClient’s documentation! &mdash; MLClient 0.1.0 documentation</title>
+  <title>MLClient - MarkLogic instance in your hands &mdash; MLClient 0.1.0 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -19,7 +19,7 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Python API" href="pythonapi.html" /> 
+    <link rel="next" title="mlclient package" href="mlclient/mlclient.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -41,9 +41,9 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+              <p class="caption" role="heading"><span class="caption-text">Python API:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="pythonapi.html">Python API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mlclient/mlclient.html">mlclient package</a></li>
 </ul>
 
         </div>
@@ -60,7 +60,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="#" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">Welcome to MLClient’s documentation!</li>
+      <li class="breadcrumb-item active">MLClient - MarkLogic instance in your hands</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -70,15 +70,54 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="welcome-to-mlclient-s-documentation">
-<h1>Welcome to MLClient’s documentation!<a class="headerlink" href="#welcome-to-mlclient-s-documentation" title="Permalink to this heading"></a></h1>
+  <section id="mlclient-marklogic-instance-in-your-hands">
+<h1>MLClient - MarkLogic instance in your hands<a class="headerlink" href="#mlclient-marklogic-instance-in-your-hands" title="Permalink to this heading"></a></h1>
+<p>ML Client is a python library providing a python API to manage a MarkLogic instance.</p>
+<p>Low-level MLClient:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient</span> <span class="kn">import</span> <span class="n">MLClient</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">config</span> <span class="o">=</span> <span class="p">{</span>
+<span class="gp">... </span>    <span class="s2">&quot;host&quot;</span><span class="p">:</span> <span class="s2">&quot;localhost&quot;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="s2">&quot;port&quot;</span><span class="p">:</span> <span class="mi">8002</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="s2">&quot;username&quot;</span><span class="p">:</span> <span class="s2">&quot;admin&quot;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="s2">&quot;password&quot;</span><span class="p">:</span> <span class="s2">&quot;admin&quot;</span><span class="p">,</span>
+<span class="gp">... </span><span class="p">}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">MLClient</span><span class="p">(</span><span class="o">**</span><span class="n">config</span><span class="p">)</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">resp</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">endpoint</span><span class="o">=</span><span class="s2">&quot;/v1/eval&quot;</span><span class="p">,</span>
+<span class="gp">... </span>                       <span class="n">body</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;xquery&quot;</span><span class="p">:</span> <span class="s2">&quot;xdmp:database() =&gt; xdmp:database-name()&quot;</span><span class="p">})</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="n">resp</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+<span class="gp">...</span>
+<span class="go">--6a5df7d535c71968</span>
+<span class="go">Content-Type: text/plain</span>
+<span class="go">X-Primitive: string</span>
+
+<span class="go">App-Services</span>
+<span class="go">--6a5df7d535c71968--</span>
+</pre></div>
+</div>
+<p>Medium-level MLResourceClient:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient</span> <span class="kn">import</span> <span class="n">MLResourceClient</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">config</span> <span class="o">=</span> <span class="p">{</span>
+<span class="gp">... </span>    <span class="s2">&quot;host&quot;</span><span class="p">:</span> <span class="s2">&quot;localhost&quot;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="s2">&quot;port&quot;</span><span class="p">:</span> <span class="mi">8002</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="s2">&quot;username&quot;</span><span class="p">:</span> <span class="s2">&quot;admin&quot;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="s2">&quot;password&quot;</span><span class="p">:</span> <span class="s2">&quot;admin&quot;</span><span class="p">,</span>
+<span class="gp">... </span><span class="p">}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">MLResourceClient</span><span class="p">(</span><span class="o">**</span><span class="n">config</span><span class="p">)</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">resp</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="n">xquery</span><span class="o">=</span><span class="s2">&quot;xdmp:database() =&gt; xdmp:database-name()&quot;</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="n">resp</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+<span class="gp">...</span>
+<span class="go">--6a5df7d535c71968</span>
+<span class="go">Content-Type: text/plain</span>
+<span class="go">X-Primitive: string</span>
+
+<span class="go">App-Services</span>
+<span class="go">--6a5df7d535c71968--</span>
+</pre></div>
+</div>
 <div class="toctree-wrapper compound">
-<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<p class="caption" role="heading"><span class="caption-text">Python API:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="pythonapi.html">Python API</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="mlclient/mlclient.html">mlclient package</a></li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="mlclient/mlclient.html">mlclient package</a></li>
 </ul>
 </div>
 </section>
@@ -95,7 +134,7 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="pythonapi.html" class="btn btn-neutral float-right" title="Python API" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="mlclient/mlclient.html" class="btn btn-neutral float-right" title="mlclient package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

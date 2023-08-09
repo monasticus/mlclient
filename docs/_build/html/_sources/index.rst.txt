@@ -6,7 +6,17 @@
 MLClient - MarkLogic instance in your hands
 ===========================================
 
+.. image:: https://img.shields.io/github/license/monasticus/mlclient?label=License&style=plastic
+    :target: https://github.com/monasticus/mlclient/blob/main/LICENSE
+    :alt: License Badge
+
+.. image:: https://img.shields.io/pypi/pyversions/mlclient?label=Python&style=plastic
+    :target: https://www.python.org/
+    :alt: Python Version Support Badge
+
 ML Client is a python library providing a python API to manage a MarkLogic instance.
+
+-------------------
 
 Low-level MLClient::
 

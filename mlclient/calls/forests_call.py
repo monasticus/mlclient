@@ -1,12 +1,12 @@
 """The ML Forests Resource Calls module.
 
 It exports 3 classes:
-* ForestsGetCall
-    A GET request to get forests summary.
-* ForestsPostCall
-    A POST request to create a new forest.
-* ForestsPutCall
-    A PUT request to perform an operation on forests.
+    * ForestsGetCall
+        A GET request to get forests summary.
+    * ForestsPostCall
+        A POST request to create a new forest.
+    * ForestsPutCall
+        A PUT request to perform an operation on forests.
 """
 from __future__ import annotations
 
@@ -29,27 +29,9 @@ class ForestsGetCall(ResourceCall):
     If no view is specified, this request returns a summary of the forests
     in the cluster.
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/GET/manage/v2/forests
-
-    Attributes
-    ----------
-    ENDPOINT
-        A static constant storing the Forests endpoint value
-
-    Attributes
-    ----------
-    All attributes are inherited from the ResourceCall abstract class.
-    This class implements the endpoint computed property to return an endpoint
-    for the specific call.
-
-    endpoint : str
-        An endpoint of the ResourceCall
-
-    Methods
-    -------
-    All public methods are inherited from the ResourceCall abstract class.
     """
 
-    ENDPOINT: str = "/manage/v2/forests"
+    _ENDPOINT: str = "/manage/v2/forests"
 
     _FORMAT_PARAM: str = "format"
     _VIEW_PARAM: str = "view"
@@ -114,14 +96,14 @@ class ForestsGetCall(ResourceCall):
     def endpoint(
             self,
     ):
-        """Return an endpoint for the Forests call.
+        """An endpoint for the Forests call.
 
         Returns
         -------
         str
             A Forests call endpoint
         """
-        return self.ENDPOINT
+        return self._ENDPOINT
 
     @classmethod
     def _validate_params(
@@ -148,27 +130,9 @@ class ForestsPostCall(ResourceCall):
     Create a new forest, including replicas if specified.
     If a database id or database is included, attach the new forest(s) to the database.
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/POST/manage/v2/forests
-
-    Attributes
-    ----------
-    ENDPOINT
-        A static constant storing the Forests endpoint value
-
-    Attributes
-    ----------
-    All attributes are inherited from the ResourceCall abstract class.
-    This class implements the endpoint computed property to return an endpoint
-    for the specific call.
-
-    endpoint : str
-        An endpoint of the ResourceCall
-
-    Methods
-    -------
-    All public methods are inherited from the ResourceCall abstract class.
     """
 
-    ENDPOINT: str = "/manage/v2/forests"
+    _ENDPOINT: str = "/manage/v2/forests"
 
     _WAIT_FOR_FOREST_TO_MOUNT_PARAM: str = "wait-for-forest-to-mount"
 
@@ -203,14 +167,14 @@ class ForestsPostCall(ResourceCall):
     def endpoint(
             self,
     ):
-        """Return an endpoint for the Forests call.
+        """An endpoint for the Forests call.
 
         Returns
         -------
         str
             A Forests call endpoint
         """
-        return self.ENDPOINT
+        return self._ENDPOINT
 
     @classmethod
     def _validate_params(
@@ -231,27 +195,9 @@ class ForestsPutCall(ResourceCall):
     Perform an operation on one or more forests, such as combining multiple forests
     into a single new one, or migrating the data in the forests to a new data directory.
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/PUT/manage/v2/forests
-
-    Attributes
-    ----------
-    ENDPOINT
-        A static constant storing the Forests endpoint value
-
-    Attributes
-    ----------
-    All attributes are inherited from the ResourceCall abstract class.
-    This class implements the endpoint computed property to return an endpoint
-    for the specific call.
-
-    endpoint : str
-        An endpoint of the ResourceCall
-
-    Methods
-    -------
-    All public methods are inherited from the ResourceCall abstract class.
     """
 
-    ENDPOINT: str = "/manage/v2/forests"
+    _ENDPOINT: str = "/manage/v2/forests"
 
     def __init__(
             self,
@@ -276,14 +222,14 @@ class ForestsPutCall(ResourceCall):
     def endpoint(
             self,
     ):
-        """Return an endpoint for the Forests call.
+        """An endpoint for the Forests call.
 
         Returns
         -------
         str
             A Forests call endpoint
         """
-        return self.ENDPOINT
+        return self._ENDPOINT
 
     @classmethod
     def _validate_params(

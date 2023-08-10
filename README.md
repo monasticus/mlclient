@@ -5,5 +5,57 @@
 [![Code Coverage](https://img.shields.io/badge/Code%20Coverage-100%25-brightgreen?style=plastic)](https://github.com/monasticus/mlclient/actions/workflows/coverage_badge.yml?query=branch%3Amain)
 
 # ML Client
+___
 
 ML Client is a python library providing a python API to manage a MarkLogic instance.
+
+Low-level **MLClient**:
+```python
+>>> from mlclient import MLClient
+>>> config = {
+...     "host": "localhost",
+...     "port": 8002,
+...     "username": "admin",
+...     "password": "admin",
+... }
+>>> with MLClient(**config) as client:
+...     resp = client.post(endpoint="/v1/eval",
+...                        body={"xquery": "xdmp:database() => xdmp:database-name()"})
+...     print(resp.text)
+...
+--6a5df7d535c71968
+Content-Type: text/plain
+X-Primitive: string
+
+App-Services
+--6a5df7d535c71968--
+```
+
+Medium-level **MLResourceClient**:
+```python
+>>> from mlclient import MLResourceClient
+>>> config = {
+...     "host": "localhost",
+...     "port": 8002,
+...     "username": "admin",
+...     "password": "admin",
+... }
+>>> with MLResourceClient(**config) as client:
+...     resp = client.eval(xquery="xdmp:database() => xdmp:database-name()")
+...     print(resp.text)
+...
+--6a5df7d535c71968
+Content-Type: text/plain
+X-Primitive: string
+
+App-Services
+--6a5df7d535c71968--
+```
+
+## Installation
+
+Install MLClient with pip
+
+```sh
+pip install mlclient
+```

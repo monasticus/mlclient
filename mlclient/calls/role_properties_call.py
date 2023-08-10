@@ -1,10 +1,10 @@
 """The ML Role Properties Resource Calls module.
 
 It exports 2 classes:
-* RolePropertiesGetCall
-    A GET request to get role properties.
-* RolePropertiesPutCall
-    A PUT request to modify role properties.
+    * RolePropertiesGetCall
+        A GET request to get role properties.
+    * RolePropertiesPutCall
+        A PUT request to modify role properties.
 """
 from __future__ import annotations
 
@@ -25,19 +25,6 @@ class RolePropertiesGetCall(ResourceCall):
     This resource address returns the properties of the specified role.
     Documentation of the REST Resource API:
     https://docs.marklogic.com/REST/GET/manage/v2/roles/[id-or-name]/properties
-
-    Attributes
-    ----------
-    All attributes are inherited from the ResourceCall abstract class.
-    This class implements the endpoint computed property to return an endpoint
-    for the specific call.
-
-    endpoint : str
-        An endpoint of the ResourceCall
-
-    Methods
-    -------
-    All public methods are inherited from the ResourceCall abstract class.
     """
 
     _ENDPOINT_TEMPLATE: str = "/manage/v2/roles/{}/properties"
@@ -73,7 +60,7 @@ class RolePropertiesGetCall(ResourceCall):
     def endpoint(
             self,
     ):
-        """Return an endpoint for the Role Properties call.
+        """An endpoint for the Role Properties call.
 
         Returns
         -------
@@ -102,19 +89,6 @@ class RolePropertiesPutCall(ResourceCall):
     This resource address can be used to update the properties for the specified role.
     Documentation of the REST Resource API:
     https://docs.marklogic.com/REST/PUT/manage/v2/roles/[id-or-name]/properties
-
-    Attributes
-    ----------
-    All attributes are inherited from the ResourceCall abstract class.
-    This class implements the endpoint computed property to return an endpoint
-    for the specific call.
-
-    endpoint : str
-        An endpoint of the ResourceCall
-
-    Methods
-    -------
-    All public methods are inherited from the ResourceCall abstract class.
     """
 
     _ENDPOINT_TEMPLATE: str = "/manage/v2/roles/{}/properties"
@@ -146,7 +120,7 @@ class RolePropertiesPutCall(ResourceCall):
     def endpoint(
             self,
     ):
-        """Return an endpoint for the Role Properties call.
+        """An endpoint for the Role Properties call.
 
         Returns
         -------

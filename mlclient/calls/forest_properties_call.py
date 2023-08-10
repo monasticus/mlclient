@@ -1,10 +1,10 @@
 """The ML Forest Properties Resource Calls module.
 
 It exports 2 classes:
-* ForestPropertiesGetCall
-    A GET request to get forest properties.
-* ForestPropertiesPutCall
-    A PUT request to modify forest properties.
+    * ForestPropertiesGetCall
+        A GET request to get forest properties.
+    * ForestPropertiesPutCall
+        A PUT request to modify forest properties.
 """
 from __future__ import annotations
 
@@ -26,19 +26,6 @@ class ForestPropertiesGetCall(ResourceCall):
     by {id|name}.
     Documentation of the REST Resource API:
     https://docs.marklogic.com/REST/GET/manage/v2/forests/[id-or-name]/properties
-
-    Attributes
-    ----------
-    All attributes are inherited from the ResourceCall abstract class.
-    This class implements the endpoint computed property to return an endpoint
-    for the specific call.
-
-    endpoint : str
-        An endpoint of the ResourceCall
-
-    Methods
-    -------
-    All public methods are inherited from the ResourceCall abstract class.
     """
 
     _ENDPOINT_TEMPLATE: str = "/manage/v2/forests/{}/properties"
@@ -74,7 +61,7 @@ class ForestPropertiesGetCall(ResourceCall):
     def endpoint(
             self,
     ):
-        """Return an endpoint for the Forest Properties call.
+        """An endpoint for the Forest Properties call.
 
         Returns
         -------
@@ -103,19 +90,6 @@ class ForestPropertiesPutCall(ResourceCall):
     Modify the configuration of the forest identified by {id|name}.
     Documentation of the REST Resource API:
     https://docs.marklogic.com/REST/PUT/manage/v2/forests/[id-or-name]/properties
-
-    Attributes
-    ----------
-    All attributes are inherited from the ResourceCall abstract class.
-    This class implements the endpoint computed property to return an endpoint
-    for the specific call.
-
-    endpoint : str
-        An endpoint of the ResourceCall
-
-    Methods
-    -------
-    All public methods are inherited from the ResourceCall abstract class.
     """
 
     _ENDPOINT_TEMPLATE: str = "/manage/v2/forests/{}/properties"
@@ -147,7 +121,7 @@ class ForestPropertiesPutCall(ResourceCall):
     def endpoint(
             self,
     ):
-        """Return an endpoint for the Forest Properties call.
+        """An endpoint for the Forest Properties call.
 
         Returns
         -------

@@ -1,10 +1,10 @@
 """The ML Roles Resource Calls module.
 
 It exports 2 classes:
-* RolesGetCall
-    A GET request to get roles summary.
-* RolesPostCall
-    A POST request to create a new role.
+    * RolesGetCall
+        A GET request to get roles summary.
+    * RolesPostCall
+        A POST request to create a new role.
 """
 from __future__ import annotations
 
@@ -24,27 +24,9 @@ class RolesGetCall(ResourceCall):
 
     This resource address returns a summary of the roles in the security database.
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/GET/manage/v2/roles
-
-    Attributes
-    ----------
-    ENDPOINT
-        A static constant storing the Roles endpoint value
-
-    Attributes
-    ----------
-    All attributes are inherited from the ResourceCall abstract class.
-    This class implements the endpoint computed property to return an endpoint
-    for the specific call.
-
-    endpoint : str
-        An endpoint of the ResourceCall
-
-    Methods
-    -------
-    All public methods are inherited from the ResourceCall abstract class.
     """
 
-    ENDPOINT: str = "/manage/v2/roles"
+    _ENDPOINT: str = "/manage/v2/roles"
 
     _FORMAT_PARAM: str = "format"
     _VIEW_PARAM: str = "view"
@@ -79,14 +61,14 @@ class RolesGetCall(ResourceCall):
     def endpoint(
             self,
     ):
-        """Return an endpoint for the Roles call.
+        """An endpoint for the Roles call.
 
         Returns
         -------
         str
             A Roles call endpoint
         """
-        return self.ENDPOINT
+        return self._ENDPOINT
 
     @classmethod
     def _validate_params(
@@ -112,27 +94,9 @@ class RolesPostCall(ResourceCall):
 
     This resource address creates a new role in the security database.
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/POST/manage/v2/roles
-
-    Attributes
-    ----------
-    ENDPOINT
-        A static constant storing the Roles endpoint value
-
-    Attributes
-    ----------
-    All attributes are inherited from the ResourceCall abstract class.
-    This class implements the endpoint computed property to return an endpoint
-    for the specific call.
-
-    endpoint : str
-        An endpoint of the ResourceCall
-
-    Methods
-    -------
-    All public methods are inherited from the ResourceCall abstract class.
     """
 
-    ENDPOINT: str = "/manage/v2/roles"
+    _ENDPOINT: str = "/manage/v2/roles"
 
     def __init__(
             self,
@@ -157,14 +121,14 @@ class RolesPostCall(ResourceCall):
     def endpoint(
             self,
     ):
-        """Return an endpoint for the Roles call.
+        """An endpoint for the Roles call.
 
         Returns
         -------
         str
             A Roles call endpoint
         """
-        return self.ENDPOINT
+        return self._ENDPOINT
 
     @classmethod
     def _validate_params(

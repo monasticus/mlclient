@@ -1,10 +1,10 @@
 """The ML Server Resource Calls module.
 
 It exports 2 classes:
-* ServerGetCall
-    A GET request to get app server details.
-* ServerDeleteCall
-    A DELETE request to remove an app server.
+    * ServerGetCall
+        A GET request to get app server details.
+    * ServerDeleteCall
+        A DELETE request to remove an app server.
 """
 from __future__ import annotations
 
@@ -25,19 +25,6 @@ class ServerGetCall(ResourceCall):
     The data returned depends on the value of the view request parameter.
     The default view is a summary with links to additional data.
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/GET/manage/v2/servers/[id-or-name]
-
-    Attributes
-    ----------
-    All attributes are inherited from the ResourceCall abstract class.
-    This class implements the endpoint computed property to return an endpoint
-    for the specific call.
-
-    endpoint : str
-        An endpoint of the ResourceCall
-
-    Methods
-    -------
-    All public methods are inherited from the ResourceCall abstract class.
     """
 
     _ENDPOINT_TEMPLATE: str = "/manage/v2/servers/{}"
@@ -114,7 +101,7 @@ class ServerGetCall(ResourceCall):
     def endpoint(
             self,
     ):
-        """Return an endpoint for the Server call.
+        """An endpoint for the Server call.
 
         Returns
         -------
@@ -147,19 +134,6 @@ class ServerDeleteCall(ResourceCall):
 
     This resource address deletes the specified App Server from the specified group.
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/DELETE/manage/v2/servers/[id-or-name]
-
-    Attributes
-    ----------
-    All attributes are inherited from the ResourceCall abstract class.
-    This class implements the endpoint computed property to return an endpoint
-    for the specific call.
-
-    endpoint : str
-        An endpoint of the ResourceCall
-
-    Methods
-    -------
-    All public methods are inherited from the ResourceCall abstract class.
     """
 
     _ENDPOINT_TEMPLATE: str = "/manage/v2/servers/{}"
@@ -189,7 +163,7 @@ class ServerDeleteCall(ResourceCall):
     def endpoint(
             self,
     ):
-        """Return an endpoint for the Server call.
+        """An endpoint for the Server call.
 
         Returns
         -------

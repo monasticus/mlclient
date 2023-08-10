@@ -1,10 +1,10 @@
 """The ML Server Properties Resource Calls module.
 
 It exports 2 classes:
-* ServerPropertiesGetCall
-    A GET request to get app server properties.
-* ServerPropertiesPutCall
-    A PUT request to modify app server properties.
+    * ServerPropertiesGetCall
+        A GET request to get app server properties.
+    * ServerPropertiesPutCall
+        A PUT request to modify app server properties.
 """
 from __future__ import annotations
 
@@ -26,19 +26,6 @@ class ServerPropertiesGetCall(ResourceCall):
     of the specified App Server.
     Documentation of the REST Resource API:
     https://docs.marklogic.com/REST/GET/manage/v2/servers/[id-or-name]/properties
-
-    Attributes
-    ----------
-    All attributes are inherited from the ResourceCall abstract class.
-    This class implements the endpoint computed property to return an endpoint
-    for the specific call.
-
-    endpoint : str
-        An endpoint of the ResourceCall
-
-    Methods
-    -------
-    All public methods are inherited from the ResourceCall abstract class.
     """
 
     _ENDPOINT_TEMPLATE: str = "/manage/v2/servers/{}/properties"
@@ -80,7 +67,7 @@ class ServerPropertiesGetCall(ResourceCall):
     def endpoint(
             self,
     ):
-        """Return an endpoint for the Server Properties call.
+        """An endpoint for the Server Properties call.
 
         Returns
         -------
@@ -109,19 +96,6 @@ class ServerPropertiesPutCall(ResourceCall):
     Initiate a properties change on the specified App Server.
     Documentation of the REST Resource API:
     https://docs.marklogic.com/REST/PUT/manage/v2/servers/[id-or-name]/properties
-
-    Attributes
-    ----------
-    All attributes are inherited from the ResourceCall abstract class.
-    This class implements the endpoint computed property to return an endpoint
-    for the specific call.
-
-    endpoint : str
-        An endpoint of the ResourceCall
-
-    Methods
-    -------
-    All public methods are inherited from the ResourceCall abstract class.
     """
 
     _ENDPOINT_TEMPLATE: str = "/manage/v2/servers/{}/properties"
@@ -160,7 +134,7 @@ class ServerPropertiesPutCall(ResourceCall):
     def endpoint(
             self,
     ):
-        """Return an endpoint for the Server Properties call.
+        """An endpoint for the Server Properties call.
 
         Returns
         -------

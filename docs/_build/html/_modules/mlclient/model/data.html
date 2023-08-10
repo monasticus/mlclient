@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mlclient.model.data &mdash; MLClient 0.1.0 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=2389946f"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            MLClient
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Python API:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../mlclient/mlclient.html">mlclient package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">MLClient</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">mlclient.model.data</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for mlclient.model.data</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;The ML Data module.</span>
+
+<span class="sd">It exports 5 classes:</span>
+<span class="sd">    * DocumentType</span>
+<span class="sd">        An enumeration class representing document types.</span>
+<span class="sd">    * Document</span>
+<span class="sd">        A class representing a single MarkLogic document.</span>
+<span class="sd">    * Metadata</span>
+<span class="sd">        A class representing MarkLogic&#39;s document metadata.</span>
+<span class="sd">    * Permission:</span>
+<span class="sd">        A class representing MarkLogic&#39;s document permission.</span>
+<span class="sd">    * MetadataEncoder(json.JSONEncoder):</span>
+<span class="sd">        A JSONEncoder subclass to dump Metadata to JSON accordingly.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">xml.etree.ElementTree</span> <span class="k">as</span> <span class="nn">ElemTree</span>
+<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABCMeta</span><span class="p">,</span> <span class="n">abstractmethod</span>
+<span class="kn">from</span> <span class="nn">enum</span> <span class="kn">import</span> <span class="n">Enum</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">ClassVar</span><span class="p">,</span> <span class="n">Any</span>
+<span class="kn">from</span> <span class="nn">xml.dom</span> <span class="kn">import</span> <span class="n">minidom</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="DocumentType"><a class="viewcode-back" href="../../../mlclient/model/mlclient.model.html#mlclient.model.DocumentType">[docs]</a><span class="k">class</span> <span class="nc">DocumentType</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;An enumeration class representing document types.&quot;&quot;&quot;</span>
+
+    <span class="n">XML</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;xml&quot;</span>
+    <span class="n">JSON</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;json&quot;</span>
+    <span class="n">BINARY</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;binary&quot;</span>
+    <span class="n">TEXT</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;text&quot;</span></div>
+
+
+<div class="viewcode-block" id="Document"><a class="viewcode-back" href="../../../mlclient/model/mlclient.model.html#mlclient.model.Document">[docs]</a><span class="k">class</span> <span class="nc">Document</span><span class="p">(</span><span class="n">metaclass</span><span class="o">=</span><span class="n">ABCMeta</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A class representing a single MarkLogic document.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">uri</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">doc_type</span><span class="p">:</span> <span class="n">DocumentType</span> <span class="o">=</span> <span class="n">DocumentType</span><span class="o">.</span><span class="n">XML</span><span class="p">,</span>
+            <span class="n">metadata</span><span class="p">:</span> <span class="n">Metadata</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">is_temporal</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize Document instance.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        uri : str</span>
+<span class="sd">            A document URI</span>
+<span class="sd">        doc_type : DocumentType</span>
+<span class="sd">            A document type</span>
+<span class="sd">        metadata : Metadata</span>
+<span class="sd">            A document metadata</span>
+<span class="sd">        is_temporal : bool</span>
+<span class="sd">            The temporal flag</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_uri</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_non_blank_uri</span><span class="p">(</span><span class="n">uri</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_doc_type</span> <span class="o">=</span> <span class="n">doc_type</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_metadata</span> <span class="o">=</span> <span class="n">metadata</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_is_temporal</span> <span class="o">=</span> <span class="n">is_temporal</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">__subclasshook__</span><span class="p">(</span>
+            <span class="bp">cls</span><span class="p">,</span>
+            <span class="n">subclass</span><span class="p">:</span> <span class="n">Document</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Verify if a subclass implements all abstract methods.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        subclass : Document</span>
+<span class="sd">            A Document subclass</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        bool</span>
+<span class="sd">            True if the subclass includes the content property</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="s2">&quot;content&quot;</span> <span class="ow">in</span> <span class="n">subclass</span><span class="o">.</span><span class="vm">__dict__</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">callable</span><span class="p">(</span><span class="n">subclass</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">content</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;A document content.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Any</span>
+<span class="sd">            A document&#39;s content</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">uri</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;A document URI.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_uri</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">doc_type</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DocumentType</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;A document type.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_doc_type</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">metadata</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Metadata</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;A document metadata.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_metadata</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">is_temporal</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;The temporal flag.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_temporal</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_get_non_blank_uri</span><span class="p">(</span>
+            <span class="n">uri</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return URI or None when blank.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">uri</span> <span class="k">if</span> <span class="n">uri</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s2">&quot;^</span><span class="se">\\</span><span class="s2">s*$&quot;</span><span class="p">,</span> <span class="n">uri</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="Metadata"><a class="viewcode-back" href="../../../mlclient/model/mlclient.model.html#mlclient.model.Metadata">[docs]</a><span class="k">class</span> <span class="nc">Metadata</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A class representing MarkLogic&#39;s document metadata.&quot;&quot;&quot;</span>
+
+    <span class="n">_COLLECTIONS_KEY</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;collections&quot;</span>
+    <span class="n">_PERMISSIONS_KEY</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;permissions&quot;</span>
+    <span class="n">_PROPERTIES_KEY</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;properties&quot;</span>
+    <span class="n">_QUALITY_KEY</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;quality&quot;</span>
+    <span class="n">_METADATA_VALUES_KEY</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;metadataValues&quot;</span>
+
+    <span class="n">_METADATA_TAG</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;rapi:metadata&quot;</span>
+    <span class="n">_COLLECTIONS_TAG</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;rapi:collections&quot;</span>
+    <span class="n">_COLLECTION_TAG</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;rapi:collection&quot;</span>
+    <span class="n">_PERMISSIONS_TAG</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;rapi:permissions&quot;</span>
+    <span class="n">_PERMISSION_TAG</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;rapi:permission&quot;</span>
+    <span class="n">_ROLE_NAME_TAG</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;rapi:role-name&quot;</span>
+    <span class="n">_CAPABILITY_TAG</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;rapi:capability&quot;</span>
+    <span class="n">_PROPERTIES_TAG</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;prop:properties&quot;</span>
+    <span class="n">_QUALITY_TAG</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;rapi:quality&quot;</span>
+    <span class="n">_METADATA_VALUES_TAG</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;rapi:metadata-values&quot;</span>
+    <span class="n">_METADATA_VALUE_TAG</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;rapi:metadata-value&quot;</span>
+    <span class="n">_KEY_ATTR</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;key&quot;</span>
+
+    <span class="n">_RAPI_NS_PREFIX</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;xmlns:rapi&quot;</span>
+    <span class="n">_PROP_NS_PREFIX</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;xmlns:prop&quot;</span>
+    <span class="n">_RAPI_NS_URI</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;http://marklogic.com/rest-api&quot;</span>
+    <span class="n">_PROP_NS_URI</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;http://marklogic.com/xdmp/property&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">collections</span><span class="p">:</span> <span class="nb">list</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">permissions</span><span class="p">:</span> <span class="nb">list</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">properties</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">quality</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">metadata_values</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize Metadata instance.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        collections : list | None</span>
+<span class="sd">            Document collections&#39; list</span>
+<span class="sd">        permissions : list | None</span>
+<span class="sd">            Document permissions&#39; list</span>
+<span class="sd">        properties : dict | None</span>
+<span class="sd">            Document&#39;s properties</span>
+<span class="sd">        quality : int | None</span>
+<span class="sd">            Document&#39;s quality</span>
+<span class="sd">        metadata_values : dict | None</span>
+<span class="sd">            Document&#39;s metadata values</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_collections</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">collections</span><span class="p">))</span> <span class="k">if</span> <span class="n">collections</span> <span class="k">else</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_permissions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_clean_permissions</span><span class="p">(</span><span class="n">permissions</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_properties</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_clean_dict</span><span class="p">(</span><span class="n">properties</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_quality</span> <span class="o">=</span> <span class="n">quality</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_metadata_values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_clean_dict</span><span class="p">(</span><span class="n">metadata_values</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">other</span><span class="p">:</span> <span class="n">Metadata</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Verify if Metadata instances are equal.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        other : Metadata</span>
+<span class="sd">            A Metadata instance to compare</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        bool</span>
+<span class="sd">            True if there&#39;s no difference between internal Metadata fields.</span>
+<span class="sd">            Otherwise, False.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">collections_diff</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_collections</span><span class="p">)</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">collections</span><span class="p">()))</span>
+        <span class="n">permissions_diff</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_permissions</span><span class="p">)</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">permissions</span><span class="p">()))</span>
+        <span class="k">return</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">Metadata</span><span class="p">)</span> <span class="ow">and</span>
+                <span class="n">collections_diff</span> <span class="o">==</span> <span class="nb">set</span><span class="p">()</span> <span class="ow">and</span>
+                <span class="n">permissions_diff</span> <span class="o">==</span> <span class="nb">set</span><span class="p">()</span> <span class="ow">and</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_properties</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">properties</span><span class="p">()</span> <span class="ow">and</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_quality</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">quality</span><span class="p">()</span> <span class="ow">and</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_metadata_values</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">metadata_values</span><span class="p">())</span>
+
+    <span class="k">def</span> <span class="fm">__hash__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Generate a hash value of a Metadata instance.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        int</span>
+<span class="sd">            A hash value generated using all internal Metadata fields.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">items</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">collections</span><span class="p">()</span>
+        <span class="n">items</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">permissions</span><span class="p">())</span>
+        <span class="n">items</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">quality</span><span class="p">())</span>
+        <span class="n">items</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">frozenset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">properties</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">()))</span>
+        <span class="n">items</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">frozenset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metadata_values</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">()))</span>
+        <span class="k">return</span> <span class="nb">hash</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">items</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">__copy__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Metadata</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Copy Metadata instance.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">Metadata</span><span class="p">(</span>
+            <span class="n">collections</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">collections</span><span class="p">(),</span>
+            <span class="n">permissions</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">permissions</span><span class="p">(),</span>
+            <span class="n">properties</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">properties</span><span class="p">(),</span>
+            <span class="n">quality</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">quality</span><span class="p">(),</span>
+            <span class="n">metadata_values</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">metadata_values</span><span class="p">())</span>
+
+<div class="viewcode-block" id="Metadata.collections"><a class="viewcode-back" href="../../../mlclient/model/mlclient.model.html#mlclient.model.Metadata.collections">[docs]</a>    <span class="k">def</span> <span class="nf">collections</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return document&#39;s collections.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_collections</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="Metadata.permissions"><a class="viewcode-back" href="../../../mlclient/model/mlclient.model.html#mlclient.model.Metadata.permissions">[docs]</a>    <span class="k">def</span> <span class="nf">permissions</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return document&#39;s permissions.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">perm</span><span class="p">)</span> <span class="k">for</span> <span class="n">perm</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_permissions</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="Metadata.properties"><a class="viewcode-back" href="../../../mlclient/model/mlclient.model.html#mlclient.model.Metadata.properties">[docs]</a>    <span class="k">def</span> <span class="nf">properties</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return document&#39;s properties.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_properties</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="Metadata.quality"><a class="viewcode-back" href="../../../mlclient/model/mlclient.model.html#mlclient.model.Metadata.quality">[docs]</a>    <span class="k">def</span> <span class="nf">quality</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return document&#39;s quality.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_quality</span></div>
+
+<div class="viewcode-block" id="Metadata.metadata_values"><a class="viewcode-back" href="../../../mlclient/model/mlclient.model.html#mlclient.model.Metadata.metadata_values">[docs]</a>    <span class="k">def</span> <span class="nf">metadata_values</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return document&#39;s metadata values.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_metadata_values</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="Metadata.set_quality"><a class="viewcode-back" href="../../../mlclient/model/mlclient.model.html#mlclient.model.Metadata.set_quality">[docs]</a>    <span class="k">def</span> <span class="nf">set_quality</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">quality</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set document&#39;s quality.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        quality : int</span>
+<span class="sd">            A document&#39;s new quality</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        allow : bool</span>
+<span class="sd">            True if value provided is an integer. Otherwise, False.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">allow</span> <span class="o">=</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">quality</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">allow</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_quality</span> <span class="o">=</span> <span class="n">quality</span>
+        <span class="k">return</span> <span class="n">allow</span></div>
+
+<div class="viewcode-block" id="Metadata.add_collection"><a class="viewcode-back" href="../../../mlclient/model/mlclient.model.html#mlclient.model.Metadata.add_collection">[docs]</a>    <span class="k">def</span> <span class="nf">add_collection</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">collection</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Assign a new collection to document.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        collection : str</span>
+<span class="sd">            A document&#39;s new collection</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        allow : bool</span>
+<span class="sd">            True if the collection is non-blank value, and it does not appear already</span>
+<span class="sd">            in document&#39;s collections. Otherwise, False.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">allow</span> <span class="o">=</span> <span class="p">(</span><span class="n">collection</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span>
+                 <span class="ow">not</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s2">&quot;^</span><span class="se">\\</span><span class="s2">s*$&quot;</span><span class="p">,</span> <span class="n">collection</span><span class="p">)</span> <span class="ow">and</span>
+                 <span class="n">collection</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">collections</span><span class="p">())</span>
+        <span class="k">if</span> <span class="n">allow</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_collections</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">collection</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">allow</span></div>
+
+<div class="viewcode-block" id="Metadata.add_permission"><a class="viewcode-back" href="../../../mlclient/model/mlclient.model.html#mlclient.model.Metadata.add_permission">[docs]</a>    <span class="k">def</span> <span class="nf">add_permission</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">role_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+            <span class="n">capability</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Assign a new permission to document.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        role_name : str</span>
+<span class="sd">            a permission&#39;s role name</span>
+<span class="sd">        capability : str</span>
+<span class="sd">            a permission&#39;s capability</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        bool</span>
+<span class="sd">            True if there&#39;s no such capability assigned to this role already, and it is</span>
+<span class="sd">            a correct one. Otherwise, False.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">allow</span> <span class="o">=</span> <span class="n">role_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">capability</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">allow</span><span class="p">:</span>
+            <span class="n">permission</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_permission_for_role</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_permissions</span><span class="p">,</span> <span class="n">role_name</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">permission</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">permission</span><span class="o">.</span><span class="n">add_capability</span><span class="p">(</span><span class="n">capability</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_permissions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Permission</span><span class="p">(</span><span class="n">role_name</span><span class="p">,</span> <span class="p">{</span><span class="n">capability</span><span class="p">}))</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="n">allow</span></div>
+
+<div class="viewcode-block" id="Metadata.put_property"><a class="viewcode-back" href="../../../mlclient/model/mlclient.model.html#mlclient.model.Metadata.put_property">[docs]</a>    <span class="k">def</span> <span class="nf">put_property</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+            <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Assign a new property to document.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        name : str</span>
+<span class="sd">            A property name</span>
+<span class="sd">        value : str</span>
+<span class="sd">            A property value</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">and</span> <span class="n">value</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_properties</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span></div>
+
+<div class="viewcode-block" id="Metadata.put_metadata_value"><a class="viewcode-back" href="../../../mlclient/model/mlclient.model.html#mlclient.model.Metadata.put_metadata_value">[docs]</a>    <span class="k">def</span> <span class="nf">put_metadata_value</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+            <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Assign a new metadata value to document.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        name : str</span>
+<span class="sd">            A metadata name</span>
+<span class="sd">        value : str</span>
+<span class="sd">            A metadata value</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">and</span> <span class="n">value</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_metadata_values</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span></div>
+
+<div class="viewcode-block" id="Metadata.remove_collection"><a class="viewcode-back" href="../../../mlclient/model/mlclient.model.html#mlclient.model.Metadata.remove_collection">[docs]</a>    <span class="k">def</span> <span class="nf">remove_collection</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">collection</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Remove a collection from document.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        collection : str</span>
+<span class="sd">            A document&#39;s collection</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        allow : bool</span>
+<span class="sd">            True if the collection is assigned to the document. Otherwise, False.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">allow</span> <span class="o">=</span> <span class="n">collection</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">collection</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">collections</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">allow</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_collections</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">collection</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">allow</span></div>
+
+<div class="viewcode-block" id="Metadata.remove_permission"><a class="viewcode-back" href="../../../mlclient/model/mlclient.model.html#mlclient.model.Metadata.remove_permission">[docs]</a>    <span class="k">def</span> <span class="nf">remove_permission</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">role_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+            <span class="n">capability</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Remove a permission from document.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        role_name : str</span>
+<span class="sd">            A permission&#39;s role name</span>
+<span class="sd">        capability : str</span>
+<span class="sd">            A permission&#39;s capability</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        bool</span>
+<span class="sd">            True if the capability is assigned to the role for a document.</span>
+<span class="sd">            Otherwise, False.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">allow</span> <span class="o">=</span> <span class="n">role_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">capability</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">allow</span><span class="p">:</span>
+            <span class="n">permission</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_permission_for_role</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_permissions</span><span class="p">,</span> <span class="n">role_name</span><span class="p">)</span>
+            <span class="n">allow</span> <span class="o">=</span> <span class="n">permission</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="n">allow</span><span class="p">:</span>
+                <span class="n">success</span> <span class="o">=</span> <span class="n">permission</span><span class="o">.</span><span class="n">remove_capability</span><span class="p">(</span><span class="n">capability</span><span class="p">)</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">permission</span><span class="o">.</span><span class="n">capabilities</span><span class="p">())</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_permissions</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">permission</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">success</span>
+            <span class="k">return</span> <span class="n">allow</span>
+        <span class="k">return</span> <span class="n">allow</span></div>
+
+<div class="viewcode-block" id="Metadata.remove_property"><a class="viewcode-back" href="../../../mlclient/model/mlclient.model.html#mlclient.model.Metadata.remove_property">[docs]</a>    <span class="k">def</span> <span class="nf">remove_property</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Remove a property from document.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        name : str</span>
+<span class="sd">            A property name</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        bool</span>
+<span class="sd">            True if the document has a property with such name. Otherwise, False.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_properties</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="Metadata.remove_metadata_value"><a class="viewcode-back" href="../../../mlclient/model/mlclient.model.html#mlclient.model.Metadata.remove_metadata_value">[docs]</a>    <span class="k">def</span> <span class="nf">remove_metadata_value</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Remove a metadata value from document.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        name : str</span>
+<span class="sd">            A metadata name</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        bool</span>
+<span class="sd">            True if the document has a metadata with such name. Otherwise, False.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_metadata_values</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="Metadata.to_json_string"><a class="viewcode-back" href="../../../mlclient/model/mlclient.model.html#mlclient.model.Metadata.to_json_string">[docs]</a>    <span class="k">def</span> <span class="nf">to_json_string</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">indent</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a stringified JSON representation of the Metadata instance.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        indent : int | None</span>
+<span class="sd">            A number of spaces per indent level</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        str</span>
+<span class="sd">            Metadata in a stringified JSON representation</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">to_json</span><span class="p">(),</span> <span class="n">indent</span><span class="o">=</span><span class="n">indent</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Metadata.to_json"><a class="viewcode-back" href="../../../mlclient/model/mlclient.model.html#mlclient.model.Metadata.to_json">[docs]</a>    <span class="k">def</span> <span class="nf">to_json</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a JSON representation of the Metadata instance.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_COLLECTIONS_KEY</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">collections</span><span class="p">(),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_PERMISSIONS_KEY</span><span class="p">:</span> <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">to_json</span><span class="p">()</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_permissions</span><span class="p">],</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_PROPERTIES_KEY</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">properties</span><span class="p">(),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_QUALITY_KEY</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">quality</span><span class="p">(),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_METADATA_VALUES_KEY</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_metadata_values</span><span class="p">,</span>
+        <span class="p">}</span></div>
+
+<div class="viewcode-block" id="Metadata.to_xml_string"><a class="viewcode-back" href="../../../mlclient/model/mlclient.model.html#mlclient.model.Metadata.to_xml_string">[docs]</a>    <span class="k">def</span> <span class="nf">to_xml_string</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">indent</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a stringified XML representation of the Metadata instance.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        indent : int | None</span>
+<span class="sd">            A number of spaces per indent level</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        str</span>
+<span class="sd">            Metadata in a stringified XML representation</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">metadata_xml</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_xml</span><span class="p">()</span><span class="o">.</span><span class="n">getroot</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">indent</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">metadata_str</span> <span class="o">=</span> <span class="n">ElemTree</span><span class="o">.</span><span class="n">tostring</span><span class="p">(</span>
+                <span class="n">metadata_xml</span><span class="p">,</span>
+                <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">,</span>
+                <span class="n">method</span><span class="o">=</span><span class="s2">&quot;xml&quot;</span><span class="p">,</span>
+                <span class="n">xml_declaration</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">metadata_xml_string</span> <span class="o">=</span> <span class="n">ElemTree</span><span class="o">.</span><span class="n">tostring</span><span class="p">(</span><span class="n">metadata_xml</span><span class="p">)</span>
+            <span class="n">metadata_xml_minidom</span> <span class="o">=</span> <span class="n">minidom</span><span class="o">.</span><span class="n">parseString</span><span class="p">(</span><span class="n">metadata_xml_string</span><span class="p">)</span>
+            <span class="n">metadata_str</span> <span class="o">=</span> <span class="n">metadata_xml_minidom</span><span class="o">.</span><span class="n">toprettyxml</span><span class="p">(</span>
+                <span class="n">indent</span><span class="o">=</span><span class="s2">&quot; &quot;</span> <span class="o">*</span> <span class="n">indent</span><span class="p">,</span>
+                <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">metadata_str</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;ascii&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Metadata.to_xml"><a class="viewcode-back" href="../../../mlclient/model/mlclient.model.html#mlclient.model.Metadata.to_xml">[docs]</a>    <span class="k">def</span> <span class="nf">to_xml</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ElemTree</span><span class="o">.</span><span class="n">ElementTree</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return an XML representation of the Metadata instance.&quot;&quot;&quot;</span>
+        <span class="n">attrs</span> <span class="o">=</span> <span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_RAPI_NS_PREFIX</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_RAPI_NS_URI</span><span class="p">}</span>
+        <span class="n">root</span> <span class="o">=</span> <span class="n">ElemTree</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_METADATA_TAG</span><span class="p">,</span> <span class="n">attrib</span><span class="o">=</span><span class="n">attrs</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_to_xml_collections</span><span class="p">(</span><span class="n">root</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_to_xml_permissions</span><span class="p">(</span><span class="n">root</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_to_xml_properties</span><span class="p">(</span><span class="n">root</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_to_xml_quality</span><span class="p">(</span><span class="n">root</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_to_xml_metadata_values</span><span class="p">(</span><span class="n">root</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ElemTree</span><span class="o">.</span><span class="n">ElementTree</span><span class="p">(</span><span class="n">root</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_to_xml_collections</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">root</span><span class="p">:</span> <span class="n">ElemTree</span><span class="o">.</span><span class="n">Element</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Add collections node to Metadata root.&quot;&quot;&quot;</span>
+        <span class="n">parent</span> <span class="o">=</span> <span class="n">ElemTree</span><span class="o">.</span><span class="n">SubElement</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_COLLECTIONS_TAG</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">collection</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">collections</span><span class="p">():</span>
+            <span class="n">child</span> <span class="o">=</span> <span class="n">ElemTree</span><span class="o">.</span><span class="n">SubElement</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_COLLECTION_TAG</span><span class="p">)</span>
+            <span class="n">child</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="n">collection</span>
+
+    <span class="k">def</span> <span class="nf">_to_xml_permissions</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">root</span><span class="p">:</span> <span class="n">ElemTree</span><span class="o">.</span><span class="n">Element</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Add permissions node to Metadata root.&quot;&quot;&quot;</span>
+        <span class="n">permissions</span> <span class="o">=</span> <span class="n">ElemTree</span><span class="o">.</span><span class="n">SubElement</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_PERMISSIONS_TAG</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">perm</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_permissions</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">cap</span> <span class="ow">in</span> <span class="n">perm</span><span class="o">.</span><span class="n">capabilities</span><span class="p">():</span>
+                <span class="n">permission</span> <span class="o">=</span> <span class="n">ElemTree</span><span class="o">.</span><span class="n">SubElement</span><span class="p">(</span><span class="n">permissions</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_PERMISSION_TAG</span><span class="p">)</span>
+                <span class="n">role_name</span> <span class="o">=</span> <span class="n">ElemTree</span><span class="o">.</span><span class="n">SubElement</span><span class="p">(</span><span class="n">permission</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ROLE_NAME_TAG</span><span class="p">)</span>
+                <span class="n">capability</span> <span class="o">=</span> <span class="n">ElemTree</span><span class="o">.</span><span class="n">SubElement</span><span class="p">(</span><span class="n">permission</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_CAPABILITY_TAG</span><span class="p">)</span>
+                <span class="n">role_name</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="n">perm</span><span class="o">.</span><span class="n">role_name</span><span class="p">()</span>
+                <span class="n">capability</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="n">cap</span>
+
+    <span class="k">def</span> <span class="nf">_to_xml_properties</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">root</span><span class="p">:</span> <span class="n">ElemTree</span><span class="o">.</span><span class="n">Element</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Add properties node to Metadata root.&quot;&quot;&quot;</span>
+        <span class="n">attrs</span> <span class="o">=</span> <span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_PROP_NS_PREFIX</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_PROP_NS_URI</span><span class="p">}</span>
+        <span class="n">properties</span> <span class="o">=</span> <span class="n">ElemTree</span><span class="o">.</span><span class="n">SubElement</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_PROPERTIES_TAG</span><span class="p">,</span> <span class="n">attrib</span><span class="o">=</span><span class="n">attrs</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">prop_name</span><span class="p">,</span> <span class="n">prop_value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">properties</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">property_</span> <span class="o">=</span> <span class="n">ElemTree</span><span class="o">.</span><span class="n">SubElement</span><span class="p">(</span><span class="n">properties</span><span class="p">,</span> <span class="n">prop_name</span><span class="p">)</span>
+            <span class="n">property_</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="n">prop_value</span>
+
+    <span class="k">def</span> <span class="nf">_to_xml_quality</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">root</span><span class="p">:</span> <span class="n">ElemTree</span><span class="o">.</span><span class="n">Element</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Add quality node to Metadata root.&quot;&quot;&quot;</span>
+        <span class="n">quality</span> <span class="o">=</span> <span class="n">ElemTree</span><span class="o">.</span><span class="n">SubElement</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_QUALITY_TAG</span><span class="p">)</span>
+        <span class="n">quality</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">quality</span><span class="p">())</span>
+
+    <span class="k">def</span> <span class="nf">_to_xml_metadata_values</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">root</span><span class="p">:</span> <span class="n">ElemTree</span><span class="o">.</span><span class="n">Element</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Add metadata values node to Metadata root.&quot;&quot;&quot;</span>
+        <span class="n">values</span> <span class="o">=</span> <span class="n">ElemTree</span><span class="o">.</span><span class="n">SubElement</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_METADATA_VALUES_TAG</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">metadata_name</span><span class="p">,</span> <span class="n">metadata_value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata_values</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">attrs</span> <span class="o">=</span> <span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_KEY_ATTR</span><span class="p">:</span> <span class="n">metadata_name</span><span class="p">}</span>
+            <span class="n">child</span> <span class="o">=</span> <span class="n">ElemTree</span><span class="o">.</span><span class="n">SubElement</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_METADATA_VALUE_TAG</span><span class="p">,</span> <span class="n">attrib</span><span class="o">=</span><span class="n">attrs</span><span class="p">)</span>
+            <span class="n">child</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="n">metadata_value</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">_get_clean_permissions</span><span class="p">(</span>
+            <span class="bp">cls</span><span class="p">,</span>
+            <span class="n">source_permissions</span><span class="p">:</span> <span class="nb">list</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return permissions list without duplicates.</span>
+
+<span class="sd">        If source permissions are None, it returns an empty list.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        source_permissions : list | None</span>
+<span class="sd">            Source permissions to clean out.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        permissions : list</span>
+<span class="sd">            A clean permissions list</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">permissions</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">source_permissions</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">permissions</span>
+
+        <span class="k">for</span> <span class="n">permission</span> <span class="ow">in</span> <span class="n">source_permissions</span><span class="p">:</span>
+            <span class="n">role_name</span> <span class="o">=</span> <span class="n">permission</span><span class="o">.</span><span class="n">role_name</span><span class="p">()</span>
+            <span class="n">existing_perm</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_get_permission_for_role</span><span class="p">(</span><span class="n">permissions</span><span class="p">,</span> <span class="n">role_name</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">existing_perm</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">permissions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">permission</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                    <span class="s2">&quot;Ignoring permission [</span><span class="si">%s</span><span class="s2">]: role [</span><span class="si">%s</span><span class="s2">] is already used in [</span><span class="si">%s</span><span class="s2">]&quot;</span><span class="p">,</span>
+                    <span class="n">permission</span><span class="p">,</span> <span class="n">role_name</span><span class="p">,</span> <span class="n">existing_perm</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">permissions</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_get_permission_for_role</span><span class="p">(</span>
+            <span class="n">permissions</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span>
+            <span class="n">role_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Permission</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return permissions assigned to the role provided.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        permissions : list</span>
+<span class="sd">            A permissions list</span>
+<span class="sd">        role_name : str</span>
+<span class="sd">            A role name</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Permission | None</span>
+<span class="sd">            A role&#39;s permission if exists. Otherwise, None.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">next</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="n">p</span><span class="o">.</span><span class="n">role_name</span><span class="p">()</span> <span class="o">==</span> <span class="n">role_name</span><span class="p">,</span> <span class="n">permissions</span><span class="p">),</span> <span class="kc">None</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_get_clean_dict</span><span class="p">(</span>
+            <span class="n">source_dict</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a dictionary with stringified values and removed None values.</span>
+
+<span class="sd">        If source dictionary are None, it returns an empty one.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        source_dict : dict | None</span>
+<span class="sd">            A source dictionary to clean out.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        dict</span>
+<span class="sd">            A clean dictionary</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">source_dict</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">{}</span>
+        <span class="k">return</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">source_dict</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">}</span></div>
+
+
+<div class="viewcode-block" id="Permission"><a class="viewcode-back" href="../../../mlclient/model/mlclient.model.html#mlclient.model.Permission">[docs]</a><span class="k">class</span> <span class="nc">Permission</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A class representing MarkLogic&#39;s document permission.&quot;&quot;&quot;</span>
+
+    <span class="n">READ</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;read&quot;</span>
+    <span class="n">INSERT</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;insert&quot;</span>
+    <span class="n">UPDATE</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;update&quot;</span>
+    <span class="n">UPDATE_NODE</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;update-node&quot;</span>
+    <span class="n">EXECUTE</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;execute&quot;</span>
+
+    <span class="n">_CAPABILITIES</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">tuple</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">READ</span><span class="p">,</span> <span class="n">INSERT</span><span class="p">,</span> <span class="n">UPDATE</span><span class="p">,</span> <span class="n">UPDATE_NODE</span><span class="p">,</span> <span class="n">EXECUTE</span><span class="p">}</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">role_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+            <span class="n">capabilities</span><span class="p">:</span> <span class="nb">set</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize a Permission instance.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        role_name : str</span>
+<span class="sd">            A role name</span>
+<span class="sd">        capabilities : set</span>
+<span class="sd">            Capabilities set</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_role_name</span> <span class="o">=</span> <span class="n">role_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_capabilities</span> <span class="o">=</span> <span class="p">{</span><span class="n">cap</span> <span class="k">for</span> <span class="n">cap</span> <span class="ow">in</span> <span class="n">capabilities</span> <span class="k">if</span> <span class="n">cap</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_CAPABILITIES</span><span class="p">}</span>
+
+    <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">other</span><span class="p">:</span> <span class="n">Permission</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Verify if Permission instances are equal.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        other : Permission</span>
+<span class="sd">            A Permission instance to compare</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        bool</span>
+<span class="sd">            True if there&#39;s no difference between internal Permission fields.</span>
+<span class="sd">            Otherwise, False.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">Permission</span><span class="p">)</span> <span class="ow">and</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_role_name</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">_role_name</span> <span class="ow">and</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_capabilities</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">_capabilities</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__hash__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Generate a hash value of a Permission instance.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        int</span>
+<span class="sd">            A hash value generated using all internal Permission fields.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">items</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_capabilities</span><span class="p">)</span>
+        <span class="n">items</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_role_name</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">hash</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">items</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a string representation of the Permission instance.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Permission(&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;role_name=&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_role_name</span><span class="si">}</span><span class="s2">&#39;, &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;capabilities=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_capabilities</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Permission.role_name"><a class="viewcode-back" href="../../../mlclient/model/mlclient.model.html#mlclient.model.Permission.role_name">[docs]</a>    <span class="k">def</span> <span class="nf">role_name</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return permission&#39;s role name.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_role_name</span></div>
+
+<div class="viewcode-block" id="Permission.capabilities"><a class="viewcode-back" href="../../../mlclient/model/mlclient.model.html#mlclient.model.Permission.capabilities">[docs]</a>    <span class="k">def</span> <span class="nf">capabilities</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">set</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return permission&#39;s capabilities.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_capabilities</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="Permission.add_capability"><a class="viewcode-back" href="../../../mlclient/model/mlclient.model.html#mlclient.model.Permission.add_capability">[docs]</a>    <span class="k">def</span> <span class="nf">add_capability</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">capability</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Assign a new capability to the role.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        capability : str</span>
+<span class="sd">            a permission&#39;s capability</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        allow : bool</span>
+<span class="sd">            True if there&#39;s no such capability assigned to this role already, and it is</span>
+<span class="sd">            a correct one. Otherwise, False.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">allow</span> <span class="o">=</span> <span class="p">(</span><span class="n">capability</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span>
+                 <span class="n">capability</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_CAPABILITIES</span> <span class="ow">and</span>
+                 <span class="n">capability</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">capabilities</span><span class="p">())</span>
+        <span class="k">if</span> <span class="n">allow</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_capabilities</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">capability</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">allow</span></div>
+
+<div class="viewcode-block" id="Permission.remove_capability"><a class="viewcode-back" href="../../../mlclient/model/mlclient.model.html#mlclient.model.Permission.remove_capability">[docs]</a>    <span class="k">def</span> <span class="nf">remove_capability</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">capability</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Remove a capability from the role.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        capability : str</span>
+<span class="sd">            a permission&#39;s capability</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        allow : bool</span>
+<span class="sd">            True if the capability is assigned to the role.</span>
+<span class="sd">            Otherwise, False.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">allow</span> <span class="o">=</span> <span class="p">(</span><span class="n">capability</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span>
+                 <span class="n">capability</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">capabilities</span><span class="p">())</span>
+        <span class="k">if</span> <span class="n">allow</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_capabilities</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">capability</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">allow</span></div>
+
+<div class="viewcode-block" id="Permission.to_json"><a class="viewcode-back" href="../../../mlclient/model/mlclient.model.html#mlclient.model.Permission.to_json">[docs]</a>    <span class="k">def</span> <span class="nf">to_json</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a JSON representation of the Permission instance.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">&quot;role-name&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">role_name</span><span class="p">(),</span>
+            <span class="s2">&quot;capabilities&quot;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">capabilities</span><span class="p">()),</span>
+        <span class="p">}</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Tomasz Aniołowski.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

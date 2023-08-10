@@ -1,10 +1,10 @@
 """The ML Users Resource Calls module.
 
 It exports 2 classes:
-* UsersGetCall
-    A GET request to get users summary.
-* UsersPostCall
-    A POST request to create a new user.
+    * UsersGetCall
+        A GET request to get users summary.
+    * UsersPostCall
+        A POST request to create a new user.
 """
 from __future__ import annotations
 
@@ -24,27 +24,9 @@ class UsersGetCall(ResourceCall):
 
     This resource address returns a summary of the users in the cluster.
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/GET/manage/v2/users
-
-    Attributes
-    ----------
-    ENDPOINT
-        A static constant storing the Users endpoint value
-
-    Attributes
-    ----------
-    All attributes are inherited from the ResourceCall abstract class.
-    This class implements the endpoint computed property to return an endpoint
-    for the specific call.
-
-    endpoint : str
-        An endpoint of the ResourceCall
-
-    Methods
-    -------
-    All public methods are inherited from the ResourceCall abstract class.
     """
 
-    ENDPOINT: str = "/manage/v2/users"
+    _ENDPOINT: str = "/manage/v2/users"
 
     _FORMAT_PARAM: str = "format"
     _VIEW_PARAM: str = "view"
@@ -79,14 +61,14 @@ class UsersGetCall(ResourceCall):
     def endpoint(
             self,
     ):
-        """Return an endpoint for the Users call.
+        """An endpoint for the Users call.
 
         Returns
         -------
         str
             An Users call endpoint
         """
-        return self.ENDPOINT
+        return self._ENDPOINT
 
     @classmethod
     def _validate_params(
@@ -112,27 +94,9 @@ class UsersPostCall(ResourceCall):
 
     This resource address creates a new user in the security database.
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/POST/manage/v2/users
-
-    Attributes
-    ----------
-    ENDPOINT
-        A static constant storing the Users endpoint value
-
-    Attributes
-    ----------
-    All attributes are inherited from the ResourceCall abstract class.
-    This class implements the endpoint computed property to return an endpoint
-    for the specific call.
-
-    endpoint : str
-        An endpoint of the ResourceCall
-
-    Methods
-    -------
-    All public methods are inherited from the ResourceCall abstract class.
     """
 
-    ENDPOINT: str = "/manage/v2/users"
+    _ENDPOINT: str = "/manage/v2/users"
 
     def __init__(
             self,
@@ -157,14 +121,14 @@ class UsersPostCall(ResourceCall):
     def endpoint(
             self,
     ):
-        """Return an endpoint for the Users call.
+        """An endpoint for the Users call.
 
         Returns
         -------
         str
             An Users call endpoint
         """
-        return self.ENDPOINT
+        return self._ENDPOINT
 
     @classmethod
     def _validate_params(

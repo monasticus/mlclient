@@ -36,8 +36,6 @@ def test_validation_xquery_and_javascript_param():
 
 def test_endpoint(default_eval_call):
     assert default_eval_call.endpoint == "/v1/eval"
-    assert default_eval_call.ENDPOINT == "/v1/eval"
-    assert EvalCall.ENDPOINT == "/v1/eval"
 
 
 def test_method(default_eval_call):

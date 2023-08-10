@@ -1,10 +1,10 @@
 """The ML Databases Resource Calls module.
 
 It exports 2 classes:
-* DatabasesGetCall
-    A GET request to get databases summary.
-* DatabasesPostCall
-    A POST request to create a new database.
+    * DatabasesGetCall
+        A GET request to get databases summary.
+    * DatabasesPostCall
+        A POST request to create a new database.
 """
 from __future__ import annotations
 
@@ -24,27 +24,9 @@ class DatabasesGetCall(ResourceCall):
 
     This resource address returns a summary of the databases in the cluster.
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/GET/manage/v2/databases
-
-    Attributes
-    ----------
-    ENDPOINT
-        A static constant storing the Databases endpoint value
-
-    Attributes
-    ----------
-    All attributes are inherited from the ResourceCall abstract class.
-    This class implements the endpoint computed property to return an endpoint
-    for the specific call.
-
-    endpoint : str
-        An endpoint of the ResourceCall
-
-    Methods
-    -------
-    All public methods are inherited from the ResourceCall abstract class.
     """
 
-    ENDPOINT: str = "/manage/v2/databases"
+    _ENDPOINT: str = "/manage/v2/databases"
 
     _FORMAT_PARAM: str = "format"
     _VIEW_PARAM: str = "view"
@@ -81,14 +63,14 @@ class DatabasesGetCall(ResourceCall):
     def endpoint(
             self,
     ):
-        """Return an endpoint for the Databases call.
+        """An endpoint for the Databases call.
 
         Returns
         -------
         str
             A Databases call endpoint
         """
-        return self.ENDPOINT
+        return self._ENDPOINT
 
     @classmethod
     def _validate_params(
@@ -114,27 +96,9 @@ class DatabasesPostCall(ResourceCall):
 
     This resource address creates a new database in the cluster.
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/POST/manage/v2/databases
-
-    Attributes
-    ----------
-    ENDPOINT
-        A static constant storing the Databases endpoint value
-
-    Attributes
-    ----------
-    All attributes are inherited from the ResourceCall abstract class.
-    This class implements the endpoint computed property to return an endpoint
-    for the specific call.
-
-    endpoint : str
-        An endpoint of the ResourceCall
-
-    Methods
-    -------
-    All public methods are inherited from the ResourceCall abstract class.
     """
 
-    ENDPOINT: str = "/manage/v2/databases"
+    _ENDPOINT: str = "/manage/v2/databases"
 
     def __init__(
             self,
@@ -159,14 +123,14 @@ class DatabasesPostCall(ResourceCall):
     def endpoint(
             self,
     ):
-        """Return an endpoint for the Databases call.
+        """An endpoint for the Databases call.
 
         Returns
         -------
         str
             A Databases call endpoint
         """
-        return self.ENDPOINT
+        return self._ENDPOINT
 
     @classmethod
     def _validate_params(

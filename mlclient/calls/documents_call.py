@@ -1,8 +1,8 @@
 """The ML Documents Resource Calls module.
 
 It exports 1 class:
-* DocumentsGetCall
-    A GET request to retrieve documents' content or metadata.
+    * DocumentsGetCall
+        A GET request to retrieve documents' content or metadata.
 """
 from __future__ import annotations
 
@@ -20,22 +20,9 @@ class DocumentsGetCall(ResourceCall):
 
     Retrieve document content and/or metadata from the database.
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/GET/v1/documents
-
-    Attributes
-    ----------
-    All attributes are inherited from the ResourceCall abstract class.
-    This class implements the endpoint computed property to return an endpoint
-    for the specific call.
-
-    endpoint : str
-        An endpoint of the ResourceCall
-
-    Methods
-    -------
-    All public methods are inherited from the ResourceCall abstract class.
     """
 
-    ENDPOINT: str = "/v1/documents"
+    _ENDPOINT: str = "/v1/documents"
 
     _URI_PARAM: str = "uri"
     _DATABASE_PARAM: str = "database"
@@ -124,14 +111,14 @@ class DocumentsGetCall(ResourceCall):
     def endpoint(
             self,
     ):
-        """Return an endpoint for the Documents call.
+        """An endpoint for the Documents call.
 
         Returns
         -------
         str
             A Documents call endpoint
         """
-        return self.ENDPOINT
+        return self._ENDPOINT
 
     @classmethod
     def _validate_params(

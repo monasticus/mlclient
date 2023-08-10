@@ -1,8 +1,8 @@
 """The ML Eval Resource Call module.
 
 It exports 1 class:
-* EvalCall
-    A POST request to evaluate an ad-hoc query.
+    * EvalCall
+        A POST request to evaluate an ad-hoc query.
 """
 from __future__ import annotations
 
@@ -20,27 +20,9 @@ class EvalCall(ResourceCall):
 
     Evaluate an ad-hoc query expressed using XQuery or server-side JavaScript.
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/POST/v1/eval
-
-    Attributes
-    ----------
-    ENDPOINT
-        A static constant storing the Eval endpoint value
-
-    Attributes
-    ----------
-    All attributes are inherited from the ResourceCall abstract class.
-    This class implements the endpoint computed property to return an endpoint
-    for the specific call.
-
-    endpoint : str
-        An endpoint of the ResourceCall
-
-    Methods
-    -------
-    All public methods are inherited from the ResourceCall abstract class.
     """
 
-    ENDPOINT: str = "/v1/eval"
+    _ENDPOINT: str = "/v1/eval"
 
     _XQ_PARAM: str = "xquery"
     _JS_PARAM: str = "javascript"
@@ -91,14 +73,14 @@ class EvalCall(ResourceCall):
     def endpoint(
             self,
     ):
-        """Return an endpoint for the Eval call.
+        """An endpoint for the Eval call.
 
         Returns
         -------
         str
             An Eval call endpoint
         """
-        return self.ENDPOINT
+        return self._ENDPOINT
 
     @classmethod
     def _validate_params(

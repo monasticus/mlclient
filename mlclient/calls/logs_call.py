@@ -1,8 +1,8 @@
 """The ML Logs Resource Call module.
 
 It exports 1 class:
-* LogsCall
-    A GET request to retrieve logs.
+    * LogsCall
+        A GET request to retrieve logs.
 """
 from __future__ import annotations
 
@@ -20,27 +20,9 @@ class LogsCall(ResourceCall):
 
     Returns the content of server log files.
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/GET/manage/v2/logs
-
-    Attributes
-    ----------
-    ENDPOINT
-        A static constant storing the Logs endpoint value
-
-    Attributes
-    ----------
-    All attributes are inherited from the ResourceCall abstract class.
-    This class implements the endpoint computed property to return an endpoint
-    for the specific call.
-
-    endpoint : str
-        An endpoint of the ResourceCall
-
-    Methods
-    -------
-    All public methods are inherited from the ResourceCall abstract class.
     """
 
-    ENDPOINT: str = "/manage/v2/logs"
+    _ENDPOINT: str = "/manage/v2/logs"
 
     _FORMAT_PARAM: str = "format"
     _FILENAME_PARAM: str = "filename"
@@ -93,14 +75,14 @@ class LogsCall(ResourceCall):
     def endpoint(
             self,
     ):
-        """Return an endpoint for the Logs call.
+        """An endpoint for the Logs call.
 
         Returns
         -------
         str
             A Logs call endpoint
         """
-        return self.ENDPOINT
+        return self._ENDPOINT
 
     @classmethod
     def _validate_params(

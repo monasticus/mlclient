@@ -28,8 +28,6 @@ def test_validation_view_param():
 
 def test_endpoint(default_roles_get_call):
     assert default_roles_get_call.endpoint == "/manage/v2/roles"
-    assert default_roles_get_call.ENDPOINT == "/manage/v2/roles"
-    assert RolesGetCall.ENDPOINT == "/manage/v2/roles"
 
 
 def test_method(default_roles_get_call):

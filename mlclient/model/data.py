@@ -1,16 +1,16 @@
 """The ML Data module.
 
 It exports 5 classes:
-* DocumentType
-    An enumeration class representing document types.
-* Document
-    A class representing a single MarkLogic document.
-* Metadata
-    A class representing MarkLogic's document metadata.
-* Permission:
-    A class representing MarkLogic's document permission.
-* MetadataEncoder(json.JSONEncoder):
-    A JSONEncoder subclass to dump Metadata to JSON accordingly.
+    * DocumentType
+        An enumeration class representing document types.
+    * Document
+        A class representing a single MarkLogic document.
+    * Metadata
+        A class representing MarkLogic's document metadata.
+    * Permission:
+        A class representing MarkLogic's document permission.
+    * MetadataEncoder(json.JSONEncoder):
+        A JSONEncoder subclass to dump Metadata to JSON accordingly.
 """
 from __future__ import annotations
 
@@ -28,19 +28,7 @@ logger = logging.getLogger(__name__)
 
 
 class DocumentType(Enum):
-    """An enumeration class representing document types.
-
-    Attributes
-    ----------
-    XML : str
-        XML document type
-    JSON : str
-        JSON document type
-    BINARY : str
-        Binary document type
-    TEXT : str
-        Text document type
-    """
+    """An enumeration class representing document types."""
 
     XML: str = "xml"
     JSON: str = "json"
@@ -49,32 +37,7 @@ class DocumentType(Enum):
 
 
 class Document(metaclass=ABCMeta):
-    """A class representing a single MarkLogic document.
-
-    Attributes
-    ----------
-    content : str
-        A document content
-    uri : str
-        A document URI
-    doc_type : DocumentType
-        A document type
-    metadata : Metadata
-        A document metadata
-    is_temporal : bool
-        The temporal flag
-
-    Methods
-    -------
-    uri() -> str
-        Return a document URI.
-    doc_type() -> DocumentType
-        Return a document type.
-    metadata() -> Metadata
-        Return a document metadata.
-    is_temporal() -> bool
-        Return the temporal flag.
-    """
+    """A class representing a single MarkLogic document."""
 
     def __init__(
             self,
@@ -125,7 +88,7 @@ class Document(metaclass=ABCMeta):
     def content(
             self,
     ) -> Any:
-        """Return a document's content.
+        """A document content.
 
         Returns
         -------
@@ -138,28 +101,28 @@ class Document(metaclass=ABCMeta):
     def uri(
             self,
     ) -> str:
-        """Return a document URI."""
+        """A document URI."""
         return self._uri
 
     @property
     def doc_type(
             self,
     ) -> DocumentType:
-        """Return a document type."""
+        """A document type."""
         return self._doc_type
 
     @property
     def metadata(
             self,
     ) -> Metadata:
-        """Return a document metadata."""
+        """A document metadata."""
         return copy.copy(self._metadata)
 
     @property
     def is_temporal(
             self,
     ) -> bool:
-        """Return the temporal flag."""
+        """The temporal flag."""
         return self._is_temporal
 
     @staticmethod
@@ -171,47 +134,7 @@ class Document(metaclass=ABCMeta):
 
 
 class Metadata:
-    """A class representing MarkLogic's document metadata.
-
-    Methods
-    -------
-    collections() -> list
-        Return document's collections.
-    permissions() -> list
-        Return document's permissions.
-    properties() -> dict
-        Return document's properties.
-    quality() -> int
-        Return document's quality.
-    metadata_values() -> dict
-        Return document's metadata values.
-    set_quality(quality: int) -> bool
-        Set document's quality.
-    add_collection(collection: str) -> bool
-        Assign a new collection to document.
-    add_permission(role_name: str, capability: str) -> bool
-        Assign a new permission to document.
-    put_property(name: str, value: str)
-        Assign a new property to document.
-    put_metadata_value(name: str, value: str)
-        Assign a new metadata value to document.
-    remove_collection(collection: str) -> bool
-        Remove a collection from document.
-    remove_permission(role_name: str, capability: str) -> bool
-        Remove a permission from document.
-    remove_property(name: str) -> bool
-        Remove a property from document.
-    remove_metadata_value(name: str) -> bool
-        Remove a metadata value from document.
-    to_json_string(indent: int | None = None) -> str
-        Return a stringified JSON representation of the Metadata instance.
-    to_json() -> dict
-        Return a JSON representation of the Metadata instance.
-    to_xml_string(indent: int = None) -> str
-        Return a stringified XML representation of the Metadata instance.
-    to_xml() -> ElemTree.ElementTree
-        Return an XML representation of the Metadata instance.
-    """
+    """A class representing MarkLogic's document metadata."""
 
     _COLLECTIONS_KEY: str = "collections"
     _PERMISSIONS_KEY: str = "permissions"
@@ -756,21 +679,7 @@ class Metadata:
 
 
 class Permission:
-    """A class representing MarkLogic's document permission.
-
-    Methods
-    -------
-    role_name() -> str
-        Return permission's role name.
-    capabilities() -> set
-        Return permission's capabilities.
-    add_capability(capability: str -> bool
-        Assign a new capability to the role.
-    remove_capability(capability: str) -> bool
-        Remove a capability from the role.
-    to_json() -> dict
-        Return a JSON representation of the Permission instance.
-    """
+    """A class representing MarkLogic's document permission."""
 
     READ: str = "read"
     INSERT: str = "insert"

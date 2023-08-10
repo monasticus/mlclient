@@ -1,10 +1,10 @@
 """The ML Servers Resource Calls module.
 
 It exports 2 classes:
-* ServersGetCall
-    A GET request to get app servers summary.
-* ServersPostCall
-    A POST request to create a new app server.
+    * ServersGetCall
+        A GET request to get app servers summary.
+    * ServersPostCall
+        A POST request to create a new app server.
 """
 from __future__ import annotations
 
@@ -26,27 +26,9 @@ class ServersGetCall(ResourceCall):
     The data returned depends on the setting of the view request parameter.
     The default view provides a summary of the servers.
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/GET/manage/v2/servers
-
-    Attributes
-    ----------
-    ENDPOINT
-        A static constant storing the Servers endpoint value
-
-    Attributes
-    ----------
-    All attributes are inherited from the ResourceCall abstract class.
-    This class implements the endpoint computed property to return an endpoint
-    for the specific call.
-
-    endpoint : str
-        An endpoint of the ResourceCall
-
-    Methods
-    -------
-    All public methods are inherited from the ResourceCall abstract class.
     """
 
-    ENDPOINT: str = "/manage/v2/servers"
+    _ENDPOINT: str = "/manage/v2/servers"
 
     _FORMAT_PARAM: str = "format"
     _GROUP_ID_PARAM: str = "group-id"
@@ -99,14 +81,14 @@ class ServersGetCall(ResourceCall):
     def endpoint(
             self,
     ):
-        """Return an endpoint for the Servers call.
+        """An endpoint for the Servers call.
 
         Returns
         -------
         str
             A Servers call endpoint
         """
-        return self.ENDPOINT
+        return self._ENDPOINT
 
     @classmethod
     def _validate_params(
@@ -132,27 +114,9 @@ class ServersPostCall(ResourceCall):
 
     This resource address is used to create a new App Server in the specified group.
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/POST/manage/v2/servers
-
-    Attributes
-    ----------
-    ENDPOINT
-        A static constant storing the Servers endpoint value
-
-    Attributes
-    ----------
-    All attributes are inherited from the ResourceCall abstract class.
-    This class implements the endpoint computed property to return an endpoint
-    for the specific call.
-
-    endpoint : str
-        An endpoint of the ResourceCall
-
-    Methods
-    -------
-    All public methods are inherited from the ResourceCall abstract class.
     """
 
-    ENDPOINT: str = "/manage/v2/servers"
+    _ENDPOINT: str = "/manage/v2/servers"
 
     _GROUP_ID_PARAM: str = "group-id"
     _SERVER_TYPE_PARAM: str = "server-type"
@@ -196,14 +160,14 @@ class ServersPostCall(ResourceCall):
     def endpoint(
             self,
     ):
-        """Return an endpoint for the Servers call.
+        """An endpoint for the Servers call.
 
         Returns
         -------
         str
             A Servers call endpoint
         """
-        return self.ENDPOINT
+        return self._ENDPOINT
 
     @classmethod
     def _validate_params(

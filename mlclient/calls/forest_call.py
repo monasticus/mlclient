@@ -1,12 +1,12 @@
 """The ML Forest Resource Calls module.
 
 It exports 3 classes:
-* ForestGetCall
-    A GET request to get a forest details.
-* ForestPostCall
-    A POST request to change a forest's state.
-* ForestDeleteCall
-    A DELETE request to remove a forest.
+    * ForestGetCall
+        A GET request to get a forest details.
+    * ForestPostCall
+        A POST request to change a forest's state.
+    * ForestDeleteCall
+        A DELETE request to remove a forest.
 """
 from __future__ import annotations
 
@@ -25,19 +25,6 @@ class ForestGetCall(ResourceCall):
     Retrieve information about a forest. The forest can be identified either by id
     or name.
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/GET/manage/v2/forests/[id-or-name]
-
-    Attributes
-    ----------
-    All attributes are inherited from the ResourceCall abstract class.
-    This class implements the endpoint computed property to return an endpoint
-    for the specific call.
-
-    endpoint : str
-        An endpoint of the ResourceCall
-
-    Methods
-    -------
-    All public methods are inherited from the ResourceCall abstract class.
     """
 
     _ENDPOINT_TEMPLATE: str = "/manage/v2/forests/{}"
@@ -83,7 +70,7 @@ class ForestGetCall(ResourceCall):
     def endpoint(
             self,
     ):
-        """Return an endpoint for the Forest call.
+        """An endpoint for the Forest call.
 
         Returns
         -------
@@ -116,24 +103,6 @@ class ForestPostCall(ResourceCall):
 
     Initiate a state change on a forest, such as a merge, restart, or attach.
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/POST/manage/v2/forests/[id-or-name]
-
-    Attributes
-    ----------
-    ENDPOINT
-        a static constant storing the Forests endpoint value
-
-    Attributes
-    ----------
-    All attributes are inherited from the ResourceCall abstract class.
-    This class implements the endpoint computed property to return an endpoint
-    for the specific call.
-
-    endpoint : str
-        An endpoint of the ResourceCall
-
-    Methods
-    -------
-    All public methods are inherited from the ResourceCall abstract class.
     """
 
     _ENDPOINT_TEMPLATE: str = "/manage/v2/forests/{}"
@@ -169,7 +138,7 @@ class ForestPostCall(ResourceCall):
     def endpoint(
             self,
     ):
-        """Return an endpoint for the Forests call.
+        """An endpoint for the Forests call.
 
         Returns
         -------
@@ -200,19 +169,6 @@ class ForestDeleteCall(ResourceCall):
 
     Delete a forest.
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/DELETE/manage/v2/forests/[id-or-name]
-
-    Attributes
-    ----------
-    All attributes are inherited from the ResourceCall abstract class.
-    This class implements the endpoint computed property to return an endpoint
-    for the specific call.
-
-    endpoint : str
-        An endpoint of the ResourceCall
-
-    Methods
-    -------
-    All public methods are inherited from the ResourceCall abstract class.
     """
 
     _ENDPOINT_TEMPLATE: str = "/manage/v2/forests/{}"
@@ -255,7 +211,7 @@ class ForestDeleteCall(ResourceCall):
     def endpoint(
             self,
     ):
-        """Return an endpoint for the Forest call.
+        """An endpoint for the Forest call.
 
         Returns
         -------

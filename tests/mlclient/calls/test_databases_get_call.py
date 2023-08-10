@@ -29,8 +29,6 @@ def test_validation_view_param():
 
 def test_endpoint(default_databases_get_call):
     assert default_databases_get_call.endpoint == "/manage/v2/databases"
-    assert default_databases_get_call.ENDPOINT == "/manage/v2/databases"
-    assert DatabasesGetCall.ENDPOINT == "/manage/v2/databases"
 
 
 def test_method(default_databases_get_call):

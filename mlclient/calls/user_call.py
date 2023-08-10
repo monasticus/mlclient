@@ -1,10 +1,10 @@
 """The ML User Resource Calls module.
 
 It exports 2 classes:
-* UserGetCall
-    A GET request to get user details.
-* UserDeleteCall
-    A DELETE request to remove a user.
+    * UserGetCall
+        A GET request to get user details.
+    * UserDeleteCall
+        A DELETE request to remove a user.
 """
 from __future__ import annotations
 
@@ -22,19 +22,6 @@ class UserGetCall(ResourceCall):
 
     This resource address returns the configuration for the specified user.
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/GET/manage/v2/users/[id-or-name]
-
-    Attributes
-    ----------
-    All attributes are inherited from the ResourceCall abstract class.
-    This class implements the endpoint computed property to return an endpoint
-    for the specific call.
-
-    endpoint : str
-        An endpoint of the ResourceCall
-
-    Methods
-    -------
-    All public methods are inherited from the ResourceCall abstract class.
     """
 
     _ENDPOINT_TEMPLATE: str = "/manage/v2/users/{}"
@@ -77,7 +64,7 @@ class UserGetCall(ResourceCall):
     def endpoint(
             self,
     ):
-        """Return an endpoint for the User call.
+        """An endpoint for the User call.
 
         Returns
         -------
@@ -110,19 +97,6 @@ class UserDeleteCall(ResourceCall):
 
     This resource address deletes the named user from the named security database.
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/DELETE/manage/v2/users/[id-or-name]
-
-    Attributes
-    ----------
-    All attributes are inherited from the ResourceCall abstract class.
-    This class implements the endpoint computed property to return an endpoint
-    for the specific call.
-
-    endpoint : str
-        An endpoint of the ResourceCall
-
-    Methods
-    -------
-    All public methods are inherited from the ResourceCall abstract class.
     """
 
     _ENDPOINT_TEMPLATE: str = "/manage/v2/users/{}"
@@ -145,7 +119,7 @@ class UserDeleteCall(ResourceCall):
     def endpoint(
             self,
     ):
-        """Return an endpoint for the User call.
+        """An endpoint for the User call.
 
         Returns
         -------

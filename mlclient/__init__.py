@@ -17,6 +17,8 @@ This package exports the following classes:
         A low-level class used to send simple HTTP requests to a MarkLogic instance.
     * MLResourceClient
         An MLClient subclass supporting internal REST Resources of the MarkLogic server.
+    * MLResponseParser
+        A MarkLogic HTTP response parser.
 
 Examples
 --------
@@ -24,7 +26,7 @@ Examples
 """
 from __future__ import annotations
 
-from .ml_client import MLClient, MLResourceClient
+from .ml_client import MLClient, MLResourceClient, MLResponseParser
 
 __version__ = "0.1.0"
-__all__ = ["MLClient", "MLResourceClient"]
+__all__ = ["MLClient", "MLResourceClient", "MLResponseParser"]

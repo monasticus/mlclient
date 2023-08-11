@@ -5,6 +5,8 @@ It exports 2 classes:
         A low-level class used to send simple HTTP requests to a MarkLogic instance.
     * MLResourceClient
         An MLClient subclass supporting internal REST Resources of the MarkLogic server.
+    * MLResponseParser
+        A MarkLogic HTTP response parser.
 """
 from __future__ import annotations
 
@@ -14,6 +16,8 @@ from types import TracebackType
 from requests import Response, Session
 from requests.adapters import HTTPAdapter, Retry
 from requests.auth import AuthBase, HTTPBasicAuth, HTTPDigestAuth
+from requests_toolbelt import MultipartDecoder
+from requests_toolbelt.multipart.decoder import BodyPart
 
 from mlclient import constants
 from mlclient.calls import (DatabaseDeleteCall, DatabaseGetCall,
@@ -1361,3 +1365,91 @@ class MLResourceClient(MLClient):
             params=call.params,
             headers=call.headers,
             body=call.body)
+
+
+class MLResponseParser:
+    """A MarkLogic HTTP response parser.
+
+    MarkLogic returns responses with multipart/mixed content. This class allows to get
+    all returned parts as python representations. They are parsed depending on content
+    type of corresponding part.
+
+    Examples
+    --------
+    >>> from mlclient import MLResourceClient, MLResponseParser
+    >>> config = {
+    ...     "host": "localhost",
+    ...     "port": 8002,
+    ...     "username": "admin",
+    ...     "password": "admin",
+    ...     "auth_method": "digest",
+    ... }
+    >>> with MLResourceClient(**config) as client:
+    ...     resp = client.eval(xquery="xdmp:database() => xdmp:database-name()")
+    ...     print("Raw:", resp.text)
+    ...     print("Parsed:", MLResponseParser.parse(resp))
+    ...
+    Raw:
+    --6a5df7d535c71968
+    Content-Type: text/plain
+    X-Primitive: string
+    App-Services
+    --6a5df7d535c71968--
+    Parsed: App-Services
+    """
+
+    @classmethod
+    def parse(
+            cls,
+            response: Response,
+    ) -> bytes | str | list:
+        """Parse MarkLogic HTTP Response.
+
+        Parameters
+        ----------
+        response : Response
+            An HTTP response taken from MarkLogic instance
+
+        Returns
+        -------
+        str | list
+            A parsed response body
+        """
+        raw_parts: tuple[BodyPart] = MultipartDecoder.from_response(response).parts
+        parsed_parts = []
+        for raw_part in raw_parts:
+            content_type = cls._get_header(raw_part, "Content-Type")
+            if content_type == "text/plain":
+                parsed_part = raw_part.text
+            else:
+                parsed_part = raw_part.content
+            parsed_parts.append(parsed_part)
+        if len(parsed_parts) == 1:
+            return parsed_parts[0]
+        return parsed_parts
+
+    @staticmethod
+    def _get_header(
+            raw_part: BodyPart,
+            header_name: str,
+    ) -> str:
+        """Return a header value of response body part.
+
+        All headers are stored in a binary form. This method decodes them using
+        BodyPart's encoding attribute.
+
+        Parameters
+        ----------
+        raw_part : BodyPart
+            A response body part
+        header_name : str
+            A header name
+
+        Returns
+        -------
+        str
+            A header value
+        """
+        encoded_header_name = header_name.encode(raw_part.encoding)
+        header_value = raw_part.headers.get(encoded_header_name)
+        return header_value.decode(raw_part.encoding)

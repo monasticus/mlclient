@@ -11,16 +11,16 @@ import mlclient
 project = 'MLClient'
 copyright = '2023, Tomasz Aniołowski'
 author = 'Tomasz Aniołowski'
-release = mlclient.__version__
+release = '0.1.0'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
 extensions = [
-    "sphinx.ext.autodoc",
-    "sphinx.ext.autosectionlabel",
-    "sphinx.ext.viewcode",
-    "sphinx.ext.napoleon",
+    'sphinx.ext.autodoc',
+    'sphinx.ext.autosectionlabel',
+    'sphinx.ext.viewcode',
+    'sphinx.ext.napoleon',
 ]
 
 templates_path = ['_templates']

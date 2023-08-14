@@ -50,14 +50,14 @@ def test_parameters(default_user_properties_put_call):
 def test_headers_for_dict_body():
     call = UserPropertiesPutCall(user="admin", body={"user-name": "custom-user"})
     assert call.headers == {
-        "content-type": "application/json",
+        "Content-Type": "application/json",
     }
 
 
 def test_headers_for_stringified_dict_body():
     call = UserPropertiesPutCall(user="admin", body='{"user-name": "custom-user"}')
     assert call.headers == {
-        "content-type": "application/json",
+        "Content-Type": "application/json",
     }
 
 
@@ -67,7 +67,7 @@ def test_headers_for_xml_body():
             '</user-properties>')
     call = UserPropertiesPutCall(user="admin", body=body)
     assert call.headers == {
-        "content-type": "application/xml",
+        "Content-Type": "application/xml",
     }
 
 

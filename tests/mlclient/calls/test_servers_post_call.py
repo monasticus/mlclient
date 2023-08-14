@@ -59,14 +59,14 @@ def test_parameters(default_servers_post_call):
 def test_headers_for_dict_body():
     call = ServersPostCall(body={"server-name": "custom-server"})
     assert call.headers == {
-        "content-type": "application/json",
+        "Content-Type": "application/json",
     }
 
 
 def test_headers_for_stringified_dict_body():
     call = ServersPostCall(body='{"server-name": "custom-server"}')
     assert call.headers == {
-        "content-type": "application/json",
+        "Content-Type": "application/json",
     }
 
 
@@ -76,7 +76,7 @@ def test_headers_for_xml_body():
             '</http-server-properties>')
     call = ServersPostCall(body=body)
     assert call.headers == {
-        "content-type": "application/xml",
+        "Content-Type": "application/xml",
     }
 
 
@@ -110,7 +110,7 @@ def test_fully_parametrized_call():
                            body=body)
     assert call.method == "POST"
     assert call.headers == {
-        "content-type": "application/json",
+        "Content-Type": "application/json",
     }
     assert call.params == {
         "group-id": "Default",

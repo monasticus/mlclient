@@ -39,6 +39,7 @@ packages = [
 python = "^3.8"
 requests = "^2.31.0"
 python-dateutil = "^2.8.2"
+requests-toolbelt = "^1.0.0"
 
 [tool.poetry.group.dev.dependencies]
 ruff = "^0.0.281"

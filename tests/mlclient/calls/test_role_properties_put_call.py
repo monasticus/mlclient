@@ -50,14 +50,14 @@ def test_parameters(default_role_properties_put_call):
 def test_headers_for_dict_body():
     call = RolePropertiesPutCall(role="admin", body={"role-name": "custom-role"})
     assert call.headers == {
-        "content-type": "application/json",
+        "Content-Type": "application/json",
     }
 
 
 def test_headers_for_stringified_dict_body():
     call = RolePropertiesPutCall(role="admin", body='{"role-name": "custom-role"}')
     assert call.headers == {
-        "content-type": "application/json",
+        "Content-Type": "application/json",
     }
 
 
@@ -67,7 +67,7 @@ def test_headers_for_xml_body():
             '</role-properties>')
     call = RolePropertiesPutCall(role="admin", body=body)
     assert call.headers == {
-        "content-type": "application/xml",
+        "Content-Type": "application/xml",
     }
 
 

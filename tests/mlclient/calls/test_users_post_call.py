@@ -43,14 +43,14 @@ def test_parameters(default_users_post_call):
 def test_headers_for_dict_body():
     call = UsersPostCall(body={"user-name": "custom-user"})
     assert call.headers == {
-        "content-type": "application/json",
+        "Content-Type": "application/json",
     }
 
 
 def test_headers_for_stringified_dict_body():
     call = UsersPostCall(body='{"user-name": "custom-user"}')
     assert call.headers == {
-        "content-type": "application/json",
+        "Content-Type": "application/json",
     }
 
 
@@ -60,7 +60,7 @@ def test_headers_for_xml_body():
             '</user-properties>')
     call = UsersPostCall(body=body)
     assert call.headers == {
-        "content-type": "application/xml",
+        "Content-Type": "application/xml",
     }
 
 

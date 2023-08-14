@@ -48,14 +48,14 @@ def test_parameters(default_forests_post_call):
 def test_headers_for_dict_body():
     call = ForestsPostCall(body={"server-name": "custom-server"})
     assert call.headers == {
-        "content-type": "application/json",
+        "Content-Type": "application/json",
     }
 
 
 def test_headers_for_stringified_dict_body():
     call = ForestsPostCall(body='{"server-name": "custom-server"}')
     assert call.headers == {
-        "content-type": "application/json",
+        "Content-Type": "application/json",
     }
 
 
@@ -66,7 +66,7 @@ def test_headers_for_xml_body():
             '</forest-create>')
     call = ForestsPostCall(body=body)
     assert call.headers == {
-        "content-type": "application/xml",
+        "Content-Type": "application/xml",
     }
 
 
@@ -109,7 +109,7 @@ def test_fully_parametrized_call():
         wait_for_forest_to_mount=False)
     assert call.method == "POST"
     assert call.headers == {
-        "content-type": "application/json",
+        "Content-Type": "application/json",
     }
     assert call.params == {
         "wait-for-forest-to-mount": "false",

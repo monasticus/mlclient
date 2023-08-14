@@ -70,12 +70,12 @@ def test_post_with_customized_params_and_headers_and_body_different_than_json():
             "/v1/eval",
             body={"xquery": "()"},
             params={"database": "Documents"},
-            headers={"content-type": "application/x-www-form-urlencoded"})
+            headers={"Content-Type": "application/x-www-form-urlencoded"})
 
     assert resp.request.method == "POST"
     assert "?database=Documents" in resp.request.url
-    assert "content-type" in resp.request.headers
-    assert resp.request.headers["content-type"] == "application/x-www-form-urlencoded"
+    assert "Content-Type" in resp.request.headers
+    assert resp.request.headers["Content-Type"] == "application/x-www-form-urlencoded"
     assert resp.request.body == "xquery=%28%29"
     assert resp.status_code == 200
 
@@ -86,12 +86,12 @@ def test_post_with_customized_params_and_headers_and_json_body():
         resp = client.post("/manage/v2/databases/Documents",
                            body={"operation": "clear-database"},
                            params={"format": "json"},
-                           headers={"content-type": "application/json"})
+                           headers={"Content-Type": "application/json"})
 
     assert resp.request.method == "POST"
     assert "?format=json" in resp.request.url
-    assert "content-type" in resp.request.headers
-    assert resp.request.headers["content-type"] == "application/json"
+    assert "Content-Type" in resp.request.headers
+    assert resp.request.headers["Content-Type"] == "application/json"
     assert resp.request.body == b'{"operation": "clear-database"}'
     assert resp.status_code == 200
 
@@ -113,12 +113,12 @@ def test_put_with_customized_params_and_headers_and_body_different_than_json():
         resp = client.put("/v1/documents",
                           body="<document/>",
                           params={"database": "Documents"},
-                          headers={"content-type": "application/xml"})
+                          headers={"Content-Type": "application/xml"})
 
     assert resp.request.method == "PUT"
     assert "?database=Documents" in resp.request.url
-    assert "content-type" in resp.request.headers
-    assert resp.request.headers["content-type"] == "application/xml"
+    assert "Content-Type" in resp.request.headers
+    assert resp.request.headers["Content-Type"] == "application/xml"
     assert resp.request.body == "<document/>"
     assert resp.status_code == 400
 
@@ -129,12 +129,12 @@ def test_put_with_customized_params_and_headers_and_json_body():
         resp = client.put("/v1/documents",
                           body={"document": {}},
                           params={"database": "Documents"},
-                          headers={"content-type": "application/json"})
+                          headers={"Content-Type": "application/json"})
 
     assert resp.request.method == "PUT"
     assert "?database=Documents" in resp.request.url
-    assert "content-type" in resp.request.headers
-    assert resp.request.headers["content-type"] == "application/json"
+    assert "Content-Type" in resp.request.headers
+    assert resp.request.headers["Content-Type"] == "application/json"
     assert resp.request.body == b'{"document": {}}'
     assert resp.status_code == 400
 

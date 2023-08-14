@@ -50,14 +50,14 @@ def test_parameters(default_forests_put_call):
 def test_headers_for_dict_body():
     call = ForestsPutCall(body={"server-name": "custom-server"})
     assert call.headers == {
-        "content-type": "application/json",
+        "Content-Type": "application/json",
     }
 
 
 def test_headers_for_stringified_dict_body():
     call = ForestsPutCall(body='{"server-name": "custom-server"}')
     assert call.headers == {
-        "content-type": "application/json",
+        "Content-Type": "application/json",
     }
 
 
@@ -72,7 +72,7 @@ def test_headers_for_xml_body():
             '</forest-combine>')
     call = ForestsPutCall(body=body)
     assert call.headers == {
-        "content-type": "application/xml",
+        "Content-Type": "application/xml",
     }
 
 
@@ -123,7 +123,7 @@ def test_fully_parametrized_call():
     call = ForestsPutCall(body=body)
     assert call.method == "PUT"
     assert call.headers == {
-        "content-type": "application/json",
+        "Content-Type": "application/json",
     }
     assert call.params == {}
     assert call.body == body

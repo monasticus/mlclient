@@ -21,7 +21,7 @@ import re
 import xml.etree.ElementTree as ElemTree
 from abc import ABCMeta, abstractmethod
 from enum import Enum
-from typing import ClassVar, Any
+from typing import Any, ClassVar
 from xml.dom import minidom
 
 logger = logging.getLogger(__name__)

@@ -1429,6 +1429,13 @@ class MLResponseParser:
         list
             A parsed response body
         """
+        if not response.ok:
+            html = ElemTree.fromstring(response.text)
+            terms = html.findall("{http://www.w3.org/1999/xhtml}body/"
+                                 "{http://www.w3.org/1999/xhtml}span/"
+                                 "{http://www.w3.org/1999/xhtml}dl/"
+                                 "{http://www.w3.org/1999/xhtml}dt")
+            return "\n".join(term.text for term in terms)
         raw_parts: tuple[BodyPart] = MultipartDecoder.from_response(response).parts
         parsed_parts = []
         for raw_part in raw_parts:

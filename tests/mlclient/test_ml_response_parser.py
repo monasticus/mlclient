@@ -21,6 +21,16 @@ def _setup_and_teardown(client):
     client.disconnect()
 
 
+def test_default_single_error_response(client):
+    xqy = "'missing-quote"
+    resp = client.eval(xquery=xqy)
+    parsed_resp = MLResponseParser.parse(resp)
+    assert isinstance(parsed_resp, str)
+    assert parsed_resp == (
+        "XDMP-BADCHAR: (err:XPST0003) Unexpected character found ''' (0x0027)\n"
+        "in /eval, at 1:0 [1.0-ml]")
+
+
 def test_default_single_not_parsed_response(client):
     xqy = 'cts:directory-query("/root/", "infinity")'
     resp = client.eval(xquery=xqy)

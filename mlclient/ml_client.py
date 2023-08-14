@@ -13,6 +13,7 @@ from __future__ import annotations
 import json
 import logging
 from types import TracebackType
+from typing import ClassVar
 
 from requests import Response, Session
 from requests.adapters import HTTPAdapter, Retry
@@ -1399,6 +1400,13 @@ class MLResponseParser:
     Parsed: App-Services
     """
 
+    _PLAIN_TEXT_PARSERS: ClassVar[dict] = {
+        "string": lambda data: data,
+        "integer": lambda data: int(data),
+        "decimal": lambda data: float(data),
+        "boolean": lambda data: bool(data),
+    }
+
     @classmethod
     def parse(
             cls,
@@ -1422,17 +1430,9 @@ class MLResponseParser:
             content_type = cls._get_header(raw_part, "Content-Type")
             primitive_type = cls._get_header(raw_part, "X-Primitive")
             data = raw_part.text
-            if content_type == "text/plain":
-                if primitive_type == "string":
-                    parsed_part = data
-                elif primitive_type == "integer":
-                    parsed_part = int(data)
-                elif primitive_type == "decimal":
-                    parsed_part = float(data)
-                elif primitive_type == "boolean":
-                    parsed_part = bool(data)
-                else:
-                    parsed_part = raw_part.content
+            if (content_type == "text/plain" and
+                    primitive_type in cls._PLAIN_TEXT_PARSERS):
+                parsed_part = cls._PLAIN_TEXT_PARSERS[primitive_type](data)
             elif content_type == "application/json":
                 parsed_part = json.loads(data)
             else:

@@ -19,5 +19,5 @@ class WrongParametersError(Exception):
 class UnsupportedFormatError(Exception):
     """A custom Exception class for an unsupported format.
 
-    Raised when getting an accept header for a format.
+    Raised when getting an Accept header for a format.
     """

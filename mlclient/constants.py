@@ -9,8 +9,8 @@ METHOD_PUT = "PUT"
 METHOD_DELETE = "DELETE"
 
 # HEADERS
-HEADER_NAME_ACCEPT = "accept"
-HEADER_NAME_CONTENT_TYPE = "content-type"
+HEADER_NAME_ACCEPT = "Accept"
+HEADER_NAME_CONTENT_TYPE = "Content-Type"
 
 HEADER_MULTIPART_MIXED = "multipart/mixed"
 HEADER_XML = "application/xml"

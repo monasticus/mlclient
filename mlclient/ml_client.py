@@ -1439,7 +1439,7 @@ class MLResponseParser:
         raw_parts: tuple[BodyPart] = MultipartDecoder.from_response(response).parts
         parsed_parts = []
         for raw_part in raw_parts:
-            content_type = cls._get_header(raw_part, "Content-Type")
+            content_type = cls._get_header(raw_part, constants.HEADER_NAME_CONTENT_TYPE)
             primitive_type = cls._get_header(raw_part, "X-Primitive")
             data = raw_part.text
             if (content_type == "text/plain" and

@@ -21,6 +21,7 @@ def _setup_and_teardown(client):
     client.disconnect()
 
 
+@pytest.mark.ml_access()
 def test_default_single_error_response(client):
     xqy = "'missing-quote"
     resp = client.eval(xquery=xqy)
@@ -31,6 +32,7 @@ def test_default_single_error_response(client):
         "in /eval, at 1:0 [1.0-ml]")
 
 
+@pytest.mark.ml_access()
 def test_default_single_not_parsed_response(client):
     xqy = 'cts:directory-query("/root/", "infinity")'
     resp = client.eval(xquery=xqy)
@@ -39,6 +41,7 @@ def test_default_single_not_parsed_response(client):
     assert parsed_resp == b'cts:directory-query("/root/", "infinity")'
 
 
+@pytest.mark.ml_access()
 def test_default_single_plain_text_str_response(client):
     xqy = "'plain text'"
     resp = client.eval(xquery=xqy)
@@ -47,6 +50,7 @@ def test_default_single_plain_text_str_response(client):
     assert parsed_resp == "plain text"
 
 
+@pytest.mark.ml_access()
 def test_default_single_plain_text_int_response(client):
     xqy = "1"
     resp = client.eval(xquery=xqy)
@@ -55,6 +59,7 @@ def test_default_single_plain_text_int_response(client):
     assert parsed_resp == 1
 
 
+@pytest.mark.ml_access()
 def test_default_single_plain_text_float_response(client):
     xqy = "1.1"
     resp = client.eval(xquery=xqy)
@@ -63,6 +68,7 @@ def test_default_single_plain_text_float_response(client):
     assert parsed_resp == 1.1
 
 
+@pytest.mark.ml_access()
 def test_default_single_plain_text_boolean_response(client):
     xqy = "fn:true()"
     resp = client.eval(xquery=xqy)
@@ -71,6 +77,7 @@ def test_default_single_plain_text_boolean_response(client):
     assert parsed_resp is True
 
 
+@pytest.mark.ml_access()
 def test_default_single_json_map_response(client):
     xqy = ('map:map() '
            '=> map:with("str", "value") '
@@ -90,6 +97,7 @@ def test_default_single_json_map_response(client):
     }
 
 
+@pytest.mark.ml_access()
 def test_default_single_json_array_response(client):
     xqy = ('("value", "1", 1, 1.1, fn:true())'
            '=> json:to-array()')
@@ -99,6 +107,7 @@ def test_default_single_json_array_response(client):
     assert parsed_resp == ["value", "1", 1, 1.1, True]
 
 
+@pytest.mark.ml_access()
 def test_default_single_xml_document_node_response(client):
     xqy = "document { element root {} }"
     resp = client.eval(xquery=xqy)
@@ -109,6 +118,7 @@ def test_default_single_xml_document_node_response(client):
     assert parsed_resp.getroot().attrib == {}
 
 
+@pytest.mark.ml_access()
 def test_default_single_xml_element_response(client):
     xqy = "element root {}"
     resp = client.eval(xquery=xqy)
@@ -119,6 +129,7 @@ def test_default_single_xml_element_response(client):
     assert parsed_resp.attrib == {}
 
 
+@pytest.mark.ml_access()
 def test_default_multiple_responses(client):
     xqy = '(cts:directory-query("/root/", "infinity"), "plain text")'
     resp = client.eval(xquery=xqy)

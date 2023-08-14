@@ -49,7 +49,7 @@ def test_headers_for_dict_body():
     body = {"operation": "clear-database"}
     call = DatabasePostCall(database="Documents", body=body)
     assert call.headers == {
-        "content-type": "application/json",
+        "Content-Type": "application/json",
     }
 
 
@@ -57,7 +57,7 @@ def test_headers_for_stringified_dict_body():
     body ='{"operation": "clear-database"}'
     call = DatabasePostCall(database="Documents", body=body)
     assert call.headers == {
-        "content-type": "application/json",
+        "Content-Type": "application/json",
     }
 
 
@@ -67,7 +67,7 @@ def test_headers_for_xml_body():
             '</clear-database-operation>')
     call = DatabasePostCall(database="Documents", body=body)
     assert call.headers == {
-        "content-type": "application/xml",
+        "Content-Type": "application/xml",
     }
 
 

@@ -51,7 +51,7 @@ def test_headers_for_dict_body():
     body = {"database-name": "custom-db"}
     call = DatabasePropertiesPutCall(database="Documents", body=body)
     assert call.headers == {
-        "content-type": "application/json",
+        "Content-Type": "application/json",
     }
 
 
@@ -59,7 +59,7 @@ def test_headers_for_stringified_dict_body():
     body = '{"database-name": "custom-db"}'
     call = DatabasePropertiesPutCall(database="Documents", body=body)
     assert call.headers == {
-        "content-type": "application/json",
+        "Content-Type": "application/json",
     }
 
 
@@ -69,7 +69,7 @@ def test_headers_for_xml_body():
             '</database-properties>')
     call = DatabasePropertiesPutCall(database="Documents", body=body)
     assert call.headers == {
-        "content-type": "application/xml",
+        "Content-Type": "application/xml",
     }
 
 

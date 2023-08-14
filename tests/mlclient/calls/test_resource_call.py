@@ -124,13 +124,13 @@ def test_custom_headers_with_none_value():
 def test_headers_with_accept():
     call_with_accept = ResourceCallTestImpl(
         accept="application/xml")
-    assert call_with_accept.headers == {"accept": "application/xml"}
+    assert call_with_accept.headers == {"Accept": "application/xml"}
 
 
 def test_headers_with_content_type():
     call_with_content_type = ResourceCallTestImpl(
         content_type="application/xml")
-    assert call_with_content_type.headers == {"content-type": "application/xml"}
+    assert call_with_content_type.headers == {"Content-Type": "application/xml"}
 
 
 def test_mixed_headers():
@@ -140,23 +140,23 @@ def test_mixed_headers():
         content_type="application/xml")
     assert call_with_mixed_headers.headers == {
         "custom-header": "custom-value",
-        "accept": "application/xml",
-        "content-type": "application/xml",
+        "Accept": "application/xml",
+        "Content-Type": "application/xml",
     }
 
 
 def test_headers_when_accept_exists_and_is_provided():
     call_with_custom_header = ResourceCallTestImpl(
-        headers={"accept": "application/xml"},
+        headers={"Accept": "application/xml"},
         accept="application/json")
-    assert call_with_custom_header.headers == {"accept": "application/json"}
+    assert call_with_custom_header.headers == {"Accept": "application/json"}
 
 
 def test_headers_when_content_type_exists_and_is_provided():
     call_with_custom_header = ResourceCallTestImpl(
-        headers={"content-type": "application/xml"},
+        headers={"Content-Type": "application/xml"},
         content_type="application/json")
-    assert call_with_custom_header.headers == {"content-type": "application/json"}
+    assert call_with_custom_header.headers == {"Content-Type": "application/json"}
 
 
 def test_headers_encapsulation():

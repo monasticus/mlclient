@@ -48,8 +48,8 @@ def test_parameters(default_eval_call):
 
 def test_headers(default_eval_call):
     assert default_eval_call.headers == {
-        "accept": "multipart/mixed",
-        "content-type": "application/x-www-form-urlencoded",
+        "Accept": "multipart/mixed",
+        "Content-Type": "application/x-www-form-urlencoded",
     }
 
 
@@ -100,8 +100,8 @@ def test_fully_parametrized_xquery_call():
                     txid="custom-transaction-id")
     assert call.method == "POST"
     assert call.headers == {
-        "accept": "multipart/mixed",
-        "content-type": "application/x-www-form-urlencoded",
+        "Accept": "multipart/mixed",
+        "Content-Type": "application/x-www-form-urlencoded",
     }
     assert call.params == {
         "database": "custom-db",
@@ -120,8 +120,8 @@ def test_fully_parametrized_javascript_call():
                     txid="custom-transaction-id")
     assert call.method == "POST"
     assert call.headers == {
-        "accept": "multipart/mixed",
-        "content-type": "application/x-www-form-urlencoded",
+        "Accept": "multipart/mixed",
+        "Content-Type": "application/x-www-form-urlencoded",
     }
     assert call.params == {
         "database": "custom-db",

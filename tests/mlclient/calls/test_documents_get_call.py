@@ -91,7 +91,7 @@ def test_headers_for_single_uri_metadata_category_and_json_format():
         uri="/a.xml",
         category="collections",
         data_format="json").headers == {
-        "accept": "application/json",
+        "Accept": "application/json",
     }
 
 
@@ -100,13 +100,13 @@ def test_headers_for_single_uri_metadata_category_and_xml_format():
         uri="/a.xml",
         category="collections",
         data_format="xml").headers == {
-        "accept": "application/xml",
+        "Accept": "application/xml",
     }
 
 
 def test_headers_for_multiple_uris_and_no_format():
     assert DocumentsGetCall(uri=["/a.xml", "/b.xml"]).headers == {
-        "accept": "multipart/mixed",
+        "Accept": "multipart/mixed",
     }
 
 
@@ -114,7 +114,7 @@ def test_headers_for_multiple_uris_and_none_format():
     assert DocumentsGetCall(
         uri=["/a.xml", "/b.xml"],
         data_format=None).headers == {
-        "accept": "multipart/mixed",
+        "Accept": "multipart/mixed",
     }
 
 
@@ -122,7 +122,7 @@ def test_headers_for_multiple_uris_no_category_and_format():
     assert DocumentsGetCall(
         uri=["/a.xml", "/b.xml"],
         data_format="json").headers == {
-        "accept": "multipart/mixed",
+        "Accept": "multipart/mixed",
     }
 
 
@@ -131,7 +131,7 @@ def test_headers_for_multiple_uris_content_category_and_format():
         uri=["/a.xml", "/b.xml"],
         category="content",
         data_format="json").headers == {
-        "accept": "multipart/mixed",
+        "Accept": "multipart/mixed",
     }
 
 
@@ -140,7 +140,7 @@ def test_headers_for_multiple_uris_metadata_category_and_json_format():
         uri=["/a.xml", "/b.xml"],
         category="collections",
         data_format="json").headers == {
-        "accept": "multipart/mixed",
+        "Accept": "multipart/mixed",
     }
 
 
@@ -149,7 +149,7 @@ def test_headers_for_multiple_uris_metadata_category_and_xml_format():
         uri=["/a.xml", "/b.xml"],
         category="collections",
         data_format="xml").headers == {
-        "accept": "multipart/mixed",
+        "Accept": "multipart/mixed",
     }
 
 
@@ -193,7 +193,7 @@ def test_fully_parametrized_call_for_single_uri_metadata():
         txid="transaction")
     assert call.method == "GET"
     assert call.headers == {
-        "accept": "application/xml",
+        "Accept": "application/xml",
     }
     assert call.params == {
         "uri": "/a.xml",
@@ -222,7 +222,7 @@ def test_fully_parametrized_call_for_multiple_uris_metadata():
         txid="transaction")
     assert call.method == "GET"
     assert call.headers == {
-        "accept": "multipart/mixed",
+        "Accept": "multipart/mixed",
     }
     assert call.params == {
         "uri": ["/a.xml", "/b.xml"],

@@ -3,12 +3,12 @@ import pytest
 from mlclient import MLResourceClient, MLResponseParser
 
 
-@pytest.fixture()
+@pytest.fixture(scope="module")
 def client():
     return MLResourceClient(auth_method="digest")
 
 
-@pytest.fixture(autouse=True)
+@pytest.fixture(scope="module", autouse=True)
 def _setup_and_teardown(client):
     # Setup
     client.connect()
@@ -67,6 +67,34 @@ def test_default_single_plain_text_boolean_response(client):
     assert parsed_resp is True
 
 
+def test_default_single_json_map_response(client):
+    xqy = ('map:map() '
+           '=> map:with("str", "value") '
+           '=> map:with("int_str", "1") '
+           '=> map:with("int", 1) '
+           '=> map:with("float", 1.1) '
+           '=> map:with("bool", fn:true())')
+    resp = client.eval(xquery=xqy)
+    parsed_resp = MLResponseParser.parse(resp)
+    assert isinstance(parsed_resp, dict)
+    assert parsed_resp == {
+        "str": "value",
+        "int_str": "1",
+        "int": 1,
+        "float": 1.1,
+        "bool": True,
+    }
+
+
+def test_default_single_json_array_response(client):
+    xqy = ('("value", "1", 1, 1.1, fn:true())'
+           '=> json:to-array()')
+    resp = client.eval(xquery=xqy)
+    parsed_resp = MLResponseParser.parse(resp)
+    assert isinstance(parsed_resp, list)
+    assert parsed_resp == ["value", "1", 1, 1.1, True]
+
+
 def test_default_multiple_responses(client):
     xqy = "(<root/>, 'plain text')"
     resp = client.eval(xquery=xqy)
@@ -76,4 +104,3 @@ def test_default_multiple_responses(client):
     assert parsed_resp[0] == b"<root/>"
     assert isinstance(parsed_resp[1], str)
     assert parsed_resp[1] == "plain text"
-

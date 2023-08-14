@@ -10,6 +10,7 @@ It exports 2 classes:
 """
 from __future__ import annotations
 
+import json
 import logging
 from types import TracebackType
 
@@ -1420,8 +1421,8 @@ class MLResponseParser:
         for raw_part in raw_parts:
             content_type = cls._get_header(raw_part, "Content-Type")
             primitive_type = cls._get_header(raw_part, "X-Primitive")
+            data = raw_part.text
             if content_type == "text/plain":
-                data = raw_part.text
                 if primitive_type == "string":
                     parsed_part = data
                 elif primitive_type == "integer":
@@ -1432,6 +1433,8 @@ class MLResponseParser:
                     parsed_part = bool(data)
                 else:
                     parsed_part = raw_part.content
+            elif content_type == "application/json":
+                parsed_part = json.loads(data)
             else:
                 parsed_part = raw_part.content
             parsed_parts.append(parsed_part)

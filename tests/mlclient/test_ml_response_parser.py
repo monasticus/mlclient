@@ -1,3 +1,5 @@
+import xml.etree.ElementTree as ElemTree
+
 import pytest
 
 from mlclient import MLResourceClient, MLResponseParser
@@ -20,14 +22,6 @@ def _setup_and_teardown(client):
 
 
 def test_default_single_not_parsed_response(client):
-    xqy = "<root/>"
-    resp = client.eval(xquery=xqy)
-    parsed_resp = MLResponseParser.parse(resp)
-    assert isinstance(parsed_resp, bytes)
-    assert parsed_resp == b"<root/>"
-
-
-def test_default_single_plain_text_not_parsed_response(client):
     xqy = 'cts:directory-query("/root/", "infinity")'
     resp = client.eval(xquery=xqy)
     parsed_resp = MLResponseParser.parse(resp)
@@ -95,12 +89,32 @@ def test_default_single_json_array_response(client):
     assert parsed_resp == ["value", "1", 1, 1.1, True]
 
 
+def test_default_single_xml_document_node_response(client):
+    xqy = "document { element root {} }"
+    resp = client.eval(xquery=xqy)
+    parsed_resp = MLResponseParser.parse(resp)
+    assert isinstance(parsed_resp, ElemTree.ElementTree)
+    assert parsed_resp.getroot().tag == "root"
+    assert parsed_resp.getroot().text is None
+    assert parsed_resp.getroot().attrib == {}
+
+
+def test_default_single_xml_element_response(client):
+    xqy = "element root {}"
+    resp = client.eval(xquery=xqy)
+    parsed_resp = MLResponseParser.parse(resp)
+    assert isinstance(parsed_resp, ElemTree.Element)
+    assert parsed_resp.tag == "root"
+    assert parsed_resp.text is None
+    assert parsed_resp.attrib == {}
+
+
 def test_default_multiple_responses(client):
-    xqy = "(<root/>, 'plain text')"
+    xqy = '(cts:directory-query("/root/", "infinity"), "plain text")'
     resp = client.eval(xquery=xqy)
     parsed_resp = MLResponseParser.parse(resp)
     assert isinstance(parsed_resp, list)
     assert isinstance(parsed_resp[0], bytes)
-    assert parsed_resp[0] == b"<root/>"
+    assert parsed_resp[0] == b'cts:directory-query("/root/", "infinity")'
     assert isinstance(parsed_resp[1], str)
     assert parsed_resp[1] == "plain text"

@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import json
 import logging
+import xml.etree.ElementTree as ElemTree
 from types import TracebackType
 from typing import ClassVar
 
@@ -1411,7 +1412,9 @@ class MLResponseParser:
     def parse(
             cls,
             response: Response,
-    ) -> bytes | str | list:
+    ) -> (bytes | str | int | float | bool | dict |
+          ElemTree.ElementTree | ElemTree.Element |
+          list):
         """Parse MarkLogic HTTP Response.
 
         Parameters
@@ -1421,7 +1424,9 @@ class MLResponseParser:
 
         Returns
         -------
-        str | list
+        bytes | str | int | float | bool | dict |
+        ElemTree.ElementTree | ElemTree.Element |
+        list
             A parsed response body
         """
         raw_parts: tuple[BodyPart] = MultipartDecoder.from_response(response).parts
@@ -1435,6 +1440,11 @@ class MLResponseParser:
                 parsed_part = cls._PLAIN_TEXT_PARSERS[primitive_type](data)
             elif content_type == "application/json":
                 parsed_part = json.loads(data)
+            elif content_type == "application/xml":
+                element = ElemTree.fromstring(data)
+                if primitive_type == "document-node()":
+                    return ElemTree.ElementTree(element)
+                return element
             else:
                 parsed_part = raw_part.content
             parsed_parts.append(parsed_part)

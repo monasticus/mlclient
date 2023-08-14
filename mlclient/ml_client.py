@@ -1430,6 +1430,8 @@ class MLResponseParser:
                     parsed_part = float(data)
                 elif primitive_type == "boolean":
                     parsed_part = bool(data)
+                else:
+                    parsed_part = raw_part.content
             else:
                 parsed_part = raw_part.content
             parsed_parts.append(parsed_part)

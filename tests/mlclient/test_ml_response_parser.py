@@ -27,6 +27,14 @@ def test_default_single_not_parsed_response(client):
     assert parsed_resp == b"<root/>"
 
 
+def test_default_single_plain_text_not_parsed_response(client):
+    xqy = 'cts:directory-query("/root/", "infinity")'
+    resp = client.eval(xquery=xqy)
+    parsed_resp = MLResponseParser.parse(resp)
+    assert isinstance(parsed_resp, bytes)
+    assert parsed_resp == b'cts:directory-query("/root/", "infinity")'
+
+
 def test_default_single_plain_text_str_response(client):
     xqy = "'plain text'"
     resp = client.eval(xquery=xqy)

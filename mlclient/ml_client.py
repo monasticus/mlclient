@@ -1402,10 +1402,10 @@ class MLResponseParser:
     """
 
     _PLAIN_TEXT_PARSERS: ClassVar[dict] = {
-        "string": lambda data: data,
-        "integer": lambda data: int(data),
-        "decimal": lambda data: float(data),
-        "boolean": lambda data: bool(data),
+        constants.HEADER_PRIMITIVE_STRING: lambda data: data,
+        constants.HEADER_PRIMITIVE_INTEGER: lambda data: int(data),
+        constants.HEADER_PRIMITIVE_DECIMAL: lambda data: float(data),
+        constants.HEADER_PRIMITIVE_BOOLEAN: lambda data: bool(data),
     }
 
     @classmethod
@@ -1430,34 +1430,74 @@ class MLResponseParser:
             A parsed response body
         """
         if not response.ok:
-            html = ElemTree.fromstring(response.text)
-            terms = html.findall("{http://www.w3.org/1999/xhtml}body/"
-                                 "{http://www.w3.org/1999/xhtml}span/"
-                                 "{http://www.w3.org/1999/xhtml}dl/"
-                                 "{http://www.w3.org/1999/xhtml}dt")
-            return "\n".join(term.text for term in terms)
-        raw_parts: tuple[BodyPart] = MultipartDecoder.from_response(response).parts
-        parsed_parts = []
-        for raw_part in raw_parts:
-            content_type = cls._get_header(raw_part, constants.HEADER_NAME_CONTENT_TYPE)
-            primitive_type = cls._get_header(raw_part, "X-Primitive")
-            data = raw_part.text
-            if (content_type == "text/plain" and
-                    primitive_type in cls._PLAIN_TEXT_PARSERS):
-                parsed_part = cls._PLAIN_TEXT_PARSERS[primitive_type](data)
-            elif content_type == "application/json":
-                parsed_part = json.loads(data)
-            elif content_type == "application/xml":
-                element = ElemTree.fromstring(data)
-                if primitive_type == "document-node()":
-                    return ElemTree.ElementTree(element)
-                return element
-            else:
-                parsed_part = raw_part.content
-            parsed_parts.append(parsed_part)
+            return cls._parse_error(response)
+
+        raw_parts = MultipartDecoder.from_response(response).parts
+        parsed_parts = [cls._parse_part(raw_part) for raw_part in raw_parts]
         if len(parsed_parts) == 1:
             return parsed_parts[0]
         return parsed_parts
+
+    @classmethod
+    def _parse_error(
+            cls,
+            response: Response,
+    ) -> str:
+        """Parse MarkLogic error response.
+
+        Parameters
+        ----------
+        response : Response
+            A non-OK HTTP response taken from MarkLogic instance
+
+        Returns
+        -------
+        str
+            A parsed error description
+        """
+        html = ElemTree.fromstring(response.text)
+        terms = html.findall("{http://www.w3.org/1999/xhtml}body/"
+                             "{http://www.w3.org/1999/xhtml}span/"
+                             "{http://www.w3.org/1999/xhtml}dl/"
+                             "{http://www.w3.org/1999/xhtml}dt")
+        return "\n".join(term.text for term in terms)
+
+    @classmethod
+    def _parse_part(
+            cls,
+            raw_part: BodyPart,
+    ) -> (bytes | str | int | float | bool | dict |
+          ElemTree.ElementTree | ElemTree.Element |
+          list):
+        """Parse MarkLogic HTTP Response part.
+
+        Parameters
+        ----------
+        raw_part : BodyPart
+            An HTTP response part taken from MarkLogic instance
+
+        Returns
+        -------
+        bytes | str | int | float | bool | dict |
+        ElemTree.ElementTree | ElemTree.Element |
+        list
+            A parsed response body part
+        """
+        content_type = cls._get_header(raw_part, constants.HEADER_NAME_CONTENT_TYPE)
+        primitive_type = cls._get_header(raw_part, constants.HEADER_NAME_PRIMITIVE)
+        text = raw_part.text
+        if (content_type == constants.HEADER_PLAIN_TEXT and
+                primitive_type in cls._PLAIN_TEXT_PARSERS):
+            return cls._PLAIN_TEXT_PARSERS[primitive_type](text)
+        if content_type == constants.HEADER_JSON:
+            return json.loads(text)
+        if content_type == constants.HEADER_XML:
+            element = ElemTree.fromstring(text)
+            if primitive_type == constants.HEADER_PRIMITIVE_DOCUMENT_NODE:
+                return ElemTree.ElementTree(element)
+            return element
+
+        return raw_part.content
 
     @staticmethod
     def _get_header(

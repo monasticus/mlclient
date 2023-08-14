@@ -1419,8 +1419,17 @@ class MLResponseParser:
         parsed_parts = []
         for raw_part in raw_parts:
             content_type = cls._get_header(raw_part, "Content-Type")
+            primitive_type = cls._get_header(raw_part, "X-Primitive")
             if content_type == "text/plain":
-                parsed_part = raw_part.text
+                data = raw_part.text
+                if primitive_type == "string":
+                    parsed_part = data
+                elif primitive_type == "integer":
+                    parsed_part = int(data)
+                elif primitive_type == "decimal":
+                    parsed_part = float(data)
+                elif primitive_type == "boolean":
+                    parsed_part = bool(data)
             else:
                 parsed_part = raw_part.content
             parsed_parts.append(parsed_part)

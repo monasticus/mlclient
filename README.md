@@ -52,6 +52,23 @@ App-Services
 --6a5df7d535c71968--
 ```
 
+Parsed response :
+```python
+>>> from mlclient import MLResourceClient, MLResponseParser
+>>> config = {
+...     "host": "localhost",
+...     "port": 8002,
+...     "username": "admin",
+...     "password": "admin",
+... }
+>>> with MLResourceClient(**config) as client:
+...     resp = client.eval(xquery="xdmp:database() => xdmp:database-name()")
+...     parsed_resp = MLResponseParser.parse(resp)
+...     print(parsed_resp)
+...
+App-Services
+```
+
 ## Installation
 
 Install MLClient with pip

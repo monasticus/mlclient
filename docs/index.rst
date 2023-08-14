@@ -64,6 +64,23 @@ Medium-level MLResourceClient::
    App-Services
    --6a5df7d535c71968--
 
+
+Parsing response::
+
+   >>> from mlclient import MLResourceClient, MLResponseParser
+   >>> config = {
+   ...     "host": "localhost",
+   ...     "port": 8002,
+   ...     "username": "admin",
+   ...     "password": "admin",
+   ... }
+   >>> with MLResourceClient(**config) as client:
+   ...     resp = client.eval(xquery="xdmp:database() => xdmp:database-name()")
+   ...     parsed_resp = MLResponseParser.parse(resp)
+   ...     print(parsed_resp)
+   ...
+   App-Services
+
 .. toctree::
    :maxdepth: 1
    :caption: Python API:

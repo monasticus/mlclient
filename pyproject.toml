@@ -111,6 +111,9 @@ max-complexity = 10
     "A003", # allow shadowing eval builtin for consistency
     "PLR0913" # allow many arguments as they depend on ML REST resource
 ]
+"mlclient/ml_config.py" = [
+    "UP006", # allow using List instead of list for pydantic
+]
 "mlclient/calls/*" = [
     "PLR0913" # allow many arguments as they depend on ML REST resource
 ]

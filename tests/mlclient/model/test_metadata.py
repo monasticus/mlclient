@@ -1,14 +1,15 @@
+from __future__ import annotations
+
 import copy
 
 import pytest
-from typing import List
 
 from mlclient.model import Metadata, Permission
 
 
 def __assert_permissions_are_equal(
-        these_permissions: List[Permission],
-        those_permissions: List[Permission],
+        these_permissions: list[Permission],
+        those_permissions: list[Permission],
 ):
     assert len(these_permissions) == len(those_permissions)
     for this_permission in these_permissions:

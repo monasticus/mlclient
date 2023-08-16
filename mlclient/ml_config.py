@@ -28,6 +28,25 @@ class AuthMethod(Enum):
     DIGEST = "digest"
 
 
+class MLAppServerConfiguration(BaseModel):
+    """A class representing MarkLogic App Server configuration.
+
+    Attributes
+    ----------
+    identifier : str
+        A unique identifier of the App Server
+    port : int
+        A port number
+    auth : AuthMethod
+        An authorization method
+    """
+
+    identifier: str = Field(
+        alias="id")
+    port: int
+    auth: AuthMethod = AuthMethod.DIGEST
+
+
 class MLConfiguration(BaseModel):
     """A class representing MarkLogic configuration.
 
@@ -55,7 +74,7 @@ class MLConfiguration(BaseModel):
     password: str = "admin"
     app_servers: List[MLAppServerConfiguration] = Field(
         alias="app-servers",
-        default=[])
+        default=[MLAppServerConfiguration(id="manage", port=8002)])
 
     @classmethod
     def from_environment(
@@ -107,22 +126,3 @@ class MLConfiguration(BaseModel):
     ):
         with Path(file_path).open() as config_file:
             return yaml.safe_load(config_file.read())
-
-
-class MLAppServerConfiguration(BaseModel):
-    """A class representing MarkLogic App Server configuration.
-
-    Attributes
-    ----------
-    identifier : str
-        A unique identifier of the App Server
-    port : int
-        A port number
-    auth : AuthMethod
-        An authorization method
-    """
-
-    identifier: str = Field(
-        alias="id")
-    port: int
-    auth: AuthMethod = AuthMethod.DIGEST

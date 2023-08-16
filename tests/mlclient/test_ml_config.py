@@ -79,7 +79,13 @@ def test_from_file_default_values():
         "username": "admin",
         "password": "admin",
         "protocol": "http",
-        "app_servers": [],
+        "app_servers": [
+            {
+                "identifier": "manage",
+                "port": 8002,
+                "auth": AuthMethod.DIGEST,
+            },
+        ],
     }
     assert isinstance(config, MLConfiguration)
     assert all(isinstance(app_server_config, MLAppServerConfiguration)
@@ -139,7 +145,13 @@ def test_from_environment_default():
         "username": "admin",
         "password": "admin",
         "protocol": "http",
-        "app_servers": [],
+        "app_servers": [
+            {
+                "identifier": "manage",
+                "port": 8002,
+                "auth": AuthMethod.DIGEST,
+            },
+        ],
     }
     assert isinstance(config, MLConfiguration)
     assert all(isinstance(app_server_config, MLAppServerConfiguration)

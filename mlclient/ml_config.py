@@ -19,6 +19,7 @@ import yaml
 from pydantic import BaseModel, Field, field_serializer
 
 from mlclient import constants
+from mlclient.exceptions import NoSuchAppServerError
 
 
 class AuthMethod(Enum):
@@ -105,6 +106,9 @@ class MLConfiguration(BaseModel):
         app_server = next((app_server
                            for app_server in self.app_servers
                            if app_server.identifier == app_server_id), None)
+        if not app_server:
+            msg = f"There's no [{app_server_id}] app server configuration!"
+            raise NoSuchAppServerError(msg)
         app_server_config = app_server.model_dump(exclude={"identifier"})
         return {**ml_config, **app_server_config}
 

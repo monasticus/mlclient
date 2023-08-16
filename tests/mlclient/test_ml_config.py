@@ -5,6 +5,7 @@ from pathlib import Path
 import pytest
 
 from mlclient import MLConfiguration, constants
+from mlclient.exceptions import NoSuchAppServerError
 from mlclient.ml_config import MLAppServerConfiguration
 
 RESOURCES_PATH = "tests/resources/test-ml-config"
@@ -168,3 +169,12 @@ def test_provide_config():
         "port": 8002,
         "auth": "basic",
     }
+
+
+def test_provide_config_non_existing_server():
+    config = MLConfiguration.from_environment("test")
+    with pytest.raises(NoSuchAppServerError) as err:
+        config.provide_config("non-existing")
+    expected_msg = "There's no [non-existing] app server configuration!"
+    actual_msg = err.value.args[0]
+    assert actual_msg == expected_msg

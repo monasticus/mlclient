@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from mlclient import AuthMethod, MLConfiguration, constants
+from mlclient import MLConfiguration, constants
 from mlclient.ml_config import MLAppServerConfiguration
 
 RESOURCES_PATH = "tests/resources/test-ml-config"
@@ -41,27 +41,27 @@ def test_from_file():
             {
                 "identifier": "manage",
                 "port": 8002,
-                "auth": AuthMethod.BASIC,
+                "auth": "basic",
             },
             {
                 "identifier": "content",
                 "port": 8100,
-                "auth": AuthMethod.BASIC,
+                "auth": "basic",
             },
             {
                 "identifier": "modules",
                 "port": 8101,
-                "auth": AuthMethod.BASIC,
+                "auth": "basic",
             },
             {
                 "identifier": "schemas",
                 "port": 8102,
-                "auth": AuthMethod.BASIC,
+                "auth": "basic",
             },
             {
                 "identifier": "test",
                 "port": 8103,
-                "auth": AuthMethod.BASIC,
+                "auth": "basic",
             },
         ],
     }
@@ -83,7 +83,7 @@ def test_from_file_default_values():
             {
                 "identifier": "manage",
                 "port": 8002,
-                "auth": AuthMethod.DIGEST,
+                "auth": "digest",
             },
         ],
     }
@@ -106,27 +106,27 @@ def test_from_environment():
             {
                 "identifier": "manage",
                 "port": 8002,
-                "auth": AuthMethod.BASIC,
+                "auth": "basic",
             },
             {
                 "identifier": "content",
                 "port": 8100,
-                "auth": AuthMethod.BASIC,
+                "auth": "basic",
             },
             {
                 "identifier": "modules",
                 "port": 8101,
-                "auth": AuthMethod.BASIC,
+                "auth": "basic",
             },
             {
                 "identifier": "schemas",
                 "port": 8102,
-                "auth": AuthMethod.BASIC,
+                "auth": "basic",
             },
             {
                 "identifier": "test",
                 "port": 8103,
-                "auth": AuthMethod.BASIC,
+                "auth": "basic",
             },
         ],
     }
@@ -149,10 +149,22 @@ def test_from_environment_default():
             {
                 "identifier": "manage",
                 "port": 8002,
-                "auth": AuthMethod.DIGEST,
+                "auth": "digest",
             },
         ],
     }
     assert isinstance(config, MLConfiguration)
     assert all(isinstance(app_server_config, MLAppServerConfiguration)
                for app_server_config in config.app_servers)
+
+
+def test_provide_config():
+    config = MLConfiguration.from_environment("test")
+    assert config.provide_config("manage") == {
+        "protocol": "http",
+        "host": "localhost",
+        "username": "admin",
+        "password": "admin",
+        "port": 8002,
+        "auth": "basic",
+    }

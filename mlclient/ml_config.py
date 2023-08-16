@@ -16,7 +16,7 @@ from pathlib import Path
 from typing import List
 
 import yaml
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_serializer
 
 from mlclient import constants
 
@@ -45,6 +45,15 @@ class MLAppServerConfiguration(BaseModel):
         alias="id")
     port: int
     auth: AuthMethod = AuthMethod.DIGEST
+
+    @field_serializer("auth")
+    def serialize_auth(
+            self,
+            auth: AuthMethod,
+            _info,
+    ):
+        """Serialize auth field."""
+        return auth.value
 
 
 class MLConfiguration(BaseModel):
@@ -75,6 +84,29 @@ class MLConfiguration(BaseModel):
     app_servers: List[MLAppServerConfiguration] = Field(
         alias="app-servers",
         default=[MLAppServerConfiguration(id="manage", port=8002)])
+
+    def provide_config(
+            self,
+            app_server_id: str,
+    ) -> dict:
+        """Provide an app server configuration for MLClient's use.
+
+        Parameters
+        ----------
+        app_server_id : str
+            A unique identifier of the App Server
+
+        Returns
+        -------
+        dict
+            A configuration dictionary for an MLClient initialization
+        """
+        ml_config = self.model_dump(exclude={"app_name", "app_servers"})
+        app_server = next((app_server
+                           for app_server in self.app_servers
+                           if app_server.identifier == app_server_id), None)
+        app_server_config = app_server.model_dump(exclude={"identifier"})
+        return {**ml_config, **app_server_config}
 
     @classmethod
     def from_environment(

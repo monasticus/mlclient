@@ -18,6 +18,8 @@ from typing import List
 import yaml
 from pydantic import BaseModel, Field
 
+from mlclient import constants
+
 
 class AuthMethod(Enum):
     """An enumeration class representing authorization methods."""
@@ -56,6 +58,30 @@ class MLConfiguration(BaseModel):
         default=[])
 
     @classmethod
+    def from_environment(
+            cls,
+            environment_name: str,
+    ):
+        """Instantiate MLConfiguration from an environment.
+
+        This method looks for a configuration file in the .mlclient directory.
+        An environment configuration needs to match a file name pattern
+        to be recognized: mlclient-<environment-name>.yaml.
+
+        Parameters
+        ----------
+        environment_name : str
+            An environment name
+
+        Returns
+        -------
+        MLConfiguration
+            An MLConfiguration instance
+        """
+        file_path = f"{constants.ML_CLIENT_PATH}/mlclient-{environment_name}.yaml"
+        return cls.from_file(file_path)
+
+    @classmethod
     def from_file(
             cls,
             file_path: str,
@@ -72,9 +98,15 @@ class MLConfiguration(BaseModel):
         MLConfiguration
             An MLConfiguration instance
         """
+        source_config = cls._get_source_config(file_path)
+        return MLConfiguration(**source_config)
+
+    @staticmethod
+    def _get_source_config(
+            file_path: str,
+    ):
         with Path(file_path).open() as config_file:
-            source_config = yaml.safe_load(config_file.read())
-            return MLConfiguration(**source_config)
+            return yaml.safe_load(config_file.read())
 
 
 class MLAppServerConfiguration(BaseModel):

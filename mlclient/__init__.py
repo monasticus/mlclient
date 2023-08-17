@@ -23,8 +23,6 @@ This package exports the following classes:
         A MarkLogic HTTP response parser.
     * MLConfiguration
         A class representing MarkLogic configuration.
-    * AuthMethod
-        An enumeration class representing authorization methods.
 
 Examples
 --------
@@ -33,8 +31,8 @@ Examples
 from __future__ import annotations
 
 from .ml_client import MLClient, MLResourceClient, MLResponseParser
-from .ml_config import AuthMethod, MLConfiguration
+from .ml_config import MLConfiguration
 
 __version__ = "0.1.0"
 __all__ = ["MLClient", "MLResourceClient", "MLResponseParser",
-           "MLConfiguration", "AuthMethod"]
+           "MLConfiguration"]

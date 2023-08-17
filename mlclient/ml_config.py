@@ -2,6 +2,7 @@
 
 This module contains an API for MarkLogic configuration.
 It exports the following classes:
+
     * MLConfiguration
         A class representing MarkLogic configuration.
     * MLAppServerConfiguration
@@ -30,22 +31,16 @@ class AuthMethod(Enum):
 
 
 class MLAppServerConfiguration(BaseModel):
-    """A class representing MarkLogic App Server configuration.
-
-    Attributes
-    ----------
-    identifier : str
-        A unique identifier of the App Server
-    port : int
-        A port number
-    auth : AuthMethod
-        An authorization method
-    """
+    """A class representing MarkLogic App Server configuration."""
 
     identifier: str = Field(
-        alias="id")
-    port: int
-    auth: AuthMethod = AuthMethod.DIGEST
+        alias="id",
+        description="A unique identifier of the App Server")
+    port: int = Field(
+        description="A port number")
+    auth: AuthMethod = Field(
+        description="An authorization method",
+        default=AuthMethod.DIGEST)
 
     @field_serializer("auth")
     def serialize_auth(
@@ -58,32 +53,26 @@ class MLAppServerConfiguration(BaseModel):
 
 
 class MLConfiguration(BaseModel):
-    """A class representing MarkLogic configuration.
-
-    Attributes
-    ----------
-    app_name : str
-        An application name
-    protocol : str
-        An HTTP protocol
-    host : str
-        A hostname
-    username : str
-        An username
-    password : str
-        A password
-    app_servers : List[MLAppServerConfiguration]
-        App Servers configurations' list
-    """
+    """A class representing MarkLogic configuration."""
 
     app_name: str = Field(
-        alias="app-name")
-    protocol: str = "http"
-    host: str = "localhost"
-    username: str = "admin"
-    password: str = "admin"
+        alias="app-name",
+        description="An application name")
+    protocol: str = Field(
+        description="An HTTP protocol",
+        default="http")
+    host: str = Field(
+        description="A hostname",
+        default="localhost")
+    username: str = Field(
+        description="An username",
+        default="admin")
+    password: str = Field(
+        description="A password",
+        default="admin")
     app_servers: List[MLAppServerConfiguration] = Field(
         alias="app-servers",
+        description="App Servers configurations' list",
         default=[MLAppServerConfiguration(id="manage", port=8002)])
 
     def provide_config(

@@ -20,7 +20,8 @@ import yaml
 from pydantic import BaseModel, Field, field_serializer
 
 from mlclient import constants
-from mlclient.exceptions import NoSuchAppServerError
+from mlclient.exceptions import (MissingMLClientConfigurationError,
+                                 NoSuchAppServerError)
 
 
 class AuthMethod(Enum):
@@ -121,8 +122,14 @@ class MLConfiguration(BaseModel):
         -------
         MLConfiguration
             An MLConfiguration instance
+
+        Raises
+        ------
+        MissingMLClientConfigurationError
+            If .mlclient directory has not been found
         """
-        file_path = f"{constants.ML_CLIENT_PATH}/mlclient-{environment_name}.yaml"
+        ml_client_dir = cls._find_mlclient_directory(Path.cwd())
+        file_path = f"{ml_client_dir}/mlclient-{environment_name}.yaml"
         return cls.from_file(file_path)
 
     @classmethod
@@ -145,9 +152,47 @@ class MLConfiguration(BaseModel):
         source_config = cls._get_source_config(file_path)
         return MLConfiguration(**source_config)
 
+    @classmethod
+    def _find_mlclient_directory(
+            cls,
+            path: Path,
+    ) -> str:
+        """Return MLClient configuration path.
+
+        Recursively searches for .mlclient directory. If it is not being found,
+        it tries in a parent until it reaches root dir.
+
+        Parameters
+        ----------
+        path : Path
+            A path to look for .mlclient subdirectory
+
+        Returns
+        -------
+        str
+            An MLClient configuration path
+
+        Raises
+        ------
+        MissingMLClientConfigurationError
+            If .mlclient directory has not been found
+        """
+        if Path.as_posix(path) in (".", "/"):
+            msg = (f"{constants.ML_CLIENT_DIR} directory has not been found in any of "
+                   f"parent directories!")
+            raise MissingMLClientConfigurationError(msg)
+        mlclient_dir = next((
+            path
+            for path in path.glob(constants.ML_CLIENT_DIR)
+            if path.is_dir()), None)
+        if mlclient_dir:
+            return mlclient_dir.as_posix()
+        return cls._find_mlclient_directory(path.parent)
+
     @staticmethod
     def _get_source_config(
             file_path: str,
     ):
         with Path(file_path).open() as config_file:
             return yaml.safe_load(config_file.read())
+

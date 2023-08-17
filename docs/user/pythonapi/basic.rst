@@ -1,28 +1,10 @@
-.. MLClient documentation master file, created by
-   sphinx-quickstart on Mon Aug  7 10:42:08 2023.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+Basic Usage
+===========
 
-MLClient - MarkLogic instance in your hands
-===========================================
+Send a custom request
+---------------------
 
-.. image:: https://img.shields.io/badge/GitHub-monasticus%2Fmlclient-white?style=plastic&logo=github&color=white
-    :target: https://github.com/monasticus/mlclient
-    :alt: Tag Badge
-
-.. image:: https://img.shields.io/github/license/monasticus/mlclient?label=License&style=plastic
-    :target: https://github.com/monasticus/mlclient/blob/main/LICENSE
-    :alt: License Badge
-
-.. image:: https://img.shields.io/pypi/pyversions/mlclient?label=Python&style=plastic
-    :target: https://www.python.org/
-    :alt: Python Version Support Badge
-
-ML Client is a python library providing a python API to manage a MarkLogic instance.
-
--------------------
-
-Low-level MLClient::
+To send a custom request, simply import and use MLClient class::
 
    >>> from mlclient import MLClient
    >>> config = {
@@ -44,7 +26,11 @@ Low-level MLClient::
    --6a5df7d535c71968--
 
 
-Medium-level MLResourceClient::
+Use MarkLogic REST Resources
+----------------------------
+
+MarkLogic have defined multiple REST Resources. The mlclient library provides you
+a simple API to call them::
 
    >>> from mlclient import MLResourceClient
    >>> config = {
@@ -65,7 +51,10 @@ Medium-level MLResourceClient::
    --6a5df7d535c71968--
 
 
-Parsing response::
+Parse response
+--------------
+
+MakLogic returns data with multipart/mixed content. To easily extract data, use MLResponseParser class::
 
    >>> from mlclient import MLResourceClient, MLResponseParser
    >>> config = {
@@ -80,24 +69,3 @@ Parsing response::
    ...     print(parsed_resp)
    ...
    App-Services
-
-.. toctree::
-   :maxdepth: 1
-   :caption: Python API:
-
-   api/mlclient/mlclient
-
-.. toctree::
-   :maxdepth: 1
-   :caption: User Guide:
-
-   user/pythonapi
-
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`

@@ -39,18 +39,19 @@ class MLAppServerConfiguration(BaseModel):
         description="A unique identifier of the App Server")
     port: int = Field(
         description="A port number")
-    auth: AuthMethod = Field(
+    auth_method: AuthMethod = Field(
+        alias="auth",
         description="An authorization method",
         default=AuthMethod.DIGEST)
 
-    @field_serializer("auth")
+    @field_serializer("auth_method")
     def serialize_auth(
             self,
-            auth: AuthMethod,
+            auth_method: AuthMethod,
             _info,
     ):
         """Serialize auth field."""
-        return auth.value
+        return auth_method.value
 
 
 class MLConfiguration(BaseModel):

@@ -1,7 +1,6 @@
 import os
 import shutil
 from pathlib import Path
-from tests import utils
 
 import pytest
 
@@ -9,6 +8,7 @@ from mlclient import MLConfiguration, constants
 from mlclient.exceptions import (MissingMLClientConfigurationError,
                                  NoSuchAppServerError)
 from mlclient.ml_config import MLAppServerConfiguration
+from tests import tools
 
 _SCRIPT_DIR = Path(__file__).resolve().parent
 
@@ -19,21 +19,21 @@ def _setup_and_teardown():
     ml_client_dir = Path(constants.ML_CLIENT_DIR)
     if not ml_client_dir.exists() or not ml_client_dir.is_dir():
         ml_client_dir.mkdir()
-    for file_name in utils.list_resources(__file__):
-        file_path = utils.get_test_resource_path(__file__, file_name)
+    for file_name in tools.list_resources(__file__):
+        file_path = tools.get_test_resource_path(__file__, file_name)
         shutil.copy(file_path, constants.ML_CLIENT_DIR)
 
     yield
 
     # Teardown
-    for file_name in utils.list_resources(__file__):
+    for file_name in tools.list_resources(__file__):
         Path(f"{constants.ML_CLIENT_DIR}/{file_name}").unlink()
     if ml_client_dir.exists() and not os.listdir(constants.ML_CLIENT_DIR):
         ml_client_dir.rmdir()
 
 
 def test_from_file():
-    path = utils.get_test_resource_path(__file__, "mlclient-test.yaml")
+    path = tools.get_test_resource_path(__file__, "mlclient-test.yaml")
     config = MLConfiguration.from_file(path)
     assert config.model_dump() == {
         "app_name": "my-marklogic-app",
@@ -45,27 +45,27 @@ def test_from_file():
             {
                 "identifier": "manage",
                 "port": 8002,
-                "auth": "basic",
+                "auth_method": "basic",
             },
             {
                 "identifier": "content",
                 "port": 8100,
-                "auth": "basic",
+                "auth_method": "basic",
             },
             {
                 "identifier": "modules",
                 "port": 8101,
-                "auth": "basic",
+                "auth_method": "basic",
             },
             {
                 "identifier": "schemas",
                 "port": 8102,
-                "auth": "basic",
+                "auth_method": "basic",
             },
             {
                 "identifier": "test",
                 "port": 8103,
-                "auth": "basic",
+                "auth_method": "basic",
             },
         ],
     }
@@ -75,7 +75,7 @@ def test_from_file():
 
 
 def test_from_file_default_values():
-    path = utils.get_test_resource_path(__file__, "mlclient-test-default.yaml")
+    path = tools.get_test_resource_path(__file__, "mlclient-test-default.yaml")
     config = MLConfiguration.from_file(path)
     assert config.model_dump() == {
         "app_name": "my-default-app",
@@ -87,7 +87,7 @@ def test_from_file_default_values():
             {
                 "identifier": "manage",
                 "port": 8002,
-                "auth": "digest",
+                "auth_method": "digest",
             },
         ],
     }
@@ -110,27 +110,27 @@ def test_from_environment():
             {
                 "identifier": "manage",
                 "port": 8002,
-                "auth": "basic",
+                "auth_method": "basic",
             },
             {
                 "identifier": "content",
                 "port": 8100,
-                "auth": "basic",
+                "auth_method": "basic",
             },
             {
                 "identifier": "modules",
                 "port": 8101,
-                "auth": "basic",
+                "auth_method": "basic",
             },
             {
                 "identifier": "schemas",
                 "port": 8102,
-                "auth": "basic",
+                "auth_method": "basic",
             },
             {
                 "identifier": "test",
                 "port": 8103,
-                "auth": "basic",
+                "auth_method": "basic",
             },
         ],
     }
@@ -153,7 +153,7 @@ def test_from_environment_default():
             {
                 "identifier": "manage",
                 "port": 8002,
-                "auth": "digest",
+                "auth_method": "digest",
             },
         ],
     }
@@ -179,7 +179,7 @@ def test_from_environment_in_child_directory():
             {
                 "identifier": "manage",
                 "port": 8002,
-                "auth": "digest",
+                "auth_method": "digest",
             },
         ],
     }
@@ -214,7 +214,7 @@ def test_provide_config():
         "username": "admin",
         "password": "admin",
         "port": 8002,
-        "auth": "basic",
+        "auth_method": "basic",
     }
 
 

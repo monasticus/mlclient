@@ -7,7 +7,7 @@ It exports the following class:
 """
 from __future__ import annotations
 
-from mlclient import MLClient, MLConfiguration
+from mlclient import MLClient, MLConfiguration, MLResourceClient
 
 
 class MLManager:
@@ -96,3 +96,22 @@ class MLManager:
         """
         app_server_config = self.config.provide_config(app_server_id)
         return MLClient(**app_server_config)
+
+    def get_resource_client(
+            self,
+            app_server_id: str,
+    ) -> MLResourceClient:
+        """Initialize an MLResourceClient instance for a specific App Server.
+
+        Parameters
+        ----------
+        app_server_id : str
+            An App Server identifier
+
+        Returns
+        -------
+        MLResourceClient
+            An MLResourceClient instance
+        """
+        app_server_config = self.config.provide_config(app_server_id)
+        return MLResourceClient(**app_server_config)

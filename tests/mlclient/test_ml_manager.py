@@ -52,3 +52,18 @@ def test_get_client():
         assert client.is_connected()
     assert not client.is_connected()
 
+
+def test_get_resource_client():
+    # uses tests/resources/test-ml-manager/mlclient-test.yaml copy
+    ml_manager = MLManager("test")
+    with ml_manager.get_resource_client("content") as client:
+        assert isinstance(client, MLResourceClient)
+        assert client.protocol == "https"
+        assert client.host == "localhost"
+        assert client.port == 8100
+        assert client.username == "my-marklogic-app-user"
+        assert client.password == "my-marklogic-app-password"
+        assert client.auth_method == "basic"
+        assert client.is_connected()
+    assert not client.is_connected()
+

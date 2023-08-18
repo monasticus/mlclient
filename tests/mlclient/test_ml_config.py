@@ -1,6 +1,7 @@
 import os
 import shutil
 from pathlib import Path
+from tests import utils
 
 import pytest
 
@@ -9,9 +10,7 @@ from mlclient.exceptions import (MissingMLClientConfigurationError,
                                  NoSuchAppServerError)
 from mlclient.ml_config import MLAppServerConfiguration
 
-SCRIPT_DIR = Path(__file__).resolve().parent
-RESOURCES_DIR = "resources/test-ml-config"
-RESOURCES_PATH = next(Path(SCRIPT_DIR).parent.glob(RESOURCES_DIR)).as_posix()
+_SCRIPT_DIR = Path(__file__).resolve().parent
 
 
 @pytest.fixture(scope="module", autouse=True)
@@ -20,20 +19,21 @@ def _setup_and_teardown():
     ml_client_dir = Path(constants.ML_CLIENT_DIR)
     if not ml_client_dir.exists() or not ml_client_dir.is_dir():
         ml_client_dir.mkdir()
-    for file_name in os.listdir(RESOURCES_PATH):
-        shutil.copy(f"{RESOURCES_PATH}/{file_name}", constants.ML_CLIENT_DIR)
+    for file_name in utils.list_resources(__file__):
+        file_path = utils.get_test_resource_path(__file__, file_name)
+        shutil.copy(file_path, constants.ML_CLIENT_DIR)
 
     yield
 
     # Teardown
-    for file_name in os.listdir(RESOURCES_PATH):
+    for file_name in utils.list_resources(__file__):
         Path(f"{constants.ML_CLIENT_DIR}/{file_name}").unlink()
     if ml_client_dir.exists() and not os.listdir(constants.ML_CLIENT_DIR):
         ml_client_dir.rmdir()
 
 
 def test_from_file():
-    path = f"{RESOURCES_PATH}/mlclient-test.yaml"
+    path = utils.get_test_resource_path(__file__, "mlclient-test.yaml")
     config = MLConfiguration.from_file(path)
     assert config.model_dump() == {
         "app_name": "my-marklogic-app",
@@ -75,7 +75,7 @@ def test_from_file():
 
 
 def test_from_file_default_values():
-    path = f"{RESOURCES_PATH}/mlclient-test-default.yaml"
+    path = utils.get_test_resource_path(__file__, "mlclient-test-default.yaml")
     config = MLConfiguration.from_file(path)
     assert config.model_dump() == {
         "app_name": "my-default-app",
@@ -166,7 +166,7 @@ def test_from_environment_in_child_directory():
     # Note: the test-default environment configuration is copied from the test resources
     # to .mlclient directory in a setup step
     curr_dir = Path.cwd()
-    os.chdir(SCRIPT_DIR)
+    os.chdir(_SCRIPT_DIR)
 
     config = MLConfiguration.from_environment("test-default")
     assert config.model_dump() == {
@@ -194,7 +194,7 @@ def test_from_environment_in_parent_directory():
     # Note: the test-default environment configuration is copied from the test resources
     # to .mlclient directory in a setup step
     curr_dir = Path.cwd()
-    os.chdir(Path(SCRIPT_DIR).parent.parent.parent)
+    os.chdir(Path(_SCRIPT_DIR).parent.parent.parent)
 
     with pytest.raises(MissingMLClientConfigurationError) as err:
         MLConfiguration.from_environment("test-default")

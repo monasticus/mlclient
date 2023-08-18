@@ -6,4 +6,4 @@ Python API
    :caption: User Guide:
 
    pythonapi/basic
-   pythonapi/configurationsetup
+   pythonapi/projectintegration

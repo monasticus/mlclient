@@ -21,6 +21,7 @@ extensions = [
     'sphinx.ext.autosectionlabel',
     'sphinx.ext.viewcode',
     'sphinx.ext.napoleon',
+    'sphinxcontrib.autodoc_pydantic',
 ]
 
 templates_path = ['_templates']

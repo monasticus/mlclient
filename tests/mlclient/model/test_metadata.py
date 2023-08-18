@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import copy
 
 import pytest
@@ -5,8 +7,21 @@ import pytest
 from mlclient.model import Metadata, Permission
 
 
-def __assert_permissions_are_equal(this: list, that: list):
-    assert set(this).difference(set(that)) == set()
+def __assert_permissions_are_equal(
+        these_permissions: list[Permission],
+        those_permissions: list[Permission],
+):
+    assert len(these_permissions) == len(those_permissions)
+    for this_permission in these_permissions:
+        this_role = this_permission.role_name()
+        that_permission = next((permission
+                                for permission in those_permissions
+                                if permission.role_name() == this_role), None)
+        assert that_permission is not None
+
+        this_capabilities = this_permission.capabilities()
+        that_capabilities = that_permission.capabilities()
+        assert this_capabilities.difference(that_capabilities) == set()
 
 
 @pytest.fixture()

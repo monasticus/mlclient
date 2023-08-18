@@ -5,7 +5,8 @@ from pathlib import Path
 import pytest
 
 from mlclient import MLConfiguration, constants
-from mlclient.exceptions import (MissingMLClientConfigurationError,
+from mlclient.exceptions import (MLClientDirectoryNotFoundError,
+                                 MLClientEnvironmentNotFoundError,
                                  NoSuchAppServerError)
 from mlclient.ml_config import MLAppServerConfiguration
 from tests import tools
@@ -162,6 +163,15 @@ def test_from_environment_default():
                for app_server_config in config.app_servers)
 
 
+def test_from_environment_non_existing():
+    with pytest.raises(MLClientEnvironmentNotFoundError) as err:
+        MLConfiguration.from_environment("non-existing")
+    expected_msg = ("MLClient's configuration has not been found for the environment "
+                    "[non-existing]!")
+    actual_msg = err.value.args[0]
+    assert actual_msg == expected_msg
+
+
 def test_from_environment_in_child_directory():
     # Note: the test-default environment configuration is copied from the test resources
     # to .mlclient directory in a setup step
@@ -196,7 +206,7 @@ def test_from_environment_in_parent_directory():
     curr_dir = Path.cwd()
     os.chdir(Path(_SCRIPT_DIR).parent.parent.parent)
 
-    with pytest.raises(MissingMLClientConfigurationError) as err:
+    with pytest.raises(MLClientDirectoryNotFoundError) as err:
         MLConfiguration.from_environment("test-default")
     expected_msg = (".mlclient directory has not been found in any of "
                     "parent directories!")

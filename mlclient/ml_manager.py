@@ -30,8 +30,10 @@ class MLManager:
 
         Raises
         ------
-        MissingMLClientConfigurationError
+        MLClientDirectoryNotFoundError
             If .mlclient directory has not been found
+        MLClientEnvironmentNotFoundError
+            If there's no .mlclient/mlclient-<environment_name>.yaml file
         """
         self._environment_name = environment_name
         self.config = MLConfiguration.from_environment(environment_name)

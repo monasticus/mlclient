@@ -20,7 +20,8 @@ import yaml
 from pydantic import BaseModel, Field, field_serializer
 
 from mlclient import constants
-from mlclient.exceptions import (MissingMLClientConfigurationError,
+from mlclient.exceptions import (MLClientDirectoryNotFoundError,
+                                 MLClientEnvironmentNotFoundError,
                                  NoSuchAppServerError)
 
 
@@ -39,18 +40,19 @@ class MLAppServerConfiguration(BaseModel):
         description="A unique identifier of the App Server")
     port: int = Field(
         description="A port number")
-    auth: AuthMethod = Field(
+    auth_method: AuthMethod = Field(
+        alias="auth",
         description="An authorization method",
         default=AuthMethod.DIGEST)
 
-    @field_serializer("auth")
+    @field_serializer("auth_method")
     def serialize_auth(
             self,
-            auth: AuthMethod,
+            auth_method: AuthMethod,
             _info,
     ):
         """Serialize auth field."""
-        return auth.value
+        return auth_method.value
 
 
 class MLConfiguration(BaseModel):
@@ -106,7 +108,7 @@ class MLConfiguration(BaseModel):
     def from_environment(
             cls,
             environment_name: str,
-    ):
+    ) -> MLConfiguration:
         """Instantiate MLConfiguration from an environment.
 
         This method looks for a configuration file in the .mlclient directory.
@@ -116,7 +118,7 @@ class MLConfiguration(BaseModel):
         Parameters
         ----------
         environment_name : str
-            An environment name
+            An MLClient environment name
 
         Returns
         -------
@@ -125,12 +127,13 @@ class MLConfiguration(BaseModel):
 
         Raises
         ------
-        MissingMLClientConfigurationError
+        MLClientDirectoryNotFoundError
             If .mlclient directory has not been found
+        MLClientEnvironmentNotFoundError
+            If there's no .mlclient/mlclient-<environment_name>.yaml file
         """
-        ml_client_dir = cls._find_mlclient_directory(Path.cwd())
-        file_path = f"{ml_client_dir}/mlclient-{environment_name}.yaml"
-        return cls.from_file(file_path)
+        env_file_path = cls._find_mlclient_environment(environment_name)
+        return cls.from_file(env_file_path)
 
     @classmethod
     def from_file(
@@ -151,6 +154,39 @@ class MLConfiguration(BaseModel):
         """
         source_config = cls._get_source_config(file_path)
         return MLConfiguration(**source_config)
+
+    @classmethod
+    def _find_mlclient_environment(
+            cls,
+            environment_name: str,
+    ) -> str:
+        """Return MLClient environment configuration path.
+
+        Parameters
+        ----------
+        environment_name : str
+            An MLClient environment name
+
+        Returns
+        -------
+        str
+            An MLClient environment configuration path
+
+        Raises
+        ------
+        MLClientDirectoryNotFoundError
+            If .mlclient directory has not been found
+        MLClientEnvironmentNotFoundError
+            If there's no .mlclient/mlclient-<environment_name>.yaml file
+        """
+        ml_client_dir = cls._find_mlclient_directory(Path.cwd())
+        env_file_name = f"mlclient-{environment_name}.yaml"
+        env_file_path = next(Path(ml_client_dir).glob(env_file_name), None)
+        if not env_file_path:
+            msg = (f"MLClient's configuration has not been found for the environment "
+                   f"[{environment_name}]!")
+            raise MLClientEnvironmentNotFoundError(msg)
+        return env_file_path.as_posix()
 
     @classmethod
     def _find_mlclient_directory(
@@ -174,13 +210,13 @@ class MLConfiguration(BaseModel):
 
         Raises
         ------
-        MissingMLClientConfigurationError
+        MLClientDirectoryNotFoundError
             If .mlclient directory has not been found
         """
         if Path.as_posix(path) in (".", "/"):
             msg = (f"{constants.ML_CLIENT_DIR} directory has not been found in any of "
                    f"parent directories!")
-            raise MissingMLClientConfigurationError(msg)
+            raise MLClientDirectoryNotFoundError(msg)
         mlclient_dir = next((
             path
             for path in path.glob(constants.ML_CLIENT_DIR)
@@ -192,7 +228,19 @@ class MLConfiguration(BaseModel):
     @staticmethod
     def _get_source_config(
             file_path: str,
-    ):
+    ) -> dict:
+        """Load a source MLClient's configuration YAML file.
+
+        Parameters
+        ----------
+        file_path : str
+            A source configuration's filepath
+
+        Returns
+        -------
+        dict
+            A source MLClient's configuration
+        """
         with Path(file_path).open() as config_file:
             return yaml.safe_load(config_file.read())
 

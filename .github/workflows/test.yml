@@ -20,8 +20,8 @@ jobs:
           MARKLOGIC_ADMIN_PASSWORD: admin
 
     steps:
-      - name: Sleep for 30 seconds
-        run: sleep 30s
+      - name: Sleep for 45 seconds
+        run: sleep 45s
         shell: bash
 
       - uses: actions/checkout@v3

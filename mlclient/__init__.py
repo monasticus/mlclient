@@ -7,6 +7,8 @@ generic modules:
         The ML Client module.
     * ml_config
         The ML Configuration module.
+    * ml_manager
+        The ML Manager module.
     * constants
         The ML Client Constants module.
     * exceptions
@@ -23,6 +25,8 @@ This package exports the following classes:
         A MarkLogic HTTP response parser.
     * MLConfiguration
         A class representing MarkLogic configuration.
+    * MLManager
+        A high-level class managing a MarkLogic instance.
 
 Examples
 --------
@@ -32,7 +36,8 @@ from __future__ import annotations
 
 from .ml_client import MLClient, MLResourceClient, MLResponseParser
 from .ml_config import MLConfiguration
+from .ml_manager import MLManager
 
 __version__ = "0.1.0"
 __all__ = ["MLClient", "MLResourceClient", "MLResponseParser",
-           "MLConfiguration"]
+           "MLConfiguration", "MLManager"]

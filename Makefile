@@ -1,7 +1,7 @@
 install:
 	@pip install poetry
 	@poetry install
-	@poetry self add poetry-bumpversion
+	@poetry self add poetry-bumpversion<0.3.1
 
 update:
 	@poetry update

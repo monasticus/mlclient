@@ -51,6 +51,7 @@ pytest-cov = "^4.1.0"
 sphinx = "^7.1.2"
 sphinx-rtd-theme = "^1.2.2"
 autodoc-pydantic = "^2.0.1"
+poetry-bumpversion = "<0.3.1"
 
 [tool.poetry.scripts]
 ml = "cli.ml_cli:main"

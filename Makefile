@@ -17,7 +17,7 @@ lint-fix:
 	@poetry run ruff . --fix
 
 test:
-	@poetry run pytest --cov=mlclient tests/
+	@poetry run pytest --cov=mlclient --cov=cli tests/
 
 ml-start:
 	@sudo /etc/init.d/MarkLogic start
@@ -34,6 +34,3 @@ publish:
 
 update-linters:
 	@poetry run ruff linter --format=json > ./meta/linters/linters.json
-
-activate-path:
-	@echo `poetry env info --path`/bin/activate

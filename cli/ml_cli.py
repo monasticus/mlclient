@@ -3,7 +3,7 @@
 This module provides a Command Line Interface for ML Client.
 It exports a single function:
     * main()
-        Execute a MLCLIent Job.
+        Execute a MLCLIent Job using CLI.
 """
 from __future__ import annotations
 
@@ -11,7 +11,7 @@ from argparse import ArgumentParser, Namespace
 
 
 def main():
-    """Execute a Mimeo Job using CLI."""
+    """Execute an ML Client Job using CLI."""
     MLCLIentJob()
 
 
@@ -43,7 +43,7 @@ class MLCLIentArgumentParser(ArgumentParser):
             "-v",
             "--version",
             action="version",
-            version="MLClient v0.1.0")
+            version="MLCLIent v0.1.0")
 
 
 if __name__ == "__main__":

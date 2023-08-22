@@ -1,14 +1,14 @@
 install:
 	@pip install poetry
 	@poetry install
-	@poetry self add poetry-bumpversion
+	@poetry self add 'poetry-bumpversion<0.3.1'
 
 update:
 	@poetry update
 
 imports:
 	@poetry run isort .
-	@poetry run isort -a "from __future__ import annotations" mlclient
+	@poetry run isort -a "from __future__ import annotations" mlclient cli
 
 lint:
 	@poetry run ruff .
@@ -17,7 +17,7 @@ lint-fix:
 	@poetry run ruff . --fix
 
 test:
-	@poetry run pytest --cov=mlclient tests/
+	@poetry run pytest --cov=mlclient --cov=cli tests/
 
 ml-start:
 	@sudo /etc/init.d/MarkLogic start
@@ -34,6 +34,3 @@ publish:
 
 update-linters:
 	@poetry run ruff linter --format=json > ./meta/linters/linters.json
-
-activate-path:
-	@echo `poetry env info --path`/bin/activate

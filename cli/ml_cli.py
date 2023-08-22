@@ -5,6 +5,7 @@ It exports a single function:
     * main()
         Execute a MLCLIent Job using CLI.
 """
+
 from __future__ import annotations
 
 from argparse import ArgumentParser, Namespace

@@ -8,7 +8,7 @@ update:
 
 imports:
 	@poetry run isort .
-	@poetry run isort -a "from __future__ import annotations" mlclient
+	@poetry run isort -a "from __future__ import annotations" mlclient cli
 
 lint:
 	@poetry run ruff .

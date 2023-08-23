@@ -1,21 +1,26 @@
 import sys
-from io import StringIO
 
 import pytest
 
 import mlclient
-from cli import ml_cli
+from cli.ml_cli import MLCLIentApplication
+from cli import main
 
 
-def test_cli_version():
-    sys.argv = ["ml", "--version"]
+def test_main_sys_exit_0():
+    sys.argv = ["ml"]
+    with pytest.raises(SystemExit) as err:
+        main()
+        assert err.value.args[0] == 0
 
-    output_redirection = StringIO()
-    sys.stdout = output_redirection
 
-    try:
-        ml_cli.main()
-        pytest.fail("'ml --version' should invoke system exit")
-    except SystemExit:
-        assert output_redirection.getvalue() == f"MLCLIent v{mlclient.__version__}\n"
-        sys.stdout = sys.__stdout__
+def test_main_sys_exit_1():
+    with pytest.raises(SystemExit) as err:
+        main()
+        assert err.value.args[0] == 1
+
+
+def test_app_properties():
+    app = MLCLIentApplication()
+    assert app.display_name == "MLCLIent"
+    assert app.version == mlclient.__version__

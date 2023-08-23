@@ -39,5 +39,6 @@ from .ml_config import MLConfiguration
 from .ml_manager import MLManager
 
 __version__ = "0.1.0"
-__all__ = ["MLClient", "MLResourceClient", "MLResponseParser",
+__all__ = ["__version__",
+           "MLClient", "MLResourceClient", "MLResponseParser",
            "MLConfiguration", "MLManager"]

@@ -8,43 +8,31 @@ It exports a single function:
 
 from __future__ import annotations
 
-from argparse import ArgumentParser, Namespace
+from cleo.application import Application
+
+from mlclient import __version__ as ml_client_version
 
 
-def main():
-    """Execute an ML Client Job using CLI."""
-    MLCLIentJob()
+class MLCLIentApplication(Application):
+    """An ML Client Command Line Application."""
 
-
-class MLCLIentJob:
-    """A class representing a single ML Client CLI job."""
+    _APP_NAME = "MLCLIent"
 
     def __init__(
             self,
     ):
-        """Initialize MLCLIent instance."""
-        self._args: Namespace = MLCLIentArgumentParser().parse_args()
+        """Initialize MLCLIentApplication instance."""
+        super().__init__(self._APP_NAME, ml_client_version)
+
+    @property
+    def display_name(self) -> str:
+        """The application name to display."""
+        return self._name
 
 
-class MLCLIentArgumentParser(ArgumentParser):
-    """A custom ArgumentParser for the ML Client CLI."""
-
-    def __init__(self):
-        """Initialize MLCLIentArgumentParser instance."""
-        super().__init__(
-            prog="ml",
-            description="Manage your MarkLogic instance with ease")
-        self._add_positional_arguments()
-
-    def _add_positional_arguments(
-            self,
-    ):
-        """Add positional arguments."""
-        self.add_argument(
-            "-v",
-            "--version",
-            action="version",
-            version="MLCLIent v0.1.0")
+def main() -> int:
+    """Execute an ML Client Job using CLI."""
+    return MLCLIentApplication().run()
 
 
 if __name__ == "__main__":

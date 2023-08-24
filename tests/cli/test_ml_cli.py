@@ -8,9 +8,9 @@ import pytest
 from cleo.testers.command_tester import CommandTester
 
 import mlclient
-from cli.ml_cli import MLCLIentApplication
 from cli import main
-from mlclient import constants, MLManager
+from cli.ml_cli import MLCLIentApplication
+from mlclient import MLManager, constants
 from tests import tools
 
 

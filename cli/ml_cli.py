@@ -10,9 +10,14 @@ from __future__ import annotations
 
 from cleo.application import Application
 from cleo.commands.command import Command
+from cleo.formatters.style import Style
 from cleo.helpers import option
+from cleo.io.inputs.input import Input
+from cleo.io.io import IO
+from cleo.io.outputs.output import Output
 
-from mlclient import __version__ as ml_client_version, MLManager
+from mlclient import MLManager
+from mlclient import __version__ as ml_client_version
 
 
 class CallLogsCommand(Command):
@@ -92,17 +97,15 @@ class CallLogsCommand(Command):
             )
             return resp.json()["logfile"]["log"]
 
+    @staticmethod
     def _styled_logs(
-            self,
             logs: list[dict],
     ) -> str:
-        self.add_style("time", fg="green", options=["bold"])
-        self.add_style("level", fg="cyan", options=["bold"])
-        for log in sorted(logs, key=lambda l: l["timestamp"]):
-            timestamp = log['timestamp']
-            level = log['level'].upper()
-            msg = log['message']
-            yield f"<time>{timestamp}</> <level>{level}</>: {msg}"
+        for log_dict in sorted(logs, key=lambda log: log["timestamp"]):
+            timestamp = log_dict["timestamp"]
+            level = log_dict["level"].upper()
+            msg = log_dict["message"]
+            yield f"<time>{timestamp}</> <log-level>{level}</>: {msg}"
 
 
 class MLCLIentApplication(Application):
@@ -121,6 +124,20 @@ class MLCLIentApplication(Application):
     def display_name(self) -> str:
         """The application name to display."""
         return self._name
+
+    def create_io(
+            self,
+            input: Input | None = None,
+            output: Output | None = None,
+            error_output: Output | None = None,
+    ) -> IO:
+        io = super().create_io(input, output, error_output)
+
+        formatter = io.output.formatter
+        formatter.set_style("time", Style(foreground="green", options=["bold"]))
+        formatter.set_style("log-level", Style(foreground="cyan", options=["bold"]))
+
+        return io
 
 
 def main() -> int:

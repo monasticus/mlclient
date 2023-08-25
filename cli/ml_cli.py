@@ -55,21 +55,21 @@ class CallLogsCommand(Command):
         # option(
         #     "from",
         #     "f",
-        #     description="The start time for the log data",
+        #     description="The start time for the error log data",
         #     flag=False,
         #     value_required=False,
         # ),
         # option(
         #     "to",
         #     "t",
-        #     description="The end time for the log data",
+        #     description="The end time for the error log data",
         #     flag=False,
         #     value_required=False,
         # ),
         # option(
         #     "regex",
         #     "r",
-        #     description="Filters the log data, based on a regular expression",
+        #     description="Filters the error log data, based on a regular expression",
         #     flag=False,
         #     value_required=False,
         # ),
@@ -78,15 +78,19 @@ class CallLogsCommand(Command):
     def handle(
             self,
     ) -> int:
-        logs = self._get_logs()
+        environment = self.option("environment")
+        app_server = self.option("app-server")
+        logs = self._get_logs(environment, app_server)
         self._io.write(self._styled_logs(logs), new_line=True)
         return 0
 
     def _get_logs(
             self,
+            environment: str,
+            app_server: str,
     ) -> list[dict]:
-        manager = MLManager(self.option("environment"))
-        with manager.get_resource_client(self.option("app-server")) as client:
+        manager = MLManager(environment)
+        with manager.get_resource_client(app_server) as client:
             self.line(f"Getting logs from {client.base_url}\n")
             resp = client.get_logs(
                 filename=f"{client.port}_ErrorLog.txt",

@@ -4,7 +4,9 @@ It exports 2 classes:
     * MLClient
         A low-level class used to send simple HTTP requests to a MarkLogic instance.
     * MLResourceClient
-        An MLClient subclass supporting internal REST Resources of the MarkLogic server.
+        A MLClient subclass calling ResourceCall implementation classes.
+    * MLResourceClient
+        A MLResourceClient subclass supporting REST Resources of the MarkLogic server.
     * MLResponseParser
         A MarkLogic HTTP response parser.
 """
@@ -358,14 +360,73 @@ class MLClient:
 
 
 class MLResourceClient(MLClient):
-    """A MLClient subclass supporting internal REST Resources of the MarkLogic server.
+    """A MLClient subclass calling ResourceCall implementation classes.
+
+    It can connect with the MarkLogic Server as a Context Manager or explicitly by
+    using the connect method.
+
+    You can call ML REST Resource by using the call() method accepting a ResourceCall
+    implementation classes.
+
+    Attributes
+    ----------
+    All attributes are inherited from the MLClient superclass.
+
+    Examples
+    --------
+    >>> from mlclient import MLResourceClient
+    >>> from mlclient.calls import EvalCall
+    >>> config = {
+    ...     "host": "localhost",
+    ...     "port": 8002,
+    ...     "username": "admin",
+    ...     "password": "admin",
+    ... }
+    >>> with MLResourceClient(**config) as client:
+    ...     eval_call = EvalCall(xquery="xdmp:database() => xdmp:database-name()")
+    ...     resp = client.call(eval_call)
+    ...     print(resp.text)
+    ...
+    --6a5df7d535c71968
+    Content-Type: text/plain
+    X-Primitive: string
+    App-Services
+    --6a5df7d535c71968--
+    """
+
+    def call(
+            self,
+            call: ResourceCall,
+    ) -> Response:
+        """Send a custom request to a MarkLogic endpoint.
+
+        Parameters
+        ----------
+        call : ResourceCall
+            A specific endpoint call implementation
+
+        Returns
+        -------
+        Response
+            An HTTP response
+        """
+        return self.request(
+            method=call.method,
+            endpoint=call.endpoint,
+            params=call.params,
+            headers=call.headers,
+            body=call.body)
+
+
+class MLResourcesClient(MLResourceClient):
+    """A MLResourceClient subclass supporting REST Resources of the MarkLogic server.
 
     It can connect with the MarkLogic Server as a Context Manager or explicitly by
     using the connect method.
 
     There are two ways to call ML REST Resources:
     - by using defined methods corresponding to a resource (e.g. /v1/eval -> eval())
-    - by using a general method call() accepting a ResourceCall implementation classes.
+    - by using the call() method accepting a ResourceCall implementation classes.
 
     This class can be treated as an example of MLClient class extension for your own
     dedicated APIs or as a superclass for your client.
@@ -376,14 +437,14 @@ class MLResourceClient(MLClient):
 
     Examples
     --------
-    >>> from mlclient import MLResourceClient
+    >>> from mlclient import MLResourcesClient
     >>> config = {
     ...     "host": "localhost",
     ...     "port": 8002,
     ...     "username": "admin",
     ...     "password": "admin",
     ... }
-    >>> with MLResourceClient(**config) as client:
+    >>> with MLResourcesClient(**config) as client:
     ...     resp = client.eval(xquery="xdmp:database() => xdmp:database-name()")
     ...     print(resp.text)
     ...
@@ -1379,7 +1440,7 @@ class MLResponseParser:
 
     Examples
     --------
-    >>> from mlclient import MLResourceClient, MLResponseParser
+    >>> from mlclient import MLResourcesClient, MLResponseParser
     >>> config = {
     ...     "host": "localhost",
     ...     "port": 8002,
@@ -1387,7 +1448,7 @@ class MLResponseParser:
     ...     "password": "admin",
     ...     "auth_method": "digest",
     ... }
-    >>> with MLResourceClient(**config) as client:
+    >>> with MLResourcesClient(**config) as client:
     ...     resp = client.eval(xquery="xdmp:database() => xdmp:database-name()")
     ...     print("Raw:", resp.text)
     ...     print("Parsed:", MLResponseParser.parse(resp))

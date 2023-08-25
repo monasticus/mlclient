@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from mlclient import (MLClient, MLConfiguration, MLManager, MLResourceClient,
+from mlclient import (MLClient, MLConfiguration, MLManager, MLResourcesClient,
                       constants)
 from tests import tools
 
@@ -42,7 +42,7 @@ def test_get_client():
     ml_manager = MLManager("test")
     with ml_manager.get_client("content") as client:
         assert isinstance(client, MLClient)
-        assert not isinstance(client, MLResourceClient)
+        assert not isinstance(client, MLResourcesClient)
         assert client.protocol == "https"
         assert client.host == "localhost"
         assert client.port == 8100
@@ -53,11 +53,11 @@ def test_get_client():
     assert not client.is_connected()
 
 
-def test_get_resource_client():
+def test_get_resources_client():
     # uses tests/resources/test-ml-manager/mlclient-test.yaml copy
     ml_manager = MLManager("test")
-    with ml_manager.get_resource_client("content") as client:
-        assert isinstance(client, MLResourceClient)
+    with ml_manager.get_resources_client("content") as client:
+        assert isinstance(client, MLResourcesClient)
         assert client.protocol == "https"
         assert client.host == "localhost"
         assert client.port == 8100

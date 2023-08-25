@@ -2,12 +2,12 @@ import xml.etree.ElementTree as ElemTree
 
 import pytest
 
-from mlclient import MLResourceClient, MLResponseParser
+from mlclient import MLResourcesClient, MLResponseParser
 
 
 @pytest.fixture(scope="module")
 def client():
-    return MLResourceClient(auth_method="digest")
+    return MLResourcesClient(auth_method="digest")
 
 
 @pytest.fixture(scope="module", autouse=True)

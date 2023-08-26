@@ -123,6 +123,9 @@ max-complexity = 10
 "mlclient/calls/*" = [
     "PLR0913" # allow many arguments as they depend on ML REST resource
 ]
+"mlclient/clients/*" = [
+    "PLR0913" # allow many arguments as they depend on ML REST resource
+]
 "mlclient/model/data.py" = [
     "PLR0913" # allow many arguments as they depend on ML structure
 ]

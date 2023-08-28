@@ -3,8 +3,8 @@ from __future__ import annotations
 from enum import Enum
 from typing import Iterator
 
-from mlclient import MLResourceClient
 from mlclient.calls import LogsCall
+from mlclient.clients import MLResourceClient
 from mlclient.exceptions import MarkLogicError
 
 

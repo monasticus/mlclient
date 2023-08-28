@@ -3,8 +3,6 @@
 The root package of Python API to manage MarkLogic instance. It contains the most
 generic modules:
 
-    * ml_client
-        The ML Client module.
     * ml_config
         The ML Configuration module.
     * ml_manager
@@ -36,8 +34,9 @@ Examples
 """
 from __future__ import annotations
 
-from .ml_client import (MLClient, MLResourceClient, MLResourcesClient,
-                        MLResponseParser)
+from mlclient.clients import (MLClient, MLResourceClient, MLResourcesClient,
+                              MLResponseParser)
+
 from .ml_config import MLConfiguration
 from .ml_manager import MLManager
 

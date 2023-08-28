@@ -80,7 +80,8 @@ exclude_lines = [
 [tool.isort]
 skip_glob=[
     # Disable imports' sorting when the import order is important
-    "mlclient/calls/__init__.py"
+    "mlclient/calls/__init__.py",
+    "mlclient/clients/__init__.py"
 ]
 
 [tool.ruff]

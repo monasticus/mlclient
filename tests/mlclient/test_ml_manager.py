@@ -6,6 +6,7 @@ import pytest
 
 from mlclient import (MLClient, MLConfiguration, MLManager, MLResourcesClient,
                       constants)
+from mlclient.clients import LogsClient
 from tests import tools
 
 
@@ -61,6 +62,21 @@ def test_get_resources_client():
         assert client.protocol == "https"
         assert client.host == "localhost"
         assert client.port == 8100
+        assert client.username == "my-marklogic-app-user"
+        assert client.password == "my-marklogic-app-password"
+        assert client.auth_method == "basic"
+        assert client.is_connected()
+    assert not client.is_connected()
+
+
+def test_get_logs_client():
+    # uses tests/resources/test-ml-manager/mlclient-test.yaml copy
+    ml_manager = MLManager("test")
+    with ml_manager.get_logs_client("manage") as client:
+        assert isinstance(client, LogsClient)
+        assert client.protocol == "https"
+        assert client.host == "localhost"
+        assert client.port == 8002
         assert client.username == "my-marklogic-app-user"
         assert client.password == "my-marklogic-app-password"
         assert client.auth_method == "basic"

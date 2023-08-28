@@ -4,14 +4,19 @@ from mlclient import MLResourcesClient
 from mlclient.clients import LogsClient, LogType
 from tests import tools
 
+test_helper = tools.TestHelper("test")
+
 
 @pytest.fixture(scope="module", autouse=True)
-def _setup():
+def _setup_and_teardown():
     with MLResourcesClient(auth_method="digest") as client:
         for i in range(10):
             client.eval(xquery=f'xdmp:log("Test request {i+1}", "ERROR")')
+    test_helper.setup_environment()
 
-    return
+    yield
+
+    test_helper.clean_environment()
 
 
 def test_get_error_logs():
@@ -60,8 +65,7 @@ def _confirm_last_request(
         request_params: dict,
 ):
     request_url = f"/manage/v2/logs?{'&'.join('='.join([key, val]) for key, val in request_params.items())}"
-    tools.confirm_last_request(
-        environment="local",
+    test_helper.confirm_last_request(
         app_server="manage",
         request_method="GET",
         request_url=request_url)

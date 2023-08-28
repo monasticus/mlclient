@@ -48,17 +48,31 @@ def get_test_resources_path(
 
 
 class TestHelper:
+    """A useful class to make testing MLClient easier."""
 
     def __init__(
             self,
             environment_name: str,
     ):
+        """Initialize TestHelper instance.
+
+        Parameters
+        ----------
+        environment_name : str
+            An MLClient configuration environment name.
+        """
         self._environment = environment_name
         self._ml_manager = None
 
     def setup_environment(
             self,
     ):
+        """Set up an ML Client environment.
+
+        This method creates .mlclient directory if it does not exist,
+        and copies an environment config from common resources.
+        It also initializes an internal MLManager field.
+        """
         ml_client_dir = Path(constants.ML_CLIENT_DIR)
         if not ml_client_dir.exists() or not ml_client_dir.is_dir():
             ml_client_dir.mkdir()
@@ -70,6 +84,12 @@ class TestHelper:
     def clean_environment(
             self,
     ):
+        """Clean up an ML Client environment.
+
+        This method removes an environment config from .mlclient directory,
+        and the directory itself, if there's no other files within.
+        It also reset an internal MLManager field.
+        """
         Path(f"{constants.ML_CLIENT_DIR}/mlclient-{self._environment}.yaml").unlink()
         ml_client_dir = Path(constants.ML_CLIENT_DIR)
         if ml_client_dir.exists() and not os.listdir(constants.ML_CLIENT_DIR):
@@ -82,6 +102,21 @@ class TestHelper:
         request_method: str,
         request_url: str,
     ):
+        """Verify the last request being sent.
+
+        This function reaches access logs and extracts last request of the app server.
+        Every request generates two logs and one of them includes username.
+        We filter out redundant logs to get a single log per request.
+
+        Parameters
+        ----------
+        app_server : str
+            An App Server identifier
+        request_method : str
+            A request method
+        request_url : str
+            A request url
+        """
         sleep(1)
         with self._ml_manager.get_resources_client(app_server) as client:
             filename = f"{client.port}_AccessLog.txt"

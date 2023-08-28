@@ -67,13 +67,11 @@ class LogsClient(MLResourceClient):
     def _parse_logs(
             log_type: LogType,
             resp_json: dict,
-    ):
+    ) -> Iterator[dict]:
         logfile = resp_json["logfile"]
         if log_type == LogType.ERROR:
-            if "log" in logfile:
-                logs = logfile["log"]
-                return iter(sorted(logs, key=lambda log: log["timestamp"]))
-            return iter(())
+            logs = logfile.get("log", ())
+            return iter(sorted(logs, key=lambda log: log["timestamp"]))
         return ({"message": log} for log in logfile["message"].split("\n"))
 
 

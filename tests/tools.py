@@ -105,8 +105,7 @@ class TestHelper:
         """Verify the last request being sent.
 
         This function reaches access logs and extracts last request of the app server.
-        Every request generates two logs and one of them includes username.
-        We filter out redundant logs to get a single log per request.
+        We filter out logs unrelated to the used user.
 
         Parameters
         ----------
@@ -117,13 +116,13 @@ class TestHelper:
         request_url : str
             A request url
         """
-        sleep(1.5)
+        sleep(1)
         with self._ml_manager.get_resources_client(app_server) as client:
             filename = f"{client.port}_AccessLog.txt"
             resp = client.get_logs(filename=filename, data_format="json")
             logfile = resp.json()["logfile"]
             logs = [log
                     for log in logfile["message"].split("\n")
-                    if log != "" and f"- {client.username} " not in log]
+                    if log != "" and f"- {client.username} " in log]
             assert f"{request_method.upper()} {request_url} HTTP/1.1" in logs[-1]
 

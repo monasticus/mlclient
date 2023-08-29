@@ -62,20 +62,6 @@ To make it easier, ``mlclient`` lib provides you a ``MLManager`` class with the 
 The same logic as in the above example we will achieve in fewer steps::
    >>> from mlclient import MLManager
    >>> ml_manager = MLManager("local")
-   >>> with ml_manager.get_resources_client("content") as client:
-   ...     resp = client.eval(xquery="xdmp:database() => xdmp:database-name()")
-   ...     parsed_resp = MLResponseParser.parse(resp)
-   ...
-The same logic as in the above example we will achieve in fewer steps::
-   >>> from mlclient import MLManager
-   >>> ml_manager = MLManager("local")
-   >>> with ml_manager.get_resources_client("content") as client:
-   ...     resp = client.eval(xquery="xdmp:database() => xdmp:database-name()")
-   ...     parsed_resp = MLResponseParser.parse(resp)
-   ...
-The same logic as in the above example we will achieve in fewer steps::
-   >>> from mlclient import MLManager
-   >>> ml_manager = MLManager("local")
    >>> with ml_manager.get_resource_client("content") as client:
    ...     resp = client.eval(xquery="xdmp:database() => xdmp:database-name()")
    ...     parsed_resp = MLResponseParser.parse(resp)

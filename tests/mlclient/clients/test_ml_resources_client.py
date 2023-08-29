@@ -1,7 +1,6 @@
 import pytest
 
-from mlclient import MLResourceClient
-from mlclient.calls import EvalCall
+from mlclient import MLResourcesClient
 
 
 @pytest.fixture()
@@ -15,20 +14,8 @@ def xquery():
 
 
 @pytest.mark.ml_access()
-def test_call(xquery):
-    eval_call = EvalCall(
-        xquery=xquery,
-        variables={"element": "<parent><child/></parent>"})
-    with MLResourceClient(auth_method="digest") as client:
-        resp = client.call(eval_call)
-
-    assert resp.status_code == 200
-    assert "<new-parent><child/></new-parent>" in resp.text
-
-
-@pytest.mark.ml_access()
 def test_eval(xquery):
-    with MLResourceClient(auth_method="digest") as client:
+    with MLResourcesClient(auth_method="digest") as client:
         resp = client.eval(
             xquery=xquery,
             variables={"element": "<parent><child/></parent>"})
@@ -39,7 +26,7 @@ def test_eval(xquery):
 
 @pytest.mark.ml_access()
 def test_get_logs():
-    with MLResourceClient(auth_method="digest") as client:
+    with MLResourcesClient(auth_method="digest") as client:
         resp = client.get_logs(filename="ErrorLog.txt", data_format="json")
 
     assert resp.status_code == 200
@@ -48,7 +35,7 @@ def test_get_logs():
 
 @pytest.mark.ml_access()
 def test_get_databases():
-    with MLResourceClient(auth_method="digest") as client:
+    with MLResourcesClient(auth_method="digest") as client:
         resp = client.get_databases(data_format="json")
 
     expected_uri = "/manage/v2/databases?view=default"
@@ -59,7 +46,7 @@ def test_get_databases():
 @pytest.mark.ml_access()
 def test_post_databases():
     body = '<database-properties xmlns="http://marklogic.com/manage" />'
-    with MLResourceClient(auth_method="digest") as client:
+    with MLResourcesClient(auth_method="digest") as client:
         resp = client.post_databases(body=body)
 
     assert resp.status_code == 400
@@ -69,7 +56,7 @@ def test_post_databases():
 
 @pytest.mark.ml_access()
 def test_get_database():
-    with MLResourceClient(auth_method="digest") as client:
+    with MLResourcesClient(auth_method="digest") as client:
         resp = client.get_database(database="Documents", data_format="json")
 
     expected_uri = "/manage/v2/databases/Documents?view=default"
@@ -79,7 +66,7 @@ def test_get_database():
 
 @pytest.mark.ml_access()
 def test_post_database():
-    with MLResourceClient(auth_method="digest") as client:
+    with MLResourcesClient(auth_method="digest") as client:
         resp = client.post_database(
             database="Documents",
             body={"operation": "clear-database"})
@@ -90,7 +77,7 @@ def test_post_database():
 
 @pytest.mark.ml_access()
 def test_delete_database():
-    with MLResourceClient(auth_method="digest") as client:
+    with MLResourcesClient(auth_method="digest") as client:
         resp = client.delete_database(database="custom-db")
 
     assert resp.status_code == 204
@@ -99,7 +86,7 @@ def test_delete_database():
 
 @pytest.mark.ml_access()
 def test_get_database_properties():
-    with MLResourceClient(auth_method="digest") as client:
+    with MLResourcesClient(auth_method="digest") as client:
         resp = client.get_database_properties(database="Documents", data_format="json")
 
     assert resp.status_code == 200
@@ -108,7 +95,7 @@ def test_get_database_properties():
 
 @pytest.mark.ml_access()
 def test_put_database_properties():
-    with MLResourceClient(auth_method="digest") as client:
+    with MLResourcesClient(auth_method="digest") as client:
         resp = client.put_database_properties(
             database="non-existing-db",
             body={"database-name": "custom-db"})
@@ -119,7 +106,7 @@ def test_put_database_properties():
 
 @pytest.mark.ml_access()
 def test_get_servers():
-    with MLResourceClient(auth_method="digest") as client:
+    with MLResourcesClient(auth_method="digest") as client:
         resp = client.get_servers(data_format="json")
 
     expected_uri = "/manage/v2/servers?view=default"
@@ -129,7 +116,7 @@ def test_get_servers():
 
 @pytest.mark.ml_access()
 def test_post_servers():
-    with MLResourceClient(auth_method="digest") as client:
+    with MLResourcesClient(auth_method="digest") as client:
         resp = client.post_servers(
             group_id="Default",
             server_type="http",
@@ -142,7 +129,7 @@ def test_post_servers():
 
 @pytest.mark.ml_access()
 def test_get_server():
-    with MLResourceClient(auth_method="digest") as client:
+    with MLResourcesClient(auth_method="digest") as client:
         resp = client.get_server(
             server="App-Services",
             group_id="Default",
@@ -155,7 +142,7 @@ def test_get_server():
 
 @pytest.mark.ml_access()
 def test_delete_server():
-    with MLResourceClient(auth_method="digest") as client:
+    with MLResourcesClient(auth_method="digest") as client:
         resp = client.delete_server(server="Non-existing-server",
                                     group_id="Non-existing-group")
 
@@ -165,7 +152,7 @@ def test_delete_server():
 
 @pytest.mark.ml_access()
 def test_get_server_properties():
-    with MLResourceClient(auth_method="digest") as client:
+    with MLResourcesClient(auth_method="digest") as client:
         resp = client.get_server_properties(
             server="App-Services",
             group_id="Default",
@@ -177,7 +164,7 @@ def test_get_server_properties():
 
 @pytest.mark.ml_access()
 def test_put_server_properties():
-    with MLResourceClient(auth_method="digest") as client:
+    with MLResourcesClient(auth_method="digest") as client:
         resp = client.put_server_properties(server="non-existing-server",
                                             group_id="non-existing-group",
                                             body={"server-name": "non-existing-server"})
@@ -188,7 +175,7 @@ def test_put_server_properties():
 
 @pytest.mark.ml_access()
 def test_get_forests():
-    with MLResourceClient(auth_method="digest") as client:
+    with MLResourcesClient(auth_method="digest") as client:
         resp = client.get_forests(data_format="json", database="Documents")
 
     expected_uri = "/manage/v2/forests?view=default&database-id=Documents"
@@ -199,7 +186,7 @@ def test_get_forests():
 @pytest.mark.ml_access()
 def test_post_forests():
     body = '<forest-create xmlns="http://marklogic.com/manage" />'
-    with MLResourceClient(auth_method="digest") as client:
+    with MLResourcesClient(auth_method="digest") as client:
         resp = client.post_forests(body=body)
 
     assert resp.status_code == 500
@@ -208,7 +195,7 @@ def test_post_forests():
 @pytest.mark.ml_access()
 def test_put_forests():
     body = '<forest-migrate xmlns="http://marklogic.com/manage" />'
-    with MLResourceClient(auth_method="digest") as client:
+    with MLResourcesClient(auth_method="digest") as client:
         resp = client.put_forests(body=body)
 
     assert resp.status_code == 400
@@ -218,7 +205,7 @@ def test_put_forests():
 
 @pytest.mark.ml_access()
 def test_get_forest():
-    with MLResourceClient(auth_method="digest") as client:
+    with MLResourcesClient(auth_method="digest") as client:
         resp = client.get_forest(forest="Documents", data_format="json")
 
     expected_uri = "/manage/v2/forests/Documents?view=default"
@@ -228,7 +215,7 @@ def test_get_forest():
 
 @pytest.mark.ml_access()
 def test_post_forest():
-    with MLResourceClient(auth_method="digest") as client:
+    with MLResourcesClient(auth_method="digest") as client:
         resp = client.post_forest(forest="aaa", body={"state": "clear"})
 
     assert resp.status_code == 404
@@ -237,7 +224,7 @@ def test_post_forest():
 
 @pytest.mark.ml_access()
 def test_delete_forest():
-    with MLResourceClient(auth_method="digest") as client:
+    with MLResourcesClient(auth_method="digest") as client:
         client.post_forests(body={"forest-name": "aaa"})
         resp = client.delete_forest(forest="aaa", level="full")
 
@@ -247,7 +234,7 @@ def test_delete_forest():
 
 @pytest.mark.ml_access()
 def test_get_forest_properties():
-    with MLResourceClient(auth_method="digest") as client:
+    with MLResourcesClient(auth_method="digest") as client:
         resp = client.get_forest_properties(forest="Documents", data_format="json")
 
     assert resp.status_code == 200
@@ -256,7 +243,7 @@ def test_get_forest_properties():
 
 @pytest.mark.ml_access()
 def test_put_forest_properties():
-    with MLResourceClient(auth_method="digest") as client:
+    with MLResourcesClient(auth_method="digest") as client:
         resp = client.put_forest_properties(
             forest="non-existing-forest",
             body={"forest-name": "custom-forest"})
@@ -267,7 +254,7 @@ def test_put_forest_properties():
 
 @pytest.mark.ml_access()
 def test_get_roles():
-    with MLResourceClient(auth_method="digest") as client:
+    with MLResourcesClient(auth_method="digest") as client:
         resp = client.get_roles(data_format="json")
 
     expected_uri = "/manage/v2/roles?view=default"
@@ -278,7 +265,7 @@ def test_get_roles():
 @pytest.mark.ml_access()
 def test_post_roles():
     body = '<role-properties xmlns="http://marklogic.com/manage/role/properties" />'
-    with MLResourceClient(auth_method="digest") as client:
+    with MLResourcesClient(auth_method="digest") as client:
         resp = client.post_roles(body=body)
 
     assert resp.status_code == 400
@@ -287,7 +274,7 @@ def test_post_roles():
 
 @pytest.mark.ml_access()
 def test_get_role():
-    with MLResourceClient(auth_method="digest") as client:
+    with MLResourcesClient(auth_method="digest") as client:
         resp = client.get_role(role="admin", data_format="json")
 
     expected_uri = "/manage/v2/roles/admin?view=default"
@@ -297,7 +284,7 @@ def test_get_role():
 
 @pytest.mark.ml_access()
 def test_delete_role():
-    with MLResourceClient(auth_method="digest") as client:
+    with MLResourcesClient(auth_method="digest") as client:
         resp = client.delete_role(role="custom-role")
 
     assert resp.status_code == 204
@@ -306,7 +293,7 @@ def test_delete_role():
 
 @pytest.mark.ml_access()
 def test_get_role_properties():
-    with MLResourceClient(auth_method="digest") as client:
+    with MLResourcesClient(auth_method="digest") as client:
         resp = client.get_role_properties(role="admin", data_format="json")
 
     assert resp.status_code == 200
@@ -315,7 +302,7 @@ def test_get_role_properties():
 
 @pytest.mark.ml_access()
 def test_put_role_properties():
-    with MLResourceClient(auth_method="digest") as client:
+    with MLResourcesClient(auth_method="digest") as client:
         resp = client.put_role_properties(
             role="non-existing-role",
             body={"role-name": "custom-db"})
@@ -327,7 +314,7 @@ def test_put_role_properties():
 
 @pytest.mark.ml_access()
 def test_get_users():
-    with MLResourceClient(auth_method="digest") as client:
+    with MLResourcesClient(auth_method="digest") as client:
         resp = client.get_users(data_format="json")
 
     expected_uri = "/manage/v2/users?view=default"
@@ -338,7 +325,7 @@ def test_get_users():
 @pytest.mark.ml_access()
 def test_post_users():
     body = '<user-properties xmlns="http://marklogic.com/manage/user/properties" />'
-    with MLResourceClient(auth_method="digest") as client:
+    with MLResourcesClient(auth_method="digest") as client:
         resp = client.post_users(body=body)
 
     assert resp.status_code == 400
@@ -347,7 +334,7 @@ def test_post_users():
 
 @pytest.mark.ml_access()
 def test_get_user():
-    with MLResourceClient(auth_method="digest") as client:
+    with MLResourcesClient(auth_method="digest") as client:
         resp = client.get_user(user="admin", data_format="json")
 
     expected_uri = "/manage/v2/users/admin?view=default"
@@ -357,7 +344,7 @@ def test_get_user():
 
 @pytest.mark.ml_access()
 def test_delete_user():
-    with MLResourceClient(auth_method="digest") as client:
+    with MLResourcesClient(auth_method="digest") as client:
         resp = client.delete_user(user="custom-user")
 
     assert resp.status_code == 404
@@ -366,7 +353,7 @@ def test_delete_user():
 
 @pytest.mark.ml_access()
 def test_get_user_properties():
-    with MLResourceClient(auth_method="digest") as client:
+    with MLResourcesClient(auth_method="digest") as client:
         resp = client.get_user_properties(
             user="admin",
             data_format="json")
@@ -377,7 +364,7 @@ def test_get_user_properties():
 
 @pytest.mark.ml_access()
 def test_put_user_properties():
-    with MLResourceClient(auth_method="digest") as client:
+    with MLResourcesClient(auth_method="digest") as client:
         resp = client.put_user_properties(
             user="non-existing-user",
             body={"user-name": "custom-db"})

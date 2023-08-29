@@ -1,8 +1,4 @@
-import os
-import shutil
 import sys
-from pathlib import Path
-from time import sleep
 
 import pytest
 from cleo.testers.command_tester import CommandTester
@@ -10,27 +6,20 @@ from cleo.testers.command_tester import CommandTester
 import mlclient
 from cli import main
 from cli.ml_cli import MLCLIentApplication
-from mlclient import MLManager, constants
 from tests import tools
+
+test_helper = tools.TestHelper("test")
 
 
 @pytest.fixture(scope="module", autouse=True)
 def _setup_and_teardown():
     # Setup
-    ml_client_dir = Path(constants.ML_CLIENT_DIR)
-    if not ml_client_dir.exists() or not ml_client_dir.is_dir():
-        ml_client_dir.mkdir()
-    for file_name in tools.list_resources(__file__):
-        file_path = tools.get_test_resource_path(__file__, file_name)
-        shutil.copy(file_path, constants.ML_CLIENT_DIR)
+    test_helper.setup_environment()
 
     yield
 
     # Teardown
-    for file_name in tools.list_resources(__file__):
-        Path(f"{constants.ML_CLIENT_DIR}/{file_name}").unlink()
-    if ml_client_dir.exists() and not os.listdir(constants.ML_CLIENT_DIR):
-        ml_client_dir.rmdir()
+    test_helper.clean_environment()
 
 
 def test_main_sys_exit_1():
@@ -62,10 +51,10 @@ def test_command_call_logs():
     assert command_environment == "test"
     assert command_app_server == "manage"
     assert "Getting logs from http://localhost:8002" in tester.io.fetch_output()
-    _confirm_last_request(
-        environment=command_environment,
+    test_helper.confirm_last_request(
         app_server=command_app_server,
-        request="GET /manage/v2/logs?format=json&filename=8002_ErrorLog.txt")
+        request_method="GET",
+        request_url="/manage/v2/logs?format=json&filename=8002_ErrorLog.txt")
 
 
 def _get_tester(
@@ -75,24 +64,3 @@ def _get_tester(
     app = MLCLIentApplication()
     command = app.find(command_name)
     return CommandTester(command)
-
-
-def _confirm_last_request(
-        environment: str,
-        app_server: str,
-        request: str,
-):
-    """Verifies the last request being sent.
-
-    This function reaches access logs and extracts last request of the app server.
-    Every request generates two logs and one of them includes username.
-    We filter out redundant logs to get a single log per request.
-    """
-    sleep(1)
-    with MLManager(environment).get_resource_client(app_server) as client:
-        filename = f"{client.port}_AccessLog.txt"
-        resp = client.get_logs(filename=filename, data_format="json")
-        logs = [log
-                for log in resp.json()["logfile"]["message"].split("\n")
-                if log != "" and f"- {client.username} " not in log]
-        assert request in logs[-1]

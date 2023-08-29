@@ -8,6 +8,8 @@ It exports a single function:
 
 from __future__ import annotations
 
+from typing import Iterator
+
 from cleo.application import Application
 from cleo.commands.command import Command
 from cleo.formatters.style import Style
@@ -78,33 +80,33 @@ class CallLogsCommand(Command):
     def handle(
             self,
     ) -> int:
-        environment = self.option("environment")
-        app_server = self.option("app-server")
-        logs = self._get_logs(environment, app_server)
-        self._io.write(self._styled_logs(logs), new_line=True)
+        logs = self._get_logs()
+        styled_logs = self._styled_logs(logs)
+        self._io.write(styled_logs, new_line=True)
         return 0
 
     def _get_logs(
             self,
-            environment: str,
-            app_server: str,
-    ) -> list[dict]:
+    ) -> Iterator[dict]:
+        environment = self.option("environment")
+        app_server = self.option("app-server")
+        # start_time = self.option("from")
+        # end_time = self.option("to")
+        # regex = self.option("regex")
         manager = MLManager(environment)
-        with manager.get_resource_client(app_server) as client:
+        with manager.get_logs_client(app_server) as client:
             self.line(f"Getting logs from {client.base_url}\n")
-            resp = client.get_logs(
-                filename=f"{client.port}_ErrorLog.txt",
-                data_format="json",
+            return client.get_logs(
+                app_server_port=client.port,
                 # start_time=self.option("from"),
                 # end_time=self.option("to"),
                 # regex=self.option("regex"),
             )
-            return resp.json()["logfile"]["log"]
 
     @staticmethod
     def _styled_logs(
-            logs: list[dict],
-    ) -> str:
+            logs: Iterator[dict],
+    ) -> Iterator[str]:
         for log_dict in sorted(logs, key=lambda log: log["timestamp"]):
             timestamp = log_dict["timestamp"]
             level = log_dict["level"].upper()

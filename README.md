@@ -31,16 +31,16 @@ App-Services
 --6a5df7d535c71968--
 ```
 
-Medium-level **MLResourceClient**:
+Medium-level **MLResourcesClient**:
 ```python
->>> from mlclient import MLResourceClient
+>>> from mlclient import MLResourcesClient
 >>> config = {
 ...     "host": "localhost",
 ...     "port": 8002,
 ...     "username": "admin",
 ...     "password": "admin",
 ... }
->>> with MLResourceClient(**config) as client:
+>>> with MLResourcesClient(**config) as client:
 ...     resp = client.eval(xquery="xdmp:database() => xdmp:database-name()")
 ...     print(resp.text)
 ...
@@ -54,14 +54,14 @@ App-Services
 
 Parsed response :
 ```python
->>> from mlclient import MLResourceClient, MLResponseParser
+>>> from mlclient import MLResourcesClient, MLResponseParser
 >>> config = {
 ...     "host": "localhost",
 ...     "port": 8002,
 ...     "username": "admin",
 ...     "password": "admin",
 ... }
->>> with MLResourceClient(**config) as client:
+>>> with MLResourcesClient(**config) as client:
 ...     resp = client.eval(xquery="xdmp:database() => xdmp:database-name()")
 ...     parsed_resp = MLResponseParser.parse(resp)
 ...     print(parsed_resp)

@@ -11,6 +11,8 @@ It contains all custom exceptions related to ML Client:
         A custom Exception class for a non-existing MLClient environment.
     * NoSuchAppServerError
         A custom Exception class for a non-existing app server configuration.
+    * MarkLogicError
+        A custom Exception class representing MarkLogic errors.
 """
 from __future__ import annotations
 
@@ -48,3 +50,27 @@ class NoSuchAppServerError(Exception):
 
     Raised when getting an app server config from an MLConfiguration instance.
     """
+
+
+class MarkLogicError(Exception):
+    """A custom Exception class representing MarkLogic errors.
+
+    Raised whenever an ML server returns an error.
+    """
+
+    def __init__(
+            self,
+            error: dict,
+    ):
+        """Initialize MarkLogicError instance.
+
+        Parameters
+        ----------
+        error : dict
+            An error response object
+        """
+        status_code = error["statusCode"]
+        status = error["status"]
+        msg_code = error["messageCode"]
+        msg = error["message"]
+        super().__init__(f"[{status_code} {status}] ({msg_code}) {msg}")

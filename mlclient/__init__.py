@@ -3,8 +3,6 @@
 The root package of Python API to manage MarkLogic instance. It contains the most
 generic modules:
 
-    * ml_client
-        The ML Client module.
     * ml_config
         The ML Configuration module.
     * ml_manager
@@ -20,7 +18,9 @@ This package exports the following classes:
     * MLClient
         A low-level class used to send simple HTTP requests to a MarkLogic instance.
     * MLResourceClient
-        An MLClient subclass supporting internal REST Resources of the MarkLogic server.
+        A MLClient subclass calling ResourceCall implementation classes.
+    * MLResourcesClient
+        A MLResourceClient subclass supporting REST Resources of the MarkLogic server.
     * MLResponseParser
         A MarkLogic HTTP response parser.
     * MLConfiguration
@@ -30,15 +30,16 @@ This package exports the following classes:
 
 Examples
 --------
->>> from mlclient import MLResourceClient
+>>> from mlclient import MLResourcesClient
 """
 from __future__ import annotations
 
-from .ml_client import MLClient, MLResourceClient, MLResponseParser
+from .clients import (MLClient, MLResourceClient, MLResourcesClient,
+                      MLResponseParser)
 from .ml_config import MLConfiguration
 from .ml_manager import MLManager
 
 __version__ = "0.1.0"
 __all__ = ["__version__",
-           "MLClient", "MLResourceClient", "MLResponseParser",
+           "MLClient", "MLResourceClient", "MLResourcesClient", "MLResponseParser",
            "MLConfiguration", "MLManager"]

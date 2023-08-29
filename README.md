@@ -31,59 +31,42 @@ App-Services
 --6a5df7d535c71968--
 ```
 
-Medium-level **MLResourceClient**:
-
+Medium-level **MLResourcesClient**:
 ```python
->> > from mlclient import MLResourcesClient
->> > config = {
-    ...
-"host": "localhost",
+>>> from mlclient import MLResourcesClient
+>>> config = {
+...     "host": "localhost",
+...     "port": 8002,
+...     "username": "admin",
+...     "password": "admin",
+... }
+>>> with MLResourcesClient(**config) as client:
+...     resp = client.eval(xquery="xdmp:database() => xdmp:database-name()")
+...     print(resp.text)
 ...
-"port": 8002,
-...
-"username": "admin",
-...
-"password": "admin",
-...}
->> > with MLResourcesClient(**config) as client:
-    ...
-resp = client.eval(xquery="xdmp:database() => xdmp:database-name()")
-...
-print(resp.text)
-...
---6
-a5df7d535c71968
-Content - Type: text / plain
-X - Primitive: string
+--6a5df7d535c71968
+Content-Type: text/plain
+X-Primitive: string
 
-App - Services
---6
-a5df7d535c71968 - -
+App-Services
+--6a5df7d535c71968--
 ```
 
 Parsed response :
-
 ```python
->> > from mlclient import MLResourcesClient, MLResponseParser
->> > config = {
-    ...
-"host": "localhost",
+>>> from mlclient import MLResourcesClient, MLResponseParser
+>>> config = {
+...     "host": "localhost",
+...     "port": 8002,
+...     "username": "admin",
+...     "password": "admin",
+... }
+>>> with MLResourcesClient(**config) as client:
+...     resp = client.eval(xquery="xdmp:database() => xdmp:database-name()")
+...     parsed_resp = MLResponseParser.parse(resp)
+...     print(parsed_resp)
 ...
-"port": 8002,
-...
-"username": "admin",
-...
-"password": "admin",
-...}
->> > with MLResourcesClient(**config) as client:
-    ...
-resp = client.eval(xquery="xdmp:database() => xdmp:database-name()")
-...
-parsed_resp = MLResponseParser.parse(resp)
-...
-print(parsed_resp)
-...
-App - Services
+App-Services
 ```
 
 ## Installation

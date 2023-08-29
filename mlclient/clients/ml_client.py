@@ -4,9 +4,9 @@ It exports 2 classes:
     * MLClient
         A low-level class used to send simple HTTP requests to a MarkLogic instance.
     * MLResourceClient
-        A MLClient subclass calling ResourceCall implementation classes.
-    * MLResourceClient
-        A MLResourceClient subclass supporting REST Resources of the MarkLogic server.
+        An MLClient subclass calling ResourceCall implementation classes.
+    * MLResourcesClient
+        An MLResourceClient subclass supporting REST Resources of the MarkLogic server.
     * MLResponseParser
         A MarkLogic HTTP response parser.
 """
@@ -360,7 +360,7 @@ class MLClient:
 
 
 class MLResourceClient(MLClient):
-    """A MLClient subclass calling ResourceCall implementation classes.
+    """An MLClient subclass calling ResourceCall implementation classes.
 
     It can connect with the MarkLogic Server as a Context Manager or explicitly by
     using the connect method.
@@ -419,7 +419,7 @@ class MLResourceClient(MLClient):
 
 
 class MLResourcesClient(MLResourceClient):
-    """A MLResourceClient subclass supporting REST Resources of the MarkLogic server.
+    """An MLResourceClient subclass supporting REST Resources of the MarkLogic server.
 
     It can connect with the MarkLogic Server as a Context Manager or explicitly by
     using the connect method.

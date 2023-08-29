@@ -125,7 +125,6 @@ max-complexity = 10
 ]
 "mlclient/clients/ml_client.py" = [
     "A003", # allow shadowing eval builtin for consistency
-    "PLR0913" # allow many arguments as they depend on ML REST resource
 ]
 "mlclient/model/data.py" = [
     "PLR0913" # allow many arguments as they depend on ML structure

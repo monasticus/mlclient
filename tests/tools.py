@@ -117,7 +117,7 @@ class TestHelper:
         request_url : str
             A request url
         """
-        sleep(1)
+        sleep(1.5)
         with self._ml_manager.get_resources_client(app_server) as client:
             filename = f"{client.port}_AccessLog.txt"
             resp = client.get_logs(filename=filename, data_format="json")

@@ -41,18 +41,20 @@ def test_app_properties():
     assert app.version == mlclient.__version__
 
 
-def test_command_call_logs():
+def test_command_call_logs_default():
     tester = _get_tester("call logs")
-    tester.execute("-e test")
+    tester.execute("-e test -p 8002")
 
     command_environment = tester.command.option("environment")
-    command_app_server = tester.command.option("app-server")
+    command_rest_server = tester.command.option("rest-server")
+    command_app_port = tester.command.option("app-port")
 
     assert command_environment == "test"
-    assert command_app_server == "manage"
-    assert "Getting logs from http://localhost:8002" in tester.io.fetch_output()
+    assert command_rest_server == "manage"
+    assert command_app_port == "8002"
+    assert "Getting [8002] logs using REST App-Server http://localhost:8002" in tester.io.fetch_output()
     test_helper.confirm_last_request(
-        app_server=command_app_server,
+        app_server_port=int(command_app_port),
         request_method="GET",
         request_url="/manage/v2/logs?format=json&filename=8002_ErrorLog.txt")
 

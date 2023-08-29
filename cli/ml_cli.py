@@ -41,11 +41,17 @@ class CallLogsCommand(Command):
             default="local",
         ),
         option(
-            "app-server",
+            "rest-server",
             "s",
-            description="The ML Client environment name",
+            description="The ML REST App-Server environmental id",
             flag=False,
             default="manage",
+        ),
+        option(
+            "app-port",
+            "p",
+            description="The App-Server port to get logs from",
+            flag=False,
         ),
         # option(
         #     "log-type",
@@ -89,15 +95,16 @@ class CallLogsCommand(Command):
             self,
     ) -> Iterator[dict]:
         environment = self.option("environment")
-        app_server = self.option("app-server")
+        rest_server = self.option("rest-server")
+        app_port = int(self.option("app-port"))
         # start_time = self.option("from")
         # end_time = self.option("to")
         # regex = self.option("regex")
         manager = MLManager(environment)
-        with manager.get_logs_client(app_server) as client:
-            self.line(f"Getting logs from {client.base_url}\n")
+        with manager.get_logs_client(rest_server) as client:
+            self.line(f"Getting [{app_port}] logs using REST App-Server {client.base_url}\n")
             return client.get_logs(
-                app_server_port=client.port,
+                app_server_port=app_port,
                 # start_time=self.option("from"),
                 # end_time=self.option("to"),
                 # regex=self.option("regex"),

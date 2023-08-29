@@ -199,7 +199,8 @@ def _confirm_last_request(
 ):
     params = urllib.parse.urlencode(request_params).replace("%2B", "+")
     request_url = f"/manage/v2/logs?{params}"
+
     test_helper.confirm_last_request(
-        app_server="manage",
+        app_server_port=test_helper.config.provide_config("manage")["port"],
         request_method="GET",
         request_url=request_url)

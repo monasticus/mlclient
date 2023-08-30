@@ -44,6 +44,11 @@ class MLAppServerConfiguration(BaseModel):
         alias="auth",
         description="An authorization method",
         default=AuthMethod.DIGEST)
+    rest_api: bool = Field(
+        alias="rest-api",
+        description="A flag informing if the App-Server is a REST server",
+        default=False,
+    )
 
     @field_serializer("auth_method")
     def serialize_auth(
@@ -101,7 +106,7 @@ class MLConfiguration(BaseModel):
         if not app_server:
             msg = f"There's no [{app_server_id}] app server configuration!"
             raise NoSuchAppServerError(msg)
-        app_server_config = app_server.model_dump(exclude={"identifier"})
+        app_server_config = app_server.model_dump(exclude={"identifier", "rest_api"})
         return {**ml_config, **app_server_config}
 
     @classmethod

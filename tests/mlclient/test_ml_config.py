@@ -47,26 +47,31 @@ def test_from_file():
                 "identifier": "manage",
                 "port": 8002,
                 "auth_method": "basic",
+                "rest_api": True,
             },
             {
                 "identifier": "content",
                 "port": 8100,
                 "auth_method": "basic",
+                "rest_api": True,
             },
             {
                 "identifier": "modules",
                 "port": 8101,
                 "auth_method": "basic",
+                "rest_api": False,
             },
             {
                 "identifier": "schemas",
                 "port": 8102,
                 "auth_method": "basic",
+                "rest_api": False,
             },
             {
                 "identifier": "test",
                 "port": 8103,
                 "auth_method": "basic",
+                "rest_api": True,
             },
         ],
     }
@@ -89,6 +94,7 @@ def test_from_file_default_values():
                 "identifier": "manage",
                 "port": 8002,
                 "auth_method": "digest",
+                "rest_api": False,
             },
         ],
     }
@@ -112,26 +118,31 @@ def test_from_environment():
                 "identifier": "manage",
                 "port": 8002,
                 "auth_method": "basic",
+                "rest_api": True,
             },
             {
                 "identifier": "content",
                 "port": 8100,
                 "auth_method": "basic",
+                "rest_api": True,
             },
             {
                 "identifier": "modules",
                 "port": 8101,
                 "auth_method": "basic",
+                "rest_api": False,
             },
             {
                 "identifier": "schemas",
                 "port": 8102,
                 "auth_method": "basic",
+                "rest_api": False,
             },
             {
                 "identifier": "test",
                 "port": 8103,
                 "auth_method": "basic",
+                "rest_api": True,
             },
         ],
     }
@@ -155,6 +166,7 @@ def test_from_environment_default():
                 "identifier": "manage",
                 "port": 8002,
                 "auth_method": "digest",
+                "rest_api": False,
             },
         ],
     }
@@ -190,6 +202,7 @@ def test_from_environment_in_child_directory():
                 "identifier": "manage",
                 "port": 8002,
                 "auth_method": "digest",
+                "rest_api": False,
             },
         ],
     }

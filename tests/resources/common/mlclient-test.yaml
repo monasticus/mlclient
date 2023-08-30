@@ -8,3 +8,4 @@ app-servers:
   - id: manage
     port: 8002
     auth: digest
+    rest-server: true

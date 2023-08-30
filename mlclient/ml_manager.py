@@ -9,6 +9,7 @@ from __future__ import annotations
 
 from mlclient import MLClient, MLConfiguration, MLResourcesClient
 from mlclient.clients import LogsClient
+from mlclient.exceptions import NotARestServerError, NoRestServerConfiguredError
 
 
 class MLManager:
@@ -100,20 +101,40 @@ class MLManager:
 
     def get_resources_client(
             self,
-            app_server_id: str,
+            app_server_id: str | None = None,
     ) -> MLResourcesClient:
         """Initialize an MLResourcesClient instance for a specific App Server.
 
+        If the no identifier is provided - it returns a client of a first configured
+        REST server within an environment.
+
         Parameters
         ----------
-        app_server_id : str
+        app_server_id : str | None, default None
             An App Server identifier
 
         Returns
         -------
         MLResourcesClient
             An MLResourcesClient instance
+
+        Raises
+        ------
+        NotARestServerError
+            If the App-Server identifier does not point to a REST server
+        NoRestServerConfiguredError
+            If an identifier has not been provided and there's no REST servers
+            configured for the environment
         """
+        if app_server_id is None:
+            if len(self.config.rest_servers) == 0:
+                env = self.environment_name
+                msg = f"No REST server is configured for the [{env}] environment."
+                raise NoRestServerConfiguredError(msg)
+            app_server_id = self.config.rest_servers[0]
+        elif app_server_id not in self.config.rest_servers:
+            msg = f"[{app_server_id}] App-Server is not configured as a REST one."
+            raise NotARestServerError(msg)
         app_server_config = self.config.provide_config(app_server_id)
         return MLResourcesClient(**app_server_config)
 

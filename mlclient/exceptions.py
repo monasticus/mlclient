@@ -11,6 +11,10 @@ It contains all custom exceptions related to ML Client:
         A custom Exception class for a non-existing MLClient environment.
     * NoSuchAppServerError
         A custom Exception class for a non-existing app server configuration.
+    * NotARestServerError
+        A custom Exception class for a regular App-Server used as a REST Server.
+    * NoRestServerConfiguredError
+        A custom Exception class for no REST Server configured when required.
     * MarkLogicError
         A custom Exception class representing MarkLogic errors.
 """
@@ -49,6 +53,20 @@ class NoSuchAppServerError(Exception):
     """A custom Exception class for a non-existing app server configuration.
 
     Raised when getting an app server config from an MLConfiguration instance.
+    """
+
+
+class NotARestServerError(Exception):
+    """A custom Exception class for a regular App-Server used as a REST Server.
+
+    Raised while getting an app server config not being a REST server.
+    """
+
+
+class NoRestServerConfiguredError(Exception):
+    """A custom Exception class for no REST Server configured when required.
+
+    Raised while getting an app server config when no REST server is configured.
     """
 
 

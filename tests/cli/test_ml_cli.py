@@ -53,12 +53,14 @@ def test_command_call_logs_basic():
     command_app_port = tester.command.option("app-port")
     command_from = tester.command.option("from")
     command_to = tester.command.option("to")
+    command_regex = tester.command.option("regex")
 
     assert command_environment == "test"
     assert command_rest_server is None
     assert command_app_port == "8002"
     assert command_from is None
     assert command_to is None
+    assert command_regex is None
     assert "Getting [8002] logs using REST App-Server http://localhost:8002" in tester.io.fetch_output()
 
     _confirm_last_request(
@@ -78,12 +80,14 @@ def test_command_call_logs_custom_rest_server():
     command_app_port = tester.command.option("app-port")
     command_from = tester.command.option("from")
     command_to = tester.command.option("to")
+    command_regex = tester.command.option("regex")
 
     assert command_environment == "test"
     assert command_rest_server == "manage"
     assert command_app_port == "8002"
     assert command_from is None
     assert command_to is None
+    assert command_regex is None
     assert "Getting [8002] logs using REST App-Server http://localhost:8002" in tester.io.fetch_output()
 
     _confirm_last_request(
@@ -103,12 +107,14 @@ def test_command_call_logs_from():
     command_app_port = tester.command.option("app-port")
     command_from = tester.command.option("from")
     command_to = tester.command.option("to")
+    command_regex = tester.command.option("regex")
 
     assert command_environment == "test"
     assert command_rest_server is None
     assert command_app_port == "8002"
     assert command_from == "1970-01-01"
     assert command_to is None
+    assert command_regex is None
     assert "Getting [8002] logs using REST App-Server http://localhost:8002" in tester.io.fetch_output()
 
     _confirm_last_request(
@@ -129,12 +135,14 @@ def test_command_call_logs_to():
     command_app_port = tester.command.option("app-port")
     command_from = tester.command.option("from")
     command_to = tester.command.option("to")
+    command_regex = tester.command.option("regex")
 
     assert command_environment == "test"
     assert command_rest_server is None
     assert command_app_port == "8002"
     assert command_from is None
     assert command_to == "1984-01-01"
+    assert command_regex is None
     assert "Getting [8002] logs using REST App-Server http://localhost:8002" in tester.io.fetch_output()
 
     _confirm_last_request(
@@ -143,6 +151,34 @@ def test_command_call_logs_to():
             "format": "json",
             "filename": "8002_ErrorLog.txt",
             "end": "1984-01-01T00:00:00",
+        })
+
+
+def test_command_call_logs_regex():
+    tester = _get_tester("call logs")
+    tester.execute("-e test -p 8002 -r you-will-not-find-it")
+
+    command_environment = tester.command.option("environment")
+    command_rest_server = tester.command.option("rest-server")
+    command_app_port = tester.command.option("app-port")
+    command_from = tester.command.option("from")
+    command_to = tester.command.option("to")
+    command_regex = tester.command.option("regex")
+
+    assert command_environment == "test"
+    assert command_rest_server is None
+    assert command_app_port == "8002"
+    assert command_from is None
+    assert command_to is None
+    assert command_regex == "you-will-not-find-it"
+    assert "Getting [8002] logs using REST App-Server http://localhost:8002" in tester.io.fetch_output()
+
+    _confirm_last_request(
+        command_rest_server,
+        {
+            "format": "json",
+            "filename": "8002_ErrorLog.txt",
+            "regex": "you-will-not-find-it",
         })
 
 

@@ -74,13 +74,13 @@ class CallLogsCommand(Command):
             flag=False,
             value_required=False,
         ),
-        # option(
-        #     "regex",
-        #     "r",
-        #     description="Filters the error log data, based on a regular expression",
-        #     flag=False,
-        #     value_required=False,
-        # ),
+        option(
+            "regex",
+            "r",
+            description="Filters the error log data, based on a regular expression",
+            flag=False,
+            value_required=False,
+        ),
     ]
 
     def handle(
@@ -99,7 +99,7 @@ class CallLogsCommand(Command):
         app_port = int(self.option("app-port"))
         start_time = self.option("from")
         end_time = self.option("to")
-        # regex = self.option("regex")
+        regex = self.option("regex")
         manager = MLManager(environment)
         with manager.get_logs_client(rest_server) as client:
             self.line(f"Getting [{app_port}] logs using REST App-Server {client.base_url}\n")
@@ -107,7 +107,7 @@ class CallLogsCommand(Command):
                 app_server_port=app_port,
                 start_time=start_time,
                 end_time=end_time,
-                # regex=self.option("regex"),
+                regex=regex,
             )
 
     @staticmethod

@@ -5,7 +5,7 @@ import shutil
 from pathlib import Path
 from time import sleep
 
-from mlclient import MLManager, constants, MLConfiguration
+from mlclient import MLConfiguration, MLManager, constants
 
 _SCRIPT_DIR = Path(__file__).resolve()
 _RESOURCES_DIR = "resources"

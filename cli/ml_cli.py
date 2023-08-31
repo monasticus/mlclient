@@ -41,16 +41,15 @@ class CallLogsCommand(Command):
             default="local",
         ),
         option(
-            "rest-server",
-            "s",
-            description="The ML REST App-Server environmental id",
-            flag=False,
-            default="manage",
-        ),
-        option(
             "app-port",
             "p",
             description="The App-Server port to get logs from",
+            flag=False,
+        ),
+        option(
+            "rest-server",
+            "s",
+            description="The ML REST Server environmental id",
             flag=False,
         ),
         # option(

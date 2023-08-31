@@ -21,6 +21,7 @@ from cleo.io.outputs.output import Output
 
 from mlclient import MLManager
 from mlclient import __version__ as ml_client_version
+from mlclient.clients import LogType
 
 
 class CallLogsCommand(Command):
@@ -53,13 +54,13 @@ class CallLogsCommand(Command):
             description="The ML REST Server environmental id",
             flag=False,
         ),
-        # option(
-        #     "log-type",
-        #     "l",
-        #     description="MarkLogic logs type",
-        #     flag=False,
-        #     default="error",
-        # ),
+        option(
+            "log-type",
+            "l",
+            description="MarkLogic log type (error, access or request)",
+            flag=False,
+            default="error",
+        ),
         option(
             "from",
             "f",
@@ -90,8 +91,8 @@ class CallLogsCommand(Command):
             self,
     ) -> int:
         logs = self._get_logs()
-        styled_logs = self._styled_logs(logs)
-        self._io.write(styled_logs, new_line=True)
+        parsed_logs = self._parse_logs(logs)
+        self._io.write(parsed_logs, new_line=True)
         return 0
 
     def _get_logs(
@@ -99,7 +100,8 @@ class CallLogsCommand(Command):
     ) -> Iterator[dict]:
         environment = self.option("environment")
         rest_server = self.option("rest-server")
-        app_port = int(self.option("app-port"))
+        app_port = self.option("app-port")
+        log_type = self.option("log-type").lower()
         start_time = self.option("from")
         end_time = self.option("to")
         regex = self.option("regex")
@@ -107,24 +109,29 @@ class CallLogsCommand(Command):
 
         manager = MLManager(environment)
         with manager.get_logs_client(rest_server) as client:
-            self.line(f"Getting [{app_port}] logs using REST App-Server {client.base_url}\n")
+            self.line(f"Getting [{app_port}] {log_type} logs using REST App-Server {client.base_url}\n")
             return client.get_logs(
-                app_server_port=app_port,
+                app_server_port=int(app_port),
+                log_type=LogType.get(log_type),
                 start_time=start_time,
                 end_time=end_time,
                 regex=regex,
                 host=host,
             )
 
-    @staticmethod
-    def _styled_logs(
+    def _parse_logs(
+            self,
             logs: Iterator[dict],
     ) -> Iterator[str]:
-        for log_dict in sorted(logs, key=lambda log: log["timestamp"]):
-            timestamp = log_dict["timestamp"]
-            level = log_dict["level"].upper()
-            msg = log_dict["message"]
-            yield f"<time>{timestamp}</> <log-level>{level}</>: {msg}"
+        if self.option("log-type").lower() != "error":
+            for log_dict in logs:
+                yield log_dict["message"]
+        else:
+            for log_dict in logs:
+                timestamp = log_dict["timestamp"]
+                level = log_dict["level"].upper()
+                msg = log_dict["message"]
+                yield f"<time>{timestamp}</> <log-level>{level}</>: {msg}"
 
 
 class MLCLIentApplication(Application):

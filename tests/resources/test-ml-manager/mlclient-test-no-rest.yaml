@@ -1,19 +1,17 @@
 app-name: my-marklogic-app
 host: localhost
-username: admin
-password: admin
-protocol: http
+username: my-marklogic-app-user
+password: my-marklogic-app-password
+protocol: https
 app-servers:
 
   - id: manage
     port: 8002
     auth: basic
-    rest: true
 
   - id: content
     port: 8100
     auth: basic
-    rest: true
 
   - id: modules
     port: 8101
@@ -26,4 +24,3 @@ app-servers:
   - id: test
     port: 8103
     auth: basic
-    rest: true

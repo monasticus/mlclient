@@ -47,26 +47,31 @@ def test_from_file():
                 "identifier": "manage",
                 "port": 8002,
                 "auth_method": "basic",
+                "rest": True,
             },
             {
                 "identifier": "content",
                 "port": 8100,
                 "auth_method": "basic",
+                "rest": True,
             },
             {
                 "identifier": "modules",
                 "port": 8101,
                 "auth_method": "basic",
+                "rest": False,
             },
             {
                 "identifier": "schemas",
                 "port": 8102,
                 "auth_method": "basic",
+                "rest": False,
             },
             {
                 "identifier": "test",
                 "port": 8103,
                 "auth_method": "basic",
+                "rest": True,
             },
         ],
     }
@@ -89,6 +94,7 @@ def test_from_file_default_values():
                 "identifier": "manage",
                 "port": 8002,
                 "auth_method": "digest",
+                "rest": True,
             },
         ],
     }
@@ -112,26 +118,31 @@ def test_from_environment():
                 "identifier": "manage",
                 "port": 8002,
                 "auth_method": "basic",
+                "rest": True,
             },
             {
                 "identifier": "content",
                 "port": 8100,
                 "auth_method": "basic",
+                "rest": True,
             },
             {
                 "identifier": "modules",
                 "port": 8101,
                 "auth_method": "basic",
+                "rest": False,
             },
             {
                 "identifier": "schemas",
                 "port": 8102,
                 "auth_method": "basic",
+                "rest": False,
             },
             {
                 "identifier": "test",
                 "port": 8103,
                 "auth_method": "basic",
+                "rest": True,
             },
         ],
     }
@@ -155,6 +166,7 @@ def test_from_environment_default():
                 "identifier": "manage",
                 "port": 8002,
                 "auth_method": "digest",
+                "rest": True,
             },
         ],
     }
@@ -190,6 +202,7 @@ def test_from_environment_in_child_directory():
                 "identifier": "manage",
                 "port": 8002,
                 "auth_method": "digest",
+                "rest": True,
             },
         ],
     }
@@ -214,6 +227,13 @@ def test_from_environment_in_parent_directory():
     assert actual_msg == expected_msg
 
     os.chdir(curr_dir)
+
+
+def test_rest_servers():
+    test_config = MLConfiguration.from_environment("test")
+    default_config = MLConfiguration.from_environment("test-default")
+    assert test_config.rest_servers == ["manage", "content", "test"]
+    assert default_config.rest_servers == ["manage"]
 
 
 def test_provide_config():

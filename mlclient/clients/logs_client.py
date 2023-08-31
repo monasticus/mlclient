@@ -108,7 +108,7 @@ class LogsClient(MLResourceClient):
         regex : str | None = None
             A regex to search error logs
         host : str | None = None
-            A host name with logs to retrieve
+            The host from which to return the log data.
 
         Returns
         -------

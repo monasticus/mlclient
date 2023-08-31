@@ -63,23 +63,26 @@ class CallLogsCommand(Command):
         option(
             "from",
             "f",
-            description="The start time for the error log data",
+            description="A start time to search error logs",
             flag=False,
-            value_required=False,
         ),
         option(
             "to",
             "t",
-            description="The end time for the error log data",
+            description="n end time to search error logs",
             flag=False,
-            value_required=False,
         ),
         option(
             "regex",
             "r",
-            description="Filters the error log data, based on a regular expression",
+            description="A regex to search error logs",
             flag=False,
-            value_required=False,
+        ),
+        option(
+            "host",
+            "H",
+            description="The host from which to return the log data.",
+            flag=False,
         ),
     ]
 
@@ -100,6 +103,8 @@ class CallLogsCommand(Command):
         start_time = self.option("from")
         end_time = self.option("to")
         regex = self.option("regex")
+        host = self.option("host")
+
         manager = MLManager(environment)
         with manager.get_logs_client(rest_server) as client:
             self.line(f"Getting [{app_port}] logs using REST App-Server {client.base_url}\n")
@@ -108,6 +113,7 @@ class CallLogsCommand(Command):
                 start_time=start_time,
                 end_time=end_time,
                 regex=regex,
+                host=host,
             )
 
     @staticmethod

@@ -9,7 +9,8 @@ from __future__ import annotations
 
 from mlclient import MLClient, MLConfiguration, MLResourcesClient
 from mlclient.clients import LogsClient
-from mlclient.exceptions import NotARestServerError, NoRestServerConfiguredError
+from mlclient.exceptions import (NoRestServerConfiguredError,
+                                 NotARestServerError)
 
 
 class MLManager:
@@ -126,33 +127,75 @@ class MLManager:
             If an identifier has not been provided and there's no REST servers
             configured for the environment
         """
-        if app_server_id is None:
-            if len(self.config.rest_servers) == 0:
-                env = self.environment_name
-                msg = f"No REST server is configured for the [{env}] environment."
-                raise NoRestServerConfiguredError(msg)
-            app_server_id = self.config.rest_servers[0]
-        elif app_server_id not in self.config.rest_servers:
-            msg = f"[{app_server_id}] App-Server is not configured as a REST one."
-            raise NotARestServerError(msg)
-        app_server_config = self.config.provide_config(app_server_id)
-        return MLResourcesClient(**app_server_config)
+        rest_server_id = self._get_rest_server_id(app_server_id)
+        rest_server_config = self.config.provide_config(rest_server_id)
+        return MLResourcesClient(**rest_server_config)
 
     def get_logs_client(
             self,
-            app_server_id: str,
+            app_server_id: str | None = None,
     ) -> LogsClient:
         """Initialize a LogsClient instance for a specific App Server.
 
+        If the no identifier is provided - it returns a client of a first configured
+        REST server within an environment.
+
         Parameters
         ----------
-        app_server_id : str
+        app_server_id : str | None, default None
             An App Server identifier
 
         Returns
         -------
         LogsClient
-            An LogsClient instance
+            A LogsClient instance
+
+        Raises
+        ------
+        NotARestServerError
+            If the App-Server identifier does not point to a REST server
+        NoRestServerConfiguredError
+            If an identifier has not been provided and there's no REST servers
+            configured for the environment
         """
-        app_server_config = self.config.provide_config(app_server_id)
-        return LogsClient(**app_server_config)
+        rest_server_id = self._get_rest_server_id(app_server_id)
+        rest_server_config = self.config.provide_config(rest_server_id)
+        return LogsClient(**rest_server_config)
+
+    def _get_rest_server_id(
+            self,
+            app_server_id: str | None = None,
+    ) -> str:
+        """Return verified REST Server identifier.
+
+        If the App-Server identifier is None, it tries to find a REST server configured
+        in the environment. Otherwise, it validates if the one provided is REST server.
+
+        Parameters
+        ----------
+        app_server_id : str | None, default None
+            An App Server identifier
+
+        Returns
+        -------
+        str
+            A REST server identifier
+
+        Raises
+        ------
+        NotARestServerError
+            If the App-Server identifier does not point to a REST server
+        NoRestServerConfiguredError
+            If an identifier has not been provided and there's no REST servers
+            configured for the environment
+        """
+        if app_server_id is None:
+            if len(self.config.rest_servers) == 0:
+                env = self.environment_name
+                msg = f"No REST server is configured for the [{env}] environment."
+                raise NoRestServerConfiguredError(msg)
+            return self.config.rest_servers[0]
+        if app_server_id not in self.config.rest_servers:
+            msg = f"[{app_server_id}] App-Server is not configured as a REST one."
+            raise NotARestServerError(msg)
+        return app_server_id

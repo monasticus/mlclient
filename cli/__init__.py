@@ -8,6 +8,6 @@ It exports a single function:
     * main()
         Execute a MLCLIent Job using CLI.
 """
-from .ml_cli import main
+from .app import main
 
 __all__ = ["main"]

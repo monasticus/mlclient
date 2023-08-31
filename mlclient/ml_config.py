@@ -44,8 +44,7 @@ class MLAppServerConfiguration(BaseModel):
         alias="auth",
         description="An authorization method",
         default=AuthMethod.DIGEST)
-    rest_server: bool = Field(
-        alias="rest-server",
+    rest: bool = Field(
         description="A flag informing if the App-Server is a REST server",
         default=False,
     )
@@ -81,11 +80,7 @@ class MLConfiguration(BaseModel):
     app_servers: List[MLAppServerConfiguration] = Field(
         alias="app-servers",
         description="App Servers configurations' list",
-        default=[MLAppServerConfiguration(**{
-            "id": "manage",
-            "port": 8002,
-            "rest-server": True,
-        })])
+        default=[MLAppServerConfiguration(id="manage", port=8002, rest=True)])
 
     @property
     def rest_servers(
@@ -94,7 +89,7 @@ class MLConfiguration(BaseModel):
         """REST servers identifiers."""
         return [app_server.identifier
                 for app_server in self.app_servers
-                if app_server.rest_server]
+                if app_server.rest]
 
     def provide_config(
             self,
@@ -119,7 +114,7 @@ class MLConfiguration(BaseModel):
         if not app_server:
             msg = f"There's no [{app_server_id}] app server configuration!"
             raise NoSuchAppServerError(msg)
-        app_server_config = app_server.model_dump(exclude={"identifier", "rest_server"})
+        app_server_config = app_server.model_dump(exclude={"identifier", "rest"})
         return {**ml_config, **app_server_config}
 
     @classmethod

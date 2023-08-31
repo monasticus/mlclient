@@ -32,8 +32,6 @@ Examples
 --------
 >>> from mlclient import MLResourcesClient
 """
-from __future__ import annotations
-
 from .clients import (MLClient, MLResourceClient, MLResourcesClient,
                       MLResponseParser)
 from .ml_config import MLConfiguration

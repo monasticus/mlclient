@@ -1,10 +1,9 @@
 from __future__ import annotations
 
 import sys
-
-import pytest
 import urllib.parse
 
+import pytest
 from cleo.testers.command_tester import CommandTester
 
 import mlclient

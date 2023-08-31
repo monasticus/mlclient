@@ -26,8 +26,6 @@ Examples
 --------
 >>> from mlclient.clients import MLResourceClient
 """
-from __future__ import annotations
-
 from .ml_client import (MLClient, MLResourceClient, MLResourcesClient,
                         MLResponseParser)
 from .logs_client import LogsClient, LogType

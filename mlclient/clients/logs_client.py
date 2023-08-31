@@ -13,7 +13,7 @@ from typing import Iterator
 
 from mlclient.calls import LogsCall
 from mlclient.clients import MLResourceClient
-from mlclient.exceptions import MarkLogicError, InvalidLogTypeError
+from mlclient.exceptions import InvalidLogTypeError, MarkLogicError
 
 
 class LogType(Enum):

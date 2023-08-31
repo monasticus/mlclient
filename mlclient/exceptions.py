@@ -70,6 +70,14 @@ class NoRestServerConfiguredError(Exception):
     """
 
 
+class InvalidLogTypeError(Exception):
+    """A custom Exception class for an invalid log type.
+
+    Raised while getting LogType enum for a value different from error, access
+    and request.
+    """
+
+
 class MarkLogicError(Exception):
     """A custom Exception class representing MarkLogic errors.
 

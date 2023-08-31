@@ -13,7 +13,7 @@ from typing import Iterator
 
 from mlclient.calls import LogsCall
 from mlclient.clients import MLResourceClient
-from mlclient.exceptions import MarkLogicError
+from mlclient.exceptions import MarkLogicError, InvalidLogTypeError
 
 
 class LogType(Enum):
@@ -22,6 +22,31 @@ class LogType(Enum):
     ERROR = "ErrorLog"
     ACCESS = "AccessLog"
     REQUEST = "RequestLog"
+
+    @staticmethod
+    def get(
+            logs_type: str,
+    ) -> LogType:
+        """Get a specific LogType enum for a string value.
+
+        Parameters
+        ----------
+        logs_type : str,
+            A log type
+
+        Returns
+        -------
+        LogType
+            A LogType enum
+        """
+        if logs_type.lower() == "error":
+            return LogType.ERROR
+        if logs_type.lower() == "access":
+            return LogType.ACCESS
+        if logs_type.lower() == "request":
+            return LogType.REQUEST
+        msg = "Invalid log type! Allowed values are: error, access, request."
+        raise InvalidLogTypeError(msg)
 
 
 class LogsClient(MLResourceClient):

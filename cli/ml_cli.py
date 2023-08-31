@@ -3,6 +3,7 @@
 This module provides a Command Line Interface for ML Client.
 It exports a single function:
     * main()
+
         Execute a MLCLIent Job using CLI.
 """
 
@@ -59,13 +60,13 @@ class CallLogsCommand(Command):
         #     flag=False,
         #     default="error",
         # ),
-        # option(
-        #     "from",
-        #     "f",
-        #     description="The start time for the error log data",
-        #     flag=False,
-        #     value_required=False,
-        # ),
+        option(
+            "from",
+            "f",
+            description="The start time for the error log data",
+            flag=False,
+            value_required=False,
+        ),
         # option(
         #     "to",
         #     "t",
@@ -96,7 +97,7 @@ class CallLogsCommand(Command):
         environment = self.option("environment")
         rest_server = self.option("rest-server")
         app_port = int(self.option("app-port"))
-        # start_time = self.option("from")
+        start_time = self.option("from")
         # end_time = self.option("to")
         # regex = self.option("regex")
         manager = MLManager(environment)
@@ -104,7 +105,7 @@ class CallLogsCommand(Command):
             self.line(f"Getting [{app_port}] logs using REST App-Server {client.base_url}\n")
             return client.get_logs(
                 app_server_port=app_port,
-                # start_time=self.option("from"),
+                start_time=self.option("from"),
                 # end_time=self.option("to"),
                 # regex=self.option("regex"),
             )

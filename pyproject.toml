@@ -115,6 +115,12 @@ convention = "numpy"
 max-complexity = 10
 
 [tool.ruff.per-file-ignores]
+"cli/commands/*" = [
+    "RUF012"  # allow for missing ClassVar annotations as superclass does not use them
+]
+"cli/app.py" = [
+    "A002"  # allow for shadowing input builtin as it is superclass method definition
+]
 "mlclient/ml_config.py" = [
     "UP006", # allow using List instead of list for pydantic
 ]

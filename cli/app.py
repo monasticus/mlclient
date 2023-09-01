@@ -1,10 +1,13 @@
 """The MLClient CLI module.
 
-This module provides a Command Line Interface for ML Client.
-It exports a single function:
-    * main()
+This module provides the ML Client Command Line Application.
+It exports a single class and single function:
 
-        Execute a MLCLIent Job using CLI.
+    * MLCLIentApplication
+        An ML Client Command Line Cleo Application.
+
+    * main()
+        Run an MLCLIent Application.
 """
 
 from __future__ import annotations
@@ -20,7 +23,7 @@ from mlclient import __version__ as ml_client_version
 
 
 class MLCLIentApplication(Application):
-    """An ML Client Command Line Application."""
+    """An ML Client Command Line Cleo Application."""
 
     _APP_NAME = "MLCLIent"
 
@@ -42,6 +45,7 @@ class MLCLIentApplication(Application):
             output: Output | None = None,
             error_output: Output | None = None,
     ) -> IO:
+        """Initialize io with custom styles."""
         io = super().create_io(input, output, error_output)
 
         formatter = io.output.formatter
@@ -52,7 +56,7 @@ class MLCLIentApplication(Application):
 
 
 def main() -> int:
-    """Execute an ML Client Job using CLI."""
+    """Run an MLCLIent Application."""
     return MLCLIentApplication().run()
 
 

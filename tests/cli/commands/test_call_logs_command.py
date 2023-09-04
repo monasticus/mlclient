@@ -7,7 +7,6 @@ import responses
 from cleo.testers.command_tester import CommandTester
 
 from cli.app import MLCLIentApplication
-from mlclient import MLManager, MLResponseParser
 from mlclient.exceptions import InvalidLogTypeError
 from tests import tools
 
@@ -226,7 +225,7 @@ def test_command_call_logs_host():
         [])
 
     tester = _get_tester("call logs")
-    tester.execute(f"-e test -p 8002 -H some-host")
+    tester.execute("-e test -p 8002 -H some-host")
 
     assert tester.command.option("environment") == "test"
     assert tester.command.option("rest-server") is None
@@ -351,7 +350,7 @@ def test_command_call_logs_output_for_request_logs():
         },
         logs,
         False)
-    
+
     tester = _get_tester("call logs")
     tester.execute("-e test -p 8002 -l request")
     command_output = tester.io.fetch_output()
@@ -385,13 +384,18 @@ def _setup_responses(
     request_url = f"http://localhost:8002/manage/v2/logs?{params}"
 
     if error_logs:
-        response_json = {"logfile": {"log": []}}
-        for log_tuple in logs:
-            response_json["logfile"]["log"].append({
-                "timestamp": log_tuple[0],
-                "level": log_tuple[1],
-                "message": log_tuple[2],
-            })
+        response_json = {
+            "logfile": {
+                "log": [
+                    {
+                        "timestamp": log_tuple[0],
+                        "level": log_tuple[1],
+                        "message": log_tuple[2],
+                    }
+                    for log_tuple in logs
+                ],
+            },
+        }
     else:
         response_json = {"logfile": {"message": "\n".join(logs)}}
 

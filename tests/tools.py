@@ -5,14 +5,12 @@ import shutil
 from pathlib import Path
 from time import sleep
 
-from mlclient import MLManager, constants
+from mlclient import MLConfiguration, MLManager, constants
 
 _SCRIPT_DIR = Path(__file__).resolve()
-_ML_CLIENT_TESTS_DIR = "mlclient"
 _RESOURCES_DIR = "resources"
 _COMMON_RESOURCES_DIR = "common"
 TESTS_PATH = Path(_SCRIPT_DIR).parent
-ML_CLIENT_TESTS_PATH = next(TESTS_PATH.glob(_ML_CLIENT_TESTS_DIR))
 RESOURCES_PATH = next(TESTS_PATH.glob(_RESOURCES_DIR))
 COMMON_RESOURCES_PATH = next(RESOURCES_PATH.glob(_COMMON_RESOURCES_DIR))
 
@@ -41,8 +39,8 @@ def get_common_resource_path(
 def get_test_resources_path(
         test_path: str,
 ) -> str:
-    mlclient_tests_path = ML_CLIENT_TESTS_PATH.as_posix()
-    resources_rel_path = test_path.replace(mlclient_tests_path, "")[1:-3]
+    tests_path = TESTS_PATH.as_posix()
+    resources_rel_path = test_path.replace(tests_path, "")[1:-3]
     resources_rel_path = resources_rel_path.replace("_", "-")
     return next(Path(RESOURCES_PATH).glob(resources_rel_path)).as_posix()
 
@@ -63,6 +61,7 @@ class TestHelper:
         """
         self._environment = environment_name
         self._ml_manager = None
+        self._config = None
 
     def setup_environment(
             self,
@@ -81,6 +80,19 @@ class TestHelper:
 
         self._ml_manager = MLManager(self._environment)
 
+    @property
+    def config(
+            self,
+    ) -> MLConfiguration:
+        """A MarkLogic configuration.
+
+        Returns
+        -------
+        MLConfiguration
+            A MarkLogic configuration
+        """
+        return self._ml_manager.config
+
     def clean_environment(
             self,
     ):
@@ -98,9 +110,10 @@ class TestHelper:
 
     def confirm_last_request(
         self,
-        app_server: str,
+        app_server_port: int,
         request_method: str,
         request_url: str,
+        rest_server: str = "manage",
     ):
         """Verify the last request being sent.
 
@@ -109,16 +122,18 @@ class TestHelper:
 
         Parameters
         ----------
-        app_server : str
-            An App Server identifier
+        app_server_port : int
+            An App Server port to get logs from
         request_method : str
             A request method
         request_url : str
             A request url
+        rest_server : str, default "manage"
+            The ML REST App-Server environmental id
         """
         sleep(1)
-        with self._ml_manager.get_resources_client(app_server) as client:
-            filename = f"{client.port}_AccessLog.txt"
+        with self._ml_manager.get_resources_client(rest_server) as client:
+            filename = f"{app_server_port}_AccessLog.txt"
             resp = client.get_logs(filename=filename, data_format="json")
             logfile = resp.json()["logfile"]
             logs = [log

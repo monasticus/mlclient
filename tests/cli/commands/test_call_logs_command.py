@@ -3,6 +3,7 @@ from __future__ import annotations
 import urllib.parse
 
 import pytest
+import responses
 from cleo.testers.command_tester import CommandTester
 
 from cli.app import MLCLIentApplication
@@ -24,7 +25,15 @@ def _setup_and_teardown():
     test_helper.clean_environment()
 
 
+@responses.activate
 def test_command_call_logs_basic():
+    _setup_responses(
+        {
+            "format": "json",
+            "filename": "8002_ErrorLog.txt",
+        },
+        [])
+
     tester = _get_tester("call logs")
     tester.execute("-e test -p 8002")
 
@@ -37,13 +46,16 @@ def test_command_call_logs_basic():
     assert tester.command.option("regex") is None
     assert tester.command.option("host") is None
 
-    _confirm_last_request({
-        "format": "json",
-        "filename": "8002_ErrorLog.txt",
-    })
 
-
+@responses.activate
 def test_command_call_logs_custom_rest_server():
+    _setup_responses(
+        {
+            "format": "json",
+            "filename": "8002_ErrorLog.txt",
+        },
+        [])
+
     tester = _get_tester("call logs")
     tester.execute("-e test -p 8002 -s manage")
 
@@ -56,13 +68,16 @@ def test_command_call_logs_custom_rest_server():
     assert tester.command.option("regex") is None
     assert tester.command.option("host") is None
 
-    _confirm_last_request({
-        "format": "json",
-        "filename": "8002_ErrorLog.txt",
-    })
 
-
+@responses.activate
 def test_command_call_logs_custom_log_type_error():
+    _setup_responses(
+        {
+            "format": "json",
+            "filename": "8002_ErrorLog.txt",
+        },
+        [])
+
     tester = _get_tester("call logs")
     tester.execute("-e test -p 8002 -l error")
 
@@ -75,13 +90,17 @@ def test_command_call_logs_custom_log_type_error():
     assert tester.command.option("regex") is None
     assert tester.command.option("host") is None
 
-    _confirm_last_request({
-        "format": "json",
-        "filename": "8002_ErrorLog.txt",
-    })
 
-
+@responses.activate
 def test_command_call_logs_custom_log_type_access():
+    _setup_responses(
+        {
+            "format": "json",
+            "filename": "8002_AccessLog.txt",
+        },
+        [],
+        False)
+
     tester = _get_tester("call logs")
     tester.execute("-e test -p 8002 -l access")
 
@@ -94,13 +113,17 @@ def test_command_call_logs_custom_log_type_access():
     assert tester.command.option("regex") is None
     assert tester.command.option("host") is None
 
-    _confirm_last_request({
-        "format": "json",
-        "filename": "8002_AccessLog.txt",
-    })
 
-
+@responses.activate
 def test_command_call_logs_custom_log_type_request():
+    _setup_responses(
+        {
+            "format": "json",
+            "filename": "8002_RequestLog.txt",
+        },
+        [],
+        False)
+
     tester = _get_tester("call logs")
     tester.execute("-e test -p 8002 -l request")
 
@@ -113,11 +136,6 @@ def test_command_call_logs_custom_log_type_request():
     assert tester.command.option("regex") is None
     assert tester.command.option("host") is None
 
-    _confirm_last_request({
-        "format": "json",
-        "filename": "8002_RequestLog.txt",
-    })
-
 
 def test_command_call_logs_custom_log_type_invalid():
     tester = _get_tester("call logs")
@@ -128,7 +146,16 @@ def test_command_call_logs_custom_log_type_invalid():
     assert err.value.args[0] == expected_msg
 
 
+@responses.activate
 def test_command_call_logs_from():
+    _setup_responses(
+        {
+            "format": "json",
+            "filename": "8002_ErrorLog.txt",
+            "start": "1970-01-01T00:00:00",
+        },
+        [])
+
     tester = _get_tester("call logs")
     tester.execute("-e test -p 8002 -f 1970-01-01")
 
@@ -141,14 +168,17 @@ def test_command_call_logs_from():
     assert tester.command.option("regex") is None
     assert tester.command.option("host") is None
 
-    _confirm_last_request({
-        "format": "json",
-        "filename": "8002_ErrorLog.txt",
-        "start": "1970-01-01T00:00:00",
-    })
 
-
+@responses.activate
 def test_command_call_logs_to():
+    _setup_responses(
+        {
+            "format": "json",
+            "filename": "8002_ErrorLog.txt",
+            "end": "1984-01-01T00:00:00",
+        },
+        [])
+
     tester = _get_tester("call logs")
     tester.execute("-e test -p 8002 -t 1984-01-01")
 
@@ -161,14 +191,17 @@ def test_command_call_logs_to():
     assert tester.command.option("regex") is None
     assert tester.command.option("host") is None
 
-    _confirm_last_request({
-        "format": "json",
-        "filename": "8002_ErrorLog.txt",
-        "end": "1984-01-01T00:00:00",
-    })
 
-
+@responses.activate
 def test_command_call_logs_regex():
+    _setup_responses(
+        {
+            "format": "json",
+            "filename": "8002_ErrorLog.txt",
+            "regex": "you-will-not-find-it",
+        },
+        [])
+
     tester = _get_tester("call logs")
     tester.execute("-e test -p 8002 -r you-will-not-find-it")
 
@@ -181,20 +214,19 @@ def test_command_call_logs_regex():
     assert tester.command.option("regex") == "you-will-not-find-it"
     assert tester.command.option("host") is None
 
-    _confirm_last_request({
-        "format": "json",
-        "filename": "8002_ErrorLog.txt",
-        "regex": "you-will-not-find-it",
-    })
 
-
+@responses.activate
 def test_command_call_logs_host():
-    with MLManager("test").get_resources_client("manage") as client:
-        resp = client.eval(xquery="xdmp:host() => xdmp:host-name()")
-        host_name = MLResponseParser.parse(resp)
+    _setup_responses(
+        {
+            "format": "json",
+            "filename": "8002_ErrorLog.txt",
+            "host": "some-host",
+        },
+        [])
 
     tester = _get_tester("call logs")
-    tester.execute(f"-e test -p 8002 -H {host_name}")
+    tester.execute(f"-e test -p 8002 -H some-host")
 
     assert tester.command.option("environment") == "test"
     assert tester.command.option("rest-server") is None
@@ -203,16 +235,22 @@ def test_command_call_logs_host():
     assert tester.command.option("from") is None
     assert tester.command.option("to") is None
     assert tester.command.option("regex") is None
-    assert tester.command.option("host") == host_name
-
-    _confirm_last_request({
-        "format": "json",
-        "filename": "8002_ErrorLog.txt",
-        "host": host_name,
-    })
+    assert tester.command.option("host") == "some-host"
 
 
+@responses.activate
 def test_command_call_logs_output_for_error_logs():
+    _setup_responses(
+        {
+            "format": "json",
+            "filename": "8002_ErrorLog.txt",
+        },
+        [
+            ("2023-09-01T00:00:00Z", "info", "Log message 1"),
+            ("2023-09-01T00:00:01Z", "info", "Log message 2"),
+            ("2023-09-01T00:00:02Z", "info", "Log message 3"),
+        ])
+
     tester = _get_tester("call logs")
     tester.execute("-e test -p 8002")
     command_output = tester.io.fetch_output()
@@ -220,13 +258,34 @@ def test_command_call_logs_output_for_error_logs():
     assert tester.command.option("environment") == "test"
     assert tester.command.option("app-port") == "8002"
     assert tester.command.option("log-type") == "error"
-    init_log = "Getting 8002_ErrorLog.txt logs using REST App-Server http://localhost:8002"
-    assert command_output.startswith(init_log)
-    assert "<time>" in command_output
-    assert "<log-level>" in command_output
+
+    expected_output_lines = [
+        "Getting 8002_ErrorLog.txt logs using REST App-Server http://localhost:8002\n",
+        "<time>2023-09-01T00:00:00Z <log-level>INFO: Log message 1",
+        "<time>2023-09-01T00:00:01Z <log-level>INFO: Log message 2",
+        "<time>2023-09-01T00:00:02Z <log-level>INFO: Log message 3",
+    ]
+    assert command_output == "\n".join(expected_output_lines) + "\n"
 
 
+@responses.activate
 def test_command_call_logs_output_for_access_logs():
+    logs = [
+        ('172.17.0.1 - admin [01/Sep/2023:03:54:16 +0000] '
+         '"GET /manage/v2/logs?format=json&filename=8002_AccessLog.txt HTTP/1.1" '
+         '200 454 - "python-requests/2.31.0"'),
+        ('172.17.0.1 - - [01/Sep/2023:03:54:16 +0000] '
+         '"GET /manage/v2/logs?format=json&filename=8002_ErrorLog.txt HTTP/1.1" '
+         '401 104 - "python-requests/2.31.0"'),
+    ]
+    _setup_responses(
+        {
+            "format": "json",
+            "filename": "8002_AccessLog.txt",
+        },
+        logs,
+        False)
+
     tester = _get_tester("call logs")
     tester.execute("-e test -p 8002 -l access")
     command_output = tester.io.fetch_output()
@@ -234,13 +293,65 @@ def test_command_call_logs_output_for_access_logs():
     assert tester.command.option("environment") == "test"
     assert tester.command.option("app-port") == "8002"
     assert tester.command.option("log-type") == "access"
-    init_log = "Getting 8002_AccessLog.txt logs using REST App-Server http://localhost:8002"
-    assert command_output.startswith(init_log)
-    assert "<time>" not in command_output
-    assert "<log-level>" not in command_output
+
+    expected_output_lines = [
+        "Getting 8002_AccessLog.txt logs using REST App-Server http://localhost:8002\n",
+    ]
+    expected_output_lines.extend(logs)
+    assert command_output == "\n".join(expected_output_lines) + "\n"
 
 
+@responses.activate
 def test_command_call_logs_output_for_request_logs():
+    logs = [
+        ('{'
+         '"time":"2023-09-04T03:53:40Z", '
+         '"url":"/manage/v2/logs?format=json&filename=8002_RequestLog.txt", '
+         '"user":"admin", '
+         '"elapsedTime":1.788074, '
+         '"requests":1, '
+         '"valueCacheHits":5347, '
+         '"valueCacheMisses":349287, '
+         '"regexpCacheHits":5279, '
+         '"regexpCacheMisses":12, '
+         '"fsProgramCacheMisses":1, '
+         '"fsMainModuleSequenceCacheMisses":1, '
+         '"fsLibraryModuleCacheMisses":226, '
+         '"compileTime":0.801934, '
+         '"runTime":0.950788'
+         '}'
+         '{'
+         '"time":"2023-09-04T03:56:59Z", '
+         '"url":"/manage/v2/forests", '
+         '"user":"admin", '
+         '"elapsedTime":1.265614, '
+         '"requests":1, '
+         '"inMemoryListHits":6, '
+         '"expandedTreeCacheHits":2, '
+         '"valueCacheHits":5142, '
+         '"valueCacheMisses":4545, '
+         '"regexpCacheHits":327, '
+         '"regexpCacheMisses":11, '
+         '"fragmentsAdded":1, '
+         '"fragmentsDeleted":1, '
+         '"fsProgramCacheHits":3, '
+         '"fsProgramCacheMisses":6, '
+         '"writeLocks":1, '
+         '"lockTime":0.000003, '
+         '"compileTime":0.00072, '
+         '"commitTime":0.000252, '
+         '"runTime":1.265031, '
+         '"indexingTime":0.000687'
+         '}'),
+    ]
+    _setup_responses(
+        {
+            "format": "json",
+            "filename": "8002_RequestLog.txt",
+        },
+        logs,
+        False)
+    
     tester = _get_tester("call logs")
     tester.execute("-e test -p 8002 -l request")
     command_output = tester.io.fetch_output()
@@ -248,10 +359,12 @@ def test_command_call_logs_output_for_request_logs():
     assert tester.command.option("environment") == "test"
     assert tester.command.option("app-port") == "8002"
     assert tester.command.option("log-type") == "request"
-    init_log = "Getting 8002_RequestLog.txt logs using REST App-Server http://localhost:8002"
-    assert command_output.startswith(init_log)
-    assert "<time>" not in command_output
-    assert "<log-level>" not in command_output
+
+    expected_output_lines = [
+        "Getting 8002_RequestLog.txt logs using REST App-Server http://localhost:8002\n",
+    ]
+    expected_output_lines.extend(logs)
+    assert command_output == "\n".join(expected_output_lines) + "\n"
 
 
 def _get_tester(
@@ -263,15 +376,26 @@ def _get_tester(
     return CommandTester(command)
 
 
-@pytest.mark.ml_access()
-def _confirm_last_request(
+def _setup_responses(
         request_params: dict,
+        logs: list[tuple | str],
+        error_logs: bool = True,
 ):
     params = urllib.parse.urlencode(request_params).replace("%2B", "+")
-    request_url = f"/manage/v2/logs?{params}"
+    request_url = f"http://localhost:8002/manage/v2/logs?{params}"
 
-    rest_server_port = test_helper.config.provide_config("manage")["port"]
-    test_helper.confirm_last_request(
-        app_server_port=rest_server_port,
-        request_method="GET",
-        request_url=request_url)
+    if error_logs:
+        response_json = {"logfile": {"log": []}}
+        for log_tuple in logs:
+            response_json["logfile"]["log"].append({
+                "timestamp": log_tuple[0],
+                "level": log_tuple[1],
+                "message": log_tuple[2],
+            })
+    else:
+        response_json = {"logfile": {"message": "\n".join(logs)}}
+
+    responses.get(
+        request_url,
+        json=response_json,
+    )

@@ -318,8 +318,8 @@ def test_command_call_logs_output_for_request_logs():
          '"fsLibraryModuleCacheMisses":226, '
          '"compileTime":0.801934, '
          '"runTime":0.950788'
-         '}'
-         '{'
+         '}'),
+        ('{'
          '"time":"2023-09-04T03:56:59Z", '
          '"url":"/manage/v2/forests", '
          '"user":"admin", '

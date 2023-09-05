@@ -48,11 +48,11 @@ def test_command_call_logs_basic():
         [])
 
     tester = _get_tester("call logs")
-    tester.execute("-e test -p 8002")
+    tester.execute("-e test -a 8002")
 
     assert tester.command.option("environment") == "test"
     assert tester.command.option("rest-server") is None
-    assert tester.command.option("app-port") == "8002"
+    assert tester.command.option("app-server") == "8002"
     assert tester.command.option("log-type") == "error"
     assert tester.command.option("from") is None
     assert tester.command.option("to") is None
@@ -70,11 +70,11 @@ def test_command_call_logs_custom_rest_server():
         [])
 
     tester = _get_tester("call logs")
-    tester.execute("-e test -p 8002 -s manage")
+    tester.execute("-e test -a 8002 -s manage")
 
     assert tester.command.option("environment") == "test"
     assert tester.command.option("rest-server") == "manage"
-    assert tester.command.option("app-port") == "8002"
+    assert tester.command.option("app-server") == "8002"
     assert tester.command.option("log-type") == "error"
     assert tester.command.option("from") is None
     assert tester.command.option("to") is None
@@ -92,11 +92,11 @@ def test_command_call_logs_custom_log_type_error():
         [])
 
     tester = _get_tester("call logs")
-    tester.execute("-e test -p 8002 -l error")
+    tester.execute("-e test -a 8002 -l error")
 
     assert tester.command.option("environment") == "test"
     assert tester.command.option("rest-server") is None
-    assert tester.command.option("app-port") == "8002"
+    assert tester.command.option("app-server") == "8002"
     assert tester.command.option("log-type") == "error"
     assert tester.command.option("from") is None
     assert tester.command.option("to") is None
@@ -115,11 +115,11 @@ def test_command_call_logs_custom_log_type_access():
         False)
 
     tester = _get_tester("call logs")
-    tester.execute("-e test -p 8002 -l access")
+    tester.execute("-e test -a 8002 -l access")
 
     assert tester.command.option("environment") == "test"
     assert tester.command.option("rest-server") is None
-    assert tester.command.option("app-port") == "8002"
+    assert tester.command.option("app-server") == "8002"
     assert tester.command.option("log-type") == "access"
     assert tester.command.option("from") is None
     assert tester.command.option("to") is None
@@ -138,11 +138,11 @@ def test_command_call_logs_custom_log_type_request():
         False)
 
     tester = _get_tester("call logs")
-    tester.execute("-e test -p 8002 -l request")
+    tester.execute("-e test -a 8002 -l request")
 
     assert tester.command.option("environment") == "test"
     assert tester.command.option("rest-server") is None
-    assert tester.command.option("app-port") == "8002"
+    assert tester.command.option("app-server") == "8002"
     assert tester.command.option("log-type") == "request"
     assert tester.command.option("from") is None
     assert tester.command.option("to") is None
@@ -153,7 +153,7 @@ def test_command_call_logs_custom_log_type_request():
 def test_command_call_logs_custom_log_type_invalid():
     tester = _get_tester("call logs")
     with pytest.raises(InvalidLogTypeError) as err:
-        tester.execute("-e test -p 8002 -l invalid")
+        tester.execute("-e test -a 8002 -l invalid")
 
     expected_msg = "Invalid log type! Allowed values are: error, access, request."
     assert err.value.args[0] == expected_msg
@@ -170,11 +170,11 @@ def test_command_call_logs_from():
         [])
 
     tester = _get_tester("call logs")
-    tester.execute("-e test -p 8002 -f 1970-01-01")
+    tester.execute("-e test -a 8002 -f 1970-01-01")
 
     assert tester.command.option("environment") == "test"
     assert tester.command.option("rest-server") is None
-    assert tester.command.option("app-port") == "8002"
+    assert tester.command.option("app-server") == "8002"
     assert tester.command.option("log-type") == "error"
     assert tester.command.option("from") == "1970-01-01"
     assert tester.command.option("to") is None
@@ -193,11 +193,11 @@ def test_command_call_logs_to():
         [])
 
     tester = _get_tester("call logs")
-    tester.execute("-e test -p 8002 -t 1984-01-01")
+    tester.execute("-e test -a 8002 -t 1984-01-01")
 
     assert tester.command.option("environment") == "test"
     assert tester.command.option("rest-server") is None
-    assert tester.command.option("app-port") == "8002"
+    assert tester.command.option("app-server") == "8002"
     assert tester.command.option("log-type") == "error"
     assert tester.command.option("from") is None
     assert tester.command.option("to") == "1984-01-01"
@@ -216,11 +216,11 @@ def test_command_call_logs_regex():
         [])
 
     tester = _get_tester("call logs")
-    tester.execute("-e test -p 8002 -r you-will-not-find-it")
+    tester.execute("-e test -a 8002 -r you-will-not-find-it")
 
     assert tester.command.option("environment") == "test"
     assert tester.command.option("rest-server") is None
-    assert tester.command.option("app-port") == "8002"
+    assert tester.command.option("app-server") == "8002"
     assert tester.command.option("log-type") == "error"
     assert tester.command.option("from") is None
     assert tester.command.option("to") is None
@@ -239,11 +239,11 @@ def test_command_call_logs_host():
         [])
 
     tester = _get_tester("call logs")
-    tester.execute("-e test -p 8002 -H some-host")
+    tester.execute("-e test -a 8002 -H some-host")
 
     assert tester.command.option("environment") == "test"
     assert tester.command.option("rest-server") is None
-    assert tester.command.option("app-port") == "8002"
+    assert tester.command.option("app-server") == "8002"
     assert tester.command.option("log-type") == "error"
     assert tester.command.option("from") is None
     assert tester.command.option("to") is None
@@ -265,11 +265,11 @@ def test_command_call_logs_output_for_error_logs():
         ])
 
     tester = _get_tester("call logs")
-    tester.execute("-e test -p 8002")
+    tester.execute("-e test -a 8002")
     command_output = tester.io.fetch_output()
 
     assert tester.command.option("environment") == "test"
-    assert tester.command.option("app-port") == "8002"
+    assert tester.command.option("app-server") == "8002"
     assert tester.command.option("log-type") == "error"
 
     expected_output_lines = [
@@ -300,11 +300,11 @@ def test_command_call_logs_output_for_access_logs():
         False)
 
     tester = _get_tester("call logs")
-    tester.execute("-e test -p 8002 -l access")
+    tester.execute("-e test -a 8002 -l access")
     command_output = tester.io.fetch_output()
 
     assert tester.command.option("environment") == "test"
-    assert tester.command.option("app-port") == "8002"
+    assert tester.command.option("app-server") == "8002"
     assert tester.command.option("log-type") == "access"
 
     expected_output_lines = [
@@ -366,11 +366,11 @@ def test_command_call_logs_output_for_request_logs():
         False)
 
     tester = _get_tester("call logs")
-    tester.execute("-e test -p 8002 -l request")
+    tester.execute("-e test -a 8002 -l request")
     command_output = tester.io.fetch_output()
 
     assert tester.command.option("environment") == "test"
-    assert tester.command.option("app-port") == "8002"
+    assert tester.command.option("app-server") == "8002"
     assert tester.command.option("log-type") == "request"
 
     expected_output_lines = [

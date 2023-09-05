@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "mlclient"
-version = "0.1.0"
+version = "0.2.0"
 description = "A python client managing your MarkLogic instance"
 authors = ["Tomasz Aniołowski <tomasz.maciej.aniolowski@gmail.com>"]
 license = "MIT"
@@ -60,7 +60,6 @@ responses = "^0.23.3"
 ml = "cli:main"
 
 [tool.poetry_bumpversion.file."mlclient/__init__.py"]
-[tool.poetry_bumpversion.file."cli/ml_cli.py"]
 [tool.poetry_bumpversion.file."docs/conf.py"]
 
 [tool.pytest.ini_options]

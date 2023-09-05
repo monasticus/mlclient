@@ -7,21 +7,35 @@ import responses
 from cleo.testers.command_tester import CommandTester
 
 from cli.app import MLCLIentApplication
+from mlclient import MLConfiguration
 from mlclient.exceptions import InvalidLogTypeError
-from tests import tools
-
-test_helper = tools.TestHelper("test")
 
 
-@pytest.fixture(scope="module", autouse=True)
-def _setup_and_teardown():
+@pytest.fixture(autouse=True)
+def ml_config() -> MLConfiguration:
+    config = {
+        "app-name": "my-marklogic-app",
+        "host": "localhost",
+        "username": "admin",
+        "password": "admin",
+        "protocol": "http",
+        "app-servers": [
+            {
+                "id": "manage",
+                "port": 8002,
+                "auth": "digest",
+                "rest": True,
+            },
+        ],
+    }
+    return MLConfiguration(**config)
+
+
+@pytest.fixture(autouse=True)
+def _setup(mocker, ml_config):
     # Setup
-    test_helper.setup_environment()
-
-    yield
-
-    # Teardown
-    test_helper.clean_environment()
+    target = "mlclient.ml_config.MLConfiguration.from_environment"
+    mocker.patch(target, return_value=ml_config)
 
 
 @responses.activate
@@ -318,8 +332,8 @@ def test_command_call_logs_output_for_request_logs():
          '"fsLibraryModuleCacheMisses":226, '
          '"compileTime":0.801934, '
          '"runTime":0.950788'
-         '}'
-         '{'
+         '}'),
+        ('{'
          '"time":"2023-09-04T03:56:59Z", '
          '"url":"/manage/v2/forests", '
          '"user":"admin", '

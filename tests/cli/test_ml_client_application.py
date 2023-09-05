@@ -7,9 +7,6 @@ import pytest
 import mlclient
 from cli import main
 from cli.app import MLCLIentApplication
-from tests import tools
-
-test_helper = tools.TestHelper("test")
 
 
 def test_main_sys_exit_1():

@@ -6,7 +6,7 @@ import pytest
 import responses
 from cleo.testers.command_tester import CommandTester
 
-from cli.app import MLCLIentApplication
+from mlclient.cli.app import MLCLIentApplication
 from mlclient import MLConfiguration
 from mlclient.exceptions import InvalidLogTypeError
 

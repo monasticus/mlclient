@@ -18,7 +18,7 @@ from cleo.io.inputs.input import Input
 from cleo.io.io import IO
 from cleo.io.outputs.output import Output
 
-from cli.commands import CallLogsCommand
+from mlclient.cli.commands import CallLogsCommand
 from mlclient import __version__ as ml_client_version
 
 

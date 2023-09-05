@@ -11,6 +11,7 @@ from typing import Iterator
 from cleo.commands.command import Command
 from cleo.helpers import option
 from cleo.io.inputs.option import Option
+from cleo.io.outputs.output import Type
 
 from mlclient import MLManager
 from mlclient.clients import LogType
@@ -102,7 +103,9 @@ class CallLogsCommand(Command):
         """Execute the command."""
         logs = self._get_logs()
         parsed_logs = self._parse_logs(logs)
-        self._io.write(parsed_logs, new_line=True)
+        for info, msg in parsed_logs:
+            self._io.write(info)
+            self._io.write(msg, new_line=True, type=Type.RAW)
         return 0
 
     def _get_logs(
@@ -134,14 +137,14 @@ class CallLogsCommand(Command):
     def _parse_logs(
             self,
             logs: Iterator[dict],
-    ) -> Iterator[str]:
+    ) -> Iterator[tuple[str, str]]:
         """Parse retrieved logs depending on the type."""
         if self.option("log-type").lower() != "error":
             for log_dict in logs:
-                yield log_dict["message"]
+                yield "", log_dict["message"]
         else:
             for log_dict in logs:
                 timestamp = log_dict["timestamp"]
                 level = log_dict["level"].upper()
                 msg = log_dict["message"]
-                yield f"<time>{timestamp}</> <log-level>{level}</>: {msg}"
+                yield f"<time>{timestamp}</> <log-level>{level}</>: ", msg

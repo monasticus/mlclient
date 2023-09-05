@@ -380,6 +380,76 @@ def test_command_call_logs_output_for_request_logs():
     assert command_output == "\n".join(expected_output_lines) + "\n"
 
 
+@responses.activate
+def test_command_call_logs_output_for_xml_logs():
+    xml_log_lines = [
+        ('<error:error '
+         'xsi:schemaLocation="http://marklogic.com/xdmp/error error.xsd" '
+         'xmlns:error="http://marklogic.com/xdmp/error" '
+         'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">'),
+        "  <error:code>XDMP-CAST</error:code>",
+        "  <error:name>err:FORG0001</error:name>",
+        "  <error:xquery-version>1.0</error:xquery-version>",
+        "  <error:message>Invalid cast</error:message>",
+        ('  <error:format-string>XDMP-CAST: (err:FORG0001) xs:date($date) '
+         '-- Invalid cast: "Asasdas" cast as xs:date</error:format-string>'),
+        "  <error:retryable>false</error:retryable>",
+        "  <error:expr>xs:date($date)</error:expr>",
+        "  <error:data>",
+        '    <error:datum>"Asasdas"</error:datum>',
+        "    <error:datum>xs:date</error:datum>",
+        "  </error:data>",
+        "  <error:stack>",
+        "    <error:frame>",
+        "      <error:uri>/MarkLogic/functx/functx-1.0-nodoc-2007-01.xqy</error:uri>",
+        "      <error:line>345</error:line>",
+        "      <error:column>19</error:column>",
+        '      <error:operation>functx:day-of-week("Asasdas")</error:operation>',
+        "      <error:variables>",
+        "        <error:variable>",
+        '          <error:name xmlns="http://www.functx.com">date</error:name>',
+        '          <error:value>"Asasdas"</error:value>',
+        "        </error:variable>",
+        "      </error:variables>",
+        "      <error:xquery-version>1.0</error:xquery-version>",
+        "    </error:frame>",
+        "    <error:frame>",
+        "      <error:line>8</error:line>",
+        "      <error:column>0</error:column>",
+        "      <error:operation>function() as item()*()</error:operation>",
+        "      <error:xquery-version>1.0-ml</error:xquery-version>",
+        "    </error:frame>",
+        "    <error:frame>",
+        "      <error:uri>/</error:uri>",
+        "      <error:xquery-version>1.0-ml</error:xquery-version>",
+        "    </error:frame>",
+        "  </error:stack>",
+        "</error:error>",
+    ]
+    _setup_responses(
+        {
+            "format": "json",
+            "filename": "8002_ErrorLog.txt",
+        },
+        [
+            ("2023-09-01T00:00:00Z", "info", "\n".join(xml_log_lines)),
+        ])
+
+    tester = _get_tester("call logs")
+    tester.execute("-e test -a 8002")
+    command_output = tester.io.fetch_output()
+
+    assert tester.command.option("environment") == "test"
+    assert tester.command.option("app-server") == "8002"
+    assert tester.command.option("log-type") == "error"
+
+    expected_output_lines = [
+        "Getting 8002_ErrorLog.txt logs using REST App-Server http://localhost:8002\n",
+        "<time>2023-09-01T00:00:00Z <log-level>INFO: " + "\n".join(xml_log_lines),
+    ]
+    assert command_output == "\n".join(expected_output_lines) + "\n"
+
+
 def _get_tester(
         command_name: str,
 ):

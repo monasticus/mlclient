@@ -67,6 +67,108 @@ def test_get_logs_empty(logs_client):
 
 
 @responses.activate
+def test_get_logs_using_string_port(logs_client):
+    _setup_responses(
+        {
+            "format": "json",
+            "filename": "8002_ErrorLog.txt",
+        },
+        [
+            ("2023-09-01T00:00:00Z", "info", "Log message 1"),
+            ("2023-09-01T00:00:01Z", "warning", "Log message 2"),
+            ("2023-09-01T00:00:02Z", "error", "Log message 3"),
+        ])
+
+    logs = logs_client.get_logs("8002")
+    logs = list(logs)
+
+    assert len(logs) == 3
+    assert logs[0] == {
+        "timestamp": "2023-09-01T00:00:00Z",
+        "level": "info",
+        "message": "Log message 1",
+    }
+    assert logs[1] == {
+        "timestamp": "2023-09-01T00:00:01Z",
+        "level": "warning",
+        "message": "Log message 2",
+    }
+    assert logs[2] == {
+        "timestamp": "2023-09-01T00:00:02Z",
+        "level": "error",
+        "message": "Log message 3",
+    }
+
+
+@responses.activate
+def test_get_task_server_logs(logs_client):
+    _setup_responses(
+        {
+            "format": "json",
+            "filename": "TaskServer_ErrorLog.txt",
+        },
+        [
+            ("2023-09-01T00:00:00Z", "info", "Log message 1"),
+            ("2023-09-01T00:00:01Z", "warning", "Log message 2"),
+            ("2023-09-01T00:00:02Z", "error", "Log message 3"),
+        ])
+
+    logs = logs_client.get_logs("TaskServer")
+    logs = list(logs)
+
+    assert len(logs) == 3
+    assert logs[0] == {
+        "timestamp": "2023-09-01T00:00:00Z",
+        "level": "info",
+        "message": "Log message 1",
+    }
+    assert logs[1] == {
+        "timestamp": "2023-09-01T00:00:01Z",
+        "level": "warning",
+        "message": "Log message 2",
+    }
+    assert logs[2] == {
+        "timestamp": "2023-09-01T00:00:02Z",
+        "level": "error",
+        "message": "Log message 3",
+    }
+
+
+@responses.activate
+def test_get_task_server_logs_using_int_port(logs_client):
+    _setup_responses(
+        {
+            "format": "json",
+            "filename": "TaskServer_ErrorLog.txt",
+        },
+        [
+            ("2023-09-01T00:00:00Z", "info", "Log message 1"),
+            ("2023-09-01T00:00:01Z", "warning", "Log message 2"),
+            ("2023-09-01T00:00:02Z", "error", "Log message 3"),
+        ])
+
+    logs = logs_client.get_logs(0)
+    logs = list(logs)
+
+    assert len(logs) == 3
+    assert logs[0] == {
+        "timestamp": "2023-09-01T00:00:00Z",
+        "level": "info",
+        "message": "Log message 1",
+    }
+    assert logs[1] == {
+        "timestamp": "2023-09-01T00:00:01Z",
+        "level": "warning",
+        "message": "Log message 2",
+    }
+    assert logs[2] == {
+        "timestamp": "2023-09-01T00:00:02Z",
+        "level": "error",
+        "message": "Log message 3",
+    }
+
+
+@responses.activate
 def test_get_error_logs(logs_client):
     _setup_responses(
         {

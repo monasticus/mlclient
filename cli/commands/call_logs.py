@@ -25,10 +25,10 @@ class CallLogsCommand(Command):
     Options:
       -e, --environment=ENVIRONMENT
             The ML Client environment name [default: "local"]
-      -p, --app-port=APP-PORT
-            The App-Server port to get logs from
+      -a, --app-server=APP-PORT
+            The App-Server (port) to get logs of
       -s, --rest-server=REST-SERVER
-            The ML REST Server environmental id
+            The ML REST Server environmental id (to get logs from)
       -l, --log-type=LOG-TYPE
             MarkLogic log type (error, access or request) [default: "error"]
       -f, --from=FROM
@@ -52,15 +52,15 @@ class CallLogsCommand(Command):
             default="local",
         ),
         option(
-            "app-port",
-            "p",
-            description="The App-Server port to get logs from",
+            "app-server",
+            "a",
+            description="The App-Server (port) to get logs of",
             flag=False,
         ),
         option(
             "rest-server",
             "s",
-            description="The ML REST Server environmental id",
+            description="The ML REST Server environmental id (to get logs from)",
             flag=False,
         ),
         option(
@@ -111,7 +111,7 @@ class CallLogsCommand(Command):
         """Retrieve logs using LogsClient."""
         environment = self.option("environment")
         rest_server = self.option("rest-server")
-        app_port = int(self.option("app-port"))
+        app_port = self.option("app-server")
         log_type = LogType.get(self.option("log-type"))
         start_time = self.option("from")
         end_time = self.option("to")
@@ -123,7 +123,7 @@ class CallLogsCommand(Command):
             self.info(f"Getting {app_port}_{log_type.value}.txt logs "
                       f"using REST App-Server {client.base_url}\n")
             return client.get_logs(
-                app_server_port=app_port,
+                app_server=app_port,
                 log_type=log_type,
                 start_time=start_time,
                 end_time=end_time,

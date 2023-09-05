@@ -57,7 +57,7 @@ poetry-bumpversion = "<0.3.1"
 responses = "^0.23.3"
 
 [tool.poetry.scripts]
-ml = "cli:main"
+ml = "mlclient.cli:main"
 
 [tool.poetry_bumpversion.file."mlclient/__init__.py"]
 [tool.poetry_bumpversion.file."docs/conf.py"]
@@ -116,17 +116,17 @@ convention = "numpy"
 max-complexity = 10
 
 [tool.ruff.per-file-ignores]
-"cli/commands/*" = [
-    "RUF012"  # allow for missing ClassVar annotations as superclass does not use them
-]
-"cli/app.py" = [
-    "A002"  # allow for shadowing input builtin as it is superclass method definition
-]
 "mlclient/ml_config.py" = [
     "UP006", # allow using List instead of list for pydantic
 ]
 "mlclient/calls/*" = [
     "PLR0913" # allow many arguments as they depend on ML REST resource
+]
+"mlclient/cli/commands/*" = [
+    "RUF012"  # allow for missing ClassVar annotations as superclass does not use them
+]
+"mlclient/cli/app.py" = [
+    "A002"  # allow for shadowing input builtin as it is superclass method definition
 ]
 "mlclient/clients/*" = [
     "PLR0913" # allow many arguments as they depend on ML REST resource

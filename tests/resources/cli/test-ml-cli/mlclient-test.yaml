@@ -1,9 +1,0 @@
-app-name: my-marklogic-app
-host: localhost
-username: admin
-password: admin
-protocol: http
-app-servers:
-
-  - id: manage
-    port: 8002

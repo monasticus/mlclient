@@ -23,8 +23,13 @@ def ml_config() -> MLConfiguration:
             {
                 "id": "manage",
                 "port": 8002,
-                "auth": "digest",
+                "auth": "basic",
                 "rest": True,
+            },
+            {
+                "id": "content",
+                "port": 8100,
+                "auth": "basic",
             },
         ],
     }
@@ -53,6 +58,28 @@ def test_command_call_logs_basic():
     assert tester.command.option("environment") == "test"
     assert tester.command.option("rest-server") is None
     assert tester.command.option("app-server") == "8002"
+    assert tester.command.option("log-type") == "error"
+    assert tester.command.option("from") is None
+    assert tester.command.option("to") is None
+    assert tester.command.option("regex") is None
+    assert tester.command.option("host") is None
+
+
+@responses.activate
+def test_command_call_logs_basic_using_named_app_server():
+    _setup_responses(
+        {
+            "format": "json",
+            "filename": "8100_ErrorLog.txt",
+        },
+        [])
+
+    tester = _get_tester("call logs")
+    tester.execute("-e test -a content")
+
+    assert tester.command.option("environment") == "test"
+    assert tester.command.option("rest-server") is None
+    assert tester.command.option("app-server") == "content"
     assert tester.command.option("log-type") == "error"
     assert tester.command.option("from") is None
     assert tester.command.option("to") is None

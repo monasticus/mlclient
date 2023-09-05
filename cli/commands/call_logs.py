@@ -122,6 +122,12 @@ class CallLogsCommand(Command):
         host = self.option("host")
 
         manager = MLManager(environment)
+        if not app_port.isnumeric():
+            named_app_port = next((app_server.port
+                                   for app_server in manager.config.app_servers
+                                   if app_server.identifier == app_port), None)
+            if named_app_port is not None:
+                app_port = named_app_port
         with manager.get_logs_client(rest_server) as client:
             self.info(f"Getting {app_port}_{log_type.value}.txt logs "
                       f"using REST App-Server {client.base_url}\n")

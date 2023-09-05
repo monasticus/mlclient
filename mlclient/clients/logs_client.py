@@ -58,7 +58,7 @@ class LogsClient(MLResourceClient):
 
     def get_logs(
             self,
-            app_server_port: int,
+            app_server: int | str,
             log_type: LogType = LogType.ERROR,
             start_time: str | None = None,
             end_time: str | None = None,
@@ -69,8 +69,8 @@ class LogsClient(MLResourceClient):
 
         Parameters
         ----------
-        app_server_port : int
-            A port with logs to retrieve
+        app_server : int | str
+            An app server (port) with logs to retrieve
         log_type : LogType, default LogType.ERROR
             A log type
         start_time : str | None = None
@@ -93,7 +93,7 @@ class LogsClient(MLResourceClient):
             If MarkLogic returns an error (most likely XDMP-NOSUCHHOST)
         """
         call = self._get_call(
-            app_server_port=app_server_port,
+            app_server=app_server,
             log_type=log_type,
             start_time=start_time,
             end_time=end_time,
@@ -108,7 +108,7 @@ class LogsClient(MLResourceClient):
 
     @staticmethod
     def _get_call(
-            app_server_port: int,
+            app_server: int | str,
             log_type: LogType,
             start_time: str | None = None,
             end_time: str | None = None,
@@ -122,8 +122,8 @@ class LogsClient(MLResourceClient):
 
         Parameters
         ----------
-        app_server_port : int
-            A port with logs to retrieve
+        app_server : int | str
+            An app server (port) with logs to retrieve
         log_type : LogType
             A log type
         start_time : str | None = None
@@ -140,7 +140,9 @@ class LogsClient(MLResourceClient):
         LogsCall
             A prepared LogsCall instance
         """
-        file_name = f"{app_server_port}_{log_type.value}.txt"
+        if app_server in [0, "0"]:
+            app_server = "TaskServer"
+        file_name = f"{app_server}_{log_type.value}.txt"
         params = {
             "filename": file_name,
             "data_format": "json",

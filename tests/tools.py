@@ -3,7 +3,6 @@ from __future__ import annotations
 import os
 import shutil
 from pathlib import Path
-from time import sleep
 
 from mlclient import MLConfiguration, MLManager, constants
 
@@ -107,37 +106,4 @@ class TestHelper:
         if ml_client_dir.exists() and not os.listdir(constants.ML_CLIENT_DIR):
             ml_client_dir.rmdir()
         self._ml_manager = None
-
-    def confirm_last_request(
-        self,
-        app_server_port: int,
-        request_method: str,
-        request_url: str,
-        rest_server: str = "manage",
-    ):
-        """Verify the last request being sent.
-
-        This function reaches access logs and extracts last request of the app server.
-        We filter out logs unrelated to the used user.
-
-        Parameters
-        ----------
-        app_server_port : int
-            An App Server port to get logs from
-        request_method : str
-            A request method
-        request_url : str
-            A request url
-        rest_server : str, default "manage"
-            The ML REST App-Server environmental id
-        """
-        sleep(1)
-        with self._ml_manager.get_resources_client(rest_server) as client:
-            filename = f"{app_server_port}_AccessLog.txt"
-            resp = client.get_logs(filename=filename, data_format="json")
-            logfile = resp.json()["logfile"]
-            logs = [log
-                    for log in logfile["message"].split("\n")
-                    if log != "" and f"- {client.username} " in log]
-            assert f"{request_method.upper()} {request_url} HTTP/1.1" in logs[-1]
 

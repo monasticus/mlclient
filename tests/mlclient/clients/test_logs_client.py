@@ -7,23 +7,11 @@ import responses
 
 from mlclient.clients import LogsClient, LogType
 from mlclient.exceptions import MarkLogicError
-from tests import tools
-
-test_helper = tools.TestHelper("test")
-
-
-@pytest.fixture(scope="module", autouse=True)
-def _module_setup_and_teardown():
-    test_helper.setup_environment()
-
-    yield
-
-    test_helper.clean_environment()
 
 
 @pytest.fixture(autouse=True)
 def logs_client() -> LogsClient:
-    return LogsClient(auth_method="digest")
+    return LogsClient()
 
 
 @pytest.fixture(autouse=True)

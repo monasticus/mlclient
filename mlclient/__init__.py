@@ -37,7 +37,7 @@ from .clients import (MLClient, MLResourceClient, MLResourcesClient,
 from .ml_config import MLConfiguration
 from .ml_manager import MLManager
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 __all__ = ["__version__",
            "MLClient", "MLResourceClient", "MLResourcesClient", "MLResponseParser",
            "MLConfiguration", "MLManager"]

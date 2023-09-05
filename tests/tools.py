@@ -3,7 +3,6 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
-
 _SCRIPT_DIR = Path(__file__).resolve()
 _RESOURCES_DIR = "resources"
 _COMMON_RESOURCES_DIR = "common"

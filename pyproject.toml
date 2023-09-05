@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "mlclient"
-version = "0.2.0"
+version = "0.2.1"
 description = "A python client managing your MarkLogic instance"
 authors = ["Tomasz Aniołowski <tomasz.maciej.aniolowski@gmail.com>"]
 license = "MIT"

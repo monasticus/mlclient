@@ -5,6 +5,7 @@ import urllib.parse
 import pytest
 import responses
 from requests_toolbelt import MultipartEncoder
+from responses import matchers
 
 from mlclient.clients import EvalClient
 
@@ -25,38 +26,46 @@ def _setup_and_teardown(eval_client):
 
 @responses.activate
 def test_eval_raw_xquery_empty(eval_client):
-    _setup_responses([])
+    code = "()"
+    _setup_responses({"xquery": code}, [])
 
-    resp = eval_client.eval(xq="()")
+    resp = eval_client.eval(xq=code)
 
     assert resp == []
 
 
 @responses.activate
 def test_eval_raw_xquery_single_item(eval_client):
-    _setup_responses([
-        ("string", ""),
-    ])
+    code = "''"
+    _setup_responses(
+        request_body={"xquery": code},
+        response_parts=[
+            ("string", ""),
+        ])
 
-    resp = eval_client.eval(xq="''")
+    resp = eval_client.eval(xq=code)
 
     assert resp == ""
 
 
 @responses.activate
 def test_eval_raw_xquery_multiple_items(eval_client):
-    _setup_responses([
-        ("string", ""),
-        ("integer", "1"),
-    ])
+    code = "('',1)"
+    _setup_responses(
+        request_body={"xquery": code},
+        response_parts=[
+            ("string", ""),
+            ("integer", "1"),
+        ])
 
-    resp = eval_client.eval(xq="('',1)")
+    resp = eval_client.eval(xq=code)
 
     assert resp == ["", 1]
 
 
 def _setup_responses(
-        parts: list[tuple[str, str]],
+        request_body: dict,
+        response_parts: list[tuple[str, str]],
         request_params: dict | None = None,
 ):
     request_url = "http://localhost:8002/v1/eval"
@@ -64,16 +73,17 @@ def _setup_responses(
         params = urllib.parse.urlencode(request_params).replace("%2B", "+")
         request_url += f"?{params}"
 
-    if len(parts) == 0:
+    if len(response_parts) == 0:
         responses.post(
             request_url,
             body=b"",
             headers={"Content-Length": "0"},
+            match=[matchers.urlencoded_params_matcher(request_body)],
         )
     else:
         content_type = "text/plain"
         fields = {}
-        for i, item in enumerate(parts):
+        for i, item in enumerate(response_parts):
             name_disposition = f"name{i}"
             field_name = f"field{i}"
             field_value = item[1]
@@ -89,4 +99,5 @@ def _setup_responses(
             headers={
                 "Content-Length": str(len(multipart_body_str)),
             },
+            match=[matchers.urlencoded_params_matcher(request_body)],
         )

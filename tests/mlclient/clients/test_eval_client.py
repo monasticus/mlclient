@@ -103,7 +103,7 @@ def test_eval_raw_javascript_multiple_items(eval_client):
 
 
 @responses.activate
-def test_eval_raw_variables_explicit(eval_client):
+def test_eval_variables_explicit(eval_client):
     code = ("declare variable $VARIABLE external; "
             "$VARIABLE")
     _setup_responses(
@@ -118,7 +118,7 @@ def test_eval_raw_variables_explicit(eval_client):
 
 
 @responses.activate
-def test_eval_raw_variables_using_kwargs(eval_client):
+def test_eval_variables_using_kwargs(eval_client):
     code = ("declare variable $VARIABLE external; "
             "$VARIABLE")
     _setup_responses(
@@ -133,7 +133,7 @@ def test_eval_raw_variables_using_kwargs(eval_client):
 
 
 @responses.activate
-def test_eval_raw_variables_explicit_with_kwargs(eval_client):
+def test_eval_variables_explicit_with_kwargs(eval_client):
     code = ("declare variable $INTEGER1 external; "
             "declare variable $INTEGER2 external; "
             "$INTEGER1 + $INTEGER2")
@@ -146,6 +146,32 @@ def test_eval_raw_variables_explicit_with_kwargs(eval_client):
     resp = eval_client.eval(xq=code, variables={"INTEGER1": 1}, INTEGER2=2)
 
     assert resp == 3
+
+
+@responses.activate
+def test_eval_using_database_param(eval_client):
+    code = "()"
+    _setup_responses(
+        request_body={"xquery": code},
+        response_parts=[],
+        request_params={"database": "Documents"})
+
+    resp = eval_client.eval(xq=code, database="Documents")
+
+    assert resp == []
+
+
+@responses.activate
+def test_eval_using_txid_param(eval_client):
+    code = "()"
+    _setup_responses(
+        request_body={"xquery": code},
+        response_parts=[],
+        request_params={"txid": "transaction-id"})
+
+    resp = eval_client.eval(xq=code, txid="transaction-id")
+
+    assert resp == []
 
 
 def _setup_responses(

@@ -8,6 +8,8 @@ from requests_toolbelt import MultipartEncoder
 from responses import matchers
 
 from mlclient.clients import LOCAL_NS, EvalClient
+from mlclient.exceptions import (UnsupportedFileExtensionError,
+                                 WrongParametersError)
 from tests import tools
 
 
@@ -191,7 +193,7 @@ def test_eval_using_txid_param(eval_client):
 
 
 @responses.activate
-def test_eval_xquery_file(eval_client):
+def test_eval_file_xquery(eval_client):
     code = 'xquery version "1.0-ml"; ()'
 
     for ext in ["xq", "xql", "xqm", "xqu", "xquery", "xqy"]:
@@ -206,7 +208,7 @@ def test_eval_xquery_file(eval_client):
 
 
 @responses.activate
-def test_eval_javascript_file(eval_client):
+def test_eval_file_javascript(eval_client):
     code = "'use strict'; Sequence.from([]);"
 
     for ext in ["js", "sjs"]:
@@ -218,6 +220,49 @@ def test_eval_javascript_file(eval_client):
         resp = eval_client.eval(file=file_path)
 
         assert resp == []
+
+
+def test_eval_file_unknown_extension(eval_client):
+    with pytest.raises(UnsupportedFileExtensionError) as err:
+        eval_client.eval(file="unknown-extension.txt")
+
+    assert err.value.args[0] == ("Unknown file extension! "
+                                 "Supported extensions are: "
+                                 "xq, xql, xqm, xqu, xquery, xqy, js, sjs")
+
+
+def test_eval_mixed_file_and_raw_xquery(eval_client):
+    file_path = tools.get_test_resource_path(__file__, "xquery-code.xq")
+    with pytest.raises(WrongParametersError) as err:
+        eval_client.eval(file=file_path, xq="()")
+
+    expected_msg = "You cannot include both the file and the xquery parameter!"
+    assert err.value.args[0] == expected_msg
+
+
+def test_eval_mixed_file_and_raw_javascript(eval_client):
+    file_path = tools.get_test_resource_path(__file__, "javascript-code.js")
+    with pytest.raises(WrongParametersError) as err:
+        eval_client.eval(file=file_path, js="Sequence.from([]);")
+
+    expected_msg = "You cannot include both the file and the javascript parameter!"
+    assert err.value.args[0] == expected_msg
+
+
+def test_eval_mixed_raw_xquery_and_raw_javascript(eval_client):
+    with pytest.raises(WrongParametersError) as err:
+        eval_client.eval(xq="()", js="Sequence.from([]);")
+
+    expected_msg = "You cannot include both the xquery and the javascript parameter!"
+    assert err.value.args[0] == expected_msg
+
+
+def test_eval_no_code_params(eval_client):
+    with pytest.raises(WrongParametersError) as err:
+        eval_client.eval()
+
+    expected_msg = "You must include either the xquery or the javascript parameter!"
+    assert err.value.args[0] == expected_msg
 
 
 def _setup_responses(

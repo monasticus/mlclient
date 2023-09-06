@@ -17,6 +17,8 @@ It contains all custom exceptions related to ML Client:
         A custom Exception class for no REST Server configured when required.
     * MarkLogicError
         A custom Exception class representing MarkLogic errors.
+    * UnsupportedFileExtensionError
+        A custom Exception class for an unsupported file extension.
 """
 from __future__ import annotations
 
@@ -100,3 +102,10 @@ class MarkLogicError(Exception):
         msg_code = error["messageCode"]
         msg = error["message"]
         super().__init__(f"[{status_code} {status}] ({msg_code}) {msg}")
+
+
+class UnsupportedFileExtensionError(Exception):
+    """A custom Exception class for an unsupported file extension.
+
+    Raised while evaluating code from file with unsupported extension.
+    """

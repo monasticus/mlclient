@@ -32,10 +32,10 @@ Examples
 """
 from .ml_client import (MLClient, MLResourceClient, MLResourcesClient,
                         MLResponseParser)
-from .eval_client import EvalClient
+from .eval_client import EvalClient, LOCAL_NS
 from .logs_client import LogsClient, LogType
 
-__all__ = ["EvalClient",
+__all__ = ["EvalClient", "LOCAL_NS",
            "LogType", "LogsClient",
            "MLClient", "MLResourceClient", "MLResourcesClient",
            "MLResponseParser"]

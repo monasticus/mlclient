@@ -7,7 +7,8 @@ import responses
 from requests_toolbelt import MultipartEncoder
 from responses import matchers
 
-from mlclient.clients import EvalClient
+from mlclient.clients import LOCAL_NS, EvalClient
+from tests import tools
 
 
 @pytest.fixture(autouse=True)
@@ -149,6 +150,21 @@ def test_eval_variables_explicit_with_kwargs(eval_client):
 
 
 @responses.activate
+def test_eval_variables_using_namespace(eval_client):
+    code = ("declare variable $local:VARIABLE external; "
+            "$local:VARIABLE")
+    _setup_responses(
+        request_body={"xquery": code, "vars": f'{{"{{{LOCAL_NS}}}VARIABLE": "X"}}'},
+        response_parts=[
+            ("string", "X"),
+        ])
+
+    resp = eval_client.eval(xq=code, variables={f"{{{LOCAL_NS}}}VARIABLE": "X"})
+
+    assert resp == "X"
+
+
+@responses.activate
 def test_eval_using_database_param(eval_client):
     code = "()"
     _setup_responses(
@@ -172,6 +188,36 @@ def test_eval_using_txid_param(eval_client):
     resp = eval_client.eval(xq=code, txid="transaction-id")
 
     assert resp == []
+
+
+@responses.activate
+def test_eval_xquery_file(eval_client):
+    code = 'xquery version "1.0-ml"; ()'
+
+    for ext in ["xq", "xql", "xqm", "xqu", "xquery", "xqy"]:
+        _setup_responses(
+            request_body={"xquery": code},
+            response_parts=[])
+
+        file_path = tools.get_test_resource_path(__file__, f"xquery-code.{ext}")
+        resp = eval_client.eval(file=file_path)
+
+        assert resp == []
+
+
+@responses.activate
+def test_eval_javascript_file(eval_client):
+    code = "'use strict'; Sequence.from([]);"
+
+    for ext in ["js", "sjs"]:
+        _setup_responses(
+            request_body={"javascript": code},
+            response_parts=[])
+
+        file_path = tools.get_test_resource_path(__file__, f"javascript-code.{ext}")
+        resp = eval_client.eval(file=file_path)
+
+        assert resp == []
 
 
 def _setup_responses(

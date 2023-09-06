@@ -1,3 +1,9 @@
+"""The ML Eval Client module.
+
+It exports high-level classes to easily evaluate code in MarkLogic server:
+    * EvalClient
+        An MLResourceClient calling /v1/eval endpoint.
+"""
 from __future__ import annotations
 
 import xml.etree.ElementTree as ElemTree
@@ -20,6 +26,7 @@ class EvalClient(MLResourceClient):
             variables: dict | None = None,
             database: str | None = None,
             txid: str | None = None,
+            **kwargs,
     ) -> (bytes | str | int | float | bool | dict |
           ElemTree.ElementTree | ElemTree.Element |
           list):
@@ -28,7 +35,8 @@ class EvalClient(MLResourceClient):
             js=js,
             variables=variables,
             database=database,
-            txid=txid)
+            txid=txid,
+            **kwargs)
         resp = self.call(call)
         return MLResponseParser.parse(resp)
 
@@ -39,7 +47,12 @@ class EvalClient(MLResourceClient):
             variables: dict | None = None,
             database: str | None = None,
             txid: str | None = None,
+            **kwargs,
     ) -> EvalCall:
+        if variables:
+            variables.update(kwargs)
+        else:
+            variables = kwargs
         params = {
             "xquery": xq,
             "javascript": js,

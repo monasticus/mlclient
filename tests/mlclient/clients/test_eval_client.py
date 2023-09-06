@@ -102,6 +102,52 @@ def test_eval_raw_javascript_multiple_items(eval_client):
     assert resp == ["", 1]
 
 
+@responses.activate
+def test_eval_raw_variables_explicit(eval_client):
+    code = ("declare variable $VARIABLE external; "
+            "$VARIABLE")
+    _setup_responses(
+        request_body={"xquery": code, "vars": '{"VARIABLE": "X"}'},
+        response_parts=[
+            ("string", "X"),
+        ])
+
+    resp = eval_client.eval(xq=code, variables={"VARIABLE": "X"})
+
+    assert resp == "X"
+
+
+@responses.activate
+def test_eval_raw_variables_using_kwargs(eval_client):
+    code = ("declare variable $VARIABLE external; "
+            "$VARIABLE")
+    _setup_responses(
+        request_body={"xquery": code, "vars": '{"VARIABLE": "X"}'},
+        response_parts=[
+            ("string", "X"),
+        ])
+
+    resp = eval_client.eval(xq=code, VARIABLE="X")
+
+    assert resp == "X"
+
+
+@responses.activate
+def test_eval_raw_variables_explicit_with_kwargs(eval_client):
+    code = ("declare variable $INTEGER1 external; "
+            "declare variable $INTEGER2 external; "
+            "$INTEGER1 + $INTEGER2")
+    _setup_responses(
+        request_body={"xquery": code, "vars": '{"INTEGER1": 1, "INTEGER2": 2}'},
+        response_parts=[
+            ("integer", "3"),
+        ])
+
+    resp = eval_client.eval(xq=code, variables={"INTEGER1": 1}, INTEGER2=2)
+
+    assert resp == 3
+
+
 def _setup_responses(
         request_body: dict,
         response_parts: list[tuple[str, str]],

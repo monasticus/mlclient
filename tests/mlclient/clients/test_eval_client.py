@@ -63,6 +63,45 @@ def test_eval_raw_xquery_multiple_items(eval_client):
     assert resp == ["", 1]
 
 
+@responses.activate
+def test_eval_raw_javascript_empty(eval_client):
+    code = "Sequence.from([]);"
+    _setup_responses({"javascript": code}, [])
+
+    resp = eval_client.eval(js=code)
+
+    assert resp == []
+
+
+@responses.activate
+def test_eval_raw_javascript_single_item(eval_client):
+    code = "''"
+    _setup_responses(
+        request_body={"javascript": code},
+        response_parts=[
+            ("string", ""),
+        ])
+
+    resp = eval_client.eval(js=code)
+
+    assert resp == ""
+
+
+@responses.activate
+def test_eval_raw_javascript_multiple_items(eval_client):
+    code = "Sequence.from(['', 1]);"
+    _setup_responses(
+        request_body={"javascript": code},
+        response_parts=[
+            ("string", ""),
+            ("integer", "1"),
+        ])
+
+    resp = eval_client.eval(js=code)
+
+    assert resp == ["", 1]
+
+
 def _setup_responses(
         request_body: dict,
         response_parts: list[tuple[str, str]],

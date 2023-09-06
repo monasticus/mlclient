@@ -5,6 +5,8 @@ It contains the following modules
 
     * ml_client
         The ML Client module.
+    * eval_client
+        The ML Eval Client module.
     * logs_client
         The ML Logs Client module.
 
@@ -17,6 +19,8 @@ This package exports the following classes:
         A MLResourceClient subclass supporting REST Resources of the MarkLogic server.
     * MLResponseParser
         A MarkLogic HTTP response parser.
+    * EvalClient
+        An MLResourceClient calling /v1/eval endpoint.
     * LogsClient
         An MLResourceClient calling /manage/v2/logs endpoint.
     * LogType
@@ -28,8 +32,10 @@ Examples
 """
 from .ml_client import (MLClient, MLResourceClient, MLResourcesClient,
                         MLResponseParser)
+from .eval_client import EvalClient
 from .logs_client import LogsClient, LogType
 
-__all__ = ["LogType", "LogsClient",
+__all__ = ["EvalClient",
+           "LogType", "LogsClient",
            "MLClient", "MLResourceClient", "MLResourcesClient",
            "MLResponseParser"]

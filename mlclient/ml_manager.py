@@ -8,7 +8,7 @@ It exports the following class:
 from __future__ import annotations
 
 from mlclient import MLClient, MLConfiguration, MLResourcesClient
-from mlclient.clients import LogsClient
+from mlclient.clients import EvalClient, LogsClient
 from mlclient.exceptions import (NoRestServerConfiguredError,
                                  NotARestServerError)
 
@@ -161,6 +161,37 @@ class MLManager:
         rest_server_id = self._get_rest_server_id(app_server_id)
         rest_server_config = self.config.provide_config(rest_server_id)
         return LogsClient(**rest_server_config)
+
+    def get_eval_client(
+            self,
+            app_server_id: str | None = None,
+    ) -> EvalClient:
+        """Initialize a EvalClient instance for a specific App Server.
+
+        If the no identifier is provided - it returns a client of a first configured
+        REST server within an environment.
+
+        Parameters
+        ----------
+        app_server_id : str | None, default None
+            An App Server identifier
+
+        Returns
+        -------
+        EvalClient
+            A EvalClient instance
+
+        Raises
+        ------
+        NotARestServerError
+            If the App-Server identifier does not point to a REST server
+        NoRestServerConfiguredError
+            If an identifier has not been provided and there's no REST servers
+            configured for the environment
+        """
+        rest_server_id = self._get_rest_server_id(app_server_id)
+        rest_server_config = self.config.provide_config(rest_server_id)
+        return EvalClient(**rest_server_config)
 
     def _get_rest_server_id(
             self,

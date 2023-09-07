@@ -43,6 +43,40 @@ class EvalClient(MLResourceClient):
     ) -> (bytes | str | int | float | bool | dict |
           ElemTree.ElementTree | ElemTree.Element |
           list):
+        """Evaluate code in a MarkLogic server and get results.
+
+        Parameters
+        ----------
+        file : str | None, default None
+            A file path of a code to evaluate
+        xq : str | None, default None
+            A raw XQuery code to evaluate
+        js : str | None, default None
+            A raw JavaScript code to evaluate
+        variables : dict | None, default None
+            External variables to pass to the query during evaluation
+        database : str | None, default None
+            Perform this operation on the named content database
+            instead of the default content database associated with the REST API
+            instance. The database can be identified by name or by database id.
+        txid : str | None, default None
+            The transaction identifier of the multi-statement transaction
+            in which to service this request.
+        kwargs : dict
+            Key value arguments used as variables
+
+        Returns
+        -------
+        bytes | str | int | float | bool | dict |
+        ElemTree.ElementTree | ElemTree.Element |
+        list
+            A code evaluation result
+
+        Raises
+        ------
+        MarkLogicError
+            If MarkLogic returns an error
+        """
         self._validate_params(file, xq, js)
         call = self._get_call(
             file=file,
@@ -69,6 +103,44 @@ class EvalClient(MLResourceClient):
             txid: str | None,
             **kwargs,
     ) -> EvalCall:
+        """Prepare an EvalCall instance.
+
+        It initializes an EvalCall instance with adjusted parameters. It combines
+        variables with kwargs. It also uses a file content if provided to use as
+        xquery / javascript value.
+
+        Parameters
+        ----------
+        file : str | None
+            A file path of a code to evaluate
+        xq : str | None
+            A raw XQuery code to evaluate
+        js : str | None
+            A raw JavaScript code to evaluate
+        variables : dict | None
+            External variables to pass to the query during evaluation
+        database : str | None
+            Perform this operation on the named content database
+            instead of the default content database associated with the REST API
+            instance. The database can be identified by name or by database id.
+        txid : str | None
+            The transaction identifier of the multi-statement transaction
+            in which to service this request.
+        kwargs : dict
+            Key value arguments used as variables
+
+        Returns
+        -------
+        EvalCall
+            A prepared EvalCall instance
+
+        Raises
+        ------
+        UnsupportedFileExtensionError
+            If the file path provided includes unsupported extension.
+        WrongParametersError
+            If the xquery and javascript were not provided or provided both
+        """
         params = {
             "xquery": xq,
             "javascript": js,
@@ -96,6 +168,20 @@ class EvalClient(MLResourceClient):
             variables: dict | None,
             kwargs: dict,
     ) -> dict:
+        """Combine variables with kwargs.
+
+        Parameters
+        ----------
+        variables : dict | None
+            External variables to pass to the query during evaluation
+        kwargs : dict
+            Key value arguments used as variables
+
+        Returns
+        -------
+        dict
+            External variables to pass to the query during evaluation
+        """
         if variables:
             variables.update(kwargs)
             return variables
@@ -107,6 +193,22 @@ class EvalClient(MLResourceClient):
             xq: str | None,
             js: str | None,
     ):
+        """Validate parameters.
+
+        Parameters
+        ----------
+        file : str | None
+            A file path of a code to evaluate
+        xq : str | None
+            A raw XQuery code to evaluate
+        js : str | None
+            A raw JavaScript code to evaluate
+
+        Raises
+        ------
+        WrongParametersError
+            If the file parameter has been provided together with xq or js
+        """
         if file and xq:
             msg = "You cannot include both the file and the xquery parameter!"
             raise WrongParametersError(msg)

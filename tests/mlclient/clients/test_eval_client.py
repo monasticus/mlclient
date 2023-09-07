@@ -16,7 +16,7 @@ from tests import tools
 
 @pytest.fixture(autouse=True)
 def eval_client() -> EvalClient:
-    return EvalClient(auth_method="digest")
+    return EvalClient()
 
 
 @pytest.fixture(autouse=True)

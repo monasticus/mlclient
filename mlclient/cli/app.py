@@ -19,7 +19,7 @@ from cleo.io.io import IO
 from cleo.io.outputs.output import Output
 
 from mlclient import __version__ as ml_client_version
-from mlclient.cli.commands import CallLogsCommand
+from mlclient.cli.commands import CallEvalCommand, CallLogsCommand
 
 
 class MLCLIentApplication(Application):
@@ -33,6 +33,7 @@ class MLCLIentApplication(Application):
         """Initialize MLCLIentApplication instance."""
         super().__init__(self._APP_NAME, ml_client_version)
         self.add(CallLogsCommand())
+        self.add(CallEvalCommand())
 
     @property
     def display_name(self) -> str:

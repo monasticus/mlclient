@@ -1,6 +1,6 @@
 """The ML Logs Client module.
 
-It exports high-level classes to easily read MarkLogicLogs:
+It exports high-level classes to easily read MarkLogic logs:
     * LogsClient
         An MLResourceClient calling /manage/v2/logs endpoint.
     * LogType

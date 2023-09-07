@@ -1492,6 +1492,8 @@ class MLResponseParser:
         """
         if not response.ok:
             return cls._parse_error(response)
+        if int(response.headers.get("Content-Length")) == 0:
+            return []
 
         raw_parts = MultipartDecoder.from_response(response).parts
         parsed_parts = [cls._parse_part(raw_part) for raw_part in raw_parts]

@@ -42,6 +42,15 @@ def test_default_single_not_parsed_response(client):
 
 
 @pytest.mark.ml_access()
+def test_default_single_empty_response(client):
+    xqy = "()"
+    resp = client.eval(xquery=xqy)
+    parsed_resp = MLResponseParser.parse(resp)
+    assert isinstance(parsed_resp, list)
+    assert parsed_resp == []
+
+
+@pytest.mark.ml_access()
 def test_default_single_plain_text_str_response(client):
     xqy = "'plain text'"
     resp = client.eval(xquery=xqy)
@@ -131,7 +140,7 @@ def test_default_single_xml_element_response(client):
 
 @pytest.mark.ml_access()
 def test_default_multiple_responses(client):
-    xqy = '(cts:directory-query("/root/", "infinity"), "plain text")'
+    xqy = '(cts:directory-query("/root/", "infinity"), (), "plain text")'
     resp = client.eval(xquery=xqy)
     parsed_resp = MLResponseParser.parse(resp)
     assert isinstance(parsed_resp, list)

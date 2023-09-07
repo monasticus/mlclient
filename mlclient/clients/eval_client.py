@@ -11,7 +11,7 @@ from pathlib import Path
 
 from mlclient.calls import EvalCall
 from mlclient.clients import MLResourceClient, MLResponseParser
-from mlclient.exceptions import (UnsupportedFileExtensionError,
+from mlclient.exceptions import (MarkLogicError, UnsupportedFileExtensionError,
                                  WrongParametersError)
 
 LOCAL_NS = "http://www.w3.org/2005/xquery-local-functions"
@@ -53,7 +53,10 @@ class EvalClient(MLResourceClient):
             txid=txid,
             **kwargs)
         resp = self.call(call)
-        return MLResponseParser.parse(resp)
+        parsed_resp = MLResponseParser.parse(resp)
+        if not resp.ok:
+            raise MarkLogicError(parsed_resp)
+        return parsed_resp
 
     @classmethod
     def _get_call(

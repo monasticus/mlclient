@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import urllib.parse
+from pathlib import Path
 
 import pytest
 import responses
@@ -8,14 +9,14 @@ from requests_toolbelt import MultipartEncoder
 from responses import matchers
 
 from mlclient.clients import LOCAL_NS, EvalClient
-from mlclient.exceptions import (UnsupportedFileExtensionError,
+from mlclient.exceptions import (MarkLogicError, UnsupportedFileExtensionError,
                                  WrongParametersError)
 from tests import tools
 
 
 @pytest.fixture(autouse=True)
 def eval_client() -> EvalClient:
-    return EvalClient()
+    return EvalClient(auth_method="digest")
 
 
 @pytest.fixture(autouse=True)
@@ -220,6 +221,27 @@ def test_eval_file_javascript(eval_client):
         resp = eval_client.eval(file=file_path)
 
         assert resp == []
+
+
+@responses.activate
+def test_eval_with_marklogic_error(eval_client):
+    error_path = tools.get_test_resource_path(__file__, "marklogic-error.html")
+    responses.post(
+        "http://localhost:8002/v1/eval",
+        body=Path(error_path).read_bytes(),
+        status=400,
+    )
+
+    code = ("declare variable $local:VARIABLE external; "
+            "$local:VARIABLE")
+    with pytest.raises(MarkLogicError) as err:
+        eval_client.eval(xq=code)
+
+    expected_msg = ('XDMP-EXTVAR: (err:XPDY0002) '
+                    'declare variable $local:VARIABLE external;  '
+                    '-- Undefined external variable xs:QName("local:VARIABLE")\n'
+                    'in /eval, at 1:43 [1.0-ml]')
+    assert err.value.args[0] == expected_msg
 
 
 def test_eval_file_unknown_extension(eval_client):

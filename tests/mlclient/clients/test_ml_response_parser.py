@@ -173,3 +173,19 @@ def test_default_multiple_responses(client):
     assert parsed_resp[0] == b'cts:directory-query("/root/", "infinity")'
     assert isinstance(parsed_resp[1], str)
     assert parsed_resp[1] == "plain text"
+
+
+@pytest.mark.ml_access()
+def test_default_raw_response(client):
+    xqy = ("document { "
+           "  element root { "
+           "    element child { "
+           "      attribute value { 1 } "
+           "    } "
+           "  }"
+           "}")
+    resp = client.eval(xquery=xqy)
+    parsed_resp = MLResponseParser.parse(resp, raw=True)
+    assert isinstance(parsed_resp, str)
+    assert parsed_resp == ('<?xml version="1.0" encoding="UTF-8"?>\n'
+                           '<root><child value="1"/></root>')

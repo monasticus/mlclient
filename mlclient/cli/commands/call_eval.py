@@ -48,6 +48,12 @@ class CallEvalCommand(Command):
             description="Evaluate the code on the named content database",
             flag=False,
         ),
+        option(
+            "txid",
+            "t",
+            description="The transaction identifier of the multi-statement transaction",
+            flag=False,
+        ),
     ]
 
     def handle(
@@ -59,6 +65,7 @@ class CallEvalCommand(Command):
         xq_flag = self.option("xquery")
         js_flag = self.option("javascript")
         database = self.option("database")
+        txid = self.option("txid")
 
         manager = MLManager(environment)
         with manager.get_eval_client(rest_server) as client:
@@ -67,6 +74,7 @@ class CallEvalCommand(Command):
             params = {
                 "raw": True,
                 "database": database,
+                "txid": txid,
             }
             if xq_flag:
                 params["xq"] = code

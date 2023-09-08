@@ -1,6 +1,8 @@
 import xml.etree.ElementTree as ElemTree
+from datetime import date, datetime
 
 import pytest
+import pytz
 
 from mlclient import MLResourcesClient, MLResponseParser
 
@@ -84,6 +86,29 @@ def test_default_single_plain_text_boolean_response(client):
     parsed_resp = MLResponseParser.parse(resp)
     assert isinstance(parsed_resp, bool)
     assert parsed_resp is True
+
+
+@pytest.mark.ml_access()
+def test_default_single_plain_text_date_response(client):
+    xqy = "fn:current-date()"
+    resp = client.eval(xquery=xqy)
+    parsed_resp = MLResponseParser.parse(resp)
+    assert isinstance(parsed_resp, date)
+    assert parsed_resp == date.today()
+
+
+@pytest.mark.ml_access()
+def test_default_single_plain_text_date_time_response(client):
+    xqy = "fn:current-dateTime()"
+    resp = client.eval(xquery=xqy)
+    parsed_resp = MLResponseParser.parse(resp)
+    assert isinstance(parsed_resp, datetime)
+    now = datetime.now(pytz.timezone(parsed_resp.tzname()))
+    assert parsed_resp.date() == now.date()
+    assert parsed_resp.hour == now.hour
+    assert parsed_resp.minute == now.minute
+    assert parsed_resp.second == now.second
+    assert parsed_resp.microsecond < now.microsecond
 
 
 @pytest.mark.ml_access()

@@ -15,6 +15,7 @@ from __future__ import annotations
 import json
 import logging
 import xml.etree.ElementTree as ElemTree
+from datetime import datetime
 from types import TracebackType
 from typing import ClassVar
 
@@ -1463,10 +1464,18 @@ class MLResponseParser:
     """
 
     _PLAIN_TEXT_PARSERS: ClassVar[dict] = {
-        constants.HEADER_PRIMITIVE_STRING: lambda data: data,
-        constants.HEADER_PRIMITIVE_INTEGER: lambda data: int(data),
-        constants.HEADER_PRIMITIVE_DECIMAL: lambda data: float(data),
-        constants.HEADER_PRIMITIVE_BOOLEAN: lambda data: bool(data),
+        constants.HEADER_PRIMITIVE_STRING:
+            lambda data: data,
+        constants.HEADER_PRIMITIVE_INTEGER:
+            lambda data: int(data),
+        constants.HEADER_PRIMITIVE_DECIMAL:
+            lambda data: float(data),
+        constants.HEADER_PRIMITIVE_BOOLEAN:
+            lambda data: bool(data),
+        constants.HEADER_PRIMITIVE_DATE:
+            lambda data: datetime.strptime(data, "%Y-%m-%d%z").date(),
+        constants.HEADER_PRIMITIVE_DATE_TIME:
+            lambda data: datetime.strptime(data, "%Y-%m-%dT%H:%M:%S.%f%z"),
     }
 
     @classmethod

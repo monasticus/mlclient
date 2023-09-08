@@ -65,6 +65,7 @@ def test_command_call_eval_basic():
     assert tester.command.option("rest-server") is None
     assert tester.command.option("xquery") is False
     assert tester.command.option("javascript") is False
+    assert tester.command.option("database") is None
 
 
 @responses.activate
@@ -86,6 +87,7 @@ def test_command_call_eval_custom_rest_server():
     assert tester.command.option("rest-server") == "manage"
     assert tester.command.option("xquery") is False
     assert tester.command.option("javascript") is False
+    assert tester.command.option("database") is None
 
 
 @responses.activate
@@ -106,6 +108,7 @@ def test_command_call_eval_xquery_flag():
     assert tester.command.option("rest-server") is None
     assert tester.command.option("xquery") is True
     assert tester.command.option("javascript") is False
+    assert tester.command.option("database") is None
 
 
 @responses.activate
@@ -126,6 +129,7 @@ def test_command_call_eval_javascript_flag():
     assert tester.command.option("rest-server") is None
     assert tester.command.option("xquery") is False
     assert tester.command.option("javascript") is True
+    assert tester.command.option("database") is None
 
 
 def test_command_call_eval_mixed_xquery_and_javascript():
@@ -138,6 +142,31 @@ def test_command_call_eval_mixed_xquery_and_javascript():
 
     expected_msg = "You cannot include both the xquery and the javascript parameter!"
     assert err.value.args[0] == expected_msg
+
+
+@responses.activate
+def test_command_call_eval_custom_database():
+    code = ('xquery version "1.0"; '
+            '""')
+    _setup_responses(
+        request_params={
+            "database": "custom-db"
+        },
+        request_body={"xquery": code},
+        response_parts=[
+            ("string", ""),
+        ])
+
+    file_path = tools.get_test_resource_path(__file__, "xquery-code.xqy")
+    tester = _get_tester("call eval")
+    tester.execute(f"-e test -d custom-db {file_path}")
+
+    assert tester.command.argument("code") == file_path
+    assert tester.command.option("environment") == "test"
+    assert tester.command.option("rest-server") is None
+    assert tester.command.option("xquery") is False
+    assert tester.command.option("javascript") is False
+    assert tester.command.option("database") == "custom-db"
 
 
 @responses.activate

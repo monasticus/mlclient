@@ -42,6 +42,12 @@ class CallEvalCommand(Command):
             "j",
             description="If set, the code will be treated as raw javascript",
         ),
+        option(
+            "database",
+            "d",
+            description="Evaluate the code on the named content database",
+            flag=False,
+        ),
     ]
 
     def handle(
@@ -52,12 +58,16 @@ class CallEvalCommand(Command):
         rest_server = self.option("rest-server")
         xq_flag = self.option("xquery")
         js_flag = self.option("javascript")
+        database = self.option("database")
 
         manager = MLManager(environment)
         with manager.get_eval_client(rest_server) as client:
             self.info(f"Evaluating code "
                       f"using REST App-Server {client.base_url}\n")
-            params = {"raw": True}
+            params = {
+                "raw": True,
+                "database": database,
+            }
             if xq_flag:
                 params["xq"] = code
             if js_flag:

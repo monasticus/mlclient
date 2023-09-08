@@ -153,9 +153,7 @@ def test_command_call_eval_custom_database():
     code = ('xquery version "1.0"; '
             '""')
     _setup_responses(
-        request_params={
-            "database": "custom-db"
-        },
+        request_params={"database": "custom-db"},
         request_body={"xquery": code},
         response_parts=[
             ("string", ""),
@@ -179,9 +177,7 @@ def test_command_call_eval_custom_txid():
     code = ('xquery version "1.0"; '
             '""')
     _setup_responses(
-        request_params={
-            "txid": "transaction-id"
-        },
+        request_params={"txid": "transaction-id"},
         request_body={"xquery": code},
         response_parts=[
             ("string", ""),

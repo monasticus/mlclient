@@ -140,6 +140,45 @@ def test_command_call_eval_mixed_xquery_and_javascript():
     assert err.value.args[0] == expected_msg
 
 
+@responses.activate
+def test_command_call_eval_output():
+    code = ('xquery version "1.0"; '
+            '('
+            ' xs:dateTime("2023-08-09T01:01:01.001Z"),'
+            ' 1,'
+            ' "string-value",'
+            ' element root {},'
+            ' map:entry("key", "value")'
+            ')')
+    _setup_responses(
+        request_body={"xquery": code},
+        response_parts=[
+            ("dateTime", "2023-08-09T01:01:01.001Z"),
+            ("integer", "1"),
+            ("string", "string-value"),
+            ("element", "<root/>"),
+            ("map", '{"key": "value"}'),
+        ])
+
+    tester = _get_tester("call eval")
+    tester.execute(f"-e test -x '{code}'")
+    command_output = tester.io.fetch_output()
+
+    assert tester.command.argument("code") == code
+    assert tester.command.option("environment") == "test"
+    assert tester.command.option("xquery") is True
+
+    expected_output_lines = [
+        "Evaluating code using REST App-Server http://localhost:8002\n",
+        "2023-08-09T01:01:01.001Z",
+        "1",
+        "string-value",
+        "<root/>",
+        '{"key": "value"}',
+    ]
+    assert command_output == "\n".join(expected_output_lines) + "\n"
+
+
 def _setup_responses(
         request_body: dict,
         response_parts: list[tuple[str, str]],

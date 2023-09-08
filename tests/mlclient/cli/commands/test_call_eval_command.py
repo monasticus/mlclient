@@ -10,6 +10,7 @@ from responses import matchers
 
 from mlclient import MLConfiguration
 from mlclient.cli.app import MLCLIentApplication
+from mlclient.exceptions import WrongParametersError
 from tests import tools
 
 
@@ -46,7 +47,7 @@ def _setup(mocker, ml_config):
 
 
 @responses.activate
-def test_command_call_logs_basic():
+def test_command_call_eval_basic():
     code = ('xquery version "1.0"; '
             '""')
     _setup_responses(
@@ -64,6 +65,79 @@ def test_command_call_logs_basic():
     assert tester.command.option("rest-server") is None
     assert tester.command.option("xquery") is False
     assert tester.command.option("javascript") is False
+
+
+@responses.activate
+def test_command_call_eval_custom_rest_server():
+    code = ('xquery version "1.0"; '
+            '""')
+    _setup_responses(
+        request_body={"xquery": code},
+        response_parts=[
+            ("string", ""),
+        ])
+
+    file_path = tools.get_test_resource_path(__file__, "xquery-code.xqy")
+    tester = _get_tester("call eval")
+    tester.execute(f"-e test -s manage {file_path}")
+
+    assert tester.command.argument("code") == file_path
+    assert tester.command.option("environment") == "test"
+    assert tester.command.option("rest-server") == "manage"
+    assert tester.command.option("xquery") is False
+    assert tester.command.option("javascript") is False
+
+
+@responses.activate
+def test_command_call_eval_xquery_flag():
+    code = ('xquery version "1.0"; '
+            '""')
+    _setup_responses(
+        request_body={"xquery": code},
+        response_parts=[
+            ("string", ""),
+        ])
+
+    tester = _get_tester("call eval")
+    tester.execute(f"-e test -x '{code}'")
+
+    assert tester.command.argument("code") == code
+    assert tester.command.option("environment") == "test"
+    assert tester.command.option("rest-server") is None
+    assert tester.command.option("xquery") is True
+    assert tester.command.option("javascript") is False
+
+
+@responses.activate
+def test_command_call_eval_javascript_flag():
+    code = ('"use strict"; '
+            '""')
+    _setup_responses(
+        request_body={"javascript": code},
+        response_parts=[
+            ("string", ""),
+        ])
+
+    tester = _get_tester("call eval")
+    tester.execute(f"-e test -j '{code}'")
+
+    assert tester.command.argument("code") == code
+    assert tester.command.option("environment") == "test"
+    assert tester.command.option("rest-server") is None
+    assert tester.command.option("xquery") is False
+    assert tester.command.option("javascript") is True
+
+
+def test_command_call_eval_mixed_xquery_and_javascript():
+    code = ('xquery version "1.0"; '
+            '""')
+
+    tester = _get_tester("call eval")
+    with pytest.raises(WrongParametersError) as err:
+        tester.execute(f"-e test -x -j '{code}'")
+
+    expected_msg = "You cannot include both the xquery and the javascript parameter!"
+    assert err.value.args[0] == expected_msg
 
 
 def _setup_responses(
@@ -84,7 +158,6 @@ def _setup_responses(
             match=[matchers.urlencoded_params_matcher(request_body)],
         )
     else:
-        content_type = "text/plain"
         fields = {}
         for i, item in enumerate(response_parts):
             name_disposition = f"name{i}"
@@ -92,6 +165,12 @@ def _setup_responses(
             field_value = item[1]
             x_primitive = item[0]
             headers = {"X-Primitive": x_primitive}
+            if x_primitive in ["array", "map"]:
+                content_type = "application/json"
+            elif x_primitive in ["document", "element"]:
+                content_type = "application/xml"
+            else:
+                content_type = "text/plain"
             fields[field_name] = (name_disposition, field_value, content_type, headers)
         multipart_body = MultipartEncoder(fields=fields)
         multipart_body_str = multipart_body.to_string()

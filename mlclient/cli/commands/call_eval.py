@@ -4,6 +4,7 @@ from cleo.commands.command import Command
 from cleo.helpers import argument, option
 from cleo.io.inputs.argument import Argument
 from cleo.io.inputs.option import Option
+from cleo.io.outputs.output import Type
 
 from mlclient import MLManager
 
@@ -14,8 +15,8 @@ class CallEvalCommand(Command):
     arguments: list[Argument] = [
         argument(
             "code",
-            "The code to evaluate (a file path or raw xqy/js code)"
-        )
+            "The code to evaluate (a file path or raw xqy/js code)",
+        ),
     ]
     options: list[Option] = [
         option(
@@ -56,22 +57,14 @@ class CallEvalCommand(Command):
         with manager.get_eval_client(rest_server) as client:
             self.info(f"Evaluating code "
                       f"using REST App-Server {client.base_url}\n")
-            params = {}
+            params = {"raw": True}
             if xq_flag:
                 params["xq"] = code
-            elif js_flag:
+            if js_flag:
                 params["js"] = code
-            else:
+            if not xq_flag and not js_flag:
                 params["file"] = code
             items = client.eval(**params)
-            if isinstance(items, bytes):
-                self.line(items.decode("utf-8"))
-            else:
-                if not isinstance(items, list):
-                    items = [items]
-                for item in items:
-                    if isinstance(item, bytes):
-                        item = item.decode("utf-8")
-                    self.line(str(item))
+            self._io.write(items, new_line=True, type=Type.RAW)
 
         return 0

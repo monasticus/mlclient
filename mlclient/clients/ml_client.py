@@ -15,6 +15,7 @@ from __future__ import annotations
 import json
 import logging
 import xml.etree.ElementTree as ElemTree
+from datetime import datetime
 from types import TracebackType
 from typing import ClassVar
 
@@ -1463,16 +1464,25 @@ class MLResponseParser:
     """
 
     _PLAIN_TEXT_PARSERS: ClassVar[dict] = {
-        constants.HEADER_PRIMITIVE_STRING: lambda data: data,
-        constants.HEADER_PRIMITIVE_INTEGER: lambda data: int(data),
-        constants.HEADER_PRIMITIVE_DECIMAL: lambda data: float(data),
-        constants.HEADER_PRIMITIVE_BOOLEAN: lambda data: bool(data),
+        constants.HEADER_PRIMITIVE_STRING:
+            lambda data: data,
+        constants.HEADER_PRIMITIVE_INTEGER:
+            lambda data: int(data),
+        constants.HEADER_PRIMITIVE_DECIMAL:
+            lambda data: float(data),
+        constants.HEADER_PRIMITIVE_BOOLEAN:
+            lambda data: bool(data),
+        constants.HEADER_PRIMITIVE_DATE:
+            lambda data: datetime.strptime(data, "%Y-%m-%d%z").date(),
+        constants.HEADER_PRIMITIVE_DATE_TIME:
+            lambda data: datetime.strptime(data, "%Y-%m-%dT%H:%M:%S.%f%z"),
     }
 
     @classmethod
     def parse(
             cls,
             response: Response,
+            raw: bool = False,
     ) -> (bytes | str | int | float | bool | dict |
           ElemTree.ElementTree | ElemTree.Element |
           list):
@@ -1482,6 +1492,8 @@ class MLResponseParser:
         ----------
         response : Response
             An HTTP response taken from MarkLogic instance
+        raw : bool, default False
+            If True, body parts are parsed to string
 
         Returns
         -------
@@ -1496,7 +1508,7 @@ class MLResponseParser:
             return []
 
         raw_parts = MultipartDecoder.from_response(response).parts
-        parsed_parts = [cls._parse_part(raw_part) for raw_part in raw_parts]
+        parsed_parts = [cls._parse_part(raw_part, raw) for raw_part in raw_parts]
         if len(parsed_parts) == 1:
             return parsed_parts[0]
         return parsed_parts
@@ -1529,6 +1541,7 @@ class MLResponseParser:
     def _parse_part(
             cls,
             raw_part: BodyPart,
+            raw: bool,
     ) -> (bytes | str | int | float | bool | dict |
           ElemTree.ElementTree | ElemTree.Element |
           list):
@@ -1538,6 +1551,8 @@ class MLResponseParser:
         ----------
         raw_part : BodyPart
             An HTTP response part taken from MarkLogic instance
+        raw : bool
+            If True, body parts are parsed to string
 
         Returns
         -------
@@ -1546,9 +1561,12 @@ class MLResponseParser:
         list
             A parsed response body part
         """
+        text = raw_part.text
+        if raw:
+            return text
+
         content_type = cls._get_header(raw_part, constants.HEADER_NAME_CONTENT_TYPE)
         primitive_type = cls._get_header(raw_part, constants.HEADER_NAME_PRIMITIVE)
-        text = raw_part.text
         if (content_type == constants.HEADER_PLAIN_TEXT and
                 primitive_type in cls._PLAIN_TEXT_PARSERS):
             return cls._PLAIN_TEXT_PARSERS[primitive_type](text)

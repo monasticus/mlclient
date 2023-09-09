@@ -6,7 +6,7 @@ import pytest
 
 from mlclient import (MLClient, MLConfiguration, MLManager, MLResourcesClient,
                       constants)
-from mlclient.clients import LogsClient
+from mlclient.clients import EvalClient, LogsClient
 from mlclient.exceptions import (NoRestServerConfiguredError,
                                  NotARestServerError)
 from tests import tools
@@ -143,5 +143,50 @@ def test_get_logs_client_not_a_rest_server():
     # uses tests/resources/test-ml-manager/mlclient-test.yaml copy
     with pytest.raises(NotARestServerError) as err:
         MLManager("test").get_logs_client("schemas")
+    assert err.value.args[0] == "[schemas] App-Server is not configured as a REST one."
+
+
+def test_get_eval_client():
+    # uses tests/resources/test-ml-manager/mlclient-test.yaml copy
+    ml_manager = MLManager("test")
+    with ml_manager.get_eval_client("manage") as client:
+        assert isinstance(client, EvalClient)
+        assert client.protocol == "https"
+        assert client.host == "localhost"
+        assert client.port == 8002
+        assert client.username == "my-marklogic-app-user"
+        assert client.password == "my-marklogic-app-password"
+        assert client.auth_method == "basic"
+        assert client.is_connected()
+    assert not client.is_connected()
+
+
+def test_get_eval_client_default():
+    # uses tests/resources/test-ml-manager/mlclient-test.yaml copy
+    ml_manager = MLManager("test")
+    with ml_manager.get_eval_client() as client:
+        assert isinstance(client, EvalClient)
+        assert client.protocol == "https"
+        assert client.host == "localhost"
+        assert client.port == 8002
+        assert client.username == "my-marklogic-app-user"
+        assert client.password == "my-marklogic-app-password"
+        assert client.auth_method == "basic"
+        assert client.is_connected()
+    assert not client.is_connected()
+
+
+def test_get_eval_client_default_no_rest_servers_configured():
+    # uses tests/resources/test-ml-manager/mlclient-test-no-rest.yaml copy
+    with pytest.raises(NoRestServerConfiguredError) as err:
+        MLManager("test-no-rest").get_eval_client()
+    assert err.value.args[0] == ("No REST server is configured for the [test-no-rest] "
+                                 "environment.")
+
+
+def test_get_eval_client_not_a_rest_server():
+    # uses tests/resources/test-ml-manager/mlclient-test.yaml copy
+    with pytest.raises(NotARestServerError) as err:
+        MLManager("test").get_eval_client("schemas")
     assert err.value.args[0] == "[schemas] App-Server is not configured as a REST one."
 

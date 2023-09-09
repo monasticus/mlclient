@@ -287,6 +287,21 @@ def test_eval_no_code_params(eval_client):
     assert err.value.args[0] == expected_msg
 
 
+@responses.activate
+def test_eval_with_raw_flag(eval_client):
+    code = "element root {}"
+    _setup_responses(
+        request_body={"xquery": code},
+        response_parts=[
+            ("element", "<root/>"),
+        ])
+
+    resp = eval_client.eval(xq=code, raw=True)
+
+    assert isinstance(resp, str)
+    assert resp == "<root/>"
+
+
 def _setup_responses(
         request_body: dict,
         response_parts: list[tuple[str, str]],
@@ -305,7 +320,6 @@ def _setup_responses(
             match=[matchers.urlencoded_params_matcher(request_body)],
         )
     else:
-        content_type = "text/plain"
         fields = {}
         for i, item in enumerate(response_parts):
             name_disposition = f"name{i}"
@@ -313,6 +327,12 @@ def _setup_responses(
             field_value = item[1]
             x_primitive = item[0]
             headers = {"X-Primitive": x_primitive}
+            if x_primitive in ["array", "map"]:
+                content_type = "application/json"
+            elif x_primitive in ["document", "element"]:
+                content_type = "application/xml"
+            else:
+                content_type = "text/plain"
             fields[field_name] = (name_disposition, field_value, content_type, headers)
         multipart_body = MultipartEncoder(fields=fields)
         multipart_body_str = multipart_body.to_string()

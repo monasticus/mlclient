@@ -1,7 +1,13 @@
 from __future__ import annotations
 
 import os
+import urllib.parse
 from pathlib import Path
+from typing import Any
+
+import responses
+from requests_toolbelt import MultipartEncoder
+from responses import matchers
 
 _SCRIPT_DIR = Path(__file__).resolve()
 _RESOURCES_DIR = "resources"
@@ -40,3 +46,86 @@ def get_test_resources_path(
     resources_rel_path = resources_rel_path.replace("_", "-")
     return next(Path(RESOURCES_PATH).glob(resources_rel_path)).as_posix()
 
+
+class MLResponseBuilder:
+
+    def __init__(self):
+        self._base_url: str | None = None
+        self._response_body: str | bytes | None = None
+        self._response_body_fields: dict | None = None
+        self._request_body: str | None = None
+        self._params: dict = {}
+        self._headers: dict = {}
+        self._content_type: str | None = None
+
+    def with_base_url(self, base_url: str):
+        self._base_url = base_url
+
+    def with_empty_response_body(self):
+        self.with_response_body(b"")
+        self.with_header("Content-Length", 0)
+
+    def with_response_body(self, body):
+        self._response_body = body
+
+    def with_response_body_part(self, x_primitive: str, body_part_content: Any):
+        if not self._response_body_fields:
+            self._response_body_fields = {}
+
+        index = len(self._response_body_fields) + 1
+        name_disposition = f"name{index}"
+        field_name = f"field{index}"
+
+        if x_primitive in ["array", "map"]:
+            content_type = "application/json"
+        elif x_primitive in ["document", "element"]:
+            content_type = "application/xml"
+        else:
+            content_type = "text/plain"
+
+        headers = {"X-Primitive": x_primitive}
+        self._response_body_fields[field_name] = (
+            name_disposition, body_part_content, content_type, headers
+        )
+
+    def with_request_body(self, body):
+        self._request_body = body
+
+    def with_params(self, params: dict):
+        for key, value in params.items():
+            self.with_param(key, value)
+
+    def with_param(self, key: str, value: Any):
+        self._params[key] = value
+
+    def with_header(self, key: str, value: Any):
+        self._headers[key] = str(value)
+
+    def build(self):
+        if self._response_body and self._response_body_fields:
+            raise RuntimeError("You can't set a regular and multipart response bodies!")
+
+        request_url = self._base_url
+        if len(self._params) > 0:
+            params = urllib.parse.urlencode(self._params).replace("%2B", "+")
+            request_url += f"?{params}"
+
+        if self._response_body:
+            responses.post(
+                request_url,
+                body=self._response_body,
+                headers=self._headers,
+                match=[matchers.urlencoded_params_matcher(self._request_body)],
+            )
+        elif self._response_body_fields:
+            multipart_body = MultipartEncoder(fields=self._response_body_fields)
+            multipart_body_str = multipart_body.to_string()
+            self.with_header("Content-Length", len(multipart_body_str))
+            responses.post(
+                request_url,
+                body=multipart_body_str,
+                content_type=f"multipart/mixed; boundary={multipart_body.boundary[2:]}",
+                headers=self._headers,
+                match=[matchers.urlencoded_params_matcher(self._request_body)],
+            )
+        self.__init__()

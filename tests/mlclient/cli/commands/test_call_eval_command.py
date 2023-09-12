@@ -56,7 +56,7 @@ def test_command_call_eval_basic():
     builder.with_base_url("http://localhost:8002/v1/eval")
     builder.with_request_body({"xquery": code})
     builder.with_response_body_part("string", "")
-    builder.build()
+    builder.build_post()
 
     file_path = tools.get_test_resource_path(__file__, "xquery-code.xqy")
     tester = _get_tester("call eval")
@@ -80,7 +80,7 @@ def test_command_call_eval_custom_rest_server():
     builder.with_base_url("http://localhost:8002/v1/eval")
     builder.with_request_body({"xquery": code})
     builder.with_response_body_part("string", "")
-    builder.build()
+    builder.build_post()
 
     file_path = tools.get_test_resource_path(__file__, "xquery-code.xqy")
     tester = _get_tester("call eval")
@@ -104,7 +104,7 @@ def test_command_call_eval_xquery_flag():
     builder.with_base_url("http://localhost:8002/v1/eval")
     builder.with_request_body({"xquery": code})
     builder.with_response_body_part("string", "")
-    builder.build()
+    builder.build_post()
 
     tester = _get_tester("call eval")
     tester.execute(f"-e test -x '{code}'")
@@ -127,7 +127,7 @@ def test_command_call_eval_javascript_flag():
     builder.with_base_url("http://localhost:8002/v1/eval")
     builder.with_request_body({"javascript": code})
     builder.with_response_body_part("string", "")
-    builder.build()
+    builder.build_post()
 
     tester = _get_tester("call eval")
     tester.execute(f"-e test -j '{code}'")
@@ -163,7 +163,7 @@ def test_command_call_eval_custom_database():
     builder.with_param("database", "custom-db")
     builder.with_request_body({"xquery": code})
     builder.with_response_body_part("string", "")
-    builder.build()
+    builder.build_post()
 
     file_path = tools.get_test_resource_path(__file__, "xquery-code.xqy")
     tester = _get_tester("call eval")
@@ -188,7 +188,7 @@ def test_command_call_eval_custom_txid():
     builder.with_param("txid", "transaction-id")
     builder.with_request_body({"xquery": code})
     builder.with_response_body_part("string", "")
-    builder.build()
+    builder.build_post()
 
     file_path = tools.get_test_resource_path(__file__, "xquery-code.xqy")
     tester = _get_tester("call eval")
@@ -222,7 +222,7 @@ def test_command_call_eval_output():
     builder.with_response_body_part("string", "string-value")
     builder.with_response_body_part("element", "<root/>")
     builder.with_response_body_part("map", '{"key": "value"}')
-    builder.build()
+    builder.build_post()
 
     tester = _get_tester("call eval")
     tester.execute(f"-e test -x '{code}'")

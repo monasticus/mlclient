@@ -9,6 +9,7 @@ from cleo.testers.command_tester import CommandTester
 from mlclient import MLConfiguration
 from mlclient.cli.app import MLCLIentApplication
 from mlclient.exceptions import InvalidLogTypeError
+from tests.tools import MLResponseBuilder
 
 
 @pytest.fixture(autouse=True)
@@ -45,12 +46,12 @@ def _setup(mocker, ml_config):
 
 @responses.activate
 def test_command_call_logs_basic():
-    _setup_responses(
-        {
-            "format": "json",
-            "filename": "8002_ErrorLog.txt",
-        },
-        [])
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/manage/v2/logs")
+    builder.with_param("format", "json")
+    builder.with_param("filename", "8002_ErrorLog.txt")
+    builder.with_response_body(_get_error_logs_response_body([]))
+    builder.build_get()
 
     tester = _get_tester("call logs")
     tester.execute("-e test -a 8002")
@@ -67,12 +68,12 @@ def test_command_call_logs_basic():
 
 @responses.activate
 def test_command_call_logs_basic_using_named_app_server():
-    _setup_responses(
-        {
-            "format": "json",
-            "filename": "8100_ErrorLog.txt",
-        },
-        [])
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/manage/v2/logs")
+    builder.with_param("format", "json")
+    builder.with_param("filename", "8100_ErrorLog.txt")
+    builder.with_response_body(_get_error_logs_response_body([]))
+    builder.build_get()
 
     tester = _get_tester("call logs")
     tester.execute("-e test -a content")
@@ -89,12 +90,12 @@ def test_command_call_logs_basic_using_named_app_server():
 
 @responses.activate
 def test_command_call_logs_custom_rest_server():
-    _setup_responses(
-        {
-            "format": "json",
-            "filename": "8002_ErrorLog.txt",
-        },
-        [])
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/manage/v2/logs")
+    builder.with_param("format", "json")
+    builder.with_param("filename", "8002_ErrorLog.txt")
+    builder.with_response_body(_get_error_logs_response_body([]))
+    builder.build_get()
 
     tester = _get_tester("call logs")
     tester.execute("-e test -a 8002 -s manage")
@@ -111,12 +112,12 @@ def test_command_call_logs_custom_rest_server():
 
 @responses.activate
 def test_command_call_logs_custom_log_type_error():
-    _setup_responses(
-        {
-            "format": "json",
-            "filename": "8002_ErrorLog.txt",
-        },
-        [])
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/manage/v2/logs")
+    builder.with_param("format", "json")
+    builder.with_param("filename", "8002_ErrorLog.txt")
+    builder.with_response_body(_get_error_logs_response_body([]))
+    builder.build_get()
 
     tester = _get_tester("call logs")
     tester.execute("-e test -a 8002 -l error")
@@ -133,13 +134,12 @@ def test_command_call_logs_custom_log_type_error():
 
 @responses.activate
 def test_command_call_logs_custom_log_type_access():
-    _setup_responses(
-        {
-            "format": "json",
-            "filename": "8002_AccessLog.txt",
-        },
-        [],
-        False)
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/manage/v2/logs")
+    builder.with_param("format", "json")
+    builder.with_param("filename", "8002_AccessLog.txt")
+    builder.with_response_body({"logfile": {"message": "\n".join([])}})
+    builder.build_get()
 
     tester = _get_tester("call logs")
     tester.execute("-e test -a 8002 -l access")
@@ -156,13 +156,12 @@ def test_command_call_logs_custom_log_type_access():
 
 @responses.activate
 def test_command_call_logs_custom_log_type_request():
-    _setup_responses(
-        {
-            "format": "json",
-            "filename": "8002_RequestLog.txt",
-        },
-        [],
-        False)
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/manage/v2/logs")
+    builder.with_param("format", "json")
+    builder.with_param("filename", "8002_RequestLog.txt")
+    builder.with_response_body({"logfile": {"message": "\n".join([])}})
+    builder.build_get()
 
     tester = _get_tester("call logs")
     tester.execute("-e test -a 8002 -l request")
@@ -188,13 +187,13 @@ def test_command_call_logs_custom_log_type_invalid():
 
 @responses.activate
 def test_command_call_logs_from():
-    _setup_responses(
-        {
-            "format": "json",
-            "filename": "8002_ErrorLog.txt",
-            "start": "1970-01-01T00:00:00",
-        },
-        [])
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/manage/v2/logs")
+    builder.with_param("format", "json")
+    builder.with_param("filename", "8002_ErrorLog.txt")
+    builder.with_param("start", "1970-01-01T00:00:00")
+    builder.with_response_body(_get_error_logs_response_body([]))
+    builder.build_get()
 
     tester = _get_tester("call logs")
     tester.execute("-e test -a 8002 -f 1970-01-01")
@@ -211,13 +210,13 @@ def test_command_call_logs_from():
 
 @responses.activate
 def test_command_call_logs_to():
-    _setup_responses(
-        {
-            "format": "json",
-            "filename": "8002_ErrorLog.txt",
-            "end": "1984-01-01T00:00:00",
-        },
-        [])
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/manage/v2/logs")
+    builder.with_param("format", "json")
+    builder.with_param("filename", "8002_ErrorLog.txt")
+    builder.with_param("end", "1984-01-01T00:00:00")
+    builder.with_response_body(_get_error_logs_response_body([]))
+    builder.build_get()
 
     tester = _get_tester("call logs")
     tester.execute("-e test -a 8002 -t 1984-01-01")
@@ -234,13 +233,13 @@ def test_command_call_logs_to():
 
 @responses.activate
 def test_command_call_logs_regex():
-    _setup_responses(
-        {
-            "format": "json",
-            "filename": "8002_ErrorLog.txt",
-            "regex": "you-will-not-find-it",
-        },
-        [])
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/manage/v2/logs")
+    builder.with_param("format", "json")
+    builder.with_param("filename", "8002_ErrorLog.txt")
+    builder.with_param("regex", "you-will-not-find-it")
+    builder.with_response_body(_get_error_logs_response_body([]))
+    builder.build_get()
 
     tester = _get_tester("call logs")
     tester.execute("-e test -a 8002 -r you-will-not-find-it")
@@ -257,13 +256,13 @@ def test_command_call_logs_regex():
 
 @responses.activate
 def test_command_call_logs_host():
-    _setup_responses(
-        {
-            "format": "json",
-            "filename": "8002_ErrorLog.txt",
-            "host": "some-host",
-        },
-        [])
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/manage/v2/logs")
+    builder.with_param("format", "json")
+    builder.with_param("filename", "8002_ErrorLog.txt")
+    builder.with_param("host", "some-host")
+    builder.with_response_body(_get_error_logs_response_body([]))
+    builder.build_get()
 
     tester = _get_tester("call logs")
     tester.execute("-e test -a 8002 -H some-host")
@@ -280,16 +279,16 @@ def test_command_call_logs_host():
 
 @responses.activate
 def test_command_call_logs_output_for_error_logs():
-    _setup_responses(
-        {
-            "format": "json",
-            "filename": "8002_ErrorLog.txt",
-        },
-        [
-            ("2023-09-01T00:00:00Z", "info", "Log message 1"),
-            ("2023-09-01T00:00:01Z", "info", "Log message 2"),
-            ("2023-09-01T00:00:02Z", "info", "Log message 3"),
-        ])
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/manage/v2/logs")
+    builder.with_param("format", "json")
+    builder.with_param("filename", "8002_ErrorLog.txt")
+    builder.with_response_body(_get_error_logs_response_body([
+        ("2023-09-01T00:00:00Z", "info", "Log message 1"),
+        ("2023-09-01T00:00:01Z", "info", "Log message 2"),
+        ("2023-09-01T00:00:02Z", "info", "Log message 3"),
+    ]))
+    builder.build_get()
 
     tester = _get_tester("call logs")
     tester.execute("-e test -a 8002")
@@ -318,13 +317,12 @@ def test_command_call_logs_output_for_access_logs():
          '"GET /manage/v2/logs?format=json&filename=8002_ErrorLog.txt HTTP/1.1" '
          '401 104 - "python-requests/2.31.0"'),
     ]
-    _setup_responses(
-        {
-            "format": "json",
-            "filename": "8002_AccessLog.txt",
-        },
-        logs,
-        False)
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/manage/v2/logs")
+    builder.with_param("format", "json")
+    builder.with_param("filename", "8002_AccessLog.txt")
+    builder.with_response_body({"logfile": {"message": "\n".join(logs)}})
+    builder.build_get()
 
     tester = _get_tester("call logs")
     tester.execute("-e test -a 8002 -l access")
@@ -384,13 +382,12 @@ def test_command_call_logs_output_for_request_logs():
          '"indexingTime":0.000687'
          '}'),
     ]
-    _setup_responses(
-        {
-            "format": "json",
-            "filename": "8002_RequestLog.txt",
-        },
-        logs,
-        False)
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/manage/v2/logs")
+    builder.with_param("format", "json")
+    builder.with_param("filename", "8002_RequestLog.txt")
+    builder.with_response_body({"logfile": {"message": "\n".join(logs)}})
+    builder.build_get()
 
     tester = _get_tester("call logs")
     tester.execute("-e test -a 8002 -l request")
@@ -453,14 +450,14 @@ def test_command_call_logs_output_for_xml_logs():
         "  </error:stack>",
         "</error:error>",
     ]
-    _setup_responses(
-        {
-            "format": "json",
-            "filename": "8002_ErrorLog.txt",
-        },
-        [
-            ("2023-09-01T00:00:00Z", "info", "\n".join(xml_log_lines)),
-        ])
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/manage/v2/logs")
+    builder.with_param("format", "json")
+    builder.with_param("filename", "8002_ErrorLog.txt")
+    builder.with_response_body(_get_error_logs_response_body([
+        ("2023-09-01T00:00:00Z", "info", "\n".join(xml_log_lines)),
+    ]))
+    builder.build_get()
 
     tester = _get_tester("call logs")
     tester.execute("-e test -a 8002")
@@ -486,31 +483,18 @@ def _get_tester(
     return CommandTester(command)
 
 
-def _setup_responses(
-        request_params: dict,
-        logs: list[tuple | str],
-        error_logs: bool = True,
+def _get_error_logs_response_body(
+        logs: list[tuple],
 ):
-    params = urllib.parse.urlencode(request_params).replace("%2B", "+")
-    request_url = f"http://localhost:8002/manage/v2/logs?{params}"
-
-    if error_logs:
-        response_json = {
-            "logfile": {
-                "log": [
-                    {
-                        "timestamp": log_tuple[0],
-                        "level": log_tuple[1],
-                        "message": log_tuple[2],
-                    }
-                    for log_tuple in logs
-                ],
-            },
-        }
-    else:
-        response_json = {"logfile": {"message": "\n".join(logs)}}
-
-    responses.get(
-        request_url,
-        json=response_json,
-    )
+    return {
+        "logfile": {
+            "log": [
+                {
+                    "timestamp": log_tuple[0],
+                    "level": log_tuple[1],
+                    "message": log_tuple[2],
+                }
+                for log_tuple in logs
+            ],
+        },
+    }

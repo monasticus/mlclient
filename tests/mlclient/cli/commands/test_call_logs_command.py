@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import urllib.parse
 
 import pytest
 import responses
@@ -138,7 +137,7 @@ def test_command_call_logs_custom_log_type_access():
     builder.with_base_url("http://localhost:8002/manage/v2/logs")
     builder.with_param("format", "json")
     builder.with_param("filename", "8002_AccessLog.txt")
-    builder.with_response_body({"logfile": {"message": "\n".join([])}})
+    builder.with_response_body({"logfile": {"message": ""}})
     builder.build_get()
 
     tester = _get_tester("call logs")
@@ -160,7 +159,7 @@ def test_command_call_logs_custom_log_type_request():
     builder.with_base_url("http://localhost:8002/manage/v2/logs")
     builder.with_param("format", "json")
     builder.with_param("filename", "8002_RequestLog.txt")
-    builder.with_response_body({"logfile": {"message": "\n".join([])}})
+    builder.with_response_body({"logfile": {"message": ""}})
     builder.build_get()
 
     tester = _get_tester("call logs")

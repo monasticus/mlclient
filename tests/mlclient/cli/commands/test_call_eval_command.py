@@ -1,12 +1,9 @@
 from __future__ import annotations
 
-import urllib.parse
 
 import pytest
 import responses
 from cleo.testers.command_tester import CommandTester
-from requests_toolbelt import MultipartEncoder
-from responses import matchers
 
 from mlclient import MLConfiguration
 from mlclient.cli.app import MLCLIentApplication

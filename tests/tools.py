@@ -89,7 +89,7 @@ class MLResponseBuilder:
 
         headers = {"X-Primitive": x_primitive}
         self._response_body_fields[field_name] = (
-            name_disposition, body_part_content, content_type, headers
+            name_disposition, body_part_content, content_type, headers,
         )
 
     def with_request_body(self, body):
@@ -115,7 +115,8 @@ class MLResponseBuilder:
 
     def build(self):
         if self._response_body and self._response_body_fields:
-            raise RuntimeError("You can't set a regular and multipart response bodies!")
+            msg = "You can't set a regular and multipart response bodies!"
+            raise RuntimeError(msg)
 
         request_url = self._base_url
         if len(self._params) > 0:
@@ -132,31 +133,35 @@ class MLResponseBuilder:
             elif self._response_body_fields:
                 multipart_body = MultipartEncoder(fields=self._response_body_fields)
                 multipart_body_str = multipart_body.to_string()
+                boundary = multipart_body.boundary[2:]
+                content_type = f"multipart/mixed; boundary={boundary}"
                 self.with_header("Content-Length", len(multipart_body_str))
 
                 responses_params["body"] = multipart_body_str
-                responses_params["content_type"] = f"multipart/mixed; boundary={multipart_body.boundary[2:]}"
+                responses_params["content_type"] = content_type
                 responses_params["headers"] = self._headers
             responses.get(
                 request_url,
-                **responses_params
+                **responses_params,
             )
         elif self._method == "POST":
             if self._response_body:
                 responses_params["body"] = self._response_body
                 responses_params["headers"] = self._headers
-                responses_params["match"] = [matchers.urlencoded_params_matcher(self._request_body)]
             elif self._response_body_fields:
                 multipart_body = MultipartEncoder(fields=self._response_body_fields)
                 multipart_body_str = multipart_body.to_string()
+                boundary = multipart_body.boundary[2:]
+                content_type = f"multipart/mixed; boundary={boundary}"
                 self.with_header("Content-Length", len(multipart_body_str))
 
                 responses_params["body"] = multipart_body_str
-                responses_params["content_type"] = f"multipart/mixed; boundary={multipart_body.boundary[2:]}"
+                responses_params["content_type"] = content_type
                 responses_params["headers"] = self._headers
-                responses_params["match"] = [matchers.urlencoded_params_matcher(self._request_body)]
+            match = [matchers.urlencoded_params_matcher(self._request_body)]
+            responses_params["match"] = match
             responses.post(
                 request_url,
-                **responses_params
+                **responses_params,
             )
         self.__init__()

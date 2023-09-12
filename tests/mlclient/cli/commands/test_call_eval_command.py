@@ -12,6 +12,7 @@ from mlclient import MLConfiguration
 from mlclient.cli.app import MLCLIentApplication
 from mlclient.exceptions import WrongParametersError
 from tests import tools
+from tests.tools import MLResponseBuilder
 
 
 @pytest.fixture(autouse=True)
@@ -50,11 +51,12 @@ def _setup(mocker, ml_config):
 def test_command_call_eval_basic():
     code = ('xquery version "1.0"; '
             '""')
-    _setup_responses(
-        request_body={"xquery": code},
-        response_parts=[
-            ("string", ""),
-        ])
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/eval")
+    builder.with_request_body({"xquery": code})
+    builder.with_response_body_part("string", "")
+    builder.build()
 
     file_path = tools.get_test_resource_path(__file__, "xquery-code.xqy")
     tester = _get_tester("call eval")
@@ -73,11 +75,12 @@ def test_command_call_eval_basic():
 def test_command_call_eval_custom_rest_server():
     code = ('xquery version "1.0"; '
             '""')
-    _setup_responses(
-        request_body={"xquery": code},
-        response_parts=[
-            ("string", ""),
-        ])
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/eval")
+    builder.with_request_body({"xquery": code})
+    builder.with_response_body_part("string", "")
+    builder.build()
 
     file_path = tools.get_test_resource_path(__file__, "xquery-code.xqy")
     tester = _get_tester("call eval")
@@ -96,11 +99,12 @@ def test_command_call_eval_custom_rest_server():
 def test_command_call_eval_xquery_flag():
     code = ('xquery version "1.0"; '
             '""')
-    _setup_responses(
-        request_body={"xquery": code},
-        response_parts=[
-            ("string", ""),
-        ])
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/eval")
+    builder.with_request_body({"xquery": code})
+    builder.with_response_body_part("string", "")
+    builder.build()
 
     tester = _get_tester("call eval")
     tester.execute(f"-e test -x '{code}'")
@@ -118,11 +122,12 @@ def test_command_call_eval_xquery_flag():
 def test_command_call_eval_javascript_flag():
     code = ('"use strict"; '
             '""')
-    _setup_responses(
-        request_body={"javascript": code},
-        response_parts=[
-            ("string", ""),
-        ])
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/eval")
+    builder.with_request_body({"javascript": code})
+    builder.with_response_body_part("string", "")
+    builder.build()
 
     tester = _get_tester("call eval")
     tester.execute(f"-e test -j '{code}'")
@@ -152,12 +157,13 @@ def test_command_call_eval_mixed_xquery_and_javascript():
 def test_command_call_eval_custom_database():
     code = ('xquery version "1.0"; '
             '""')
-    _setup_responses(
-        request_params={"database": "custom-db"},
-        request_body={"xquery": code},
-        response_parts=[
-            ("string", ""),
-        ])
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/eval")
+    builder.with_param("database", "custom-db")
+    builder.with_request_body({"xquery": code})
+    builder.with_response_body_part("string", "")
+    builder.build()
 
     file_path = tools.get_test_resource_path(__file__, "xquery-code.xqy")
     tester = _get_tester("call eval")
@@ -176,12 +182,13 @@ def test_command_call_eval_custom_database():
 def test_command_call_eval_custom_txid():
     code = ('xquery version "1.0"; '
             '""')
-    _setup_responses(
-        request_params={"txid": "transaction-id"},
-        request_body={"xquery": code},
-        response_parts=[
-            ("string", ""),
-        ])
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/eval")
+    builder.with_param("txid", "transaction-id")
+    builder.with_request_body({"xquery": code})
+    builder.with_response_body_part("string", "")
+    builder.build()
 
     file_path = tools.get_test_resource_path(__file__, "xquery-code.xqy")
     tester = _get_tester("call eval")
@@ -206,15 +213,16 @@ def test_command_call_eval_output():
             ' element root {},'
             ' map:entry("key", "value")'
             ')')
-    _setup_responses(
-        request_body={"xquery": code},
-        response_parts=[
-            ("dateTime", "2023-08-09T01:01:01.001Z"),
-            ("integer", "1"),
-            ("string", "string-value"),
-            ("element", "<root/>"),
-            ("map", '{"key": "value"}'),
-        ])
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/eval")
+    builder.with_request_body({"xquery": code})
+    builder.with_response_body_part("dateTime", "2023-08-09T01:01:01.001Z")
+    builder.with_response_body_part("integer", "1")
+    builder.with_response_body_part("string", "string-value")
+    builder.with_response_body_part("element", "<root/>")
+    builder.with_response_body_part("map", '{"key": "value"}')
+    builder.build()
 
     tester = _get_tester("call eval")
     tester.execute(f"-e test -x '{code}'")
@@ -233,51 +241,6 @@ def test_command_call_eval_output():
         '{"key": "value"}',
     ]
     assert command_output == "\n".join(expected_output_lines) + "\n"
-
-
-def _setup_responses(
-        request_body: dict,
-        response_parts: list[tuple[str, str]],
-        request_params: dict | None = None,
-):
-    request_url = "http://localhost:8002/v1/eval"
-    if request_params:
-        params = urllib.parse.urlencode(request_params).replace("%2B", "+")
-        request_url += f"?{params}"
-
-    if len(response_parts) == 0:
-        responses.post(
-            request_url,
-            body=b"",
-            headers={"Content-Length": "0"},
-            match=[matchers.urlencoded_params_matcher(request_body)],
-        )
-    else:
-        fields = {}
-        for i, item in enumerate(response_parts):
-            name_disposition = f"name{i}"
-            field_name = f"field{i}"
-            field_value = item[1]
-            x_primitive = item[0]
-            headers = {"X-Primitive": x_primitive}
-            if x_primitive in ["array", "map"]:
-                content_type = "application/json"
-            elif x_primitive in ["document", "element"]:
-                content_type = "application/xml"
-            else:
-                content_type = "text/plain"
-            fields[field_name] = (name_disposition, field_value, content_type, headers)
-        multipart_body = MultipartEncoder(fields=fields)
-        multipart_body_str = multipart_body.to_string()
-        responses.post(
-            request_url,
-            body=multipart_body_str,
-            content_type=f"multipart/mixed; boundary={multipart_body.boundary[2:]}",
-            headers={
-                "Content-Length": str(len(multipart_body_str)),
-            },
-            match=[matchers.urlencoded_params_matcher(request_body)],
-        )
 
 
 def _get_tester(

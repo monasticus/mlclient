@@ -7,8 +7,11 @@ from typing import Any
 
 import responses
 from requests import Response
-from requests_toolbelt import MultipartEncoder, MultipartDecoder
+from requests_toolbelt import MultipartDecoder, MultipartEncoder
 from responses import matchers
+
+from mlclient.constants import (HEADER_MULTIPART_MIXED, HEADER_NAME_PRIMITIVE,
+                                HEADER_X_WWW_FORM_URLENCODED)
 
 _SCRIPT_DIR = Path(__file__).resolve()
 _RESOURCES_DIR = "resources"
@@ -274,67 +277,89 @@ class MLResponseBuilder:
 
     @staticmethod
     def generate_builder_code(
-            origin_response: Response,
+            response: Response,
     ):
-        init = "\nbuilder = MLResponseBuilder()"
-        method = f'builder.with_method("{origin_response.request.method.upper()}")'
-        url_split = urllib.parse.urlsplit(origin_response.url)
-        url = f"{url_split.scheme}://{url_split.netloc}{url_split.path}"
-        base_url = f'builder.with_base_url("{url}")'
-        joined_params = url_split.query
-        if joined_params == "":
-            params = None
+        method = response.request.method.upper()
+        url = response.url
+        request_content_type = response.request.headers.get("Content-Type")
+        request_body = response.request.body
+        response_content_type = response.headers.get("Content-Type")
+        response_body_text = response.text
+
+        init_line = "\nbuilder = MLResponseBuilder()"
+
+        method_line = f'builder.with_method("{method}")'
+
+        url_split = urllib.parse.urlsplit(url)
+        base_url = f"{url_split.scheme}://{url_split.netloc}{url_split.path}"
+        base_url_line = f'builder.with_base_url("{base_url}")'
+
+        url_query = url_split.query
+        if url_query == "":
+            params_lines = None
         else:
-            params = [f'builder.with_request_param("{param.split("=")[0]}", "{param.split("=")[1]}")'
-                      for param in joined_params.split("&")]
-        if origin_response.request.method.upper() in ["POST", "PUT"]:
-            if origin_response.request.headers.get("Content-Type") == "application/x-www-form-urlencoded":
-                origin_body = urllib.parse.unquote(origin_response.request.body).replace("+", " ")
-                split = origin_body.split("&")
+            params_lines = []
+            for param in url_query.split("&"):
+                name_and_value = param.split("=")
+                param_name = name_and_value[0]
+                param_value = name_and_value[1]
+                params_lines.append(f'builder.with_request_param("{param_name}", "{param_value}")')
+
+        request_body_line = None
+        if method in ["POST", "PUT"]:
+            if request_content_type == HEADER_X_WWW_FORM_URLENCODED:
+                request_body_standardized = request_body.replace("+", "%2B")
+                request_body_decoded = urllib.parse.unquote(request_body_standardized)
+                request_body_parts = request_body_decoded.split("&")
                 body = {}
-                for part in split:
+                for part in request_body_parts:
                     key_and_value = part.split("=")
-                    body[key_and_value[0]] = key_and_value[1]
-                request_body = f"builder.with_request_body({body})"
+                    part_name = key_and_value[0]
+                    part_value = key_and_value[1]
+                    body[part_name] = part_value
+                request_body_line = f"builder.with_request_body({body})"
             else:
-                request_body = f"builder.with_request_body(\'{origin_response.request.body}\')"
+                request_body_line = f"builder.with_request_body(\'{request_body}\')"
+
+        headers_lines = [f'builder.with_response_header("{name}", "{value}")'
+                         for name, value in response.headers.items()
+                         if name not in ["Content-Length", "Content-Type"]]
+
+        status_line = f"builder.with_response_status({response.status_code})"
+
+        response_body_lines = []
+        if response.content == b"":
+            response_body_lines.append("builder.with_empty_response_body()")
+        elif response_content_type.startswith(HEADER_MULTIPART_MIXED):
+            raw_parts = MultipartDecoder.from_response(response).parts
+            for part in raw_parts:
+                encoded_header_name = HEADER_NAME_PRIMITIVE.encode(part.encoding)
+                header_value = part.headers.get(encoded_header_name)
+                x_primitive = header_value.decode(part.encoding)
+                body_part_content = part.text
+                response_body_line = f'builder.with_response_body_part("{x_primitive}", "{body_part_content}")'
+                response_body_lines.append(response_body_line)
         else:
-            request_body = None
-        headers = [f'builder.with_response_header("{name}", "{value}")'
-                   for name, value in origin_response.headers.items()
-                   if name not in ["Content-Length", "Content-Type"]]
-        status = f"builder.with_response_status({origin_response.status_code})"
-        if origin_response.content == b"":
-            response_body = "builder.with_empty_response_body()"
-        else:
-            if origin_response.headers.get("Content-Type").startswith("multipart/mixed"):
-                raw_parts = MultipartDecoder.from_response(origin_response).parts
-                response_body = []
-                for part in raw_parts:
-                    encoded_header_name = "X-Primitive".encode(part.encoding)
-                    header_value = part.headers.get(encoded_header_name)
-                    x_primitive = header_value.decode(part.encoding)
-                    body_part_content = part.text
-                    response_body.append(f'builder.with_response_body_part("{x_primitive}", "{body_part_content}")')
-            else:
-                body = origin_response.text.replace("'", "\\'")
-                response_body = f"builder.with_response_body(\'\'\'{body}\'\'\')"
-        build = "builder.build()"
-        code_lines = [
-            init,
-            method,
-            base_url,
-            params,
-            request_body,
-            headers,
-            status,
-            response_body,
-            build,
+            body = response_body_text.replace("'", "\\'")
+            response_body_lines.append(f"builder.with_response_body('''{body}''')")
+
+        build_line = "builder.build()"
+
+        build_parts = [
+            init_line,
+            method_line,
+            base_url_line,
+            params_lines,
+            request_body_line,
+            headers_lines,
+            status_line,
+            response_body_lines,
+            build_line,
         ]
-        for code_line in code_lines:
-            if code_line is not None:
-                if isinstance(code_line, list):
-                    for line in code_line:
-                        print(line)
+        for code in build_parts:
+            if code is not None:
+                if isinstance(code, list):
+                    for code_line in code:
+                        print(code_line)
                 else:
-                    print(code_line)
+                    print(code)

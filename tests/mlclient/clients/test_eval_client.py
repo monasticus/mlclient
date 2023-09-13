@@ -201,7 +201,7 @@ def test_eval_using_database_param(eval_client):
 
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/v1/eval")
-    builder.with_param("database", "Documents")
+    builder.with_request_param("database", "Documents")
     builder.with_request_body({"xquery": code})
     builder.with_empty_response_body()
     builder.build_post()
@@ -217,7 +217,7 @@ def test_eval_using_txid_param(eval_client):
 
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/v1/eval")
-    builder.with_param("txid", "transaction-id")
+    builder.with_request_param("txid", "transaction-id")
     builder.with_request_body({"xquery": code})
     builder.with_empty_response_body()
     builder.build_post()

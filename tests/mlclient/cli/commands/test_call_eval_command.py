@@ -156,7 +156,7 @@ def test_command_call_eval_custom_database():
 
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/v1/eval")
-    builder.with_param("database", "custom-db")
+    builder.with_request_param("database", "custom-db")
     builder.with_request_body({"xquery": code})
     builder.with_response_body_part("string", "")
     builder.build_post()
@@ -181,7 +181,7 @@ def test_command_call_eval_custom_txid():
 
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/v1/eval")
-    builder.with_param("txid", "transaction-id")
+    builder.with_request_param("txid", "transaction-id")
     builder.with_request_body({"xquery": code})
     builder.with_response_body_part("string", "")
     builder.build_post()

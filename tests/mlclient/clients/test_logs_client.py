@@ -26,9 +26,9 @@ def _setup_and_teardown(logs_client):
 def test_get_logs_no_such_host(logs_client):
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/manage/v2/logs")
-    builder.with_param("format", "json")
-    builder.with_param("filename", "8002_ErrorLog.txt")
-    builder.with_param("host", "non-existing-host")
+    builder.with_request_param("format", "json")
+    builder.with_request_param("filename", "8002_ErrorLog.txt")
+    builder.with_request_param("host", "non-existing-host")
     builder.with_response_body({
         "errorResponse": {
             "statusCode": "404",
@@ -55,8 +55,8 @@ def test_get_logs_no_such_host(logs_client):
 def test_get_logs_empty(logs_client):
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/manage/v2/logs")
-    builder.with_param("format", "json")
-    builder.with_param("filename", "8002_ErrorLog.txt")
+    builder.with_request_param("format", "json")
+    builder.with_request_param("filename", "8002_ErrorLog.txt")
     builder.with_response_body(builder.error_logs_body([]))
     builder.build_get()
 
@@ -69,8 +69,8 @@ def test_get_logs_empty(logs_client):
 def test_get_logs_using_string_port(logs_client):
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/manage/v2/logs")
-    builder.with_param("format", "json")
-    builder.with_param("filename", "8002_ErrorLog.txt")
+    builder.with_request_param("format", "json")
+    builder.with_request_param("filename", "8002_ErrorLog.txt")
     builder.with_response_body(builder.error_logs_body([
         ("2023-09-01T00:00:00Z", "info", "Log message 1"),
         ("2023-09-01T00:00:01Z", "warning", "Log message 2"),
@@ -103,8 +103,8 @@ def test_get_logs_using_string_port(logs_client):
 def test_get_task_server_logs(logs_client):
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/manage/v2/logs")
-    builder.with_param("format", "json")
-    builder.with_param("filename", "TaskServer_ErrorLog.txt")
+    builder.with_request_param("format", "json")
+    builder.with_request_param("filename", "TaskServer_ErrorLog.txt")
     builder.with_response_body(builder.error_logs_body([
         ("2023-09-01T00:00:00Z", "info", "Log message 1"),
         ("2023-09-01T00:00:01Z", "warning", "Log message 2"),
@@ -137,8 +137,8 @@ def test_get_task_server_logs(logs_client):
 def test_get_task_server_logs_using_int_port(logs_client):
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/manage/v2/logs")
-    builder.with_param("format", "json")
-    builder.with_param("filename", "TaskServer_ErrorLog.txt")
+    builder.with_request_param("format", "json")
+    builder.with_request_param("filename", "TaskServer_ErrorLog.txt")
     builder.with_response_body(builder.error_logs_body([
         ("2023-09-01T00:00:00Z", "info", "Log message 1"),
         ("2023-09-01T00:00:01Z", "warning", "Log message 2"),
@@ -171,8 +171,8 @@ def test_get_task_server_logs_using_int_port(logs_client):
 def test_get_error_logs(logs_client):
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/manage/v2/logs")
-    builder.with_param("format", "json")
-    builder.with_param("filename", "8002_ErrorLog.txt")
+    builder.with_request_param("format", "json")
+    builder.with_request_param("filename", "8002_ErrorLog.txt")
     builder.with_response_body(builder.error_logs_body([
         ("2023-09-01T00:00:00Z", "info", "Log message 1"),
         ("2023-09-01T00:00:01Z", "warning", "Log message 2"),
@@ -205,11 +205,11 @@ def test_get_error_logs(logs_client):
 def test_get_error_logs_with_search_params(logs_client):
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/manage/v2/logs")
-    builder.with_param("format", "json")
-    builder.with_param("filename", "8002_ErrorLog.txt")
-    builder.with_param("start", "2023-09-01T00:00:00")
-    builder.with_param("end", "2023-09-01T23:59:00")
-    builder.with_param("regex", "Log message")
+    builder.with_request_param("format", "json")
+    builder.with_request_param("filename", "8002_ErrorLog.txt")
+    builder.with_request_param("start", "2023-09-01T00:00:00")
+    builder.with_request_param("end", "2023-09-01T23:59:00")
+    builder.with_request_param("regex", "Log message")
     builder.with_response_body(builder.error_logs_body([
         ("2023-09-01T00:00:00Z", "info", "Log message 1"),
         ("2023-09-01T00:00:01Z", "warning", "Log message 2"),
@@ -246,12 +246,12 @@ def test_get_error_logs_with_search_params(logs_client):
 def test_get_error_logs_fully_customized(logs_client):
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/manage/v2/logs")
-    builder.with_param("format", "json")
-    builder.with_param("filename", "8002_ErrorLog.txt")
-    builder.with_param("host", "some-host")
-    builder.with_param("start", "2023-09-01T00:00:00")
-    builder.with_param("end", "2023-09-01T23:59:00")
-    builder.with_param("regex", "Log message")
+    builder.with_request_param("format", "json")
+    builder.with_request_param("filename", "8002_ErrorLog.txt")
+    builder.with_request_param("host", "some-host")
+    builder.with_request_param("start", "2023-09-01T00:00:00")
+    builder.with_request_param("end", "2023-09-01T23:59:00")
+    builder.with_request_param("regex", "Log message")
     builder.with_response_body(builder.error_logs_body([
         ("2023-09-01T00:00:00Z", "info", "Log message 1"),
         ("2023-09-01T00:00:01Z", "warning", "Log message 2"),
@@ -297,8 +297,8 @@ def test_get_access_logs(logs_client):
     ]
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/manage/v2/logs")
-    builder.with_param("format", "json")
-    builder.with_param("filename", "8002_AccessLog.txt")
+    builder.with_request_param("format", "json")
+    builder.with_request_param("filename", "8002_AccessLog.txt")
     builder.with_response_body(builder.access_or_request_logs_body(raw_logs))
     builder.build_get()
 
@@ -326,8 +326,8 @@ def test_get_access_logs_with_search_params(logs_client):
     ]
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/manage/v2/logs")
-    builder.with_param("format", "json")
-    builder.with_param("filename", "8002_AccessLog.txt")
+    builder.with_request_param("format", "json")
+    builder.with_request_param("filename", "8002_AccessLog.txt")
     builder.with_response_body(builder.access_or_request_logs_body(raw_logs))
     builder.build_get()
 
@@ -393,8 +393,8 @@ def test_get_request_logs(logs_client):
     ]
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/manage/v2/logs")
-    builder.with_param("format", "json")
-    builder.with_param("filename", "8002_RequestLog.txt")
+    builder.with_request_param("format", "json")
+    builder.with_request_param("filename", "8002_RequestLog.txt")
     builder.with_response_body(builder.access_or_request_logs_body(raw_logs))
     builder.build_get()
 
@@ -455,8 +455,8 @@ def test_get_request_logs_with_search_params(logs_client):
     ]
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/manage/v2/logs")
-    builder.with_param("format", "json")
-    builder.with_param("filename", "8002_RequestLog.txt")
+    builder.with_request_param("format", "json")
+    builder.with_request_param("filename", "8002_RequestLog.txt")
     builder.with_response_body(builder.access_or_request_logs_body(raw_logs))
     builder.build_get()
 

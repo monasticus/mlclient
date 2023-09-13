@@ -3,7 +3,7 @@ from __future__ import annotations
 import os
 import urllib.parse
 from pathlib import Path
-from typing import Any, Iterable
+from typing import Any
 
 import responses
 from requests import Response
@@ -79,7 +79,7 @@ class MLResponseBuilder:
             self,
     ):
         self.with_response_body(b"")
-        self.with_header("Content-Length", 0)
+        self.with_response_header("Content-Length", 0)
 
     def with_response_body(
             self,
@@ -123,21 +123,21 @@ class MLResponseBuilder:
     ):
         self._request_body = body
 
-    def with_params(
+    def with_request_params(
             self,
             params: dict,
     ):
         for key, value in params.items():
-            self.with_param(key, value)
+            self.with_request_param(key, value)
 
-    def with_param(
+    def with_request_param(
             self,
             key: str,
             value: Any,
     ):
         self._params[key] = value
 
-    def with_header(
+    def with_response_header(
             self,
             key: str,
             value: Any,
@@ -204,7 +204,7 @@ class MLResponseBuilder:
             multipart_body_str = multipart_body.to_string()
             boundary = multipart_body.boundary[2:]
             content_type = f"multipart/mixed; boundary={boundary}"
-            self.with_header("Content-Length", len(multipart_body_str))
+            self.with_response_header("Content-Length", len(multipart_body_str))
 
             responses_params["body"] = multipart_body_str
             responses_params["content_type"] = content_type
@@ -285,7 +285,7 @@ class MLResponseBuilder:
         if joined_params == "":
             params = None
         else:
-            params = [f'builder.with_param("{param.split("=")[0]}", "{param.split("=")[1]}")'
+            params = [f'builder.with_request_param("{param.split("=")[0]}", "{param.split("=")[1]}")'
                       for param in joined_params.split("&")]
         if origin_response.request.method.upper() in ["POST", "PUT"]:
             if origin_response.request.headers.get("Content-Type") == "application/x-www-form-urlencoded":
@@ -295,17 +295,17 @@ class MLResponseBuilder:
                 for part in split:
                     key_and_value = part.split("=")
                     body[key_and_value[0]] = key_and_value[1]
-                request_body = f'builder.with_request_body({body})'
+                request_body = f"builder.with_request_body({body})"
             else:
-                request_body = f'builder.with_request_body(\'{origin_response.request.body}\')'
+                request_body = f"builder.with_request_body(\'{origin_response.request.body}\')"
         else:
             request_body = None
-        headers = [f'builder.with_header("{name}", "{value}")'
+        headers = [f'builder.with_response_header("{name}", "{value}")'
                    for name, value in origin_response.headers.items()
                    if name not in ["Content-Length", "Content-Type"]]
         status = f"builder.with_response_status({origin_response.status_code})"
         if origin_response.content == b"":
-            response_body = f'builder.with_empty_response_body()'
+            response_body = "builder.with_empty_response_body()"
         else:
             if origin_response.headers.get("Content-Type").startswith("multipart/mixed"):
                 raw_parts = MultipartDecoder.from_response(origin_response).parts
@@ -318,7 +318,7 @@ class MLResponseBuilder:
                     response_body.append(f'builder.with_response_body_part("{x_primitive}", "{body_part_content}")')
             else:
                 body = origin_response.text.replace("'", "\\'")
-                response_body = f'builder.with_response_body(\'\'\'{body}\'\'\')'
+                response_body = f"builder.with_response_body(\'\'\'{body}\'\'\')"
         build = "builder.build()"
         code_lines = [
             init,

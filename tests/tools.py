@@ -49,7 +49,9 @@ def get_test_resources_path(
 
 class MLResponseBuilder:
 
-    def __init__(self):
+    def __init__(
+            self,
+    ):
         self._method: str | None = None
         self._base_url: str | None = None
         self._response_body: str | bytes | None = None
@@ -60,20 +62,35 @@ class MLResponseBuilder:
         self._headers: dict = {}
         self._content_type: str | None = None
 
-    def with_method(self, method: str):
+    def with_method(
+            self,
+            method: str,
+    ):
         self._method = method
 
-    def with_base_url(self, base_url: str):
+    def with_base_url(
+            self,
+            base_url: str,
+    ):
         self._base_url = base_url
 
-    def with_empty_response_body(self):
+    def with_empty_response_body(
+            self,
+    ):
         self.with_response_body(b"")
         self.with_header("Content-Length", 0)
 
-    def with_response_body(self, body):
+    def with_response_body(
+            self,
+            body,
+    ):
         self._response_body = body
 
-    def with_response_body_part(self, x_primitive: str, body_part_content: Any):
+    def with_response_body_part(
+            self,
+            x_primitive: str,
+            body_part_content: Any,
+    ):
         if not self._response_body_fields:
             self._response_body_fields = {}
 
@@ -93,85 +110,139 @@ class MLResponseBuilder:
             name_disposition, body_part_content, content_type, headers,
         )
 
-    def with_response_status(self, status: int):
+    def with_response_status(
+            self,
+            status: int,
+    ):
         self._response_status = status
 
-    def with_request_body(self, body):
+    def with_request_body(
+            self,
+            body: Any,
+    ):
         self._request_body = body
 
-    def with_params(self, params: dict):
+    def with_params(
+            self,
+            params: dict,
+    ):
         for key, value in params.items():
             self.with_param(key, value)
 
-    def with_param(self, key: str, value: Any):
+    def with_param(
+            self,
+            key: str,
+            value: Any,
+    ):
         self._params[key] = value
 
-    def with_header(self, key: str, value: Any):
+    def with_header(
+            self,
+            key: str,
+            value: Any,
+    ):
         self._headers[key] = str(value)
 
-    def build_get(self):
+    def build_get(
+            self,
+    ):
         self.with_method("GET")
         self.build()
 
-    def build_post(self):
+    def build_post(
+            self,
+    ):
         self.with_method("POST")
         self.build()
 
-    def build(self):
+    def build(
+            self,
+    ):
+        self._validate()
+        request_url, responses_params = self._build()
+        self._finalize(request_url, responses_params)
+        self.__init__()
+
+    def _validate(
+            self,
+    ):
         if self._response_body and self._response_body_fields:
             msg = "You can't set a regular and multipart response bodies!"
             raise RuntimeError(msg)
 
+    def _build(
+            self,
+    ):
+        request_url = self._build_request_url()
+        responses_params = self._build_responses_params()
+        return request_url, responses_params
+
+    def _build_request_url(
+            self,
+    ):
         request_url = self._base_url
         if len(self._params) > 0:
             params = urllib.parse.urlencode(self._params).replace("%2B", "+")
             request_url += f"?{params}"
+        return request_url
 
+    def _build_responses_params(
+            self,
+    ):
         responses_params = {}
+
         if self._response_status:
             responses_params["status"] = self._response_status
 
+        if self._response_body is not None:
+            body_param = "json" if isinstance(self._response_body, dict) else "body"
+            responses_params[body_param] = self._response_body
+            responses_params["headers"] = self._headers
+        elif self._response_body_fields is not None:
+            multipart_body = MultipartEncoder(fields=self._response_body_fields)
+            multipart_body_str = multipart_body.to_string()
+            boundary = multipart_body.boundary[2:]
+            content_type = f"multipart/mixed; boundary={boundary}"
+            self.with_header("Content-Length", len(multipart_body_str))
+
+            responses_params["body"] = multipart_body_str
+            responses_params["content_type"] = content_type
+            responses_params["headers"] = self._headers
+
+        return responses_params
+
+    def _finalize(
+            self,
+            request_url: str,
+            responses_params: dict,
+    ):
         if self._method == "GET":
-
-            if self._response_body is not None:
-                body_param = "json" if isinstance(self._response_body, dict) else "body"
-                responses_params[body_param] = self._response_body
-                responses_params["headers"] = self._headers
-            elif self._response_body_fields is not None:
-                multipart_body = MultipartEncoder(fields=self._response_body_fields)
-                multipart_body_str = multipart_body.to_string()
-                boundary = multipart_body.boundary[2:]
-                content_type = f"multipart/mixed; boundary={boundary}"
-                self.with_header("Content-Length", len(multipart_body_str))
-
-                responses_params["body"] = multipart_body_str
-                responses_params["content_type"] = content_type
-                responses_params["headers"] = self._headers
-            responses.get(
-                request_url,
-                **responses_params,
-            )
+            self._finalize_get(request_url, responses_params)
         elif self._method == "POST":
-            if self._response_body is not None:
-                responses_params["body"] = self._response_body
-                responses_params["headers"] = self._headers
-            elif self._response_body_fields is not None:
-                multipart_body = MultipartEncoder(fields=self._response_body_fields)
-                multipart_body_str = multipart_body.to_string()
-                boundary = multipart_body.boundary[2:]
-                content_type = f"multipart/mixed; boundary={boundary}"
-                self.with_header("Content-Length", len(multipart_body_str))
+            self._finalize_post(request_url, self._request_body, responses_params)
 
-                responses_params["body"] = multipart_body_str
-                responses_params["content_type"] = content_type
-                responses_params["headers"] = self._headers
-            match = [matchers.urlencoded_params_matcher(self._request_body)]
-            responses_params["match"] = match
-            responses.post(
-                request_url,
-                **responses_params,
-            )
-        self.__init__()
+    @staticmethod
+    def _finalize_get(
+            request_url: str,
+            responses_params: dict,
+    ):
+        responses.get(
+            request_url,
+            **responses_params,
+        )
+
+    @staticmethod
+    def _finalize_post(
+            request_url: str,
+            request_body: Any,
+            responses_params: dict,
+    ):
+        match = [matchers.urlencoded_params_matcher(request_body)]
+        responses_params["match"] = match
+        responses.post(
+            request_url,
+            **responses_params,
+        )
 
     @staticmethod
     def error_logs_body(

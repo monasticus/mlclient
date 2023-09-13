@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-
 import pytest
 import responses
 from cleo.testers.command_tester import CommandTester

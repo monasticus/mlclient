@@ -149,3 +149,6 @@ max-complexity = 10
     "PLR2004", # allow magic values in tests
     "SLF001" # allow private members access in tests
 ]
+"tests/tools.py" = [
+    "T201" # allow printing by MLResponseBuilder
+]

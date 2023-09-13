@@ -58,13 +58,12 @@ class MLResponseBuilder:
     ):
         self._method: str | None = None
         self._base_url: str | None = None
+        self._request_body: str | None = None
+        self._request_params: dict = {}
         self._response_body: str | bytes | None = None
         self._response_body_fields: dict | None = None
         self._response_status: int | None = None
-        self._request_body: str | None = None
-        self._params: dict = {}
-        self._headers: dict = {}
-        self._content_type: str | None = None
+        self._response_headers: dict = {}
 
     def with_method(
             self,
@@ -77,6 +76,26 @@ class MLResponseBuilder:
             base_url: str,
     ):
         self._base_url = base_url
+
+    def with_request_body(
+            self,
+            body: Any,
+    ):
+        self._request_body = body
+
+    def with_request_params(
+            self,
+            params: dict,
+    ):
+        for key, value in params.items():
+            self.with_request_param(key, value)
+
+    def with_request_param(
+            self,
+            key: str,
+            value: Any,
+    ):
+        self._request_params[key] = value
 
     def with_empty_response_body(
             self,
@@ -120,32 +139,12 @@ class MLResponseBuilder:
     ):
         self._response_status = status
 
-    def with_request_body(
-            self,
-            body: Any,
-    ):
-        self._request_body = body
-
-    def with_request_params(
-            self,
-            params: dict,
-    ):
-        for key, value in params.items():
-            self.with_request_param(key, value)
-
-    def with_request_param(
-            self,
-            key: str,
-            value: Any,
-    ):
-        self._params[key] = value
-
     def with_response_header(
             self,
             key: str,
             value: Any,
     ):
-        self._headers[key] = str(value)
+        self._response_headers[key] = str(value)
 
     def build_get(
             self,
@@ -185,8 +184,8 @@ class MLResponseBuilder:
             self,
     ):
         request_url = self._base_url
-        if len(self._params) > 0:
-            params = urllib.parse.urlencode(self._params).replace("%2B", "+")
+        if len(self._request_params) > 0:
+            params = urllib.parse.urlencode(self._request_params).replace("%2B", "+")
             request_url += f"?{params}"
         return request_url
 
@@ -201,7 +200,7 @@ class MLResponseBuilder:
         if self._response_body is not None:
             body_param = "json" if isinstance(self._response_body, dict) else "body"
             responses_params[body_param] = self._response_body
-            responses_params["headers"] = self._headers
+            responses_params["headers"] = self._response_headers
         elif self._response_body_fields is not None:
             multipart_body = MultipartEncoder(fields=self._response_body_fields)
             multipart_body_str = multipart_body.to_string()
@@ -211,7 +210,7 @@ class MLResponseBuilder:
 
             responses_params["body"] = multipart_body_str
             responses_params["content_type"] = content_type
-            responses_params["headers"] = self._headers
+            responses_params["headers"] = self._response_headers
 
         return responses_params
 
@@ -275,91 +274,128 @@ class MLResponseBuilder:
             },
         }
 
-    @staticmethod
+    @classmethod
     def generate_builder_code(
+            cls,
             response: Response,
     ):
-        method = response.request.method.upper()
-        url = response.url
-        request_content_type = response.request.headers.get("Content-Type")
-        request_body = response.request.body
-        response_content_type = response.headers.get("Content-Type")
-        response_body_text = response.text
-
-        init_line = "\nbuilder = MLResponseBuilder()"
-
-        method_line = f'builder.with_method("{method}")'
-
-        url_split = urllib.parse.urlsplit(url)
-        base_url = f"{url_split.scheme}://{url_split.netloc}{url_split.path}"
-        base_url_line = f'builder.with_base_url("{base_url}")'
-
-        url_query = url_split.query
-        if url_query == "":
-            params_lines = None
-        else:
-            params_lines = []
-            for param in url_query.split("&"):
-                name_and_value = param.split("=")
-                param_name = name_and_value[0]
-                param_value = name_and_value[1]
-                params_lines.append(f'builder.with_request_param("{param_name}", "{param_value}")')
-
-        request_body_line = None
-        if method in ["POST", "PUT"]:
-            if request_content_type == HEADER_X_WWW_FORM_URLENCODED:
-                request_body_standardized = request_body.replace("+", "%2B")
-                request_body_decoded = urllib.parse.unquote(request_body_standardized)
-                request_body_parts = request_body_decoded.split("&")
-                body = {}
-                for part in request_body_parts:
-                    key_and_value = part.split("=")
-                    part_name = key_and_value[0]
-                    part_value = key_and_value[1]
-                    body[part_name] = part_value
-                request_body_line = f"builder.with_request_body({body})"
-            else:
-                request_body_line = f"builder.with_request_body(\'{request_body}\')"
-
-        headers_lines = [f'builder.with_response_header("{name}", "{value}")'
-                         for name, value in response.headers.items()
-                         if name not in ["Content-Length", "Content-Type"]]
-
-        status_line = f"builder.with_response_status({response.status_code})"
-
-        response_body_lines = []
-        if response.content == b"":
-            response_body_lines.append("builder.with_empty_response_body()")
-        elif response_content_type.startswith(HEADER_MULTIPART_MIXED):
-            raw_parts = MultipartDecoder.from_response(response).parts
-            for part in raw_parts:
-                encoded_header_name = HEADER_NAME_PRIMITIVE.encode(part.encoding)
-                header_value = part.headers.get(encoded_header_name)
-                x_primitive = header_value.decode(part.encoding)
-                body_part_content = part.text
-                response_body_line = f'builder.with_response_body_part("{x_primitive}", "{body_part_content}")'
-                response_body_lines.append(response_body_line)
-        else:
-            body = response_body_text.replace("'", "\\'")
-            response_body_lines.append(f"builder.with_response_body('''{body}''')")
-
-        build_line = "builder.build()"
-
         build_parts = [
-            init_line,
-            method_line,
-            base_url_line,
-            params_lines,
-            request_body_line,
-            headers_lines,
-            status_line,
-            response_body_lines,
-            build_line,
+            "\n",
+            "builder = MLResponseBuilder()",
+            cls._generate_method_line(response),
+            cls._generate_base_url_line(response),
+            cls._generate_request_params_lines(response),
+            cls._generate_request_body_lines(response),
+            cls._generate_response_headers(response),
+            cls._generate_response_status(response),
+            cls._generate_response_body_lines(response),
+            "builder.build()",
+            "\n",
         ]
         for code in build_parts:
             if code is not None:
-                if isinstance(code, list):
-                    for code_line in code:
-                        print(code_line)
-                else:
-                    print(code)
+                code_to_print = code if isinstance(code, list) else [code]
+                for code_line in code_to_print:
+                    print(code_line)
+
+    @staticmethod
+    def _generate_method_line(
+            response: Response,
+    ) -> str:
+        method = response.request.method.upper()
+        return f'builder.with_method("{method}")'
+
+    @staticmethod
+    def _generate_base_url_line(
+            response: Response,
+    ) -> str:
+        url = response.url
+        url_split = urllib.parse.urlsplit(url)
+        base_url = f"{url_split.scheme}://{url_split.netloc}{url_split.path}"
+        return f'builder.with_base_url("{base_url}")'
+
+    @staticmethod
+    def _generate_request_params_lines(
+            response: Response,
+    ) -> list[str] | None:
+        url = response.url
+        url_split = urllib.parse.urlsplit(url)
+        url_query = url_split.query
+        if url_query == "":
+            return None
+
+        params_lines = []
+        for param in url_query.split("&"):
+            name_and_value = param.split("=")
+            param_name = name_and_value[0]
+            param_value = name_and_value[1]
+            param_line = f'builder.with_request_param("{param_name}", "{param_value}")'
+            params_lines.append(param_line)
+        return params_lines
+
+    @staticmethod
+    def _generate_request_body_lines(
+            response: Response,
+    ) -> str | None:
+        method = response.request.method.upper()
+        request_content_type = response.request.headers.get("Content-Type")
+        request_body = response.request.body
+
+        if method not in ["POST", "PUT"]:
+            return None
+
+        if request_content_type != HEADER_X_WWW_FORM_URLENCODED:
+            return f"builder.with_request_body(\'{request_body}\')"
+
+        request_body_standardized = request_body.replace("+", "%2B")
+        request_body_decoded = urllib.parse.unquote(request_body_standardized)
+        request_body_parts = request_body_decoded.split("&")
+        body = {}
+        for part in request_body_parts:
+            key_and_value = part.split("=")
+            part_name = key_and_value[0]
+            part_value = key_and_value[1]
+            body[part_name] = part_value
+        return f"builder.with_request_body({body})"
+
+    @staticmethod
+    def _generate_response_headers(
+            response: Response,
+    ) -> list[str]:
+        return [f'builder.with_response_header("{name}", "{value}")'
+                for name, value in response.headers.items()
+                if name not in ["Content-Length", "Content-Type"]]
+
+    @staticmethod
+    def _generate_response_status(
+            response: Response,
+    ) -> str:
+        status_code = response.status_code
+        return f"builder.with_response_status({status_code})"
+
+    @staticmethod
+    def _generate_response_body_lines(
+            response: Response,
+    ) -> list[str]:
+        response_content_type = response.headers.get("Content-Type")
+        response_body_text = response.text
+
+        if response.content == b"":
+            return ["builder.with_empty_response_body()"]
+
+        if not response_content_type.startswith(HEADER_MULTIPART_MIXED):
+            body = response_body_text.replace("'", "\\'")
+            return [f"builder.with_response_body('''{body}''')"]
+
+        response_body_lines = []
+        raw_parts = MultipartDecoder.from_response(response).parts
+        for part in raw_parts:
+            encoded_header_name = HEADER_NAME_PRIMITIVE.encode(part.encoding)
+            header_value = part.headers.get(encoded_header_name)
+            x_primitive = header_value.decode(part.encoding)
+            body_part_content = part.text
+            response_body_line = (f'builder.with_response_body_part('
+                                  f'"{x_primitive}", "{body_part_content}"'
+                                  f')')
+            response_body_lines.append(response_body_line)
+        return response_body_lines

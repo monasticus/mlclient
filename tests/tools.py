@@ -172,3 +172,30 @@ class MLResponseBuilder:
                 **responses_params,
             )
         self.__init__()
+
+    @staticmethod
+    def error_logs_body(
+            logs: list[tuple],
+    ):
+        return {
+            "logfile": {
+                "log": [
+                    {
+                        "timestamp": log_tuple[0],
+                        "level": log_tuple[1],
+                        "message": log_tuple[2],
+                    }
+                    for log_tuple in logs
+                ],
+            },
+        }
+
+    @staticmethod
+    def access_or_request_logs_body(
+            logs: list[str],
+    ):
+        return {
+            "logfile": {
+                "message": "\n".join(logs),
+            },
+        }

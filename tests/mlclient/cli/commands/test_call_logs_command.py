@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-
 import pytest
 import responses
 from cleo.testers.command_tester import CommandTester
@@ -49,7 +48,7 @@ def test_command_call_logs_basic():
     builder.with_base_url("http://localhost:8002/manage/v2/logs")
     builder.with_param("format", "json")
     builder.with_param("filename", "8002_ErrorLog.txt")
-    builder.with_response_body(_get_error_logs_response_body([]))
+    builder.with_response_body(builder.error_logs_body([]))
     builder.build_get()
 
     tester = _get_tester("call logs")
@@ -71,7 +70,7 @@ def test_command_call_logs_basic_using_named_app_server():
     builder.with_base_url("http://localhost:8002/manage/v2/logs")
     builder.with_param("format", "json")
     builder.with_param("filename", "8100_ErrorLog.txt")
-    builder.with_response_body(_get_error_logs_response_body([]))
+    builder.with_response_body(builder.error_logs_body([]))
     builder.build_get()
 
     tester = _get_tester("call logs")
@@ -93,7 +92,7 @@ def test_command_call_logs_custom_rest_server():
     builder.with_base_url("http://localhost:8002/manage/v2/logs")
     builder.with_param("format", "json")
     builder.with_param("filename", "8002_ErrorLog.txt")
-    builder.with_response_body(_get_error_logs_response_body([]))
+    builder.with_response_body(builder.error_logs_body([]))
     builder.build_get()
 
     tester = _get_tester("call logs")
@@ -115,7 +114,7 @@ def test_command_call_logs_custom_log_type_error():
     builder.with_base_url("http://localhost:8002/manage/v2/logs")
     builder.with_param("format", "json")
     builder.with_param("filename", "8002_ErrorLog.txt")
-    builder.with_response_body(_get_error_logs_response_body([]))
+    builder.with_response_body(builder.error_logs_body([]))
     builder.build_get()
 
     tester = _get_tester("call logs")
@@ -137,7 +136,7 @@ def test_command_call_logs_custom_log_type_access():
     builder.with_base_url("http://localhost:8002/manage/v2/logs")
     builder.with_param("format", "json")
     builder.with_param("filename", "8002_AccessLog.txt")
-    builder.with_response_body({"logfile": {"message": ""}})
+    builder.with_response_body(builder.access_or_request_logs_body([]))
     builder.build_get()
 
     tester = _get_tester("call logs")
@@ -159,7 +158,7 @@ def test_command_call_logs_custom_log_type_request():
     builder.with_base_url("http://localhost:8002/manage/v2/logs")
     builder.with_param("format", "json")
     builder.with_param("filename", "8002_RequestLog.txt")
-    builder.with_response_body({"logfile": {"message": ""}})
+    builder.with_response_body(builder.access_or_request_logs_body([]))
     builder.build_get()
 
     tester = _get_tester("call logs")
@@ -191,7 +190,7 @@ def test_command_call_logs_from():
     builder.with_param("format", "json")
     builder.with_param("filename", "8002_ErrorLog.txt")
     builder.with_param("start", "1970-01-01T00:00:00")
-    builder.with_response_body(_get_error_logs_response_body([]))
+    builder.with_response_body(builder.error_logs_body([]))
     builder.build_get()
 
     tester = _get_tester("call logs")
@@ -214,7 +213,7 @@ def test_command_call_logs_to():
     builder.with_param("format", "json")
     builder.with_param("filename", "8002_ErrorLog.txt")
     builder.with_param("end", "1984-01-01T00:00:00")
-    builder.with_response_body(_get_error_logs_response_body([]))
+    builder.with_response_body(builder.error_logs_body([]))
     builder.build_get()
 
     tester = _get_tester("call logs")
@@ -237,7 +236,7 @@ def test_command_call_logs_regex():
     builder.with_param("format", "json")
     builder.with_param("filename", "8002_ErrorLog.txt")
     builder.with_param("regex", "you-will-not-find-it")
-    builder.with_response_body(_get_error_logs_response_body([]))
+    builder.with_response_body(builder.error_logs_body([]))
     builder.build_get()
 
     tester = _get_tester("call logs")
@@ -260,7 +259,7 @@ def test_command_call_logs_host():
     builder.with_param("format", "json")
     builder.with_param("filename", "8002_ErrorLog.txt")
     builder.with_param("host", "some-host")
-    builder.with_response_body(_get_error_logs_response_body([]))
+    builder.with_response_body(builder.error_logs_body([]))
     builder.build_get()
 
     tester = _get_tester("call logs")
@@ -282,7 +281,7 @@ def test_command_call_logs_output_for_error_logs():
     builder.with_base_url("http://localhost:8002/manage/v2/logs")
     builder.with_param("format", "json")
     builder.with_param("filename", "8002_ErrorLog.txt")
-    builder.with_response_body(_get_error_logs_response_body([
+    builder.with_response_body(builder.error_logs_body([
         ("2023-09-01T00:00:00Z", "info", "Log message 1"),
         ("2023-09-01T00:00:01Z", "info", "Log message 2"),
         ("2023-09-01T00:00:02Z", "info", "Log message 3"),
@@ -320,7 +319,7 @@ def test_command_call_logs_output_for_access_logs():
     builder.with_base_url("http://localhost:8002/manage/v2/logs")
     builder.with_param("format", "json")
     builder.with_param("filename", "8002_AccessLog.txt")
-    builder.with_response_body({"logfile": {"message": "\n".join(logs)}})
+    builder.with_response_body(builder.access_or_request_logs_body(logs))
     builder.build_get()
 
     tester = _get_tester("call logs")
@@ -385,7 +384,7 @@ def test_command_call_logs_output_for_request_logs():
     builder.with_base_url("http://localhost:8002/manage/v2/logs")
     builder.with_param("format", "json")
     builder.with_param("filename", "8002_RequestLog.txt")
-    builder.with_response_body({"logfile": {"message": "\n".join(logs)}})
+    builder.with_response_body(builder.access_or_request_logs_body(logs))
     builder.build_get()
 
     tester = _get_tester("call logs")
@@ -453,7 +452,7 @@ def test_command_call_logs_output_for_xml_logs():
     builder.with_base_url("http://localhost:8002/manage/v2/logs")
     builder.with_param("format", "json")
     builder.with_param("filename", "8002_ErrorLog.txt")
-    builder.with_response_body(_get_error_logs_response_body([
+    builder.with_response_body(builder.error_logs_body([
         ("2023-09-01T00:00:00Z", "info", "\n".join(xml_log_lines)),
     ]))
     builder.build_get()
@@ -480,20 +479,3 @@ def _get_tester(
     app = MLCLIentApplication()
     command = app.find(command_name)
     return CommandTester(command)
-
-
-def _get_error_logs_response_body(
-        logs: list[tuple],
-):
-    return {
-        "logfile": {
-            "log": [
-                {
-                    "timestamp": log_tuple[0],
-                    "level": log_tuple[1],
-                    "message": log_tuple[2],
-                }
-                for log_tuple in logs
-            ],
-        },
-    }

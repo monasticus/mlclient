@@ -123,7 +123,7 @@ class MLResponseBuilder:
 
         if x_primitive in ["array", "map"]:
             content_type = "application/json"
-        elif x_primitive in ["document", "element"]:
+        elif x_primitive in ["document-node()", "element()"]:
             content_type = "application/xml"
         else:
             content_type = "text/plain"
@@ -347,14 +347,13 @@ class MLResponseBuilder:
         if request_content_type != HEADER_X_WWW_FORM_URLENCODED:
             return f"builder.with_request_body(\'{request_body}\')"
 
-        request_body_standardized = request_body.replace("+", "%2B")
-        request_body_decoded = urllib.parse.unquote(request_body_standardized)
+        request_body_decoded = urllib.parse.unquote(request_body).replace("+", " ")
         request_body_parts = request_body_decoded.split("&")
         body = {}
         for part in request_body_parts:
             key_and_value = part.split("=")
             part_name = key_and_value[0]
-            part_value = key_and_value[1]
+            part_value = "=".join(key_and_value[1:])
             body[part_name] = part_value
         return f"builder.with_request_body({body})"
 
@@ -385,7 +384,11 @@ class MLResponseBuilder:
 
         if not response_content_type.startswith(HEADER_MULTIPART_MIXED):
             body = response_body_text.replace("'", "\\'")
-            return [f"builder.with_response_body('''{body}''')"]
+
+            if "\n" in body:
+                return [f"builder.with_response_body('''{body}''')"]
+
+            return [f"builder.with_response_body('{body}')"]
 
         response_body_lines = []
         raw_parts = MultipartDecoder.from_response(response).parts
@@ -393,9 +396,14 @@ class MLResponseBuilder:
             encoded_header_name = HEADER_NAME_PRIMITIVE.encode(part.encoding)
             header_value = part.headers.get(encoded_header_name)
             x_primitive = header_value.decode(part.encoding)
-            body_part_content = part.text
-            response_body_line = (f'builder.with_response_body_part('
-                                  f'"{x_primitive}", "{body_part_content}"'
-                                  f')')
+            body_part_content = part.text.replace("'", "\\'")
+            if "\n" in body_part_content:
+                response_body_line = (f"builder.with_response_body_part("
+                                      f"\"{x_primitive}\", '''{body_part_content}'''"
+                                      f")")
+            else:
+                response_body_line = (f"builder.with_response_body_part("
+                                      f"\"{x_primitive}\", '{body_part_content}'"
+                                      f")")
             response_body_lines.append(response_body_line)
         return response_body_lines

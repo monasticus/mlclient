@@ -34,6 +34,7 @@ def test_default_single_error_response(client):
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/v1/eval")
     builder.with_request_body({"xquery": xqy})
+    builder.with_response_content_type("text/html; charset=utf-8")
     builder.with_response_status(500)
     builder.with_response_body(Path(response_body_path).read_bytes())
     builder.build_post()

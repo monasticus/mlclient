@@ -139,6 +139,12 @@ class MLResponseBuilder:
     ):
         self._response_status = status
 
+    def with_response_content_type(
+            self,
+            content_type: str,
+    ):
+        self.with_response_header("Content-Type", content_type)
+
     def with_response_header(
             self,
             key: str,
@@ -368,9 +374,24 @@ class MLResponseBuilder:
             cls,
             response: Response,
     ) -> list[str]:
-        return [f'builder.with_response_header("{name}", "{value}")'
-                for name, value in response.headers.items()
-                if name not in ["Content-Length", "Content-Type"]]
+        response_headers = response.headers
+        response_content_type = response_headers.get(
+            "Content-Type", HEADER_MULTIPART_MIXED)
+        excluded = ["Content-Length", "Content-Type"]
+
+        response_headers_lines = []
+        if not response_content_type.startswith(HEADER_MULTIPART_MIXED):
+            content_type_line = (f'builder.with_response_content_type('
+                                 f'"{response_content_type}"'
+                                 f')')
+            response_headers_lines.append(content_type_line)
+
+        for name, value in response_headers.items():
+            if name not in excluded:
+                header_line = f'builder.with_response_header("{name}", "{value}")'
+                response_headers_lines.append(header_line)
+
+        return response_headers_lines
 
     @classmethod
     def _generate_response_status(

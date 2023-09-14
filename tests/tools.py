@@ -278,6 +278,8 @@ class MLResponseBuilder:
     def generate_builder_code(
             cls,
             response: Response,
+            save_response_body: bool = False,
+            test_path: str | None = None,
     ):
         build_parts = [
             "\n",
@@ -288,7 +290,7 @@ class MLResponseBuilder:
             cls._generate_request_body_lines(response),
             cls._generate_response_headers(response),
             cls._generate_response_status(response),
-            cls._generate_response_body_lines(response),
+            cls._generate_response_body_lines(response, save_response_body, test_path),
             "builder.build()",
             "\n",
         ]
@@ -298,15 +300,17 @@ class MLResponseBuilder:
                 for code_line in code_to_print:
                     print(code_line)
 
-    @staticmethod
+    @classmethod
     def _generate_method_line(
+            cls,
             response: Response,
     ) -> str:
         method = response.request.method.upper()
         return f'builder.with_method("{method}")'
 
-    @staticmethod
+    @classmethod
     def _generate_base_url_line(
+            cls,
             response: Response,
     ) -> str:
         url = response.url
@@ -314,8 +318,9 @@ class MLResponseBuilder:
         base_url = f"{url_split.scheme}://{url_split.netloc}{url_split.path}"
         return f'builder.with_base_url("{base_url}")'
 
-    @staticmethod
+    @classmethod
     def _generate_request_params_lines(
+            cls,
             response: Response,
     ) -> list[str] | None:
         url = response.url
@@ -333,8 +338,9 @@ class MLResponseBuilder:
             params_lines.append(param_line)
         return params_lines
 
-    @staticmethod
+    @classmethod
     def _generate_request_body_lines(
+            cls,
             response: Response,
     ) -> str | None:
         method = response.request.method.upper()
@@ -357,25 +363,40 @@ class MLResponseBuilder:
             body[part_name] = part_value
         return f"builder.with_request_body({body})"
 
-    @staticmethod
+    @classmethod
     def _generate_response_headers(
+            cls,
             response: Response,
     ) -> list[str]:
         return [f'builder.with_response_header("{name}", "{value}")'
                 for name, value in response.headers.items()
                 if name not in ["Content-Length", "Content-Type"]]
 
-    @staticmethod
+    @classmethod
     def _generate_response_status(
+            cls,
             response: Response,
     ) -> str:
         status_code = response.status_code
         return f"builder.with_response_status({status_code})"
 
-    @staticmethod
+    @classmethod
     def _generate_response_body_lines(
+            cls,
             response: Response,
+            save_response_body: bool,
+            test_path: str | None,
     ) -> list[str]:
+        if not save_response_body:
+            return cls._generate_response_body_raw_lines(response)
+
+        return cls._generate_response_body_file_lines(response, test_path)
+
+    @classmethod
+    def _generate_response_body_raw_lines(
+            cls,
+            response: Response,
+    ):
         response_content_type = response.headers.get("Content-Type")
         response_body_text = response.text
 
@@ -407,3 +428,44 @@ class MLResponseBuilder:
                                       f")")
             response_body_lines.append(response_body_line)
         return response_body_lines
+
+    @classmethod
+    def _generate_response_body_file_lines(
+            cls,
+            response: Response,
+            test_path: str,
+    ):
+        response_content_type = response.headers.get("Content-Type")
+        response_body_text = response.text
+
+        ext = cls._get_file_ext_from_content_type(response_content_type)
+        file_name = f"response_body.{ext}"
+
+        if test_path is None:
+            path = file_name
+        else:
+            path = get_test_resources_path(test_path) + os.sep + file_name
+
+        with Path(path).open("w") as file:
+            file.write(response_body_text)
+
+        if test_path is None:
+            return [f'builder.with_response_body(Path("{path}").read_bytes())']
+
+        return [
+            f'response_body_path = '
+            f'tools.get_test_resource_path(__file__, "{file_name}")',
+            "builder.with_response_body(Path(response_body_path).read_bytes())",
+        ]
+
+    @staticmethod
+    def _get_file_ext_from_content_type(
+            content_type: str,
+    ):
+        if "html" in content_type:
+            return "html"
+        if "xml" in content_type:
+            return "xml"
+        if "json" in content_type:
+            return "json"
+        return "txt"

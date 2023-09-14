@@ -35,7 +35,6 @@ def test_default_single_error_response(client):
         "in /eval, at 1:0 [1.0-ml]")
 
 
-@pytest.mark.ml_access()
 @responses.activate
 def test_default_single_not_parsed_response(client):
     xqy = 'cts:directory-query("/root/", "infinity")'
@@ -56,7 +55,6 @@ def test_default_single_not_parsed_response(client):
     assert parsed_resp == b'cts:directory-query("/root/", "infinity")'
 
 
-@pytest.mark.ml_access()
 @responses.activate
 def test_default_single_empty_response(client):
     xqy = "()"
@@ -75,7 +73,6 @@ def test_default_single_empty_response(client):
     assert parsed_resp == []
 
 
-@pytest.mark.ml_access()
 @responses.activate
 def test_default_single_plain_text_str_response(client):
     xqy = "'plain text'"
@@ -94,7 +91,6 @@ def test_default_single_plain_text_str_response(client):
     assert parsed_resp == "plain text"
 
 
-@pytest.mark.ml_access()
 @responses.activate
 def test_default_single_plain_text_int_response(client):
     xqy = "1"
@@ -113,7 +109,6 @@ def test_default_single_plain_text_int_response(client):
     assert parsed_resp == 1
 
 
-@pytest.mark.ml_access()
 @responses.activate
 def test_default_single_plain_text_decimal_response(client):
     xqy = "1.1"
@@ -132,7 +127,6 @@ def test_default_single_plain_text_decimal_response(client):
     assert parsed_resp == 1.1
 
 
-@pytest.mark.ml_access()
 @responses.activate
 def test_default_single_plain_text_boolean_response(client):
     xqy = "fn:true()"
@@ -151,7 +145,6 @@ def test_default_single_plain_text_boolean_response(client):
     assert parsed_resp is True
 
 
-@pytest.mark.ml_access()
 @responses.activate
 def test_default_single_plain_text_date_response(client):
     xqy = "fn:current-date()"
@@ -170,7 +163,6 @@ def test_default_single_plain_text_date_response(client):
     assert parsed_resp == datetime.strptime("2023-09-14Z", "%Y-%m-%d%z").date()
 
 
-@pytest.mark.ml_access()
 @responses.activate
 def test_default_single_plain_text_date_time_response(client):
     xqy = "fn:current-dateTime()"
@@ -191,7 +183,6 @@ def test_default_single_plain_text_date_time_response(client):
         "%Y-%m-%dT%H:%M:%S.%f%z")
 
 
-@pytest.mark.ml_access()
 @responses.activate
 def test_default_single_json_map_response(client):
     xqy = ('map:map() '
@@ -223,7 +214,6 @@ def test_default_single_json_map_response(client):
     }
 
 
-@pytest.mark.ml_access()
 @responses.activate
 def test_default_single_json_array_response(client):
     xqy = ('("value", "1", 1, 1.1, fn:true())'
@@ -243,7 +233,6 @@ def test_default_single_json_array_response(client):
     assert parsed_resp == ["value", "1", 1, 1.1, True]
 
 
-@pytest.mark.ml_access()
 @responses.activate
 def test_default_single_xml_document_node_response(client):
     xqy = "document { element root {} }"
@@ -267,7 +256,6 @@ def test_default_single_xml_document_node_response(client):
     assert parsed_resp.getroot().attrib == {}
 
 
-@pytest.mark.ml_access()
 @responses.activate
 def test_default_single_xml_element_response(client):
     xqy = "element root {}"
@@ -288,11 +276,23 @@ def test_default_single_xml_element_response(client):
     assert parsed_resp.attrib == {}
 
 
-@pytest.mark.ml_access()
+@responses.activate
 def test_default_multiple_responses(client):
     xqy = '(cts:directory-query("/root/", "infinity"), (), "plain text")'
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/eval")
+    builder.with_request_body({"xquery": xqy})
+    builder.with_response_status(200)
+    builder.with_response_body_part(
+        "directory-query",
+        'cts:directory-query("/root/", "infinity")')
+    builder.with_response_body_part("string", "plain text")
+    builder.build_post()
+
     resp = client.eval(xquery=xqy)
     parsed_resp = MLResponseParser.parse(resp)
+
     assert isinstance(parsed_resp, list)
     assert isinstance(parsed_resp[0], bytes)
     assert parsed_resp[0] == b'cts:directory-query("/root/", "infinity")'
@@ -300,7 +300,7 @@ def test_default_multiple_responses(client):
     assert parsed_resp[1] == "plain text"
 
 
-@pytest.mark.ml_access()
+@responses.activate
 def test_default_raw_response(client):
     xqy = ("document { "
            "  element root { "
@@ -309,8 +309,25 @@ def test_default_raw_response(client):
            "    } "
            "  }"
            "}")
+
+    builder = MLResponseBuilder()
+    builder.with_method("POST")
+    builder.with_base_url("http://localhost:8002/v1/eval")
+    builder.with_request_body({
+        "xquery": "document {"
+                  " element root { element child { attribute value { 1 } } }"
+                  "}",
+    })
+    builder.with_response_status(200)
+    builder.with_response_body_part(
+        "document-node()",
+        '<?xml version="1.0" encoding="UTF-8"?>\n'
+        '<root><child value="1"/></root>')
+    builder.build()
+
     resp = client.eval(xquery=xqy)
     parsed_resp = MLResponseParser.parse(resp, raw=True)
+
     assert isinstance(parsed_resp, str)
     assert parsed_resp == ('<?xml version="1.0" encoding="UTF-8"?>\n'
                            '<root><child value="1"/></root>')

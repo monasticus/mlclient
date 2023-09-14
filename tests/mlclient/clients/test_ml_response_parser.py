@@ -1,10 +1,12 @@
 import xml.etree.ElementTree as ElemTree
 from datetime import date, datetime
+from pathlib import Path
 
 import pytest
 import responses
 
 from mlclient import MLResourcesClient, MLResponseParser
+from tests import tools
 from tests.tools import MLResponseBuilder
 
 
@@ -24,11 +26,21 @@ def _setup_and_teardown(client):
     client.disconnect()
 
 
-@pytest.mark.ml_access()
+@responses.activate
 def test_default_single_error_response(client):
     xqy = "'missing-quote"
+
+    response_body_path = tools.get_test_resource_path(__file__, "error_response.html")
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/eval")
+    builder.with_request_body({"xquery": xqy})
+    builder.with_response_status(500)
+    builder.with_response_body(Path(response_body_path).read_bytes())
+    builder.build_post()
+
     resp = client.eval(xquery=xqy)
     parsed_resp = MLResponseParser.parse(resp)
+
     assert isinstance(parsed_resp, str)
     assert parsed_resp == (
         "XDMP-BADCHAR: (err:XPST0003) Unexpected character found ''' (0x0027)\n"

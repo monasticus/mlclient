@@ -58,7 +58,7 @@ class LogsClient(MLResourceClient):
 
     def get_logs(
             self,
-            app_server: int | str,
+            app_server: int | str | None = None,
             log_type: LogType = LogType.ERROR,
             start_time: str | None = None,
             end_time: str | None = None,
@@ -69,17 +69,17 @@ class LogsClient(MLResourceClient):
 
         Parameters
         ----------
-        app_server : int | str
+        app_server : int | str | None, default None
             An app server (port) with logs to retrieve
         log_type : LogType, default LogType.ERROR
             A log type
-        start_time : str | None = None
+        start_time : str | None, default None
             A start time to search error logs
-        end_time : str | None = None
+        end_time : str | None, default None
             An end time to search error logs
-        regex : str | None = None
+        regex : str | None, default None
             A regex to search error logs
-        host : str | None = None
+        host : str | None, default None
             A host name with logs to retrieve
 
         Returns
@@ -126,13 +126,13 @@ class LogsClient(MLResourceClient):
             An app server (port) with logs to retrieve
         log_type : LogType
             A log type
-        start_time : str | None = None
+        start_time : str | None, default None
             A start time to search error logs
-        end_time : str | None = None
+        end_time : str | None, default None
             An end time to search error logs
-        regex : str | None = None
+        regex : str | None, default None
             A regex to search error logs
-        host : str | None = None
+        host : str | None, default None
             The host from which to return the log data.
 
         Returns
@@ -142,7 +142,10 @@ class LogsClient(MLResourceClient):
         """
         if app_server in [0, "0"]:
             app_server = "TaskServer"
-        file_name = f"{app_server}_{log_type.value}.txt"
+        if app_server is None:
+            file_name = f"{log_type.value}.txt"
+        else:
+            file_name = f"{app_server}_{log_type.value}.txt"
         params = {
             "filename": file_name,
             "data_format": "json",

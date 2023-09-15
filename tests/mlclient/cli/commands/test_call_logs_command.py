@@ -65,6 +65,28 @@ def test_command_call_logs_basic():
 
 
 @responses.activate
+def test_command_call_logs_basic_without_app_server():
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/manage/v2/logs")
+    builder.with_request_param("format", "json")
+    builder.with_request_param("filename", "ErrorLog.txt")
+    builder.with_response_body(builder.error_logs_body([]))
+    builder.build_get()
+
+    tester = _get_tester("call logs")
+    tester.execute("-e test")
+
+    assert tester.command.option("environment") == "test"
+    assert tester.command.option("rest-server") is None
+    assert tester.command.option("app-server") is None
+    assert tester.command.option("log-type") == "error"
+    assert tester.command.option("from") is None
+    assert tester.command.option("to") is None
+    assert tester.command.option("regex") is None
+    assert tester.command.option("host") is None
+
+
+@responses.activate
 def test_command_call_logs_basic_using_named_app_server():
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/manage/v2/logs")

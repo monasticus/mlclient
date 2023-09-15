@@ -60,6 +60,7 @@ class MLResponseBuilder:
         self._base_url: str | None = None
         self._request_body: str | None = None
         self._request_params: dict = {}
+        self._multipart_mixed_response: bool = False
         self._response_body: str | bytes | None = None
         self._response_body_fields: dict | None = None
         self._response_status: int | None = None
@@ -97,6 +98,11 @@ class MLResponseBuilder:
     ):
         self._request_params[key] = value
 
+    def with_response_body_multipart_mixed(
+            self,
+    ):
+        self._multipart_mixed_response = True
+
     def with_empty_response_body(
             self,
     ):
@@ -107,6 +113,10 @@ class MLResponseBuilder:
             self,
             body,
     ):
+        if self._multipart_mixed_response:
+            func = "MLResponseBuilder.with_response_body_part()"
+            msg = f"multipart/mixed response set to True: use {func} instead"
+            raise RuntimeError(msg)
         self._response_body = body
 
     def with_response_body_part(
@@ -114,6 +124,11 @@ class MLResponseBuilder:
             x_primitive: str,
             body_part_content: Any,
     ):
+        if not self._multipart_mixed_response:
+            func = "MLResponseBuilder.with_response_body_multipart_mixed()"
+            msg = f"multipart/mixed response set to False: use {func} first"
+            raise RuntimeError(msg)
+
         if not self._response_body_fields:
             self._response_body_fields = {}
 
@@ -203,11 +218,11 @@ class MLResponseBuilder:
         if self._response_status:
             responses_params["status"] = self._response_status
 
-        if self._response_body is not None:
+        if not self._multipart_mixed_response:
             body_param = "json" if isinstance(self._response_body, dict) else "body"
             responses_params[body_param] = self._response_body
             responses_params["headers"] = self._response_headers
-        elif self._response_body_fields is not None:
+        else:
             multipart_body = MultipartEncoder(fields=self._response_body_fields)
             multipart_body_str = multipart_body.to_string()
             boundary = multipart_body.boundary[2:]

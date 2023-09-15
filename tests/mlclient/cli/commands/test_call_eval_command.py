@@ -51,6 +51,7 @@ def test_command_call_eval_basic():
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/v1/eval")
     builder.with_request_body({"xquery": code})
+    builder.with_response_body_multipart_mixed()
     builder.with_response_body_part("string", "")
     builder.build_post()
 
@@ -75,6 +76,7 @@ def test_command_call_eval_custom_rest_server():
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/v1/eval")
     builder.with_request_body({"xquery": code})
+    builder.with_response_body_multipart_mixed()
     builder.with_response_body_part("string", "")
     builder.build_post()
 
@@ -99,6 +101,7 @@ def test_command_call_eval_xquery_flag():
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/v1/eval")
     builder.with_request_body({"xquery": code})
+    builder.with_response_body_multipart_mixed()
     builder.with_response_body_part("string", "")
     builder.build_post()
 
@@ -122,6 +125,7 @@ def test_command_call_eval_javascript_flag():
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/v1/eval")
     builder.with_request_body({"javascript": code})
+    builder.with_response_body_multipart_mixed()
     builder.with_response_body_part("string", "")
     builder.build_post()
 
@@ -158,6 +162,7 @@ def test_command_call_eval_custom_database():
     builder.with_base_url("http://localhost:8002/v1/eval")
     builder.with_request_param("database", "custom-db")
     builder.with_request_body({"xquery": code})
+    builder.with_response_body_multipart_mixed()
     builder.with_response_body_part("string", "")
     builder.build_post()
 
@@ -183,6 +188,7 @@ def test_command_call_eval_custom_txid():
     builder.with_base_url("http://localhost:8002/v1/eval")
     builder.with_request_param("txid", "transaction-id")
     builder.with_request_body({"xquery": code})
+    builder.with_response_body_multipart_mixed()
     builder.with_response_body_part("string", "")
     builder.build_post()
 
@@ -213,6 +219,7 @@ def test_command_call_eval_output():
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/v1/eval")
     builder.with_request_body({"xquery": code})
+    builder.with_response_body_multipart_mixed()
     builder.with_response_body_part("dateTime", "2023-08-09T01:01:01.001Z")
     builder.with_response_body_part("integer", "1")
     builder.with_response_body_part("string", "string-value")

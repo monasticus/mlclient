@@ -56,6 +56,7 @@ def test_default_single_not_parsed_response(client):
     builder.with_base_url("http://localhost:8002/v1/eval")
     builder.with_request_body({"xquery": xqy})
     builder.with_response_status(200)
+    builder.with_response_body_multipart_mixed()
     builder.with_response_body_part(
         "directory-query",
         'cts:directory-query("/root/", "infinity")')
@@ -94,6 +95,7 @@ def test_default_single_plain_text_str_response(client):
     builder.with_base_url("http://localhost:8002/v1/eval")
     builder.with_request_body({"xquery": xqy})
     builder.with_response_status(200)
+    builder.with_response_body_multipart_mixed()
     builder.with_response_body_part("string", "plain text")
     builder.build_post()
 
@@ -112,6 +114,7 @@ def test_default_single_plain_text_int_response(client):
     builder.with_base_url("http://localhost:8002/v1/eval")
     builder.with_request_body({"xquery": xqy})
     builder.with_response_status(200)
+    builder.with_response_body_multipart_mixed()
     builder.with_response_body_part("integer", "1")
     builder.build_post()
 
@@ -130,6 +133,7 @@ def test_default_single_plain_text_decimal_response(client):
     builder.with_base_url("http://localhost:8002/v1/eval")
     builder.with_request_body({"xquery": xqy})
     builder.with_response_status(200)
+    builder.with_response_body_multipart_mixed()
     builder.with_response_body_part("decimal", "1.1")
     builder.build_post()
 
@@ -148,6 +152,7 @@ def test_default_single_plain_text_boolean_response(client):
     builder.with_base_url("http://localhost:8002/v1/eval")
     builder.with_request_body({"xquery": xqy})
     builder.with_response_status(200)
+    builder.with_response_body_multipart_mixed()
     builder.with_response_body_part("boolean", "true")
     builder.build_post()
 
@@ -166,6 +171,7 @@ def test_default_single_plain_text_date_response(client):
     builder.with_base_url("http://localhost:8002/v1/eval")
     builder.with_request_body({"xquery": xqy})
     builder.with_response_status(200)
+    builder.with_response_body_multipart_mixed()
     builder.with_response_body_part("date", "2023-09-14Z")
     builder.build_post()
 
@@ -184,6 +190,7 @@ def test_default_single_plain_text_date_time_response(client):
     builder.with_base_url("http://localhost:8002/v1/eval")
     builder.with_request_body({"xquery": xqy})
     builder.with_response_status(200)
+    builder.with_response_body_multipart_mixed()
     builder.with_response_body_part("dateTime", "2023-09-14T07:30:27.997332Z")
     builder.build_post()
 
@@ -209,6 +216,7 @@ def test_default_single_json_map_response(client):
     builder.with_base_url("http://localhost:8002/v1/eval")
     builder.with_request_body({"xquery": xqy})
     builder.with_response_status(200)
+    builder.with_response_body_multipart_mixed()
     builder.with_response_body_part(
         "map",
         '{"float":1.1, "int":1, "bool":true, "str":"value", "int_str":"1"}')
@@ -236,6 +244,7 @@ def test_default_single_json_array_response(client):
     builder.with_base_url("http://localhost:8002/v1/eval")
     builder.with_request_body({"xquery": xqy})
     builder.with_response_status(200)
+    builder.with_response_body_multipart_mixed()
     builder.with_response_body_part("array", '["value", "1", 1, 1.1, true]')
     builder.build_post()
 
@@ -254,6 +263,7 @@ def test_default_single_xml_document_node_response(client):
     builder.with_base_url("http://localhost:8002/v1/eval")
     builder.with_request_body({"xquery": xqy})
     builder.with_response_status(200)
+    builder.with_response_body_multipart_mixed()
     builder.with_response_body_part(
         "document-node()",
         '<?xml version="1.0" encoding="UTF-8"?>\n'
@@ -277,6 +287,7 @@ def test_default_single_xml_element_response(client):
     builder.with_base_url("http://localhost:8002/v1/eval")
     builder.with_request_body({"xquery": xqy})
     builder.with_response_status(200)
+    builder.with_response_body_multipart_mixed()
     builder.with_response_body_part("element()", "<root/>")
     builder.build_post()
 
@@ -297,6 +308,7 @@ def test_default_multiple_responses(client):
     builder.with_base_url("http://localhost:8002/v1/eval")
     builder.with_request_body({"xquery": xqy})
     builder.with_response_status(200)
+    builder.with_response_body_multipart_mixed()
     builder.with_response_body_part(
         "directory-query",
         'cts:directory-query("/root/", "infinity")')
@@ -332,6 +344,7 @@ def test_default_raw_response(client):
                   "}",
     })
     builder.with_response_status(200)
+    builder.with_response_body_multipart_mixed()
     builder.with_response_body_part(
         "document-node()",
         '<?xml version="1.0" encoding="UTF-8"?>\n'

@@ -48,6 +48,7 @@ def test_eval_raw_xquery_single_item(eval_client):
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/v1/eval")
     builder.with_request_body({"xquery": code})
+    builder.with_response_body_multipart_mixed()
     builder.with_response_body_part("string", "")
     builder.build_post()
 
@@ -63,6 +64,7 @@ def test_eval_raw_xquery_multiple_items(eval_client):
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/v1/eval")
     builder.with_request_body({"xquery": code})
+    builder.with_response_body_multipart_mixed()
     builder.with_response_body_part("string", "")
     builder.with_response_body_part("integer", "1")
     builder.build_post()
@@ -94,6 +96,7 @@ def test_eval_raw_javascript_single_item(eval_client):
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/v1/eval")
     builder.with_request_body({"javascript": code})
+    builder.with_response_body_multipart_mixed()
     builder.with_response_body_part("string", "")
     builder.build_post()
 
@@ -109,6 +112,7 @@ def test_eval_raw_javascript_multiple_items(eval_client):
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/v1/eval")
     builder.with_request_body({"javascript": code})
+    builder.with_response_body_multipart_mixed()
     builder.with_response_body_part("string", "")
     builder.with_response_body_part("integer", "1")
     builder.build_post()
@@ -129,6 +133,7 @@ def test_eval_variables_explicit(eval_client):
         "xquery": code,
         "vars": '{"VARIABLE": "X"}',
     })
+    builder.with_response_body_multipart_mixed()
     builder.with_response_body_part("string", "X")
     builder.build_post()
 
@@ -148,6 +153,7 @@ def test_eval_variables_using_kwargs(eval_client):
         "xquery": code,
         "vars": '{"VARIABLE": "X"}',
     })
+    builder.with_response_body_multipart_mixed()
     builder.with_response_body_part("string", "X")
     builder.build_post()
 
@@ -168,6 +174,7 @@ def test_eval_variables_explicit_with_kwargs(eval_client):
         "xquery": code,
         "vars": '{"INTEGER1": 1, "INTEGER2": 2}',
     })
+    builder.with_response_body_multipart_mixed()
     builder.with_response_body_part("integer", "3")
     builder.build_post()
 
@@ -187,6 +194,7 @@ def test_eval_variables_using_namespace(eval_client):
         "xquery": code,
         "vars": f'{{"{{{LOCAL_NS}}}VARIABLE": "X"}}',
     })
+    builder.with_response_body_multipart_mixed()
     builder.with_response_body_part("string", "X")
     builder.build_post()
 
@@ -334,6 +342,7 @@ def test_eval_with_raw_flag(eval_client):
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/v1/eval")
     builder.with_request_body({"xquery": code})
+    builder.with_response_body_multipart_mixed()
     builder.with_response_body_part("element", "<root/>")
     builder.build_post()
 

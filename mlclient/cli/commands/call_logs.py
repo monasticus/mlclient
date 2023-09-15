@@ -122,7 +122,7 @@ class CallLogsCommand(Command):
         host = self.option("host")
 
         manager = MLManager(environment)
-        if not app_port.isnumeric():
+        if app_port is not None and not app_port.isnumeric():
             named_app_port = next((app_server.port
                                    for app_server in manager.config.app_servers
                                    if app_server.identifier == app_port), None)

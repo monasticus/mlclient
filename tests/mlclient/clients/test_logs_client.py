@@ -52,6 +52,30 @@ def test_get_logs_no_such_host(logs_client):
 
 
 @responses.activate
+def test_get_logs_unauthorized(logs_client):
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/manage/v2/logs")
+    builder.with_request_param("format", "json")
+    builder.with_request_param("filename", "ErrorLog.txt")
+    builder.with_response_content_type("application/json; charset=utf-8")
+    builder.with_response_status(401)
+    builder.with_response_body({
+        "errorResponse": {
+            "statusCode": 401,
+            "status": "Unauthorized",
+            "message": "401 Unauthorized",
+        },
+    })
+    builder.build_get()
+
+    with pytest.raises(MarkLogicError) as err:
+        logs_client.get_logs()
+
+    expected_error = "[401 Unauthorized] 401 Unauthorized"
+    assert err.value.args[0] == expected_error
+
+
+@responses.activate
 def test_get_logs_empty(logs_client):
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/manage/v2/logs")
@@ -63,6 +87,43 @@ def test_get_logs_empty(logs_client):
     logs = logs_client.get_logs(8002)
 
     assert next(logs, None) is None
+
+
+@responses.activate
+def test_get_logs_without_port(logs_client):
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/manage/v2/logs")
+    builder.with_request_param("format", "json")
+    builder.with_request_param("filename", "ErrorLog.txt")
+    builder.with_response_content_type("application/json; charset=UTF-8")
+    builder.with_response_header("Content-type", "application/json; charset=UTF-8")
+    builder.with_response_status(200)
+    builder.with_response_body(builder.error_logs_body([
+        ("2023-09-01T00:00:00Z", "info", "Log message 1"),
+        ("2023-09-01T00:00:01Z", "warning", "Log message 2"),
+        ("2023-09-01T00:00:02Z", "error", "Log message 3"),
+    ]))
+    builder.build_get()
+
+    logs = logs_client.get_logs()
+    logs = list(logs)
+
+    assert len(logs) == 3
+    assert logs[0] == {
+        "timestamp": "2023-09-01T00:00:00Z",
+        "level": "info",
+        "message": "Log message 1",
+    }
+    assert logs[1] == {
+        "timestamp": "2023-09-01T00:00:01Z",
+        "level": "warning",
+        "message": "Log message 2",
+    }
+    assert logs[2] == {
+        "timestamp": "2023-09-01T00:00:02Z",
+        "level": "error",
+        "message": "Log message 3",
+    }
 
 
 @responses.activate

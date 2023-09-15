@@ -55,7 +55,6 @@ sphinx-rtd-theme = "^1.2.2"
 autodoc-pydantic = "^2.0.1"
 poetry-bumpversion = "<0.3.1"
 responses = "^0.23.3"
-pytz = "^2023.3.post1"
 
 [tool.poetry.scripts]
 ml = "mlclient.cli:main"
@@ -148,4 +147,7 @@ max-complexity = 10
     "PLR0915", # allow many statements in tests
     "PLR2004", # allow magic values in tests
     "SLF001" # allow private members access in tests
+]
+"tests/tools.py" = [
+    "T201" # allow printing by MLResponseBuilder
 ]

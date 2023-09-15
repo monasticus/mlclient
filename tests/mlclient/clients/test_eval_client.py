@@ -1,17 +1,15 @@
 from __future__ import annotations
 
-import urllib.parse
 from pathlib import Path
 
 import pytest
 import responses
-from requests_toolbelt import MultipartEncoder
-from responses import matchers
 
 from mlclient.clients import LOCAL_NS, EvalClient
 from mlclient.exceptions import (MarkLogicError, UnsupportedFileExtensionError,
                                  WrongParametersError)
 from tests import tools
+from tests.tools import MLResponseBuilder
 
 
 @pytest.fixture(autouse=True)
@@ -31,7 +29,12 @@ def _setup_and_teardown(eval_client):
 @responses.activate
 def test_eval_raw_xquery_empty(eval_client):
     code = "()"
-    _setup_responses({"xquery": code}, [])
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/eval")
+    builder.with_request_body({"xquery": code})
+    builder.with_empty_response_body()
+    builder.build_post()
 
     resp = eval_client.eval(xq=code)
 
@@ -41,11 +44,13 @@ def test_eval_raw_xquery_empty(eval_client):
 @responses.activate
 def test_eval_raw_xquery_single_item(eval_client):
     code = "''"
-    _setup_responses(
-        request_body={"xquery": code},
-        response_parts=[
-            ("string", ""),
-        ])
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/eval")
+    builder.with_request_body({"xquery": code})
+    builder.with_response_body_multipart_mixed()
+    builder.with_response_body_part("string", "")
+    builder.build_post()
 
     resp = eval_client.eval(xq=code)
 
@@ -55,12 +60,14 @@ def test_eval_raw_xquery_single_item(eval_client):
 @responses.activate
 def test_eval_raw_xquery_multiple_items(eval_client):
     code = "('',1)"
-    _setup_responses(
-        request_body={"xquery": code},
-        response_parts=[
-            ("string", ""),
-            ("integer", "1"),
-        ])
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/eval")
+    builder.with_request_body({"xquery": code})
+    builder.with_response_body_multipart_mixed()
+    builder.with_response_body_part("string", "")
+    builder.with_response_body_part("integer", "1")
+    builder.build_post()
 
     resp = eval_client.eval(xq=code)
 
@@ -70,7 +77,12 @@ def test_eval_raw_xquery_multiple_items(eval_client):
 @responses.activate
 def test_eval_raw_javascript_empty(eval_client):
     code = "Sequence.from([]);"
-    _setup_responses({"javascript": code}, [])
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/eval")
+    builder.with_request_body({"javascript": code})
+    builder.with_empty_response_body()
+    builder.build_post()
 
     resp = eval_client.eval(js=code)
 
@@ -80,11 +92,13 @@ def test_eval_raw_javascript_empty(eval_client):
 @responses.activate
 def test_eval_raw_javascript_single_item(eval_client):
     code = "''"
-    _setup_responses(
-        request_body={"javascript": code},
-        response_parts=[
-            ("string", ""),
-        ])
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/eval")
+    builder.with_request_body({"javascript": code})
+    builder.with_response_body_multipart_mixed()
+    builder.with_response_body_part("string", "")
+    builder.build_post()
 
     resp = eval_client.eval(js=code)
 
@@ -94,12 +108,14 @@ def test_eval_raw_javascript_single_item(eval_client):
 @responses.activate
 def test_eval_raw_javascript_multiple_items(eval_client):
     code = "Sequence.from(['', 1]);"
-    _setup_responses(
-        request_body={"javascript": code},
-        response_parts=[
-            ("string", ""),
-            ("integer", "1"),
-        ])
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/eval")
+    builder.with_request_body({"javascript": code})
+    builder.with_response_body_multipart_mixed()
+    builder.with_response_body_part("string", "")
+    builder.with_response_body_part("integer", "1")
+    builder.build_post()
 
     resp = eval_client.eval(js=code)
 
@@ -110,11 +126,16 @@ def test_eval_raw_javascript_multiple_items(eval_client):
 def test_eval_variables_explicit(eval_client):
     code = ("declare variable $VARIABLE external; "
             "$VARIABLE")
-    _setup_responses(
-        request_body={"xquery": code, "vars": '{"VARIABLE": "X"}'},
-        response_parts=[
-            ("string", "X"),
-        ])
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/eval")
+    builder.with_request_body({
+        "xquery": code,
+        "vars": '{"VARIABLE": "X"}',
+    })
+    builder.with_response_body_multipart_mixed()
+    builder.with_response_body_part("string", "X")
+    builder.build_post()
 
     resp = eval_client.eval(xq=code, variables={"VARIABLE": "X"})
 
@@ -125,11 +146,16 @@ def test_eval_variables_explicit(eval_client):
 def test_eval_variables_using_kwargs(eval_client):
     code = ("declare variable $VARIABLE external; "
             "$VARIABLE")
-    _setup_responses(
-        request_body={"xquery": code, "vars": '{"VARIABLE": "X"}'},
-        response_parts=[
-            ("string", "X"),
-        ])
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/eval")
+    builder.with_request_body({
+        "xquery": code,
+        "vars": '{"VARIABLE": "X"}',
+    })
+    builder.with_response_body_multipart_mixed()
+    builder.with_response_body_part("string", "X")
+    builder.build_post()
 
     resp = eval_client.eval(xq=code, VARIABLE="X")
 
@@ -141,11 +167,16 @@ def test_eval_variables_explicit_with_kwargs(eval_client):
     code = ("declare variable $INTEGER1 external; "
             "declare variable $INTEGER2 external; "
             "$INTEGER1 + $INTEGER2")
-    _setup_responses(
-        request_body={"xquery": code, "vars": '{"INTEGER1": 1, "INTEGER2": 2}'},
-        response_parts=[
-            ("integer", "3"),
-        ])
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/eval")
+    builder.with_request_body({
+        "xquery": code,
+        "vars": '{"INTEGER1": 1, "INTEGER2": 2}',
+    })
+    builder.with_response_body_multipart_mixed()
+    builder.with_response_body_part("integer", "3")
+    builder.build_post()
 
     resp = eval_client.eval(xq=code, variables={"INTEGER1": 1}, INTEGER2=2)
 
@@ -156,11 +187,16 @@ def test_eval_variables_explicit_with_kwargs(eval_client):
 def test_eval_variables_using_namespace(eval_client):
     code = ("declare variable $local:VARIABLE external; "
             "$local:VARIABLE")
-    _setup_responses(
-        request_body={"xquery": code, "vars": f'{{"{{{LOCAL_NS}}}VARIABLE": "X"}}'},
-        response_parts=[
-            ("string", "X"),
-        ])
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/eval")
+    builder.with_request_body({
+        "xquery": code,
+        "vars": f'{{"{{{LOCAL_NS}}}VARIABLE": "X"}}',
+    })
+    builder.with_response_body_multipart_mixed()
+    builder.with_response_body_part("string", "X")
+    builder.build_post()
 
     resp = eval_client.eval(xq=code, variables={f"{{{LOCAL_NS}}}VARIABLE": "X"})
 
@@ -170,10 +206,13 @@ def test_eval_variables_using_namespace(eval_client):
 @responses.activate
 def test_eval_using_database_param(eval_client):
     code = "()"
-    _setup_responses(
-        request_body={"xquery": code},
-        response_parts=[],
-        request_params={"database": "Documents"})
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/eval")
+    builder.with_request_param("database", "Documents")
+    builder.with_request_body({"xquery": code})
+    builder.with_empty_response_body()
+    builder.build_post()
 
     resp = eval_client.eval(xq=code, database="Documents")
 
@@ -183,10 +222,13 @@ def test_eval_using_database_param(eval_client):
 @responses.activate
 def test_eval_using_txid_param(eval_client):
     code = "()"
-    _setup_responses(
-        request_body={"xquery": code},
-        response_parts=[],
-        request_params={"txid": "transaction-id"})
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/eval")
+    builder.with_request_param("txid", "transaction-id")
+    builder.with_request_body({"xquery": code})
+    builder.with_empty_response_body()
+    builder.build_post()
 
     resp = eval_client.eval(xq=code, txid="transaction-id")
 
@@ -197,10 +239,12 @@ def test_eval_using_txid_param(eval_client):
 def test_eval_file_xquery(eval_client):
     code = 'xquery version "1.0-ml"; ()'
 
+    builder = MLResponseBuilder()
     for ext in ["xq", "xql", "xqm", "xqu", "xquery", "xqy"]:
-        _setup_responses(
-            request_body={"xquery": code},
-            response_parts=[])
+        builder.with_base_url("http://localhost:8002/v1/eval")
+        builder.with_request_body({"xquery": code})
+        builder.with_empty_response_body()
+        builder.build_post()
 
         file_path = tools.get_test_resource_path(__file__, f"xquery-code.{ext}")
         resp = eval_client.eval(file=file_path)
@@ -212,10 +256,12 @@ def test_eval_file_xquery(eval_client):
 def test_eval_file_javascript(eval_client):
     code = "'use strict'; Sequence.from([]);"
 
+    builder = MLResponseBuilder()
     for ext in ["js", "sjs"]:
-        _setup_responses(
-            request_body={"javascript": code},
-            response_parts=[])
+        builder.with_base_url("http://localhost:8002/v1/eval")
+        builder.with_request_body({"javascript": code})
+        builder.with_empty_response_body()
+        builder.build_post()
 
         file_path = tools.get_test_resource_path(__file__, f"javascript-code.{ext}")
         resp = eval_client.eval(file=file_path)
@@ -226,14 +272,16 @@ def test_eval_file_javascript(eval_client):
 @responses.activate
 def test_eval_with_marklogic_error(eval_client):
     error_path = tools.get_test_resource_path(__file__, "marklogic-error.html")
-    responses.post(
-        "http://localhost:8002/v1/eval",
-        body=Path(error_path).read_bytes(),
-        status=400,
-    )
-
     code = ("declare variable $local:VARIABLE external; "
             "$local:VARIABLE")
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/eval")
+    builder.with_request_body({"xquery": code})
+    builder.with_response_status(400)
+    builder.with_response_body(Path(error_path).read_bytes())
+    builder.build_post()
+
     with pytest.raises(MarkLogicError) as err:
         eval_client.eval(xq=code)
 
@@ -290,58 +338,15 @@ def test_eval_no_code_params(eval_client):
 @responses.activate
 def test_eval_with_raw_flag(eval_client):
     code = "element root {}"
-    _setup_responses(
-        request_body={"xquery": code},
-        response_parts=[
-            ("element", "<root/>"),
-        ])
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/eval")
+    builder.with_request_body({"xquery": code})
+    builder.with_response_body_multipart_mixed()
+    builder.with_response_body_part("element", "<root/>")
+    builder.build_post()
 
     resp = eval_client.eval(xq=code, raw=True)
 
     assert isinstance(resp, str)
     assert resp == "<root/>"
-
-
-def _setup_responses(
-        request_body: dict,
-        response_parts: list[tuple[str, str]],
-        request_params: dict | None = None,
-):
-    request_url = "http://localhost:8002/v1/eval"
-    if request_params:
-        params = urllib.parse.urlencode(request_params).replace("%2B", "+")
-        request_url += f"?{params}"
-
-    if len(response_parts) == 0:
-        responses.post(
-            request_url,
-            body=b"",
-            headers={"Content-Length": "0"},
-            match=[matchers.urlencoded_params_matcher(request_body)],
-        )
-    else:
-        fields = {}
-        for i, item in enumerate(response_parts):
-            name_disposition = f"name{i}"
-            field_name = f"field{i}"
-            field_value = item[1]
-            x_primitive = item[0]
-            headers = {"X-Primitive": x_primitive}
-            if x_primitive in ["array", "map"]:
-                content_type = "application/json"
-            elif x_primitive in ["document", "element"]:
-                content_type = "application/xml"
-            else:
-                content_type = "text/plain"
-            fields[field_name] = (name_disposition, field_value, content_type, headers)
-        multipart_body = MultipartEncoder(fields=fields)
-        multipart_body_str = multipart_body.to_string()
-        responses.post(
-            request_url,
-            body=multipart_body_str,
-            content_type=f"multipart/mixed; boundary={multipart_body.boundary[2:]}",
-            headers={
-                "Content-Length": str(len(multipart_body_str)),
-            },
-            match=[matchers.urlencoded_params_matcher(request_body)],
-        )

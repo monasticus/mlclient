@@ -10,7 +10,7 @@ from tests.tools import MLResponseBuilder
 
 @pytest.fixture(autouse=True)
 def logs_client() -> LogsClient:
-    return LogsClient(auth_method="digest")
+    return LogsClient()
 
 
 @pytest.fixture(autouse=True)

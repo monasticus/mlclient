@@ -100,16 +100,41 @@ class LogsClient(MLResourceClient):
             regex=regex,
             host=host)
 
-        resp_json = self.call(call).json()
-        if "errorResponse" in resp_json:
-            raise MarkLogicError(resp_json["errorResponse"])
+        resp = self.call(call)
+        resp_body = resp.json()
+        if "errorResponse" in resp_body:
+            raise MarkLogicError(resp_body["errorResponse"])
 
-        return self._parse_logs(log_type, resp_json)
+        return self._parse_logs(log_type, resp_body)
+
+    def get_logs_list(
+            self,
+    ) -> list:
+        """Return a logs list from a MarkLogic server.
+
+        Returns
+        -------
+        list
+            A list of log files in the MarkLogic server
+
+        Raises
+        ------
+        MarkLogicError
+            If MarkLogic returns an error
+        """
+        call = self._get_call()
+
+        resp = self.call(call)
+        resp_body = resp.json()
+        if "errorResponse" in resp_body:
+            raise MarkLogicError(resp_body["errorResponse"])
+
+        return resp_body["log-default-list"]["list-items"]["list-item"]
 
     @staticmethod
     def _get_call(
-            app_server: int | str,
-            log_type: LogType,
+            app_server: int | str | None = None,
+            log_type: LogType | None = None,
             start_time: str | None = None,
             end_time: str | None = None,
             regex: str | None = None,
@@ -122,9 +147,9 @@ class LogsClient(MLResourceClient):
 
         Parameters
         ----------
-        app_server : int | str
+        app_server : int | str | None, default None
             An app server (port) with logs to retrieve
-        log_type : LogType
+        log_type : LogType | None, default None
             A log type
         start_time : str | None, default None
             A start time to search error logs
@@ -142,7 +167,9 @@ class LogsClient(MLResourceClient):
         """
         if app_server in [0, "0"]:
             app_server = "TaskServer"
-        if app_server is None:
+        if log_type is None:
+            file_name = None
+        elif app_server is None:
             file_name = f"{log_type.value}.txt"
         else:
             file_name = f"{app_server}_{log_type.value}.txt"

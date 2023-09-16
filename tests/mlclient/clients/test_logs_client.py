@@ -536,3 +536,61 @@ def test_get_request_logs_with_search_params(logs_client):
     assert logs[1] == {
         "message": raw_logs[1],
     }
+
+
+@responses.activate
+def test_get_logs_list(logs_client):
+    items = [
+        {
+            "uriref": "/manage/v2/logs?filename=8001_AccessLog.txt&host=localhost",
+            "nameref": "8001_AccessLog.txt",
+            "roleref": "localhost"},
+        {
+            "uriref": "/manage/v2/logs?filename=8002_AccessLog_1.txt&host=localhost",
+            "nameref": "8002_AccessLog_1.txt",
+            "roleref": "localhost",
+        },
+    ]
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/manage/v2/logs")
+    builder.with_request_param("format", "json")
+    builder.with_response_content_type("application/json; charset=UTF-8")
+    builder.with_response_status(200)
+    builder.with_response_body({
+        "log-default-list": {
+            "list-items": {
+                "list-item": items,
+            },
+        },
+    })
+    builder.build_get()
+
+    logs_list = logs_client.get_logs_list()
+
+    assert len(logs_list) == 2
+    assert logs_list == items
+
+
+@responses.activate
+def test_get_logs_list_unauthorized(logs_client):
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/manage/v2/logs")
+    builder.with_request_param("format", "json")
+    builder.with_response_content_type("application/json; charset=UTF-8")
+    builder.with_response_status(401)
+    builder.with_response_body({
+        "errorResponse": {
+            "statusCode": 401,
+            "status": "Unauthorized",
+            "message": "401 Unauthorized",
+        },
+    })
+    builder.build_get()
+
+    with pytest.raises(MarkLogicError) as err:
+        logs_client.get_logs_list()
+
+    expected_error = "[401 Unauthorized] 401 Unauthorized"
+    assert err.value.args[0] == expected_error
+

@@ -393,6 +393,8 @@ class MLResponseBuilder:
         response_content_type = response_headers.get(
             "Content-Type", HEADER_MULTIPART_MIXED)
         excluded = ["Content-Length", "Content-Type"]
+        if "Content-Type" in response_headers and "Content-type" in response_headers:
+            excluded.append("Content-type")
 
         response_headers_lines = []
         if not response_content_type.startswith(HEADER_MULTIPART_MIXED):

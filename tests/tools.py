@@ -272,28 +272,26 @@ class MLResponseBuilder:
     def error_logs_body(
             logs: list[tuple],
     ):
-        return {
-            "logfile": {
-                "log": [
-                    {
-                        "timestamp": log_tuple[0],
-                        "level": log_tuple[1],
-                        "message": log_tuple[2],
-                    }
-                    for log_tuple in logs
-                ],
-            },
-        }
+        logs_body = {"logfile": {}}
+        if len(logs) > 0:
+            logs_body["logfile"]["log"] = [
+                {
+                    "timestamp": log_tuple[0],
+                    "level": log_tuple[1],
+                    "message": log_tuple[2],
+                }
+                for log_tuple in logs
+            ]
+        return logs_body
 
     @staticmethod
     def access_or_request_logs_body(
             logs: list[str],
     ):
-        return {
-            "logfile": {
-                "message": "\n".join(logs),
-            },
-        }
+        logs_body = {"logfile": {}}
+        if len(logs) > 0:
+            logs_body["logfile"]["message"] = "\n".join(logs)
+        return logs_body
 
     @classmethod
     def generate_builder_code(

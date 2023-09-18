@@ -347,6 +347,21 @@ def test_get_error_logs_fully_customized(logs_client):
 
 
 @responses.activate
+def test_get_error_logs_empty(logs_client):
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/manage/v2/logs")
+    builder.with_request_param("format", "json")
+    builder.with_request_param("filename", "8002_ErrorLog.txt")
+    builder.with_response_body(builder.error_logs_body([]))
+    builder.build_get()
+
+    logs = logs_client.get_logs(8002)
+    logs = list(logs)
+
+    assert len(logs) == 0
+
+
+@responses.activate
 def test_get_access_logs(logs_client):
     raw_logs = [
         ('172.17.0.1 - admin [01/Sep/2023:03:54:16 +0000] '
@@ -407,6 +422,21 @@ def test_get_access_logs_with_search_params(logs_client):
     assert logs[1] == {
         "message": raw_logs[1],
     }
+
+
+@responses.activate
+def test_get_access_logs_empty(logs_client):
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/manage/v2/logs")
+    builder.with_request_param("format", "json")
+    builder.with_request_param("filename", "8002_AccessLog.txt")
+    builder.with_response_body(builder.access_or_request_logs_body([]))
+    builder.build_get()
+
+    logs = logs_client.get_logs(8002, log_type=LogType.ACCESS)
+    logs = list(logs)
+
+    assert len(logs) == 0
 
 
 @responses.activate
@@ -539,6 +569,21 @@ def test_get_request_logs_with_search_params(logs_client):
 
 
 @responses.activate
+def test_get_request_logs_empty(logs_client):
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/manage/v2/logs")
+    builder.with_request_param("format", "json")
+    builder.with_request_param("filename", "8002_RequestLog.txt")
+    builder.with_response_body(builder.access_or_request_logs_body([]))
+    builder.build_get()
+
+    logs = logs_client.get_logs(8002, log_type=LogType.REQUEST)
+    logs = list(logs)
+
+    assert len(logs) == 0
+
+
+@responses.activate
 def test_get_logs_list(logs_client):
     items = [
         {
@@ -593,4 +638,3 @@ def test_get_logs_list_unauthorized(logs_client):
 
     expected_error = "[401 Unauthorized] 401 Unauthorized"
     assert err.value.args[0] == expected_error
-

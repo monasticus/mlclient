@@ -8,6 +8,7 @@ It exports high-level classes to easily read MarkLogic logs:
 """
 from __future__ import annotations
 
+import re
 from enum import Enum
 from typing import Iterator
 
@@ -55,6 +56,8 @@ class LogsClient(MLResourceClient):
     It is a high-level class parsing MarkLogic response and extracting logs from
     the server.
     """
+
+    _FILENAME_RE = re.compile(r"((.+)_)?(Access|Request|Error)Log(_([1-6]))?\.txt")
 
     def get_logs(
             self,
@@ -109,13 +112,20 @@ class LogsClient(MLResourceClient):
 
     def get_logs_list(
             self,
-    ) -> list:
+    ) -> dict:
         """Return a logs list from a MarkLogic server.
+
+        Result of this method is a parsed dict of log files with 3 keys:
+        * source: points to origin log list items
+        * parsed: points to parsed log list items
+          includes a filename, server, log type and a number of days
+        * grouped: points to a dictionary
+          { <server>: { <log-type>: { <num-of-days>: <file-name> } } }
 
         Returns
         -------
         list
-            A list of log files in the MarkLogic server
+            A parsed list of log files in the MarkLogic server
 
         Raises
         ------
@@ -129,7 +139,7 @@ class LogsClient(MLResourceClient):
         if "errorResponse" in resp_body:
             raise MarkLogicError(resp_body["errorResponse"])
 
-        return resp_body["log-default-list"]["list-items"]["list-item"]
+        return self._parse_logs_list(resp_body)
 
     @staticmethod
     def _get_call(
@@ -190,7 +200,7 @@ class LogsClient(MLResourceClient):
     @staticmethod
     def _parse_logs(
             log_type: LogType,
-            resp_json: dict,
+            resp_body: dict,
     ) -> Iterator[dict]:
         """Parse MarkLogic logs depending on their type.
 
@@ -198,15 +208,15 @@ class LogsClient(MLResourceClient):
         ----------
         log_type : LogType
             A log type
-        resp_json : dict
-            A JSON response from an MarkLogic server
+        resp_body : dict
+            A JSON response body from an MarkLogic server
 
         Returns
         -------
         Iterator[dict]
             A log details generator.
         """
-        logfile = resp_json["logfile"]
+        logfile = resp_body["logfile"]
         if log_type == LogType.ERROR:
             logs = logfile.get("log", ())
             return iter(sorted(logs, key=lambda log: log["timestamp"]))
@@ -214,4 +224,89 @@ class LogsClient(MLResourceClient):
             return iter([])
         return ({"message": log} for log in logfile["message"].split("\n"))
 
+    @classmethod
+    def _parse_logs_list(
+            cls,
+            resp_body: dict,
+    ) -> dict:
+        """Parse MarkLogic logs list.
 
+        Parameters
+        ----------
+        resp_body : dict
+            A JSON response body from an MarkLogic server
+
+        Returns
+        -------
+        dict
+            A compiled information about ML log files
+        """
+        source_items = resp_body["log-default-list"]["list-items"]["list-item"]
+        parsed = [cls._parse_log_file(log_item) for log_item in source_items]
+        grouped = cls._group_log_files(parsed)
+
+        return {
+            "source": source_items,
+            "parsed": parsed,
+            "grouped": grouped,
+        }
+
+    @classmethod
+    def _parse_log_file(
+            cls,
+            source_log_item: dict,
+    ) -> dict:
+        """Parse MarkLogic logs list item.
+
+        Parameters
+        ----------
+        source_log_item : dict
+            A source item of log list received from an ML server.
+
+        Returns
+        -------
+        dict
+            A parsed log item
+        """
+        file_name = source_log_item["nameref"]
+        match = cls._FILENAME_RE.match(file_name)
+        server = match.group(2)
+        log_type = LogType.get(match.group(3))
+        days_ago = int(match.group(5) or 0)
+        return {
+            "file-name": file_name,
+            "server": server,
+            "log-type": log_type,
+            "days-ago": days_ago,
+        }
+
+    @staticmethod
+    def _group_log_files(
+            parsed_log_items: list[dict],
+    ) -> dict:
+        """Group parsed logs items.
+
+        Parameters
+        ----------
+        parsed_log_items : list[dict]
+            Parsed log items
+
+        Returns
+        -------
+        dict
+            Log items grouped by server, log type and number of days
+        """
+        grouped = {}
+        for item in parsed_log_items:
+            file_name = item["file-name"]
+            server = item["server"]
+            log_type = item["log-type"]
+            days_ago = item["days-ago"]
+
+            if server not in grouped:
+                grouped[server] = {}
+            if log_type not in grouped[server]:
+                grouped[server][log_type] = {}
+            grouped[server][log_type][days_ago] = file_name
+
+        return grouped

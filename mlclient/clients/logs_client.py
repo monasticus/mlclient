@@ -183,6 +183,8 @@ class LogsClient(MLResourceClient):
         if log_type == LogType.ERROR:
             logs = logfile.get("log", ())
             return iter(sorted(logs, key=lambda log: log["timestamp"]))
+        if "message" not in logfile:
+            return iter([])
         return ({"message": log} for log in logfile["message"].split("\n"))
 
 

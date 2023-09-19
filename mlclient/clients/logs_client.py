@@ -49,6 +49,24 @@ class LogType(Enum):
         msg = "Invalid log type! Allowed values are: error, access, request."
         raise InvalidLogTypeError(msg)
 
+    def __lt__(
+            self,
+            other: LogType,
+    ):
+        """Compare LogTypes with LT operator.
+
+        Parameters
+        ----------
+        other : LogType
+            An other LogType instance
+
+        Returns
+        -------
+        bool
+            A comparison result.
+        """
+        return self.value < other.value
+
 
 class LogsClient(MLResourceClient):
     """An MLResourceClient calling /manage/v2/logs endpoint.

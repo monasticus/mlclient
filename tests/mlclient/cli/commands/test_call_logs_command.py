@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from pathlib import Path
+
 import pytest
 import responses
 from cleo.testers.command_tester import CommandTester
@@ -7,7 +9,11 @@ from cleo.testers.command_tester import CommandTester
 from mlclient import MLConfiguration
 from mlclient.cli.app import MLCLIentApplication
 from mlclient.exceptions import InvalidLogTypeError
+from tests import tools
 from tests.tools import MLResponseBuilder
+
+
+ENDPOINT = "/manage/v2/logs"
 
 
 @pytest.fixture(autouse=True)
@@ -45,7 +51,7 @@ def _setup(mocker, ml_config):
 @responses.activate
 def test_command_call_logs_basic():
     builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/manage/v2/logs")
+    builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
     builder.with_request_param("format", "json")
     builder.with_request_param("filename", "8002_ErrorLog.txt")
     builder.with_response_body(builder.error_logs_body([]))
@@ -62,12 +68,13 @@ def test_command_call_logs_basic():
     assert tester.command.option("to") is None
     assert tester.command.option("regex") is None
     assert tester.command.option("host") is None
+    assert tester.command.option("list") is False
 
 
 @responses.activate
 def test_command_call_logs_basic_without_app_server():
     builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/manage/v2/logs")
+    builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
     builder.with_request_param("format", "json")
     builder.with_request_param("filename", "ErrorLog.txt")
     builder.with_response_body(builder.error_logs_body([]))
@@ -84,12 +91,13 @@ def test_command_call_logs_basic_without_app_server():
     assert tester.command.option("to") is None
     assert tester.command.option("regex") is None
     assert tester.command.option("host") is None
+    assert tester.command.option("list") is False
 
 
 @responses.activate
 def test_command_call_logs_basic_using_named_app_server():
     builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/manage/v2/logs")
+    builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
     builder.with_request_param("format", "json")
     builder.with_request_param("filename", "8100_ErrorLog.txt")
     builder.with_response_body(builder.error_logs_body([]))
@@ -106,12 +114,13 @@ def test_command_call_logs_basic_using_named_app_server():
     assert tester.command.option("to") is None
     assert tester.command.option("regex") is None
     assert tester.command.option("host") is None
+    assert tester.command.option("list") is False
 
 
 @responses.activate
 def test_command_call_logs_custom_rest_server():
     builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/manage/v2/logs")
+    builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
     builder.with_request_param("format", "json")
     builder.with_request_param("filename", "8002_ErrorLog.txt")
     builder.with_response_body(builder.error_logs_body([]))
@@ -128,12 +137,13 @@ def test_command_call_logs_custom_rest_server():
     assert tester.command.option("to") is None
     assert tester.command.option("regex") is None
     assert tester.command.option("host") is None
+    assert tester.command.option("list") is False
 
 
 @responses.activate
 def test_command_call_logs_custom_log_type_error():
     builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/manage/v2/logs")
+    builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
     builder.with_request_param("format", "json")
     builder.with_request_param("filename", "8002_ErrorLog.txt")
     builder.with_response_body(builder.error_logs_body([]))
@@ -150,12 +160,13 @@ def test_command_call_logs_custom_log_type_error():
     assert tester.command.option("to") is None
     assert tester.command.option("regex") is None
     assert tester.command.option("host") is None
+    assert tester.command.option("list") is False
 
 
 @responses.activate
 def test_command_call_logs_custom_log_type_access():
     builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/manage/v2/logs")
+    builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
     builder.with_request_param("format", "json")
     builder.with_request_param("filename", "8002_AccessLog.txt")
     builder.with_response_body(builder.access_or_request_logs_body([]))
@@ -172,12 +183,13 @@ def test_command_call_logs_custom_log_type_access():
     assert tester.command.option("to") is None
     assert tester.command.option("regex") is None
     assert tester.command.option("host") is None
+    assert tester.command.option("list") is False
 
 
 @responses.activate
 def test_command_call_logs_custom_log_type_request():
     builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/manage/v2/logs")
+    builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
     builder.with_request_param("format", "json")
     builder.with_request_param("filename", "8002_RequestLog.txt")
     builder.with_response_body(builder.access_or_request_logs_body([]))
@@ -194,6 +206,7 @@ def test_command_call_logs_custom_log_type_request():
     assert tester.command.option("to") is None
     assert tester.command.option("regex") is None
     assert tester.command.option("host") is None
+    assert tester.command.option("list") is False
 
 
 def test_command_call_logs_custom_log_type_invalid():
@@ -208,7 +221,7 @@ def test_command_call_logs_custom_log_type_invalid():
 @responses.activate
 def test_command_call_logs_from():
     builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/manage/v2/logs")
+    builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
     builder.with_request_param("format", "json")
     builder.with_request_param("filename", "8002_ErrorLog.txt")
     builder.with_request_param("start", "1970-01-01T00:00:00")
@@ -226,12 +239,13 @@ def test_command_call_logs_from():
     assert tester.command.option("to") is None
     assert tester.command.option("regex") is None
     assert tester.command.option("host") is None
+    assert tester.command.option("list") is False
 
 
 @responses.activate
 def test_command_call_logs_to():
     builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/manage/v2/logs")
+    builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
     builder.with_request_param("format", "json")
     builder.with_request_param("filename", "8002_ErrorLog.txt")
     builder.with_request_param("end", "1984-01-01T00:00:00")
@@ -249,12 +263,13 @@ def test_command_call_logs_to():
     assert tester.command.option("to") == "1984-01-01"
     assert tester.command.option("regex") is None
     assert tester.command.option("host") is None
+    assert tester.command.option("list") is False
 
 
 @responses.activate
 def test_command_call_logs_regex():
     builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/manage/v2/logs")
+    builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
     builder.with_request_param("format", "json")
     builder.with_request_param("filename", "8002_ErrorLog.txt")
     builder.with_request_param("regex", "you-will-not-find-it")
@@ -272,12 +287,13 @@ def test_command_call_logs_regex():
     assert tester.command.option("to") is None
     assert tester.command.option("regex") == "you-will-not-find-it"
     assert tester.command.option("host") is None
+    assert tester.command.option("list") is False
 
 
 @responses.activate
 def test_command_call_logs_host():
     builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/manage/v2/logs")
+    builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
     builder.with_request_param("format", "json")
     builder.with_request_param("filename", "8002_ErrorLog.txt")
     builder.with_request_param("host", "some-host")
@@ -295,12 +311,35 @@ def test_command_call_logs_host():
     assert tester.command.option("to") is None
     assert tester.command.option("regex") is None
     assert tester.command.option("host") == "some-host"
+    assert tester.command.option("list") is False
+
+
+@responses.activate
+def test_command_call_logs_list():
+    builder = MLResponseBuilder()
+    builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
+    builder.with_request_param("format", "json")
+    builder.with_response_body(builder.logs_list_body([]))
+    builder.build_get()
+
+    tester = _get_tester("call logs")
+    tester.execute("-e test --list")
+
+    assert tester.command.option("environment") == "test"
+    assert tester.command.option("rest-server") is None
+    assert tester.command.option("app-server") is None
+    assert tester.command.option("log-type") == "error"
+    assert tester.command.option("from") is None
+    assert tester.command.option("to") is None
+    assert tester.command.option("regex") is None
+    assert tester.command.option("host") is None
+    assert tester.command.option("list") is True
 
 
 @responses.activate
 def test_command_call_logs_output_for_error_logs():
     builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/manage/v2/logs")
+    builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
     builder.with_request_param("format", "json")
     builder.with_request_param("filename", "8002_ErrorLog.txt")
     builder.with_response_body(builder.error_logs_body([
@@ -338,7 +377,7 @@ def test_command_call_logs_output_for_access_logs():
          '401 104 - "python-requests/2.31.0"'),
     ]
     builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/manage/v2/logs")
+    builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
     builder.with_request_param("format", "json")
     builder.with_request_param("filename", "8002_AccessLog.txt")
     builder.with_response_body(builder.access_or_request_logs_body(logs))
@@ -403,7 +442,7 @@ def test_command_call_logs_output_for_request_logs():
          '}'),
     ]
     builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/manage/v2/logs")
+    builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
     builder.with_request_param("format", "json")
     builder.with_request_param("filename", "8002_RequestLog.txt")
     builder.with_response_body(builder.access_or_request_logs_body(logs))
@@ -471,7 +510,7 @@ def test_command_call_logs_output_for_xml_logs():
         "</error:error>",
     ]
     builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/manage/v2/logs")
+    builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
     builder.with_request_param("format", "json")
     builder.with_request_param("filename", "8002_ErrorLog.txt")
     builder.with_response_body(builder.error_logs_body([
@@ -492,6 +531,433 @@ def test_command_call_logs_output_for_xml_logs():
         "<time>2023-09-01T00:00:00Z <log-level>INFO: " + "\n".join(xml_log_lines),
     ]
     assert command_output == "\n".join(expected_output_lines) + "\n"
+
+
+@responses.activate
+def test_command_call_output_of_logs_list():
+    items = [
+        {
+            "uriref": f"{ENDPOINT}?filename=8001_AccessLog.txt&host=localhost",
+            "nameref": "8001_AccessLog.txt",
+            "roleref": "localhost"},
+        {
+            "uriref": f"{ENDPOINT}?filename=8002_AccessLog_1.txt&host=localhost",
+            "nameref": "8002_AccessLog_1.txt",
+            "roleref": "localhost",
+        },
+        {
+            "uriref": f"{ENDPOINT}?filename=8001_RequestLog.txt&host=localhost",
+            "nameref": "8001_RequestLog.txt",
+            "roleref": "localhost"},
+        {
+            "uriref": f"{ENDPOINT}?filename=8002_RequestLog_1.txt&host=localhost",
+            "nameref": "8002_RequestLog_1.txt",
+            "roleref": "localhost",
+        },
+        {
+            "uriref": f"{ENDPOINT}?filename=8001_ErrorLog.txt&host=localhost",
+            "nameref": "8001_ErrorLog.txt",
+            "roleref": "localhost"},
+        {
+            "uriref": f"{ENDPOINT}?filename=8002_ErrorLog_1.txt&host=localhost",
+            "nameref": "8002_ErrorLog_1.txt",
+            "roleref": "localhost",
+        },
+        {
+            "uriref": f"{ENDPOINT}?filename=TaskServer_AccessLog.txt&host=localhost",
+            "nameref": "TaskServer_AccessLog.txt",
+            "roleref": "localhost"},
+        {
+            "uriref": f"{ENDPOINT}?filename=TaskServer_AccessLog_1.txt&host=localhost",
+            "nameref": "TaskServer_AccessLog_1.txt",
+            "roleref": "localhost",
+        },
+        {
+            "uriref": f"{ENDPOINT}?filename=TaskServer_RequestLog.txt&host=localhost",
+            "nameref": "TaskServer_RequestLog.txt",
+            "roleref": "localhost"},
+        {
+            "uriref": f"{ENDPOINT}?filename=TaskServer_RequestLog_1.txt&host=localhost",
+            "nameref": "TaskServer_RequestLog_1.txt",
+            "roleref": "localhost",
+        },
+        {
+            "uriref": f"{ENDPOINT}?filename=TaskServer_ErrorLog.txt&host=localhost",
+            "nameref": "TaskServer_ErrorLog.txt",
+            "roleref": "localhost"},
+        {
+            "uriref": f"{ENDPOINT}?filename=TaskServer_ErrorLog_1.txt&host=localhost",
+            "nameref": "TaskServer_ErrorLog_1.txt",
+            "roleref": "localhost",
+        },
+        {
+            "uriref": f"{ENDPOINT}?filename=AccessLog.txt&host=localhost",
+            "nameref": "AccessLog.txt",
+            "roleref": "localhost"},
+        {
+            "uriref": f"{ENDPOINT}?filename=AccessLog_1.txt&host=localhost",
+            "nameref": "AccessLog_1.txt",
+            "roleref": "localhost",
+        },
+        {
+            "uriref": f"{ENDPOINT}?filename=RequestLog.txt&host=localhost",
+            "nameref": "RequestLog.txt",
+            "roleref": "localhost"},
+        {
+            "uriref": f"{ENDPOINT}?filename=RequestLog_1.txt&host=localhost",
+            "nameref": "RequestLog_1.txt",
+            "roleref": "localhost",
+        },
+        {
+            "uriref": f"{ENDPOINT}?filename=ErrorLog.txt&host=localhost",
+            "nameref": "ErrorLog.txt",
+            "roleref": "localhost"},
+        {
+            "uriref": f"{ENDPOINT}?filename=ErrorLog_1.txt&host=localhost",
+            "nameref": "ErrorLog_1.txt",
+            "roleref": "localhost",
+        },
+    ]
+
+    builder = MLResponseBuilder()
+    builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
+    builder.with_request_param("format", "json")
+    builder.with_response_content_type("application/json; charset=UTF-8")
+    builder.with_response_status(200)
+    builder.with_response_body(builder.logs_list_body(items))
+    builder.build_get()
+
+    tester = _get_tester("call logs")
+    tester.execute("-e test --list")
+    command_output = tester.io.fetch_output()
+
+    assert tester.command.option("environment") == "test"
+    assert tester.command.option("list") is True
+
+    expected_output_path = tools.get_test_resource_path(__file__, "output-full.txt")
+    expected_output = Path(expected_output_path).read_text()
+    assert command_output == expected_output
+
+
+@responses.activate
+def test_command_call_output_of_logs_list_for_app_server():
+    items = [
+        {
+            "uriref": f"{ENDPOINT}?filename=8001_AccessLog.txt&host=localhost",
+            "nameref": "8001_AccessLog.txt",
+            "roleref": "localhost"},
+        {
+            "uriref": f"{ENDPOINT}?filename=8002_AccessLog_1.txt&host=localhost",
+            "nameref": "8002_AccessLog_1.txt",
+            "roleref": "localhost",
+        },
+        {
+            "uriref": f"{ENDPOINT}?filename=8001_RequestLog.txt&host=localhost",
+            "nameref": "8001_RequestLog.txt",
+            "roleref": "localhost"},
+        {
+            "uriref": f"{ENDPOINT}?filename=8002_RequestLog_1.txt&host=localhost",
+            "nameref": "8002_RequestLog_1.txt",
+            "roleref": "localhost",
+        },
+        {
+            "uriref": f"{ENDPOINT}?filename=8001_ErrorLog.txt&host=localhost",
+            "nameref": "8001_ErrorLog.txt",
+            "roleref": "localhost"},
+        {
+            "uriref": f"{ENDPOINT}?filename=8002_ErrorLog_1.txt&host=localhost",
+            "nameref": "8002_ErrorLog_1.txt",
+            "roleref": "localhost",
+        },
+        {
+            "uriref": f"{ENDPOINT}?filename=TaskServer_AccessLog.txt&host=localhost",
+            "nameref": "TaskServer_AccessLog.txt",
+            "roleref": "localhost"},
+        {
+            "uriref": f"{ENDPOINT}?filename=TaskServer_AccessLog_1.txt&host=localhost",
+            "nameref": "TaskServer_AccessLog_1.txt",
+            "roleref": "localhost",
+        },
+        {
+            "uriref": f"{ENDPOINT}?filename=TaskServer_RequestLog.txt&host=localhost",
+            "nameref": "TaskServer_RequestLog.txt",
+            "roleref": "localhost"},
+        {
+            "uriref": f"{ENDPOINT}?filename=TaskServer_RequestLog_1.txt&host=localhost",
+            "nameref": "TaskServer_RequestLog_1.txt",
+            "roleref": "localhost",
+        },
+        {
+            "uriref": f"{ENDPOINT}?filename=TaskServer_ErrorLog.txt&host=localhost",
+            "nameref": "TaskServer_ErrorLog.txt",
+            "roleref": "localhost"},
+        {
+            "uriref": f"{ENDPOINT}?filename=TaskServer_ErrorLog_1.txt&host=localhost",
+            "nameref": "TaskServer_ErrorLog_1.txt",
+            "roleref": "localhost",
+        },
+        {
+            "uriref": f"{ENDPOINT}?filename=AccessLog.txt&host=localhost",
+            "nameref": "AccessLog.txt",
+            "roleref": "localhost"},
+        {
+            "uriref": f"{ENDPOINT}?filename=AccessLog_1.txt&host=localhost",
+            "nameref": "AccessLog_1.txt",
+            "roleref": "localhost",
+        },
+        {
+            "uriref": f"{ENDPOINT}?filename=RequestLog.txt&host=localhost",
+            "nameref": "RequestLog.txt",
+            "roleref": "localhost"},
+        {
+            "uriref": f"{ENDPOINT}?filename=RequestLog_1.txt&host=localhost",
+            "nameref": "RequestLog_1.txt",
+            "roleref": "localhost",
+        },
+        {
+            "uriref": f"{ENDPOINT}?filename=ErrorLog.txt&host=localhost",
+            "nameref": "ErrorLog.txt",
+            "roleref": "localhost"},
+        {
+            "uriref": f"{ENDPOINT}?filename=ErrorLog_1.txt&host=localhost",
+            "nameref": "ErrorLog_1.txt",
+            "roleref": "localhost",
+        },
+    ]
+
+    builder = MLResponseBuilder()
+    builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
+    builder.with_request_param("format", "json")
+    builder.with_response_content_type("application/json; charset=UTF-8")
+    builder.with_response_status(200)
+    builder.with_response_body(builder.logs_list_body(items))
+    builder.build_get()
+
+    tester = _get_tester("call logs")
+    tester.execute("-e test -a manage --list")
+    command_output = tester.io.fetch_output()
+
+    assert tester.command.option("environment") == "test"
+    assert tester.command.option("app-server") == "manage"
+    assert tester.command.option("list") is True
+
+    expected_output_path = tools.get_test_resource_path(__file__, "output-server.txt")
+    expected_output = Path(expected_output_path).read_text()
+    assert command_output == expected_output
+
+
+@responses.activate
+def test_command_call_output_of_logs_list_for_task_server():
+    items = [
+        {
+            "uriref": f"{ENDPOINT}?filename=8001_AccessLog.txt&host=localhost",
+            "nameref": "8001_AccessLog.txt",
+            "roleref": "localhost"},
+        {
+            "uriref": f"{ENDPOINT}?filename=8002_AccessLog_1.txt&host=localhost",
+            "nameref": "8002_AccessLog_1.txt",
+            "roleref": "localhost",
+        },
+        {
+            "uriref": f"{ENDPOINT}?filename=8001_RequestLog.txt&host=localhost",
+            "nameref": "8001_RequestLog.txt",
+            "roleref": "localhost"},
+        {
+            "uriref": f"{ENDPOINT}?filename=8002_RequestLog_1.txt&host=localhost",
+            "nameref": "8002_RequestLog_1.txt",
+            "roleref": "localhost",
+        },
+        {
+            "uriref": f"{ENDPOINT}?filename=8001_ErrorLog.txt&host=localhost",
+            "nameref": "8001_ErrorLog.txt",
+            "roleref": "localhost"},
+        {
+            "uriref": f"{ENDPOINT}?filename=8002_ErrorLog_1.txt&host=localhost",
+            "nameref": "8002_ErrorLog_1.txt",
+            "roleref": "localhost",
+        },
+        {
+            "uriref": f"{ENDPOINT}?filename=TaskServer_AccessLog.txt&host=localhost",
+            "nameref": "TaskServer_AccessLog.txt",
+            "roleref": "localhost"},
+        {
+            "uriref": f"{ENDPOINT}?filename=TaskServer_AccessLog_1.txt&host=localhost",
+            "nameref": "TaskServer_AccessLog_1.txt",
+            "roleref": "localhost",
+        },
+        {
+            "uriref": f"{ENDPOINT}?filename=TaskServer_RequestLog.txt&host=localhost",
+            "nameref": "TaskServer_RequestLog.txt",
+            "roleref": "localhost"},
+        {
+            "uriref": f"{ENDPOINT}?filename=TaskServer_RequestLog_1.txt&host=localhost",
+            "nameref": "TaskServer_RequestLog_1.txt",
+            "roleref": "localhost",
+        },
+        {
+            "uriref": f"{ENDPOINT}?filename=TaskServer_ErrorLog.txt&host=localhost",
+            "nameref": "TaskServer_ErrorLog.txt",
+            "roleref": "localhost"},
+        {
+            "uriref": f"{ENDPOINT}?filename=TaskServer_ErrorLog_1.txt&host=localhost",
+            "nameref": "TaskServer_ErrorLog_1.txt",
+            "roleref": "localhost",
+        },
+        {
+            "uriref": f"{ENDPOINT}?filename=AccessLog.txt&host=localhost",
+            "nameref": "AccessLog.txt",
+            "roleref": "localhost"},
+        {
+            "uriref": f"{ENDPOINT}?filename=AccessLog_1.txt&host=localhost",
+            "nameref": "AccessLog_1.txt",
+            "roleref": "localhost",
+        },
+        {
+            "uriref": f"{ENDPOINT}?filename=RequestLog.txt&host=localhost",
+            "nameref": "RequestLog.txt",
+            "roleref": "localhost"},
+        {
+            "uriref": f"{ENDPOINT}?filename=RequestLog_1.txt&host=localhost",
+            "nameref": "RequestLog_1.txt",
+            "roleref": "localhost",
+        },
+        {
+            "uriref": f"{ENDPOINT}?filename=ErrorLog.txt&host=localhost",
+            "nameref": "ErrorLog.txt",
+            "roleref": "localhost"},
+        {
+            "uriref": f"{ENDPOINT}?filename=ErrorLog_1.txt&host=localhost",
+            "nameref": "ErrorLog_1.txt",
+            "roleref": "localhost",
+        },
+    ]
+
+    builder = MLResponseBuilder()
+    builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
+    builder.with_request_param("format", "json")
+    builder.with_response_content_type("application/json; charset=UTF-8")
+    builder.with_response_status(200)
+    builder.with_response_body(builder.logs_list_body(items))
+    builder.build_get()
+
+    tester = _get_tester("call logs")
+    tester.execute("-e test -a 0 --list")
+    command_output = tester.io.fetch_output()
+
+    assert tester.command.option("environment") == "test"
+    assert tester.command.option("app-server") == "0"
+    assert tester.command.option("list") is True
+
+    expected_output_path = tools.get_test_resource_path(__file__, "output-task.txt")
+    expected_output = Path(expected_output_path).read_text()
+    assert command_output == expected_output
+
+
+@responses.activate
+def test_command_call_output_of_logs_list_empty():
+    items = [
+        {
+            "uriref": f"{ENDPOINT}?filename=8001_AccessLog.txt&host=localhost",
+            "nameref": "8001_AccessLog.txt",
+            "roleref": "localhost"},
+        {
+            "uriref": f"{ENDPOINT}?filename=8002_AccessLog_1.txt&host=localhost",
+            "nameref": "8002_AccessLog_1.txt",
+            "roleref": "localhost",
+        },
+        {
+            "uriref": f"{ENDPOINT}?filename=8001_RequestLog.txt&host=localhost",
+            "nameref": "8001_RequestLog.txt",
+            "roleref": "localhost"},
+        {
+            "uriref": f"{ENDPOINT}?filename=8002_RequestLog_1.txt&host=localhost",
+            "nameref": "8002_RequestLog_1.txt",
+            "roleref": "localhost",
+        },
+        {
+            "uriref": f"{ENDPOINT}?filename=8001_ErrorLog.txt&host=localhost",
+            "nameref": "8001_ErrorLog.txt",
+            "roleref": "localhost"},
+        {
+            "uriref": f"{ENDPOINT}?filename=8002_ErrorLog_1.txt&host=localhost",
+            "nameref": "8002_ErrorLog_1.txt",
+            "roleref": "localhost",
+        },
+        {
+            "uriref": f"{ENDPOINT}?filename=TaskServer_AccessLog.txt&host=localhost",
+            "nameref": "TaskServer_AccessLog.txt",
+            "roleref": "localhost"},
+        {
+            "uriref": f"{ENDPOINT}?filename=TaskServer_AccessLog_1.txt&host=localhost",
+            "nameref": "TaskServer_AccessLog_1.txt",
+            "roleref": "localhost",
+        },
+        {
+            "uriref": f"{ENDPOINT}?filename=TaskServer_RequestLog.txt&host=localhost",
+            "nameref": "TaskServer_RequestLog.txt",
+            "roleref": "localhost"},
+        {
+            "uriref": f"{ENDPOINT}?filename=TaskServer_RequestLog_1.txt&host=localhost",
+            "nameref": "TaskServer_RequestLog_1.txt",
+            "roleref": "localhost",
+        },
+        {
+            "uriref": f"{ENDPOINT}?filename=TaskServer_ErrorLog.txt&host=localhost",
+            "nameref": "TaskServer_ErrorLog.txt",
+            "roleref": "localhost"},
+        {
+            "uriref": f"{ENDPOINT}?filename=TaskServer_ErrorLog_1.txt&host=localhost",
+            "nameref": "TaskServer_ErrorLog_1.txt",
+            "roleref": "localhost",
+        },
+        {
+            "uriref": f"{ENDPOINT}?filename=AccessLog.txt&host=localhost",
+            "nameref": "AccessLog.txt",
+            "roleref": "localhost"},
+        {
+            "uriref": f"{ENDPOINT}?filename=AccessLog_1.txt&host=localhost",
+            "nameref": "AccessLog_1.txt",
+            "roleref": "localhost",
+        },
+        {
+            "uriref": f"{ENDPOINT}?filename=RequestLog.txt&host=localhost",
+            "nameref": "RequestLog.txt",
+            "roleref": "localhost"},
+        {
+            "uriref": f"{ENDPOINT}?filename=RequestLog_1.txt&host=localhost",
+            "nameref": "RequestLog_1.txt",
+            "roleref": "localhost",
+        },
+        {
+            "uriref": f"{ENDPOINT}?filename=ErrorLog.txt&host=localhost",
+            "nameref": "ErrorLog.txt",
+            "roleref": "localhost"},
+        {
+            "uriref": f"{ENDPOINT}?filename=ErrorLog_1.txt&host=localhost",
+            "nameref": "ErrorLog_1.txt",
+            "roleref": "localhost",
+        },
+    ]
+
+    builder = MLResponseBuilder()
+    builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
+    builder.with_request_param("format", "json")
+    builder.with_response_content_type("application/json; charset=UTF-8")
+    builder.with_response_status(200)
+    builder.with_response_body(builder.logs_list_body(items))
+    builder.build_get()
+
+    tester = _get_tester("call logs")
+    tester.execute("-e test -a 9999 --list")
+    command_output = tester.io.fetch_output()
+
+    assert tester.command.option("environment") == "test"
+    assert tester.command.option("app-server") == "9999"
+    assert tester.command.option("list") is True
+
+    expected_output_path = tools.get_test_resource_path(__file__, "output-empty.txt")
+    expected_output = Path(expected_output_path).read_text()
+    assert command_output == expected_output
 
 
 def _get_tester(

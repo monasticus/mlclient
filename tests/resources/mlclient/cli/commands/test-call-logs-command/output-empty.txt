@@ -1,0 +1,2 @@
+Getting logs list using REST App-Server http://localhost:8002
+

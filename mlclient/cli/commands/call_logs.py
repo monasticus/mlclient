@@ -271,7 +271,9 @@ class CallLogsCommand(Command):
         environment = self.option("environment")
         app_port = self.option("app-server")
         manager = MLManager(environment)
-        if app_port is not None and not app_port.isnumeric():
+        if app_port == "0":
+            app_port = "TaskServer"
+        elif app_port is not None and not app_port.isnumeric():
             named_app_port = next((app_server.port
                                    for app_server in manager.config.app_servers
                                    if app_server.identifier == app_port), None)

@@ -1,0 +1,14 @@
+Getting logs list using REST App-Server http://localhost:8002
+
+┌─────────────────────────────┬─────────────────── MARKLOGIC LOG FILES ──────────────────────────────────────────────────┐
+│ FILENAME                    │ URL                                                                                      │
+├─────────────────────────────┼──────────────────────────────────────────────────────────────────────────────────────────┤
+│ TaskServer_AccessLog.txt    │ http://localhost:8002/manage/v2/logs?filename=TaskServer_AccessLog.txt&host=localhost    │
+│ TaskServer_AccessLog_1.txt  │ http://localhost:8002/manage/v2/logs?filename=TaskServer_AccessLog_1.txt&host=localhost  │
+│                             │                                                                                          │
+│ TaskServer_ErrorLog.txt     │ http://localhost:8002/manage/v2/logs?filename=TaskServer_ErrorLog.txt&host=localhost     │
+│ TaskServer_ErrorLog_1.txt   │ http://localhost:8002/manage/v2/logs?filename=TaskServer_ErrorLog_1.txt&host=localhost   │
+│                             │                                                                                          │
+│ TaskServer_RequestLog.txt   │ http://localhost:8002/manage/v2/logs?filename=TaskServer_RequestLog.txt&host=localhost   │
+│ TaskServer_RequestLog_1.txt │ http://localhost:8002/manage/v2/logs?filename=TaskServer_RequestLog_1.txt&host=localhost │
+└─────────────────────────────┴──────────────────────────────────────────────────────────────────────────────────────────┘

@@ -676,13 +676,7 @@ def test_get_logs_list(logs_client):
     builder.with_request_param("format", "json")
     builder.with_response_content_type("application/json; charset=UTF-8")
     builder.with_response_status(200)
-    builder.with_response_body({
-        "log-default-list": {
-            "list-items": {
-                "list-item": items,
-            },
-        },
-    })
+    builder.with_response_body(builder.logs_list_body(items))
     builder.build_get()
 
     logs_list = logs_client.get_logs_list()

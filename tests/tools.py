@@ -293,6 +293,18 @@ class MLResponseBuilder:
             logs_body["logfile"]["message"] = "\n".join(logs)
         return logs_body
 
+    @staticmethod
+    def logs_list_body(
+            items: list[dict],
+    ) -> dict:
+        return {
+            "log-default-list": {
+                "list-items": {
+                    "list-item": items,
+                },
+            },
+        }
+
     @classmethod
     def generate_builder_code(
             cls,
@@ -391,6 +403,8 @@ class MLResponseBuilder:
         response_content_type = response_headers.get(
             "Content-Type", HEADER_MULTIPART_MIXED)
         excluded = ["Content-Length", "Content-Type"]
+        if "Content-Type" in response_headers and "Content-type" in response_headers:
+            excluded.append("Content-type")
 
         response_headers_lines = []
         if not response_content_type.startswith(HEADER_MULTIPART_MIXED):

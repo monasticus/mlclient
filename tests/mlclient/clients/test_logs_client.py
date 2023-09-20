@@ -7,6 +7,8 @@ from mlclient.clients import LogsClient, LogType
 from mlclient.exceptions import MarkLogicError
 from tests.tools import MLResponseBuilder
 
+ENDPOINT = "/manage/v2/logs"
+
 
 @pytest.fixture(autouse=True)
 def logs_client() -> LogsClient:
@@ -25,7 +27,7 @@ def _setup_and_teardown(logs_client):
 @responses.activate
 def test_get_logs_no_such_host(logs_client):
     builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/manage/v2/logs")
+    builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
     builder.with_request_param("format", "json")
     builder.with_request_param("filename", "8002_ErrorLog.txt")
     builder.with_request_param("host", "non-existing-host")
@@ -54,7 +56,7 @@ def test_get_logs_no_such_host(logs_client):
 @responses.activate
 def test_get_logs_unauthorized(logs_client):
     builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/manage/v2/logs")
+    builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
     builder.with_request_param("format", "json")
     builder.with_request_param("filename", "ErrorLog.txt")
     builder.with_response_content_type("application/json; charset=utf-8")
@@ -78,7 +80,7 @@ def test_get_logs_unauthorized(logs_client):
 @responses.activate
 def test_get_logs_empty(logs_client):
     builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/manage/v2/logs")
+    builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
     builder.with_request_param("format", "json")
     builder.with_request_param("filename", "8002_ErrorLog.txt")
     builder.with_response_body(builder.error_logs_body([]))
@@ -92,7 +94,7 @@ def test_get_logs_empty(logs_client):
 @responses.activate
 def test_get_logs_without_port(logs_client):
     builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/manage/v2/logs")
+    builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
     builder.with_request_param("format", "json")
     builder.with_request_param("filename", "ErrorLog.txt")
     builder.with_response_content_type("application/json; charset=UTF-8")
@@ -129,7 +131,7 @@ def test_get_logs_without_port(logs_client):
 @responses.activate
 def test_get_logs_using_string_port(logs_client):
     builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/manage/v2/logs")
+    builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
     builder.with_request_param("format", "json")
     builder.with_request_param("filename", "8002_ErrorLog.txt")
     builder.with_response_body(builder.error_logs_body([
@@ -163,7 +165,7 @@ def test_get_logs_using_string_port(logs_client):
 @responses.activate
 def test_get_task_server_logs(logs_client):
     builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/manage/v2/logs")
+    builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
     builder.with_request_param("format", "json")
     builder.with_request_param("filename", "TaskServer_ErrorLog.txt")
     builder.with_response_body(builder.error_logs_body([
@@ -197,7 +199,7 @@ def test_get_task_server_logs(logs_client):
 @responses.activate
 def test_get_task_server_logs_using_int_port(logs_client):
     builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/manage/v2/logs")
+    builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
     builder.with_request_param("format", "json")
     builder.with_request_param("filename", "TaskServer_ErrorLog.txt")
     builder.with_response_body(builder.error_logs_body([
@@ -231,7 +233,7 @@ def test_get_task_server_logs_using_int_port(logs_client):
 @responses.activate
 def test_get_error_logs(logs_client):
     builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/manage/v2/logs")
+    builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
     builder.with_request_param("format", "json")
     builder.with_request_param("filename", "8002_ErrorLog.txt")
     builder.with_response_body(builder.error_logs_body([
@@ -265,7 +267,7 @@ def test_get_error_logs(logs_client):
 @responses.activate
 def test_get_error_logs_with_search_params(logs_client):
     builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/manage/v2/logs")
+    builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
     builder.with_request_param("format", "json")
     builder.with_request_param("filename", "8002_ErrorLog.txt")
     builder.with_request_param("start", "2023-09-01T00:00:00")
@@ -306,7 +308,7 @@ def test_get_error_logs_with_search_params(logs_client):
 @responses.activate
 def test_get_error_logs_fully_customized(logs_client):
     builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/manage/v2/logs")
+    builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
     builder.with_request_param("format", "json")
     builder.with_request_param("filename", "8002_ErrorLog.txt")
     builder.with_request_param("host", "some-host")
@@ -349,7 +351,7 @@ def test_get_error_logs_fully_customized(logs_client):
 @responses.activate
 def test_get_error_logs_empty(logs_client):
     builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/manage/v2/logs")
+    builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
     builder.with_request_param("format", "json")
     builder.with_request_param("filename", "8002_ErrorLog.txt")
     builder.with_response_body(builder.error_logs_body([]))
@@ -372,7 +374,7 @@ def test_get_access_logs(logs_client):
          '401 104 - "python-requests/2.31.0"'),
     ]
     builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/manage/v2/logs")
+    builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
     builder.with_request_param("format", "json")
     builder.with_request_param("filename", "8002_AccessLog.txt")
     builder.with_response_body(builder.access_or_request_logs_body(raw_logs))
@@ -401,7 +403,7 @@ def test_get_access_logs_with_search_params(logs_client):
          '401 104 - "python-requests/2.31.0"'),
     ]
     builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/manage/v2/logs")
+    builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
     builder.with_request_param("format", "json")
     builder.with_request_param("filename", "8002_AccessLog.txt")
     builder.with_response_body(builder.access_or_request_logs_body(raw_logs))
@@ -427,7 +429,7 @@ def test_get_access_logs_with_search_params(logs_client):
 @responses.activate
 def test_get_access_logs_empty(logs_client):
     builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/manage/v2/logs")
+    builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
     builder.with_request_param("format", "json")
     builder.with_request_param("filename", "8002_AccessLog.txt")
     builder.with_response_body(builder.access_or_request_logs_body([]))
@@ -483,7 +485,7 @@ def test_get_request_logs(logs_client):
          '}'),
     ]
     builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/manage/v2/logs")
+    builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
     builder.with_request_param("format", "json")
     builder.with_request_param("filename", "8002_RequestLog.txt")
     builder.with_response_body(builder.access_or_request_logs_body(raw_logs))
@@ -545,7 +547,7 @@ def test_get_request_logs_with_search_params(logs_client):
          '}'),
     ]
     builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/manage/v2/logs")
+    builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
     builder.with_request_param("format", "json")
     builder.with_request_param("filename", "8002_RequestLog.txt")
     builder.with_response_body(builder.access_or_request_logs_body(raw_logs))
@@ -571,7 +573,7 @@ def test_get_request_logs_with_search_params(logs_client):
 @responses.activate
 def test_get_request_logs_empty(logs_client):
     builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/manage/v2/logs")
+    builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
     builder.with_request_param("format", "json")
     builder.with_request_param("filename", "8002_RequestLog.txt")
     builder.with_response_body(builder.access_or_request_logs_body([]))
@@ -581,3 +583,302 @@ def test_get_request_logs_empty(logs_client):
     logs = list(logs)
 
     assert len(logs) == 0
+
+
+@responses.activate
+def test_get_logs_list(logs_client):
+    items = [
+        {
+            "uriref": f"{ENDPOINT}?filename=8001_AccessLog.txt&host=localhost",
+            "nameref": "8001_AccessLog.txt",
+            "roleref": "localhost"},
+        {
+            "uriref": f"{ENDPOINT}?filename=8002_AccessLog_1.txt&host=localhost",
+            "nameref": "8002_AccessLog_1.txt",
+            "roleref": "localhost",
+        },
+        {
+            "uriref": f"{ENDPOINT}?filename=8001_RequestLog.txt&host=localhost",
+            "nameref": "8001_RequestLog.txt",
+            "roleref": "localhost"},
+        {
+            "uriref": f"{ENDPOINT}?filename=8002_RequestLog_1.txt&host=localhost",
+            "nameref": "8002_RequestLog_1.txt",
+            "roleref": "localhost",
+        },
+        {
+            "uriref": f"{ENDPOINT}?filename=8001_ErrorLog.txt&host=localhost",
+            "nameref": "8001_ErrorLog.txt",
+            "roleref": "localhost"},
+        {
+            "uriref": f"{ENDPOINT}?filename=8002_ErrorLog_1.txt&host=localhost",
+            "nameref": "8002_ErrorLog_1.txt",
+            "roleref": "localhost",
+        },
+        {
+            "uriref": f"{ENDPOINT}?filename=TaskServer_AccessLog.txt&host=localhost",
+            "nameref": "TaskServer_AccessLog.txt",
+            "roleref": "localhost"},
+        {
+            "uriref": f"{ENDPOINT}?filename=TaskServer_AccessLog_1.txt&host=localhost",
+            "nameref": "TaskServer_AccessLog_1.txt",
+            "roleref": "localhost",
+        },
+        {
+            "uriref": f"{ENDPOINT}?filename=TaskServer_RequestLog.txt&host=localhost",
+            "nameref": "TaskServer_RequestLog.txt",
+            "roleref": "localhost"},
+        {
+            "uriref": f"{ENDPOINT}?filename=TaskServer_RequestLog_1.txt&host=localhost",
+            "nameref": "TaskServer_RequestLog_1.txt",
+            "roleref": "localhost",
+        },
+        {
+            "uriref": f"{ENDPOINT}?filename=TaskServer_ErrorLog.txt&host=localhost",
+            "nameref": "TaskServer_ErrorLog.txt",
+            "roleref": "localhost"},
+        {
+            "uriref": f"{ENDPOINT}?filename=TaskServer_ErrorLog_1.txt&host=localhost",
+            "nameref": "TaskServer_ErrorLog_1.txt",
+            "roleref": "localhost",
+        },
+        {
+            "uriref": f"{ENDPOINT}?filename=AccessLog.txt&host=localhost",
+            "nameref": "AccessLog.txt",
+            "roleref": "localhost"},
+        {
+            "uriref": f"{ENDPOINT}?filename=AccessLog_1.txt&host=localhost",
+            "nameref": "AccessLog_1.txt",
+            "roleref": "localhost",
+        },
+        {
+            "uriref": f"{ENDPOINT}?filename=RequestLog.txt&host=localhost",
+            "nameref": "RequestLog.txt",
+            "roleref": "localhost"},
+        {
+            "uriref": f"{ENDPOINT}?filename=RequestLog_1.txt&host=localhost",
+            "nameref": "RequestLog_1.txt",
+            "roleref": "localhost",
+        },
+        {
+            "uriref": f"{ENDPOINT}?filename=ErrorLog.txt&host=localhost",
+            "nameref": "ErrorLog.txt",
+            "roleref": "localhost"},
+        {
+            "uriref": f"{ENDPOINT}?filename=ErrorLog_1.txt&host=localhost",
+            "nameref": "ErrorLog_1.txt",
+            "roleref": "localhost",
+        },
+    ]
+
+    builder = MLResponseBuilder()
+    builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
+    builder.with_request_param("format", "json")
+    builder.with_response_content_type("application/json; charset=UTF-8")
+    builder.with_response_status(200)
+    builder.with_response_body(builder.logs_list_body(items))
+    builder.build_get()
+
+    logs_list = logs_client.get_logs_list()
+    assert isinstance(logs_list, dict)
+
+    source = logs_list["source"]
+    assert isinstance(source, list)
+    assert len(source) == 18
+
+    parsed = logs_list["parsed"]
+    assert isinstance(parsed, list)
+    assert len(parsed) == 18
+
+    grouped = logs_list["grouped"]
+    assert isinstance(grouped, dict)
+    assert len(grouped) == 4
+
+    assert logs_list == {
+        "source": items,
+        "parsed": [
+            {
+                "file-name": "8001_AccessLog.txt",
+                "server": "8001",
+                "log-type": LogType.ACCESS,
+                "days-ago": 0,
+            },
+            {
+                "file-name": "8002_AccessLog_1.txt",
+                "server": "8002",
+                "log-type": LogType.ACCESS,
+                "days-ago": 1,
+            },
+            {
+                "file-name": "8001_RequestLog.txt",
+                "server": "8001",
+                "log-type": LogType.REQUEST,
+                "days-ago": 0,
+            },
+            {
+                "file-name": "8002_RequestLog_1.txt",
+                "server": "8002",
+                "log-type": LogType.REQUEST,
+                "days-ago": 1,
+            },
+            {
+                "file-name": "8001_ErrorLog.txt",
+                "server": "8001",
+                "log-type": LogType.ERROR,
+                "days-ago": 0,
+            },
+            {
+                "file-name": "8002_ErrorLog_1.txt",
+                "server": "8002",
+                "log-type": LogType.ERROR,
+                "days-ago": 1,
+            },
+            {
+                "file-name": "TaskServer_AccessLog.txt",
+                "server": "TaskServer",
+                "log-type": LogType.ACCESS,
+                "days-ago": 0,
+            },
+            {
+                "file-name": "TaskServer_AccessLog_1.txt",
+                "server": "TaskServer",
+                "log-type": LogType.ACCESS,
+                "days-ago": 1,
+            },
+            {
+                "file-name": "TaskServer_RequestLog.txt",
+                "server": "TaskServer",
+                "log-type": LogType.REQUEST,
+                "days-ago": 0,
+            },
+            {
+                "file-name": "TaskServer_RequestLog_1.txt",
+                "server": "TaskServer",
+                "log-type": LogType.REQUEST,
+                "days-ago": 1,
+            },
+            {
+                "file-name": "TaskServer_ErrorLog.txt",
+                "server": "TaskServer",
+                "log-type": LogType.ERROR,
+                "days-ago": 0,
+            },
+            {
+                "file-name": "TaskServer_ErrorLog_1.txt",
+                "server": "TaskServer",
+                "log-type": LogType.ERROR,
+                "days-ago": 1,
+            },
+            {
+                "file-name": "AccessLog.txt",
+                "server": None,
+                "log-type": LogType.ACCESS,
+                "days-ago": 0,
+            },
+            {
+                "file-name": "AccessLog_1.txt",
+                "server": None,
+                "log-type": LogType.ACCESS,
+                "days-ago": 1,
+            },
+            {
+                "file-name": "RequestLog.txt",
+                "server": None,
+                "log-type": LogType.REQUEST,
+                "days-ago": 0,
+            },
+            {
+                "file-name": "RequestLog_1.txt",
+                "server": None,
+                "log-type": LogType.REQUEST,
+                "days-ago": 1,
+            },
+            {
+                "file-name": "ErrorLog.txt",
+                "server": None,
+                "log-type": LogType.ERROR,
+                "days-ago": 0,
+            },
+            {
+                "file-name": "ErrorLog_1.txt",
+                "server": None,
+                "log-type": LogType.ERROR,
+                "days-ago": 1,
+            },
+        ],
+        "grouped": {
+            "8001": {
+                LogType.ACCESS: {
+                    0: "8001_AccessLog.txt",
+                },
+                LogType.REQUEST: {
+                    0: "8001_RequestLog.txt",
+                },
+                LogType.ERROR: {
+                    0: "8001_ErrorLog.txt",
+                },
+            },
+            "8002": {
+                LogType.ACCESS: {
+                    1: "8002_AccessLog_1.txt",
+                },
+                LogType.REQUEST: {
+                    1: "8002_RequestLog_1.txt",
+                },
+                LogType.ERROR: {
+                    1: "8002_ErrorLog_1.txt",
+                },
+            },
+            "TaskServer": {
+                LogType.ACCESS: {
+                    0: "TaskServer_AccessLog.txt",
+                    1: "TaskServer_AccessLog_1.txt",
+                },
+                LogType.REQUEST: {
+                    0: "TaskServer_RequestLog.txt",
+                    1: "TaskServer_RequestLog_1.txt",
+                },
+                LogType.ERROR: {
+                    0: "TaskServer_ErrorLog.txt",
+                    1: "TaskServer_ErrorLog_1.txt",
+                },
+            },
+            None: {
+                LogType.ACCESS: {
+                    0: "AccessLog.txt",
+                    1: "AccessLog_1.txt",
+                },
+                LogType.REQUEST: {
+                    0: "RequestLog.txt",
+                    1: "RequestLog_1.txt",
+                },
+                LogType.ERROR: {
+                    0: "ErrorLog.txt",
+                    1: "ErrorLog_1.txt",
+                },
+            },
+        },
+    }
+
+
+@responses.activate
+def test_get_logs_list_unauthorized(logs_client):
+    builder = MLResponseBuilder()
+    builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
+    builder.with_request_param("format", "json")
+    builder.with_response_content_type("application/json; charset=UTF-8")
+    builder.with_response_status(401)
+    builder.with_response_body({
+        "errorResponse": {
+            "statusCode": 401,
+            "status": "Unauthorized",
+            "message": "401 Unauthorized",
+        },
+    })
+    builder.build_get()
+
+    with pytest.raises(MarkLogicError) as err:
+        logs_client.get_logs_list()
+
+    expected_error = "[401 Unauthorized] 401 Unauthorized"
+    assert err.value.args[0] == expected_error

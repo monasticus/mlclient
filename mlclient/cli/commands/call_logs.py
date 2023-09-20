@@ -40,6 +40,8 @@ class CallLogsCommand(Command):
             A regex to search error logs
       -H, --host=HOST
             The host from which to return the log data.
+          --list
+            If set, no filename will be passed to the Logs REST API
     """
 
     name: str = "call logs"
@@ -95,40 +97,147 @@ class CallLogsCommand(Command):
             description="The host from which to return the log data.",
             flag=False,
         ),
+        option(
+            "list",
+            description="If set, no filename will be passed to the Logs REST API",
+        ),
     ]
+
+    _NONE_SERVER_KEY: str = "AAA"
 
     def handle(
             self,
     ) -> int:
         """Execute the command."""
+        if self.option("list") is True:
+            self._print_log_files()
+        else:
+            self._print_logs()
+        return 0
+
+    def _print_log_files(
+            self,
+    ):
+        """Print MarkLogic log files in a table."""
+        logs_list = self._get_logs_list()
+        rows = self._get_log_files_rows(logs_list)
+        self._render_log_files_table(rows)
+
+    def _get_logs_list(
+            self,
+    ) -> dict:
+        """Retrieve logs list using LogsClient."""
+        environment = self.option("environment")
+        rest_server = self.option("rest-server")
+
+        manager = MLManager(environment)
+        with manager.get_logs_client(rest_server) as client:
+            self.info(f"Getting logs list "
+                      f"using REST App-Server {client.base_url}\n")
+            return client.get_logs_list()
+
+    def _get_log_files_rows(
+            self,
+            logs_list: dict,
+    ) -> list[list[str]]:
+        """Get rows to build a table with log files."""
+        grouped_logs = logs_list["grouped"]
+
+        app_port = self._get_app_port()
+        ml_url = self._get_logs_client().base_url
+        rows = []
+        servers = sorted(server if server is not None else self._NONE_SERVER_KEY
+                         for server in grouped_logs
+                         if app_port is None or str(app_port) == server)
+        for server_index, server_key in enumerate(servers):
+            server = None if server_key == self._NONE_SERVER_KEY else server_key
+            self._populate_rows_from_server_lvl(
+                rows, logs_list, ml_url, server)
+
+            if server_index < len(servers) - 1:
+                rows.append(self.table_separator())
+
+        return rows
+
+    @classmethod
+    def _populate_rows_from_server_lvl(
+            cls,
+            rows: list,
+            logs_list: dict,
+            ml_url: str,
+            server: str | None,
+    ):
+        """Populate rows with server log files."""
+        grouped_logs = logs_list["grouped"]
+
+        server_logs = grouped_logs[server]
+        log_types = sorted(server_logs.keys())
+        for log_type_index, log_type in enumerate(log_types):
+            cls._populate_rows_from_log_type_lvl(
+                rows, logs_list, ml_url, server, log_type)
+
+            if log_type_index < len(log_types) - 1:
+                rows.append(["", ""])
+
+    @staticmethod
+    def _populate_rows_from_log_type_lvl(
+            rows: list,
+            logs_list: dict,
+            ml_url: str,
+            server: str | None,
+            log_type: LogType,
+    ):
+        """Populate rows with server log files of a specific type."""
+        source_logs = logs_list["source"]
+        grouped_logs = logs_list["grouped"]
+
+        server_logs = grouped_logs[server]
+        type_logs = server_logs[log_type]
+        for days in sorted(type_logs):
+            file_name = type_logs[days]
+            endpoint = next(log["uriref"]
+                            for log in source_logs
+                            if log["nameref"] == file_name)
+            url = f"{ml_url}{endpoint}"
+            rows.append([file_name, url])
+
+    def _render_log_files_table(
+            self,
+            rows: list[list[str]],
+    ):
+        """Render a table with MarkLogic log files."""
+        if len(rows) > 0:
+            table = self.table()
+            table.set_header_title("MARKLOGIC LOG FILES")
+            table.set_headers(["FILENAME", "URL"])
+            table.set_style("box")
+            table.set_rows(rows)
+            table.render()
+        else:
+            self.line_error("No log files found")
+
+    def _print_logs(
+            self,
+    ):
+        """Print MarkLogic logs."""
         logs = self._get_logs()
         parsed_logs = self._parse_logs(logs)
         for info, msg in parsed_logs:
             self._io.write(info)
             self._io.write(msg, new_line=True, type=Type.RAW)
-        return 0
 
     def _get_logs(
             self,
     ) -> Iterator[dict]:
         """Retrieve logs using LogsClient."""
-        environment = self.option("environment")
-        rest_server = self.option("rest-server")
-        app_port = self.option("app-server")
+        app_port = self._get_app_port()
         log_type = LogType.get(self.option("log-type"))
         start_time = self.option("from")
         end_time = self.option("to")
         regex = self.option("regex")
         host = self.option("host")
 
-        manager = MLManager(environment)
-        if app_port is not None and not app_port.isnumeric():
-            named_app_port = next((app_server.port
-                                   for app_server in manager.config.app_servers
-                                   if app_server.identifier == app_port), None)
-            if named_app_port is not None:
-                app_port = named_app_port
-        with manager.get_logs_client(rest_server) as client:
+        with self._get_logs_client() as client:
             self.info(f"Getting {app_port}_{log_type.value}.txt logs "
                       f"using REST App-Server {client.base_url}\n")
             return client.get_logs(
@@ -144,7 +253,7 @@ class CallLogsCommand(Command):
             self,
             logs: Iterator[dict],
     ) -> Iterator[tuple[str, str]]:
-        """Parse retrieved logs depending on the type."""
+        """Parse retrieved logs depending on the log type."""
         if self.option("log-type").lower() != "error":
             for log_dict in logs:
                 yield "", log_dict["message"]
@@ -154,3 +263,27 @@ class CallLogsCommand(Command):
                 level = log_dict["level"].upper()
                 msg = log_dict["message"]
                 yield f"<time>{timestamp}</> <log-level>{level}</>: ", msg
+
+    def _get_app_port(
+            self,
+    ):
+        """Identify app port to be used."""
+        environment = self.option("environment")
+        app_port = self.option("app-server")
+        manager = MLManager(environment)
+        if app_port == "0":
+            app_port = "TaskServer"
+        elif app_port is not None and not app_port.isnumeric():
+            named_app_port = next((app_server.port
+                                   for app_server in manager.config.app_servers
+                                   if app_server.identifier == app_port), None)
+            if named_app_port is not None:
+                app_port = named_app_port
+        return app_port
+
+    def _get_logs_client(self):
+        """Get LogsClient instance."""
+        environment = self.option("environment")
+        rest_server = self.option("rest-server")
+        manager = MLManager(environment)
+        return manager.get_logs_client(rest_server)

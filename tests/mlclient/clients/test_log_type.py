@@ -22,3 +22,25 @@ def test_get_invalid_log_type():
 
     expected_msg = "Invalid log type! Allowed values are: error, access, request."
     assert err.value.args[0] == expected_msg
+
+
+def test_log_types_sorting():
+    log_types = [
+        LogType.REQUEST,
+        LogType.ERROR,
+        LogType.ACCESS,
+        LogType.ERROR,
+        LogType.ACCESS,
+        LogType.REQUEST,
+    ]
+
+    log_types.sort()
+
+    assert log_types == [
+        LogType.ACCESS,
+        LogType.ACCESS,
+        LogType.ERROR,
+        LogType.ERROR,
+        LogType.REQUEST,
+        LogType.REQUEST,
+    ]

@@ -377,7 +377,7 @@ def test_get_access_logs(logs_client):
     builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
     builder.with_request_param("format", "json")
     builder.with_request_param("filename", "8002_AccessLog.txt")
-    builder.with_response_body(builder.access_or_request_logs_body(raw_logs))
+    builder.with_response_body(builder.non_error_logs_body(raw_logs))
     builder.build_get()
 
     logs = logs_client.get_logs(8002, log_type=LogType.ACCESS)
@@ -406,7 +406,7 @@ def test_get_access_logs_with_search_params(logs_client):
     builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
     builder.with_request_param("format", "json")
     builder.with_request_param("filename", "8002_AccessLog.txt")
-    builder.with_response_body(builder.access_or_request_logs_body(raw_logs))
+    builder.with_response_body(builder.non_error_logs_body(raw_logs))
     builder.build_get()
 
     logs = logs_client.get_logs(
@@ -432,7 +432,7 @@ def test_get_access_logs_empty(logs_client):
     builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
     builder.with_request_param("format", "json")
     builder.with_request_param("filename", "8002_AccessLog.txt")
-    builder.with_response_body(builder.access_or_request_logs_body([]))
+    builder.with_response_body(builder.non_error_logs_body([]))
     builder.build_get()
 
     logs = logs_client.get_logs(8002, log_type=LogType.ACCESS)
@@ -488,7 +488,7 @@ def test_get_request_logs(logs_client):
     builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
     builder.with_request_param("format", "json")
     builder.with_request_param("filename", "8002_RequestLog.txt")
-    builder.with_response_body(builder.access_or_request_logs_body(raw_logs))
+    builder.with_response_body(builder.non_error_logs_body(raw_logs))
     builder.build_get()
 
     logs = logs_client.get_logs(8002, log_type=LogType.REQUEST)
@@ -550,7 +550,7 @@ def test_get_request_logs_with_search_params(logs_client):
     builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
     builder.with_request_param("format", "json")
     builder.with_request_param("filename", "8002_RequestLog.txt")
-    builder.with_response_body(builder.access_or_request_logs_body(raw_logs))
+    builder.with_response_body(builder.non_error_logs_body(raw_logs))
     builder.build_get()
 
     logs = logs_client.get_logs(
@@ -576,10 +576,93 @@ def test_get_request_logs_empty(logs_client):
     builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
     builder.with_request_param("format", "json")
     builder.with_request_param("filename", "8002_RequestLog.txt")
-    builder.with_response_body(builder.access_or_request_logs_body([]))
+    builder.with_response_body(builder.non_error_logs_body([]))
     builder.build_get()
 
     logs = logs_client.get_logs(8002, log_type=LogType.REQUEST)
+    logs = list(logs)
+
+    assert len(logs) == 0
+
+
+@responses.activate
+def test_get_audit_logs(logs_client):
+    raw_logs = [
+        ('2023-09-04 01:01:01.111 event=server-restart; '
+         'success=true; user=user; roles=admin'),
+        ('2023-09-04 01:01:01.112 event=server-startup; '
+         'success=true;'),
+        ('2023-09-04 01:01:01.112 event=configuration-change; '
+         'file=/data/MarkLogic/groups.xml; success=true;'),
+    ]
+    builder = MLResponseBuilder()
+    builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
+    builder.with_request_param("format", "json")
+    builder.with_request_param("filename", "AuditLog.txt")
+    builder.with_response_body(builder.non_error_logs_body(raw_logs))
+    builder.build_get()
+
+    logs = logs_client.get_logs(log_type=LogType.AUDIT)
+    logs = list(logs)
+
+    assert len(logs) == 3
+    assert logs[0] == {
+        "message": raw_logs[0],
+    }
+    assert logs[1] == {
+        "message": raw_logs[1],
+    }
+    assert logs[2] == {
+        "message": raw_logs[2],
+    }
+
+
+@responses.activate
+def test_get_audit_logs_with_search_params(logs_client):
+    raw_logs = [
+        ('2023-09-04 01:01:01.111 event=server-restart; '
+         'success=true; user=user; roles=admin'),
+        ('2023-09-04 01:01:01.112 event=server-startup; '
+         'success=true;'),
+        ('2023-09-04 01:01:01.112 event=configuration-change; '
+         'file=/data/MarkLogic/groups.xml; success=true;'),
+    ]
+    builder = MLResponseBuilder()
+    builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
+    builder.with_request_param("format", "json")
+    builder.with_request_param("filename", "AuditLog.txt")
+    builder.with_response_body(builder.non_error_logs_body(raw_logs))
+    builder.build_get()
+
+    logs = logs_client.get_logs(
+        log_type=LogType.AUDIT,
+        start_time="00:00",
+        end_time="23:59:59",
+        regex="Test request")
+    logs = list(logs)
+
+    assert len(logs) == 3
+    assert logs[0] == {
+        "message": raw_logs[0],
+    }
+    assert logs[1] == {
+        "message": raw_logs[1],
+    }
+    assert logs[2] == {
+        "message": raw_logs[2],
+    }
+
+
+@responses.activate
+def test_get_audit_logs_empty(logs_client):
+    builder = MLResponseBuilder()
+    builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
+    builder.with_request_param("format", "json")
+    builder.with_request_param("filename", "AuditLog.txt")
+    builder.with_response_body(builder.non_error_logs_body([]))
+    builder.build_get()
+
+    logs = logs_client.get_logs(log_type=LogType.AUDIT)
     logs = list(logs)
 
     assert len(logs) == 0

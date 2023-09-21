@@ -256,7 +256,7 @@ def test_command_call_logs_custom_log_type_access():
     builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
     builder.with_request_param("format", "json")
     builder.with_request_param("filename", "8002_AccessLog.txt")
-    builder.with_response_body(builder.access_or_request_logs_body([]))
+    builder.with_response_body(builder.non_error_logs_body([]))
     builder.build_get()
 
     tester = _get_tester("call logs")
@@ -279,7 +279,7 @@ def test_command_call_logs_custom_log_type_request():
     builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
     builder.with_request_param("format", "json")
     builder.with_request_param("filename", "8002_RequestLog.txt")
-    builder.with_response_body(builder.access_or_request_logs_body([]))
+    builder.with_response_body(builder.non_error_logs_body([]))
     builder.build_get()
 
     tester = _get_tester("call logs")
@@ -467,7 +467,7 @@ def test_command_call_logs_output_for_access_logs():
     builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
     builder.with_request_param("format", "json")
     builder.with_request_param("filename", "8002_AccessLog.txt")
-    builder.with_response_body(builder.access_or_request_logs_body(logs))
+    builder.with_response_body(builder.non_error_logs_body(logs))
     builder.build_get()
 
     tester = _get_tester("call logs")
@@ -532,7 +532,7 @@ def test_command_call_logs_output_for_request_logs():
     builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
     builder.with_request_param("format", "json")
     builder.with_request_param("filename", "8002_RequestLog.txt")
-    builder.with_response_body(builder.access_or_request_logs_body(logs))
+    builder.with_response_body(builder.non_error_logs_body(logs))
     builder.build_get()
 
     tester = _get_tester("call logs")

@@ -16,6 +16,10 @@ def test_get_request_log_type():
     assert LogType.get("request") == LogType.REQUEST
 
 
+def test_get_audit_log_type():
+    assert LogType.get("audit") == LogType.AUDIT
+
+
 def test_get_invalid_log_type():
     with pytest.raises(InvalidLogTypeError) as err:
         LogType.get("invalid")

@@ -588,12 +588,12 @@ def test_get_request_logs_empty(logs_client):
 @responses.activate
 def test_get_audit_logs(logs_client):
     raw_logs = [
-        ('2023-09-04 01:01:01.111 event=server-restart; '
-         'success=true; user=user; roles=admin'),
-        ('2023-09-04 01:01:01.112 event=server-startup; '
-         'success=true;'),
-        ('2023-09-04 01:01:01.112 event=configuration-change; '
-         'file=/data/MarkLogic/groups.xml; success=true;'),
+        ("2023-09-04 01:01:01.111 event=server-restart; "
+         "success=true; user=user; roles=admin"),
+        ("2023-09-04 01:01:01.112 event=server-startup; "
+         "success=true;"),
+        ("2023-09-04 01:01:01.112 event=configuration-change; "
+         "file=/data/MarkLogic/groups.xml; success=true;"),
     ]
     builder = MLResponseBuilder()
     builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
@@ -620,12 +620,12 @@ def test_get_audit_logs(logs_client):
 @responses.activate
 def test_get_audit_logs_with_search_params(logs_client):
     raw_logs = [
-        ('2023-09-04 01:01:01.111 event=server-restart; '
-         'success=true; user=user; roles=admin'),
-        ('2023-09-04 01:01:01.112 event=server-startup; '
-         'success=true;'),
-        ('2023-09-04 01:01:01.112 event=configuration-change; '
-         'file=/data/MarkLogic/groups.xml; success=true;'),
+        ("2023-09-04 01:01:01.111 event=server-restart; "
+         "success=true; user=user; roles=admin"),
+        ("2023-09-04 01:01:01.112 event=server-startup; "
+         "success=true;"),
+        ("2023-09-04 01:01:01.112 event=configuration-change; "
+         "file=/data/MarkLogic/groups.xml; success=true;"),
     ]
     builder = MLResponseBuilder()
     builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
@@ -752,6 +752,15 @@ def test_get_logs_list(logs_client):
             "nameref": "ErrorLog_1.txt",
             "roleref": "localhost",
         },
+        {
+            "uriref": f"{ENDPOINT}?filename=AuditLog.txt&host=localhost",
+            "nameref": "AuditLog.txt",
+            "roleref": "localhost"},
+        {
+            "uriref": f"{ENDPOINT}?filename=AuditLog_1.txt&host=localhost",
+            "nameref": "AuditLog_1.txt",
+            "roleref": "localhost",
+        },
     ]
 
     builder = MLResponseBuilder()
@@ -767,11 +776,11 @@ def test_get_logs_list(logs_client):
 
     source = logs_list["source"]
     assert isinstance(source, list)
-    assert len(source) == 18
+    assert len(source) == 20
 
     parsed = logs_list["parsed"]
     assert isinstance(parsed, list)
-    assert len(parsed) == 18
+    assert len(parsed) == 20
 
     grouped = logs_list["grouped"]
     assert isinstance(grouped, dict)
@@ -888,6 +897,18 @@ def test_get_logs_list(logs_client):
                 "log-type": LogType.ERROR,
                 "days-ago": 1,
             },
+            {
+                "file-name": "AuditLog.txt",
+                "server": None,
+                "log-type": LogType.AUDIT,
+                "days-ago": 0,
+            },
+            {
+                "file-name": "AuditLog_1.txt",
+                "server": None,
+                "log-type": LogType.AUDIT,
+                "days-ago": 1,
+            },
         ],
         "grouped": {
             "8001": {
@@ -938,6 +959,10 @@ def test_get_logs_list(logs_client):
                 LogType.ERROR: {
                     0: "ErrorLog.txt",
                     1: "ErrorLog_1.txt",
+                },
+                LogType.AUDIT: {
+                    0: "AuditLog.txt",
+                    1: "AuditLog_1.txt",
                 },
             },
         },

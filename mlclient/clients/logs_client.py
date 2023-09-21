@@ -78,7 +78,8 @@ class LogsClient(MLResourceClient):
     the server.
     """
 
-    _FILENAME_RE = re.compile(r"((.+)_)?(Access|Request|Error)Log(_([1-6]))?\.txt")
+    _LOG_TYPES_RE = "|".join(t.value[:-3] for t in LogType)
+    _FILENAME_RE = re.compile(rf"((.+)_)?({_LOG_TYPES_RE})Log(_([1-6]))?\.txt")
 
     def get_logs(
             self,

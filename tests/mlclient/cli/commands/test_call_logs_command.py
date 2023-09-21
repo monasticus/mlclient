@@ -125,6 +125,15 @@ def logs_list_items() -> list:
             "nameref": "ErrorLog_1.txt",
             "roleref": "localhost",
         },
+        {
+            "uriref": f"{ENDPOINT}?filename=AuditLog.txt&host=localhost",
+            "nameref": "AuditLog.txt",
+            "roleref": "localhost"},
+        {
+            "uriref": f"{ENDPOINT}?filename=AuditLog_1.txt&host=localhost",
+            "nameref": "AuditLog_1.txt",
+            "roleref": "localhost",
+        },
     ]
 
 
@@ -553,12 +562,12 @@ def test_command_call_logs_output_for_request_logs():
 @responses.activate
 def test_command_call_logs_output_for_audit_logs():
     logs = [
-        ('2023-09-04 01:01:01.111 event=server-restart; '
-         'success=true; user=user; roles=admin'),
-        ('2023-09-04 01:01:01.112 event=server-startup; '
-         'success=true;'),
-        ('2023-09-04 01:01:01.112 event=configuration-change; '
-         'file=/data/MarkLogic/groups.xml; success=true;'),
+        ("2023-09-04 01:01:01.111 event=server-restart; "
+         "success=true; user=user; roles=admin"),
+        ("2023-09-04 01:01:01.112 event=server-startup; "
+         "success=true;"),
+        ("2023-09-04 01:01:01.112 event=configuration-change; "
+         "file=/data/MarkLogic/groups.xml; success=true;"),
     ]
     builder = MLResponseBuilder()
     builder.with_base_url(f"http://localhost:8002{ENDPOINT}")

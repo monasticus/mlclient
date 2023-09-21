@@ -238,7 +238,11 @@ class CallLogsCommand(Command):
         host = self.option("host")
 
         with self._get_logs_client() as client:
-            self.info(f"Getting {app_port}_{log_type.value}.txt logs "
+            if app_port is None:
+                file_name = f"{log_type.value}.txt"
+            else:
+                file_name = f"{app_port}_{log_type.value}.txt"
+            self.info(f"Getting {file_name} logs "
                       f"using REST App-Server {client.base_url}\n")
             return client.get_logs(
                 app_server=app_port,

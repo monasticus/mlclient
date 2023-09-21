@@ -285,7 +285,7 @@ class MLResponseBuilder:
         return logs_body
 
     @staticmethod
-    def access_or_request_logs_body(
+    def non_error_logs_body(
             logs: list[str],
     ):
         logs_body = {"logfile": {}}

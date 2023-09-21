@@ -23,6 +23,7 @@ class LogType(Enum):
     ERROR = "ErrorLog"
     ACCESS = "AccessLog"
     REQUEST = "RequestLog"
+    AUDIT = "AuditLog"
 
     @staticmethod
     def get(
@@ -46,6 +47,8 @@ class LogType(Enum):
             return LogType.ACCESS
         if logs_type.lower() == "request":
             return LogType.REQUEST
+        if logs_type.lower() == "audit":
+            return LogType.AUDIT
         msg = "Invalid log type! Allowed values are: error, access, request."
         raise InvalidLogTypeError(msg)
 
@@ -75,7 +78,8 @@ class LogsClient(MLResourceClient):
     the server.
     """
 
-    _FILENAME_RE = re.compile(r"((.+)_)?(Access|Request|Error)Log(_([1-6]))?\.txt")
+    _LOG_TYPES_RE = "|".join(t.value[:-3] for t in LogType)
+    _FILENAME_RE = re.compile(rf"((.+)_)?({_LOG_TYPES_RE})Log(_([1-6]))?\.txt")
 
     def get_logs(
             self,

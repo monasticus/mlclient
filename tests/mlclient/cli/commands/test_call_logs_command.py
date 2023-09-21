@@ -125,6 +125,15 @@ def logs_list_items() -> list:
             "nameref": "ErrorLog_1.txt",
             "roleref": "localhost",
         },
+        {
+            "uriref": f"{ENDPOINT}?filename=AuditLog.txt&host=localhost",
+            "nameref": "AuditLog.txt",
+            "roleref": "localhost"},
+        {
+            "uriref": f"{ENDPOINT}?filename=AuditLog_1.txt&host=localhost",
+            "nameref": "AuditLog_1.txt",
+            "roleref": "localhost",
+        },
     ]
 
 
@@ -256,7 +265,7 @@ def test_command_call_logs_custom_log_type_access():
     builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
     builder.with_request_param("format", "json")
     builder.with_request_param("filename", "8002_AccessLog.txt")
-    builder.with_response_body(builder.access_or_request_logs_body([]))
+    builder.with_response_body(builder.non_error_logs_body([]))
     builder.build_get()
 
     tester = _get_tester("call logs")
@@ -279,7 +288,7 @@ def test_command_call_logs_custom_log_type_request():
     builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
     builder.with_request_param("format", "json")
     builder.with_request_param("filename", "8002_RequestLog.txt")
-    builder.with_response_body(builder.access_or_request_logs_body([]))
+    builder.with_response_body(builder.non_error_logs_body([]))
     builder.build_get()
 
     tester = _get_tester("call logs")
@@ -467,7 +476,7 @@ def test_command_call_logs_output_for_access_logs():
     builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
     builder.with_request_param("format", "json")
     builder.with_request_param("filename", "8002_AccessLog.txt")
-    builder.with_response_body(builder.access_or_request_logs_body(logs))
+    builder.with_response_body(builder.non_error_logs_body(logs))
     builder.build_get()
 
     tester = _get_tester("call logs")
@@ -532,7 +541,7 @@ def test_command_call_logs_output_for_request_logs():
     builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
     builder.with_request_param("format", "json")
     builder.with_request_param("filename", "8002_RequestLog.txt")
-    builder.with_response_body(builder.access_or_request_logs_body(logs))
+    builder.with_response_body(builder.non_error_logs_body(logs))
     builder.build_get()
 
     tester = _get_tester("call logs")
@@ -547,6 +556,67 @@ def test_command_call_logs_output_for_request_logs():
         "Getting 8002_RequestLog.txt logs using REST App-Server http://localhost:8002\n",
     ]
     expected_output_lines.extend(logs)
+    assert command_output == "\n".join(expected_output_lines) + "\n"
+
+
+@responses.activate
+def test_command_call_logs_output_for_audit_logs():
+    logs = [
+        ("2023-09-04 01:01:01.111 event=server-restart; "
+         "success=true; user=user; roles=admin"),
+        ("2023-09-04 01:01:01.112 event=server-startup; "
+         "success=true;"),
+        ("2023-09-04 01:01:01.112 event=configuration-change; "
+         "file=/data/MarkLogic/groups.xml; success=true;"),
+    ]
+    builder = MLResponseBuilder()
+    builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
+    builder.with_request_param("format", "json")
+    builder.with_request_param("filename", "AuditLog.txt")
+    builder.with_response_body(builder.non_error_logs_body(logs))
+    builder.build_get()
+
+    tester = _get_tester("call logs")
+    tester.execute("-e test -l audit")
+    command_output = tester.io.fetch_output()
+
+    assert tester.command.option("environment") == "test"
+    assert tester.command.option("log-type") == "audit"
+
+    expected_output_lines = [
+        "Getting AuditLog.txt logs using REST App-Server http://localhost:8002\n",
+    ]
+    expected_output_lines.extend(logs)
+    assert command_output == "\n".join(expected_output_lines) + "\n"
+
+
+@responses.activate
+def test_command_call_logs_output_for_error_logs_without_app_port():
+    builder = MLResponseBuilder()
+    builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
+    builder.with_request_param("format", "json")
+    builder.with_request_param("filename", "ErrorLog.txt")
+    builder.with_response_body(builder.error_logs_body([
+        ("2023-09-01T00:00:00Z", "info", "Log message 1"),
+        ("2023-09-01T00:00:01Z", "info", "Log message 2"),
+        ("2023-09-01T00:00:02Z", "info", "Log message 3"),
+    ]))
+    builder.build_get()
+
+    tester = _get_tester("call logs")
+    tester.execute("-e test")
+    command_output = tester.io.fetch_output()
+
+    assert tester.command.option("environment") == "test"
+    assert tester.command.option("app-server") is None
+    assert tester.command.option("log-type") == "error"
+
+    expected_output_lines = [
+        "Getting ErrorLog.txt logs using REST App-Server http://localhost:8002\n",
+        "<time>2023-09-01T00:00:00Z <log-level>INFO: Log message 1",
+        "<time>2023-09-01T00:00:01Z <log-level>INFO: Log message 2",
+        "<time>2023-09-01T00:00:02Z <log-level>INFO: Log message 3",
+    ]
     assert command_output == "\n".join(expected_output_lines) + "\n"
 
 

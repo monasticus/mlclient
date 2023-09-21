@@ -18,6 +18,9 @@ Getting logs list using REST App-Server http://localhost:8002
 │ AccessLog.txt               │ http://localhost:8002/manage/v2/logs?filename=AccessLog.txt&host=localhost               │
 │ AccessLog_1.txt             │ http://localhost:8002/manage/v2/logs?filename=AccessLog_1.txt&host=localhost             │
 │                             │                                                                                          │
+│ AuditLog.txt                │ http://localhost:8002/manage/v2/logs?filename=AuditLog.txt&host=localhost                │
+│ AuditLog_1.txt              │ http://localhost:8002/manage/v2/logs?filename=AuditLog_1.txt&host=localhost              │
+│                             │                                                                                          │
 │ ErrorLog.txt                │ http://localhost:8002/manage/v2/logs?filename=ErrorLog.txt&host=localhost                │
 │ ErrorLog_1.txt              │ http://localhost:8002/manage/v2/logs?filename=ErrorLog_1.txt&host=localhost              │
 │                             │                                                                                          │

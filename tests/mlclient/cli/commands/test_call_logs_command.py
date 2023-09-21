@@ -551,6 +551,37 @@ def test_command_call_logs_output_for_request_logs():
 
 
 @responses.activate
+def test_command_call_logs_output_for_audit_logs():
+    logs = [
+        ('2023-09-04 01:01:01.111 event=server-restart; '
+         'success=true; user=user; roles=admin'),
+        ('2023-09-04 01:01:01.112 event=server-startup; '
+         'success=true;'),
+        ('2023-09-04 01:01:01.112 event=configuration-change; '
+         'file=/data/MarkLogic/groups.xml; success=true;'),
+    ]
+    builder = MLResponseBuilder()
+    builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
+    builder.with_request_param("format", "json")
+    builder.with_request_param("filename", "AuditLog.txt")
+    builder.with_response_body(builder.non_error_logs_body(logs))
+    builder.build_get()
+
+    tester = _get_tester("call logs")
+    tester.execute("-e test -l audit")
+    command_output = tester.io.fetch_output()
+
+    assert tester.command.option("environment") == "test"
+    assert tester.command.option("log-type") == "audit"
+
+    expected_output_lines = [
+        "Getting AuditLog.txt logs using REST App-Server http://localhost:8002\n",
+    ]
+    expected_output_lines.extend(logs)
+    assert command_output == "\n".join(expected_output_lines) + "\n"
+
+
+@responses.activate
 def test_command_call_logs_output_for_error_logs_without_app_port():
     builder = MLResponseBuilder()
     builder.with_base_url(f"http://localhost:8002{ENDPOINT}")

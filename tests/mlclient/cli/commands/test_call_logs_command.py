@@ -551,6 +551,36 @@ def test_command_call_logs_output_for_request_logs():
 
 
 @responses.activate
+def test_command_call_logs_output_for_error_logs_without_app_port():
+    builder = MLResponseBuilder()
+    builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
+    builder.with_request_param("format", "json")
+    builder.with_request_param("filename", "ErrorLog.txt")
+    builder.with_response_body(builder.error_logs_body([
+        ("2023-09-01T00:00:00Z", "info", "Log message 1"),
+        ("2023-09-01T00:00:01Z", "info", "Log message 2"),
+        ("2023-09-01T00:00:02Z", "info", "Log message 3"),
+    ]))
+    builder.build_get()
+
+    tester = _get_tester("call logs")
+    tester.execute("-e test")
+    command_output = tester.io.fetch_output()
+
+    assert tester.command.option("environment") == "test"
+    assert tester.command.option("app-server") is None
+    assert tester.command.option("log-type") == "error"
+
+    expected_output_lines = [
+        "Getting ErrorLog.txt logs using REST App-Server http://localhost:8002\n",
+        "<time>2023-09-01T00:00:00Z <log-level>INFO: Log message 1",
+        "<time>2023-09-01T00:00:01Z <log-level>INFO: Log message 2",
+        "<time>2023-09-01T00:00:02Z <log-level>INFO: Log message 3",
+    ]
+    assert command_output == "\n".join(expected_output_lines) + "\n"
+
+
+@responses.activate
 def test_command_call_logs_output_for_xml_logs():
     xml_log_lines = [
         ('<error:error '

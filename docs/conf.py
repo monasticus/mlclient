@@ -11,7 +11,7 @@ import mlclient
 project = 'MLClient'
 copyright = '2023, Tomasz Aniołowski'
 author = 'Tomasz Aniołowski'
-release = '0.3.0'
+release = '0.3.1'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration

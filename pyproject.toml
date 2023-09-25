@@ -137,6 +137,9 @@ max-complexity = 10
 "mlclient/clients/ml_client.py" = [
     "A003", # allow shadowing eval builtin for consistency
 ]
+"mlclient/model/*" = [
+    "UP007" # allow using Union instead of X | Y for pydantic
+]
 "mlclient/model/data.py" = [
     "PLR0913" # allow many arguments as they depend on ML structure
 ]

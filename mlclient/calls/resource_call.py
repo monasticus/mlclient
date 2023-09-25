@@ -20,7 +20,7 @@ class ResourceCall(metaclass=ABCMeta):
             method: str = constants.METHOD_GET,
             params: dict | None = None,
             headers: dict | None = None,
-            body: str | dict | None = None,
+            body: str | dict | bytes | None = None,
             accept: str | None = None,
             content_type: str | None = None,
     ):
@@ -34,7 +34,7 @@ class ResourceCall(metaclass=ABCMeta):
             request parameters
         headers : dict
             request headers
-        body : str | dict
+        body : str | dict | bytes
             a request body
         accept : str
             an Accept header value
@@ -173,7 +173,7 @@ class ResourceCall(metaclass=ABCMeta):
     @property
     def body(
             self,
-    ) -> str | dict | None:
+    ) -> str | dict | bytes | None:
         """A request body.
 
         Returns
@@ -181,7 +181,7 @@ class ResourceCall(metaclass=ABCMeta):
         str | dict
             a request body
         """
-        if isinstance(self._body, str):
+        if isinstance(self._body, (str, bytes)):
             return self._body
         if isinstance(self._body, dict):
             return self._body.copy()
@@ -190,7 +190,7 @@ class ResourceCall(metaclass=ABCMeta):
     @body.setter
     def body(
             self,
-            body: str | dict,
+            body: str | dict | bytes,
     ):
         """Set a request body.
 

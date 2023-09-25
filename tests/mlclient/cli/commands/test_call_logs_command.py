@@ -12,7 +12,6 @@ from mlclient.exceptions import InvalidLogTypeError
 from tests import tools
 from tests.tools import MLResponseBuilder
 
-
 ENDPOINT = "/manage/v2/logs"
 
 

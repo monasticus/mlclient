@@ -23,8 +23,8 @@ Examples
 --------
 >>> from mlclient.model.calls import DocumentsBodyPart
 """
-from .documents import (DocumentsBodyPartType, DocumentsBodyPart,
+from .documents import (DocumentsBodyPart, DocumentsBodyPartType,
                         DocumentsContentDisposition, Extract, Repair)
 
-__all__ = ["DocumentsBodyPartType", "DocumentsBodyPart",
+__all__ = ["DocumentsBodyPart", "DocumentsBodyPartType",
            "DocumentsContentDisposition", "Extract", "Repair"]

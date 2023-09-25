@@ -142,4 +142,4 @@ class DocumentsBodyPart(BaseModel):
         default=HEADER_JSON)
     content_disposition: Union[str, DocumentsContentDisposition] = Field(
         alias="content-disposition")
-    content: Union[str, bytes]
+    content: Union[str, bytes, dict]

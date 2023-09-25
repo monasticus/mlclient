@@ -61,6 +61,8 @@ This package exports the following classes:
         A POST request to create a new database.
     * DocumentsGetCall
         A GET request to retrieve documents' content or metadata.
+    * DocumentsPostCall
+        A POST request to insert or update documents' content or metadata.
     * EvalCall
         A POST request to evaluate an ad-hoc query.
     * ForestGetCall
@@ -128,7 +130,7 @@ from .database_call import (DatabaseDeleteCall, DatabaseGetCall,
 from .database_properties_call import (DatabasePropertiesGetCall,
                                        DatabasePropertiesPutCall)
 from .databases_call import DatabasesGetCall, DatabasesPostCall
-from .documents_call import DocumentsGetCall
+from .documents_call import DocumentsGetCall, DocumentsPostCall
 from .eval_call import EvalCall
 from .forest_call import (ForestDeleteCall, ForestGetCall,
                           ForestPostCall)
@@ -154,7 +156,7 @@ __all__ = ["ResourceCall",
            "DatabaseDeleteCall", "DatabaseGetCall", "DatabasePostCall",
            "DatabasePropertiesGetCall", "DatabasePropertiesPutCall",
            "DatabasesGetCall", "DatabasesPostCall",
-           "DocumentsGetCall",
+           "DocumentsGetCall", "DocumentsPostCall",
            "EvalCall",
            "ForestDeleteCall", "ForestGetCall", "ForestPostCall",
            "ForestPropertiesGetCall", "ForestPropertiesPutCall",

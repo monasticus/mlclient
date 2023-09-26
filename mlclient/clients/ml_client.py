@@ -29,8 +29,9 @@ from mlclient import constants
 from mlclient.calls import (DatabaseDeleteCall, DatabaseGetCall,
                             DatabasePostCall, DatabasePropertiesGetCall,
                             DatabasePropertiesPutCall, DatabasesGetCall,
-                            DatabasesPostCall, DocumentsGetCall, EvalCall,
-                            ForestDeleteCall, ForestGetCall, ForestPostCall,
+                            DatabasesPostCall, DocumentsGetCall,
+                            DocumentsPostCall, EvalCall, ForestDeleteCall,
+                            ForestGetCall, ForestPostCall,
                             ForestPropertiesGetCall, ForestPropertiesPutCall,
                             ForestsGetCall, ForestsPostCall, ForestsPutCall,
                             LogsCall, ResourceCall, RoleDeleteCall,
@@ -41,6 +42,7 @@ from mlclient.calls import (DatabaseDeleteCall, DatabaseGetCall,
                             ServersGetCall, ServersPostCall, UserDeleteCall,
                             UserGetCall, UserPropertiesGetCall,
                             UserPropertiesPutCall, UsersGetCall, UsersPostCall)
+from mlclient.model.calls import DocumentsBodyPart
 
 logger = logging.getLogger(__name__)
 
@@ -1472,6 +1474,60 @@ class MLResourcesClient(MLResourceClient):
                                 transform=transform,
                                 transform_params=transform_params,
                                 txid=txid)
+        return self.call(call)
+
+    def post_documents(
+            self,
+            body_parts: list[DocumentsBodyPart],
+            database: str | None = None,
+            transform: str | None = None,
+            transform_params: dict | None = None,
+            txid: str | None = None,
+            temporal_collection: str | None = None,
+            system_time: str | None = None,
+    ):
+        """Send a POST request to the /v1/documents endpoint.
+
+        Parameters
+        ----------
+        body_parts : list[DocumentsBodyPart]
+            A list of multipart request body parts
+        database : str
+            Perform this operation on the named content database instead
+            of the default content database associated with the REST API instance.
+            Using an alternative database requires the "eval-in" privilege.
+        transform : str
+            Names a content transformation previously installed via
+            the /config/transforms service. The service applies the transformation
+            to all documents prior to constructing the response.
+        transform_params : str
+            A transform parameter names and values. For example, { "myparam": 1 }.
+            Transform parameters are passed to the transform named in the transform
+            parameter.
+        txid : str
+            The transaction identifier of the multi-statement transaction in which
+            to service this request. Use the /transactions service to create and manage
+            multi-statement transactions.
+        temporal_collection : str
+            Specify the name of a temporal collection into which the documents are
+            to be inserted.
+        system_time : str
+            Set the system start time for the insertion or update.
+            This time will override the system time set by MarkLogic.
+            Ignored if temporal-collection is not included in the request.
+
+        Returns
+        -------
+        Response
+            An HTTP response
+        """
+        call = DocumentsPostCall(body_parts=body_parts,
+                                 database=database,
+                                 transform=transform,
+                                 transform_params=transform_params,
+                                 txid=txid,
+                                 temporal_collection=temporal_collection,
+                                 system_time=system_time)
         return self.call(call)
 
 

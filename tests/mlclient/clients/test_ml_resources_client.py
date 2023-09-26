@@ -1,6 +1,7 @@
 import pytest
 
 from mlclient import MLResourcesClient
+from mlclient.model.calls import DocumentsBodyPart
 
 
 @pytest.fixture()
@@ -381,3 +382,17 @@ def test_get_documents():
 
     assert resp.status_code == 500
     assert resp.json()["errorResponse"]["messageCode"] == "RESTAPI-NODOCUMENT"
+
+
+@pytest.mark.ml_access()
+def test_post_documents():
+    body_part = {
+        "content-type": "application/json",
+        "content-disposition": "foo",
+        "content": {"root": "data"},
+    }
+    with MLResourcesClient(auth_method="digest") as client:
+        resp = client.post_documents(body_parts=[DocumentsBodyPart(**body_part)])
+
+    assert resp.status_code == 400
+    assert "foo parameter without value for content disposition" in resp.text

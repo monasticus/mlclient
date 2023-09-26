@@ -371,3 +371,13 @@ def test_put_user_properties():
 
     assert resp.status_code == 404
     assert resp.json()["errorResponse"]["messageCode"] == "SEC-USERDNE"
+
+
+@pytest.mark.ml_access()
+def test_get_documents():
+    with MLResourcesClient(auth_method="digest") as client:
+        resp = client.get_documents(uri="/path/to/non-existing/document.xml",
+                                    data_format="json")
+
+    assert resp.status_code == 500
+    assert resp.json()["errorResponse"]["messageCode"] == "RESTAPI-NODOCUMENT"

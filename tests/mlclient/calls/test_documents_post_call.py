@@ -72,6 +72,25 @@ def test_body(default_body_part):
     assert call.body == expected_body.encode("utf-8")
 
 
+def test_body_with_dict_content():
+    body_part = {
+        "content-disposition": {
+            "body_part_type": "attachment",
+            "filename": "/path/to/file.json",
+        },
+        "content": {"root": "data"},
+    }
+    call = DocumentsPostCall(body_parts=[DocumentsBodyPart(**body_part)])
+    boundary = call.headers["Content-Type"].replace("multipart/mixed; boundary=", "")
+    expected_body = f"--{boundary}\r\n"
+    expected_body += "Content-Disposition: attachment; filename=/path/to/file.json\r\n"
+    expected_body += "Content-Type: application/json\r\n"
+    expected_body += "\r\n"
+    expected_body += '{"root": "data"}\r\n'
+    expected_body += f"--{boundary}--\r\n"
+    assert call.body == expected_body.encode("utf-8")
+
+
 def test_fully_parametrized_call_for_multiple_uris_metadata(default_body_part):
     call = DocumentsPostCall(
         body_parts=[default_body_part],

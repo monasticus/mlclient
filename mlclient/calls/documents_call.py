@@ -8,6 +8,7 @@ It exports 1 class:
 """
 from __future__ import annotations
 
+import json
 from typing import ClassVar
 
 import urllib3
@@ -271,9 +272,12 @@ class DocumentsPostCall(ResourceCall):
     def _get_request_field(
             body_part: DocumentsBodyPart,
     ) -> RequestField:
+        data = body_part.content
+        if isinstance(data, dict):
+            data = json.dumps(data)
         return RequestField(
             name="--ignore--",
-            data=body_part.content,
+            data=data,
             headers={
                 "Content-Disposition": body_part.content_disposition,
                 "Content-Type": body_part.content_type,

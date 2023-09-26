@@ -221,6 +221,10 @@ def test_custom_json_body():
     assert ResourceCallTestImpl(body={}).body == {}
 
 
+def test_custom_bytes_body():
+    assert ResourceCallTestImpl(body=b"").body == b""
+
+
 def test_string_body_encapsulation():
     call = ResourceCallTestImpl(body="")
     body = call.body
@@ -241,6 +245,17 @@ def test_dict_body_encapsulation():
     assert body == {"custom-key": "custom-value"}
 
     assert call.body == {}
+
+
+def test_bytes_body_encapsulation():
+    call = ResourceCallTestImpl(body=b"")
+    body = call.body
+    assert body == b""
+
+    body = b"custom-body"
+    assert body == b"custom-body"
+
+    assert call.body == b""
 
 
 # set_body

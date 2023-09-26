@@ -3,13 +3,21 @@
 It exports 1 class:
     * DocumentsGetCall
         A GET request to retrieve documents' content or metadata.
+    * DocumentsPostCall
+        A POST request to insert or update documents' content or metadata.
 """
 from __future__ import annotations
 
+import json
 from typing import ClassVar
+
+import urllib3
+from urllib3.fields import RequestField
 
 from mlclient import constants, exceptions, utils
 from mlclient.calls import ResourceCall
+from mlclient.constants import HEADER_JSON
+from mlclient.model.calls import DocumentsBodyPart
 
 
 class DocumentsGetCall(ResourceCall):
@@ -151,3 +159,126 @@ class DocumentsGetCall(ResourceCall):
         if data_format is not None and category is not None and category != "content":
             return utils.get_accept_header_for_format(data_format)
         return None
+
+
+class DocumentsPostCall(ResourceCall):
+    """A POST request to insert or update documents' content or metadata.
+
+    A ResourceCall implementation representing a single POST request
+    to the /manage/v2/documents REST Resource.
+
+    Insert or update content and/or metadata for multiple documents in a single request.
+    Documentation of the REST Resource API: https://docs.marklogic.com/REST/POST/v1/documents
+    """
+
+    _ENDPOINT: str = "/v1/documents"
+
+    _DATABASE_PARAM: str = "database"
+    _TRANSFORM_PARAM: str = "transform"
+    _TXID_PARAM: str = "txid"
+    _TEMPORAL_COLLECTION_PARAM: str = "temporal-collection"
+    _SYSTEM_TIME_PARAM: str = "system-time"
+    _TRANS_PARAM_PREFIX: str = "trans:"
+
+    def __init__(
+            self,
+            body_parts: list[DocumentsBodyPart],
+            database: str | None = None,
+            transform: str | None = None,
+            transform_params: dict | None = None,
+            txid: str | None = None,
+            temporal_collection: str | None = None,
+            system_time: str | None = None,
+    ):
+        """Initialize DocumentsGetCall instance.
+
+        Parameters
+        ----------
+        body_parts : list[DocumentsBodyPart]
+            A list of multipart request body parts
+        database : str
+            Perform this operation on the named content database instead
+            of the default content database associated with the REST API instance.
+            Using an alternative database requires the "eval-in" privilege.
+        transform : str
+            Names a content transformation previously installed via
+            the /config/transforms service. The service applies the transformation
+            to all documents prior to constructing the response.
+        transform_params : str
+            A transform parameter names and values. For example, { "myparam": 1 }.
+            Transform parameters are passed to the transform named in the transform
+            parameter.
+        txid : str
+            The transaction identifier of the multi-statement transaction in which
+            to service this request. Use the /transactions service to create and manage
+            multi-statement transactions.
+        temporal_collection : str
+            Specify the name of a temporal collection into which the documents are
+            to be inserted.
+        system_time : str
+            Set the system start time for the insertion or update.
+            This time will override the system time set by MarkLogic.
+            Ignored if temporal-collection is not included in the request.
+        """
+        self._validate_params(body_parts)
+
+        super().__init__(method="POST")
+        self.add_header(constants.HEADER_NAME_ACCEPT, HEADER_JSON)
+        self.add_param(self._DATABASE_PARAM, database)
+        self.add_param(self._TRANSFORM_PARAM, transform)
+        self.add_param(self._TXID_PARAM, txid)
+        self.add_param(self._TEMPORAL_COLLECTION_PARAM, temporal_collection)
+        self.add_param(self._SYSTEM_TIME_PARAM, system_time)
+        if transform_params:
+            for trans_param_name, value in transform_params.items():
+                param = self._TRANS_PARAM_PREFIX + trans_param_name
+                self.add_param(param, value)
+        body, content_type = self._build_body(body_parts)
+        self.add_header(constants.HEADER_NAME_CONTENT_TYPE, content_type)
+        self.body = body
+
+    @property
+    def endpoint(
+            self,
+    ):
+        """An endpoint for the Documents call.
+
+        Returns
+        -------
+        str
+            A Documents call endpoint
+        """
+        return self._ENDPOINT
+
+    @classmethod
+    def _validate_params(
+            cls,
+            body: list[DocumentsBodyPart] | None,
+    ):
+        if body is None or len(body) == 0:
+            msg = "No request body provided for POST /v1/documents!"
+            raise exceptions.WrongParametersError(msg)
+
+    @classmethod
+    def _build_body(
+            cls,
+            body_parts: list[DocumentsBodyPart],
+    ) -> tuple[bytes, str]:
+        fields = [cls._get_request_field(body_part) for body_part in body_parts]
+        body, content_type = urllib3.encode_multipart_formdata(fields)
+        return body, content_type.replace("multipart/form-data", "multipart/mixed")
+
+    @staticmethod
+    def _get_request_field(
+            body_part: DocumentsBodyPart,
+    ) -> RequestField:
+        data = body_part.content
+        if isinstance(data, dict):
+            data = json.dumps(data)
+        return RequestField(
+            name="--ignore--",
+            data=data,
+            headers={
+                "Content-Disposition": body_part.content_disposition,
+                "Content-Type": body_part.content_type,
+            })

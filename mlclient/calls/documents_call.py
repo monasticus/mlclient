@@ -5,6 +5,8 @@ It exports 1 class:
         A GET request to retrieve documents' content or metadata.
     * DocumentsPostCall
         A POST request to insert or update documents' content or metadata.
+    * DocumentsDeleteCall
+        A DELETE request to remove documents, or reset document metadata.
 """
 from __future__ import annotations
 
@@ -24,7 +26,7 @@ class DocumentsGetCall(ResourceCall):
     """A GET request to retrieve documents' content or metadata.
 
     A ResourceCall implementation representing a single GET request
-    to the /manage/v2/documents REST Resource.
+    to the /v1/documents REST Resource.
 
     Retrieve document content and/or metadata from the database.
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/GET/v1/documents
@@ -165,7 +167,7 @@ class DocumentsPostCall(ResourceCall):
     """A POST request to insert or update documents' content or metadata.
 
     A ResourceCall implementation representing a single POST request
-    to the /manage/v2/documents REST Resource.
+    to the /v1/documents REST Resource.
 
     Insert or update content and/or metadata for multiple documents in a single request.
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/POST/v1/documents
@@ -190,7 +192,7 @@ class DocumentsPostCall(ResourceCall):
             temporal_collection: str | None = None,
             system_time: str | None = None,
     ):
-        """Initialize DocumentsGetCall instance.
+        """Initialize DocumentsPostCall instance.
 
         Parameters
         ----------
@@ -282,3 +284,106 @@ class DocumentsPostCall(ResourceCall):
                 "Content-Disposition": body_part.content_disposition,
                 "Content-Type": body_part.content_type,
             })
+
+
+class DocumentsDeleteCall(ResourceCall):
+    """A DELETE request to remove documents, or reset document metadata.
+
+    A ResourceCall implementation representing a single DELETE request
+    to the /v1/documents REST Resource.
+
+    Retrieve document content and/or metadata from the database.
+    Documentation of the REST Resource API: https://docs.marklogic.com/REST/GET/v1/documents
+    """
+
+    _ENDPOINT: str = "/v1/documents"
+
+    _URI_PARAM: str = "uri"
+    _DATABASE_PARAM: str = "database"
+    _CATEGORY_PARAM: str = "category"
+    _TXID_PARAM: str = "txid"
+    _TEMPORAL_COLLECTION_PARAM: str = "temporal-collection"
+    _SYSTEM_TIME_PARAM: str = "system-time"
+    _RESULT_PARAM: str = "result"
+
+    _SUPPORTED_CATEGORIES: ClassVar[list] = ["content", "metadata", "metadata-values",
+                                             "collections", "permissions", "properties",
+                                             "quality"]
+
+    def __init__(
+            self,
+            uri: str | list,
+            database: str | None = None,
+            category: str | None = None,
+            txid: str | None = None,
+            temporal_collection: str | None = None,
+            system_time: str | None = None,
+            wipe_temporal: bool | None = None,
+    ):
+        """Initialize DocumentsDeleteCall instance.
+
+        Parameters
+        ----------
+        uri : str | list
+            One or more URIs for documents in the database.
+            If you specify multiple URIs, the Accept header must be multipart/mixed.
+        database : str
+            Perform this operation on the named content database instead
+            of the default content database associated with the REST API instance.
+            Using an alternative database requires the "eval-in" privilege.
+        category : str
+            The category of data to fetch about the requested document.
+            Category can be specified multiple times to retrieve any combination
+            of content and metadata. Valid categories: content (default), metadata,
+            metadata-values, collections, permissions, properties, and quality.
+            Use metadata to request all categories except content.
+        txid : str
+            The transaction identifier of the multi-statement transaction in which
+            to service this request. Use the /transactions service to create and manage
+            multi-statement transactions.
+        temporal_collection : str
+            Specify the name of a temporal collection into which the documents are
+            to be inserted.
+        system_time : str
+            Set the system start time for the insertion or update.
+            This time will override the system time set by MarkLogic.
+            Ignored if temporal-collection is not included in the request.
+        wipe_temporal : bool
+            Remove all versions of a temporal document rather than performing
+            a temporal delete. You can only use this parameter when you also specify
+            a temporal-collection parameter.
+        """
+        self._validate_params(category)
+
+        super().__init__(method="DELETE")
+        self.add_param(self._URI_PARAM, uri)
+        self.add_param(self._DATABASE_PARAM, database)
+        self.add_param(self._CATEGORY_PARAM, category)
+        self.add_param(self._TXID_PARAM, txid)
+        self.add_param(self._TEMPORAL_COLLECTION_PARAM, temporal_collection)
+        self.add_param(self._SYSTEM_TIME_PARAM, system_time)
+        if wipe_temporal is True:
+            self.add_param(self._RESULT_PARAM, "wipe")
+
+    @property
+    def endpoint(
+            self,
+    ):
+        """An endpoint for the Documents call.
+
+        Returns
+        -------
+        str
+            A Documents call endpoint
+        """
+        return self._ENDPOINT
+
+    @classmethod
+    def _validate_params(
+            cls,
+            category: str,
+    ):
+        if category and category not in cls._SUPPORTED_CATEGORIES:
+            joined_supported_categories = ", ".join(cls._SUPPORTED_CATEGORIES)
+            msg = f"The supported categories are: {joined_supported_categories}"
+            raise exceptions.WrongParametersError(msg)

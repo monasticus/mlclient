@@ -396,3 +396,15 @@ def test_post_documents():
 
     assert resp.status_code == 400
     assert "foo parameter without value for content disposition" in resp.text
+
+
+@pytest.mark.ml_access()
+def test_delete_documents():
+    with MLResourcesClient(auth_method="digest") as client:
+        resp = client.delete_documents(uri="/path/to/non-existing/document.xml",
+                                       wipe_temporal=True)
+
+    assert resp.status_code == 400
+    assert ("Endpoint does not support query parameter: "
+            "invalid parameters: result "
+            "for /path/to/non-existing/document.xml") in resp.text

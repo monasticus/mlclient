@@ -29,9 +29,9 @@ from mlclient import constants
 from mlclient.calls import (DatabaseDeleteCall, DatabaseGetCall,
                             DatabasePostCall, DatabasePropertiesGetCall,
                             DatabasePropertiesPutCall, DatabasesGetCall,
-                            DatabasesPostCall, DocumentsGetCall,
-                            DocumentsPostCall, EvalCall, ForestDeleteCall,
-                            ForestGetCall, ForestPostCall,
+                            DatabasesPostCall, DocumentsDeleteCall,
+                            DocumentsGetCall, DocumentsPostCall, EvalCall,
+                            ForestDeleteCall, ForestGetCall, ForestPostCall,
                             ForestPropertiesGetCall, ForestPropertiesPutCall,
                             ForestsGetCall, ForestsPostCall, ForestsPutCall,
                             LogsCall, ResourceCall, RoleDeleteCall,
@@ -1528,6 +1528,63 @@ class MLResourcesClient(MLResourceClient):
                                  txid=txid,
                                  temporal_collection=temporal_collection,
                                  system_time=system_time)
+        return self.call(call)
+
+    def delete_documents(
+            self,
+            uri: str | list,
+            database: str | None = None,
+            category: str | None = None,
+            txid: str | None = None,
+            temporal_collection: str | None = None,
+            system_time: str | None = None,
+            wipe_temporal: bool | None = None,
+    ):
+        """Send a DELETE request to the /v1/documents endpoint.
+
+        Parameters
+        ----------
+        uri : str | list
+            One or more URIs for documents in the database.
+            If you specify multiple URIs, the Accept header must be multipart/mixed.
+        database : str
+            Perform this operation on the named content database instead
+            of the default content database associated with the REST API instance.
+            Using an alternative database requires the "eval-in" privilege.
+        category : str
+            The category of data to fetch about the requested document.
+            Category can be specified multiple times to retrieve any combination
+            of content and metadata. Valid categories: content (default), metadata,
+            metadata-values, collections, permissions, properties, and quality.
+            Use metadata to request all categories except content.
+        txid : str
+            The transaction identifier of the multi-statement transaction in which
+            to service this request. Use the /transactions service to create and manage
+            multi-statement transactions.
+        temporal_collection : str
+            Specify the name of a temporal collection into which the documents are
+            to be inserted.
+        system_time : str
+            Set the system start time for the insertion or update.
+            This time will override the system time set by MarkLogic.
+            Ignored if temporal-collection is not included in the request.
+        wipe_temporal : bool
+            Remove all versions of a temporal document rather than performing
+            a temporal delete. You can only use this parameter when you also specify
+            a temporal-collection parameter.
+
+        Returns
+        -------
+        Response
+            An HTTP response
+        """
+        call = DocumentsDeleteCall(uri=uri,
+                                   database=database,
+                                   category=category,
+                                   txid=txid,
+                                   temporal_collection=temporal_collection,
+                                   system_time=system_time,
+                                   wipe_temporal=wipe_temporal)
         return self.call(call)
 
 

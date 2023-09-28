@@ -1,34 +1,107 @@
-import os
-import shutil
-from pathlib import Path
 
 import pytest
 
-from mlclient import (MLClient, MLConfiguration, MLManager, MLResourcesClient,
-                      constants)
+from mlclient import (MLClient, MLConfiguration, MLManager, MLResourcesClient)
 from mlclient.clients import EvalClient, LogsClient
 from mlclient.exceptions import (NoRestServerConfiguredError,
                                  NotARestServerError)
-from tests import tools
 
 
-@pytest.fixture(scope="module", autouse=True)
-def _setup_and_teardown():
+@pytest.fixture(autouse=True)
+def ml_config() -> MLConfiguration:
+    config = {
+        "app-name": "my-marklogic-app",
+        "host": "localhost",
+        "username": "my-marklogic-app-user",
+        "password": "my-marklogic-app-password",
+        "protocol": "https",
+        "app-servers": [
+            {
+                "id": "manage",
+                "port": 8002,
+                "auth": "basic",
+                "rest": True,
+            },
+            {
+                "id": "content",
+                "port": 8100,
+                "auth": "basic",
+                "rest": True,
+            },
+            {
+                "id": "modules",
+                "port": 8101,
+                "auth": "basic",
+            },
+            {
+                "id": "schemas",
+                "port": 8102,
+                "auth": "basic",
+            },
+            {
+                "id": "test",
+                "port": 8103,
+                "auth": "basic",
+                "rest": True,
+            },
+        ],
+    }
+    return MLConfiguration(**config)
+
+
+@pytest.fixture(autouse=True)
+def ml_config_no_rest() -> MLConfiguration:
+    config = {
+        "app-name": "my-marklogic-app",
+        "host": "localhost",
+        "username": "my-marklogic-app-user",
+        "password": "my-marklogic-app-password",
+        "protocol": "https",
+        "app-servers": [
+            {
+                "id": "manage",
+                "port": 8002,
+                "auth": "basic",
+            },
+            {
+                "id": "content",
+                "port": 8100,
+                "auth": "basic",
+            },
+            {
+                "id": "modules",
+                "port": 8101,
+                "auth": "basic",
+            },
+            {
+                "id": "schemas",
+                "port": 8102,
+                "auth": "basic",
+            },
+            {
+                "id": "test",
+                "port": 8103,
+                "auth": "basic",
+            },
+        ],
+    }
+    return MLConfiguration(**config)
+
+
+@pytest.fixture(autouse=True)
+def _setup(mocker, ml_config, ml_config_no_rest):
     # Setup
-    ml_client_dir = Path(constants.ML_CLIENT_DIR)
-    if not ml_client_dir.exists() or not ml_client_dir.is_dir():
-        ml_client_dir.mkdir()
-    for file_name in tools.list_resources(__file__):
-        file_path = tools.get_test_resource_path(__file__, file_name)
-        shutil.copy(file_path, constants.ML_CLIENT_DIR)
+    original_method = MLConfiguration.from_environment
 
-    yield
+    def config_from_environment(environment_name: str):
+        if environment_name == "test":
+            return ml_config
+        if environment_name == "test-no-rest":
+            return ml_config_no_rest
+        return original_method(environment_name)
 
-    # Teardown
-    for file_name in tools.list_resources(__file__):
-        Path(f"{constants.ML_CLIENT_DIR}/{file_name}").unlink()
-    if ml_client_dir.exists() and not os.listdir(constants.ML_CLIENT_DIR):
-        ml_client_dir.rmdir()
+    target = "mlclient.ml_config.MLConfiguration.from_environment"
+    mocker.patch(target, side_effect=config_from_environment)
 
 
 def test_properties():

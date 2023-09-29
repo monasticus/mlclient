@@ -197,7 +197,7 @@ class BytesDocument(Document):
             metadata: Metadata | None = None,
             is_temporal: bool = False,
     ):
-        """Initialize StringDocument instance.
+        """Initialize BytesDocument instance.
 
         Parameters
         ----------

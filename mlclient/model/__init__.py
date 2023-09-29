@@ -21,6 +21,8 @@ This package exports the following classes:
         A Document implementation representing a single MarkLogic document.
     * BytesDocument
         A Document implementation representing a single MarkLogic document.
+    * JSONDocument
+        A Document implementation representing a single MarkLogic document.
     * Metadata
         A class representing MarkLogic's document metadata.
     * Permission:
@@ -30,8 +32,8 @@ Examples
 --------
 >>> from mlclient.model import Document, DocumentType, Metadata
 """
-from .data import (BytesDocument, Document, DocumentType, Metadata, Permission,
-                   StringDocument)
+from .data import (BytesDocument, Document, DocumentType, JSONDocument,
+                   Metadata, Permission, StringDocument)
 
-__all__ = ["Document", "StringDocument", "BytesDocument",
+__all__ = ["Document", "StringDocument", "BytesDocument", "JSONDocument",
            "DocumentType", "Metadata", "Permission"]

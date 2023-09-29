@@ -7,6 +7,8 @@ It exports 5 classes:
         An abstract class representing a single MarkLogic document.
     * StringDocument
         A Document implementation representing a single MarkLogic document.
+    * BytesDocument
+        A Document implementation representing a single MarkLogic document.
     * Metadata
         A class representing MarkLogic's document metadata.
     * Permission:
@@ -176,6 +178,52 @@ class StringDocument(Document):
         Returns
         -------
         str
+            A document's content
+        """
+        return self._content
+
+
+class BytesDocument(Document):
+    """A Document implementation representing a single MarkLogic document.
+
+    This implementation stores content in bytes format.
+    """
+
+    def __init__(
+            self,
+            content: bytes,
+            uri: str | None = None,
+            doc_type: DocumentType = DocumentType.XML,
+            metadata: Metadata | None = None,
+            is_temporal: bool = False,
+    ):
+        """Initialize StringDocument instance.
+
+        Parameters
+        ----------
+        content : bytes
+            A document content
+        uri : str
+            A document URI
+        doc_type : DocumentType
+            A document type
+        metadata : Metadata
+            A document metadata
+        is_temporal : bool
+            The temporal flag
+        """
+        super().__init__(uri, doc_type, metadata, is_temporal)
+        self._content = content
+
+    @property
+    def content(
+            self,
+    ) -> bytes:
+        """A document content.
+
+        Returns
+        -------
+        bytes
             A document's content
         """
         return self._content

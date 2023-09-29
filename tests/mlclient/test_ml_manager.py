@@ -1,7 +1,7 @@
 
 import pytest
 
-from mlclient import (MLClient, MLConfiguration, MLManager, MLResourcesClient)
+from mlclient import MLClient, MLConfiguration, MLManager, MLResourcesClient
 from mlclient.clients import EvalClient, LogsClient
 from mlclient.exceptions import (NoRestServerConfiguredError,
                                  NotARestServerError)

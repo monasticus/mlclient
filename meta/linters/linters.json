@@ -244,6 +244,14 @@
     "name": "Perflint"
   },
   {
+    "prefix": "FURB",
+    "name": "refurb"
+  },
+  {
+    "prefix": "LOG",
+    "name": "flake8-logging"
+  },
+  {
     "prefix": "RUF",
     "name": "Ruff-specific rules"
   }

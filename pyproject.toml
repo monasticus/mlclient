@@ -45,7 +45,7 @@ pyyaml = "^6.0.1"
 cleo = "^2.0.1"
 
 [tool.poetry.group.dev.dependencies]
-ruff = "^0.0.281"
+ruff = "*"
 isort = "^5.12.0"
 pytest = "^7.4.2"
 pytest-cov = "^4.1.0"
@@ -90,7 +90,7 @@ skip_glob=[
 select = [
     "F", "E", "W", "C90", "N", "D", "UP", "B", "A", "COM", "C4", "EM", "EXE", "ISC", "G", "PIE", "T20",
     "PT", "Q", "RSE", "RET", "SLF", "SIM", "ARG", "PTH", "ERA", "PD", "PGH", "PL", "TRY", "RUF", "FLY",
-    "ASYNC", "FA", "FIX", "CPY", "PERF"
+    "ASYNC", "FA", "FIX", "CPY", "PERF", "FURB", "LOG"
 ]
 ignore = []
 exclude = [
@@ -118,6 +118,7 @@ max-complexity = 10
 [tool.ruff.per-file-ignores]
 "mlclient/ml_config.py" = [
     "UP006", # allow using List instead of list for pydantic
+    "PLR6301" # allow for a non-static method as it is defined by the Pydantic lib
 ]
 "mlclient/calls/*" = [
     "PLR0913" # allow many arguments as they depend on ML REST resource
@@ -126,7 +127,8 @@ max-complexity = 10
     "RUF012"  # allow for missing ClassVar annotations as superclass does not use them
 ]
 "mlclient/cli/app.py" = [
-    "A002"  # allow for shadowing input builtin as it is superclass method definition
+    "A002",  # allow for shadowing input builtin as it is superclass method definition
+    "PLR6301"  # allow for a non-static method as it is defined in a superclass
 ]
 "mlclient/clients/*" = [
     "PLR0913" # allow many arguments as they depend on ML REST resource
@@ -136,6 +138,7 @@ max-complexity = 10
 ]
 "mlclient/clients/ml_client.py" = [
     "A003", # allow shadowing eval builtin for consistency
+    "PLR0904"  # allow many public methods as MLResourcesClient is a fascade for all ML resources
 ]
 "mlclient/model/*" = [
     "UP007" # allow using Union instead of X | Y for pydantic

@@ -13,8 +13,14 @@ imports:
 lint:
 	@poetry run ruff .
 
+lintp:
+	@poetry run ruff . --preview
+
 lint-fix:
 	@poetry run ruff . --fix
+
+lintp-fix:
+	@poetry run ruff . --preview --fix
 
 test:
 	@poetry run pytest --cov=mlclient --cov=cli tests/

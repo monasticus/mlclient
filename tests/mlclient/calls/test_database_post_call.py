@@ -54,7 +54,7 @@ def test_headers_for_dict_body():
 
 
 def test_headers_for_stringified_dict_body():
-    body ='{"operation": "clear-database"}'
+    body = '{"operation": "clear-database"}'
     call = DatabasePostCall(database="Documents", body=body)
     assert call.headers == {
         "Content-Type": "application/json",

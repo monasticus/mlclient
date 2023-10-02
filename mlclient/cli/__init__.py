@@ -4,10 +4,12 @@ It contains modules providing Command Line Interface for ML Client App:
     * app
         The MLClient CLI module.
 
-It exports a single function:
+It exports a single function and a single class:
     * main()
         Run an MLCLIent Application.
+    * MLCLIentApplication
+        An ML Client Command Line Cleo Application.
 """
-from .app import main
+from .app import MLCLIentApplication, main
 
-__all__ = ["main"]
+__all__ = ["MLCLIentApplication", "main"]

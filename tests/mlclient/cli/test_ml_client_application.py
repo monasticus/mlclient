@@ -5,8 +5,7 @@ import sys
 import pytest
 
 import mlclient
-from mlclient.cli import main
-from mlclient.cli.app import MLCLIentApplication
+from mlclient.cli import MLCLIentApplication, main
 
 
 def test_main_sys_exit_1():

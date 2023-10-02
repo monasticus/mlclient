@@ -5,7 +5,7 @@ import responses
 from cleo.testers.command_tester import CommandTester
 
 from mlclient import MLConfiguration
-from mlclient.cli.app import MLCLIentApplication
+from mlclient.cli import MLCLIentApplication
 from mlclient.exceptions import WrongParametersError
 from tests import tools
 from tests.tools import MLResponseBuilder

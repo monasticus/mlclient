@@ -25,7 +25,7 @@ from requests.auth import AuthBase, HTTPBasicAuth, HTTPDigestAuth
 from requests_toolbelt import MultipartDecoder
 from requests_toolbelt.multipart.decoder import BodyPart
 
-from mlclient import constants
+from mlclient import constants as const
 from mlclient.calls import (DatabaseDeleteCall, DatabaseGetCall,
                             DatabasePostCall, DatabasePropertiesGetCall,
                             DatabasePropertiesPutCall, DatabasesGetCall,
@@ -347,8 +347,8 @@ class MLClient:
                 "headers": headers,
             }
             if body:
-                content_type = headers.get(constants.HEADER_NAME_CONTENT_TYPE)
-                if content_type == constants.HEADER_JSON:
+                content_type = headers.get(const.HEADER_NAME_CONTENT_TYPE)
+                if content_type == const.HEADER_JSON:
                     request["json"] = body
                 else:
                     request["data"] = body
@@ -1620,17 +1620,17 @@ class MLResponseParser:
     """
 
     _PLAIN_TEXT_PARSERS: ClassVar[dict] = {
-        constants.HEADER_PRIMITIVE_STRING:
+        const.HEADER_PRIMITIVE_STRING:
             lambda data: data,
-        constants.HEADER_PRIMITIVE_INTEGER:
+        const.HEADER_PRIMITIVE_INTEGER:
             lambda data: int(data),
-        constants.HEADER_PRIMITIVE_DECIMAL:
+        const.HEADER_PRIMITIVE_DECIMAL:
             lambda data: float(data),
-        constants.HEADER_PRIMITIVE_BOOLEAN:
+        const.HEADER_PRIMITIVE_BOOLEAN:
             lambda data: bool(data),
-        constants.HEADER_PRIMITIVE_DATE:
+        const.HEADER_PRIMITIVE_DATE:
             lambda data: datetime.strptime(data, "%Y-%m-%d%z").date(),
-        constants.HEADER_PRIMITIVE_DATE_TIME:
+        const.HEADER_PRIMITIVE_DATE_TIME:
             lambda data: datetime.strptime(data, "%Y-%m-%dT%H:%M:%S.%f%z"),
     }
 
@@ -1662,6 +1662,9 @@ class MLResponseParser:
             return cls._parse_error(response)
         if int(response.headers.get("Content-Length")) == 0:
             return []
+        content_type = cls._get_response_content_type(response)
+        if not content_type.startswith(const.HEADER_MULTIPART_MIXED):
+            return cls._parse_part(response, raw)
 
         raw_parts = MultipartDecoder.from_response(response).parts
         parsed_parts = [cls._parse_part(raw_part, raw) for raw_part in raw_parts]
@@ -1696,7 +1699,7 @@ class MLResponseParser:
     @classmethod
     def _parse_part(
             cls,
-            raw_part: BodyPart,
+            body_part: BodyPart | Response,
             raw: bool,
     ) -> (bytes | str | int | float | bool | dict |
           ElemTree.ElementTree | ElemTree.Element |
@@ -1705,8 +1708,8 @@ class MLResponseParser:
 
         Parameters
         ----------
-        raw_part : BodyPart
-            An HTTP response part taken from MarkLogic instance
+        body_part : BodyPart | Response
+            An HTTP response body or body part taken from MarkLogic instance
         raw : bool
             If True, body parts are parsed to string
 
@@ -1715,30 +1718,45 @@ class MLResponseParser:
         bytes | str | int | float | bool | dict |
         ElemTree.ElementTree | ElemTree.Element |
         list
-            A parsed response body part
+            A parsed response body or body part
         """
-        text = raw_part.text
+        text = body_part.text
         if raw:
             return text
 
-        content_type = cls._get_header(raw_part, constants.HEADER_NAME_CONTENT_TYPE)
-        primitive_type = cls._get_header(raw_part, constants.HEADER_NAME_PRIMITIVE)
-        if (content_type == constants.HEADER_PLAIN_TEXT and
+        if isinstance(body_part, BodyPart):
+            content_type = cls._get_header(body_part, const.HEADER_NAME_CONTENT_TYPE)
+            primitive_type = cls._get_header(body_part, const.HEADER_NAME_PRIMITIVE)
+        else:
+            content_type = cls._get_response_content_type(body_part)
+            primitive_type = body_part.headers.get(const.HEADER_NAME_PRIMITIVE)
+
+        if (content_type.startswith(const.HEADER_PLAIN_TEXT) and
                 primitive_type in cls._PLAIN_TEXT_PARSERS):
             return cls._PLAIN_TEXT_PARSERS[primitive_type](text)
-        if content_type == constants.HEADER_JSON:
+        if content_type.startswith(const.HEADER_JSON):
             return json.loads(text)
-        if content_type == constants.HEADER_XML:
+        if content_type.startswith(const.HEADER_XML):
             element = ElemTree.fromstring(text)
-            if primitive_type == constants.HEADER_PRIMITIVE_DOCUMENT_NODE:
+            if primitive_type in [None, const.HEADER_PRIMITIVE_DOCUMENT_NODE]:
                 return ElemTree.ElementTree(element)
             return element
 
-        return raw_part.content
+        return body_part.content
+
+    @classmethod
+    def _get_response_content_type(
+            cls,
+            response: Response,
+    ):
+        content_type_header = next(header
+                                   for header in response.headers
+                                   if header.lower() == "content-type")
+        return response.headers.get(content_type_header)
 
     @staticmethod
     def _get_header(
-            raw_part: BodyPart,
+            raw_part: BodyPart | Response,
             header_name: str,
     ) -> str:
         """Return a header value of response body part.
@@ -1748,8 +1766,8 @@ class MLResponseParser:
 
         Parameters
         ----------
-        raw_part : BodyPart
-            A response body part
+        raw_part : BodyPart | Response
+            A response body or body part
         header_name : str
             A header name
 
@@ -1758,6 +1776,9 @@ class MLResponseParser:
         str
             A header value
         """
+        if not isinstance(raw_part, BodyPart):
+            return raw_part.headers.get(header_name)
+
         encoded_header_name = header_name.encode(raw_part.encoding)
         header_value = raw_part.headers.get(encoded_header_name)
         return header_value.decode(raw_part.encoding)

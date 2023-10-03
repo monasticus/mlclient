@@ -12,7 +12,7 @@ from tests.tools import MLResponseBuilder
 
 @pytest.fixture(scope="module")
 def client():
-    return MLResourcesClient(auth_method="digest")
+    return MLResourcesClient()
 
 
 @pytest.fixture(scope="module", autouse=True)
@@ -27,7 +27,7 @@ def _setup_and_teardown(client):
 
 
 @responses.activate
-def test_default_single_error_response(client):
+def test_single_error_response(client):
     xqy = "'missing-quote"
 
     response_body_path = tools.get_test_resource_path(__file__, "error_response.html")
@@ -49,7 +49,50 @@ def test_default_single_error_response(client):
 
 
 @responses.activate
-def test_default_single_not_parsed_response(client):
+def test_non_multipart_mixed_response_xml(client):
+    uri = "/some/dir/doc1.xml"
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/documents")
+    builder.with_request_param("uri", uri)
+    builder.with_response_content_type("application/xml; charset=utf-8")
+    builder.with_response_status(200)
+    builder.with_response_body('<?xml version="1.0" encoding="UTF-8"?>\n'
+                               '<root/>')
+    builder.build_get()
+
+    resp = client.get_documents(uri=uri)
+    parsed_resp = MLResponseParser.parse(resp)
+
+    assert isinstance(parsed_resp, ElemTree.ElementTree)
+    assert parsed_resp.getroot().tag == "root"
+    assert parsed_resp.getroot().text is None
+    assert parsed_resp.getroot().attrib == {}
+
+
+@responses.activate
+def test_non_multipart_mixed_response_json(client):
+    uri = "/some/dir/doc2.json"
+
+    builder = MLResponseBuilder()
+    builder.with_method("GET")
+    builder.with_base_url("http://localhost:8002/v1/documents")
+    builder.with_request_param("uri", uri)
+    builder.with_response_content_type("application/json; charset=utf-8")
+    builder.with_response_status(200)
+    builder.with_response_body('{"root":{"child":"data2"}}')
+    builder.build()
+
+    resp = client.get_documents(uri=uri)
+    builder.generate_builder_code(resp)
+    parsed_resp = MLResponseParser.parse(resp)
+
+    assert isinstance(parsed_resp, dict)
+    assert parsed_resp == {"root": {"child": "data2"}}
+
+
+@responses.activate
+def test_single_not_parsed_response(client):
     xqy = 'cts:directory-query("/root/", "infinity")'
 
     builder = MLResponseBuilder()
@@ -70,7 +113,7 @@ def test_default_single_not_parsed_response(client):
 
 
 @responses.activate
-def test_default_single_empty_response(client):
+def test_single_empty_response(client):
     xqy = "()"
 
     builder = MLResponseBuilder()
@@ -88,7 +131,7 @@ def test_default_single_empty_response(client):
 
 
 @responses.activate
-def test_default_single_plain_text_str_response(client):
+def test_single_plain_text_str_response(client):
     xqy = "'plain text'"
 
     builder = MLResponseBuilder()
@@ -107,7 +150,7 @@ def test_default_single_plain_text_str_response(client):
 
 
 @responses.activate
-def test_default_single_plain_text_int_response(client):
+def test_single_plain_text_int_response(client):
     xqy = "1"
 
     builder = MLResponseBuilder()
@@ -126,7 +169,7 @@ def test_default_single_plain_text_int_response(client):
 
 
 @responses.activate
-def test_default_single_plain_text_decimal_response(client):
+def test_single_plain_text_decimal_response(client):
     xqy = "1.1"
 
     builder = MLResponseBuilder()
@@ -145,7 +188,7 @@ def test_default_single_plain_text_decimal_response(client):
 
 
 @responses.activate
-def test_default_single_plain_text_boolean_response(client):
+def test_single_plain_text_boolean_response(client):
     xqy = "fn:true()"
 
     builder = MLResponseBuilder()
@@ -164,7 +207,7 @@ def test_default_single_plain_text_boolean_response(client):
 
 
 @responses.activate
-def test_default_single_plain_text_date_response(client):
+def test_single_plain_text_date_response(client):
     xqy = "fn:current-date()"
 
     builder = MLResponseBuilder()
@@ -183,7 +226,7 @@ def test_default_single_plain_text_date_response(client):
 
 
 @responses.activate
-def test_default_single_plain_text_date_time_response(client):
+def test_single_plain_text_date_time_response(client):
     xqy = "fn:current-dateTime()"
 
     builder = MLResponseBuilder()
@@ -204,7 +247,7 @@ def test_default_single_plain_text_date_time_response(client):
 
 
 @responses.activate
-def test_default_single_json_map_response(client):
+def test_single_json_map_response(client):
     xqy = ('map:map() '
            '=> map:with("str", "value") '
            '=> map:with("int_str", "1") '
@@ -236,7 +279,7 @@ def test_default_single_json_map_response(client):
 
 
 @responses.activate
-def test_default_single_json_array_response(client):
+def test_single_json_array_response(client):
     xqy = ('("value", "1", 1, 1.1, fn:true())'
            ' => json:to-array()')
 
@@ -256,7 +299,7 @@ def test_default_single_json_array_response(client):
 
 
 @responses.activate
-def test_default_single_xml_document_node_response(client):
+def test_single_xml_document_node_response(client):
     xqy = "document { element root {} }"
 
     builder = MLResponseBuilder()
@@ -280,7 +323,7 @@ def test_default_single_xml_document_node_response(client):
 
 
 @responses.activate
-def test_default_single_xml_element_response(client):
+def test_single_xml_element_response(client):
     xqy = "element root {}"
 
     builder = MLResponseBuilder()
@@ -301,7 +344,7 @@ def test_default_single_xml_element_response(client):
 
 
 @responses.activate
-def test_default_multiple_responses(client):
+def test_multiple_responses(client):
     xqy = '(cts:directory-query("/root/", "infinity"), (), "plain text")'
 
     builder = MLResponseBuilder()
@@ -326,7 +369,7 @@ def test_default_multiple_responses(client):
 
 
 @responses.activate
-def test_default_raw_response(client):
+def test_raw_response(client):
     xqy = ("document { "
            "  element root { "
            "    element child { "

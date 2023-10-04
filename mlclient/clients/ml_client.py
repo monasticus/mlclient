@@ -1752,7 +1752,7 @@ class MLResponseParser:
         content_type_header = next(header
                                    for header in response.headers
                                    if header.lower() == "content-type")
-        return response.headers.get(content_type_header)
+        return cls._get_header(response, content_type_header)
 
     @staticmethod
     def _get_header(

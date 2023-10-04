@@ -365,7 +365,7 @@ class MLResponseBuilder:
     ) -> list[str] | None:
         url = response.url
         url_split = urllib.parse.urlsplit(url)
-        url_query = url_split.query
+        url_query = urllib.parse.unquote(url_split.query)
         if url_query == "":
             return None
 

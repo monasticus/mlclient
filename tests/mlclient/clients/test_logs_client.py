@@ -98,7 +98,6 @@ def test_get_logs_without_port(logs_client):
     builder.with_request_param("format", "json")
     builder.with_request_param("filename", "ErrorLog.txt")
     builder.with_response_content_type("application/json; charset=UTF-8")
-    builder.with_response_header("Content-type", "application/json; charset=UTF-8")
     builder.with_response_status(200)
     builder.with_response_body(builder.error_logs_body([
         ("2023-09-01T00:00:00Z", "info", "Log message 1"),

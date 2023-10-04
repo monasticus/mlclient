@@ -219,8 +219,12 @@ class MLResponseBuilder:
             responses_params["status"] = self._response_status
 
         if not self._multipart_mixed_response:
-            self.with_response_header("Content-Length", len(self._response_body))
-            body_param = "json" if isinstance(self._response_body, dict) else "body"
+            if isinstance(self._response_body, dict):
+                body_param = "json"
+            else:
+                body_param = "body"
+                self.with_response_header("Content-Length", len(self._response_body))
+
             responses_params[body_param] = self._response_body
             if "Content-Type" in self._response_headers:
                 content_type = self._response_headers["Content-Type"]

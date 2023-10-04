@@ -1,0 +1,657 @@
+mimetypes:
+
+  - mime-type: text/n3
+    extensions: [ n3 ]
+    doc-type: text
+
+  - mime-type: image/tiff
+    extensions: [ tiff, tif ]
+    doc-type: binary
+
+  - mime-type: text/xml
+    extensions: [  ]
+    doc-type: xml
+
+  - mime-type: application/vnd.ms-excel.sheet.binary.macroEnabled.12
+    extensions: [ xlsb ]
+    doc-type: binary
+
+  - mime-type: application/vnd.wordperfect
+    extensions: [ wpd ]
+    doc-type: binary
+
+  - mime-type: image/svg+xml
+    extensions: [ svg ]
+    doc-type: xml
+
+  - mime-type: application/x-turtle
+    extensions: [  ]
+    doc-type: text
+
+  - mime-type: image/x-portable-graymap
+    extensions: [ pgm ]
+    doc-type: binary
+
+  - mime-type: audio/basic
+    extensions: [ au, snd ]
+    doc-type: binary
+
+  - mime-type: application/x-csh
+    extensions: [ csh ]
+    doc-type: binary
+
+  - mime-type: image/png
+    extensions: [ png ]
+    doc-type: binary
+
+  - mime-type: application/rtf
+    extensions: [  ]
+    doc-type: binary
+
+  - mime-type: font/woff
+    extensions: [ woff2 ]
+    doc-type: binary
+
+  - mime-type: application/vnd.apple.mpegurl
+    extensions: [ m3u8 ]
+    doc-type: text
+
+  - mime-type: application/vnd.marklogic-javascript
+    extensions: [ sjs ]
+    doc-type: text
+
+  - mime-type: image/x-portable-bitmap
+    extensions: [ pbm ]
+    doc-type: binary
+
+  - mime-type: application/x-netcdf
+    extensions: [ nc, cdf ]
+    doc-type: binary
+
+  - mime-type: application/vnd.openxmlformats-officedocument.wordprocessingml.document
+    extensions: [ docx ]
+    doc-type: binary
+
+  - mime-type: application/msword
+    extensions: [ doc ]
+    doc-type: binary
+
+  - mime-type: application/sparql-results+xml
+    extensions: [ srx ]
+    doc-type: xml
+
+  - mime-type: image/x-portable-pixmap
+    extensions: [ ppm ]
+    doc-type: binary
+
+  - mime-type: text/html
+    extensions: [ html, htm ]
+    doc-type: text
+
+  - mime-type: application/x-kword
+    extensions: [ kwd, kwt ]
+    doc-type: binary
+
+  - mime-type: text/sgml
+    extensions: [ sgml, sgm ]
+    doc-type: xml
+
+  - mime-type: application/n-triples
+    extensions: [ nt ]
+    doc-type: text
+
+  - mime-type: application/sparql-query
+    extensions: [ rq ]
+    doc-type: text
+
+  - mime-type: application/mac-compactpro
+    extensions: [ cpt ]
+    doc-type: binary
+
+  - mime-type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+    extensions: [ xlsx ]
+    doc-type: binary
+
+  - mime-type: application/vnd.openxmlformats-officedocument.presentationml.slideshow
+    extensions: [ ppsx ]
+    doc-type: binary
+
+  - mime-type: application/vnd.marklogic.triples+xml
+    extensions: [ triplexml ]
+    doc-type: xml
+
+  - mime-type: application/vnd.wap.wmlscriptc
+    extensions: [ wmlsc ]
+    doc-type: binary
+
+  - mime-type: application/postscript
+    extensions: [ ai, eps, ps ]
+    doc-type: binary
+
+  - mime-type: application/font-sfnt
+    extensions: [ ttf, otf, sfnt ]
+    doc-type: binary
+
+  - mime-type: application/vnd.ms-powerpoint
+    extensions: [ ppt ]
+    doc-type: binary
+
+  - mime-type: application/mac-binhex40
+    extensions: [ hqx ]
+    doc-type: binary
+
+  - mime-type: application/vnd.marklogic-tde+xml
+    extensions: [ tdex ]
+    doc-type: xml
+
+  - mime-type: text/x-setext
+    extensions: [ etx ]
+    doc-type: text
+
+  - mime-type: application/x-kspread
+    extensions: [ ksp ]
+    doc-type: binary
+
+  - mime-type: application/vnd.mif
+    extensions: [ mif ]
+    doc-type: binary
+
+  - mime-type: application/x-tex
+    extensions: [ tex ]
+    doc-type: binary
+
+  - mime-type: application/x-troff-ms
+    extensions: [ ms ]
+    doc-type: binary
+
+  - mime-type: audio/mpeg
+    extensions: [ mpga, mp2, mp3 ]
+    doc-type: binary
+
+  - mime-type: application/x-troff
+    extensions: [ t, tr, roff ]
+    doc-type: binary
+
+  - mime-type: text/uri-list
+    extensions: [  ]
+    doc-type: text
+
+  - mime-type: image/x-rgb
+    extensions: [ rgb ]
+    doc-type: binary
+
+  - mime-type: application/vnd.ms-powerpoint.slideshow.macroEnabled.12
+    extensions: [ ppsm ]
+    doc-type: binary
+
+  - mime-type: application/x-gtar
+    extensions: [ gtar ]
+    doc-type: binary
+
+  - mime-type: application/xquery
+    extensions: [  ]
+    doc-type: text
+
+  - mime-type: image/bmp
+    extensions: [ bmp ]
+    doc-type: binary
+
+  - mime-type: audio/x-wav
+    extensions: [ wav ]
+    doc-type: binary
+
+  - mime-type: application/javascript
+    extensions: [ js ]
+    doc-type: text
+
+  - mime-type: application/x-cdlink
+    extensions: [ vcd ]
+    doc-type: binary
+
+  - mime-type: image/x-cmu-raster
+    extensions: [ ras ]
+    doc-type: binary
+
+  - mime-type: audio/mp4
+    extensions: [ f4a, f4b ]
+    doc-type: binary
+
+  - mime-type: application/font-woff2
+    extensions: [ woff2 ]
+    doc-type: binary
+
+  - mime-type: application/smil
+    extensions: [ smi, smil ]
+    doc-type: binary
+
+  - mime-type: application/xhtml+xml
+    extensions: [ xhtml ]
+    doc-type: xml
+
+  - mime-type: video/x-msvideo
+    extensions: [ avi ]
+    doc-type: binary
+
+  - mime-type: application/rdf+json
+    extensions: [ rj ]
+    doc-type: json
+
+  - mime-type: video/mpeg
+    extensions: [ mpeg, mpg, mpe ]
+    doc-type: binary
+
+  - mime-type: application/x-shar
+    extensions: [ shar ]
+    doc-type: binary
+
+  - mime-type: application/andrew-inset
+    extensions: [ ez ]
+    doc-type: binary
+
+  - mime-type: application/vnd.ms-excel.sheet.macroEnabled.12
+    extensions: [ xlsm ]
+    doc-type: binary
+
+  - mime-type: text/richtext
+    extensions: [ rtx ]
+    doc-type: text
+
+  - mime-type: text/tab-separated-values
+    extensions: [ tsv ]
+    doc-type: text
+
+  - mime-type: text/ping
+    extensions: [  ]
+    doc-type: text
+
+  - mime-type: image/vnd.microsoft.icon
+    extensions: [ ico ]
+    doc-type: binary
+
+  - mime-type: text/x-component
+    extensions: [ htc ]
+    doc-type: text
+
+  - mime-type: model/mesh
+    extensions: [ msh, mesh, silo ]
+    doc-type: binary
+
+  - mime-type: text/cache-manifest
+    extensions: [ manifest ]
+    doc-type: text
+
+  - mime-type: application/x-troff-me
+    extensions: [ me ]
+    doc-type: binary
+
+  - mime-type: application/x-stuffit
+    extensions: [ sit ]
+    doc-type: binary
+
+  - mime-type: text/plain
+    extensions: [ asc, txt ]
+    doc-type: text
+
+  - mime-type: application/vnd.ms-word.document.macroEnabled.12
+    extensions: [ docm ]
+    doc-type: binary
+
+  - mime-type: application/x-killustrator
+    extensions: [ kil ]
+    doc-type: binary
+
+  - mime-type: application/vnd.ms-xpsdocument
+    extensions: [ xps ]
+    doc-type: binary
+
+  - mime-type: application/x-rpm
+    extensions: [ rpm ]
+    doc-type: binary
+
+  - mime-type: application/pdf
+    extensions: [ pdf ]
+    doc-type: binary
+
+  - mime-type: application/x-wais-source
+    extensions: [ src ]
+    doc-type: binary
+
+  - mime-type: application/x-tar
+    extensions: [ tar ]
+    doc-type: binary
+
+  - mime-type: application/x-kchart
+    extensions: [ chrt ]
+    doc-type: binary
+
+  - mime-type: application/x-director
+    extensions: [ dcr, dir, dxr ]
+    doc-type: binary
+
+  - mime-type: application/x-koan
+    extensions: [ skp, skd, skt, skm ]
+    doc-type: binary
+
+  - mime-type: application/x-hdf
+    extensions: [ hdf ]
+    doc-type: binary
+
+  - mime-type: text/csv
+    extensions: [ csv ]
+    doc-type: text
+
+  - mime-type: model/vrml
+    extensions: [ wrl, vrml ]
+    doc-type: binary
+
+  - mime-type: text/html-sandboxed
+    extensions: [ sandboxed ]
+    doc-type: text
+
+  - mime-type: application/vnd.ms-fontobject
+    extensions: [ eot ]
+    doc-type: binary
+
+  - mime-type: application/x-sv4cpio
+    extensions: [ sv4cpio ]
+    doc-type: binary
+
+  - mime-type: video/x-flv
+    extensions: [ flv ]
+    doc-type: binary
+
+  - mime-type: application/x-bzip2
+    extensions: [ bz2 ]
+    doc-type: binary
+
+  - mime-type: application/x-dvi
+    extensions: [ dvi ]
+    doc-type: binary
+
+  - mime-type: video/mp4
+    extensions: [ f4v, f4p, mp4 ]
+    doc-type: binary
+
+  - mime-type: application/x-gzip
+    extensions: [ gz, tgz ]
+    doc-type: binary
+
+  - mime-type: image/x-xbitmap
+    extensions: [ xbm ]
+    doc-type: binary
+
+  - mime-type: image/jpeg
+    extensions: [ jpeg, jpg, jpe ]
+    doc-type: binary
+
+  - mime-type: image/ief
+    extensions: [ ief ]
+    doc-type: binary
+
+  - mime-type: application/x-kpresenter
+    extensions: [ kpr, kpt ]
+    doc-type: binary
+
+  - mime-type: application/vnd.wap.wmlc
+    extensions: [ wmlc ]
+    doc-type: binary
+
+  - mime-type: chemical/x-pdb
+    extensions: [ pdb, xyz ]
+    doc-type: binary
+
+  - mime-type: image/x-xpixmap
+    extensions: [ xpm ]
+    doc-type: binary
+
+  - mime-type: text/css
+    extensions: [ css ]
+    doc-type: text
+
+  - mime-type: application/x-latex
+    extensions: [ latex ]
+    doc-type: binary
+
+  - mime-type: video/x-sgi-movie
+    extensions: [ movie ]
+    doc-type: binary
+
+  - mime-type: application/vnd.ms-powerpoint.presentation.macroEnabled.12
+    extensions: [ pptm ]
+    doc-type: binary
+
+  - mime-type: application/vnd.marklogic-ruleset
+    extensions: [ rules ]
+    doc-type: text
+
+  - mime-type: text/turtle
+    extensions: [ ttl ]
+    doc-type: text
+
+  - mime-type: application/vnd.wap.sic
+    extensions: [ sic ]
+    doc-type: binary
+
+  - mime-type: application/x-sv4crc
+    extensions: [ sv4crc ]
+    doc-type: binary
+
+  - mime-type: audio/x-aiff
+    extensions: [ aif, aiff, aifc ]
+    doc-type: binary
+
+  - mime-type: application/x-sh
+    extensions: [ sh ]
+    doc-type: binary
+
+  - mime-type: application/font-woff
+    extensions: [ woff ]
+    doc-type: binary
+
+  - mime-type: application/x-futuresplash
+    extensions: [ spl ]
+    doc-type: binary
+
+  - mime-type: model/iges
+    extensions: [ igs, iges ]
+    doc-type: binary
+
+  - mime-type: audio/midi
+    extensions: [ mid, midi, kar ]
+    doc-type: binary
+
+  - mime-type: application/atom+xml
+    extensions: [  ]
+    doc-type: xml
+
+  - mime-type: video/quicktime
+    extensions: [ qt, mov ]
+    doc-type: binary
+
+  - mime-type: application/x-bcpio
+    extensions: [ bcpio ]
+    doc-type: binary
+
+  - mime-type: application/vnd.ms-excel
+    extensions: [ xls ]
+    doc-type: binary
+
+  - mime-type: application/vnd.wap.slc
+    extensions: [ slc ]
+    doc-type: binary
+
+  - mime-type: application/octet-stream
+    extensions: [ bin, dms, lha, lzh, exe, class ]
+    doc-type: binary
+
+  - mime-type: audio/x-realaudio
+    extensions: [ ra ]
+    doc-type: binary
+
+  - mime-type: text/rtf
+    extensions: [ rtf ]
+    doc-type: text
+
+  - mime-type: application/vnd.ms-word.template.macroEnabled.12
+    extensions: [ dotm ]
+    doc-type: binary
+
+  - mime-type: application/owl+xml
+    extensions: [ owl ]
+    doc-type: xml
+
+  - mime-type: application/x-shockwave-flash
+    extensions: [ swf ]
+    doc-type: binary
+
+  - mime-type: application/json
+    extensions: [ json ]
+    doc-type: json
+
+  - mime-type: application/epub+zip
+    extensions: [ epub ]
+    doc-type: binary
+
+  - mime-type: application/vnd.openxmlformats-officedocument.presentationml.presentation
+    extensions: [ pptx ]
+    doc-type: binary
+
+  - mime-type: application/sparql-results+json
+    extensions: [ srj ]
+    doc-type: json
+
+  - mime-type: application/x-troff-man
+    extensions: [ man ]
+    doc-type: binary
+
+  - mime-type: application/xslt+xml
+    extensions: [ xslt, xsl ]
+    doc-type: xml
+
+  - mime-type: application/zip
+    extensions: [ zip ]
+    doc-type: binary
+
+  - mime-type: application/x-cpio
+    extensions: [ cpio ]
+    doc-type: binary
+
+  - mime-type: application/rdf+xml
+    extensions: [ rdf ]
+    doc-type: xml
+
+  - mime-type: text/rdf+n3
+    extensions: [ n3 ]
+    doc-type: text
+
+  - mime-type: application/x-chess-pgn
+    extensions: [ pgn ]
+    doc-type: binary
+
+  - mime-type: text/vnd.wap.wml
+    extensions: [ wml ]
+    doc-type: text
+
+  - mime-type: text/vnd.wap.si
+    extensions: [ si ]
+    doc-type: text
+
+  - mime-type: text/vnd.wap.wmlscript
+    extensions: [ wmls ]
+    doc-type: text
+
+  - mime-type: image/vnd.wap.wbmp
+    extensions: [ wbmp ]
+    doc-type: binary
+
+  - mime-type: image/x-xwindowdump
+    extensions: [ xwd ]
+    doc-type: binary
+
+  - mime-type: application/vnd.marklogic-tde+json
+    extensions: [ tdej ]
+    doc-type: json
+
+  - mime-type: application/trig
+    extensions: [ trig ]
+    doc-type: text
+
+  - mime-type: image/gif
+    extensions: [ gif ]
+    doc-type: binary
+
+  - mime-type: application/x-ustar
+    extensions: [ ustar ]
+    doc-type: binary
+
+  - mime-type: application/vnd.openxmlformats
+    extensions: [  ]
+    doc-type: binary
+
+  - mime-type: audio/x-pn-realaudio
+    extensions: [ ram, rm ]
+    doc-type: binary
+
+  - mime-type: application/vnd.openxmlformats-officedocument.wordprocessingml.template
+    extensions: [ dotx ]
+    doc-type: binary
+
+  - mime-type: application/n-quads
+    extensions: [ nq ]
+    doc-type: text
+
+  - mime-type: application/vnd.marklogic-js-module
+    extensions: [ mjs ]
+    doc-type: text
+
+  - mime-type: text/json
+    extensions: [  ]
+    doc-type: json
+
+  - mime-type: application/oda
+    extensions: [ oda ]
+    doc-type: binary
+
+  - mime-type: text/vnd.wap.sl
+    extensions: [ sl ]
+    doc-type: text
+
+  - mime-type: application/x-texinfo
+    extensions: [ texinfo, texi ]
+    doc-type: binary
+
+  - mime-type: application/xml
+    extensions: [ xml, xsd, xvs, sch ]
+    doc-type: xml
+
+  - mime-type: image/x-portable-anymap
+    extensions: [ pnm ]
+    doc-type: binary
+
+  - mime-type: video/mp2t
+    extensions: [ ts ]
+    doc-type: binary
+
+  - mime-type: application/vnd.marklogic-xdmp
+    extensions: [ xqy, xqe, xq, xquery ]
+    doc-type: text
+
+  - mime-type: application/x-tcl
+    extensions: [ tcl ]
+    doc-type: binary
+
+  - mime-type: x-conference/x-cooltalk
+    extensions: [ ice ]
+    doc-type: binary
+
+  - mime-type: application/vnd.marklogic-api+json
+    extensions: [ api ]
+    doc-type: json
+
+  - mime-type: application/x-unknown-content-type
+    extensions: [ if-not-found! ]
+    doc-type: binary
+
+  - mime-type: video/x-ms-wmv
+    extensions: [ wmv ]
+    doc-type: binary

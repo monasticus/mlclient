@@ -104,7 +104,8 @@ exclude = [
     "dist",
     "venv",
     "meta",
-    "docs"
+    "docs",
+    "scripts"
 ]
 ignore-init-module-imports = true
 target-version = "py38"

@@ -1662,12 +1662,14 @@ class MLResponseParser:
             return cls._parse_error(response)
         if int(response.headers.get("Content-Length")) == 0:
             return []
-        content_type = cls._get_response_content_type(response)
-        if not content_type.startswith(const.HEADER_MULTIPART_MIXED):
-            return cls._parse_part(response, raw)
 
-        raw_parts = MultipartDecoder.from_response(response).parts
-        parsed_parts = [cls._parse_part(raw_part, raw) for raw_part in raw_parts]
+        content_type = cls._get_response_content_type(response)
+        if content_type.startswith(const.HEADER_MULTIPART_MIXED):
+            body_parts = MultipartDecoder.from_response(response).parts
+        else:
+            body_parts = [response]
+
+        parsed_parts = [cls._parse_part(body_part, raw) for body_part in body_parts]
         if len(parsed_parts) == 1:
             return parsed_parts[0]
         return parsed_parts

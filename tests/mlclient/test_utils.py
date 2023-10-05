@@ -1,6 +1,7 @@
 import pytest
 
 from mlclient import exceptions, utils
+from mlclient.exceptions import ResourceNotFoundError
 
 
 def test_get_accept_header_for_xml_format():
@@ -47,3 +48,15 @@ def test_get_content_type_header_for_stringified_json_data():
     data = '{"key": "value"}'
     json_content_type_header = utils.get_content_type_header_for_data(data)
     assert json_content_type_header == "application/json"
+
+
+def test_get_resource_existing():
+    with utils.get_resource("mimetypes.yaml") as resource:
+        assert resource.name.endswith("resources/mimetypes.yaml")
+
+
+def test_get_resource_non_existing():
+    with pytest.raises(ResourceNotFoundError) as err:
+        utils.get_resource("non-existing-file.yaml")
+
+    assert err.value.args[0] == "No such resource: [non-existing-file.yaml]"

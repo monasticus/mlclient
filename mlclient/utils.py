@@ -10,9 +10,13 @@ all classes. It exports following functions:
 """
 from __future__ import annotations
 
+import importlib.resources as pkg_resources
 import json
+from typing import TextIO
 
 from mlclient import constants, exceptions
+from mlclient import resources as data
+from mlclient.exceptions import ResourceNotFoundError
 
 
 def get_accept_header_for_format(
@@ -71,3 +75,32 @@ def get_content_type_header_for_data(
         return constants.HEADER_XML
     else:
         return constants.HEADER_JSON
+
+
+def get_resource(
+        resource_name: str,
+) -> TextIO:
+    """Return an MLClient resource.
+
+    The resource needs to be included in mlclient.resources package
+    to be returned.
+
+    Parameters
+    ----------
+    resource_name : str
+        An MLClient resource name
+
+    Returns
+    -------
+    TextIO
+        A MLClient resource
+
+    Raises
+    ------
+    ResourceNotFoundError
+        If the resource does not exist
+    """
+    try:
+        return pkg_resources.open_text(data, resource_name)
+    except FileNotFoundError:
+        raise ResourceNotFoundError(resource_name) from FileNotFoundError

@@ -146,6 +146,7 @@ max-complexity = 10
     "PLR0904"  # allow many public methods as MLResourcesClient is a fascade for all ML resources
 ]
 "mlclient/model/*" = [
+    "UP006", # allow using List instead of list for pydantic
     "UP007" # allow using Union instead of X | Y for pydantic
 ]
 "mlclient/model/data.py" = [

@@ -370,20 +370,22 @@ def test_multiple_responses(client):
 
 @responses.activate
 def test_raw_response(client):
-    xqy = ("document { "
-           "  element root { "
-           "    element child { "
-           "      attribute value { 1 } "
-           "    } "
-           "  }"
-           "}")
+    xqy = ("""
+    document {
+      element root {
+        element child {
+          attribute value { 1 }
+        }
+      }
+    }
+    """)
 
     builder = MLResponseBuilder()
     builder.with_method("POST")
     builder.with_base_url("http://localhost:8002/v1/eval")
     builder.with_request_body({
         "xquery": "document {"
-                  " element root { element child { attribute value { 1 } } }"
+                  " element root { element child { attribute value { 1 } } } "
                   "}",
     })
     builder.with_response_status(200)

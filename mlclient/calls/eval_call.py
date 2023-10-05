@@ -6,6 +6,7 @@ It exports 1 class:
 """
 from __future__ import annotations
 
+import re
 from json import dumps
 
 from mlclient import constants, exceptions
@@ -113,5 +114,5 @@ class EvalCall(ResourceCall):
     def _normalize_code(
             code: str,
     ):
-        one_line_code = code.replace("\n", " ")
-        return " ".join(one_line_code.split())
+        code = re.sub(r"\s*\n\s*", " ", code)
+        return code.strip()

@@ -59,6 +59,7 @@ def test_non_multipart_mixed_response_xml(client):
     builder.with_response_status(200)
     builder.with_response_body('<?xml version="1.0" encoding="UTF-8"?>\n'
                                '<root/>')
+    builder.with_response_header("vnd.marklogic.document-format", "xml")
     builder.build_get()
 
     resp = client.get_documents(uri=uri)
@@ -75,13 +76,13 @@ def test_non_multipart_mixed_response_json(client):
     uri = "/some/dir/doc2.json"
 
     builder = MLResponseBuilder()
-    builder.with_method("GET")
     builder.with_base_url("http://localhost:8002/v1/documents")
     builder.with_request_param("uri", uri)
     builder.with_response_content_type("application/json; charset=utf-8")
     builder.with_response_status(200)
     builder.with_response_body('{"root":{"child":"data2"}}')
-    builder.build()
+    builder.with_response_header("vnd.marklogic.document-format", "json")
+    builder.build_get()
 
     resp = client.get_documents(uri=uri)
     builder.generate_builder_code(resp)
@@ -89,6 +90,27 @@ def test_non_multipart_mixed_response_json(client):
 
     assert isinstance(parsed_resp, dict)
     assert parsed_resp == {"root": {"child": "data2"}}
+
+
+@responses.activate
+def test_non_multipart_mixed_response_text(client):
+    uri = "/some/dir/doc3.xqy"
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/documents")
+    builder.with_request_param("uri", uri)
+    builder.with_response_content_type("application/vnd.marklogic-xdmp; charset=utf-8")
+    builder.with_response_status(200)
+    builder.with_response_body(b'xquery version "1.0-ml";\n\nfn:current-date()')
+    builder.with_response_header("vnd.marklogic.document-format", "text")
+    builder.build_get()
+
+    resp = client.get_documents(uri=uri)
+    builder.generate_builder_code(resp)
+    parsed_resp = MLResponseParser.parse(resp)
+
+    assert isinstance(parsed_resp, str)
+    assert parsed_resp == 'xquery version "1.0-ml";\n\nfn:current-date()'
 
 
 @responses.activate

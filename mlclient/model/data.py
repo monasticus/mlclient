@@ -17,8 +17,8 @@ It exports 5 classes:
         A class representing MarkLogic's document metadata.
     * Permission:
         A class representing MarkLogic's document permission.
-    * MetadataEncoder(json.JSONEncoder):
-        A JSONEncoder subclass to dump Metadata to JSON accordingly.
+    * Mimetype
+        A class representing mime type.
 """
 from __future__ import annotations
 
@@ -29,8 +29,10 @@ import re
 import xml.etree.ElementTree as ElemTree
 from abc import ABCMeta, abstractmethod
 from enum import Enum
-from typing import Any, ClassVar
+from typing import Any, ClassVar, List
 from xml.dom import minidom
+
+from pydantic import BaseModel, Field
 
 logger = logging.getLogger(__name__)
 
@@ -1008,3 +1010,11 @@ class Permission:
             "role-name": self.role_name(),
             "capabilities": list(self.capabilities()),
         }
+
+
+class Mimetype(BaseModel):
+    """A class representing a mime type."""
+
+    mime_type: str = Field(alias="mime-type")
+    extensions: List[str]
+    document_type: DocumentType = Field(alias="doc-type")

@@ -42,6 +42,8 @@ from mlclient.calls import (DatabaseDeleteCall, DatabaseGetCall,
                             ServersGetCall, ServersPostCall, UserDeleteCall,
                             UserGetCall, UserPropertiesGetCall,
                             UserPropertiesPutCall, UsersGetCall, UsersPostCall)
+from mlclient.mimetypes import Mimetypes
+from mlclient.model import DocumentType
 from mlclient.model.calls import DocumentsBodyPart
 
 logger = logging.getLogger(__name__)
@@ -1632,6 +1634,8 @@ class MLResponseParser:
             lambda data: datetime.strptime(data, "%Y-%m-%d%z").date(),
         const.HEADER_PRIMITIVE_DATE_TIME:
             lambda data: datetime.strptime(data, "%Y-%m-%dT%H:%M:%S.%f%z"),
+        None:
+            lambda data: data,
     }
 
     @classmethod
@@ -1733,12 +1737,12 @@ class MLResponseParser:
             content_type = cls._get_response_content_type(body_part)
             primitive_type = body_part.headers.get(const.HEADER_NAME_PRIMITIVE)
 
-        if (content_type.startswith(const.HEADER_PLAIN_TEXT) and
+        if (content_type.startswith(Mimetypes.get_mimetypes(DocumentType.TEXT)) and
                 primitive_type in cls._PLAIN_TEXT_PARSERS):
             return cls._PLAIN_TEXT_PARSERS[primitive_type](text)
-        if content_type.startswith(const.HEADER_JSON):
+        if content_type.startswith(Mimetypes.get_mimetypes(DocumentType.JSON)):
             return json.loads(text)
-        if content_type.startswith(const.HEADER_XML):
+        if content_type.startswith(Mimetypes.get_mimetypes(DocumentType.XML)):
             element = ElemTree.fromstring(text)
             if primitive_type in [None, const.HEADER_PRIMITIVE_DOCUMENT_NODE]:
                 return ElemTree.ElementTree(element)

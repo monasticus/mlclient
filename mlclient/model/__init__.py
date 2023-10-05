@@ -29,13 +29,15 @@ This package exports the following classes:
         A class representing MarkLogic's document metadata.
     * Permission:
         A class representing MarkLogic's document permission.
+    * Mimetype
+        A class representing mime type
 
 Examples
 --------
 >>> from mlclient.model import Document, DocumentType, Metadata
 """
 from .data import (BytesDocument, Document, DocumentType, JSONDocument,
-                   Metadata, Permission, StringDocument, XMLDocument)
+                   Metadata, Mimetype, Permission, StringDocument, XMLDocument)
 
 __all__ = ["Document", "StringDocument", "BytesDocument", "JSONDocument", "XMLDocument",
-           "DocumentType", "Metadata", "Permission"]
+           "DocumentType", "Metadata", "Mimetype", "Permission"]

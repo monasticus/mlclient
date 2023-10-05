@@ -10,7 +10,7 @@ from mlclient.model import DocumentType, Mimetype
 
 class Mimetypes:
     _MIMETYPES: ClassVar[list[Mimetype]] = None
-    _DOC_TYPE_MIMETYPES: ClassVar[dict] = {
+    _DOC_TYPE_MIMETYPES: ClassVar[dict[DocumentType, Mimetype]] = {
         DocumentType.XML: [],
         DocumentType.JSON: [],
         DocumentType.BINARY: [],
@@ -21,13 +21,14 @@ class Mimetypes:
     def get_mimetypes(
             cls,
             doc_type: DocumentType,
-    ) -> list[str]:
+    ) -> tuple[str]:
         if cls._MIMETYPES is None:
             cls._init_mimetypes()
         if len(cls._DOC_TYPE_MIMETYPES[doc_type]) == 0:
             cls._init_doc_type_mimetypes(doc_type)
 
-        return [mimetype.mime_type for mimetype in cls._DOC_TYPE_MIMETYPES[doc_type]]
+        return tuple(mimetype.mime_type
+                     for mimetype in cls._DOC_TYPE_MIMETYPES[doc_type])
 
     @classmethod
     def _init_mimetypes(

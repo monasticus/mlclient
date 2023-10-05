@@ -1,4 +1,5 @@
 import xml.etree.ElementTree as ElemTree
+import zlib
 
 import pytest
 import responses
@@ -9,7 +10,7 @@ from tests.tools import MLResponseBuilder
 
 @pytest.fixture(autouse=True)
 def docs_client() -> DocumentsClient:
-    return DocumentsClient(port=8000, auth_method="digest")
+    return DocumentsClient(port=8000)
 
 
 @pytest.fixture(autouse=True)
@@ -78,3 +79,23 @@ def test_read_text_doc(docs_client):
 
     assert isinstance(resp, str)
     assert resp == 'xquery version "1.0-ml";\n\nfn:current-date()'
+
+
+@responses.activate
+def test_read_binary_doc(docs_client):
+    uri = "/some/dir/doc4.zip"
+    content = zlib.compress(b'xquery version "1.0-ml";\n\nfn:current-date()')
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8000/v1/documents")
+    builder.with_request_param("uri", uri)
+    builder.with_response_content_type("application/zip")
+    builder.with_response_status(200)
+    builder.with_response_body(content)
+    builder.with_response_header("vnd.marklogic.document-format", "binary")
+    builder.build_get()
+
+    resp = docs_client.read(uri)
+
+    assert isinstance(resp, bytes)
+    assert resp == content

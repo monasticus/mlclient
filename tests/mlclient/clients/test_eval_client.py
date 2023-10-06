@@ -336,7 +336,7 @@ def test_eval_no_code_params(eval_client):
 
 
 @responses.activate
-def test_eval_with_raw_flag(eval_client):
+def test_eval_with_str_output_type(eval_client):
     code = "element root {}"
 
     builder = MLResponseBuilder()
@@ -346,7 +346,24 @@ def test_eval_with_raw_flag(eval_client):
     builder.with_response_body_part("element", "<root/>")
     builder.build_post()
 
-    resp = eval_client.eval(xq=code, raw=True)
+    resp = eval_client.eval(xq=code, output_type=str)
 
     assert isinstance(resp, str)
     assert resp == "<root/>"
+
+
+@responses.activate
+def test_eval_with_bytes_output_type(eval_client):
+    code = "element root {}"
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/eval")
+    builder.with_request_body({"xquery": code})
+    builder.with_response_body_multipart_mixed()
+    builder.with_response_body_part("element", "<root/>")
+    builder.build_post()
+
+    resp = eval_client.eval(xq=code, output_type=bytes)
+
+    assert isinstance(resp, bytes)
+    assert resp == b"<root/>"

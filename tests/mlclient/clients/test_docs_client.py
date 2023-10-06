@@ -37,17 +37,19 @@ def test_read_non_existing_doc(docs_client):
             "statusCode": 404,
             "status": "Not Found",
             "messageCode": "RESTAPI-NODOCUMENT",
-            "message": "RESTAPI-NODOCUMENT: (err:FOER0000) Resource or document does not exist:  "
-                       f"category: content message: {uri}"
+            "message": "RESTAPI-NODOCUMENT: (err:FOER0000) "
+                       "Resource or document does not exist:  "
+                       f"category: content message: {uri}",
         },
     })
     builder.build_get()
     with pytest.raises(MarkLogicError) as err:
         docs_client.read(uri)
 
-    expected_error = ('[404 Not Found] (RESTAPI-NODOCUMENT) '
-                      'RESTAPI-NODOCUMENT: (err:FOER0000) Resource or document does not exist:  '
-                      f'category: content message: {uri}')
+    expected_error = ("[404 Not Found] (RESTAPI-NODOCUMENT) "
+                      "RESTAPI-NODOCUMENT: (err:FOER0000) "
+                      "Resource or document does not exist:  "
+                      f"category: content message: {uri}")
     assert err.value.args[0] == expected_error
 
 

@@ -39,7 +39,7 @@ class EvalClient(MLResourceClient):
             variables: dict | None = None,
             database: str | None = None,
             txid: str | None = None,
-            raw: bool = False,
+            output_type: type | None = None,
             **kwargs,
     ) -> (bytes | str | int | float | bool | dict |
           ElemTree.ElementTree | ElemTree.Element |
@@ -63,8 +63,8 @@ class EvalClient(MLResourceClient):
         txid : str | None, default None
             The transaction identifier of the multi-statement transaction
             in which to service this request.
-        raw : bool, default False
-            If True, body parts are parsed to string
+        output_type : type | None, default None
+            A raw output type (supported: str, bytes)
         kwargs : dict
             Key value arguments used as variables
 
@@ -90,7 +90,7 @@ class EvalClient(MLResourceClient):
             txid=txid,
             **kwargs)
         resp = self.call(call)
-        parsed_resp = MLResponseParser.parse(resp, raw=raw)
+        parsed_resp = MLResponseParser.parse(resp, output_type=output_type)
         if not resp.ok:
             raise MarkLogicError(parsed_resp)
         return parsed_resp

@@ -59,7 +59,7 @@ class CallEvalCommand(Command):
         option(
             "rest-server",
             "s",
-            description="The ML REST Server environmental id (to get logs from)",
+            description="The ML REST Server environmental id",
             flag=False,
         ),
         option(
@@ -105,7 +105,7 @@ class CallEvalCommand(Command):
         txid = self.option("txid")
 
         params = {
-            "raw": True,
+            "output_type": str,
             "database": database,
             "txid": txid,
         }

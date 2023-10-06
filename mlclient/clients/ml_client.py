@@ -1642,7 +1642,7 @@ class MLResponseParser:
     def parse(
             cls,
             response: Response,
-            raw: bool = False,
+            output_type: type | None = None,
     ) -> (bytes | str | int | float | bool | dict |
           ElemTree.ElementTree | ElemTree.Element |
           list):
@@ -1652,8 +1652,39 @@ class MLResponseParser:
         ----------
         response : Response
             An HTTP response taken from MarkLogic instance
-        raw : bool, default False
-            If True, body parts are parsed to string
+        output_type : type | None , default None
+            A raw output type (supported: str, bytes)
+
+        Returns
+        -------
+        bytes | str | int | float | bool | dict |
+        ElemTree.ElementTree | ElemTree.Element |
+        list
+            A parsed response body
+        """
+        if response.ok and int(response.headers.get("Content-Length")) == 0:
+            return []
+
+        if output_type == str:
+            return cls._parse_text(response)
+        if output_type == bytes:
+            return cls._parse_bytes(response)
+
+        return cls._parse(response)
+
+    @classmethod
+    def _parse(
+            cls,
+            response: Response,
+    ) -> (bytes | str | int | float | bool | dict |
+          ElemTree.ElementTree | ElemTree.Element |
+          list):
+        """Parse MarkLogic HTTP Response.
+
+        Parameters
+        ----------
+        response : Response
+            An HTTP response taken from MarkLogic instance
 
         Returns
         -------
@@ -1667,21 +1698,19 @@ class MLResponseParser:
             if content_type.startswith("application/json"):
                 return response.json()
             return cls._parse_error(response)
-        if int(response.headers.get("Content-Length")) == 0:
-            return []
 
         if content_type.startswith(const.HEADER_MULTIPART_MIXED):
             body_parts = MultipartDecoder.from_response(response).parts
         else:
             body_parts = [response]
 
-        parsed_parts = [cls._parse_part(body_part, raw) for body_part in body_parts]
+        parsed_parts = [cls._parse_part(body_part) for body_part in body_parts]
         if len(parsed_parts) == 1:
             return parsed_parts[0]
         return parsed_parts
 
     @classmethod
-    def parse_text(
+    def _parse_text(
             cls,
             response: Response,
     ) -> str | list[str]:
@@ -1690,8 +1719,6 @@ class MLResponseParser:
             if content_type.startswith("application/json"):
                 return json.dumps(response.json())
             return cls._parse_error(response)
-        if int(response.headers.get("Content-Length")) == 0:
-            return ""
 
         if content_type.startswith(const.HEADER_MULTIPART_MIXED):
             body_parts = MultipartDecoder.from_response(response).parts
@@ -1704,7 +1731,7 @@ class MLResponseParser:
         return parsed_parts
 
     @classmethod
-    def parse_bytes(
+    def _parse_bytes(
             cls,
             response: Response,
     ) -> bytes | list[bytes]:
@@ -1713,8 +1740,6 @@ class MLResponseParser:
             if content_type.startswith("application/json"):
                 return json.dumps(response.json()).encode("utf-8")
             return cls._parse_error(response).encode("utf-8")
-        if int(response.headers.get("Content-Length")) == 0:
-            return response.content
 
         if content_type.startswith(const.HEADER_MULTIPART_MIXED):
             body_parts = MultipartDecoder.from_response(response).parts
@@ -1764,7 +1789,7 @@ class MLResponseParser:
         ----------
         body_part : BodyPart | Response
             An HTTP response body or body part taken from MarkLogic instance
-        output_type : type , default None
+        output_type : type | None , default None
             An output type (supported: str, bytes)
 
         Returns

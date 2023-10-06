@@ -62,7 +62,7 @@ def test_parse_text_single_error_response(client):
     builder.build_post()
 
     resp = client.eval(xquery=xqy)
-    parsed_resp = MLResponseParser.parse_text(resp)
+    parsed_resp = MLResponseParser.parse(resp, output_type=str)
 
     assert isinstance(parsed_resp, str)
     assert parsed_resp == (
@@ -84,7 +84,7 @@ def test_parse_bytes_single_error_response(client):
     builder.build_post()
 
     resp = client.eval(xquery=xqy)
-    parsed_resp = MLResponseParser.parse_bytes(resp)
+    parsed_resp = MLResponseParser.parse(resp, output_type=bytes)
 
     assert isinstance(parsed_resp, bytes)
     assert parsed_resp == (
@@ -144,7 +144,7 @@ def test_parse_text_single_error_response_json(client):
     builder.build_get()
 
     resp = client.get_documents(uri=uri)
-    parsed_resp = MLResponseParser.parse_text(resp)
+    parsed_resp = MLResponseParser.parse(resp, output_type=str)
 
     assert isinstance(parsed_resp, str)
     assert parsed_resp == (
@@ -180,7 +180,7 @@ def test_parse_bytes_single_error_response_json(client):
     builder.build_get()
 
     resp = client.get_documents(uri=uri)
-    parsed_resp = MLResponseParser.parse_bytes(resp)
+    parsed_resp = MLResponseParser.parse(resp, output_type=bytes)
 
     assert isinstance(parsed_resp, bytes)
     assert parsed_resp == (
@@ -232,7 +232,7 @@ def test_parse_text_non_multipart_mixed_response_xml(client):
     builder.build_get()
 
     resp = client.get_documents(uri=uri)
-    parsed_resp = MLResponseParser.parse_text(resp)
+    parsed_resp = MLResponseParser.parse(resp, output_type=str)
 
     assert isinstance(parsed_resp, str)
     assert parsed_resp == content
@@ -253,7 +253,7 @@ def test_parse_bytes_non_multipart_mixed_response_xml(client):
     builder.build_get()
 
     resp = client.get_documents(uri=uri)
-    parsed_resp = MLResponseParser.parse_bytes(resp)
+    parsed_resp = MLResponseParser.parse(resp, output_type=bytes)
 
     assert isinstance(parsed_resp, bytes)
     assert parsed_resp == content.encode("utf-8")
@@ -294,7 +294,7 @@ def test_parse_text_non_multipart_mixed_response_json(client):
     builder.build_get()
 
     resp = client.get_documents(uri=uri)
-    parsed_resp = MLResponseParser.parse_text(resp)
+    parsed_resp = MLResponseParser.parse(resp, output_type=str)
 
     assert isinstance(parsed_resp, str)
     assert parsed_resp == content
@@ -315,7 +315,7 @@ def test_parse_bytes_non_multipart_mixed_response_json(client):
     builder.build_get()
 
     resp = client.get_documents(uri=uri)
-    parsed_resp = MLResponseParser.parse_bytes(resp)
+    parsed_resp = MLResponseParser.parse(resp, output_type=bytes)
 
     assert isinstance(parsed_resp, bytes)
     assert parsed_resp == content.encode("utf-8")
@@ -355,7 +355,7 @@ def test_parse_text_non_multipart_mixed_response_text(client):
     builder.build_get()
 
     resp = client.get_documents(uri=uri)
-    parsed_resp = MLResponseParser.parse_text(resp)
+    parsed_resp = MLResponseParser.parse(resp, output_type=str)
 
     assert isinstance(parsed_resp, str)
     assert parsed_resp == 'xquery version "1.0-ml";\n\nfn:current-date()'
@@ -375,7 +375,7 @@ def test_parse_bytes_non_multipart_mixed_response_text(client):
     builder.build_get()
 
     resp = client.get_documents(uri=uri)
-    parsed_resp = MLResponseParser.parse_bytes(resp)
+    parsed_resp = MLResponseParser.parse(resp, output_type=bytes)
 
     assert isinstance(parsed_resp, bytes)
     assert parsed_resp == b'xquery version "1.0-ml";\n\nfn:current-date()'
@@ -417,7 +417,7 @@ def test_parse_text_single_unsupported_response(client):
     builder.build_post()
 
     resp = client.eval(xquery=xqy)
-    parsed_resp = MLResponseParser.parse_text(resp)
+    parsed_resp = MLResponseParser.parse(resp, output_type=str)
 
     assert isinstance(parsed_resp, str)
     assert parsed_resp == 'cts:directory-query("/root/", "infinity")'
@@ -438,7 +438,7 @@ def test_parse_bytes_single_unsupported_response(client):
     builder.build_post()
 
     resp = client.eval(xquery=xqy)
-    parsed_resp = MLResponseParser.parse_bytes(resp)
+    parsed_resp = MLResponseParser.parse(resp, output_type=bytes)
 
     assert isinstance(parsed_resp, bytes)
     assert parsed_resp == b'cts:directory-query("/root/", "infinity")'
@@ -474,10 +474,10 @@ def test_parse_text_single_empty_response(client):
     builder.build_post()
 
     resp = client.eval(xquery=xqy)
-    parsed_resp = MLResponseParser.parse_text(resp)
+    parsed_resp = MLResponseParser.parse(resp, output_type=str)
 
-    assert isinstance(parsed_resp, str)
-    assert parsed_resp == ""
+    assert isinstance(parsed_resp, list)
+    assert parsed_resp == []
 
 
 @responses.activate
@@ -492,10 +492,10 @@ def test_parse_bytes_single_empty_response(client):
     builder.build_post()
 
     resp = client.eval(xquery=xqy)
-    parsed_resp = MLResponseParser.parse_bytes(resp)
+    parsed_resp = MLResponseParser.parse(resp, output_type=bytes)
 
-    assert isinstance(parsed_resp, bytes)
-    assert parsed_resp == b""
+    assert isinstance(parsed_resp, list)
+    assert parsed_resp == []
 
 
 @responses.activate
@@ -530,7 +530,7 @@ def test_parse_text_single_plain_text_str_response(client):
     builder.build_post()
 
     resp = client.eval(xquery=xqy)
-    parsed_resp = MLResponseParser.parse_text(resp)
+    parsed_resp = MLResponseParser.parse(resp, output_type=str)
 
     assert isinstance(parsed_resp, str)
     assert parsed_resp == "plain text"
@@ -549,7 +549,7 @@ def test_parse_bytes_single_plain_text_str_response(client):
     builder.build_post()
 
     resp = client.eval(xquery=xqy)
-    parsed_resp = MLResponseParser.parse_bytes(resp)
+    parsed_resp = MLResponseParser.parse(resp, output_type=bytes)
 
     assert isinstance(parsed_resp, bytes)
     assert parsed_resp == b"plain text"
@@ -587,7 +587,7 @@ def test_parse_text_single_plain_text_int_response(client):
     builder.build_post()
 
     resp = client.eval(xquery=xqy)
-    parsed_resp = MLResponseParser.parse_text(resp)
+    parsed_resp = MLResponseParser.parse(resp, output_type=str)
 
     assert isinstance(parsed_resp, str)
     assert parsed_resp == "1"
@@ -606,7 +606,7 @@ def test_parse_bytes_single_plain_text_int_response(client):
     builder.build_post()
 
     resp = client.eval(xquery=xqy)
-    parsed_resp = MLResponseParser.parse_bytes(resp)
+    parsed_resp = MLResponseParser.parse(resp, output_type=bytes)
 
     assert isinstance(parsed_resp, bytes)
     assert parsed_resp == b"1"
@@ -644,7 +644,7 @@ def test_parse_text_single_plain_text_decimal_response(client):
     builder.build_post()
 
     resp = client.eval(xquery=xqy)
-    parsed_resp = MLResponseParser.parse_text(resp)
+    parsed_resp = MLResponseParser.parse(resp, output_type=str)
 
     assert isinstance(parsed_resp, str)
     assert parsed_resp == "1.1"
@@ -663,7 +663,7 @@ def test_parse_bytes_single_plain_text_decimal_response(client):
     builder.build_post()
 
     resp = client.eval(xquery=xqy)
-    parsed_resp = MLResponseParser.parse_bytes(resp)
+    parsed_resp = MLResponseParser.parse(resp, output_type=bytes)
 
     assert isinstance(parsed_resp, bytes)
     assert parsed_resp == b"1.1"
@@ -701,7 +701,7 @@ def test_parse_text_single_plain_text_boolean_response(client):
     builder.build_post()
 
     resp = client.eval(xquery=xqy)
-    parsed_resp = MLResponseParser.parse_text(resp)
+    parsed_resp = MLResponseParser.parse(resp, output_type=str)
 
     assert isinstance(parsed_resp, str)
     assert parsed_resp == "true"
@@ -720,7 +720,7 @@ def test_parse_bytes_single_plain_text_boolean_response(client):
     builder.build_post()
 
     resp = client.eval(xquery=xqy)
-    parsed_resp = MLResponseParser.parse_bytes(resp)
+    parsed_resp = MLResponseParser.parse(resp, output_type=bytes)
 
     assert isinstance(parsed_resp, bytes)
     assert parsed_resp == b"true"
@@ -758,7 +758,7 @@ def test_parse_text_single_plain_text_date_response(client):
     builder.build_post()
 
     resp = client.eval(xquery=xqy)
-    parsed_resp = MLResponseParser.parse_text(resp)
+    parsed_resp = MLResponseParser.parse(resp, output_type=str)
 
     assert isinstance(parsed_resp, str)
     assert parsed_resp == "2023-09-14Z"
@@ -777,7 +777,7 @@ def test_parse_bytes_single_plain_text_date_response(client):
     builder.build_post()
 
     resp = client.eval(xquery=xqy)
-    parsed_resp = MLResponseParser.parse_bytes(resp)
+    parsed_resp = MLResponseParser.parse(resp, output_type=bytes)
 
     assert isinstance(parsed_resp, bytes)
     assert parsed_resp == b"2023-09-14Z"
@@ -817,7 +817,7 @@ def test_parse_text_single_plain_text_date_time_response(client):
     builder.build_post()
 
     resp = client.eval(xquery=xqy)
-    parsed_resp = MLResponseParser.parse_text(resp)
+    parsed_resp = MLResponseParser.parse(resp, output_type=str)
 
     assert isinstance(parsed_resp, str)
     assert parsed_resp == "2023-09-14T07:30:27.997332Z"
@@ -836,7 +836,7 @@ def test_parse_bytes_single_plain_text_date_time_response(client):
     builder.build_post()
 
     resp = client.eval(xquery=xqy)
-    parsed_resp = MLResponseParser.parse_bytes(resp)
+    parsed_resp = MLResponseParser.parse(resp, output_type=bytes)
 
     assert isinstance(parsed_resp, bytes)
     assert parsed_resp == b"2023-09-14T07:30:27.997332Z"
@@ -893,7 +893,7 @@ def test_parse_text_single_json_map_response(client):
     builder.build_post()
 
     resp = client.eval(xquery=xqy)
-    parsed_resp = MLResponseParser.parse_text(resp)
+    parsed_resp = MLResponseParser.parse(resp, output_type=str)
 
     assert isinstance(parsed_resp, str)
     assert parsed_resp == serialized_map
@@ -918,7 +918,7 @@ def test_parse_bytes_single_json_map_response(client):
     builder.build_post()
 
     resp = client.eval(xquery=xqy)
-    parsed_resp = MLResponseParser.parse_bytes(resp)
+    parsed_resp = MLResponseParser.parse(resp, output_type=bytes)
 
     assert isinstance(parsed_resp, bytes)
     assert parsed_resp == serialized_map.encode("utf-8")
@@ -958,7 +958,7 @@ def test_parse_text_single_json_array_response(client):
     builder.build_post()
 
     resp = client.eval(xquery=xqy)
-    parsed_resp = MLResponseParser.parse_text(resp)
+    parsed_resp = MLResponseParser.parse(resp, output_type=str)
 
     assert isinstance(parsed_resp, str)
     assert parsed_resp == '["value", "1", 1, 1.1, true]'
@@ -978,7 +978,7 @@ def test_parse_bytes_single_json_array_response(client):
     builder.build_post()
 
     resp = client.eval(xquery=xqy)
-    parsed_resp = MLResponseParser.parse_bytes(resp)
+    parsed_resp = MLResponseParser.parse(resp, output_type=bytes)
 
     assert isinstance(parsed_resp, bytes)
     assert parsed_resp == b'["value", "1", 1, 1.1, true]'
@@ -1024,7 +1024,7 @@ def test_parse_text_single_xml_document_node_response(client):
     builder.build_post()
 
     resp = client.eval(xquery=xqy)
-    parsed_resp = MLResponseParser.parse_text(resp)
+    parsed_resp = MLResponseParser.parse(resp, output_type=str)
 
     assert isinstance(parsed_resp, str)
     assert parsed_resp == '<?xml version="1.0" encoding="UTF-8"?>\n<root/>'
@@ -1046,7 +1046,7 @@ def test_parse_bytes_single_xml_document_node_response(client):
     builder.build_post()
 
     resp = client.eval(xquery=xqy)
-    parsed_resp = MLResponseParser.parse_bytes(resp)
+    parsed_resp = MLResponseParser.parse(resp, output_type=bytes)
 
     assert isinstance(parsed_resp, bytes)
     assert parsed_resp == b'<?xml version="1.0" encoding="UTF-8"?>\n<root/>'
@@ -1086,7 +1086,7 @@ def test_parse_text_single_xml_element_response(client):
     builder.build_post()
 
     resp = client.eval(xquery=xqy)
-    parsed_resp = MLResponseParser.parse_text(resp)
+    parsed_resp = MLResponseParser.parse(resp, output_type=str)
 
     assert isinstance(parsed_resp, str)
     assert parsed_resp == "<root/>"
@@ -1105,7 +1105,7 @@ def test_parse_bytes_single_xml_element_response(client):
     builder.build_post()
 
     resp = client.eval(xquery=xqy)
-    parsed_resp = MLResponseParser.parse_bytes(resp)
+    parsed_resp = MLResponseParser.parse(resp, output_type=bytes)
 
     assert isinstance(parsed_resp, bytes)
     assert parsed_resp == b"<root/>"
@@ -1152,7 +1152,7 @@ def test_parse_text_multiple_responses(client):
     builder.build_post()
 
     resp = client.eval(xquery=xqy)
-    parsed_resp = MLResponseParser.parse_text(resp)
+    parsed_resp = MLResponseParser.parse(resp, output_type=str)
 
     assert isinstance(parsed_resp, list)
     assert isinstance(parsed_resp[0], str)
@@ -1177,7 +1177,7 @@ def test_parse_bytes_multiple_responses(client):
     builder.build_post()
 
     resp = client.eval(xquery=xqy)
-    parsed_resp = MLResponseParser.parse_bytes(resp)
+    parsed_resp = MLResponseParser.parse(resp, output_type=bytes)
 
     assert isinstance(parsed_resp, list)
     assert isinstance(parsed_resp[0], bytes)

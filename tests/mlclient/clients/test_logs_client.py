@@ -31,6 +31,7 @@ def test_get_logs_no_such_host(logs_client):
     builder.with_request_param("format", "json")
     builder.with_request_param("filename", "8002_ErrorLog.txt")
     builder.with_request_param("host", "non-existing-host")
+    builder.with_response_status(404)
     builder.with_response_body({
         "errorResponse": {
             "statusCode": "404",

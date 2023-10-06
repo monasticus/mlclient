@@ -42,7 +42,6 @@ from mlclient.calls import (DatabaseDeleteCall, DatabaseGetCall,
                             ServersGetCall, ServersPostCall, UserDeleteCall,
                             UserGetCall, UserPropertiesGetCall,
                             UserPropertiesPutCall, UsersGetCall, UsersPostCall)
-from mlclient.exceptions import MarkLogicError
 from mlclient.mimetypes import Mimetypes
 from mlclient.model import DocumentType
 from mlclient.model.calls import DocumentsBodyPart
@@ -1705,6 +1704,29 @@ class MLResponseParser:
         return parsed_parts
 
     @classmethod
+    def parse_bytes(
+            cls,
+            response: Response,
+    ) -> bytes | list[bytes]:
+        content_type = cls._get_response_content_type(response)
+        if not response.ok:
+            if content_type.startswith("application/json"):
+                return json.dumps(response.json()).encode("utf-8")
+            return cls._parse_error(response).encode("utf-8")
+        if int(response.headers.get("Content-Length")) == 0:
+            return response.content
+
+        if content_type.startswith(const.HEADER_MULTIPART_MIXED):
+            body_parts = MultipartDecoder.from_response(response).parts
+        else:
+            body_parts = [response]
+
+        parsed_parts = [cls._parse_part(body_part, bytes) for body_part in body_parts]
+        if len(parsed_parts) == 1:
+            return parsed_parts[0]
+        return parsed_parts
+
+    @classmethod
     def _parse_error(
             cls,
             response: Response,
@@ -1756,6 +1778,8 @@ class MLResponseParser:
         content = body_part.content
         if output_type is str:
             return text
+        if output_type is bytes:
+            return content
 
         if isinstance(body_part, BodyPart):
             content_type = cls._get_header(body_part, const.HEADER_NAME_CONTENT_TYPE)
@@ -1766,16 +1790,19 @@ class MLResponseParser:
 
         if (content_type.startswith(Mimetypes.get_mimetypes(DocumentType.TEXT)) and
                 primitive_type in cls._PLAIN_TEXT_PARSERS):
-            return cls._PLAIN_TEXT_PARSERS[primitive_type](text)
-        if content_type.startswith(Mimetypes.get_mimetypes(DocumentType.JSON)):
-            return json.loads(text)
-        if content_type.startswith(Mimetypes.get_mimetypes(DocumentType.XML)):
+            parsed = cls._PLAIN_TEXT_PARSERS[primitive_type](text)
+        elif content_type.startswith(Mimetypes.get_mimetypes(DocumentType.JSON)):
+            parsed = json.loads(text)
+        elif content_type.startswith(Mimetypes.get_mimetypes(DocumentType.XML)):
             element = ElemTree.fromstring(text)
             if primitive_type in [None, const.HEADER_PRIMITIVE_DOCUMENT_NODE]:
-                return ElemTree.ElementTree(element)
-            return element
+                parsed = ElemTree.ElementTree(element)
+            else:
+                parsed = element
+        else:
+            parsed = content
 
-        return content
+        return parsed
 
     @classmethod
     def _get_response_content_type(

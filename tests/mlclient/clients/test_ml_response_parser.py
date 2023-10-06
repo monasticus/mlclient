@@ -49,6 +49,34 @@ def test_single_error_response(client):
 
 
 @responses.activate
+def test_single_error_response_json(client):
+    uri = "/some/dir/doc.xml"
+    error = {
+        "errorResponse": {
+            "statusCode": 404,
+            "status": "Not Found",
+            "messageCode": "RESTAPI-NODOCUMENT",
+            "message": "RESTAPI-NODOCUMENT: (err:FOER0000) Resource or document does not exist:  "
+                       "category: content message: /some/dir/doc5.xml"
+        }
+    }
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/documents")
+    builder.with_request_param("uri", uri)
+    builder.with_response_content_type("application/json; charset=UTF-8")
+    builder.with_response_status(404)
+    builder.with_response_body(error)
+    builder.build_get()
+
+    resp = client.get_documents(uri=uri)
+    parsed_resp = MLResponseParser.parse(resp)
+
+    assert isinstance(parsed_resp, dict)
+    assert parsed_resp == error
+
+
+@responses.activate
 def test_non_multipart_mixed_response_xml(client):
     uri = "/some/dir/doc1.xml"
 

@@ -42,6 +42,7 @@ from mlclient.calls import (DatabaseDeleteCall, DatabaseGetCall,
                             ServersGetCall, ServersPostCall, UserDeleteCall,
                             UserGetCall, UserPropertiesGetCall,
                             UserPropertiesPutCall, UsersGetCall, UsersPostCall)
+from mlclient.exceptions import MarkLogicError
 from mlclient.mimetypes import Mimetypes
 from mlclient.model import DocumentType
 from mlclient.model.calls import DocumentsBodyPart
@@ -1662,12 +1663,14 @@ class MLResponseParser:
         list
             A parsed response body
         """
+        content_type = cls._get_response_content_type(response)
         if not response.ok:
+            if content_type.startswith("application/json"):
+                return response.json()
             return cls._parse_error(response)
         if int(response.headers.get("Content-Length")) == 0:
             return []
 
-        content_type = cls._get_response_content_type(response)
         if content_type.startswith(const.HEADER_MULTIPART_MIXED):
             body_parts = MultipartDecoder.from_response(response).parts
         else:

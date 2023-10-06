@@ -17,7 +17,7 @@ class DocumentsClient(MLResourceClient):
         resp = self.call(call)
         parsed_resp = MLResponseParser.parse(resp)
         if not resp.ok:
-            raise MarkLogicError(parsed_resp)
+            raise MarkLogicError(parsed_resp["errorResponse"])
         return parsed_resp
 
     @classmethod

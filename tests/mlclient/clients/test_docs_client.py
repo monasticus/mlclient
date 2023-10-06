@@ -5,12 +5,13 @@ import pytest
 import responses
 
 from mlclient.clients import DocumentsClient
+from mlclient.exceptions import MarkLogicError
 from tests.tools import MLResponseBuilder
 
 
 @pytest.fixture(autouse=True)
 def docs_client() -> DocumentsClient:
-    return DocumentsClient(port=8000)
+    return DocumentsClient(port=8000, auth_method="digest")
 
 
 @pytest.fixture(autouse=True)
@@ -20,6 +21,34 @@ def _setup_and_teardown(docs_client):
     yield
 
     docs_client.disconnect()
+
+
+# @responses.activate
+def test_read_non_existing_doc(docs_client):
+    uri = "/some/dir/doc5.xml"
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8000/v1/documents")
+    builder.with_request_param("uri", "/some/dir/doc5.xml")
+    builder.with_response_content_type("application/json; charset=UTF-8")
+    builder.with_response_status(404)
+    builder.with_response_body({
+        "errorResponse": {
+            "statusCode": 404,
+            "status": "Not Found",
+            "messageCode": "RESTAPI-NODOCUMENT",
+            "message": "RESTAPI-NODOCUMENT: (err:FOER0000) Resource or document does not exist:  "
+                       f"category: content message: {uri}"
+        },
+    })
+    builder.build_get()
+    with pytest.raises(MarkLogicError) as err:
+        docs_client.read(uri)
+
+    expected_error = ('[404 Not Found] (RESTAPI-NODOCUMENT) '
+                      'RESTAPI-NODOCUMENT: (err:FOER0000) Resource or document does not exist:  '
+                      f'category: content message: {uri}')
+    assert err.value.args[0] == expected_error
 
 
 @responses.activate

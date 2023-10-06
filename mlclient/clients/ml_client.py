@@ -1682,6 +1682,29 @@ class MLResponseParser:
         return parsed_parts
 
     @classmethod
+    def parse_text(
+            cls,
+            response: Response,
+    ) -> str | list[str]:
+        content_type = cls._get_response_content_type(response)
+        if not response.ok:
+            if content_type.startswith("application/json"):
+                return json.dumps(response.json())
+            return cls._parse_error(response)
+        if int(response.headers.get("Content-Length")) == 0:
+            return ""
+
+        if content_type.startswith(const.HEADER_MULTIPART_MIXED):
+            body_parts = MultipartDecoder.from_response(response).parts
+        else:
+            body_parts = [response]
+
+        parsed_parts = [cls._parse_part(body_part, str) for body_part in body_parts]
+        if len(parsed_parts) == 1:
+            return parsed_parts[0]
+        return parsed_parts
+
+    @classmethod
     def _parse_error(
             cls,
             response: Response,
@@ -1709,7 +1732,7 @@ class MLResponseParser:
     def _parse_part(
             cls,
             body_part: BodyPart | Response,
-            raw: bool,
+            output_type: type | None = None,
     ) -> (bytes | str | int | float | bool | dict |
           ElemTree.ElementTree | ElemTree.Element |
           list):
@@ -1719,8 +1742,8 @@ class MLResponseParser:
         ----------
         body_part : BodyPart | Response
             An HTTP response body or body part taken from MarkLogic instance
-        raw : bool
-            If True, body parts are parsed to string
+        output_type : type , default None
+            An output type (supported: str, bytes)
 
         Returns
         -------
@@ -1730,7 +1753,8 @@ class MLResponseParser:
             A parsed response body or body part
         """
         text = body_part.text
-        if raw:
+        content = body_part.content
+        if output_type is str:
             return text
 
         if isinstance(body_part, BodyPart):
@@ -1751,7 +1775,7 @@ class MLResponseParser:
                 return ElemTree.ElementTree(element)
             return element
 
-        return body_part.content
+        return content
 
     @classmethod
     def _get_response_content_type(

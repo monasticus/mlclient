@@ -6,6 +6,8 @@ import responses
 
 from mlclient.clients import DocumentsClient
 from mlclient.exceptions import MarkLogicError
+from mlclient.model import (BytesDocument, DocumentType, JSONDocument,
+                            StringDocument, XMLDocument)
 from tests.tools import MLResponseBuilder
 
 
@@ -23,7 +25,7 @@ def _setup_and_teardown(docs_client):
     docs_client.disconnect()
 
 
-# @responses.activate
+@responses.activate
 def test_read_non_existing_doc(docs_client):
     uri = "/some/dir/doc5.xml"
 
@@ -66,12 +68,14 @@ def test_read_xml_doc(docs_client):
     builder.with_response_body(b'<?xml version="1.0" encoding="UTF-8"?>\n<root/>')
     builder.build_get()
 
-    resp = docs_client.read(uri)
+    document = docs_client.read(uri)
 
-    assert isinstance(resp, ElemTree.ElementTree)
-    assert resp.getroot().tag == "root"
-    assert resp.getroot().text is None
-    assert resp.getroot().attrib == {}
+    assert isinstance(document, XMLDocument)
+    assert document.doc_type == DocumentType.XML
+    assert isinstance(document.content, ElemTree.ElementTree)
+    assert document.content.getroot().tag == "root"
+    assert document.content.getroot().text is None
+    assert document.content.getroot().attrib == {}
 
 
 @responses.activate
@@ -87,10 +91,12 @@ def test_read_json_doc(docs_client):
     builder.with_response_body(b'{"root":{"child":"data"}}')
     builder.build_get()
 
-    resp = docs_client.read(uri)
+    document = docs_client.read(uri)
 
-    assert isinstance(resp, dict)
-    assert resp == {"root": {"child": "data"}}
+    assert isinstance(document, JSONDocument)
+    assert document.doc_type == DocumentType.JSON
+    assert isinstance(document.content, dict)
+    assert document.content == {"root": {"child": "data"}}
 
 
 @responses.activate
@@ -106,10 +112,12 @@ def test_read_text_doc(docs_client):
     builder.with_response_header("vnd.marklogic.document-format", "text")
     builder.build_get()
 
-    resp = docs_client.read(uri)
+    document = docs_client.read(uri)
 
-    assert isinstance(resp, str)
-    assert resp == 'xquery version "1.0-ml";\n\nfn:current-date()'
+    assert isinstance(document, StringDocument)
+    assert document.doc_type == DocumentType.TEXT
+    assert isinstance(document.content, str)
+    assert document.content == 'xquery version "1.0-ml";\n\nfn:current-date()'
 
 
 @responses.activate
@@ -126,7 +134,9 @@ def test_read_binary_doc(docs_client):
     builder.with_response_header("vnd.marklogic.document-format", "binary")
     builder.build_get()
 
-    resp = docs_client.read(uri)
+    document = docs_client.read(uri)
 
-    assert isinstance(resp, bytes)
-    assert resp == content
+    assert isinstance(document, BytesDocument)
+    assert document.doc_type == DocumentType.BINARY
+    assert isinstance(document.content, bytes)
+    assert document.content == content

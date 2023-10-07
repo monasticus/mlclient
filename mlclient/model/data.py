@@ -284,12 +284,12 @@ class JSONDocument(Document):
 class XMLDocument(Document):
     """A Document implementation representing a single MarkLogic document.
 
-    This implementation stores content in ElemTree.Element format.
+    This implementation stores content in ElemTree.ElementTree format.
     """
 
     def __init__(
             self,
-            content: ElemTree.Element,
+            content: ElemTree.ElementTree,
             uri: str | None = None,
             doc_type: DocumentType = DocumentType.XML,
             metadata: Metadata | None = None,
@@ -299,7 +299,7 @@ class XMLDocument(Document):
 
         Parameters
         ----------
-        content : ElemTree.Element
+        content : ElemTree.ElementTree
             A document content
         uri : str
             A document URI
@@ -316,7 +316,7 @@ class XMLDocument(Document):
     @property
     def content(
             self,
-    ) -> ElemTree.Element:
+    ) -> ElemTree.ElementTree:
         """A document content.
 
         Returns

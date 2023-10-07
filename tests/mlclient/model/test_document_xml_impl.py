@@ -1,4 +1,4 @@
-from xml.etree.ElementTree import Element, SubElement
+from xml.etree.ElementTree import Element, ElementTree, SubElement
 
 from mlclient.model import Document, DocumentType, XMLDocument
 
@@ -14,9 +14,9 @@ def test_content():
 
     root.append(parent)
 
-    document = XMLDocument(root)
+    document = XMLDocument(ElementTree(root))
     assert document.content == root
 
 
 def test_doc_type_when_none():
-    assert XMLDocument(Element("root")).doc_type == DocumentType.XML
+    assert XMLDocument(ElementTree(Element("root"))).doc_type == DocumentType.XML

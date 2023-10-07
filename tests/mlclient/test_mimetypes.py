@@ -20,7 +20,32 @@ def test_text_mimetypes():
     assert "text/html" in mimetypes
 
 
-def test_binary_mimetypes():
+def test_bin_mimetypes():
     mimetypes = Mimetypes.get_mimetypes(DocumentType.BINARY)
     assert len(mimetypes) > 0
     assert "image/png" in mimetypes
+
+
+def test_doc_type_for_uri_xml():
+    doc_type = Mimetypes.get_doc_type("/some/dir/doc1.xml")
+    assert doc_type == DocumentType.XML
+
+
+def test_doc_type_for_uri_json():
+    doc_type = Mimetypes.get_doc_type("/some/dir/doc2.json")
+    assert doc_type == DocumentType.JSON
+
+
+def test_doc_type_for_uri_text():
+    doc_type = Mimetypes.get_doc_type("/some/dir/doc3.xqy")
+    assert doc_type == DocumentType.TEXT
+
+
+def test_doc_type_for_uri_bin():
+    doc_type = Mimetypes.get_doc_type("/some/dir/doc4.zip")
+    assert doc_type == DocumentType.BINARY
+
+
+def test_doc_type_for_uri_bin_unknown_ext():
+    doc_type = Mimetypes.get_doc_type("/some/dir/doc5")
+    assert doc_type == DocumentType.BINARY

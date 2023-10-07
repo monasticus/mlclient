@@ -10,7 +10,7 @@ from mlclient.model import DocumentType, Mimetype
 
 class Mimetypes:
     _MIMETYPES: ClassVar[list[Mimetype]] = None
-    _DOC_TYPE_MIMETYPES: ClassVar[dict[DocumentType, Mimetype]] = {
+    _DOC_TYPE_MIMETYPES: ClassVar[dict[DocumentType, list[Mimetype]]] = {
         DocumentType.XML: [],
         DocumentType.JSON: [],
         DocumentType.BINARY: [],
@@ -22,28 +22,39 @@ class Mimetypes:
             cls,
             doc_type: DocumentType,
     ) -> tuple[str]:
-        if cls._MIMETYPES is None:
-            cls._init_mimetypes()
-        if len(cls._DOC_TYPE_MIMETYPES[doc_type]) == 0:
-            cls._init_doc_type_mimetypes(doc_type)
-
+        cls._init_doc_type_mimetypes(doc_type)
         return tuple(mimetype.mime_type
                      for mimetype in cls._DOC_TYPE_MIMETYPES[doc_type])
 
     @classmethod
-    def _init_mimetypes(
+    def get_doc_type(
             cls,
+            uri: str,
     ):
-        with utils.get_resource("mimetypes.yaml") as mimetypes_file:
-            constants = yaml.safe_load(mimetypes_file.read())
-            mimetypes = constants["mimetypes"]
-            cls._MIMETYPES = [Mimetype(**mimetype) for mimetype in mimetypes]
+        cls._init_mimetypes()
+        for mimetype in cls._MIMETYPES:
+            extensions = mimetype.extensions
+            if uri.endswith(tuple(extensions)):
+                return mimetype.document_type
+        return DocumentType.BINARY
 
     @classmethod
     def _init_doc_type_mimetypes(
             cls,
             doc_type: DocumentType,
     ):
-        for mimetype in cls._MIMETYPES:
-            if mimetype.document_type == doc_type:
-                cls._DOC_TYPE_MIMETYPES[doc_type].append(mimetype)
+        cls._init_mimetypes()
+        if len(cls._DOC_TYPE_MIMETYPES[doc_type]) == 0:
+            for mimetype in cls._MIMETYPES:
+                if mimetype.document_type == doc_type:
+                    cls._DOC_TYPE_MIMETYPES[doc_type].append(mimetype)
+
+    @classmethod
+    def _init_mimetypes(
+            cls,
+    ):
+        if cls._MIMETYPES is None:
+            with utils.get_resource("mimetypes.yaml") as mimetypes_file:
+                constants = yaml.safe_load(mimetypes_file.read())
+                mimetypes = constants["mimetypes"]
+                cls._MIMETYPES = [Mimetype(**mimetype) for mimetype in mimetypes]

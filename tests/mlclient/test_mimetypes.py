@@ -49,3 +49,28 @@ def test_doc_type_for_uri_bin():
 def test_doc_type_for_uri_bin_unknown_ext():
     doc_type = Mimetypes.get_doc_type("/some/dir/doc5")
     assert doc_type == DocumentType.BINARY
+
+
+def test_doc_type_for_content_type_xml():
+    doc_type = Mimetypes.get_doc_type("application/xml; charset=utf-8")
+    assert doc_type == DocumentType.XML
+
+
+def test_doc_type_for_content_type_json():
+    doc_type = Mimetypes.get_doc_type("application/json; charset=utf-8")
+    assert doc_type == DocumentType.JSON
+
+
+def test_doc_type_for_content_type_text():
+    doc_type = Mimetypes.get_doc_type("application/vnd.marklogic-xdmp; charset=utf-8")
+    assert doc_type == DocumentType.TEXT
+
+
+def test_doc_type_for_content_type_bin():
+    doc_type = Mimetypes.get_doc_type("application/zip")
+    assert doc_type == DocumentType.BINARY
+
+
+def test_doc_type_for_content_type_bin_unknown_ext():
+    doc_type = Mimetypes.get_doc_type("unknown")
+    assert doc_type == DocumentType.BINARY

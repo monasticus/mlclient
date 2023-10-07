@@ -29,12 +29,12 @@ class Mimetypes:
     @classmethod
     def get_doc_type(
             cls,
-            uri: str,
+            uri_or_content_type: str,
     ):
         cls._init_mimetypes()
         for mimetype in cls._MIMETYPES:
-            extensions = mimetype.extensions
-            if uri.endswith(tuple(extensions)):
+            if (uri_or_content_type.startswith(mimetype.mime_type) or
+                    uri_or_content_type.endswith(tuple(mimetype.extensions))):
                 return mimetype.document_type
         return DocumentType.BINARY
 
@@ -55,6 +55,6 @@ class Mimetypes:
     ):
         if cls._MIMETYPES is None:
             with utils.get_resource("mimetypes.yaml") as mimetypes_file:
-                constants = yaml.safe_load(mimetypes_file.read())
-                mimetypes = constants["mimetypes"]
+                mimetypes_yaml = yaml.safe_load(mimetypes_file.read())
+                mimetypes = mimetypes_yaml["mimetypes"]
                 cls._MIMETYPES = [Mimetype(**mimetype) for mimetype in mimetypes]

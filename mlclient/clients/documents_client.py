@@ -12,25 +12,29 @@ class DocumentsClient(MLResourceClient):
 
     def read(
             self,
-            uri: str,
+            uri: str | list[str] | tuple[str] | set[str],
     ) -> Document:
         call = self._get_call(uri=uri)
         resp = self.call(call)
-        parsed_resp = MLResponseParser.parse(resp)
-        if not resp.ok:
-            raise MarkLogicError(parsed_resp["errorResponse"])
-        content_type = resp.headers.get("Content-Type")
-        doc_type = Mimetypes.get_doc_type(content_type)
-        if doc_type == DocumentType.XML:
-            impl = XMLDocument
-        elif doc_type == DocumentType.JSON:
-            impl = JSONDocument
-        elif doc_type == DocumentType.TEXT:
-            impl = StringDocument
-        elif doc_type == DocumentType.BINARY:
-            impl = BytesDocument
+        if isinstance(uri, (list, tuple, set)) and len(uri) == 1:
+            uri = uri[0]
 
-        return impl(parsed_resp, uri=uri, doc_type=doc_type)
+        if isinstance(uri, str):
+            parsed_resp = MLResponseParser.parse(resp)
+            if not resp.ok:
+                raise MarkLogicError(parsed_resp["errorResponse"])
+            content_type = resp.headers.get("Content-Type")
+            doc_type = Mimetypes.get_doc_type(content_type)
+            if doc_type == DocumentType.XML:
+                impl = XMLDocument
+            elif doc_type == DocumentType.JSON:
+                impl = JSONDocument
+            elif doc_type == DocumentType.TEXT:
+                impl = StringDocument
+            elif doc_type == DocumentType.BINARY:
+                impl = BytesDocument
+
+            return impl(parsed_resp, uri=uri, doc_type=doc_type)
 
     @classmethod
     def _get_call(

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 import urllib.parse
+import zlib
 from pathlib import Path
 from typing import Any
 
@@ -11,7 +12,7 @@ from requests_toolbelt import MultipartDecoder, MultipartEncoder
 from responses import matchers
 
 from mlclient.constants import (HEADER_MULTIPART_MIXED, HEADER_NAME_PRIMITIVE,
-                                HEADER_X_WWW_FORM_URLENCODED)
+                                HEADER_X_WWW_FORM_URLENCODED, HEADER_NAME_CONTENT_TYPE)
 
 _SCRIPT_DIR = Path(__file__).resolve()
 _RESOURCES_DIR = "resources"
@@ -121,8 +122,9 @@ class MLResponseBuilder:
 
     def with_response_body_part(
             self,
-            x_primitive: str,
+            x_primitive: str | None,
             body_part_content: Any,
+            content_type: str | None = None,
     ):
         if not self._multipart_mixed_response:
             func = "MLResponseBuilder.with_response_body_multipart_mixed()"
@@ -136,14 +138,16 @@ class MLResponseBuilder:
         name_disposition = f"name{index}"
         field_name = f"field{index}"
 
-        if x_primitive in ["array", "map"]:
+        if content_type is not None:
+            content_type = content_type
+        elif x_primitive in ["array", "map"]:
             content_type = "application/json"
         elif x_primitive in ["document-node()", "element()"]:
             content_type = "application/xml"
         else:
             content_type = "text/plain"
 
-        headers = {"X-Primitive": x_primitive}
+        headers = {} if x_primitive is None else {"X-Primitive": x_primitive}
         self._response_body_fields[field_name] = (
             name_disposition, body_part_content, content_type, headers,
         )
@@ -471,18 +475,35 @@ class MLResponseBuilder:
         response_body_lines = []
         raw_parts = MultipartDecoder.from_response(response).parts
         for part in raw_parts:
-            encoded_header_name = HEADER_NAME_PRIMITIVE.encode(part.encoding)
-            header_value = part.headers.get(encoded_header_name)
-            x_primitive = header_value.decode(part.encoding)
-            body_part_content = part.text.replace("'", "\\'")
-            if "\n" in body_part_content:
-                response_body_line = (f"builder.with_response_body_part("
-                                      f"\"{x_primitive}\", '''{body_part_content}'''"
-                                      f")")
+            x_primitive_name_enc = HEADER_NAME_PRIMITIVE.encode(part.encoding)
+            x_primitive_value_enc = part.headers.get(x_primitive_name_enc)
+            if x_primitive_value_enc is None:
+                x_primitive = None
             else:
-                response_body_line = (f"builder.with_response_body_part("
-                                      f"\"{x_primitive}\", '{body_part_content}'"
-                                      f")")
+                x_primitive = f'"{x_primitive_value_enc.decode(part.encoding)}"'
+
+            content_type_name_enc = HEADER_NAME_CONTENT_TYPE.encode(part.encoding)
+            content_type_value_enc = part.headers.get(content_type_name_enc)
+            if content_type_value_enc is None:
+                content_type = None
+            else:
+                content_type = f'"{content_type_value_enc.decode(part.encoding)}"'
+
+            if content_type != '"application/zip"':
+                body_part_content = part.text.replace("'", "\\'")
+            else:
+                body_part_content = zlib.decompress(part.content)
+
+            if isinstance(body_part_content, bytes):
+                body_part_content = body_part_content
+            elif "\n" in body_part_content:
+                body_part_content = f"'''{body_part_content}'''"
+            else:
+                body_part_content = f"'{body_part_content}'"
+            response_body_line = (f"builder.with_response_body_part("
+                                  f"{x_primitive}, {body_part_content}, {content_type}"
+                                  f")")
+
             response_body_lines.append(response_body_line)
         return response_body_lines
 

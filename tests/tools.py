@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import os
 import urllib.parse
 import zlib
@@ -9,12 +10,16 @@ from typing import Any
 import responses
 import urllib3
 from requests import Response
-from requests_toolbelt import MultipartDecoder, MultipartEncoder
+from requests_toolbelt import MultipartDecoder
+from requests_toolbelt.multipart.decoder import BodyPart
 from responses import matchers
 from urllib3.fields import RequestField
 
-from mlclient.constants import (HEADER_MULTIPART_MIXED, HEADER_NAME_PRIMITIVE,
-                                HEADER_X_WWW_FORM_URLENCODED, HEADER_NAME_CONTENT_TYPE)
+from mlclient.constants import (HEADER_MULTIPART_MIXED,
+                                HEADER_NAME_CONTENT_DISP,
+                                HEADER_NAME_CONTENT_TYPE,
+                                HEADER_NAME_PRIMITIVE,
+                                HEADER_X_WWW_FORM_URLENCODED)
 from mlclient.model.calls import DocumentsBodyPart
 
 _SCRIPT_DIR = Path(__file__).resolve()
@@ -138,7 +143,7 @@ class MLResponseBuilder:
             self._response_body_fields = []
 
         if content_type is not None:
-            content_type = content_type
+            ...
         elif x_primitive in ["array", "map"]:
             content_type = "application/json"
         elif x_primitive in ["document-node()", "element()"]:
@@ -154,6 +159,31 @@ class MLResponseBuilder:
             name="--ignore--",
             data=body_part_content,
             headers=headers)
+        self._response_body_fields.append(req_field)
+
+    def with_response_documents_body_part(
+            self,
+            body_part: DocumentsBodyPart,
+    ):
+        if not self._multipart_mixed_response:
+            func = "MLResponseBuilder.with_response_body_multipart_mixed()"
+            msg = f"multipart/mixed response set to False: use {func} first"
+            raise RuntimeError(msg)
+
+        if not self._response_body_fields:
+            self._response_body_fields = []
+
+        data = body_part.content
+        if isinstance(data, dict):
+            data = json.dumps(data)
+
+        req_field = RequestField(
+            name="--ignore--",
+            data=data,
+            headers={
+                "Content-Disposition": body_part.content_disposition,
+                "Content-Type": body_part.content_type,
+            })
         self._response_body_fields.append(req_field)
 
     def with_response_status(
@@ -240,8 +270,10 @@ class MLResponseBuilder:
                 del self._response_headers["Content-Type"]
             responses_params["headers"] = self._response_headers
         else:
-            body, content_type = urllib3.encode_multipart_formdata(self._response_body_fields)
-            content_type = content_type.replace("multipart/form-data", "multipart/mixed")
+            body, content_type = urllib3.encode_multipart_formdata(
+                self._response_body_fields)
+            content_type = content_type.replace(
+                "multipart/form-data", "multipart/mixed")
             self.with_response_header("Content-Length", len(body))
 
             responses_params["body"] = body
@@ -460,7 +492,10 @@ class MLResponseBuilder:
             cls,
             response: Response,
     ):
-        response_content_type = response.headers.get("Content-Type")
+        content_type_header = next(header
+                                   for header in response.headers
+                                   if header.lower() == "content-type")
+        response_content_type = response.headers.get(content_type_header)
         response_body_text = response.text
 
         if response.content == b"":
@@ -477,37 +512,50 @@ class MLResponseBuilder:
         response_body_lines = []
         raw_parts = MultipartDecoder.from_response(response).parts
         for part in raw_parts:
-            x_primitive_name_enc = HEADER_NAME_PRIMITIVE.encode(part.encoding)
-            x_primitive_value_enc = part.headers.get(x_primitive_name_enc)
-            if x_primitive_value_enc is None:
-                x_primitive = None
-            else:
-                x_primitive = f'"{x_primitive_value_enc.decode(part.encoding)}"'
+            x_primitive = cls._decode_header(part, HEADER_NAME_PRIMITIVE)
+            content_type = cls._decode_header(part, HEADER_NAME_CONTENT_TYPE)
+            content_disp = cls._decode_header(part, HEADER_NAME_CONTENT_DISP)
 
-            content_type_name_enc = HEADER_NAME_CONTENT_TYPE.encode(part.encoding)
-            content_type_value_enc = part.headers.get(content_type_name_enc)
-            if content_type_value_enc is None:
-                content_type = None
-            else:
-                content_type = f'"{content_type_value_enc.decode(part.encoding)}"'
-
-            if content_type != '"application/zip"':
+            if content_type != "application/zip":
                 body_part_content = part.text.replace("'", "\\'")
             else:
                 body_part_content = zlib.decompress(part.content)
+                body_part_content = body_part_content.replace(b"'", b"\\'")
 
-            if isinstance(body_part_content, bytes):
-                body_part_content = body_part_content
-            elif "\n" in body_part_content:
-                body_part_content = f"'''{body_part_content}'''"
+            if response.request.path_url.startswith("/v1/documents"):
+                doc_body_part = {
+                    "content-type": content_type,
+                    "content-disposition": content_disp,
+                    "content": body_part_content,
+                }
+                response_body_line = ("builder.with_response_documents_body_part("
+                                      f"**{doc_body_part}"
+                                      ")")
             else:
-                body_part_content = f"'{body_part_content}'"
-            response_body_line = (f"builder.with_response_body_part("
-                                  f"{x_primitive}, {body_part_content}, {content_type}"
-                                  f")")
+                if isinstance(body_part_content, bytes):
+                    ...
+                elif "\n" in body_part_content:
+                    body_part_content = f"'''{body_part_content}'''"
+                else:
+                    body_part_content = f"'{body_part_content}'"
+                response_body_line = ("builder.with_response_body_part("
+                                      f'"{x_primitive}", {body_part_content}'
+                                      ")")
 
-            response_body_lines.append(response_body_line)
+        response_body_lines.append(response_body_line)
         return response_body_lines
+
+    @classmethod
+    def _decode_header(
+            cls,
+            body_part: BodyPart,
+            header_name: str,
+    ) -> str | None:
+        name_enc = header_name.encode(body_part.encoding)
+        value_enc = body_part.headers.get(name_enc)
+        if value_enc is None:
+            return None
+        return value_enc.decode(body_part.encoding)
 
     @classmethod
     def _generate_response_body_file_lines(

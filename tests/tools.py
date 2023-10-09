@@ -7,12 +7,15 @@ from pathlib import Path
 from typing import Any
 
 import responses
+import urllib3
 from requests import Response
 from requests_toolbelt import MultipartDecoder, MultipartEncoder
 from responses import matchers
+from urllib3.fields import RequestField
 
 from mlclient.constants import (HEADER_MULTIPART_MIXED, HEADER_NAME_PRIMITIVE,
                                 HEADER_X_WWW_FORM_URLENCODED, HEADER_NAME_CONTENT_TYPE)
+from mlclient.model.calls import DocumentsBodyPart
 
 _SCRIPT_DIR = Path(__file__).resolve()
 _RESOURCES_DIR = "resources"
@@ -63,7 +66,7 @@ class MLResponseBuilder:
         self._request_params: dict = {}
         self._multipart_mixed_response: bool = False
         self._response_body: str | bytes | None = None
-        self._response_body_fields: dict | None = None
+        self._response_body_fields: list | None = None
         self._response_status: int | None = None
         self._response_headers: dict = {}
 
@@ -132,11 +135,7 @@ class MLResponseBuilder:
             raise RuntimeError(msg)
 
         if not self._response_body_fields:
-            self._response_body_fields = {}
-
-        index = len(self._response_body_fields) + 1
-        name_disposition = f"name{index}"
-        field_name = f"field{index}"
+            self._response_body_fields = []
 
         if content_type is not None:
             content_type = content_type
@@ -147,10 +146,15 @@ class MLResponseBuilder:
         else:
             content_type = "text/plain"
 
-        headers = {} if x_primitive is None else {"X-Primitive": x_primitive}
-        self._response_body_fields[field_name] = (
-            name_disposition, body_part_content, content_type, headers,
-        )
+        headers = {"Content-Type": content_type}
+        if x_primitive is not None:
+            headers["X-Primitive"] = x_primitive
+
+        req_field = RequestField(
+            name="--ignore--",
+            data=body_part_content,
+            headers=headers)
+        self._response_body_fields.append(req_field)
 
     def with_response_status(
             self,
@@ -236,13 +240,11 @@ class MLResponseBuilder:
                 del self._response_headers["Content-Type"]
             responses_params["headers"] = self._response_headers
         else:
-            multipart_body = MultipartEncoder(fields=self._response_body_fields)
-            multipart_body_str = multipart_body.to_string()
-            boundary = multipart_body.boundary[2:]
-            content_type = f"multipart/mixed; boundary={boundary}"
-            self.with_response_header("Content-Length", len(multipart_body_str))
+            body, content_type = urllib3.encode_multipart_formdata(self._response_body_fields)
+            content_type = content_type.replace("multipart/form-data", "multipart/mixed")
+            self.with_response_header("Content-Length", len(body))
 
-            responses_params["body"] = multipart_body_str
+            responses_params["body"] = body
             responses_params["content_type"] = content_type
             responses_params["headers"] = self._response_headers
 

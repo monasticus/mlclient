@@ -13,9 +13,10 @@ def test_content():
     parent.text = "data"
 
     root.append(parent)
+    tree = ElementTree(root)
 
-    document = XMLDocument(ElementTree(root))
-    assert document.content == root
+    document = XMLDocument(tree)
+    assert document.content == tree
 
 
 def test_doc_type_when_none():

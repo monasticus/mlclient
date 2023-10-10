@@ -458,7 +458,9 @@ class MLResponseBuilder:
             content_type_line = (f'builder.with_response_content_type('
                                  f'"{response_content_type}"'
                                  f')')
-            response_headers_lines.append(content_type_line)
+        else:
+            content_type_line = "builder.with_response_body_multipart_mixed()"
+        response_headers_lines.append(content_type_line)
 
         for name, value in response_headers.items():
             if name not in excluded:
@@ -529,8 +531,8 @@ class MLResponseBuilder:
                     "content": body_part_content,
                 }
                 response_body_line = ("builder.with_response_documents_body_part("
-                                      f"**{doc_body_part}"
-                                      ")")
+                                      f"DocumentsBodyPart(**{doc_body_part}"
+                                      "))")
             else:
                 if isinstance(body_part_content, bytes):
                     ...

@@ -13,6 +13,7 @@ HEADER_NAME_ACCEPT = "Accept"
 HEADER_NAME_CONTENT_TYPE = "Content-Type"
 HEADER_NAME_CONTENT_DISP = "Content-Disposition"
 HEADER_NAME_PRIMITIVE = "X-Primitive"
+HEADER_NAME_ML_DOCUMENT_FORMAT = "vnd.marklogic.document-format"
 
 HEADER_MULTIPART_MIXED = "multipart/mixed"
 HEADER_XML = "application/xml"

@@ -1673,12 +1673,43 @@ class MLResponseParser:
         return cls._parse(response)
 
     @classmethod
+    def parse_with_headers(
+            cls,
+            response: Response,
+            output_type: type | None = None,
+    ) -> tuple | list[tuple]:
+        """Parse MarkLogic HTTP Response and get headers.
+
+        Parameters
+        ----------
+        response : Response
+            An HTTP response taken from MarkLogic instance
+        output_type : type | None , default None
+            A raw output type (supported: str, bytes)
+
+        Returns
+        -------
+        tuple
+            A parsed response body with headers
+        """
+        if response.ok and int(response.headers.get("Content-Length")) == 0:
+            return response.headers, []
+
+        if output_type == str:
+            return cls._parse_text(response, with_headers=True)
+        if output_type == bytes:
+            return cls._parse_bytes(response, with_headers=True)
+
+        return cls._parse(response, with_headers=True)
+
+    @classmethod
     def _parse(
             cls,
             response: Response,
+            with_headers: bool = False,
     ) -> (bytes | str | int | float | bool | dict |
           ElemTree.ElementTree | ElemTree.Element |
-          list):
+          list | tuple):
         """Parse MarkLogic HTTP Response.
 
         Parameters
@@ -1690,21 +1721,26 @@ class MLResponseParser:
         -------
         bytes | str | int | float | bool | dict |
         ElemTree.ElementTree | ElemTree.Element |
-        list
+        list | tuple
             A parsed response body
         """
         content_type = cls._get_response_content_type(response)
         if not response.ok:
             if content_type.startswith("application/json"):
-                return response.json()
-            return cls._parse_error(response)
+                error = response.json()
+            else:
+                error = cls._parse_error(response)
+            if with_headers:
+                return response.headers, error
+            return error
 
         if content_type.startswith(const.HEADER_MULTIPART_MIXED):
             body_parts = MultipartDecoder.from_response(response).parts
         else:
             body_parts = [response]
 
-        parsed_parts = [cls._parse_part(body_part) for body_part in body_parts]
+        parsed_parts = [cls._parse_part(body_part, None, with_headers)
+                        for body_part in body_parts]
         if len(parsed_parts) == 1:
             return parsed_parts[0]
         return parsed_parts
@@ -1713,7 +1749,8 @@ class MLResponseParser:
     def _parse_text(
             cls,
             response: Response,
-    ) -> str | list[str]:
+            with_headers: bool = False,
+    ) -> str | tuple[dict, str] | list[str | tuple[dict, str]]:
         content_type = cls._get_response_content_type(response)
         if not response.ok:
             if content_type.startswith("application/json"):
@@ -1725,7 +1762,8 @@ class MLResponseParser:
         else:
             body_parts = [response]
 
-        parsed_parts = [cls._parse_part(body_part, str) for body_part in body_parts]
+        parsed_parts = [cls._parse_part(body_part, str, with_headers)
+                        for body_part in body_parts]
         if len(parsed_parts) == 1:
             return parsed_parts[0]
         return parsed_parts
@@ -1734,7 +1772,8 @@ class MLResponseParser:
     def _parse_bytes(
             cls,
             response: Response,
-    ) -> bytes | list[bytes]:
+            with_headers: bool = False,
+    ) -> bytes | tuple[dict, bytes] | list[bytes | tuple[dict, bytes]]:
         content_type = cls._get_response_content_type(response)
         if not response.ok:
             if content_type.startswith("application/json"):
@@ -1746,7 +1785,8 @@ class MLResponseParser:
         else:
             body_parts = [response]
 
-        parsed_parts = [cls._parse_part(body_part, bytes) for body_part in body_parts]
+        parsed_parts = [cls._parse_part(body_part, bytes, with_headers)
+                        for body_part in body_parts]
         if len(parsed_parts) == 1:
             return parsed_parts[0]
         return parsed_parts
@@ -1780,9 +1820,10 @@ class MLResponseParser:
             cls,
             body_part: BodyPart | Response,
             output_type: type | None = None,
+            with_headers: bool = False,
     ) -> (bytes | str | int | float | bool | dict |
           ElemTree.ElementTree | ElemTree.Element |
-          list):
+          list | tuple):
         """Parse MarkLogic HTTP Response part.
 
         Parameters
@@ -1796,38 +1837,51 @@ class MLResponseParser:
         -------
         bytes | str | int | float | bool | dict |
         ElemTree.ElementTree | ElemTree.Element |
-        list
+        list | tuple
             A parsed response body or body part
         """
         text = body_part.text
         content = body_part.content
-        if output_type is str:
-            return text
-        if output_type is bytes:
-            return content
-
+        headers = body_part.headers
         if isinstance(body_part, BodyPart):
-            content_type = cls._get_header(body_part, const.HEADER_NAME_CONTENT_TYPE)
-            primitive_type = cls._get_header(body_part, const.HEADER_NAME_PRIMITIVE)
+            headers = cls._decode_headers(headers, body_part.encoding)
+
+        if output_type is str:
+            parsed = text
+        elif output_type is bytes:
+            parsed = content
+        else:
+            parsed = cls._parse_type_specific(body_part, headers)
+
+        if not with_headers:
+            return parsed
+        return headers, parsed
+
+    @classmethod
+    def _parse_type_specific(
+            cls,
+            body_part,
+            headers,
+    ):
+        text = body_part.text
+        if isinstance(body_part, BodyPart):
+            content_type = headers.get(const.HEADER_NAME_CONTENT_TYPE)
+            primitive_type = headers.get(const.HEADER_NAME_PRIMITIVE)
         else:
             content_type = cls._get_response_content_type(body_part)
-            primitive_type = body_part.headers.get(const.HEADER_NAME_PRIMITIVE)
+            primitive_type = headers.get(const.HEADER_NAME_PRIMITIVE)
 
         if (content_type.startswith(Mimetypes.get_mimetypes(DocumentType.TEXT)) and
                 primitive_type in cls._PLAIN_TEXT_PARSERS):
-            parsed = cls._PLAIN_TEXT_PARSERS[primitive_type](text)
-        elif content_type.startswith(Mimetypes.get_mimetypes(DocumentType.JSON)):
-            parsed = json.loads(text)
-        elif content_type.startswith(Mimetypes.get_mimetypes(DocumentType.XML)):
+            return cls._PLAIN_TEXT_PARSERS[primitive_type](text)
+        if content_type.startswith(Mimetypes.get_mimetypes(DocumentType.JSON)):
+            return json.loads(text)
+        if content_type.startswith(Mimetypes.get_mimetypes(DocumentType.XML)):
             element = ElemTree.fromstring(text)
             if primitive_type in [None, const.HEADER_PRIMITIVE_DOCUMENT_NODE]:
-                parsed = ElemTree.ElementTree(element)
-            else:
-                parsed = element
-        else:
-            parsed = content
-
-        return parsed
+                return ElemTree.ElementTree(element)
+            return element
+        return body_part.content
 
     @classmethod
     def _get_response_content_type(
@@ -1837,33 +1891,12 @@ class MLResponseParser:
         content_type_header = next(header
                                    for header in response.headers
                                    if header.lower() == "content-type")
-        return cls._get_header(response, content_type_header)
+        return response.headers.get(content_type_header)
 
     @staticmethod
-    def _get_header(
-            raw_part: BodyPart | Response,
-            header_name: str,
-    ) -> str:
-        """Return a header value of response body part.
-
-        All headers are stored in a binary form. This method decodes them using
-        BodyPart's encoding attribute.
-
-        Parameters
-        ----------
-        raw_part : BodyPart | Response
-            A response body or body part
-        header_name : str
-            A header name
-
-        Returns
-        -------
-        str
-            A header value
-        """
-        if not isinstance(raw_part, BodyPart):
-            return raw_part.headers.get(header_name)
-
-        encoded_header_name = header_name.encode(raw_part.encoding)
-        header_value = raw_part.headers.get(encoded_header_name)
-        return header_value.decode(raw_part.encoding)
+    def _decode_headers(
+            headers: dict,
+            encoding: str,
+    ):
+        return {name.decode(encoding): value.decode(encoding)
+                for name, value in headers.items()}

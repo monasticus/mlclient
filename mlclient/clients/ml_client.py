@@ -1724,7 +1724,7 @@ class MLResponseParser:
         list | tuple
             A parsed response body
         """
-        content_type = cls._get_response_content_type(response)
+        content_type = cls._get_response_content_type(response.headers)
         if not response.ok:
             if content_type.startswith("application/json"):
                 error = response.json()
@@ -1751,7 +1751,7 @@ class MLResponseParser:
             response: Response,
             with_headers: bool = False,
     ) -> str | tuple[dict, str] | list[str | tuple[dict, str]]:
-        content_type = cls._get_response_content_type(response)
+        content_type = cls._get_response_content_type(response.headers)
         if not response.ok:
             if content_type.startswith("application/json"):
                 return json.dumps(response.json())
@@ -1774,7 +1774,7 @@ class MLResponseParser:
             response: Response,
             with_headers: bool = False,
     ) -> bytes | tuple[dict, bytes] | list[bytes | tuple[dict, bytes]]:
-        content_type = cls._get_response_content_type(response)
+        content_type = cls._get_response_content_type(response.headers)
         if not response.ok:
             if content_type.startswith("application/json"):
                 return json.dumps(response.json()).encode("utf-8")
@@ -1840,16 +1840,17 @@ class MLResponseParser:
         list | tuple
             A parsed response body or body part
         """
-        text = body_part.text
-        content = body_part.content
         headers = body_part.headers
         if isinstance(body_part, BodyPart):
             headers = cls._decode_headers(headers, body_part.encoding)
 
         if output_type is str:
-            parsed = text
+            if body_part.encoding is not None:
+                parsed = body_part.text
+            else:
+                parsed = body_part.content
         elif output_type is bytes:
-            parsed = content
+            parsed = body_part.content
         else:
             parsed = cls._parse_type_specific(body_part, headers)
 
@@ -1860,24 +1861,19 @@ class MLResponseParser:
     @classmethod
     def _parse_type_specific(
             cls,
-            body_part,
-            headers,
+            body_part: BodyPart | Response,
+            headers: dict,
     ):
-        text = body_part.text
-        if isinstance(body_part, BodyPart):
-            content_type = headers.get(const.HEADER_NAME_CONTENT_TYPE)
-            primitive_type = headers.get(const.HEADER_NAME_PRIMITIVE)
-        else:
-            content_type = cls._get_response_content_type(body_part)
-            primitive_type = headers.get(const.HEADER_NAME_PRIMITIVE)
+        content_type = cls._get_response_content_type(headers)
+        primitive_type = headers.get(const.HEADER_NAME_PRIMITIVE)
 
         if (content_type.startswith(Mimetypes.get_mimetypes(DocumentType.TEXT)) and
                 primitive_type in cls._PLAIN_TEXT_PARSERS):
-            return cls._PLAIN_TEXT_PARSERS[primitive_type](text)
+            return cls._PLAIN_TEXT_PARSERS[primitive_type](body_part.text)
         if content_type.startswith(Mimetypes.get_mimetypes(DocumentType.JSON)):
-            return json.loads(text)
+            return json.loads(body_part.text)
         if content_type.startswith(Mimetypes.get_mimetypes(DocumentType.XML)):
-            element = ElemTree.fromstring(text)
+            element = ElemTree.fromstring(body_part.text)
             if primitive_type in [None, const.HEADER_PRIMITIVE_DOCUMENT_NODE]:
                 return ElemTree.ElementTree(element)
             return element
@@ -1886,12 +1882,11 @@ class MLResponseParser:
     @classmethod
     def _get_response_content_type(
             cls,
-            response: Response,
-    ):
-        content_type_header = next(header
-                                   for header in response.headers
-                                   if header.lower() == "content-type")
-        return response.headers.get(content_type_header)
+            headers: dict,
+    ) -> str | None:
+        return next((value
+                     for name, value in headers.items()
+                     if name.lower() == "content-type"), None)
 
     @staticmethod
     def _decode_headers(

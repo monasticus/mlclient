@@ -1,4 +1,5 @@
 import xml.etree.ElementTree as ElemTree
+import zlib
 from datetime import date, datetime
 from pathlib import Path
 
@@ -514,6 +515,95 @@ def test_parse_with_headers_non_multipart_mixed_response_text(client):
         "vnd.marklogic.document-format": "text",
         "Content-Type": "application/vnd.marklogic-xdmp; charset=utf-8",
         "Content-Length": "43",
+    }
+
+
+@responses.activate
+def test_parse_non_multipart_mixed_response_binary(client):
+    uri = "/some/dir/doc4.zip"
+    content = zlib.compress(b'xquery version "1.0-ml";\n\nfn:current-date()')
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/documents")
+    builder.with_request_param("uri", uri)
+    builder.with_response_content_type("application/zip")
+    builder.with_response_status(200)
+    builder.with_response_body(content)
+    builder.with_response_header("vnd.marklogic.document-format", "binary")
+    builder.build_get()
+
+    resp = client.get_documents(uri=uri)
+    parsed_resp = MLResponseParser.parse(resp)
+
+    assert isinstance(parsed_resp, bytes)
+    assert parsed_resp == content
+
+
+@responses.activate
+def test_parse_text_non_multipart_mixed_response_binary(client):
+    uri = "/some/dir/doc4.zip"
+    content = zlib.compress(b'xquery version "1.0-ml";\n\nfn:current-date()')
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/documents")
+    builder.with_request_param("uri", uri)
+    builder.with_response_content_type("application/zip")
+    builder.with_response_status(200)
+    builder.with_response_body(content)
+    builder.with_response_header("vnd.marklogic.document-format", "binary")
+    builder.build_get()
+
+    resp = client.get_documents(uri=uri)
+    parsed_resp = MLResponseParser.parse(resp, output_type=str)
+
+    assert isinstance(parsed_resp, bytes)
+    assert parsed_resp == content
+
+
+@responses.activate
+def test_parse_bytes_non_multipart_mixed_response_binary(client):
+    uri = "/some/dir/doc4.zip"
+    content = zlib.compress(b'xquery version "1.0-ml";\n\nfn:current-date()')
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/documents")
+    builder.with_request_param("uri", uri)
+    builder.with_response_content_type("application/zip")
+    builder.with_response_status(200)
+    builder.with_response_body(content)
+    builder.with_response_header("vnd.marklogic.document-format", "binary")
+    builder.build_get()
+
+    resp = client.get_documents(uri=uri)
+    parsed_resp = MLResponseParser.parse(resp, output_type=bytes)
+
+    assert isinstance(parsed_resp, bytes)
+    assert parsed_resp == content
+
+
+@responses.activate
+def test_parse_with_headers_non_multipart_mixed_response_binary(client):
+    uri = "/some/dir/doc4.zip"
+    content = zlib.compress(b'xquery version "1.0-ml";\n\nfn:current-date()')
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/documents")
+    builder.with_request_param("uri", uri)
+    builder.with_response_content_type("application/zip")
+    builder.with_response_status(200)
+    builder.with_response_body(content)
+    builder.with_response_header("vnd.marklogic.document-format", "binary")
+    builder.build_get()
+
+    resp = client.get_documents(uri=uri)
+    headers, parsed_resp = MLResponseParser.parse_with_headers(resp)
+
+    assert isinstance(parsed_resp, bytes)
+    assert parsed_resp == content
+    assert headers == {
+        "vnd.marklogic.document-format": "binary",
+        "Content-Type": "application/zip",
+        "Content-Length": "51",
     }
 
 

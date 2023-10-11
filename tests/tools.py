@@ -68,7 +68,7 @@ class MLResponseBuilder:
         self._method: str | None = None
         self._base_url: str | None = None
         self._request_body: str | None = None
-        self._request_params: dict = {}
+        self._request_params: list[tuple] = []
         self._multipart_mixed_response: bool = False
         self._response_body: str | bytes | None = None
         self._response_body_fields: list | None = None
@@ -105,7 +105,7 @@ class MLResponseBuilder:
             key: str,
             value: Any,
     ):
-        self._request_params[key] = value
+        self._request_params.append((key, value))
 
     def with_response_body_multipart_mixed(
             self,

@@ -8,6 +8,7 @@ from mlclient.clients import DocumentsClient
 from mlclient.exceptions import MarkLogicError
 from mlclient.model import (BytesDocument, DocumentType, JSONDocument,
                             StringDocument, XMLDocument)
+from mlclient.model.calls import DocumentsBodyPart
 from tests.tools import MLResponseBuilder
 
 
@@ -229,7 +230,7 @@ def test_read_binary_doc_uri_list(docs_client):
     assert document.content == content
 
 
-# @responses.activate
+@responses.activate
 def test_multiple_docs(docs_client):
     uris = [
         "/some/dir/doc1.xml",
@@ -237,6 +238,7 @@ def test_multiple_docs(docs_client):
         "/some/dir/doc3.xqy",
         "/some/dir/doc4.zip",
     ]
+    zip_content = zlib.compress(b'xquery version "1.0-ml";\n\nfn:current-date()')
 
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8000/v1/documents")
@@ -245,35 +247,36 @@ def test_multiple_docs(docs_client):
     builder.with_request_param("uri", "/some/dir/doc3.xqy")
     builder.with_request_param("uri", "/some/dir/doc4.zip")
     builder.with_response_status(200)
-    builder.with_response_documents_body_part(**{
+    builder.with_response_body_multipart_mixed()
+    builder.with_response_documents_body_part(DocumentsBodyPart(**{
         "content-type": "application/zip",
         "content-disposition": 'attachment; '
                                'filename="/some/dir/doc4.zip"; '
                                'category=content; '
                                'format=binary',
-        "content": b'xquery version "1.0-ml";\n\nfn:current-date()'})
-    builder.with_response_documents_body_part(**{
+        "content": zip_content}))
+    builder.with_response_documents_body_part(DocumentsBodyPart(**{
         "content-type": "application/xml",
         "content-disposition": 'attachment; '
                                'filename="/some/dir/doc1.xml"; '
                                'category=content; '
                                'format=xml',
         "content": '<?xml version="1.0" encoding="UTF-8"?>\n'
-                   '<root><child>data</child></root>'})
-    builder.with_response_documents_body_part(**{
+                   '<root><child>data</child></root>'}))
+    builder.with_response_documents_body_part(DocumentsBodyPart(**{
         "content-type": "application/vnd.marklogic-xdmp",
         "content-disposition": 'attachment; '
                                'filename="/some/dir/doc3.xqy"; '
                                'category=content; '
                                'format=text',
-        "content": 'xquery version "1.0-ml";\n\nfn:current-date()'})
-    builder.with_response_documents_body_part(**{
+        "content": 'xquery version "1.0-ml";\n\nfn:current-date()'}))
+    builder.with_response_documents_body_part(DocumentsBodyPart(**{
         "content-type": "application/json",
         "content-disposition": 'attachment; '
                                'filename="/some/dir/doc2.json"; '
                                'category=content; '
                                'format=json',
-        "content": {"root": {"child": "data"}}})
+        "content": {"root": {"child": "data"}}}))
     builder.build_get()
 
     docs = docs_client.read(uris)
@@ -281,7 +284,7 @@ def test_multiple_docs(docs_client):
     assert isinstance(docs, list)
     assert len(docs) == 4
 
-    xml_docs = list(filter(lambda d: d.uri.endswith(".xml"), docs))
+    xml_docs = [doc for doc in docs if doc.uri.endswith(".xml")]
     assert len(xml_docs) == 1
     xml_doc = xml_docs[0]
     assert isinstance(xml_doc, XMLDocument)
@@ -313,4 +316,4 @@ def test_multiple_docs(docs_client):
     assert isinstance(zip_doc, BytesDocument)
     assert zip_doc.doc_type == DocumentType.BINARY
     assert isinstance(zip_doc.content, bytes)
-    assert zip_doc.content == b'xquery version "1.0-ml";\n\nfn:current-date()'
+    assert zip_doc.content == zip_content

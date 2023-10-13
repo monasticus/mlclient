@@ -22,7 +22,7 @@ This package exports the following classes:
     * BytesDocument
         A Document implementation representing a single MarkLogic document.
     * JSONDocument
-        A Document implementation representing a single MarkLogic document.
+        A Document implementation representing a single MarkLogic JSON document.
     * XMLDocument
         A Document implementation representing a single MarkLogic XML document.
     * Metadata

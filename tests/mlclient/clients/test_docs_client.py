@@ -14,7 +14,7 @@ from tests.tools import MLResponseBuilder
 
 @pytest.fixture(autouse=True)
 def docs_client() -> DocumentsClient:
-    return DocumentsClient(port=8000, auth_method="digest")
+    return DocumentsClient(port=8000)
 
 
 @pytest.fixture(autouse=True)
@@ -231,7 +231,7 @@ def test_read_binary_doc_uri_list(docs_client):
 
 
 @responses.activate
-def test_multiple_docs(docs_client):
+def test_read_multiple_docs(docs_client):
     uris = [
         "/some/dir/doc1.xml",
         "/some/dir/doc2.json",
@@ -317,3 +317,94 @@ def test_multiple_docs(docs_client):
     assert zip_doc.doc_type == DocumentType.BINARY
     assert isinstance(zip_doc.content, bytes)
     assert zip_doc.content == zip_content
+
+
+@responses.activate
+def test_read_multiple_non_existing_docs(docs_client):
+    uris = [
+        "/some/dir/doc5.xml",
+        "/some/dir/doc6.xml",
+    ]
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8000/v1/documents")
+    builder.with_request_param("uri", "/some/dir/doc5.xml")
+    builder.with_request_param("uri", "/some/dir/doc6.xml")
+    builder.with_response_content_type("application/json; charset=UTF-8")
+    builder.with_response_status(404)
+    builder.with_response_body({
+        "errorResponse": {
+            "statusCode": 404,
+            "status": "Not Found",
+            "messageCode": "RESTAPI-NODOCUMENT",
+            "message": "RESTAPI-NODOCUMENT: (err:FOER0000) "
+                       "Resource or document does not exist:  "
+                       f"category: content message: {uris}",
+        },
+    })
+    builder.build_get()
+    with pytest.raises(MarkLogicError) as err:
+        docs_client.read(uris)
+
+    expected_error = ("[404 Not Found] (RESTAPI-NODOCUMENT) "
+                      "RESTAPI-NODOCUMENT: (err:FOER0000) "
+                      "Resource or document does not exist:  "
+                      f"category: content message: {uris}")
+    assert err.value.args[0] == expected_error
+
+
+@responses.activate
+def test_read_multiple_existing_and_non_existing_docs(docs_client):
+    uris = [
+        "/some/dir/doc1.xml",
+        "/some/dir/doc2.json",
+        "/some/dir/doc5.xml",
+        "/some/dir/doc6.json",
+    ]
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8000/v1/documents")
+    builder.with_request_param("uri", "/some/dir/doc1.xml")
+    builder.with_request_param("uri", "/some/dir/doc2.json")
+    builder.with_request_param("uri", "/some/dir/doc5.xml")
+    builder.with_request_param("uri", "/some/dir/doc6.json")
+    builder.with_response_status(200)
+    builder.with_response_body_multipart_mixed()
+    builder.with_response_documents_body_part(DocumentsBodyPart(**{
+        "content-type": "application/xml",
+        "content-disposition": 'attachment; '
+                               'filename="/some/dir/doc1.xml"; '
+                               'category=content; '
+                               'format=xml',
+        "content": '<?xml version="1.0" encoding="UTF-8"?>\n'
+                   '<root><child>data</child></root>'}))
+    builder.with_response_documents_body_part(DocumentsBodyPart(**{
+        "content-type": "application/json",
+        "content-disposition": 'attachment; '
+                               'filename="/some/dir/doc2.json"; '
+                               'category=content; '
+                               'format=json',
+        "content": {"root": {"child": "data"}}}))
+    builder.build_get()
+
+    docs = docs_client.read(uris)
+
+    assert isinstance(docs, list)
+    assert len(docs) == 2
+
+    xml_docs = [doc for doc in docs if doc.uri.endswith(".xml")]
+    assert len(xml_docs) == 1
+    xml_doc = xml_docs[0]
+    assert isinstance(xml_doc, XMLDocument)
+    assert xml_doc.doc_type == DocumentType.XML
+    assert isinstance(xml_doc.content, ElemTree.ElementTree)
+    assert xml_doc.content.getroot().tag == "root"
+    assert xml_doc.content.getroot().text is None
+    assert xml_doc.content.getroot().attrib == {}
+
+    json_docs = list(filter(lambda d: d.uri.endswith(".json"), docs))
+    assert len(json_docs) == 1
+    json_doc = json_docs[0]
+    assert isinstance(json_doc, JSONDocument)
+    assert json_doc.doc_type == DocumentType.JSON
+    assert isinstance(json_doc.content, dict)
+    assert json_doc.content == {"root": {"child": "data"}}

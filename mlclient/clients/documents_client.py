@@ -55,9 +55,10 @@ class DocumentsClient(MLResourceClient):
             cls,
             uri: str | list[str] | tuple[str] | set[str],
             parsed_resp_with_headers: list[tuple],
-    ):
+    ) -> list[Document]:
         return [cls._parse_to_document(uri, headers, parsed_resp)
-                for headers, parsed_resp in parsed_resp_with_headers]
+                for headers, parsed_resp in parsed_resp_with_headers
+                if parsed_resp != []]
 
     @classmethod
     def _parse_to_document(
@@ -65,7 +66,7 @@ class DocumentsClient(MLResourceClient):
             uri: str | list[str] | tuple[str] | set[str],
             headers: dict,
             parsed_resp: ElemTree.ElementTree | dict | str | bytes,
-    ):
+    ) -> Document:
         single_doc = isinstance(uri, str) or len(uri) == 1
         if single_doc:
             uri = uri if isinstance(uri, str) else uri[0]

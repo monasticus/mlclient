@@ -10,7 +10,7 @@ It exports 5 classes:
     * BytesDocument
         A Document implementation representing a single MarkLogic document.
     * JSONDocument
-        A Document implementation representing a single MarkLogic document.
+        A Document implementation representing a single MarkLogic JSON document.
     * XMLDocument
         A Document implementation representing a single MarkLogic XML document.
     * Metadata
@@ -234,7 +234,7 @@ class BytesDocument(Document):
 
 
 class JSONDocument(Document):
-    """A Document implementation representing a single MarkLogic document.
+    """A Document implementation representing a single MarkLogic JSON document.
 
     This implementation stores content in dict format.
     """
@@ -243,7 +243,6 @@ class JSONDocument(Document):
             self,
             content: dict,
             uri: str | None = None,
-            doc_type: DocumentType = DocumentType.JSON,
             metadata: Metadata | None = None,
             is_temporal: bool = False,
     ):
@@ -255,20 +254,18 @@ class JSONDocument(Document):
             A document content
         uri : str
             A document URI
-        doc_type : DocumentType
-            A document type
         metadata : Metadata
             A document metadata
         is_temporal : bool
             The temporal flag
         """
-        super().__init__(uri, doc_type, metadata, is_temporal)
+        super().__init__(uri, DocumentType.JSON, metadata, is_temporal)
         self._content = content
 
     @property
     def content(
             self,
-    ) -> bytes:
+    ) -> dict:
         """A document content.
 
         Returns

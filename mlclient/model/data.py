@@ -13,6 +13,8 @@ It exports 5 classes:
         A Document implementation representing a single MarkLogic JSON document.
     * XMLDocument
         A Document implementation representing a single MarkLogic XML document.
+    * TextDocument
+        A Document implementation representing a single MarkLogic TEXT document.
     * Metadata
         A class representing MarkLogic's document metadata.
     * Permission:
@@ -314,6 +316,49 @@ class XMLDocument(Document):
         Returns
         -------
         dict
+            A document's content
+        """
+        return self._content
+
+
+class TextDocument(Document):
+    """A Document implementation representing a single MarkLogic TEXT document.
+
+    This implementation stores content in a string format.
+    """
+
+    def __init__(
+            self,
+            content: str,
+            uri: str | None = None,
+            metadata: Metadata | None = None,
+            is_temporal: bool = False,
+    ):
+        """Initialize TextDocument instance.
+
+        Parameters
+        ----------
+        content : str
+            A document content
+        uri : str
+            A document URI
+        metadata : Metadata
+            A document metadata
+        is_temporal : bool
+            The temporal flag
+        """
+        super().__init__(uri, DocumentType.TEXT, metadata, is_temporal)
+        self._content = content
+
+    @property
+    def content(
+            self,
+    ) -> str:
+        """A document content.
+
+        Returns
+        -------
+        str
             A document's content
         """
         return self._content

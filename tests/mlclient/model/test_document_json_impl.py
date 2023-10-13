@@ -10,5 +10,5 @@ def test_content():
     assert document.content == {"root": "data"}
 
 
-def test_doc_type_when_none():
+def test_doc_type():
     assert JSONDocument({"root": "data"}).doc_type == DocumentType.JSON

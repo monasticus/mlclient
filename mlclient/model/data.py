@@ -15,6 +15,8 @@ It exports 5 classes:
         A Document implementation representing a single MarkLogic XML document.
     * TextDocument
         A Document implementation representing a single MarkLogic TEXT document.
+    * BinaryDocument
+        A Document implementation representing a single MarkLogic BINARY document.
     * Metadata
         A class representing MarkLogic's document metadata.
     * Permission:
@@ -359,6 +361,49 @@ class TextDocument(Document):
         Returns
         -------
         str
+            A document's content
+        """
+        return self._content
+
+
+class BinaryDocument(Document):
+    """A Document implementation representing a single MarkLogic BINARY document.
+
+    This implementation stores content in bytes format.
+    """
+
+    def __init__(
+            self,
+            content: bytes,
+            uri: str | None = None,
+            metadata: Metadata | None = None,
+            is_temporal: bool = False,
+    ):
+        """Initialize BinaryDocument instance.
+
+        Parameters
+        ----------
+        content : bytes
+            A document content
+        uri : str
+            A document URI
+        metadata : Metadata
+            A document metadata
+        is_temporal : bool
+            The temporal flag
+        """
+        super().__init__(uri, DocumentType.BINARY, metadata, is_temporal)
+        self._content = content
+
+    @property
+    def content(
+            self,
+    ) -> bytes:
+        """A document content.
+
+        Returns
+        -------
+        bytes
             A document's content
         """
         return self._content

@@ -12,7 +12,7 @@ It exports 5 classes:
     * JSONDocument
         A Document implementation representing a single MarkLogic document.
     * XMLDocument
-        A Document implementation representing a single MarkLogic document.
+        A Document implementation representing a single MarkLogic XML document.
     * Metadata
         A class representing MarkLogic's document metadata.
     * Permission:
@@ -280,7 +280,7 @@ class JSONDocument(Document):
 
 
 class XMLDocument(Document):
-    """A Document implementation representing a single MarkLogic document.
+    """A Document implementation representing a single MarkLogic XML document.
 
     This implementation stores content in ElemTree.Element format.
     """
@@ -289,7 +289,6 @@ class XMLDocument(Document):
             self,
             content: ElemTree.Element,
             uri: str | None = None,
-            doc_type: DocumentType = DocumentType.XML,
             metadata: Metadata | None = None,
             is_temporal: bool = False,
     ):
@@ -301,14 +300,12 @@ class XMLDocument(Document):
             A document content
         uri : str
             A document URI
-        doc_type : DocumentType
-            A document type
         metadata : Metadata
             A document metadata
         is_temporal : bool
             The temporal flag
         """
-        super().__init__(uri, doc_type, metadata, is_temporal)
+        super().__init__(uri, DocumentType.XML, metadata, is_temporal)
         self._content = content
 
     @property

@@ -24,7 +24,7 @@ This package exports the following classes:
     * JSONDocument
         A Document implementation representing a single MarkLogic document.
     * XMLDocument
-        A Document implementation representing a single MarkLogic document.
+        A Document implementation representing a single MarkLogic XML document.
     * Metadata
         A class representing MarkLogic's document metadata.
     * Permission:

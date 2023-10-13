@@ -334,7 +334,7 @@ class TextDocument(Document):
             metadata: Metadata | None = None,
             is_temporal: bool = False,
     ):
-        """Initialize StringDocument instance.
+        """Initialize TextDocument instance.
 
         Parameters
         ----------

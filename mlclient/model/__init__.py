@@ -17,8 +17,6 @@ This package exports the following classes:
         An enumeration class representing document types.
     * Document
         A class representing a single MarkLogic document.
-    * BytesDocument
-        A Document implementation representing a single MarkLogic document.
     * JSONDocument
         A Document implementation representing a single MarkLogic JSON document.
     * XMLDocument
@@ -27,6 +25,8 @@ This package exports the following classes:
         A Document implementation representing a single MarkLogic TEXT document.
     * BinaryDocument
         A Document implementation representing a single MarkLogic BINARY document.
+    * RawDocument
+        A Document implementation representing a single MarkLogic document.
     * RawStringDocument
         A Document implementation representing a single MarkLogic document.
     * Metadata
@@ -38,10 +38,10 @@ Examples
 --------
 >>> from mlclient.model import Document, DocumentType, Metadata
 """
-from .data import (BinaryDocument, BytesDocument, Document, DocumentType,
-                   JSONDocument, Metadata, Permission, RawStringDocument,
+from .data import (BinaryDocument, Document, DocumentType, JSONDocument,
+                   Metadata, Permission, RawDocument, RawStringDocument,
                    TextDocument, XMLDocument)
 
-__all__ = ["Document", "RawStringDocument", "BytesDocument",
-           "JSONDocument", "XMLDocument", "TextDocument", "BinaryDocument",
+__all__ = ["Document", "RawDocument", "RawStringDocument",
+           "XMLDocument", "JSONDocument", "TextDocument", "BinaryDocument",
            "DocumentType", "Metadata", "Permission"]

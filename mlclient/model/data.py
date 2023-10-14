@@ -5,8 +5,6 @@ It exports 5 classes:
         An enumeration class representing document types.
     * Document
         An abstract class representing a single MarkLogic document.
-    * BytesDocument
-        A Document implementation representing a single MarkLogic document.
     * JSONDocument
         A Document implementation representing a single MarkLogic JSON document.
     * XMLDocument
@@ -15,6 +13,8 @@ It exports 5 classes:
         A Document implementation representing a single MarkLogic TEXT document.
     * BinaryDocument
         A Document implementation representing a single MarkLogic BINARY document.
+    * RawDocument
+        A Document implementation representing a single MarkLogic document.
     * RawStringDocument
         A Document implementation representing a single MarkLogic document.
     * Metadata
@@ -143,52 +143,6 @@ class Document(metaclass=ABCMeta):
     ) -> str | None:
         """Return URI or None when blank."""
         return uri if uri is not None and not re.search("^\\s*$", uri) else None
-
-
-class BytesDocument(Document):
-    """A Document implementation representing a single MarkLogic document.
-
-    This implementation stores content in bytes format.
-    """
-
-    def __init__(
-            self,
-            content: bytes,
-            uri: str | None = None,
-            doc_type: DocumentType = DocumentType.XML,
-            metadata: Metadata | None = None,
-            is_temporal: bool = False,
-    ):
-        """Initialize BytesDocument instance.
-
-        Parameters
-        ----------
-        content : bytes
-            A document content
-        uri : str
-            A document URI
-        doc_type : DocumentType
-            A document type
-        metadata : Metadata
-            A document metadata
-        is_temporal : bool
-            The temporal flag
-        """
-        super().__init__(uri, doc_type, metadata, is_temporal)
-        self._content = content
-
-    @property
-    def content(
-            self,
-    ) -> bytes:
-        """A document content.
-
-        Returns
-        -------
-        bytes
-            A document's content
-        """
-        return self._content
 
 
 class JSONDocument(Document):
@@ -347,6 +301,52 @@ class BinaryDocument(Document):
             The temporal flag
         """
         super().__init__(uri, DocumentType.BINARY, metadata, is_temporal)
+        self._content = content
+
+    @property
+    def content(
+            self,
+    ) -> bytes:
+        """A document content.
+
+        Returns
+        -------
+        bytes
+            A document's content
+        """
+        return self._content
+
+
+class RawDocument(Document):
+    """A Document implementation representing a single MarkLogic document.
+
+    This implementation stores content in bytes format.
+    """
+
+    def __init__(
+            self,
+            content: bytes,
+            uri: str | None = None,
+            doc_type: DocumentType = DocumentType.XML,
+            metadata: Metadata | None = None,
+            is_temporal: bool = False,
+    ):
+        """Initialize RawDocument instance.
+
+        Parameters
+        ----------
+        content : bytes
+            A document content
+        uri : str
+            A document URI
+        doc_type : DocumentType
+            A document type
+        metadata : Metadata
+            A document metadata
+        is_temporal : bool
+            The temporal flag
+        """
+        super().__init__(uri, doc_type, metadata, is_temporal)
         self._content = content
 
     @property

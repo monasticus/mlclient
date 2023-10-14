@@ -5,8 +5,6 @@ It exports 5 classes:
         An enumeration class representing document types.
     * Document
         An abstract class representing a single MarkLogic document.
-    * StringDocument
-        A Document implementation representing a single MarkLogic document.
     * BytesDocument
         A Document implementation representing a single MarkLogic document.
     * JSONDocument
@@ -17,6 +15,8 @@ It exports 5 classes:
         A Document implementation representing a single MarkLogic TEXT document.
     * BinaryDocument
         A Document implementation representing a single MarkLogic BINARY document.
+    * RawStringDocument
+        A Document implementation representing a single MarkLogic document.
     * Metadata
         A class representing MarkLogic's document metadata.
     * Permission:
@@ -143,52 +143,6 @@ class Document(metaclass=ABCMeta):
     ) -> str | None:
         """Return URI or None when blank."""
         return uri if uri is not None and not re.search("^\\s*$", uri) else None
-
-
-class StringDocument(Document):
-    """A Document implementation representing a single MarkLogic document.
-
-    This implementation stores content in a string format.
-    """
-
-    def __init__(
-            self,
-            content: str,
-            uri: str | None = None,
-            doc_type: DocumentType = DocumentType.XML,
-            metadata: Metadata | None = None,
-            is_temporal: bool = False,
-    ):
-        """Initialize StringDocument instance.
-
-        Parameters
-        ----------
-        content : str
-            A document content
-        uri : str
-            A document URI
-        doc_type : DocumentType
-            A document type
-        metadata : Metadata
-            A document metadata
-        is_temporal : bool
-            The temporal flag
-        """
-        super().__init__(uri, doc_type, metadata, is_temporal)
-        self._content = content
-
-    @property
-    def content(
-            self,
-    ) -> str:
-        """A document content.
-
-        Returns
-        -------
-        str
-            A document's content
-        """
-        return self._content
 
 
 class BytesDocument(Document):
@@ -404,6 +358,52 @@ class BinaryDocument(Document):
         Returns
         -------
         bytes
+            A document's content
+        """
+        return self._content
+
+
+class RawStringDocument(Document):
+    """A Document implementation representing a single MarkLogic document.
+
+    This implementation stores content in a string format.
+    """
+
+    def __init__(
+            self,
+            content: str,
+            uri: str | None = None,
+            doc_type: DocumentType = DocumentType.XML,
+            metadata: Metadata | None = None,
+            is_temporal: bool = False,
+    ):
+        """Initialize RawStringDocument instance.
+
+        Parameters
+        ----------
+        content : str
+            A document content
+        uri : str
+            A document URI
+        doc_type : DocumentType
+            A document type
+        metadata : Metadata
+            A document metadata
+        is_temporal : bool
+            The temporal flag
+        """
+        super().__init__(uri, doc_type, metadata, is_temporal)
+        self._content = content
+
+    @property
+    def content(
+            self,
+    ) -> str:
+        """A document content.
+
+        Returns
+        -------
+        str
             A document's content
         """
         return self._content

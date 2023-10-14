@@ -12,4 +12,4 @@ def test_content():
 
 
 def test_doc_type_when_none():
-    assert RawStringDocument('').doc_type == DocumentType.XML
+    assert RawStringDocument("").doc_type == DocumentType.XML

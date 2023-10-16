@@ -423,15 +423,7 @@ class DocumentFactory:
         if isinstance(doc_type, str):
             doc_type = DocumentType(doc_type)
 
-        if doc_type == DocumentType.XML:
-            impl = XMLDocument
-        elif doc_type == DocumentType.JSON:
-            impl = JSONDocument
-        elif doc_type == DocumentType.TEXT:
-            impl = TextDocument
-        else:
-            impl = BinaryDocument
-
+        impl = cls.get_document_impl(doc_type=doc_type)
         return impl(content=content,
                     uri=uri,
                     metadata=metadata,
@@ -449,18 +441,37 @@ class DocumentFactory:
         if isinstance(doc_type, str):
             doc_type = DocumentType(doc_type)
 
-        if isinstance(content, bytes):
-            impl = RawDocument
-        elif isinstance(content, str):
-            impl = RawStringDocument
-        else:
-            raise Exception
+        impl = cls.get_document_impl(doc_type=doc_type, content=content, raw=True)
 
         return impl(content=content,
                     doc_type=doc_type,
                     uri=uri,
                     metadata=metadata,
                     is_temporal=is_temporal)
+
+    @staticmethod
+    def get_document_impl(
+            doc_type: DocumentType | None = None,
+            content: ElemTree.Element | dict | str | bytes | None = None,
+            raw: bool = False,
+    ) -> type[RawDocument | RawStringDocument |
+              XMLDocument | JSONDocument | TextDocument | BinaryDocument]:
+        if raw and not isinstance(content, (bytes, str)):
+            msg = "Raw document can store content only in [bytes] or [str] format!"
+            raise NotImplementedError(msg)
+
+        if raw and isinstance(content, bytes):
+            return RawDocument
+        if raw and isinstance(content, str):
+            return RawStringDocument
+
+        if doc_type == DocumentType.XML:
+            return XMLDocument
+        if doc_type == DocumentType.JSON:
+            return JSONDocument
+        if doc_type == DocumentType.TEXT:
+            return TextDocument
+        return BinaryDocument
 
 
 class Metadata:

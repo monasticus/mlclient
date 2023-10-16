@@ -1,6 +1,8 @@
 from xml.etree.ElementTree import Element
 
-from mlclient.model import DocumentType, DocumentFactory
+import pytest
+
+from mlclient.model import DocumentFactory, DocumentType
 
 
 def test_build_document_by_document_type_xml():
@@ -97,4 +99,12 @@ def test_build_raw_document_str_with_str_document_type():
 
     assert document.content == content
     assert document.doc_type == DocumentType.XML
+
+
+def test_build_raw_document_unsupported():
+    with pytest.raises(NotImplementedError) as err:
+        DocumentFactory.build_raw_document({}, DocumentType.JSON)
+
+    expected_msg = "Raw document can store content only in [bytes] or [str] format!"
+    assert err.value.args[0] == expected_msg
 

@@ -409,6 +409,31 @@ class RawStringDocument(Document):
         return self._content
 
 
+class DocumentFactory:
+
+    @classmethod
+    def build_document(
+            cls,
+            content: ElemTree.Element | dict | str | bytes,
+            doc_type: DocumentType | None = None,
+            uri: str | None = None,
+            metadata: Metadata | None = None,
+            is_temporal: bool = False,
+    ) -> Document:
+        if doc_type == DocumentType.XML:
+            impl = XMLDocument
+        elif doc_type == DocumentType.JSON:
+            impl = JSONDocument
+        elif doc_type == DocumentType.TEXT:
+            impl = TextDocument
+        elif doc_type == DocumentType.BINARY:
+            impl = BinaryDocument
+        return impl(content=content,
+                    uri=uri,
+                    metadata=metadata,
+                    is_temporal=is_temporal)
+
+
 class Metadata:
     """A class representing MarkLogic's document metadata."""
 

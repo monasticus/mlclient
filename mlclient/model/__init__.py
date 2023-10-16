@@ -29,6 +29,8 @@ This package exports the following classes:
         A Document implementation representing a single MarkLogic document.
     * RawStringDocument
         A Document implementation representing a single MarkLogic document.
+    * DocumentFactory
+        A factory class instantiating a Document implementation classes.
     * Metadata
         A class representing MarkLogic's document metadata.
     * Permission:

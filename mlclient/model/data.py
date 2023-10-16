@@ -17,6 +17,8 @@ It exports 5 classes:
         A Document implementation representing a single MarkLogic document.
     * RawStringDocument
         A Document implementation representing a single MarkLogic document.
+    * DocumentFactory
+        A factory class instantiating a Document implementation classes.
     * Metadata
         A class representing MarkLogic's document metadata.
     * Permission:
@@ -410,6 +412,7 @@ class RawStringDocument(Document):
 
 
 class DocumentFactory:
+    """A factory class instantiating a Document implementation classes."""
 
     @classmethod
     def build_document(
@@ -420,10 +423,30 @@ class DocumentFactory:
             metadata: Metadata | None = None,
             is_temporal: bool = False,
     ) -> Document:
+        """Instantiate Document based on the document type.
+
+        Parameters
+        ----------
+        content : ElemTree.Element | dict | str | bytes
+            A document content
+        doc_type : DocumentType | str | None, default None
+            A document type
+        uri : str | None, default None
+            A document URI
+        metadata : Metadata | None, default None
+            A document metadata
+        is_temporal : bool, default False
+            The temporal flag
+
+        Returns
+        -------
+        Document
+            A Document implementation instance
+        """
         if isinstance(doc_type, str):
             doc_type = DocumentType(doc_type)
 
-        impl = cls.get_document_impl(doc_type=doc_type)
+        impl = cls._get_document_impl(doc_type=doc_type)
         return impl(content=content,
                     uri=uri,
                     metadata=metadata,
@@ -438,10 +461,35 @@ class DocumentFactory:
             metadata: Metadata | None = None,
             is_temporal: bool = False,
     ) -> Document:
+        """Instantiate Document based on the document type.
+
+        Parameters
+        ----------
+        content : bytes | str
+            A document content
+        doc_type : DocumentType | str
+            A document type
+        uri : str | None, default None
+            A document URI
+        metadata : Metadata | None, default None
+            A document metadata
+        is_temporal : bool, default False
+            The temporal flag
+
+        Returns
+        -------
+        Document
+            A raw Document implementation instance
+
+        Raises
+        ------
+        NotImplementedError
+            If content type is neither bytes nor str
+        """
         if isinstance(doc_type, str):
             doc_type = DocumentType(doc_type)
 
-        impl = cls.get_document_impl(doc_type=doc_type, content=content, raw=True)
+        impl = cls._get_document_impl(content=content, raw=True)
 
         return impl(content=content,
                     doc_type=doc_type,
@@ -450,12 +498,35 @@ class DocumentFactory:
                     is_temporal=is_temporal)
 
     @staticmethod
-    def get_document_impl(
+    def _get_document_impl(
             doc_type: DocumentType | None = None,
             content: ElemTree.Element | dict | str | bytes | None = None,
             raw: bool = False,
     ) -> type[RawDocument | RawStringDocument |
               XMLDocument | JSONDocument | TextDocument | BinaryDocument]:
+        """Return a Document implementation type based on a content and a document type.
+
+        Parameters
+        ----------
+        doc_type : DocumentType | None, default None
+            A document type
+        content : ElemTree.Element | dict | str | bytes
+            A document content
+        raw
+            A flag enforcing a raw Document implementation
+            (RawDocument, RawStringDocument)
+
+        Returns
+        -------
+        type[RawDocument | RawStringDocument |
+             XMLDocument | JSONDocument | TextDocument | BinaryDocument]
+             A Document implementation type
+
+        Raises
+        ------
+        NotImplementedError
+            If content type is neither bytes nor stra nd the raw flag is enabled
+        """
         if raw and not isinstance(content, (bytes, str)):
             msg = "Raw document can store content only in [bytes] or [str] format!"
             raise NotImplementedError(msg)

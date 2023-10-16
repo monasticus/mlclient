@@ -19,5 +19,5 @@ def test_content():
     assert document.content == tree
 
 
-def test_doc_type_when_none():
+def test_doc_type():
     assert XMLDocument(ElementTree(Element("root"))).doc_type == DocumentType.XML

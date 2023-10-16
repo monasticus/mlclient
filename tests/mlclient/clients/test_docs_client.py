@@ -6,8 +6,8 @@ import responses
 
 from mlclient.clients import DocumentsClient
 from mlclient.exceptions import MarkLogicError
-from mlclient.model import (BytesDocument, DocumentType, JSONDocument,
-                            StringDocument, XMLDocument)
+from mlclient.model import (BinaryDocument, DocumentType, JSONDocument,
+                            TextDocument, XMLDocument)
 from mlclient.model.calls import DocumentsBodyPart
 from tests.tools import MLResponseBuilder
 
@@ -159,7 +159,7 @@ def test_read_text_doc(docs_client):
 
     document = docs_client.read(uri)
 
-    assert isinstance(document, StringDocument)
+    assert isinstance(document, TextDocument)
     assert document.doc_type == DocumentType.TEXT
     assert isinstance(document.content, str)
     assert document.content == 'xquery version "1.0-ml";\n\nfn:current-date()'
@@ -180,7 +180,7 @@ def test_read_text_doc_uri_list(docs_client):
 
     document = docs_client.read([uri])
 
-    assert isinstance(document, StringDocument)
+    assert isinstance(document, TextDocument)
     assert document.doc_type == DocumentType.TEXT
     assert isinstance(document.content, str)
     assert document.content == 'xquery version "1.0-ml";\n\nfn:current-date()'
@@ -202,7 +202,7 @@ def test_read_binary_doc(docs_client):
 
     document = docs_client.read(uri)
 
-    assert isinstance(document, BytesDocument)
+    assert isinstance(document, BinaryDocument)
     assert document.doc_type == DocumentType.BINARY
     assert isinstance(document.content, bytes)
     assert document.content == content
@@ -224,7 +224,7 @@ def test_read_binary_doc_uri_list(docs_client):
 
     document = docs_client.read([uri])
 
-    assert isinstance(document, BytesDocument)
+    assert isinstance(document, BinaryDocument)
     assert document.doc_type == DocumentType.BINARY
     assert isinstance(document.content, bytes)
     assert document.content == content
@@ -305,7 +305,7 @@ def test_read_multiple_docs(docs_client):
     xqy_docs = list(filter(lambda d: d.uri.endswith(".xqy"), docs))
     assert len(xqy_docs) == 1
     xqy_doc = xqy_docs[0]
-    assert isinstance(xqy_doc, StringDocument)
+    assert isinstance(xqy_doc, TextDocument)
     assert xqy_doc.doc_type == DocumentType.TEXT
     assert isinstance(xqy_doc.content, str)
     assert xqy_doc.content == 'xquery version "1.0-ml";\n\nfn:current-date()'
@@ -313,7 +313,7 @@ def test_read_multiple_docs(docs_client):
     zip_docs = list(filter(lambda d: d.uri.endswith(".zip"), docs))
     assert len(zip_docs) == 1
     zip_doc = zip_docs[0]
-    assert isinstance(zip_doc, BytesDocument)
+    assert isinstance(zip_doc, BinaryDocument)
     assert zip_doc.doc_type == DocumentType.BINARY
     assert isinstance(zip_doc.content, bytes)
     assert zip_doc.content == zip_content

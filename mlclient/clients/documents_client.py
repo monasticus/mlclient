@@ -8,8 +8,8 @@ from mlclient import constants
 from mlclient.calls import DocumentsGetCall
 from mlclient.clients import MLResourceClient, MLResponseParser
 from mlclient.exceptions import MarkLogicError
-from mlclient.model import (BytesDocument, Document, DocumentType,
-                            JSONDocument, StringDocument, XMLDocument)
+from mlclient.model import (BinaryDocument, Document, DocumentType,
+                            JSONDocument, TextDocument, XMLDocument)
 
 
 class DocumentsClient(MLResourceClient):
@@ -85,8 +85,8 @@ class DocumentsClient(MLResourceClient):
         elif doc_type == DocumentType.JSON:
             impl = JSONDocument
         elif doc_type == DocumentType.TEXT:
-            impl = StringDocument
+            impl = TextDocument
         else:
-            impl = BytesDocument
+            impl = BinaryDocument
 
-        return impl(parsed_resp, uri=uri, doc_type=doc_type)
+        return impl(parsed_resp, uri=uri)

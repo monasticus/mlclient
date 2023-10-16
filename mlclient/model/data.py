@@ -5,14 +5,20 @@ It exports 5 classes:
         An enumeration class representing document types.
     * Document
         An abstract class representing a single MarkLogic document.
-    * StringDocument
-        A Document implementation representing a single MarkLogic document.
-    * BytesDocument
-        A Document implementation representing a single MarkLogic document.
     * JSONDocument
-        A Document implementation representing a single MarkLogic document.
+        A Document implementation representing a single MarkLogic JSON document.
     * XMLDocument
+        A Document implementation representing a single MarkLogic XML document.
+    * TextDocument
+        A Document implementation representing a single MarkLogic TEXT document.
+    * BinaryDocument
+        A Document implementation representing a single MarkLogic BINARY document.
+    * RawDocument
         A Document implementation representing a single MarkLogic document.
+    * RawStringDocument
+        A Document implementation representing a single MarkLogic document.
+    * DocumentFactory
+        A factory class instantiating a Document implementation classes.
     * Metadata
         A class representing MarkLogic's document metadata.
     * Permission:
@@ -143,8 +149,94 @@ class Document(metaclass=ABCMeta):
         return uri if uri is not None and not re.search("^\\s*$", uri) else None
 
 
-class StringDocument(Document):
-    """A Document implementation representing a single MarkLogic document.
+class JSONDocument(Document):
+    """A Document implementation representing a single MarkLogic JSON document.
+
+    This implementation stores content in dict format.
+    """
+
+    def __init__(
+            self,
+            content: dict,
+            uri: str | None = None,
+            metadata: Metadata | None = None,
+            is_temporal: bool = False,
+    ):
+        """Initialize JSONDocument instance.
+
+        Parameters
+        ----------
+        content : dict
+            A document content
+        uri : str
+            A document URI
+        metadata : Metadata
+            A document metadata
+        is_temporal : bool
+            The temporal flag
+        """
+        super().__init__(uri, DocumentType.JSON, metadata, is_temporal)
+        self._content = content
+
+    @property
+    def content(
+            self,
+    ) -> dict:
+        """A document content.
+
+        Returns
+        -------
+        dict
+            A document's content
+        """
+        return self._content
+
+
+class XMLDocument(Document):
+    """A Document implementation representing a single MarkLogic XML document.
+
+    This implementation stores content in ElemTree.ElementTree format.
+    """
+
+    def __init__(
+            self,
+            content: ElemTree.ElementTree,
+            uri: str | None = None,
+            metadata: Metadata | None = None,
+            is_temporal: bool = False,
+    ):
+        """Initialize XMLDocument instance.
+
+        Parameters
+        ----------
+        content : ElemTree.ElementTree
+            A document content
+        uri : str
+            A document URI
+        metadata : Metadata
+            A document metadata
+        is_temporal : bool
+            The temporal flag
+        """
+        super().__init__(uri, DocumentType.XML, metadata, is_temporal)
+        self._content = content
+
+    @property
+    def content(
+            self,
+    ) -> ElemTree.ElementTree:
+        """A document content.
+
+        Returns
+        -------
+        dict
+            A document's content
+        """
+        return self._content
+
+
+class TextDocument(Document):
+    """A Document implementation representing a single MarkLogic TEXT document.
 
     This implementation stores content in a string format.
     """
@@ -153,11 +245,10 @@ class StringDocument(Document):
             self,
             content: str,
             uri: str | None = None,
-            doc_type: DocumentType = DocumentType.XML,
             metadata: Metadata | None = None,
             is_temporal: bool = False,
     ):
-        """Initialize StringDocument instance.
+        """Initialize TextDocument instance.
 
         Parameters
         ----------
@@ -165,14 +256,12 @@ class StringDocument(Document):
             A document content
         uri : str
             A document URI
-        doc_type : DocumentType
-            A document type
         metadata : Metadata
             A document metadata
         is_temporal : bool
             The temporal flag
         """
-        super().__init__(uri, doc_type, metadata, is_temporal)
+        super().__init__(uri, DocumentType.TEXT, metadata, is_temporal)
         self._content = content
 
     @property
@@ -189,7 +278,50 @@ class StringDocument(Document):
         return self._content
 
 
-class BytesDocument(Document):
+class BinaryDocument(Document):
+    """A Document implementation representing a single MarkLogic BINARY document.
+
+    This implementation stores content in bytes format.
+    """
+
+    def __init__(
+            self,
+            content: bytes,
+            uri: str | None = None,
+            metadata: Metadata | None = None,
+            is_temporal: bool = False,
+    ):
+        """Initialize BinaryDocument instance.
+
+        Parameters
+        ----------
+        content : bytes
+            A document content
+        uri : str
+            A document URI
+        metadata : Metadata
+            A document metadata
+        is_temporal : bool
+            The temporal flag
+        """
+        super().__init__(uri, DocumentType.BINARY, metadata, is_temporal)
+        self._content = content
+
+    @property
+    def content(
+            self,
+    ) -> bytes:
+        """A document content.
+
+        Returns
+        -------
+        bytes
+            A document's content
+        """
+        return self._content
+
+
+class RawDocument(Document):
     """A Document implementation representing a single MarkLogic document.
 
     This implementation stores content in bytes format.
@@ -203,7 +335,7 @@ class BytesDocument(Document):
             metadata: Metadata | None = None,
             is_temporal: bool = False,
     ):
-        """Initialize BytesDocument instance.
+        """Initialize RawDocument instance.
 
         Parameters
         ----------
@@ -235,71 +367,26 @@ class BytesDocument(Document):
         return self._content
 
 
-class JSONDocument(Document):
+class RawStringDocument(Document):
     """A Document implementation representing a single MarkLogic document.
 
-    This implementation stores content in dict format.
+
+    This implementation stores content in a string format.
     """
 
     def __init__(
             self,
-            content: dict,
-            uri: str | None = None,
-            doc_type: DocumentType = DocumentType.JSON,
-            metadata: Metadata | None = None,
-            is_temporal: bool = False,
-    ):
-        """Initialize JSONDocument instance.
-
-        Parameters
-        ----------
-        content : dict
-            A document content
-        uri : str
-            A document URI
-        doc_type : DocumentType
-            A document type
-        metadata : Metadata
-            A document metadata
-        is_temporal : bool
-            The temporal flag
-        """
-        super().__init__(uri, doc_type, metadata, is_temporal)
-        self._content = content
-
-    @property
-    def content(
-            self,
-    ) -> bytes:
-        """A document content.
-
-        Returns
-        -------
-        dict
-            A document's content
-        """
-        return self._content
-
-
-class XMLDocument(Document):
-    """A Document implementation representing a single MarkLogic document.
-
-    This implementation stores content in ElemTree.ElementTree format.
-    """
-
-    def __init__(
-            self,
-            content: ElemTree.ElementTree,
+            content: str,
             uri: str | None = None,
             doc_type: DocumentType = DocumentType.XML,
             metadata: Metadata | None = None,
             is_temporal: bool = False,
     ):
-        """Initialize XMLDocument instance.
+        """Initialize RawStringDocument instance.
 
         Parameters
         ----------
-        content : ElemTree.ElementTree
+        content : str
             A document content
         uri : str
             A document URI
@@ -316,15 +403,128 @@ class XMLDocument(Document):
     @property
     def content(
             self,
-    ) -> ElemTree.ElementTree:
+    ) -> str:
         """A document content.
 
         Returns
         -------
-        dict
+        str
             A document's content
         """
         return self._content
+
+
+class DocumentFactory:
+    """A factory class instantiating a Document implementation classes."""
+
+    @classmethod
+    def build_document(
+            cls,
+            content: ElemTree.Element | dict | str | bytes,
+            doc_type: DocumentType | str | None = None,
+            uri: str | None = None,
+            metadata: Metadata | None = None,
+            is_temporal: bool = False,
+    ) -> Document:
+        """Instantiate Document based on the document or content type.
+
+        Parameters
+        ----------
+        content : ElemTree.Element | dict | str | bytes
+            A document content
+        doc_type : DocumentType | str | None, default None
+            A document type
+        uri : str | None, default None
+            A document URI
+        metadata : Metadata | None, default None
+            A document metadata
+        is_temporal : bool, default False
+            The temporal flag
+
+        Returns
+        -------
+        Document
+            A Document implementation instance
+        """
+        if isinstance(doc_type, str):
+            doc_type = DocumentType(doc_type)
+
+        if doc_type == DocumentType.XML:
+            impl = XMLDocument
+        elif doc_type == DocumentType.JSON:
+            impl = JSONDocument
+        elif doc_type == DocumentType.TEXT:
+            impl = TextDocument
+        elif doc_type == DocumentType.BINARY:
+            impl = BinaryDocument
+        elif isinstance(content, ElemTree.Element):
+            impl = XMLDocument
+        elif isinstance(content, dict):
+            impl = JSONDocument
+        elif isinstance(content, str):
+            impl = TextDocument
+        elif isinstance(content, bytes):
+            impl = BinaryDocument
+        else:
+            msg = ("Unsupported document type! "
+                   "Document types are: XML, JSON, TEXT, BINARY!")
+            raise NotImplementedError(msg)
+
+        return impl(content=content,
+                    uri=uri,
+                    metadata=metadata,
+                    is_temporal=is_temporal)
+
+    @classmethod
+    def build_raw_document(
+            cls,
+            content: bytes | str,
+            doc_type: DocumentType | str,
+            uri: str | None = None,
+            metadata: Metadata | None = None,
+            is_temporal: bool = False,
+    ) -> Document:
+        """Instantiate Document based on the document type.
+
+        Parameters
+        ----------
+        content : bytes | str
+            A document content
+        doc_type : DocumentType | str
+            A document type
+        uri : str | None, default None
+            A document URI
+        metadata : Metadata | None, default None
+            A document metadata
+        is_temporal : bool, default False
+            The temporal flag
+
+        Returns
+        -------
+        Document
+            A raw Document implementation instance
+
+        Raises
+        ------
+        NotImplementedError
+            If content type is neither bytes nor str
+        """
+        if isinstance(doc_type, str):
+            doc_type = DocumentType(doc_type)
+
+        if isinstance(content, bytes):
+            impl = RawDocument
+        elif isinstance(content, str):
+            impl = RawStringDocument
+        else:
+            msg = "Raw document can store content only in [bytes] or [str] format!"
+            raise NotImplementedError(msg)
+
+        return impl(content=content,
+                    doc_type=doc_type,
+                    uri=uri,
+                    metadata=metadata,
+                    is_temporal=is_temporal)
 
 
 class Metadata:

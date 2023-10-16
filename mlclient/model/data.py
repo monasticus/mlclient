@@ -415,11 +415,14 @@ class DocumentFactory:
     def build_document(
             cls,
             content: ElemTree.Element | dict | str | bytes,
-            doc_type: DocumentType | None = None,
+            doc_type: DocumentType | str | None = None,
             uri: str | None = None,
             metadata: Metadata | None = None,
             is_temporal: bool = False,
     ) -> Document:
+        if isinstance(doc_type, str):
+            doc_type = DocumentType(doc_type)
+
         if doc_type == DocumentType.XML:
             impl = XMLDocument
         elif doc_type == DocumentType.JSON:

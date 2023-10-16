@@ -29,6 +29,8 @@ This package exports the following classes:
         A Document implementation representing a single MarkLogic document.
     * RawStringDocument
         A Document implementation representing a single MarkLogic document.
+    * DocumentFactory
+        A factory class instantiating a Document implementation classes.
     * Metadata
         A class representing MarkLogic's document metadata.
     * Permission:
@@ -38,10 +40,10 @@ Examples
 --------
 >>> from mlclient.model import Document, DocumentType, Metadata
 """
-from .data import (BinaryDocument, Document, DocumentType, JSONDocument,
-                   Metadata, Permission, RawDocument, RawStringDocument,
-                   TextDocument, XMLDocument)
+from .data import (BinaryDocument, Document, DocumentFactory, DocumentType,
+                   JSONDocument, Metadata, Permission, RawDocument,
+                   RawStringDocument, TextDocument, XMLDocument)
 
-__all__ = ["Document", "RawDocument", "RawStringDocument",
+__all__ = ["DocumentFactory", "Document", "RawDocument", "RawStringDocument",
            "XMLDocument", "JSONDocument", "TextDocument", "BinaryDocument",
            "DocumentType", "Metadata", "Permission"]

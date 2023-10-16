@@ -17,6 +17,8 @@ It exports 5 classes:
         A Document implementation representing a single MarkLogic document.
     * RawStringDocument
         A Document implementation representing a single MarkLogic document.
+    * DocumentFactory
+        A factory class instantiating a Document implementation classes.
     * Metadata
         A class representing MarkLogic's document metadata.
     * Permission:
@@ -407,6 +409,119 @@ class RawStringDocument(Document):
             A document's content
         """
         return self._content
+
+
+class DocumentFactory:
+    """A factory class instantiating a Document implementation classes."""
+
+    @classmethod
+    def build_document(
+            cls,
+            content: ElemTree.Element | dict | str | bytes,
+            doc_type: DocumentType | str | None = None,
+            uri: str | None = None,
+            metadata: Metadata | None = None,
+            is_temporal: bool = False,
+    ) -> Document:
+        """Instantiate Document based on the document or content type.
+
+        Parameters
+        ----------
+        content : ElemTree.Element | dict | str | bytes
+            A document content
+        doc_type : DocumentType | str | None, default None
+            A document type
+        uri : str | None, default None
+            A document URI
+        metadata : Metadata | None, default None
+            A document metadata
+        is_temporal : bool, default False
+            The temporal flag
+
+        Returns
+        -------
+        Document
+            A Document implementation instance
+        """
+        if isinstance(doc_type, str):
+            doc_type = DocumentType(doc_type)
+
+        if doc_type == DocumentType.XML:
+            impl = XMLDocument
+        elif doc_type == DocumentType.JSON:
+            impl = JSONDocument
+        elif doc_type == DocumentType.TEXT:
+            impl = TextDocument
+        elif doc_type == DocumentType.BINARY:
+            impl = BinaryDocument
+        elif isinstance(content, ElemTree.Element):
+            impl = XMLDocument
+        elif isinstance(content, dict):
+            impl = JSONDocument
+        elif isinstance(content, str):
+            impl = TextDocument
+        elif isinstance(content, bytes):
+            impl = BinaryDocument
+        else:
+            msg = ("Unsupported document type! "
+                   "Document types are: XML, JSON, TEXT, BINARY!")
+            raise NotImplementedError(msg)
+
+        return impl(content=content,
+                    uri=uri,
+                    metadata=metadata,
+                    is_temporal=is_temporal)
+
+    @classmethod
+    def build_raw_document(
+            cls,
+            content: bytes | str,
+            doc_type: DocumentType | str,
+            uri: str | None = None,
+            metadata: Metadata | None = None,
+            is_temporal: bool = False,
+    ) -> Document:
+        """Instantiate Document based on the document type.
+
+        Parameters
+        ----------
+        content : bytes | str
+            A document content
+        doc_type : DocumentType | str
+            A document type
+        uri : str | None, default None
+            A document URI
+        metadata : Metadata | None, default None
+            A document metadata
+        is_temporal : bool, default False
+            The temporal flag
+
+        Returns
+        -------
+        Document
+            A raw Document implementation instance
+
+        Raises
+        ------
+        NotImplementedError
+            If content type is neither bytes nor str
+        """
+        if isinstance(doc_type, str):
+            doc_type = DocumentType(doc_type)
+
+        if isinstance(content, bytes):
+            impl = RawDocument
+        elif isinstance(content, str):
+            impl = RawStringDocument
+        else:
+            msg = "Raw document can store content only in [bytes] or [str] format!"
+            raise NotImplementedError(msg)
+
+        return impl(content=content,
+                    doc_type=doc_type,
+                    uri=uri,
+                    metadata=metadata,
+                    is_temporal=is_temporal)
 
 
 class Metadata:

@@ -21,6 +21,14 @@ def test_build_document_by_str_document_type_xml():
     assert document.doc_type == DocumentType.XML
 
 
+def test_build_document_by_content_type_xml():
+    content = Element("root")
+    document = DocumentFactory.build_document(content)
+
+    assert document.content == content
+    assert document.doc_type == DocumentType.XML
+
+
 def test_build_document_by_document_type_json():
     content = {"root": "data"}
     document = DocumentFactory.build_document(content, DocumentType.JSON)
@@ -32,6 +40,14 @@ def test_build_document_by_document_type_json():
 def test_build_document_by_str_document_type_json():
     content = {"root": "data"}
     document = DocumentFactory.build_document(content, "json")
+
+    assert document.content == content
+    assert document.doc_type == DocumentType.JSON
+
+
+def test_build_document_by_content_type_json():
+    content = {"root": "data"}
+    document = DocumentFactory.build_document(content)
 
     assert document.content == content
     assert document.doc_type == DocumentType.JSON
@@ -53,6 +69,14 @@ def test_build_document_by_str_document_type_text():
     assert document.doc_type == DocumentType.TEXT
 
 
+def test_build_document_by_content_type_text():
+    content = 'xquery version "1.0-ml";\nfn:current-dateTime()'
+    document = DocumentFactory.build_document(content)
+
+    assert document.content == content
+    assert document.doc_type == DocumentType.TEXT
+
+
 def test_build_document_by_document_type_binary():
     content = b'{"root": "data"}'
     document = DocumentFactory.build_document(content, DocumentType.BINARY)
@@ -67,6 +91,23 @@ def test_build_document_by_str_document_type_binary():
 
     assert document.content == content
     assert document.doc_type == DocumentType.BINARY
+
+
+def test_build_document_by_content_type_binary():
+    content = b'{"root": "data"}'
+    document = DocumentFactory.build_document(content)
+
+    assert document.content == content
+    assert document.doc_type == DocumentType.BINARY
+
+
+def test_build_document_unsupported_content_type():
+    with pytest.raises(NotImplementedError) as err:
+        DocumentFactory.build_document(None)
+
+    expected_msg = ("Unsupported document type! "
+                    "Document types are: XML, JSON, TEXT, BINARY!")
+    assert err.value.args[0] == expected_msg
 
 
 def test_build_raw_document_bytes_with_document_type():
@@ -101,7 +142,7 @@ def test_build_raw_document_str_with_str_document_type():
     assert document.doc_type == DocumentType.XML
 
 
-def test_build_raw_document_unsupported():
+def test_build_raw_document_unsupported_content_type():
     with pytest.raises(NotImplementedError) as err:
         DocumentFactory.build_raw_document({}, DocumentType.JSON)
 

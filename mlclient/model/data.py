@@ -423,7 +423,7 @@ class DocumentFactory:
             metadata: Metadata | None = None,
             is_temporal: bool = False,
     ) -> Document:
-        """Instantiate Document based on the document type.
+        """Instantiate Document based on the document or content type.
 
         Parameters
         ----------
@@ -446,7 +446,27 @@ class DocumentFactory:
         if isinstance(doc_type, str):
             doc_type = DocumentType(doc_type)
 
-        impl = cls._get_document_impl(doc_type=doc_type)
+        if doc_type == DocumentType.XML:
+            impl = XMLDocument
+        elif doc_type == DocumentType.JSON:
+            impl = JSONDocument
+        elif doc_type == DocumentType.TEXT:
+            impl = TextDocument
+        elif doc_type == DocumentType.BINARY:
+            impl = BinaryDocument
+        elif isinstance(content, ElemTree.Element):
+            impl = XMLDocument
+        elif isinstance(content, dict):
+            impl = JSONDocument
+        elif isinstance(content, str):
+            impl = TextDocument
+        elif isinstance(content, bytes):
+            impl = BinaryDocument
+        else:
+            msg = ("Unsupported document type! "
+                   "Document types are: XML, JSON, TEXT, BINARY!")
+            raise NotImplementedError(msg)
+
         return impl(content=content,
                     uri=uri,
                     metadata=metadata,
@@ -489,60 +509,19 @@ class DocumentFactory:
         if isinstance(doc_type, str):
             doc_type = DocumentType(doc_type)
 
-        impl = cls._get_document_impl(content=content, raw=True)
+        if isinstance(content, bytes):
+            impl = RawDocument
+        elif isinstance(content, str):
+            impl = RawStringDocument
+        else:
+            msg = "Raw document can store content only in [bytes] or [str] format!"
+            raise NotImplementedError(msg)
 
         return impl(content=content,
                     doc_type=doc_type,
                     uri=uri,
                     metadata=metadata,
                     is_temporal=is_temporal)
-
-    @staticmethod
-    def _get_document_impl(
-            doc_type: DocumentType | None = None,
-            content: ElemTree.Element | dict | str | bytes | None = None,
-            raw: bool = False,
-    ) -> type[RawDocument | RawStringDocument |
-              XMLDocument | JSONDocument | TextDocument | BinaryDocument]:
-        """Return a Document implementation type based on a content and a document type.
-
-        Parameters
-        ----------
-        doc_type : DocumentType | None, default None
-            A document type
-        content : ElemTree.Element | dict | str | bytes
-            A document content
-        raw
-            A flag enforcing a raw Document implementation
-            (RawDocument, RawStringDocument)
-
-        Returns
-        -------
-        type[RawDocument | RawStringDocument |
-             XMLDocument | JSONDocument | TextDocument | BinaryDocument]
-             A Document implementation type
-
-        Raises
-        ------
-        NotImplementedError
-            If content type is neither bytes nor stra nd the raw flag is enabled
-        """
-        if raw and not isinstance(content, (bytes, str)):
-            msg = "Raw document can store content only in [bytes] or [str] format!"
-            raise NotImplementedError(msg)
-
-        if raw and isinstance(content, bytes):
-            return RawDocument
-        if raw and isinstance(content, str):
-            return RawStringDocument
-
-        if doc_type == DocumentType.XML:
-            return XMLDocument
-        if doc_type == DocumentType.JSON:
-            return JSONDocument
-        if doc_type == DocumentType.TEXT:
-            return TextDocument
-        return BinaryDocument
 
 
 class Metadata:

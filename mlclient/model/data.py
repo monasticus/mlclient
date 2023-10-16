@@ -429,9 +429,35 @@ class DocumentFactory:
             impl = JSONDocument
         elif doc_type == DocumentType.TEXT:
             impl = TextDocument
-        elif doc_type == DocumentType.BINARY:
+        else:
             impl = BinaryDocument
+
         return impl(content=content,
+                    uri=uri,
+                    metadata=metadata,
+                    is_temporal=is_temporal)
+
+    @classmethod
+    def build_raw_document(
+            cls,
+            content: bytes | str,
+            doc_type: DocumentType | str,
+            uri: str | None = None,
+            metadata: Metadata | None = None,
+            is_temporal: bool = False,
+    ) -> Document:
+        if isinstance(doc_type, str):
+            doc_type = DocumentType(doc_type)
+
+        if isinstance(content, bytes):
+            impl = RawDocument
+        elif isinstance(content, str):
+            impl = RawStringDocument
+        else:
+            raise Exception
+
+        return impl(content=content,
+                    doc_type=doc_type,
                     uri=uri,
                     metadata=metadata,
                     is_temporal=is_temporal)

@@ -1414,7 +1414,7 @@ class MLResourcesClient(MLResourceClient):
             self,
             uri: str | list,
             database: str | None = None,
-            category: str | None = None,
+            category: str | list | None = None,
             data_format: str | None = None,
             timestamp: str | None = None,
             transform: str | None = None,

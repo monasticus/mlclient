@@ -22,6 +22,18 @@ def test_validation_category_param():
     assert err.value.args[0] == expected_msg
 
 
+def test_validation_multiple_categories_param():
+    with pytest.raises(exceptions.WrongParametersError) as err:
+        DocumentsGetCall(
+            uri="/a.xml",
+            category=["collections", "X"])
+
+    expected_msg = ("The supported categories are: "
+                    "content, metadata, metadata-values, collections, "
+                    "permissions, properties, quality")
+    assert err.value.args[0] == expected_msg
+
+
 def test_validation_format_param():
     with pytest.raises(exceptions.WrongParametersError) as err:
         DocumentsGetCall(
@@ -60,6 +72,26 @@ def test_parameters_single_uri():
 def test_parameters_multiple_uris():
     assert DocumentsGetCall(uri=["/a.xml", "/b.xml"]).params == {
         "uri": ["/a.xml", "/b.xml"],
+    }
+
+
+def test_parameters_single_category():
+    assert DocumentsGetCall(
+        uri="/a.xml",
+        category="collections",
+    ).params == {
+        "uri": "/a.xml",
+        "category": "collections",
+    }
+
+
+def test_parameters_multiple_categories():
+    assert DocumentsGetCall(
+        uri="/a.xml",
+        category=["collections", "permissions"],
+    ).params == {
+        "uri": "/a.xml",
+        "category": ["collections", "permissions"],
     }
 
 

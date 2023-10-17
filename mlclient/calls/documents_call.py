@@ -53,7 +53,7 @@ class DocumentsGetCall(ResourceCall):
             self,
             uri: str | list,
             database: str | None = None,
-            category: str | None = None,
+            category: str | list | None = None,
             data_format: str | None = None,
             timestamp: str | None = None,
             transform: str | None = None,
@@ -71,7 +71,7 @@ class DocumentsGetCall(ResourceCall):
             Perform this operation on the named content database instead
             of the default content database associated with the REST API instance.
             Using an alternative database requires the "eval-in" privilege.
-        category : str
+        category : str | list
             The category of data to fetch about the requested document.
             Category can be specified multiple times to retrieve any combination
             of content and metadata. Valid categories: content (default), metadata,
@@ -133,10 +133,11 @@ class DocumentsGetCall(ResourceCall):
     @classmethod
     def _validate_params(
             cls,
-            category: str,
+            category: str | list | None,
             data_format: str,
     ):
-        if category and category not in cls._SUPPORTED_CATEGORIES:
+        categories = [category] if not isinstance(category, list) else category
+        if any(cat and cat not in cls._SUPPORTED_CATEGORIES for cat in categories):
             joined_supported_categories = ", ".join(cls._SUPPORTED_CATEGORIES)
             msg = f"The supported categories are: {joined_supported_categories}"
             raise exceptions.WrongParametersError(msg)

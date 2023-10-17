@@ -1534,7 +1534,7 @@ class MLResourcesClient(MLResourceClient):
             self,
             uri: str | list,
             database: str | None = None,
-            category: str | None = None,
+            category: str | list | None = None,
             txid: str | None = None,
             temporal_collection: str | None = None,
             system_time: str | None = None,
@@ -1551,7 +1551,7 @@ class MLResourcesClient(MLResourceClient):
             Perform this operation on the named content database instead
             of the default content database associated with the REST API instance.
             Using an alternative database requires the "eval-in" privilege.
-        category : str
+        category : str | list
             The category of data to fetch about the requested document.
             Category can be specified multiple times to retrieve any combination
             of content and metadata. Valid categories: content (default), metadata,

@@ -370,7 +370,6 @@ class RawDocument(Document):
 class RawStringDocument(Document):
     """A Document implementation representing a single MarkLogic document.
 
-
     This implementation stores content in a string format.
     """
 

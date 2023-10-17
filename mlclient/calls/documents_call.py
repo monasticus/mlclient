@@ -136,10 +136,13 @@ class DocumentsGetCall(ResourceCall):
             category: str,
             data_format: str,
     ):
-        if category and category not in cls._SUPPORTED_CATEGORIES:
-            joined_supported_categories = ", ".join(cls._SUPPORTED_CATEGORIES)
-            msg = f"The supported categories are: {joined_supported_categories}"
-            raise exceptions.WrongParametersError(msg)
+        if isinstance(category, str):
+            category = [category]
+        for cat in category:
+            if cat and cat not in cls._SUPPORTED_CATEGORIES:
+                joined_supported_categories = ", ".join(cls._SUPPORTED_CATEGORIES)
+                msg = f"The supported categories are: {joined_supported_categories}"
+                raise exceptions.WrongParametersError(msg)
         if data_format and data_format not in cls._SUPPORTED_FORMATS:
             joined_supported_formats = ", ".join(cls._SUPPORTED_FORMATS)
             msg = f"The supported formats are: {joined_supported_formats}"

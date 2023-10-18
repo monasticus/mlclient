@@ -13,6 +13,8 @@ It exports the following classes:
         An enumeration class representing repair levels.
     * Extract
         An enumeration class representing metadata extract types.
+    * Category
+        An enumeration class representing data categories.
 """
 from __future__ import annotations
 
@@ -45,14 +47,26 @@ class Extract(Enum):
     DOCUMENT = "document"
 
 
+class Category(Enum):
+    """An enumeration class representing data categories."""
+
+    CONTENT = "content"
+    METADATA = "metadata"
+    METADATA_VALUES = "metadata-values"
+    COLLECTIONS = "collections"
+    PERMISSIONS = "permissions"
+    PROPERTIES = "properties"
+    QUALITY = "quality"
+
+
 class DocumentsContentDisposition(BaseModel):
     """A class representing /v1/documents body part Content-Disposition header."""
 
     body_part_type: DocumentsBodyPartType = Field(
         description="The content type indication (inline or attachment).")
-    metadata: Optional[bool] = Field(
-        description="Indicates that the part contains metadata.",
-        default=False)
+    category: Optional[Category] = Field(
+        description="The category of data.",
+        default=None)
     repair: Optional[Repair] = Field(
         description="For an XML content part, the level of XML repair to perform. "
                     "Allowed values: full (default) or none. "
@@ -109,7 +123,7 @@ class DocumentsContentDisposition(BaseModel):
         disposition = [
             self._get_disposition(self.body_part_type),
             self._get_disposition(self.filename, "filename"),
-            self._get_disposition(self.metadata, "category=metadata"),
+            self._get_disposition(self.category, "category"),
             self._get_disposition(self.extension, "extension"),
             self._get_disposition(self.directory, "directory"),
             self._get_disposition(self.repair, "repair"),
@@ -122,13 +136,11 @@ class DocumentsContentDisposition(BaseModel):
 
     @staticmethod
     def _get_disposition(
-            disp_value: str | int | bool | Enum,
+            disp_value: str | int | Enum,
             disp: Optional[str] = None,
     ) -> Optional[str]:
         if disp_value is None:
             return None
-        if isinstance(disp_value, bool):
-            return disp if disp_value else None
 
         final_value = disp_value.value if isinstance(disp_value, Enum) else disp_value
         return final_value if disp is None else f"{disp}={final_value}"

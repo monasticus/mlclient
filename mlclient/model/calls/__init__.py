@@ -18,13 +18,15 @@ This package exports the following classes:
         An enumeration class representing repair levels.
     * Extract
         An enumeration class representing metadata extract types.
+    * Category
+        An enumeration class representing data categories.
 
 Examples
 --------
 >>> from mlclient.model.calls import DocumentsBodyPart
 """
-from .documents import (DocumentsBodyPart, DocumentsBodyPartType,
+from .documents import (Category, DocumentsBodyPart, DocumentsBodyPartType,
                         DocumentsContentDisposition, Extract, Repair)
 
 __all__ = ["DocumentsBodyPart", "DocumentsBodyPartType",
-           "DocumentsContentDisposition", "Extract", "Repair"]
+           "DocumentsContentDisposition", "Category", "Extract", "Repair"]

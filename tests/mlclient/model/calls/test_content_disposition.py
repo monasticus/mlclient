@@ -23,14 +23,14 @@ def test_to_str_inline():
 def test_to_str_attachment():
     disp = DocumentsContentDisposition(
         body_part_type=DocumentsBodyPartType.ATTACHMENT,
-        metadata=True,
+        category="collections",
         filename="/path/to/file.xml",
         repair=Repair.FULL,
         temporal_document="/path/to/file.xml",
     )
     expected_str = ("attachment; "
                     "filename=/path/to/file.xml; "
-                    "category=metadata; "
+                    "category=collections; "
                     "repair=full; "
                     "temporal-document=/path/to/file.xml")
     assert str(disp) == expected_str

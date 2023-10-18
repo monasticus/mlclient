@@ -19,7 +19,7 @@ from urllib3.fields import RequestField
 from mlclient import constants, exceptions, utils
 from mlclient.calls import ResourceCall
 from mlclient.constants import HEADER_JSON
-from mlclient.model.calls import DocumentsBodyPart
+from mlclient.model.calls import Category, DocumentsBodyPart
 
 
 class DocumentsGetCall(ResourceCall):
@@ -45,9 +45,7 @@ class DocumentsGetCall(ResourceCall):
 
     _SUPPORTED_FORMATS: ClassVar[list] = ["binary", "json", "text", "xml"]
     _SUPPORTED_METADATA_FORMATS: ClassVar[list] = ["json", "xml"]
-    _SUPPORTED_CATEGORIES: ClassVar[list] = ["content", "metadata", "metadata-values",
-                                             "collections", "permissions", "properties",
-                                             "quality"]
+    _SUPPORTED_CATEGORIES: ClassVar[list] = [category.value for category in Category]
 
     def __init__(
             self,
@@ -307,9 +305,7 @@ class DocumentsDeleteCall(ResourceCall):
     _SYSTEM_TIME_PARAM: str = "system-time"
     _RESULT_PARAM: str = "result"
 
-    _SUPPORTED_CATEGORIES: ClassVar[list] = ["content", "metadata", "metadata-values",
-                                             "collections", "permissions", "properties",
-                                             "quality"]
+    _SUPPORTED_CATEGORIES: ClassVar[list] = [category.value for category in Category]
 
     def __init__(
             self,

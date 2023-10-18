@@ -22,6 +22,18 @@ def test_validation_category_param():
     assert err.value.args[0] == expected_msg
 
 
+def test_validation_multiple_categories_param():
+    with pytest.raises(exceptions.WrongParametersError) as err:
+        DocumentsDeleteCall(
+            uri="/a.xml",
+            category=["collections", "X"])
+
+    expected_msg = ("The supported categories are: "
+                    "content, metadata, metadata-values, collections, "
+                    "permissions, properties, quality")
+    assert err.value.args[0] == expected_msg
+
+
 def test_endpoint(default_documents_get_call):
     assert default_documents_get_call.endpoint == "/v1/documents"
 
@@ -39,6 +51,26 @@ def test_parameters_single_uri():
 def test_parameters_multiple_uris():
     assert DocumentsDeleteCall(uri=["/a.xml", "/b.xml"]).params == {
         "uri": ["/a.xml", "/b.xml"],
+    }
+
+
+def test_parameters_single_category():
+    assert DocumentsDeleteCall(
+        uri="/a.xml",
+        category="collections",
+    ).params == {
+        "uri": "/a.xml",
+        "category": "collections",
+    }
+
+
+def test_parameters_multiple_categories():
+    assert DocumentsDeleteCall(
+        uri="/a.xml",
+        category=["collections", "permissions"],
+    ).params == {
+        "uri": "/a.xml",
+        "category": ["collections", "permissions"],
     }
 
 

@@ -19,7 +19,7 @@ from urllib3.fields import RequestField
 from mlclient import constants, exceptions, utils
 from mlclient.calls import ResourceCall
 from mlclient.constants import HEADER_JSON
-from mlclient.model.calls import DocumentsBodyPart
+from mlclient.model.calls import Category, DocumentsBodyPart
 
 
 class DocumentsGetCall(ResourceCall):
@@ -45,15 +45,13 @@ class DocumentsGetCall(ResourceCall):
 
     _SUPPORTED_FORMATS: ClassVar[list] = ["binary", "json", "text", "xml"]
     _SUPPORTED_METADATA_FORMATS: ClassVar[list] = ["json", "xml"]
-    _SUPPORTED_CATEGORIES: ClassVar[list] = ["content", "metadata", "metadata-values",
-                                             "collections", "permissions", "properties",
-                                             "quality"]
+    _SUPPORTED_CATEGORIES: ClassVar[list] = [category.value for category in Category]
 
     def __init__(
             self,
             uri: str | list,
             database: str | None = None,
-            category: str | None = None,
+            category: str | list | None = None,
             data_format: str | None = None,
             timestamp: str | None = None,
             transform: str | None = None,
@@ -71,7 +69,7 @@ class DocumentsGetCall(ResourceCall):
             Perform this operation on the named content database instead
             of the default content database associated with the REST API instance.
             Using an alternative database requires the "eval-in" privilege.
-        category : str
+        category : str | list
             The category of data to fetch about the requested document.
             Category can be specified multiple times to retrieve any combination
             of content and metadata. Valid categories: content (default), metadata,
@@ -133,16 +131,14 @@ class DocumentsGetCall(ResourceCall):
     @classmethod
     def _validate_params(
             cls,
-            category: str,
+            category: str | list | None,
             data_format: str,
     ):
-        if isinstance(category, str):
-            category = [category]
-        for cat in category:
-            if cat and cat not in cls._SUPPORTED_CATEGORIES:
-                joined_supported_categories = ", ".join(cls._SUPPORTED_CATEGORIES)
-                msg = f"The supported categories are: {joined_supported_categories}"
-                raise exceptions.WrongParametersError(msg)
+        categories = [category] if not isinstance(category, list) else category
+        if any(cat and cat not in cls._SUPPORTED_CATEGORIES for cat in categories):
+            joined_supported_categories = ", ".join(cls._SUPPORTED_CATEGORIES)
+            msg = f"The supported categories are: {joined_supported_categories}"
+            raise exceptions.WrongParametersError(msg)
         if data_format and data_format not in cls._SUPPORTED_FORMATS:
             joined_supported_formats = ", ".join(cls._SUPPORTED_FORMATS)
             msg = f"The supported formats are: {joined_supported_formats}"
@@ -309,15 +305,13 @@ class DocumentsDeleteCall(ResourceCall):
     _SYSTEM_TIME_PARAM: str = "system-time"
     _RESULT_PARAM: str = "result"
 
-    _SUPPORTED_CATEGORIES: ClassVar[list] = ["content", "metadata", "metadata-values",
-                                             "collections", "permissions", "properties",
-                                             "quality"]
+    _SUPPORTED_CATEGORIES: ClassVar[list] = [category.value for category in Category]
 
     def __init__(
             self,
             uri: str | list,
             database: str | None = None,
-            category: str | None = None,
+            category: str | list | None = None,
             txid: str | None = None,
             temporal_collection: str | None = None,
             system_time: str | None = None,
@@ -328,29 +322,31 @@ class DocumentsDeleteCall(ResourceCall):
         Parameters
         ----------
         uri : str | list
-            One or more URIs for documents in the database.
-            If you specify multiple URIs, the Accept header must be multipart/mixed.
+            The URI of a document to delete or for which to remove metadata.
+            You can specify multiple documents.
         database : str
             Perform this operation on the named content database instead
             of the default content database associated with the REST API instance.
             Using an alternative database requires the "eval-in" privilege.
-        category : str
-            The category of data to fetch about the requested document.
-            Category can be specified multiple times to retrieve any combination
-            of content and metadata. Valid categories: content (default), metadata,
-            metadata-values, collections, permissions, properties, and quality.
-            Use metadata to request all categories except content.
+        category : str | list
+            The category of data to remove/reset.
+            Category may be specified multiple times to remove or reset
+            any combination of content and metadata.
+            Valid categories: content (default), metadata, metadata-values,
+            collections, permissions, properties, and quality.
+            Use metadata to reset all metadata.
         txid : str
             The transaction identifier of the multi-statement transaction in which
             to service this request. Use the /transactions service to create and manage
             multi-statement transactions.
         temporal_collection : str
-            Specify the name of a temporal collection into which the documents are
-            to be inserted.
+            Specify the name of a temporal collection that contains the document(s)
+            to be deleted. Applies to all documents when deleting more than one.
         system_time : str
             Set the system start time for the insertion or update.
             This time will override the system time set by MarkLogic.
             Ignored if temporal-collection is not included in the request.
+            Applies to all documents when deleting more than one.
         wipe_temporal : bool
             Remove all versions of a temporal document rather than performing
             a temporal delete. You can only use this parameter when you also specify
@@ -386,7 +382,8 @@ class DocumentsDeleteCall(ResourceCall):
             cls,
             category: str,
     ):
-        if category and category not in cls._SUPPORTED_CATEGORIES:
+        categories = [category] if not isinstance(category, list) else category
+        if any(cat and cat not in cls._SUPPORTED_CATEGORIES for cat in categories):
             joined_supported_categories = ", ".join(cls._SUPPORTED_CATEGORIES)
             msg = f"The supported categories are: {joined_supported_categories}"
             raise exceptions.WrongParametersError(msg)

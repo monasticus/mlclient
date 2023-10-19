@@ -14,7 +14,7 @@ from tests.tools import MLResponseBuilder
 
 @pytest.fixture(autouse=True)
 def docs_client() -> DocumentsClient:
-    return DocumentsClient(port=8000)
+    return DocumentsClient(port=8000, auth_method="digest")
 
 
 @pytest.fixture(autouse=True)
@@ -72,11 +72,14 @@ def test_read_xml_doc(docs_client):
     document = docs_client.read(uri)
 
     assert isinstance(document, XMLDocument)
+    assert document.uri == uri
     assert document.doc_type == DocumentType.XML
     assert isinstance(document.content, ElemTree.ElementTree)
     assert document.content.getroot().tag == "root"
     assert document.content.getroot().text is None
     assert document.content.getroot().attrib == {}
+    assert document.metadata is None
+    assert document.is_temporal is False
 
 
 @responses.activate
@@ -95,11 +98,14 @@ def test_read_xml_doc_using_uri_list(docs_client):
     document = docs_client.read([uri])
 
     assert isinstance(document, XMLDocument)
+    assert document.uri == uri
     assert document.doc_type == DocumentType.XML
     assert isinstance(document.content, ElemTree.ElementTree)
     assert document.content.getroot().tag == "root"
     assert document.content.getroot().text is None
     assert document.content.getroot().attrib == {}
+    assert document.metadata is None
+    assert document.is_temporal is False
 
 
 @responses.activate
@@ -118,9 +124,12 @@ def test_read_json_doc(docs_client):
     document = docs_client.read(uri)
 
     assert isinstance(document, JSONDocument)
+    assert document.uri == uri
     assert document.doc_type == DocumentType.JSON
     assert isinstance(document.content, dict)
     assert document.content == {"root": {"child": "data"}}
+    assert document.metadata is None
+    assert document.is_temporal is False
 
 
 @responses.activate
@@ -139,9 +148,12 @@ def test_read_json_doc_uri_list(docs_client):
     document = docs_client.read([uri])
 
     assert isinstance(document, JSONDocument)
+    assert document.uri == uri
     assert document.doc_type == DocumentType.JSON
     assert isinstance(document.content, dict)
     assert document.content == {"root": {"child": "data"}}
+    assert document.metadata is None
+    assert document.is_temporal is False
 
 
 @responses.activate
@@ -160,9 +172,12 @@ def test_read_text_doc(docs_client):
     document = docs_client.read(uri)
 
     assert isinstance(document, TextDocument)
+    assert document.uri == uri
     assert document.doc_type == DocumentType.TEXT
     assert isinstance(document.content, str)
     assert document.content == 'xquery version "1.0-ml";\n\nfn:current-date()'
+    assert document.metadata is None
+    assert document.is_temporal is False
 
 
 @responses.activate
@@ -181,9 +196,12 @@ def test_read_text_doc_uri_list(docs_client):
     document = docs_client.read([uri])
 
     assert isinstance(document, TextDocument)
+    assert document.uri == uri
     assert document.doc_type == DocumentType.TEXT
     assert isinstance(document.content, str)
     assert document.content == 'xquery version "1.0-ml";\n\nfn:current-date()'
+    assert document.metadata is None
+    assert document.is_temporal is False
 
 
 @responses.activate
@@ -203,9 +221,12 @@ def test_read_binary_doc(docs_client):
     document = docs_client.read(uri)
 
     assert isinstance(document, BinaryDocument)
+    assert document.uri == uri
     assert document.doc_type == DocumentType.BINARY
     assert isinstance(document.content, bytes)
     assert document.content == content
+    assert document.metadata is None
+    assert document.is_temporal is False
 
 
 @responses.activate
@@ -225,9 +246,12 @@ def test_read_binary_doc_uri_list(docs_client):
     document = docs_client.read([uri])
 
     assert isinstance(document, BinaryDocument)
+    assert document.uri == uri
     assert document.doc_type == DocumentType.BINARY
     assert isinstance(document.content, bytes)
     assert document.content == content
+    assert document.metadata is None
+    assert document.is_temporal is False
 
 
 @responses.activate
@@ -288,35 +312,47 @@ def test_read_multiple_docs(docs_client):
     assert len(xml_docs) == 1
     xml_doc = xml_docs[0]
     assert isinstance(xml_doc, XMLDocument)
+    assert xml_doc.uri == "/some/dir/doc1.xml"
     assert xml_doc.doc_type == DocumentType.XML
     assert isinstance(xml_doc.content, ElemTree.ElementTree)
     assert xml_doc.content.getroot().tag == "root"
     assert xml_doc.content.getroot().text is None
     assert xml_doc.content.getroot().attrib == {}
+    assert xml_doc.metadata is None
+    assert xml_doc.is_temporal is False
 
     json_docs = list(filter(lambda d: d.uri.endswith(".json"), docs))
     assert len(json_docs) == 1
     json_doc = json_docs[0]
     assert isinstance(json_doc, JSONDocument)
+    assert json_doc.uri == "/some/dir/doc2.json"
     assert json_doc.doc_type == DocumentType.JSON
     assert isinstance(json_doc.content, dict)
     assert json_doc.content == {"root": {"child": "data"}}
+    assert json_doc.metadata is None
+    assert json_doc.is_temporal is False
 
     xqy_docs = list(filter(lambda d: d.uri.endswith(".xqy"), docs))
     assert len(xqy_docs) == 1
     xqy_doc = xqy_docs[0]
     assert isinstance(xqy_doc, TextDocument)
+    assert xqy_doc.uri == "/some/dir/doc3.xqy"
     assert xqy_doc.doc_type == DocumentType.TEXT
     assert isinstance(xqy_doc.content, str)
     assert xqy_doc.content == 'xquery version "1.0-ml";\n\nfn:current-date()'
+    assert xqy_doc.metadata is None
+    assert xqy_doc.is_temporal is False
 
     zip_docs = list(filter(lambda d: d.uri.endswith(".zip"), docs))
     assert len(zip_docs) == 1
     zip_doc = zip_docs[0]
     assert isinstance(zip_doc, BinaryDocument)
+    assert zip_doc.uri == "/some/dir/doc4.zip"
     assert zip_doc.doc_type == DocumentType.BINARY
     assert isinstance(zip_doc.content, bytes)
     assert zip_doc.content == zip_content
+    assert zip_doc.metadata is None
+    assert zip_doc.is_temporal is False
 
 
 @responses.activate
@@ -395,16 +431,22 @@ def test_read_multiple_existing_and_non_existing_docs(docs_client):
     assert len(xml_docs) == 1
     xml_doc = xml_docs[0]
     assert isinstance(xml_doc, XMLDocument)
+    assert xml_doc.uri == "/some/dir/doc1.xml"
     assert xml_doc.doc_type == DocumentType.XML
     assert isinstance(xml_doc.content, ElemTree.ElementTree)
     assert xml_doc.content.getroot().tag == "root"
     assert xml_doc.content.getroot().text is None
     assert xml_doc.content.getroot().attrib == {}
+    assert xml_doc.metadata is None
+    assert xml_doc.is_temporal is False
 
     json_docs = list(filter(lambda d: d.uri.endswith(".json"), docs))
     assert len(json_docs) == 1
     json_doc = json_docs[0]
     assert isinstance(json_doc, JSONDocument)
+    assert json_doc.uri == "/some/dir/doc2.json"
     assert json_doc.doc_type == DocumentType.JSON
     assert isinstance(json_doc.content, dict)
     assert json_doc.content == {"root": {"child": "data"}}
+    assert json_doc.metadata is None
+    assert json_doc.is_temporal is False

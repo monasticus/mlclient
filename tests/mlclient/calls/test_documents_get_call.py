@@ -268,3 +268,32 @@ def test_fully_parametrized_call_for_multiple_uris_metadata():
         "txid": "transaction",
     }
     assert call.body is None
+
+
+def test_fully_parametrized_call_for_single_uri_and_multiple_categories():
+    call = DocumentsGetCall(
+        uri="/a.xml",
+        database="Documents",
+        category=["collections", "properties"],
+        data_format="xml",
+        timestamp="16692287403272560",
+        transform="custom-transformation",
+        transform_params={"custom-param-1": "custom-value-1",
+                          "custom-param-2": "custom-value-2"},
+        txid="transaction")
+    assert call.method == "GET"
+    assert call.headers == {
+        "Accept": "multipart/mixed",
+    }
+    assert call.params == {
+        "uri": "/a.xml",
+        "database": "Documents",
+        "category": ["collections", "properties"],
+        "format": "xml",
+        "timestamp": "16692287403272560",
+        "transform": "custom-transformation",
+        "trans:custom-param-1": "custom-value-1",
+        "trans:custom-param-2": "custom-value-2",
+        "txid": "transaction",
+    }
+    assert call.body is None

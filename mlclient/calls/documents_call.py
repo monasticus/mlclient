@@ -152,12 +152,13 @@ class DocumentsGetCall(ResourceCall):
     @staticmethod
     def _get_accept_header(
             uri: str | list,
-            category: str,
+            category: str | list,
             data_format: str,
     ):
-        if not isinstance(uri, str) and len(uri) > 1:
+        if (not isinstance(uri, str) and len(uri) > 1 or
+                isinstance(category, list) and len(category) > 1):
             return constants.HEADER_MULTIPART_MIXED
-        if data_format is not None and category is not None and category != "content":
+        if data_format and category and category != "content":
             return utils.get_accept_header_for_format(data_format)
         return None
 

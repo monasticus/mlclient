@@ -1,5 +1,4 @@
 from mlclient.calls import ResourceCall
-from mlclient.calls.model import Category
 
 
 class ResourceCallTestImpl(ResourceCall):
@@ -282,30 +281,6 @@ def test_add_param():
     assert call.params == {}
 
     call.add_param("custom-param", "custom-value")
-    assert call.params == {"custom-param": "custom-value"}
-
-
-def test_add_param_with_enum_value():
-    call = ResourceCallTestImpl()
-    assert call.params == {}
-
-    call.add_param("custom-param", Category.CONTENT)
-    assert call.params == {"custom-param": "content"}
-
-
-def test_add_param_with_enum_value_in_list():
-    call = ResourceCallTestImpl()
-    assert call.params == {}
-
-    call.add_param("custom-param", ["collections", Category.CONTENT])
-    assert call.params == {"custom-param": ["collections", "content"]}
-
-
-def test_add_param_with_single_item_list():
-    call = ResourceCallTestImpl()
-    assert call.params == {}
-
-    call.add_param("custom-param", ["custom-value"])
     assert call.params == {"custom-param": "custom-value"}
 
 

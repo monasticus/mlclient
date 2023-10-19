@@ -7,7 +7,6 @@ It exports 1 class:
 from __future__ import annotations
 
 from abc import ABCMeta, abstractmethod
-from enum import Enum
 from typing import Any
 
 from mlclient import constants
@@ -217,13 +216,6 @@ class ResourceCall(metaclass=ABCMeta):
             a request parameter value
         """
         if param_name and param_value:
-            if isinstance(param_value, Enum):
-                param_value = param_value.value
-            elif isinstance(param_value, list):
-                param_value = [item.value if isinstance(item, Enum) else item
-                               for item in param_value]
-                if len(param_value) == 1:
-                    param_value = param_value[0]
             self._params[param_name] = param_value
 
     def add_header(

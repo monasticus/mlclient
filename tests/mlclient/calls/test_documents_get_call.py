@@ -2,13 +2,36 @@ import pytest
 
 from mlclient import exceptions
 from mlclient.calls import DocumentsGetCall
-from mlclient.calls.model import Category
 
 
 @pytest.fixture()
 def default_documents_get_call():
     """Returns an DocumentsGetCall instance"""
     return DocumentsGetCall(uri="/a.xml")
+
+
+def test_validation_category_param():
+    with pytest.raises(exceptions.WrongParametersError) as err:
+        DocumentsGetCall(
+            uri="/a.xml",
+            category="X")
+
+    expected_msg = ("The supported categories are: "
+                    "content, metadata, metadata-values, collections, "
+                    "permissions, properties, quality")
+    assert err.value.args[0] == expected_msg
+
+
+def test_validation_multiple_categories_param():
+    with pytest.raises(exceptions.WrongParametersError) as err:
+        DocumentsGetCall(
+            uri="/a.xml",
+            category=["collections", "X"])
+
+    expected_msg = ("The supported categories are: "
+                    "content, metadata, metadata-values, collections, "
+                    "permissions, properties, quality")
+    assert err.value.args[0] == expected_msg
 
 
 def test_validation_format_param():
@@ -25,7 +48,7 @@ def test_validation_format_param_for_metadata_categories():
     with pytest.raises(exceptions.WrongParametersError) as err:
         DocumentsGetCall(
             uri="/a.xml",
-            category=Category.COLLECTIONS,
+            category="collections",
             data_format="text")
 
     expected_msg = "The supported metadata formats are: json, xml"
@@ -55,7 +78,7 @@ def test_parameters_multiple_uris():
 def test_parameters_single_category():
     assert DocumentsGetCall(
         uri="/a.xml",
-        category=Category.COLLECTIONS,
+        category="collections",
     ).params == {
         "uri": "/a.xml",
         "category": "collections",
@@ -65,7 +88,7 @@ def test_parameters_single_category():
 def test_parameters_multiple_categories():
     assert DocumentsGetCall(
         uri="/a.xml",
-        category=[Category.COLLECTIONS, Category.PERMISSIONS],
+        category=["collections", "permissions"],
     ).params == {
         "uri": "/a.xml",
         "category": ["collections", "permissions"],
@@ -91,14 +114,14 @@ def test_headers_for_single_uri_no_category_and_format():
 def test_headers_for_single_uri_content_category_and_format():
     assert DocumentsGetCall(
         uri="/a.xml",
-        category=Category.CONTENT,
+        category="content",
         data_format="json").headers == {}
 
 
 def test_headers_for_single_uri_metadata_category_and_json_format():
     assert DocumentsGetCall(
         uri="/a.xml",
-        category=Category.COLLECTIONS,
+        category="collections",
         data_format="json").headers == {
         "Accept": "application/json",
     }
@@ -107,7 +130,7 @@ def test_headers_for_single_uri_metadata_category_and_json_format():
 def test_headers_for_single_uri_metadata_category_and_xml_format():
     assert DocumentsGetCall(
         uri="/a.xml",
-        category=Category.COLLECTIONS,
+        category="collections",
         data_format="xml").headers == {
         "Accept": "application/xml",
     }
@@ -138,7 +161,7 @@ def test_headers_for_multiple_uris_no_category_and_format():
 def test_headers_for_multiple_uris_content_category_and_format():
     assert DocumentsGetCall(
         uri=["/a.xml", "/b.xml"],
-        category=Category.CONTENT,
+        category="content",
         data_format="json").headers == {
         "Accept": "multipart/mixed",
     }
@@ -147,7 +170,7 @@ def test_headers_for_multiple_uris_content_category_and_format():
 def test_headers_for_multiple_uris_metadata_category_and_json_format():
     assert DocumentsGetCall(
         uri=["/a.xml", "/b.xml"],
-        category=Category.COLLECTIONS,
+        category="collections",
         data_format="json").headers == {
         "Accept": "multipart/mixed",
     }
@@ -156,7 +179,7 @@ def test_headers_for_multiple_uris_metadata_category_and_json_format():
 def test_headers_for_multiple_uris_metadata_category_and_xml_format():
     assert DocumentsGetCall(
         uri=["/a.xml", "/b.xml"],
-        category=Category.COLLECTIONS,
+        category="collections",
         data_format="xml").headers == {
         "Accept": "multipart/mixed",
     }
@@ -193,7 +216,7 @@ def test_fully_parametrized_call_for_single_uri_metadata():
     call = DocumentsGetCall(
         uri="/a.xml",
         database="Documents",
-        category=Category.PROPERTIES,
+        category="properties",
         data_format="xml",
         timestamp="16692287403272560",
         transform="custom-transformation",
@@ -222,7 +245,7 @@ def test_fully_parametrized_call_for_multiple_uris_metadata():
     call = DocumentsGetCall(
         uri=["/a.xml", "/b.xml"],
         database="Documents",
-        category=Category.COLLECTIONS,
+        category="collections",
         data_format="json",
         timestamp="16692287403272560",
         transform="custom-transformation",

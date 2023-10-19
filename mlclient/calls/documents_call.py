@@ -51,7 +51,7 @@ class DocumentsGetCall(ResourceCall):
             self,
             uri: str | list,
             database: str | None = None,
-            category: Category | list[Category] | None = None,
+            category: str | list | None = None,
             data_format: str | None = None,
             timestamp: str | None = None,
             transform: str | None = None,
@@ -69,7 +69,7 @@ class DocumentsGetCall(ResourceCall):
             Perform this operation on the named content database instead
             of the default content database associated with the REST API instance.
             Using an alternative database requires the "eval-in" privilege.
-        category : Category | list[Category]
+        category : str | list
             The category of data to fetch about the requested document.
             Category can be specified multiple times to retrieve any combination
             of content and metadata. Valid categories: content (default), metadata,
@@ -98,15 +98,14 @@ class DocumentsGetCall(ResourceCall):
             to service this request. Use the /transactions service to create and manage
             multi-statement transactions.
         """
-        categories = self._get_categories(category)
-        self._validate_params(categories, data_format)
+        self._validate_params(category, data_format)
 
         super().__init__(method="GET")
-        accept_header = self._get_accept_header(uri, categories, data_format)
+        accept_header = self._get_accept_header(uri, category, data_format)
         self.add_header(constants.HEADER_NAME_ACCEPT, accept_header)
         self.add_param(self._URI_PARAM, uri)
         self.add_param(self._DATABASE_PARAM, database)
-        self.add_param(self._CATEGORY_PARAM, categories)
+        self.add_param(self._CATEGORY_PARAM, category)
         self.add_param(self._FORMAT_PARAM, data_format)
         self.add_param(self._TIMESTAMP_PARAM, timestamp)
         self.add_param(self._TRANSFORM_PARAM, transform)
@@ -130,27 +129,21 @@ class DocumentsGetCall(ResourceCall):
         return self._ENDPOINT
 
     @classmethod
-    def _get_categories(
-            cls,
-            category: Category | list[Category] | None,
-    ) -> list[Category] | None:
-        if category is None:
-            return None
-        if isinstance(category, Category):
-            return [category]
-        return category
-
-    @classmethod
     def _validate_params(
             cls,
-            categories: list[Category] | None,
+            category: str | list | None,
             data_format: str,
     ):
+        categories = [category] if not isinstance(category, list) else category
+        if any(cat and cat not in cls._SUPPORTED_CATEGORIES for cat in categories):
+            joined_supported_categories = ", ".join(cls._SUPPORTED_CATEGORIES)
+            msg = f"The supported categories are: {joined_supported_categories}"
+            raise exceptions.WrongParametersError(msg)
         if data_format and data_format not in cls._SUPPORTED_FORMATS:
             joined_supported_formats = ", ".join(cls._SUPPORTED_FORMATS)
             msg = f"The supported formats are: {joined_supported_formats}"
             raise exceptions.WrongParametersError(msg)
-        if (categories and categories != [Category.CONTENT] and
+        if (category and category != "content" and
                 data_format and data_format not in cls._SUPPORTED_METADATA_FORMATS):
             joined_supported_formats = ", ".join(cls._SUPPORTED_METADATA_FORMATS)
             msg = f"The supported metadata formats are: {joined_supported_formats}"
@@ -159,12 +152,12 @@ class DocumentsGetCall(ResourceCall):
     @staticmethod
     def _get_accept_header(
             uri: str | list,
-            categories: list[Category],
+            category: str,
             data_format: str,
     ):
         if not isinstance(uri, str) and len(uri) > 1:
             return constants.HEADER_MULTIPART_MIXED
-        if data_format and categories and categories != [Category.CONTENT]:
+        if data_format is not None and category is not None and category != "content":
             return utils.get_accept_header_for_format(data_format)
         return None
 

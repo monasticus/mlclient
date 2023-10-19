@@ -24,6 +24,7 @@ from typing import Optional, Union
 from pydantic import BaseModel, Field
 
 from mlclient.constants import HEADER_JSON
+from mlclient.model import DocumentType
 
 
 class DocumentsBodyPartType(Enum):
@@ -115,6 +116,10 @@ class DocumentsContentDisposition(BaseModel):
                     "You can only use this parameter if the request also includes "
                     "the temporal-collection parameter.",
         default=None)
+    format_: Optional[DocumentType] = Field(
+        description="The content format (xml, json, text or binary)",
+        alias="format",
+        default=None)
 
     def __str__(
             self,
@@ -130,6 +135,7 @@ class DocumentsContentDisposition(BaseModel):
             self._get_disposition(self.extract, "extract"),
             self._get_disposition(self.version_id, "versionId"),
             self._get_disposition(self.temporal_document, "temporal-document"),
+            self._get_disposition(self.format_, "format"),
         ]
 
         return "; ".join([disp for disp in disposition if disp is not None])

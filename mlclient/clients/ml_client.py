@@ -42,9 +42,9 @@ from mlclient.calls import (DatabaseDeleteCall, DatabaseGetCall,
                             ServersGetCall, ServersPostCall, UserDeleteCall,
                             UserGetCall, UserPropertiesGetCall,
                             UserPropertiesPutCall, UsersGetCall, UsersPostCall)
+from mlclient.calls.model import DocumentsBodyPart
 from mlclient.mimetypes import Mimetypes
 from mlclient.model import DocumentType
-from mlclient.model.calls import DocumentsBodyPart
 
 logger = logging.getLogger(__name__)
 

@@ -1,12 +1,7 @@
 """The ML Model package.
 
 It contains modules with a corresponding Python representation of MarkLogic-related
-data structures. Exports the following packages:
-
-    * calls
-        The ML Calls Model package.
-
-This package exports the following modules:
+data structures:
 
     * data
         The ML Data module.

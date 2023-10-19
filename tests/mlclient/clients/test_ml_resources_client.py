@@ -1,7 +1,7 @@
 import pytest
 
 from mlclient import MLResourcesClient
-from mlclient.model.calls import DocumentsBodyPart
+from mlclient.calls.model import DocumentsBodyPart
 
 
 @pytest.fixture()

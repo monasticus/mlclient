@@ -15,12 +15,12 @@ from requests_toolbelt.multipart.decoder import BodyPart
 from responses import matchers
 from urllib3.fields import RequestField
 
+from mlclient.calls.model import DocumentsBodyPart
 from mlclient.constants import (HEADER_MULTIPART_MIXED,
                                 HEADER_NAME_CONTENT_DISP,
                                 HEADER_NAME_CONTENT_TYPE,
                                 HEADER_NAME_PRIMITIVE,
                                 HEADER_X_WWW_FORM_URLENCODED)
-from mlclient.model.calls import DocumentsBodyPart
 
 _SCRIPT_DIR = Path(__file__).resolve()
 _RESOURCES_DIR = "resources"

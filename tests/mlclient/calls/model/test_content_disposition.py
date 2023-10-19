@@ -1,4 +1,4 @@
-from mlclient.model.calls import (DocumentsBodyPartType,
+from mlclient.calls.model import (DocumentsBodyPartType,
                                   DocumentsContentDisposition, Extract, Repair)
 
 

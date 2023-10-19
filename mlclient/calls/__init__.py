@@ -1,7 +1,12 @@
 """The ML Calls package.
 
 It contains modules dealing with MarkLogic REST Resources at the lowest level
-of HTTP requests:
+of HTTP requests. Additionally, it exports the following package:
+
+    * model
+        The ML Calls Model package.
+
+This package exports the following modules:
 
     * resource_call
         An abstract class representing a single request to a MarkLogic REST Resource.

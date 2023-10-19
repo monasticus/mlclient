@@ -4,11 +4,11 @@ import zlib
 import pytest
 import responses
 
+from mlclient.calls.model import DocumentsBodyPart
 from mlclient.clients import DocumentsClient
 from mlclient.exceptions import MarkLogicError
 from mlclient.model import (BinaryDocument, DocumentType, JSONDocument,
                             TextDocument, XMLDocument)
-from mlclient.model.calls import DocumentsBodyPart
 from tests.tools import MLResponseBuilder
 
 

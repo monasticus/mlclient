@@ -129,6 +129,10 @@ max-complexity = 10
 "mlclient/calls/*" = [
     "PLR0913" # allow many arguments as they depend on ML REST resource
 ]
+"mlclient/calls/model/*" = [
+    "UP006", # allow using List instead of list for pydantic
+    "UP007" # allow using Union instead of X | Y for pydantic
+]
 "mlclient/cli/commands/*" = [
     "RUF012"  # allow for missing ClassVar annotations as superclass does not use them
 ]

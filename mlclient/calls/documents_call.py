@@ -18,8 +18,8 @@ from urllib3.fields import RequestField
 
 from mlclient import constants, exceptions, utils
 from mlclient.calls import ResourceCall
+from mlclient.calls.model import Category, DocumentsBodyPart
 from mlclient.constants import HEADER_JSON
-from mlclient.model.calls import Category, DocumentsBodyPart
 
 
 class DocumentsGetCall(ResourceCall):

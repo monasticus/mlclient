@@ -450,3 +450,41 @@ def test_read_multiple_existing_and_non_existing_docs(docs_client):
     assert json_doc.content == {"root": {"child": "data"}}
     assert json_doc.metadata is None
     assert json_doc.is_temporal is False
+
+
+# @responses.activate
+def test_read_doc_with_metadata(docs_client):
+    uri = "/some/dir/doc1.xml"
+
+    # builder = MLResponseBuilder()
+    # builder.with_base_url("http://localhost:8000/v1/documents")
+    # builder.with_request_param("uri", uri)
+    # builder.with_request_param("category", "content")
+    # builder.with_request_param("category", "metadata")
+    # builder.with_request_param("format", "json")
+    # builder.with_response_body_multipart_mixed()
+    # builder.with_response_content_type("application/xml; charset=utf-8")
+    # builder.with_response_header("vnd.marklogic.document-format", "xml")
+    # builder.with_response_status(200)
+    # builder.with_response_documents_body_part(DocumentsBodyPart(**{
+    #     'content-type': 'application/xml',
+    #     'content-disposition': 'attachment; filename="/some/dir/doc1.xml"; category=content; format=xml',
+    #     'content': '<?xml version="1.0" encoding="UTF-8"?>\n<root><child>data</child></root>'}))
+    # builder.build_get()
+
+    document = docs_client.read(uri, category=["content", "metadata"])
+
+    assert isinstance(document, XMLDocument)
+    assert document.uri == uri
+    assert document.doc_type == DocumentType.XML
+    assert isinstance(document.content, ElemTree.ElementTree)
+    assert document.content.getroot().tag == "root"
+    assert document.content.getroot().text is None
+    assert document.content.getroot().attrib == {}
+    assert document.metadata is not None
+    assert document.metadata.collections() == []
+    assert document.metadata.metadata_values() == {}
+    assert document.metadata.permissions() == []
+    assert document.metadata.properties() == {}
+    assert document.metadata.quality() == 0
+    assert document.is_temporal is False

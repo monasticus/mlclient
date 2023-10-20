@@ -151,3 +151,10 @@ class DocumentsClient(MLResourceClient):
     ) -> Metadata | None:
         if not metadata_parts:
             return None
+        if len(metadata_parts) == 1:
+            headers, parsed_response = metadata_parts[0]
+            content_disp = cls._get_content_disposition(headers)
+            if content_disp.category == Category.METADATA:
+                parsed_response["metadata_values"] = parsed_response["metadataValues"]
+                del parsed_response["metadataValues"]
+                return Metadata(**parsed_response)

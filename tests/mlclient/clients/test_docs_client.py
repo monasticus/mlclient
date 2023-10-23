@@ -452,25 +452,28 @@ def test_read_multiple_existing_and_non_existing_docs(docs_client):
     assert json_doc.is_temporal is False
 
 
-# @responses.activate
+@responses.activate
 def test_read_doc_with_metadata(docs_client):
     uri = "/some/dir/doc1.xml"
 
-    # builder = MLResponseBuilder()
-    # builder.with_base_url("http://localhost:8000/v1/documents")
-    # builder.with_request_param("uri", uri)
-    # builder.with_request_param("category", "content")
-    # builder.with_request_param("category", "metadata")
-    # builder.with_request_param("format", "json")
-    # builder.with_response_body_multipart_mixed()
-    # builder.with_response_content_type("application/xml; charset=utf-8")
-    # builder.with_response_header("vnd.marklogic.document-format", "xml")
-    # builder.with_response_status(200)
-    # builder.with_response_documents_body_part(DocumentsBodyPart(**{
-    #     'content-type': 'application/xml',
-    #     'content-disposition': 'attachment; filename="/some/dir/doc1.xml"; category=content; format=xml',
-    #     'content': '<?xml version="1.0" encoding="UTF-8"?>\n<root><child>data</child></root>'}))
-    # builder.build_get()
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8000/v1/documents")
+    builder.with_request_param("uri", uri)
+    builder.with_request_param("category", "content")
+    builder.with_request_param("category", "metadata")
+    builder.with_request_param("format", "json")
+    builder.with_response_body_multipart_mixed()
+    builder.with_response_header("vnd.marklogic.document-format", "xml")
+    builder.with_response_status(200)
+    builder.with_response_documents_body_part(DocumentsBodyPart(**{
+        'content-type': 'application/json',
+        'content-disposition': 'attachment; filename="/some/dir/doc1.xml"; category=metadata; format=json',
+        'content': '{"collections":[],"permissions":[],"properties":{},"quality":0,"metadataValues":{}}'}))
+    builder.with_response_documents_body_part(DocumentsBodyPart(**{
+        'content-type': 'application/xml',
+        'content-disposition': 'attachment; filename="/some/dir/doc1.xml"; category=content; format=xml',
+        'content': '<?xml version="1.0" encoding="UTF-8"?>\n<root><child>data</child></root>'}))
+    builder.build_get()
 
     document = docs_client.read(uri, category=["content", "metadata"])
 

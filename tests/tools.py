@@ -543,8 +543,7 @@ class MLResponseBuilder:
                 response_body_line = ("builder.with_response_body_part("
                                       f'"{x_primitive}", {body_part_content}'
                                       ")")
-
-        response_body_lines.append(response_body_line)
+            response_body_lines.append(response_body_line)
         return response_body_lines
 
     @classmethod

@@ -19,7 +19,7 @@ It exports the following classes:
 from __future__ import annotations
 
 from enum import Enum
-from typing import Optional, Union
+from typing import List, Optional, Union
 
 from pydantic import BaseModel, Field
 
@@ -53,7 +53,7 @@ class Category(Enum):
 
     CONTENT = "content"
     METADATA = "metadata"
-    METADATA_VALUES = "metadata-values"
+    METADATA_VALUES = "metadataValues"
     COLLECTIONS = "collections"
     PERMISSIONS = "permissions"
     PROPERTIES = "properties"
@@ -65,9 +65,9 @@ class DocumentsContentDisposition(BaseModel):
 
     body_part_type: DocumentsBodyPartType = Field(
         description="The content type indication (inline or attachment).")
-    category: Optional[Category] = Field(
+    category: Optional[List[Category]] = Field(
         description="The category of data.",
-        default=None)
+        default=[])
     repair: Optional[Repair] = Field(
         description="For an XML content part, the level of XML repair to perform. "
                     "Allowed values: full (default) or none. "
@@ -142,14 +142,21 @@ class DocumentsContentDisposition(BaseModel):
 
     @staticmethod
     def _get_disposition(
-            disp_value: str | int | Enum,
-            disp: Optional[str] = None,
-    ) -> Optional[str]:
+            disp_value: str | int | list | Enum | None,
+            disp: str | None = None,
+    ) -> str | None:
         if disp_value is None:
             return None
 
-        final_value = disp_value.value if isinstance(disp_value, Enum) else disp_value
-        return final_value if disp is None else f"{disp}={final_value}"
+        if not isinstance(disp_value, list):
+            disp_value = [disp_value]
+
+        dispositions = []
+        for value in disp_value:
+            final_value = value.value if isinstance(value, Enum) else value
+            disposition = final_value if disp is None else f"{disp}={final_value}"
+            dispositions.append(disposition)
+        return "; ".join(dispositions)
 
 
 class DocumentsBodyPart(BaseModel):

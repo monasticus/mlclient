@@ -24,7 +24,7 @@ def test_to_str_inline():
 def test_to_str_attachment():
     disp = DocumentsContentDisposition(
         body_part_type=DocumentsBodyPartType.ATTACHMENT,
-        category="collections",
+        category=["collections"],
         filename="/path/to/file.xml",
         repair=Repair.FULL,
         temporal_document="/path/to/file.xml",
@@ -33,6 +33,26 @@ def test_to_str_attachment():
     expected_str = ("attachment; "
                     "filename=/path/to/file.xml; "
                     "category=collections; "
+                    "repair=full; "
+                    "temporal-document=/path/to/file.xml; "
+                    "format=json")
+    assert str(disp) == expected_str
+
+
+def test_to_str_multiple_categories():
+    disp = DocumentsContentDisposition(
+        body_part_type=DocumentsBodyPartType.ATTACHMENT,
+        category=["collections", "quality", "metadataValues"],
+        filename="/path/to/file.xml",
+        repair=Repair.FULL,
+        temporal_document="/path/to/file.xml",
+        format=DocumentType.JSON,
+    )
+    expected_str = ("attachment; "
+                    "filename=/path/to/file.xml; "
+                    "category=collections; "
+                    "category=quality; "
+                    "category=metadataValues; "
                     "repair=full; "
                     "temporal-document=/path/to/file.xml; "
                     "format=json")

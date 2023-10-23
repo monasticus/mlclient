@@ -466,13 +466,26 @@ def test_read_doc_with_metadata(docs_client):
     builder.with_response_header("vnd.marklogic.document-format", "xml")
     builder.with_response_status(200)
     builder.with_response_documents_body_part(DocumentsBodyPart(**{
-        'content-type': 'application/json',
-        'content-disposition': 'attachment; filename="/some/dir/doc1.xml"; category=metadata; format=json',
-        'content': '{"collections":[],"permissions":[],"properties":{},"quality":0,"metadataValues":{}}'}))
+        "content-type": "application/json",
+        "content-disposition": 'attachment; '
+                               'filename="/some/dir/doc1.xml"; '
+                               'category=metadata; '
+                               'format=json',
+        "content": {
+            "collections": [],
+            "permissions": [],
+            "properties": {},
+            "quality": 0,
+            "metadataValues": {},
+        }}))
     builder.with_response_documents_body_part(DocumentsBodyPart(**{
-        'content-type': 'application/xml',
-        'content-disposition': 'attachment; filename="/some/dir/doc1.xml"; category=content; format=xml',
-        'content': '<?xml version="1.0" encoding="UTF-8"?>\n<root><child>data</child></root>'}))
+        "content-type": "application/xml",
+        "content-disposition": 'attachment; '
+                               'filename="/some/dir/doc1.xml"; '
+                               'category=content; '
+                               'format=xml',
+        "content": '<?xml version="1.0" encoding="UTF-8"?>\n'
+                   '<root><child>data</child></root>'}))
     builder.build_get()
 
     document = docs_client.read(uri, category=["content", "metadata"])

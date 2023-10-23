@@ -1,13 +1,12 @@
 from __future__ import annotations
 
-import xml.etree.ElementTree as ElemTree
 from typing import Iterator
 
 from requests import Response
 
 from mlclient import constants
 from mlclient.calls import DocumentsGetCall
-from mlclient.calls.model import DocumentsContentDisposition, Category
+from mlclient.calls.model import Category, DocumentsContentDisposition
 from mlclient.clients import MLResourceClient, MLResponseParser
 from mlclient.exceptions import MarkLogicError
 from mlclient.model import Document, DocumentFactory, Metadata
@@ -72,9 +71,9 @@ class DocumentsClient(MLResourceClient):
             uri: str | list[str] | tuple[str] | set[str],
             data_group: list[tuple],
     ) -> Document:
-        is_multipart = any("content-disposition" == header.lower()
+        is_multipart = any(header.lower() == "content-disposition"
                            for headers, parsed_resp in data_group
-                           for header in headers.keys())
+                           for header in headers)
         if is_multipart:
             content_part, metadata_parts = cls._split_data_group(data_group)
             content_headers, parsed_resp = content_part
@@ -86,13 +85,12 @@ class DocumentsClient(MLResourceClient):
                                                   doc_type=doc_format,
                                                   uri=uri,
                                                   metadata=metadata)
-        else:
-            headers, parsed_resp = data_group[0]
-            uri = uri if isinstance(uri, str) else uri[0]
-            doc_format = headers.get(constants.HEADER_NAME_ML_DOCUMENT_FORMAT)
-            return DocumentFactory.build_document(content=parsed_resp,
-                                                  doc_type=doc_format,
-                                                  uri=uri)
+        headers, parsed_resp = data_group[0]
+        uri = uri if isinstance(uri, str) else uri[0]
+        doc_format = headers.get(constants.HEADER_NAME_ML_DOCUMENT_FORMAT)
+        return DocumentFactory.build_document(content=parsed_resp,
+                                              doc_type=doc_format,
+                                              uri=uri)
 
     @classmethod
     def _get_content_disposition(
@@ -134,12 +132,15 @@ class DocumentsClient(MLResourceClient):
             cls,
             data_group: list[tuple],
     ) -> tuple[tuple | None, list[tuple] | None]:
-        content_part = next(((headers, parsed_resp)
-                             for headers, parsed_resp in data_group
-                             if cls._get_content_disposition(headers).category == Category.CONTENT), None)
-        metadata_parts = [(headers, parsed_resp)
-                          for headers, parsed_resp in data_group
-                          if cls._get_content_disposition(headers).category != Category.CONTENT]
+        content_part = next((
+            (headers, parsed_resp)
+            for headers, parsed_resp in data_group
+            if cls._get_content_disposition(headers).category == Category.CONTENT
+        ), None)
+        metadata_parts = [
+            (headers, parsed_resp)
+            for headers, parsed_resp in data_group
+            if cls._get_content_disposition(headers).category != Category.CONTENT]
         if len(metadata_parts) == 0:
             metadata_parts = None
         return content_part, metadata_parts
@@ -147,7 +148,7 @@ class DocumentsClient(MLResourceClient):
     @classmethod
     def _parse_metadata(
             cls,
-            metadata_parts: list[tuple] | None
+            metadata_parts: list[tuple] | None,
     ) -> Metadata | None:
         if not metadata_parts:
             return None
@@ -158,3 +159,4 @@ class DocumentsClient(MLResourceClient):
                 parsed_response["metadata_values"] = parsed_response["metadataValues"]
                 del parsed_response["metadataValues"]
                 return Metadata(**parsed_response)
+        return None

@@ -75,12 +75,12 @@ class DocumentsClient(MLResourceClient):
                            for headers, parsed_resp in data_group
                            for header in headers)
         if is_multipart:
-            content_part, metadata_parts = cls._split_data_group(data_group)
+            content_part, metadata_part = cls._split_data_group(data_group)
             content_headers, parsed_resp = content_part
             content_disp = cls._get_content_disposition(content_headers)
-            uri = content_disp.filename[1:-1]
+            uri = content_disp.filename
             doc_format = content_disp.format_
-            metadata = cls._parse_metadata(metadata_parts)
+            metadata = cls._parse_metadata(metadata_part)
             return DocumentFactory.build_document(content=parsed_resp,
                                                   doc_type=doc_format,
                                                   uri=uri,
@@ -98,10 +98,23 @@ class DocumentsClient(MLResourceClient):
             headers: dict,
     ) -> DocumentsContentDisposition:
         content_disp = headers.get(constants.HEADER_NAME_CONTENT_DISP).split("; ")
-        disp_dict = {disp.split("=")[0]: disp.split("=")[1]
-                     for disp in content_disp
-                     if len(disp.split("=")) > 1}
-        disp_dict["body_part_type"] = content_disp[0]
+        disp_dict = {}
+        for disp in content_disp:
+            key_value_pair = disp.split("=")
+            if len(key_value_pair) == 1:
+                disp_dict["body_part_type"] = key_value_pair[0]
+            else:
+                key = key_value_pair[0]
+                value = key_value_pair[1]
+                if key == "filename":
+                    value = value[1:-1]
+                curr_value = disp_dict.get(key)
+                if curr_value is None:
+                    disp_dict[key] = value
+                elif not isinstance(curr_value, list):
+                    disp_dict[key] = [curr_value, value]
+                else:
+                    curr_value.append(value)
         return DocumentsContentDisposition(**disp_dict)
 
     @classmethod
@@ -131,32 +144,30 @@ class DocumentsClient(MLResourceClient):
     def _split_data_group(
             cls,
             data_group: list[tuple],
-    ) -> tuple[tuple | None, list[tuple] | None]:
+    ) -> tuple[tuple | None, tuple | None]:
         content_part = next((
             (headers, parsed_resp)
             for headers, parsed_resp in data_group
             if cls._get_content_disposition(headers).category == Category.CONTENT
         ), None)
-        metadata_parts = [
+        metadata_part = next((
             (headers, parsed_resp)
             for headers, parsed_resp in data_group
-            if cls._get_content_disposition(headers).category != Category.CONTENT]
-        if len(metadata_parts) == 0:
-            metadata_parts = None
-        return content_part, metadata_parts
+            if cls._get_content_disposition(headers).category != Category.CONTENT
+        ), None)
+        return content_part, metadata_part
 
     @classmethod
     def _parse_metadata(
             cls,
-            metadata_parts: list[tuple] | None,
+            metadata_part: tuple | None,
     ) -> Metadata | None:
-        if not metadata_parts:
+        if not metadata_part:
             return None
-        if len(metadata_parts) == 1:
-            headers, parsed_response = metadata_parts[0]
-            content_disp = cls._get_content_disposition(headers)
-            if content_disp.category == Category.METADATA:
-                parsed_response["metadata_values"] = parsed_response["metadataValues"]
-                del parsed_response["metadataValues"]
-                return Metadata(**parsed_response)
-        return None
+
+        headers, parsed_response = metadata_part
+        if Category.METADATA_VALUES.value in parsed_response:
+            parsed_response["metadata_values"] = parsed_response["metadataValues"]
+            del parsed_response["metadataValues"]
+
+        return Metadata(**parsed_response)

@@ -23,8 +23,8 @@ class DocumentsClient(MLResourceClient):
         call = self._get_call(uri=uri, category=category)
         resp = self.call(call)
         parsed_resp_with_headers = self._parse_response(resp)
-        data_groups = self._group_data_by_uri(parsed_resp_with_headers)
-        docs = self._parse_to_documents(uri, data_groups, category)
+        documents_data = self._pre_format_data(parsed_resp_with_headers, uri, category)
+        docs = self._parse_to_documents(documents_data)
         if len(docs) == 1:
             docs = docs[0]
         return docs
@@ -34,7 +34,7 @@ class DocumentsClient(MLResourceClient):
             cls,
             uri: str | list[str] | tuple[str] | set[str],
             category: str | list | None,
-    ):
+    ) -> DocumentsGetCall:
         params = {
             "uri": uri,
             "category": category,
@@ -58,52 +58,93 @@ class DocumentsClient(MLResourceClient):
         return parsed_resp_with_headers
 
     @classmethod
-    def _parse_to_documents(
+    def _pre_format_data(
             cls,
-            uri: str | list[str] | tuple[str] | set[str],
-            data_groups: Iterator[list[tuple]],
-            category: str | list | None,
-    ) -> list[Document]:
-        return [cls._parse_to_document(uri, data_group, category)
-                for data_group in data_groups]
+            parsed_resp_with_headers: list[tuple],
+            origin_uri: str | list[str] | tuple[str] | set[str],
+            origin_category: str | list | None,
+    ) -> Iterator[dict]:
+        if len(parsed_resp_with_headers) == 1:
+            headers, parsed_resp = parsed_resp_with_headers[0]
+            is_multipart = any(header.lower() == "content-disposition"
+                               for header in headers)
+            if is_multipart:
+                content_disp = cls._get_content_disposition(headers)
+                uri = content_disp.filename
+                category = content_disp.category
+                if category == Category.CONTENT:
+                    category_key = "content"
+                    doc_format = content_disp.format_
+                else:
+                    category_key = "metadata"
+                    doc_format = None
+                data = {
+                    "uri": uri,
+                    "format": doc_format,
+                    category_key: parsed_resp,
+                }
+            else:
+                if not origin_category or Category.CONTENT.value in origin_category:
+                    category_key = "content"
+                    doc_format = headers.get(constants.HEADER_NAME_ML_DOCUMENT_FORMAT)
+                else:
+                    category_key = "metadata"
+                    doc_format = None
+                uri = origin_uri[0] if isinstance(origin_uri, list) else origin_uri
+                data = {
+                    "uri": uri,
+                    "format": doc_format,
+                    category_key: parsed_resp,
+                }
+            yield data
+        else:
+            uris = {cls._get_content_disposition(headers).filename
+                    for headers, _ in parsed_resp_with_headers}
+            for uri in uris:
+                yield cls._pre_formatted_data(parsed_resp_with_headers, uri)
 
     @classmethod
-    def _parse_to_document(
+    def _pre_formatted_data(
             cls,
-            uri: str | list[str] | tuple[str] | set[str],
-            data_group: list[tuple],
-            category: str | list | None,
-    ) -> Document:
-        is_multipart = any(header.lower() == "content-disposition"
-                           for headers, parsed_resp in data_group
-                           for header in headers)
-        if is_multipart:
-            content_part, metadata_part = cls._split_data_group(data_group)
-            metadata = cls._parse_metadata(metadata_part)
-            if content_part:
-                content_headers, content = content_part
-                content_disp = cls._get_content_disposition(content_headers)
-                uri = content_disp.filename
-                doc_format = content_disp.format_
-                return DocumentFactory.build_document(content=content,
-                                                      doc_type=doc_format,
-                                                      uri=uri,
-                                                      metadata=metadata)
-            metadata_headers = metadata_part[0]
-            content_disp = cls._get_content_disposition(metadata_headers)
-            uri = content_disp.filename
-            return MetadataDocument(uri=uri,
-                                    metadata=metadata)
-        headers, parsed_resp = data_group[0]
-        uri = uri if isinstance(uri, str) else uri[0]
-        if not category or "content" in category:
-            doc_format = headers.get(constants.HEADER_NAME_ML_DOCUMENT_FORMAT)
-            return DocumentFactory.build_document(content=parsed_resp,
-                                                  doc_type=doc_format,
-                                                  uri=uri)
-        metadata = cls._parse_metadata(data_group[0])
-        return MetadataDocument(uri=uri,
-                                metadata=metadata)
+            parsed_resp_with_headers: list[tuple],
+            uri: str,
+    ) -> dict:
+        content_part = next(
+            cls._find_part_by_uri_and_condition(
+                parsed_resp_with_headers,
+                uri,
+                lambda cat: cat == Category.CONTENT,
+            ), None)
+        metadata_part = next(
+            cls._find_part_by_uri_and_condition(
+                parsed_resp_with_headers,
+                uri,
+                lambda cat: cat != Category.CONTENT,
+            ), None)
+
+        data = {"uri": uri}
+        if content_part:
+            headers, parsed_resp = content_part
+            content_disp = cls._get_content_disposition(headers)
+            data["format"] = content_disp.format_
+            data["content"] = parsed_resp
+        if metadata_part:
+            headers, parsed_resp = metadata_part
+            data["metadata"] = parsed_resp
+        return data
+
+    @classmethod
+    def _find_part_by_uri_and_condition(
+            cls,
+            parsed_resp_with_headers: list[tuple],
+            uri: str,
+            category_condition,
+    ) -> Iterator[tuple]:
+        for headers, parsed_resp in parsed_resp_with_headers:
+            content_disp = cls._get_content_disposition(headers)
+            if (content_disp.filename == uri and
+                    category_condition(content_disp.category)):
+                yield headers, parsed_resp
 
     @classmethod
     def _get_content_disposition(
@@ -131,56 +172,41 @@ class DocumentsClient(MLResourceClient):
         return DocumentsContentDisposition(**disp_dict)
 
     @classmethod
-    def _group_data_by_uri(
+    def _parse_to_documents(
             cls,
-            parsed_resp_with_headers: list[tuple],
-    ) -> Iterator[list[tuple]]:
-        if len(parsed_resp_with_headers) == 1:
-            yield parsed_resp_with_headers
-        else:
-            uris = {cls._get_content_disposition(headers).filename
-                    for headers, _ in parsed_resp_with_headers}
-            for uri in uris:
-                yield cls._data_referring_to_same_uri(parsed_resp_with_headers, uri)
+            documents_data: Iterator[dict],
+    ) -> list[Document]:
+        return [cls._parse_to_document(document_data)
+                for document_data in documents_data]
 
     @classmethod
-    def _data_referring_to_same_uri(
+    def _parse_to_document(
             cls,
-            parsed_resp_with_headers: list[tuple],
-            uri: str,
-    ) -> list[tuple]:
-        return [(headers, parsed_resp)
-                for headers, parsed_resp in parsed_resp_with_headers
-                if cls._get_content_disposition(headers).filename == uri]
-
-    @classmethod
-    def _split_data_group(
-            cls,
-            data_group: list[tuple],
-    ) -> tuple[tuple | None, tuple | None]:
-        content_part = next((
-            (headers, parsed_resp)
-            for headers, parsed_resp in data_group
-            if cls._get_content_disposition(headers).category == Category.CONTENT
-        ), None)
-        metadata_part = next((
-            (headers, parsed_resp)
-            for headers, parsed_resp in data_group
-            if cls._get_content_disposition(headers).category != Category.CONTENT
-        ), None)
-        return content_part, metadata_part
+            document_data: dict,
+    ) -> Document:
+        uri = document_data.get("uri")
+        doc_format = document_data.get("format")
+        content_raw = document_data.get("content")
+        metadata_raw = document_data.get("metadata")
+        metadata = cls._parse_metadata(metadata_raw)
+        if content_raw:
+            return DocumentFactory.build_document(content=content_raw,
+                                                  doc_type=doc_format,
+                                                  uri=uri,
+                                                  metadata=metadata)
+        return MetadataDocument(uri=uri,
+                                metadata=metadata)
 
     @classmethod
     def _parse_metadata(
             cls,
-            metadata_part: tuple | None,
+            metadata_raw: dict | None,
     ) -> Metadata | None:
-        if not metadata_part:
+        if not metadata_raw:
             return None
 
-        parsed_response = metadata_part[1]
-        if "metadataValues" in parsed_response:
-            parsed_response["metadata_values"] = parsed_response["metadataValues"]
-            del parsed_response["metadataValues"]
+        if "metadataValues" in metadata_raw:
+            metadata_raw["metadata_values"] = metadata_raw["metadataValues"]
+            del metadata_raw["metadataValues"]
 
-        return Metadata(**parsed_response)
+        return Metadata(**metadata_raw)

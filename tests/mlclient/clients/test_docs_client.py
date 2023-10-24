@@ -8,7 +8,7 @@ from mlclient.calls.model import DocumentsBodyPart
 from mlclient.clients import DocumentsClient
 from mlclient.exceptions import MarkLogicError
 from mlclient.model import (BinaryDocument, DocumentType, JSONDocument,
-                            TextDocument, XMLDocument)
+                            TextDocument, XMLDocument, MetadataDocument)
 from tests.tools import MLResponseBuilder
 
 
@@ -661,6 +661,48 @@ def test_read_doc_with_all_metadata_categories(docs_client):
     assert document.content.getroot().tag == "root"
     assert document.content.getroot().text is None
     assert document.content.getroot().attrib == {}
+    assert document.metadata is not None
+    assert document.metadata.collections() == []
+    assert document.metadata.metadata_values() == {}
+    assert document.metadata.permissions() == []
+    assert document.metadata.properties() == {}
+    assert document.metadata.quality() == 0
+    assert document.is_temporal is False
+
+
+@responses.activate
+def test_read_full_metadata_without_content(docs_client):
+    uri = "/some/dir/doc1.xml"
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8000/v1/documents")
+    builder.with_request_param("uri", uri)
+    builder.with_request_param("category", "metadata")
+    builder.with_request_param("format", "json")
+    builder.with_response_body_multipart_mixed()
+    builder.with_response_header("vnd.marklogic.document-format", "json")
+    builder.with_response_status(200)
+    builder.with_response_documents_body_part(DocumentsBodyPart(**{
+        "content-type": "application/json",
+        "content-disposition": 'attachment; '
+                               'filename="/some/dir/doc1.xml"; '
+                               'category=metadata; '
+                               'format=json',
+        "content": {
+            "collections": [],
+            "permissions": [],
+            "properties": {},
+            "quality": 0,
+            "metadataValues": {},
+        }}))
+    builder.build_get()
+
+    document = docs_client.read(uri, category=["metadata"])
+
+    assert isinstance(document, MetadataDocument)
+    assert document.uri == uri
+    assert document.doc_type is None
+    assert document.content is None
     assert document.metadata is not None
     assert document.metadata.collections() == []
     assert document.metadata.metadata_values() == {}

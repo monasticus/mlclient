@@ -9,7 +9,7 @@ from mlclient.calls import DocumentsGetCall
 from mlclient.calls.model import Category, DocumentsContentDisposition
 from mlclient.clients import MLResourceClient, MLResponseParser
 from mlclient.exceptions import MarkLogicError
-from mlclient.model import Document, DocumentFactory, Metadata
+from mlclient.model import Document, DocumentFactory, Metadata, MetadataDocument
 
 
 class DocumentsClient(MLResourceClient):
@@ -23,7 +23,7 @@ class DocumentsClient(MLResourceClient):
         resp = self.call(call)
         parsed_resp_with_headers = self._parse_response(resp)
         data_groups = self._group_data_by_uri(parsed_resp_with_headers)
-        docs = self._parse_to_documents(uri, data_groups)
+        docs = self._parse_to_documents(uri, data_groups, category)
         if len(docs) == 1:
             docs = docs[0]
         return docs
@@ -61,8 +61,9 @@ class DocumentsClient(MLResourceClient):
             cls,
             uri: str | list[str] | tuple[str] | set[str],
             data_groups: Iterator[list[tuple]],
+            category: str | list | None,
     ) -> list[Document]:
-        return [cls._parse_to_document(uri, data_group)
+        return [cls._parse_to_document(uri, data_group, category)
                 for data_group in data_groups]
 
     @classmethod
@@ -70,27 +71,40 @@ class DocumentsClient(MLResourceClient):
             cls,
             uri: str | list[str] | tuple[str] | set[str],
             data_group: list[tuple],
+            category: str | list | None,
     ) -> Document:
         is_multipart = any(header.lower() == "content-disposition"
                            for headers, parsed_resp in data_group
                            for header in headers)
         if is_multipart:
             content_part, metadata_part = cls._split_data_group(data_group)
-            content_headers, parsed_resp = content_part
-            content_disp = cls._get_content_disposition(content_headers)
-            uri = content_disp.filename
-            doc_format = content_disp.format_
             metadata = cls._parse_metadata(metadata_part)
-            return DocumentFactory.build_document(content=parsed_resp,
-                                                  doc_type=doc_format,
-                                                  uri=uri,
-                                                  metadata=metadata)
+            if content_part:
+                content_headers, content = content_part
+                content_disp = cls._get_content_disposition(content_headers)
+                uri = content_disp.filename
+                doc_format = content_disp.format_
+                return DocumentFactory.build_document(content=content,
+                                                      doc_type=doc_format,
+                                                      uri=uri,
+                                                      metadata=metadata)
+            else:
+                metadata_headers = metadata_part[0]
+                content_disp = cls._get_content_disposition(metadata_headers)
+                uri = content_disp.filename
+                return MetadataDocument(uri=uri,
+                                        metadata=metadata)
         headers, parsed_resp = data_group[0]
         uri = uri if isinstance(uri, str) else uri[0]
-        doc_format = headers.get(constants.HEADER_NAME_ML_DOCUMENT_FORMAT)
-        return DocumentFactory.build_document(content=parsed_resp,
-                                              doc_type=doc_format,
-                                              uri=uri)
+        if "content" in category:
+            doc_format = headers.get(constants.HEADER_NAME_ML_DOCUMENT_FORMAT)
+            return DocumentFactory.build_document(content=parsed_resp,
+                                                  doc_type=doc_format,
+                                                  uri=uri)
+        else:
+            metadata = cls._parse_metadata(data_group[0])
+            return MetadataDocument(uri=uri,
+                                    metadata=metadata)
 
     @classmethod
     def _get_content_disposition(
@@ -165,7 +179,7 @@ class DocumentsClient(MLResourceClient):
         if not metadata_part:
             return None
 
-        headers, parsed_response = metadata_part
+        parsed_response = metadata_part[1]
         if "metadataValues" in parsed_response:
             parsed_response["metadata_values"] = parsed_response["metadataValues"]
             del parsed_response["metadataValues"]

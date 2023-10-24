@@ -95,8 +95,11 @@ def test_read_xml_doc_using_uri_list(docs_client):
     builder.with_response_body(b'<?xml version="1.0" encoding="UTF-8"?>\n<root/>')
     builder.build_get()
 
-    document = docs_client.read([uri])
+    docs = docs_client.read([uri])
+    assert isinstance(docs, list)
+    assert len(docs) == 1
 
+    document = docs[0]
     assert isinstance(document, XMLDocument)
     assert document.uri == uri
     assert document.doc_type == DocumentType.XML
@@ -145,8 +148,11 @@ def test_read_json_doc_uri_list(docs_client):
     builder.with_response_body(b'{"root":{"child":"data"}}')
     builder.build_get()
 
-    document = docs_client.read([uri])
+    docs = docs_client.read([uri])
+    assert isinstance(docs, list)
+    assert len(docs) == 1
 
+    document = docs[0]
     assert isinstance(document, JSONDocument)
     assert document.uri == uri
     assert document.doc_type == DocumentType.JSON
@@ -193,8 +199,11 @@ def test_read_text_doc_uri_list(docs_client):
     builder.with_response_header("vnd.marklogic.document-format", "text")
     builder.build_get()
 
-    document = docs_client.read([uri])
+    docs = docs_client.read([uri])
+    assert isinstance(docs, list)
+    assert len(docs) == 1
 
+    document = docs[0]
     assert isinstance(document, TextDocument)
     assert document.uri == uri
     assert document.doc_type == DocumentType.TEXT
@@ -243,8 +252,11 @@ def test_read_binary_doc_uri_list(docs_client):
     builder.with_response_header("vnd.marklogic.document-format", "binary")
     builder.build_get()
 
-    document = docs_client.read([uri])
+    docs = docs_client.read([uri])
+    assert isinstance(docs, list)
+    assert len(docs) == 1
 
+    document = docs[0]
     assert isinstance(document, BinaryDocument)
     assert document.uri == uri
     assert document.doc_type == DocumentType.BINARY
@@ -276,8 +288,11 @@ def test_read_existing_and_non_existing_doc(docs_client):
                    '<root><child>data</child></root>'}))
     builder.build_get()
 
-    document = docs_client.read(uris)
+    docs = docs_client.read(uris)
+    assert isinstance(docs, list)
+    assert len(docs) == 1
 
+    document = docs[0]
     assert isinstance(document, XMLDocument)
     assert document.uri == "/some/dir/doc1.xml"
     assert document.doc_type == DocumentType.XML

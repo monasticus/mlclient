@@ -17,26 +17,26 @@ class DocumentsClient(MLResourceClient):
 
     def read(
             self,
-            uri: str | list[str] | tuple[str] | set[str],
+            uris: str | list[str] | tuple[str] | set[str],
             category: str | list | None = None,
     ) -> Document | list[Document]:
-        call = self._get_call(uri=uri, category=category)
+        call = self._get_call(uris=uris, category=category)
         resp = self.call(call)
         parsed_resp_with_headers = self._parse_response(resp)
-        documents_data = self._pre_format_data(parsed_resp_with_headers, uri, category)
+        documents_data = self._pre_format_data(parsed_resp_with_headers, uris, category)
         docs = self._parse_to_documents(documents_data)
-        if len(docs) == 1:
+        if isinstance(uris, str):
             docs = docs[0]
         return docs
 
     @classmethod
     def _get_call(
             cls,
-            uri: str | list[str] | tuple[str] | set[str],
+            uris: str | list[str] | tuple[str] | set[str],
             category: str | list | None,
     ) -> DocumentsGetCall:
         params = {
-            "uri": uri,
+            "uri": uris,
             "category": category,
         }
         if category and category != "content" or isinstance(category, list):
@@ -61,7 +61,7 @@ class DocumentsClient(MLResourceClient):
     def _pre_format_data(
             cls,
             parsed_resp_with_headers: list[tuple],
-            origin_uri: str | list[str] | tuple[str] | set[str],
+            origin_uris: str | list[str] | tuple[str] | set[str],
             origin_category: str | list | None,
     ) -> Iterator[dict]:
         if len(parsed_resp_with_headers) == 1:
@@ -94,7 +94,7 @@ class DocumentsClient(MLResourceClient):
                     category_key = "metadata"
                     doc_format = None
                     value = cls._parse_metadata(parsed_resp)
-                uri = origin_uri[0] if isinstance(origin_uri, list) else origin_uri
+                uri = origin_uris[0] if isinstance(origin_uris, list) else origin_uris
                 data = {
                     "uri": uri,
                     "format": doc_format,

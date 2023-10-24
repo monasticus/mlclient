@@ -8,7 +8,7 @@ from mlclient.calls.model import DocumentsBodyPart
 from mlclient.clients import DocumentsClient
 from mlclient.exceptions import MarkLogicError
 from mlclient.model import (BinaryDocument, DocumentType, JSONDocument,
-                            TextDocument, XMLDocument, MetadataDocument)
+                            MetadataDocument, TextDocument, XMLDocument)
 from tests.tools import MLResponseBuilder
 
 
@@ -679,14 +679,121 @@ def test_read_full_metadata_without_content(docs_client):
     builder.with_request_param("uri", uri)
     builder.with_request_param("category", "metadata")
     builder.with_request_param("format", "json")
-    builder.with_response_body_multipart_mixed()
+    builder.with_response_content_type("application/json; charset=utf-8")
     builder.with_response_header("vnd.marklogic.document-format", "json")
+    builder.with_response_status(200)
+    builder.with_response_body({
+        "collections": [],
+        "permissions": [],
+        "properties": {},
+        "quality": 0,
+        "metadataValues": {}})
+    builder.build_get()
+
+    document = docs_client.read(uri, category=["metadata"])
+
+    assert isinstance(document, MetadataDocument)
+    assert document.uri == uri
+    assert document.doc_type is None
+    assert document.content is None
+    assert document.metadata is not None
+    assert document.metadata.collections() == []
+    assert document.metadata.metadata_values() == {}
+    assert document.metadata.permissions() == []
+    assert document.metadata.properties() == {}
+    assert document.metadata.quality() == 0
+    assert document.is_temporal is False
+
+
+@responses.activate
+def test_read_single_metadata_category_without_content(docs_client):
+    uri = "/some/dir/doc1.xml"
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8000/v1/documents")
+    builder.with_request_param("uri", uri)
+    builder.with_request_param("category", "collections")
+    builder.with_request_param("format", "json")
+    builder.with_response_content_type("application/json; charset=utf-8")
+    builder.with_response_header("vnd.marklogic.document-format", "json")
+    builder.with_response_status(200)
+    builder.with_response_body({"collections": []})
+    builder.build_get()
+
+    document = docs_client.read(uri, category=["collections"])
+
+    assert isinstance(document, MetadataDocument)
+    assert document.uri == uri
+    assert document.doc_type is None
+    assert document.content is None
+    assert document.metadata is not None
+    assert document.metadata.collections() == []
+    assert document.metadata.metadata_values() == {}
+    assert document.metadata.permissions() == []
+    assert document.metadata.properties() == {}
+    assert document.metadata.quality() is None
+    assert document.is_temporal is False
+
+
+@responses.activate
+def test_read_two_metadata_categories_without_content(docs_client):
+    uri = "/some/dir/doc1.xml"
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8000/v1/documents")
+    builder.with_request_param("uri", uri)
+    builder.with_request_param("category", "collections")
+    builder.with_request_param("category", "quality")
+    builder.with_request_param("format", "json")
+    builder.with_response_body_multipart_mixed()
     builder.with_response_status(200)
     builder.with_response_documents_body_part(DocumentsBodyPart(**{
         "content-type": "application/json",
         "content-disposition": 'attachment; '
                                'filename="/some/dir/doc1.xml"; '
-                               'category=metadata; '
+                               'category=collections; '
+                               'category=quality; '
+                               'format=json',
+        "content": {"collections": [], "quality": 0}}))
+    builder.build_get()
+
+    document = docs_client.read(uri, category=["collections", "quality"])
+
+    assert isinstance(document, MetadataDocument)
+    assert document.uri == uri
+    assert document.doc_type is None
+    assert document.content is None
+    assert document.metadata is not None
+    assert document.metadata.collections() == []
+    assert document.metadata.metadata_values() == {}
+    assert document.metadata.permissions() == []
+    assert document.metadata.properties() == {}
+    assert document.metadata.quality() == 0
+    assert document.is_temporal is False
+
+
+@responses.activate
+def test_read_all_metadata_categories_without_content(docs_client):
+    uri = "/some/dir/doc1.xml"
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8000/v1/documents")
+    builder.with_request_param("uri", uri)
+    builder.with_request_param("category", "metadata-values")
+    builder.with_request_param("category", "collections")
+    builder.with_request_param("category", "permissions")
+    builder.with_request_param("category", "properties")
+    builder.with_request_param("category", "quality")
+    builder.with_request_param("format", "json")
+    builder.with_response_body_multipart_mixed()
+    builder.with_response_header("vnd.marklogic.document-format", "xml")
+    builder.with_response_status(200)
+    builder.with_response_documents_body_part(DocumentsBodyPart(**{
+        "content-type": "application/json",
+        "content-disposition": 'attachment; '
+                               'filename="/some/dir/doc1.xml"; '
+                               'category=collections; '
+                               'category=quality; '
                                'format=json',
         "content": {
             "collections": [],
@@ -697,7 +804,11 @@ def test_read_full_metadata_without_content(docs_client):
         }}))
     builder.build_get()
 
-    document = docs_client.read(uri, category=["metadata"])
+    document = docs_client.read(uri, category=["metadata-values",
+                                               "collections",
+                                               "permissions",
+                                               "properties",
+                                               "quality"])
 
     assert isinstance(document, MetadataDocument)
     assert document.uri == uri

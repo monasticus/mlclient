@@ -40,8 +40,9 @@ Examples
 >>> from mlclient.model import Document, DocumentType, Metadata
 """
 from .data import (BinaryDocument, Document, DocumentFactory, DocumentType,
-                   JSONDocument, Metadata, Mimetype, Permission, RawDocument,
-                   RawStringDocument, TextDocument, XMLDocument, MetadataDocument)
+                   JSONDocument, Metadata, MetadataDocument, Mimetype,
+                   Permission, RawDocument, RawStringDocument, TextDocument,
+                   XMLDocument)
 
 __all__ = ["DocumentFactory", "Document",
            "RawDocument", "RawStringDocument", "MetadataDocument",

@@ -9,7 +9,8 @@ from mlclient.calls import DocumentsGetCall
 from mlclient.calls.model import Category, DocumentsContentDisposition
 from mlclient.clients import MLResourceClient, MLResponseParser
 from mlclient.exceptions import MarkLogicError
-from mlclient.model import Document, DocumentFactory, Metadata, MetadataDocument
+from mlclient.model import (Document, DocumentFactory, Metadata,
+                            MetadataDocument)
 
 
 class DocumentsClient(MLResourceClient):
@@ -96,7 +97,7 @@ class DocumentsClient(MLResourceClient):
                                         metadata=metadata)
         headers, parsed_resp = data_group[0]
         uri = uri if isinstance(uri, str) else uri[0]
-        if "content" in category:
+        if not category or "content" in category:
             doc_format = headers.get(constants.HEADER_NAME_ML_DOCUMENT_FORMAT)
             return DocumentFactory.build_document(content=parsed_resp,
                                                   doc_type=doc_format,

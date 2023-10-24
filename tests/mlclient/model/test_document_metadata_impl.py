@@ -1,4 +1,4 @@
-from mlclient.model import Document, MetadataDocument, Metadata
+from mlclient.model import Document, Metadata, MetadataDocument
 
 
 def test_is_document_subclass():

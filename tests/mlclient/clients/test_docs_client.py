@@ -604,3 +604,67 @@ def test_read_doc_with_two_metadata_categories(docs_client):
     assert document.metadata.properties() == {}
     assert document.metadata.quality() == 0
     assert document.is_temporal is False
+
+
+@responses.activate
+def test_read_doc_with_all_metadata_categories(docs_client):
+    uri = "/some/dir/doc1.xml"
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8000/v1/documents")
+    builder.with_request_param("uri", uri)
+    builder.with_request_param("category", "content")
+    builder.with_request_param("category", "metadata-values")
+    builder.with_request_param("category", "collections")
+    builder.with_request_param("category", "permissions")
+    builder.with_request_param("category", "properties")
+    builder.with_request_param("category", "quality")
+    builder.with_request_param("format", "json")
+    builder.with_response_body_multipart_mixed()
+    builder.with_response_header("vnd.marklogic.document-format", "xml")
+    builder.with_response_status(200)
+    builder.with_response_documents_body_part(DocumentsBodyPart(**{
+        "content-type": "application/json",
+        "content-disposition": 'attachment; '
+                               'filename="/some/dir/doc1.xml"; '
+                               'category=collections; '
+                               'category=quality; '
+                               'format=json',
+        "content": {
+            "collections": [],
+            "permissions": [],
+            "properties": {},
+            "quality": 0,
+            "metadataValues": {},
+        }}))
+    builder.with_response_documents_body_part(DocumentsBodyPart(**{
+        "content-type": "application/xml",
+        "content-disposition": 'attachment; '
+                               'filename="/some/dir/doc1.xml"; '
+                               'category=content; '
+                               'format=xml',
+        "content": '<?xml version="1.0" encoding="UTF-8"?>\n'
+                   '<root><child>data</child></root>'}))
+    builder.build_get()
+
+    document = docs_client.read(uri, category=["content",
+                                               "metadata-values",
+                                               "collections",
+                                               "permissions",
+                                               "properties",
+                                               "quality"])
+
+    assert isinstance(document, XMLDocument)
+    assert document.uri == uri
+    assert document.doc_type == DocumentType.XML
+    assert isinstance(document.content, ElemTree.ElementTree)
+    assert document.content.getroot().tag == "root"
+    assert document.content.getroot().text is None
+    assert document.content.getroot().attrib == {}
+    assert document.metadata is not None
+    assert document.metadata.collections() == []
+    assert document.metadata.metadata_values() == {}
+    assert document.metadata.permissions() == []
+    assert document.metadata.properties() == {}
+    assert document.metadata.quality() == 0
+    assert document.is_temporal is False

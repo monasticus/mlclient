@@ -42,7 +42,7 @@ def test_to_str_attachment():
 def test_to_str_multiple_categories():
     disp = DocumentsContentDisposition(
         body_part_type=DocumentsBodyPartType.ATTACHMENT,
-        category=["collections", "quality", "metadataValues"],
+        category=["collections", "quality", "metadata-values"],
         filename="/path/to/file.xml",
         repair=Repair.FULL,
         temporal_document="/path/to/file.xml",
@@ -52,7 +52,7 @@ def test_to_str_multiple_categories():
                     "filename=/path/to/file.xml; "
                     "category=collections; "
                     "category=quality; "
-                    "category=metadataValues; "
+                    "category=metadata-values; "
                     "repair=full; "
                     "temporal-document=/path/to/file.xml; "
                     "format=json")

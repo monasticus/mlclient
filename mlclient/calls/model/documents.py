@@ -53,7 +53,7 @@ class Category(Enum):
 
     CONTENT = "content"
     METADATA = "metadata"
-    METADATA_VALUES = "metadataValues"
+    METADATA_VALUES = "metadata-values"
     COLLECTIONS = "collections"
     PERMISSIONS = "permissions"
     PROPERTIES = "properties"

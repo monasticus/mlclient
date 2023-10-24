@@ -166,7 +166,7 @@ class DocumentsClient(MLResourceClient):
             return None
 
         headers, parsed_response = metadata_part
-        if Category.METADATA_VALUES.value in parsed_response:
+        if "metadataValues" in parsed_response:
             parsed_response["metadata_values"] = parsed_response["metadataValues"]
             del parsed_response["metadataValues"]
 

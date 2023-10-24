@@ -65,9 +65,9 @@ class DocumentsContentDisposition(BaseModel):
 
     body_part_type: DocumentsBodyPartType = Field(
         description="The content type indication (inline or attachment).")
-    category: Optional[List[Category]] = Field(
+    category: Optional[Union[Category, List[Category]]] = Field(
         description="The category of data.",
-        default=[])
+        default=None)
     repair: Optional[Repair] = Field(
         description="For an XML content part, the level of XML repair to perform. "
                     "Allowed values: full (default) or none. "

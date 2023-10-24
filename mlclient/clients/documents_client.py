@@ -89,12 +89,11 @@ class DocumentsClient(MLResourceClient):
                                                       doc_type=doc_format,
                                                       uri=uri,
                                                       metadata=metadata)
-            else:
-                metadata_headers = metadata_part[0]
-                content_disp = cls._get_content_disposition(metadata_headers)
-                uri = content_disp.filename
-                return MetadataDocument(uri=uri,
-                                        metadata=metadata)
+            metadata_headers = metadata_part[0]
+            content_disp = cls._get_content_disposition(metadata_headers)
+            uri = content_disp.filename
+            return MetadataDocument(uri=uri,
+                                    metadata=metadata)
         headers, parsed_resp = data_group[0]
         uri = uri if isinstance(uri, str) else uri[0]
         if not category or "content" in category:
@@ -102,10 +101,9 @@ class DocumentsClient(MLResourceClient):
             return DocumentFactory.build_document(content=parsed_resp,
                                                   doc_type=doc_format,
                                                   uri=uri)
-        else:
-            metadata = cls._parse_metadata(data_group[0])
-            return MetadataDocument(uri=uri,
-                                    metadata=metadata)
+        metadata = cls._parse_metadata(data_group[0])
+        return MetadataDocument(uri=uri,
+                                metadata=metadata)
 
     @classmethod
     def _get_content_disposition(

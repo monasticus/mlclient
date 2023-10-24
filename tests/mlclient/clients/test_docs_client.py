@@ -627,7 +627,10 @@ def test_read_doc_with_all_metadata_categories(docs_client):
         "content-type": "application/json",
         "content-disposition": 'attachment; '
                                'filename="/some/dir/doc1.xml"; '
+                               'category=metadata-values; '
                                'category=collections; '
+                               'category=permissions; '
+                               'category=properties; '
                                'category=quality; '
                                'format=json',
         "content": {
@@ -792,7 +795,10 @@ def test_read_all_metadata_categories_without_content(docs_client):
         "content-type": "application/json",
         "content-disposition": 'attachment; '
                                'filename="/some/dir/doc1.xml"; '
+                               'category=metadata-values; '
                                'category=collections; '
+                               'category=permissions; '
+                               'category=properties; '
                                'category=quality; '
                                'format=json',
         "content": {

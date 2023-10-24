@@ -255,6 +255,41 @@ def test_read_binary_doc_uri_list(docs_client):
 
 
 @responses.activate
+def test_read_existing_and_non_existing_doc(docs_client):
+    uris = [
+        "/some/dir/doc1.xml",
+        "/some/dir/doc5.xml",
+    ]
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8000/v1/documents")
+    builder.with_request_param("uri", "/some/dir/doc1.xml")
+    builder.with_request_param("uri", "/some/dir/doc5.xml")
+    builder.with_response_status(200)
+    builder.with_response_body_multipart_mixed()
+    builder.with_response_documents_body_part(DocumentsBodyPart(**{
+        "content-type": "application/xml",
+        "content-disposition": 'attachment; '
+                               'filename="/some/dir/doc1.xml"; '
+                               'category=content; '
+                               'format=xml',
+        "content": '<?xml version="1.0" encoding="UTF-8"?>\n'
+                   '<root><child>data</child></root>'}))
+    builder.build_get()
+
+    document = docs_client.read(uris)
+
+    assert isinstance(document, XMLDocument)
+    assert document.uri == "/some/dir/doc1.xml"
+    assert document.doc_type == DocumentType.XML
+    assert isinstance(document.content, ElemTree.ElementTree)
+    assert document.content.getroot().tag == "root"
+    assert document.content.getroot().text is None
+    assert document.content.getroot().attrib == {}
+    assert document.metadata is None
+    assert document.is_temporal is False
+
+
+@responses.activate
 def test_read_multiple_docs(docs_client):
     uris = [
         "/some/dir/doc1.xml",

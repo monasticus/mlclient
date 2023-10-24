@@ -17,6 +17,8 @@ It exports 5 classes:
         A Document implementation representing a single MarkLogic document.
     * RawStringDocument
         A Document implementation representing a single MarkLogic document.
+    * MetadataDocument
+        A Document implementation representing a single MarkLogic document's metadata.
     * DocumentFactory
         A factory class instantiating a Document implementation classes.
     * Metadata
@@ -58,7 +60,7 @@ class Document(metaclass=ABCMeta):
     def __init__(
             self,
             uri: str | None = None,
-            doc_type: DocumentType = DocumentType.XML,
+            doc_type: DocumentType | None = DocumentType.XML,
             metadata: Metadata | None = None,
             is_temporal: bool = False,
     ):
@@ -68,7 +70,7 @@ class Document(metaclass=ABCMeta):
         ----------
         uri : str
             A document URI
-        doc_type : DocumentType
+        doc_type : DocumentType | None
             A document type
         metadata : Metadata
             A document metadata
@@ -123,7 +125,7 @@ class Document(metaclass=ABCMeta):
     @property
     def doc_type(
             self,
-    ) -> DocumentType:
+    ) -> DocumentType | None:
         """A document type."""
         return self._doc_type
 
@@ -331,7 +333,7 @@ class RawDocument(Document):
             self,
             content: bytes,
             uri: str | None = None,
-            doc_type: DocumentType = DocumentType.XML,
+            doc_type: DocumentType | None = DocumentType.XML,
             metadata: Metadata | None = None,
             is_temporal: bool = False,
     ):
@@ -343,7 +345,7 @@ class RawDocument(Document):
             A document content
         uri : str
             A document URI
-        doc_type : DocumentType
+        doc_type : DocumentType | None
             A document type
         metadata : Metadata
             A document metadata
@@ -377,7 +379,7 @@ class RawStringDocument(Document):
             self,
             content: str,
             uri: str | None = None,
-            doc_type: DocumentType = DocumentType.XML,
+            doc_type: DocumentType | None = DocumentType.XML,
             metadata: Metadata | None = None,
             is_temporal: bool = False,
     ):
@@ -389,7 +391,7 @@ class RawStringDocument(Document):
             A document content
         uri : str
             A document URI
-        doc_type : DocumentType
+        doc_type : DocumentType | None
             A document type
         metadata : Metadata
             A document metadata
@@ -411,6 +413,42 @@ class RawStringDocument(Document):
             A document's content
         """
         return self._content
+
+
+class MetadataDocument(Document):
+    """A Document implementation representing a single MarkLogic document's metadata.
+
+    This implementation does not store any content.
+    """
+
+    def __init__(
+            self,
+            uri: str | None = None,
+            metadata: Metadata | None = None,
+    ):
+        """Initialize RawStringDocument instance.
+
+        Parameters
+        ----------
+        uri : str
+            A document URI
+        metadata : Metadata
+            A document metadata
+        """
+        super().__init__(uri, doc_type=None, metadata=metadata)
+
+    @property
+    def content(
+            self,
+    ) -> None:
+        """A document content.
+
+        Returns
+        -------
+        None
+            A document's content
+        """
+        return
 
 
 class DocumentFactory:

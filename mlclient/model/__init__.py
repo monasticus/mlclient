@@ -24,6 +24,8 @@ This package exports the following classes:
         A Document implementation representing a single MarkLogic document.
     * RawStringDocument
         A Document implementation representing a single MarkLogic document.
+    * MetadataDocument
+        A Document implementation representing a single MarkLogic document's metadata.
     * DocumentFactory
         A factory class instantiating a Document implementation classes.
     * Metadata
@@ -39,8 +41,9 @@ Examples
 """
 from .data import (BinaryDocument, Document, DocumentFactory, DocumentType,
                    JSONDocument, Metadata, Mimetype, Permission, RawDocument,
-                   RawStringDocument, TextDocument, XMLDocument)
+                   RawStringDocument, TextDocument, XMLDocument, MetadataDocument)
 
-__all__ = ["DocumentFactory", "Document", "RawDocument", "RawStringDocument",
+__all__ = ["DocumentFactory", "Document",
+           "RawDocument", "RawStringDocument", "MetadataDocument",
            "XMLDocument", "JSONDocument", "TextDocument", "BinaryDocument",
            "DocumentType", "Mimetype", "Metadata", "Permission"]

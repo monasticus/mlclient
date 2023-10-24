@@ -827,3 +827,401 @@ def test_read_all_metadata_categories_without_content(docs_client):
     assert document.metadata.properties() == {}
     assert document.metadata.quality() == 0
     assert document.is_temporal is False
+
+
+@responses.activate
+def test_read_multiple_docs_with_full_metadata(docs_client):
+    uris = [
+        "/some/dir/doc1.xml",
+        "/some/dir/doc2.json",
+    ]
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8000/v1/documents")
+    builder.with_request_param("uri", "/some/dir/doc1.xml")
+    builder.with_request_param("uri", "/some/dir/doc2.json")
+    builder.with_request_param("category", "content")
+    builder.with_request_param("category", "metadata")
+    builder.with_request_param("format", "json")
+    builder.with_response_status(200)
+    builder.with_response_body_multipart_mixed()
+    builder.with_response_documents_body_part(DocumentsBodyPart(**{
+        "content-type": "application/json",
+        "content-disposition": 'attachment; '
+                               'filename="/some/dir/doc1.xml"; '
+                               'category=metadata; '
+                               'format=json',
+        "content": {
+            "collections": [],
+            "permissions": [],
+            "properties": {},
+            "quality": 0,
+            "metadataValues": {},
+        }}))
+    builder.with_response_documents_body_part(DocumentsBodyPart(**{
+        "content-type": "application/xml",
+        "content-disposition": 'attachment; '
+                               'filename="/some/dir/doc1.xml"; '
+                               'category=content; '
+                               'format=xml',
+        "content": '<?xml version="1.0" encoding="UTF-8"?>\n'
+                   '<root><child>data</child></root>'}))
+    builder.with_response_documents_body_part(DocumentsBodyPart(**{
+        "content-type": "application/json",
+        "content-disposition": 'attachment; '
+                               'filename="/some/dir/doc2.json"; '
+                               'category=metadata; '
+                               'format=json',
+        "content": {
+            "collections": [],
+            "permissions": [],
+            "properties": {},
+            "quality": 1,
+            "metadataValues": {},
+        }}))
+    builder.with_response_documents_body_part(DocumentsBodyPart(**{
+        "content-type": "application/json",
+        "content-disposition": 'attachment; '
+                               'filename="/some/dir/doc2.json"; '
+                               'category=content; '
+                               'format=json',
+        "content": {"root": {"child": "data"}}}))
+    builder.build_get()
+
+    docs = docs_client.read(uris, category=["content", "metadata"])
+
+    assert isinstance(docs, list)
+    assert len(docs) == 2
+
+    xml_docs = [doc for doc in docs if doc.uri.endswith(".xml")]
+    assert len(xml_docs) == 1
+    xml_doc = xml_docs[0]
+    assert isinstance(xml_doc, XMLDocument)
+    assert xml_doc.uri == "/some/dir/doc1.xml"
+    assert xml_doc.doc_type == DocumentType.XML
+    assert isinstance(xml_doc.content, ElemTree.ElementTree)
+    assert xml_doc.content.getroot().tag == "root"
+    assert xml_doc.content.getroot().text is None
+    assert xml_doc.content.getroot().attrib == {}
+    assert xml_doc.metadata is not None
+    assert xml_doc.metadata.collections() == []
+    assert xml_doc.metadata.metadata_values() == {}
+    assert xml_doc.metadata.permissions() == []
+    assert xml_doc.metadata.properties() == {}
+    assert xml_doc.metadata.quality() == 0
+    assert xml_doc.is_temporal is False
+
+    json_docs = list(filter(lambda d: d.uri.endswith(".json"), docs))
+    assert len(json_docs) == 1
+    json_doc = json_docs[0]
+    assert isinstance(json_doc, JSONDocument)
+    assert json_doc.uri == "/some/dir/doc2.json"
+    assert json_doc.doc_type == DocumentType.JSON
+    assert isinstance(json_doc.content, dict)
+    assert json_doc.content == {"root": {"child": "data"}}
+    assert json_doc.metadata is not None
+    assert json_doc.metadata.collections() == []
+    assert json_doc.metadata.metadata_values() == {}
+    assert json_doc.metadata.permissions() == []
+    assert json_doc.metadata.properties() == {}
+    assert json_doc.metadata.quality() == 1
+    assert json_doc.is_temporal is False
+
+
+@responses.activate
+def test_read_multiple_docs_with_single_metadata_category(docs_client):
+    uris = [
+        "/some/dir/doc1.xml",
+        "/some/dir/doc2.json",
+    ]
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8000/v1/documents")
+    builder.with_request_param("uri", "/some/dir/doc1.xml")
+    builder.with_request_param("uri", "/some/dir/doc2.json")
+    builder.with_request_param("category", "content")
+    builder.with_request_param("category", "collections")
+    builder.with_request_param("format", "json")
+    builder.with_response_status(200)
+    builder.with_response_body_multipart_mixed()
+    builder.with_response_documents_body_part(DocumentsBodyPart(**{
+        "content-type": "application/json",
+        "content-disposition": 'attachment; '
+                               'filename="/some/dir/doc1.xml"; '
+                               'category=collections; '
+                               'format=json',
+        "content": {
+            "collections": ["xml"],
+        }}))
+    builder.with_response_documents_body_part(DocumentsBodyPart(**{
+        "content-type": "application/xml",
+        "content-disposition": 'attachment; '
+                               'filename="/some/dir/doc1.xml"; '
+                               'category=content; '
+                               'format=xml',
+        "content": '<?xml version="1.0" encoding="UTF-8"?>\n'
+                   '<root><child>data</child></root>'}))
+    builder.with_response_documents_body_part(DocumentsBodyPart(**{
+        "content-type": "application/json",
+        "content-disposition": 'attachment; '
+                               'filename="/some/dir/doc2.json"; '
+                               'category=collections; '
+                               'format=json',
+        "content": {
+            "collections": ["json"],
+        }}))
+    builder.with_response_documents_body_part(DocumentsBodyPart(**{
+        "content-type": "application/json",
+        "content-disposition": 'attachment; '
+                               'filename="/some/dir/doc2.json"; '
+                               'category=content; '
+                               'format=json',
+        "content": {"root": {"child": "data"}}}))
+    builder.build_get()
+
+    docs = docs_client.read(uris, category=["content", "collections"])
+
+    assert isinstance(docs, list)
+    assert len(docs) == 2
+
+    xml_docs = [doc for doc in docs if doc.uri.endswith(".xml")]
+    assert len(xml_docs) == 1
+    xml_doc = xml_docs[0]
+    assert isinstance(xml_doc, XMLDocument)
+    assert xml_doc.uri == "/some/dir/doc1.xml"
+    assert xml_doc.doc_type == DocumentType.XML
+    assert isinstance(xml_doc.content, ElemTree.ElementTree)
+    assert xml_doc.content.getroot().tag == "root"
+    assert xml_doc.content.getroot().text is None
+    assert xml_doc.content.getroot().attrib == {}
+    assert xml_doc.metadata is not None
+    assert xml_doc.metadata.collections() == ["xml"]
+    assert xml_doc.metadata.metadata_values() == {}
+    assert xml_doc.metadata.permissions() == []
+    assert xml_doc.metadata.properties() == {}
+    assert xml_doc.metadata.quality() is None
+    assert xml_doc.is_temporal is False
+
+    json_docs = list(filter(lambda d: d.uri.endswith(".json"), docs))
+    assert len(json_docs) == 1
+    json_doc = json_docs[0]
+    assert isinstance(json_doc, JSONDocument)
+    assert json_doc.uri == "/some/dir/doc2.json"
+    assert json_doc.doc_type == DocumentType.JSON
+    assert isinstance(json_doc.content, dict)
+    assert json_doc.content == {"root": {"child": "data"}}
+    assert json_doc.metadata is not None
+    assert json_doc.metadata.collections() == ["json"]
+    assert json_doc.metadata.metadata_values() == {}
+    assert json_doc.metadata.permissions() == []
+    assert json_doc.metadata.properties() == {}
+    assert json_doc.metadata.quality() is None
+    assert json_doc.is_temporal is False
+
+
+@responses.activate
+def test_read_multiple_docs_with_two_metadata_categories(docs_client):
+    uris = [
+        "/some/dir/doc1.xml",
+        "/some/dir/doc2.json",
+    ]
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8000/v1/documents")
+    builder.with_request_param("uri", "/some/dir/doc1.xml")
+    builder.with_request_param("uri", "/some/dir/doc2.json")
+    builder.with_request_param("category", "content")
+    builder.with_request_param("category", "collections")
+    builder.with_request_param("category", "quality")
+    builder.with_request_param("format", "json")
+    builder.with_response_status(200)
+    builder.with_response_body_multipart_mixed()
+    builder.with_response_documents_body_part(DocumentsBodyPart(**{
+        "content-type": "application/json",
+        "content-disposition": 'attachment; '
+                               'filename="/some/dir/doc1.xml"; '
+                               'category=collections; '
+                               'category=quality; '
+                               'format=json',
+        "content": {
+            "collections": ["xml"],
+            "quality": 0,
+        }}))
+    builder.with_response_documents_body_part(DocumentsBodyPart(**{
+        "content-type": "application/xml",
+        "content-disposition": 'attachment; '
+                               'filename="/some/dir/doc1.xml"; '
+                               'category=content; '
+                               'format=xml',
+        "content": '<?xml version="1.0" encoding="UTF-8"?>\n'
+                   '<root><child>data</child></root>'}))
+    builder.with_response_documents_body_part(DocumentsBodyPart(**{
+        "content-type": "application/json",
+        "content-disposition": 'attachment; '
+                               'filename="/some/dir/doc2.json"; '
+                               'category=collections; '
+                               'category=quality; '
+                               'format=json',
+        "content": {
+            "collections": ["json"],
+            "quality": 1,
+        }}))
+    builder.with_response_documents_body_part(DocumentsBodyPart(**{
+        "content-type": "application/json",
+        "content-disposition": 'attachment; '
+                               'filename="/some/dir/doc2.json"; '
+                               'category=content; '
+                               'format=json',
+        "content": {"root": {"child": "data"}}}))
+    builder.build_get()
+
+    docs = docs_client.read(uris, category=["content", "collections", "quality"])
+
+    assert isinstance(docs, list)
+    assert len(docs) == 2
+
+    xml_docs = [doc for doc in docs if doc.uri.endswith(".xml")]
+    assert len(xml_docs) == 1
+    xml_doc = xml_docs[0]
+    assert isinstance(xml_doc, XMLDocument)
+    assert xml_doc.uri == "/some/dir/doc1.xml"
+    assert xml_doc.doc_type == DocumentType.XML
+    assert isinstance(xml_doc.content, ElemTree.ElementTree)
+    assert xml_doc.content.getroot().tag == "root"
+    assert xml_doc.content.getroot().text is None
+    assert xml_doc.content.getroot().attrib == {}
+    assert xml_doc.metadata is not None
+    assert xml_doc.metadata.collections() == ["xml"]
+    assert xml_doc.metadata.metadata_values() == {}
+    assert xml_doc.metadata.permissions() == []
+    assert xml_doc.metadata.properties() == {}
+    assert xml_doc.metadata.quality() == 0
+    assert xml_doc.is_temporal is False
+
+    json_docs = list(filter(lambda d: d.uri.endswith(".json"), docs))
+    assert len(json_docs) == 1
+    json_doc = json_docs[0]
+    assert isinstance(json_doc, JSONDocument)
+    assert json_doc.uri == "/some/dir/doc2.json"
+    assert json_doc.doc_type == DocumentType.JSON
+    assert isinstance(json_doc.content, dict)
+    assert json_doc.content == {"root": {"child": "data"}}
+    assert json_doc.metadata is not None
+    assert json_doc.metadata.collections() == ["json"]
+    assert json_doc.metadata.metadata_values() == {}
+    assert json_doc.metadata.permissions() == []
+    assert json_doc.metadata.properties() == {}
+    assert json_doc.metadata.quality() == 1
+    assert json_doc.is_temporal is False
+
+
+@responses.activate
+def test_read_multiple_docs_with_all_metadata_categories(docs_client):
+    uris = [
+        "/some/dir/doc1.xml",
+        "/some/dir/doc2.json",
+    ]
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8000/v1/documents")
+    builder.with_request_param("uri", "/some/dir/doc1.xml")
+    builder.with_request_param("uri", "/some/dir/doc2.json")
+    builder.with_request_param("category", "content")
+    builder.with_request_param("category", "metadata-values")
+    builder.with_request_param("category", "collections")
+    builder.with_request_param("category", "permissions")
+    builder.with_request_param("category", "properties")
+    builder.with_request_param("category", "quality")
+    builder.with_request_param("format", "json")
+    builder.with_response_status(200)
+    builder.with_response_body_multipart_mixed()
+    builder.with_response_documents_body_part(DocumentsBodyPart(**{
+        "content-type": "application/json",
+        "content-disposition": 'attachment; '
+                               'filename="/some/dir/doc1.xml"; '
+                               'category=collections; '
+                               'category=metadata-values; '
+                               'category=permissions; '
+                               'category=properties; '
+                               'category=quality; '
+                               'format=json',
+        "content": {
+            "collections": [],
+            "permissions": [],
+            "properties": {},
+            "quality": 0,
+            "metadataValues": {},
+        }}))
+    builder.with_response_documents_body_part(DocumentsBodyPart(**{
+        "content-type": "application/xml",
+        "content-disposition": 'attachment; '
+                               'filename="/some/dir/doc1.xml"; '
+                               'category=content; '
+                               'format=xml',
+        "content": '<?xml version="1.0" encoding="UTF-8"?>\n'
+                   '<root><child>data</child></root>'}))
+    builder.with_response_documents_body_part(DocumentsBodyPart(**{
+        "content-type": "application/json",
+        "content-disposition": 'attachment; '
+                               'filename="/some/dir/doc2.json"; '
+                               'category=collections; '
+                               'category=metadata-values; '
+                               'category=permissions; '
+                               'category=properties; '
+                               'category=quality; '
+                               'format=json',
+        "content": {
+            "collections": [],
+            "permissions": [],
+            "properties": {},
+            "quality": 1,
+            "metadataValues": {},
+        }}))
+    builder.with_response_documents_body_part(DocumentsBodyPart(**{
+        "content-type": "application/json",
+        "content-disposition": 'attachment; '
+                               'filename="/some/dir/doc2.json"; '
+                               'category=content; '
+                               'format=json',
+        "content": {"root": {"child": "data"}}}))
+    builder.build_get()
+
+    docs = docs_client.read(uris, category=["content",
+                                            "metadata-values",
+                                            "collections",
+                                            "permissions",
+                                            "properties",
+                                            "quality"])
+
+    assert isinstance(docs, list)
+    assert len(docs) == 2
+
+    xml_docs = [doc for doc in docs if doc.uri.endswith(".xml")]
+    assert len(xml_docs) == 1
+    xml_doc = xml_docs[0]
+    assert isinstance(xml_doc, XMLDocument)
+    assert xml_doc.uri == "/some/dir/doc1.xml"
+    assert xml_doc.doc_type == DocumentType.XML
+    assert isinstance(xml_doc.content, ElemTree.ElementTree)
+    assert xml_doc.content.getroot().tag == "root"
+    assert xml_doc.content.getroot().text is None
+    assert xml_doc.content.getroot().attrib == {}
+    assert xml_doc.metadata is not None
+    assert xml_doc.metadata.collections() == []
+    assert xml_doc.metadata.metadata_values() == {}
+    assert xml_doc.metadata.permissions() == []
+    assert xml_doc.metadata.properties() == {}
+    assert xml_doc.metadata.quality() == 0
+    assert xml_doc.is_temporal is False
+
+    json_docs = list(filter(lambda d: d.uri.endswith(".json"), docs))
+    assert len(json_docs) == 1
+    json_doc = json_docs[0]
+    assert isinstance(json_doc, JSONDocument)
+    assert json_doc.uri == "/some/dir/doc2.json"
+    assert json_doc.doc_type == DocumentType.JSON
+    assert isinstance(json_doc.content, dict)
+    assert json_doc.content == {"root": {"child": "data"}}
+    assert json_doc.metadata is not None
+    assert json_doc.metadata.collections() == []
+    assert json_doc.metadata.metadata_values() == {}
+    assert json_doc.metadata.permissions() == []
+    assert json_doc.metadata.properties() == {}
+    assert json_doc.metadata.quality() == 1
+    assert json_doc.is_temporal is False

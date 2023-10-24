@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Iterator
+from typing import Iterator, Callable
 
 from requests import Response
 
@@ -75,26 +75,30 @@ class DocumentsClient(MLResourceClient):
                 if category == Category.CONTENT:
                     category_key = "content"
                     doc_format = content_disp.format_
+                    value = parsed_resp
                 else:
                     category_key = "metadata"
                     doc_format = None
+                    value = cls._parse_metadata(parsed_resp)
                 data = {
                     "uri": uri,
                     "format": doc_format,
-                    category_key: parsed_resp,
+                    category_key: value,
                 }
             else:
                 if not origin_category or Category.CONTENT.value in origin_category:
                     category_key = "content"
                     doc_format = headers.get(constants.HEADER_NAME_ML_DOCUMENT_FORMAT)
+                    value = parsed_resp
                 else:
                     category_key = "metadata"
                     doc_format = None
+                    value = cls._parse_metadata(parsed_resp)
                 uri = origin_uri[0] if isinstance(origin_uri, list) else origin_uri
                 data = {
                     "uri": uri,
                     "format": doc_format,
-                    category_key: parsed_resp,
+                    category_key: value,
                 }
             yield data
         else:
@@ -130,15 +134,26 @@ class DocumentsClient(MLResourceClient):
             data["content"] = parsed_resp
         if metadata_part:
             headers, parsed_resp = metadata_part
-            data["metadata"] = parsed_resp
+            data["metadata"] = cls._parse_metadata(parsed_resp)
         return data
+
+    @classmethod
+    def _parse_metadata(
+            cls,
+            raw_metadata: dict,
+    ) -> Metadata:
+        if "metadataValues" in raw_metadata:
+            raw_metadata["metadata_values"] = raw_metadata["metadataValues"]
+            del raw_metadata["metadataValues"]
+
+        return Metadata(**raw_metadata)
 
     @classmethod
     def _find_part_by_uri_and_condition(
             cls,
             parsed_resp_with_headers: list[tuple],
             uri: str,
-            category_condition,
+            category_condition: Callable,
     ) -> Iterator[tuple]:
         for headers, parsed_resp in parsed_resp_with_headers:
             content_disp = cls._get_content_disposition(headers)
@@ -186,27 +201,12 @@ class DocumentsClient(MLResourceClient):
     ) -> Document:
         uri = document_data.get("uri")
         doc_format = document_data.get("format")
-        content_raw = document_data.get("content")
-        metadata_raw = document_data.get("metadata")
-        metadata = cls._parse_metadata(metadata_raw)
-        if content_raw:
-            return DocumentFactory.build_document(content=content_raw,
+        content = document_data.get("content")
+        metadata = document_data.get("metadata")
+        if content:
+            return DocumentFactory.build_document(content=content,
                                                   doc_type=doc_format,
                                                   uri=uri,
                                                   metadata=metadata)
         return MetadataDocument(uri=uri,
                                 metadata=metadata)
-
-    @classmethod
-    def _parse_metadata(
-            cls,
-            metadata_raw: dict | None,
-    ) -> Metadata | None:
-        if not metadata_raw:
-            return None
-
-        if "metadataValues" in metadata_raw:
-            metadata_raw["metadata_values"] = metadata_raw["metadataValues"]
-            del metadata_raw["metadataValues"]
-
-        return Metadata(**metadata_raw)

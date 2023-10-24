@@ -250,6 +250,7 @@ def test_parse_with_headers_single_error_response_json(client):
     assert parsed_resp == error
     assert headers == {
         "Content-Type": "application/json; charset=UTF-8",
+        "Content-Length": "230",
     }
 
 

@@ -22,18 +22,7 @@ class DocumentsClient(MLResourceClient):
     ) -> Document | list[Document]:
         call = self._get_call(uris=uris, category=category)
         resp = self.call(call)
-        is_multipart = (self._get_response_content_type(resp)
-                        .startswith(constants.HEADER_MULTIPART_MIXED))
-        parsed_resp_with_headers = self._parse_response(resp)
-        documents_data = self._pre_format_data(
-            parsed_resp_with_headers,
-            is_multipart,
-            uris,
-            category)
-        docs = self._parse_to_documents(documents_data)
-        if isinstance(uris, str):
-            docs = docs[0]
-        return docs
+        return self._parse(resp, uris, category)
 
     @classmethod
     def _get_call(
@@ -52,6 +41,22 @@ class DocumentsClient(MLResourceClient):
         return DocumentsGetCall(**params)
 
     @classmethod
+    def _parse(
+            cls,
+            resp: Response,
+            uris: str | list[str] | tuple[str] | set[str],
+            category: str | list | None,
+    ) -> Document | list[Document]:
+        parsed_resp = cls._parse_response(resp)
+        content_type = cls._get_response_content_type(resp)
+        is_multipart = content_type.startswith(constants.HEADER_MULTIPART_MIXED)
+        documents_data = cls._pre_format_data(parsed_resp, is_multipart, uris, category)
+        docs = cls._parse_to_documents(documents_data)
+        if isinstance(uris, str):
+            return docs[0]
+        return docs
+
+    @classmethod
     def _get_response_content_type(
             cls,
             resp: Response,
@@ -68,37 +73,37 @@ class DocumentsClient(MLResourceClient):
         if not resp.ok:
             resp_body = resp.json()
             raise MarkLogicError(resp_body["errorResponse"])
-        parsed_resp_with_headers = MLResponseParser.parse_with_headers(resp)
-        if isinstance(parsed_resp_with_headers, tuple):
-            return [parsed_resp_with_headers]
-        return parsed_resp_with_headers
+        parsed_resp = MLResponseParser.parse_with_headers(resp)
+        if isinstance(parsed_resp, tuple):
+            return [parsed_resp]
+        return parsed_resp
 
     @classmethod
     def _pre_format_data(
             cls,
-            parsed_resp_with_headers: list[tuple],
+            parsed_resp: list[tuple],
             is_multipart: bool,
             origin_uris: str | list[str] | tuple[str] | set[str],
             origin_category: str | list | None,
     ) -> Iterator[dict]:
         if is_multipart:
-            return cls._pre_format_documents(parsed_resp_with_headers, origin_category)
+            return cls._pre_format_documents(parsed_resp, origin_category)
         return cls._pre_format_document(
-            parsed_resp_with_headers,
+            parsed_resp,
             origin_uris,
             origin_category)
 
     @classmethod
     def _pre_format_documents(
             cls,
-            parsed_resp_with_headers: list[tuple],
+            parsed_resp: list[tuple],
             origin_category: str | list | None,
     ) -> Iterator[dict]:
         expect_content, expect_metadata = cls._expect_categories(origin_category)
         pre_formatted_data = {}
-        for headers, parsed_resp in parsed_resp_with_headers:
+        for headers, parse_resp_body in parsed_resp:
             content_disp = cls._get_content_disposition(headers)
-            partial_data = cls._get_partial_data(content_disp, parsed_resp)
+            partial_data = cls._get_partial_data(content_disp, parse_resp_body)
 
             if not (expect_content and expect_metadata):
                 yield partial_data
@@ -116,23 +121,23 @@ class DocumentsClient(MLResourceClient):
     @classmethod
     def _pre_format_document(
             cls,
-            parsed_resp_with_headers: list[tuple],
+            parsed_resp: list[tuple],
             origin_uris: str | list[str] | tuple[str] | set[str],
             origin_category: str | list | None,
     ) -> Iterator[dict]:
-        headers, parsed_resp = parsed_resp_with_headers[0]
+        headers, parsed_resp_body = parsed_resp[0]
         uri = origin_uris[0] if isinstance(origin_uris, list) else origin_uris
         expect_content, _ = cls._expect_categories(origin_category)
         if expect_content:
             yield {
                 "uri": uri,
                 "format": headers.get(constants.HEADER_NAME_ML_DOCUMENT_FORMAT),
-                "content": parsed_resp,
+                "content": parsed_resp_body,
             }
         else:
             yield {
                 "uri": uri,
-                "metadata": cls._parse_metadata(parsed_resp),
+                "metadata": cls._parse_metadata(parsed_resp_body),
             }
 
     @classmethod
@@ -151,17 +156,17 @@ class DocumentsClient(MLResourceClient):
     def _get_partial_data(
             cls,
             content_disp: DocumentsContentDisposition,
-            parsed_resp: Any,
+            parsed_resp_body: Any,
     ) -> dict:
         if content_disp.category == Category.CONTENT:
             return {
                 "uri": content_disp.filename,
                 "format": content_disp.format_,
-                "content": parsed_resp,
+                "content": parsed_resp_body,
             }
         return {
             "uri": content_disp.filename,
-            "metadata": cls._parse_metadata(parsed_resp),
+            "metadata": cls._parse_metadata(parsed_resp_body),
         }
 
     @classmethod

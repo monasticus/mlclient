@@ -140,6 +140,32 @@ class DocumentsContentDisposition(BaseModel):
 
         return "; ".join([disp for disp in disposition if disp is not None])
 
+    @classmethod
+    def from_raw_string(
+            cls,
+            raw_content_disposition: str,
+    ) -> DocumentsContentDisposition:
+        disp_dict = {}
+        for disp in raw_content_disposition.split("; "):
+            key_value_pair = disp.split("=")
+            if len(key_value_pair) == 1:
+                disp_dict["body_part_type"] = key_value_pair[0]
+            else:
+                key, value = key_value_pair
+                if key == "versionId":
+                    key = "version_id"
+                elif key == "temporal-document":
+                    key = "temporal_document"
+                value = value[1:-1] if key == "filename" else value
+                curr_value = disp_dict.get(key)
+                if curr_value is None:
+                    disp_dict[key] = value
+                elif not isinstance(curr_value, list):
+                    disp_dict[key] = [curr_value, value]
+                else:
+                    curr_value.append(value)
+        return DocumentsContentDisposition(**disp_dict)
+
     @staticmethod
     def _get_disposition(
             disp_value: str | int | list | Enum | None,
@@ -153,7 +179,12 @@ class DocumentsContentDisposition(BaseModel):
 
         dispositions = []
         for value in disp_value:
-            final_value = value.value if isinstance(value, Enum) else value
+            if isinstance(value, Enum):
+                final_value = value.value
+            elif disp == "filename":
+                final_value = f'"{value}"'
+            else:
+                final_value = value
             disposition = final_value if disp is None else f"{disp}={final_value}"
             dispositions.append(disposition)
         return "; ".join(dispositions)

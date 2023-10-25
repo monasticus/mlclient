@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Iterator, Any
+from typing import Any, Iterator
 
 from requests import Response
 
@@ -22,8 +22,14 @@ class DocumentsClient(MLResourceClient):
     ) -> Document | list[Document]:
         call = self._get_call(uris=uris, category=category)
         resp = self.call(call)
+        is_multipart = (self._get_response_content_type(resp)
+                        .startswith(constants.HEADER_MULTIPART_MIXED))
         parsed_resp_with_headers = self._parse_response(resp)
-        documents_data = self._pre_format_data(parsed_resp_with_headers, uris, category)
+        documents_data = self._pre_format_data(
+            parsed_resp_with_headers,
+            is_multipart,
+            uris,
+            category)
         docs = self._parse_to_documents(documents_data)
         if isinstance(uris, str):
             docs = docs[0]
@@ -46,6 +52,15 @@ class DocumentsClient(MLResourceClient):
         return DocumentsGetCall(**params)
 
     @classmethod
+    def _get_response_content_type(
+            cls,
+            resp: Response,
+    ) -> str | None:
+        return next((value
+                     for name, value in resp.headers.items()
+                     if name.lower() == "content-type"), None)
+
+    @classmethod
     def _parse_response(
             cls,
             resp: Response,
@@ -62,54 +77,22 @@ class DocumentsClient(MLResourceClient):
     def _pre_format_data(
             cls,
             parsed_resp_with_headers: list[tuple],
+            is_multipart: bool,
             origin_uris: str | list[str] | tuple[str] | set[str],
             origin_category: str | list | None,
     ) -> Iterator[dict]:
-        if len(parsed_resp_with_headers) > 1:
-            return cls._pre_format_documents(origin_category, parsed_resp_with_headers)
-
-        headers, parsed_resp = parsed_resp_with_headers[0]
-        is_multipart = any(header.lower() == "content-disposition"
-                           for header in headers)
         if is_multipart:
-            content_disp = cls._get_content_disposition(headers)
-            uri = content_disp.filename
-            category = content_disp.category
-            if category == Category.CONTENT:
-                category_key = "content"
-                doc_format = content_disp.format_
-                value = parsed_resp
-            else:
-                category_key = "metadata"
-                doc_format = None
-                value = cls._parse_metadata(parsed_resp)
-            data = {
-                "uri": uri,
-                "format": doc_format,
-                category_key: value,
-            }
-        else:
-            if not origin_category or Category.CONTENT.value in origin_category:
-                category_key = "content"
-                doc_format = headers.get(constants.HEADER_NAME_ML_DOCUMENT_FORMAT)
-                value = parsed_resp
-            else:
-                category_key = "metadata"
-                doc_format = None
-                value = cls._parse_metadata(parsed_resp)
-            uri = origin_uris[0] if isinstance(origin_uris, list) else origin_uris
-            data = {
-                "uri": uri,
-                "format": doc_format,
-                category_key: value,
-            }
-        return iter([data])
+            return cls._pre_format_documents(parsed_resp_with_headers, origin_category)
+        return cls._pre_format_document(
+            parsed_resp_with_headers,
+            origin_uris,
+            origin_category)
 
     @classmethod
     def _pre_format_documents(
             cls,
-            origin_category: str | list | None,
             parsed_resp_with_headers: list[tuple],
+            origin_category: str | list | None,
     ) -> Iterator[dict]:
         expect_content, expect_metadata = cls._expect_categories(origin_category)
         pre_formatted_data = {}
@@ -129,6 +112,28 @@ class DocumentsClient(MLResourceClient):
                 else:
                     partial_data.update(data)
                     yield partial_data
+
+    @classmethod
+    def _pre_format_document(
+            cls,
+            parsed_resp_with_headers: list[tuple],
+            origin_uris: str | list[str] | tuple[str] | set[str],
+            origin_category: str | list | None,
+    ) -> Iterator[dict]:
+        headers, parsed_resp = parsed_resp_with_headers[0]
+        uri = origin_uris[0] if isinstance(origin_uris, list) else origin_uris
+        expect_content, _ = cls._expect_categories(origin_category)
+        if expect_content:
+            yield {
+                "uri": uri,
+                "format": headers.get(constants.HEADER_NAME_ML_DOCUMENT_FORMAT),
+                "content": parsed_resp,
+            }
+        else:
+            yield {
+                "uri": uri,
+                "metadata": cls._parse_metadata(parsed_resp),
+            }
 
     @classmethod
     def _expect_categories(

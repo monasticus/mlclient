@@ -895,6 +895,14 @@ def test_read_multiple_docs_with_full_metadata(docs_client):
     builder.with_response_status(200)
     builder.with_response_body_multipart_mixed()
     builder.with_response_documents_body_part(DocumentsBodyPart(**{
+        "content-type": "application/xml",
+        "content-disposition": 'attachment; '
+                               'filename="/some/dir/doc1.xml"; '
+                               'category=content; '
+                               'format=xml',
+        "content": '<?xml version="1.0" encoding="UTF-8"?>\n'
+                   '<root><child>data</child></root>'}))
+    builder.with_response_documents_body_part(DocumentsBodyPart(**{
         "content-type": "application/json",
         "content-disposition": 'attachment; '
                                'filename="/some/dir/doc1.xml"; '
@@ -907,14 +915,6 @@ def test_read_multiple_docs_with_full_metadata(docs_client):
             "quality": 0,
             "metadataValues": {},
         }}))
-    builder.with_response_documents_body_part(DocumentsBodyPart(**{
-        "content-type": "application/xml",
-        "content-disposition": 'attachment; '
-                               'filename="/some/dir/doc1.xml"; '
-                               'category=content; '
-                               'format=xml',
-        "content": '<?xml version="1.0" encoding="UTF-8"?>\n'
-                   '<root><child>data</child></root>'}))
     builder.with_response_documents_body_part(DocumentsBodyPart(**{
         "content-type": "application/json",
         "content-disposition": 'attachment; '
@@ -993,6 +993,14 @@ def test_read_multiple_docs_with_single_metadata_category(docs_client):
     builder.with_response_status(200)
     builder.with_response_body_multipart_mixed()
     builder.with_response_documents_body_part(DocumentsBodyPart(**{
+        "content-type": "application/xml",
+        "content-disposition": 'attachment; '
+                               'filename="/some/dir/doc1.xml"; '
+                               'category=content; '
+                               'format=xml',
+        "content": '<?xml version="1.0" encoding="UTF-8"?>\n'
+                   '<root><child>data</child></root>'}))
+    builder.with_response_documents_body_part(DocumentsBodyPart(**{
         "content-type": "application/json",
         "content-disposition": 'attachment; '
                                'filename="/some/dir/doc1.xml"; '
@@ -1001,14 +1009,6 @@ def test_read_multiple_docs_with_single_metadata_category(docs_client):
         "content": {
             "collections": ["xml"],
         }}))
-    builder.with_response_documents_body_part(DocumentsBodyPart(**{
-        "content-type": "application/xml",
-        "content-disposition": 'attachment; '
-                               'filename="/some/dir/doc1.xml"; '
-                               'category=content; '
-                               'format=xml',
-        "content": '<?xml version="1.0" encoding="UTF-8"?>\n'
-                   '<root><child>data</child></root>'}))
     builder.with_response_documents_body_part(DocumentsBodyPart(**{
         "content-type": "application/json",
         "content-disposition": 'attachment; '
@@ -1084,6 +1084,14 @@ def test_read_multiple_docs_with_two_metadata_categories(docs_client):
     builder.with_response_status(200)
     builder.with_response_body_multipart_mixed()
     builder.with_response_documents_body_part(DocumentsBodyPart(**{
+        "content-type": "application/xml",
+        "content-disposition": 'attachment; '
+                               'filename="/some/dir/doc1.xml"; '
+                               'category=content; '
+                               'format=xml',
+        "content": '<?xml version="1.0" encoding="UTF-8"?>\n'
+                   '<root><child>data</child></root>'}))
+    builder.with_response_documents_body_part(DocumentsBodyPart(**{
         "content-type": "application/json",
         "content-disposition": 'attachment; '
                                'filename="/some/dir/doc1.xml"; '
@@ -1094,14 +1102,6 @@ def test_read_multiple_docs_with_two_metadata_categories(docs_client):
             "collections": ["xml"],
             "quality": 0,
         }}))
-    builder.with_response_documents_body_part(DocumentsBodyPart(**{
-        "content-type": "application/xml",
-        "content-disposition": 'attachment; '
-                               'filename="/some/dir/doc1.xml"; '
-                               'category=content; '
-                               'format=xml',
-        "content": '<?xml version="1.0" encoding="UTF-8"?>\n'
-                   '<root><child>data</child></root>'}))
     builder.with_response_documents_body_part(DocumentsBodyPart(**{
         "content-type": "application/json",
         "content-disposition": 'attachment; '
@@ -1182,6 +1182,14 @@ def test_read_multiple_docs_with_all_metadata_categories(docs_client):
     builder.with_response_status(200)
     builder.with_response_body_multipart_mixed()
     builder.with_response_documents_body_part(DocumentsBodyPart(**{
+        "content-type": "application/xml",
+        "content-disposition": 'attachment; '
+                               'filename="/some/dir/doc1.xml"; '
+                               'category=content; '
+                               'format=xml',
+        "content": '<?xml version="1.0" encoding="UTF-8"?>\n'
+                   '<root><child>data</child></root>'}))
+    builder.with_response_documents_body_part(DocumentsBodyPart(**{
         "content-type": "application/json",
         "content-disposition": 'attachment; '
                                'filename="/some/dir/doc1.xml"; '
@@ -1198,14 +1206,6 @@ def test_read_multiple_docs_with_all_metadata_categories(docs_client):
             "quality": 0,
             "metadataValues": {},
         }}))
-    builder.with_response_documents_body_part(DocumentsBodyPart(**{
-        "content-type": "application/xml",
-        "content-disposition": 'attachment; '
-                               'filename="/some/dir/doc1.xml"; '
-                               'category=content; '
-                               'format=xml',
-        "content": '<?xml version="1.0" encoding="UTF-8"?>\n'
-                   '<root><child>data</child></root>'}))
     builder.with_response_documents_body_part(DocumentsBodyPart(**{
         "content-type": "application/json",
         "content-disposition": 'attachment; '

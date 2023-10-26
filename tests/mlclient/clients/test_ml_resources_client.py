@@ -388,14 +388,22 @@ def test_get_documents():
 def test_post_documents():
     body_part = {
         "content-type": "application/json",
-        "content-disposition": "foo",
+        "content-disposition": "inline",
         "content": {"root": "data"},
     }
     with MLResourcesClient(auth_method="digest") as client:
         resp = client.post_documents(body_parts=[DocumentsBodyPart(**body_part)])
 
-    assert resp.status_code == 400
-    assert "foo parameter without value for content disposition" in resp.text
+    assert resp.status_code == 500
+    assert resp.json() == {
+        "errorResponse": {
+            "statusCode": "500",
+            "status": "Internal Server Error",
+            "messageCode": "XDMP-AS",
+            "message": "XDMP-AS: (err:XPTY0004) $uri as xs:string -- "
+                       "Invalid coercion: () as xs:string",
+        },
+    }
 
 
 @pytest.mark.ml_access()

@@ -21,7 +21,7 @@ from __future__ import annotations
 from enum import Enum
 from typing import List, Optional, Union
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 from mlclient.constants import HEADER_JSON
 from mlclient.model import DocumentType
@@ -129,9 +129,19 @@ class DocumentsBodyPart(BaseModel):
     content_type: str = Field(
         alias="content-type",
         default=HEADER_JSON)
-    content_disposition: Union[str, DocumentsContentDisposition] = Field(
+    content_disposition: DocumentsContentDisposition = Field(
         alias="content-disposition")
     content: Union[str, bytes, dict]
+
+    @field_validator("content_disposition", mode="before")
+    @classmethod
+    def parse_content_disposition(
+            cls,
+            value: str | dict,
+    ) -> DocumentsContentDisposition:
+        if isinstance(value, dict):
+            return DocumentsContentDisposition(**value)
+        return ContentDispositionSerializer.serialize(value)
 
 
 class ContentDispositionSerializer:

@@ -15,7 +15,8 @@ from requests_toolbelt.multipart.decoder import BodyPart
 from responses import matchers
 from urllib3.fields import RequestField
 
-from mlclient.calls.model import DocumentsBodyPart
+from mlclient.calls.model import (ContentDispositionSerializer,
+                                  DocumentsBodyPart)
 from mlclient.constants import (HEADER_MULTIPART_MIXED,
                                 HEADER_NAME_CONTENT_DISP,
                                 HEADER_NAME_CONTENT_TYPE,
@@ -176,12 +177,13 @@ class MLResponseBuilder:
         data = body_part.content
         if isinstance(data, dict):
             data = json.dumps(data)
-
+        content_disp = ContentDispositionSerializer.deserialize(
+            body_part.content_disposition)
         req_field = RequestField(
             name="--ignore--",
             data=data,
             headers={
-                "Content-Disposition": body_part.content_disposition,
+                "Content-Disposition": content_disp,
                 "Content-Type": body_part.content_type,
             })
         self._response_body_fields.append(req_field)

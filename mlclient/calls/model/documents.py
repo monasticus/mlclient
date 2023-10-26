@@ -25,6 +25,7 @@ from pydantic import BaseModel, Field
 
 from mlclient.constants import HEADER_JSON
 from mlclient.model import DocumentType
+from mlclient.utils import BiDict
 
 
 class DocumentsBodyPartType(Enum):
@@ -140,32 +141,6 @@ class DocumentsContentDisposition(BaseModel):
 
         return "; ".join([disp for disp in disposition if disp is not None])
 
-    @classmethod
-    def from_raw_string(
-            cls,
-            raw_content_disposition: str,
-    ) -> DocumentsContentDisposition:
-        disp_dict = {}
-        for disp in raw_content_disposition.split("; "):
-            key_value_pair = disp.split("=")
-            if len(key_value_pair) == 1:
-                disp_dict["body_part_type"] = key_value_pair[0]
-            else:
-                key, value = key_value_pair
-                if key == "versionId":
-                    key = "version_id"
-                elif key == "temporal-document":
-                    key = "temporal_document"
-                value = value[1:-1] if key == "filename" else value
-                curr_value = disp_dict.get(key)
-                if curr_value is None:
-                    disp_dict[key] = value
-                elif not isinstance(curr_value, list):
-                    disp_dict[key] = [curr_value, value]
-                else:
-                    curr_value.append(value)
-        return DocumentsContentDisposition(**disp_dict)
-
     @staticmethod
     def _get_disposition(
             disp_value: str | int | list | Enum | None,
@@ -199,3 +174,124 @@ class DocumentsBodyPart(BaseModel):
     content_disposition: Union[str, DocumentsContentDisposition] = Field(
         alias="content-disposition")
     content: Union[str, bytes, dict]
+
+
+class ContentDispositionSerializer:
+
+    _DISP_SEP = "; "
+    _KEY_VALUE_SEP = "="
+    _CLASS_KEY_BODY_PART_TYPE = "body_part_type"
+    _CLASS_KEY_CATEGORY = "category"
+    _CLASS_KEY_REPAIR = "repair"
+    _CLASS_KEY_FILENAME = "filename"
+    _CLASS_KEY_EXTENSION = "extension"
+    _CLASS_KEY_DIRECTORY = "directory"
+    _CLASS_KEY_EXTRACT = "extract"
+    _CLASS_KEY_VERSION_ID = "version_id"
+    _CLASS_KEY_TEMPORAL_DOC = "temporal_document"
+    _CLASS_KEY_FORMAT = "format"
+    _DISP_KEY_BODY_PART_TYPE = None
+    _DISP_KEY_CATEGORY = _CLASS_KEY_CATEGORY
+    _DISP_KEY_REPAIR = _CLASS_KEY_REPAIR
+    _DISP_KEY_FILENAME = _CLASS_KEY_FILENAME
+    _DISP_KEY_EXTENSION = _CLASS_KEY_EXTENSION
+    _DISP_KEY_DIRECTORY = _CLASS_KEY_DIRECTORY
+    _DISP_KEY_EXTRACT = _CLASS_KEY_EXTRACT
+    _DISP_KEY_VERSION_ID = "versionId"
+    _DISP_KEY_TEMPORAL_DOC = "temporal-document"
+    _DISP_KEY_FORMAT = _CLASS_KEY_FORMAT
+    _DISPOSITIONS = BiDict({
+        _CLASS_KEY_BODY_PART_TYPE: _DISP_KEY_BODY_PART_TYPE,
+        _CLASS_KEY_CATEGORY: _DISP_KEY_CATEGORY,
+        _CLASS_KEY_REPAIR: _DISP_KEY_REPAIR,
+        _CLASS_KEY_FILENAME: _DISP_KEY_FILENAME,
+        _CLASS_KEY_EXTENSION: _DISP_KEY_EXTENSION,
+        _CLASS_KEY_DIRECTORY: _DISP_KEY_DIRECTORY,
+        _CLASS_KEY_EXTRACT: _DISP_KEY_EXTRACT,
+        _CLASS_KEY_VERSION_ID: _DISP_KEY_VERSION_ID,
+        _CLASS_KEY_TEMPORAL_DOC: _DISP_KEY_TEMPORAL_DOC,
+        _CLASS_KEY_FORMAT: _DISP_KEY_FORMAT,
+    })
+
+    @classmethod
+    def serialize(
+            cls,
+            content_disposition: str,
+    ) -> DocumentsContentDisposition:
+        disp_dict = {}
+        for disp in content_disposition.split(cls._DISP_SEP):
+            key, value = cls._get_disp_key_and_value(disp)
+            curr_value = disp_dict.get(key)
+            if curr_value is None:
+                disp_dict[key] = value
+            elif not isinstance(curr_value, list):
+                disp_dict[key] = [curr_value, value]
+            else:
+                curr_value.append(value)
+        return DocumentsContentDisposition(**disp_dict)
+
+    @classmethod
+    def _get_disp_key_and_value(
+            cls,
+            disp: str,
+    ) -> tuple[str, str]:
+        key_value_pair = disp.split(cls._KEY_VALUE_SEP)
+        if len(key_value_pair) == 1:
+            key = None
+            value = key_value_pair[0]
+        else:
+            key, value = key_value_pair
+        return cls._parse_disp_key_and_value(key, value)
+
+    @classmethod
+    def _parse_disp_key_and_value(
+            cls,
+            key: str,
+            value: str,
+    ) -> tuple[str, str]:
+        key = cls._DISPOSITIONS.get(key)
+        value = value[1:-1] if key == cls._DISP_KEY_FILENAME else value
+        return key, value
+
+    @classmethod
+    def deserialize(
+            cls,
+            content_disposition: DocumentsContentDisposition,
+    ) -> str:
+        disposition = [
+            cls._get_disposition(content_disposition.body_part_type),
+            cls._get_disposition(content_disposition.filename, "filename"),
+            cls._get_disposition(content_disposition.category, "category"),
+            cls._get_disposition(content_disposition.extension, "extension"),
+            cls._get_disposition(content_disposition.directory, "directory"),
+            cls._get_disposition(content_disposition.repair, "repair"),
+            cls._get_disposition(content_disposition.extract, "extract"),
+            cls._get_disposition(content_disposition.version_id, "versionId"),
+            cls._get_disposition(content_disposition.temporal_document, "temporal-document"),
+            cls._get_disposition(content_disposition.format_, "format"),
+        ]
+
+        return "; ".join([disp for disp in disposition if disp is not None])
+
+    @staticmethod
+    def _get_disposition(
+            disp_value: str | int | list | Enum | None,
+            disp: str | None = None,
+    ) -> str | None:
+        if disp_value is None:
+            return None
+
+        if not isinstance(disp_value, list):
+            disp_value = [disp_value]
+
+        dispositions = []
+        for value in disp_value:
+            if isinstance(value, Enum):
+                final_value = value.value
+            elif disp == "filename":
+                final_value = f'"{value}"'
+            else:
+                final_value = value
+            disposition = final_value if disp is None else f"{disp}={final_value}"
+            dispositions.append(disposition)
+        return "; ".join(dispositions)

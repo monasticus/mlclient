@@ -23,10 +23,12 @@ This package exports the following classes:
 
 Examples
 --------
->>> from mlclient.model.calls import DocumentsBodyPart
+>>> from mlclient.calls.model import DocumentsBodyPart
 """
-from .documents import (Category, DocumentsBodyPart, DocumentsBodyPartType,
+from .documents import (Category, ContentDispositionSerializer,
+                        DocumentsBodyPart, DocumentsBodyPartType,
                         DocumentsContentDisposition, Extract, Repair)
 
 __all__ = ["DocumentsBodyPart", "DocumentsBodyPartType",
-           "DocumentsContentDisposition", "Category", "Extract", "Repair"]
+           "DocumentsContentDisposition", "Category", "Extract", "Repair",
+           "ContentDispositionSerializer"]

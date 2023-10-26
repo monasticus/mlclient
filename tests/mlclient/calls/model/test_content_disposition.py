@@ -1,4 +1,5 @@
-from mlclient.calls.model import (DocumentsBodyPartType,
+from mlclient.calls.model import (ContentDispositionSerializer,
+                                  DocumentsBodyPartType,
                                   DocumentsContentDisposition, Extract, Repair)
 from mlclient.model import DocumentType
 
@@ -59,7 +60,7 @@ def test_to_str_multiple_categories():
     assert str(disp) == expected_str
 
 
-def test_from_str_inline():
+def test_serialize_inline():
     raw_content_disposition = (
         "inline; "
         "extension=jpeg; "
@@ -75,11 +76,11 @@ def test_from_str_inline():
         extract=Extract.DOCUMENT,
         version_id=1,
     )
-    actual_disp = DocumentsContentDisposition.from_raw_string(raw_content_disposition)
+    actual_disp = ContentDispositionSerializer.serialize(raw_content_disposition)
     assert actual_disp == expected_disp
 
 
-def test_from_str_attachment():
+def test_serialize_attachment():
     raw_content_disposition = (
         "attachment; "
         'filename="/path/to/file.xml"; '
@@ -95,11 +96,11 @@ def test_from_str_attachment():
         temporal_document="/path/to/file.xml",
         format=DocumentType.JSON,
     )
-    actual_disp = DocumentsContentDisposition.from_raw_string(raw_content_disposition)
+    actual_disp = ContentDispositionSerializer.serialize(raw_content_disposition)
     assert actual_disp == expected_disp
 
 
-def test_from_str_multiple_categories():
+def test_serialize_multiple_categories():
     raw_content_disposition = (
         "attachment; "
         'filename="/path/to/file.xml"; '
@@ -117,5 +118,5 @@ def test_from_str_multiple_categories():
         temporal_document="/path/to/file.xml",
         format=DocumentType.JSON,
     )
-    actual_disp = DocumentsContentDisposition.from_raw_string(raw_content_disposition)
+    actual_disp = ContentDispositionSerializer.serialize(raw_content_disposition)
     assert actual_disp == expected_disp

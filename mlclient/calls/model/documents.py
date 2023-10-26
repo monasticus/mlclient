@@ -122,48 +122,6 @@ class DocumentsContentDisposition(BaseModel):
         alias="format",
         default=None)
 
-    def __str__(
-            self,
-    ) -> str:
-        """Stringify the Content-Disposition header."""
-        disposition = [
-            self._get_disposition(self.body_part_type),
-            self._get_disposition(self.filename, "filename"),
-            self._get_disposition(self.category, "category"),
-            self._get_disposition(self.extension, "extension"),
-            self._get_disposition(self.directory, "directory"),
-            self._get_disposition(self.repair, "repair"),
-            self._get_disposition(self.extract, "extract"),
-            self._get_disposition(self.version_id, "versionId"),
-            self._get_disposition(self.temporal_document, "temporal-document"),
-            self._get_disposition(self.format_, "format"),
-        ]
-
-        return "; ".join([disp for disp in disposition if disp is not None])
-
-    @staticmethod
-    def _get_disposition(
-            disp_value: str | int | list | Enum | None,
-            disp: str | None = None,
-    ) -> str | None:
-        if disp_value is None:
-            return None
-
-        if not isinstance(disp_value, list):
-            disp_value = [disp_value]
-
-        dispositions = []
-        for value in disp_value:
-            if isinstance(value, Enum):
-                final_value = value.value
-            elif disp == "filename":
-                final_value = f'"{value}"'
-            else:
-                final_value = value
-            disposition = final_value if disp is None else f"{disp}={final_value}"
-            dispositions.append(disposition)
-        return "; ".join(dispositions)
-
 
 class DocumentsBodyPart(BaseModel):
     """A class representing /v1/documents body part."""
@@ -189,7 +147,8 @@ class ContentDispositionSerializer:
     _CLASS_KEY_EXTRACT = "extract"
     _CLASS_KEY_VERSION_ID = "version_id"
     _CLASS_KEY_TEMPORAL_DOC = "temporal_document"
-    _CLASS_KEY_FORMAT = "format"
+    _CLASS_KEY_FORMAT = "format_"
+    _CLASS_KEY_FORMAT_ALIAS = "format"
     _DISP_KEY_BODY_PART_TYPE = None
     _DISP_KEY_CATEGORY = _CLASS_KEY_CATEGORY
     _DISP_KEY_REPAIR = _CLASS_KEY_REPAIR
@@ -199,7 +158,7 @@ class ContentDispositionSerializer:
     _DISP_KEY_EXTRACT = _CLASS_KEY_EXTRACT
     _DISP_KEY_VERSION_ID = "versionId"
     _DISP_KEY_TEMPORAL_DOC = "temporal-document"
-    _DISP_KEY_FORMAT = _CLASS_KEY_FORMAT
+    _DISP_KEY_FORMAT = _CLASS_KEY_FORMAT_ALIAS
     _DISPOSITIONS = BiDict({
         _CLASS_KEY_BODY_PART_TYPE: _DISP_KEY_BODY_PART_TYPE,
         _CLASS_KEY_CATEGORY: _DISP_KEY_CATEGORY,
@@ -250,6 +209,8 @@ class ContentDispositionSerializer:
             value: str,
     ) -> tuple[str, str]:
         key = cls._DISPOSITIONS.get(key)
+        if key == cls._CLASS_KEY_FORMAT:
+            key = cls._CLASS_KEY_FORMAT_ALIAS
         value = value[1:-1] if key == cls._DISP_KEY_FILENAME else value
         return key, value
 
@@ -259,27 +220,32 @@ class ContentDispositionSerializer:
             content_disposition: DocumentsContentDisposition,
     ) -> str:
         disposition = [
-            cls._get_disposition(content_disposition.body_part_type),
-            cls._get_disposition(content_disposition.filename, "filename"),
-            cls._get_disposition(content_disposition.category, "category"),
-            cls._get_disposition(content_disposition.extension, "extension"),
-            cls._get_disposition(content_disposition.directory, "directory"),
-            cls._get_disposition(content_disposition.repair, "repair"),
-            cls._get_disposition(content_disposition.extract, "extract"),
-            cls._get_disposition(content_disposition.version_id, "versionId"),
-            cls._get_disposition(content_disposition.temporal_document, "temporal-document"),
-            cls._get_disposition(content_disposition.format_, "format"),
+            cls._get_disposition(content_disposition, cls._CLASS_KEY_BODY_PART_TYPE),
+            cls._get_disposition(content_disposition, cls._CLASS_KEY_FILENAME),
+            cls._get_disposition(content_disposition, cls._CLASS_KEY_CATEGORY),
+            cls._get_disposition(content_disposition, cls._CLASS_KEY_EXTENSION),
+            cls._get_disposition(content_disposition, cls._CLASS_KEY_DIRECTORY),
+            cls._get_disposition(content_disposition, cls._CLASS_KEY_REPAIR),
+            cls._get_disposition(content_disposition, cls._CLASS_KEY_EXTRACT),
+            cls._get_disposition(content_disposition, cls._CLASS_KEY_VERSION_ID),
+            cls._get_disposition(content_disposition, cls._CLASS_KEY_TEMPORAL_DOC),
+            cls._get_disposition(content_disposition, cls._CLASS_KEY_FORMAT),
         ]
 
-        return "; ".join([disp for disp in disposition if disp is not None])
+        return cls._DISP_SEP.join([disp
+                                   for disp in disposition
+                                   if disp is not None])
 
-    @staticmethod
+    @classmethod
     def _get_disposition(
-            disp_value: str | int | list | Enum | None,
-            disp: str | None = None,
+            cls,
+            content_disposition: DocumentsContentDisposition,
+            class_key: str,
     ) -> str | None:
+        disp_value = content_disposition.model_dump().get(class_key)
         if disp_value is None:
             return None
+        disp = cls._DISPOSITIONS.get(class_key)
 
         if not isinstance(disp_value, list):
             disp_value = [disp_value]
@@ -288,7 +254,7 @@ class ContentDispositionSerializer:
         for value in disp_value:
             if isinstance(value, Enum):
                 final_value = value.value
-            elif disp == "filename":
+            elif disp == cls._DISP_KEY_FILENAME:
                 final_value = f'"{value}"'
             else:
                 final_value = value

@@ -6,7 +6,8 @@ from requests import Response
 
 from mlclient import constants
 from mlclient.calls import DocumentsGetCall
-from mlclient.calls.model import Category, DocumentsContentDisposition
+from mlclient.calls.model import (Category, ContentDispositionSerializer,
+                                  DocumentsContentDisposition)
 from mlclient.clients import MLResourceClient, MLResponseParser
 from mlclient.exceptions import MarkLogicError
 from mlclient.model import (Document, DocumentFactory, Metadata,
@@ -102,7 +103,8 @@ class DocumentsClient(MLResourceClient):
         expect_content, expect_metadata = cls._expect_categories(origin_category)
         pre_formatted_data = {}
         for headers, parse_resp_body in parsed_resp:
-            content_disp = cls._get_content_disposition(headers)
+            raw_content_disp = headers.get(constants.HEADER_NAME_CONTENT_DISP)
+            content_disp = ContentDispositionSerializer.serialize(raw_content_disp)
             partial_data = cls._get_partial_data(content_disp, parse_resp_body)
 
             if not (expect_content and expect_metadata):
@@ -179,31 +181,6 @@ class DocumentsClient(MLResourceClient):
             del raw_metadata["metadataValues"]
 
         return Metadata(**raw_metadata)
-
-    @classmethod
-    def _get_content_disposition(
-            cls,
-            headers: dict,
-    ) -> DocumentsContentDisposition:
-        content_disp = headers.get(constants.HEADER_NAME_CONTENT_DISP).split("; ")
-        disp_dict = {}
-        for disp in content_disp:
-            key_value_pair = disp.split("=")
-            if len(key_value_pair) == 1:
-                disp_dict["body_part_type"] = key_value_pair[0]
-            else:
-                key = key_value_pair[0]
-                value = key_value_pair[1]
-                if key == "filename":
-                    value = value[1:-1]
-                curr_value = disp_dict.get(key)
-                if curr_value is None:
-                    disp_dict[key] = value
-                elif not isinstance(curr_value, list):
-                    disp_dict[key] = [curr_value, value]
-                else:
-                    curr_value.append(value)
-        return DocumentsContentDisposition(**disp_dict)
 
     @classmethod
     def _parse_to_documents(

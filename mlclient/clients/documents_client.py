@@ -10,7 +10,7 @@ from mlclient.calls.model import (Category, ContentDispositionSerializer,
                                   DocumentsContentDisposition)
 from mlclient.clients import MLResourceClient, MLResponseParser
 from mlclient.exceptions import MarkLogicError
-from mlclient.model import (Document, DocumentFactory, Metadata)
+from mlclient.model import Document, DocumentFactory, Metadata
 
 
 class DocumentsClient(MLResourceClient):
@@ -19,8 +19,9 @@ class DocumentsClient(MLResourceClient):
             self,
             uris: str | list[str] | tuple[str] | set[str],
             category: str | list | None = None,
+            database: str | None = None,
     ) -> Document | list[Document]:
-        call = self._get_call(uris=uris, category=category)
+        call = self._get_call(uris=uris, category=category, database=database)
         resp = self.call(call)
         return self._parse(resp, uris, category)
 
@@ -29,10 +30,12 @@ class DocumentsClient(MLResourceClient):
             cls,
             uris: str | list[str] | tuple[str] | set[str],
             category: str | list | None,
+            database: str | None,
     ) -> DocumentsGetCall:
         params = {
             "uri": uris,
             "category": category,
+            "database": database,
         }
         if (category and category != "content" or
                 isinstance(category, list) and category != ["content"]):

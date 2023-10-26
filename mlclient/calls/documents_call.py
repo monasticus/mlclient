@@ -18,7 +18,7 @@ from urllib3.fields import RequestField
 
 from mlclient import constants, exceptions, utils
 from mlclient.calls import ResourceCall
-from mlclient.calls.model import Category, DocumentsBodyPart
+from mlclient.calls.model import Category, DocumentsBodyPart, ContentDispositionSerializer
 from mlclient.constants import HEADER_JSON
 
 
@@ -277,11 +277,16 @@ class DocumentsPostCall(ResourceCall):
         data = body_part.content
         if isinstance(data, dict):
             data = json.dumps(data)
+        if isinstance(body_part.content_disposition, str):
+            content_disp = body_part.content_disposition
+        else:
+            content_disp = ContentDispositionSerializer.deserialize(
+                body_part.content_disposition)
         return RequestField(
             name="--ignore--",
             data=data,
             headers={
-                "Content-Disposition": body_part.content_disposition,
+                "Content-Disposition": content_disp,
                 "Content-Type": body_part.content_type,
             })
 

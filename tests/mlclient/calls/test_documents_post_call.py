@@ -64,7 +64,7 @@ def test_body(default_body_part):
     call = DocumentsPostCall(body_parts=[default_body_part])
     boundary = call.headers["Content-Type"].replace("multipart/mixed; boundary=", "")
     expected_body = f"--{boundary}\r\n"
-    expected_body += "Content-Disposition: attachment; filename=/path/to/file.json\r\n"
+    expected_body += 'Content-Disposition: attachment; filename="/path/to/file.json"\r\n'
     expected_body += "Content-Type: application/json\r\n"
     expected_body += "\r\n"
     expected_body += '{"root": "data"}\r\n'
@@ -83,7 +83,7 @@ def test_body_with_dict_content():
     call = DocumentsPostCall(body_parts=[DocumentsBodyPart(**body_part)])
     boundary = call.headers["Content-Type"].replace("multipart/mixed; boundary=", "")
     expected_body = f"--{boundary}\r\n"
-    expected_body += "Content-Disposition: attachment; filename=/path/to/file.json\r\n"
+    expected_body += 'Content-Disposition: attachment; filename="/path/to/file.json"\r\n'
     expected_body += "Content-Type: application/json\r\n"
     expected_body += "\r\n"
     expected_body += '{"root": "data"}\r\n'
@@ -116,7 +116,7 @@ def test_fully_parametrized_call_for_multiple_uris_metadata(default_body_part):
     }
     boundary = call.headers["Content-Type"].replace("multipart/mixed; boundary=", "")
     expected_body = f"--{boundary}\r\n"
-    expected_body += "Content-Disposition: attachment; filename=/path/to/file.json\r\n"
+    expected_body += 'Content-Disposition: attachment; filename="/path/to/file.json"\r\n'
     expected_body += "Content-Type: application/json\r\n"
     expected_body += "\r\n"
     expected_body += '{"root": "data"}\r\n'

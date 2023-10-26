@@ -334,7 +334,7 @@ class RawDocument(Document):
             content: bytes,
             uri: str | None = None,
             doc_type: DocumentType | None = DocumentType.XML,
-            metadata: Metadata | None = None,
+            metadata: bytes | None = None,
             is_temporal: bool = False,
     ):
         """Initialize RawDocument instance.
@@ -347,7 +347,7 @@ class RawDocument(Document):
             A document URI
         doc_type : DocumentType | None
             A document type
-        metadata : Metadata
+        metadata : bytes
             A document metadata
         is_temporal : bool
             The temporal flag
@@ -380,7 +380,7 @@ class RawStringDocument(Document):
             content: str,
             uri: str | None = None,
             doc_type: DocumentType | None = DocumentType.XML,
-            metadata: Metadata | None = None,
+            metadata: str | None = None,
             is_temporal: bool = False,
     ):
         """Initialize RawStringDocument instance.
@@ -393,7 +393,7 @@ class RawStringDocument(Document):
             A document URI
         doc_type : DocumentType | None
             A document type
-        metadata : Metadata
+        metadata : str
             A document metadata
         is_temporal : bool
             The temporal flag
@@ -423,8 +423,8 @@ class MetadataDocument(Document):
 
     def __init__(
             self,
-            uri: str | None = None,
-            metadata: Metadata | None = None,
+            uri: str,
+            metadata: Metadata,
     ):
         """Initialize RawStringDocument instance.
 
@@ -518,7 +518,7 @@ class DocumentFactory:
             content: bytes | str,
             doc_type: DocumentType | str,
             uri: str | None = None,
-            metadata: Metadata | None = None,
+            metadata: bytes | str | None = None,
             is_temporal: bool = False,
     ) -> Document:
         """Instantiate Document based on the document type.
@@ -531,7 +531,7 @@ class DocumentFactory:
             A document type
         uri : str | None, default None
             A document URI
-        metadata : Metadata | None, default None
+        metadata : bytes | str | None, default None
             A document metadata
         is_temporal : bool, default False
             The temporal flag

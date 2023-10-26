@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import importlib.resources as pkg_resources
 import json
-from typing import TextIO
+from typing import Any, TextIO
 
 from mlclient import constants, exceptions
 from mlclient import resources as data
@@ -104,3 +104,20 @@ def get_resource(
         return pkg_resources.open_text(data, resource_name)
     except FileNotFoundError:
         raise ResourceNotFoundError(resource_name) from FileNotFoundError
+
+
+class BiDict:
+
+    def __init__(
+            self,
+            input_dict: dict,
+    ):
+        self._origin = dict(input_dict)
+        self._inverse = {value: key for key, value in input_dict.items()}
+
+    def get(
+            self,
+            key: Any,
+            default: Any = None,
+    ) -> Any:
+        return self._origin.get(key, self._inverse.get(key, default))

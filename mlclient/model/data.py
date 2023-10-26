@@ -457,7 +457,7 @@ class DocumentFactory:
     @classmethod
     def build_document(
             cls,
-            content: ElemTree.Element | dict | str | bytes,
+            content: ElemTree.Element | dict | str | bytes | None = None,
             doc_type: DocumentType | str | None = None,
             uri: str | None = None,
             metadata: Metadata | None = None,
@@ -467,7 +467,7 @@ class DocumentFactory:
 
         Parameters
         ----------
-        content : ElemTree.Element | dict | str | bytes
+        content : ElemTree.Element | dict | str | bytes | None, default None
             A document content
         doc_type : DocumentType | str | None, default None
             A document type
@@ -486,27 +486,10 @@ class DocumentFactory:
         if isinstance(doc_type, str):
             doc_type = DocumentType(doc_type)
 
-        if doc_type == DocumentType.XML:
-            impl = XMLDocument
-        elif doc_type == DocumentType.JSON:
-            impl = JSONDocument
-        elif doc_type == DocumentType.TEXT:
-            impl = TextDocument
-        elif doc_type == DocumentType.BINARY:
-            impl = BinaryDocument
-        elif isinstance(content, ElemTree.Element):
-            impl = XMLDocument
-        elif isinstance(content, dict):
-            impl = JSONDocument
-        elif isinstance(content, str):
-            impl = TextDocument
-        elif isinstance(content, bytes):
-            impl = BinaryDocument
-        else:
-            msg = ("Unsupported document type! "
-                   "Document types are: XML, JSON, TEXT, BINARY!")
-            raise NotImplementedError(msg)
+        if content is None and doc_type is None:
+            return MetadataDocument(uri=uri, metadata=metadata)
 
+        impl = cls._get_impl(content, doc_type)
         return impl(content=content,
                     uri=uri,
                     metadata=metadata,
@@ -562,6 +545,34 @@ class DocumentFactory:
                     uri=uri,
                     metadata=metadata,
                     is_temporal=is_temporal)
+
+    @classmethod
+    def _get_impl(
+            cls,
+            content: ElemTree.Element | dict | str | bytes | None,
+            doc_type: DocumentType | None,
+    ):
+        if doc_type == DocumentType.XML:
+            impl = XMLDocument
+        elif doc_type == DocumentType.JSON:
+            impl = JSONDocument
+        elif doc_type == DocumentType.TEXT:
+            impl = TextDocument
+        elif doc_type == DocumentType.BINARY:
+            impl = BinaryDocument
+        elif isinstance(content, ElemTree.Element):
+            impl = XMLDocument
+        elif isinstance(content, dict):
+            impl = JSONDocument
+        elif isinstance(content, str):
+            impl = TextDocument
+        elif isinstance(content, bytes):
+            impl = BinaryDocument
+        else:
+            msg = ("Unsupported document type! "
+                   "Document types are: XML, JSON, TEXT, BINARY!")
+            raise NotImplementedError(msg)
+        return impl
 
 
 class Metadata:

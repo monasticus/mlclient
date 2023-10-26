@@ -10,8 +10,7 @@ from mlclient.calls.model import (Category, ContentDispositionSerializer,
                                   DocumentsContentDisposition)
 from mlclient.clients import MLResourceClient, MLResponseParser
 from mlclient.exceptions import MarkLogicError
-from mlclient.model import (Document, DocumentFactory, Metadata,
-                            MetadataDocument)
+from mlclient.model import (Document, DocumentFactory, Metadata)
 
 
 class DocumentsClient(MLResourceClient):
@@ -199,10 +198,8 @@ class DocumentsClient(MLResourceClient):
         doc_format = document_data.get("format")
         content = document_data.get("content")
         metadata = document_data.get("metadata")
-        if content:
-            return DocumentFactory.build_document(content=content,
-                                                  doc_type=doc_format,
-                                                  uri=uri,
-                                                  metadata=metadata)
-        return MetadataDocument(uri=uri,
-                                metadata=metadata)
+        return DocumentFactory.build_document(
+            content=content,
+            doc_type=doc_format,
+            uri=uri,
+            metadata=metadata)

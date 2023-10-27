@@ -14,6 +14,8 @@ import importlib.resources as pkg_resources
 import json
 from typing import Any, TextIO
 
+from requests.structures import CaseInsensitiveDict
+
 from mlclient import constants, exceptions
 from mlclient import resources as data
 from mlclient.exceptions import ResourceNotFoundError
@@ -75,6 +77,13 @@ def get_content_type_header_for_data(
         return constants.HEADER_XML
     else:
         return constants.HEADER_JSON
+
+
+def get_content_type_from_headers(
+    headers: dict | CaseInsensitiveDict,
+) -> str | None:
+    gen = (value for name, value in headers.items() if name.lower() == "content-type")
+    return next(gen, None)
 
 
 def get_resource(

@@ -106,7 +106,7 @@ class CallLogsCommand(Command):
     _NONE_SERVER_KEY: str = "AAA"
 
     def handle(
-            self,
+        self,
     ) -> int:
         """Execute the command."""
         if self.option("list") is True:
@@ -116,7 +116,7 @@ class CallLogsCommand(Command):
         return 0
 
     def _print_log_files(
-            self,
+        self,
     ):
         """Print MarkLogic log files in a table."""
         logs_list = self._get_logs_list()
@@ -124,7 +124,7 @@ class CallLogsCommand(Command):
         self._render_log_files_table(rows)
 
     def _get_logs_list(
-            self,
+        self,
     ) -> dict:
         """Retrieve logs list using LogsClient."""
         environment = self.option("environment")
@@ -132,13 +132,12 @@ class CallLogsCommand(Command):
 
         manager = MLManager(environment)
         with manager.get_logs_client(rest_server) as client:
-            self.info(f"Getting logs list "
-                      f"using REST App-Server {client.base_url}\n")
+            self.info(f"Getting logs list using REST App-Server {client.base_url}\n")
             return client.get_logs_list()
 
     def _get_log_files_rows(
-            self,
-            logs_list: dict,
+        self,
+        logs_list: dict,
     ) -> list[list[str]]:
         """Get rows to build a table with log files."""
         grouped_logs = logs_list["grouped"]
@@ -146,13 +145,14 @@ class CallLogsCommand(Command):
         app_port = self._get_app_port()
         ml_url = self._get_logs_client().base_url
         rows = []
-        servers = sorted(server if server is not None else self._NONE_SERVER_KEY
-                         for server in grouped_logs
-                         if app_port is None or str(app_port) == server)
+        servers = sorted(
+            server if server is not None else self._NONE_SERVER_KEY
+            for server in grouped_logs
+            if app_port is None or str(app_port) == server
+        )
         for server_index, server_key in enumerate(servers):
             server = None if server_key == self._NONE_SERVER_KEY else server_key
-            self._populate_rows_from_server_lvl(
-                rows, logs_list, ml_url, server)
+            self._populate_rows_from_server_lvl(rows, logs_list, ml_url, server)
 
             if server_index < len(servers) - 1:
                 rows.append(self.table_separator())
@@ -161,11 +161,11 @@ class CallLogsCommand(Command):
 
     @classmethod
     def _populate_rows_from_server_lvl(
-            cls,
-            rows: list,
-            logs_list: dict,
-            ml_url: str,
-            server: str | None,
+        cls,
+        rows: list,
+        logs_list: dict,
+        ml_url: str,
+        server: str | None,
     ):
         """Populate rows with server log files."""
         grouped_logs = logs_list["grouped"]
@@ -174,18 +174,23 @@ class CallLogsCommand(Command):
         log_types = sorted(server_logs.keys())
         for log_type_index, log_type in enumerate(log_types):
             cls._populate_rows_from_log_type_lvl(
-                rows, logs_list, ml_url, server, log_type)
+                rows,
+                logs_list,
+                ml_url,
+                server,
+                log_type,
+            )
 
             if log_type_index < len(log_types) - 1:
                 rows.append(["", ""])
 
     @staticmethod
     def _populate_rows_from_log_type_lvl(
-            rows: list,
-            logs_list: dict,
-            ml_url: str,
-            server: str | None,
-            log_type: LogType,
+        rows: list,
+        logs_list: dict,
+        ml_url: str,
+        server: str | None,
+        log_type: LogType,
     ):
         """Populate rows with server log files of a specific type."""
         source_logs = logs_list["source"]
@@ -195,15 +200,15 @@ class CallLogsCommand(Command):
         type_logs = server_logs[log_type]
         for days in sorted(type_logs):
             file_name = type_logs[days]
-            endpoint = next(log["uriref"]
-                            for log in source_logs
-                            if log["nameref"] == file_name)
+            endpoint = next(
+                log["uriref"] for log in source_logs if log["nameref"] == file_name
+            )
             url = f"{ml_url}{endpoint}"
             rows.append([file_name, url])
 
     def _render_log_files_table(
-            self,
-            rows: list[list[str]],
+        self,
+        rows: list[list[str]],
     ):
         """Render a table with MarkLogic log files."""
         if len(rows) > 0:
@@ -217,7 +222,7 @@ class CallLogsCommand(Command):
             self.line_error("No log files found")
 
     def _print_logs(
-            self,
+        self,
     ):
         """Print MarkLogic logs."""
         logs = self._get_logs()
@@ -227,7 +232,7 @@ class CallLogsCommand(Command):
             self._io.write(msg, new_line=True, type=Type.RAW)
 
     def _get_logs(
-            self,
+        self,
     ) -> Iterator[dict]:
         """Retrieve logs using LogsClient."""
         app_port = self._get_app_port()
@@ -242,8 +247,10 @@ class CallLogsCommand(Command):
                 file_name = f"{log_type.value}.txt"
             else:
                 file_name = f"{app_port}_{log_type.value}.txt"
-            self.info(f"Getting {file_name} logs "
-                      f"using REST App-Server {client.base_url}\n")
+            self.info(
+                f"Getting {file_name} logs "
+                f"using REST App-Server {client.base_url}\n",
+            )
             return client.get_logs(
                 app_server=app_port,
                 log_type=log_type,
@@ -254,8 +261,8 @@ class CallLogsCommand(Command):
             )
 
     def _parse_logs(
-            self,
-            logs: Iterator[dict],
+        self,
+        logs: Iterator[dict],
     ) -> Iterator[tuple[str, str]]:
         """Parse retrieved logs depending on the log type."""
         if self.option("log-type").lower() != "error":
@@ -269,7 +276,7 @@ class CallLogsCommand(Command):
                 yield f"<time>{timestamp}</> <log-level>{level}</>: ", msg
 
     def _get_app_port(
-            self,
+        self,
     ):
         """Identify app port to be used."""
         environment = self.option("environment")
@@ -278,9 +285,14 @@ class CallLogsCommand(Command):
         if app_port == "0":
             app_port = "TaskServer"
         elif app_port is not None and not app_port.isnumeric():
-            named_app_port = next((app_server.port
-                                   for app_server in manager.config.app_servers
-                                   if app_server.identifier == app_port), None)
+            named_app_port = next(
+                (
+                    app_server.port
+                    for app_server in manager.config.app_servers
+                    if app_server.identifier == app_port
+                ),
+                None,
+            )
             if named_app_port is not None:
                 app_port = named_app_port
         return app_port

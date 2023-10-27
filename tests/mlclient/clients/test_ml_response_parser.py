@@ -46,7 +46,8 @@ def test_parse_single_error_response(client):
     assert isinstance(parsed_resp, str)
     assert parsed_resp == (
         "XDMP-BADCHAR: (err:XPST0003) Unexpected character found ''' (0x0027)\n"
-        "in /eval, at 1:0 [1.0-ml]")
+        "in /eval, at 1:0 [1.0-ml]"
+    )
 
 
 @responses.activate
@@ -68,7 +69,8 @@ def test_parse_text_single_error_response(client):
     assert isinstance(parsed_resp, str)
     assert parsed_resp == (
         "XDMP-BADCHAR: (err:XPST0003) Unexpected character found ''' (0x0027)\n"
-        "in /eval, at 1:0 [1.0-ml]")
+        "in /eval, at 1:0 [1.0-ml]"
+    )
 
 
 @responses.activate
@@ -90,7 +92,8 @@ def test_parse_bytes_single_error_response(client):
     assert isinstance(parsed_resp, bytes)
     assert parsed_resp == (
         b"XDMP-BADCHAR: (err:XPST0003) Unexpected character found ''' (0x0027)\n"
-        b"in /eval, at 1:0 [1.0-ml]")
+        b"in /eval, at 1:0 [1.0-ml]"
+    )
 
 
 @responses.activate
@@ -112,7 +115,8 @@ def test_parse_with_headers_single_error_response(client):
     assert isinstance(parsed_resp, str)
     assert parsed_resp == (
         "XDMP-BADCHAR: (err:XPST0003) Unexpected character found ''' (0x0027)\n"
-        "in /eval, at 1:0 [1.0-ml]")
+        "in /eval, at 1:0 [1.0-ml]"
+    )
     assert headers == {
         "Content-Type": "text/html; charset=utf-8",
         "Content-Length": "1014",
@@ -128,8 +132,8 @@ def test_parse_single_error_response_json(client):
             "status": "Not Found",
             "messageCode": "RESTAPI-NODOCUMENT",
             "message": "RESTAPI-NODOCUMENT: (err:FOER0000) "
-                       "Resource or document does not exist:  "
-                       "category: content message: /some/dir/doc.xml",
+            "Resource or document does not exist:  "
+            "category: content message: /some/dir/doc.xml",
         },
     }
 
@@ -157,8 +161,8 @@ def test_parse_text_single_error_response_json(client):
             "status": "Not Found",
             "messageCode": "RESTAPI-NODOCUMENT",
             "message": "RESTAPI-NODOCUMENT: (err:FOER0000) "
-                       "Resource or document does not exist:  "
-                       "category: content message: /some/dir/doc.xml",
+            "Resource or document does not exist:  "
+            "category: content message: /some/dir/doc.xml",
         },
     }
 
@@ -181,7 +185,8 @@ def test_parse_text_single_error_response_json(client):
         '"messageCode": "RESTAPI-NODOCUMENT", '
         '"message": "RESTAPI-NODOCUMENT: (err:FOER0000) '
         f'Resource or document does not exist:  category: content message: {uri}"'
-        '}}')
+        "}}"
+    )
 
 
 @responses.activate
@@ -193,8 +198,8 @@ def test_parse_bytes_single_error_response_json(client):
             "status": "Not Found",
             "messageCode": "RESTAPI-NODOCUMENT",
             "message": "RESTAPI-NODOCUMENT: (err:FOER0000) "
-                       "Resource or document does not exist:  "
-                       "category: content message: /some/dir/doc.xml",
+            "Resource or document does not exist:  "
+            "category: content message: /some/dir/doc.xml",
         },
     }
 
@@ -215,10 +220,11 @@ def test_parse_bytes_single_error_response_json(client):
         b'"statusCode": 404, '
         b'"status": "Not Found", '
         b'"messageCode": "RESTAPI-NODOCUMENT", '
-        b'"message": "RESTAPI-NODOCUMENT: (err:FOER0000) ' +
-        'Resource or document does not exist:  '
-        f'category: content message: {uri}"'.encode() +
-        b"}}")
+        b'"message": "RESTAPI-NODOCUMENT: (err:FOER0000) '
+        + "Resource or document does not exist:  "
+        f'category: content message: {uri}"'.encode()
+        + b"}}"
+    )
 
 
 @responses.activate
@@ -230,8 +236,8 @@ def test_parse_with_headers_single_error_response_json(client):
             "status": "Not Found",
             "messageCode": "RESTAPI-NODOCUMENT",
             "message": "RESTAPI-NODOCUMENT: (err:FOER0000) "
-                       "Resource or document does not exist:  "
-                       "category: content message: /some/dir/doc.xml",
+            "Resource or document does not exist:  "
+            "category: content message: /some/dir/doc.xml",
         },
     }
 
@@ -264,8 +270,7 @@ def test_parse_non_multipart_mixed_response_xml(client):
     builder.with_response_content_type("application/xml; charset=utf-8")
     builder.with_response_header("vnd.marklogic.document-format", "xml")
     builder.with_response_status(200)
-    builder.with_response_body('<?xml version="1.0" encoding="UTF-8"?>\n'
-                               '<root/>')
+    builder.with_response_body('<?xml version="1.0" encoding="UTF-8"?>\n<root/>')
     builder.build_get()
 
     resp = client.get_documents(uri=uri)
@@ -329,8 +334,7 @@ def test_parse_with_headers_non_multipart_mixed_response_xml(client):
     builder.with_response_content_type("application/xml; charset=utf-8")
     builder.with_response_header("vnd.marklogic.document-format", "xml")
     builder.with_response_status(200)
-    builder.with_response_body('<?xml version="1.0" encoding="UTF-8"?>\n'
-                               '<root/>')
+    builder.with_response_body('<?xml version="1.0" encoding="UTF-8"?>\n<root/>')
     builder.build_get()
 
     resp = client.get_documents(uri=uri)
@@ -619,7 +623,8 @@ def test_parse_single_unsupported_response(client):
     builder.with_response_body_multipart_mixed()
     builder.with_response_body_part(
         "directory-query",
-        'cts:directory-query("/root/", "infinity")')
+        'cts:directory-query("/root/", "infinity")',
+    )
     builder.build_post()
 
     resp = client.eval(xquery=xqy)
@@ -640,7 +645,8 @@ def test_parse_text_single_unsupported_response(client):
     builder.with_response_body_multipart_mixed()
     builder.with_response_body_part(
         "directory-query",
-        'cts:directory-query("/root/", "infinity")')
+        'cts:directory-query("/root/", "infinity")',
+    )
     builder.build_post()
 
     resp = client.eval(xquery=xqy)
@@ -661,7 +667,8 @@ def test_parse_bytes_single_unsupported_response(client):
     builder.with_response_body_multipart_mixed()
     builder.with_response_body_part(
         "directory-query",
-        'cts:directory-query("/root/", "infinity")')
+        'cts:directory-query("/root/", "infinity")',
+    )
     builder.build_post()
 
     resp = client.eval(xquery=xqy)
@@ -682,7 +689,8 @@ def test_parse_with_headers_single_unsupported_response(client):
     builder.with_response_body_multipart_mixed()
     builder.with_response_body_part(
         "directory-query",
-        'cts:directory-query("/root/", "infinity")')
+        'cts:directory-query("/root/", "infinity")',
+    )
     builder.build_post()
 
     resp = client.eval(xquery=xqy)
@@ -1190,7 +1198,8 @@ def test_parse_single_plain_text_date_time_response(client):
     assert isinstance(parsed_resp, datetime)
     assert parsed_resp == datetime.strptime(
         "2023-09-14T07:30:27.997332Z",
-        "%Y-%m-%dT%H:%M:%S.%f%z")
+        "%Y-%m-%dT%H:%M:%S.%f%z",
+    )
 
 
 @responses.activate
@@ -1249,7 +1258,8 @@ def test_parse_with_headers_single_plain_text_date_time_response(client):
     assert isinstance(parsed_resp, datetime)
     assert parsed_resp == datetime.strptime(
         "2023-09-14T07:30:27.997332Z",
-        "%Y-%m-%dT%H:%M:%S.%f%z")
+        "%Y-%m-%dT%H:%M:%S.%f%z",
+    )
     assert headers == {
         "Content-Type": "text/plain",
         "X-Primitive": "dateTime",
@@ -1258,12 +1268,14 @@ def test_parse_with_headers_single_plain_text_date_time_response(client):
 
 @responses.activate
 def test_parse_single_map_response(client):
-    xqy = ('map:map() '
-           '=> map:with("str", "value") '
-           '=> map:with("int_str", "1") '
-           '=> map:with("int", 1) '
-           '=> map:with("float", 1.1) '
-           '=> map:with("bool", fn:true())')
+    xqy = (
+        "map:map() "
+        '=> map:with("str", "value") '
+        '=> map:with("int_str", "1") '
+        '=> map:with("int", 1) '
+        '=> map:with("float", 1.1) '
+        '=> map:with("bool", fn:true())'
+    )
 
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/v1/eval")
@@ -1272,7 +1284,8 @@ def test_parse_single_map_response(client):
     builder.with_response_body_multipart_mixed()
     builder.with_response_body_part(
         "map",
-        '{"float":1.1, "int":1, "bool":true, "str":"value", "int_str":"1"}')
+        '{"float":1.1, "int":1, "bool":true, "str":"value", "int_str":"1"}',
+    )
     builder.build_post()
 
     resp = client.eval(xquery=xqy)
@@ -1290,12 +1303,14 @@ def test_parse_single_map_response(client):
 
 @responses.activate
 def test_parse_text_single_map_response(client):
-    xqy = ('map:map() '
-           '=> map:with("str", "value") '
-           '=> map:with("int_str", "1") '
-           '=> map:with("int", 1) '
-           '=> map:with("float", 1.1) '
-           '=> map:with("bool", fn:true())')
+    xqy = (
+        "map:map() "
+        '=> map:with("str", "value") '
+        '=> map:with("int_str", "1") '
+        '=> map:with("int", 1) '
+        '=> map:with("float", 1.1) '
+        '=> map:with("bool", fn:true())'
+    )
     serialized_map = '{"float":1.1, "int":1, "bool":true, "str":"value", "int_str":"1"}'
 
     builder = MLResponseBuilder()
@@ -1315,12 +1330,14 @@ def test_parse_text_single_map_response(client):
 
 @responses.activate
 def test_parse_bytes_single_map_response(client):
-    xqy = ('map:map() '
-           '=> map:with("str", "value") '
-           '=> map:with("int_str", "1") '
-           '=> map:with("int", 1) '
-           '=> map:with("float", 1.1) '
-           '=> map:with("bool", fn:true())')
+    xqy = (
+        "map:map() "
+        '=> map:with("str", "value") '
+        '=> map:with("int_str", "1") '
+        '=> map:with("int", 1) '
+        '=> map:with("float", 1.1) '
+        '=> map:with("bool", fn:true())'
+    )
     serialized_map = '{"float":1.1, "int":1, "bool":true, "str":"value", "int_str":"1"}'
 
     builder = MLResponseBuilder()
@@ -1340,12 +1357,14 @@ def test_parse_bytes_single_map_response(client):
 
 @responses.activate
 def test_parse_with_headers_single_map_response(client):
-    xqy = ('map:map() '
-           '=> map:with("str", "value") '
-           '=> map:with("int_str", "1") '
-           '=> map:with("int", 1) '
-           '=> map:with("float", 1.1) '
-           '=> map:with("bool", fn:true())')
+    xqy = (
+        "map:map() "
+        '=> map:with("str", "value") '
+        '=> map:with("int_str", "1") '
+        '=> map:with("int", 1) '
+        '=> map:with("float", 1.1) '
+        '=> map:with("bool", fn:true())'
+    )
 
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/v1/eval")
@@ -1354,7 +1373,8 @@ def test_parse_with_headers_single_map_response(client):
     builder.with_response_body_multipart_mixed()
     builder.with_response_body_part(
         "map",
-        '{"float":1.1, "int":1, "bool":true, "str":"value", "int_str":"1"}')
+        '{"float":1.1, "int":1, "bool":true, "str":"value", "int_str":"1"}',
+    )
     builder.build_post()
 
     resp = client.eval(xquery=xqy)
@@ -1376,12 +1396,14 @@ def test_parse_with_headers_single_map_response(client):
 
 @responses.activate
 def test_parse_single_json_response(client):
-    xqy = ('json:object() '
-           '=> map:with("str", "value") '
-           '=> map:with("int_str", "1") '
-           '=> map:with("int", 1) '
-           '=> map:with("float", 1.1) '
-           '=> map:with("bool", fn:true())')
+    xqy = (
+        "json:object() "
+        '=> map:with("str", "value") '
+        '=> map:with("int_str", "1") '
+        '=> map:with("int", 1) '
+        '=> map:with("float", 1.1) '
+        '=> map:with("bool", fn:true())'
+    )
 
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/v1/eval")
@@ -1390,7 +1412,8 @@ def test_parse_single_json_response(client):
     builder.with_response_body_multipart_mixed()
     builder.with_response_body_part(
         "map",
-        '{"float":1.1, "int":1, "bool":true, "str":"value", "int_str":"1"}')
+        '{"float":1.1, "int":1, "bool":true, "str":"value", "int_str":"1"}',
+    )
     builder.build_post()
 
     resp = client.eval(xquery=xqy)
@@ -1408,12 +1431,14 @@ def test_parse_single_json_response(client):
 
 @responses.activate
 def test_parse_text_single_json_response(client):
-    xqy = ('json:object() '
-           '=> map:with("str", "value") '
-           '=> map:with("int_str", "1") '
-           '=> map:with("int", 1) '
-           '=> map:with("float", 1.1) '
-           '=> map:with("bool", fn:true())')
+    xqy = (
+        "json:object() "
+        '=> map:with("str", "value") '
+        '=> map:with("int_str", "1") '
+        '=> map:with("int", 1) '
+        '=> map:with("float", 1.1) '
+        '=> map:with("bool", fn:true())'
+    )
     serialized_map = '{"float":1.1, "int":1, "bool":true, "str":"value", "int_str":"1"}'
 
     builder = MLResponseBuilder()
@@ -1433,12 +1458,14 @@ def test_parse_text_single_json_response(client):
 
 @responses.activate
 def test_parse_bytes_single_json_response(client):
-    xqy = ('json:object() '
-           '=> map:with("str", "value") '
-           '=> map:with("int_str", "1") '
-           '=> map:with("int", 1) '
-           '=> map:with("float", 1.1) '
-           '=> map:with("bool", fn:true())')
+    xqy = (
+        "json:object() "
+        '=> map:with("str", "value") '
+        '=> map:with("int_str", "1") '
+        '=> map:with("int", 1) '
+        '=> map:with("float", 1.1) '
+        '=> map:with("bool", fn:true())'
+    )
     serialized_map = '{"float":1.1, "int":1, "bool":true, "str":"value", "int_str":"1"}'
 
     builder = MLResponseBuilder()
@@ -1458,12 +1485,14 @@ def test_parse_bytes_single_json_response(client):
 
 @responses.activate
 def test_parse_with_headers_single_json_response(client):
-    xqy = ('json:object() '
-           '=> map:with("str", "value") '
-           '=> map:with("int_str", "1") '
-           '=> map:with("int", 1) '
-           '=> map:with("float", 1.1) '
-           '=> map:with("bool", fn:true())')
+    xqy = (
+        "json:object() "
+        '=> map:with("str", "value") '
+        '=> map:with("int_str", "1") '
+        '=> map:with("int", 1) '
+        '=> map:with("float", 1.1) '
+        '=> map:with("bool", fn:true())'
+    )
 
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/v1/eval")
@@ -1472,7 +1501,8 @@ def test_parse_with_headers_single_json_response(client):
     builder.with_response_body_multipart_mixed()
     builder.with_response_body_part(
         "map",
-        '{"float":1.1, "int":1, "bool":true, "str":"value", "int_str":"1"}')
+        '{"float":1.1, "int":1, "bool":true, "str":"value", "int_str":"1"}',
+    )
     builder.build_post()
 
     resp = client.eval(xquery=xqy)
@@ -1494,8 +1524,7 @@ def test_parse_with_headers_single_json_response(client):
 
 @responses.activate
 def test_parse_single_json_array_response(client):
-    xqy = ('("value", "1", 1, 1.1, fn:true())'
-           ' => json:to-array()')
+    xqy = '("value", "1", 1, 1.1, fn:true()) => json:to-array()'
 
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/v1/eval")
@@ -1514,8 +1543,7 @@ def test_parse_single_json_array_response(client):
 
 @responses.activate
 def test_parse_text_single_json_array_response(client):
-    xqy = ('("value", "1", 1, 1.1, fn:true())'
-           ' => json:to-array()')
+    xqy = '("value", "1", 1, 1.1, fn:true()) => json:to-array()'
 
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/v1/eval")
@@ -1534,8 +1562,7 @@ def test_parse_text_single_json_array_response(client):
 
 @responses.activate
 def test_parse_bytes_single_json_array_response(client):
-    xqy = ('("value", "1", 1, 1.1, fn:true())'
-           ' => json:to-array()')
+    xqy = '("value", "1", 1, 1.1, fn:true()) => json:to-array()'
 
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/v1/eval")
@@ -1554,8 +1581,7 @@ def test_parse_bytes_single_json_array_response(client):
 
 @responses.activate
 def test_parse_with_headers_single_json_array_response(client):
-    xqy = ('("value", "1", 1, 1.1, fn:true())'
-           ' => json:to-array()')
+    xqy = '("value", "1", 1, 1.1, fn:true()) => json:to-array()'
 
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/v1/eval")
@@ -1587,8 +1613,8 @@ def test_parse_single_xml_document_node_response(client):
     builder.with_response_body_multipart_mixed()
     builder.with_response_body_part(
         "document-node()",
-        '<?xml version="1.0" encoding="UTF-8"?>\n'
-        '<root/>')
+        '<?xml version="1.0" encoding="UTF-8"?>\n<root/>',
+    )
     builder.build_post()
 
     resp = client.eval(xquery=xqy)
@@ -1611,8 +1637,8 @@ def test_parse_text_single_xml_document_node_response(client):
     builder.with_response_body_multipart_mixed()
     builder.with_response_body_part(
         "document-node()",
-        '<?xml version="1.0" encoding="UTF-8"?>\n'
-        '<root/>')
+        '<?xml version="1.0" encoding="UTF-8"?>\n<root/>',
+    )
     builder.build_post()
 
     resp = client.eval(xquery=xqy)
@@ -1633,8 +1659,8 @@ def test_parse_bytes_single_xml_document_node_response(client):
     builder.with_response_body_multipart_mixed()
     builder.with_response_body_part(
         "document-node()",
-        '<?xml version="1.0" encoding="UTF-8"?>\n'
-        '<root/>')
+        '<?xml version="1.0" encoding="UTF-8"?>\n<root/>',
+    )
     builder.build_post()
 
     resp = client.eval(xquery=xqy)
@@ -1655,8 +1681,8 @@ def test_parse_with_headers_single_xml_document_node_response(client):
     builder.with_response_body_multipart_mixed()
     builder.with_response_body_part(
         "document-node()",
-        '<?xml version="1.0" encoding="UTF-8"?>\n'
-        '<root/>')
+        '<?xml version="1.0" encoding="UTF-8"?>\n<root/>',
+    )
     builder.build_post()
 
     resp = client.eval(xquery=xqy)
@@ -1767,7 +1793,8 @@ def test_parse_multiple_responses(client):
     builder.with_response_body_multipart_mixed()
     builder.with_response_body_part(
         "directory-query",
-        'cts:directory-query("/root/", "infinity")')
+        'cts:directory-query("/root/", "infinity")',
+    )
     builder.with_response_body_part("string", "plain text")
     builder.build_post()
 
@@ -1792,7 +1819,8 @@ def test_parse_text_multiple_responses(client):
     builder.with_response_body_multipart_mixed()
     builder.with_response_body_part(
         "directory-query",
-        'cts:directory-query("/root/", "infinity")')
+        'cts:directory-query("/root/", "infinity")',
+    )
     builder.with_response_body_part("string", "plain text")
     builder.build_post()
 
@@ -1817,7 +1845,8 @@ def test_parse_bytes_multiple_responses(client):
     builder.with_response_body_multipart_mixed()
     builder.with_response_body_part(
         "directory-query",
-        'cts:directory-query("/root/", "infinity")')
+        'cts:directory-query("/root/", "infinity")',
+    )
     builder.with_response_body_part("string", "plain text")
     builder.build_post()
 
@@ -1842,7 +1871,8 @@ def test_parse_with_headers_multiple_responses(client):
     builder.with_response_body_multipart_mixed()
     builder.with_response_body_part(
         "directory-query",
-        'cts:directory-query("/root/", "infinity")')
+        'cts:directory-query("/root/", "infinity")',
+    )
     builder.with_response_body_part("string", "plain text")
     builder.build_post()
 

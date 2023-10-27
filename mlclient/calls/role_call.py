@@ -33,10 +33,10 @@ class RoleGetCall(ResourceCall):
     _SUPPORTED_VIEWS: ClassVar[list] = ["describe", "default"]
 
     def __init__(
-            self,
-            role: str,
-            data_format: str = "xml",
-            view: str = "default",
+        self,
+        role: str,
+        data_format: str = "xml",
+        view: str = "default",
     ):
         """Initialize RoleGetCall instance.
 
@@ -54,15 +54,17 @@ class RoleGetCall(ResourceCall):
         view = view if view is not None else "default"
         self._validate_params(data_format, view)
 
-        super().__init__(method="GET",
-                         accept=utils.get_accept_header_for_format(data_format))
+        super().__init__(
+            method="GET",
+            accept=utils.get_accept_header_for_format(data_format),
+        )
         self._role = role
         self.add_param(self._FORMAT_PARAM, data_format)
         self.add_param(self._VIEW_PARAM, view)
 
     @property
     def endpoint(
-            self,
+        self,
     ):
         """An endpoint for the Role call.
 
@@ -75,9 +77,9 @@ class RoleGetCall(ResourceCall):
 
     @classmethod
     def _validate_params(
-            cls,
-            data_format: str,
-            view: str,
+        cls,
+        data_format: str,
+        view: str,
     ):
         if data_format not in cls._SUPPORTED_FORMATS:
             joined_supported_formats = ", ".join(cls._SUPPORTED_FORMATS)
@@ -102,8 +104,8 @@ class RoleDeleteCall(ResourceCall):
     _ENDPOINT_TEMPLATE: str = "/manage/v2/roles/{}"
 
     def __init__(
-            self,
-            role: str,
+        self,
+        role: str,
     ):
         """Initialize RoleDeleteCall instance.
 
@@ -117,7 +119,7 @@ class RoleDeleteCall(ResourceCall):
 
     @property
     def endpoint(
-            self,
+        self,
     ):
         """An endpoint for the Role call.
 

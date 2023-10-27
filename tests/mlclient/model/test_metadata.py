@@ -8,15 +8,20 @@ from mlclient.model import Metadata, Permission
 
 
 def __assert_permissions_are_equal(
-        these_permissions: list[Permission],
-        those_permissions: list[Permission],
+    these_permissions: list[Permission],
+    those_permissions: list[Permission],
 ):
     assert len(these_permissions) == len(those_permissions)
     for this_permission in these_permissions:
         this_role = this_permission.role_name()
-        that_permission = next((permission
-                                for permission in those_permissions
-                                if permission.role_name() == this_role), None)
+        that_permission = next(
+            (
+                permission
+                for permission in those_permissions
+                if permission.role_name() == this_role
+            ),
+            None,
+        )
         assert that_permission is not None
 
         this_capabilities = this_permission.capabilities()
@@ -35,11 +40,13 @@ def metadata():
     quality = 1
     metadata_values = {"meta-name-1": "meta-value-1", "meta-name-2": "meta-value-2"}
 
-    return Metadata(collections=collections,
-                    permissions=permissions,
-                    properties=properties,
-                    quality=quality,
-                    metadata_values=metadata_values)
+    return Metadata(
+        collections=collections,
+        permissions=permissions,
+        properties=properties,
+        quality=quality,
+        metadata_values=metadata_values,
+    )
 
 
 def test_equal():
@@ -47,16 +54,20 @@ def test_equal():
     permissions = [Permission("role-1", {Permission.READ})]
     properties = {"prop-name-1": "prop-value-1", "prop-name-2": "prop-value-2"}
     metadata_values = {"meta-name-1": "meta-value-1", "meta-name-2": "meta-value-2"}
-    metadata_1 = Metadata(collections=collections,
-                          permissions=permissions,
-                          properties=properties,
-                          quality=1,
-                          metadata_values=metadata_values)
-    metadata_2 = Metadata(collections=collections,
-                          permissions=permissions,
-                          properties=properties,
-                          quality=1,
-                          metadata_values=metadata_values)
+    metadata_1 = Metadata(
+        collections=collections,
+        permissions=permissions,
+        properties=properties,
+        quality=1,
+        metadata_values=metadata_values,
+    )
+    metadata_2 = Metadata(
+        collections=collections,
+        permissions=permissions,
+        properties=properties,
+        quality=1,
+        metadata_values=metadata_values,
+    )
     assert metadata_1 == metadata_2
     assert metadata_1.__hash__() == metadata_2.__hash__()
 
@@ -67,16 +78,20 @@ def test_not_equal_when_collections_differ():
     permissions = [Permission("role-1", {Permission.READ})]
     properties = {"prop-name-1": "prop-value-1", "prop-name-2": "prop-value-2"}
     metadata_values = {"meta-name-1": "meta-value-1", "meta-name-2": "meta-value-2"}
-    metadata_1 = Metadata(collections=collections_1,
-                          permissions=permissions,
-                          properties=properties,
-                          quality=1,
-                          metadata_values=metadata_values)
-    metadata_2 = Metadata(collections=collections_2,
-                          permissions=permissions,
-                          properties=properties,
-                          quality=1,
-                          metadata_values=metadata_values)
+    metadata_1 = Metadata(
+        collections=collections_1,
+        permissions=permissions,
+        properties=properties,
+        quality=1,
+        metadata_values=metadata_values,
+    )
+    metadata_2 = Metadata(
+        collections=collections_2,
+        permissions=permissions,
+        properties=properties,
+        quality=1,
+        metadata_values=metadata_values,
+    )
     assert metadata_1 != metadata_2
     assert metadata_1.__hash__() != metadata_2.__hash__()
 
@@ -87,16 +102,20 @@ def test_not_equal_when_permissions_differ():
     permissions_2 = [Permission("role-1", {Permission.UPDATE})]
     properties = {"prop-name-1": "prop-value-1", "prop-name-2": "prop-value-2"}
     metadata_values = {"meta-name-1": "meta-value-1", "meta-name-2": "meta-value-2"}
-    metadata_1 = Metadata(collections=collections,
-                          permissions=permissions_1,
-                          properties=properties,
-                          quality=1,
-                          metadata_values=metadata_values)
-    metadata_2 = Metadata(collections=collections,
-                          permissions=permissions_2,
-                          properties=properties,
-                          quality=1,
-                          metadata_values=metadata_values)
+    metadata_1 = Metadata(
+        collections=collections,
+        permissions=permissions_1,
+        properties=properties,
+        quality=1,
+        metadata_values=metadata_values,
+    )
+    metadata_2 = Metadata(
+        collections=collections,
+        permissions=permissions_2,
+        properties=properties,
+        quality=1,
+        metadata_values=metadata_values,
+    )
     assert metadata_1 != metadata_2
     assert metadata_1.__hash__() != metadata_2.__hash__()
 
@@ -107,16 +126,20 @@ def test_not_equal_when_properties_differ():
     properties_1 = {"prop-name-1": "prop-value-1", "prop-name-2": "prop-value-2"}
     properties_2 = {"prop-name-1": "prop-value-1", "prop-name-2": "prop-value-3"}
     metadata_values = {"meta-name-1": "meta-value-1", "meta-name-2": "meta-value-2"}
-    metadata_1 = Metadata(collections=collections,
-                          permissions=permissions,
-                          properties=properties_1,
-                          quality=1,
-                          metadata_values=metadata_values)
-    metadata_2 = Metadata(collections=collections,
-                          permissions=permissions,
-                          properties=properties_2,
-                          quality=1,
-                          metadata_values=metadata_values)
+    metadata_1 = Metadata(
+        collections=collections,
+        permissions=permissions,
+        properties=properties_1,
+        quality=1,
+        metadata_values=metadata_values,
+    )
+    metadata_2 = Metadata(
+        collections=collections,
+        permissions=permissions,
+        properties=properties_2,
+        quality=1,
+        metadata_values=metadata_values,
+    )
     assert metadata_1 != metadata_2
     assert metadata_1.__hash__() != metadata_2.__hash__()
 
@@ -126,16 +149,20 @@ def test_not_equal_when_qualities_differ():
     permissions = [Permission("role-1", {Permission.READ})]
     properties = {"prop-name-1": "prop-value-1", "prop-name-2": "prop-value-2"}
     metadata_values = {"meta-name-1": "meta-value-1", "meta-name-2": "meta-value-2"}
-    metadata_1 = Metadata(collections=collections,
-                          permissions=permissions,
-                          properties=properties,
-                          quality=1,
-                          metadata_values=metadata_values)
-    metadata_2 = Metadata(collections=collections,
-                          permissions=permissions,
-                          properties=properties,
-                          quality=2,
-                          metadata_values=metadata_values)
+    metadata_1 = Metadata(
+        collections=collections,
+        permissions=permissions,
+        properties=properties,
+        quality=1,
+        metadata_values=metadata_values,
+    )
+    metadata_2 = Metadata(
+        collections=collections,
+        permissions=permissions,
+        properties=properties,
+        quality=2,
+        metadata_values=metadata_values,
+    )
     assert metadata_1 != metadata_2
     assert metadata_1.__hash__() != metadata_2.__hash__()
 
@@ -146,16 +173,20 @@ def test_not_equal_when_metadata_values_differ():
     properties = {"prop-name-1": "prop-value-1", "prop-name-2": "prop-value-2"}
     metadata_values_1 = {"meta-name-1": "meta-value-1", "meta-name-2": "meta-value-2"}
     metadata_values_2 = {"meta-name-1": "meta-value-1", "meta-name-2": "meta-value-3"}
-    metadata_1 = Metadata(collections=collections,
-                          permissions=permissions,
-                          properties=properties,
-                          quality=1,
-                          metadata_values=metadata_values_1)
-    metadata_2 = Metadata(collections=collections,
-                          permissions=permissions,
-                          properties=properties,
-                          quality=1,
-                          metadata_values=metadata_values_2)
+    metadata_1 = Metadata(
+        collections=collections,
+        permissions=permissions,
+        properties=properties,
+        quality=1,
+        metadata_values=metadata_values_1,
+    )
+    metadata_2 = Metadata(
+        collections=collections,
+        permissions=permissions,
+        properties=properties,
+        quality=1,
+        metadata_values=metadata_values_2,
+    )
     assert metadata_1 != metadata_2
     assert metadata_1.__hash__() != metadata_2.__hash__()
 
@@ -397,16 +428,22 @@ def test_remove_permission():
     metadata = Metadata(permissions=permissions)
     success = metadata.remove_permission("role-2", Permission.READ)
     assert success is True
-    __assert_permissions_are_equal(metadata.permissions(), [
-        Permission("role-1", {Permission.READ}),
-        Permission("role-2", {Permission.UPDATE}),
-    ])
+    __assert_permissions_are_equal(
+        metadata.permissions(),
+        [
+            Permission("role-1", {Permission.READ}),
+            Permission("role-2", {Permission.UPDATE}),
+        ],
+    )
 
     success = metadata.remove_permission("role-2", Permission.UPDATE)
     assert success is True
-    __assert_permissions_are_equal(metadata.permissions(), [
-        Permission("role-1", {Permission.READ}),
-    ])
+    __assert_permissions_are_equal(
+        metadata.permissions(),
+        [
+            Permission("role-1", {Permission.READ}),
+        ],
+    )
 
     success = metadata.remove_permission("role-1", Permission.READ)
     assert success is True
@@ -568,7 +605,12 @@ def test_to_json(metadata):
     metadata_values = metadata_json.get("metadataValues")
 
     assert list(metadata_json.keys()) == [
-        "collections", "permissions", "properties", "quality", "metadataValues"]
+        "collections",
+        "permissions",
+        "properties",
+        "quality",
+        "metadataValues",
+    ]
     assert collections.sort() == ["collection-1", "collection-2"].sort()
     assert permissions in [
         [{"role-name": "role-1", "capabilities": [Permission.READ]},
@@ -724,7 +766,9 @@ def test_to_xml(metadata):
     properties_element = root.find("prop:properties")
     property_elements = list(properties_element)
     assert properties_element is not None
-    assert properties_element.attrib == {"xmlns:prop": "http://marklogic.com/xdmp/property"}
+    assert properties_element.attrib == {
+        "xmlns:prop": "http://marklogic.com/xdmp/property",
+    }
     assert len(property_elements) == 2
     for property_element in property_elements:
         assert property_element.tag in ["prop-name-1", "prop-name-2"]

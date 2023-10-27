@@ -16,13 +16,13 @@ class ResourceCall(metaclass=ABCMeta):
     """An abstract class representing a single request to a MarkLogic REST Resource."""
 
     def __init__(
-            self,
-            method: str = constants.METHOD_GET,
-            params: dict | None = None,
-            headers: dict | None = None,
-            body: str | dict | bytes | None = None,
-            accept: str | None = None,
-            content_type: str | None = None,
+        self,
+        method: str = constants.METHOD_GET,
+        params: dict | None = None,
+        headers: dict | None = None,
+        body: str | dict | bytes | None = None,
+        accept: str | None = None,
+        content_type: str | None = None,
     ):
         """Initialize ResourceCall implementation instance.
 
@@ -52,8 +52,8 @@ class ResourceCall(metaclass=ABCMeta):
 
     @classmethod
     def __subclasshook__(
-            cls,
-            subclass: ResourceCall,
+        cls,
+        subclass: ResourceCall,
     ):
         """Verify if a subclass implements all abstract methods.
 
@@ -72,7 +72,7 @@ class ResourceCall(metaclass=ABCMeta):
     @property
     @abstractmethod
     def endpoint(
-            self,
+        self,
     ) -> str:
         """An endpoint of the ResourceCall.
 
@@ -85,7 +85,7 @@ class ResourceCall(metaclass=ABCMeta):
 
     @property
     def method(
-            self,
+        self,
     ) -> str:
         """A request method.
 
@@ -98,8 +98,8 @@ class ResourceCall(metaclass=ABCMeta):
 
     @method.setter
     def method(
-            self,
-            method: str,
+        self,
+        method: str,
     ):
         """Set a request method.
 
@@ -112,7 +112,7 @@ class ResourceCall(metaclass=ABCMeta):
 
     @property
     def params(
-            self,
+        self,
     ) -> dict:
         """Request parameters.
 
@@ -125,8 +125,8 @@ class ResourceCall(metaclass=ABCMeta):
 
     @params.setter
     def params(
-            self,
-            params: dict,
+        self,
+        params: dict,
     ):
         """Set request parameters.
 
@@ -142,7 +142,7 @@ class ResourceCall(metaclass=ABCMeta):
 
     @property
     def headers(
-            self,
+        self,
     ) -> dict:
         """Request headers.
 
@@ -155,8 +155,8 @@ class ResourceCall(metaclass=ABCMeta):
 
     @headers.setter
     def headers(
-            self,
-            headers: dict,
+        self,
+        headers: dict,
     ):
         """Set request headers.
 
@@ -172,7 +172,7 @@ class ResourceCall(metaclass=ABCMeta):
 
     @property
     def body(
-            self,
+        self,
     ) -> str | dict | bytes | None:
         """A request body.
 
@@ -189,8 +189,8 @@ class ResourceCall(metaclass=ABCMeta):
 
     @body.setter
     def body(
-            self,
-            body: str | dict | bytes,
+        self,
+        body: str | dict | bytes,
     ):
         """Set a request body.
 
@@ -202,9 +202,9 @@ class ResourceCall(metaclass=ABCMeta):
         self._body = body
 
     def add_param(
-            self,
-            param_name: str,
-            param_value: Any,
+        self,
+        param_name: str,
+        param_value: Any,
     ):
         """Put a request parameter if it's name and value exist.
 
@@ -219,9 +219,9 @@ class ResourceCall(metaclass=ABCMeta):
             self._params[param_name] = param_value
 
     def add_header(
-            self,
-            header_name: str,
-            header_value: Any,
+        self,
+        header_name: str,
+        header_value: Any,
     ):
         """Put a request header if it's name and value exist.
 

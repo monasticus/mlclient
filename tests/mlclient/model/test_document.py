@@ -2,7 +2,6 @@ from mlclient.model import Document, DocumentType, Metadata, Permission
 
 
 class DocumentTestImpl(Document):
-
     @property
     def content(self):
         return ""
@@ -46,8 +45,10 @@ def test_doc_type_when_none():
 
 
 def test_metadata():
-    metadata = Metadata(collections=["custom-collection"],
-                        permissions=[Permission("custom-role", {Permission.READ})])
+    metadata = Metadata(
+        collections=["custom-collection"],
+        permissions=[Permission("custom-role", {Permission.READ})],
+    )
     document = DocumentTestImpl(metadata=metadata)
     assert document.metadata == metadata
     assert document.metadata is not metadata

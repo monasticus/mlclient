@@ -33,10 +33,10 @@ class UserGetCall(ResourceCall):
     _SUPPORTED_VIEWS: ClassVar[list] = ["describe", "default"]
 
     def __init__(
-            self,
-            user: str,
-            data_format: str = "xml",
-            view: str = "default",
+        self,
+        user: str,
+        data_format: str = "xml",
+        view: str = "default",
     ):
         """Initialize UserGetCall instance.
 
@@ -54,15 +54,17 @@ class UserGetCall(ResourceCall):
         view = view if view is not None else "default"
         self._validate_params(data_format, view)
 
-        super().__init__(method="GET",
-                         accept=utils.get_accept_header_for_format(data_format))
+        super().__init__(
+            method="GET",
+            accept=utils.get_accept_header_for_format(data_format),
+        )
         self._user = user
         self.add_param(self._FORMAT_PARAM, data_format)
         self.add_param(self._VIEW_PARAM, view)
 
     @property
     def endpoint(
-            self,
+        self,
     ):
         """An endpoint for the User call.
 
@@ -75,9 +77,9 @@ class UserGetCall(ResourceCall):
 
     @classmethod
     def _validate_params(
-            cls,
-            data_format: str,
-            view: str,
+        cls,
+        data_format: str,
+        view: str,
     ):
         if data_format not in cls._SUPPORTED_FORMATS:
             joined_supported_formats = ", ".join(cls._SUPPORTED_FORMATS)
@@ -102,8 +104,8 @@ class UserDeleteCall(ResourceCall):
     _ENDPOINT_TEMPLATE: str = "/manage/v2/users/{}"
 
     def __init__(
-            self,
-            user: str,
+        self,
+        user: str,
     ):
         """Initialize UserDeleteCall instance.
 
@@ -117,7 +119,7 @@ class UserDeleteCall(ResourceCall):
 
     @property
     def endpoint(
-            self,
+        self,
     ):
         """An endpoint for the User call.
 

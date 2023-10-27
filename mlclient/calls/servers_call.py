@@ -36,15 +36,22 @@ class ServersGetCall(ResourceCall):
     _FULL_REFS_PARAM: str = "fullrefs"
 
     _SUPPORTED_FORMATS: ClassVar[list] = ["xml", "json", "html"]
-    _SUPPORTED_VIEWS: ClassVar[list] = ["describe", "default", "status", "metrics",
-                                        "package", "schema", "properties-schema"]
+    _SUPPORTED_VIEWS: ClassVar[list] = [
+        "describe",
+        "default",
+        "status",
+        "metrics",
+        "package",
+        "schema",
+        "properties-schema",
+    ]
 
     def __init__(
-            self,
-            data_format: str = "xml",
-            group_id: str | None = None,
-            view: str = "default",
-            full_refs: bool | None = None,
+        self,
+        data_format: str = "xml",
+        group_id: str | None = None,
+        view: str = "default",
+        full_refs: bool | None = None,
     ):
         """Initialize ServersGetCall instance.
 
@@ -68,8 +75,10 @@ class ServersGetCall(ResourceCall):
         view = view if view is not None else "default"
         self._validate_params(data_format, view)
 
-        super().__init__(method="GET",
-                         accept=utils.get_accept_header_for_format(data_format))
+        super().__init__(
+            method="GET",
+            accept=utils.get_accept_header_for_format(data_format),
+        )
         if full_refs is not None:
             full_refs = str(full_refs).lower()
         self.add_param(self._FORMAT_PARAM, data_format)
@@ -79,7 +88,7 @@ class ServersGetCall(ResourceCall):
 
     @property
     def endpoint(
-            self,
+        self,
     ):
         """An endpoint for the Servers call.
 
@@ -92,9 +101,9 @@ class ServersGetCall(ResourceCall):
 
     @classmethod
     def _validate_params(
-            cls,
-            data_format: str,
-            view: str,
+        cls,
+        data_format: str,
+        view: str,
     ):
         if data_format not in cls._SUPPORTED_FORMATS:
             joined_supported_formats = ", ".join(cls._SUPPORTED_FORMATS)
@@ -124,11 +133,11 @@ class ServersPostCall(ResourceCall):
     _SUPPORTED_SERVER_TYPES: ClassVar[list] = ["http", "odbc", "xdbc", "webdav"]
 
     def __init__(
-            self,
-            body: str | dict,
-            group_id: str | None = None,
-            server_type: str | None = None,
-                     ):
+        self,
+        body: str | dict,
+        group_id: str | None = None,
+        server_type: str | None = None,
+    ):
         """Initialize ServersPostCall instance.
 
         Parameters
@@ -150,15 +159,13 @@ class ServersPostCall(ResourceCall):
         content_type = utils.get_content_type_header_for_data(body)
         if content_type == constants.HEADER_JSON and isinstance(body, str):
             body = json.loads(body)
-        super().__init__(method="POST",
-                         content_type=content_type,
-                         body=body)
+        super().__init__(method="POST", content_type=content_type, body=body)
         self.add_param(self._GROUP_ID_PARAM, group_id)
         self.add_param(self._SERVER_TYPE_PARAM, server_type)
 
     @property
     def endpoint(
-            self,
+        self,
     ):
         """An endpoint for the Servers call.
 
@@ -171,9 +178,9 @@ class ServersPostCall(ResourceCall):
 
     @classmethod
     def _validate_params(
-            cls,
-            server_type: str,
-            body: str | dict,
+        cls,
+        server_type: str,
+        body: str | dict,
     ):
         if server_type and server_type not in cls._SUPPORTED_SERVER_TYPES:
             joined_supported_server_types = ", ".join(cls._SUPPORTED_SERVER_TYPES)

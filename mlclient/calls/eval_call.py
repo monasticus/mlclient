@@ -32,12 +32,12 @@ class EvalCall(ResourceCall):
     _TXID_PARAM: str = "txid"
 
     def __init__(
-            self,
-            xquery: str | None = None,
-            javascript: str | None = None,
-            variables: dict | None = None,
-            database: str | None = None,
-            txid: str | None = None,
+        self,
+        xquery: str | None = None,
+        javascript: str | None = None,
+        variables: dict | None = None,
+        database: str | None = None,
+        txid: str | None = None,
     ):
         """Initialize EvalCall instance.
 
@@ -63,16 +63,18 @@ class EvalCall(ResourceCall):
         """
         self._validate_params(xquery, javascript)
 
-        super().__init__(method=constants.METHOD_POST,
-                         accept=constants.HEADER_MULTIPART_MIXED,
-                         content_type=constants.HEADER_X_WWW_FORM_URLENCODED)
+        super().__init__(
+            method=constants.METHOD_POST,
+            accept=constants.HEADER_MULTIPART_MIXED,
+            content_type=constants.HEADER_X_WWW_FORM_URLENCODED,
+        )
         self.add_param(self._DATABASE_PARAM, database)
         self.add_param(self._TXID_PARAM, txid)
         self.body = self._build_body(xquery, javascript, variables)
 
     @property
     def endpoint(
-            self,
+        self,
     ):
         """An endpoint for the Eval call.
 
@@ -85,9 +87,9 @@ class EvalCall(ResourceCall):
 
     @classmethod
     def _validate_params(
-            cls,
-            xquery: str,
-            javascript: str,
+        cls,
+        xquery: str,
+        javascript: str,
     ):
         if not xquery and not javascript:
             msg = "You must include either the xquery or the javascript parameter!"
@@ -98,10 +100,10 @@ class EvalCall(ResourceCall):
 
     @classmethod
     def _build_body(
-            cls,
-            xquery: str,
-            javascript: str,
-            variables: dict,
+        cls,
+        xquery: str,
+        javascript: str,
+        variables: dict,
     ):
         code_lang = cls._XQ_PARAM if xquery else cls._JS_PARAM
         code_to_eval = cls._normalize_code(xquery if xquery else javascript)
@@ -112,7 +114,7 @@ class EvalCall(ResourceCall):
 
     @staticmethod
     def _normalize_code(
-            code: str,
+        code: str,
     ):
         code = re.sub(r"\s*\n\s*", " ", code)
         return code.strip()

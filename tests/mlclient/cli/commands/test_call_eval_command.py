@@ -45,8 +45,7 @@ def _setup(mocker, ml_config):
 
 @responses.activate
 def test_command_call_eval_basic():
-    code = ('xquery version "1.0"; '
-            '""')
+    code = 'xquery version "1.0"; ""'
 
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/v1/eval")
@@ -70,8 +69,7 @@ def test_command_call_eval_basic():
 
 @responses.activate
 def test_command_call_eval_custom_rest_server():
-    code = ('xquery version "1.0"; '
-            '""')
+    code = 'xquery version "1.0"; ""'
 
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/v1/eval")
@@ -95,8 +93,7 @@ def test_command_call_eval_custom_rest_server():
 
 @responses.activate
 def test_command_call_eval_xquery_flag():
-    code = ('xquery version "1.0"; '
-            '""')
+    code = 'xquery version "1.0"; ""'
 
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/v1/eval")
@@ -119,8 +116,7 @@ def test_command_call_eval_xquery_flag():
 
 @responses.activate
 def test_command_call_eval_javascript_flag():
-    code = ('"use strict"; '
-            '""')
+    code = '"use strict"; ""'
 
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/v1/eval")
@@ -142,8 +138,7 @@ def test_command_call_eval_javascript_flag():
 
 
 def test_command_call_eval_mixed_xquery_and_javascript():
-    code = ('xquery version "1.0"; '
-            '""')
+    code = 'xquery version "1.0"; ""'
 
     tester = _get_tester("call eval")
     with pytest.raises(WrongParametersError) as err:
@@ -155,8 +150,7 @@ def test_command_call_eval_mixed_xquery_and_javascript():
 
 @responses.activate
 def test_command_call_eval_custom_database():
-    code = ('xquery version "1.0"; '
-            '""')
+    code = 'xquery version "1.0"; ""'
 
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/v1/eval")
@@ -181,8 +175,7 @@ def test_command_call_eval_custom_database():
 
 @responses.activate
 def test_command_call_eval_custom_txid():
-    code = ('xquery version "1.0"; '
-            '""')
+    code = 'xquery version "1.0"; ""'
 
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/v1/eval")
@@ -207,14 +200,16 @@ def test_command_call_eval_custom_txid():
 
 @responses.activate
 def test_command_call_eval_output():
-    code = ('xquery version "1.0"; '
-            '('
-            ' xs:dateTime("2023-08-09T01:01:01.001Z"),'
-            ' 1,'
-            ' "string-value",'
-            ' element root {},'
-            ' map:entry("key", "value")'
-            ')')
+    code = (
+        'xquery version "1.0"; '
+        "("
+        ' xs:dateTime("2023-08-09T01:01:01.001Z"),'
+        " 1,"
+        ' "string-value",'
+        " element root {},"
+        ' map:entry("key", "value")'
+        ")"
+    )
 
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/v1/eval")
@@ -247,7 +242,7 @@ def test_command_call_eval_output():
 
 
 def _get_tester(
-        command_name: str,
+    command_name: str,
 ):
     """Returns a command tester."""
     app = MLCLIentApplication()

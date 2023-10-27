@@ -25,10 +25,22 @@ Examples
 --------
 >>> from mlclient.calls.model import DocumentsBodyPart
 """
-from .documents import (Category, ContentDispositionSerializer,
-                        DocumentsBodyPart, DocumentsBodyPartType,
-                        DocumentsContentDisposition, Extract, Repair)
+from .documents import (
+    Category,
+    ContentDispositionSerializer,
+    DocumentsBodyPart,
+    DocumentsBodyPartType,
+    DocumentsContentDisposition,
+    Extract,
+    Repair,
+)
 
-__all__ = ["DocumentsBodyPart", "DocumentsBodyPartType",
-           "DocumentsContentDisposition", "Category", "Extract", "Repair",
-           "ContentDispositionSerializer"]
+__all__ = [
+    "DocumentsBodyPart",
+    "DocumentsBodyPartType",
+    "DocumentsContentDisposition",
+    "Category",
+    "Extract",
+    "Repair",
+    "ContentDispositionSerializer",
+]

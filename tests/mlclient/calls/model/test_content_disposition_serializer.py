@@ -1,6 +1,10 @@
-from mlclient.calls.model import (ContentDispositionSerializer,
-                                  DocumentsBodyPartType,
-                                  DocumentsContentDisposition, Extract, Repair)
+from mlclient.calls.model import (
+    ContentDispositionSerializer,
+    DocumentsBodyPartType,
+    DocumentsContentDisposition,
+    Extract,
+    Repair,
+)
 from mlclient.model import DocumentType
 
 
@@ -11,7 +15,8 @@ def test_serialize_inline():
         "directory=/path/to/; "
         "repair=none; "
         "extract=document; "
-        "versionId=1")
+        "versionId=1"
+    )
     expected_disp = DocumentsContentDisposition(
         body_part_type=DocumentsBodyPartType.INLINE,
         extension="jpeg",
@@ -31,7 +36,8 @@ def test_serialize_attachment():
         "category=collections; "
         "repair=full; "
         "temporal-document=/path/to/file.xml; "
-        "format=json")
+        "format=json"
+    )
     expected_disp = DocumentsContentDisposition(
         body_part_type=DocumentsBodyPartType.ATTACHMENT,
         category="collections",
@@ -53,7 +59,8 @@ def test_serialize_multiple_categories():
         "category=metadata-values; "
         "repair=full; "
         "temporal-document=/path/to/file.xml; "
-        "format=json")
+        "format=json"
+    )
     expected_disp = DocumentsContentDisposition(
         body_part_type=DocumentsBodyPartType.ATTACHMENT,
         category=["collections", "quality", "metadata-values"],
@@ -75,12 +82,14 @@ def test_deserialize_inline():
         extract=Extract.DOCUMENT,
         version_id=1,
     )
-    expected_str = ("inline; "
-                    "extension=jpeg; "
-                    "directory=/path/to/; "
-                    "repair=none; "
-                    "extract=document; "
-                    "versionId=1")
+    expected_str = (
+        "inline; "
+        "extension=jpeg; "
+        "directory=/path/to/; "
+        "repair=none; "
+        "extract=document; "
+        "versionId=1"
+    )
     actual_str = ContentDispositionSerializer.deserialize(disp)
     assert actual_str == expected_str
 
@@ -94,12 +103,14 @@ def test_deserialize_attachment():
         temporal_document="/path/to/file.xml",
         format=DocumentType.JSON,
     )
-    expected_str = ("attachment; "
-                    'filename="/path/to/file.xml"; '
-                    "category=collections; "
-                    "repair=full; "
-                    "temporal-document=/path/to/file.xml; "
-                    "format=json")
+    expected_str = (
+        "attachment; "
+        'filename="/path/to/file.xml"; '
+        "category=collections; "
+        "repair=full; "
+        "temporal-document=/path/to/file.xml; "
+        "format=json"
+    )
     actual_str = ContentDispositionSerializer.deserialize(disp)
     assert actual_str == expected_str
 
@@ -113,13 +124,15 @@ def test_deserialize_multiple_categories():
         temporal_document="/path/to/file.xml",
         format=DocumentType.JSON,
     )
-    expected_str = ("attachment; "
-                    'filename="/path/to/file.xml"; '
-                    "category=collections; "
-                    "category=quality; "
-                    "category=metadata-values; "
-                    "repair=full; "
-                    "temporal-document=/path/to/file.xml; "
-                    "format=json")
+    expected_str = (
+        "attachment; "
+        'filename="/path/to/file.xml"; '
+        "category=collections; "
+        "category=quality; "
+        "category=metadata-values; "
+        "repair=full; "
+        "temporal-document=/path/to/file.xml; "
+        "format=json"
+    )
     actual_str = ContentDispositionSerializer.deserialize(disp)
     assert actual_str == expected_str

@@ -46,7 +46,8 @@ def logs_list_items() -> list:
         {
             "uriref": f"{ENDPOINT}?filename=8001_AccessLog.txt&host=localhost",
             "nameref": "8001_AccessLog.txt",
-            "roleref": "localhost"},
+            "roleref": "localhost",
+        },
         {
             "uriref": f"{ENDPOINT}?filename=8002_AccessLog_1.txt&host=localhost",
             "nameref": "8002_AccessLog_1.txt",
@@ -55,7 +56,8 @@ def logs_list_items() -> list:
         {
             "uriref": f"{ENDPOINT}?filename=8001_RequestLog.txt&host=localhost",
             "nameref": "8001_RequestLog.txt",
-            "roleref": "localhost"},
+            "roleref": "localhost",
+        },
         {
             "uriref": f"{ENDPOINT}?filename=8002_RequestLog_1.txt&host=localhost",
             "nameref": "8002_RequestLog_1.txt",
@@ -64,7 +66,8 @@ def logs_list_items() -> list:
         {
             "uriref": f"{ENDPOINT}?filename=8001_ErrorLog.txt&host=localhost",
             "nameref": "8001_ErrorLog.txt",
-            "roleref": "localhost"},
+            "roleref": "localhost",
+        },
         {
             "uriref": f"{ENDPOINT}?filename=8002_ErrorLog_1.txt&host=localhost",
             "nameref": "8002_ErrorLog_1.txt",
@@ -73,7 +76,8 @@ def logs_list_items() -> list:
         {
             "uriref": f"{ENDPOINT}?filename=TaskServer_AccessLog.txt&host=localhost",
             "nameref": "TaskServer_AccessLog.txt",
-            "roleref": "localhost"},
+            "roleref": "localhost",
+        },
         {
             "uriref": f"{ENDPOINT}?filename=TaskServer_AccessLog_1.txt&host=localhost",
             "nameref": "TaskServer_AccessLog_1.txt",
@@ -82,7 +86,8 @@ def logs_list_items() -> list:
         {
             "uriref": f"{ENDPOINT}?filename=TaskServer_RequestLog.txt&host=localhost",
             "nameref": "TaskServer_RequestLog.txt",
-            "roleref": "localhost"},
+            "roleref": "localhost",
+        },
         {
             "uriref": f"{ENDPOINT}?filename=TaskServer_RequestLog_1.txt&host=localhost",
             "nameref": "TaskServer_RequestLog_1.txt",
@@ -91,7 +96,8 @@ def logs_list_items() -> list:
         {
             "uriref": f"{ENDPOINT}?filename=TaskServer_ErrorLog.txt&host=localhost",
             "nameref": "TaskServer_ErrorLog.txt",
-            "roleref": "localhost"},
+            "roleref": "localhost",
+        },
         {
             "uriref": f"{ENDPOINT}?filename=TaskServer_ErrorLog_1.txt&host=localhost",
             "nameref": "TaskServer_ErrorLog_1.txt",
@@ -100,7 +106,8 @@ def logs_list_items() -> list:
         {
             "uriref": f"{ENDPOINT}?filename=AccessLog.txt&host=localhost",
             "nameref": "AccessLog.txt",
-            "roleref": "localhost"},
+            "roleref": "localhost",
+        },
         {
             "uriref": f"{ENDPOINT}?filename=AccessLog_1.txt&host=localhost",
             "nameref": "AccessLog_1.txt",
@@ -109,7 +116,8 @@ def logs_list_items() -> list:
         {
             "uriref": f"{ENDPOINT}?filename=RequestLog.txt&host=localhost",
             "nameref": "RequestLog.txt",
-            "roleref": "localhost"},
+            "roleref": "localhost",
+        },
         {
             "uriref": f"{ENDPOINT}?filename=RequestLog_1.txt&host=localhost",
             "nameref": "RequestLog_1.txt",
@@ -118,7 +126,8 @@ def logs_list_items() -> list:
         {
             "uriref": f"{ENDPOINT}?filename=ErrorLog.txt&host=localhost",
             "nameref": "ErrorLog.txt",
-            "roleref": "localhost"},
+            "roleref": "localhost",
+        },
         {
             "uriref": f"{ENDPOINT}?filename=ErrorLog_1.txt&host=localhost",
             "nameref": "ErrorLog_1.txt",
@@ -127,7 +136,8 @@ def logs_list_items() -> list:
         {
             "uriref": f"{ENDPOINT}?filename=AuditLog.txt&host=localhost",
             "nameref": "AuditLog.txt",
-            "roleref": "localhost"},
+            "roleref": "localhost",
+        },
         {
             "uriref": f"{ENDPOINT}?filename=AuditLog_1.txt&host=localhost",
             "nameref": "AuditLog_1.txt",
@@ -437,11 +447,15 @@ def test_command_call_logs_output_for_error_logs():
     builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
     builder.with_request_param("format", "json")
     builder.with_request_param("filename", "8002_ErrorLog.txt")
-    builder.with_response_body(builder.error_logs_body([
-        ("2023-09-01T00:00:00Z", "info", "Log message 1"),
-        ("2023-09-01T00:00:01Z", "info", "Log message 2"),
-        ("2023-09-01T00:00:02Z", "info", "Log message 3"),
-    ]))
+    builder.with_response_body(
+        builder.error_logs_body(
+            [
+                ("2023-09-01T00:00:00Z", "info", "Log message 1"),
+                ("2023-09-01T00:00:01Z", "info", "Log message 2"),
+                ("2023-09-01T00:00:02Z", "info", "Log message 3"),
+            ],
+        ),
+    )
     builder.build_get()
 
     tester = _get_tester("call logs")
@@ -464,12 +478,16 @@ def test_command_call_logs_output_for_error_logs():
 @responses.activate
 def test_command_call_logs_output_for_access_logs():
     logs = [
-        ('172.17.0.1 - admin [01/Sep/2023:03:54:16 +0000] '
-         '"GET /manage/v2/logs?format=json&filename=8002_AccessLog.txt HTTP/1.1" '
-         '200 454 - "python-requests/2.31.0"'),
-        ('172.17.0.1 - - [01/Sep/2023:03:54:16 +0000] '
-         '"GET /manage/v2/logs?format=json&filename=8002_ErrorLog.txt HTTP/1.1" '
-         '401 104 - "python-requests/2.31.0"'),
+        (
+            "172.17.0.1 - admin [01/Sep/2023:03:54:16 +0000] "
+            '"GET /manage/v2/logs?format=json&filename=8002_AccessLog.txt HTTP/1.1" '
+            '200 454 - "python-requests/2.31.0"'
+        ),
+        (
+            "172.17.0.1 - - [01/Sep/2023:03:54:16 +0000] "
+            '"GET /manage/v2/logs?format=json&filename=8002_ErrorLog.txt HTTP/1.1" '
+            '401 104 - "python-requests/2.31.0"'
+        ),
     ]
     builder = MLResponseBuilder()
     builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
@@ -496,45 +514,49 @@ def test_command_call_logs_output_for_access_logs():
 @responses.activate
 def test_command_call_logs_output_for_request_logs():
     logs = [
-        ('{'
-         '"time":"2023-09-04T03:53:40Z", '
-         '"url":"/manage/v2/logs?format=json&filename=8002_RequestLog.txt", '
-         '"user":"admin", '
-         '"elapsedTime":1.788074, '
-         '"requests":1, '
-         '"valueCacheHits":5347, '
-         '"valueCacheMisses":349287, '
-         '"regexpCacheHits":5279, '
-         '"regexpCacheMisses":12, '
-         '"fsProgramCacheMisses":1, '
-         '"fsMainModuleSequenceCacheMisses":1, '
-         '"fsLibraryModuleCacheMisses":226, '
-         '"compileTime":0.801934, '
-         '"runTime":0.950788'
-         '}'),
-        ('{'
-         '"time":"2023-09-04T03:56:59Z", '
-         '"url":"/manage/v2/forests", '
-         '"user":"admin", '
-         '"elapsedTime":1.265614, '
-         '"requests":1, '
-         '"inMemoryListHits":6, '
-         '"expandedTreeCacheHits":2, '
-         '"valueCacheHits":5142, '
-         '"valueCacheMisses":4545, '
-         '"regexpCacheHits":327, '
-         '"regexpCacheMisses":11, '
-         '"fragmentsAdded":1, '
-         '"fragmentsDeleted":1, '
-         '"fsProgramCacheHits":3, '
-         '"fsProgramCacheMisses":6, '
-         '"writeLocks":1, '
-         '"lockTime":0.000003, '
-         '"compileTime":0.00072, '
-         '"commitTime":0.000252, '
-         '"runTime":1.265031, '
-         '"indexingTime":0.000687'
-         '}'),
+        (
+            "{"
+            '"time":"2023-09-04T03:53:40Z", '
+            '"url":"/manage/v2/logs?format=json&filename=8002_RequestLog.txt", '
+            '"user":"admin", '
+            '"elapsedTime":1.788074, '
+            '"requests":1, '
+            '"valueCacheHits":5347, '
+            '"valueCacheMisses":349287, '
+            '"regexpCacheHits":5279, '
+            '"regexpCacheMisses":12, '
+            '"fsProgramCacheMisses":1, '
+            '"fsMainModuleSequenceCacheMisses":1, '
+            '"fsLibraryModuleCacheMisses":226, '
+            '"compileTime":0.801934, '
+            '"runTime":0.950788'
+            "}"
+        ),
+        (
+            "{"
+            '"time":"2023-09-04T03:56:59Z", '
+            '"url":"/manage/v2/forests", '
+            '"user":"admin", '
+            '"elapsedTime":1.265614, '
+            '"requests":1, '
+            '"inMemoryListHits":6, '
+            '"expandedTreeCacheHits":2, '
+            '"valueCacheHits":5142, '
+            '"valueCacheMisses":4545, '
+            '"regexpCacheHits":327, '
+            '"regexpCacheMisses":11, '
+            '"fragmentsAdded":1, '
+            '"fragmentsDeleted":1, '
+            '"fsProgramCacheHits":3, '
+            '"fsProgramCacheMisses":6, '
+            '"writeLocks":1, '
+            '"lockTime":0.000003, '
+            '"compileTime":0.00072, '
+            '"commitTime":0.000252, '
+            '"runTime":1.265031, '
+            '"indexingTime":0.000687'
+            "}"
+        ),
     ]
     builder = MLResponseBuilder()
     builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
@@ -561,12 +583,15 @@ def test_command_call_logs_output_for_request_logs():
 @responses.activate
 def test_command_call_logs_output_for_audit_logs():
     logs = [
-        ("2023-09-04 01:01:01.111 event=server-restart; "
-         "success=true; user=user; roles=admin"),
-        ("2023-09-04 01:01:01.112 event=server-startup; "
-         "success=true;"),
-        ("2023-09-04 01:01:01.112 event=configuration-change; "
-         "file=/data/MarkLogic/groups.xml; success=true;"),
+        (
+            "2023-09-04 01:01:01.111 event=server-restart; "
+            "success=true; user=user; roles=admin"
+        ),
+        ("2023-09-04 01:01:01.112 event=server-startup; success=true;"),
+        (
+            "2023-09-04 01:01:01.112 event=configuration-change; "
+            "file=/data/MarkLogic/groups.xml; success=true;"
+        ),
     ]
     builder = MLResponseBuilder()
     builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
@@ -595,11 +620,15 @@ def test_command_call_logs_output_for_error_logs_without_app_port():
     builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
     builder.with_request_param("format", "json")
     builder.with_request_param("filename", "ErrorLog.txt")
-    builder.with_response_body(builder.error_logs_body([
-        ("2023-09-01T00:00:00Z", "info", "Log message 1"),
-        ("2023-09-01T00:00:01Z", "info", "Log message 2"),
-        ("2023-09-01T00:00:02Z", "info", "Log message 3"),
-    ]))
+    builder.with_response_body(
+        builder.error_logs_body(
+            [
+                ("2023-09-01T00:00:00Z", "info", "Log message 1"),
+                ("2023-09-01T00:00:01Z", "info", "Log message 2"),
+                ("2023-09-01T00:00:02Z", "info", "Log message 3"),
+            ],
+        ),
+    )
     builder.build_get()
 
     tester = _get_tester("call logs")
@@ -622,16 +651,20 @@ def test_command_call_logs_output_for_error_logs_without_app_port():
 @responses.activate
 def test_command_call_logs_output_for_xml_logs():
     xml_log_lines = [
-        ('<error:error '
-         'xsi:schemaLocation="http://marklogic.com/xdmp/error error.xsd" '
-         'xmlns:error="http://marklogic.com/xdmp/error" '
-         'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">'),
+        (
+            "<error:error "
+            'xsi:schemaLocation="http://marklogic.com/xdmp/error error.xsd" '
+            'xmlns:error="http://marklogic.com/xdmp/error" '
+            'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">'
+        ),
         "  <error:code>XDMP-CAST</error:code>",
         "  <error:name>err:FORG0001</error:name>",
         "  <error:xquery-version>1.0</error:xquery-version>",
         "  <error:message>Invalid cast</error:message>",
-        ('  <error:format-string>XDMP-CAST: (err:FORG0001) xs:date($date) '
-         '-- Invalid cast: "Asasdas" cast as xs:date</error:format-string>'),
+        (
+            "  <error:format-string>XDMP-CAST: (err:FORG0001) xs:date($date) "
+            '-- Invalid cast: "Asasdas" cast as xs:date</error:format-string>'
+        ),
         "  <error:retryable>false</error:retryable>",
         "  <error:expr>xs:date($date)</error:expr>",
         "  <error:data>",
@@ -669,9 +702,13 @@ def test_command_call_logs_output_for_xml_logs():
     builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
     builder.with_request_param("format", "json")
     builder.with_request_param("filename", "8002_ErrorLog.txt")
-    builder.with_response_body(builder.error_logs_body([
-        ("2023-09-01T00:00:00Z", "info", "\n".join(xml_log_lines)),
-    ]))
+    builder.with_response_body(
+        builder.error_logs_body(
+            [
+                ("2023-09-01T00:00:00Z", "info", "\n".join(xml_log_lines)),
+            ],
+        ),
+    )
     builder.build_get()
 
     tester = _get_tester("call logs")
@@ -781,7 +818,7 @@ def test_command_call_output_of_logs_list_empty(logs_list_items):
 
 
 def _get_tester(
-        command_name: str,
+    command_name: str,
 ):
     """Returns a command tester."""
     app = MLCLIentApplication()

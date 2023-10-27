@@ -22,9 +22,11 @@ def test_validation_view_param():
     with pytest.raises(exceptions.WrongParametersError) as err:
         ServersGetCall(view="X")
 
-    expected_msg = ("The supported views are: "
-                    "describe, default, status, metrics, "
-                    "package, schema, properties-schema")
+    expected_msg = (
+        "The supported views are: "
+        "describe, default, status, metrics, "
+        "package, schema, properties-schema"
+    )
     assert err.value.args[0] == expected_msg
 
 
@@ -82,10 +84,12 @@ def test_body(default_servers_get_call):
 
 
 def test_fully_parametrized_call():
-    call = ServersGetCall(data_format="json",
-                          group_id="Default",
-                          view="schema",
-                          full_refs=False)
+    call = ServersGetCall(
+        data_format="json",
+        group_id="Default",
+        view="schema",
+        full_refs=False,
+    )
     assert call.method == "GET"
     assert call.headers == {
         "Accept": "application/json",

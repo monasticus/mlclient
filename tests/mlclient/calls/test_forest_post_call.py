@@ -7,16 +7,12 @@ from mlclient.calls import ForestPostCall
 @pytest.fixture()
 def default_forest_post_call():
     """Returns an ForestPostCall instance"""
-    return ForestPostCall(
-        forest="custom-forest",
-        body={"state": "clear"})
+    return ForestPostCall(forest="custom-forest", body={"state": "clear"})
 
 
 def test_validation_no_state_param_in_body():
     with pytest.raises(exceptions.WrongParametersError) as err:
-        ForestPostCall(
-            forest="custom-forest",
-            body={})
+        ForestPostCall(forest="custom-forest", body={})
 
     expected_msg = "You must include the 'state' parameter within a body!"
     assert err.value.args[0] == expected_msg
@@ -24,22 +20,24 @@ def test_validation_no_state_param_in_body():
 
 def test_validation_blank_body_param():
     with pytest.raises(exceptions.WrongParametersError) as err:
-        ForestPostCall(
-            forest="custom-forest",
-            body={"state": "XXX"})
+        ForestPostCall(forest="custom-forest", body={"state": "XXX"})
 
-    expected_msg = ("The supported states are: "
-                    "clear, merge, restart, attach, detach, retire, employ")
+    expected_msg = (
+        "The supported states are: "
+        "clear, merge, restart, attach, detach, retire, employ"
+    )
     assert err.value.args[0] == expected_msg
 
 
 def test_endpoint():
-    assert ForestPostCall(
-        forest="1",
-        body={"state": "clear"}).endpoint == "/manage/v2/forests/1"
-    assert ForestPostCall(
-        forest="custom-forest",
-        body={"state": "clear"}).endpoint == "/manage/v2/forests/custom-forest"
+    assert (
+        ForestPostCall(forest="1", body={"state": "clear"}).endpoint
+        == "/manage/v2/forests/1"
+    )
+    assert (
+        ForestPostCall(forest="custom-forest", body={"state": "clear"}).endpoint
+        == "/manage/v2/forests/custom-forest"
+    )
 
 
 def test_method(default_forest_post_call):

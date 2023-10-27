@@ -15,13 +15,14 @@ from requests_toolbelt.multipart.decoder import BodyPart
 from responses import matchers
 from urllib3.fields import RequestField
 
-from mlclient.calls.model import (ContentDispositionSerializer,
-                                  DocumentsBodyPart)
-from mlclient.constants import (HEADER_MULTIPART_MIXED,
-                                HEADER_NAME_CONTENT_DISP,
-                                HEADER_NAME_CONTENT_TYPE,
-                                HEADER_NAME_PRIMITIVE,
-                                HEADER_X_WWW_FORM_URLENCODED)
+from mlclient.calls.model import ContentDispositionSerializer, DocumentsBodyPart
+from mlclient.constants import (
+    HEADER_MULTIPART_MIXED,
+    HEADER_NAME_CONTENT_DISP,
+    HEADER_NAME_CONTENT_TYPE,
+    HEADER_NAME_PRIMITIVE,
+    HEADER_X_WWW_FORM_URLENCODED,
+)
 
 _SCRIPT_DIR = Path(__file__).resolve()
 _RESOURCES_DIR = "resources"
@@ -32,28 +33,28 @@ COMMON_RESOURCES_PATH = next(RESOURCES_PATH.glob(_COMMON_RESOURCES_DIR))
 
 
 def list_resources(
-        test_path: str,
+    test_path: str,
 ) -> list[str]:
     test_resources_path = get_test_resources_path(test_path)
     return os.listdir(test_resources_path)
 
 
 def get_test_resource_path(
-        test_path: str,
-        resource: str,
+    test_path: str,
+    resource: str,
 ) -> str:
     test_resources_path = get_test_resources_path(test_path)
     return next(Path(test_resources_path).glob(resource)).as_posix()
 
 
 def get_common_resource_path(
-        resource: str,
+    resource: str,
 ) -> str:
     return next(COMMON_RESOURCES_PATH.glob(resource)).as_posix()
 
 
 def get_test_resources_path(
-        test_path: str,
+    test_path: str,
 ) -> str:
     tests_path = TESTS_PATH.as_posix()
     resources_rel_path = test_path.replace(tests_path, "")[1:-3]
@@ -62,9 +63,8 @@ def get_test_resources_path(
 
 
 class MLResponseBuilder:
-
     def __init__(
-            self,
+        self,
     ):
         self._method: str | None = None
         self._base_url: str | None = None
@@ -77,51 +77,51 @@ class MLResponseBuilder:
         self._response_headers: dict = {}
 
     def with_method(
-            self,
-            method: str,
+        self,
+        method: str,
     ):
         self._method = method
 
     def with_base_url(
-            self,
-            base_url: str,
+        self,
+        base_url: str,
     ):
         self._base_url = base_url
 
     def with_request_body(
-            self,
-            body: Any,
+        self,
+        body: Any,
     ):
         self._request_body = body
 
     def with_request_params(
-            self,
-            params: dict,
+        self,
+        params: dict,
     ):
         for key, value in params.items():
             self.with_request_param(key, value)
 
     def with_request_param(
-            self,
-            key: str,
-            value: Any,
+        self,
+        key: str,
+        value: Any,
     ):
         self._request_params.append((key, value))
 
     def with_response_body_multipart_mixed(
-            self,
+        self,
     ):
         self._multipart_mixed_response = True
 
     def with_empty_response_body(
-            self,
+        self,
     ):
         self.with_response_body(b"")
         self.with_response_header("Content-Length", 0)
 
     def with_response_body(
-            self,
-            body,
+        self,
+        body,
     ):
         if self._multipart_mixed_response:
             func = "MLResponseBuilder.with_response_body_part()"
@@ -130,10 +130,10 @@ class MLResponseBuilder:
         self._response_body = body
 
     def with_response_body_part(
-            self,
-            x_primitive: str | None,
-            body_part_content: Any,
-            content_type: str | None = None,
+        self,
+        x_primitive: str | None,
+        body_part_content: Any,
+        content_type: str | None = None,
     ):
         if not self._multipart_mixed_response:
             func = "MLResponseBuilder.with_response_body_multipart_mixed()"
@@ -159,12 +159,13 @@ class MLResponseBuilder:
         req_field = RequestField(
             name="--ignore--",
             data=body_part_content,
-            headers=headers)
+            headers=headers,
+        )
         self._response_body_fields.append(req_field)
 
     def with_response_documents_body_part(
-            self,
-            body_part: DocumentsBodyPart,
+        self,
+        body_part: DocumentsBodyPart,
     ):
         if not self._multipart_mixed_response:
             func = "MLResponseBuilder.with_response_body_multipart_mixed()"
@@ -178,49 +179,51 @@ class MLResponseBuilder:
         if isinstance(data, dict):
             data = json.dumps(data)
         content_disp = ContentDispositionSerializer.deserialize(
-            body_part.content_disposition)
+            body_part.content_disposition,
+        )
         req_field = RequestField(
             name="--ignore--",
             data=data,
             headers={
                 "Content-Disposition": content_disp,
                 "Content-Type": body_part.content_type,
-            })
+            },
+        )
         self._response_body_fields.append(req_field)
 
     def with_response_status(
-            self,
-            status: int,
+        self,
+        status: int,
     ):
         self._response_status = status
 
     def with_response_content_type(
-            self,
-            content_type: str,
+        self,
+        content_type: str,
     ):
         self.with_response_header("Content-Type", content_type)
 
     def with_response_header(
-            self,
-            key: str,
-            value: Any,
+        self,
+        key: str,
+        value: Any,
     ):
         self._response_headers[key] = str(value)
 
     def build_get(
-            self,
+        self,
     ):
         self.with_method("GET")
         self.build()
 
     def build_post(
-            self,
+        self,
     ):
         self.with_method("POST")
         self.build()
 
     def build(
-            self,
+        self,
     ):
         self._validate()
         request_url, responses_params = self._build()
@@ -228,21 +231,21 @@ class MLResponseBuilder:
         self.__init__()
 
     def _validate(
-            self,
+        self,
     ):
         if self._response_body and self._response_body_fields:
             msg = "You can't set a regular and multipart response bodies!"
             raise RuntimeError(msg)
 
     def _build(
-            self,
+        self,
     ):
         request_url = self._build_request_url()
         responses_params = self._build_responses_params()
         return request_url, responses_params
 
     def _build_request_url(
-            self,
+        self,
     ):
         request_url = self._base_url
         if len(self._request_params) > 0:
@@ -251,7 +254,7 @@ class MLResponseBuilder:
         return request_url
 
     def _build_responses_params(
-            self,
+        self,
     ):
         responses_params = {}
 
@@ -274,9 +277,12 @@ class MLResponseBuilder:
             responses_params["headers"] = self._response_headers
         else:
             body, content_type = urllib3.encode_multipart_formdata(
-                self._response_body_fields)
+                self._response_body_fields,
+            )
             content_type = content_type.replace(
-                "multipart/form-data", "multipart/mixed")
+                "multipart/form-data",
+                "multipart/mixed",
+            )
             self.with_response_header("Content-Length", len(body))
 
             responses_params["body"] = body
@@ -286,9 +292,9 @@ class MLResponseBuilder:
         return responses_params
 
     def _finalize(
-            self,
-            request_url: str,
-            responses_params: dict,
+        self,
+        request_url: str,
+        responses_params: dict,
     ):
         if self._method == "GET":
             self._finalize_get(request_url, responses_params)
@@ -297,8 +303,8 @@ class MLResponseBuilder:
 
     @staticmethod
     def _finalize_get(
-            request_url: str,
-            responses_params: dict,
+        request_url: str,
+        responses_params: dict,
     ):
         responses.get(
             request_url,
@@ -307,9 +313,9 @@ class MLResponseBuilder:
 
     @staticmethod
     def _finalize_post(
-            request_url: str,
-            request_body: Any,
-            responses_params: dict,
+        request_url: str,
+        request_body: Any,
+        responses_params: dict,
     ):
         match = [matchers.urlencoded_params_matcher(request_body)]
         responses_params["match"] = match
@@ -320,7 +326,7 @@ class MLResponseBuilder:
 
     @staticmethod
     def error_logs_body(
-            logs: list[tuple],
+        logs: list[tuple],
     ):
         logs_body = {"logfile": {}}
         if len(logs) > 0:
@@ -336,7 +342,7 @@ class MLResponseBuilder:
 
     @staticmethod
     def non_error_logs_body(
-            logs: list[str],
+        logs: list[str],
     ):
         logs_body = {"logfile": {}}
         if len(logs) > 0:
@@ -345,7 +351,7 @@ class MLResponseBuilder:
 
     @staticmethod
     def logs_list_body(
-            items: list[dict],
+        items: list[dict],
     ) -> dict:
         return {
             "log-default-list": {
@@ -357,10 +363,10 @@ class MLResponseBuilder:
 
     @classmethod
     def generate_builder_code(
-            cls,
-            response: Response,
-            save_response_body: bool = False,
-            test_path: str | None = None,
+        cls,
+        response: Response,
+        save_response_body: bool = False,
+        test_path: str | None = None,
     ):
         build_parts = [
             "\n",
@@ -383,16 +389,16 @@ class MLResponseBuilder:
 
     @classmethod
     def _generate_method_line(
-            cls,
-            response: Response,
+        cls,
+        response: Response,
     ) -> str:
         method = response.request.method.upper()
         return f'builder.with_method("{method}")'
 
     @classmethod
     def _generate_base_url_line(
-            cls,
-            response: Response,
+        cls,
+        response: Response,
     ) -> str:
         url = response.url
         url_split = urllib.parse.urlsplit(url)
@@ -401,8 +407,8 @@ class MLResponseBuilder:
 
     @classmethod
     def _generate_request_params_lines(
-            cls,
-            response: Response,
+        cls,
+        response: Response,
     ) -> list[str] | None:
         url = response.url
         url_split = urllib.parse.urlsplit(url)
@@ -421,8 +427,8 @@ class MLResponseBuilder:
 
     @classmethod
     def _generate_request_body_lines(
-            cls,
-            response: Response,
+        cls,
+        response: Response,
     ) -> str | None:
         method = response.request.method.upper()
         request_content_type = response.request.headers.get("Content-Type")
@@ -432,7 +438,7 @@ class MLResponseBuilder:
             return None
 
         if request_content_type != HEADER_X_WWW_FORM_URLENCODED:
-            return f"builder.with_request_body(\'{request_body}\')"
+            return f"builder.with_request_body('{request_body}')"
 
         request_body_decoded = urllib.parse.unquote(request_body).replace("+", " ")
         request_body_parts = request_body_decoded.split("&")
@@ -446,21 +452,23 @@ class MLResponseBuilder:
 
     @classmethod
     def _generate_response_headers(
-            cls,
-            response: Response,
+        cls,
+        response: Response,
     ) -> list[str]:
         response_headers = response.headers
         response_content_type = response_headers.get(
-            "Content-Type", HEADER_MULTIPART_MIXED)
+            "Content-Type",
+            HEADER_MULTIPART_MIXED,
+        )
         excluded = ["Content-Length", "Content-Type"]
         if "Content-Type" in response_headers and "Content-type" in response_headers:
             excluded.append("Content-type")
 
         response_headers_lines = []
         if not response_content_type.startswith(HEADER_MULTIPART_MIXED):
-            content_type_line = (f'builder.with_response_content_type('
-                                 f'"{response_content_type}"'
-                                 f')')
+            content_type_line = (
+                f"builder.with_response_content_type({response_content_type})"
+            )
         else:
             content_type_line = "builder.with_response_body_multipart_mixed()"
         response_headers_lines.append(content_type_line)
@@ -474,18 +482,18 @@ class MLResponseBuilder:
 
     @classmethod
     def _generate_response_status(
-            cls,
-            response: Response,
+        cls,
+        response: Response,
     ) -> str:
         status_code = response.status_code
         return f"builder.with_response_status({status_code})"
 
     @classmethod
     def _generate_response_body_lines(
-            cls,
-            response: Response,
-            save_response_body: bool,
-            test_path: str | None,
+        cls,
+        response: Response,
+        save_response_body: bool,
+        test_path: str | None,
     ) -> list[str]:
         if not save_response_body:
             return cls._generate_response_body_raw_lines(response)
@@ -494,12 +502,12 @@ class MLResponseBuilder:
 
     @classmethod
     def _generate_response_body_raw_lines(
-            cls,
-            response: Response,
+        cls,
+        response: Response,
     ):
-        content_type_header = next(header
-                                   for header in response.headers
-                                   if header.lower() == "content-type")
+        content_type_header = next(
+            header for header in response.headers if header.lower() == "content-type"
+        )
         response_content_type = response.headers.get(content_type_header)
         response_body_text = response.text
 
@@ -533,9 +541,11 @@ class MLResponseBuilder:
                     "content-disposition": content_disp,
                     "content": body_part_content,
                 }
-                response_body_line = ("builder.with_response_documents_body_part("
-                                      f"DocumentsBodyPart(**{doc_body_part}"
-                                      "))")
+                response_body_line = (
+                    "builder.with_response_documents_body_part("
+                    f"DocumentsBodyPart(**{doc_body_part}"
+                    "))"
+                )
             else:
                 if isinstance(body_part_content, bytes):
                     ...
@@ -543,17 +553,19 @@ class MLResponseBuilder:
                     body_part_content = f"'''{body_part_content}'''"
                 else:
                     body_part_content = f"'{body_part_content}'"
-                response_body_line = ("builder.with_response_body_part("
-                                      f'"{x_primitive}", {body_part_content}'
-                                      ")")
+                response_body_line = (
+                    "builder.with_response_body_part("
+                    f'"{x_primitive}", {body_part_content}'
+                    ")"
+                )
             response_body_lines.append(response_body_line)
         return response_body_lines
 
     @classmethod
     def _decode_header(
-            cls,
-            body_part: BodyPart,
-            header_name: str,
+        cls,
+        body_part: BodyPart,
+        header_name: str,
     ) -> str | None:
         name_enc = header_name.encode(body_part.encoding)
         value_enc = body_part.headers.get(name_enc)
@@ -563,9 +575,9 @@ class MLResponseBuilder:
 
     @classmethod
     def _generate_response_body_file_lines(
-            cls,
-            response: Response,
-            test_path: str,
+        cls,
+        response: Response,
+        test_path: str,
     ):
         response_content_type = response.headers.get("Content-Type")
         response_body_text = response.text
@@ -585,14 +597,14 @@ class MLResponseBuilder:
             return [f'builder.with_response_body(Path("{path}").read_bytes())']
 
         return [
-            f'response_body_path = '
+            f"response_body_path = "
             f'tools.get_test_resource_path(__file__, "{file_name}")',
             "builder.with_response_body(Path(response_body_path).read_bytes())",
         ]
 
     @staticmethod
     def _get_file_ext_from_content_type(
-            content_type: str,
+        content_type: str,
     ):
         if "html" in content_type:
             return "html"

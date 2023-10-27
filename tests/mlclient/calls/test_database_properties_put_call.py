@@ -15,8 +15,9 @@ def test_validation_body_param():
     with pytest.raises(exceptions.WrongParametersError) as err:
         DatabasePropertiesPutCall(database="Documents", body=None)
 
-    expected_msg = ("No request body provided for "
-                    "PUT /manage/v2/databases/{id|name}/properties!")
+    expected_msg = (
+        "No request body provided for PUT /manage/v2/databases/{id|name}/properties!"
+    )
     assert err.value.args[0] == expected_msg
 
 
@@ -24,8 +25,9 @@ def test_validation_blank_body_param():
     with pytest.raises(exceptions.WrongParametersError) as err:
         DatabasePropertiesPutCall(database="Documents", body=" \n")
 
-    expected_msg = ("No request body provided for "
-                    "PUT /manage/v2/databases/{id|name}/properties!")
+    expected_msg = (
+        "No request body provided for PUT /manage/v2/databases/{id|name}/properties!"
+    )
     assert err.value.args[0] == expected_msg
 
 
@@ -33,10 +35,14 @@ def test_endpoint():
     body = {"database-name": "custom-db"}
     expected__id_endpoint = "/manage/v2/databases/1/properties"
     expected__name_endpoint = "/manage/v2/databases/Documents/properties"
-    assert DatabasePropertiesPutCall(database="1",
-                                     body=body).endpoint == expected__id_endpoint
-    assert DatabasePropertiesPutCall(database="Documents",
-                                     body=body).endpoint == expected__name_endpoint
+    assert (
+        DatabasePropertiesPutCall(database="1", body=body).endpoint
+        == expected__id_endpoint
+    )
+    assert (
+        DatabasePropertiesPutCall(database="Documents", body=body).endpoint
+        == expected__name_endpoint
+    )
 
 
 def test_method(default_database_properties_put_call):
@@ -64,9 +70,11 @@ def test_headers_for_stringified_dict_body():
 
 
 def test_headers_for_xml_body():
-    body = ('<database-properties xmlns="http://marklogic.com/manage">'
-            '  <database-name>custom-db</database-name>'
-            '</database-properties>')
+    body = (
+        '<database-properties xmlns="http://marklogic.com/manage">'
+        "  <database-name>custom-db</database-name>"
+        "</database-properties>"
+    )
     call = DatabasePropertiesPutCall(database="Documents", body=body)
     assert call.headers == {
         "Content-Type": "application/xml",
@@ -86,8 +94,10 @@ def test_stringified_dict_body():
 
 
 def test_xml_body():
-    body = ('<database-properties xmlns="http://marklogic.com/manage">'
-            '  <database-name>custom-db</database-name>'
-            '</database-properties>')
+    body = (
+        '<database-properties xmlns="http://marklogic.com/manage">'
+        "  <database-name>custom-db</database-name>"
+        "</database-properties>"
+    )
     call = DatabasePropertiesPutCall(database="Documents", body=body)
     assert call.body == body

@@ -27,8 +27,7 @@ def test_validation_body_param():
     with pytest.raises(exceptions.WrongParametersError) as err:
         DocumentsPostCall(body_parts=None)
 
-    expected_msg = ("No request body provided for "
-                    "POST /v1/documents!")
+    expected_msg = "No request body provided for POST /v1/documents!"
     assert err.value.args[0] == expected_msg
 
 
@@ -36,8 +35,7 @@ def test_validation_empty_body_param():
     with pytest.raises(exceptions.WrongParametersError) as err:
         DocumentsPostCall(body_parts=[])
 
-    expected_msg = ("No request body provided for "
-                    "POST /v1/documents!")
+    expected_msg = "No request body provided for POST /v1/documents!"
     assert err.value.args[0] == expected_msg
 
 
@@ -96,11 +94,14 @@ def test_fully_parametrized_call_for_multiple_uris_metadata(default_body_part):
         body_parts=[default_body_part],
         database="Documents",
         transform="custom-transformation",
-        transform_params={"custom-param-1": "custom-value-1",
-                          "custom-param-2": "custom-value-2"},
+        transform_params={
+            "custom-param-1": "custom-value-1",
+            "custom-param-2": "custom-value-2",
+        },
         txid="transaction",
         temporal_collection="Entity-collection",
-        system_time="1900-01-01T01:01:01.001Z")
+        system_time="1900-01-01T01:01:01.001Z",
+    )
     assert call.method == "POST"
     assert len(call.headers) == 2
     assert call.headers["Accept"] == "application/json"

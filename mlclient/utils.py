@@ -20,7 +20,7 @@ from mlclient.exceptions import ResourceNotFoundError
 
 
 def get_accept_header_for_format(
-        data_format: str,
+    data_format: str,
 ) -> str:
     """Return an Accept header for data format.
 
@@ -53,13 +53,13 @@ def get_accept_header_for_format(
 
 
 def get_content_type_header_for_data(
-        data: str | dict,
+    content: str | dict,
 ) -> str:
     """Return a Content-Type header for data provided.
 
     Parameters
     ----------
-    data : str | dict
+    content : str | dict
         Data to send in a request
 
     Returns
@@ -67,10 +67,10 @@ def get_content_type_header_for_data(
     str
         A Content-Type header value
     """
-    if isinstance(data, dict):
+    if isinstance(content, dict):
         return constants.HEADER_JSON
     try:
-        json.loads(data)
+        json.loads(content)
     except ValueError:
         return constants.HEADER_XML
     else:
@@ -78,7 +78,7 @@ def get_content_type_header_for_data(
 
 
 def get_resource(
-        resource_name: str,
+    resource_name: str,
 ) -> TextIO:
     """Return an MLClient resource.
 
@@ -107,17 +107,16 @@ def get_resource(
 
 
 class BiDict:
-
     def __init__(
-            self,
-            input_dict: dict,
+        self,
+        input_dict: dict,
     ):
         self._origin = dict(input_dict)
         self._inverse = {value: key for key, value in input_dict.items()}
 
     def get(
-            self,
-            key: Any,
-            default: Any = None,
+        self,
+        key: Any,
+        default: Any = None,
     ) -> Any:
         return self._origin.get(key, self._inverse.get(key, default))

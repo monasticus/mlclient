@@ -27,7 +27,7 @@ class LogType(Enum):
 
     @staticmethod
     def get(
-            logs_type: str,
+        logs_type: str,
     ) -> LogType:
         """Get a specific LogType enum for a string value.
 
@@ -53,8 +53,8 @@ class LogType(Enum):
         raise InvalidLogTypeError(msg)
 
     def __lt__(
-            self,
-            other: LogType,
+        self,
+        other: LogType,
     ):
         """Compare LogTypes with LT operator.
 
@@ -82,13 +82,13 @@ class LogsClient(MLResourceClient):
     _FILENAME_RE = re.compile(rf"((.+)_)?({_LOG_TYPES_RE})Log(_([1-6]))?\.txt")
 
     def get_logs(
-            self,
-            app_server: int | str | None = None,
-            log_type: LogType = LogType.ERROR,
-            start_time: str | None = None,
-            end_time: str | None = None,
-            regex: str | None = None,
-            host: str | None = None,
+        self,
+        app_server: int | str | None = None,
+        log_type: LogType = LogType.ERROR,
+        start_time: str | None = None,
+        end_time: str | None = None,
+        regex: str | None = None,
+        host: str | None = None,
     ) -> Iterator[dict]:
         """Return logs from a MarkLogic server.
 
@@ -123,7 +123,8 @@ class LogsClient(MLResourceClient):
             start_time=start_time,
             end_time=end_time,
             regex=regex,
-            host=host)
+            host=host,
+        )
 
         resp = self.call(call)
         resp_body = resp.json()
@@ -133,7 +134,7 @@ class LogsClient(MLResourceClient):
         return self._parse_logs(log_type, resp_body)
 
     def get_logs_list(
-            self,
+        self,
     ) -> dict:
         """Return a logs list from a MarkLogic server.
 
@@ -165,12 +166,12 @@ class LogsClient(MLResourceClient):
 
     @staticmethod
     def _get_call(
-            app_server: int | str | None = None,
-            log_type: LogType | None = None,
-            start_time: str | None = None,
-            end_time: str | None = None,
-            regex: str | None = None,
-            host: str | None = None,
+        app_server: int | str | None = None,
+        log_type: LogType | None = None,
+        start_time: str | None = None,
+        end_time: str | None = None,
+        regex: str | None = None,
+        host: str | None = None,
     ) -> LogsCall:
         """Prepare a LogsCall instance.
 
@@ -211,18 +212,20 @@ class LogsClient(MLResourceClient):
             "host": host,
         }
         if log_type == LogType.ERROR:
-            params.update({
-                "start_time": start_time,
-                "end_time": end_time,
-                "regex": regex,
-            })
+            params.update(
+                {
+                    "start_time": start_time,
+                    "end_time": end_time,
+                    "regex": regex,
+                },
+            )
 
         return LogsCall(**params)
 
     @staticmethod
     def _parse_logs(
-            log_type: LogType,
-            resp_body: dict,
+        log_type: LogType,
+        resp_body: dict,
     ) -> Iterator[dict]:
         """Parse MarkLogic logs depending on their type.
 
@@ -248,8 +251,8 @@ class LogsClient(MLResourceClient):
 
     @classmethod
     def _parse_logs_list(
-            cls,
-            resp_body: dict,
+        cls,
+        resp_body: dict,
     ) -> dict:
         """Parse MarkLogic logs list.
 
@@ -275,8 +278,8 @@ class LogsClient(MLResourceClient):
 
     @classmethod
     def _parse_log_file(
-            cls,
-            source_log_item: dict,
+        cls,
+        source_log_item: dict,
     ) -> dict:
         """Parse MarkLogic logs list item.
 
@@ -304,7 +307,7 @@ class LogsClient(MLResourceClient):
 
     @staticmethod
     def _group_log_files(
-            parsed_log_items: list[dict],
+        parsed_log_items: list[dict],
     ) -> dict:
         """Group parsed logs items.
 

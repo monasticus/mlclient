@@ -26,22 +26,47 @@ from requests_toolbelt import MultipartDecoder
 from requests_toolbelt.multipart.decoder import BodyPart
 
 from mlclient import constants as const
-from mlclient.calls import (DatabaseDeleteCall, DatabaseGetCall,
-                            DatabasePostCall, DatabasePropertiesGetCall,
-                            DatabasePropertiesPutCall, DatabasesGetCall,
-                            DatabasesPostCall, DocumentsDeleteCall,
-                            DocumentsGetCall, DocumentsPostCall, EvalCall,
-                            ForestDeleteCall, ForestGetCall, ForestPostCall,
-                            ForestPropertiesGetCall, ForestPropertiesPutCall,
-                            ForestsGetCall, ForestsPostCall, ForestsPutCall,
-                            LogsCall, ResourceCall, RoleDeleteCall,
-                            RoleGetCall, RolePropertiesGetCall,
-                            RolePropertiesPutCall, RolesGetCall, RolesPostCall,
-                            ServerDeleteCall, ServerGetCall,
-                            ServerPropertiesGetCall, ServerPropertiesPutCall,
-                            ServersGetCall, ServersPostCall, UserDeleteCall,
-                            UserGetCall, UserPropertiesGetCall,
-                            UserPropertiesPutCall, UsersGetCall, UsersPostCall)
+from mlclient.calls import (
+    DatabaseDeleteCall,
+    DatabaseGetCall,
+    DatabasePostCall,
+    DatabasePropertiesGetCall,
+    DatabasePropertiesPutCall,
+    DatabasesGetCall,
+    DatabasesPostCall,
+    DocumentsDeleteCall,
+    DocumentsGetCall,
+    DocumentsPostCall,
+    EvalCall,
+    ForestDeleteCall,
+    ForestGetCall,
+    ForestPostCall,
+    ForestPropertiesGetCall,
+    ForestPropertiesPutCall,
+    ForestsGetCall,
+    ForestsPostCall,
+    ForestsPutCall,
+    LogsCall,
+    ResourceCall,
+    RoleDeleteCall,
+    RoleGetCall,
+    RolePropertiesGetCall,
+    RolePropertiesPutCall,
+    RolesGetCall,
+    RolesPostCall,
+    ServerDeleteCall,
+    ServerGetCall,
+    ServerPropertiesGetCall,
+    ServerPropertiesPutCall,
+    ServersGetCall,
+    ServersPostCall,
+    UserDeleteCall,
+    UserGetCall,
+    UserPropertiesGetCall,
+    UserPropertiesPutCall,
+    UsersGetCall,
+    UsersPostCall,
+)
 from mlclient.calls.model import DocumentsBodyPart
 from mlclient.mimetypes import Mimetypes
 from mlclient.model import DocumentType
@@ -102,14 +127,14 @@ class MLClient:
     )
 
     def __init__(
-            self,
-            protocol: str = "http",
-            host: str = "localhost",
-            port: int = 8002,
-            auth_method: str = "basic",
-            username: str = "admin",
-            password: str = "admin",
-            retry: Retry = _DEFAULT_RETRY_STRATEGY,
+        self,
+        protocol: str = "http",
+        host: str = "localhost",
+        port: int = 8002,
+        auth_method: str = "basic",
+        username: str = "admin",
+        password: str = "admin",
+        retry: Retry = _DEFAULT_RETRY_STRATEGY,
     ):
         """Initialize MLClient instance.
 
@@ -143,7 +168,7 @@ class MLClient:
         self._auth: AuthBase = auth_impl(username, password)
 
     def __enter__(
-            self,
+        self,
     ):
         """Enter the MLClient instance.
 
@@ -158,10 +183,10 @@ class MLClient:
         return self
 
     def __exit__(
-            self,
-            exc_type: type,
-            exc_val: BaseException,
-            exc_tb: TracebackType,
+        self,
+        exc_type: type,
+        exc_val: BaseException,
+        exc_tb: TracebackType,
     ):
         """Exit the MLClient instance.
 
@@ -179,7 +204,7 @@ class MLClient:
         self.disconnect()
 
     def connect(
-            self,
+        self,
     ):
         """Start an HTTP session."""
         logger.debug("Initiating a connection")
@@ -187,7 +212,7 @@ class MLClient:
         self._sess.mount(self.base_url, HTTPAdapter(max_retries=self._retry))
 
     def disconnect(
-            self,
+        self,
     ):
         """Close an HTTP session."""
         if self._sess:
@@ -196,7 +221,7 @@ class MLClient:
             self._sess = None
 
     def is_connected(
-            self,
+        self,
     ) -> bool:
         """Return a connection status.
 
@@ -208,10 +233,10 @@ class MLClient:
         return self._sess is not None
 
     def get(
-            self,
-            endpoint: str,
-            params: dict | None = None,
-            headers: dict | None = None,
+        self,
+        endpoint: str,
+        params: dict | None = None,
+        headers: dict | None = None,
     ) -> Response | None:
         """Send a GET request.
 
@@ -232,11 +257,11 @@ class MLClient:
         return self.request("GET", endpoint, params, headers)
 
     def post(
-            self,
-            endpoint: str,
-            params: dict | None = None,
-            headers: dict | None = None,
-            body: str | dict | None = None,
+        self,
+        endpoint: str,
+        params: dict | None = None,
+        headers: dict | None = None,
+        body: str | dict | None = None,
     ) -> Response | None:
         """Send a POST request.
 
@@ -259,11 +284,11 @@ class MLClient:
         return self.request("POST", endpoint, params, headers, body)
 
     def put(
-            self,
-            endpoint: str,
-            params: dict | None = None,
-            headers: dict | None = None,
-            body: str | dict | None = None,
+        self,
+        endpoint: str,
+        params: dict | None = None,
+        headers: dict | None = None,
+        body: str | dict | None = None,
     ) -> Response | None:
         """Send a PUT request.
 
@@ -286,10 +311,10 @@ class MLClient:
         return self.request("PUT", endpoint, params, headers, body)
 
     def delete(
-            self,
-            endpoint: str,
-            params: dict | None = None,
-            headers: dict | None = None,
+        self,
+        endpoint: str,
+        params: dict | None = None,
+        headers: dict | None = None,
     ) -> Response | None:
         """Send a DELETE request.
 
@@ -310,12 +335,12 @@ class MLClient:
         return self.request("DELETE", endpoint, params, headers)
 
     def request(
-            self,
-            method: str,
-            endpoint: str,
-            params: dict | None = None,
-            headers: dict | None = None,
-            body: str | dict | None = None,
+        self,
+        method: str,
+        endpoint: str,
+        params: dict | None = None,
+        headers: dict | None = None,
+        body: str | dict | None = None,
     ):
         """Send an HTTP request.
 
@@ -355,12 +380,14 @@ class MLClient:
                 else:
                     request["data"] = body
 
-            logger.debug("Sending a request... %s %s",
-                         method.upper(), endpoint)
+            logger.debug("Sending a request... %s %s", method.upper(), endpoint)
             return self._sess.request(method, url, **request)
 
-        logger.warning("A request attempt failure: %s %s -- MLClient is not connected",
-                       method.upper(), endpoint)
+        logger.warning(
+            "A request attempt failure: %s %s -- MLClient is not connected",
+            method.upper(),
+            endpoint,
+        )
         return None
 
 
@@ -400,8 +427,8 @@ class MLResourceClient(MLClient):
     """
 
     def call(
-            self,
-            call: ResourceCall,
+        self,
+        call: ResourceCall,
     ) -> Response:
         """Send a custom request to a MarkLogic endpoint.
 
@@ -420,7 +447,8 @@ class MLResourceClient(MLClient):
             endpoint=call.endpoint,
             params=call.params,
             headers=call.headers,
-            body=call.body)
+            body=call.body,
+        )
 
 
 class MLResourcesClient(MLResourceClient):
@@ -461,12 +489,12 @@ class MLResourcesClient(MLResourceClient):
     """
 
     def eval(
-            self,
-            xquery: str | None = None,
-            javascript: str | None = None,
-            variables: dict | None = None,
-            database: str | None = None,
-            txid: str | None = None,
+        self,
+        xquery: str | None = None,
+        javascript: str | None = None,
+        variables: dict | None = None,
+        database: str | None = None,
+        txid: str | None = None,
     ) -> Response:
         """Send a POST request to the /v1/eval endpoint.
 
@@ -495,21 +523,23 @@ class MLResourcesClient(MLResourceClient):
         Response
             An HTTP response
         """
-        call = EvalCall(xquery=xquery,
-                        javascript=javascript,
-                        variables=variables,
-                        database=database,
-                        txid=txid)
+        call = EvalCall(
+            xquery=xquery,
+            javascript=javascript,
+            variables=variables,
+            database=database,
+            txid=txid,
+        )
         return self.call(call)
 
     def get_logs(
-            self,
-            filename: str,
-            data_format: str | None = None,
-            host: str | None = None,
-            start_time: str | None = None,
-            end_time: str | None = None,
-            regex: str | None = None,
+        self,
+        filename: str,
+        data_format: str | None = None,
+        host: str | None = None,
+        start_time: str | None = None,
+        end_time: str | None = None,
+        regex: str | None = None,
     ) -> Response:
         """Send a GET request to the /manage/v2/logs endpoint.
 
@@ -534,18 +564,20 @@ class MLResourcesClient(MLResourceClient):
         Response
             An HTTP response
         """
-        call = LogsCall(filename=filename,
-                        data_format=data_format,
-                        host=host,
-                        start_time=start_time,
-                        end_time=end_time,
-                        regex=regex)
+        call = LogsCall(
+            filename=filename,
+            data_format=data_format,
+            host=host,
+            start_time=start_time,
+            end_time=end_time,
+            regex=regex,
+        )
         return self.call(call)
 
     def get_databases(
-            self,
-            data_format: str | None = None,
-            view: str | None = None,
+        self,
+        data_format: str | None = None,
+        view: str | None = None,
     ) -> Response:
         """Send a GET request to the /manage/v2/databases endpoint.
 
@@ -562,13 +594,12 @@ class MLResourcesClient(MLResourceClient):
         Response
             An HTTP response
         """
-        call = DatabasesGetCall(data_format=data_format,
-                                view=view)
+        call = DatabasesGetCall(data_format=data_format, view=view)
         return self.call(call)
 
     def post_databases(
-            self,
-            body: str | dict,
+        self,
+        body: str | dict,
     ) -> Response:
         """Send a POST request to the /manage/v2/databases endpoint.
 
@@ -586,10 +617,10 @@ class MLResourcesClient(MLResourceClient):
         return self.call(call)
 
     def get_database(
-            self,
-            database: str,
-            data_format: str | None = None,
-            view: str | None = None,
+        self,
+        database: str,
+        data_format: str | None = None,
+        view: str | None = None,
     ) -> Response:
         """Send a GET request to the /manage/v2/databases/{id|name} endpoint.
 
@@ -610,15 +641,13 @@ class MLResourcesClient(MLResourceClient):
         Response
             An HTTP response
         """
-        call = DatabaseGetCall(database=database,
-                               data_format=data_format,
-                               view=view)
+        call = DatabaseGetCall(database=database, data_format=data_format, view=view)
         return self.call(call)
 
     def post_database(
-            self,
-            database: str,
-            body: str | dict,
+        self,
+        database: str,
+        body: str | dict,
     ) -> Response:
         """Send a POST request to the /manage/v2/databases/{id|name} endpoint.
 
@@ -634,14 +663,13 @@ class MLResourcesClient(MLResourceClient):
         Response
             An HTTP response
         """
-        call = DatabasePostCall(database=database,
-                                body=body)
+        call = DatabasePostCall(database=database, body=body)
         return self.call(call)
 
     def delete_database(
-            self,
-            database: str,
-            forest_delete: str | None = None,
+        self,
+        database: str,
+        forest_delete: str | None = None,
     ) -> Response:
         """Send a DELETE request to the /manage/v2/databases/{id|name} endpoint.
 
@@ -661,14 +689,13 @@ class MLResourcesClient(MLResourceClient):
         Response
             An HTTP response
         """
-        call = DatabaseDeleteCall(database=database,
-                                  forest_delete=forest_delete)
+        call = DatabaseDeleteCall(database=database, forest_delete=forest_delete)
         return self.call(call)
 
     def get_database_properties(
-            self,
-            database: str,
-            data_format: str | None = None,
+        self,
+        database: str,
+        data_format: str | None = None,
     ) -> Response:
         """Send a GET request to the /manage/v2/databases/{id|name}/properties endpoint.
 
@@ -685,14 +712,13 @@ class MLResourcesClient(MLResourceClient):
         Response
             An HTTP response
         """
-        call = DatabasePropertiesGetCall(database=database,
-                                         data_format=data_format)
+        call = DatabasePropertiesGetCall(database=database, data_format=data_format)
         return self.call(call)
 
     def put_database_properties(
-            self,
-            database: str,
-            body: str | dict,
+        self,
+        database: str,
+        body: str | dict,
     ) -> Response:
         """Send a PUT request to the /manage/v2/databases/{id|name}/properties endpoint.
 
@@ -708,16 +734,15 @@ class MLResourcesClient(MLResourceClient):
         Response
             An HTTP response
         """
-        call = DatabasePropertiesPutCall(database=database,
-                                         body=body)
+        call = DatabasePropertiesPutCall(database=database, body=body)
         return self.call(call)
 
     def get_servers(
-            self,
-            data_format: str | None = None,
-            group_id: str | None = None,
-            view: str | None = None,
-            full_refs: bool | None = None,
+        self,
+        data_format: str | None = None,
+        group_id: str | None = None,
+        view: str | None = None,
+        full_refs: bool | None = None,
     ) -> Response:
         """Send a GET request to the /manage/v2/servers endpoint.
 
@@ -742,17 +767,19 @@ class MLResourcesClient(MLResourceClient):
         Response
             An HTTP response
         """
-        call = ServersGetCall(data_format=data_format,
-                              group_id=group_id,
-                              view=view,
-                              full_refs=full_refs)
+        call = ServersGetCall(
+            data_format=data_format,
+            group_id=group_id,
+            view=view,
+            full_refs=full_refs,
+        )
         return self.call(call)
 
     def post_servers(
-            self,
-            body: str | dict,
-            group_id: str | None = None,
-            server_type: str | None = None,
+        self,
+        body: str | dict,
+        group_id: str | None = None,
+        server_type: str | None = None,
     ) -> Response:
         """Send a POST request to the /manage/v2/servers endpoint.
 
@@ -776,20 +803,18 @@ class MLResourcesClient(MLResourceClient):
         Response
             An HTTP response
         """
-        call = ServersPostCall(body=body,
-                               group_id=group_id,
-                               server_type=server_type)
+        call = ServersPostCall(body=body, group_id=group_id, server_type=server_type)
         return self.call(call)
 
     def get_server(
-            self,
-            server: str,
-            group_id: str,
-            data_format: str | None = None,
-            view: str | None = None,
-            host_id: str | None = None,
-            full_refs: bool | None = None,
-            modules: bool | None = None,
+        self,
+        server: str,
+        group_id: str,
+        data_format: str | None = None,
+        view: str | None = None,
+        host_id: str | None = None,
+        full_refs: bool | None = None,
+        modules: bool | None = None,
     ) -> Response:
         """Send a GET request to the /manage/v2/servers/{id|name} endpoint.
 
@@ -825,19 +850,21 @@ class MLResourcesClient(MLResourceClient):
         Response
             An HTTP response
         """
-        call = ServerGetCall(server=server,
-                             group_id=group_id,
-                             data_format=data_format,
-                             view=view,
-                             host_id=host_id,
-                             full_refs=full_refs,
-                             modules=modules)
+        call = ServerGetCall(
+            server=server,
+            group_id=group_id,
+            data_format=data_format,
+            view=view,
+            host_id=host_id,
+            full_refs=full_refs,
+            modules=modules,
+        )
         return self.call(call)
 
     def delete_server(
-            self,
-            server: str,
-            group_id: str,
+        self,
+        server: str,
+        group_id: str,
     ) -> Response:
         """Send a DELETE request to the /manage/v2/servers/{id|name} endpoint.
 
@@ -854,15 +881,14 @@ class MLResourcesClient(MLResourceClient):
         Response
             An HTTP response
         """
-        call = ServerDeleteCall(server=server,
-                                group_id=group_id)
+        call = ServerDeleteCall(server=server, group_id=group_id)
         return self.call(call)
 
     def get_server_properties(
-            self,
-            server: str,
-            group_id: str,
-            data_format: str | None = None,
+        self,
+        server: str,
+        group_id: str,
+        data_format: str | None = None,
     ) -> Response:
         """Send a GET request to the /manage/v2/servers/{id|name}/properties endpoint.
 
@@ -882,16 +908,18 @@ class MLResourcesClient(MLResourceClient):
         Response
             An HTTP response
         """
-        call = ServerPropertiesGetCall(server=server,
-                                       group_id=group_id,
-                                       data_format=data_format)
+        call = ServerPropertiesGetCall(
+            server=server,
+            group_id=group_id,
+            data_format=data_format,
+        )
         return self.call(call)
 
     def put_server_properties(
-            self,
-            server: str,
-            group_id: str,
-            body: str | dict,
+        self,
+        server: str,
+        group_id: str,
+        body: str | dict,
     ) -> Response:
         """Send a PUT request to the /manage/v2/servers/{id|name}/properties endpoint.
 
@@ -910,19 +938,17 @@ class MLResourcesClient(MLResourceClient):
         Response
             An HTTP response
         """
-        call = ServerPropertiesPutCall(server=server,
-                                       group_id=group_id,
-                                       body=body)
+        call = ServerPropertiesPutCall(server=server, group_id=group_id, body=body)
         return self.call(call)
 
     def get_forests(
-            self,
-            data_format: str | None = None,
-            view: str | None = None,
-            database: str | None = None,
-            group: str | None = None,
-            host: str | None = None,
-            full_refs: bool | None = None,
+        self,
+        data_format: str | None = None,
+        view: str | None = None,
+        database: str | None = None,
+        group: str | None = None,
+        host: str | None = None,
+        full_refs: bool | None = None,
     ) -> Response:
         """Send a GET request to the /manage/v2/forests endpoint.
 
@@ -953,18 +979,20 @@ class MLResourcesClient(MLResourceClient):
         Response
             An HTTP response
         """
-        call = ForestsGetCall(data_format=data_format,
-                              view=view,
-                              database=database,
-                              group=group,
-                              host=host,
-                              full_refs=full_refs)
+        call = ForestsGetCall(
+            data_format=data_format,
+            view=view,
+            database=database,
+            group=group,
+            host=host,
+            full_refs=full_refs,
+        )
         return self.call(call)
 
     def post_forests(
-            self,
-            body: str | dict,
-            wait_for_forest_to_mount: bool | None = None,
+        self,
+        body: str | dict,
+        wait_for_forest_to_mount: bool | None = None,
     ) -> Response:
         """Send a POST request to the /manage/v2/forests endpoint.
 
@@ -981,13 +1009,15 @@ class MLResourcesClient(MLResourceClient):
         Response
             An HTTP response
         """
-        call = ForestsPostCall(body=body,
-                               wait_for_forest_to_mount=wait_for_forest_to_mount)
+        call = ForestsPostCall(
+            body=body,
+            wait_for_forest_to_mount=wait_for_forest_to_mount,
+        )
         return self.call(call)
 
     def put_forests(
-            self,
-            body: str | dict,
+        self,
+        body: str | dict,
     ) -> Response:
         """Send a PUT request to the /manage/v2/forests endpoint.
 
@@ -1005,10 +1035,10 @@ class MLResourcesClient(MLResourceClient):
         return self.call(call)
 
     def get_forest(
-            self,
-            forest: str,
-            data_format: str | None = None,
-            view: str | None = None,
+        self,
+        forest: str,
+        data_format: str | None = None,
+        view: str | None = None,
     ) -> Response:
         """Send a GET request to the /manage/v2/forests/{id|name} endpoint.
 
@@ -1028,15 +1058,13 @@ class MLResourcesClient(MLResourceClient):
         Response
             An HTTP response
         """
-        call = ForestGetCall(forest=forest,
-                             data_format=data_format,
-                             view=view)
+        call = ForestGetCall(forest=forest, data_format=data_format, view=view)
         return self.call(call)
 
     def post_forest(
-            self,
-            forest: str,
-            body: str | dict,
+        self,
+        forest: str,
+        body: str | dict,
     ) -> Response:
         """Send a POST request to the /manage/v2/forests/{id|name} endpoint.
 
@@ -1054,15 +1082,14 @@ class MLResourcesClient(MLResourceClient):
         Response
             An HTTP response
         """
-        call = ForestPostCall(forest=forest,
-                              body=body)
+        call = ForestPostCall(forest=forest, body=body)
         return self.call(call)
 
     def delete_forest(
-            self,
-            forest: str,
-            level: str,
-            replicas: str | None = None,
+        self,
+        forest: str,
+        level: str,
+        replicas: str | None = None,
     ) -> Response:
         """Send a DELETE request to the /manage/v2/forests/{id|name} endpoint.
 
@@ -1085,15 +1112,13 @@ class MLResourcesClient(MLResourceClient):
         Response
             An HTTP response
         """
-        call = ForestDeleteCall(forest=forest,
-                                level=level,
-                                replicas=replicas)
+        call = ForestDeleteCall(forest=forest, level=level, replicas=replicas)
         return self.call(call)
 
     def get_forest_properties(
-            self,
-            forest: str,
-            data_format: str | None = None,
+        self,
+        forest: str,
+        data_format: str | None = None,
     ) -> Response:
         """Send a GET request to the /manage/v2/forests/{id|name}/properties endpoint.
 
@@ -1110,14 +1135,13 @@ class MLResourcesClient(MLResourceClient):
         Response
             An HTTP response
         """
-        call = ForestPropertiesGetCall(forest=forest,
-                                       data_format=data_format)
+        call = ForestPropertiesGetCall(forest=forest, data_format=data_format)
         return self.call(call)
 
     def put_forest_properties(
-            self,
-            forest: str,
-            body: str | dict,
+        self,
+        forest: str,
+        body: str | dict,
     ) -> Response:
         """Send a PUT request to the /manage/v2/databases/{id|name}/properties endpoint.
 
@@ -1133,14 +1157,13 @@ class MLResourcesClient(MLResourceClient):
         Response
             An HTTP response
         """
-        call = ForestPropertiesPutCall(forest=forest,
-                                       body=body)
+        call = ForestPropertiesPutCall(forest=forest, body=body)
         return self.call(call)
 
     def get_roles(
-            self,
-            data_format: str | None = None,
-            view: str | None = None,
+        self,
+        data_format: str | None = None,
+        view: str | None = None,
     ) -> Response:
         """Send a GET request to the /manage/v2/roles endpoint.
 
@@ -1156,13 +1179,12 @@ class MLResourcesClient(MLResourceClient):
         Response
             An HTTP response
         """
-        call = RolesGetCall(data_format=data_format,
-                            view=view)
+        call = RolesGetCall(data_format=data_format, view=view)
         return self.call(call)
 
     def post_roles(
-            self,
-            body: str | dict,
+        self,
+        body: str | dict,
     ) -> Response:
         """Send a POST request to the /manage/v2/roles endpoint.
 
@@ -1180,10 +1202,10 @@ class MLResourcesClient(MLResourceClient):
         return self.call(call)
 
     def get_role(
-            self,
-            role: str,
-            data_format: str | None = None,
-            view: str | None = None,
+        self,
+        role: str,
+        data_format: str | None = None,
+        view: str | None = None,
     ) -> Response:
         """Send a GET request to the /manage/v2/roles/{id|name} endpoint.
 
@@ -1201,14 +1223,12 @@ class MLResourcesClient(MLResourceClient):
         Response
             An HTTP response
         """
-        call = RoleGetCall(role=role,
-                           data_format=data_format,
-                           view=view)
+        call = RoleGetCall(role=role, data_format=data_format, view=view)
         return self.call(call)
 
     def delete_role(
-            self,
-            role: str,
+        self,
+        role: str,
     ) -> Response:
         """Send a DELETE request to the /manage/v2/roles/{id|name} endpoint.
 
@@ -1226,9 +1246,9 @@ class MLResourcesClient(MLResourceClient):
         return self.call(call)
 
     def get_role_properties(
-            self,
-            role: str,
-            data_format: str | None = None,
+        self,
+        role: str,
+        data_format: str | None = None,
     ) -> Response:
         """Send a GET request to the /manage/v2/roles/{id|name}/properties endpoint.
 
@@ -1245,14 +1265,13 @@ class MLResourcesClient(MLResourceClient):
         Response
             An HTTP response
         """
-        call = RolePropertiesGetCall(role=role,
-                                     data_format=data_format)
+        call = RolePropertiesGetCall(role=role, data_format=data_format)
         return self.call(call)
 
     def put_role_properties(
-            self,
-            role: str,
-            body: str | dict,
+        self,
+        role: str,
+        body: str | dict,
     ) -> Response:
         """Send a PUT request to the /manage/v2/roles/{id|name}/properties endpoint.
 
@@ -1268,14 +1287,13 @@ class MLResourcesClient(MLResourceClient):
         Response
             An HTTP response
         """
-        call = RolePropertiesPutCall(role=role,
-                                     body=body)
+        call = RolePropertiesPutCall(role=role, body=body)
         return self.call(call)
 
     def get_users(
-            self,
-            data_format: str | None = None,
-            view: str | None = None,
+        self,
+        data_format: str | None = None,
+        view: str | None = None,
     ) -> Response:
         """Send a GET request to the /manage/v2/users endpoint.
 
@@ -1291,13 +1309,12 @@ class MLResourcesClient(MLResourceClient):
         Response
             An HTTP response
         """
-        call = UsersGetCall(data_format=data_format,
-                            view=view)
+        call = UsersGetCall(data_format=data_format, view=view)
         return self.call(call)
 
     def post_users(
-            self,
-            body: str | dict,
+        self,
+        body: str | dict,
     ) -> Response:
         """Send a POST request to the /manage/v2/users endpoint.
 
@@ -1315,10 +1332,10 @@ class MLResourcesClient(MLResourceClient):
         return self.call(call)
 
     def get_user(
-            self,
-            user: str,
-            data_format: str | None = None,
-            view: str | None = None,
+        self,
+        user: str,
+        data_format: str | None = None,
+        view: str | None = None,
     ) -> Response:
         """Send a GET request to the /manage/v2/users/{id|name} endpoint.
 
@@ -1336,14 +1353,12 @@ class MLResourcesClient(MLResourceClient):
         Response
             An HTTP response
         """
-        call = UserGetCall(user=user,
-                           data_format=data_format,
-                           view=view)
+        call = UserGetCall(user=user, data_format=data_format, view=view)
         return self.call(call)
 
     def delete_user(
-            self,
-            user: str,
+        self,
+        user: str,
     ) -> Response:
         """Send a DELETE request to the /manage/v2/users/{id|name} endpoint.
 
@@ -1361,9 +1376,9 @@ class MLResourcesClient(MLResourceClient):
         return self.call(call)
 
     def get_user_properties(
-            self,
-            user: str,
-            data_format: str | None = None,
+        self,
+        user: str,
+        data_format: str | None = None,
     ) -> Response:
         """Send a GET request to the /manage/v2/users/{id|name}/properties endpoint.
 
@@ -1380,14 +1395,13 @@ class MLResourcesClient(MLResourceClient):
         Response
             An HTTP response
         """
-        call = UserPropertiesGetCall(user=user,
-                                     data_format=data_format)
+        call = UserPropertiesGetCall(user=user, data_format=data_format)
         return self.call(call)
 
     def put_user_properties(
-            self,
-            user: str,
-            body: str | dict,
+        self,
+        user: str,
+        body: str | dict,
     ) -> Response:
         """Send a PUT request to the /manage/v2/users/{id|name}/properties endpoint.
 
@@ -1408,20 +1422,19 @@ class MLResourcesClient(MLResourceClient):
         NotImplementedError
             If the call's method is not GET, POST, PUT nor DELETE.
         """
-        call = UserPropertiesPutCall(user=user,
-                                     body=body)
+        call = UserPropertiesPutCall(user=user, body=body)
         return self.call(call)
 
     def get_documents(
-            self,
-            uri: str | list,
-            database: str | None = None,
-            category: str | list | None = None,
-            data_format: str | None = None,
-            timestamp: str | None = None,
-            transform: str | None = None,
-            transform_params: dict | None = None,
-            txid: str | None = None,
+        self,
+        uri: str | list,
+        database: str | None = None,
+        category: str | list | None = None,
+        data_format: str | None = None,
+        timestamp: str | None = None,
+        transform: str | None = None,
+        transform_params: dict | None = None,
+        txid: str | None = None,
     ):
         """Send a GET request to the /v1/documents endpoint.
 
@@ -1468,25 +1481,27 @@ class MLResourcesClient(MLResourceClient):
         Response
             An HTTP response
         """
-        call = DocumentsGetCall(uri=uri,
-                                database=database,
-                                category=category,
-                                data_format=data_format,
-                                timestamp=timestamp,
-                                transform=transform,
-                                transform_params=transform_params,
-                                txid=txid)
+        call = DocumentsGetCall(
+            uri=uri,
+            database=database,
+            category=category,
+            data_format=data_format,
+            timestamp=timestamp,
+            transform=transform,
+            transform_params=transform_params,
+            txid=txid,
+        )
         return self.call(call)
 
     def post_documents(
-            self,
-            body_parts: list[DocumentsBodyPart],
-            database: str | None = None,
-            transform: str | None = None,
-            transform_params: dict | None = None,
-            txid: str | None = None,
-            temporal_collection: str | None = None,
-            system_time: str | None = None,
+        self,
+        body_parts: list[DocumentsBodyPart],
+        database: str | None = None,
+        transform: str | None = None,
+        transform_params: dict | None = None,
+        txid: str | None = None,
+        temporal_collection: str | None = None,
+        system_time: str | None = None,
     ):
         """Send a POST request to the /v1/documents endpoint.
 
@@ -1523,24 +1538,26 @@ class MLResourcesClient(MLResourceClient):
         Response
             An HTTP response
         """
-        call = DocumentsPostCall(body_parts=body_parts,
-                                 database=database,
-                                 transform=transform,
-                                 transform_params=transform_params,
-                                 txid=txid,
-                                 temporal_collection=temporal_collection,
-                                 system_time=system_time)
+        call = DocumentsPostCall(
+            body_parts=body_parts,
+            database=database,
+            transform=transform,
+            transform_params=transform_params,
+            txid=txid,
+            temporal_collection=temporal_collection,
+            system_time=system_time,
+        )
         return self.call(call)
 
     def delete_documents(
-            self,
-            uri: str | list,
-            database: str | None = None,
-            category: str | list | None = None,
-            txid: str | None = None,
-            temporal_collection: str | None = None,
-            system_time: str | None = None,
-            wipe_temporal: bool | None = None,
+        self,
+        uri: str | list,
+        database: str | None = None,
+        category: str | list | None = None,
+        txid: str | None = None,
+        temporal_collection: str | None = None,
+        system_time: str | None = None,
+        wipe_temporal: bool | None = None,
     ):
         """Send a DELETE request to the /v1/documents endpoint.
 
@@ -1580,13 +1597,15 @@ class MLResourcesClient(MLResourceClient):
         Response
             An HTTP response
         """
-        call = DocumentsDeleteCall(uri=uri,
-                                   database=database,
-                                   category=category,
-                                   txid=txid,
-                                   temporal_collection=temporal_collection,
-                                   system_time=system_time,
-                                   wipe_temporal=wipe_temporal)
+        call = DocumentsDeleteCall(
+            uri=uri,
+            database=database,
+            category=category,
+            txid=txid,
+            temporal_collection=temporal_collection,
+            system_time=system_time,
+            wipe_temporal=wipe_temporal,
+        )
         return self.call(call)
 
 
@@ -1622,30 +1641,37 @@ class MLResponseParser:
     """
 
     _PLAIN_TEXT_PARSERS: ClassVar[dict] = {
-        const.HEADER_PRIMITIVE_STRING:
-            lambda data: data,
-        const.HEADER_PRIMITIVE_INTEGER:
-            lambda data: int(data),
-        const.HEADER_PRIMITIVE_DECIMAL:
-            lambda data: float(data),
-        const.HEADER_PRIMITIVE_BOOLEAN:
-            lambda data: bool(data),
-        const.HEADER_PRIMITIVE_DATE:
-            lambda data: datetime.strptime(data, "%Y-%m-%d%z").date(),
-        const.HEADER_PRIMITIVE_DATE_TIME:
-            lambda data: datetime.strptime(data, "%Y-%m-%dT%H:%M:%S.%f%z"),
-        None:
-            lambda data: data,
+        const.HEADER_PRIMITIVE_STRING: lambda data: data,
+        const.HEADER_PRIMITIVE_INTEGER: lambda data: int(data),
+        const.HEADER_PRIMITIVE_DECIMAL: lambda data: float(data),
+        const.HEADER_PRIMITIVE_BOOLEAN: lambda data: bool(data),
+        const.HEADER_PRIMITIVE_DATE: lambda data: datetime.strptime(
+            data,
+            "%Y-%m-%d%z",
+        ).date(),
+        const.HEADER_PRIMITIVE_DATE_TIME: lambda data: datetime.strptime(
+            data,
+            "%Y-%m-%dT%H:%M:%S.%f%z",
+        ),
+        None: lambda data: data,
     }
 
     @classmethod
     def parse(
-            cls,
-            response: Response,
-            output_type: type | None = None,
-    ) -> (bytes | str | int | float | bool | dict |
-          ElemTree.ElementTree | ElemTree.Element |
-          list):
+        cls,
+        response: Response,
+        output_type: type | None = None,
+    ) -> (
+        bytes
+        | str
+        | int
+        | float
+        | bool
+        | dict
+        | ElemTree.ElementTree
+        | ElemTree.Element
+        | list
+    ):
         """Parse MarkLogic HTTP Response.
 
         Parameters
@@ -1674,9 +1700,9 @@ class MLResponseParser:
 
     @classmethod
     def parse_with_headers(
-            cls,
-            response: Response,
-            output_type: type | None = None,
+        cls,
+        response: Response,
+        output_type: type | None = None,
     ) -> tuple | list[tuple]:
         """Parse MarkLogic HTTP Response and get headers.
 
@@ -1704,12 +1730,21 @@ class MLResponseParser:
 
     @classmethod
     def _parse(
-            cls,
-            response: Response,
-            with_headers: bool = False,
-    ) -> (bytes | str | int | float | bool | dict |
-          ElemTree.ElementTree | ElemTree.Element |
-          list | tuple):
+        cls,
+        response: Response,
+        with_headers: bool = False,
+    ) -> (
+        bytes
+        | str
+        | int
+        | float
+        | bool
+        | dict
+        | ElemTree.ElementTree
+        | ElemTree.Element
+        | list
+        | tuple
+    ):
         """Parse MarkLogic HTTP Response.
 
         Parameters
@@ -1739,17 +1774,18 @@ class MLResponseParser:
         else:
             body_parts = [response]
 
-        parsed_parts = [cls._parse_part(body_part, None, with_headers)
-                        for body_part in body_parts]
+        parsed_parts = [
+            cls._parse_part(body_part, None, with_headers) for body_part in body_parts
+        ]
         if len(parsed_parts) == 1:
             return parsed_parts[0]
         return parsed_parts
 
     @classmethod
     def _parse_text(
-            cls,
-            response: Response,
-            with_headers: bool = False,
+        cls,
+        response: Response,
+        with_headers: bool = False,
     ) -> str | tuple[dict, str] | list[str | tuple[dict, str]]:
         content_type = cls._get_response_content_type(response.headers)
         if not response.ok:
@@ -1762,17 +1798,18 @@ class MLResponseParser:
         else:
             body_parts = [response]
 
-        parsed_parts = [cls._parse_part(body_part, str, with_headers)
-                        for body_part in body_parts]
+        parsed_parts = [
+            cls._parse_part(body_part, str, with_headers) for body_part in body_parts
+        ]
         if len(parsed_parts) == 1:
             return parsed_parts[0]
         return parsed_parts
 
     @classmethod
     def _parse_bytes(
-            cls,
-            response: Response,
-            with_headers: bool = False,
+        cls,
+        response: Response,
+        with_headers: bool = False,
     ) -> bytes | tuple[dict, bytes] | list[bytes | tuple[dict, bytes]]:
         content_type = cls._get_response_content_type(response.headers)
         if not response.ok:
@@ -1785,16 +1822,17 @@ class MLResponseParser:
         else:
             body_parts = [response]
 
-        parsed_parts = [cls._parse_part(body_part, bytes, with_headers)
-                        for body_part in body_parts]
+        parsed_parts = [
+            cls._parse_part(body_part, bytes, with_headers) for body_part in body_parts
+        ]
         if len(parsed_parts) == 1:
             return parsed_parts[0]
         return parsed_parts
 
     @classmethod
     def _parse_error(
-            cls,
-            response: Response,
+        cls,
+        response: Response,
     ) -> str:
         """Parse MarkLogic error response.
 
@@ -1809,21 +1847,32 @@ class MLResponseParser:
             A parsed error description
         """
         html = ElemTree.fromstring(response.text)
-        terms = html.findall("{http://www.w3.org/1999/xhtml}body/"
-                             "{http://www.w3.org/1999/xhtml}span/"
-                             "{http://www.w3.org/1999/xhtml}dl/"
-                             "{http://www.w3.org/1999/xhtml}dt")
+        terms = html.findall(
+            "{http://www.w3.org/1999/xhtml}body/"
+            "{http://www.w3.org/1999/xhtml}span/"
+            "{http://www.w3.org/1999/xhtml}dl/"
+            "{http://www.w3.org/1999/xhtml}dt",
+        )
         return "\n".join(term.text for term in terms)
 
     @classmethod
     def _parse_part(
-            cls,
-            body_part: BodyPart | Response,
-            output_type: type | None = None,
-            with_headers: bool = False,
-    ) -> (bytes | str | int | float | bool | dict |
-          ElemTree.ElementTree | ElemTree.Element |
-          list | tuple):
+        cls,
+        body_part: BodyPart | Response,
+        output_type: type | None = None,
+        with_headers: bool = False,
+    ) -> (
+        bytes
+        | str
+        | int
+        | float
+        | bool
+        | dict
+        | ElemTree.ElementTree
+        | ElemTree.Element
+        | list
+        | tuple
+    ):
         """Parse MarkLogic HTTP Response part.
 
         Parameters
@@ -1860,15 +1909,17 @@ class MLResponseParser:
 
     @classmethod
     def _parse_type_specific(
-            cls,
-            body_part: BodyPart | Response,
-            headers: dict,
+        cls,
+        body_part: BodyPart | Response,
+        headers: dict,
     ):
         content_type = cls._get_response_content_type(headers)
         primitive_type = headers.get(const.HEADER_NAME_PRIMITIVE)
 
-        if (content_type.startswith(Mimetypes.get_mimetypes(DocumentType.TEXT)) and
-                primitive_type in cls._PLAIN_TEXT_PARSERS):
+        if (
+            content_type.startswith(Mimetypes.get_mimetypes(DocumentType.TEXT))
+            and primitive_type in cls._PLAIN_TEXT_PARSERS
+        ):
             return cls._PLAIN_TEXT_PARSERS[primitive_type](body_part.text)
         if content_type.startswith(Mimetypes.get_mimetypes(DocumentType.JSON)):
             return json.loads(body_part.text)
@@ -1881,17 +1932,20 @@ class MLResponseParser:
 
     @classmethod
     def _get_response_content_type(
-            cls,
-            headers: dict,
+        cls,
+        headers: dict,
     ) -> str | None:
-        return next((value
-                     for name, value in headers.items()
-                     if name.lower() == "content-type"), None)
+        gen = (
+            value for name, value in headers.items() if name.lower() == "content-type"
+        )
+        return next(gen, None)
 
     @staticmethod
     def _decode_headers(
-            headers: dict,
-            encoding: str,
+        headers: dict,
+        encoding: str,
     ):
-        return {name.decode(encoding): value.decode(encoding)
-                for name, value in headers.items()}
+        return {
+            name.decode(encoding): value.decode(encoding)
+            for name, value in headers.items()
+        }

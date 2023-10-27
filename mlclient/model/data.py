@@ -58,11 +58,11 @@ class Document(metaclass=ABCMeta):
     """An abstract class representing a single MarkLogic document."""
 
     def __init__(
-            self,
-            uri: str | None = None,
-            doc_type: DocumentType | None = DocumentType.XML,
-            metadata: Metadata | None = None,
-            is_temporal: bool = False,
+        self,
+        uri: str | None = None,
+        doc_type: DocumentType | None = DocumentType.XML,
+        metadata: Metadata | None = None,
+        is_temporal: bool = False,
     ):
         """Initialize Document instance.
 
@@ -84,8 +84,8 @@ class Document(metaclass=ABCMeta):
 
     @classmethod
     def __subclasshook__(
-            cls,
-            subclass: Document,
+        cls,
+        subclass: Document,
     ):
         """Verify if a subclass implements all abstract methods.
 
@@ -104,7 +104,7 @@ class Document(metaclass=ABCMeta):
     @property
     @abstractmethod
     def content(
-            self,
+        self,
     ) -> Any:
         """A document content.
 
@@ -117,35 +117,35 @@ class Document(metaclass=ABCMeta):
 
     @property
     def uri(
-            self,
+        self,
     ) -> str:
         """A document URI."""
         return self._uri
 
     @property
     def doc_type(
-            self,
+        self,
     ) -> DocumentType | None:
         """A document type."""
         return self._doc_type
 
     @property
     def metadata(
-            self,
+        self,
     ) -> Metadata:
         """A document metadata."""
         return copy.copy(self._metadata)
 
     @property
     def is_temporal(
-            self,
+        self,
     ) -> bool:
         """The temporal flag."""
         return self._is_temporal
 
     @staticmethod
     def _get_non_blank_uri(
-            uri: str,
+        uri: str,
     ) -> str | None:
         """Return URI or None when blank."""
         return uri if uri is not None and not re.search("^\\s*$", uri) else None
@@ -158,11 +158,11 @@ class JSONDocument(Document):
     """
 
     def __init__(
-            self,
-            content: dict,
-            uri: str | None = None,
-            metadata: Metadata | None = None,
-            is_temporal: bool = False,
+        self,
+        content: dict,
+        uri: str | None = None,
+        metadata: Metadata | None = None,
+        is_temporal: bool = False,
     ):
         """Initialize JSONDocument instance.
 
@@ -182,7 +182,7 @@ class JSONDocument(Document):
 
     @property
     def content(
-            self,
+        self,
     ) -> dict:
         """A document content.
 
@@ -201,11 +201,11 @@ class XMLDocument(Document):
     """
 
     def __init__(
-            self,
-            content: ElemTree.ElementTree,
-            uri: str | None = None,
-            metadata: Metadata | None = None,
-            is_temporal: bool = False,
+        self,
+        content: ElemTree.ElementTree,
+        uri: str | None = None,
+        metadata: Metadata | None = None,
+        is_temporal: bool = False,
     ):
         """Initialize XMLDocument instance.
 
@@ -225,7 +225,7 @@ class XMLDocument(Document):
 
     @property
     def content(
-            self,
+        self,
     ) -> ElemTree.ElementTree:
         """A document content.
 
@@ -244,11 +244,11 @@ class TextDocument(Document):
     """
 
     def __init__(
-            self,
-            content: str,
-            uri: str | None = None,
-            metadata: Metadata | None = None,
-            is_temporal: bool = False,
+        self,
+        content: str,
+        uri: str | None = None,
+        metadata: Metadata | None = None,
+        is_temporal: bool = False,
     ):
         """Initialize TextDocument instance.
 
@@ -268,7 +268,7 @@ class TextDocument(Document):
 
     @property
     def content(
-            self,
+        self,
     ) -> str:
         """A document content.
 
@@ -287,11 +287,11 @@ class BinaryDocument(Document):
     """
 
     def __init__(
-            self,
-            content: bytes,
-            uri: str | None = None,
-            metadata: Metadata | None = None,
-            is_temporal: bool = False,
+        self,
+        content: bytes,
+        uri: str | None = None,
+        metadata: Metadata | None = None,
+        is_temporal: bool = False,
     ):
         """Initialize BinaryDocument instance.
 
@@ -311,7 +311,7 @@ class BinaryDocument(Document):
 
     @property
     def content(
-            self,
+        self,
     ) -> bytes:
         """A document content.
 
@@ -330,12 +330,12 @@ class RawDocument(Document):
     """
 
     def __init__(
-            self,
-            content: bytes,
-            uri: str | None = None,
-            doc_type: DocumentType | None = DocumentType.XML,
-            metadata: bytes | None = None,
-            is_temporal: bool = False,
+        self,
+        content: bytes,
+        uri: str | None = None,
+        doc_type: DocumentType | None = DocumentType.XML,
+        metadata: bytes | None = None,
+        is_temporal: bool = False,
     ):
         """Initialize RawDocument instance.
 
@@ -357,7 +357,7 @@ class RawDocument(Document):
 
     @property
     def content(
-            self,
+        self,
     ) -> bytes:
         """A document content.
 
@@ -376,12 +376,12 @@ class RawStringDocument(Document):
     """
 
     def __init__(
-            self,
-            content: str,
-            uri: str | None = None,
-            doc_type: DocumentType | None = DocumentType.XML,
-            metadata: str | None = None,
-            is_temporal: bool = False,
+        self,
+        content: str,
+        uri: str | None = None,
+        doc_type: DocumentType | None = DocumentType.XML,
+        metadata: str | None = None,
+        is_temporal: bool = False,
     ):
         """Initialize RawStringDocument instance.
 
@@ -403,7 +403,7 @@ class RawStringDocument(Document):
 
     @property
     def content(
-            self,
+        self,
     ) -> str:
         """A document content.
 
@@ -422,9 +422,9 @@ class MetadataDocument(Document):
     """
 
     def __init__(
-            self,
-            uri: str,
-            metadata: Metadata,
+        self,
+        uri: str,
+        metadata: Metadata,
     ):
         """Initialize RawStringDocument instance.
 
@@ -439,7 +439,7 @@ class MetadataDocument(Document):
 
     @property
     def content(
-            self,
+        self,
     ) -> None:
         """A document content.
 
@@ -456,12 +456,12 @@ class DocumentFactory:
 
     @classmethod
     def build_document(
-            cls,
-            content: ElemTree.Element | dict | str | bytes | None = None,
-            doc_type: DocumentType | str | None = None,
-            uri: str | None = None,
-            metadata: Metadata | None = None,
-            is_temporal: bool = False,
+        cls,
+        content: ElemTree.Element | dict | str | bytes | None = None,
+        doc_type: DocumentType | str | None = None,
+        uri: str | None = None,
+        metadata: Metadata | None = None,
+        is_temporal: bool = False,
     ) -> Document:
         """Instantiate Document based on the document or content type.
 
@@ -490,19 +490,21 @@ class DocumentFactory:
             return MetadataDocument(uri=uri, metadata=metadata)
 
         impl = cls._get_impl(content, doc_type)
-        return impl(content=content,
-                    uri=uri,
-                    metadata=metadata,
-                    is_temporal=is_temporal)
+        return impl(
+            content=content,
+            uri=uri,
+            metadata=metadata,
+            is_temporal=is_temporal,
+        )
 
     @classmethod
     def build_raw_document(
-            cls,
-            content: bytes | str,
-            doc_type: DocumentType | str,
-            uri: str | None = None,
-            metadata: bytes | str | None = None,
-            is_temporal: bool = False,
+        cls,
+        content: bytes | str,
+        doc_type: DocumentType | str,
+        uri: str | None = None,
+        metadata: bytes | str | None = None,
+        is_temporal: bool = False,
     ) -> Document:
         """Instantiate Document based on the document type.
 
@@ -540,17 +542,19 @@ class DocumentFactory:
             msg = "Raw document can store content only in [bytes] or [str] format!"
             raise NotImplementedError(msg)
 
-        return impl(content=content,
-                    doc_type=doc_type,
-                    uri=uri,
-                    metadata=metadata,
-                    is_temporal=is_temporal)
+        return impl(
+            content=content,
+            doc_type=doc_type,
+            uri=uri,
+            metadata=metadata,
+            is_temporal=is_temporal,
+        )
 
     @classmethod
     def _get_impl(
-            cls,
-            content: ElemTree.Element | dict | str | bytes | None,
-            doc_type: DocumentType | None,
+        cls,
+        content: ElemTree.Element | dict | str | bytes | None,
+        doc_type: DocumentType | None,
     ):
         if doc_type == DocumentType.XML:
             impl = XMLDocument
@@ -569,8 +573,10 @@ class DocumentFactory:
         elif isinstance(content, bytes):
             impl = BinaryDocument
         else:
-            msg = ("Unsupported document type! "
-                   "Document types are: XML, JSON, TEXT, BINARY!")
+            msg = (
+                "Unsupported document type! "
+                "Document types are: XML, JSON, TEXT, BINARY!"
+            )
             raise NotImplementedError(msg)
         return impl
 
@@ -603,12 +609,12 @@ class Metadata:
     _PROP_NS_URI: str = "http://marklogic.com/xdmp/property"
 
     def __init__(
-            self,
-            collections: list | None = None,
-            permissions: list | None = None,
-            properties: dict | None = None,
-            quality: int | None = None,
-            metadata_values: dict | None = None,
+        self,
+        collections: list | None = None,
+        permissions: list | None = None,
+        properties: dict | None = None,
+        quality: int | None = None,
+        metadata_values: dict | None = None,
     ):
         """Initialize Metadata instance.
 
@@ -632,8 +638,8 @@ class Metadata:
         self._metadata_values = self._get_clean_dict(metadata_values)
 
     def __eq__(
-            self,
-            other: Metadata,
+        self,
+        other: Metadata,
     ) -> bool:
         """Verify if Metadata instances are equal.
 
@@ -650,15 +656,17 @@ class Metadata:
         """
         collections_diff = set(self._collections).difference(set(other.collections()))
         permissions_diff = set(self._permissions).difference(set(other.permissions()))
-        return (isinstance(other, Metadata) and
-                collections_diff == set() and
-                permissions_diff == set() and
-                self._properties == other.properties() and
-                self._quality == other.quality() and
-                self._metadata_values == other.metadata_values())
+        return (
+            isinstance(other, Metadata)
+            and collections_diff == set()
+            and permissions_diff == set()
+            and self._properties == other.properties()
+            and self._quality == other.quality()
+            and self._metadata_values == other.metadata_values()
+        )
 
     def __hash__(
-            self,
+        self,
     ) -> int:
         """Generate a hash value of a Metadata instance.
 
@@ -675,7 +683,7 @@ class Metadata:
         return hash(tuple(items))
 
     def __copy__(
-            self,
+        self,
     ) -> Metadata:
         """Copy Metadata instance."""
         return Metadata(
@@ -683,41 +691,42 @@ class Metadata:
             permissions=self.permissions(),
             properties=self.properties(),
             quality=self.quality(),
-            metadata_values=self.metadata_values())
+            metadata_values=self.metadata_values(),
+        )
 
     def collections(
-            self,
+        self,
     ) -> list:
         """Return document's collections."""
         return self._collections.copy()
 
     def permissions(
-            self,
+        self,
     ) -> list:
         """Return document's permissions."""
         return [copy.copy(perm) for perm in self._permissions]
 
     def properties(
-            self,
+        self,
     ) -> dict:
         """Return document's properties."""
         return self._properties.copy()
 
     def quality(
-            self,
+        self,
     ) -> int:
         """Return document's quality."""
         return self._quality
 
     def metadata_values(
-            self,
+        self,
     ) -> dict:
         """Return document's metadata values."""
         return self._metadata_values.copy()
 
     def set_quality(
-            self,
-            quality: int,
+        self,
+        quality: int,
     ) -> bool:
         """Set document's quality.
 
@@ -737,8 +746,8 @@ class Metadata:
         return allow
 
     def add_collection(
-            self,
-            collection: str,
+        self,
+        collection: str,
     ) -> bool:
         """Assign a new collection to document.
 
@@ -753,17 +762,19 @@ class Metadata:
             True if the collection is non-blank value, and it does not appear already
             in document's collections. Otherwise, False.
         """
-        allow = (collection is not None and
-                 not re.search("^\\s*$", collection) and
-                 collection not in self.collections())
+        allow = (
+            collection is not None
+            and not re.search("^\\s*$", collection)
+            and collection not in self.collections()
+        )
         if allow:
             self._collections.append(collection)
         return allow
 
     def add_permission(
-            self,
-            role_name: str,
-            capability: str,
+        self,
+        role_name: str,
+        capability: str,
     ) -> bool:
         """Assign a new permission to document.
 
@@ -791,9 +802,9 @@ class Metadata:
         return allow
 
     def put_property(
-            self,
-            name: str,
-            value: str,
+        self,
+        name: str,
+        value: str,
     ):
         """Assign a new property to document.
 
@@ -808,9 +819,9 @@ class Metadata:
             self._properties[name] = value
 
     def put_metadata_value(
-            self,
-            name: str,
-            value: str,
+        self,
+        name: str,
+        value: str,
     ):
         """Assign a new metadata value to document.
 
@@ -825,8 +836,8 @@ class Metadata:
             self._metadata_values[name] = value
 
     def remove_collection(
-            self,
-            collection: str,
+        self,
+        collection: str,
     ) -> bool:
         """Remove a collection from document.
 
@@ -846,9 +857,9 @@ class Metadata:
         return allow
 
     def remove_permission(
-            self,
-            role_name: str,
-            capability: str,
+        self,
+        role_name: str,
+        capability: str,
     ) -> bool:
         """Remove a permission from document.
 
@@ -878,8 +889,8 @@ class Metadata:
         return allow
 
     def remove_property(
-            self,
-            name: str,
+        self,
+        name: str,
     ) -> bool:
         """Remove a property from document.
 
@@ -896,8 +907,8 @@ class Metadata:
         return self._properties.pop(name, None) is not None
 
     def remove_metadata_value(
-            self,
-            name: str,
+        self,
+        name: str,
     ) -> bool:
         """Remove a metadata value from document.
 
@@ -914,8 +925,8 @@ class Metadata:
         return self._metadata_values.pop(name, None) is not None
 
     def to_json_string(
-            self,
-            indent: int | None = None,
+        self,
+        indent: int | None = None,
     ) -> str:
         """Return a stringified JSON representation of the Metadata instance.
 
@@ -932,7 +943,7 @@ class Metadata:
         return json.dumps(self.to_json(), indent=indent)
 
     def to_json(
-            self,
+        self,
     ) -> dict:
         """Return a JSON representation of the Metadata instance."""
         return {
@@ -944,8 +955,8 @@ class Metadata:
         }
 
     def to_xml_string(
-            self,
-            indent: int | None = None,
+        self,
+        indent: int | None = None,
     ) -> str:
         """Return a stringified XML representation of the Metadata instance.
 
@@ -965,17 +976,19 @@ class Metadata:
                 metadata_xml,
                 encoding="utf-8",
                 method="xml",
-                xml_declaration=True)
+                xml_declaration=True,
+            )
         else:
             metadata_xml_string = ElemTree.tostring(metadata_xml)
             metadata_xml_minidom = minidom.parseString(metadata_xml_string)
             metadata_str = metadata_xml_minidom.toprettyxml(
                 indent=" " * indent,
-                encoding="utf-8")
+                encoding="utf-8",
+            )
         return metadata_str.decode("ascii")
 
     def to_xml(
-            self,
+        self,
     ) -> ElemTree.ElementTree:
         """Return an XML representation of the Metadata instance."""
         attrs = {self._RAPI_NS_PREFIX: self._RAPI_NS_URI}
@@ -989,8 +1002,8 @@ class Metadata:
         return ElemTree.ElementTree(root)
 
     def _to_xml_collections(
-            self,
-            root: ElemTree.Element,
+        self,
+        root: ElemTree.Element,
     ):
         """Add collections node to Metadata root."""
         parent = ElemTree.SubElement(root, self._COLLECTIONS_TAG)
@@ -999,8 +1012,8 @@ class Metadata:
             child.text = collection
 
     def _to_xml_permissions(
-            self,
-            root: ElemTree.Element,
+        self,
+        root: ElemTree.Element,
     ):
         """Add permissions node to Metadata root."""
         permissions = ElemTree.SubElement(root, self._PERMISSIONS_TAG)
@@ -1013,8 +1026,8 @@ class Metadata:
                 capability.text = cap
 
     def _to_xml_properties(
-            self,
-            root: ElemTree.Element,
+        self,
+        root: ElemTree.Element,
     ):
         """Add properties node to Metadata root."""
         attrs = {self._PROP_NS_PREFIX: self._PROP_NS_URI}
@@ -1024,16 +1037,16 @@ class Metadata:
             property_.text = prop_value
 
     def _to_xml_quality(
-            self,
-            root: ElemTree.Element,
+        self,
+        root: ElemTree.Element,
     ):
         """Add quality node to Metadata root."""
         quality = ElemTree.SubElement(root, self._QUALITY_TAG)
         quality.text = str(self.quality())
 
     def _to_xml_metadata_values(
-            self,
-            root: ElemTree.Element,
+        self,
+        root: ElemTree.Element,
     ):
         """Add metadata values node to Metadata root."""
         values = ElemTree.SubElement(root, self._METADATA_VALUES_TAG)
@@ -1044,8 +1057,8 @@ class Metadata:
 
     @classmethod
     def _get_clean_permissions(
-            cls,
-            source_permissions: list | None,
+        cls,
+        source_permissions: list | None,
     ) -> list:
         """Return permissions list without duplicates.
 
@@ -1073,13 +1086,16 @@ class Metadata:
             else:
                 logger.warning(
                     "Ignoring permission [%s]: role [%s] is already used in [%s]",
-                    permission, role_name, existing_perm)
+                    permission,
+                    role_name,
+                    existing_perm,
+                )
         return permissions
 
     @staticmethod
     def _get_permission_for_role(
-            permissions: list,
-            role_name: str,
+        permissions: list,
+        role_name: str,
     ) -> Permission | None:
         """Return permissions assigned to the role provided.
 
@@ -1099,7 +1115,7 @@ class Metadata:
 
     @staticmethod
     def _get_clean_dict(
-            source_dict: dict | None,
+        source_dict: dict | None,
     ) -> dict:
         """Return a dictionary with stringified values and removed None values.
 
@@ -1132,9 +1148,9 @@ class Permission:
     _CAPABILITIES: ClassVar[tuple] = {READ, INSERT, UPDATE, UPDATE_NODE, EXECUTE}
 
     def __init__(
-            self,
-            role_name: str,
-            capabilities: set,
+        self,
+        role_name: str,
+        capabilities: set,
     ):
         """Initialize a Permission instance.
 
@@ -1149,8 +1165,8 @@ class Permission:
         self._capabilities = {cap for cap in capabilities if cap in self._CAPABILITIES}
 
     def __eq__(
-            self,
-            other: Permission,
+        self,
+        other: Permission,
     ) -> bool:
         """Verify if Permission instances are equal.
 
@@ -1165,12 +1181,14 @@ class Permission:
             True if there's no difference between internal Permission fields.
             Otherwise, False.
         """
-        return (isinstance(other, Permission) and
-                self._role_name == other._role_name and
-                self._capabilities == other._capabilities)
+        return (
+            isinstance(other, Permission)
+            and self._role_name == other._role_name
+            and self._capabilities == other._capabilities
+        )
 
     def __hash__(
-            self,
+        self,
     ) -> int:
         """Generate a hash value of a Permission instance.
 
@@ -1184,28 +1202,30 @@ class Permission:
         return hash(tuple(items))
 
     def __repr__(
-            self,
+        self,
     ) -> str:
         """Return a string representation of the Permission instance."""
-        return (f"Permission("
-                f"role_name='{self._role_name}', "
-                f"capabilities={self._capabilities})")
+        return (
+            f"Permission("
+            f"role_name='{self._role_name}', "
+            f"capabilities={self._capabilities})"
+        )
 
     def role_name(
-            self,
+        self,
     ) -> str:
         """Return permission's role name."""
         return self._role_name
 
     def capabilities(
-            self,
+        self,
     ) -> set:
         """Return permission's capabilities."""
         return self._capabilities.copy()
 
     def add_capability(
-            self,
-            capability: str,
+        self,
+        capability: str,
     ) -> bool:
         """Assign a new capability to the role.
 
@@ -1220,16 +1240,18 @@ class Permission:
             True if there's no such capability assigned to this role already, and it is
             a correct one. Otherwise, False.
         """
-        allow = (capability is not None and
-                 capability in self._CAPABILITIES and
-                 capability not in self.capabilities())
+        allow = (
+            capability is not None
+            and capability in self._CAPABILITIES
+            and capability not in self.capabilities()
+        )
         if allow:
             self._capabilities.add(capability)
         return allow
 
     def remove_capability(
-            self,
-            capability: str,
+        self,
+        capability: str,
     ) -> bool:
         """Remove a capability from the role.
 
@@ -1244,14 +1266,13 @@ class Permission:
             True if the capability is assigned to the role.
             Otherwise, False.
         """
-        allow = (capability is not None and
-                 capability in self.capabilities())
+        allow = capability is not None and capability in self.capabilities()
         if allow:
             self._capabilities.remove(capability)
         return allow
 
     def to_json(
-            self,
+        self,
     ) -> dict:
         """Return a JSON representation of the Permission instance."""
         return {

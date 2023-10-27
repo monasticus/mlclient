@@ -7,17 +7,12 @@ from mlclient.calls import ServerGetCall
 @pytest.fixture()
 def default_server_get_call():
     """Returns an ServerGetCall instance"""
-    return ServerGetCall(
-        server="App-Services",
-        group_id="Default")
+    return ServerGetCall(server="App-Services", group_id="Default")
 
 
 def test_validation_format_param():
     with pytest.raises(exceptions.WrongParametersError) as err:
-        ServerGetCall(
-            server="App-Services",
-            group_id="Default",
-            data_format="text")
+        ServerGetCall(server="App-Services", group_id="Default", data_format="text")
 
     expected_msg = "The supported formats are: xml, json, html"
     assert err.value.args[0] == expected_msg
@@ -25,24 +20,24 @@ def test_validation_format_param():
 
 def test_validation_view_param():
     with pytest.raises(exceptions.WrongParametersError) as err:
-        ServerGetCall(
-            server="App-Services",
-            group_id="Default",
-            view="X")
+        ServerGetCall(server="App-Services", group_id="Default", view="X")
 
-    expected_msg = ("The supported views are: "
-                    "describe, default, config, edit, package, "
-                    "status, xdmp:server-status, properties-schema")
+    expected_msg = (
+        "The supported views are: "
+        "describe, default, config, edit, package, "
+        "status, xdmp:server-status, properties-schema"
+    )
     assert err.value.args[0] == expected_msg
 
 
 def test_endpoint():
-    assert ServerGetCall(
-        server="1",
-        group_id="Default").endpoint == "/manage/v2/servers/1"
-    assert ServerGetCall(
-        server="App-Services",
-        group_id="Default").endpoint == "/manage/v2/servers/App-Services"
+    assert (
+        ServerGetCall(server="1", group_id="Default").endpoint == "/manage/v2/servers/1"
+    )
+    assert (
+        ServerGetCall(server="App-Services", group_id="Default").endpoint
+        == "/manage/v2/servers/App-Services"
+    )
 
 
 def test_method(default_server_get_call):
@@ -64,20 +59,14 @@ def test_headers(default_server_get_call):
 
 
 def test_headers_for_none_format():
-    call = ServerGetCall(
-        server="App-Services",
-        group_id="Default",
-        data_format=None)
+    call = ServerGetCall(server="App-Services", group_id="Default", data_format=None)
     assert call.headers == {
         "Accept": "application/xml",
     }
 
 
 def test_headers_for_html_format():
-    call = ServerGetCall(
-        server="App-Services",
-        group_id="Default",
-        data_format="html")
+    call = ServerGetCall(server="App-Services", group_id="Default", data_format="html")
     assert call.headers == {
         "Accept": "text/html",
     }
@@ -102,13 +91,15 @@ def test_body(default_server_get_call):
 
 
 def test_fully_parametrized_call():
-    call = ServerGetCall(server="App-Services",
-                         group_id="Default",
-                         data_format="json",
-                         view="status",
-                         host_id="localhost",
-                         full_refs=False,
-                         modules=True)
+    call = ServerGetCall(
+        server="App-Services",
+        group_id="Default",
+        data_format="json",
+        view="status",
+        host_id="localhost",
+        full_refs=False,
+        modules=True,
+    )
     assert call.method == "GET"
     assert call.headers == {
         "Accept": "application/json",

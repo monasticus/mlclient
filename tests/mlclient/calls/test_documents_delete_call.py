@@ -12,25 +12,25 @@ def default_documents_get_call():
 
 def test_validation_category_param():
     with pytest.raises(exceptions.WrongParametersError) as err:
-        DocumentsDeleteCall(
-            uri="/a.xml",
-            category="X")
+        DocumentsDeleteCall(uri="/a.xml", category="X")
 
-    expected_msg = ("The supported categories are: "
-                    "content, metadata, metadata-values, collections, "
-                    "permissions, properties, quality")
+    expected_msg = (
+        "The supported categories are: "
+        "content, metadata, metadata-values, collections, "
+        "permissions, properties, quality"
+    )
     assert err.value.args[0] == expected_msg
 
 
 def test_validation_multiple_categories_param():
     with pytest.raises(exceptions.WrongParametersError) as err:
-        DocumentsDeleteCall(
-            uri="/a.xml",
-            category=["collections", "X"])
+        DocumentsDeleteCall(uri="/a.xml", category=["collections", "X"])
 
-    expected_msg = ("The supported categories are: "
-                    "content, metadata, metadata-values, collections, "
-                    "permissions, properties, quality")
+    expected_msg = (
+        "The supported categories are: "
+        "content, metadata, metadata-values, collections, "
+        "permissions, properties, quality"
+    )
     assert err.value.args[0] == expected_msg
 
 
@@ -90,7 +90,8 @@ def test_fully_parametrized_call_for_single_uri():
         txid="transaction",
         temporal_collection="Entity-collection",
         system_time="2023-09-09T01:01:01.000Z",
-        wipe_temporal=True)
+        wipe_temporal=True,
+    )
     assert call.method == "DELETE"
     assert call.headers == {}
     assert call.params == {
@@ -113,7 +114,8 @@ def test_fully_parametrized_call_for_multiple_uris():
         txid="transaction",
         temporal_collection="Entity-collection",
         system_time="2023-09-09T01:01:01.000Z",
-        wipe_temporal=True)
+        wipe_temporal=True,
+    )
     assert call.method == "DELETE"
     assert call.headers == {}
     assert call.params == {

@@ -30,8 +30,7 @@ def test_validation_body_param():
     with pytest.raises(exceptions.WrongParametersError) as err:
         ServersPostCall(body=None)
 
-    expected_msg = ("No request body provided for "
-                    "POST /manage/v2/servers!")
+    expected_msg = "No request body provided for POST /manage/v2/servers!"
     assert err.value.args[0] == expected_msg
 
 
@@ -39,8 +38,7 @@ def test_validation_blank_body_param():
     with pytest.raises(exceptions.WrongParametersError) as err:
         ServersPostCall(body=" \n")
 
-    expected_msg = ("No request body provided for "
-                    "POST /manage/v2/servers!")
+    expected_msg = "No request body provided for POST /manage/v2/servers!"
     assert err.value.args[0] == expected_msg
 
 
@@ -71,9 +69,11 @@ def test_headers_for_stringified_dict_body():
 
 
 def test_headers_for_xml_body():
-    body = ('<http-server-properties xmlns="http://marklogic.com/manage">'
-            '  <server-name>custom-server</server-name>'
-            '</http-server-properties>')
+    body = (
+        '<http-server-properties xmlns="http://marklogic.com/manage">'
+        "  <server-name>custom-server</server-name>"
+        "</http-server-properties>"
+    )
     call = ServersPostCall(body=body)
     assert call.headers == {
         "Content-Type": "application/xml",
@@ -91,9 +91,11 @@ def test_stringified_dict_body():
 
 
 def test_xml_body():
-    body = ('<http-server-properties xmlns="http://marklogic.com/manage">'
-            '  <server-name>custom-server</server-name>'
-            '</http-server-properties>')
+    body = (
+        '<http-server-properties xmlns="http://marklogic.com/manage">'
+        "  <server-name>custom-server</server-name>"
+        "</http-server-properties>"
+    )
     call = ServersPostCall(body=body)
     assert call.body == body
 
@@ -105,9 +107,7 @@ def test_fully_parametrized_call():
         "port": 8090,
         "content-database": "Documents",
     }
-    call = ServersPostCall(group_id="Default",
-                           server_type="http",
-                           body=body)
+    call = ServersPostCall(group_id="Default", server_type="http", body=body)
     assert call.method == "POST"
     assert call.headers == {
         "Content-Type": "application/json",

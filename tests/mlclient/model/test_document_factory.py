@@ -2,10 +2,18 @@ from xml.etree.ElementTree import Element
 
 import pytest
 
-from mlclient.model import (BinaryDocument, DocumentFactory, DocumentType,
-                            JSONDocument, Metadata, MetadataDocument,
-                            RawDocument, RawStringDocument, TextDocument,
-                            XMLDocument)
+from mlclient.model import (
+    BinaryDocument,
+    DocumentFactory,
+    DocumentType,
+    JSONDocument,
+    Metadata,
+    MetadataDocument,
+    RawDocument,
+    RawStringDocument,
+    TextDocument,
+    XMLDocument,
+)
 
 
 def test_build_metadata_document():
@@ -128,8 +136,9 @@ def test_build_document_unsupported_content_type():
     with pytest.raises(NotImplementedError) as err:
         DocumentFactory.build_document(1)
 
-    expected_msg = ("Unsupported document type! "
-                    "Document types are: XML, JSON, TEXT, BINARY!")
+    expected_msg = (
+        "Unsupported document type! Document types are: XML, JSON, TEXT, BINARY!"
+    )
     assert err.value.args[0] == expected_msg
 
 
@@ -175,4 +184,3 @@ def test_build_raw_document_unsupported_content_type():
 
     expected_msg = "Raw document can store content only in [bytes] or [str] format!"
     assert err.value.args[0] == expected_msg
-

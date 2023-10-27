@@ -41,9 +41,11 @@ def test_get():
 @pytest.mark.ml_access()
 def test_get_with_customized_params_and_headers():
     with MLClient(auth_method="digest") as client:
-        resp = client.get("/manage/v2/servers",
-                          params={"format": "json"},
-                          headers={"custom-header": "custom-value"})
+        resp = client.get(
+            "/manage/v2/servers",
+            params={"format": "json"},
+            headers={"custom-header": "custom-value"},
+        )
 
     assert resp.request.method == "GET"
     assert "?format=json" in resp.request.url
@@ -70,7 +72,8 @@ def test_post_with_customized_params_and_headers_and_body_different_than_json():
             "/v1/eval",
             body={"xquery": "()"},
             params={"database": "Documents"},
-            headers={"Content-Type": "application/x-www-form-urlencoded"})
+            headers={"Content-Type": "application/x-www-form-urlencoded"},
+        )
 
     assert resp.request.method == "POST"
     assert "?database=Documents" in resp.request.url
@@ -83,10 +86,12 @@ def test_post_with_customized_params_and_headers_and_body_different_than_json():
 @pytest.mark.ml_access()
 def test_post_with_customized_params_and_headers_and_json_body():
     with MLClient(auth_method="digest") as client:
-        resp = client.post("/manage/v2/databases/Documents",
-                           body={"operation": "clear-database"},
-                           params={"format": "json"},
-                           headers={"Content-Type": "application/json"})
+        resp = client.post(
+            "/manage/v2/databases/Documents",
+            body={"operation": "clear-database"},
+            params={"format": "json"},
+            headers={"Content-Type": "application/json"},
+        )
 
     assert resp.request.method == "POST"
     assert "?format=json" in resp.request.url
@@ -110,10 +115,12 @@ def test_put():
 @pytest.mark.ml_access()
 def test_put_with_customized_params_and_headers_and_body_different_than_json():
     with MLClient(auth_method="digest") as client:
-        resp = client.put("/v1/documents",
-                          body="<document/>",
-                          params={"database": "Documents"},
-                          headers={"Content-Type": "application/xml"})
+        resp = client.put(
+            "/v1/documents",
+            body="<document/>",
+            params={"database": "Documents"},
+            headers={"Content-Type": "application/xml"},
+        )
 
     assert resp.request.method == "PUT"
     assert "?database=Documents" in resp.request.url
@@ -126,10 +133,12 @@ def test_put_with_customized_params_and_headers_and_body_different_than_json():
 @pytest.mark.ml_access()
 def test_put_with_customized_params_and_headers_and_json_body():
     with MLClient(auth_method="digest") as client:
-        resp = client.put("/v1/documents",
-                          body={"document": {}},
-                          params={"database": "Documents"},
-                          headers={"Content-Type": "application/json"})
+        resp = client.put(
+            "/v1/documents",
+            body={"document": {}},
+            params={"database": "Documents"},
+            headers={"Content-Type": "application/json"},
+        )
 
     assert resp.request.method == "PUT"
     assert "?database=Documents" in resp.request.url
@@ -153,9 +162,11 @@ def test_delete():
 @pytest.mark.ml_access()
 def test_delete_with_customized_params_and_headers():
     with MLClient(auth_method="digest") as client:
-        resp = client.delete("/manage/v2/databases/custom-db",
-                             params={"format": "json"},
-                             headers={"custom-header": "custom-value"})
+        resp = client.delete(
+            "/manage/v2/databases/custom-db",
+            params={"format": "json"},
+            headers={"custom-header": "custom-value"},
+        )
 
     assert resp.request.method == "DELETE"
     assert "?format=json" in resp.request.url

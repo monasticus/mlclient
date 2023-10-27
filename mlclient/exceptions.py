@@ -89,8 +89,8 @@ class MarkLogicError(Exception):
     """
 
     def __init__(
-            self,
-            error: dict | str,
+        self,
+        error: dict | str,
     ):
         """Initialize MarkLogicError instance.
 
@@ -127,8 +127,8 @@ class ResourceNotFoundError(Exception):
     """
 
     def __init__(
-            self,
-            resource_name: str,
+        self,
+        resource_name: str,
     ):
         """Initialize ResourceNotFoundError exception with details.
 

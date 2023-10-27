@@ -87,7 +87,7 @@ class CallEvalCommand(Command):
     ]
 
     def handle(
-            self,
+        self,
     ) -> int:
         """Execute the command."""
         eval_params = self._get_eval_params()
@@ -119,8 +119,8 @@ class CallEvalCommand(Command):
         return params
 
     def _call_eval(
-            self,
-            eval_params: dict,
+        self,
+        eval_params: dict,
     ):
         """Evaluate the code and get results."""
         environment = self.option("environment")
@@ -128,6 +128,5 @@ class CallEvalCommand(Command):
 
         manager = MLManager(environment)
         with manager.get_eval_client(rest_server) as client:
-            self.info(f"Evaluating code "
-                      f"using REST App-Server {client.base_url}\n")
+            self.info(f"Evaluating code using REST App-Server {client.base_url}\n")
             return client.eval(**eval_params)

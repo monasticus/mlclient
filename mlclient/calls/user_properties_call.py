@@ -34,9 +34,9 @@ class UserPropertiesGetCall(ResourceCall):
     _SUPPORTED_FORMATS: ClassVar[list] = ["xml", "json", "html"]
 
     def __init__(
-            self,
-            user: str,
-            data_format: str = "xml",
+        self,
+        user: str,
+        data_format: str = "xml",
     ):
         """Initialize UserPropertiesGetCall instance.
 
@@ -51,14 +51,16 @@ class UserPropertiesGetCall(ResourceCall):
         data_format = data_format if data_format is not None else "xml"
         self._validate_params(data_format)
 
-        super().__init__(method="GET",
-                         accept=utils.get_accept_header_for_format(data_format))
+        super().__init__(
+            method="GET",
+            accept=utils.get_accept_header_for_format(data_format),
+        )
         self._user = user
         self.add_param(self._FORMAT_PARAM, data_format)
 
     @property
     def endpoint(
-            self,
+        self,
     ):
         """An endpoint for the User Properties call.
 
@@ -71,8 +73,8 @@ class UserPropertiesGetCall(ResourceCall):
 
     @classmethod
     def _validate_params(
-            cls,
-            data_format: str,
+        cls,
+        data_format: str,
     ):
         if data_format not in cls._SUPPORTED_FORMATS:
             joined_supported_formats = ", ".join(cls._SUPPORTED_FORMATS)
@@ -94,9 +96,9 @@ class UserPropertiesPutCall(ResourceCall):
     _ENDPOINT_TEMPLATE: str = "/manage/v2/users/{}/properties"
 
     def __init__(
-            self,
-            user: str,
-            body: str | dict,
+        self,
+        user: str,
+        body: str | dict,
     ):
         """Initialize UserPropertiesPutCall instance.
 
@@ -111,14 +113,12 @@ class UserPropertiesPutCall(ResourceCall):
         content_type = utils.get_content_type_header_for_data(body)
         if content_type == constants.HEADER_JSON and isinstance(body, str):
             body = json.loads(body)
-        super().__init__(method="PUT",
-                         content_type=content_type,
-                         body=body)
+        super().__init__(method="PUT", content_type=content_type, body=body)
         self._user = user
 
     @property
     def endpoint(
-            self,
+        self,
     ):
         """An endpoint for the User Properties call.
 
@@ -131,10 +131,12 @@ class UserPropertiesPutCall(ResourceCall):
 
     @classmethod
     def _validate_params(
-            cls,
-            body: str | dict,
+        cls,
+        body: str | dict,
     ):
         if body is None or isinstance(body, str) and re.search("^\\s*$", body):
-            msg = ("No request body provided for "
-                   "PUT /manage/v2/users/{id|name}/properties!")
+            msg = (
+                "No request body provided for "
+                "PUT /manage/v2/users/{id|name}/properties!"
+            )
             raise exceptions.WrongParametersError(msg)

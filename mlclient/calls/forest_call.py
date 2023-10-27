@@ -33,15 +33,23 @@ class ForestGetCall(ResourceCall):
     _VIEW_PARAM: str = "view"
 
     _SUPPORTED_FORMATS: ClassVar[list] = ["xml", "json", "html"]
-    _SUPPORTED_VIEWS: ClassVar[list] = ["describe", "default", "config", "counts",
-                                        "edit", "status", "storage",
-                                        "xdmp:forest-status", "properties-schema"]
+    _SUPPORTED_VIEWS: ClassVar[list] = [
+        "describe",
+        "default",
+        "config",
+        "counts",
+        "edit",
+        "status",
+        "storage",
+        "xdmp:forest-status",
+        "properties-schema",
+    ]
 
     def __init__(
-            self,
-            forest: str,
-            data_format: str = "xml",
-            view: str = "default",
+        self,
+        forest: str,
+        data_format: str = "xml",
+        view: str = "default",
     ):
         """Initialize ForestGetCall instance.
 
@@ -60,15 +68,17 @@ class ForestGetCall(ResourceCall):
         view = view if view is not None else "default"
         self._validate_params(data_format, view)
 
-        super().__init__(method="GET",
-                         accept=utils.get_accept_header_for_format(data_format))
+        super().__init__(
+            method="GET",
+            accept=utils.get_accept_header_for_format(data_format),
+        )
         self._forest = forest
         self.add_param(self._FORMAT_PARAM, data_format)
         self.add_param(self._VIEW_PARAM, view)
 
     @property
     def endpoint(
-            self,
+        self,
     ):
         """An endpoint for the Forest call.
 
@@ -81,9 +91,9 @@ class ForestGetCall(ResourceCall):
 
     @classmethod
     def _validate_params(
-            cls,
-            data_format: str,
-            view: str,
+        cls,
+        data_format: str,
+        view: str,
     ):
         if data_format not in cls._SUPPORTED_FORMATS:
             joined_supported_formats = ", ".join(cls._SUPPORTED_FORMATS)
@@ -109,13 +119,20 @@ class ForestPostCall(ResourceCall):
 
     _STATE_PARAM: str = "state"
 
-    _SUPPORTED_STATES: ClassVar[list] = ["clear", "merge", "restart", "attach",
-                                         "detach", "retire", "employ"]
+    _SUPPORTED_STATES: ClassVar[list] = [
+        "clear",
+        "merge",
+        "restart",
+        "attach",
+        "detach",
+        "retire",
+        "employ",
+    ]
 
     def __init__(
-            self,
-            forest: str,
-            body: dict,
+        self,
+        forest: str,
+        body: dict,
     ):
         """Initialize ForestPostCall instance.
 
@@ -129,14 +146,16 @@ class ForestPostCall(ResourceCall):
             Allowed values: clear, merge, restart, attach, detach, retire, employ.
         """
         self._validate_params(body.get(self._STATE_PARAM))
-        super().__init__(method="POST",
-                         content_type=constants.HEADER_X_WWW_FORM_URLENCODED,
-                         body=body)
+        super().__init__(
+            method="POST",
+            content_type=constants.HEADER_X_WWW_FORM_URLENCODED,
+            body=body,
+        )
         self._forest = forest
 
     @property
     def endpoint(
-            self,
+        self,
     ):
         """An endpoint for the Forests call.
 
@@ -149,8 +168,8 @@ class ForestPostCall(ResourceCall):
 
     @classmethod
     def _validate_params(
-            cls,
-            state: str,
+        cls,
+        state: str,
     ):
         if state is None:
             msg = "You must include the 'state' parameter within a body!"
@@ -180,10 +199,10 @@ class ForestDeleteCall(ResourceCall):
     _SUPPORTED_REPLICAS_OPTS: ClassVar[list] = ["detach", "delete"]
 
     def __init__(
-            self,
-            forest: str,
-            level: str,
-            replicas: str | None = None,
+        self,
+        forest: str,
+        level: str,
+        replicas: str | None = None,
     ):
         """Initialize ForestDeleteCall instance.
 
@@ -209,7 +228,7 @@ class ForestDeleteCall(ResourceCall):
 
     @property
     def endpoint(
-            self,
+        self,
     ):
         """An endpoint for the Forest call.
 
@@ -222,9 +241,9 @@ class ForestDeleteCall(ResourceCall):
 
     @classmethod
     def _validate_params(
-            cls,
-            level: str,
-            replicas: str,
+        cls,
+        level: str,
+        replicas: str,
     ):
         if level not in cls._SUPPORTED_LEVELS:
             joined_supported_levels = ", ".join(cls._SUPPORTED_LEVELS)

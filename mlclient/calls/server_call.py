@@ -37,18 +37,26 @@ class ServerGetCall(ResourceCall):
     _MODULES_PARAM: str = "modules"
 
     _SUPPORTED_FORMATS: ClassVar[list] = ["xml", "json", "html"]
-    _SUPPORTED_VIEWS: ClassVar[list] = ["describe", "default", "config", "edit",
-                                        "package", "status", "xdmp:server-status",
-                                        "properties-schema"]
+    _SUPPORTED_VIEWS: ClassVar[list] = [
+        "describe",
+        "default",
+        "config",
+        "edit",
+        "package",
+        "status",
+        "xdmp:server-status",
+        "properties-schema",
+    ]
 
     def __init__(
-            self, server: str,
-            group_id: str,
-            data_format: str = "xml",
-            view: str = "default",
-            host_id: str | None = None,
-            full_refs: bool | None = None,
-            modules: bool | None = None,
+        self,
+        server: str,
+        group_id: str,
+        data_format: str = "xml",
+        view: str = "default",
+        host_id: str | None = None,
+        full_refs: bool | None = None,
+        modules: bool | None = None,
     ):
         """Initialize ServerGetCall instance.
 
@@ -83,8 +91,10 @@ class ServerGetCall(ResourceCall):
         view = view if view is not None else "default"
         self._validate_params(data_format, view)
 
-        super().__init__(method="GET",
-                         accept=utils.get_accept_header_for_format(data_format))
+        super().__init__(
+            method="GET",
+            accept=utils.get_accept_header_for_format(data_format),
+        )
         if full_refs is not None:
             full_refs = str(full_refs).lower()
         if modules is not None:
@@ -99,7 +109,7 @@ class ServerGetCall(ResourceCall):
 
     @property
     def endpoint(
-            self,
+        self,
     ):
         """An endpoint for the Server call.
 
@@ -112,9 +122,9 @@ class ServerGetCall(ResourceCall):
 
     @classmethod
     def _validate_params(
-            cls,
-            data_format: str,
-            view: str,
+        cls,
+        data_format: str,
+        view: str,
     ):
         if data_format not in cls._SUPPORTED_FORMATS:
             joined_supported_formats = ", ".join(cls._SUPPORTED_FORMATS)
@@ -141,9 +151,9 @@ class ServerDeleteCall(ResourceCall):
     _GROUP_ID_PARAM: str = "group-id"
 
     def __init__(
-            self,
-            server: str,
-            group_id: str,
+        self,
+        server: str,
+        group_id: str,
     ):
         """Initialize ServerDeleteCall instance.
 
@@ -161,7 +171,7 @@ class ServerDeleteCall(ResourceCall):
 
     @property
     def endpoint(
-            self,
+        self,
     ):
         """An endpoint for the Server call.
 

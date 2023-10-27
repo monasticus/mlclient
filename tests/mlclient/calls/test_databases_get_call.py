@@ -22,8 +22,10 @@ def test_validation_view_param():
     with pytest.raises(exceptions.WrongParametersError) as err:
         DatabasesGetCall(view="X")
 
-    expected_msg = ("The supported views are: "
-                    "describe, default, metrics, package, schema, properties-schema")
+    expected_msg = (
+        "The supported views are: "
+        "describe, default, metrics, package, schema, properties-schema"
+    )
     assert err.value.args[0] == expected_msg
 
 
@@ -81,8 +83,7 @@ def test_body(default_databases_get_call):
 
 
 def test_fully_parametrized_call():
-    call = DatabasesGetCall(data_format="json",
-                            view="schema")
+    call = DatabasesGetCall(data_format="json", view="schema")
     assert call.method == "GET"
     assert call.headers == {
         "Accept": "application/json",

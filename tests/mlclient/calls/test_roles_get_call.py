@@ -80,8 +80,7 @@ def test_body(default_roles_get_call):
 
 
 def test_fully_parametrized_call():
-    call = RolesGetCall(data_format="json",
-                        view="describe")
+    call = RolesGetCall(data_format="json", view="describe")
     assert call.method == "GET"
     assert call.headers == {
         "Accept": "application/json",

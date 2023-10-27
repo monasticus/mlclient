@@ -4,7 +4,7 @@ from typing import Any, Iterator
 
 from requests import Response
 
-from mlclient import constants
+from mlclient import constants, utils
 from mlclient.calls import DocumentsGetCall
 from mlclient.calls.model import (
     Category,
@@ -57,25 +57,13 @@ class DocumentsClient(MLResourceClient):
         category: str | list | None,
     ) -> Document | list[Document]:
         parsed_resp = cls._parse_response(resp)
-        content_type = cls._get_response_content_type(resp)
+        content_type = utils.get_content_type_from_headers(resp.headers)
         is_multipart = content_type.startswith(constants.HEADER_MULTIPART_MIXED)
         documents_data = cls._pre_format_data(parsed_resp, is_multipart, uris, category)
         docs = cls._parse_to_documents(documents_data)
         if isinstance(uris, str):
             return docs[0]
         return docs
-
-    @classmethod
-    def _get_response_content_type(
-        cls,
-        resp: Response,
-    ) -> str | None:
-        gen = (
-            value
-            for name, value in resp.headers.items()
-            if name.lower() == "content-type"
-        )
-        return next(gen, None)
 
     @classmethod
     def _parse_response(

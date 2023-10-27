@@ -25,7 +25,7 @@ from requests.auth import AuthBase, HTTPBasicAuth, HTTPDigestAuth
 from requests_toolbelt import MultipartDecoder
 from requests_toolbelt.multipart.decoder import BodyPart
 
-from mlclient import constants as const
+from mlclient import constants as const, utils
 from mlclient.calls import (
     DatabaseDeleteCall,
     DatabaseGetCall,
@@ -1759,7 +1759,7 @@ class MLResponseParser:
         list | tuple
             A parsed response body
         """
-        content_type = cls._get_response_content_type(response.headers)
+        content_type = utils.get_content_type_from_headers(response.headers)
         if not response.ok:
             if content_type.startswith("application/json"):
                 error = response.json()
@@ -1787,7 +1787,7 @@ class MLResponseParser:
         response: Response,
         with_headers: bool = False,
     ) -> str | tuple[dict, str] | list[str | tuple[dict, str]]:
-        content_type = cls._get_response_content_type(response.headers)
+        content_type = utils.get_content_type_from_headers(response.headers)
         if not response.ok:
             if content_type.startswith("application/json"):
                 return json.dumps(response.json())
@@ -1811,7 +1811,7 @@ class MLResponseParser:
         response: Response,
         with_headers: bool = False,
     ) -> bytes | tuple[dict, bytes] | list[bytes | tuple[dict, bytes]]:
-        content_type = cls._get_response_content_type(response.headers)
+        content_type = utils.get_content_type_from_headers(response.headers)
         if not response.ok:
             if content_type.startswith("application/json"):
                 return json.dumps(response.json()).encode("utf-8")
@@ -1913,7 +1913,7 @@ class MLResponseParser:
         body_part: BodyPart | Response,
         headers: dict,
     ):
-        content_type = cls._get_response_content_type(headers)
+        content_type = utils.get_content_type_from_headers(headers)
         primitive_type = headers.get(const.HEADER_NAME_PRIMITIVE)
 
         if (
@@ -1929,16 +1929,6 @@ class MLResponseParser:
                 return ElemTree.ElementTree(element)
             return element
         return body_part.content
-
-    @classmethod
-    def _get_response_content_type(
-        cls,
-        headers: dict,
-    ) -> str | None:
-        gen = (
-            value for name, value in headers.items() if name.lower() == "content-type"
-        )
-        return next(gen, None)
 
     @staticmethod
     def _decode_headers(

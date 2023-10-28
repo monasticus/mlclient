@@ -137,7 +137,7 @@ def test_parse_text_with_headers_single_error_response(client):
     builder.build_post()
 
     resp = client.eval(xquery=xqy)
-    headers, parsed_resp = MLResponseParser.parse_with_headers(resp, str)
+    headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=str)
 
     assert isinstance(parsed_resp, str)
     assert parsed_resp == (
@@ -164,7 +164,7 @@ def test_parse_bytes_with_headers_single_error_response(client):
     builder.build_post()
 
     resp = client.eval(xquery=xqy)
-    headers, parsed_resp = MLResponseParser.parse_with_headers(resp, bytes)
+    headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=bytes)
 
     assert isinstance(parsed_resp, bytes)
     assert parsed_resp == (
@@ -337,7 +337,7 @@ def test_parse_text_with_headers_single_error_response_json(client):
     builder.build_get()
 
     resp = client.get_documents(uri=uri)
-    headers, parsed_resp = MLResponseParser.parse_with_headers(resp, str)
+    headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=str)
 
     assert isinstance(parsed_resp, str)
     assert parsed_resp == (
@@ -382,7 +382,7 @@ def test_parse_bytes_with_headers_single_error_response_json(client):
     builder.build_get()
 
     resp = client.get_documents(uri=uri)
-    headers, parsed_resp = MLResponseParser.parse_with_headers(resp, bytes)
+    headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=bytes)
 
     assert isinstance(parsed_resp, bytes)
     assert parsed_resp == (
@@ -496,6 +496,56 @@ def test_parse_with_headers_non_multipart_mixed_response_xml(client):
 
 
 @responses.activate
+def test_parse_text_with_headers_non_multipart_mixed_response_xml(client):
+    uri = "/some/dir/doc1.xml"
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/documents")
+    builder.with_request_param("uri", uri)
+    builder.with_response_content_type("application/xml; charset=utf-8")
+    builder.with_response_header("vnd.marklogic.document-format", "xml")
+    builder.with_response_status(200)
+    builder.with_response_body('<?xml version="1.0" encoding="UTF-8"?>\n<root/>')
+    builder.build_get()
+
+    resp = client.get_documents(uri=uri)
+    headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=str)
+
+    assert isinstance(parsed_resp, str)
+    assert parsed_resp == '<?xml version="1.0" encoding="UTF-8"?>\n<root/>'
+    assert headers == {
+        "vnd.marklogic.document-format": "xml",
+        "Content-Type": "application/xml; charset=utf-8",
+        "Content-Length": "46",
+    }
+
+
+@responses.activate
+def test_parse_bytes_with_headers_non_multipart_mixed_response_xml(client):
+    uri = "/some/dir/doc1.xml"
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/documents")
+    builder.with_request_param("uri", uri)
+    builder.with_response_content_type("application/xml; charset=utf-8")
+    builder.with_response_header("vnd.marklogic.document-format", "xml")
+    builder.with_response_status(200)
+    builder.with_response_body('<?xml version="1.0" encoding="UTF-8"?>\n<root/>')
+    builder.build_get()
+
+    resp = client.get_documents(uri=uri)
+    headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=bytes)
+
+    assert isinstance(parsed_resp, bytes)
+    assert parsed_resp == b'<?xml version="1.0" encoding="UTF-8"?>\n<root/>'
+    assert headers == {
+        "vnd.marklogic.document-format": "xml",
+        "Content-Type": "application/xml; charset=utf-8",
+        "Content-Length": "46",
+    }
+
+
+@responses.activate
 def test_parse_non_multipart_mixed_response_json(client):
     uri = "/some/dir/doc2.json"
 
@@ -575,6 +625,58 @@ def test_parse_with_headers_non_multipart_mixed_response_json(client):
 
     assert isinstance(parsed_resp, dict)
     assert parsed_resp == {"root": {"child": "data2"}}
+    assert headers == {
+        "vnd.marklogic.document-format": "json",
+        "Content-Type": "application/json; charset=utf-8",
+        "Content-Length": "26",
+    }
+
+
+@responses.activate
+def test_parse_text_with_headers_non_multipart_mixed_response_json(client):
+    uri = "/some/dir/doc2.json"
+    content = '{"root":{"child":"data2"}}'
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/documents")
+    builder.with_request_param("uri", uri)
+    builder.with_response_content_type("application/json; charset=utf-8")
+    builder.with_response_header("vnd.marklogic.document-format", "json")
+    builder.with_response_status(200)
+    builder.with_response_body(content)
+    builder.build_get()
+
+    resp = client.get_documents(uri=uri)
+    headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=str)
+
+    assert isinstance(parsed_resp, str)
+    assert parsed_resp == content
+    assert headers == {
+        "vnd.marklogic.document-format": "json",
+        "Content-Type": "application/json; charset=utf-8",
+        "Content-Length": "26",
+    }
+
+
+@responses.activate
+def test_parse_bytes_with_headers_non_multipart_mixed_response_json(client):
+    uri = "/some/dir/doc2.json"
+    content = '{"root":{"child":"data2"}}'
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/documents")
+    builder.with_request_param("uri", uri)
+    builder.with_response_content_type("application/json; charset=utf-8")
+    builder.with_response_header("vnd.marklogic.document-format", "json")
+    builder.with_response_status(200)
+    builder.with_response_body(content)
+    builder.build_get()
+
+    resp = client.get_documents(uri=uri)
+    headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=bytes)
+
+    assert isinstance(parsed_resp, bytes)
+    assert parsed_resp == content.encode("utf-8")
     assert headers == {
         "vnd.marklogic.document-format": "json",
         "Content-Type": "application/json; charset=utf-8",
@@ -668,6 +770,56 @@ def test_parse_with_headers_non_multipart_mixed_response_text(client):
 
 
 @responses.activate
+def test_parse_text_with_headers_non_multipart_mixed_response_text(client):
+    uri = "/some/dir/doc3.xqy"
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/documents")
+    builder.with_request_param("uri", uri)
+    builder.with_response_content_type("application/vnd.marklogic-xdmp; charset=utf-8")
+    builder.with_response_header("vnd.marklogic.document-format", "text")
+    builder.with_response_status(200)
+    builder.with_response_body(b'xquery version "1.0-ml";\n\nfn:current-date()')
+    builder.build_get()
+
+    resp = client.get_documents(uri=uri)
+    headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=str)
+
+    assert isinstance(parsed_resp, str)
+    assert parsed_resp == 'xquery version "1.0-ml";\n\nfn:current-date()'
+    assert headers == {
+        "vnd.marklogic.document-format": "text",
+        "Content-Type": "application/vnd.marklogic-xdmp; charset=utf-8",
+        "Content-Length": "43",
+    }
+
+
+@responses.activate
+def test_parse_bytes_with_headers_non_multipart_mixed_response_text(client):
+    uri = "/some/dir/doc3.xqy"
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/documents")
+    builder.with_request_param("uri", uri)
+    builder.with_response_content_type("application/vnd.marklogic-xdmp; charset=utf-8")
+    builder.with_response_header("vnd.marklogic.document-format", "text")
+    builder.with_response_status(200)
+    builder.with_response_body(b'xquery version "1.0-ml";\n\nfn:current-date()')
+    builder.build_get()
+
+    resp = client.get_documents(uri=uri)
+    headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=bytes)
+
+    assert isinstance(parsed_resp, bytes)
+    assert parsed_resp == b'xquery version "1.0-ml";\n\nfn:current-date()'
+    assert headers == {
+        "vnd.marklogic.document-format": "text",
+        "Content-Type": "application/vnd.marklogic-xdmp; charset=utf-8",
+        "Content-Length": "43",
+    }
+
+
+@responses.activate
 def test_parse_non_multipart_mixed_response_binary(client):
     uri = "/some/dir/doc4.zip"
     content = zlib.compress(b'xquery version "1.0-ml";\n\nfn:current-date()')
@@ -746,6 +898,58 @@ def test_parse_with_headers_non_multipart_mixed_response_binary(client):
 
     resp = client.get_documents(uri=uri)
     headers, parsed_resp = MLResponseParser.parse_with_headers(resp)
+
+    assert isinstance(parsed_resp, bytes)
+    assert parsed_resp == content
+    assert headers == {
+        "vnd.marklogic.document-format": "binary",
+        "Content-Type": "application/zip",
+        "Content-Length": "51",
+    }
+
+
+@responses.activate
+def test_parse_text_with_headers_non_multipart_mixed_response_binary(client):
+    uri = "/some/dir/doc4.zip"
+    content = zlib.compress(b'xquery version "1.0-ml";\n\nfn:current-date()')
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/documents")
+    builder.with_request_param("uri", uri)
+    builder.with_response_content_type("application/zip")
+    builder.with_response_status(200)
+    builder.with_response_body(content)
+    builder.with_response_header("vnd.marklogic.document-format", "binary")
+    builder.build_get()
+
+    resp = client.get_documents(uri=uri)
+    headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=str)
+
+    assert isinstance(parsed_resp, bytes)
+    assert parsed_resp == content
+    assert headers == {
+        "vnd.marklogic.document-format": "binary",
+        "Content-Type": "application/zip",
+        "Content-Length": "51",
+    }
+
+
+@responses.activate
+def test_parse_bytes_with_headers_non_multipart_mixed_response_binary(client):
+    uri = "/some/dir/doc4.zip"
+    content = zlib.compress(b'xquery version "1.0-ml";\n\nfn:current-date()')
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/documents")
+    builder.with_request_param("uri", uri)
+    builder.with_response_content_type("application/zip")
+    builder.with_response_status(200)
+    builder.with_response_body(content)
+    builder.with_response_header("vnd.marklogic.document-format", "binary")
+    builder.build_get()
+
+    resp = client.get_documents(uri=uri)
+    headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=bytes)
 
     assert isinstance(parsed_resp, bytes)
     assert parsed_resp == content
@@ -849,6 +1053,58 @@ def test_parse_with_headers_single_unsupported_response(client):
 
 
 @responses.activate
+def test_parse_text_with_headers_single_unsupported_response(client):
+    xqy = 'cts:directory-query("/root/", "infinity")'
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/eval")
+    builder.with_request_body({"xquery": xqy})
+    builder.with_response_status(200)
+    builder.with_response_body_multipart_mixed()
+    builder.with_response_body_part(
+        "directory-query",
+        'cts:directory-query("/root/", "infinity")',
+    )
+    builder.build_post()
+
+    resp = client.eval(xquery=xqy)
+    headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=str)
+
+    assert isinstance(parsed_resp, str)
+    assert parsed_resp == 'cts:directory-query("/root/", "infinity")'
+    assert headers == {
+        "Content-Type": "text/plain",
+        "X-Primitive": "directory-query",
+    }
+
+
+@responses.activate
+def test_parse_bytes_with_headers_single_unsupported_response(client):
+    xqy = 'cts:directory-query("/root/", "infinity")'
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/eval")
+    builder.with_request_body({"xquery": xqy})
+    builder.with_response_status(200)
+    builder.with_response_body_multipart_mixed()
+    builder.with_response_body_part(
+        "directory-query",
+        'cts:directory-query("/root/", "infinity")',
+    )
+    builder.build_post()
+
+    resp = client.eval(xquery=xqy)
+    headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=bytes)
+
+    assert isinstance(parsed_resp, bytes)
+    assert parsed_resp == b'cts:directory-query("/root/", "infinity")'
+    assert headers == {
+        "Content-Type": "text/plain",
+        "X-Primitive": "directory-query",
+    }
+
+
+@responses.activate
 def test_parse_single_empty_response(client):
     xqy = "()"
 
@@ -915,6 +1171,50 @@ def test_parse_with_headers_single_empty_response(client):
 
     resp = client.eval(xquery=xqy)
     headers, parsed_resp = MLResponseParser.parse_with_headers(resp)
+
+    assert isinstance(parsed_resp, list)
+    assert parsed_resp == []
+    assert headers == {
+        "Content-Type": "text/plain",
+        "Content-Length": "0",
+    }
+
+
+@responses.activate
+def test_parse_text_with_headers_single_empty_response(client):
+    xqy = "()"
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/eval")
+    builder.with_request_body({"xquery": xqy})
+    builder.with_response_status(200)
+    builder.with_empty_response_body()
+    builder.build_post()
+
+    resp = client.eval(xquery=xqy)
+    headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=str)
+
+    assert isinstance(parsed_resp, list)
+    assert parsed_resp == []
+    assert headers == {
+        "Content-Type": "text/plain",
+        "Content-Length": "0",
+    }
+
+
+@responses.activate
+def test_parse_bytes_with_headers_single_empty_response(client):
+    xqy = "()"
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/eval")
+    builder.with_request_body({"xquery": xqy})
+    builder.with_response_status(200)
+    builder.with_empty_response_body()
+    builder.build_post()
+
+    resp = client.eval(xquery=xqy)
+    headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=bytes)
 
     assert isinstance(parsed_resp, list)
     assert parsed_resp == []
@@ -1005,6 +1305,52 @@ def test_parse_with_headers_single_plain_text_str_response(client):
 
 
 @responses.activate
+def test_parse_text_with_headers_single_plain_text_str_response(client):
+    xqy = "'plain text'"
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/eval")
+    builder.with_request_body({"xquery": xqy})
+    builder.with_response_status(200)
+    builder.with_response_body_multipart_mixed()
+    builder.with_response_body_part("string", "plain text")
+    builder.build_post()
+
+    resp = client.eval(xquery=xqy)
+    headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=str)
+
+    assert isinstance(parsed_resp, str)
+    assert parsed_resp == "plain text"
+    assert headers == {
+        "Content-Type": "text/plain",
+        "X-Primitive": "string",
+    }
+
+
+@responses.activate
+def test_parse_bytes_with_headers_single_plain_text_str_response(client):
+    xqy = "'plain text'"
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/eval")
+    builder.with_request_body({"xquery": xqy})
+    builder.with_response_status(200)
+    builder.with_response_body_multipart_mixed()
+    builder.with_response_body_part("string", "plain text")
+    builder.build_post()
+
+    resp = client.eval(xquery=xqy)
+    headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=bytes)
+
+    assert isinstance(parsed_resp, bytes)
+    assert parsed_resp == b"plain text"
+    assert headers == {
+        "Content-Type": "text/plain",
+        "X-Primitive": "string",
+    }
+
+
+@responses.activate
 def test_parse_single_plain_text_int_response(client):
     xqy = "1"
 
@@ -1078,6 +1424,52 @@ def test_parse_with_headers_single_plain_text_int_response(client):
 
     assert isinstance(parsed_resp, int)
     assert parsed_resp == 1
+    assert headers == {
+        "Content-Type": "text/plain",
+        "X-Primitive": "integer",
+    }
+
+
+@responses.activate
+def test_parse_text_with_headers_single_plain_text_int_response(client):
+    xqy = "1"
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/eval")
+    builder.with_request_body({"xquery": xqy})
+    builder.with_response_status(200)
+    builder.with_response_body_multipart_mixed()
+    builder.with_response_body_part("integer", "1")
+    builder.build_post()
+
+    resp = client.eval(xquery=xqy)
+    headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=str)
+
+    assert isinstance(parsed_resp, str)
+    assert parsed_resp == "1"
+    assert headers == {
+        "Content-Type": "text/plain",
+        "X-Primitive": "integer",
+    }
+
+
+@responses.activate
+def test_parse_bytes_with_headers_single_plain_text_int_response(client):
+    xqy = "1"
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/eval")
+    builder.with_request_body({"xquery": xqy})
+    builder.with_response_status(200)
+    builder.with_response_body_multipart_mixed()
+    builder.with_response_body_part("integer", "1")
+    builder.build_post()
+
+    resp = client.eval(xquery=xqy)
+    headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=bytes)
+
+    assert isinstance(parsed_resp, bytes)
+    assert parsed_resp == b"1"
     assert headers == {
         "Content-Type": "text/plain",
         "X-Primitive": "integer",
@@ -1165,6 +1557,52 @@ def test_parse_with_headers_single_plain_text_decimal_response(client):
 
 
 @responses.activate
+def test_parse_text_with_headers_single_plain_text_decimal_response(client):
+    xqy = "1.1"
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/eval")
+    builder.with_request_body({"xquery": xqy})
+    builder.with_response_status(200)
+    builder.with_response_body_multipart_mixed()
+    builder.with_response_body_part("decimal", "1.1")
+    builder.build_post()
+
+    resp = client.eval(xquery=xqy)
+    headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=str)
+
+    assert isinstance(parsed_resp, str)
+    assert parsed_resp == "1.1"
+    assert headers == {
+        "Content-Type": "text/plain",
+        "X-Primitive": "decimal",
+    }
+
+
+@responses.activate
+def test_parse_bytes_with_headers_single_plain_text_decimal_response(client):
+    xqy = "1.1"
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/eval")
+    builder.with_request_body({"xquery": xqy})
+    builder.with_response_status(200)
+    builder.with_response_body_multipart_mixed()
+    builder.with_response_body_part("decimal", "1.1")
+    builder.build_post()
+
+    resp = client.eval(xquery=xqy)
+    headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=bytes)
+
+    assert isinstance(parsed_resp, bytes)
+    assert parsed_resp == b"1.1"
+    assert headers == {
+        "Content-Type": "text/plain",
+        "X-Primitive": "decimal",
+    }
+
+
+@responses.activate
 def test_parse_single_plain_text_boolean_response(client):
     xqy = "fn:true()"
 
@@ -1238,6 +1676,52 @@ def test_parse_with_headers_single_plain_text_boolean_response(client):
 
     assert isinstance(parsed_resp, bool)
     assert parsed_resp is True
+    assert headers == {
+        "Content-Type": "text/plain",
+        "X-Primitive": "boolean",
+    }
+
+
+@responses.activate
+def test_parse_text_with_headers_single_plain_text_boolean_response(client):
+    xqy = "fn:true()"
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/eval")
+    builder.with_request_body({"xquery": xqy})
+    builder.with_response_status(200)
+    builder.with_response_body_multipart_mixed()
+    builder.with_response_body_part("boolean", "true")
+    builder.build_post()
+
+    resp = client.eval(xquery=xqy)
+    headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=str)
+
+    assert isinstance(parsed_resp, str)
+    assert parsed_resp == "true"
+    assert headers == {
+        "Content-Type": "text/plain",
+        "X-Primitive": "boolean",
+    }
+
+
+@responses.activate
+def test_parse_bytes_with_headers_single_plain_text_boolean_response(client):
+    xqy = "fn:true()"
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/eval")
+    builder.with_request_body({"xquery": xqy})
+    builder.with_response_status(200)
+    builder.with_response_body_multipart_mixed()
+    builder.with_response_body_part("boolean", "true")
+    builder.build_post()
+
+    resp = client.eval(xquery=xqy)
+    headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=bytes)
+
+    assert isinstance(parsed_resp, bytes)
+    assert parsed_resp == b"true"
     assert headers == {
         "Content-Type": "text/plain",
         "X-Primitive": "boolean",
@@ -1325,6 +1809,52 @@ def test_parse_with_headers_single_plain_text_date_response(client):
 
 
 @responses.activate
+def test_parse_text_with_headers_single_plain_text_date_response(client):
+    xqy = "fn:current-date()"
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/eval")
+    builder.with_request_body({"xquery": xqy})
+    builder.with_response_status(200)
+    builder.with_response_body_multipart_mixed()
+    builder.with_response_body_part("date", "2023-09-14Z")
+    builder.build_post()
+
+    resp = client.eval(xquery=xqy)
+    headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=str)
+
+    assert isinstance(parsed_resp, str)
+    assert parsed_resp == "2023-09-14Z"
+    assert headers == {
+        "Content-Type": "text/plain",
+        "X-Primitive": "date",
+    }
+
+
+@responses.activate
+def test_parse_bytes_with_headers_single_plain_text_date_response(client):
+    xqy = "fn:current-date()"
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/eval")
+    builder.with_request_body({"xquery": xqy})
+    builder.with_response_status(200)
+    builder.with_response_body_multipart_mixed()
+    builder.with_response_body_part("date", "2023-09-14Z")
+    builder.build_post()
+
+    resp = client.eval(xquery=xqy)
+    headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=bytes)
+
+    assert isinstance(parsed_resp, bytes)
+    assert parsed_resp == b"2023-09-14Z"
+    assert headers == {
+        "Content-Type": "text/plain",
+        "X-Primitive": "date",
+    }
+
+
+@responses.activate
 def test_parse_single_plain_text_date_time_response(client):
     xqy = "fn:current-dateTime()"
 
@@ -1404,6 +1934,52 @@ def test_parse_with_headers_single_plain_text_date_time_response(client):
         "2023-09-14T07:30:27.997332Z",
         "%Y-%m-%dT%H:%M:%S.%f%z",
     )
+    assert headers == {
+        "Content-Type": "text/plain",
+        "X-Primitive": "dateTime",
+    }
+
+
+@responses.activate
+def test_parse_text_with_headers_single_plain_text_date_time_response(client):
+    xqy = "fn:current-dateTime()"
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/eval")
+    builder.with_request_body({"xquery": xqy})
+    builder.with_response_status(200)
+    builder.with_response_body_multipart_mixed()
+    builder.with_response_body_part("dateTime", "2023-09-14T07:30:27.997332Z")
+    builder.build_post()
+
+    resp = client.eval(xquery=xqy)
+    headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=str)
+
+    assert isinstance(parsed_resp, str)
+    assert parsed_resp == "2023-09-14T07:30:27.997332Z"
+    assert headers == {
+        "Content-Type": "text/plain",
+        "X-Primitive": "dateTime",
+    }
+
+
+@responses.activate
+def test_parse_bytes_with_headers_single_plain_text_date_time_response(client):
+    xqy = "fn:current-dateTime()"
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/eval")
+    builder.with_request_body({"xquery": xqy})
+    builder.with_response_status(200)
+    builder.with_response_body_multipart_mixed()
+    builder.with_response_body_part("dateTime", "2023-09-14T07:30:27.997332Z")
+    builder.build_post()
+
+    resp = client.eval(xquery=xqy)
+    headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=bytes)
+
+    assert isinstance(parsed_resp, bytes)
+    assert parsed_resp == b"2023-09-14T07:30:27.997332Z"
     assert headers == {
         "Content-Type": "text/plain",
         "X-Primitive": "dateTime",
@@ -1539,6 +2115,74 @@ def test_parse_with_headers_single_map_response(client):
 
 
 @responses.activate
+def test_parse_text_with_headers_single_map_response(client):
+    xqy = (
+        "map:map() "
+        '=> map:with("str", "value") '
+        '=> map:with("int_str", "1") '
+        '=> map:with("int", 1) '
+        '=> map:with("float", 1.1) '
+        '=> map:with("bool", fn:true())'
+    )
+    serialized_map = '{"float":1.1, "int":1, "bool":true, "str":"value", "int_str":"1"}'
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/eval")
+    builder.with_request_body({"xquery": xqy})
+    builder.with_response_status(200)
+    builder.with_response_body_multipart_mixed()
+    builder.with_response_body_part(
+        "map",
+        '{"float":1.1, "int":1, "bool":true, "str":"value", "int_str":"1"}',
+    )
+    builder.build_post()
+
+    resp = client.eval(xquery=xqy)
+    headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=str)
+
+    assert isinstance(parsed_resp, str)
+    assert parsed_resp == serialized_map
+    assert headers == {
+        "Content-Type": "application/json",
+        "X-Primitive": "map",
+    }
+
+
+@responses.activate
+def test_parse_bytes_with_headers_single_map_response(client):
+    xqy = (
+        "map:map() "
+        '=> map:with("str", "value") '
+        '=> map:with("int_str", "1") '
+        '=> map:with("int", 1) '
+        '=> map:with("float", 1.1) '
+        '=> map:with("bool", fn:true())'
+    )
+    serialized_map = '{"float":1.1, "int":1, "bool":true, "str":"value", "int_str":"1"}'
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/eval")
+    builder.with_request_body({"xquery": xqy})
+    builder.with_response_status(200)
+    builder.with_response_body_multipart_mixed()
+    builder.with_response_body_part(
+        "map",
+        '{"float":1.1, "int":1, "bool":true, "str":"value", "int_str":"1"}',
+    )
+    builder.build_post()
+
+    resp = client.eval(xquery=xqy)
+    headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=bytes)
+
+    assert isinstance(parsed_resp, bytes)
+    assert parsed_resp == serialized_map.encode("utf-8")
+    assert headers == {
+        "Content-Type": "application/json",
+        "X-Primitive": "map",
+    }
+
+
+@responses.activate
 def test_parse_single_json_response(client):
     xqy = (
         "json:object() "
@@ -1667,6 +2311,74 @@ def test_parse_with_headers_single_json_response(client):
 
 
 @responses.activate
+def test_parse_text_with_headers_single_json_response(client):
+    xqy = (
+        "json:object() "
+        '=> map:with("str", "value") '
+        '=> map:with("int_str", "1") '
+        '=> map:with("int", 1) '
+        '=> map:with("float", 1.1) '
+        '=> map:with("bool", fn:true())'
+    )
+    serialized_map = '{"float":1.1, "int":1, "bool":true, "str":"value", "int_str":"1"}'
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/eval")
+    builder.with_request_body({"xquery": xqy})
+    builder.with_response_status(200)
+    builder.with_response_body_multipart_mixed()
+    builder.with_response_body_part(
+        "map",
+        '{"float":1.1, "int":1, "bool":true, "str":"value", "int_str":"1"}',
+    )
+    builder.build_post()
+
+    resp = client.eval(xquery=xqy)
+    headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=str)
+
+    assert isinstance(parsed_resp, str)
+    assert parsed_resp == serialized_map
+    assert headers == {
+        "Content-Type": "application/json",
+        "X-Primitive": "map",
+    }
+
+
+@responses.activate
+def test_parse_bytes_with_headers_single_json_response(client):
+    xqy = (
+        "json:object() "
+        '=> map:with("str", "value") '
+        '=> map:with("int_str", "1") '
+        '=> map:with("int", 1) '
+        '=> map:with("float", 1.1) '
+        '=> map:with("bool", fn:true())'
+    )
+    serialized_map = '{"float":1.1, "int":1, "bool":true, "str":"value", "int_str":"1"}'
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/eval")
+    builder.with_request_body({"xquery": xqy})
+    builder.with_response_status(200)
+    builder.with_response_body_multipart_mixed()
+    builder.with_response_body_part(
+        "map",
+        '{"float":1.1, "int":1, "bool":true, "str":"value", "int_str":"1"}',
+    )
+    builder.build_post()
+
+    resp = client.eval(xquery=xqy)
+    headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=bytes)
+
+    assert isinstance(parsed_resp, bytes)
+    assert parsed_resp == serialized_map.encode("utf-8")
+    assert headers == {
+        "Content-Type": "application/json",
+        "X-Primitive": "map",
+    }
+
+
+@responses.activate
 def test_parse_single_json_array_response(client):
     xqy = '("value", "1", 1, 1.1, fn:true()) => json:to-array()'
 
@@ -1740,6 +2452,52 @@ def test_parse_with_headers_single_json_array_response(client):
 
     assert isinstance(parsed_resp, list)
     assert parsed_resp == ["value", "1", 1, 1.1, True]
+    assert headers == {
+        "Content-Type": "application/json",
+        "X-Primitive": "array",
+    }
+
+
+@responses.activate
+def test_parse_text_with_headers_single_json_array_response(client):
+    xqy = '("value", "1", 1, 1.1, fn:true()) => json:to-array()'
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/eval")
+    builder.with_request_body({"xquery": xqy})
+    builder.with_response_status(200)
+    builder.with_response_body_multipart_mixed()
+    builder.with_response_body_part("array", '["value", "1", 1, 1.1, true]')
+    builder.build_post()
+
+    resp = client.eval(xquery=xqy)
+    headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=str)
+
+    assert isinstance(parsed_resp, str)
+    assert parsed_resp == '["value", "1", 1, 1.1, true]'
+    assert headers == {
+        "Content-Type": "application/json",
+        "X-Primitive": "array",
+    }
+
+
+@responses.activate
+def test_parse_bytes_with_headers_single_json_array_response(client):
+    xqy = '("value", "1", 1, 1.1, fn:true()) => json:to-array()'
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/eval")
+    builder.with_request_body({"xquery": xqy})
+    builder.with_response_status(200)
+    builder.with_response_body_multipart_mixed()
+    builder.with_response_body_part("array", '["value", "1", 1, 1.1, true]')
+    builder.build_post()
+
+    resp = client.eval(xquery=xqy)
+    headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=bytes)
+
+    assert isinstance(parsed_resp, bytes)
+    assert parsed_resp == b'["value", "1", 1, 1.1, true]'
     assert headers == {
         "Content-Type": "application/json",
         "X-Primitive": "array",
@@ -1843,6 +2601,58 @@ def test_parse_with_headers_single_xml_document_node_response(client):
 
 
 @responses.activate
+def test_parse_text_with_headers_single_xml_document_node_response(client):
+    xqy = "document { element root {} }"
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/eval")
+    builder.with_request_body({"xquery": xqy})
+    builder.with_response_status(200)
+    builder.with_response_body_multipart_mixed()
+    builder.with_response_body_part(
+        "document-node()",
+        '<?xml version="1.0" encoding="UTF-8"?>\n<root/>',
+    )
+    builder.build_post()
+
+    resp = client.eval(xquery=xqy)
+    headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=str)
+
+    assert isinstance(parsed_resp, str)
+    assert parsed_resp == '<?xml version="1.0" encoding="UTF-8"?>\n<root/>'
+    assert headers == {
+        "Content-Type": "application/xml",
+        "X-Primitive": "document-node()",
+    }
+
+
+@responses.activate
+def test_parse_bytes_with_headers_single_xml_document_node_response(client):
+    xqy = "document { element root {} }"
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/eval")
+    builder.with_request_body({"xquery": xqy})
+    builder.with_response_status(200)
+    builder.with_response_body_multipart_mixed()
+    builder.with_response_body_part(
+        "document-node()",
+        '<?xml version="1.0" encoding="UTF-8"?>\n<root/>',
+    )
+    builder.build_post()
+
+    resp = client.eval(xquery=xqy)
+    headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=bytes)
+
+    assert isinstance(parsed_resp, bytes)
+    assert parsed_resp == b'<?xml version="1.0" encoding="UTF-8"?>\n<root/>'
+    assert headers == {
+        "Content-Type": "application/xml",
+        "X-Primitive": "document-node()",
+    }
+
+
+@responses.activate
 def test_parse_single_xml_element_response(client):
     xqy = "element root {}"
 
@@ -1920,6 +2730,52 @@ def test_parse_with_headers_single_xml_element_response(client):
     assert parsed_resp.tag == "root"
     assert parsed_resp.text is None
     assert parsed_resp.attrib == {}
+    assert headers == {
+        "Content-Type": "application/xml",
+        "X-Primitive": "element()",
+    }
+
+
+@responses.activate
+def test_parse_text_with_headers_single_xml_element_response(client):
+    xqy = "element root {}"
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/eval")
+    builder.with_request_body({"xquery": xqy})
+    builder.with_response_status(200)
+    builder.with_response_body_multipart_mixed()
+    builder.with_response_body_part("element()", "<root/>")
+    builder.build_post()
+
+    resp = client.eval(xquery=xqy)
+    headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=str)
+
+    assert isinstance(parsed_resp, str)
+    assert parsed_resp == "<root/>"
+    assert headers == {
+        "Content-Type": "application/xml",
+        "X-Primitive": "element()",
+    }
+
+
+@responses.activate
+def test_parse_bytes_with_headers_single_xml_element_response(client):
+    xqy = "element root {}"
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/eval")
+    builder.with_request_body({"xquery": xqy})
+    builder.with_response_status(200)
+    builder.with_response_body_multipart_mixed()
+    builder.with_response_body_part("element()", "<root/>")
+    builder.build_post()
+
+    resp = client.eval(xquery=xqy)
+    headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=bytes)
+
+    assert isinstance(parsed_resp, bytes)
+    assert parsed_resp == b"<root/>"
     assert headers == {
         "Content-Type": "application/xml",
         "X-Primitive": "element()",
@@ -2036,6 +2892,86 @@ def test_parse_with_headers_multiple_responses(client):
     headers_2, parsed_resp_2 = parsed_resp_with_headers[1]
     assert isinstance(parsed_resp_2, str)
     assert parsed_resp_2 == "plain text"
+    assert headers_2 == {
+        "Content-Type": "text/plain",
+        "X-Primitive": "string",
+    }
+
+
+@responses.activate
+def test_parse_text_with_headers_multiple_responses(client):
+    xqy = '(cts:directory-query("/root/", "infinity"), (), "plain text")'
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/eval")
+    builder.with_request_body({"xquery": xqy})
+    builder.with_response_status(200)
+    builder.with_response_body_multipart_mixed()
+    builder.with_response_body_part(
+        "directory-query",
+        'cts:directory-query("/root/", "infinity")',
+    )
+    builder.with_response_body_part("string", "plain text")
+    builder.build_post()
+
+    resp = client.eval(xquery=xqy)
+    parsed_resp_with_headers = MLResponseParser.parse_with_headers(
+        resp, output_type=str,
+    )
+
+    assert isinstance(parsed_resp_with_headers, list)
+
+    headers_1, parsed_resp_1 = parsed_resp_with_headers[0]
+    assert isinstance(parsed_resp_1, str)
+    assert parsed_resp_1 == 'cts:directory-query("/root/", "infinity")'
+    assert headers_1 == {
+        "Content-Type": "text/plain",
+        "X-Primitive": "directory-query",
+    }
+
+    headers_2, parsed_resp_2 = parsed_resp_with_headers[1]
+    assert isinstance(parsed_resp_2, str)
+    assert parsed_resp_2 == "plain text"
+    assert headers_2 == {
+        "Content-Type": "text/plain",
+        "X-Primitive": "string",
+    }
+
+
+@responses.activate
+def test_parse_bytes_with_headers_multiple_responses(client):
+    xqy = '(cts:directory-query("/root/", "infinity"), (), "plain text")'
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/eval")
+    builder.with_request_body({"xquery": xqy})
+    builder.with_response_status(200)
+    builder.with_response_body_multipart_mixed()
+    builder.with_response_body_part(
+        "directory-query",
+        'cts:directory-query("/root/", "infinity")',
+    )
+    builder.with_response_body_part("string", "plain text")
+    builder.build_post()
+
+    resp = client.eval(xquery=xqy)
+    parsed_resp_with_headers = MLResponseParser.parse_with_headers(
+        resp, output_type=bytes,
+    )
+
+    assert isinstance(parsed_resp_with_headers, list)
+
+    headers_1, parsed_resp_1 = parsed_resp_with_headers[0]
+    assert isinstance(parsed_resp_1, bytes)
+    assert parsed_resp_1 == b'cts:directory-query("/root/", "infinity")'
+    assert headers_1 == {
+        "Content-Type": "text/plain",
+        "X-Primitive": "directory-query",
+    }
+
+    headers_2, parsed_resp_2 = parsed_resp_with_headers[1]
+    assert isinstance(parsed_resp_2, bytes)
+    assert parsed_resp_2 == b"plain text"
     assert headers_2 == {
         "Content-Type": "text/plain",
         "X-Primitive": "string",

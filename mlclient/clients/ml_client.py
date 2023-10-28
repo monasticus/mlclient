@@ -1786,12 +1786,16 @@ class MLResponseParser:
         cls,
         response: Response,
         with_headers: bool = False,
-    ) -> str | tuple[dict, str] | list[str | tuple[dict, str]]:
+    ) -> str | tuple | list:
         content_type = utils.get_content_type_from_headers(response.headers)
         if not response.ok:
             if content_type.startswith("application/json"):
-                return json.dumps(response.json())
-            return cls._parse_error(response)
+                error = json.dumps(response.json())
+            else:
+                error = cls._parse_error(response)
+            if with_headers:
+                return response.headers, error
+            return error
 
         if content_type.startswith(const.HEADER_MULTIPART_MIXED):
             body_parts = MultipartDecoder.from_response(response).parts
@@ -1810,12 +1814,16 @@ class MLResponseParser:
         cls,
         response: Response,
         with_headers: bool = False,
-    ) -> bytes | tuple[dict, bytes] | list[bytes | tuple[dict, bytes]]:
+    ) -> bytes | tuple | list:
         content_type = utils.get_content_type_from_headers(response.headers)
         if not response.ok:
             if content_type.startswith("application/json"):
-                return json.dumps(response.json()).encode("utf-8")
-            return cls._parse_error(response).encode("utf-8")
+                error = json.dumps(response.json()).encode("utf-8")
+            else:
+                error = cls._parse_error(response).encode("utf-8")
+            if with_headers:
+                return response.headers, error
+            return error
 
         if content_type.startswith(const.HEADER_MULTIPART_MIXED):
             body_parts = MultipartDecoder.from_response(response).parts

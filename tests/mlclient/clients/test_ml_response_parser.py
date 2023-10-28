@@ -124,6 +124,60 @@ def test_parse_with_headers_single_error_response(client):
 
 
 @responses.activate
+def test_parse_text_with_headers_single_error_response(client):
+    xqy = "'missing-quote"
+
+    response_body_path = tools.get_test_resource_path(__file__, "error_response.html")
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/eval")
+    builder.with_request_body({"xquery": xqy})
+    builder.with_response_content_type("text/html; charset=utf-8")
+    builder.with_response_status(500)
+    builder.with_response_body(Path(response_body_path).read_bytes())
+    builder.build_post()
+
+    resp = client.eval(xquery=xqy)
+    headers, parsed_resp = MLResponseParser.parse_with_headers(resp, str)
+
+    assert isinstance(parsed_resp, str)
+    assert parsed_resp == (
+        "XDMP-BADCHAR: (err:XPST0003) Unexpected character found ''' (0x0027)\n"
+        "in /eval, at 1:0 [1.0-ml]"
+    )
+    assert headers == {
+        "Content-Type": "text/html; charset=utf-8",
+        "Content-Length": "1014",
+    }
+
+
+@responses.activate
+def test_parse_bytes_with_headers_single_error_response(client):
+    xqy = "'missing-quote"
+
+    response_body_path = tools.get_test_resource_path(__file__, "error_response.html")
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/eval")
+    builder.with_request_body({"xquery": xqy})
+    builder.with_response_content_type("text/html; charset=utf-8")
+    builder.with_response_status(500)
+    builder.with_response_body(Path(response_body_path).read_bytes())
+    builder.build_post()
+
+    resp = client.eval(xquery=xqy)
+    headers, parsed_resp = MLResponseParser.parse_with_headers(resp, bytes)
+
+    assert isinstance(parsed_resp, bytes)
+    assert parsed_resp == (
+        b"XDMP-BADCHAR: (err:XPST0003) Unexpected character found ''' (0x0027)\n"
+        b"in /eval, at 1:0 [1.0-ml]"
+    )
+    assert headers == {
+        "Content-Type": "text/html; charset=utf-8",
+        "Content-Length": "1014",
+    }
+
+
+@responses.activate
 def test_parse_single_error_response_json(client):
     uri = "/some/dir/doc.xml"
     error = {
@@ -254,6 +308,96 @@ def test_parse_with_headers_single_error_response_json(client):
 
     assert isinstance(parsed_resp, dict)
     assert parsed_resp == error
+    assert headers == {
+        "Content-Type": "application/json; charset=UTF-8",
+        "Content-Length": "230",
+    }
+
+
+@responses.activate
+def test_parse_text_with_headers_single_error_response_json(client):
+    uri = "/some/dir/doc.xml"
+    error = {
+        "errorResponse": {
+            "statusCode": 404,
+            "status": "Not Found",
+            "messageCode": "RESTAPI-NODOCUMENT",
+            "message": "RESTAPI-NODOCUMENT: (err:FOER0000) "
+            "Resource or document does not exist:  "
+            "category: content message: /some/dir/doc.xml",
+        },
+    }
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/documents")
+    builder.with_request_param("uri", uri)
+    builder.with_response_content_type("application/json; charset=UTF-8")
+    builder.with_response_status(404)
+    builder.with_response_body(error)
+    builder.build_get()
+
+    resp = client.get_documents(uri=uri)
+    headers, parsed_resp = MLResponseParser.parse_with_headers(resp, str)
+
+    assert isinstance(parsed_resp, str)
+    assert parsed_resp == (
+        "{"
+        '"errorResponse": '
+        "{"
+        '"statusCode": 404, '
+        '"status": "Not Found", '
+        '"messageCode": "RESTAPI-NODOCUMENT", '
+        '"message": "RESTAPI-NODOCUMENT: (err:FOER0000) '
+        "Resource or document does not exist: "
+        ' category: content message: /some/dir/doc.xml"'
+        "}"
+        "}"
+    )
+    assert headers == {
+        "Content-Type": "application/json; charset=UTF-8",
+        "Content-Length": "230",
+    }
+
+
+@responses.activate
+def test_parse_bytes_with_headers_single_error_response_json(client):
+    uri = "/some/dir/doc.xml"
+    error = {
+        "errorResponse": {
+            "statusCode": 404,
+            "status": "Not Found",
+            "messageCode": "RESTAPI-NODOCUMENT",
+            "message": "RESTAPI-NODOCUMENT: (err:FOER0000) "
+            "Resource or document does not exist:  "
+            "category: content message: /some/dir/doc.xml",
+        },
+    }
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/documents")
+    builder.with_request_param("uri", uri)
+    builder.with_response_content_type("application/json; charset=UTF-8")
+    builder.with_response_status(404)
+    builder.with_response_body(error)
+    builder.build_get()
+
+    resp = client.get_documents(uri=uri)
+    headers, parsed_resp = MLResponseParser.parse_with_headers(resp, bytes)
+
+    assert isinstance(parsed_resp, bytes)
+    assert parsed_resp == (
+        b"{"
+        b'"errorResponse": '
+        b"{"
+        b'"statusCode": 404, '
+        b'"status": "Not Found", '
+        b'"messageCode": "RESTAPI-NODOCUMENT", '
+        b'"message": "RESTAPI-NODOCUMENT: (err:FOER0000) '
+        b"Resource or document does not exist: "
+        b' category: content message: /some/dir/doc.xml"'
+        b"}"
+        b"}"
+    )
     assert headers == {
         "Content-Type": "application/json; charset=UTF-8",
         "Content-Length": "230",

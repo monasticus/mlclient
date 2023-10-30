@@ -20,6 +20,8 @@ This package exports the following classes:
         An enumeration class representing metadata extract types.
     * Category
         An enumeration class representing data categories.
+    * ContentDispositionSerializer
+        A Content-Disposition header serializer.
 
 Examples
 --------

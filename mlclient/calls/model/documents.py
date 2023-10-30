@@ -15,6 +15,8 @@ It exports the following classes:
         An enumeration class representing metadata extract types.
     * Category
         An enumeration class representing data categories.
+    * ContentDispositionSerializer
+        A Content-Disposition header serializer.
 """
 from __future__ import annotations
 
@@ -148,12 +150,15 @@ class DocumentsBodyPart(BaseModel):
         cls,
         value: str | dict,
     ) -> DocumentsContentDisposition:
+        """Parse a Content-Disposition header."""
         if isinstance(value, dict):
             return DocumentsContentDisposition(**value)
         return ContentDispositionSerializer.serialize(value)
 
 
 class ContentDispositionSerializer:
+    """A Content-Disposition header serializer."""
+
     _DISP_SEP = "; "
     _KEY_VALUE_SEP = "="
     _CLASS_KEY_BODY_PART_TYPE = "body_part_type"
@@ -197,6 +202,20 @@ class ContentDispositionSerializer:
         cls,
         content_disposition: str,
     ) -> DocumentsContentDisposition:
+        """Serialize a raw Content-Disposition header.
+
+        Creates and initializes a DocumentsContentDisposition instance.
+
+        Parameters
+        ----------
+        content_disposition : str
+            A raw Content-Disposition header value
+
+        Returns
+        -------
+        DocumentsContentDisposition
+            A serialized DocumentsContentDisposition instance
+        """
         disp_dict = {}
         for disp in content_disposition.split(cls._DISP_SEP):
             key, value = cls._get_disp_key_and_value(disp)
@@ -214,6 +233,18 @@ class ContentDispositionSerializer:
         cls,
         disp: str,
     ) -> tuple[str, str]:
+        """Get a single DocumentsContentDisposition-like disposition key and value.
+
+        Parameters
+        ----------
+        disp : str
+            A single disposition
+
+        Returns
+        -------
+        tuple[str, str]
+            A single DocumentsContentDisposition-like disposition key and value
+        """
         key_value_pair = disp.split(cls._KEY_VALUE_SEP)
         if len(key_value_pair) == 1:
             key = None
@@ -228,6 +259,20 @@ class ContentDispositionSerializer:
         key: str,
         value: str,
     ) -> tuple[str, str]:
+        """Parse a single raw Content-Disposition key and value.
+
+        Parameters
+        ----------
+        key : str
+            A single disposition key
+        value : str
+            A single disposition value
+
+        Returns
+        -------
+        tuple[str, str]
+            A single DocumentsContentDisposition-like disposition key and value
+        """
         key = cls._DISPOSITIONS.get(key)
         if key == cls._CLASS_KEY_FORMAT:
             key = cls._CLASS_KEY_FORMAT_ALIAS
@@ -239,6 +284,20 @@ class ContentDispositionSerializer:
         cls,
         content_disposition: DocumentsContentDisposition,
     ) -> str:
+        """Deserialize a DocumentsContentDisposition instance.
+
+        Parses a DocumentsContentDisposition instance to a string representation
+
+        Parameters
+        ----------
+        content_disposition : DocumentsContentDisposition
+            A DocumentsContentDisposition instance
+
+        Returns
+        -------
+        str
+            A raw Content-Disposition header value
+        """
         disposition = [
             cls._get_disposition(content_disposition, cls._CLASS_KEY_BODY_PART_TYPE),
             cls._get_disposition(content_disposition, cls._CLASS_KEY_FILENAME),
@@ -260,6 +319,20 @@ class ContentDispositionSerializer:
         content_disposition: DocumentsContentDisposition,
         class_key: str,
     ) -> str | None:
+        """Parse a single DocumentsContentDisposition attribute to a string.
+
+        Parameters
+        ----------
+        content_disposition : DocumentsContentDisposition
+            A DocumentsContentDisposition instance
+        class_key : str
+            A DocumentsContentDisposition class attribute key
+
+        Returns
+        -------
+        str | None
+            A single raw disposition key-value pair
+        """
         disp_value = content_disposition.model_dump().get(class_key)
         if disp_value is None:
             return None

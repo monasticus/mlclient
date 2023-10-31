@@ -1,12 +1,19 @@
 """The ML Client Utils module.
 
-It contains all useful functions shared in ML Client package and independent of
-all classes. It exports following functions:
+It contains all useful functions and classes shared in ML Client package.
+It exports following functions:
 
     * get_accept_header_for_format(data_format: str) -> str
         Return an Accept header for data format.
     * get_content_type_header_for_data(data: str | dict) -> str
         Return a Content-Type header for data provided.
+    * get_resource(resource_name: str) -> TextIO
+        Return an MLClient resource.
+
+It also exports a single class:
+
+    * BiDict
+        A bidirectional dictionary.
 """
 from __future__ import annotations
 
@@ -107,10 +114,22 @@ def get_resource(
 
 
 class BiDict:
+    """A bidirectional dictionary.
+
+    This dict allows you to find a corresponding value by key in two directions.
+    """
+
     def __init__(
         self,
         input_dict: dict,
     ):
+        """Initialize a BiDict instance.
+
+        Parameters
+        ----------
+        input_dict : dict
+            An input regular dictionary
+        """
         self._origin = dict(input_dict)
         self._inverse = {value: key for key, value in input_dict.items()}
 
@@ -119,4 +138,18 @@ class BiDict:
         key: Any,
         default: Any = None,
     ) -> Any:
+        """Return a corresponding value for a key regardless direction.
+
+        Parameters
+        ----------
+        key : Any
+            A dictionary key or value
+        default : Ant, default None
+            A default value
+
+        Returns
+        -------
+        Any
+            A corresponding value from the dictionary
+        """
         return self._origin.get(key, self._inverse.get(key, default))

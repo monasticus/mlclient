@@ -233,7 +233,7 @@ class ContentDispositionSerializer:
         cls,
         disp: str,
     ) -> tuple[str, str]:
-        """Get a single DocumentsContentDisposition-like disposition key and value.
+        """Return a single DocumentsContentDisposition-like disposition key and value.
 
         Parameters
         ----------

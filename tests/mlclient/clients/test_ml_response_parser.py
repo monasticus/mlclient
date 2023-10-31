@@ -2916,7 +2916,8 @@ def test_parse_text_with_headers_multiple_responses(client):
 
     resp = client.eval(xquery=xqy)
     parsed_resp_with_headers = MLResponseParser.parse_with_headers(
-        resp, output_type=str,
+        resp,
+        output_type=str,
     )
 
     assert isinstance(parsed_resp_with_headers, list)
@@ -2956,7 +2957,8 @@ def test_parse_bytes_with_headers_multiple_responses(client):
 
     resp = client.eval(xquery=xqy)
     parsed_resp_with_headers = MLResponseParser.parse_with_headers(
-        resp, output_type=bytes,
+        resp,
+        output_type=bytes,
     )
 
     assert isinstance(parsed_resp_with_headers, list)

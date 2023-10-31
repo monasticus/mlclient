@@ -63,38 +63,6 @@ def test_get_resource_non_existing():
     assert err.value.args[0] == "No such resource: [non-existing-file.yaml]"
 
 
-def test_get_content_type_from_headers_common():
-    headers = {
-        "Content-Type": "application/xml",
-    }
-    content_type = utils.get_content_type_from_headers(headers)
-    assert content_type == "application/xml"
-
-
-def test_get_content_type_from_headers_lower_cased():
-    headers = {
-        "content-type": "application/xml",
-    }
-    content_type = utils.get_content_type_from_headers(headers)
-    assert content_type == "application/xml"
-
-
-def test_get_content_type_from_headers_lower_cased_type():
-    headers = {
-        "Content-type": "application/xml",
-    }
-    content_type = utils.get_content_type_from_headers(headers)
-    assert content_type == "application/xml"
-
-
-def test_get_content_type_from_headers_none():
-    headers = {
-        "Content_Type": "application/xml",
-    }
-    content_type = utils.get_content_type_from_headers(headers)
-    assert content_type is None
-
-
 def test_bidict_forward():
     bi_dict = BiDict({"a": 1})
     assert bi_dict.get("a") == 1

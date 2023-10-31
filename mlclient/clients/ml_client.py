@@ -22,10 +22,11 @@ from typing import ClassVar
 from requests import Response, Session
 from requests.adapters import HTTPAdapter, Retry
 from requests.auth import AuthBase, HTTPBasicAuth, HTTPDigestAuth
+from requests.structures import CaseInsensitiveDict
 from requests_toolbelt import MultipartDecoder
 from requests_toolbelt.multipart.decoder import BodyPart
 
-from mlclient import constants as const, utils
+from mlclient import constants as const
 from mlclient.calls import (
     DatabaseDeleteCall,
     DatabaseGetCall,
@@ -1759,7 +1760,7 @@ class MLResponseParser:
         list | tuple
             A parsed response body
         """
-        content_type = utils.get_content_type_from_headers(response.headers)
+        content_type = response.headers.get(const.HEADER_NAME_CONTENT_TYPE)
         if not response.ok:
             if content_type.startswith("application/json"):
                 error = response.json()
@@ -1787,7 +1788,7 @@ class MLResponseParser:
         response: Response,
         with_headers: bool = False,
     ) -> str | tuple | list:
-        content_type = utils.get_content_type_from_headers(response.headers)
+        content_type = response.headers.get(const.HEADER_NAME_CONTENT_TYPE)
         if not response.ok:
             if content_type.startswith("application/json"):
                 error = json.dumps(response.json())
@@ -1815,7 +1816,7 @@ class MLResponseParser:
         response: Response,
         with_headers: bool = False,
     ) -> bytes | tuple | list:
-        content_type = utils.get_content_type_from_headers(response.headers)
+        content_type = response.headers.get(const.HEADER_NAME_CONTENT_TYPE)
         if not response.ok:
             if content_type.startswith("application/json"):
                 error = json.dumps(response.json()).encode("utf-8")
@@ -1919,9 +1920,20 @@ class MLResponseParser:
     def _parse_type_specific(
         cls,
         body_part: BodyPart | Response,
-        headers: dict,
+        headers: CaseInsensitiveDict,
+    ) -> (
+        bytes
+        | str
+        | int
+        | float
+        | bool
+        | dict
+        | ElemTree.ElementTree
+        | ElemTree.Element
+        | list
+        | tuple
     ):
-        content_type = utils.get_content_type_from_headers(headers)
+        content_type = headers.get(const.HEADER_NAME_CONTENT_TYPE)
         primitive_type = headers.get(const.HEADER_NAME_PRIMITIVE)
 
         if (
@@ -1942,8 +1954,9 @@ class MLResponseParser:
     def _decode_headers(
         headers: dict,
         encoding: str,
-    ):
-        return {
+    ) -> CaseInsensitiveDict:
+        headers_dict = {
             name.decode(encoding): value.decode(encoding)
             for name, value in headers.items()
         }
+        return CaseInsensitiveDict(**headers_dict)

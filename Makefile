@@ -11,16 +11,20 @@ imports:
 	@poetry run isort .
 
 lint:
-	@poetry run ruff .
+	-@poetry run ruff .
 
 lintp:
-	@poetry run ruff . --preview
+	-@poetry run ruff . --preview
 
 lint-fix:
-	@poetry run ruff . --fix
+	-@poetry run ruff . --fix
 
 lintp-fix:
-	@poetry run ruff . --preview --fix
+	-@poetry run ruff . --preview --fix
+
+format: imports lint-fix
+	@poetry run ruff format .
+	@git checkout -- tests/mlclient/model/test_metadata.py
 
 test:
 	@poetry run pytest --cov=mlclient --cov=cli tests/

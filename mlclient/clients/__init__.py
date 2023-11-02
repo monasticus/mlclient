@@ -5,6 +5,8 @@ It contains the following modules
 
     * ml_client
         The ML Client module.
+    * documents_client
+        The ML Documents Client module.
     * eval_client
         The ML Eval Client module.
     * logs_client

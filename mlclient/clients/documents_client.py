@@ -1,3 +1,9 @@
+"""The ML Documents Client module.
+
+It exports high-level class to perform CRUD operations in aMarkLogic server:
+    * DocumentsClient
+        An MLResourceClient calling /v1/documents endpoint.
+"""
 from __future__ import annotations
 
 from typing import Any, Iterator
@@ -17,12 +23,38 @@ from mlclient.model import Document, DocumentFactory, Metadata
 
 
 class DocumentsClient(MLResourceClient):
+    """An MLResourceClient calling /v1/documents endpoint.
+
+    It is a high-level class performing CRUD operations in a MarkLogic server.
+    """
+
     def read(
         self,
         uris: str | list[str] | tuple[str] | set[str],
         category: str | list | None = None,
         database: str | None = None,
     ) -> Document | list[Document]:
+        """Return document(s) content or metadata from a MarkLogic database.
+
+        Parameters
+        ----------
+        uris : str | list[str] | tuple[str] | set[str]
+            One or more URIs for documents in the database.
+        category : str | list | None, default None
+            The category of data to fetch about the requested document.
+            Category can be specified multiple times to retrieve any combination
+            of content and metadata. Valid categories: content (default), metadata,
+            metadata-values, collections, permissions, properties, and quality.
+            Use metadata to request all categories except content.
+        database : str | None, default None
+            Perform this operation on the named content database instead
+            of the default content database associated with the REST API instance.
+
+        Returns
+        -------
+        Document | list[Document]
+            One or more documents from the database.
+        """
         call = self._get_call(uris=uris, category=category, database=database)
         resp = self.call(call)
         return self._parse(resp, uris, category)

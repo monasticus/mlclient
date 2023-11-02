@@ -1935,15 +1935,12 @@ class MLResponseParser:
     ):
         content_type = headers.get(const.HEADER_NAME_CONTENT_TYPE)
         primitive_type = headers.get(const.HEADER_NAME_PRIMITIVE)
-
-        if (
-            content_type.startswith(Mimetypes.get_mimetypes(DocumentType.TEXT))
-            and primitive_type in cls._PLAIN_TEXT_PARSERS
-        ):
+        doc_type = Mimetypes.get_doc_type(content_type)
+        if doc_type == DocumentType.TEXT and primitive_type in cls._PLAIN_TEXT_PARSERS:
             return cls._PLAIN_TEXT_PARSERS[primitive_type](body_part.text)
-        if content_type.startswith(Mimetypes.get_mimetypes(DocumentType.JSON)):
+        if doc_type == DocumentType.JSON:
             return json.loads(body_part.text)
-        if content_type.startswith(Mimetypes.get_mimetypes(DocumentType.XML)):
+        if doc_type == DocumentType.XML:
             element = ElemTree.fromstring(body_part.text)
             if primitive_type in [None, const.HEADER_PRIMITIVE_DOCUMENT_NODE]:
                 return ElemTree.ElementTree(element)

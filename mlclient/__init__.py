@@ -9,6 +9,8 @@ generic modules:
         The ML Manager module.
     * constants
         The ML Client Constants module.
+    * mimetypes
+        The ML Client Mimetypes module.
     * exceptions
         The ML Client Exceptions module.
     * utils

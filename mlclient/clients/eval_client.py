@@ -11,8 +11,11 @@ from pathlib import Path
 
 from mlclient.calls import EvalCall
 from mlclient.clients import MLResourceClient, MLResponseParser
-from mlclient.exceptions import (MarkLogicError, UnsupportedFileExtensionError,
-                                 WrongParametersError)
+from mlclient.exceptions import (
+    MarkLogicError,
+    UnsupportedFileExtensionError,
+    WrongParametersError,
+)
 
 LOCAL_NS = "http://www.w3.org/2005/xquery-local-functions"
 
@@ -29,21 +32,30 @@ class EvalClient(MLResourceClient):
     _SUPPORTED_FILE_EXT = (
         extension
         for extensions in [_XQUERY_FILE_EXT, _JAVASCRIPT_FILE_EXT]
-        for extension in extensions)
+        for extension in extensions
+    )
 
     def eval(
-            self,
-            file: str | None = None,
-            xq: str | None = None,
-            js: str | None = None,
-            variables: dict | None = None,
-            database: str | None = None,
-            txid: str | None = None,
-            raw: bool = False,
-            **kwargs,
-    ) -> (bytes | str | int | float | bool | dict |
-          ElemTree.ElementTree | ElemTree.Element |
-          list):
+        self,
+        file: str | None = None,
+        xq: str | None = None,
+        js: str | None = None,
+        variables: dict | None = None,
+        database: str | None = None,
+        txid: str | None = None,
+        output_type: type | None = None,
+        **kwargs,
+    ) -> (
+        bytes
+        | str
+        | int
+        | float
+        | bool
+        | dict
+        | ElemTree.ElementTree
+        | ElemTree.Element
+        | list
+    ):
         """Evaluate code in a MarkLogic server and get results.
 
         Parameters
@@ -63,8 +75,8 @@ class EvalClient(MLResourceClient):
         txid : str | None, default None
             The transaction identifier of the multi-statement transaction
             in which to service this request.
-        raw : bool, default False
-            If True, body parts are parsed to string
+        output_type : type | None, default None
+            A raw output type (supported: str, bytes)
         kwargs : dict
             Key value arguments used as variables
 
@@ -88,23 +100,24 @@ class EvalClient(MLResourceClient):
             variables=variables,
             database=database,
             txid=txid,
-            **kwargs)
+            **kwargs,
+        )
         resp = self.call(call)
-        parsed_resp = MLResponseParser.parse(resp, raw=raw)
+        parsed_resp = MLResponseParser.parse(resp, output_type=output_type)
         if not resp.ok:
             raise MarkLogicError(parsed_resp)
         return parsed_resp
 
     @classmethod
     def _get_call(
-            cls,
-            file: str | None,
-            xq: str | None,
-            js: str | None,
-            variables: dict | None,
-            database: str | None,
-            txid: str | None,
-            **kwargs,
+        cls,
+        file: str | None,
+        xq: str | None,
+        js: str | None,
+        variables: dict | None,
+        database: str | None,
+        txid: str | None,
+        **kwargs,
     ) -> EvalCall:
         """Prepare an EvalCall instance.
 
@@ -168,8 +181,8 @@ class EvalClient(MLResourceClient):
 
     @staticmethod
     def _get_variables(
-            variables: dict | None,
-            kwargs: dict,
+        variables: dict | None,
+        kwargs: dict,
     ) -> dict:
         """Combine variables with kwargs.
 
@@ -192,9 +205,9 @@ class EvalClient(MLResourceClient):
 
     @staticmethod
     def _validate_params(
-            file: str | None,
-            xq: str | None,
-            js: str | None,
+        file: str | None,
+        xq: str | None,
+        js: str | None,
     ):
         """Validate parameters.
 
@@ -218,4 +231,3 @@ class EvalClient(MLResourceClient):
         if file and js:
             msg = "You cannot include both the file and the javascript parameter!"
             raise WrongParametersError(msg)
-

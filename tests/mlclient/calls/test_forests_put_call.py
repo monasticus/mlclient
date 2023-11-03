@@ -8,10 +8,10 @@ from mlclient.calls import ForestsPutCall
 def default_forests_put_call():
     """Returns a ForestsPutCall instance"""
     body = {
-      "operation": "forest-combine",
-      "forest": ["forest-1", "forest-2"],
-      "forest-name": "forest",
-      "host": "custom-host",
+        "operation": "forest-combine",
+        "forest": ["forest-1", "forest-2"],
+        "forest-name": "forest",
+        "host": "custom-host",
     }
 
     return ForestsPutCall(body=body)
@@ -21,8 +21,7 @@ def test_validation_body_param():
     with pytest.raises(exceptions.WrongParametersError) as err:
         ForestsPutCall(body=None)
 
-    expected_msg = ("No request body provided for "
-                    "PUT /manage/v2/forests!")
+    expected_msg = "No request body provided for PUT /manage/v2/forests!"
     assert err.value.args[0] == expected_msg
 
 
@@ -30,8 +29,7 @@ def test_validation_blank_body_param():
     with pytest.raises(exceptions.WrongParametersError) as err:
         ForestsPutCall(body=" \n")
 
-    expected_msg = ("No request body provided for "
-                    "PUT /manage/v2/forests!")
+    expected_msg = "No request body provided for PUT /manage/v2/forests!"
     assert err.value.args[0] == expected_msg
 
 
@@ -62,14 +60,16 @@ def test_headers_for_stringified_dict_body():
 
 
 def test_headers_for_xml_body():
-    body = ('<forest-combine xmlns="http://marklogic.com/manage">'
-            '  <forests>'
-            '    <forest>forest-1</forest>'
-            '    <forest>forest-2</forest>'
-            '  </forests>'
-            '  <forest-name>forest</forest-name>'
-            '  <host>custom-host</host>'
-            '</forest-combine>')
+    body = (
+        '<forest-combine xmlns="http://marklogic.com/manage">'
+        "  <forests>"
+        "    <forest>forest-1</forest>"
+        "    <forest>forest-2</forest>"
+        "  </forests>"
+        "  <forest-name>forest</forest-name>"
+        "  <host>custom-host</host>"
+        "</forest-combine>"
+    )
     call = ForestsPutCall(body=body)
     assert call.headers == {
         "Content-Type": "application/xml",
@@ -78,10 +78,10 @@ def test_headers_for_xml_body():
 
 def test_dict_body():
     body = {
-      "operation": "forest-combine",
-      "forest": ["forest-1", "forest-2"],
-      "forest-name": "forest",
-      "host": "custom-host",
+        "operation": "forest-combine",
+        "forest": ["forest-1", "forest-2"],
+        "forest-name": "forest",
+        "host": "custom-host",
     }
 
     call = ForestsPutCall(body=body)
@@ -89,36 +89,40 @@ def test_dict_body():
 
 
 def test_stringified_dict_body():
-    body = ('{"operation": "forest-combine", "forest": ["forest-1", "forest-2"], '
-            '"forest-name": "forest", "host": "custom-host"}')
+    body = (
+        '{"operation": "forest-combine", "forest": ["forest-1", "forest-2"], '
+        '"forest-name": "forest", "host": "custom-host"}'
+    )
     call = ForestsPutCall(body=body)
     assert call.body == {
-      "operation": "forest-combine",
-      "forest": ["forest-1", "forest-2"],
-      "forest-name": "forest",
-      "host": "custom-host",
+        "operation": "forest-combine",
+        "forest": ["forest-1", "forest-2"],
+        "forest-name": "forest",
+        "host": "custom-host",
     }
 
 
 def test_xml_body():
-    body = ('<forest-combine xmlns="http://marklogic.com/manage">'
-            '  <forests>'
-            '    <forest>forest-1</forest>'
-            '    <forest>forest-2</forest>'
-            '  </forests>'
-            '  <forest-name>forest</forest-name>'
-            '  <host>custom-host</host>'
-            '</forest-combine>')
+    body = (
+        '<forest-combine xmlns="http://marklogic.com/manage">'
+        "  <forests>"
+        "    <forest>forest-1</forest>"
+        "    <forest>forest-2</forest>"
+        "  </forests>"
+        "  <forest-name>forest</forest-name>"
+        "  <host>custom-host</host>"
+        "</forest-combine>"
+    )
     call = ForestsPutCall(body=body)
     assert call.body == body
 
 
 def test_fully_parametrized_call():
     body = {
-      "operation": "forest-combine",
-      "forest": ["forest-1", "forest-2"],
-      "forest-name": "forest",
-      "host": "custom-host",
+        "operation": "forest-combine",
+        "forest": ["forest-1", "forest-2"],
+        "forest-name": "forest",
+        "host": "custom-host",
     }
     call = ForestsPutCall(body=body)
     assert call.method == "PUT"

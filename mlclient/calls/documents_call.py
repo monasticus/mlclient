@@ -18,8 +18,12 @@ from urllib3.fields import RequestField
 
 from mlclient import constants, exceptions, utils
 from mlclient.calls import ResourceCall
+from mlclient.calls.model import (
+    Category,
+    ContentDispositionSerializer,
+    DocumentsBodyPart,
+)
 from mlclient.constants import HEADER_JSON
-from mlclient.model.calls import Category, DocumentsBodyPart
 
 
 class DocumentsGetCall(ResourceCall):
@@ -48,15 +52,15 @@ class DocumentsGetCall(ResourceCall):
     _SUPPORTED_CATEGORIES: ClassVar[list] = [category.value for category in Category]
 
     def __init__(
-            self,
-            uri: str | list,
-            database: str | None = None,
-            category: str | list | None = None,
-            data_format: str | None = None,
-            timestamp: str | None = None,
-            transform: str | None = None,
-            transform_params: dict | None = None,
-            txid: str | None = None,
+        self,
+        uri: str | list,
+        database: str | None = None,
+        category: str | list | None = None,
+        data_format: str | None = None,
+        timestamp: str | None = None,
+        transform: str | None = None,
+        transform_params: dict | None = None,
+        txid: str | None = None,
     ):
         """Initialize DocumentsGetCall instance.
 
@@ -117,7 +121,7 @@ class DocumentsGetCall(ResourceCall):
 
     @property
     def endpoint(
-            self,
+        self,
     ):
         """An endpoint for the Documents call.
 
@@ -130,9 +134,9 @@ class DocumentsGetCall(ResourceCall):
 
     @classmethod
     def _validate_params(
-            cls,
-            category: str | list | None,
-            data_format: str,
+        cls,
+        category: str | list | None,
+        data_format: str,
     ):
         categories = [category] if not isinstance(category, list) else category
         if any(cat and cat not in cls._SUPPORTED_CATEGORIES for cat in categories):
@@ -143,21 +147,30 @@ class DocumentsGetCall(ResourceCall):
             joined_supported_formats = ", ".join(cls._SUPPORTED_FORMATS)
             msg = f"The supported formats are: {joined_supported_formats}"
             raise exceptions.WrongParametersError(msg)
-        if (category and category != "content" and
-                data_format and data_format not in cls._SUPPORTED_METADATA_FORMATS):
+        if (
+            category
+            and category != "content"
+            and data_format
+            and data_format not in cls._SUPPORTED_METADATA_FORMATS
+        ):
             joined_supported_formats = ", ".join(cls._SUPPORTED_METADATA_FORMATS)
             msg = f"The supported metadata formats are: {joined_supported_formats}"
             raise exceptions.WrongParametersError(msg)
 
     @staticmethod
     def _get_accept_header(
-            uri: str | list,
-            category: str,
-            data_format: str,
+        uri: str | list,
+        category: str | list,
+        data_format: str,
     ):
-        if not isinstance(uri, str) and len(uri) > 1:
+        if (
+            not isinstance(uri, str)
+            and len(uri) > 1
+            or isinstance(category, list)
+            and len(category) > 1
+        ):
             return constants.HEADER_MULTIPART_MIXED
-        if data_format is not None and category is not None and category != "content":
+        if data_format and category and category != "content":
             return utils.get_accept_header_for_format(data_format)
         return None
 
@@ -182,14 +195,14 @@ class DocumentsPostCall(ResourceCall):
     _TRANS_PARAM_PREFIX: str = "trans:"
 
     def __init__(
-            self,
-            body_parts: list[DocumentsBodyPart],
-            database: str | None = None,
-            transform: str | None = None,
-            transform_params: dict | None = None,
-            txid: str | None = None,
-            temporal_collection: str | None = None,
-            system_time: str | None = None,
+        self,
+        body_parts: list[DocumentsBodyPart],
+        database: str | None = None,
+        transform: str | None = None,
+        transform_params: dict | None = None,
+        txid: str | None = None,
+        temporal_collection: str | None = None,
+        system_time: str | None = None,
     ):
         """Initialize DocumentsPostCall instance.
 
@@ -240,7 +253,7 @@ class DocumentsPostCall(ResourceCall):
 
     @property
     def endpoint(
-            self,
+        self,
     ):
         """An endpoint for the Documents call.
 
@@ -253,8 +266,8 @@ class DocumentsPostCall(ResourceCall):
 
     @classmethod
     def _validate_params(
-            cls,
-            body: list[DocumentsBodyPart] | None,
+        cls,
+        body: list[DocumentsBodyPart] | None,
     ):
         if body is None or len(body) == 0:
             msg = "No request body provided for POST /v1/documents!"
@@ -262,8 +275,8 @@ class DocumentsPostCall(ResourceCall):
 
     @classmethod
     def _build_body(
-            cls,
-            body_parts: list[DocumentsBodyPart],
+        cls,
+        body_parts: list[DocumentsBodyPart],
     ) -> tuple[bytes, str]:
         fields = [cls._get_request_field(body_part) for body_part in body_parts]
         body, content_type = urllib3.encode_multipart_formdata(fields)
@@ -271,18 +284,22 @@ class DocumentsPostCall(ResourceCall):
 
     @staticmethod
     def _get_request_field(
-            body_part: DocumentsBodyPart,
+        body_part: DocumentsBodyPart,
     ) -> RequestField:
         data = body_part.content
         if isinstance(data, dict):
             data = json.dumps(data)
+        content_disp = ContentDispositionSerializer.deserialize(
+            body_part.content_disposition,
+        )
         return RequestField(
             name="--ignore--",
             data=data,
             headers={
-                "Content-Disposition": body_part.content_disposition,
+                "Content-Disposition": content_disp,
                 "Content-Type": body_part.content_type,
-            })
+            },
+        )
 
 
 class DocumentsDeleteCall(ResourceCall):
@@ -308,14 +325,14 @@ class DocumentsDeleteCall(ResourceCall):
     _SUPPORTED_CATEGORIES: ClassVar[list] = [category.value for category in Category]
 
     def __init__(
-            self,
-            uri: str | list,
-            database: str | None = None,
-            category: str | list | None = None,
-            txid: str | None = None,
-            temporal_collection: str | None = None,
-            system_time: str | None = None,
-            wipe_temporal: bool | None = None,
+        self,
+        uri: str | list,
+        database: str | None = None,
+        category: str | list | None = None,
+        txid: str | None = None,
+        temporal_collection: str | None = None,
+        system_time: str | None = None,
+        wipe_temporal: bool | None = None,
     ):
         """Initialize DocumentsDeleteCall instance.
 
@@ -366,7 +383,7 @@ class DocumentsDeleteCall(ResourceCall):
 
     @property
     def endpoint(
-            self,
+        self,
     ):
         """An endpoint for the Documents call.
 
@@ -379,8 +396,8 @@ class DocumentsDeleteCall(ResourceCall):
 
     @classmethod
     def _validate_params(
-            cls,
-            category: str,
+        cls,
+        category: str,
     ):
         categories = [category] if not isinstance(category, list) else category
         if any(cat and cat not in cls._SUPPORTED_CATEGORIES for cat in categories):

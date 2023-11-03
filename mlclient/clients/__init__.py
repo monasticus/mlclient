@@ -5,6 +5,8 @@ It contains the following modules
 
     * ml_client
         The ML Client module.
+    * documents_client
+        The ML Documents Client module.
     * eval_client
         The ML Eval Client module.
     * logs_client
@@ -30,12 +32,19 @@ Examples
 --------
 >>> from mlclient.clients import MLResourceClient
 """
-from .ml_client import (MLClient, MLResourceClient, MLResourcesClient,
-                        MLResponseParser)
+from .ml_client import MLClient, MLResourceClient, MLResourcesClient, MLResponseParser
+from .documents_client import DocumentsClient
 from .eval_client import EvalClient, LOCAL_NS
 from .logs_client import LogsClient, LogType
 
-__all__ = ["EvalClient", "LOCAL_NS",
-           "LogType", "LogsClient",
-           "MLClient", "MLResourceClient", "MLResourcesClient",
-           "MLResponseParser"]
+__all__ = [
+    "EvalClient",
+    "LOCAL_NS",
+    "LogType",
+    "LogsClient",
+    "DocumentsClient",
+    "MLClient",
+    "MLResourceClient",
+    "MLResourcesClient",
+    "MLResponseParser",
+]

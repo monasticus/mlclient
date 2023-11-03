@@ -9,8 +9,7 @@ from __future__ import annotations
 
 from mlclient import MLClient, MLConfiguration, MLResourcesClient
 from mlclient.clients import EvalClient, LogsClient
-from mlclient.exceptions import (NoRestServerConfiguredError,
-                                 NotARestServerError)
+from mlclient.exceptions import NoRestServerConfiguredError, NotARestServerError
 
 
 class MLManager:
@@ -21,8 +20,8 @@ class MLManager:
     """
 
     def __init__(
-            self,
-            environment_name: str,
+        self,
+        environment_name: str,
     ):
         """Initialize MLManager instance.
 
@@ -43,7 +42,7 @@ class MLManager:
 
     @property
     def environment_name(
-            self,
+        self,
     ) -> str:
         """An MLClient configuration environment name.
 
@@ -56,7 +55,7 @@ class MLManager:
 
     @property
     def config(
-            self,
+        self,
     ) -> MLConfiguration:
         """A MarkLogic configuration.
 
@@ -69,8 +68,8 @@ class MLManager:
 
     @config.setter
     def config(
-            self,
-            ml_configuration: MLConfiguration,
+        self,
+        ml_configuration: MLConfiguration,
     ):
         """Set a MarkLogic configuration.
 
@@ -82,8 +81,8 @@ class MLManager:
         self._config = ml_configuration
 
     def get_client(
-            self,
-            app_server_id: str,
+        self,
+        app_server_id: str,
     ) -> MLClient:
         """Initialize an MLClient instance for a specific App Server.
 
@@ -101,8 +100,8 @@ class MLManager:
         return MLClient(**app_server_config)
 
     def get_resources_client(
-            self,
-            app_server_id: str | None = None,
+        self,
+        app_server_id: str | None = None,
     ) -> MLResourcesClient:
         """Initialize an MLResourcesClient instance for a specific App Server.
 
@@ -132,8 +131,8 @@ class MLManager:
         return MLResourcesClient(**rest_server_config)
 
     def get_logs_client(
-            self,
-            app_server_id: str | None = None,
+        self,
+        app_server_id: str | None = None,
     ) -> LogsClient:
         """Initialize a LogsClient instance for a specific App Server.
 
@@ -163,8 +162,8 @@ class MLManager:
         return LogsClient(**rest_server_config)
 
     def get_eval_client(
-            self,
-            app_server_id: str | None = None,
+        self,
+        app_server_id: str | None = None,
     ) -> EvalClient:
         """Initialize a EvalClient instance for a specific App Server.
 
@@ -194,8 +193,8 @@ class MLManager:
         return EvalClient(**rest_server_config)
 
     def _get_rest_server_id(
-            self,
-            app_server_id: str | None = None,
+        self,
+        app_server_id: str | None = None,
     ) -> str:
         """Return verified REST Server identifier.
 

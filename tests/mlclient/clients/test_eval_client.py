@@ -6,8 +6,11 @@ import pytest
 import responses
 
 from mlclient.clients import LOCAL_NS, EvalClient
-from mlclient.exceptions import (MarkLogicError, UnsupportedFileExtensionError,
-                                 WrongParametersError)
+from mlclient.exceptions import (
+    MarkLogicError,
+    UnsupportedFileExtensionError,
+    WrongParametersError,
+)
 from tests import tools
 from tests.tools import MLResponseBuilder
 
@@ -124,15 +127,16 @@ def test_eval_raw_javascript_multiple_items(eval_client):
 
 @responses.activate
 def test_eval_variables_explicit(eval_client):
-    code = ("declare variable $VARIABLE external; "
-            "$VARIABLE")
+    code = "declare variable $VARIABLE external; $VARIABLE"
 
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/v1/eval")
-    builder.with_request_body({
-        "xquery": code,
-        "vars": '{"VARIABLE": "X"}',
-    })
+    builder.with_request_body(
+        {
+            "xquery": code,
+            "vars": '{"VARIABLE": "X"}',
+        },
+    )
     builder.with_response_body_multipart_mixed()
     builder.with_response_body_part("string", "X")
     builder.build_post()
@@ -144,15 +148,16 @@ def test_eval_variables_explicit(eval_client):
 
 @responses.activate
 def test_eval_variables_using_kwargs(eval_client):
-    code = ("declare variable $VARIABLE external; "
-            "$VARIABLE")
+    code = "declare variable $VARIABLE external; $VARIABLE"
 
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/v1/eval")
-    builder.with_request_body({
-        "xquery": code,
-        "vars": '{"VARIABLE": "X"}',
-    })
+    builder.with_request_body(
+        {
+            "xquery": code,
+            "vars": '{"VARIABLE": "X"}',
+        },
+    )
     builder.with_response_body_multipart_mixed()
     builder.with_response_body_part("string", "X")
     builder.build_post()
@@ -164,16 +169,20 @@ def test_eval_variables_using_kwargs(eval_client):
 
 @responses.activate
 def test_eval_variables_explicit_with_kwargs(eval_client):
-    code = ("declare variable $INTEGER1 external; "
-            "declare variable $INTEGER2 external; "
-            "$INTEGER1 + $INTEGER2")
+    code = (
+        "declare variable $INTEGER1 external; "
+        "declare variable $INTEGER2 external; "
+        "$INTEGER1 + $INTEGER2"
+    )
 
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/v1/eval")
-    builder.with_request_body({
-        "xquery": code,
-        "vars": '{"INTEGER1": 1, "INTEGER2": 2}',
-    })
+    builder.with_request_body(
+        {
+            "xquery": code,
+            "vars": '{"INTEGER1": 1, "INTEGER2": 2}',
+        },
+    )
     builder.with_response_body_multipart_mixed()
     builder.with_response_body_part("integer", "3")
     builder.build_post()
@@ -185,15 +194,16 @@ def test_eval_variables_explicit_with_kwargs(eval_client):
 
 @responses.activate
 def test_eval_variables_using_namespace(eval_client):
-    code = ("declare variable $local:VARIABLE external; "
-            "$local:VARIABLE")
+    code = "declare variable $local:VARIABLE external; $local:VARIABLE"
 
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/v1/eval")
-    builder.with_request_body({
-        "xquery": code,
-        "vars": f'{{"{{{LOCAL_NS}}}VARIABLE": "X"}}',
-    })
+    builder.with_request_body(
+        {
+            "xquery": code,
+            "vars": f'{{"{{{LOCAL_NS}}}VARIABLE": "X"}}',
+        },
+    )
     builder.with_response_body_multipart_mixed()
     builder.with_response_body_part("string", "X")
     builder.build_post()
@@ -272,8 +282,7 @@ def test_eval_file_javascript(eval_client):
 @responses.activate
 def test_eval_with_marklogic_error(eval_client):
     error_path = tools.get_test_resource_path(__file__, "marklogic-error.html")
-    code = ("declare variable $local:VARIABLE external; "
-            "$local:VARIABLE")
+    code = "declare variable $local:VARIABLE external; $local:VARIABLE"
 
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/v1/eval")
@@ -285,10 +294,12 @@ def test_eval_with_marklogic_error(eval_client):
     with pytest.raises(MarkLogicError) as err:
         eval_client.eval(xq=code)
 
-    expected_msg = ('XDMP-EXTVAR: (err:XPDY0002) '
-                    'declare variable $local:VARIABLE external;  '
-                    '-- Undefined external variable xs:QName("local:VARIABLE")\n'
-                    'in /eval, at 1:43 [1.0-ml]')
+    expected_msg = (
+        "XDMP-EXTVAR: (err:XPDY0002) "
+        "declare variable $local:VARIABLE external;  "
+        '-- Undefined external variable xs:QName("local:VARIABLE")\n'
+        "in /eval, at 1:43 [1.0-ml]"
+    )
     assert err.value.args[0] == expected_msg
 
 
@@ -296,9 +307,11 @@ def test_eval_file_unknown_extension(eval_client):
     with pytest.raises(UnsupportedFileExtensionError) as err:
         eval_client.eval(file="unknown-extension.txt")
 
-    assert err.value.args[0] == ("Unknown file extension! "
-                                 "Supported extensions are: "
-                                 "xq, xql, xqm, xqu, xquery, xqy, js, sjs")
+    assert err.value.args[0] == (
+        "Unknown file extension! "
+        "Supported extensions are: "
+        "xq, xql, xqm, xqu, xquery, xqy, js, sjs"
+    )
 
 
 def test_eval_mixed_file_and_raw_xquery(eval_client):
@@ -336,7 +349,7 @@ def test_eval_no_code_params(eval_client):
 
 
 @responses.activate
-def test_eval_with_raw_flag(eval_client):
+def test_eval_with_str_output_type(eval_client):
     code = "element root {}"
 
     builder = MLResponseBuilder()
@@ -346,7 +359,24 @@ def test_eval_with_raw_flag(eval_client):
     builder.with_response_body_part("element", "<root/>")
     builder.build_post()
 
-    resp = eval_client.eval(xq=code, raw=True)
+    resp = eval_client.eval(xq=code, output_type=str)
 
     assert isinstance(resp, str)
     assert resp == "<root/>"
+
+
+@responses.activate
+def test_eval_with_bytes_output_type(eval_client):
+    code = "element root {}"
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/eval")
+    builder.with_request_body({"xquery": code})
+    builder.with_response_body_multipart_mixed()
+    builder.with_response_body_part("element", "<root/>")
+    builder.build_post()
+
+    resp = eval_client.eval(xq=code, output_type=bytes)
+
+    assert isinstance(resp, bytes)
+    assert resp == b"<root/>"

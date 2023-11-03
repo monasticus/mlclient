@@ -9,40 +9,47 @@ def default_forest_properties_put_call():
     """Returns an ForestPropertiesPutCall instance"""
     return ForestPropertiesPutCall(
         forest="forest-1",
-        body={"forest-name": "custom-forest"})
+        body={"forest-name": "custom-forest"},
+    )
 
 
 def test_validation_body_param():
     with pytest.raises(exceptions.WrongParametersError) as err:
-        ForestPropertiesPutCall(
-            forest="forest-1",
-            body=None)
+        ForestPropertiesPutCall(forest="forest-1", body=None)
 
-    expected_msg = ("No request body provided for "
-                    "PUT /manage/v2/forests/{id|name}/properties!")
+    expected_msg = (
+        "No request body provided for PUT /manage/v2/forests/{id|name}/properties!"
+    )
     assert err.value.args[0] == expected_msg
 
 
 def test_validation_blank_body_param():
     with pytest.raises(exceptions.WrongParametersError) as err:
-        ForestPropertiesPutCall(
-            forest="forest-1",
-            body=" \n")
+        ForestPropertiesPutCall(forest="forest-1", body=" \n")
 
-    expected_msg = ("No request body provided for "
-                    "PUT /manage/v2/forests/{id|name}/properties!")
+    expected_msg = (
+        "No request body provided for PUT /manage/v2/forests/{id|name}/properties!"
+    )
     assert err.value.args[0] == expected_msg
 
 
 def test_endpoint():
     expected__id_endpoint = "/manage/v2/forests/1/properties"
     expected__name_endpoint = "/manage/v2/forests/forest-1/properties"
-    assert ForestPropertiesPutCall(
-        forest="1",
-        body={"forest-name": "custom-forest"}).endpoint == expected__id_endpoint
-    assert ForestPropertiesPutCall(
-        forest="forest-1",
-        body={"forest-name": "custom-forest"}).endpoint == expected__name_endpoint
+    assert (
+        ForestPropertiesPutCall(
+            forest="1",
+            body={"forest-name": "custom-forest"},
+        ).endpoint
+        == expected__id_endpoint
+    )
+    assert (
+        ForestPropertiesPutCall(
+            forest="forest-1",
+            body={"forest-name": "custom-forest"},
+        ).endpoint
+        == expected__name_endpoint
+    )
 
 
 def test_method(default_forest_properties_put_call):
@@ -56,7 +63,8 @@ def test_parameters(default_forest_properties_put_call):
 def test_headers_for_dict_body():
     call = ForestPropertiesPutCall(
         forest="forest-1",
-        body={"forest-name": "custom-forest"})
+        body={"forest-name": "custom-forest"},
+    )
     assert call.headers == {
         "Content-Type": "application/json",
     }
@@ -65,19 +73,20 @@ def test_headers_for_dict_body():
 def test_headers_for_stringified_dict_body():
     call = ForestPropertiesPutCall(
         forest="forest-1",
-        body='{"forest-name": "custom-forest"}')
+        body='{"forest-name": "custom-forest"}',
+    )
     assert call.headers == {
         "Content-Type": "application/json",
     }
 
 
 def test_headers_for_xml_body():
-    body = ('<forest-properties xmlns="http://marklogic.com/manage">'
-            '  <forest-name>custom-forest</forest-name>'
-            '</forest-properties>')
-    call = ForestPropertiesPutCall(
-        forest="forest-1",
-        body=body)
+    body = (
+        '<forest-properties xmlns="http://marklogic.com/manage">'
+        "  <forest-name>custom-forest</forest-name>"
+        "</forest-properties>"
+    )
+    call = ForestPropertiesPutCall(forest="forest-1", body=body)
     assert call.headers == {
         "Content-Type": "application/xml",
     }
@@ -86,22 +95,24 @@ def test_headers_for_xml_body():
 def test_dict_body():
     call = ForestPropertiesPutCall(
         forest="forest-1",
-        body={"forest-name": "custom-forest"})
+        body={"forest-name": "custom-forest"},
+    )
     assert call.body == {"forest-name": "custom-forest"}
 
 
 def test_stringified_dict_body():
     call = ForestPropertiesPutCall(
         forest="forest-1",
-        body='{"forest-name": "custom-forest"}')
+        body='{"forest-name": "custom-forest"}',
+    )
     assert call.body == {"forest-name": "custom-forest"}
 
 
 def test_xml_body():
-    body = ('<forest-properties xmlns="http://marklogic.com/manage">'
-            '  <forest-name>custom-forest</forest-name>'
-            '</forest-properties>')
-    call = ForestPropertiesPutCall(
-        forest="forest-1",
-        body=body)
+    body = (
+        '<forest-properties xmlns="http://marklogic.com/manage">'
+        "  <forest-name>custom-forest</forest-name>"
+        "</forest-properties>"
+    )
+    call = ForestPropertiesPutCall(forest="forest-1", body=body)
     assert call.body == body

@@ -28,7 +28,7 @@ class MLCLIentApplication(Application):
     _APP_NAME = "MLCLIent"
 
     def __init__(
-            self,
+        self,
     ):
         """Initialize MLCLIentApplication instance."""
         super().__init__(self._APP_NAME, ml_client_version)
@@ -41,10 +41,10 @@ class MLCLIentApplication(Application):
         return self._name
 
     def create_io(
-            self,
-            input: Input | None = None,
-            output: Output | None = None,
-            error_output: Output | None = None,
+        self,
+        input: Input | None = None,
+        output: Output | None = None,
+        error_output: Output | None = None,
     ) -> IO:
         """Initialize io with custom styles."""
         io = super().create_io(input, output, error_output)

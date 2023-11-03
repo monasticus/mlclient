@@ -18,7 +18,8 @@ def xquery():
 def test_call(xquery):
     eval_call = EvalCall(
         xquery=xquery,
-        variables={"element": "<parent><child/></parent>"})
+        variables={"element": "<parent><child/></parent>"},
+    )
     with MLResourceClient(auth_method="digest") as client:
         resp = client.call(eval_call)
 

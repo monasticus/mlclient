@@ -22,9 +22,11 @@ def test_validation_view_param():
     with pytest.raises(exceptions.WrongParametersError) as err:
         ForestsGetCall(view="X")
 
-    expected_msg = ("The supported views are: "
-                    "describe, default, status, metrics, "
-                    "schema, storage, properties-schema")
+    expected_msg = (
+        "The supported views are: "
+        "describe, default, status, metrics, "
+        "schema, storage, properties-schema"
+    )
     assert err.value.args[0] == expected_msg
 
 
@@ -82,12 +84,14 @@ def test_body(default_forests_get_call):
 
 
 def test_fully_parametrized_call():
-    call = ForestsGetCall(data_format="json",
-                          view="schema",
-                          database="Documents",
-                          group="Default",
-                          host="localhost",
-                          full_refs=False)
+    call = ForestsGetCall(
+        data_format="json",
+        view="schema",
+        database="Documents",
+        group="Default",
+        host="localhost",
+        full_refs=False,
+    )
     assert call.method == "GET"
     assert call.headers == {
         "Accept": "application/json",

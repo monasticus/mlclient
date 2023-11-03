@@ -14,8 +14,7 @@ def test_validation_body_param():
     with pytest.raises(exceptions.WrongParametersError) as err:
         RolesPostCall(body=None)
 
-    expected_msg = ("No request body provided for "
-                    "POST /manage/v2/roles!")
+    expected_msg = "No request body provided for POST /manage/v2/roles!"
     assert err.value.args[0] == expected_msg
 
 
@@ -23,8 +22,7 @@ def test_validation_blank_body_param():
     with pytest.raises(exceptions.WrongParametersError) as err:
         RolesPostCall(body=" \n")
 
-    expected_msg = ("No request body provided for "
-                    "POST /manage/v2/roles!")
+    expected_msg = "No request body provided for POST /manage/v2/roles!"
     assert err.value.args[0] == expected_msg
 
 
@@ -55,9 +53,11 @@ def test_headers_for_stringified_dict_body():
 
 
 def test_headers_for_xml_body():
-    body = ('<role-properties xmlns="http://marklogic.com/manage/role/properties">'
-            '  <role-name>custom-role</role-name>'
-            '</role-properties>')
+    body = (
+        '<role-properties xmlns="http://marklogic.com/manage/role/properties">'
+        "  <role-name>custom-role</role-name>"
+        "</role-properties>"
+    )
     call = RolesPostCall(body=body)
     assert call.headers == {
         "Content-Type": "application/xml",
@@ -75,8 +75,10 @@ def test_stringified_dict_body():
 
 
 def test_xml_body():
-    body = ('<role-properties xmlns="http://marklogic.com/manage/role/properties">'
-            '  <role-name>custom-role</role-name>'
-            '</role-properties>')
+    body = (
+        '<role-properties xmlns="http://marklogic.com/manage/role/properties">'
+        "  <role-name>custom-role</role-name>"
+        "</role-properties>"
+    )
     call = RolesPostCall(body=body)
     assert call.body == body

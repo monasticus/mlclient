@@ -60,8 +60,7 @@ def test_body_without_variables(default_eval_call):
 
 
 def test_body_with_variables():
-    call = EvalCall(xquery="()",
-                    variables={"custom-variable": "custom-value"})
+    call = EvalCall(xquery="()", variables={"custom-variable": "custom-value"})
     assert call.body == {
         "xquery": "()",
         "vars": '{"custom-variable": "custom-value"}',
@@ -70,7 +69,7 @@ def test_body_with_variables():
 
 def test_body_is_normalized():
     xquery = """
-    xquery version '1.0-ml';
+    xquery version '1.0-ml';   
 
     declare variable $data as xs:string? external;
 
@@ -81,23 +80,54 @@ def test_body_is_normalized():
     return $a
     """
 
-    call = EvalCall(xquery=xquery,
-                    variables={"data": "custom-value"})
+    call = EvalCall(xquery=xquery, variables={"data": "custom-value"})
 
-    assert call.body == {  # No new line in the xquery code
-        "xquery": "xquery version '1.0-ml'; "
-                  "declare variable $data as xs:string? external; "
-                  "let $a = if (fn:empty($data)) then 'default' else $data "
-                  "return $a",
-        "vars": '{"data": "custom-value"}',
-    }
+    assert (
+        call.body
+        == {  # No new line in the xquery code
+            "xquery": "xquery version '1.0-ml'; "
+            "declare variable $data as xs:string? external; "
+            "let $a = if (fn:empty($data)) then 'default' else $data "
+            "return $a",
+            "vars": '{"data": "custom-value"}',
+        }
+    )
+
+
+def test_body_normalization_does_not_break_code():
+    xquery = """
+    xquery version '1.0-ml';
+
+    declare variable $data as xs:string? external;
+
+    let $a =
+        if (fn:empty($data)) then
+            '    default'
+        else $data
+    return $a
+    """
+
+    call = EvalCall(xquery=xquery, variables={"data": "custom-value"})
+
+    assert (
+        call.body
+        == {  # No new line in the xquery code
+            "xquery": "xquery version '1.0-ml'; "
+            "declare variable $data as xs:string? external; "
+            "let $a = if (fn:empty($data)) then '    default' else $data "
+            "return $a",
+            "vars": '{"data": "custom-value"}',
+        }
+    )
 
 
 def test_fully_parametrized_xquery_call():
-    call = EvalCall(xquery="()",
-                    variables={"custom-variable": "custom-value"},
-                    database="custom-db",
-                    txid="custom-transaction-id")
+    call = EvalCall(
+        xquery="()",
+        variables={"custom-variable": "custom-value"},
+        database="custom-db",
+        txid="custom-transaction-id",
+    )
     assert call.method == "POST"
     assert call.headers == {
         "Accept": "multipart/mixed",
@@ -114,10 +144,12 @@ def test_fully_parametrized_xquery_call():
 
 
 def test_fully_parametrized_javascript_call():
-    call = EvalCall(javascript="[]",
-                    variables={"custom-variable": "custom-value"},
-                    database="custom-db",
-                    txid="custom-transaction-id")
+    call = EvalCall(
+        javascript="[]",
+        variables={"custom-variable": "custom-value"},
+        database="custom-db",
+        txid="custom-transaction-id",
+    )
     assert call.method == "POST"
     assert call.headers == {
         "Accept": "multipart/mixed",

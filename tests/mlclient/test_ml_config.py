@@ -5,9 +5,11 @@ from pathlib import Path
 import pytest
 
 from mlclient import MLConfiguration, constants
-from mlclient.exceptions import (MLClientDirectoryNotFoundError,
-                                 MLClientEnvironmentNotFoundError,
-                                 NoSuchAppServerError)
+from mlclient.exceptions import (
+    MLClientDirectoryNotFoundError,
+    MLClientEnvironmentNotFoundError,
+    NoSuchAppServerError,
+)
 from mlclient.ml_config import MLAppServerConfiguration
 from tests import tools
 
@@ -76,8 +78,10 @@ def test_from_file():
         ],
     }
     assert isinstance(config, MLConfiguration)
-    assert all(isinstance(app_server_config, MLAppServerConfiguration)
-               for app_server_config in config.app_servers)
+    assert all(
+        isinstance(app_server_config, MLAppServerConfiguration)
+        for app_server_config in config.app_servers
+    )
 
 
 def test_from_file_default_values():
@@ -99,8 +103,10 @@ def test_from_file_default_values():
         ],
     }
     assert isinstance(config, MLConfiguration)
-    assert all(isinstance(app_server_config, MLAppServerConfiguration)
-               for app_server_config in config.app_servers)
+    assert all(
+        isinstance(app_server_config, MLAppServerConfiguration)
+        for app_server_config in config.app_servers
+    )
 
 
 def test_from_environment():
@@ -147,8 +153,10 @@ def test_from_environment():
         ],
     }
     assert isinstance(config, MLConfiguration)
-    assert all(isinstance(app_server_config, MLAppServerConfiguration)
-               for app_server_config in config.app_servers)
+    assert all(
+        isinstance(app_server_config, MLAppServerConfiguration)
+        for app_server_config in config.app_servers
+    )
 
 
 def test_from_environment_default():
@@ -171,15 +179,19 @@ def test_from_environment_default():
         ],
     }
     assert isinstance(config, MLConfiguration)
-    assert all(isinstance(app_server_config, MLAppServerConfiguration)
-               for app_server_config in config.app_servers)
+    assert all(
+        isinstance(app_server_config, MLAppServerConfiguration)
+        for app_server_config in config.app_servers
+    )
 
 
 def test_from_environment_non_existing():
     with pytest.raises(MLClientEnvironmentNotFoundError) as err:
         MLConfiguration.from_environment("non-existing")
-    expected_msg = ("MLClient's configuration has not been found for the environment "
-                    "[non-existing]!")
+    expected_msg = (
+        "MLClient's configuration has not been found for the environment "
+        "[non-existing]!"
+    )
     actual_msg = err.value.args[0]
     assert actual_msg == expected_msg
 
@@ -207,8 +219,10 @@ def test_from_environment_in_child_directory():
         ],
     }
     assert isinstance(config, MLConfiguration)
-    assert all(isinstance(app_server_config, MLAppServerConfiguration)
-               for app_server_config in config.app_servers)
+    assert all(
+        isinstance(app_server_config, MLAppServerConfiguration)
+        for app_server_config in config.app_servers
+    )
 
     os.chdir(curr_dir)
 
@@ -221,8 +235,9 @@ def test_from_environment_in_parent_directory():
 
     with pytest.raises(MLClientDirectoryNotFoundError) as err:
         MLConfiguration.from_environment("test-default")
-    expected_msg = (".mlclient directory has not been found in any of "
-                    "parent directories!")
+    expected_msg = (
+        ".mlclient directory has not been found in any of parent directories!"
+    )
     actual_msg = err.value.args[0]
     assert actual_msg == expected_msg
 

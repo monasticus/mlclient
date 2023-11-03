@@ -9,6 +9,8 @@ generic modules:
         The ML Manager module.
     * constants
         The ML Client Constants module.
+    * mimetypes
+        The ML Client Mimetypes module.
     * exceptions
         The ML Client Exceptions module.
     * utils
@@ -32,12 +34,24 @@ Examples
 --------
 >>> from mlclient import MLResourcesClient
 """
-from .clients import (LOCAL_NS, MLClient, MLResourceClient, MLResourcesClient,
-                      MLResponseParser)
+from .clients import (
+    LOCAL_NS,
+    MLClient,
+    MLResourceClient,
+    MLResourcesClient,
+    MLResponseParser,
+)
 from .ml_config import MLConfiguration
 from .ml_manager import MLManager
 
 __version__ = "0.3.1"
-__all__ = ["__version__", "LOCAL_NS",
-           "MLClient", "MLResourceClient", "MLResourcesClient", "MLResponseParser",
-           "MLConfiguration", "MLManager"]
+__all__ = [
+    "__version__",
+    "LOCAL_NS",
+    "MLClient",
+    "MLResourceClient",
+    "MLResourcesClient",
+    "MLResponseParser",
+    "MLConfiguration",
+    "MLManager",
+]

@@ -8,9 +8,9 @@ from mlclient.calls import ForestsPostCall
 def default_forests_post_call():
     """Returns a ForestsPostCall instance"""
     body = {
-      "forest-name": "custom-forest",
-      "host": "custom-host",
-      "database": "custom-database",
+        "forest-name": "custom-forest",
+        "host": "custom-host",
+        "database": "custom-database",
     }
     return ForestsPostCall(body=body)
 
@@ -19,8 +19,7 @@ def test_validation_body_param():
     with pytest.raises(exceptions.WrongParametersError) as err:
         ForestsPostCall(body=None)
 
-    expected_msg = ("No request body provided for "
-                    "POST /manage/v2/forests!")
+    expected_msg = "No request body provided for POST /manage/v2/forests!"
     assert err.value.args[0] == expected_msg
 
 
@@ -28,8 +27,7 @@ def test_validation_blank_body_param():
     with pytest.raises(exceptions.WrongParametersError) as err:
         ForestsPostCall(body=" \n")
 
-    expected_msg = ("No request body provided for "
-                    "POST /manage/v2/forests!")
+    expected_msg = "No request body provided for POST /manage/v2/forests!"
     assert err.value.args[0] == expected_msg
 
 
@@ -60,10 +58,12 @@ def test_headers_for_stringified_dict_body():
 
 
 def test_headers_for_xml_body():
-    body = ('<forest-create xmlns="http://marklogic.com/manage">'
-            '  <forest-name>custom-forest</forest-name>'
-            '  <host>custom-host</host>'
-            '</forest-create>')
+    body = (
+        '<forest-create xmlns="http://marklogic.com/manage">'
+        "  <forest-name>custom-forest</forest-name>"
+        "  <host>custom-host</host>"
+        "</forest-create>"
+    )
     call = ForestsPostCall(body=body)
     assert call.headers == {
         "Content-Type": "application/xml",
@@ -72,8 +72,8 @@ def test_headers_for_xml_body():
 
 def test_dict_body():
     body = {
-      "forest-name": "custom-forest",
-      "host": "custom-host",
+        "forest-name": "custom-forest",
+        "host": "custom-host",
     }
 
     call = ForestsPostCall(body=body)
@@ -82,7 +82,8 @@ def test_dict_body():
 
 def test_stringified_dict_body():
     call = ForestsPostCall(
-        body='{"forest-name": "custom-forest", "host": "custom-host"}')
+        body='{"forest-name": "custom-forest", "host": "custom-host"}',
+    )
     assert call.body == {
         "forest-name": "custom-forest",
         "host": "custom-host",
@@ -90,23 +91,23 @@ def test_stringified_dict_body():
 
 
 def test_xml_body():
-    body = ('<forest-create xmlns="http://marklogic.com/manage">'
-            '  <forest-name>custom-forest</forest-name>'
-            '  <host>custom-host</host>'
-            '</forest-create>')
+    body = (
+        '<forest-create xmlns="http://marklogic.com/manage">'
+        "  <forest-name>custom-forest</forest-name>"
+        "  <host>custom-host</host>"
+        "</forest-create>"
+    )
     call = ForestsPostCall(body=body)
     assert call.body == body
 
 
 def test_fully_parametrized_call():
     body = {
-      "forest-name": "custom-forest",
-      "host": "custom-host",
-      "database": "custom-database",
+        "forest-name": "custom-forest",
+        "host": "custom-host",
+        "database": "custom-database",
     }
-    call = ForestsPostCall(
-        body=body,
-        wait_for_forest_to_mount=False)
+    call = ForestsPostCall(body=body, wait_for_forest_to_mount=False)
     assert call.method == "POST"
     assert call.headers == {
         "Content-Type": "application/json",

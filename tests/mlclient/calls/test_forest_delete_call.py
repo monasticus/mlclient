@@ -7,16 +7,12 @@ from mlclient.calls import ForestDeleteCall
 @pytest.fixture()
 def default_forest_delete_call():
     """Returns an ForestDeleteCall instance"""
-    return ForestDeleteCall(
-        forest="custom-forest",
-        level="full")
+    return ForestDeleteCall(forest="custom-forest", level="full")
 
 
 def test_validation_level_param():
     with pytest.raises(exceptions.WrongParametersError) as err:
-        ForestDeleteCall(
-            forest="custom-forest",
-            level="X")
+        ForestDeleteCall(forest="custom-forest", level="X")
 
     expected_msg = "The supported levels are: full, config-only"
     assert err.value.args[0] == expected_msg
@@ -24,22 +20,18 @@ def test_validation_level_param():
 
 def test_validation_replicas_param():
     with pytest.raises(exceptions.WrongParametersError) as err:
-        ForestDeleteCall(
-            forest="custom-forest",
-            level="full",
-            replicas="X")
+        ForestDeleteCall(forest="custom-forest", level="full", replicas="X")
 
     expected_msg = "The supported replicas options are: detach, delete"
     assert err.value.args[0] == expected_msg
 
 
 def test_endpoint():
-    assert ForestDeleteCall(
-        forest="1",
-        level="full").endpoint == "/manage/v2/forests/1"
-    assert ForestDeleteCall(
-        forest="custom-forest",
-        level="full").endpoint == "/manage/v2/forests/custom-forest"
+    assert ForestDeleteCall(forest="1", level="full").endpoint == "/manage/v2/forests/1"
+    assert (
+        ForestDeleteCall(forest="custom-forest", level="full").endpoint
+        == "/manage/v2/forests/custom-forest"
+    )
 
 
 def test_method(default_forest_delete_call):
@@ -64,7 +56,8 @@ def test_fully_parametrized_call():
     call = ForestDeleteCall(
         forest="custom-forest",
         level="config-only",
-        replicas="delete")
+        replicas="delete",
+    )
     assert call.method == "DELETE"
     assert call.headers == {}
     assert call.params == {

@@ -1,7 +1,7 @@
 import pytest
 
 from mlclient import MLResourcesClient
-from mlclient.model.calls import DocumentsBodyPart
+from mlclient.calls.model import DocumentsBodyPart
 
 
 @pytest.fixture()
@@ -19,7 +19,8 @@ def test_eval(xquery):
     with MLResourcesClient(auth_method="digest") as client:
         resp = client.eval(
             xquery=xquery,
-            variables={"element": "<parent><child/></parent>"})
+            variables={"element": "<parent><child/></parent>"},
+        )
 
     assert resp.status_code == 200
     assert "<new-parent><child/></new-parent>" in resp.text
@@ -51,8 +52,10 @@ def test_post_databases():
         resp = client.post_databases(body=body)
 
     assert resp.status_code == 400
-    assert ("Payload has errors in structure, content-type or values. "
-            "Database name missing.") in resp.text
+    assert (
+        "Payload has errors in structure, content-type or values. "
+        "Database name missing."
+    ) in resp.text
 
 
 @pytest.mark.ml_access()
@@ -70,7 +73,8 @@ def test_post_database():
     with MLResourcesClient(auth_method="digest") as client:
         resp = client.post_database(
             database="Documents",
-            body={"operation": "clear-database"})
+            body={"operation": "clear-database"},
+        )
 
     assert resp.status_code == 200
     assert not resp.text
@@ -99,7 +103,8 @@ def test_put_database_properties():
     with MLResourcesClient(auth_method="digest") as client:
         resp = client.put_database_properties(
             database="non-existing-db",
-            body={"database-name": "custom-db"})
+            body={"database-name": "custom-db"},
+        )
 
     assert resp.status_code == 404
     assert resp.json()["errorResponse"]["messageCode"] == "XDMP-NOSUCHDB"
@@ -121,11 +126,14 @@ def test_post_servers():
         resp = client.post_servers(
             group_id="Default",
             server_type="http",
-            body='<http-server-properties xmlns="http://marklogic.com/manage" />')
+            body='<http-server-properties xmlns="http://marklogic.com/manage" />',
+        )
 
     assert resp.status_code == 400
-    assert ("Payload has errors in structure, content-type or values. "
-            "Server name missing.") in resp.text
+    assert (
+        "Payload has errors in structure, content-type or values. "
+        "Server name missing."
+    ) in resp.text
 
 
 @pytest.mark.ml_access()
@@ -134,7 +142,8 @@ def test_get_server():
         resp = client.get_server(
             server="App-Services",
             group_id="Default",
-            data_format="json")
+            data_format="json",
+        )
 
     expected_uri = "/manage/v2/servers/App-Services?group-id=Default&view=default"
     assert resp.status_code == 200
@@ -144,8 +153,10 @@ def test_get_server():
 @pytest.mark.ml_access()
 def test_delete_server():
     with MLResourcesClient(auth_method="digest") as client:
-        resp = client.delete_server(server="Non-existing-server",
-                                    group_id="Non-existing-group")
+        resp = client.delete_server(
+            server="Non-existing-server",
+            group_id="Non-existing-group",
+        )
 
     assert resp.status_code == 404
     assert "No such group Non-existing-group" in resp.text
@@ -157,7 +168,8 @@ def test_get_server_properties():
         resp = client.get_server_properties(
             server="App-Services",
             group_id="Default",
-            data_format="json")
+            data_format="json",
+        )
 
     assert resp.status_code == 200
     assert resp.json()["server-name"] == "App-Services"
@@ -166,9 +178,11 @@ def test_get_server_properties():
 @pytest.mark.ml_access()
 def test_put_server_properties():
     with MLResourcesClient(auth_method="digest") as client:
-        resp = client.put_server_properties(server="non-existing-server",
-                                            group_id="non-existing-group",
-                                            body={"server-name": "non-existing-server"})
+        resp = client.put_server_properties(
+            server="non-existing-server",
+            group_id="non-existing-group",
+            body={"server-name": "non-existing-server"},
+        )
 
     assert resp.status_code == 404
     assert resp.json()["errorResponse"]["messageCode"] == "XDMP-NOSUCHGROUP"
@@ -200,8 +214,10 @@ def test_put_forests():
         resp = client.put_forests(body=body)
 
     assert resp.status_code == 400
-    assert ("Payload has errors in structure, content-type or values. "
-            "Cannot validate payload, no forests specified.") in resp.text
+    assert (
+        "Payload has errors in structure, content-type or values. "
+        "Cannot validate payload, no forests specified."
+    ) in resp.text
 
 
 @pytest.mark.ml_access()
@@ -247,7 +263,8 @@ def test_put_forest_properties():
     with MLResourcesClient(auth_method="digest") as client:
         resp = client.put_forest_properties(
             forest="non-existing-forest",
-            body={"forest-name": "custom-forest"})
+            body={"forest-name": "custom-forest"},
+        )
 
     assert resp.status_code == 404
     assert resp.json()["errorResponse"]["messageCode"] == "XDMP-NOSUCHFOREST"
@@ -306,11 +323,14 @@ def test_put_role_properties():
     with MLResourcesClient(auth_method="digest") as client:
         resp = client.put_role_properties(
             role="non-existing-role",
-            body={"role-name": "custom-db"})
+            body={"role-name": "custom-db"},
+        )
 
     assert resp.status_code == 400
-    assert ("Payload has errors in structure, content-type or values. "
-            "Role non-existing-role does not exist or is not accessible") in resp.text
+    assert (
+        "Payload has errors in structure, content-type or values. "
+        "Role non-existing-role does not exist or is not accessible"
+    ) in resp.text
 
 
 @pytest.mark.ml_access()
@@ -355,9 +375,7 @@ def test_delete_user():
 @pytest.mark.ml_access()
 def test_get_user_properties():
     with MLResourcesClient(auth_method="digest") as client:
-        resp = client.get_user_properties(
-            user="admin",
-            data_format="json")
+        resp = client.get_user_properties(user="admin", data_format="json")
 
     assert resp.status_code == 200
     assert resp.json()["user-name"] == "admin"
@@ -368,7 +386,8 @@ def test_put_user_properties():
     with MLResourcesClient(auth_method="digest") as client:
         resp = client.put_user_properties(
             user="non-existing-user",
-            body={"user-name": "custom-db"})
+            body={"user-name": "custom-db"},
+        )
 
     assert resp.status_code == 404
     assert resp.json()["errorResponse"]["messageCode"] == "SEC-USERDNE"
@@ -377,8 +396,10 @@ def test_put_user_properties():
 @pytest.mark.ml_access()
 def test_get_documents():
     with MLResourcesClient(auth_method="digest") as client:
-        resp = client.get_documents(uri="/path/to/non-existing/document.xml",
-                                    data_format="json")
+        resp = client.get_documents(
+            uri="/path/to/non-existing/document.xml",
+            data_format="json",
+        )
 
     assert resp.status_code == 500
     assert resp.json()["errorResponse"]["messageCode"] == "RESTAPI-NODOCUMENT"
@@ -388,23 +409,35 @@ def test_get_documents():
 def test_post_documents():
     body_part = {
         "content-type": "application/json",
-        "content-disposition": "foo",
+        "content-disposition": "inline",
         "content": {"root": "data"},
     }
     with MLResourcesClient(auth_method="digest") as client:
         resp = client.post_documents(body_parts=[DocumentsBodyPart(**body_part)])
 
-    assert resp.status_code == 400
-    assert "foo parameter without value for content disposition" in resp.text
+    assert resp.status_code == 500
+    assert resp.json() == {
+        "errorResponse": {
+            "statusCode": "500",
+            "status": "Internal Server Error",
+            "messageCode": "XDMP-AS",
+            "message": "XDMP-AS: (err:XPTY0004) $uri as xs:string -- "
+            "Invalid coercion: () as xs:string",
+        },
+    }
 
 
 @pytest.mark.ml_access()
 def test_delete_documents():
     with MLResourcesClient(auth_method="digest") as client:
-        resp = client.delete_documents(uri="/path/to/non-existing/document.xml",
-                                       wipe_temporal=True)
+        resp = client.delete_documents(
+            uri="/path/to/non-existing/document.xml",
+            wipe_temporal=True,
+        )
 
     assert resp.status_code == 400
-    assert ("Endpoint does not support query parameter: "
-            "invalid parameters: result "
-            "for /path/to/non-existing/document.xml") in resp.text
+    assert (
+        "Endpoint does not support query parameter: "
+        "invalid parameters: result "
+        "for /path/to/non-existing/document.xml"
+    ) in resp.text

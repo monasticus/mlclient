@@ -90,12 +90,14 @@ def test_body(default_logs_call):
 
 
 def test_fully_parametrized_call():
-    call = LogsCall(filename="ErrorLog.txt",
-                    data_format="json",
-                    host="localhost",
-                    start_time="2022-01-01 01:01:01",
-                    end_time="2022-01-01 01:02:02",
-                    regex="some-re")
+    call = LogsCall(
+        filename="ErrorLog.txt",
+        data_format="json",
+        host="localhost",
+        start_time="2022-01-01 01:01:01",
+        end_time="2022-01-01 01:02:02",
+        regex="some-re",
+    )
     assert call.method == "GET"
     assert call.headers == {
         "Accept": "application/json",
@@ -112,94 +114,83 @@ def test_fully_parametrized_call():
 
 
 def test_formatting_datetime_basic():
-    params = LogsCall(filename="ErrorLog.txt",
-                      start_time="2022-01-01 01:01:01").params
+    params = LogsCall(filename="ErrorLog.txt", start_time="2022-01-01 01:01:01").params
     assert params["start"] == "2022-01-01T01:01:01"
 
 
 def test_formatting_datetime_year_only():
-    params = LogsCall(filename="ErrorLog.txt",
-                      start_time="2020").params
+    params = LogsCall(filename="ErrorLog.txt", start_time="2020").params
     now = datetime.now()
     assert params["start"] == f"2020-{now.month:02d}-{now.day:02d}T00:00:00"
 
 
 def test_formatting_datetime_partial_year_only():
-    params = LogsCall(filename="ErrorLog.txt",
-                      start_time="32").params
+    params = LogsCall(filename="ErrorLog.txt", start_time="32").params
     now = datetime.now()
     assert params["start"] == f"2032-{now.month:02d}-{now.day:02d}T00:00:00"
 
 
 def test_formatting_datetime_day_only():
-    params = LogsCall(filename="ErrorLog.txt",
-                      start_time="28").params
+    params = LogsCall(filename="ErrorLog.txt", start_time="28").params
     now = datetime.now()
     assert params["start"] == f"{now.year}-{now.month:02d}-28T00:00:00"
 
 
 def test_formatting_datetime_month_and_day():
-    params = LogsCall(filename="ErrorLog.txt",
-                      start_time="01-01").params
+    params = LogsCall(filename="ErrorLog.txt", start_time="01-01").params
     now = datetime.now()
     assert params["start"] == f"{now.year}-01-01T00:00:00"
 
 
 def test_formatting_datetime_year_month_and_day():
-    params = LogsCall(filename="ErrorLog.txt",
-                      start_time="1999-01-01").params
+    params = LogsCall(filename="ErrorLog.txt", start_time="1999-01-01").params
     assert params["start"] == "1999-01-01T00:00:00"
 
 
 def test_formatting_datetime_time_only():
-    params = LogsCall(filename="ErrorLog.txt",
-                      start_time="01:01").params
+    params = LogsCall(filename="ErrorLog.txt", start_time="01:01").params
     now = datetime.now()
     assert params["start"] == f"{now.year}-{now.month:02d}-{now.day:02d}T01:01:00"
 
 
 def test_formatting_datetime_time_only_with_seconds():
-    params = LogsCall(filename="ErrorLog.txt",
-                      start_time="01:01:01").params
+    params = LogsCall(filename="ErrorLog.txt", start_time="01:01:01").params
     now = datetime.now()
     assert params["start"] == f"{now.year}-{now.month:02d}-{now.day:02d}T01:01:01"
 
 
 def test_formatting_datetime_time_only_with_seconds_and_millis():
-    params = LogsCall(filename="ErrorLog.txt",
-                      start_time="01:01:01.001").params
+    params = LogsCall(filename="ErrorLog.txt", start_time="01:01:01.001").params
     now = datetime.now()
     assert params["start"] == f"{now.year}-{now.month:02d}-{now.day:02d}T01:01:01"
 
 
 def test_formatting_datetime_date_and_hour_only():
-    params = LogsCall(filename="ErrorLog.txt",
-                      start_time="2022-01-01 01").params
+    params = LogsCall(filename="ErrorLog.txt", start_time="2022-01-01 01").params
     assert params["start"] == "2022-01-01T01:00:00"
 
 
 def test_formatting_datetime_date_and_time():
-    params = LogsCall(filename="ErrorLog.txt",
-                      start_time="2022-01-01 01:01").params
+    params = LogsCall(filename="ErrorLog.txt", start_time="2022-01-01 01:01").params
     assert params["start"] == "2022-01-01T01:01:00"
 
 
 def test_formatting_datetime_date_and_time_with_seconds():
-    params = LogsCall(filename="ErrorLog.txt",
-                      start_time="2022-01-01 01:01:01").params
+    params = LogsCall(filename="ErrorLog.txt", start_time="2022-01-01 01:01:01").params
     assert params["start"] == "2022-01-01T01:01:01"
 
 
 def test_formatting_datetime_date_and_time_with_seconds_and_millis():
-    params = LogsCall(filename="ErrorLog.txt",
-                      start_time="2022-01-01 01:01:01.001").params
+    params = LogsCall(
+        filename="ErrorLog.txt",
+        start_time="2022-01-01 01:01:01.001",
+    ).params
     assert params["start"] == "2022-01-01T01:01:01"
 
 
 def test_formatting_datetime_impossible_to_parse_as_month_and_day():
     with pytest.raises(exceptions.WrongParametersError) as err:
-        assert LogsCall(filename="ErrorLog.txt",
-                        start_time="13-01").params == {}
+        assert LogsCall(filename="ErrorLog.txt", start_time="13-01").params == {}
 
     expected_msg = "The start parameter is not a dateTime value!"
     assert err.value.args[0] == expected_msg
@@ -207,8 +198,7 @@ def test_formatting_datetime_impossible_to_parse_as_month_and_day():
 
 def test_formatting_datetime_impossible_to_parse_as_time_1():
     with pytest.raises(exceptions.WrongParametersError) as err:
-        assert LogsCall(filename="ErrorLog.txt",
-                        start_time="25:01").params == {}
+        assert LogsCall(filename="ErrorLog.txt", start_time="25:01").params == {}
 
     expected_msg = "The start parameter is not a dateTime value!"
     assert err.value.args[0] == expected_msg
@@ -216,8 +206,7 @@ def test_formatting_datetime_impossible_to_parse_as_time_1():
 
 def test_formatting_datetime_impossible_to_parse_as_time_2():
     with pytest.raises(exceptions.WrongParametersError) as err:
-        assert LogsCall(filename="ErrorLog.txt",
-                        start_time="24:00").params == {}
+        assert LogsCall(filename="ErrorLog.txt", start_time="24:00").params == {}
 
     expected_msg = "The start parameter is not a dateTime value!"
     assert err.value.args[0] == expected_msg
@@ -225,8 +214,7 @@ def test_formatting_datetime_impossible_to_parse_as_time_2():
 
 def test_formatting_datetime_impossible_to_parse_as_time_3():
     with pytest.raises(exceptions.WrongParametersError) as err:
-        assert LogsCall(filename="ErrorLog.txt",
-                        start_time="01:60").params == {}
+        assert LogsCall(filename="ErrorLog.txt", start_time="01:60").params == {}
 
     expected_msg = "The start parameter is not a dateTime value!"
     assert err.value.args[0] == expected_msg

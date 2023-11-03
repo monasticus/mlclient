@@ -20,13 +20,29 @@ This package exports the following classes:
         An enumeration class representing metadata extract types.
     * Category
         An enumeration class representing data categories.
+    * ContentDispositionSerializer
+        A Content-Disposition header serializer.
 
 Examples
 --------
->>> from mlclient.model.calls import DocumentsBodyPart
+>>> from mlclient.calls.model import DocumentsBodyPart
 """
-from .documents import (Category, DocumentsBodyPart, DocumentsBodyPartType,
-                        DocumentsContentDisposition, Extract, Repair)
+from .documents import (
+    Category,
+    ContentDispositionSerializer,
+    DocumentsBodyPart,
+    DocumentsBodyPartType,
+    DocumentsContentDisposition,
+    Extract,
+    Repair,
+)
 
-__all__ = ["DocumentsBodyPart", "DocumentsBodyPartType",
-           "DocumentsContentDisposition", "Category", "Extract", "Repair"]
+__all__ = [
+    "DocumentsBodyPart",
+    "DocumentsBodyPartType",
+    "DocumentsContentDisposition",
+    "Category",
+    "Extract",
+    "Repair",
+    "ContentDispositionSerializer",
+]

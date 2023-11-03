@@ -59,7 +59,7 @@ class CallEvalCommand(Command):
         option(
             "rest-server",
             "s",
-            description="The ML REST Server environmental id (to get logs from)",
+            description="The ML REST Server environmental id",
             flag=False,
         ),
         option(
@@ -87,7 +87,7 @@ class CallEvalCommand(Command):
     ]
 
     def handle(
-            self,
+        self,
     ) -> int:
         """Execute the command."""
         eval_params = self._get_eval_params()
@@ -105,7 +105,7 @@ class CallEvalCommand(Command):
         txid = self.option("txid")
 
         params = {
-            "raw": True,
+            "output_type": str,
             "database": database,
             "txid": txid,
         }
@@ -119,8 +119,8 @@ class CallEvalCommand(Command):
         return params
 
     def _call_eval(
-            self,
-            eval_params: dict,
+        self,
+        eval_params: dict,
     ):
         """Evaluate the code and get results."""
         environment = self.option("environment")
@@ -128,6 +128,5 @@ class CallEvalCommand(Command):
 
         manager = MLManager(environment)
         with manager.get_eval_client(rest_server) as client:
-            self.info(f"Evaluating code "
-                      f"using REST App-Server {client.base_url}\n")
+            self.info(f"Evaluating code using REST App-Server {client.base_url}\n")
             return client.eval(**eval_params)

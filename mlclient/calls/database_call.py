@@ -36,15 +36,23 @@ class DatabaseGetCall(ResourceCall):
     _VIEW_PARAM: str = "view"
 
     _SUPPORTED_FORMATS: ClassVar[list] = ["xml", "json", "html"]
-    _SUPPORTED_VIEWS: ClassVar[list] = ["describe", "default", "config", "counts",
-                                        "edit", "package", "status", "forest-storage",
-                                        "properties-schema"]
+    _SUPPORTED_VIEWS: ClassVar[list] = [
+        "describe",
+        "default",
+        "config",
+        "counts",
+        "edit",
+        "package",
+        "status",
+        "forest-storage",
+        "properties-schema",
+    ]
 
     def __init__(
-            self,
-            database: str,
-            data_format: str = "xml",
-            view: str = "default",
+        self,
+        database: str,
+        data_format: str = "xml",
+        view: str = "default",
     ):
         """Initialize DatabaseGetCall instance.
 
@@ -64,15 +72,17 @@ class DatabaseGetCall(ResourceCall):
         view = view if view is not None else "default"
         self._validate_params(data_format, view)
 
-        super().__init__(method="GET",
-                         accept=utils.get_accept_header_for_format(data_format))
+        super().__init__(
+            method="GET",
+            accept=utils.get_accept_header_for_format(data_format),
+        )
         self.__database = database
         self.add_param(self._FORMAT_PARAM, data_format)
         self.add_param(self._VIEW_PARAM, view)
 
     @property
     def endpoint(
-            self,
+        self,
     ):
         """An endpoint for the Database call.
 
@@ -85,9 +95,9 @@ class DatabaseGetCall(ResourceCall):
 
     @classmethod
     def _validate_params(
-            cls,
-            data_format: str,
-            view: str,
+        cls,
+        data_format: str,
+        view: str,
     ):
         if data_format not in cls._SUPPORTED_FORMATS:
             joined_supported_formats = ", ".join(cls._SUPPORTED_FORMATS)
@@ -115,9 +125,9 @@ class DatabasePostCall(ResourceCall):
     _ENDPOINT_TEMPLATE: str = "/manage/v2/databases/{}"
 
     def __init__(
-            self,
-            database: str,
-            body: str | dict,
+        self,
+        database: str,
+        body: str | dict,
     ):
         """Initialize DatabasePostCall instance.
 
@@ -132,14 +142,12 @@ class DatabasePostCall(ResourceCall):
         content_type = utils.get_content_type_header_for_data(body)
         if content_type == constants.HEADER_JSON and isinstance(body, str):
             body = json.loads(body)
-        super().__init__(method="POST",
-                         content_type=content_type,
-                         body=body)
+        super().__init__(method="POST", content_type=content_type, body=body)
         self.__database = database
 
     @property
     def endpoint(
-            self,
+        self,
     ):
         """An endpoint for the Database call.
 
@@ -152,8 +160,8 @@ class DatabasePostCall(ResourceCall):
 
     @classmethod
     def _validate_params(
-            cls,
-            body: str | dict,
+        cls,
+        body: str | dict,
     ):
         if body is None or isinstance(body, str) and re.search("^\\s*$", body):
             msg = "No request body provided for POST /manage/v2/databases/{id|name}!"
@@ -178,9 +186,9 @@ class DatabaseDeleteCall(ResourceCall):
     _SUPPORTED_FOREST_DELETE_OPTS: ClassVar[list] = ["configuration", "data"]
 
     def __init__(
-            self,
-            database: str,
-            forest_delete: str | None = None,
+        self,
+        database: str,
+        forest_delete: str | None = None,
     ):
         """Initialize DatabaseDeleteCall instance.
 
@@ -202,7 +210,7 @@ class DatabaseDeleteCall(ResourceCall):
 
     @property
     def endpoint(
-            self,
+        self,
     ):
         """An endpoint for the Database call.
 
@@ -215,8 +223,8 @@ class DatabaseDeleteCall(ResourceCall):
 
     @classmethod
     def _validate_params(
-            cls,
-            forest_delete: str,
+        cls,
+        forest_delete: str,
     ):
         if forest_delete and forest_delete not in cls._SUPPORTED_FOREST_DELETE_OPTS:
             joined_supported_opts = ", ".join(cls._SUPPORTED_FOREST_DELETE_OPTS)

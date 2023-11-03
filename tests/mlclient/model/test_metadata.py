@@ -613,14 +613,34 @@ def test_to_json(metadata):
     ]
     assert collections.sort() == ["collection-1", "collection-2"].sort()
     assert permissions in [
-        [{"role-name": "role-1", "capabilities": [Permission.READ]},
-         {"role-name": "role-2", "capabilities": [Permission.READ, Permission.UPDATE]}],
-        [{"role-name": "role-1", "capabilities": [Permission.READ]},
-         {"role-name": "role-2", "capabilities": [Permission.UPDATE, Permission.READ]}],
-        [{"role-name": "role-2", "capabilities": [Permission.READ, Permission.UPDATE]},
-         {"role-name": "role-1", "capabilities": [Permission.READ]}],
-        [{"role-name": "role-2", "capabilities": [Permission.UPDATE, Permission.READ]},
-         {"role-name": "role-1", "capabilities": [Permission.READ]}],
+        [
+            {"role-name": "role-1", "capabilities": [Permission.READ]},
+            {
+                "role-name": "role-2",
+                "capabilities": [Permission.READ, Permission.UPDATE],
+            },
+        ],
+        [
+            {"role-name": "role-1", "capabilities": [Permission.READ]},
+            {
+                "role-name": "role-2",
+                "capabilities": [Permission.UPDATE, Permission.READ],
+            },
+        ],
+        [
+            {
+                "role-name": "role-2",
+                "capabilities": [Permission.READ, Permission.UPDATE],
+            },
+            {"role-name": "role-1", "capabilities": [Permission.READ]},
+        ],
+        [
+            {
+                "role-name": "role-2",
+                "capabilities": [Permission.UPDATE, Permission.READ],
+            },
+            {"role-name": "role-1", "capabilities": [Permission.READ]},
+        ],
     ]
     assert properties == {"prop-name-1": "prop-value-1", "prop-name-2": "prop-value-2"}
     assert quality == 1
@@ -632,92 +652,128 @@ def test_to_json(metadata):
 
 def test_to_json_string(metadata):
     metadata_json_string = metadata.to_json_string()
+    assert isinstance(metadata_json_string, str)
     assert "\n" not in metadata_json_string
-    assert ('"collections": ["collection-1", "collection-2"]' in metadata_json_string or
-            '"collections": ["collection-2", "collection-1"]' in metadata_json_string)
-    assert (('"permissions": ['
-             '{"role-name": "role-2", '
-             '"capabilities": ["read", "update"]}, '
-             '{"role-name": "role-1", '
-             '"capabilities": ["read"]}]') in metadata_json_string or
-            ('"permissions": ['
-             '{"role-name": "role-1", '
-             '"capabilities": ["read"]}, '
-             '{"role-name": "role-2", '
-             '"capabilities": ["read", "update"]}]') in metadata_json_string or
-            ('"permissions": ['
-             '{"role-name": "role-2", '
-             '"capabilities": ["update", "read"]}, '
-             '{"role-name": "role-1", '
-             '"capabilities": ["read"]}]') in metadata_json_string or
-            ('"permissions": ['
-             '{"role-name": "role-1", '
-             '"capabilities": ["read"]}, '
-             '{"role-name": "role-2", '
-             '"capabilities": ["update", "read"]}]') in metadata_json_string)
-    assert (('"properties": '
-             '{"prop-name-1": "prop-value-1", '
-             '"prop-name-2": "prop-value-2"}') in metadata_json_string or
-            ('"properties": '
-             '{"prop-name-2": "prop-value-2", '
-             '"prop-name-1": "prop-value-1"}') in metadata_json_string)
+    assert (
+        '"collections": ["collection-1", "collection-2"]' in metadata_json_string
+        or '"collections": ["collection-2", "collection-1"]' in metadata_json_string
+    )
+    assert (
+        (
+            '"permissions": ['
+            '{"role-name": "role-2", "capabilities": ["read", "update"]}, '
+            '{"role-name": "role-1", "capabilities": ["read"]}]'
+        )
+        in metadata_json_string
+        or (
+            '"permissions": ['
+            '{"role-name": "role-1", "capabilities": ["read"]}, '
+            '{"role-name": "role-2", "capabilities": ["read", "update"]}]'
+        )
+        in metadata_json_string
+        or (
+            '"permissions": ['
+            '{"role-name": "role-2", "capabilities": ["update", "read"]}, '
+            '{"role-name": "role-1", "capabilities": ["read"]}]'
+        )
+        in metadata_json_string
+        or (
+            '"permissions": ['
+            '{"role-name": "role-1", "capabilities": ["read"]}, '
+            '{"role-name": "role-2", "capabilities": ["update", "read"]}]'
+        )
+        in metadata_json_string
+    )
+    assert (
+        '"properties": {"prop-name-1": "prop-value-1", "prop-name-2": "prop-value-2"}'
+    ) in metadata_json_string or (
+        '"properties": {"prop-name-2": "prop-value-2", "prop-name-1": "prop-value-1"}'
+    ) in metadata_json_string
     assert '"quality": 1' in metadata_json_string
-    assert (('"metadataValues": '
-             '{"meta-name-1": "meta-value-1", '
-             '"meta-name-2": "meta-value-2"}') in metadata_json_string or
-            ('"metadataValues": '
-             '{"meta-name-2": "meta-value-2", '
-             '"meta-name-1": "meta-value-1"}') in metadata_json_string)
+    assert (
+        '"metadataValues": '
+        '{"meta-name-1": "meta-value-1", "meta-name-2": "meta-value-2"}'
+    ) in metadata_json_string or (
+        '"metadataValues": '
+        '{"meta-name-2": "meta-value-2", "meta-name-1": "meta-value-1"}'
+    ) in metadata_json_string
 
 
 def test_to_json_string_with_indent(metadata):
     metadata_json_string = metadata.to_json_string(indent=4)
+    assert isinstance(metadata_json_string, str)
     assert "{\n" in metadata_json_string
     assert '    "collections": [\n' in metadata_json_string
-    assert ('        "collection-1"\n' in metadata_json_string or
-            '        "collection-1",\n' in metadata_json_string)
-    assert ('        "collection-2"\n' in metadata_json_string or
-            '        "collection-2",\n' in metadata_json_string)
+    assert (
+        '        "collection-1"\n' in metadata_json_string
+        or '        "collection-1",\n' in metadata_json_string
+    )
+    assert (
+        '        "collection-2"\n' in metadata_json_string
+        or '        "collection-2",\n' in metadata_json_string
+    )
     assert "    ],\n" in metadata_json_string
     assert '    "permissions": [\n' in metadata_json_string
     assert "        {\n" in metadata_json_string
-    assert ('            "role-name": "role-1"\n' in metadata_json_string or
-            '            "role-name": "role-1",\n' in metadata_json_string)
+    assert (
+        '            "role-name": "role-1"\n' in metadata_json_string
+        or '            "role-name": "role-1",\n' in metadata_json_string
+    )
     assert '            "capabilities": [\n' in metadata_json_string
     assert '                "read"\n' in metadata_json_string
-    assert ("            ]\n" in metadata_json_string or
-            '            "],\n' in metadata_json_string)
-    assert ("        }\n" in metadata_json_string or
-            '        "},\n' in metadata_json_string)
+    assert (
+        "            ]\n" in metadata_json_string
+        or '            "],\n' in metadata_json_string
+    )
+    assert (
+        "        }\n" in metadata_json_string or '        "},\n' in metadata_json_string
+    )
     assert "        {\n" in metadata_json_string
-    assert ('            "role-name": "role-2"\n' in metadata_json_string or
-            '            "role-name": "role-2",\n' in metadata_json_string)
+    assert (
+        '            "role-name": "role-2"\n' in metadata_json_string
+        or '            "role-name": "role-2",\n' in metadata_json_string
+    )
     assert '            "capabilities": [\n' in metadata_json_string
-    assert ('                "read"\n' in metadata_json_string or
-            '                "read",\n' in metadata_json_string)
-    assert ('                "update"\n' in metadata_json_string or
-            '                "update",\n' in metadata_json_string)
-    assert ("            ]\n" in metadata_json_string or
-            '            "],\n' in metadata_json_string)
-    assert ("        }\n" in metadata_json_string or
-            '        "},\n' in metadata_json_string)
+    assert (
+        '                "read"\n' in metadata_json_string
+        or '                "read",\n' in metadata_json_string
+    )
+    assert (
+        '                "update"\n' in metadata_json_string
+        or '                "update",\n' in metadata_json_string
+    )
+    assert (
+        "            ]\n" in metadata_json_string
+        or '            "],\n' in metadata_json_string
+    )
+    assert (
+        "        }\n" in metadata_json_string or '        "},\n' in metadata_json_string
+    )
     assert "    ],\n" in metadata_json_string
     assert '"properties": {\n' in metadata_json_string
-    assert ('        "prop-name-1": "prop-value-1"\n' in metadata_json_string or
-            '        "prop-name-1": "prop-value-1",\n' in metadata_json_string)
-    assert ('        "prop-name-2": "prop-value-2"\n' in metadata_json_string or
-            '        "prop-name-2": "prop-value-2",\n' in metadata_json_string)
-    assert ("    },\n" in metadata_json_string or
-            "    }\n" in metadata_json_string)
-    assert ('    "quality": 1\n' in metadata_json_string or
-            '    "quality": 1,\n' in metadata_json_string)
+    assert (
+        '        "prop-name-1": "prop-value-1"\n' in metadata_json_string
+        or '        "prop-name-1": "prop-value-1",\n' in metadata_json_string
+    )
+    assert (
+        '        "prop-name-2": "prop-value-2"\n' in metadata_json_string
+        or '        "prop-name-2": "prop-value-2",\n' in metadata_json_string
+    )
+    assert "    },\n" in metadata_json_string or "    }\n" in metadata_json_string
+    assert (
+        '    "quality": 1\n' in metadata_json_string
+        or '    "quality": 1,\n' in metadata_json_string
+    )
     assert '    "metadataValues": {\n' in metadata_json_string
-    assert ('        "meta-name-1": "meta-value-1"\n' in metadata_json_string or
-            '        "meta-name-1": "meta-value-1",\n' in metadata_json_string)
-    assert ('        "meta-name-2": "meta-value-2"\n' in metadata_json_string or
-            '        "meta-name-2": "meta-value-2",\n' in metadata_json_string)
-    assert ("    }\n" in metadata_json_string or
-            "    },\n" in metadata_json_string)
+    assert (
+        '        "meta-name-1": "meta-value-1"\n' in metadata_json_string
+        or '        "meta-name-1": "meta-value-1",\n' in metadata_json_string
+    )
+    assert (
+        '        "meta-name-2": "meta-value-2"\n' in metadata_json_string
+        or '        "meta-name-2": "meta-value-2",\n' in metadata_json_string
+    )
+    assert "    }\n" in metadata_json_string or "    },\n" in metadata_json_string
     assert "}" in metadata_json_string
 
 
@@ -828,6 +884,7 @@ def test_to_xml_string(metadata):
         "</rapi:metadata-values>",
         "</rapi:metadata>",
     ]
+    assert isinstance(metadata_xml_string, str)
     for line in expected_lines:
         assert line in metadata_xml_string
 
@@ -861,12 +918,21 @@ def test_to_xml_string_with_indent(metadata):
         "    </prop:properties>\n",
         "    <rapi:quality>1</rapi:quality>\n",
         "    <rapi:metadata-values>\n",
-        ('        <rapi:metadata-value key="meta-name-1">meta-value-1'
-         '</rapi:metadata-value>\n'),
-        ('        <rapi:metadata-value key="meta-name-2">meta-value-2'
-         '</rapi:metadata-value>\n'),
+        (
+            "        "
+            '<rapi:metadata-value key="meta-name-1">'
+            "meta-value-1"
+            "</rapi:metadata-value>\n"
+        ),
+        (
+            "        "
+            '<rapi:metadata-value key="meta-name-2">'
+            "meta-value-2"
+            "</rapi:metadata-value>\n"
+        ),
         "    </rapi:metadata-values>\n",
         "</rapi:metadata>\n",
     ]
+    assert isinstance(metadata_xml_string, str)
     for line in expected_lines:
         assert line in metadata_xml_string

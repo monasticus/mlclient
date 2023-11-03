@@ -37,7 +37,7 @@ jobs:
 
       - name: Create test report
         run: |
-          poetry run pytest --cov=mlclient --cov=cli tests | tee output.txt
+          poetry run pytest --cov=mlclient tests | tee output.txt
 
       - name: Parse Code Coverage
         id: coverageComment

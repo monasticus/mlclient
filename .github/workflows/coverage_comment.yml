@@ -36,8 +36,8 @@ jobs:
 
       - name: Create test reports
         run: |
-          poetry run pytest --junitxml=pytest.xml --cov=mlclient --cov=cli tests | tee output.txt
-          poetry run pytest --cov=mlclient --cov=cli --cov-report=xml:coverage.xml tests
+          poetry run pytest --junitxml=pytest.xml --cov=mlclient tests | tee output.txt
+          poetry run pytest --cov=mlclient --cov-report=xml:coverage.xml tests
 
       - name: Put an overall test & coverage comment
         uses: MishaKav/pytest-coverage-comment@main

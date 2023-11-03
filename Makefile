@@ -27,7 +27,7 @@ format: imports lint-fix
 	@git checkout -- tests/mlclient/model/test_metadata.py
 
 test:
-	@poetry run pytest --cov=mlclient --cov=cli tests/
+	@poetry run pytest --cov=mlclient tests/
 
 ml-start:
 	@sudo /etc/init.d/MarkLogic start

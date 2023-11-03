@@ -3,6 +3,7 @@ from __future__ import annotations
 import copy
 
 import pytest
+from deepdiff import DeepDiff
 
 from mlclient.model import Metadata, Permission
 
@@ -597,57 +598,23 @@ def test_metadata_values_stringified():
 
 
 def test_to_json(metadata):
-    metadata_json = metadata.to_json()
-    collections = metadata_json.get("collections")
-    permissions = metadata_json.get("permissions")
-    properties = metadata_json.get("properties")
-    quality = metadata_json.get("quality")
-    metadata_values = metadata_json.get("metadataValues")
-
-    assert list(metadata_json.keys()) == [
-        "collections",
-        "permissions",
-        "properties",
-        "quality",
-        "metadataValues",
-    ]
-    assert collections.sort() == ["collection-1", "collection-2"].sort()
-    assert permissions in [
-        [
-            {"role-name": "role-1", "capabilities": [Permission.READ]},
-            {
-                "role-name": "role-2",
-                "capabilities": [Permission.READ, Permission.UPDATE],
-            },
+    actual_metadata_json = metadata.to_json()
+    expected_metadata_json = {
+        "collections": ["collection-2", "collection-1"],
+        "permissions": [
+            {"role-name": "role-1", "capabilities": ["read"]},
+            {"role-name": "role-2", "capabilities": ["update", "read"]},
         ],
-        [
-            {"role-name": "role-1", "capabilities": [Permission.READ]},
-            {
-                "role-name": "role-2",
-                "capabilities": [Permission.UPDATE, Permission.READ],
-            },
-        ],
-        [
-            {
-                "role-name": "role-2",
-                "capabilities": [Permission.READ, Permission.UPDATE],
-            },
-            {"role-name": "role-1", "capabilities": [Permission.READ]},
-        ],
-        [
-            {
-                "role-name": "role-2",
-                "capabilities": [Permission.UPDATE, Permission.READ],
-            },
-            {"role-name": "role-1", "capabilities": [Permission.READ]},
-        ],
-    ]
-    assert properties == {"prop-name-1": "prop-value-1", "prop-name-2": "prop-value-2"}
-    assert quality == 1
-    assert metadata_values == {
-        "meta-name-1": "meta-value-1",
-        "meta-name-2": "meta-value-2",
+        "properties": {"prop-name-1": "prop-value-1", "prop-name-2": "prop-value-2"},
+        "quality": 1,
+        "metadataValues": {
+            "meta-name-1": "meta-value-1",
+            "meta-name-2": "meta-value-2",
+        },
     }
+
+    diff = DeepDiff(actual_metadata_json, expected_metadata_json, ignore_order=True)
+    assert not diff
 
 
 def test_to_json_string(metadata):

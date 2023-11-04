@@ -24,7 +24,6 @@ lintp-fix:
 
 format: imports lint-fix
 	@poetry run ruff format .
-	@#git checkout -- tests/mlclient/model/test_metadata.py
 
 test:
 	@poetry run pytest --cov=mlclient tests/

@@ -39,7 +39,7 @@ def metadata():
     ]
     properties = {"prop-name-1": "prop-value-1", "prop-name-2": "prop-value-2"}
     quality = 1
-    metadata_values = {"meta-name-1": "meta-value-1", "meta-name-2": "meta-value-2"}
+    metadata_values = {"meta-name-1": "meta-1", "meta-name-2": "meta-2"}
 
     return Metadata(
         collections=collections,
@@ -54,7 +54,7 @@ def test_equal():
     collections = ["collection-1", "collection-2"]
     permissions = [Permission("role-1", {Permission.READ})]
     properties = {"prop-name-1": "prop-value-1", "prop-name-2": "prop-value-2"}
-    metadata_values = {"meta-name-1": "meta-value-1", "meta-name-2": "meta-value-2"}
+    metadata_values = {"meta-name-1": "meta-1", "meta-name-2": "meta-2"}
     metadata_1 = Metadata(
         collections=collections,
         permissions=permissions,
@@ -78,7 +78,7 @@ def test_not_equal_when_collections_differ():
     collections_2 = ["collection-1", "collection-3"]
     permissions = [Permission("role-1", {Permission.READ})]
     properties = {"prop-name-1": "prop-value-1", "prop-name-2": "prop-value-2"}
-    metadata_values = {"meta-name-1": "meta-value-1", "meta-name-2": "meta-value-2"}
+    metadata_values = {"meta-name-1": "meta-1", "meta-name-2": "meta-2"}
     metadata_1 = Metadata(
         collections=collections_1,
         permissions=permissions,
@@ -102,7 +102,7 @@ def test_not_equal_when_permissions_differ():
     permissions_1 = [Permission("role-1", {Permission.READ})]
     permissions_2 = [Permission("role-1", {Permission.UPDATE})]
     properties = {"prop-name-1": "prop-value-1", "prop-name-2": "prop-value-2"}
-    metadata_values = {"meta-name-1": "meta-value-1", "meta-name-2": "meta-value-2"}
+    metadata_values = {"meta-name-1": "meta-1", "meta-name-2": "meta-2"}
     metadata_1 = Metadata(
         collections=collections,
         permissions=permissions_1,
@@ -126,7 +126,7 @@ def test_not_equal_when_properties_differ():
     permissions = [Permission("role-1", {Permission.READ})]
     properties_1 = {"prop-name-1": "prop-value-1", "prop-name-2": "prop-value-2"}
     properties_2 = {"prop-name-1": "prop-value-1", "prop-name-2": "prop-value-3"}
-    metadata_values = {"meta-name-1": "meta-value-1", "meta-name-2": "meta-value-2"}
+    metadata_values = {"meta-name-1": "meta-1", "meta-name-2": "meta-2"}
     metadata_1 = Metadata(
         collections=collections,
         permissions=permissions,
@@ -149,7 +149,7 @@ def test_not_equal_when_qualities_differ():
     collections = ["collection-1", "collection-2"]
     permissions = [Permission("role-1", {Permission.READ})]
     properties = {"prop-name-1": "prop-value-1", "prop-name-2": "prop-value-2"}
-    metadata_values = {"meta-name-1": "meta-value-1", "meta-name-2": "meta-value-2"}
+    metadata_values = {"meta-name-1": "meta-1", "meta-name-2": "meta-2"}
     metadata_1 = Metadata(
         collections=collections,
         permissions=permissions,
@@ -172,8 +172,8 @@ def test_not_equal_when_metadata_values_differ():
     collections = ["collection-1", "collection-2"]
     permissions = [Permission("role-1", {Permission.READ})]
     properties = {"prop-name-1": "prop-value-1", "prop-name-2": "prop-value-2"}
-    metadata_values_1 = {"meta-name-1": "meta-value-1", "meta-name-2": "meta-value-2"}
-    metadata_values_2 = {"meta-name-1": "meta-value-1", "meta-name-2": "meta-value-3"}
+    metadata_values_1 = {"meta-name-1": "meta-1", "meta-name-2": "meta-2"}
+    metadata_values_2 = {"meta-name-1": "meta-1", "meta-name-2": "meta-3"}
     metadata_1 = Metadata(
         collections=collections,
         permissions=permissions,
@@ -244,7 +244,7 @@ def test_get_quality_when_empty():
 
 
 def test_get_metadata_values_when_exists():
-    metadata_values = {"meta-name-1": "meta-value-1", "meta-name-2": "meta-value-2"}
+    metadata_values = {"meta-name-1": "meta-1", "meta-name-2": "meta-2"}
     metadata = Metadata(metadata_values=metadata_values)
     assert metadata.metadata_values() == metadata_values
 
@@ -375,31 +375,31 @@ def test_put_none_property():
 
 def test_put_metadata_value():
     metadata = Metadata()
-    metadata.put_metadata_value("meta-name-1", "meta-value-1")
+    metadata.put_metadata_value("meta-name-1", "meta-1")
     assert metadata.metadata_values() == {
-        "meta-name-1": "meta-value-1",
+        "meta-name-1": "meta-1",
     }
 
-    metadata.put_metadata_value("meta-name-2", "meta-value-2")
+    metadata.put_metadata_value("meta-name-2", "meta-2")
     assert metadata.metadata_values() == {
-        "meta-name-1": "meta-value-1",
-        "meta-name-2": "meta-value-2",
+        "meta-name-1": "meta-1",
+        "meta-name-2": "meta-2",
     }
 
 
 def test_put_metadata_value_when_exists():
-    metadata = Metadata(metadata_values={"meta-name-1": "meta-value-1"})
-    metadata.put_metadata_value("meta-name-1", "meta-value-2")
+    metadata = Metadata(metadata_values={"meta-name-1": "meta-1"})
+    metadata.put_metadata_value("meta-name-1", "meta-2")
     assert metadata.metadata_values() == {
-        "meta-name-1": "meta-value-2",
+        "meta-name-1": "meta-2",
     }
 
 
 def test_put_none_metadata_value():
-    metadata = Metadata(metadata_values={"meta-name-1": "meta-value-1"})
+    metadata = Metadata(metadata_values={"meta-name-1": "meta-1"})
     metadata.put_metadata_value("meta-name-1", None)
     assert metadata.metadata_values() == {
-        "meta-name-1": "meta-value-1",
+        "meta-name-1": "meta-1",
     }
 
 
@@ -499,12 +499,12 @@ def test_remove_property_when_does_not_exist():
 
 
 def test_remove_metadata_value():
-    metadata_values = {"meta-name-1": "meta-value-1", "meta-name-2": "meta-value-2"}
+    metadata_values = {"meta-name-1": "meta-1", "meta-name-2": "meta-2"}
     metadata = Metadata(metadata_values=metadata_values)
     success = metadata.remove_metadata_value("meta-name-1")
     assert success is True
     assert metadata.metadata_values() == {
-        "meta-name-2": "meta-value-2",
+        "meta-name-2": "meta-2",
     }
 
     success = metadata.remove_metadata_value("meta-name-2")
@@ -513,11 +513,11 @@ def test_remove_metadata_value():
 
 
 def test_remove_metadata_value_when_does_not_exist():
-    metadata = Metadata(metadata_values={"meta-name-1": "meta-value-1"})
+    metadata = Metadata(metadata_values={"meta-name-1": "meta-1"})
     success = metadata.remove_metadata_value("meta-name-2")
     assert success is False
     assert metadata.metadata_values() == {
-        "meta-name-1": "meta-value-1",
+        "meta-name-1": "meta-1",
     }
 
 
@@ -569,15 +569,15 @@ def test_properties_with_non_string_values():
 
 def test_metadata_values_with_none_values():
     metadata_values = {
-        "meta-name-1": "meta-value-1",
+        "meta-name-1": "meta-1",
         "meta-name-2": None,
-        "meta-name-3": "meta-value-3",
+        "meta-name-3": "meta-3",
         "meta-name-4": None,
     }
     metadata = Metadata(metadata_values=metadata_values)
     assert metadata.metadata_values() == {
-        "meta-name-1": "meta-value-1",
-        "meta-name-3": "meta-value-3",
+        "meta-name-1": "meta-1",
+        "meta-name-3": "meta-3",
     }
 
 
@@ -608,8 +608,8 @@ def test_to_json(metadata):
         "properties": {"prop-name-1": "prop-value-1", "prop-name-2": "prop-value-2"},
         "quality": 1,
         "metadataValues": {
-            "meta-name-1": "meta-value-1",
-            "meta-name-2": "meta-value-2",
+            "meta-name-1": "meta-1",
+            "meta-name-2": "meta-2",
         },
     }
 
@@ -649,10 +649,8 @@ def test_to_json_string(metadata):
             '"quality": 1',
         ],
         [
-            '"metadataValues": '
-            '{"meta-name-1": "meta-value-1", "meta-name-2": "meta-value-2"}',
-            '"metadataValues": '
-            '{"meta-name-2": "meta-value-2", "meta-name-1": "meta-value-1"}',
+            '"metadataValues": {"meta-name-1": "meta-1", "meta-name-2": "meta-2"}',
+            '"metadataValues": {"meta-name-2": "meta-2", "meta-name-1": "meta-1"}',
         ],
     ]
     assert isinstance(metadata_json_string, str)
@@ -755,12 +753,12 @@ def test_to_json_string_with_indent(metadata):
         ],
         [
             '    "metadataValues": {\n'
-            '        "meta-name-1": "meta-value-1",\n'
-            '        "meta-name-2": "meta-value-2"\n'
+            '        "meta-name-1": "meta-1",\n'
+            '        "meta-name-2": "meta-2"\n'
             "    }",
             '    "metadataValues": {\n'
-            '        "meta-name-2": "meta-value-2",\n'
-            '        "meta-name-1": "meta-value-1"\n'
+            '        "meta-name-2": "meta-2",\n'
+            '        "meta-name-1": "meta-1"\n'
             "    }",
         ],
     ]
@@ -846,7 +844,7 @@ def test_to_xml(metadata):
             {"key": "meta-name-2"},
         ]
         assert len(list(metadata_value_element)) == 0
-        assert metadata_value_element.text in ["meta-value-1", "meta-value-2"]
+        assert metadata_value_element.text in ["meta-1", "meta-2"]
 
 
 def test_to_xml_string(metadata):
@@ -875,8 +873,8 @@ def test_to_xml_string(metadata):
         "</prop:properties>",
         "<rapi:quality>1</rapi:quality>",
         "<rapi:metadata-values>",
-        '<rapi:metadata-value key="meta-name-1">meta-value-1</rapi:metadata-value>',
-        '<rapi:metadata-value key="meta-name-2">meta-value-2</rapi:metadata-value>',
+        '<rapi:metadata-value key="meta-name-1">meta-1</rapi:metadata-value>',
+        '<rapi:metadata-value key="meta-name-2">meta-2</rapi:metadata-value>',
         "</rapi:metadata-values>",
         "</rapi:metadata>",
     ]
@@ -914,18 +912,8 @@ def test_to_xml_string_with_indent(metadata):
         "    </prop:properties>\n",
         "    <rapi:quality>1</rapi:quality>\n",
         "    <rapi:metadata-values>\n",
-        (
-            "        "
-            '<rapi:metadata-value key="meta-name-1">'
-            "meta-value-1"
-            "</rapi:metadata-value>\n"
-        ),
-        (
-            "        "
-            '<rapi:metadata-value key="meta-name-2">'
-            "meta-value-2"
-            "</rapi:metadata-value>\n"
-        ),
+        '        <rapi:metadata-value key="meta-name-1">meta-1</rapi:metadata-value>\n',
+        '        <rapi:metadata-value key="meta-name-2">meta-2</rapi:metadata-value>\n',
         "    </rapi:metadata-values>\n",
         "</rapi:metadata>\n",
     ]

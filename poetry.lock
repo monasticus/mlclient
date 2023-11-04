@@ -452,6 +452,24 @@ test = ["pretend", "pytest (>=6.2.0)", "pytest-benchmark", "pytest-cov", "pytest
 test-randomorder = ["pytest-randomly"]
 
 [[package]]
+name = "deepdiff"
+version = "6.6.1"
+description = "Deep Difference and Search of any Python object/data. Recreate objects by adding adding deltas to each other."
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "deepdiff-6.6.1-py3-none-any.whl", hash = "sha256:891b3cb12837e5d376ac0b58f4c8a2764e3a8bbceabb7108ff82235f1f2c4460"},
+    {file = "deepdiff-6.6.1.tar.gz", hash = "sha256:75c75b1511f0e48edef2b70d785a9c32b2631666b465fa8c32270a77a7b950b5"},
+]
+
+[package.dependencies]
+ordered-set = ">=4.0.2,<4.2.0"
+
+[package.extras]
+cli = ["click (==8.1.3)", "pyyaml (==6.0.1)"]
+optimize = ["orjson"]
+
+[[package]]
 name = "distlib"
 version = "0.3.7"
 description = "Distribution utilities"
@@ -914,6 +932,20 @@ files = [
     {file = "msgpack-1.0.7-cp39-cp39-win_amd64.whl", hash = "sha256:1dc93e8e4653bdb5910aed79f11e165c85732067614f180f70534f056da97db3"},
     {file = "msgpack-1.0.7.tar.gz", hash = "sha256:572efc93db7a4d27e404501975ca6d2d9775705c2d922390d878fcf768d92c87"},
 ]
+
+[[package]]
+name = "ordered-set"
+version = "4.1.0"
+description = "An OrderedSet is a custom MutableSet that remembers its order, so that every"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "ordered-set-4.1.0.tar.gz", hash = "sha256:694a8e44c87657c59292ede72891eb91d34131f6531463aab3009191c77364a8"},
+    {file = "ordered_set-4.1.0-py3-none-any.whl", hash = "sha256:046e1132c71fcf3330438a539928932caf51ddbc582496833e23de611de14562"},
+]
+
+[package.extras]
+dev = ["black", "mypy", "pytest"]
 
 [[package]]
 name = "packaging"
@@ -2081,4 +2113,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.8"
-content-hash = "9eae2550aa1fc8add92068bac775ec8f411d592412236127e0e10339046da9a1"
+content-hash = "fb3534649d5dcbd89bbcf0d0077cd18cccbb9a4865ae392a1eb8dd5d8d851c97"

@@ -7,6 +7,8 @@ generic modules:
         The ML Configuration module.
     * ml_manager
         The ML Manager module.
+    * ml_response_parser
+        The ML Response Parser module.
     * constants
         The ML Client Constants module.
     * mimetypes
@@ -23,26 +25,21 @@ This package exports the following classes:
         A MLClient subclass calling ResourceCall implementation classes.
     * MLResourcesClient
         A MLResourceClient subclass supporting REST Resources of the MarkLogic server.
-    * MLResponseParser
-        A MarkLogic HTTP response parser.
     * MLConfiguration
         A class representing MarkLogic configuration.
     * MLManager
         A high-level class managing a MarkLogic instance.
+    * MLResponseParser
+        A MarkLogic HTTP response parser.
 
 Examples
 --------
 >>> from mlclient import MLResourcesClient
 """
-from .clients import (
-    LOCAL_NS,
-    MLClient,
-    MLResourceClient,
-    MLResourcesClient,
-    MLResponseParser,
-)
+from .clients import LOCAL_NS, MLClient, MLResourceClient, MLResourcesClient
 from .ml_config import MLConfiguration
 from .ml_manager import MLManager
+from .ml_response_parser import MLResponseParser
 
 __version__ = "0.3.1"
 __all__ = [

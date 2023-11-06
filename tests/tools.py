@@ -216,10 +216,22 @@ class MLResponseBuilder:
         self.with_method("GET")
         self.build()
 
+    def build_delete(
+        self,
+    ):
+        self.with_method("DELETE")
+        self.build()
+
     def build_post(
         self,
     ):
         self.with_method("POST")
+        self.build()
+
+    def build_put(
+        self,
+    ):
+        self.with_method("PUT")
         self.build()
 
     def build(
@@ -298,8 +310,12 @@ class MLResponseBuilder:
     ):
         if self._method == "GET":
             self._finalize_get(request_url, responses_params)
+        elif self._method == "DELETE":
+            self._finalize_delete(request_url, responses_params)
         elif self._method == "POST":
             self._finalize_post(request_url, self._request_body, responses_params)
+        elif self._method == "PUT":
+            self._finalize_put(request_url, self._request_body, responses_params)
 
     @staticmethod
     def _finalize_get(
@@ -312,14 +328,43 @@ class MLResponseBuilder:
         )
 
     @staticmethod
+    def _finalize_delete(
+        request_url: str,
+        responses_params: dict,
+    ):
+        responses.delete(
+            request_url,
+            **responses_params,
+        )
+
+    @staticmethod
     def _finalize_post(
         request_url: str,
         request_body: Any,
         responses_params: dict,
     ):
-        match = [matchers.urlencoded_params_matcher(request_body)]
+        if isinstance(request_body, dict):
+            match = [matchers.json_params_matcher(request_body)]
+        else:
+            match = [matchers.urlencoded_params_matcher(request_body)]
         responses_params["match"] = match
         responses.post(
+            request_url,
+            **responses_params,
+        )
+
+    @staticmethod
+    def _finalize_put(
+        request_url: str,
+        request_body: Any,
+        responses_params: dict,
+    ):
+        if isinstance(request_body, dict):
+            match = [matchers.json_params_matcher(request_body)]
+        else:
+            match = [matchers.urlencoded_params_matcher(request_body)]
+        responses_params["match"] = match
+        responses.put(
             request_url,
             **responses_params,
         )
@@ -434,7 +479,7 @@ class MLResponseBuilder:
         request_content_type = response.request.headers.get("Content-Type")
         request_body = response.request.body
 
-        if method not in ["POST", "PUT"]:
+        if request_body is None or method not in ["POST", "PUT"]:
             return None
 
         if request_content_type != HEADER_X_WWW_FORM_URLENCODED:
@@ -467,7 +512,7 @@ class MLResponseBuilder:
         response_headers_lines = []
         if not response_content_type.startswith(HEADER_MULTIPART_MIXED):
             content_type_line = (
-                f"builder.with_response_content_type({response_content_type})"
+                f'builder.with_response_content_type("{response_content_type}")'
             )
         else:
             content_type_line = "builder.with_response_body_multipart_mixed()"
@@ -505,10 +550,7 @@ class MLResponseBuilder:
         cls,
         response: Response,
     ):
-        content_type_header = next(
-            header for header in response.headers if header.lower() == "content-type"
-        )
-        response_content_type = response.headers.get(content_type_header)
+        response_content_type = response.headers.get("content-type")
         response_body_text = response.text
 
         if response.content == b"":

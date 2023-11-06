@@ -60,6 +60,8 @@ from mlclient.calls import (
     UsersPostCall,
 )
 from mlclient.calls.model import DocumentsBodyPart
+from mlclient.mimetypes import Mimetypes
+from mlclient.model import DocumentType
 
 logger = logging.getLogger(__name__)
 
@@ -365,7 +367,10 @@ class MLClient:
             }
             if body:
                 content_type = headers.get(const.HEADER_NAME_CONTENT_TYPE)
-                if content_type == const.HEADER_JSON:
+                doc_type = (
+                    Mimetypes.get_doc_type(content_type) if content_type else None
+                )
+                if doc_type == DocumentType.JSON:
                     request["json"] = body
                 else:
                     request["data"] = body

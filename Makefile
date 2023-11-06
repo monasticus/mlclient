@@ -25,8 +25,13 @@ lintp-fix:
 format: imports lint-fix
 	@poetry run ruff format .
 
-test:
-	@poetry run pytest --cov=mlclient tests/
+unit-test:
+	@poetry run pytest --cov=mlclient tests/unit
+
+integration-test:
+	@poetry run pytest --cov=mlclient/clients tests/integration
+
+test: unit-test integration-test
 
 ml-start:
 	@sudo /etc/init.d/MarkLogic start

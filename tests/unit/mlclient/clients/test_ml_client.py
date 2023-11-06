@@ -104,6 +104,7 @@ def test_post():
 def test_post_with_customized_params_and_headers_and_body_different_than_json():
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/v1/eval")
+    builder.with_request_content_type("application/x-www-form-urlencoded")
     builder.with_request_param("database", "Documents")
     builder.with_request_body({"xquery": "()"})
     builder.with_response_status(200)
@@ -130,6 +131,7 @@ def test_post_with_customized_params_and_headers_and_body_different_than_json():
 def test_post_with_customized_params_and_headers_and_json_body():
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/manage/v2/databases/Documents")
+    builder.with_request_content_type("application/json")
     builder.with_request_param("format", "json")
     builder.with_request_body({"operation": "clear-database"})
     builder.with_response_content_type("application/json; charset=UTF-8")
@@ -176,6 +178,7 @@ def test_put():
 def test_put_with_customized_params_and_headers_and_body_different_than_json():
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/v1/documents")
+    builder.with_request_content_type("application/xml")
     builder.with_request_param("database", "Documents")
     builder.with_request_param("uri", "/doc.xml")
     builder.with_response_status(201)
@@ -202,6 +205,7 @@ def test_put_with_customized_params_and_headers_and_body_different_than_json():
 def test_put_with_customized_params_and_headers_and_json_body():
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/v1/documents")
+    builder.with_request_content_type("application/json")
     builder.with_request_param("database", "Documents")
     builder.with_request_param("uri", "/doc.json")
     builder.with_request_body({"document": {}})

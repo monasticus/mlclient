@@ -6,6 +6,7 @@ import urllib.parse
 import zlib
 from pathlib import Path
 from typing import Any
+import inspect
 
 import responses
 import urllib3
@@ -659,11 +660,12 @@ class MLResponseBuilder:
         response_body_text = response.text
 
         ext = cls._get_file_ext_from_content_type(response_content_type)
-        file_name = f"response_body.{ext}"
 
         if test_path is None:
+            file_name = f"response_body.{ext}"
             path = file_name
         else:
+            file_name = inspect.stack()[3].function.replace("_", "-") + f".{ext}"
             path = get_test_resources_path(test_path) + os.sep + file_name
 
         with Path(path).open("w") as file:

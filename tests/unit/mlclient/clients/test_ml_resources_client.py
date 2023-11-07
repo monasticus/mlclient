@@ -1,7 +1,12 @@
+from pathlib import Path
+
 import pytest
+import responses
 
 from mlclient import MLResourcesClient
 from mlclient.calls.model import DocumentsBodyPart
+from tests import tools
+from tests.tools import MLResponseBuilder
 
 
 @pytest.fixture()
@@ -14,8 +19,24 @@ def xquery():
     """
 
 
-@pytest.mark.ml_access()
+@responses.activate()
 def test_eval(xquery):
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/eval")
+    builder.with_request_content_type("application/x-www-form-urlencoded")
+    builder.with_request_body(
+        {
+            "xquery": "xquery version '1.0-ml';"
+            " declare variable $element as element() external;"
+            " <new-parent>{$element/child::element()}</new-parent>",
+            "vars": '{"element": "<parent><child/></parent>"}',
+        },
+    )
+    builder.with_response_body_multipart_mixed()
+    builder.with_response_status(200)
+    builder.with_response_body_part("element()", "<new-parent><child/></new-parent>")
+    builder.build_post()
+
     with MLResourcesClient(auth_method="digest") as client:
         resp = client.eval(
             xquery=xquery,
@@ -26,8 +47,18 @@ def test_eval(xquery):
     assert "<new-parent><child/></new-parent>" in resp.text
 
 
-@pytest.mark.ml_access()
+@responses.activate()
 def test_get_logs():
+    response_body_path = tools.get_test_resource_path(__file__, "test-get-logs.json")
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/manage/v2/logs")
+    builder.with_request_param("format", "json")
+    builder.with_request_param("filename", "ErrorLog.txt")
+    builder.with_response_content_type("application/json; charset=UTF-8")
+    builder.with_response_status(200)
+    builder.with_response_body(Path(response_body_path).read_bytes())
+    builder.build_get()
+
     with MLResourcesClient(auth_method="digest") as client:
         resp = client.get_logs(filename="ErrorLog.txt", data_format="json")
 

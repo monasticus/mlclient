@@ -1,12 +1,12 @@
 from __future__ import annotations
 
+import inspect
 import json
 import os
 import urllib.parse
 import zlib
 from pathlib import Path
 from typing import Any
-import inspect
 
 import responses
 import urllib3

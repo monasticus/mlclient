@@ -69,7 +69,8 @@ def test_get_logs():
 @responses.activate()
 def test_get_databases():
     response_body_path = tools.get_test_resource_path(
-        __file__, "test-get-databases.json"
+        __file__,
+        "test-get-databases.json",
     )
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/manage/v2/databases")
@@ -93,7 +94,8 @@ def test_post_databases():
     body = '<database-properties xmlns="http://marklogic.com/manage" />'
 
     response_body_path = tools.get_test_resource_path(
-        __file__, "test-post-databases.xml"
+        __file__,
+        "test-post-databases.xml",
     )
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/manage/v2/databases")
@@ -117,7 +119,8 @@ def test_post_databases():
 @responses.activate()
 def test_get_database():
     response_body_path = tools.get_test_resource_path(
-        __file__, "test-get-database.json"
+        __file__,
+        "test-get-database.json",
     )
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/manage/v2/databases/Documents")
@@ -139,7 +142,8 @@ def test_get_database():
 @responses.activate()
 def test_post_database():
     response_body_path = tools.get_test_resource_path(
-        __file__, "test-post-database.xml"
+        __file__,
+        "test-post-database.xml",
     )
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/manage/v2/databases/Documents")
@@ -175,8 +179,21 @@ def test_delete_database():
     assert not resp.text
 
 
-@pytest.mark.ml_access()
+@responses.activate()
 def test_get_database_properties():
+    response_body_path = tools.get_test_resource_path(
+        __file__, "test-get-database-properties.json"
+    )
+    builder = MLResponseBuilder()
+    builder.with_base_url(
+        "http://localhost:8002/manage/v2/databases/Documents/properties"
+    )
+    builder.with_request_param("format", "json")
+    builder.with_response_content_type("application/json; charset=UTF-8")
+    builder.with_response_status(200)
+    builder.with_response_body(Path(response_body_path).read_bytes())
+    builder.build_get()
+
     with MLResourcesClient(auth_method="digest") as client:
         resp = client.get_database_properties(database="Documents", data_format="json")
 
@@ -184,8 +201,22 @@ def test_get_database_properties():
     assert resp.json()["database-name"] == "Documents"
 
 
-@pytest.mark.ml_access()
+@responses.activate()
 def test_put_database_properties():
+    response_body_path = tools.get_test_resource_path(
+        __file__, "test-put-database-properties.json"
+    )
+    builder = MLResponseBuilder()
+    builder.with_base_url(
+        "http://localhost:8002/manage/v2/databases/non-existing-db/properties"
+    )
+    builder.with_request_content_type("application/json")
+    builder.with_request_body({"database-name": "custom-db"})
+    builder.with_response_content_type("application/json; charset=UTF-8")
+    builder.with_response_status(404)
+    builder.with_response_body(Path(response_body_path).read_bytes())
+    builder.build_put()
+
     with MLResourcesClient(auth_method="digest") as client:
         resp = client.put_database_properties(
             database="non-existing-db",

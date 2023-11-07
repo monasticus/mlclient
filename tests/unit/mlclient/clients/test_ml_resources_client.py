@@ -66,8 +66,20 @@ def test_get_logs():
     assert "logfile" in resp.json()
 
 
-@pytest.mark.ml_access()
+@responses.activate()
 def test_get_databases():
+    response_body_path = tools.get_test_resource_path(
+        __file__, "test-get-databases.json"
+    )
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/manage/v2/databases")
+    builder.with_request_param("format", "json")
+    builder.with_request_param("view", "default")
+    builder.with_response_content_type("application/json; charset=UTF-8")
+    builder.with_response_status(200)
+    builder.with_response_body(Path(response_body_path).read_bytes())
+    builder.build_get()
+
     with MLResourcesClient(auth_method="digest") as client:
         resp = client.get_databases(data_format="json")
 
@@ -76,9 +88,22 @@ def test_get_databases():
     assert resp.json()["database-default-list"]["meta"]["uri"] == expected_uri
 
 
-@pytest.mark.ml_access()
+@responses.activate()
 def test_post_databases():
     body = '<database-properties xmlns="http://marklogic.com/manage" />'
+
+    response_body_path = tools.get_test_resource_path(
+        __file__, "test-post-databases.xml"
+    )
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/manage/v2/databases")
+    builder.with_request_content_type("application/xml")
+    builder.with_request_body(body)
+    builder.with_response_content_type("application/xml; charset=UTF-8")
+    builder.with_response_status(400)
+    builder.with_response_body(Path(response_body_path).read_bytes())
+    builder.build_post()
+
     with MLResourcesClient(auth_method="digest") as client:
         resp = client.post_databases(body=body)
 
@@ -89,8 +114,20 @@ def test_post_databases():
     ) in resp.text
 
 
-@pytest.mark.ml_access()
+@responses.activate()
 def test_get_database():
+    response_body_path = tools.get_test_resource_path(
+        __file__, "test-get-database.json"
+    )
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/manage/v2/databases/Documents")
+    builder.with_request_param("format", "json")
+    builder.with_request_param("view", "default")
+    builder.with_response_content_type("application/json; charset=UTF-8")
+    builder.with_response_status(200)
+    builder.with_response_body(Path(response_body_path).read_bytes())
+    builder.build_get()
+
     with MLResourcesClient(auth_method="digest") as client:
         resp = client.get_database(database="Documents", data_format="json")
 
@@ -99,8 +136,20 @@ def test_get_database():
     assert resp.json()["database-default"]["meta"]["uri"] == expected_uri
 
 
-@pytest.mark.ml_access()
+@responses.activate()
 def test_post_database():
+    response_body_path = tools.get_test_resource_path(
+        __file__, "test-post-database.xml"
+    )
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/manage/v2/databases/Documents")
+    builder.with_request_content_type("application/json")
+    builder.with_request_body({"operation": "clear-database"})
+    builder.with_response_content_type("application/xml; charset=UTF-8")
+    builder.with_response_status(200)
+    builder.with_response_body(Path(response_body_path).read_bytes())
+    builder.build_post()
+
     with MLResourcesClient(auth_method="digest") as client:
         resp = client.post_database(
             database="Documents",
@@ -111,8 +160,14 @@ def test_post_database():
     assert not resp.text
 
 
-@pytest.mark.ml_access()
+@responses.activate()
 def test_delete_database():
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/manage/v2/databases/custom-db")
+    builder.with_response_status(204)
+    builder.with_empty_response_body()
+    builder.build_delete()
+
     with MLResourcesClient(auth_method="digest") as client:
         resp = client.delete_database(database="custom-db")
 

@@ -512,11 +512,12 @@ def test_delete_forest():
 @responses.activate()
 def test_get_forest_properties():
     response_body_path = tools.get_test_resource_path(
-        __file__, "test-get-forest-properties.json"
+        __file__,
+        "test-get-forest-properties.json",
     )
     builder = MLResponseBuilder()
     builder.with_base_url(
-        "http://localhost:8002/manage/v2/forests/Documents/properties"
+        "http://localhost:8002/manage/v2/forests/Documents/properties",
     )
     builder.with_request_param("format", "json")
     builder.with_response_content_type("application/json; charset=UTF-8")
@@ -534,11 +535,12 @@ def test_get_forest_properties():
 @responses.activate()
 def test_put_forest_properties():
     response_body_path = tools.get_test_resource_path(
-        __file__, "test-put-forest-properties.json"
+        __file__,
+        "test-put-forest-properties.json",
     )
     builder = MLResponseBuilder()
     builder.with_base_url(
-        "http://localhost:8002/manage/v2/forests/non-existing-forest/properties"
+        "http://localhost:8002/manage/v2/forests/non-existing-forest/properties",
     )
     builder.with_request_content_type("application/json")
     builder.with_request_body({"forest-name": "custom-forest"})
@@ -557,8 +559,18 @@ def test_put_forest_properties():
     assert resp.json()["errorResponse"]["messageCode"] == "XDMP-NOSUCHFOREST"
 
 
-@pytest.mark.ml_access()
+@responses.activate()
 def test_get_roles():
+    response_body_path = tools.get_test_resource_path(__file__, "test-get-roles.json")
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/manage/v2/roles")
+    builder.with_request_param("format", "json")
+    builder.with_request_param("view", "default")
+    builder.with_response_content_type("application/json; charset=UTF-8")
+    builder.with_response_status(200)
+    builder.with_response_body(Path(response_body_path).read_bytes())
+    builder.build_get()
+
     with MLResourcesClient(auth_method="digest") as client:
         resp = client.get_roles(data_format="json")
 
@@ -567,9 +579,20 @@ def test_get_roles():
     assert resp.json()["role-default-list"]["meta"]["uri"] == expected_uri
 
 
-@pytest.mark.ml_access()
+@responses.activate()
 def test_post_roles():
     body = '<role-properties xmlns="http://marklogic.com/manage/role/properties" />'
+
+    response_body_path = tools.get_test_resource_path(__file__, "test-post-roles.xml")
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/manage/v2/roles")
+    builder.with_request_content_type("application/xml")
+    builder.with_request_body(body)
+    builder.with_response_content_type("application/xml; charset=UTF-8")
+    builder.with_response_status(400)
+    builder.with_response_body(Path(response_body_path).read_bytes())
+    builder.build_post()
+
     with MLResourcesClient(auth_method="digest") as client:
         resp = client.post_roles(body=body)
 
@@ -577,8 +600,18 @@ def test_post_roles():
     assert "Payload has errors in structure, content-type or values." in resp.text
 
 
-@pytest.mark.ml_access()
+@responses.activate()
 def test_get_role():
+    response_body_path = tools.get_test_resource_path(__file__, "test-get-role.json")
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/manage/v2/roles/admin")
+    builder.with_request_param("format", "json")
+    builder.with_request_param("view", "default")
+    builder.with_response_content_type("application/json; charset=UTF-8")
+    builder.with_response_status(200)
+    builder.with_response_body(Path(response_body_path).read_bytes())
+    builder.build_get()
+
     with MLResourcesClient(auth_method="digest") as client:
         resp = client.get_role(role="admin", data_format="json")
 
@@ -587,8 +620,14 @@ def test_get_role():
     assert resp.json()["role-default"]["meta"]["uri"] == expected_uri
 
 
-@pytest.mark.ml_access()
+@responses.activate()
 def test_delete_role():
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/manage/v2/roles/custom-role")
+    builder.with_response_status(204)
+    builder.with_empty_response_body()
+    builder.build_delete()
+
     with MLResourcesClient(auth_method="digest") as client:
         resp = client.delete_role(role="custom-role")
 
@@ -596,8 +635,19 @@ def test_delete_role():
     assert not resp.text
 
 
-@pytest.mark.ml_access()
+@responses.activate()
 def test_get_role_properties():
+    response_body_path = tools.get_test_resource_path(
+        __file__, "test-get-role-properties.json"
+    )
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/manage/v2/roles/admin/properties")
+    builder.with_request_param("format", "json")
+    builder.with_response_content_type("application/json; charset=UTF-8")
+    builder.with_response_status(200)
+    builder.with_response_body(Path(response_body_path).read_bytes())
+    builder.build_get()
+
     with MLResourcesClient(auth_method="digest") as client:
         resp = client.get_role_properties(role="admin", data_format="json")
 
@@ -605,8 +655,22 @@ def test_get_role_properties():
     assert resp.json()["role-name"] == "admin"
 
 
-@pytest.mark.ml_access()
+@responses.activate()
 def test_put_role_properties():
+    response_body_path = tools.get_test_resource_path(
+        __file__, "test-put-role-properties.json"
+    )
+    builder = MLResponseBuilder()
+    builder.with_base_url(
+        "http://localhost:8002/manage/v2/roles/non-existing-role/properties"
+    )
+    builder.with_request_content_type("application/json")
+    builder.with_request_body({"role-name": "custom-db"})
+    builder.with_response_content_type("application/json; charset=UTF-8")
+    builder.with_response_status(400)
+    builder.with_response_body(Path(response_body_path).read_bytes())
+    builder.build_put()
+
     with MLResourcesClient(auth_method="digest") as client:
         resp = client.put_role_properties(
             role="non-existing-role",

@@ -258,7 +258,7 @@ def test_post_servers():
     builder.with_request_param("group-id", "Default")
     builder.with_request_param("server-type", "http")
     builder.with_request_body(
-        '<http-server-properties xmlns="http://marklogic.com/manage" />'
+        '<http-server-properties xmlns="http://marklogic.com/manage" />',
     )
     builder.with_response_content_type("application/xml; charset=UTF-8")
     builder.with_response_status(400)
@@ -307,7 +307,8 @@ def test_get_server():
 @responses.activate()
 def test_delete_server():
     response_body_path = tools.get_test_resource_path(
-        __file__, "test-delete-server.xml"
+        __file__,
+        "test-delete-server.xml",
     )
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/manage/v2/servers/Non-existing-server")
@@ -330,11 +331,12 @@ def test_delete_server():
 @responses.activate()
 def test_get_server_properties():
     response_body_path = tools.get_test_resource_path(
-        __file__, "test-get-server-properties.json"
+        __file__,
+        "test-get-server-properties.json",
     )
     builder = MLResponseBuilder()
     builder.with_base_url(
-        "http://localhost:8002/manage/v2/servers/App-Services/properties"
+        "http://localhost:8002/manage/v2/servers/App-Services/properties",
     )
     builder.with_request_param("group-id", "Default")
     builder.with_request_param("format", "json")
@@ -357,12 +359,12 @@ def test_get_server_properties():
 @responses.activate()
 def test_put_server_properties():
     response_body_path = tools.get_test_resource_path(
-        __file__, "test-put-server-properties.json"
+        __file__,
+        "test-put-server-properties.json",
     )
     builder = MLResponseBuilder()
-    builder.with_method("PUT")
     builder.with_base_url(
-        "http://localhost:8002/manage/v2/servers/non-existing-server/properties"
+        "http://localhost:8002/manage/v2/servers/non-existing-server/properties",
     )
     builder.with_request_content_type("application/json")
     builder.with_request_param("group-id", "non-existing-group")
@@ -370,7 +372,7 @@ def test_put_server_properties():
     builder.with_response_content_type("application/json; charset=UTF-8")
     builder.with_response_status(404)
     builder.with_response_body(Path(response_body_path).read_bytes())
-    builder.build()
+    builder.build_put()
 
     with MLResourcesClient(auth_method="digest") as client:
         resp = client.put_server_properties(
@@ -383,8 +385,19 @@ def test_put_server_properties():
     assert resp.json()["errorResponse"]["messageCode"] == "XDMP-NOSUCHGROUP"
 
 
-@pytest.mark.ml_access()
+@responses.activate()
 def test_get_forests():
+    response_body_path = tools.get_test_resource_path(__file__, "test-get-forests.json")
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/manage/v2/forests")
+    builder.with_request_param("format", "json")
+    builder.with_request_param("view", "default")
+    builder.with_request_param("database-id", "Documents")
+    builder.with_response_content_type("application/json; charset=UTF-8")
+    builder.with_response_status(200)
+    builder.with_response_body(Path(response_body_path).read_bytes())
+    builder.build_get()
+
     with MLResourcesClient(auth_method="digest") as client:
         resp = client.get_forests(data_format="json", database="Documents")
 
@@ -393,18 +406,40 @@ def test_get_forests():
     assert resp.json()["forest-default-list"]["meta"]["uri"] == expected_uri
 
 
-@pytest.mark.ml_access()
+@responses.activate()
 def test_post_forests():
     body = '<forest-create xmlns="http://marklogic.com/manage" />'
+
+    response_body_path = tools.get_test_resource_path(__file__, "test-post-forests.xml")
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/manage/v2/forests")
+    builder.with_request_content_type("application/xml")
+    builder.with_request_body(body)
+    builder.with_response_content_type("application/xml; charset=UTF-8")
+    builder.with_response_status(500)
+    builder.with_response_body(Path(response_body_path).read_bytes())
+    builder.build_post()
+
     with MLResourcesClient(auth_method="digest") as client:
         resp = client.post_forests(body=body)
 
     assert resp.status_code == 500
 
 
-@pytest.mark.ml_access()
+@responses.activate()
 def test_put_forests():
     body = '<forest-migrate xmlns="http://marklogic.com/manage" />'
+
+    response_body_path = tools.get_test_resource_path(__file__, "test-put-forests.xml")
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/manage/v2/forests")
+    builder.with_request_content_type("application/xml")
+    builder.with_request_body('<forest-migrate xmlns="http://marklogic.com/manage" />')
+    builder.with_response_content_type("application/xml; charset=UTF-8")
+    builder.with_response_status(400)
+    builder.with_response_body(Path(response_body_path).read_bytes())
+    builder.build_put()
+
     with MLResourcesClient(auth_method="digest") as client:
         resp = client.put_forests(body=body)
 
@@ -415,8 +450,19 @@ def test_put_forests():
     ) in resp.text
 
 
-@pytest.mark.ml_access()
+@responses.activate()
 def test_get_forest():
+    response_body_path = tools.get_test_resource_path(__file__, "test-get-forest.json")
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/manage/v2/forests/Documents")
+    builder.with_request_param("format", "json")
+    builder.with_request_param("view", "default")
+    builder.with_response_content_type("application/json; charset=UTF-8")
+    builder.with_response_status(200)
+    builder.with_response_body(Path(response_body_path).read_bytes())
+    builder.build_get()
+
     with MLResourcesClient(auth_method="digest") as client:
         resp = client.get_forest(forest="Documents", data_format="json")
 
@@ -425,27 +471,59 @@ def test_get_forest():
     assert resp.json()["forest-default"]["meta"]["uri"] == expected_uri
 
 
-@pytest.mark.ml_access()
+@responses.activate()
 def test_post_forest():
+    response_body_path = tools.get_test_resource_path(__file__, "test-post-forest.xml")
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/manage/v2/forests/aaa")
+    builder.with_request_content_type("application/x-www-form-urlencoded")
+    builder.with_request_body({"state": "clear"})
+    builder.with_response_content_type("application/xml; charset=UTF-8")
+    builder.with_response_status(404)
+    builder.with_response_body(Path(response_body_path).read_bytes())
+    builder.build_post()
+
     with MLResourcesClient(auth_method="digest") as client:
         resp = client.post_forest(forest="aaa", body={"state": "clear"})
+        MLResponseBuilder.generate_builder_code(resp, True, __file__)
 
     assert resp.status_code == 404
     assert "XDMP-NOSUCHFOREST" in resp.text
 
 
-@pytest.mark.ml_access()
+@responses.activate()
 def test_delete_forest():
+    builder = MLResponseBuilder()
+    builder.with_method("DELETE")
+    builder.with_base_url("http://localhost:8002/manage/v2/forests/aaa")
+    builder.with_request_param("level", "full")
+    builder.with_response_status(204)
+    builder.with_empty_response_body()
+    builder.build()
+
     with MLResourcesClient(auth_method="digest") as client:
-        client.post_forests(body={"forest-name": "aaa"})
         resp = client.delete_forest(forest="aaa", level="full")
 
     assert resp.status_code == 204
     assert not resp.text
 
 
-@pytest.mark.ml_access()
+@responses.activate()
 def test_get_forest_properties():
+    response_body_path = tools.get_test_resource_path(
+        __file__, "test-get-forest-properties.json"
+    )
+    builder = MLResponseBuilder()
+    builder.with_base_url(
+        "http://localhost:8002/manage/v2/forests/Documents/properties"
+    )
+    builder.with_request_param("format", "json")
+    builder.with_response_content_type("application/json; charset=UTF-8")
+    builder.with_response_status(200)
+    builder.with_response_body(Path(response_body_path).read_bytes())
+    builder.build_get()
+
     with MLResourcesClient(auth_method="digest") as client:
         resp = client.get_forest_properties(forest="Documents", data_format="json")
 
@@ -453,8 +531,22 @@ def test_get_forest_properties():
     assert resp.json()["forest-name"] == "Documents"
 
 
-@pytest.mark.ml_access()
+@responses.activate()
 def test_put_forest_properties():
+    response_body_path = tools.get_test_resource_path(
+        __file__, "test-put-forest-properties.json"
+    )
+    builder = MLResponseBuilder()
+    builder.with_base_url(
+        "http://localhost:8002/manage/v2/forests/non-existing-forest/properties"
+    )
+    builder.with_request_content_type("application/json")
+    builder.with_request_body({"forest-name": "custom-forest"})
+    builder.with_response_content_type("application/json; charset=UTF-8")
+    builder.with_response_status(404)
+    builder.with_response_body(Path(response_body_path).read_bytes())
+    builder.build_put()
+
     with MLResourcesClient(auth_method="digest") as client:
         resp = client.put_forest_properties(
             forest="non-existing-forest",

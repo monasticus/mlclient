@@ -18,6 +18,7 @@ from urllib3.fields import RequestField
 
 from mlclient.calls.model import ContentDispositionSerializer, DocumentsBodyPart
 from mlclient.constants import (
+    HEADER_JSON,
     HEADER_MULTIPART_MIXED,
     HEADER_NAME_CONTENT_DISP,
     HEADER_NAME_CONTENT_TYPE,
@@ -440,7 +441,6 @@ class MLResponseBuilder:
         build_parts = [
             "\n",
             "builder = MLResponseBuilder()",
-            cls._generate_method_line(response),
             cls._generate_base_url_line(response),
             cls._generate_request_content_type_line(response),
             cls._generate_request_params_lines(response),
@@ -448,22 +448,14 @@ class MLResponseBuilder:
             cls._generate_response_headers_lines(response),
             cls._generate_response_status_line(response),
             cls._generate_response_body_lines(response, save_response_body, test_path),
-            "builder.build()",
+            cls._generate_build_line(response),
             "\n",
         ]
+        build_parts = cls._flatten_list(build_parts)
+        cls._move_resp_body_path_line_to_front(build_parts)
         for code in build_parts:
             if code is not None:
-                code_to_print = code if isinstance(code, list) else [code]
-                for code_line in code_to_print:
-                    print(code_line)
-
-    @classmethod
-    def _generate_method_line(
-        cls,
-        response: Response,
-    ) -> str:
-        method = response.request.method.upper()
-        return f'builder.with_method("{method}")'
+                print(code)
 
     @classmethod
     def _generate_base_url_line(
@@ -517,8 +509,13 @@ class MLResponseBuilder:
         if request_body is None or method not in ["POST", "PUT"]:
             return None
 
+        if request_content_type.startswith(HEADER_JSON):
+            request_body = json.loads(request_body)
+
         if request_content_type != HEADER_X_WWW_FORM_URLENCODED:
-            return f"builder.with_request_body('{request_body}')"
+            if isinstance(request_body, str):
+                return f"builder.with_request_body('{request_body}')"
+            return f"builder.with_request_body({request_body})"
 
         request_body_decoded = urllib.parse.unquote(request_body).replace("+", " ")
         request_body_parts = request_body_decoded.split("&")
@@ -639,6 +636,14 @@ class MLResponseBuilder:
         return response_body_lines
 
     @classmethod
+    def _generate_build_line(
+        cls,
+        response: Response,
+    ) -> str:
+        method = response.request.method.lower()
+        return f"builder.build_{method}()"
+
+    @classmethod
     def _decode_header(
         cls,
         body_part: BodyPart,
@@ -691,3 +696,27 @@ class MLResponseBuilder:
         if "json" in content_type:
             return "json"
         return "txt"
+
+    @classmethod
+    def _flatten_list(
+        cls,
+        build_parts: list,
+    ) -> list:
+        build_parts = [
+            [elem] if not isinstance(elem, list) else elem for elem in build_parts
+        ]
+        return sum(build_parts, [])
+
+    @classmethod
+    def _move_resp_body_path_line_to_front(
+        cls,
+        build_parts: list,
+    ):
+        gen = (
+            build_parts.index(line)
+            for line in build_parts
+            if isinstance(line, str) and line.startswith("response_body_path")
+        )
+        index = next(gen, None)
+        if index:
+            build_parts.insert(1, build_parts.pop(index))

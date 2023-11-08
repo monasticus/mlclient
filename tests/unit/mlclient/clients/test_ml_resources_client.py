@@ -182,11 +182,12 @@ def test_delete_database():
 @responses.activate()
 def test_get_database_properties():
     response_body_path = tools.get_test_resource_path(
-        __file__, "test-get-database-properties.json"
+        __file__,
+        "test-get-database-properties.json",
     )
     builder = MLResponseBuilder()
     builder.with_base_url(
-        "http://localhost:8002/manage/v2/databases/Documents/properties"
+        "http://localhost:8002/manage/v2/databases/Documents/properties",
     )
     builder.with_request_param("format", "json")
     builder.with_response_content_type("application/json; charset=UTF-8")
@@ -204,11 +205,12 @@ def test_get_database_properties():
 @responses.activate()
 def test_put_database_properties():
     response_body_path = tools.get_test_resource_path(
-        __file__, "test-put-database-properties.json"
+        __file__,
+        "test-put-database-properties.json",
     )
     builder = MLResponseBuilder()
     builder.with_base_url(
-        "http://localhost:8002/manage/v2/databases/non-existing-db/properties"
+        "http://localhost:8002/manage/v2/databases/non-existing-db/properties",
     )
     builder.with_request_content_type("application/json")
     builder.with_request_body({"database-name": "custom-db"})
@@ -227,8 +229,18 @@ def test_put_database_properties():
     assert resp.json()["errorResponse"]["messageCode"] == "XDMP-NOSUCHDB"
 
 
-@pytest.mark.ml_access()
+@responses.activate()
 def test_get_servers():
+    response_body_path = tools.get_test_resource_path(__file__, "test-get-servers.json")
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/manage/v2/servers")
+    builder.with_request_param("format", "json")
+    builder.with_request_param("view", "default")
+    builder.with_response_content_type("application/json; charset=UTF-8")
+    builder.with_response_status(200)
+    builder.with_response_body(Path(response_body_path).read_bytes())
+    builder.build_get()
+
     with MLResourcesClient(auth_method="digest") as client:
         resp = client.get_servers(data_format="json")
 
@@ -237,8 +249,22 @@ def test_get_servers():
     assert resp.json()["server-default-list"]["meta"]["uri"] == expected_uri
 
 
-@pytest.mark.ml_access()
+@responses.activate()
 def test_post_servers():
+    response_body_path = tools.get_test_resource_path(__file__, "test-post-servers.xml")
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/manage/v2/servers")
+    builder.with_request_content_type("application/xml")
+    builder.with_request_param("group-id", "Default")
+    builder.with_request_param("server-type", "http")
+    builder.with_request_body(
+        '<http-server-properties xmlns="http://marklogic.com/manage" />'
+    )
+    builder.with_response_content_type("application/xml; charset=UTF-8")
+    builder.with_response_status(400)
+    builder.with_response_body(Path(response_body_path).read_bytes())
+    builder.build_post()
+
     with MLResourcesClient(auth_method="digest") as client:
         resp = client.post_servers(
             group_id="Default",
@@ -253,8 +279,19 @@ def test_post_servers():
     ) in resp.text
 
 
-@pytest.mark.ml_access()
+@responses.activate()
 def test_get_server():
+    response_body_path = tools.get_test_resource_path(__file__, "test-get-server.json")
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/manage/v2/servers/App-Services")
+    builder.with_request_param("group-id", "Default")
+    builder.with_request_param("format", "json")
+    builder.with_request_param("view", "default")
+    builder.with_response_content_type("application/json; charset=UTF-8")
+    builder.with_response_status(200)
+    builder.with_response_body(Path(response_body_path).read_bytes())
+    builder.build_get()
+
     with MLResourcesClient(auth_method="digest") as client:
         resp = client.get_server(
             server="App-Services",
@@ -267,8 +304,19 @@ def test_get_server():
     assert resp.json()["server-default"]["meta"]["uri"] == expected_uri
 
 
-@pytest.mark.ml_access()
+@responses.activate()
 def test_delete_server():
+    response_body_path = tools.get_test_resource_path(
+        __file__, "test-delete-server.xml"
+    )
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/manage/v2/servers/Non-existing-server")
+    builder.with_request_param("group-id", "Non-existing-group")
+    builder.with_response_content_type("application/xml; charset=UTF-8")
+    builder.with_response_status(404)
+    builder.with_response_body(Path(response_body_path).read_bytes())
+    builder.build_delete()
+
     with MLResourcesClient(auth_method="digest") as client:
         resp = client.delete_server(
             server="Non-existing-server",
@@ -279,8 +327,22 @@ def test_delete_server():
     assert "No such group Non-existing-group" in resp.text
 
 
-@pytest.mark.ml_access()
+@responses.activate()
 def test_get_server_properties():
+    response_body_path = tools.get_test_resource_path(
+        __file__, "test-get-server-properties.json"
+    )
+    builder = MLResponseBuilder()
+    builder.with_base_url(
+        "http://localhost:8002/manage/v2/servers/App-Services/properties"
+    )
+    builder.with_request_param("group-id", "Default")
+    builder.with_request_param("format", "json")
+    builder.with_response_content_type("application/json; charset=UTF-8")
+    builder.with_response_status(200)
+    builder.with_response_body(Path(response_body_path).read_bytes())
+    builder.build_get()
+
     with MLResourcesClient(auth_method="digest") as client:
         resp = client.get_server_properties(
             server="App-Services",
@@ -292,8 +354,24 @@ def test_get_server_properties():
     assert resp.json()["server-name"] == "App-Services"
 
 
-@pytest.mark.ml_access()
+@responses.activate()
 def test_put_server_properties():
+    response_body_path = tools.get_test_resource_path(
+        __file__, "test-put-server-properties.json"
+    )
+    builder = MLResponseBuilder()
+    builder.with_method("PUT")
+    builder.with_base_url(
+        "http://localhost:8002/manage/v2/servers/non-existing-server/properties"
+    )
+    builder.with_request_content_type("application/json")
+    builder.with_request_param("group-id", "non-existing-group")
+    builder.with_request_body({"server-name": "non-existing-server"})
+    builder.with_response_content_type("application/json; charset=UTF-8")
+    builder.with_response_status(404)
+    builder.with_response_body(Path(response_body_path).read_bytes())
+    builder.build()
+
     with MLResourcesClient(auth_method="digest") as client:
         resp = client.put_server_properties(
             server="non-existing-server",

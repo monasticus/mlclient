@@ -638,7 +638,8 @@ def test_delete_role():
 @responses.activate()
 def test_get_role_properties():
     response_body_path = tools.get_test_resource_path(
-        __file__, "test-get-role-properties.json"
+        __file__,
+        "test-get-role-properties.json",
     )
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/manage/v2/roles/admin/properties")
@@ -658,11 +659,12 @@ def test_get_role_properties():
 @responses.activate()
 def test_put_role_properties():
     response_body_path = tools.get_test_resource_path(
-        __file__, "test-put-role-properties.json"
+        __file__,
+        "test-put-role-properties.json",
     )
     builder = MLResponseBuilder()
     builder.with_base_url(
-        "http://localhost:8002/manage/v2/roles/non-existing-role/properties"
+        "http://localhost:8002/manage/v2/roles/non-existing-role/properties",
     )
     builder.with_request_content_type("application/json")
     builder.with_request_body({"role-name": "custom-db"})
@@ -684,8 +686,18 @@ def test_put_role_properties():
     ) in resp.text
 
 
-@pytest.mark.ml_access()
+@responses.activate()
 def test_get_users():
+    response_body_path = tools.get_test_resource_path(__file__, "test-get-users.json")
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/manage/v2/users")
+    builder.with_request_param("format", "json")
+    builder.with_request_param("view", "default")
+    builder.with_response_content_type("application/json; charset=UTF-8")
+    builder.with_response_status(200)
+    builder.with_response_body(Path(response_body_path).read_bytes())
+    builder.build_get()
+
     with MLResourcesClient(auth_method="digest") as client:
         resp = client.get_users(data_format="json")
 
@@ -694,9 +706,20 @@ def test_get_users():
     assert resp.json()["user-default-list"]["meta"]["uri"] == expected_uri
 
 
-@pytest.mark.ml_access()
+@responses.activate()
 def test_post_users():
     body = '<user-properties xmlns="http://marklogic.com/manage/user/properties" />'
+
+    response_body_path = tools.get_test_resource_path(__file__, "test-post-users.xml")
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/manage/v2/users")
+    builder.with_request_content_type("application/xml")
+    builder.with_request_body(body)
+    builder.with_response_content_type("application/xml; charset=UTF-8")
+    builder.with_response_status(400)
+    builder.with_response_body(Path(response_body_path).read_bytes())
+    builder.build_post()
+
     with MLResourcesClient(auth_method="digest") as client:
         resp = client.post_users(body=body)
 
@@ -704,8 +727,18 @@ def test_post_users():
     assert "Payload has errors in structure, content-type or values." in resp.text
 
 
-@pytest.mark.ml_access()
+@responses.activate()
 def test_get_user():
+    response_body_path = tools.get_test_resource_path(__file__, "test-get-user.json")
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/manage/v2/users/admin")
+    builder.with_request_param("format", "json")
+    builder.with_request_param("view", "default")
+    builder.with_response_content_type("application/json; charset=UTF-8")
+    builder.with_response_status(200)
+    builder.with_response_body(Path(response_body_path).read_bytes())
+    builder.build_get()
+
     with MLResourcesClient(auth_method="digest") as client:
         resp = client.get_user(user="admin", data_format="json")
 
@@ -714,8 +747,16 @@ def test_get_user():
     assert resp.json()["user-default"]["meta"]["uri"] == expected_uri
 
 
-@pytest.mark.ml_access()
+@responses.activate()
 def test_delete_user():
+    response_body_path = tools.get_test_resource_path(__file__, "test-delete-user.xml")
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/manage/v2/users/custom-user")
+    builder.with_response_content_type("application/xml; charset=UTF-8")
+    builder.with_response_status(404)
+    builder.with_response_body(Path(response_body_path).read_bytes())
+    builder.build_delete()
+
     with MLResourcesClient(auth_method="digest") as client:
         resp = client.delete_user(user="custom-user")
 
@@ -723,8 +764,20 @@ def test_delete_user():
     assert "User does not exist: custom-user" in resp.text
 
 
-@pytest.mark.ml_access()
+@responses.activate()
 def test_get_user_properties():
+    response_body_path = tools.get_test_resource_path(
+        __file__,
+        "test-get-user-properties.json",
+    )
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/manage/v2/users/admin/properties")
+    builder.with_request_param("format", "json")
+    builder.with_response_content_type("application/json; charset=UTF-8")
+    builder.with_response_status(200)
+    builder.with_response_body(Path(response_body_path).read_bytes())
+    builder.build_get()
+
     with MLResourcesClient(auth_method="digest") as client:
         resp = client.get_user_properties(user="admin", data_format="json")
 
@@ -732,8 +785,23 @@ def test_get_user_properties():
     assert resp.json()["user-name"] == "admin"
 
 
-@pytest.mark.ml_access()
+@responses.activate()
 def test_put_user_properties():
+    response_body_path = tools.get_test_resource_path(
+        __file__,
+        "test-put-user-properties.json",
+    )
+    builder = MLResponseBuilder()
+    builder.with_base_url(
+        "http://localhost:8002/manage/v2/users/non-existing-user/properties",
+    )
+    builder.with_request_content_type("application/json")
+    builder.with_request_body({"user-name": "custom-db"})
+    builder.with_response_content_type("application/json; charset=UTF-8")
+    builder.with_response_status(404)
+    builder.with_response_body(Path(response_body_path).read_bytes())
+    builder.build_put()
+
     with MLResourcesClient(auth_method="digest") as client:
         resp = client.put_user_properties(
             user="non-existing-user",

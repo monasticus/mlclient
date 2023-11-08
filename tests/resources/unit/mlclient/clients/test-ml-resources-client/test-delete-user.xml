@@ -1,0 +1,6 @@
+<error xmlns="http://marklogic.com/xdmp/error">
+  <status-code>404</status-code>
+  <status>Not Found</status>
+  <message-code>SEC-USERDNE</message-code>
+  <message>SEC-USERDNE: (err:FOER0000) User does not exist: custom-user = %2</message>
+</error>

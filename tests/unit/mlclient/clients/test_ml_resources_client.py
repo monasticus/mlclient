@@ -37,7 +37,7 @@ def test_eval(xquery):
     builder.with_response_body_part("element()", "<new-parent><child/></new-parent>")
     builder.build_post()
 
-    with MLResourcesClient(auth_method="digest") as client:
+    with MLResourcesClient() as client:
         resp = client.eval(
             xquery=xquery,
             variables={"element": "<parent><child/></parent>"},
@@ -59,7 +59,7 @@ def test_get_logs():
     builder.with_response_body(Path(response_body_path).read_bytes())
     builder.build_get()
 
-    with MLResourcesClient(auth_method="digest") as client:
+    with MLResourcesClient() as client:
         resp = client.get_logs(filename="ErrorLog.txt", data_format="json")
 
     assert resp.status_code == 200
@@ -81,7 +81,7 @@ def test_get_databases():
     builder.with_response_body(Path(response_body_path).read_bytes())
     builder.build_get()
 
-    with MLResourcesClient(auth_method="digest") as client:
+    with MLResourcesClient() as client:
         resp = client.get_databases(data_format="json")
 
     expected_uri = "/manage/v2/databases?view=default"
@@ -104,7 +104,7 @@ def test_post_databases():
     builder.with_response_body(Path(response_body_path).read_bytes())
     builder.build_post()
 
-    with MLResourcesClient(auth_method="digest") as client:
+    with MLResourcesClient() as client:
         resp = client.post_databases(body=body)
 
     assert resp.status_code == 400
@@ -129,7 +129,7 @@ def test_get_database():
     builder.with_response_body(Path(response_body_path).read_bytes())
     builder.build_get()
 
-    with MLResourcesClient(auth_method="digest") as client:
+    with MLResourcesClient() as client:
         resp = client.get_database(database="Documents", data_format="json")
 
     expected_uri = "/manage/v2/databases/Documents?view=default"
@@ -152,7 +152,7 @@ def test_post_database():
     builder.with_response_body(Path(response_body_path).read_bytes())
     builder.build_post()
 
-    with MLResourcesClient(auth_method="digest") as client:
+    with MLResourcesClient() as client:
         resp = client.post_database(
             database="Documents",
             body={"operation": "clear-database"},
@@ -170,7 +170,7 @@ def test_delete_database():
     builder.with_empty_response_body()
     builder.build_delete()
 
-    with MLResourcesClient(auth_method="digest") as client:
+    with MLResourcesClient() as client:
         resp = client.delete_database(database="custom-db")
 
     assert resp.status_code == 204
@@ -193,7 +193,7 @@ def test_get_database_properties():
     builder.with_response_body(Path(response_body_path).read_bytes())
     builder.build_get()
 
-    with MLResourcesClient(auth_method="digest") as client:
+    with MLResourcesClient() as client:
         resp = client.get_database_properties(database="Documents", data_format="json")
 
     assert resp.status_code == 200
@@ -217,7 +217,7 @@ def test_put_database_properties():
     builder.with_response_body(Path(response_body_path).read_bytes())
     builder.build_put()
 
-    with MLResourcesClient(auth_method="digest") as client:
+    with MLResourcesClient() as client:
         resp = client.put_database_properties(
             database="non-existing-db",
             body={"database-name": "custom-db"},
@@ -239,7 +239,7 @@ def test_get_servers():
     builder.with_response_body(Path(response_body_path).read_bytes())
     builder.build_get()
 
-    with MLResourcesClient(auth_method="digest") as client:
+    with MLResourcesClient() as client:
         resp = client.get_servers(data_format="json")
 
     expected_uri = "/manage/v2/servers?view=default"
@@ -259,7 +259,7 @@ def test_post_servers():
     builder.with_response_body(Path(response_body_path).read_bytes())
     builder.build_post()
 
-    with MLResourcesClient(auth_method="digest") as client:
+    with MLResourcesClient() as client:
         resp = client.post_servers(
             group_id="Default",
             server_type="http",
@@ -286,7 +286,7 @@ def test_get_server():
     builder.with_response_body(Path(response_body_path).read_bytes())
     builder.build_get()
 
-    with MLResourcesClient(auth_method="digest") as client:
+    with MLResourcesClient() as client:
         resp = client.get_server(
             server="App-Services",
             group_id="Default",
@@ -312,7 +312,7 @@ def test_delete_server():
     builder.with_response_body(Path(response_body_path).read_bytes())
     builder.build_delete()
 
-    with MLResourcesClient(auth_method="digest") as client:
+    with MLResourcesClient() as client:
         resp = client.delete_server(
             server="Non-existing-server",
             group_id="Non-existing-group",
@@ -339,7 +339,7 @@ def test_get_server_properties():
     builder.with_response_body(Path(response_body_path).read_bytes())
     builder.build_get()
 
-    with MLResourcesClient(auth_method="digest") as client:
+    with MLResourcesClient() as client:
         resp = client.get_server_properties(
             server="App-Services",
             group_id="Default",
@@ -368,7 +368,7 @@ def test_put_server_properties():
     builder.with_response_body(Path(response_body_path).read_bytes())
     builder.build_put()
 
-    with MLResourcesClient(auth_method="digest") as client:
+    with MLResourcesClient() as client:
         resp = client.put_server_properties(
             server="non-existing-server",
             group_id="non-existing-group",
@@ -392,7 +392,7 @@ def test_get_forests():
     builder.with_response_body(Path(response_body_path).read_bytes())
     builder.build_get()
 
-    with MLResourcesClient(auth_method="digest") as client:
+    with MLResourcesClient() as client:
         resp = client.get_forests(data_format="json", database="Documents")
 
     expected_uri = "/manage/v2/forests?view=default&database-id=Documents"
@@ -412,7 +412,7 @@ def test_post_forests():
     builder.with_response_body(Path(response_body_path).read_bytes())
     builder.build_post()
 
-    with MLResourcesClient(auth_method="digest") as client:
+    with MLResourcesClient() as client:
         resp = client.post_forests(body=body)
 
     assert resp.status_code == 500
@@ -430,7 +430,7 @@ def test_put_forests():
     builder.with_response_body(Path(response_body_path).read_bytes())
     builder.build_put()
 
-    with MLResourcesClient(auth_method="digest") as client:
+    with MLResourcesClient() as client:
         resp = client.put_forests(body=body)
 
     assert resp.status_code == 400
@@ -453,7 +453,7 @@ def test_get_forest():
     builder.with_response_body(Path(response_body_path).read_bytes())
     builder.build_get()
 
-    with MLResourcesClient(auth_method="digest") as client:
+    with MLResourcesClient() as client:
         resp = client.get_forest(forest="Documents", data_format="json")
 
     expected_uri = "/manage/v2/forests/Documents?view=default"
@@ -474,7 +474,7 @@ def test_post_forest():
     builder.with_response_body(Path(response_body_path).read_bytes())
     builder.build_post()
 
-    with MLResourcesClient(auth_method="digest") as client:
+    with MLResourcesClient() as client:
         resp = client.post_forest(forest="aaa", body={"state": "clear"})
         MLResponseBuilder.generate_builder_code(resp, True, __file__)
 
@@ -492,7 +492,7 @@ def test_delete_forest():
     builder.with_empty_response_body()
     builder.build()
 
-    with MLResourcesClient(auth_method="digest") as client:
+    with MLResourcesClient() as client:
         resp = client.delete_forest(forest="aaa", level="full")
 
     assert resp.status_code == 204
@@ -515,7 +515,7 @@ def test_get_forest_properties():
     builder.with_response_body(Path(response_body_path).read_bytes())
     builder.build_get()
 
-    with MLResourcesClient(auth_method="digest") as client:
+    with MLResourcesClient() as client:
         resp = client.get_forest_properties(forest="Documents", data_format="json")
 
     assert resp.status_code == 200
@@ -539,7 +539,7 @@ def test_put_forest_properties():
     builder.with_response_body(Path(response_body_path).read_bytes())
     builder.build_put()
 
-    with MLResourcesClient(auth_method="digest") as client:
+    with MLResourcesClient() as client:
         resp = client.put_forest_properties(
             forest="non-existing-forest",
             body={"forest-name": "custom-forest"},
@@ -561,7 +561,7 @@ def test_get_roles():
     builder.with_response_body(Path(response_body_path).read_bytes())
     builder.build_get()
 
-    with MLResourcesClient(auth_method="digest") as client:
+    with MLResourcesClient() as client:
         resp = client.get_roles(data_format="json")
 
     expected_uri = "/manage/v2/roles?view=default"
@@ -581,7 +581,7 @@ def test_post_roles():
     builder.with_response_body(Path(response_body_path).read_bytes())
     builder.build_post()
 
-    with MLResourcesClient(auth_method="digest") as client:
+    with MLResourcesClient() as client:
         resp = client.post_roles(body=body)
 
     assert resp.status_code == 400
@@ -600,7 +600,7 @@ def test_get_role():
     builder.with_response_body(Path(response_body_path).read_bytes())
     builder.build_get()
 
-    with MLResourcesClient(auth_method="digest") as client:
+    with MLResourcesClient() as client:
         resp = client.get_role(role="admin", data_format="json")
 
     expected_uri = "/manage/v2/roles/admin?view=default"
@@ -616,7 +616,7 @@ def test_delete_role():
     builder.with_empty_response_body()
     builder.build_delete()
 
-    with MLResourcesClient(auth_method="digest") as client:
+    with MLResourcesClient() as client:
         resp = client.delete_role(role="custom-role")
 
     assert resp.status_code == 204
@@ -637,7 +637,7 @@ def test_get_role_properties():
     builder.with_response_body(Path(response_body_path).read_bytes())
     builder.build_get()
 
-    with MLResourcesClient(auth_method="digest") as client:
+    with MLResourcesClient() as client:
         resp = client.get_role_properties(role="admin", data_format="json")
 
     assert resp.status_code == 200
@@ -661,7 +661,7 @@ def test_put_role_properties():
     builder.with_response_body(Path(response_body_path).read_bytes())
     builder.build_put()
 
-    with MLResourcesClient(auth_method="digest") as client:
+    with MLResourcesClient() as client:
         resp = client.put_role_properties(
             role="non-existing-role",
             body={"role-name": "custom-db"},
@@ -686,7 +686,7 @@ def test_get_users():
     builder.with_response_body(Path(response_body_path).read_bytes())
     builder.build_get()
 
-    with MLResourcesClient(auth_method="digest") as client:
+    with MLResourcesClient() as client:
         resp = client.get_users(data_format="json")
 
     expected_uri = "/manage/v2/users?view=default"
@@ -706,7 +706,7 @@ def test_post_users():
     builder.with_response_body(Path(response_body_path).read_bytes())
     builder.build_post()
 
-    with MLResourcesClient(auth_method="digest") as client:
+    with MLResourcesClient() as client:
         resp = client.post_users(body=body)
 
     assert resp.status_code == 400
@@ -725,7 +725,7 @@ def test_get_user():
     builder.with_response_body(Path(response_body_path).read_bytes())
     builder.build_get()
 
-    with MLResourcesClient(auth_method="digest") as client:
+    with MLResourcesClient() as client:
         resp = client.get_user(user="admin", data_format="json")
 
     expected_uri = "/manage/v2/users/admin?view=default"
@@ -743,7 +743,7 @@ def test_delete_user():
     builder.with_response_body(Path(response_body_path).read_bytes())
     builder.build_delete()
 
-    with MLResourcesClient(auth_method="digest") as client:
+    with MLResourcesClient() as client:
         resp = client.delete_user(user="custom-user")
 
     assert resp.status_code == 404
@@ -764,7 +764,7 @@ def test_get_user_properties():
     builder.with_response_body(Path(response_body_path).read_bytes())
     builder.build_get()
 
-    with MLResourcesClient(auth_method="digest") as client:
+    with MLResourcesClient() as client:
         resp = client.get_user_properties(user="admin", data_format="json")
 
     assert resp.status_code == 200
@@ -788,7 +788,7 @@ def test_put_user_properties():
     builder.with_response_body(Path(response_body_path).read_bytes())
     builder.build_put()
 
-    with MLResourcesClient(auth_method="digest") as client:
+    with MLResourcesClient() as client:
         resp = client.put_user_properties(
             user="non-existing-user",
             body={"user-name": "custom-db"},
@@ -813,7 +813,7 @@ def test_get_documents():
     builder.with_response_body(Path(response_body_path).read_bytes())
     builder.build_get()
 
-    with MLResourcesClient(auth_method="digest") as client:
+    with MLResourcesClient() as client:
         resp = client.get_documents(
             uri="/path/to/non-existing/document.xml",
             data_format="json",
@@ -842,7 +842,7 @@ def test_post_documents():
     builder.with_response_body(Path(response_body_path).read_bytes())
     builder.build_post()
 
-    with MLResourcesClient(auth_method="digest") as client:
+    with MLResourcesClient() as client:
         resp = client.post_documents(body_parts=[DocumentsBodyPart(**body_part)])
 
     assert resp.status_code == 500
@@ -872,7 +872,7 @@ def test_delete_documents():
     builder.with_response_body(Path(response_body_path).read_bytes())
     builder.build_delete()
 
-    with MLResourcesClient(auth_method="digest") as client:
+    with MLResourcesClient() as client:
         resp = client.delete_documents(
             uri="/path/to/non-existing/document.xml",
             wipe_temporal=True,

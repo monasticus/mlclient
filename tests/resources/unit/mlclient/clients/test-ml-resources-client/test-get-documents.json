@@ -1,0 +1,1 @@
+{"errorResponse":{"statusCode":"500", "status":"Internal Server Error", "messageCode":"RESTAPI-NODOCUMENT", "message":"RESTAPI-NODOCUMENT: (err:FOER0000) Resource or document does not exist:  category: content message: /path/to/non-existing/document.xml"}}

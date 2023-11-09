@@ -99,8 +99,6 @@ def test_post_databases():
     )
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/manage/v2/databases")
-    builder.with_request_content_type("application/xml")
-    builder.with_request_body(body)
     builder.with_response_content_type("application/xml; charset=UTF-8")
     builder.with_response_status(400)
     builder.with_response_body(Path(response_body_path).read_bytes())
@@ -254,12 +252,8 @@ def test_post_servers():
     response_body_path = tools.get_test_resource_path(__file__, "test-post-servers.xml")
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/manage/v2/servers")
-    builder.with_request_content_type("application/xml")
     builder.with_request_param("group-id", "Default")
     builder.with_request_param("server-type", "http")
-    builder.with_request_body(
-        '<http-server-properties xmlns="http://marklogic.com/manage" />',
-    )
     builder.with_response_content_type("application/xml; charset=UTF-8")
     builder.with_response_status(400)
     builder.with_response_body(Path(response_body_path).read_bytes())
@@ -413,8 +407,6 @@ def test_post_forests():
     response_body_path = tools.get_test_resource_path(__file__, "test-post-forests.xml")
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/manage/v2/forests")
-    builder.with_request_content_type("application/xml")
-    builder.with_request_body(body)
     builder.with_response_content_type("application/xml; charset=UTF-8")
     builder.with_response_status(500)
     builder.with_response_body(Path(response_body_path).read_bytes())
@@ -433,8 +425,6 @@ def test_put_forests():
     response_body_path = tools.get_test_resource_path(__file__, "test-put-forests.xml")
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/manage/v2/forests")
-    builder.with_request_content_type("application/xml")
-    builder.with_request_body('<forest-migrate xmlns="http://marklogic.com/manage" />')
     builder.with_response_content_type("application/xml; charset=UTF-8")
     builder.with_response_status(400)
     builder.with_response_body(Path(response_body_path).read_bytes())
@@ -586,8 +576,6 @@ def test_post_roles():
     response_body_path = tools.get_test_resource_path(__file__, "test-post-roles.xml")
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/manage/v2/roles")
-    builder.with_request_content_type("application/xml")
-    builder.with_request_body(body)
     builder.with_response_content_type("application/xml; charset=UTF-8")
     builder.with_response_status(400)
     builder.with_response_body(Path(response_body_path).read_bytes())
@@ -713,8 +701,6 @@ def test_post_users():
     response_body_path = tools.get_test_resource_path(__file__, "test-post-users.xml")
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/manage/v2/users")
-    builder.with_request_content_type("application/xml")
-    builder.with_request_body(body)
     builder.with_response_content_type("application/xml; charset=UTF-8")
     builder.with_response_status(400)
     builder.with_response_body(Path(response_body_path).read_bytes())
@@ -812,8 +798,21 @@ def test_put_user_properties():
     assert resp.json()["errorResponse"]["messageCode"] == "SEC-USERDNE"
 
 
-@pytest.mark.ml_access()
+@responses.activate()
 def test_get_documents():
+    response_body_path = tools.get_test_resource_path(
+        __file__,
+        "test-get-documents.json",
+    )
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/documents")
+    builder.with_request_param("uri", "/path/to/non-existing/document.xml")
+    builder.with_request_param("format", "json")
+    builder.with_response_content_type("application/json; charset=UTF-8")
+    builder.with_response_status(500)
+    builder.with_response_body(Path(response_body_path).read_bytes())
+    builder.build_get()
+
     with MLResourcesClient(auth_method="digest") as client:
         resp = client.get_documents(
             uri="/path/to/non-existing/document.xml",
@@ -824,13 +823,25 @@ def test_get_documents():
     assert resp.json()["errorResponse"]["messageCode"] == "RESTAPI-NODOCUMENT"
 
 
-@pytest.mark.ml_access()
+@responses.activate()
 def test_post_documents():
     body_part = {
         "content-type": "application/json",
         "content-disposition": "inline",
         "content": {"root": "data"},
     }
+
+    response_body_path = tools.get_test_resource_path(
+        __file__,
+        "test-post-documents.json",
+    )
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/documents")
+    builder.with_response_content_type("application/json; charset=UTF-8")
+    builder.with_response_status(500)
+    builder.with_response_body(Path(response_body_path).read_bytes())
+    builder.build_post()
+
     with MLResourcesClient(auth_method="digest") as client:
         resp = client.post_documents(body_parts=[DocumentsBodyPart(**body_part)])
 
@@ -846,8 +857,21 @@ def test_post_documents():
     }
 
 
-@pytest.mark.ml_access()
+@responses.activate()
 def test_delete_documents():
+    response_body_path = tools.get_test_resource_path(
+        __file__,
+        "test-delete-documents.xml",
+    )
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/documents")
+    builder.with_request_param("uri", "/path/to/non-existing/document.xml")
+    builder.with_request_param("result", "wipe")
+    builder.with_response_content_type("application/xml; charset=UTF-8")
+    builder.with_response_status(400)
+    builder.with_response_body(Path(response_body_path).read_bytes())
+    builder.build_delete()
+
     with MLResourcesClient(auth_method="digest") as client:
         resp = client.delete_documents(
             uri="/path/to/non-existing/document.xml",

@@ -1,0 +1,1 @@
+{"errorResponse":{"statusCode":"500", "status":"Internal Server Error", "messageCode":"XDMP-AS", "message":"XDMP-AS: (err:XPTY0004) $uri as xs:string -- Invalid coercion: () as xs:string"}}

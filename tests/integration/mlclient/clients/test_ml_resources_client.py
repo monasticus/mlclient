@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import datetime
+from time import sleep
 from typing import ClassVar
 
 import pytest
@@ -41,13 +43,83 @@ class TestEvalEndpoint:
         return MLResponseParser.parse(resp, str)
 
 
-@pytest.mark.ml_access()
-def test_get_logs():
-    with MLResourcesClient(auth_method="digest") as client:
-        resp = client.get_logs(filename="ErrorLog.txt", data_format="json")
+class TestLogsEndpoint:
+    @pytest.mark.ml_access()
+    def test_get_logs(
+        self,
+    ):
+        self._produce_test_logs()
+        eval_logs_count = self._test_error_logs()
+        self._test_access_logs(eval_logs_count)
+        self._test_request_logs()
 
-    assert resp.status_code == 200
-    assert "logfile" in resp.json()
+    @classmethod
+    def _produce_test_logs(
+        cls,
+    ):
+        with MLResourcesClient(auth_method="digest") as client:
+            for i in range(1, 11):
+                client.eval(xquery=f'xdmp:log("Test Log {i}", "error")')
+        sleep(0.5)
+
+    @classmethod
+    def _test_error_logs(
+        cls,
+    ) -> int:
+        with MLResourcesClient(auth_method="digest") as client:
+            resp = client.get_logs(
+                filename=f"{client.port}_ErrorLog.txt",
+                data_format="json",
+                start_time=str(datetime.date.today()),
+                regex="Test Log .{1,2}",
+            )
+        assert resp.status_code == 200
+        assert resp.reason == "OK"
+
+        logfile = resp.json()["logfile"]
+        logs_count = len(logfile["log"])
+        assert logs_count % 10 == 0
+
+        return logs_count
+
+    @classmethod
+    def _test_access_logs(
+        cls,
+        eval_logs_count: int,
+    ):
+        with MLResourcesClient(auth_method="digest") as client:
+            resp = client.get_logs(
+                filename=f"{client.port}_AccessLog.txt",
+                data_format="json",
+            )
+        assert resp.status_code == 200
+        assert resp.reason == "OK"
+
+        logfile = resp.json()["logfile"]
+        assert isinstance(logfile["message"], str)
+
+        logs = logfile["message"].split("\n")
+        eval_logs = [
+            log
+            for log in logs
+            if '"POST /v1/eval HTTP/1.1"' in log and "python-requests" in log
+        ]
+        assert len(eval_logs) >= eval_logs_count
+
+    @classmethod
+    def _test_request_logs(
+        cls,
+    ):
+        with MLResourcesClient(auth_method="digest") as client:
+            resp = client.get_logs(
+                filename=f"{client.port}_RequestLog.txt",
+                data_format="json",
+            )
+        assert resp.status_code == 200
+        assert resp.reason == "OK"
+
+        logfile = resp.json()["logfile"]
+        assert isinstance(logfile["message"], str)
 
 
 class TestDatabasesManagement:
@@ -157,15 +229,6 @@ def test_post_database():
         )
 
     assert resp.status_code == 200
-    assert not resp.text
-
-
-@pytest.mark.ml_access()
-def test_delete_database():
-    with MLResourcesClient(auth_method="digest") as client:
-        resp = client.delete_database(database="custom-db")
-
-    assert resp.status_code == 204
     assert not resp.text
 
 

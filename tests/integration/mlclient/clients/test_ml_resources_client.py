@@ -1,4 +1,7 @@
+from typing import ClassVar
+
 import pytest
+from requests import Response
 
 from mlclient import MLResourcesClient
 from mlclient.calls.model import DocumentsBodyPart
@@ -35,27 +38,92 @@ def test_get_logs():
     assert "logfile" in resp.json()
 
 
-@pytest.mark.ml_access()
-def test_get_databases():
-    with MLResourcesClient(auth_method="digest") as client:
-        resp = client.get_databases(data_format="json")
+class TestDatabasesManagement:
+    TEST_DATABASE_CONFIG: ClassVar[dict] = {"database-name": "TestDB"}
 
-    expected_uri = "/manage/v2/databases?view=default"
-    assert resp.status_code == 200
-    assert resp.json()["database-default-list"]["meta"]["uri"] == expected_uri
+    @pytest.mark.ml_access()
+    def test_db_management(
+        self,
+    ):
+        init_count = self._init_check()
+        self._create_database()
+        middle_count = self._middle_check(init_count)
+        self._delete_database()
+        self._final_check(middle_count)
 
+    @classmethod
+    def _init_check(
+        cls,
+    ) -> int:
+        resp = cls._get_databases()
 
-@pytest.mark.ml_access()
-def test_post_databases():
-    body = '<database-properties xmlns="http://marklogic.com/manage" />'
-    with MLResourcesClient(auth_method="digest") as client:
-        resp = client.post_databases(body=body)
+        data = resp.json()["database-default-list"]["list-items"]
+        databases = data["list-item"]
+        databases_names = [database["nameref"] for database in databases]
+        assert cls.TEST_DATABASE_CONFIG["database-name"] not in databases_names
 
-    assert resp.status_code == 400
-    assert (
-        "Payload has errors in structure, content-type or values. "
-        "Database name missing."
-    ) in resp.text
+        return data["list-count"]["value"]
+
+    @classmethod
+    def _middle_check(
+        cls,
+        init_count: int,
+    ) -> int:
+        resp = cls._get_databases()
+
+        data = resp.json()["database-default-list"]["list-items"]
+        databases = data["list-item"]
+        databases_names = [database["nameref"] for database in databases]
+        assert cls.TEST_DATABASE_CONFIG["database-name"] in databases_names
+
+        middle_count = data["list-count"]["value"]
+        assert middle_count == init_count + 1
+
+        return middle_count
+
+    @classmethod
+    def _final_check(
+        cls,
+        middle_count: int,
+    ):
+        resp = cls._get_databases()
+
+        data = resp.json()["database-default-list"]["list-items"]
+        databases = data["list-item"]
+        databases_names = [database["nameref"] for database in databases]
+        assert cls.TEST_DATABASE_CONFIG["database-name"] not in databases_names
+
+        final_count = data["list-count"]["value"]
+        assert final_count == middle_count - 1
+
+    @classmethod
+    def _get_databases(
+        cls,
+    ) -> Response:
+        with MLResourcesClient(auth_method="digest") as client:
+            resp = client.get_databases(data_format="json")
+        assert resp.status_code == 200
+        assert resp.reason == "OK"
+
+        return resp
+
+    @classmethod
+    def _create_database(
+        cls,
+    ):
+        with MLResourcesClient(auth_method="digest") as client:
+            resp = client.post_databases(cls.TEST_DATABASE_CONFIG)
+        assert resp.status_code == 201
+        assert resp.reason == "Created"
+
+    @classmethod
+    def _delete_database(
+        cls,
+    ):
+        with MLResourcesClient(auth_method="digest") as client:
+            resp = client.delete_database(cls.TEST_DATABASE_CONFIG["database-name"])
+        assert resp.status_code == 204
+        assert resp.reason == "No Content"
 
 
 @pytest.mark.ml_access()

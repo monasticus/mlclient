@@ -1,32 +1,44 @@
+from __future__ import annotations
+
 from typing import ClassVar
 
 import pytest
 from requests import Response
 
-from mlclient import MLResourcesClient
+from mlclient import MLResourcesClient, MLResponseParser
 from mlclient.calls.model import DocumentsBodyPart
 
 
-@pytest.fixture()
-def xquery():
-    return """xquery version '1.0-ml';
-
-    declare variable $element as element() external;
-
-    <new-parent>{$element/child::element()}</new-parent>
-    """
-
-
-@pytest.mark.ml_access()
-def test_eval(xquery):
-    with MLResourcesClient(auth_method="digest") as client:
-        resp = client.eval(
-            xquery=xquery,
-            variables={"element": "<parent><child/></parent>"},
+class TestEvalEndpoint:
+    @pytest.mark.ml_access()
+    def test_eval(
+        self,
+    ):
+        parsed_resp = self._eval_xquery(
+            code="xquery version '1.0-ml'; "
+            "declare variable $element as element() external; "
+            "<new-parent>{$element/child::element()}</new-parent>",
+            variables={
+                "element": "<parent><child/></parent>",
+            },
         )
+        assert parsed_resp == "<new-parent><child/></new-parent>"
 
-    assert resp.status_code == 200
-    assert "<new-parent><child/></new-parent>" in resp.text
+    @classmethod
+    def _eval_xquery(
+        cls,
+        code: str,
+        variables: dict,
+    ) -> str | list[str]:
+        with MLResourcesClient(auth_method="digest") as client:
+            resp = client.eval(
+                xquery=code,
+                variables=variables,
+            )
+        assert resp.status_code == 200
+        assert resp.reason == "OK"
+
+        return MLResponseParser.parse(resp, str)
 
 
 @pytest.mark.ml_access()

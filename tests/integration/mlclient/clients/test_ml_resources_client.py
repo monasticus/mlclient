@@ -303,82 +303,193 @@ class TestDatabasesManagement:
         assert resp.reason == "OK"
 
 
-@pytest.mark.ml_access()
-def test_get_servers():
-    with MLResourcesClient(auth_method="digest") as client:
-        resp = client.get_servers(data_format="json")
+class TestServersManagement:
+    TEST_SERVER_CONFIG: ClassVar[dict] = {
+        "server-name": "TestServer",
+        "root": "/",
+        "port": 8100,
+        "content-database": "Documents",
+    }
 
-    expected_uri = "/manage/v2/servers?view=default"
-    assert resp.status_code == 200
-    assert resp.json()["server-default-list"]["meta"]["uri"] == expected_uri
+    def test_servers_management(
+        self,
+    ):
+        init_count = -1
+        try:
+            init_count = self._init_check()
+            self._create_server()
+            self._middle_check(init_count)
 
+            self._check_server_config()
+            self._update_server_properties()
+            self._check_server_properties()
+        finally:
+            self._delete_server()
+            self._final_check(init_count)
 
-@pytest.mark.ml_access()
-def test_post_servers():
-    with MLResourcesClient(auth_method="digest") as client:
-        resp = client.post_servers(
-            group_id="Default",
-            server_type="http",
-            body='<http-server-properties xmlns="http://marklogic.com/manage" />',
+    @classmethod
+    def _init_check(
+        cls,
+    ) -> int:
+        resp = cls._get_servers()
+
+        data = resp.json()["server-default-list"]["list-items"]
+        servers = data["list-item"]
+        servers_names = [database["nameref"] for database in servers]
+        assert cls.TEST_SERVER_CONFIG["server-name"] not in servers_names
+
+        return data["list-count"]["value"]
+
+    @classmethod
+    def _middle_check(
+        cls,
+        init_count: int,
+    ):
+        resp = cls._get_servers()
+
+        data = resp.json()["server-default-list"]["list-items"]
+        servers = data["list-item"]
+        servers_names = [database["nameref"] for database in servers]
+        assert cls.TEST_SERVER_CONFIG["server-name"] in servers_names
+
+        middle_count = data["list-count"]["value"]
+        assert middle_count == init_count + 1
+
+    @classmethod
+    def _final_check(
+        cls,
+        init_count: int,
+    ):
+        resp = cls._get_servers()
+
+        data = resp.json()["server-default-list"]["list-items"]
+        servers = data["list-item"]
+        servers_names = [database["nameref"] for database in servers]
+        assert cls.TEST_SERVER_CONFIG["server-name"] not in servers_names
+
+        final_count = data["list-count"]["value"]
+        assert init_count in (-1, final_count)
+
+    @classmethod
+    def _check_server_config(
+        cls,
+    ):
+        resp = cls._get_server(
+            cls.TEST_SERVER_CONFIG["server-name"],
+            view="config",
+        )
+        server_config = resp.json()["http-server-config"]["http-config-properties"]
+        assert server_config["root"] == cls.TEST_SERVER_CONFIG["root"]
+        assert server_config["port"] == cls.TEST_SERVER_CONFIG["port"]
+        assert server_config["enabled"] is True
+
+    @classmethod
+    def _update_server_properties(
+        cls,
+    ):
+        cls._put_server_properties(
+            cls.TEST_SERVER_CONFIG["server-name"],
+            {"enabled": False},
         )
 
-    assert resp.status_code == 400
-    assert (
-        "Payload has errors in structure, content-type or values. "
-        "Server name missing."
-    ) in resp.text
-
-
-@pytest.mark.ml_access()
-def test_get_server():
-    with MLResourcesClient(auth_method="digest") as client:
-        resp = client.get_server(
-            server="App-Services",
-            group_id="Default",
-            data_format="json",
+    @classmethod
+    def _check_server_properties(
+        cls,
+    ):
+        resp = cls._get_server_properties(
+            cls.TEST_SERVER_CONFIG["server-name"],
         )
+        server_props = resp.json()
+        assert server_props["root"] == cls.TEST_SERVER_CONFIG["root"]
+        assert server_props["port"] == cls.TEST_SERVER_CONFIG["port"]
+        assert server_props["enabled"] is False
 
-    expected_uri = "/manage/v2/servers/App-Services?group-id=Default&view=default"
-    assert resp.status_code == 200
-    assert resp.json()["server-default"]["meta"]["uri"] == expected_uri
+    @classmethod
+    def _get_servers(
+        cls,
+    ) -> Response:
+        with MLResourcesClient(auth_method="digest") as client:
+            resp = client.get_servers(data_format="json")
+        assert resp.status_code == 200
+        assert resp.reason == "OK"
 
+        return resp
 
-@pytest.mark.ml_access()
-def test_delete_server():
-    with MLResourcesClient(auth_method="digest") as client:
-        resp = client.delete_server(
-            server="Non-existing-server",
-            group_id="Non-existing-group",
-        )
+    @classmethod
+    def _get_server(
+        cls,
+        server: str,
+        view: str,
+    ) -> Response:
+        with MLResourcesClient(auth_method="digest") as client:
+            resp = client.get_server(
+                server=server,
+                group_id="Default",
+                data_format="json",
+                view=view,
+            )
+        assert resp.status_code == 200
+        assert resp.reason == "OK"
 
-    assert resp.status_code == 404
-    assert "No such group Non-existing-group" in resp.text
+        return resp
 
+    @classmethod
+    def _get_server_properties(
+        cls,
+        server: str,
+    ) -> Response:
+        with MLResourcesClient(auth_method="digest") as client:
+            resp = client.get_server_properties(
+                server=server,
+                group_id="Default",
+                data_format="json",
+            )
+        assert resp.status_code == 200
+        assert resp.reason == "OK"
 
-@pytest.mark.ml_access()
-def test_get_server_properties():
-    with MLResourcesClient(auth_method="digest") as client:
-        resp = client.get_server_properties(
-            server="App-Services",
-            group_id="Default",
-            data_format="json",
-        )
+        return resp
 
-    assert resp.status_code == 200
-    assert resp.json()["server-name"] == "App-Services"
+    @classmethod
+    def _put_server_properties(
+        cls,
+        server: str,
+        body: dict,
+    ) -> Response:
+        with MLResourcesClient(auth_method="digest") as client:
+            resp = client.put_server_properties(
+                server=server,
+                group_id="Default",
+                body=body,
+            )
+        assert resp.status_code == 204
+        assert resp.reason == "No Content"
 
+        return resp
 
-@pytest.mark.ml_access()
-def test_put_server_properties():
-    with MLResourcesClient(auth_method="digest") as client:
-        resp = client.put_server_properties(
-            server="non-existing-server",
-            group_id="non-existing-group",
-            body={"server-name": "non-existing-server"},
-        )
+    @classmethod
+    def _create_server(
+        cls,
+    ):
+        with MLResourcesClient(auth_method="digest") as client:
+            resp = client.post_servers(
+                group_id="Default",
+                server_type="http",
+                body=cls.TEST_SERVER_CONFIG,
+            )
+        assert resp.status_code == 201
+        assert resp.reason == "Created"
 
-    assert resp.status_code == 404
-    assert resp.json()["errorResponse"]["messageCode"] == "XDMP-NOSUCHGROUP"
+    @classmethod
+    def _delete_server(
+        cls,
+    ):
+        with MLResourcesClient(auth_method="digest") as client:
+            resp = client.delete_server(
+                server=cls.TEST_SERVER_CONFIG["server-name"],
+                group_id="Default",
+            )
+        assert resp.status_code == 202
+        assert resp.reason == "Accepted"
 
 
 @pytest.mark.ml_access()

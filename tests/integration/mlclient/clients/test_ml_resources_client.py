@@ -129,11 +129,18 @@ class TestDatabasesManagement:
     def test_db_management(
         self,
     ):
-        init_count = self._init_check()
-        self._create_database()
-        middle_count = self._middle_check(init_count)
-        self._delete_database()
-        self._final_check(middle_count)
+        init_count = -1
+        try:
+            init_count = self._init_check()
+
+            self._create_database()
+            self._middle_check(init_count)
+
+            self._check_database()
+            self._perform_action_on_database()
+        finally:
+            self._delete_database()
+            self._final_check(init_count)
 
     @classmethod
     def _init_check(
@@ -152,7 +159,7 @@ class TestDatabasesManagement:
     def _middle_check(
         cls,
         init_count: int,
-    ) -> int:
+    ):
         resp = cls._get_databases()
 
         data = resp.json()["database-default-list"]["list-items"]
@@ -163,12 +170,10 @@ class TestDatabasesManagement:
         middle_count = data["list-count"]["value"]
         assert middle_count == init_count + 1
 
-        return middle_count
-
     @classmethod
     def _final_check(
         cls,
-        middle_count: int,
+        init_count: int,
     ):
         resp = cls._get_databases()
 
@@ -178,7 +183,19 @@ class TestDatabasesManagement:
         assert cls.TEST_DATABASE_CONFIG["database-name"] not in databases_names
 
         final_count = data["list-count"]["value"]
-        assert final_count == middle_count - 1
+        assert init_count in (-1, final_count)
+
+    @classmethod
+    def _check_database(
+        cls,
+    ):
+        resp = cls._get_database(
+            cls.TEST_DATABASE_CONFIG["database-name"],
+            view="config",
+        )
+        database_config = resp.json()["database-config"]["config-properties"]
+        assert database_config["language"] == "en"
+        assert database_config["enabled"] is True
 
     @classmethod
     def _get_databases(
@@ -186,6 +203,19 @@ class TestDatabasesManagement:
     ) -> Response:
         with MLResourcesClient(auth_method="digest") as client:
             resp = client.get_databases(data_format="json")
+        assert resp.status_code == 200
+        assert resp.reason == "OK"
+
+        return resp
+
+    @classmethod
+    def _get_database(
+        cls,
+        database: str,
+        view: str,
+    ) -> Response:
+        with MLResourcesClient(auth_method="digest") as client:
+            resp = client.get_database(database=database, data_format="json", view=view)
         assert resp.status_code == 200
         assert resp.reason == "OK"
 
@@ -209,27 +239,17 @@ class TestDatabasesManagement:
         assert resp.status_code == 204
         assert resp.reason == "No Content"
 
-
-@pytest.mark.ml_access()
-def test_get_database():
-    with MLResourcesClient(auth_method="digest") as client:
-        resp = client.get_database(database="Documents", data_format="json")
-
-    expected_uri = "/manage/v2/databases/Documents?view=default"
-    assert resp.status_code == 200
-    assert resp.json()["database-default"]["meta"]["uri"] == expected_uri
-
-
-@pytest.mark.ml_access()
-def test_post_database():
-    with MLResourcesClient(auth_method="digest") as client:
-        resp = client.post_database(
-            database="Documents",
-            body={"operation": "clear-database"},
-        )
-
-    assert resp.status_code == 200
-    assert not resp.text
+    @classmethod
+    def _perform_action_on_database(
+        cls,
+    ):
+        with MLResourcesClient(auth_method="digest") as client:
+            resp = client.post_database(
+                database=cls.TEST_DATABASE_CONFIG["database-name"],
+                body={"operation": "clear-database"},
+            )
+        assert resp.status_code == 200
+        assert resp.reason == "OK"
 
 
 @pytest.mark.ml_access()

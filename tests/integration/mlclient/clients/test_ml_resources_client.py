@@ -60,7 +60,7 @@ class TestLogsEndpoint:
         with MLResourcesClient(auth_method="digest") as client:
             for i in range(1, 11):
                 client.eval(xquery=f'xdmp:log("Test Log {i}", "error")')
-        sleep(0.5)
+        sleep(1)
 
     @classmethod
     def _test_error_logs(
@@ -136,7 +136,10 @@ class TestDatabasesManagement:
             self._create_database()
             self._middle_check(init_count)
 
-            self._check_database()
+            self._check_database_config()
+            self._update_database_properties()
+            self._check_database_properties()
+
             self._perform_action_on_database()
         finally:
             self._delete_database()
@@ -186,7 +189,7 @@ class TestDatabasesManagement:
         assert init_count in (-1, final_count)
 
     @classmethod
-    def _check_database(
+    def _check_database_config(
         cls,
     ):
         resp = cls._get_database(
@@ -196,6 +199,26 @@ class TestDatabasesManagement:
         database_config = resp.json()["database-config"]["config-properties"]
         assert database_config["language"] == "en"
         assert database_config["enabled"] is True
+
+    @classmethod
+    def _update_database_properties(
+        cls,
+    ):
+        cls._put_database_properties(
+            cls.TEST_DATABASE_CONFIG["database-name"],
+            {"enabled": False},
+        )
+
+    @classmethod
+    def _check_database_properties(
+        cls,
+    ):
+        resp = cls._get_database_properties(
+            cls.TEST_DATABASE_CONFIG["database-name"],
+        )
+        database_props = resp.json()
+        assert database_props["language"] == "en"
+        assert database_props["enabled"] is False
 
     @classmethod
     def _get_databases(
@@ -218,6 +241,34 @@ class TestDatabasesManagement:
             resp = client.get_database(database=database, data_format="json", view=view)
         assert resp.status_code == 200
         assert resp.reason == "OK"
+
+        return resp
+
+    @classmethod
+    def _get_database_properties(
+        cls,
+        database: str,
+    ) -> Response:
+        with MLResourcesClient(auth_method="digest") as client:
+            resp = client.get_database_properties(database=database, data_format="json")
+        assert resp.status_code == 200
+        assert resp.reason == "OK"
+
+        return resp
+
+    @classmethod
+    def _put_database_properties(
+        cls,
+        database: str,
+        body: dict,
+    ) -> Response:
+        with MLResourcesClient(auth_method="digest") as client:
+            resp = client.put_database_properties(
+                database=database,
+                body=body,
+            )
+        assert resp.status_code == 204
+        assert resp.reason == "No Content"
 
         return resp
 
@@ -250,27 +301,6 @@ class TestDatabasesManagement:
             )
         assert resp.status_code == 200
         assert resp.reason == "OK"
-
-
-@pytest.mark.ml_access()
-def test_get_database_properties():
-    with MLResourcesClient(auth_method="digest") as client:
-        resp = client.get_database_properties(database="Documents", data_format="json")
-
-    assert resp.status_code == 200
-    assert resp.json()["database-name"] == "Documents"
-
-
-@pytest.mark.ml_access()
-def test_put_database_properties():
-    with MLResourcesClient(auth_method="digest") as client:
-        resp = client.put_database_properties(
-            database="non-existing-db",
-            body={"database-name": "custom-db"},
-        )
-
-    assert resp.status_code == 404
-    assert resp.json()["errorResponse"]["messageCode"] == "XDMP-NOSUCHDB"
 
 
 @pytest.mark.ml_access()

@@ -46,3 +46,4 @@ jobs:
           pytest-coverage-path: output.txt
           junitxml-path: pytest.xml
           junitxml-title: Integration Test Results
+          unique-id-for-comment: integration-tests

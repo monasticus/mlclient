@@ -32,6 +32,7 @@ jobs:
           pytest-coverage-path: output.txt
           junitxml-path: pytest.xml
           junitxml-title: Unit Test Results
+          unique-id-for-comment: unit-tests
 
       - name: Put a detailed coverage comment
         uses: orgoro/coverage@v3

@@ -574,67 +574,180 @@ def test_put_forest_properties():
     assert resp.json()["errorResponse"]["messageCode"] == "XDMP-NOSUCHFOREST"
 
 
-@pytest.mark.ml_access()
-def test_get_roles():
-    with MLResourcesClient(auth_method="digest") as client:
-        resp = client.get_roles(data_format="json")
+class TestRolesManagement:
+    TEST_ROLE_CONFIG: ClassVar[dict] = {
+        "role-name": "test-role",
+        "description": "A test role",
+    }
 
-    expected_uri = "/manage/v2/roles?view=default"
-    assert resp.status_code == 200
-    assert resp.json()["role-default-list"]["meta"]["uri"] == expected_uri
+    def test_roles_management(
+        self,
+    ):
+        init_count = -1
+        try:
+            init_count = self._init_check()
+            self._create_role()
+            self._middle_check(init_count)
 
+            self._check_role_config()
+            self._update_role_properties()
+            self._check_role_properties()
+        finally:
+            self._delete_role()
+            self._final_check(init_count)
 
-@pytest.mark.ml_access()
-def test_post_roles():
-    body = '<role-properties xmlns="http://marklogic.com/manage/role/properties" />'
-    with MLResourcesClient(auth_method="digest") as client:
-        resp = client.post_roles(body=body)
+    @classmethod
+    def _init_check(
+        cls,
+    ) -> int:
+        resp = cls._get_roles()
 
-    assert resp.status_code == 400
-    assert "Payload has errors in structure, content-type or values." in resp.text
+        data = resp.json()["role-default-list"]["list-items"]
+        roles = data["list-item"]
+        roles_names = [database["nameref"] for database in roles]
+        assert cls.TEST_ROLE_CONFIG["role-name"] not in roles_names
 
+        return data["list-count"]["value"]
 
-@pytest.mark.ml_access()
-def test_get_role():
-    with MLResourcesClient(auth_method="digest") as client:
-        resp = client.get_role(role="admin", data_format="json")
+    @classmethod
+    def _middle_check(
+        cls,
+        init_count: int,
+    ):
+        resp = cls._get_roles()
 
-    expected_uri = "/manage/v2/roles/admin?view=default"
-    assert resp.status_code == 200
-    assert resp.json()["role-default"]["meta"]["uri"] == expected_uri
+        data = resp.json()["role-default-list"]["list-items"]
+        roles = data["list-item"]
+        roles_names = [database["nameref"] for database in roles]
+        assert cls.TEST_ROLE_CONFIG["role-name"] in roles_names
 
+        middle_count = data["list-count"]["value"]
+        assert middle_count == init_count + 1
 
-@pytest.mark.ml_access()
-def test_delete_role():
-    with MLResourcesClient(auth_method="digest") as client:
-        resp = client.delete_role(role="custom-role")
+    @classmethod
+    def _final_check(
+        cls,
+        init_count: int,
+    ):
+        resp = cls._get_roles()
 
-    assert resp.status_code == 204
-    assert not resp.text
+        data = resp.json()["role-default-list"]["list-items"]
+        roles = data["list-item"]
+        roles_names = [database["nameref"] for database in roles]
+        assert cls.TEST_ROLE_CONFIG["role-name"] not in roles_names
 
+        final_count = data["list-count"]["value"]
+        assert init_count in (-1, final_count)
 
-@pytest.mark.ml_access()
-def test_get_role_properties():
-    with MLResourcesClient(auth_method="digest") as client:
-        resp = client.get_role_properties(role="admin", data_format="json")
+    @classmethod
+    def _check_role_config(
+        cls,
+    ):
+        resp = cls._get_role(
+            cls.TEST_ROLE_CONFIG["role-name"],
+        )
+        role_config = resp.json()["role-default"]
+        assert role_config["name"] == cls.TEST_ROLE_CONFIG["role-name"]
+        assert role_config["description"] == cls.TEST_ROLE_CONFIG["description"]
 
-    assert resp.status_code == 200
-    assert resp.json()["role-name"] == "admin"
-
-
-@pytest.mark.ml_access()
-def test_put_role_properties():
-    with MLResourcesClient(auth_method="digest") as client:
-        resp = client.put_role_properties(
-            role="non-existing-role",
-            body={"role-name": "custom-db"},
+    @classmethod
+    def _update_role_properties(
+        cls,
+    ):
+        cls._put_role_properties(
+            cls.TEST_ROLE_CONFIG["role-name"],
+            {"description": cls.TEST_ROLE_CONFIG["description"].upper()},
         )
 
-    assert resp.status_code == 400
-    assert (
-        "Payload has errors in structure, content-type or values. "
-        "Role non-existing-role does not exist or is not accessible"
-    ) in resp.text
+    @classmethod
+    def _check_role_properties(
+        cls,
+    ):
+        resp = cls._get_role_properties(
+            cls.TEST_ROLE_CONFIG["role-name"],
+        )
+        role_config = resp.json()
+        assert role_config["role-name"] == cls.TEST_ROLE_CONFIG["role-name"]
+        assert role_config["description"] == cls.TEST_ROLE_CONFIG["description"].upper()
+
+    @classmethod
+    def _get_roles(
+        cls,
+    ) -> Response:
+        with MLResourcesClient(auth_method="digest") as client:
+            resp = client.get_roles(data_format="json")
+        assert resp.status_code == 200
+        assert resp.reason == "OK"
+
+        return resp
+
+    @classmethod
+    def _get_role(
+        cls,
+        role: str,
+    ) -> Response:
+        with MLResourcesClient(auth_method="digest") as client:
+            resp = client.get_role(
+                role=role,
+                data_format="json",
+            )
+        assert resp.status_code == 200
+        assert resp.reason == "OK"
+
+        return resp
+
+    @classmethod
+    def _get_role_properties(
+        cls,
+        role: str,
+    ) -> Response:
+        with MLResourcesClient(auth_method="digest") as client:
+            resp = client.get_role_properties(
+                role=role,
+                data_format="json",
+            )
+        assert resp.status_code == 200
+        assert resp.reason == "OK"
+
+        return resp
+
+    @classmethod
+    def _put_role_properties(
+        cls,
+        role: str,
+        body: dict,
+    ) -> Response:
+        with MLResourcesClient(auth_method="digest") as client:
+            resp = client.put_role_properties(
+                role=role,
+                body=body,
+            )
+        assert resp.status_code == 204
+        assert resp.reason == "No Content"
+
+        return resp
+
+    @classmethod
+    def _create_role(
+        cls,
+    ):
+        with MLResourcesClient(auth_method="digest") as client:
+            resp = client.post_roles(
+                body=cls.TEST_ROLE_CONFIG,
+            )
+        assert resp.status_code == 201
+        assert resp.reason == "Created"
+
+    @classmethod
+    def _delete_role(
+        cls,
+    ):
+        with MLResourcesClient(auth_method="digest") as client:
+            resp = client.delete_role(
+                role=cls.TEST_ROLE_CONFIG["role-name"],
+            )
+        assert resp.status_code == 204
+        assert resp.reason == "No Content"
 
 
 @pytest.mark.ml_access()

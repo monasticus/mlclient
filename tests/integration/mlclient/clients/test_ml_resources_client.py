@@ -727,7 +727,7 @@ class TestRolesManagement:
 
         data = resp.json()["role-default-list"]["list-items"]
         roles = data["list-item"]
-        roles_names = [database["nameref"] for database in roles]
+        roles_names = [role["nameref"] for role in roles]
         assert cls.TEST_ROLE_CONFIG["role-name"] not in roles_names
 
         return data["list-count"]["value"]
@@ -741,7 +741,7 @@ class TestRolesManagement:
 
         data = resp.json()["role-default-list"]["list-items"]
         roles = data["list-item"]
-        roles_names = [database["nameref"] for database in roles]
+        roles_names = [role["nameref"] for role in roles]
         assert cls.TEST_ROLE_CONFIG["role-name"] in roles_names
 
         middle_count = data["list-count"]["value"]
@@ -756,7 +756,7 @@ class TestRolesManagement:
 
         data = resp.json()["role-default-list"]["list-items"]
         roles = data["list-item"]
-        roles_names = [database["nameref"] for database in roles]
+        roles_names = [role["nameref"] for role in roles]
         assert cls.TEST_ROLE_CONFIG["role-name"] not in roles_names
 
         final_count = data["list-count"]["value"]

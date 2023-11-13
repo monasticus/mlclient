@@ -492,86 +492,209 @@ class TestServersManagement:
         assert resp.reason == "Accepted"
 
 
-@pytest.mark.ml_access()
-def test_get_forests():
-    with MLResourcesClient(auth_method="digest") as client:
-        resp = client.get_forests(data_format="json", database="Documents")
+class TestForestsManagement:
+    TEST_FOREST_CONFIG: ClassVar[dict] = {"forest-name": "test-forest-1"}
 
-    expected_uri = "/manage/v2/forests?view=default&database-id=Documents"
-    assert resp.status_code == 200
-    assert resp.json()["forest-default-list"]["meta"]["uri"] == expected_uri
+    @pytest.mark.ml_access()
+    def test_forest_management(
+        self,
+    ):
+        init_count = -1
+        try:
+            init_count = self._init_check()
 
+            self._create_forest()
+            self._middle_check(init_count)
 
-@pytest.mark.ml_access()
-def test_post_forests():
-    body = '<forest-create xmlns="http://marklogic.com/manage" />'
-    with MLResourcesClient(auth_method="digest") as client:
-        resp = client.post_forests(body=body)
+            self._check_forest_config()
+            self._update_forest_properties()
+            self._check_forest_properties()
 
-    assert resp.status_code == 500
+            self._initiate_state_change_on_forest()
+            self._perform_action_on_forests()
+        finally:
+            self._delete_forest()
+            self._final_check(init_count)
 
+    @classmethod
+    def _init_check(
+        cls,
+    ) -> int:
+        resp = cls._get_forests()
 
-@pytest.mark.ml_access()
-def test_put_forests():
-    body = '<forest-migrate xmlns="http://marklogic.com/manage" />'
-    with MLResourcesClient(auth_method="digest") as client:
-        resp = client.put_forests(body=body)
+        data = resp.json()["forest-default-list"]["list-items"]
+        forests = data["list-item"]
+        forests_names = [forest["nameref"] for forest in forests]
+        assert cls.TEST_FOREST_CONFIG["forest-name"] not in forests_names
 
-    assert resp.status_code == 400
-    assert (
-        "Payload has errors in structure, content-type or values. "
-        "Cannot validate payload, no forests specified."
-    ) in resp.text
+        return data["list-count"]["value"]
 
+    @classmethod
+    def _middle_check(
+        cls,
+        init_count: int,
+    ):
+        resp = cls._get_forests()
 
-@pytest.mark.ml_access()
-def test_get_forest():
-    with MLResourcesClient(auth_method="digest") as client:
-        resp = client.get_forest(forest="Documents", data_format="json")
+        data = resp.json()["forest-default-list"]["list-items"]
+        forests = data["list-item"]
+        forests_names = [forest["nameref"] for forest in forests]
+        assert cls.TEST_FOREST_CONFIG["forest-name"] in forests_names
 
-    expected_uri = "/manage/v2/forests/Documents?view=default"
-    assert resp.status_code == 200
-    assert resp.json()["forest-default"]["meta"]["uri"] == expected_uri
+        middle_count = data["list-count"]["value"]
+        assert middle_count == init_count + 1
 
+    @classmethod
+    def _final_check(
+        cls,
+        init_count: int,
+    ):
+        resp = cls._get_forests()
 
-@pytest.mark.ml_access()
-def test_post_forest():
-    with MLResourcesClient(auth_method="digest") as client:
-        resp = client.post_forest(forest="aaa", body={"state": "clear"})
+        data = resp.json()["forest-default-list"]["list-items"]
+        forests = data["list-item"]
+        forests_names = [forest["nameref"] for forest in forests]
+        assert cls.TEST_FOREST_CONFIG["forest-name"] not in forests_names
 
-    assert resp.status_code == 404
-    assert "XDMP-NOSUCHFOREST" in resp.text
+        final_count = data["list-count"]["value"]
+        assert init_count in (-1, final_count)
 
+    @classmethod
+    def _check_forest_config(
+        cls,
+    ):
+        resp = cls._get_forest(
+            cls.TEST_FOREST_CONFIG["forest-name"],
+            view="config",
+        )
+        forest_config = resp.json()["forest-config"]["config-properties"]
+        assert forest_config["enabled"] is True
+        assert forest_config["rebalancer-enable"] is True
 
-@pytest.mark.ml_access()
-def test_delete_forest():
-    with MLResourcesClient(auth_method="digest") as client:
-        client.post_forests(body={"forest-name": "aaa"})
-        resp = client.delete_forest(forest="aaa", level="full")
-
-    assert resp.status_code == 204
-    assert not resp.text
-
-
-@pytest.mark.ml_access()
-def test_get_forest_properties():
-    with MLResourcesClient(auth_method="digest") as client:
-        resp = client.get_forest_properties(forest="Documents", data_format="json")
-
-    assert resp.status_code == 200
-    assert resp.json()["forest-name"] == "Documents"
-
-
-@pytest.mark.ml_access()
-def test_put_forest_properties():
-    with MLResourcesClient(auth_method="digest") as client:
-        resp = client.put_forest_properties(
-            forest="non-existing-forest",
-            body={"forest-name": "custom-forest"},
+    @classmethod
+    def _update_forest_properties(
+        cls,
+    ):
+        cls._put_forest_properties(
+            cls.TEST_FOREST_CONFIG["forest-name"],
+            {"rebalancer-enable": False},
         )
 
-    assert resp.status_code == 404
-    assert resp.json()["errorResponse"]["messageCode"] == "XDMP-NOSUCHFOREST"
+    @classmethod
+    def _check_forest_properties(
+        cls,
+    ):
+        resp = cls._get_forest_properties(
+            cls.TEST_FOREST_CONFIG["forest-name"],
+        )
+        forest_props = resp.json()
+        assert forest_props["enabled"] is True
+        assert forest_props["rebalancer-enable"] is False
+
+    @classmethod
+    def _get_forests(
+        cls,
+    ) -> Response:
+        with MLResourcesClient(auth_method="digest") as client:
+            resp = client.get_forests(data_format="json")
+        assert resp.status_code == 200
+        assert resp.reason == "OK"
+
+        return resp
+
+    @classmethod
+    def _get_forest(
+        cls,
+        forest: str,
+        view: str,
+    ) -> Response:
+        with MLResourcesClient(auth_method="digest") as client:
+            resp = client.get_forest(forest=forest, data_format="json", view=view)
+        assert resp.status_code == 200
+        assert resp.reason == "OK"
+
+        return resp
+
+    @classmethod
+    def _get_forest_properties(
+        cls,
+        forest: str,
+    ) -> Response:
+        with MLResourcesClient(auth_method="digest") as client:
+            resp = client.get_forest_properties(forest=forest, data_format="json")
+        assert resp.status_code == 200
+        assert resp.reason == "OK"
+
+        return resp
+
+    @classmethod
+    def _put_forest_properties(
+        cls,
+        forest: str,
+        body: dict,
+    ) -> Response:
+        with MLResourcesClient(auth_method="digest") as client:
+            resp = client.put_forest_properties(
+                forest=forest,
+                body=body,
+            )
+        assert resp.status_code == 204
+        assert resp.reason == "No Content"
+
+        return resp
+
+    @classmethod
+    def _create_forest(
+        cls,
+    ):
+        with MLResourcesClient(auth_method="digest") as client:
+            resp = client.post_forests(cls.TEST_FOREST_CONFIG)
+        assert resp.status_code == 201
+        assert resp.reason == "Created"
+
+    @classmethod
+    def _delete_forest(
+        cls,
+    ):
+        with MLResourcesClient(auth_method="digest") as client:
+            resp = client.delete_forest(
+                cls.TEST_FOREST_CONFIG["forest-name"],
+                level="full",
+            )
+        assert resp.status_code == 204
+        assert resp.reason == "No Content"
+
+    @classmethod
+    def _initiate_state_change_on_forest(
+        cls,
+    ):
+        with MLResourcesClient(auth_method="digest") as client:
+            resp = client.post_forest(
+                forest=cls.TEST_FOREST_CONFIG["forest-name"],
+                body={"state": "clear"},
+            )
+        assert resp.status_code == 200
+        assert resp.reason == "OK"
+
+    @classmethod
+    def _perform_action_on_forests(
+        cls,
+    ):
+        with MLResourcesClient(auth_method="digest") as client:
+            resp = client.put_forests(
+                body={
+                    "operation": "forest-migrate",
+                },
+            )
+        assert resp.status_code == 400
+        assert resp.reason == "Bad Request"
+        err = resp.json()["errorResponse"]
+        assert err["messageCode"] == "MANAGE-INVALIDPAYLOAD"
+        assert err["message"] == (
+            "MANAGE-INVALIDPAYLOAD: (err:FOER0000) "
+            "Payload has errors in structure, content-type or values. "
+            "Cannot validate payload, no forests specified."
+        )
 
 
 class TestRolesManagement:

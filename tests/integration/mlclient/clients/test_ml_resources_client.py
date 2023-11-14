@@ -873,64 +873,180 @@ class TestRolesManagement:
         assert resp.reason == "No Content"
 
 
-@pytest.mark.ml_access()
-def test_get_users():
-    with MLResourcesClient(auth_method="digest") as client:
-        resp = client.get_users(data_format="json")
+class TestUsersManagement:
+    TEST_USER_CONFIG: ClassVar[dict] = {
+        "user-name": "test-user",
+        "description": "A test user",
+    }
 
-    expected_uri = "/manage/v2/users?view=default"
-    assert resp.status_code == 200
-    assert resp.json()["user-default-list"]["meta"]["uri"] == expected_uri
+    def test_users_management(
+        self,
+    ):
+        init_count = -1
+        try:
+            init_count = self._init_check()
+            self._create_user()
+            self._middle_check(init_count)
 
+            self._check_user_config()
+            self._update_user_properties()
+            self._check_user_properties()
+        finally:
+            self._delete_user()
+            self._final_check(init_count)
 
-@pytest.mark.ml_access()
-def test_post_users():
-    body = '<user-properties xmlns="http://marklogic.com/manage/user/properties" />'
-    with MLResourcesClient(auth_method="digest") as client:
-        resp = client.post_users(body=body)
+    @classmethod
+    def _init_check(
+        cls,
+    ) -> int:
+        resp = cls._get_users()
 
-    assert resp.status_code == 400
-    assert "Payload has errors in structure, content-type or values." in resp.text
+        data = resp.json()["user-default-list"]["list-items"]
+        users = data["list-item"]
+        users_names = [user["nameref"] for user in users]
+        assert cls.TEST_USER_CONFIG["user-name"] not in users_names
 
+        return data["list-count"]["value"]
 
-@pytest.mark.ml_access()
-def test_get_user():
-    with MLResourcesClient(auth_method="digest") as client:
-        resp = client.get_user(user="admin", data_format="json")
+    @classmethod
+    def _middle_check(
+        cls,
+        init_count: int,
+    ):
+        resp = cls._get_users()
 
-    expected_uri = "/manage/v2/users/admin?view=default"
-    assert resp.status_code == 200
-    assert resp.json()["user-default"]["meta"]["uri"] == expected_uri
+        data = resp.json()["user-default-list"]["list-items"]
+        users = data["list-item"]
+        users_names = [user["nameref"] for user in users]
+        assert cls.TEST_USER_CONFIG["user-name"] in users_names
 
+        middle_count = data["list-count"]["value"]
+        assert middle_count == init_count + 1
 
-@pytest.mark.ml_access()
-def test_delete_user():
-    with MLResourcesClient(auth_method="digest") as client:
-        resp = client.delete_user(user="custom-user")
+    @classmethod
+    def _final_check(
+        cls,
+        init_count: int,
+    ):
+        resp = cls._get_users()
 
-    assert resp.status_code == 404
-    assert "User does not exist: custom-user" in resp.text
+        data = resp.json()["user-default-list"]["list-items"]
+        users = data["list-item"]
+        users_names = [user["nameref"] for user in users]
+        assert cls.TEST_USER_CONFIG["user-name"] not in users_names
 
+        final_count = data["list-count"]["value"]
+        assert init_count in (-1, final_count)
 
-@pytest.mark.ml_access()
-def test_get_user_properties():
-    with MLResourcesClient(auth_method="digest") as client:
-        resp = client.get_user_properties(user="admin", data_format="json")
+    @classmethod
+    def _check_user_config(
+        cls,
+    ):
+        resp = cls._get_user(
+            cls.TEST_USER_CONFIG["user-name"],
+        )
+        user_config = resp.json()["user-default"]
+        assert user_config["name"] == cls.TEST_USER_CONFIG["user-name"]
+        assert user_config["description"] == cls.TEST_USER_CONFIG["description"]
 
-    assert resp.status_code == 200
-    assert resp.json()["user-name"] == "admin"
-
-
-@pytest.mark.ml_access()
-def test_put_user_properties():
-    with MLResourcesClient(auth_method="digest") as client:
-        resp = client.put_user_properties(
-            user="non-existing-user",
-            body={"user-name": "custom-db"},
+    @classmethod
+    def _update_user_properties(
+        cls,
+    ):
+        cls._put_user_properties(
+            cls.TEST_USER_CONFIG["user-name"],
+            {"description": cls.TEST_USER_CONFIG["description"].upper()},
         )
 
-    assert resp.status_code == 404
-    assert resp.json()["errorResponse"]["messageCode"] == "SEC-USERDNE"
+    @classmethod
+    def _check_user_properties(
+        cls,
+    ):
+        resp = cls._get_user_properties(
+            cls.TEST_USER_CONFIG["user-name"],
+        )
+        user_config = resp.json()
+        assert user_config["user-name"] == cls.TEST_USER_CONFIG["user-name"]
+        assert user_config["description"] == cls.TEST_USER_CONFIG["description"].upper()
+
+    @classmethod
+    def _get_users(
+        cls,
+    ) -> Response:
+        with MLResourcesClient(auth_method="digest") as client:
+            resp = client.get_users(data_format="json")
+        assert resp.status_code == 200
+        assert resp.reason == "OK"
+
+        return resp
+
+    @classmethod
+    def _get_user(
+        cls,
+        user: str,
+    ) -> Response:
+        with MLResourcesClient(auth_method="digest") as client:
+            resp = client.get_user(
+                user=user,
+                data_format="json",
+            )
+        assert resp.status_code == 200
+        assert resp.reason == "OK"
+
+        return resp
+
+    @classmethod
+    def _get_user_properties(
+        cls,
+        user: str,
+    ) -> Response:
+        with MLResourcesClient(auth_method="digest") as client:
+            resp = client.get_user_properties(
+                user=user,
+                data_format="json",
+            )
+        assert resp.status_code == 200
+        assert resp.reason == "OK"
+
+        return resp
+
+    @classmethod
+    def _put_user_properties(
+        cls,
+        user: str,
+        body: dict,
+    ) -> Response:
+        with MLResourcesClient(auth_method="digest") as client:
+            resp = client.put_user_properties(
+                user=user,
+                body=body,
+            )
+        assert resp.status_code == 204
+        assert resp.reason == "No Content"
+
+        return resp
+
+    @classmethod
+    def _create_user(
+        cls,
+    ):
+        with MLResourcesClient(auth_method="digest") as client:
+            resp = client.post_users(
+                body=cls.TEST_USER_CONFIG,
+            )
+        assert resp.status_code == 201
+        assert resp.reason == "Created"
+
+    @classmethod
+    def _delete_user(
+        cls,
+    ):
+        with MLResourcesClient(auth_method="digest") as client:
+            resp = client.delete_user(
+                user=cls.TEST_USER_CONFIG["user-name"],
+            )
+        assert resp.status_code == 204
+        assert resp.reason == "No Content"
 
 
 @pytest.mark.ml_access()

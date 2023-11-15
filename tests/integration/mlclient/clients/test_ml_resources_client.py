@@ -1049,51 +1049,57 @@ class TestUsersManagement:
         assert resp.reason == "No Content"
 
 
-@pytest.mark.ml_access()
-def test_get_documents():
-    with MLResourcesClient(auth_method="digest") as client:
-        resp = client.get_documents(
-            uri="/path/to/non-existing/document.xml",
-            data_format="json",
-        )
-
-    assert resp.status_code == 500
-    assert resp.json()["errorResponse"]["messageCode"] == "RESTAPI-NODOCUMENT"
-
-
-@pytest.mark.ml_access()
-def test_post_documents():
-    body_part = {
-        "content-type": "application/json",
-        "content-disposition": "inline",
-        "content": {"root": "data"},
-    }
-    with MLResourcesClient(auth_method="digest") as client:
-        resp = client.post_documents(body_parts=[DocumentsBodyPart(**body_part)])
-
-    assert resp.status_code == 500
-    assert resp.json() == {
-        "errorResponse": {
-            "statusCode": "500",
-            "status": "Internal Server Error",
-            "messageCode": "XDMP-AS",
-            "message": "XDMP-AS: (err:XPTY0004) $uri as xs:string -- "
-            "Invalid coercion: () as xs:string",
+class TestDocumentsManagement:
+    DOCUMENT_BODY_PART = DocumentsBodyPart(
+        **{
+            "content-type": "application/json",
+            "content-disposition": {
+                "body_part_type": "attachment",
+                "filename": "/some/dir/doc1.json",
+            },
+            "content": b'{"root": {"child": "data"}}',
         },
-    }
+    )
 
+    def test_docs_management(
+        self,
+    ):
+        try:
+            self._init_check()
 
-@pytest.mark.ml_access()
-def test_delete_documents():
-    with MLResourcesClient(auth_method="digest") as client:
-        resp = client.delete_documents(
-            uri="/path/to/non-existing/document.xml",
-            wipe_temporal=True,
-        )
+            self._create_document()
+        finally:
+            self._delete_document()
 
-    assert resp.status_code == 400
-    assert (
-        "Endpoint does not support query parameter: "
-        "invalid parameters: result "
-        "for /path/to/non-existing/document.xml"
-    ) in resp.text
+    @classmethod
+    def _init_check(
+        cls,
+    ):
+        with MLResourcesClient(auth_method="digest") as client:
+            resp = client.get_documents(
+                uri=cls.DOCUMENT_BODY_PART.content_disposition.filename,
+                data_format="json",
+            )
+        assert resp.status_code == 500
+        assert resp.reason == "Internal Server Error"
+        assert resp.json()["errorResponse"]["messageCode"] == "RESTAPI-NODOCUMENT"
+
+    @classmethod
+    def _create_document(
+        cls,
+    ):
+        with MLResourcesClient(auth_method="digest") as client:
+            resp = client.post_documents(body_parts=[cls.DOCUMENT_BODY_PART])
+            assert resp.status_code == 200
+            assert resp.reason == "Bulk Change Written"
+
+    @classmethod
+    def _delete_document(
+        cls,
+    ):
+        with MLResourcesClient(auth_method="digest") as client:
+            resp = client.delete_documents(
+                uri=cls.DOCUMENT_BODY_PART.content_disposition.filename,
+            )
+            assert resp.status_code == 204
+            assert resp.reason == "Content Deleted"

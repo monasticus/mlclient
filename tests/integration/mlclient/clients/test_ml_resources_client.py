@@ -1050,7 +1050,7 @@ class TestUsersManagement:
 
 
 class TestDocumentsManagement:
-    DOCUMENT_BODY_PART = DocumentsBodyPart(
+    DOCUMENT_BODY_PART_1 = DocumentsBodyPart(
         **{
             "content-type": "application/json",
             "content-disposition": {
@@ -1058,6 +1058,16 @@ class TestDocumentsManagement:
                 "filename": "/some/dir/doc1.json",
             },
             "content": b'{"root": {"child": "data"}}',
+        },
+    )
+    DOCUMENT_BODY_PART_2 = DocumentsBodyPart(
+        **{
+            "content-type": "application/json",
+            "content-disposition": {
+                "body_part_type": "attachment",
+                "filename": "/some/dir/doc1.json",
+            },
+            "content": b'{"root2": {"child2": "data2"}}',
         },
     )
 
@@ -1068,7 +1078,10 @@ class TestDocumentsManagement:
             self._check_does_not_exist()
 
             self._create_document()
-            self._check_exists()
+            self._check_created()
+
+            self._update_document()
+            self._check_updated()
         finally:
             self._delete_document()
             self._check_does_not_exist()
@@ -1079,7 +1092,7 @@ class TestDocumentsManagement:
     ):
         with MLResourcesClient(auth_method="digest") as client:
             resp = client.get_documents(
-                uri=cls.DOCUMENT_BODY_PART.content_disposition.filename,
+                uri=cls.DOCUMENT_BODY_PART_1.content_disposition.filename,
                 data_format="json",
             )
         assert resp.status_code == 500
@@ -1087,12 +1100,12 @@ class TestDocumentsManagement:
         assert resp.json()["errorResponse"]["messageCode"] == "RESTAPI-NODOCUMENT"
 
     @classmethod
-    def _check_exists(
+    def _check_created(
         cls,
     ):
         with MLResourcesClient(auth_method="digest") as client:
             resp = client.get_documents(
-                uri=cls.DOCUMENT_BODY_PART.content_disposition.filename,
+                uri=cls.DOCUMENT_BODY_PART_1.content_disposition.filename,
                 data_format="json",
             )
         assert resp.status_code == 200
@@ -1102,11 +1115,35 @@ class TestDocumentsManagement:
         assert parsed_resp == {"root": {"child": "data"}}
 
     @classmethod
+    def _check_updated(
+        cls,
+    ):
+        with MLResourcesClient(auth_method="digest") as client:
+            resp = client.get_documents(
+                uri=cls.DOCUMENT_BODY_PART_1.content_disposition.filename,
+                data_format="json",
+            )
+        assert resp.status_code == 200
+        assert resp.reason == "OK"
+
+        parsed_resp = MLResponseParser.parse(resp)
+        assert parsed_resp == {"root2": {"child2": "data2"}}
+
+    @classmethod
     def _create_document(
         cls,
     ):
         with MLResourcesClient(auth_method="digest") as client:
-            resp = client.post_documents(body_parts=[cls.DOCUMENT_BODY_PART])
+            resp = client.post_documents(body_parts=[cls.DOCUMENT_BODY_PART_1])
+            assert resp.status_code == 200
+            assert resp.reason == "Bulk Change Written"
+
+    @classmethod
+    def _update_document(
+        cls,
+    ):
+        with MLResourcesClient(auth_method="digest") as client:
+            resp = client.post_documents(body_parts=[cls.DOCUMENT_BODY_PART_2])
             assert resp.status_code == 200
             assert resp.reason == "Bulk Change Written"
 
@@ -1116,7 +1153,7 @@ class TestDocumentsManagement:
     ):
         with MLResourcesClient(auth_method="digest") as client:
             resp = client.delete_documents(
-                uri=cls.DOCUMENT_BODY_PART.content_disposition.filename,
+                uri=cls.DOCUMENT_BODY_PART_1.content_disposition.filename,
             )
             assert resp.status_code == 204
             assert resp.reason == "Content Deleted"

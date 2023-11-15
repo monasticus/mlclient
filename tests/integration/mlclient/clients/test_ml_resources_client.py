@@ -1065,14 +1065,16 @@ class TestDocumentsManagement:
         self,
     ):
         try:
-            self._init_check()
+            self._check_does_not_exist()
 
             self._create_document()
+            self._check_exists()
         finally:
             self._delete_document()
+            self._check_does_not_exist()
 
     @classmethod
-    def _init_check(
+    def _check_does_not_exist(
         cls,
     ):
         with MLResourcesClient(auth_method="digest") as client:
@@ -1083,6 +1085,21 @@ class TestDocumentsManagement:
         assert resp.status_code == 500
         assert resp.reason == "Internal Server Error"
         assert resp.json()["errorResponse"]["messageCode"] == "RESTAPI-NODOCUMENT"
+
+    @classmethod
+    def _check_exists(
+        cls,
+    ):
+        with MLResourcesClient(auth_method="digest") as client:
+            resp = client.get_documents(
+                uri=cls.DOCUMENT_BODY_PART.content_disposition.filename,
+                data_format="json",
+            )
+        assert resp.status_code == 200
+        assert resp.reason == "OK"
+
+        parsed_resp = MLResponseParser.parse(resp)
+        assert parsed_resp == {"root": {"child": "data"}}
 
     @classmethod
     def _create_document(

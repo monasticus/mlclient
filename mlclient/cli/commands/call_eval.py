@@ -107,6 +107,7 @@ class CallEvalCommand(Command):
     def _get_eval_params(self):
         """Prepare parameters for an EvalClient."""
         code = self.argument("code")
+        variables = self.option("var")
         xq_flag = self.option("xquery")
         js_flag = self.option("javascript")
         database = self.option("database")
@@ -123,6 +124,11 @@ class CallEvalCommand(Command):
             params["js"] = code
         if not xq_flag and not js_flag:
             params["file"] = code
+        if len(variables) > 0:
+            params["variables"] = {
+                key_value.split("=")[0]: key_value.split("=")[1]
+                for key_value in variables
+            }
 
         return params
 

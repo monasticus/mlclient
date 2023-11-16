@@ -10,12 +10,13 @@ import xml.etree.ElementTree as ElemTree
 from pathlib import Path
 
 from mlclient.calls import EvalCall
-from mlclient.clients import MLResourceClient, MLResponseParser
+from mlclient.clients import MLResourceClient
 from mlclient.exceptions import (
     MarkLogicError,
     UnsupportedFileExtensionError,
     WrongParametersError,
 )
+from mlclient.ml_response_parser import MLResponseParser
 
 LOCAL_NS = "http://www.w3.org/2005/xquery-local-functions"
 

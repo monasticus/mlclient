@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import inspect
 import json
 import os
 import urllib.parse
@@ -17,6 +18,7 @@ from urllib3.fields import RequestField
 
 from mlclient.calls.model import ContentDispositionSerializer, DocumentsBodyPart
 from mlclient.constants import (
+    HEADER_JSON,
     HEADER_MULTIPART_MIXED,
     HEADER_NAME_CONTENT_DISP,
     HEADER_NAME_CONTENT_TYPE,
@@ -70,6 +72,7 @@ class MLResponseBuilder:
         self._base_url: str | None = None
         self._request_body: str | None = None
         self._request_params: list[tuple] = []
+        self._request_content_type: str | None = None
         self._multipart_mixed_response: bool = False
         self._response_body: str | bytes | None = None
         self._response_body_fields: list | None = None
@@ -107,6 +110,12 @@ class MLResponseBuilder:
         value: Any,
     ):
         self._request_params.append((key, value))
+
+    def with_request_content_type(
+        self,
+        content_type: str,
+    ):
+        self._request_content_type = content_type
 
     def with_response_body_multipart_mixed(
         self,
@@ -216,10 +225,22 @@ class MLResponseBuilder:
         self.with_method("GET")
         self.build()
 
+    def build_delete(
+        self,
+    ):
+        self.with_method("DELETE")
+        self.build()
+
     def build_post(
         self,
     ):
         self.with_method("POST")
+        self.build()
+
+    def build_put(
+        self,
+    ):
+        self.with_method("PUT")
         self.build()
 
     def build(
@@ -298,8 +319,22 @@ class MLResponseBuilder:
     ):
         if self._method == "GET":
             self._finalize_get(request_url, responses_params)
+        elif self._method == "DELETE":
+            self._finalize_delete(request_url, responses_params)
         elif self._method == "POST":
-            self._finalize_post(request_url, self._request_body, responses_params)
+            self._finalize_post(
+                request_url,
+                responses_params,
+                self._request_content_type,
+                self._request_body,
+            )
+        elif self._method == "PUT":
+            self._finalize_put(
+                request_url,
+                responses_params,
+                self._request_content_type,
+                self._request_body,
+            )
 
     @staticmethod
     def _finalize_get(
@@ -312,14 +347,49 @@ class MLResponseBuilder:
         )
 
     @staticmethod
-    def _finalize_post(
+    def _finalize_delete(
         request_url: str,
-        request_body: Any,
         responses_params: dict,
     ):
-        match = [matchers.urlencoded_params_matcher(request_body)]
-        responses_params["match"] = match
+        responses.delete(
+            request_url,
+            **responses_params,
+        )
+
+    @staticmethod
+    def _finalize_post(
+        request_url: str,
+        responses_params: dict,
+        request_content_type: str | None,
+        request_body: Any,
+    ):
+        if request_content_type:
+            if request_content_type.startswith("application/x-www-form-urlencoded"):
+                match = [matchers.urlencoded_params_matcher(request_body)]
+                responses_params["match"] = match
+            elif request_content_type.startswith("application/json"):
+                match = [matchers.json_params_matcher(request_body)]
+                responses_params["match"] = match
         responses.post(
+            request_url,
+            **responses_params,
+        )
+
+    @staticmethod
+    def _finalize_put(
+        request_url: str,
+        responses_params: dict,
+        request_content_type: str,
+        request_body: Any,
+    ):
+        if request_content_type:
+            if request_content_type.startswith("application/x-www-form-urlencoded"):
+                match = [matchers.urlencoded_params_matcher(request_body)]
+                responses_params["match"] = match
+            elif request_content_type.startswith("application/json"):
+                match = [matchers.json_params_matcher(request_body)]
+                responses_params["match"] = match
+        responses.put(
             request_url,
             **responses_params,
         )
@@ -371,29 +441,21 @@ class MLResponseBuilder:
         build_parts = [
             "\n",
             "builder = MLResponseBuilder()",
-            cls._generate_method_line(response),
             cls._generate_base_url_line(response),
+            cls._generate_request_content_type_line(response),
             cls._generate_request_params_lines(response),
             cls._generate_request_body_lines(response),
-            cls._generate_response_headers(response),
-            cls._generate_response_status(response),
+            cls._generate_response_headers_lines(response),
+            cls._generate_response_status_line(response),
             cls._generate_response_body_lines(response, save_response_body, test_path),
-            "builder.build()",
+            cls._generate_build_line(response),
             "\n",
         ]
+        build_parts = cls._flatten_list(build_parts)
+        cls._move_resp_body_path_line_to_front(build_parts)
         for code in build_parts:
             if code is not None:
-                code_to_print = code if isinstance(code, list) else [code]
-                for code_line in code_to_print:
-                    print(code_line)
-
-    @classmethod
-    def _generate_method_line(
-        cls,
-        response: Response,
-    ) -> str:
-        method = response.request.method.upper()
-        return f'builder.with_method("{method}")'
+                print(code)
 
     @classmethod
     def _generate_base_url_line(
@@ -426,6 +488,16 @@ class MLResponseBuilder:
         return params_lines
 
     @classmethod
+    def _generate_request_content_type_line(
+        cls,
+        response: Response,
+    ) -> str | None:
+        content_type = response.request.headers.get("content-type")
+        if not content_type:
+            return None
+        return f'builder.with_request_content_type("{content_type}")'
+
+    @classmethod
     def _generate_request_body_lines(
         cls,
         response: Response,
@@ -434,11 +506,16 @@ class MLResponseBuilder:
         request_content_type = response.request.headers.get("Content-Type")
         request_body = response.request.body
 
-        if method not in ["POST", "PUT"]:
+        if request_body is None or method not in ["POST", "PUT"]:
             return None
 
+        if request_content_type.startswith(HEADER_JSON):
+            request_body = json.loads(request_body)
+
         if request_content_type != HEADER_X_WWW_FORM_URLENCODED:
-            return f"builder.with_request_body('{request_body}')"
+            if isinstance(request_body, str):
+                return f"builder.with_request_body('{request_body}')"
+            return f"builder.with_request_body({request_body})"
 
         request_body_decoded = urllib.parse.unquote(request_body).replace("+", " ")
         request_body_parts = request_body_decoded.split("&")
@@ -451,7 +528,7 @@ class MLResponseBuilder:
         return f"builder.with_request_body({body})"
 
     @classmethod
-    def _generate_response_headers(
+    def _generate_response_headers_lines(
         cls,
         response: Response,
     ) -> list[str]:
@@ -467,7 +544,7 @@ class MLResponseBuilder:
         response_headers_lines = []
         if not response_content_type.startswith(HEADER_MULTIPART_MIXED):
             content_type_line = (
-                f"builder.with_response_content_type({response_content_type})"
+                f'builder.with_response_content_type("{response_content_type}")'
             )
         else:
             content_type_line = "builder.with_response_body_multipart_mixed()"
@@ -481,7 +558,7 @@ class MLResponseBuilder:
         return response_headers_lines
 
     @classmethod
-    def _generate_response_status(
+    def _generate_response_status_line(
         cls,
         response: Response,
     ) -> str:
@@ -505,10 +582,7 @@ class MLResponseBuilder:
         cls,
         response: Response,
     ):
-        content_type_header = next(
-            header for header in response.headers if header.lower() == "content-type"
-        )
-        response_content_type = response.headers.get(content_type_header)
+        response_content_type = response.headers.get("content-type")
         response_body_text = response.text
 
         if response.content == b"":
@@ -562,6 +636,14 @@ class MLResponseBuilder:
         return response_body_lines
 
     @classmethod
+    def _generate_build_line(
+        cls,
+        response: Response,
+    ) -> str:
+        method = response.request.method.lower()
+        return f"builder.build_{method}()"
+
+    @classmethod
     def _decode_header(
         cls,
         body_part: BodyPart,
@@ -583,11 +665,12 @@ class MLResponseBuilder:
         response_body_text = response.text
 
         ext = cls._get_file_ext_from_content_type(response_content_type)
-        file_name = f"response_body.{ext}"
 
         if test_path is None:
+            file_name = f"response_body.{ext}"
             path = file_name
         else:
+            file_name = inspect.stack()[3].function.replace("_", "-") + f".{ext}"
             path = get_test_resources_path(test_path) + os.sep + file_name
 
         with Path(path).open("w") as file:
@@ -613,3 +696,27 @@ class MLResponseBuilder:
         if "json" in content_type:
             return "json"
         return "txt"
+
+    @classmethod
+    def _flatten_list(
+        cls,
+        build_parts: list,
+    ) -> list:
+        build_parts = [
+            [elem] if not isinstance(elem, list) else elem for elem in build_parts
+        ]
+        return sum(build_parts, [])
+
+    @classmethod
+    def _move_resp_body_path_line_to_front(
+        cls,
+        build_parts: list,
+    ):
+        gen = (
+            build_parts.index(line)
+            for line in build_parts
+            if isinstance(line, str) and line.startswith("response_body_path")
+        )
+        index = next(gen, None)
+        if index:
+            build_parts.insert(1, build_parts.pop(index))

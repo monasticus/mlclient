@@ -17,8 +17,9 @@ from mlclient.calls.model import (
     ContentDispositionSerializer,
     DocumentsContentDisposition,
 )
-from mlclient.clients import MLResourceClient, MLResponseParser
+from mlclient.clients import MLResourceClient
 from mlclient.exceptions import MarkLogicError
+from mlclient.ml_response_parser import MLResponseParser
 from mlclient.model import Document, DocumentFactory, Metadata
 
 

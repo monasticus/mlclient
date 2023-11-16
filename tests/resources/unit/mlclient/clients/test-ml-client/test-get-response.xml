@@ -1,0 +1,100 @@
+<server-default-list xsi:schemaLocation="http://marklogic.com/manage/servers manage-servers.xsd" xmlns="http://marklogic.com/manage/servers" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <meta>
+    <uri>/manage/v2/servers</uri>
+    <current-time>2023-11-06T10:06:19.085091Z</current-time>
+    <elapsed-time units="sec">0.008819</elapsed-time>
+  </meta>
+  <relations>
+    <relation-group array="true">
+      <typeref>groups</typeref>
+      <relation-count units="quantity">1</relation-count>
+      <relation array="true">
+	<uriref>/manage/v2/groups/Default</uriref>
+	<idref>11633792252511439866</idref>
+	<nameref>Default</nameref>
+      </relation>
+    </relation-group>
+  </relations>
+  <list-items>
+    <list-count units="quantity">4</list-count>
+    <list-item array="true">
+      <relation-id>11633792252511439866</relation-id>
+      <groupnameref>Default</groupnameref>
+      <uriref>/manage/v2/servers/Admin?group-id=Default</uriref>
+      <kindref>http</kindref>
+      <content-db>Security</content-db>
+      <idref>6578640693744866160</idref>
+      <nameref>Admin</nameref>
+    </list-item>
+    <list-item array="true">
+      <relation-id>11633792252511439866</relation-id>
+      <groupnameref>Default</groupnameref>
+      <uriref>/manage/v2/servers/App-Services?group-id=Default</uriref>
+      <kindref>http</kindref>
+      <content-db>Documents</content-db>
+      <modules-db>Modules</modules-db>
+      <idref>882594824993807443</idref>
+      <nameref>App-Services</nameref>
+    </list-item>
+    <list-item array="true">
+      <relation-id>11633792252511439866</relation-id>
+      <groupnameref>Default</groupnameref>
+      <uriref>/manage/v2/servers/HealthCheck?group-id=Default</uriref>
+      <kindref>http</kindref>
+      <content-db>App-Services</content-db>
+      <idref>5400984594824545371</idref>
+      <nameref>HealthCheck</nameref>
+    </list-item>
+    <list-item array="true">
+      <relation-id>11633792252511439866</relation-id>
+      <groupnameref>Default</groupnameref>
+      <uriref>/manage/v2/servers/Manage?group-id=Default</uriref>
+      <kindref>http</kindref>
+      <content-db>App-Services</content-db>
+      <idref>891382231445569816</idref>
+      <nameref>Manage</nameref>
+    </list-item>
+  </list-items>
+  <related-views>
+    <related-view array="true">
+      <view-type>root</view-type>
+      <view-name>default</view-name>
+      <view-uri>/manage/v2</view-uri>
+    </related-view>
+    <related-view array="true">
+      <view-type>list</view-type>
+      <view-name>metrics</view-name>
+      <view-uri>/manage/v2/servers?view=metrics</view-uri>
+    </related-view>
+    <related-view array="true">
+      <view-type>list</view-type>
+      <view-name>package</view-name>
+      <view-uri>/manage/v2/servers?view=package</view-uri>
+    </related-view>
+    <related-view array="true">
+      <view-type>list</view-type>
+      <view-name>properties-schema</view-name>
+      <view-uri>/manage/v2/servers?view=properties-schema</view-uri>
+    </related-view>
+    <related-view array="true">
+      <view-type>list</view-type>
+      <view-name>schema</view-name>
+      <view-uri>/manage/v2/servers?view=schema</view-uri>
+    </related-view>
+    <related-view array="true">
+      <view-type>list</view-type>
+      <view-name>status</view-name>
+      <view-uri>/manage/v2/servers?view=status</view-uri>
+    </related-view>
+    <related-view array="true">
+      <view-type>list</view-type>
+      <view-name>health</view-name>
+      <view-uri>/manage/v2?view=health&amp;health-resource=server</view-uri>
+    </related-view>
+    <related-view array="true">
+      <view-type>list</view-type>
+      <view-name>docs</view-name>
+      <view-uri>http://docs.marklogic.com/REST/management/app-servers</view-uri>
+    </related-view>
+  </related-views>
+</server-default-list>

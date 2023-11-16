@@ -231,7 +231,7 @@ def test_from_environment_in_parent_directory():
     # Note: the test-default environment configuration is copied from the test resources
     # to .mlclient directory in a setup step
     curr_dir = Path.cwd()
-    os.chdir(Path(_SCRIPT_DIR).parent.parent.parent)
+    os.chdir(Path(_SCRIPT_DIR).parent.parent.parent.parent)
 
     with pytest.raises(MLClientDirectoryNotFoundError) as err:
         MLConfiguration.from_environment("test-default")

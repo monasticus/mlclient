@@ -19,8 +19,6 @@ This package exports the following classes:
         A MLClient subclass calling ResourceCall implementation classes.
     * MLResourcesClient
         A MLResourceClient subclass supporting REST Resources of the MarkLogic server.
-    * MLResponseParser
-        A MarkLogic HTTP response parser.
     * EvalClient
         An MLResourceClient calling /v1/eval endpoint.
     * LogsClient
@@ -32,7 +30,7 @@ Examples
 --------
 >>> from mlclient.clients import MLResourceClient
 """
-from .ml_client import MLClient, MLResourceClient, MLResourcesClient, MLResponseParser
+from .ml_client import MLClient, MLResourceClient, MLResourcesClient
 from .documents_client import DocumentsClient
 from .eval_client import EvalClient, LOCAL_NS
 from .logs_client import LogsClient, LogType
@@ -46,5 +44,4 @@ __all__ = [
     "MLClient",
     "MLResourceClient",
     "MLResourcesClient",
-    "MLResponseParser",
 ]

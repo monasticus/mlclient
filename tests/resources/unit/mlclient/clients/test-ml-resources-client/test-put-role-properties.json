@@ -1,0 +1,1 @@
+{"errorResponse":{"statusCode":"400", "status":"Bad Request", "messageCode":"MANAGE-INVALIDPAYLOAD", "message":"MANAGE-INVALIDPAYLOAD: (err:FOER0000) Payload has errors in structure, content-type or values. Role non-existing-role does not exist or is not accessible"}}

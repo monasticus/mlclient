@@ -1,0 +1,6 @@
+<error xmlns="http://marklogic.com/xdmp/error">
+  <status-code>400</status-code>
+  <status>Bad Request</status>
+  <message-code>MANAGE-INVALIDPAYLOAD</message-code>
+  <message>MANAGE-INVALIDPAYLOAD: (err:FOER0000) Payload has errors in structure, content-type or values. Cannot validate payload, no forests specified.</message>
+</error>

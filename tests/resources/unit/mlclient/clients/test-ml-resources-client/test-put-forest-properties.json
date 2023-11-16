@@ -1,0 +1,1 @@
+{"errorResponse":{"statusCode":"404", "status":"Not Found", "messageCode":"XDMP-NOSUCHFOREST", "message":"XDMP-NOSUCHFOREST: xdmp:forest(\"non-existing-forest\") -- No such forest non-existing-forest"}}

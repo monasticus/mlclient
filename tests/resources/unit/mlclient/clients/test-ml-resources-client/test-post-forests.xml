@@ -1,0 +1,6 @@
+<error xmlns="http://marklogic.com/xdmp/error">
+  <status-code>500</status-code>
+  <status>Internal Server Error</status>
+  <message-code>XDMP-AS</message-code>
+  <message>XDMP-AS: (err:XPTY0004) $forest-name as xs:string -- Invalid coercion: () as xs:string</message>
+</error>

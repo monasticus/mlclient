@@ -30,6 +30,8 @@ class CallEvalCommand(Command):
             The ML Client environment name [default: "local"]
       -s, --rest-server=REST-SERVER
             The ML REST Server environmental id (to get logs from)
+          --var=VAR
+            A variable to be used in the code (multiple values allowed)
       -x, --xquery
             If set, the code will be treated as raw xquery
       -j, --javascript
@@ -60,6 +62,12 @@ class CallEvalCommand(Command):
             "rest-server",
             "s",
             description="The ML REST Server environmental id",
+            flag=False,
+        ),
+        option(
+            "var",
+            multiple=True,
+            description="A variable to be used in the code",
             flag=False,
         ),
         option(

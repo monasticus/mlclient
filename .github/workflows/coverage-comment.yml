@@ -1,4 +1,4 @@
-name: Create a coverage report (UNIT TESTS)
+name: Create a coverage report
 
 on: [pull_request]
 jobs:
@@ -31,8 +31,8 @@ jobs:
           badge-title: Code Coverage
           pytest-coverage-path: output.txt
           junitxml-path: pytest.xml
-          junitxml-title: Unit Test Results
-          unique-id-for-comment: unit-tests
+          junitxml-title: Unit Tests Results
+          unique-id-for-comment: unit-tests-results
 
       - name: Put a detailed coverage comment
         uses: orgoro/coverage@v3

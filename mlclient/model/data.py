@@ -126,12 +126,12 @@ class Document(metaclass=ABCMeta):
     @abstractmethod
     def content_bytes(
         self,
-    ) -> Any:
+    ) -> bytes:
         """A document content bytes.
 
         Returns
         -------
-        Any
+        bytes
             A document's content bytes
         """
         raise NotImplementedError
@@ -140,12 +140,12 @@ class Document(metaclass=ABCMeta):
     @abstractmethod
     def content_string(
         self,
-    ) -> Any:
+    ) -> str:
         """A document content in string format.
 
         Returns
         -------
-        Any
+        str
             A document's content in string format
         """
         raise NotImplementedError
@@ -402,6 +402,32 @@ class RawDocument(Document):
             A document's content
         """
         return self._content
+
+    @property
+    def content_bytes(
+        self,
+    ) -> bytes:
+        """A document content bytes.
+
+        Returns
+        -------
+        bytes
+            A document's content bytes
+        """
+        return self.content
+
+    @property
+    def content_string(
+        self,
+    ) -> str:
+        """A document content in string format.
+
+        Returns
+        -------
+        bytes
+            A document's content in string format
+        """
+        return self._content.decode("utf-8")
 
 
 class RawStringDocument(Document):

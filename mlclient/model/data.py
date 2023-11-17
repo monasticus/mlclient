@@ -537,6 +537,32 @@ class MetadataDocument(Document):
         """
         return
 
+    @property
+    def content_bytes(
+        self,
+    ) -> None:
+        """A document content bytes.
+
+        Returns
+        -------
+        None
+            A document's content bytes
+        """
+        return
+
+    @property
+    def content_string(
+        self,
+    ) -> None:
+        """A document content in string format.
+
+        Returns
+        -------
+        None
+            A document's content in string format
+        """
+        return
+
 
 class DocumentFactory:
     """A factory class instantiating a Document implementation classes."""

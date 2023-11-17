@@ -30,6 +30,8 @@ class CallEvalCommand(Command):
             The ML Client environment name [default: "local"]
       -s, --rest-server=REST-SERVER
             The ML REST Server environmental id (to get logs from)
+          --var=VAR
+            A variable to be used in the code (multiple values allowed)
       -x, --xquery
             If set, the code will be treated as raw xquery
       -j, --javascript
@@ -60,6 +62,12 @@ class CallEvalCommand(Command):
             "rest-server",
             "s",
             description="The ML REST Server environmental id",
+            flag=False,
+        ),
+        option(
+            "var",
+            multiple=True,
+            description="A variable to be used in the code",
             flag=False,
         ),
         option(
@@ -99,6 +107,7 @@ class CallEvalCommand(Command):
     def _get_eval_params(self):
         """Prepare parameters for an EvalClient."""
         code = self.argument("code")
+        variables = self.option("var")
         xq_flag = self.option("xquery")
         js_flag = self.option("javascript")
         database = self.option("database")
@@ -115,6 +124,11 @@ class CallEvalCommand(Command):
             params["js"] = code
         if not xq_flag and not js_flag:
             params["file"] = code
+        if len(variables) > 0:
+            params["variables"] = {
+                key_value.split("=")[0]: key_value.split("=")[1]
+                for key_value in variables
+            }
 
         return params
 

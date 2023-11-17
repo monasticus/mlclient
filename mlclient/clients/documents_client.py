@@ -11,14 +11,16 @@ from typing import Any, Iterator
 from requests import Response
 
 from mlclient import constants
-from mlclient.calls import DocumentsGetCall
+from mlclient.calls import DocumentsGetCall, DocumentsPostCall
 from mlclient.calls.model import (
     Category,
     ContentDispositionSerializer,
+    DocumentsBodyPart,
     DocumentsContentDisposition,
 )
 from mlclient.clients import MLResourceClient
 from mlclient.exceptions import MarkLogicError
+from mlclient.mimetypes import Mimetypes
 from mlclient.ml_response_parser import MLResponseParser
 from mlclient.model import Document, DocumentFactory, Metadata
 
@@ -28,6 +30,15 @@ class DocumentsClient(MLResourceClient):
 
     It is a high-level class performing CRUD operations in a MarkLogic server.
     """
+
+    def create(
+        self,
+        documents: Document | list[Document],
+    ):
+        body_parts = DocumentsSender.parse(documents)
+        call = self._post_call(body_parts)
+        resp = self.call(call)
+        return MLResponseParser.parse(resp)
 
     def read(
         self,
@@ -67,6 +78,13 @@ class DocumentsClient(MLResourceClient):
         call = self._get_call(uris=uris, category=category, database=database)
         resp = self.call(call)
         return DocumentsReader.parse(resp, uris, category)
+
+    @classmethod
+    def _post_call(
+        cls,
+        body_parts: list[DocumentsBodyPart],
+    ):
+        return DocumentsPostCall(body_parts=body_parts)
 
     @classmethod
     def _get_call(
@@ -113,6 +131,32 @@ class DocumentsClient(MLResourceClient):
             params["data_format"] = "json"
 
         return DocumentsGetCall(**params)
+
+
+class DocumentsSender:
+    @classmethod
+    def parse(
+        cls,
+        documents: Document | list[Document],
+    ) -> list[DocumentsBodyPart]:
+        if isinstance(documents, Document):
+            documents = [documents]
+        body_parts = []
+        for document in documents:
+            body_parts.append(
+                DocumentsBodyPart(
+                    **{
+                        "content-type": Mimetypes.get_mimetype(document.uri),
+                        "content-disposition": {
+                            "body_part_type": "attachment",
+                            "filename": document.uri,
+                            "format": document.doc_type,
+                        },
+                        "content": document.content,
+                    },
+                ),
+            )
+        return body_parts
 
 
 class DocumentsReader:

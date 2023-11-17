@@ -4,6 +4,7 @@ import zlib
 import pytest
 import responses
 
+from mlclient import MLResourcesClient
 from mlclient.calls.model import DocumentsBodyPart
 from mlclient.clients import DocumentsClient
 from mlclient.exceptions import MarkLogicError
@@ -12,6 +13,8 @@ from mlclient.model import (
     DocumentType,
     JSONDocument,
     MetadataDocument,
+    RawDocument,
+    RawStringDocument,
     TextDocument,
     XMLDocument,
 )
@@ -1983,3 +1986,35 @@ def test_read_multiple_docs_using_custom_database(docs_client):
     assert zip_doc.content == zip_content
     assert zip_doc.metadata is None
     assert zip_doc.is_temporal is False
+
+
+@responses.activate
+def test_write_raw_document(docs_client):
+    uri = "/some/dir/doc1.xml"
+    content = b"<root><child>data</child></root>"
+    doc = RawDocument(content, uri, DocumentType.XML)
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/documents")
+    builder.with_response_content_type("application/json; charset=utf-8")
+    builder.with_response_header("vnd.marklogic.document-format", "json")
+    builder.with_response_status(200)
+    builder.with_response_body(
+        {
+            "documents": [
+                {
+                    "uri": uri,
+                    "mime-type": "application/xml",
+                    "category": ["metadata", "content"],
+                },
+            ],
+        },
+    )
+    builder.build_post()
+
+    resp = docs_client.create(doc)
+
+    documents = resp["documents"]
+    assert len(documents) == 1
+    assert documents[0]["uri"] == uri
+    assert documents[0]["mime-type"] == "application/xml"

@@ -2018,3 +2018,35 @@ def test_write_raw_document(docs_client):
     assert len(documents) == 1
     assert documents[0]["uri"] == uri
     assert documents[0]["mime-type"] == "application/xml"
+
+
+@responses.activate
+def test_write_raw_string_document(docs_client):
+    uri = "/some/dir/doc2.json"
+    content = '{"root": {"child": "data"}}'
+    doc = RawStringDocument(content, uri, DocumentType.JSON)
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/documents")
+    builder.with_response_content_type("application/json; charset=utf-8")
+    builder.with_response_header("vnd.marklogic.document-format", "json")
+    builder.with_response_status(200)
+    builder.with_response_body(
+        {
+            "documents": [
+                {
+                    "uri": uri,
+                    "mime-type": "application/json",
+                    "category": ["metadata", "content"],
+                }
+            ]
+        }
+    )
+    builder.build_post()
+
+    resp = docs_client.create(doc)
+
+    documents = resp["documents"]
+    assert len(documents) == 1
+    assert documents[0]["uri"] == uri
+    assert documents[0]["mime-type"] == "application/json"

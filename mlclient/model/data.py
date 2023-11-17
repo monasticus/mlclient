@@ -104,6 +104,8 @@ class Document(metaclass=ABCMeta):
             and not callable(subclass.content)
             and "content_bytes" in subclass.__dict__
             and not callable(subclass.content_bytes)
+            and "content_string" in subclass.__dict__
+            and not callable(subclass.content_bytes)
         )
 
     @property
@@ -131,6 +133,20 @@ class Document(metaclass=ABCMeta):
         -------
         Any
             A document's content bytes
+        """
+        raise NotImplementedError
+
+    @property
+    @abstractmethod
+    def content_string(
+        self,
+    ) -> Any:
+        """A document content in string format.
+
+        Returns
+        -------
+        Any
+            A document's content in string format
         """
         raise NotImplementedError
 

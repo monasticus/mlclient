@@ -26,6 +26,31 @@ def test_bin_mimetypes():
     assert "image/png" in mimetypes
 
 
+def test_mimetype_for_xml():
+    mimetype = Mimetypes.get_mimetype("/some/dir/doc1.xml")
+    assert mimetype == "application/xml"
+
+
+def test_mimetype_for_json():
+    mimetype = Mimetypes.get_mimetype("/some/dir/doc2.json")
+    assert mimetype == "application/json"
+
+
+def test_mimetype_for_xqy():
+    mimetype = Mimetypes.get_mimetype("/some/dir/doc3.xqy")
+    assert mimetype == "application/vnd.marklogic-xdmp"
+
+
+def test_mimetype_for_zip():
+    mimetype = Mimetypes.get_mimetype("/some/dir/doc4.zip")
+    assert mimetype == "application/zip"
+
+
+def test_mimetype_for_none():
+    mimetype = Mimetypes.get_mimetype("/some/dir/doc5")
+    assert mimetype is None
+
+
 def test_doc_type_for_uri_xml():
     doc_type = Mimetypes.get_doc_type("/some/dir/doc1.xml")
     assert doc_type == DocumentType.XML

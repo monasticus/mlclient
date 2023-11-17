@@ -409,6 +409,32 @@ class BinaryDocument(Document):
         """
         return self._content
 
+    @property
+    def content_bytes(
+        self,
+    ) -> bytes:
+        """A document content bytes.
+
+        Returns
+        -------
+        bytes
+            A document's content bytes
+        """
+        return self.content
+
+    @property
+    def content_string(
+        self,
+    ) -> str:
+        """A document content bytes.
+
+        Returns
+        -------
+        str
+            A document's content bytes
+        """
+        return self._content.decode("utf-8")
+
 
 class RawDocument(Document):
     """A Document implementation representing a single MarkLogic document.

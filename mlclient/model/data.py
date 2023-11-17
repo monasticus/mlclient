@@ -292,10 +292,43 @@ class XMLDocument(Document):
 
         Returns
         -------
-        dict
+        ElemTree.ElementTree
             A document's content
         """
         return self._content
+
+    @property
+    def content_bytes(
+        self,
+    ) -> bytes:
+        """A document content bytes.
+
+        Returns
+        -------
+        bytes
+            A document's content bytes
+        """
+        return ElemTree.tostring(
+            self._content.getroot(),
+            encoding="UTF-8",
+            xml_declaration=True,
+        ).replace(
+            b"<?xml version='1.0' encoding='UTF-8'?>",
+            b'<?xml version="1.0" encoding="UTF-8"?>',
+        )
+
+    @property
+    def content_string(
+        self,
+    ) -> str:
+        """A document content in string format.
+
+        Returns
+        -------
+        str
+            A document's content in string format
+        """
+        return self.content_bytes.decode("utf-8")
 
 
 class TextDocument(Document):

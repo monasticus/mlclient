@@ -424,7 +424,7 @@ class RawDocument(Document):
 
         Returns
         -------
-        bytes
+        str
             A document's content in string format
         """
         return self._content.decode("utf-8")
@@ -474,6 +474,32 @@ class RawStringDocument(Document):
             A document's content
         """
         return self._content
+
+    @property
+    def content_bytes(
+        self,
+    ) -> bytes:
+        """A document content bytes.
+
+        Returns
+        -------
+        bytes
+            A document's content bytes
+        """
+        return self._content.encode("utf-8")
+
+    @property
+    def content_string(
+        self,
+    ) -> str:
+        """A document content in string format.
+
+        Returns
+        -------
+        str
+            A document's content in string format
+        """
+        return self.content
 
 
 class MetadataDocument(Document):

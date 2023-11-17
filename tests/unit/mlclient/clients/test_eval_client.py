@@ -127,7 +127,7 @@ def test_eval_raw_javascript_multiple_items(eval_client):
 
 @responses.activate
 def test_eval_variables_explicit(eval_client):
-    code = "declare variable $VARIABLE external; $VARIABLE"
+    code = "declare variable $VARIABLE as xs:string external; $VARIABLE"
 
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/v1/eval")
@@ -148,7 +148,7 @@ def test_eval_variables_explicit(eval_client):
 
 @responses.activate
 def test_eval_variables_using_kwargs(eval_client):
-    code = "declare variable $VARIABLE external; $VARIABLE"
+    code = "declare variable $VARIABLE as xs:string external; $VARIABLE"
 
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/v1/eval")
@@ -194,7 +194,7 @@ def test_eval_variables_explicit_with_kwargs(eval_client):
 
 @responses.activate
 def test_eval_variables_using_namespace(eval_client):
-    code = "declare variable $local:VARIABLE external; $local:VARIABLE"
+    code = "declare variable $local:VARIABLE as xs:string external; $local:VARIABLE"
 
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/v1/eval")

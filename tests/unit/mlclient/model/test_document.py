@@ -6,9 +6,29 @@ class DocumentTestImpl(Document):
     def content(self):
         return ""
 
+    @property
+    def content_bytes(self):
+        return b""
 
-class DocumentTestInvalidImpl(Document):
+
+class DocumentTestInvalidImpl1(Document):
     """A Document invalid implementation for testing purposes"""
+
+
+class DocumentTestInvalidImpl2(Document):
+    """A Document invalid implementation for testing purposes"""
+
+    @property
+    def content(self):
+        return ""
+
+
+class DocumentTestInvalidImpl3(Document):
+    """A Document invalid implementation for testing purposes"""
+
+    @property
+    def content_bytes(self):
+        return b""
 
 
 def test_issubclass_true():
@@ -16,7 +36,9 @@ def test_issubclass_true():
 
 
 def test_issubclass_false():
-    assert not issubclass(DocumentTestInvalidImpl, Document)
+    assert not issubclass(DocumentTestInvalidImpl1, Document)
+    assert not issubclass(DocumentTestInvalidImpl2, Document)
+    assert not issubclass(DocumentTestInvalidImpl3, Document)
 
 
 def test_document_uri():
@@ -70,3 +92,8 @@ def test_is_temporal_when_none():
 def test_content():
     document = DocumentTestImpl()
     assert document.content == ""
+
+
+def test_content_bytes():
+    document = DocumentTestImpl()
+    assert document.content_bytes == b""

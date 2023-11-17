@@ -99,7 +99,12 @@ class Document(metaclass=ABCMeta):
         bool
             True if the subclass includes the content property
         """
-        return "content" in subclass.__dict__ and not callable(subclass.content)
+        return (
+            "content" in subclass.__dict__
+            and not callable(subclass.content)
+            and "content_bytes" in subclass.__dict__
+            and not callable(subclass.content_bytes)
+        )
 
     @property
     @abstractmethod
@@ -112,6 +117,20 @@ class Document(metaclass=ABCMeta):
         -------
         Any
             A document's content
+        """
+        raise NotImplementedError
+
+    @property
+    @abstractmethod
+    def content_bytes(
+        self,
+    ) -> Any:
+        """A document content bytes.
+
+        Returns
+        -------
+        Any
+            A document's content bytes
         """
         raise NotImplementedError
 

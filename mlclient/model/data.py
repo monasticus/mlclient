@@ -340,6 +340,32 @@ class TextDocument(Document):
         """
         return self._content
 
+    @property
+    def content_bytes(
+        self,
+    ) -> bytes:
+        """A document content bytes.
+
+        Returns
+        -------
+        bytes
+            A document's content bytes
+        """
+        return self._content.encode("utf-8")
+
+    @property
+    def content_string(
+        self,
+    ) -> str:
+        """A document content in string format.
+
+        Returns
+        -------
+        str
+            A document's content in string format
+        """
+        return self.content
+
 
 class BinaryDocument(Document):
     """A Document implementation representing a single MarkLogic BINARY document.

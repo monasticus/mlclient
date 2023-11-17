@@ -1,6 +1,6 @@
 """The ML Documents Client module.
 
-It exports high-level class to perform CRUD operations in aMarkLogic server:
+It exports high-level class to perform CRUD operations in a MarkLogic server:
     * DocumentsClient
         An MLResourceClient calling /v1/documents endpoint.
 """
@@ -66,7 +66,7 @@ class DocumentsClient(MLResourceClient):
         """
         call = self._get_call(uris=uris, category=category, database=database)
         resp = self.call(call)
-        return self._parse(resp, uris, category)
+        return DocumentsReader.parse(resp, uris, category)
 
     @classmethod
     def _get_call(
@@ -114,8 +114,10 @@ class DocumentsClient(MLResourceClient):
 
         return DocumentsGetCall(**params)
 
+
+class DocumentsReader:
     @classmethod
-    def _parse(
+    def parse(
         cls,
         resp: Response,
         uris: str | list[str] | tuple[str] | set[str],

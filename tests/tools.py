@@ -591,6 +591,8 @@ class MLResponseBuilder:
         if not response_content_type.startswith(HEADER_MULTIPART_MIXED):
             body = response_body_text.replace("'", "\\'")
 
+            if response_content_type.startswith(HEADER_JSON):
+                return [f"builder.with_response_body({body})"]
             if "\n" in body:
                 return [f"builder.with_response_body('''{body}''')"]
 

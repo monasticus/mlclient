@@ -152,7 +152,7 @@ class DocumentsSender:
                             "filename": document.uri,
                             "format": document.doc_type,
                         },
-                        "content": document.content,
+                        "content": document.content_bytes,
                     },
                 ),
             )

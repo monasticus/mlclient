@@ -4,7 +4,6 @@ import zlib
 import pytest
 import responses
 
-from mlclient import MLResourcesClient
 from mlclient.calls.model import DocumentsBodyPart
 from mlclient.clients import DocumentsClient
 from mlclient.exceptions import MarkLogicError
@@ -2038,9 +2037,9 @@ def test_write_raw_string_document(docs_client):
                     "uri": uri,
                     "mime-type": "application/json",
                     "category": ["metadata", "content"],
-                }
-            ]
-        }
+                },
+            ],
+        },
     )
     builder.build_post()
 
@@ -2050,3 +2049,35 @@ def test_write_raw_string_document(docs_client):
     assert len(documents) == 1
     assert documents[0]["uri"] == uri
     assert documents[0]["mime-type"] == "application/json"
+
+
+@responses.activate
+def test_write_xml_document(docs_client):
+    uri = "/some/dir/doc1.xml"
+    content_str = "<root><child>data</child></root>"
+    content = ElemTree.ElementTree(ElemTree.fromstring(content_str))
+    doc = XMLDocument(content, uri)
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/documents")
+    builder.with_response_content_type("application/json; charset=utf-8")
+    builder.with_response_header("vnd.marklogic.document-format", "json")
+    builder.with_response_body(
+        {
+            "documents": [
+                {
+                    "uri": uri,
+                    "mime-type": "application/xml",
+                    "category": ["metadata", "content"],
+                },
+            ],
+        },
+    )
+    builder.build_post()
+
+    resp = docs_client.create(doc)
+
+    documents = resp["documents"]
+    assert len(documents) == 1
+    assert documents[0]["uri"] == uri
+    assert documents[0]["mime-type"] == "application/xml"

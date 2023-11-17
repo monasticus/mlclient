@@ -19,8 +19,7 @@ def test_content_bytes():
 
     document = XMLDocument(tree)
     assert document.content_bytes == (
-        b'<?xml version="1.0" encoding="UTF-8"?>\n'
-        b"<root><parent>data</parent></root>"
+        b'<?xml version="1.0" encoding="UTF-8"?>\n<root><parent>data</parent></root>'
     )
 
 
@@ -29,7 +28,7 @@ def test_content_string():
 
     document = XMLDocument(tree)
     assert document.content_string == (
-        '<?xml version="1.0" encoding="UTF-8"?>\n' "<root><parent>data</parent></root>"
+        '<?xml version="1.0" encoding="UTF-8"?>\n<root><parent>data</parent></root>'
     )
 
 

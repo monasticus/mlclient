@@ -2113,3 +2113,35 @@ def test_write_json_document(docs_client):
     assert len(documents) == 1
     assert documents[0]["uri"] == uri
     assert documents[0]["mime-type"] == "application/json"
+
+
+@responses.activate
+def test_write_text_document(docs_client):
+    uri = "/some/dir/doc3.xqy"
+    content = 'xquery version "1.0-ml";\n\nfn:current-date()'
+    doc = TextDocument(content, uri)
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/documents")
+    builder.with_response_content_type("application/json; charset=utf-8")
+    builder.with_response_header("vnd.marklogic.document-format", "json")
+    builder.with_response_status(200)
+    builder.with_response_body(
+        {
+            "documents": [
+                {
+                    "uri": "/some/dir/doc3.xqy",
+                    "mime-type": "application/vnd.marklogic-xdmp",
+                    "category": ["metadata", "content"],
+                },
+            ],
+        },
+    )
+    builder.build_post()
+
+    resp = docs_client.create(doc)
+
+    documents = resp["documents"]
+    assert len(documents) == 1
+    assert documents[0]["uri"] == uri
+    assert documents[0]["mime-type"] == "application/vnd.marklogic-xdmp"

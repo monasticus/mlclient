@@ -41,7 +41,7 @@ from .ml_config import MLConfiguration
 from .ml_manager import MLManager
 from .ml_response_parser import MLResponseParser
 
-__version__ = "0.3.1"
+__version__ = "0.4.0"
 __all__ = [
     "__version__",
     "LOCAL_NS",

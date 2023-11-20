@@ -147,26 +147,24 @@ class DocumentsSender:
     @classmethod
     def parse(
         cls,
-        documents: Document | list[Document],
+        documents: Document | Metadata | list[Document | Metadata],
     ) -> list[DocumentsBodyPart]:
-        if isinstance(documents, Document):
+        if not isinstance(documents, list):
             documents = [documents]
         body_parts = []
         for document in documents:
-            if type(document) is not MetadataDocument:
+            if type(document) not in (Metadata, MetadataDocument):
                 if document.metadata is not None:
                     new_parts = [
                         cls._get_doc_metadata_body_part(document),
                         cls._get_doc_content_body_part(document),
                     ]
                 else:
-                    new_parts = [
-                        cls._get_doc_content_body_part(document),
-                    ]
+                    new_parts = [cls._get_doc_content_body_part(document)]
+            elif type(document) is not Metadata:
+                new_parts = [cls._get_doc_metadata_body_part(document)]
             else:
-                new_parts = [
-                    cls._get_doc_metadata_body_part(document),
-                ]
+                new_parts = [cls._get_default_metadata_body_part(document)]
             body_parts.extend(new_parts)
         return body_parts
 
@@ -201,6 +199,23 @@ class DocumentsSender:
                 "content-disposition": {
                     "body_part_type": "attachment",
                     "filename": document.uri,
+                    "category": "metadata",
+                },
+                "content": metadata,
+            },
+        )
+
+    @classmethod
+    def _get_default_metadata_body_part(
+        cls,
+        metadata: Metadata,
+    ) -> DocumentsBodyPart:
+        metadata = metadata.to_json_string()
+        return DocumentsBodyPart(
+            **{
+                "content-type": constants.HEADER_JSON,
+                "content-disposition": {
+                    "body_part_type": "inline",
                     "category": "metadata",
                 },
                 "content": metadata,

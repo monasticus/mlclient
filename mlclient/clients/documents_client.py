@@ -147,29 +147,41 @@ class DocumentsSender:
         body_parts = []
         for document in documents:
             if type(document) is not MetadataDocument:
-                config = {
-                    "content-type": Mimetypes.get_mimetype(document.uri),
-                    "content-disposition": {
-                        "body_part_type": "attachment",
-                        "filename": document.uri,
-                        "format": document.doc_type,
-                    },
-                    "content": document.content_bytes,
-                }
+                body_part = cls._get_doc_content_body_part(document)
             else:
-                config = {
-                    "content-type": constants.HEADER_JSON,
-                    "content-disposition": {
-                        "body_part_type": "attachment",
-                        "filename": document.uri,
-                        "category": "metadata",
-                    },
-                    "content": document.metadata.to_json_string(),
-                }
-            body_parts.append(
-                DocumentsBodyPart(**config),
-            )
+                body_part = cls._get_doc_metadata_body_part(document)
+            body_parts.append(body_part)
         return body_parts
+
+    @classmethod
+    def _get_doc_content_body_part(
+            cls,
+            document: Document,
+    ) -> DocumentsBodyPart:
+        return DocumentsBodyPart(**{
+            "content-type": Mimetypes.get_mimetype(document.uri),
+            "content-disposition": {
+                "body_part_type": "attachment",
+                "filename": document.uri,
+                "format": document.doc_type,
+            },
+            "content": document.content_bytes,
+        })
+
+    @classmethod
+    def _get_doc_metadata_body_part(
+            cls,
+            document: Document,
+    ) -> DocumentsBodyPart:
+        return DocumentsBodyPart(**{
+            "content-type": constants.HEADER_JSON,
+            "content-disposition": {
+                "body_part_type": "attachment",
+                "filename": document.uri,
+                "category": "metadata",
+            },
+            "content": document.metadata.to_json_string(),
+        })
 
 
 class DocumentsReader:

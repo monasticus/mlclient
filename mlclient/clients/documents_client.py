@@ -22,7 +22,7 @@ from mlclient.clients import MLResourceClient
 from mlclient.exceptions import MarkLogicError
 from mlclient.mimetypes import Mimetypes
 from mlclient.ml_response_parser import MLResponseParser
-from mlclient.model import Document, DocumentFactory, Metadata
+from mlclient.model import Document, DocumentFactory, Metadata, MetadataDocument
 
 
 class DocumentsClient(MLResourceClient):
@@ -143,18 +143,28 @@ class DocumentsSender:
             documents = [documents]
         body_parts = []
         for document in documents:
-            body_parts.append(
-                DocumentsBodyPart(
-                    **{
-                        "content-type": Mimetypes.get_mimetype(document.uri),
-                        "content-disposition": {
-                            "body_part_type": "attachment",
-                            "filename": document.uri,
-                            "format": document.doc_type,
-                        },
-                        "content": document.content_bytes,
+            if type(document) is not MetadataDocument:
+                config = {
+                    "content-type": Mimetypes.get_mimetype(document.uri),
+                    "content-disposition": {
+                        "body_part_type": "attachment",
+                        "filename": document.uri,
+                        "format": document.doc_type,
                     },
-                ),
+                    "content": document.content_bytes,
+                }
+            else:
+                config = {
+                    "content-type": constants.HEADER_JSON,
+                    "content-disposition": {
+                        "body_part_type": "attachment",
+                        "filename": document.uri,
+                        "category": "metadata",
+                    },
+                    "content": document.metadata.to_json_string(),
+                }
+            body_parts.append(
+                DocumentsBodyPart(**config),
             )
         return body_parts
 

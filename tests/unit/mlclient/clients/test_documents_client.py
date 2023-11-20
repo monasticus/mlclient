@@ -2409,3 +2409,139 @@ def test_write_raw_string_document_with_metadata(docs_client):
     assert documents[0]["uri"] == uri
     assert documents[0]["mime-type"] == "application/xml"
     assert documents[0]["category"] == ["metadata", "content"]
+
+
+@responses.activate
+def test_write_xml_document_with_metadata(docs_client):
+    uri = "/some/dir/doc1.xml"
+    content_str = "<root><child>data</child></root>"
+    content = ElemTree.ElementTree(ElemTree.fromstring(content_str))
+    metadata = Metadata(collections=["test-collection"])
+    doc = XMLDocument(content, uri, metadata)
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/documents")
+    builder.with_response_content_type("application/json; charset=utf-8")
+    builder.with_response_header("vnd.marklogic.document-format", "json")
+    builder.with_response_body(
+        {
+            "documents": [
+                {
+                    "uri": uri,
+                    "mime-type": "application/xml",
+                    "category": ["metadata", "content"],
+                },
+            ],
+        },
+    )
+    builder.build_post()
+
+    resp = docs_client.create(doc)
+
+    documents = resp["documents"]
+    assert len(documents) == 1
+    assert documents[0]["uri"] == uri
+    assert documents[0]["mime-type"] == "application/xml"
+    assert documents[0]["category"] == ["metadata", "content"]
+
+
+@responses.activate
+def test_write_json_document_with_metadata(docs_client):
+    uri = "/some/dir/doc2.json"
+    content = {"root": {"child": "data"}}
+    metadata = Metadata(collections=["test-collection"])
+    doc = JSONDocument(content, uri, metadata)
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/documents")
+    builder.with_response_content_type("application/json; charset=utf-8")
+    builder.with_response_header("vnd.marklogic.document-format", "json")
+    builder.with_response_status(200)
+    builder.with_response_body(
+        {
+            "documents": [
+                {
+                    "uri": uri,
+                    "mime-type": "application/json",
+                    "category": ["metadata", "content"],
+                },
+            ],
+        },
+    )
+    builder.build_post()
+
+    resp = docs_client.create(doc)
+
+    documents = resp["documents"]
+    assert len(documents) == 1
+    assert documents[0]["uri"] == uri
+    assert documents[0]["mime-type"] == "application/json"
+    assert documents[0]["category"] == ["metadata", "content"]
+
+
+@responses.activate
+def test_write_text_document_with_metadata(docs_client):
+    uri = "/some/dir/doc3.xqy"
+    content = 'xquery version "1.0-ml";\n\nfn:current-date()'
+    metadata = Metadata(collections=["test-collection"])
+    doc = TextDocument(content, uri, metadata)
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/documents")
+    builder.with_response_content_type("application/json; charset=utf-8")
+    builder.with_response_header("vnd.marklogic.document-format", "json")
+    builder.with_response_status(200)
+    builder.with_response_body(
+        {
+            "documents": [
+                {
+                    "uri": uri,
+                    "mime-type": "application/vnd.marklogic-xdmp",
+                    "category": ["metadata", "content"],
+                },
+            ],
+        },
+    )
+    builder.build_post()
+
+    resp = docs_client.create(doc)
+
+    documents = resp["documents"]
+    assert len(documents) == 1
+    assert documents[0]["uri"] == uri
+    assert documents[0]["mime-type"] == "application/vnd.marklogic-xdmp"
+    assert documents[0]["category"] == ["metadata", "content"]
+
+
+@responses.activate
+def test_write_binary_document_with_metadata(docs_client):
+    uri = "/some/dir/doc4.zip"
+    content = zlib.compress(b'xquery version "1.0-ml";\n\nfn:current-date()')
+    metadata = Metadata(collections=["test-collection"])
+    doc = BinaryDocument(content, uri, metadata)
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/documents")
+    builder.with_response_content_type("application/json; charset=utf-8")
+    builder.with_response_header("vnd.marklogic.document-format", "json")
+    builder.with_response_status(200)
+    builder.with_response_body(
+        {
+            "documents": [
+                {
+                    "uri": uri,
+                    "mime-type": "application/zip",
+                    "category": ["metadata", "content"],
+                },
+            ],
+        },
+    )
+    builder.build_post()
+
+    resp = docs_client.create(doc)
+
+    documents = resp["documents"]
+    assert len(documents) == 1
+    assert documents[0]["uri"] == uri
+    assert documents[0]["mime-type"] == "application/zip"
+    assert documents[0]["category"] == ["metadata", "content"]

@@ -2341,3 +2341,71 @@ def test_write_multiple_documents(docs_client):
     assert doc_4_info["uri"] == doc_4_uri
     assert doc_4_info["mime-type"] == "application/zip"
     assert doc_4_info["category"] == ["metadata", "content"]
+
+
+@responses.activate
+def test_write_raw_document_with_metadata(docs_client):
+    uri = "/some/dir/doc1.xml"
+    content = b"<root><child>data</child></root>"
+    metadata = b'{"collections": ["test-collection"]}'
+    doc = RawDocument(content, uri, DocumentType.XML, metadata)
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/documents")
+    builder.with_response_content_type("application/json; charset=utf-8")
+    builder.with_response_header("vnd.marklogic.document-format", "json")
+    builder.with_response_status(200)
+    builder.with_response_body(
+        {
+            "documents": [
+                {
+                    "uri": "/some/dir/doc1.xml",
+                    "mime-type": "application/xml",
+                    "category": ["metadata", "content"],
+                },
+            ],
+        },
+    )
+    builder.build_post()
+
+    resp = docs_client.create(doc)
+
+    documents = resp["documents"]
+    assert len(documents) == 1
+    assert documents[0]["uri"] == uri
+    assert documents[0]["mime-type"] == "application/xml"
+    assert documents[0]["category"] == ["metadata", "content"]
+
+
+@responses.activate
+def test_write_raw_string_document_with_metadata(docs_client):
+    uri = "/some/dir/doc1.xml"
+    content = "<root><child>data</child></root>"
+    metadata = '{"collections": ["test-collection"]}'
+    doc = RawStringDocument(content, uri, DocumentType.XML, metadata)
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/documents")
+    builder.with_response_content_type("application/json; charset=utf-8")
+    builder.with_response_header("vnd.marklogic.document-format", "json")
+    builder.with_response_status(200)
+    builder.with_response_body(
+        {
+            "documents": [
+                {
+                    "uri": "/some/dir/doc1.xml",
+                    "mime-type": "application/xml",
+                    "category": ["metadata", "content"],
+                },
+            ],
+        },
+    )
+    builder.build_post()
+
+    resp = docs_client.create(doc)
+
+    documents = resp["documents"]
+    assert len(documents) == 1
+    assert documents[0]["uri"] == uri
+    assert documents[0]["mime-type"] == "application/xml"
+    assert documents[0]["category"] == ["metadata", "content"]

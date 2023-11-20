@@ -22,7 +22,14 @@ from mlclient.clients import MLResourceClient
 from mlclient.exceptions import MarkLogicError
 from mlclient.mimetypes import Mimetypes
 from mlclient.ml_response_parser import MLResponseParser
-from mlclient.model import Document, DocumentFactory, Metadata, MetadataDocument
+from mlclient.model import (
+    Document,
+    DocumentFactory,
+    Metadata,
+    MetadataDocument,
+    RawDocument,
+    RawStringDocument,
+)
 
 
 class DocumentsClient(MLResourceClient):
@@ -147,41 +154,58 @@ class DocumentsSender:
         body_parts = []
         for document in documents:
             if type(document) is not MetadataDocument:
-                body_part = cls._get_doc_content_body_part(document)
+                if document.metadata is not None:
+                    new_parts = [
+                        cls._get_doc_metadata_body_part(document),
+                        cls._get_doc_content_body_part(document),
+                    ]
+                else:
+                    new_parts = [
+                        cls._get_doc_content_body_part(document),
+                    ]
             else:
-                body_part = cls._get_doc_metadata_body_part(document)
-            body_parts.append(body_part)
+                new_parts = [
+                    cls._get_doc_metadata_body_part(document),
+                ]
+            body_parts.extend(new_parts)
         return body_parts
 
     @classmethod
     def _get_doc_content_body_part(
-            cls,
-            document: Document,
+        cls,
+        document: Document,
     ) -> DocumentsBodyPart:
-        return DocumentsBodyPart(**{
-            "content-type": Mimetypes.get_mimetype(document.uri),
-            "content-disposition": {
-                "body_part_type": "attachment",
-                "filename": document.uri,
-                "format": document.doc_type,
+        return DocumentsBodyPart(
+            **{
+                "content-type": Mimetypes.get_mimetype(document.uri),
+                "content-disposition": {
+                    "body_part_type": "attachment",
+                    "filename": document.uri,
+                    "format": document.doc_type,
+                },
+                "content": document.content_bytes,
             },
-            "content": document.content_bytes,
-        })
+        )
 
     @classmethod
     def _get_doc_metadata_body_part(
-            cls,
-            document: Document,
+        cls,
+        document: Document,
     ) -> DocumentsBodyPart:
-        return DocumentsBodyPart(**{
-            "content-type": constants.HEADER_JSON,
-            "content-disposition": {
-                "body_part_type": "attachment",
-                "filename": document.uri,
-                "category": "metadata",
+        metadata = document.metadata
+        if type(document) not in (RawDocument, RawStringDocument):
+            metadata = metadata.to_json_string()
+        return DocumentsBodyPart(
+            **{
+                "content-type": constants.HEADER_JSON,
+                "content-disposition": {
+                    "body_part_type": "attachment",
+                    "filename": document.uri,
+                    "category": "metadata",
+                },
+                "content": metadata,
             },
-            "content": document.metadata.to_json_string(),
-        })
+        )
 
 
 class DocumentsReader:

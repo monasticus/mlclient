@@ -38,6 +38,9 @@ class DocumentsClient(MLResourceClient):
         body_parts = DocumentsSender.parse(documents)
         call = self._post_call(body_parts)
         resp = self.call(call)
+        if not resp.ok:
+            resp_body = resp.json()
+            raise MarkLogicError(resp_body["errorResponse"])
         return MLResponseParser.parse(resp)
 
     def read(

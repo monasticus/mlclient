@@ -2211,3 +2211,38 @@ def test_write_metadata_document_when_doc_exists(docs_client):
     assert documents[0]["uri"] == uri
     assert documents[0]["mime-type"] == ""
     assert documents[0]["category"] == ["metadata"]
+
+
+@responses.activate
+def test_write_metadata_document_when_doc_does_not_exists(docs_client):
+    uri = "/some/dir/doc1.xml"
+    metadata = Metadata(collections=["test-collection"])
+    doc = MetadataDocument(uri, metadata)
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/documents")
+    builder.with_response_content_type("application/json; charset=UTF-8")
+    builder.with_response_status(500)
+    builder.with_response_body(
+        {
+            "errorResponse": {
+                "statusCode": "500",
+                "status": "Internal Server Error",
+                "messageCode": "XDMP-DOCNOTFOUND",
+                "message": "XDMP-DOCNOTFOUND: "
+                'xdmp:document-set-collections("/some/dir/doc1.xml", "test-collection")'
+                " -- Document not found",
+            },
+        },
+    )
+    builder.build_post()
+
+    with pytest.raises(MarkLogicError) as err:
+        docs_client.create(doc)
+
+    expected_error = (
+        "[500 Internal Server Error] (XDMP-DOCNOTFOUND) XDMP-DOCNOTFOUND: "
+        'xdmp:document-set-collections("/some/dir/doc1.xml", "test-collection")'
+        " -- Document not found"
+    )
+    assert err.value.args[0] == expected_error

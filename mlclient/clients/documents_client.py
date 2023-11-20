@@ -40,7 +40,7 @@ class DocumentsClient(MLResourceClient):
 
     def create(
         self,
-        documents: Document | list[Document],
+        documents: Document | Metadata | list[Document | Metadata],
     ):
         body_parts = DocumentsSender.parse(documents)
         call = self._post_call(body_parts)

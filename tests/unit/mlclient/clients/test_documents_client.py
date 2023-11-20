@@ -2762,3 +2762,21 @@ def test_write_multiple_documents_with_default_metadata(docs_client):
     assert doc_4_info["uri"] == doc_4_uri
     assert doc_4_info["mime-type"] == "application/zip"
     assert doc_4_info["category"] == ["metadata", "content"]
+
+
+@responses.activate
+def test_write_only_default_metadata(docs_client):
+    default_metadata = Metadata(collections=["test-collection"])
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/documents")
+    builder.with_response_content_type("application/json; charset=utf-8")
+    builder.with_response_header("vnd.marklogic.document-format", "json")
+    builder.with_response_status(200)
+    builder.with_response_body({"documents": []})
+    builder.build_post()
+
+    resp = docs_client.create(default_metadata)
+
+    documents = resp["documents"]
+    assert len(documents) == 0

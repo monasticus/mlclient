@@ -2252,3 +2252,92 @@ def test_write_metadata_document_when_doc_does_not_exists(docs_client):
         " -- Document not found"
     )
     assert err.value.args[0] == expected_error
+
+
+@responses.activate
+def test_write_multiple_documents(docs_client):
+    doc_1_uri = "/some/dir/doc1.xml"
+    doc_1_content_str = "<root><child>data</child></root>"
+    doc_1_content = ElemTree.ElementTree(ElemTree.fromstring(doc_1_content_str))
+    doc_1 = XMLDocument(doc_1_content, doc_1_uri)
+
+    doc_2_uri = "/some/dir/doc2.json"
+    doc_2_content = {"root": {"child": "data"}}
+    doc_2 = JSONDocument(doc_2_content, doc_2_uri)
+
+    doc_3_uri = "/some/dir/doc3.xqy"
+    doc_3_content = 'xquery version "1.0-ml";\n\nfn:current-date()'
+    doc_3 = TextDocument(doc_3_content, doc_3_uri)
+
+    doc_4_uri = "/some/dir/doc4.zip"
+    doc_4_content = zlib.compress(b'xquery version "1.0-ml";\n\nfn:current-date()')
+    doc_4 = BinaryDocument(doc_4_content, doc_4_uri)
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/documents")
+    builder.with_response_content_type("application/json; charset=utf-8")
+    builder.with_response_header("vnd.marklogic.document-format", "json")
+    builder.with_response_header("Server", "MarkLogic")
+    builder.with_response_header("Connection", "Keep-Alive")
+    builder.with_response_header("Keep-Alive", "timeout=5")
+    builder.with_response_status(200)
+    builder.with_response_body(
+        {
+            "documents": [
+                {
+                    "uri": "/some/dir/doc1.xml",
+                    "mime-type": "application/xml",
+                    "category": ["metadata", "content"],
+                },
+                {
+                    "uri": "/some/dir/doc2.json",
+                    "mime-type": "application/json",
+                    "category": ["metadata", "content"],
+                },
+                {
+                    "uri": "/some/dir/doc3.xqy",
+                    "mime-type": "application/vnd.marklogic-xdmp",
+                    "category": ["metadata", "content"],
+                },
+                {
+                    "uri": "/some/dir/doc4.zip",
+                    "mime-type": "application/zip",
+                    "category": ["metadata", "content"],
+                },
+            ],
+        },
+    )
+    builder.build_post()
+
+    resp = docs_client.create([doc_1, doc_2, doc_3, doc_4])
+
+    documents = resp["documents"]
+    assert len(documents) == 4
+
+    doc_1_info = next(
+        doc_info for doc_info in documents if doc_info["uri"].endswith(".xml")
+    )
+    assert doc_1_info["uri"] == doc_1_uri
+    assert doc_1_info["mime-type"] == "application/xml"
+    assert doc_1_info["category"] == ["metadata", "content"]
+
+    doc_2_info = next(
+        doc_info for doc_info in documents if doc_info["uri"].endswith(".json")
+    )
+    assert doc_2_info["uri"] == doc_2_uri
+    assert doc_2_info["mime-type"] == "application/json"
+    assert doc_2_info["category"] == ["metadata", "content"]
+
+    doc_3_info = next(
+        doc_info for doc_info in documents if doc_info["uri"].endswith(".xqy")
+    )
+    assert doc_3_info["uri"] == doc_3_uri
+    assert doc_3_info["mime-type"] == "application/vnd.marklogic-xdmp"
+    assert doc_3_info["category"] == ["metadata", "content"]
+
+    doc_4_info = next(
+        doc_info for doc_info in documents if doc_info["uri"].endswith(".zip")
+    )
+    assert doc_4_info["uri"] == doc_4_uri
+    assert doc_4_info["mime-type"] == "application/zip"
+    assert doc_4_info["category"] == ["metadata", "content"]

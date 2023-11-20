@@ -2018,6 +2018,7 @@ def test_write_raw_document(docs_client):
     assert len(documents) == 1
     assert documents[0]["uri"] == uri
     assert documents[0]["mime-type"] == "application/xml"
+    assert documents[0]["category"] == ["metadata", "content"]
 
 
 @responses.activate
@@ -2050,6 +2051,7 @@ def test_write_raw_string_document(docs_client):
     assert len(documents) == 1
     assert documents[0]["uri"] == uri
     assert documents[0]["mime-type"] == "application/json"
+    assert documents[0]["category"] == ["metadata", "content"]
 
 
 @responses.activate
@@ -2082,6 +2084,7 @@ def test_write_xml_document(docs_client):
     assert len(documents) == 1
     assert documents[0]["uri"] == uri
     assert documents[0]["mime-type"] == "application/xml"
+    assert documents[0]["category"] == ["metadata", "content"]
 
 
 @responses.activate
@@ -2114,6 +2117,7 @@ def test_write_json_document(docs_client):
     assert len(documents) == 1
     assert documents[0]["uri"] == uri
     assert documents[0]["mime-type"] == "application/json"
+    assert documents[0]["category"] == ["metadata", "content"]
 
 
 @responses.activate
@@ -2146,6 +2150,7 @@ def test_write_text_document(docs_client):
     assert len(documents) == 1
     assert documents[0]["uri"] == uri
     assert documents[0]["mime-type"] == "application/vnd.marklogic-xdmp"
+    assert documents[0]["category"] == ["metadata", "content"]
 
 
 @responses.activate
@@ -2178,6 +2183,7 @@ def test_write_binary_document(docs_client):
     assert len(documents) == 1
     assert documents[0]["uri"] == uri
     assert documents[0]["mime-type"] == "application/zip"
+    assert documents[0]["category"] == ["metadata", "content"]
 
 
 @responses.activate

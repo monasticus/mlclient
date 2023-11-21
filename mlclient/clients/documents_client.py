@@ -87,6 +87,9 @@ class DocumentsClient(MLResourceClient):
         """
         call = self._get_call(uris=uris, category=category, database=database)
         resp = self.call(call)
+        if not resp.ok:
+            resp_body = resp.json()
+            raise MarkLogicError(resp_body["errorResponse"])
         return DocumentsReader.parse(resp, uris, category)
 
     @classmethod
@@ -281,17 +284,9 @@ class DocumentsReader:
         -------
         list[tuple]
             A parsed response parts with headers
-
-        Raises
-        ------
-        MarkLogicError
-            If MarkLogic returns an error
         """
-        if not resp.ok:
-            resp_body = resp.json()
-            raise MarkLogicError(resp_body["errorResponse"])
         parsed_resp = MLResponseParser.parse_with_headers(resp)
-        if isinstance(parsed_resp, tuple):
+        if not isinstance(parsed_resp, list):
             return [parsed_resp]
         return parsed_resp
 

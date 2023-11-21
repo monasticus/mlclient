@@ -41,9 +41,10 @@ class DocumentsClient(MLResourceClient):
     def create(
         self,
         documents: Document | Metadata | list[Document | Metadata],
+        database: str | None = None,
     ):
         body_parts = DocumentsSender.parse(documents)
-        call = self._post_call(body_parts)
+        call = self._post_call(body_parts, database)
         resp = self.call(call)
         if not resp.ok:
             resp_body = resp.json()
@@ -96,8 +97,9 @@ class DocumentsClient(MLResourceClient):
     def _post_call(
         cls,
         body_parts: list[DocumentsBodyPart],
+        database: str | None,
     ):
-        return DocumentsPostCall(body_parts=body_parts)
+        return DocumentsPostCall(body_parts=body_parts, database=database)
 
     @classmethod
     def _get_call(

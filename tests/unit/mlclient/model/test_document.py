@@ -6,9 +6,122 @@ class DocumentTestImpl(Document):
     def content(self):
         return ""
 
+    @property
+    def content_bytes(self):
+        return b""
 
-class DocumentTestInvalidImpl(Document):
+    @property
+    def content_string(self):
+        return self.content
+
+
+class DocumentTestInvalidImpl1(Document):
     """A Document invalid implementation for testing purposes"""
+
+
+class DocumentTestInvalidImpl2(Document):
+    """A Document invalid implementation for testing purposes"""
+
+    @property
+    def content(self):
+        return ""
+
+
+class DocumentTestInvalidImpl3(Document):
+    """A Document invalid implementation for testing purposes"""
+
+    @property
+    def content_bytes(self):
+        return b""
+
+
+class DocumentTestInvalidImpl4(Document):
+    """A Document invalid implementation for testing purposes"""
+
+    @property
+    def content_string(self):
+        return ""
+
+
+class DocumentTestInvalidImpl5(Document):
+    """A Document invalid implementation for testing purposes"""
+
+    @property
+    def content(self):
+        return ""
+
+    @property
+    def content_bytes(self):
+        return b""
+
+
+class DocumentTestInvalidImpl6(Document):
+    """A Document invalid implementation for testing purposes"""
+
+    @property
+    def content(self):
+        return ""
+
+    @property
+    def content_string(self):
+        return ""
+
+
+class DocumentTestInvalidImpl7(Document):
+    """A Document invalid implementation for testing purposes"""
+
+    @property
+    def content_bytes(self):
+        return b""
+
+    @property
+    def content_string(self):
+        return ""
+
+
+class DocumentTestInvalidImpl8(Document):
+    """A Document invalid implementation for testing purposes"""
+
+    def content(self):
+        return ""
+
+    @property
+    def content_bytes(self):
+        return b""
+
+    @property
+    def content_string(self):
+        return ""
+
+
+class DocumentTestInvalidImpl9(Document):
+    """A Document invalid implementation for testing purposes"""
+
+    @property
+    def content(self):
+        return ""
+
+    def content_bytes(self):
+        return b""
+
+    @property
+    def content_string(self):
+        return ""
+
+
+class DocumentTestInvalidImpl10(Document):
+    """A Document invalid implementation for testing purposes"""
+
+    @property
+    def content(self):
+        return ""
+
+    @property
+    def content_bytes(self):
+        return b""
+
+    def content_string(self):
+        return ""
 
 
 def test_issubclass_true():
@@ -16,7 +129,16 @@ def test_issubclass_true():
 
 
 def test_issubclass_false():
-    assert not issubclass(DocumentTestInvalidImpl, Document)
+    assert not issubclass(DocumentTestInvalidImpl1, Document)
+    assert not issubclass(DocumentTestInvalidImpl2, Document)
+    assert not issubclass(DocumentTestInvalidImpl3, Document)
+    assert not issubclass(DocumentTestInvalidImpl4, Document)
+    assert not issubclass(DocumentTestInvalidImpl5, Document)
+    assert not issubclass(DocumentTestInvalidImpl6, Document)
+    assert not issubclass(DocumentTestInvalidImpl7, Document)
+    assert not issubclass(DocumentTestInvalidImpl8, Document)
+    assert not issubclass(DocumentTestInvalidImpl9, Document)
+    assert not issubclass(DocumentTestInvalidImpl10, Document)
 
 
 def test_document_uri():
@@ -70,3 +192,13 @@ def test_is_temporal_when_none():
 def test_content():
     document = DocumentTestImpl()
     assert document.content == ""
+
+
+def test_content_bytes():
+    document = DocumentTestImpl()
+    assert document.content_bytes == b""
+
+
+def test_content_string():
+    document = DocumentTestImpl()
+    assert document.content_string == ""

@@ -99,7 +99,14 @@ class Document(metaclass=ABCMeta):
         bool
             True if the subclass includes the content property
         """
-        return "content" in subclass.__dict__ and not callable(subclass.content)
+        return (
+            "content" in subclass.__dict__
+            and not callable(subclass.content)
+            and "content_bytes" in subclass.__dict__
+            and not callable(subclass.content_bytes)
+            and "content_string" in subclass.__dict__
+            and not callable(subclass.content_string)
+        )
 
     @property
     @abstractmethod
@@ -112,6 +119,34 @@ class Document(metaclass=ABCMeta):
         -------
         Any
             A document's content
+        """
+        raise NotImplementedError
+
+    @property
+    @abstractmethod
+    def content_bytes(
+        self,
+    ) -> bytes:
+        """A document content bytes.
+
+        Returns
+        -------
+        bytes
+            A document's content bytes
+        """
+        raise NotImplementedError
+
+    @property
+    @abstractmethod
+    def content_string(
+        self,
+    ) -> str:
+        """A document content in string format.
+
+        Returns
+        -------
+        str
+            A document's content in string format
         """
         raise NotImplementedError
 
@@ -193,6 +228,32 @@ class JSONDocument(Document):
         """
         return self._content
 
+    @property
+    def content_bytes(
+        self,
+    ) -> bytes:
+        """A document content bytes.
+
+        Returns
+        -------
+        bytes
+            A document's content bytes
+        """
+        return self.content_string.encode("utf-8")
+
+    @property
+    def content_string(
+        self,
+    ) -> str:
+        """A document content in string format.
+
+        Returns
+        -------
+        str
+            A document's content in string format
+        """
+        return json.dumps(self._content)
+
 
 class XMLDocument(Document):
     """A Document implementation representing a single MarkLogic XML document.
@@ -231,10 +292,43 @@ class XMLDocument(Document):
 
         Returns
         -------
-        dict
+        ElemTree.ElementTree
             A document's content
         """
         return self._content
+
+    @property
+    def content_bytes(
+        self,
+    ) -> bytes:
+        """A document content bytes.
+
+        Returns
+        -------
+        bytes
+            A document's content bytes
+        """
+        return ElemTree.tostring(
+            self._content.getroot(),
+            encoding="UTF-8",
+            xml_declaration=True,
+        ).replace(
+            b"<?xml version='1.0' encoding='UTF-8'?>",
+            b'<?xml version="1.0" encoding="UTF-8"?>',
+        )
+
+    @property
+    def content_string(
+        self,
+    ) -> str:
+        """A document content in string format.
+
+        Returns
+        -------
+        str
+            A document's content in string format
+        """
+        return self.content_bytes.decode("utf-8")
 
 
 class TextDocument(Document):
@@ -279,6 +373,32 @@ class TextDocument(Document):
         """
         return self._content
 
+    @property
+    def content_bytes(
+        self,
+    ) -> bytes:
+        """A document content bytes.
+
+        Returns
+        -------
+        bytes
+            A document's content bytes
+        """
+        return self._content.encode("utf-8")
+
+    @property
+    def content_string(
+        self,
+    ) -> str:
+        """A document content in string format.
+
+        Returns
+        -------
+        str
+            A document's content in string format
+        """
+        return self.content
+
 
 class BinaryDocument(Document):
     """A Document implementation representing a single MarkLogic BINARY document.
@@ -321,6 +441,32 @@ class BinaryDocument(Document):
             A document's content
         """
         return self._content
+
+    @property
+    def content_bytes(
+        self,
+    ) -> bytes:
+        """A document content bytes.
+
+        Returns
+        -------
+        bytes
+            A document's content bytes
+        """
+        return self.content
+
+    @property
+    def content_string(
+        self,
+    ) -> str:
+        """A document content bytes.
+
+        Returns
+        -------
+        str
+            A document's content bytes
+        """
+        return self._content.decode("utf-8")
 
 
 class RawDocument(Document):
@@ -368,6 +514,32 @@ class RawDocument(Document):
         """
         return self._content
 
+    @property
+    def content_bytes(
+        self,
+    ) -> bytes:
+        """A document content bytes.
+
+        Returns
+        -------
+        bytes
+            A document's content bytes
+        """
+        return self.content
+
+    @property
+    def content_string(
+        self,
+    ) -> str:
+        """A document content in string format.
+
+        Returns
+        -------
+        str
+            A document's content in string format
+        """
+        return self._content.decode("utf-8")
+
 
 class RawStringDocument(Document):
     """A Document implementation representing a single MarkLogic document.
@@ -414,6 +586,32 @@ class RawStringDocument(Document):
         """
         return self._content
 
+    @property
+    def content_bytes(
+        self,
+    ) -> bytes:
+        """A document content bytes.
+
+        Returns
+        -------
+        bytes
+            A document's content bytes
+        """
+        return self._content.encode("utf-8")
+
+    @property
+    def content_string(
+        self,
+    ) -> str:
+        """A document content in string format.
+
+        Returns
+        -------
+        str
+            A document's content in string format
+        """
+        return self.content
+
 
 class MetadataDocument(Document):
     """A Document implementation representing a single MarkLogic document's metadata.
@@ -447,6 +645,32 @@ class MetadataDocument(Document):
         -------
         None
             A document's content
+        """
+        return
+
+    @property
+    def content_bytes(
+        self,
+    ) -> None:
+        """A document content bytes.
+
+        Returns
+        -------
+        None
+            A document's content bytes
+        """
+        return
+
+    @property
+    def content_string(
+        self,
+    ) -> None:
+        """A document content in string format.
+
+        Returns
+        -------
+        None
+            A document's content in string format
         """
         return
 

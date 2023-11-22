@@ -10,5 +10,15 @@ def test_content():
     assert document.content == b'{"root": "data"}'
 
 
+def test_content_bytes():
+    document = BinaryDocument(b'{"root": "data"}')
+    assert document.content_bytes == b'{"root": "data"}'
+
+
+def test_content_string():
+    document = BinaryDocument(b'{"root": "data"}')
+    assert document.content_string == '{"root": "data"}'
+
+
 def test_doc_type():
     assert BinaryDocument(b'{"root": "data"}').doc_type == DocumentType.BINARY

@@ -53,6 +53,31 @@ class Mimetypes:
         )
 
     @classmethod
+    def get_mimetype(
+        cls,
+        uri: str,
+    ) -> str | None:
+        """Return a mimetype linked to a specific extension.
+
+        Parameters
+        ----------
+        uri : str
+            A document uri, path or filename to find a mimetype for
+
+        Returns
+        -------
+        str
+            A mimetype linked to a specific extension
+        """
+        cls._init_mimetypes()
+        gen = (
+            mimetype.mime_type
+            for mimetype in cls._MIMETYPES
+            if uri.endswith(tuple(mimetype.extensions))
+        )
+        return next(gen, None)
+
+    @classmethod
     def get_doc_type(
         cls,
         uri_or_mimetype: str,

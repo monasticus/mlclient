@@ -1,6 +1,6 @@
 """The ML Documents Client module.
 
-It exports high-level class to perform CRUD operations in aMarkLogic server:
+It exports high-level class to perform CRUD operations in a MarkLogic server:
     * DocumentsClient
         An MLResourceClient calling /v1/documents endpoint.
 """
@@ -11,16 +11,25 @@ from typing import Any, Iterator
 from requests import Response
 
 from mlclient import constants
-from mlclient.calls import DocumentsGetCall
+from mlclient.calls import DocumentsGetCall, DocumentsPostCall
 from mlclient.calls.model import (
     Category,
     ContentDispositionSerializer,
+    DocumentsBodyPart,
     DocumentsContentDisposition,
 )
 from mlclient.clients import MLResourceClient
 from mlclient.exceptions import MarkLogicError
+from mlclient.mimetypes import Mimetypes
 from mlclient.ml_response_parser import MLResponseParser
-from mlclient.model import Document, DocumentFactory, Metadata
+from mlclient.model import (
+    Document,
+    DocumentFactory,
+    Metadata,
+    MetadataDocument,
+    RawDocument,
+    RawStringDocument,
+)
 
 
 class DocumentsClient(MLResourceClient):
@@ -28,6 +37,39 @@ class DocumentsClient(MLResourceClient):
 
     It is a high-level class performing CRUD operations in a MarkLogic server.
     """
+
+    def create(
+        self,
+        data: Document | Metadata | list[Document | Metadata],
+        database: str | None = None,
+    ) -> dict:
+        """Create or update document(s) content or metadata in a MarkLogic database.
+
+        Parameters
+        ----------
+        data : Document | Metadata | list[Document | Metadata]
+            One or more document or default metadata.
+        database : str | None, default None
+            Perform this operation on the named content database instead
+            of the default content database associated with the REST API instance.
+
+        Returns
+        -------
+        dict
+            An origin response from a MarkLogic server.
+
+        Raises
+        ------
+        MarkLogicError
+            If MarkLogic returns an error
+        """
+        body_parts = DocumentsSender.parse(data)
+        call = self._post_call(body_parts, database)
+        resp = self.call(call)
+        if not resp.ok:
+            resp_body = resp.json()
+            raise MarkLogicError(resp_body["errorResponse"])
+        return MLResponseParser.parse(resp)
 
     def read(
         self,
@@ -66,7 +108,35 @@ class DocumentsClient(MLResourceClient):
         """
         call = self._get_call(uris=uris, category=category, database=database)
         resp = self.call(call)
-        return self._parse(resp, uris, category)
+        if not resp.ok:
+            resp_body = resp.json()
+            raise MarkLogicError(resp_body["errorResponse"])
+        return DocumentsReader.parse(resp, uris, category)
+
+    @classmethod
+    def _post_call(
+        cls,
+        body_parts: list[DocumentsBodyPart],
+        database: str | None,
+    ) -> DocumentsPostCall:
+        """Prepare a DocumentsPostCall instance.
+
+        It initializes an DocumentsPostCall instance with adjusted parameters.
+
+        Parameters
+        ----------
+        body_parts : list[DocumentsBodyPart]
+            A list of multipart request body parts
+        database : str | None, default None
+            Perform this operation on the named content database instead
+            of the default content database associated with the REST API instance.
+
+        Returns
+        -------
+        DocumentsPostCall
+            A prepared DocumentsPostCall instance
+        """
+        return DocumentsPostCall(body_parts=body_parts, database=database)
 
     @classmethod
     def _get_call(
@@ -114,8 +184,142 @@ class DocumentsClient(MLResourceClient):
 
         return DocumentsGetCall(**params)
 
+
+class DocumentsSender:
+    """A class parsing Document or Metadata instance(s) to DocumentsBodyPart's list."""
+
     @classmethod
-    def _parse(
+    def parse(
+        cls,
+        data: Document | Metadata | list[Document | Metadata],
+    ) -> list[DocumentsBodyPart]:
+        """Parse Document or Metadata instance(s) to DocumentsBodyPart's list.
+
+        Parameters
+        ----------
+        data : Document | Metadata | list[Document | Metadata]
+            One or more document or default metadata.
+
+        Returns
+        -------
+        list[DocumentsBodyPart]
+            A list of multipart /v1/documents request body parts
+        """
+        if not isinstance(data, list):
+            data = [data]
+        body_parts = []
+        for data_unit in data:
+            if type(data_unit) not in (Metadata, MetadataDocument):
+                if data_unit.metadata is not None:
+                    new_parts = [
+                        cls._get_doc_metadata_body_part(data_unit),
+                        cls._get_doc_content_body_part(data_unit),
+                    ]
+                else:
+                    new_parts = [cls._get_doc_content_body_part(data_unit)]
+            elif type(data_unit) is not Metadata:
+                new_parts = [cls._get_doc_metadata_body_part(data_unit)]
+            else:
+                new_parts = [cls._get_default_metadata_body_part(data_unit)]
+            body_parts.extend(new_parts)
+        return body_parts
+
+    @classmethod
+    def _get_doc_content_body_part(
+        cls,
+        document: Document,
+    ) -> DocumentsBodyPart:
+        """Instantiate DocumentsBodyPart with Document's content.
+
+        Parameters
+        ----------
+        document : Document
+            A document to build a request body part.
+
+        Returns
+        -------
+        DocumentsBodyPart
+            A multipart /v1/documents request body part
+        """
+        return DocumentsBodyPart(
+            **{
+                "content-type": Mimetypes.get_mimetype(document.uri),
+                "content-disposition": {
+                    "body_part_type": "attachment",
+                    "filename": document.uri,
+                    "format": document.doc_type,
+                },
+                "content": document.content_bytes,
+            },
+        )
+
+    @classmethod
+    def _get_doc_metadata_body_part(
+        cls,
+        document: Document,
+    ) -> DocumentsBodyPart:
+        """Instantiate DocumentsBodyPart with Document's metadata.
+
+        Parameters
+        ----------
+        document : Document
+            A document to build a request body part.
+
+        Returns
+        -------
+        DocumentsBodyPart
+            A multipart /v1/documents request body part
+        """
+        metadata = document.metadata
+        if type(document) not in (RawDocument, RawStringDocument):
+            metadata = metadata.to_json_string()
+        return DocumentsBodyPart(
+            **{
+                "content-type": constants.HEADER_JSON,
+                "content-disposition": {
+                    "body_part_type": "attachment",
+                    "filename": document.uri,
+                    "category": "metadata",
+                },
+                "content": metadata,
+            },
+        )
+
+    @classmethod
+    def _get_default_metadata_body_part(
+        cls,
+        metadata: Metadata,
+    ) -> DocumentsBodyPart:
+        """Instantiate DocumentsBodyPart with default metadata.
+
+        Parameters
+        ----------
+        metadata : Metadata
+            Metadata to build a request body part.
+
+        Returns
+        -------
+        DocumentsBodyPart
+            A multipart /v1/documents request body part
+        """
+        metadata = metadata.to_json_string()
+        return DocumentsBodyPart(
+            **{
+                "content-type": constants.HEADER_JSON,
+                "content-disposition": {
+                    "body_part_type": "inline",
+                    "category": "metadata",
+                },
+                "content": metadata,
+            },
+        )
+
+
+class DocumentsReader:
+    """A class parsing raw MarkLogic response to Document instance(s)."""
+
+    @classmethod
+    def parse(
         cls,
         resp: Response,
         uris: str | list[str] | tuple[str] | set[str],
@@ -140,11 +344,6 @@ class DocumentsClient(MLResourceClient):
         -------
         Document | list[Document]
             A single Document instance or their list depending on uris type.
-
-        Raises
-        ------
-        MarkLogicError
-            If MarkLogic returns an error
         """
         parsed_resp = cls._parse_response(resp)
         content_type = resp.headers.get(constants.HEADER_NAME_CONTENT_TYPE)
@@ -171,17 +370,9 @@ class DocumentsClient(MLResourceClient):
         -------
         list[tuple]
             A parsed response parts with headers
-
-        Raises
-        ------
-        MarkLogicError
-            If MarkLogic returns an error
         """
-        if not resp.ok:
-            resp_body = resp.json()
-            raise MarkLogicError(resp_body["errorResponse"])
         parsed_resp = MLResponseParser.parse_with_headers(resp)
-        if isinstance(parsed_resp, tuple):
+        if not isinstance(parsed_resp, list):
             return [parsed_resp]
         return parsed_resp
 

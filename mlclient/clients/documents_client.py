@@ -40,10 +40,30 @@ class DocumentsClient(MLResourceClient):
 
     def create(
         self,
-        documents: Document | Metadata | list[Document | Metadata],
+        data: Document | Metadata | list[Document | Metadata],
         database: str | None = None,
-    ):
-        body_parts = DocumentsSender.parse(documents)
+    ) -> dict:
+        """Create or update document(s) content or metadata in a MarkLogic database.
+
+        Parameters
+        ----------
+        data : Document | Metadata | list[Document | Metadata]
+            One or more document or default metadata.
+        database : str | None, default None
+            Perform this operation on the named content database instead
+            of the default content database associated with the REST API instance.
+
+        Returns
+        -------
+        dict
+            An origin response from a MarkLogic server.
+
+        Raises
+        ------
+        MarkLogicError
+            If MarkLogic returns an error
+        """
+        body_parts = DocumentsSender.parse(data)
         call = self._post_call(body_parts, database)
         resp = self.call(call)
         if not resp.ok:
@@ -98,7 +118,24 @@ class DocumentsClient(MLResourceClient):
         cls,
         body_parts: list[DocumentsBodyPart],
         database: str | None,
-    ):
+    ) -> DocumentsPostCall:
+        """Prepare a DocumentsPostCall instance.
+
+        It initializes an DocumentsPostCall instance with adjusted parameters.
+
+        Parameters
+        ----------
+        body_parts : list[DocumentsBodyPart]
+            A list of multipart request body parts
+        database : str | None, default None
+            Perform this operation on the named content database instead
+            of the default content database associated with the REST API instance.
+
+        Returns
+        -------
+        DocumentsPostCall
+            A prepared DocumentsPostCall instance
+        """
         return DocumentsPostCall(body_parts=body_parts, database=database)
 
     @classmethod
@@ -149,27 +186,41 @@ class DocumentsClient(MLResourceClient):
 
 
 class DocumentsSender:
+    """A class parsing Document or Metadata instance(s) to DocumentsBodyPart's list."""
+
     @classmethod
     def parse(
         cls,
-        documents: Document | Metadata | list[Document | Metadata],
+        data: Document | Metadata | list[Document | Metadata],
     ) -> list[DocumentsBodyPart]:
-        if not isinstance(documents, list):
-            documents = [documents]
+        """Parse Document or Metadata instance(s) to DocumentsBodyPart's list.
+
+        Parameters
+        ----------
+        data : Document | Metadata | list[Document | Metadata]
+            One or more document or default metadata.
+
+        Returns
+        -------
+        list[DocumentsBodyPart]
+            A list of multipart /v1/documents request body parts
+        """
+        if not isinstance(data, list):
+            data = [data]
         body_parts = []
-        for document in documents:
-            if type(document) not in (Metadata, MetadataDocument):
-                if document.metadata is not None:
+        for data_unit in data:
+            if type(data_unit) not in (Metadata, MetadataDocument):
+                if data_unit.metadata is not None:
                     new_parts = [
-                        cls._get_doc_metadata_body_part(document),
-                        cls._get_doc_content_body_part(document),
+                        cls._get_doc_metadata_body_part(data_unit),
+                        cls._get_doc_content_body_part(data_unit),
                     ]
                 else:
-                    new_parts = [cls._get_doc_content_body_part(document)]
-            elif type(document) is not Metadata:
-                new_parts = [cls._get_doc_metadata_body_part(document)]
+                    new_parts = [cls._get_doc_content_body_part(data_unit)]
+            elif type(data_unit) is not Metadata:
+                new_parts = [cls._get_doc_metadata_body_part(data_unit)]
             else:
-                new_parts = [cls._get_default_metadata_body_part(document)]
+                new_parts = [cls._get_default_metadata_body_part(data_unit)]
             body_parts.extend(new_parts)
         return body_parts
 
@@ -178,6 +229,18 @@ class DocumentsSender:
         cls,
         document: Document,
     ) -> DocumentsBodyPart:
+        """Instantiate DocumentsBodyPart with Document's content.
+
+        Parameters
+        ----------
+        document : Document
+            A document to build a request body part.
+
+        Returns
+        -------
+        DocumentsBodyPart
+            A multipart /v1/documents request body part
+        """
         return DocumentsBodyPart(
             **{
                 "content-type": Mimetypes.get_mimetype(document.uri),
@@ -195,6 +258,18 @@ class DocumentsSender:
         cls,
         document: Document,
     ) -> DocumentsBodyPart:
+        """Instantiate DocumentsBodyPart with Document's metadata.
+
+        Parameters
+        ----------
+        document : Document
+            A document to build a request body part.
+
+        Returns
+        -------
+        DocumentsBodyPart
+            A multipart /v1/documents request body part
+        """
         metadata = document.metadata
         if type(document) not in (RawDocument, RawStringDocument):
             metadata = metadata.to_json_string()
@@ -215,6 +290,18 @@ class DocumentsSender:
         cls,
         metadata: Metadata,
     ) -> DocumentsBodyPart:
+        """Instantiate DocumentsBodyPart with default metadata.
+
+        Parameters
+        ----------
+        metadata : Metadata
+            Metadata to build a request body part.
+
+        Returns
+        -------
+        DocumentsBodyPart
+            A multipart /v1/documents request body part
+        """
         metadata = metadata.to_json_string()
         return DocumentsBodyPart(
             **{
@@ -229,6 +316,8 @@ class DocumentsSender:
 
 
 class DocumentsReader:
+    """A class parsing raw MarkLogic response to Document instance(s)."""
+
     @classmethod
     def parse(
         cls,
@@ -255,11 +344,6 @@ class DocumentsReader:
         -------
         Document | list[Document]
             A single Document instance or their list depending on uris type.
-
-        Raises
-        ------
-        MarkLogicError
-            If MarkLogic returns an error
         """
         parsed_resp = cls._parse_response(resp)
         content_type = resp.headers.get(constants.HEADER_NAME_CONTENT_TYPE)

@@ -105,7 +105,7 @@ class Document(metaclass=ABCMeta):
             and "content_bytes" in subclass.__dict__
             and not callable(subclass.content_bytes)
             and "content_string" in subclass.__dict__
-            and not callable(subclass.content_bytes)
+            and not callable(subclass.content_string)
         )
 
     @property

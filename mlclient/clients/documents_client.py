@@ -117,8 +117,9 @@ class DocumentsClient(MLResourceClient):
         self,
         uris: str | list[str] | tuple[str] | set[str],
         category: str | list | None = None,
+        database: str | None = None,
     ):
-        call = self._delete_call(uris=uris, category=category)
+        call = self._delete_call(uris=uris, category=category, database=database)
         resp = self.call(call)
         if not resp.ok:
             resp_body = resp.json()
@@ -200,8 +201,9 @@ class DocumentsClient(MLResourceClient):
         cls,
         uris: str | list[str] | tuple[str] | set[str],
         category: str | list | None,
+        database: str | None,
     ) -> DocumentsDeleteCall:
-        return DocumentsDeleteCall(uri=uris, category=category)
+        return DocumentsDeleteCall(uri=uris, category=category, database=database)
 
 
 class DocumentsSender:

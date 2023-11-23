@@ -302,7 +302,7 @@ class MLClient:
         """
         return self.request("PUT", endpoint, params, headers, body)
 
-    def delete(
+    def delete_(
         self,
         endpoint: str,
         params: dict | None = None,

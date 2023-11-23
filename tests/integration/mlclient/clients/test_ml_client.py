@@ -151,7 +151,7 @@ def test_put_with_customized_params_and_headers_and_json_body():
 @pytest.mark.ml_access()
 def test_delete():
     with MLClient(auth_method="digest") as client:
-        resp = client.delete("/manage/v2/databases/custom-db")
+        resp = client.delete_("/manage/v2/databases/custom-db")
 
     assert resp.request.method == "DELETE"
     assert "?" not in resp.request.url
@@ -162,7 +162,7 @@ def test_delete():
 @pytest.mark.ml_access()
 def test_delete_with_customized_params_and_headers():
     with MLClient(auth_method="digest") as client:
-        resp = client.delete(
+        resp = client.delete_(
             "/manage/v2/databases/custom-db",
             params={"format": "json"},
             headers={"custom-header": "custom-value"},

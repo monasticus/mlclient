@@ -11,7 +11,7 @@ from typing import Any, Iterator
 from requests import Response
 
 from mlclient import constants
-from mlclient.calls import DocumentsGetCall, DocumentsPostCall
+from mlclient.calls import DocumentsDeleteCall, DocumentsGetCall, DocumentsPostCall
 from mlclient.calls.model import (
     Category,
     ContentDispositionSerializer,
@@ -113,6 +113,16 @@ class DocumentsClient(MLResourceClient):
             raise MarkLogicError(resp_body["errorResponse"])
         return DocumentsReader.parse(resp, uris, category)
 
+    def delete(
+        self,
+        uris: str | list[str] | tuple[str] | set[str],
+    ):
+        call = self._delete_call(uris=uris)
+        resp = self.call(call)
+        if not resp.ok:
+            resp_body = resp.json()
+            raise MarkLogicError(resp_body["errorResponse"])
+
     @classmethod
     def _post_call(
         cls,
@@ -183,6 +193,13 @@ class DocumentsClient(MLResourceClient):
             params["data_format"] = "json"
 
         return DocumentsGetCall(**params)
+
+    @classmethod
+    def _delete_call(
+        cls,
+        uris: str | list[str] | tuple[str] | set[str],
+    ) -> DocumentsDeleteCall:
+        return DocumentsDeleteCall(uri=uris)
 
 
 class DocumentsSender:

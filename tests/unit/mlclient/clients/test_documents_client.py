@@ -2898,3 +2898,19 @@ def test_write_multiple_documents_using_custom_database(docs_client):
     assert doc_4_info["uri"] == doc_4_uri
     assert doc_4_info["mime-type"] == "application/zip"
     assert doc_4_info["category"] == ["metadata", "content"]
+
+
+@responses.activate
+def test_delete_single_document(docs_client):
+    uri = "/some/dir/doc1.xml"
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/documents")
+    builder.with_request_param("uri", uri)
+    builder.with_response_status(204)
+    builder.with_empty_response_body()
+    builder.build_delete()
+
+    success = docs_client.delete(uri)
+
+    assert success is True

@@ -2938,3 +2938,40 @@ def test_delete_multiple_documents(docs_client):
         docs_client.delete(uris)
     except MarkLogicError as err:
         pytest.fail(str(err))
+
+
+@responses.activate
+def test_delete_single_document_with_single_category(docs_client):
+    uri = "/some/dir/doc1.xml"
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/documents")
+    builder.with_request_param("uri", "/some/dir/doc1.xml")
+    builder.with_request_param("category", "collections")
+    builder.with_response_status(204)
+    builder.with_empty_response_body()
+    builder.build_delete()
+
+    try:
+        docs_client.delete(uri, category="collections")
+    except MarkLogicError as err:
+        pytest.fail(str(err))
+
+
+@responses.activate
+def test_delete_single_document_with_multiple_categories(docs_client):
+    uri = "/some/dir/doc1.xml"
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/documents")
+    builder.with_request_param("uri", "/some/dir/doc1.xml")
+    builder.with_request_param("category", "properties")
+    builder.with_request_param("category", "collections")
+    builder.with_response_status(204)
+    builder.with_empty_response_body()
+    builder.build_delete()
+
+    try:
+        docs_client.delete(uri, category=["properties", "collections"])
+    except MarkLogicError as err:
+        pytest.fail(str(err))

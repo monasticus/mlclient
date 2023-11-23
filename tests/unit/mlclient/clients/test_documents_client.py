@@ -2911,6 +2911,30 @@ def test_delete_single_document(docs_client):
     builder.with_empty_response_body()
     builder.build_delete()
 
-    success = docs_client.delete(uri)
+    try:
+        docs_client.delete(uri)
+    except MarkLogicError as err:
+        pytest.fail(str(err))
 
-    assert success is True
+
+@responses.activate
+def test_delete_multiple_documents(docs_client):
+    uris = [
+        "/some/dir/doc1.xml",
+        "/some/dir/doc2.json",
+        "/some/dir/doc3.xqy",
+        "/some/dir/doc4.zip",
+    ]
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/documents")
+    for uri in uris:
+        builder.with_request_param("uri", uri)
+    builder.with_response_status(204)
+    builder.with_empty_response_body()
+    builder.build_delete()
+
+    try:
+        docs_client.delete(uris)
+    except MarkLogicError as err:
+        pytest.fail(str(err))

@@ -28,10 +28,10 @@ def _setup_and_teardown(client):
 
 
 @responses.activate
-def test_parse_single_error_response(client):
+def test_parse_error_response_html(client):
     xqy = "'missing-quote"
 
-    response_body_path = tools.get_test_resource_path(__file__, "error_response.html")
+    response_body_path = tools.get_test_resource_path(__file__, "error-response.html")
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/v1/eval")
     builder.with_request_body({"xquery": xqy})
@@ -51,10 +51,10 @@ def test_parse_single_error_response(client):
 
 
 @responses.activate
-def test_parse_text_single_error_response(client):
+def test_parse_text_error_response_html(client):
     xqy = "'missing-quote"
 
-    response_body_path = tools.get_test_resource_path(__file__, "error_response.html")
+    response_body_path = tools.get_test_resource_path(__file__, "error-response.html")
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/v1/eval")
     builder.with_request_body({"xquery": xqy})
@@ -74,10 +74,10 @@ def test_parse_text_single_error_response(client):
 
 
 @responses.activate
-def test_parse_bytes_single_error_response(client):
+def test_parse_bytes_error_response_html(client):
     xqy = "'missing-quote"
 
-    response_body_path = tools.get_test_resource_path(__file__, "error_response.html")
+    response_body_path = tools.get_test_resource_path(__file__, "error-response.html")
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/v1/eval")
     builder.with_request_body({"xquery": xqy})
@@ -97,10 +97,10 @@ def test_parse_bytes_single_error_response(client):
 
 
 @responses.activate
-def test_parse_with_headers_single_error_response(client):
+def test_parse_with_headers_error_response_html(client):
     xqy = "'missing-quote"
 
-    response_body_path = tools.get_test_resource_path(__file__, "error_response.html")
+    response_body_path = tools.get_test_resource_path(__file__, "error-response.html")
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/v1/eval")
     builder.with_request_body({"xquery": xqy})
@@ -124,10 +124,10 @@ def test_parse_with_headers_single_error_response(client):
 
 
 @responses.activate
-def test_parse_text_with_headers_single_error_response(client):
+def test_parse_text_with_headers_error_response_html(client):
     xqy = "'missing-quote"
 
-    response_body_path = tools.get_test_resource_path(__file__, "error_response.html")
+    response_body_path = tools.get_test_resource_path(__file__, "error-response.html")
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/v1/eval")
     builder.with_request_body({"xquery": xqy})
@@ -151,10 +151,10 @@ def test_parse_text_with_headers_single_error_response(client):
 
 
 @responses.activate
-def test_parse_bytes_with_headers_single_error_response(client):
+def test_parse_bytes_with_headers_error_response_html(client):
     xqy = "'missing-quote"
 
-    response_body_path = tools.get_test_resource_path(__file__, "error_response.html")
+    response_body_path = tools.get_test_resource_path(__file__, "error-response.html")
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/v1/eval")
     builder.with_request_body({"xquery": xqy})
@@ -178,7 +178,7 @@ def test_parse_bytes_with_headers_single_error_response(client):
 
 
 @responses.activate
-def test_parse_single_error_response_json(client):
+def test_parse_error_response_json(client):
     uri = "/some/dir/doc.xml"
     error = {
         "errorResponse": {
@@ -207,7 +207,7 @@ def test_parse_single_error_response_json(client):
 
 
 @responses.activate
-def test_parse_text_single_error_response_json(client):
+def test_parse_text_error_response_json(client):
     uri = "/some/dir/doc.xml"
     error = {
         "errorResponse": {
@@ -244,7 +244,7 @@ def test_parse_text_single_error_response_json(client):
 
 
 @responses.activate
-def test_parse_bytes_single_error_response_json(client):
+def test_parse_bytes_error_response_json(client):
     uri = "/some/dir/doc.xml"
     error = {
         "errorResponse": {
@@ -282,7 +282,7 @@ def test_parse_bytes_single_error_response_json(client):
 
 
 @responses.activate
-def test_parse_with_headers_single_error_response_json(client):
+def test_parse_with_headers_error_response_json(client):
     uri = "/some/dir/doc.xml"
     error = {
         "errorResponse": {
@@ -315,7 +315,7 @@ def test_parse_with_headers_single_error_response_json(client):
 
 
 @responses.activate
-def test_parse_text_with_headers_single_error_response_json(client):
+def test_parse_text_with_headers_error_response_json(client):
     uri = "/some/dir/doc.xml"
     error = {
         "errorResponse": {
@@ -360,7 +360,7 @@ def test_parse_text_with_headers_single_error_response_json(client):
 
 
 @responses.activate
-def test_parse_bytes_with_headers_single_error_response_json(client):
+def test_parse_bytes_with_headers_error_response_json(client):
     uri = "/some/dir/doc.xml"
     error = {
         "errorResponse": {

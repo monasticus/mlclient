@@ -277,17 +277,17 @@ class MLResponseParser:
             A parsed JSON error
         """
         xml = ElemTree.fromstring(response.text)
-        status_code = xml.find('{http://marklogic.com/xdmp/error}status-code')
-        status = xml.find('{http://marklogic.com/xdmp/error}status')
-        msg_code = xml.find('{http://marklogic.com/xdmp/error}message-code')
-        msg = xml.find('{http://marklogic.com/xdmp/error}message')
+        status_code = xml.find("{http://marklogic.com/xdmp/error}status-code")
+        status = xml.find("{http://marklogic.com/xdmp/error}status")
+        msg_code = xml.find("{http://marklogic.com/xdmp/error}message-code")
+        msg = xml.find("{http://marklogic.com/xdmp/error}message")
         return {
             "errorResponse": {
                 "statusCode": status_code.text,
                 "status": status.text,
                 "messageCode": msg_code.text,
                 "message": msg.text,
-            }
+            },
         }
 
     @classmethod

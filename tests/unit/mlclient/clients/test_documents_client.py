@@ -3001,7 +3001,9 @@ def test_delete_document_with_custom_database(docs_client):
 def test_delete_document_with_non_existing_database(docs_client):
     uri = "/some/dir/doc1.xml"
 
-    response_body_path = tools.get_test_resource_path(__file__, "test-delete-document-with-non-existing-database.xml")
+    response_body_path = tools.get_test_resource_path(
+        __file__, "test-delete-document-with-non-existing-database.xml"
+    )
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/v1/documents")
     builder.with_request_param("uri", "/some/dir/doc1.xml")

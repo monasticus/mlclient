@@ -30,7 +30,6 @@ from mlclient.model import (
     RawDocument,
     RawStringDocument,
 )
-from tests.tools import MLResponseBuilder
 
 
 class DocumentsClient(MLResourceClient):

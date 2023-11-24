@@ -30,6 +30,7 @@ from mlclient.model import (
     RawDocument,
     RawStringDocument,
 )
+from tests.tools import MLResponseBuilder
 
 
 class DocumentsClient(MLResourceClient):
@@ -122,7 +123,7 @@ class DocumentsClient(MLResourceClient):
         call = self._delete_call(uris=uris, category=category, database=database)
         resp = self.call(call)
         if not resp.ok:
-            resp_body = resp.json()
+            resp_body = MLResponseParser.parse(resp)
             raise MarkLogicError(resp_body["errorResponse"])
 
     @classmethod

@@ -1,5 +1,6 @@
 import xml.etree.ElementTree as ElemTree
 import zlib
+from pathlib import Path
 
 import pytest
 import responses
@@ -18,6 +19,7 @@ from mlclient.model import (
     TextDocument,
     XMLDocument,
 )
+from tests import tools
 from tests.tools import MLResponseBuilder
 
 
@@ -2993,3 +2995,26 @@ def test_delete_document_with_custom_database(docs_client):
         docs_client.delete(uri, database="Documents")
     except MarkLogicError as err:
         pytest.fail(str(err))
+
+
+@responses.activate
+def test_delete_document_with_non_existing_database(docs_client):
+    uri = "/some/dir/doc1.xml"
+
+    response_body_path = tools.get_test_resource_path(__file__, "test-delete-document-with-non-existing-database.xml")
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/documents")
+    builder.with_request_param("uri", "/some/dir/doc1.xml")
+    builder.with_request_param("database", "Document")
+    builder.with_response_content_type("application/xml; charset=UTF-8")
+    builder.with_response_status(404)
+    builder.with_response_body(Path(response_body_path).read_bytes())
+    builder.build_delete()
+
+    with pytest.raises(MarkLogicError) as err:
+        docs_client.delete(uri, database="Document")
+
+    expected_error = (
+        "[404 Not Found] (XDMP-NOSUCHDB) XDMP-NOSUCHDB: No such database Document"
+    )
+    assert err.value.args[0] == expected_error

@@ -283,7 +283,7 @@ class MLResponseParser:
         msg = xml.find("{http://marklogic.com/xdmp/error}message")
         return {
             "errorResponse": {
-                "statusCode": status_code.text,
+                "statusCode": int(status_code.text),
                 "status": status.text,
                 "messageCode": msg_code.text,
                 "message": msg.text,

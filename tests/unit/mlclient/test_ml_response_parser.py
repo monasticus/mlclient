@@ -28,10 +28,10 @@ def _setup_and_teardown(client):
 
 
 @responses.activate
-def test_parse_single_error_response(client):
+def test_parse_error_response_html(client):
     xqy = "'missing-quote"
 
-    response_body_path = tools.get_test_resource_path(__file__, "error_response.html")
+    response_body_path = tools.get_test_resource_path(__file__, "error-response.html")
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/v1/eval")
     builder.with_request_body({"xquery": xqy})
@@ -51,10 +51,10 @@ def test_parse_single_error_response(client):
 
 
 @responses.activate
-def test_parse_text_single_error_response(client):
+def test_parse_text_error_response_html(client):
     xqy = "'missing-quote"
 
-    response_body_path = tools.get_test_resource_path(__file__, "error_response.html")
+    response_body_path = tools.get_test_resource_path(__file__, "error-response.html")
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/v1/eval")
     builder.with_request_body({"xquery": xqy})
@@ -74,10 +74,10 @@ def test_parse_text_single_error_response(client):
 
 
 @responses.activate
-def test_parse_bytes_single_error_response(client):
+def test_parse_bytes_error_response_html(client):
     xqy = "'missing-quote"
 
-    response_body_path = tools.get_test_resource_path(__file__, "error_response.html")
+    response_body_path = tools.get_test_resource_path(__file__, "error-response.html")
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/v1/eval")
     builder.with_request_body({"xquery": xqy})
@@ -97,10 +97,10 @@ def test_parse_bytes_single_error_response(client):
 
 
 @responses.activate
-def test_parse_with_headers_single_error_response(client):
+def test_parse_with_headers_error_response_html(client):
     xqy = "'missing-quote"
 
-    response_body_path = tools.get_test_resource_path(__file__, "error_response.html")
+    response_body_path = tools.get_test_resource_path(__file__, "error-response.html")
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/v1/eval")
     builder.with_request_body({"xquery": xqy})
@@ -124,10 +124,10 @@ def test_parse_with_headers_single_error_response(client):
 
 
 @responses.activate
-def test_parse_text_with_headers_single_error_response(client):
+def test_parse_text_with_headers_error_response_html(client):
     xqy = "'missing-quote"
 
-    response_body_path = tools.get_test_resource_path(__file__, "error_response.html")
+    response_body_path = tools.get_test_resource_path(__file__, "error-response.html")
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/v1/eval")
     builder.with_request_body({"xquery": xqy})
@@ -151,10 +151,10 @@ def test_parse_text_with_headers_single_error_response(client):
 
 
 @responses.activate
-def test_parse_bytes_with_headers_single_error_response(client):
+def test_parse_bytes_with_headers_error_response_html(client):
     xqy = "'missing-quote"
 
-    response_body_path = tools.get_test_resource_path(__file__, "error_response.html")
+    response_body_path = tools.get_test_resource_path(__file__, "error-response.html")
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/v1/eval")
     builder.with_request_body({"xquery": xqy})
@@ -178,7 +178,175 @@ def test_parse_bytes_with_headers_single_error_response(client):
 
 
 @responses.activate
-def test_parse_single_error_response_json(client):
+def test_parse_error_response_xml(client):
+    response_body_path = tools.get_test_resource_path(__file__, "error-response.xml")
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/documents")
+    builder.with_request_param("uri", "/some/dir/doc1.xml")
+    builder.with_request_param("database", "Document")
+    builder.with_response_content_type("application/xml; charset=UTF-8")
+    builder.with_response_status(404)
+    builder.with_response_body(Path(response_body_path).read_bytes())
+    builder.build_delete()
+
+    resp = client.delete_documents(uri="/some/dir/doc1.xml", database="Document")
+    parsed_resp = MLResponseParser.parse(resp)
+
+    assert isinstance(parsed_resp, dict)
+    assert parsed_resp == {
+        "errorResponse": {
+            "statusCode": 404,
+            "status": "Not Found",
+            "messageCode": "XDMP-NOSUCHDB",
+            "message": "XDMP-NOSUCHDB: No such database Document",
+        },
+    }
+
+
+@responses.activate
+def test_parse_text_error_response_xml(client):
+    response_body_path = tools.get_test_resource_path(__file__, "error-response.xml")
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/documents")
+    builder.with_request_param("uri", "/some/dir/doc1.xml")
+    builder.with_request_param("database", "Document")
+    builder.with_response_content_type("application/xml; charset=UTF-8")
+    builder.with_response_status(404)
+    builder.with_response_body(Path(response_body_path).read_bytes())
+    builder.build_delete()
+
+    resp = client.delete_documents(uri="/some/dir/doc1.xml", database="Document")
+    parsed_resp = MLResponseParser.parse(resp, output_type=str)
+
+    assert isinstance(parsed_resp, str)
+    assert parsed_resp == (
+        '{"errorResponse": {'
+        '"statusCode": 404, '
+        '"status": "Not Found", '
+        '"messageCode": "XDMP-NOSUCHDB", '
+        '"message": "XDMP-NOSUCHDB: No such database Document"'
+        "}}"
+    )
+
+
+@responses.activate
+def test_parse_bytes_error_response_xml(client):
+    response_body_path = tools.get_test_resource_path(__file__, "error-response.xml")
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/documents")
+    builder.with_request_param("uri", "/some/dir/doc1.xml")
+    builder.with_request_param("database", "Document")
+    builder.with_response_content_type("application/xml; charset=UTF-8")
+    builder.with_response_status(404)
+    builder.with_response_body(Path(response_body_path).read_bytes())
+    builder.build_delete()
+
+    resp = client.delete_documents(uri="/some/dir/doc1.xml", database="Document")
+    parsed_resp = MLResponseParser.parse(resp, output_type=bytes)
+
+    assert isinstance(parsed_resp, bytes)
+    assert parsed_resp == (
+        b'{"errorResponse": {'
+        b'"statusCode": 404, '
+        b'"status": "Not Found", '
+        b'"messageCode": "XDMP-NOSUCHDB", '
+        b'"message": "XDMP-NOSUCHDB: No such database Document"'
+        b"}}"
+    )
+
+
+@responses.activate
+def test_parse_with_headers_error_response_xml(client):
+    response_body_path = tools.get_test_resource_path(__file__, "error-response.xml")
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/documents")
+    builder.with_request_param("uri", "/some/dir/doc1.xml")
+    builder.with_request_param("database", "Document")
+    builder.with_response_content_type("application/xml; charset=UTF-8")
+    builder.with_response_status(404)
+    builder.with_response_body(Path(response_body_path).read_bytes())
+    builder.build_delete()
+
+    resp = client.delete_documents(uri="/some/dir/doc1.xml", database="Document")
+    headers, parsed_resp = MLResponseParser.parse_with_headers(resp)
+
+    assert isinstance(parsed_resp, dict)
+    assert parsed_resp == {
+        "errorResponse": {
+            "statusCode": 404,
+            "status": "Not Found",
+            "messageCode": "XDMP-NOSUCHDB",
+            "message": "XDMP-NOSUCHDB: No such database Document",
+        },
+    }
+    assert headers == {
+        "Content-Type": "application/xml; charset=UTF-8",
+        "Content-Length": "226",
+    }
+
+
+@responses.activate
+def test_parse_text_with_headers_error_response_xml(client):
+    response_body_path = tools.get_test_resource_path(__file__, "error-response.xml")
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/documents")
+    builder.with_request_param("uri", "/some/dir/doc1.xml")
+    builder.with_request_param("database", "Document")
+    builder.with_response_content_type("application/xml; charset=UTF-8")
+    builder.with_response_status(404)
+    builder.with_response_body(Path(response_body_path).read_bytes())
+    builder.build_delete()
+
+    resp = client.delete_documents(uri="/some/dir/doc1.xml", database="Document")
+    headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=str)
+
+    assert isinstance(parsed_resp, str)
+    assert parsed_resp == (
+        '{"errorResponse": {'
+        '"statusCode": 404, '
+        '"status": "Not Found", '
+        '"messageCode": "XDMP-NOSUCHDB", '
+        '"message": "XDMP-NOSUCHDB: No such database Document"'
+        "}}"
+    )
+    assert headers == {
+        "Content-Type": "application/xml; charset=UTF-8",
+        "Content-Length": "226",
+    }
+
+
+@responses.activate
+def test_parse_bytes_with_headers_error_response_xml(client):
+    response_body_path = tools.get_test_resource_path(__file__, "error-response.xml")
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/documents")
+    builder.with_request_param("uri", "/some/dir/doc1.xml")
+    builder.with_request_param("database", "Document")
+    builder.with_response_content_type("application/xml; charset=UTF-8")
+    builder.with_response_status(404)
+    builder.with_response_body(Path(response_body_path).read_bytes())
+    builder.build_delete()
+
+    resp = client.delete_documents(uri="/some/dir/doc1.xml", database="Document")
+    headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=bytes)
+
+    assert isinstance(parsed_resp, bytes)
+    assert parsed_resp == (
+        b'{"errorResponse": {'
+        b'"statusCode": 404, '
+        b'"status": "Not Found", '
+        b'"messageCode": "XDMP-NOSUCHDB", '
+        b'"message": "XDMP-NOSUCHDB: No such database Document"'
+        b"}}"
+    )
+    assert headers == {
+        "Content-Type": "application/xml; charset=UTF-8",
+        "Content-Length": "226",
+    }
+
+
+@responses.activate
+def test_parse_error_response_json(client):
     uri = "/some/dir/doc.xml"
     error = {
         "errorResponse": {
@@ -207,7 +375,7 @@ def test_parse_single_error_response_json(client):
 
 
 @responses.activate
-def test_parse_text_single_error_response_json(client):
+def test_parse_text_error_response_json(client):
     uri = "/some/dir/doc.xml"
     error = {
         "errorResponse": {
@@ -244,7 +412,7 @@ def test_parse_text_single_error_response_json(client):
 
 
 @responses.activate
-def test_parse_bytes_single_error_response_json(client):
+def test_parse_bytes_error_response_json(client):
     uri = "/some/dir/doc.xml"
     error = {
         "errorResponse": {
@@ -282,7 +450,7 @@ def test_parse_bytes_single_error_response_json(client):
 
 
 @responses.activate
-def test_parse_with_headers_single_error_response_json(client):
+def test_parse_with_headers_error_response_json(client):
     uri = "/some/dir/doc.xml"
     error = {
         "errorResponse": {
@@ -315,7 +483,7 @@ def test_parse_with_headers_single_error_response_json(client):
 
 
 @responses.activate
-def test_parse_text_with_headers_single_error_response_json(client):
+def test_parse_text_with_headers_error_response_json(client):
     uri = "/some/dir/doc.xml"
     error = {
         "errorResponse": {
@@ -360,7 +528,7 @@ def test_parse_text_with_headers_single_error_response_json(client):
 
 
 @responses.activate
-def test_parse_bytes_with_headers_single_error_response_json(client):
+def test_parse_bytes_with_headers_error_response_json(client):
     uri = "/some/dir/doc.xml"
     error = {
         "errorResponse": {

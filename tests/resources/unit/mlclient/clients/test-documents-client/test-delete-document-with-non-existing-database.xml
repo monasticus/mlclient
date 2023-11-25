@@ -1,0 +1,6 @@
+<error xmlns="http://marklogic.com/xdmp/error">
+  <status-code>404</status-code>
+  <status>Not Found</status>
+  <message-code>XDMP-NOSUCHDB</message-code>
+  <message>XDMP-NOSUCHDB: No such database Document</message>
+</error>

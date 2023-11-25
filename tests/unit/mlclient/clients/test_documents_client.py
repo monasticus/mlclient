@@ -1,5 +1,6 @@
 import xml.etree.ElementTree as ElemTree
 import zlib
+from pathlib import Path
 
 import pytest
 import responses
@@ -18,6 +19,7 @@ from mlclient.model import (
     TextDocument,
     XMLDocument,
 )
+from tests import tools
 from tests.tools import MLResponseBuilder
 
 
@@ -2898,3 +2900,124 @@ def test_write_multiple_documents_using_custom_database(docs_client):
     assert doc_4_info["uri"] == doc_4_uri
     assert doc_4_info["mime-type"] == "application/zip"
     assert doc_4_info["category"] == ["metadata", "content"]
+
+
+@responses.activate
+def test_delete_single_document(docs_client):
+    uri = "/some/dir/doc1.xml"
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/documents")
+    builder.with_request_param("uri", uri)
+    builder.with_response_status(204)
+    builder.with_empty_response_body()
+    builder.build_delete()
+
+    try:
+        docs_client.delete(uri)
+    except MarkLogicError as err:
+        pytest.fail(str(err))
+
+
+@responses.activate
+def test_delete_multiple_documents(docs_client):
+    uris = [
+        "/some/dir/doc1.xml",
+        "/some/dir/doc2.json",
+        "/some/dir/doc3.xqy",
+        "/some/dir/doc4.zip",
+    ]
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/documents")
+    for uri in uris:
+        builder.with_request_param("uri", uri)
+    builder.with_response_status(204)
+    builder.with_empty_response_body()
+    builder.build_delete()
+
+    try:
+        docs_client.delete(uris)
+    except MarkLogicError as err:
+        pytest.fail(str(err))
+
+
+@responses.activate
+def test_delete_document_with_single_category(docs_client):
+    uri = "/some/dir/doc1.xml"
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/documents")
+    builder.with_request_param("uri", "/some/dir/doc1.xml")
+    builder.with_request_param("category", "collections")
+    builder.with_response_status(204)
+    builder.with_empty_response_body()
+    builder.build_delete()
+
+    try:
+        docs_client.delete(uri, category="collections")
+    except MarkLogicError as err:
+        pytest.fail(str(err))
+
+
+@responses.activate
+def test_delete_document_with_multiple_categories(docs_client):
+    uri = "/some/dir/doc1.xml"
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/documents")
+    builder.with_request_param("uri", "/some/dir/doc1.xml")
+    builder.with_request_param("category", "properties")
+    builder.with_request_param("category", "collections")
+    builder.with_response_status(204)
+    builder.with_empty_response_body()
+    builder.build_delete()
+
+    try:
+        docs_client.delete(uri, category=["properties", "collections"])
+    except MarkLogicError as err:
+        pytest.fail(str(err))
+
+
+@responses.activate
+def test_delete_document_with_custom_database(docs_client):
+    uri = "/some/dir/doc1.xml"
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/documents")
+    builder.with_request_param("uri", "/some/dir/doc1.xml")
+    builder.with_request_param("database", "Documents")
+    builder.with_response_status(204)
+    builder.with_empty_response_body()
+    builder.build_delete()
+
+    try:
+        docs_client.delete(uri, database="Documents")
+    except MarkLogicError as err:
+        pytest.fail(str(err))
+
+
+@responses.activate
+def test_delete_document_with_non_existing_database(docs_client):
+    uri = "/some/dir/doc1.xml"
+
+    response_body_path = tools.get_test_resource_path(
+        __file__,
+        "test-delete-document-with-non-existing-database.xml",
+    )
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/documents")
+    builder.with_request_param("uri", "/some/dir/doc1.xml")
+    builder.with_request_param("database", "Document")
+    builder.with_response_content_type("application/xml; charset=UTF-8")
+    builder.with_response_status(404)
+    builder.with_response_body(Path(response_body_path).read_bytes())
+    builder.build_delete()
+
+    with pytest.raises(MarkLogicError) as err:
+        docs_client.delete(uri, database="Document")
+
+    expected_error = (
+        "[404 Not Found] (XDMP-NOSUCHDB) XDMP-NOSUCHDB: No such database Document"
+    )
+    assert err.value.args[0] == expected_error

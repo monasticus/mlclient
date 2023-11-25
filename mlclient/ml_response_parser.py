@@ -173,10 +173,12 @@ class MLResponseParser:
         """
         content_type = response.headers.get(const.HEADER_NAME_CONTENT_TYPE)
         if not response.ok:
-            if content_type.startswith("application/json"):
+            if content_type.startswith(const.HEADER_JSON):
                 error = response.json()
+            elif content_type.startswith(const.HEADER_XML):
+                error = cls._parse_xml_error(response)
             else:
-                error = cls._parse_error(response)
+                error = cls._parse_html_error(response)
             if with_headers:
                 return response.headers, error
             return error
@@ -199,12 +201,28 @@ class MLResponseParser:
         response: Response,
         with_headers: bool = False,
     ) -> str | tuple | list:
+        """Parse MarkLogic HTTP Response to string.
+
+        Parameters
+        ----------
+        response : Response
+            An HTTP response taken from MarkLogic instance
+
+        Returns
+        -------
+        str | tuple | list
+            A parsed response body in string format
+        """
         content_type = response.headers.get(const.HEADER_NAME_CONTENT_TYPE)
         if not response.ok:
-            if content_type.startswith("application/json"):
-                error = json.dumps(response.json())
+            if content_type.startswith(const.HEADER_JSON):
+                json_error = response.json()
+                error = json.dumps(json_error)
+            elif content_type.startswith(const.HEADER_XML):
+                json_error = cls._parse_xml_error(response)
+                error = json.dumps(json_error)
             else:
-                error = cls._parse_error(response)
+                error = cls._parse_html_error(response)
             if with_headers:
                 return response.headers, error
             return error
@@ -227,12 +245,28 @@ class MLResponseParser:
         response: Response,
         with_headers: bool = False,
     ) -> bytes | tuple | list:
+        """Parse MarkLogic HTTP Response to bytes.
+
+        Parameters
+        ----------
+        response : Response
+            An HTTP response taken from MarkLogic instance
+
+        Returns
+        -------
+        bytes | tuple | list
+            A parsed response body in bytes format
+        """
         content_type = response.headers.get(const.HEADER_NAME_CONTENT_TYPE)
         if not response.ok:
-            if content_type.startswith("application/json"):
-                error = json.dumps(response.json()).encode("utf-8")
+            if content_type.startswith(const.HEADER_JSON):
+                json_error = response.json()
+                error = json.dumps(json_error).encode("utf-8")
+            elif content_type.startswith(const.HEADER_XML):
+                json_error = cls._parse_xml_error(response)
+                error = json.dumps(json_error).encode("utf-8")
             else:
-                error = cls._parse_error(response).encode("utf-8")
+                error = cls._parse_html_error(response).encode("utf-8")
             if with_headers:
                 return response.headers, error
             return error
@@ -250,11 +284,42 @@ class MLResponseParser:
         return parsed_parts
 
     @classmethod
-    def _parse_error(
+    def _parse_xml_error(
+        cls,
+        response: Response,
+    ) -> dict:
+        """Parse MarkLogic XML error response to JSON.
+
+        Parameters
+        ----------
+        response : Response
+            A non-OK HTTP response taken from MarkLogic instance
+
+        Returns
+        -------
+        dict
+            A parsed JSON error
+        """
+        xml = ElemTree.fromstring(response.text)
+        status_code = xml.find("{http://marklogic.com/xdmp/error}status-code")
+        status = xml.find("{http://marklogic.com/xdmp/error}status")
+        msg_code = xml.find("{http://marklogic.com/xdmp/error}message-code")
+        msg = xml.find("{http://marklogic.com/xdmp/error}message")
+        return {
+            "errorResponse": {
+                "statusCode": int(status_code.text),
+                "status": status.text,
+                "messageCode": msg_code.text,
+                "message": msg.text,
+            },
+        }
+
+    @classmethod
+    def _parse_html_error(
         cls,
         response: Response,
     ) -> str:
-        """Parse MarkLogic error response.
+        """Parse MarkLogic HTML error response.
 
         Parameters
         ----------
@@ -344,6 +409,22 @@ class MLResponseParser:
         | list
         | tuple
     ):
+        """Parse MarkLogic HTTP Response part to a corresponding python representation.
+
+        Parameters
+        ----------
+        body_part : BodyPart | Response
+            An HTTP response body or body part taken from MarkLogic instance
+        headers : CaseInsensitiveDict
+            HTTP headers
+
+        Returns
+        -------
+        bytes | str | int | float | bool | dict |
+        ElemTree.ElementTree | ElemTree.Element |
+        list | tuple
+            A parsed response body or body part
+        """
         content_type = headers.get(const.HEADER_NAME_CONTENT_TYPE)
         primitive_type = headers.get(const.HEADER_NAME_PRIMITIVE)
         doc_type = Mimetypes.get_doc_type(content_type)
@@ -363,6 +444,20 @@ class MLResponseParser:
         headers: dict,
         encoding: str,
     ) -> CaseInsensitiveDict:
+        """Decode HTTP headers from bytes format.
+
+        Parameters
+        ----------
+        headers : dict
+            Encoded HTTP headers
+        encoding : str
+            An encoding type
+
+        Returns
+        -------
+        CaseInsensitiveDict
+            Decoded HTTP headers
+        """
         headers_dict = {
             name.decode(encoding): value.decode(encoding)
             for name, value in headers.items()

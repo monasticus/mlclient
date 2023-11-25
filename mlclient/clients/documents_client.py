@@ -119,6 +119,29 @@ class DocumentsClient(MLResourceClient):
         category: str | list | None = None,
         database: str | None = None,
     ):
+        """Delete document(s) content or metadata in a MarkLogic database.
+
+        Parameters
+        ----------
+        uris : str | list[str] | tuple[str] | set[str]
+            The URI of a document to delete or for which to remove metadata.
+            You can specify multiple documents.
+        category : str | list | None, default None
+            The category of data to remove/reset.
+            Category may be specified multiple times to remove or reset
+            any combination of content and metadata.
+            Valid categories: content (default), metadata, metadata-values,
+            collections, permissions, properties, and quality.
+            Use metadata to reset all metadata.
+        database : str | None, default None
+            Perform this operation on the named content database instead
+            of the default content database associated with the REST API instance.
+
+        Raises
+        ------
+        MarkLogicError
+            If MarkLogic returns an error
+        """
         call = self._delete_call(uris=uris, category=category, database=database)
         resp = self.call(call)
         if not resp.ok:
@@ -203,6 +226,28 @@ class DocumentsClient(MLResourceClient):
         category: str | list | None,
         database: str | None,
     ) -> DocumentsDeleteCall:
+        """Prepare a DocumentsDeleteCall instance.
+
+        Parameters
+        ----------
+        uris : str | list[str] | tuple[str] | set[str]
+            The URI of a document to delete or for which to remove metadata.
+            You can specify multiple documents.
+        category : str | list | None, default None
+            The category of data to fetch about the requested document.
+            Category can be specified multiple times to retrieve any combination
+            of content and metadata. Valid categories: content (default), metadata,
+            metadata-values, collections, permissions, properties, and quality.
+            Use metadata to request all categories except content.
+        database : str | None, default None
+            Perform this operation on the named content database instead
+            of the default content database associated with the REST API instance.
+
+        Returns
+        -------
+        DocumentsDeleteCall
+            A prepared DocumentsDeleteCall instance
+        """
         return DocumentsDeleteCall(uri=uris, category=category, database=database)
 
 

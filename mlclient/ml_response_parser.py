@@ -201,6 +201,18 @@ class MLResponseParser:
         response: Response,
         with_headers: bool = False,
     ) -> str | tuple | list:
+        """Parse MarkLogic HTTP Response to string.
+
+        Parameters
+        ----------
+        response : Response
+            An HTTP response taken from MarkLogic instance
+
+        Returns
+        -------
+        str | tuple | list
+            A parsed response body in string format
+        """
         content_type = response.headers.get(const.HEADER_NAME_CONTENT_TYPE)
         if not response.ok:
             if content_type.startswith(const.HEADER_JSON):
@@ -233,6 +245,18 @@ class MLResponseParser:
         response: Response,
         with_headers: bool = False,
     ) -> bytes | tuple | list:
+        """Parse MarkLogic HTTP Response to bytes.
+
+        Parameters
+        ----------
+        response : Response
+            An HTTP response taken from MarkLogic instance
+
+        Returns
+        -------
+        bytes | tuple | list
+            A parsed response body in bytes format
+        """
         content_type = response.headers.get(const.HEADER_NAME_CONTENT_TYPE)
         if not response.ok:
             if content_type.startswith(const.HEADER_JSON):
@@ -385,6 +409,22 @@ class MLResponseParser:
         | list
         | tuple
     ):
+        """Parse MarkLogic HTTP Response part to a corresponding python representation.
+
+        Parameters
+        ----------
+        body_part : BodyPart | Response
+            An HTTP response body or body part taken from MarkLogic instance
+        headers : CaseInsensitiveDict
+            HTTP headers
+
+        Returns
+        -------
+        bytes | str | int | float | bool | dict |
+        ElemTree.ElementTree | ElemTree.Element |
+        list | tuple
+            A parsed response body or body part
+        """
         content_type = headers.get(const.HEADER_NAME_CONTENT_TYPE)
         primitive_type = headers.get(const.HEADER_NAME_PRIMITIVE)
         doc_type = Mimetypes.get_doc_type(content_type)
@@ -404,6 +444,20 @@ class MLResponseParser:
         headers: dict,
         encoding: str,
     ) -> CaseInsensitiveDict:
+        """Decode HTTP headers from bytes format.
+
+        Parameters
+        ----------
+        headers : dict
+            Encoded HTTP headers
+        encoding : str
+            An encoding type
+
+        Returns
+        -------
+        CaseInsensitiveDict
+            Decoded HTTP headers
+        """
         headers_dict = {
             name.decode(encoding): value.decode(encoding)
             for name, value in headers.items()

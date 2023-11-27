@@ -13,4 +13,4 @@ def test_content():
     assert document.content_string is None
     assert document.doc_type is None
     assert document.metadata is not None
-    assert not document.is_temporal
+    assert document.temporal_collection is None

@@ -62,7 +62,7 @@ class Document(metaclass=ABCMeta):
         uri: str | None = None,
         doc_type: DocumentType | None = DocumentType.XML,
         metadata: Metadata | None = None,
-        is_temporal: bool = False,
+        temporal_collection: str | None = None,
     ):
         """Initialize Document instance.
 
@@ -74,13 +74,13 @@ class Document(metaclass=ABCMeta):
             A document type
         metadata : Metadata
             A document metadata
-        is_temporal : bool
-            The temporal flag
+        temporal_collection : str | None
+            The temporal colllection
         """
         self._uri = self._get_non_blank_uri(uri)
         self._doc_type = doc_type
         self._metadata = metadata
-        self._is_temporal = is_temporal
+        self._temporal_collection = temporal_collection
 
     @classmethod
     def __subclasshook__(
@@ -172,11 +172,11 @@ class Document(metaclass=ABCMeta):
         return copy.copy(self._metadata)
 
     @property
-    def is_temporal(
+    def temporal_collection(
         self,
-    ) -> bool:
-        """The temporal flag."""
-        return self._is_temporal
+    ) -> str | None:
+        """The temporal collection."""
+        return self._temporal_collection
 
     @staticmethod
     def _get_non_blank_uri(
@@ -197,7 +197,7 @@ class JSONDocument(Document):
         content: dict,
         uri: str | None = None,
         metadata: Metadata | None = None,
-        is_temporal: bool = False,
+        temporal_collection: str | None = None,
     ):
         """Initialize JSONDocument instance.
 
@@ -209,10 +209,10 @@ class JSONDocument(Document):
             A document URI
         metadata : Metadata
             A document metadata
-        is_temporal : bool
-            The temporal flag
+        temporal_collection : bool
+            The temporal colllection
         """
-        super().__init__(uri, DocumentType.JSON, metadata, is_temporal)
+        super().__init__(uri, DocumentType.JSON, metadata, temporal_collection)
         self._content = content
 
     @property
@@ -266,7 +266,7 @@ class XMLDocument(Document):
         content: ElemTree.ElementTree,
         uri: str | None = None,
         metadata: Metadata | None = None,
-        is_temporal: bool = False,
+        temporal_collection: str | None = None,
     ):
         """Initialize XMLDocument instance.
 
@@ -278,10 +278,10 @@ class XMLDocument(Document):
             A document URI
         metadata : Metadata
             A document metadata
-        is_temporal : bool
-            The temporal flag
+        temporal_collection : bool
+            The temporal colllection
         """
-        super().__init__(uri, DocumentType.XML, metadata, is_temporal)
+        super().__init__(uri, DocumentType.XML, metadata, temporal_collection)
         self._content = content
 
     @property
@@ -342,7 +342,7 @@ class TextDocument(Document):
         content: str,
         uri: str | None = None,
         metadata: Metadata | None = None,
-        is_temporal: bool = False,
+        temporal_collection: str | None = None,
     ):
         """Initialize TextDocument instance.
 
@@ -354,10 +354,10 @@ class TextDocument(Document):
             A document URI
         metadata : Metadata
             A document metadata
-        is_temporal : bool
-            The temporal flag
+        temporal_collection : bool
+            The temporal colllection
         """
-        super().__init__(uri, DocumentType.TEXT, metadata, is_temporal)
+        super().__init__(uri, DocumentType.TEXT, metadata, temporal_collection)
         self._content = content
 
     @property
@@ -411,7 +411,7 @@ class BinaryDocument(Document):
         content: bytes,
         uri: str | None = None,
         metadata: Metadata | None = None,
-        is_temporal: bool = False,
+        temporal_collection: str | None = None,
     ):
         """Initialize BinaryDocument instance.
 
@@ -423,10 +423,10 @@ class BinaryDocument(Document):
             A document URI
         metadata : Metadata
             A document metadata
-        is_temporal : bool
-            The temporal flag
+        temporal_collection : bool
+            The temporal colllection
         """
-        super().__init__(uri, DocumentType.BINARY, metadata, is_temporal)
+        super().__init__(uri, DocumentType.BINARY, metadata, temporal_collection)
         self._content = content
 
     @property
@@ -481,7 +481,7 @@ class RawDocument(Document):
         uri: str | None = None,
         doc_type: DocumentType | None = DocumentType.XML,
         metadata: bytes | None = None,
-        is_temporal: bool = False,
+        temporal_collection: str | None = None,
     ):
         """Initialize RawDocument instance.
 
@@ -495,10 +495,10 @@ class RawDocument(Document):
             A document type
         metadata : bytes
             A document metadata
-        is_temporal : bool
-            The temporal flag
+        temporal_collection : bool
+            The temporal colllection
         """
-        super().__init__(uri, doc_type, metadata, is_temporal)
+        super().__init__(uri, doc_type, metadata, temporal_collection)
         self._content = content
 
     @property
@@ -553,7 +553,7 @@ class RawStringDocument(Document):
         uri: str | None = None,
         doc_type: DocumentType | None = DocumentType.XML,
         metadata: str | None = None,
-        is_temporal: bool = False,
+        temporal_collection: str | None = None,
     ):
         """Initialize RawStringDocument instance.
 
@@ -567,10 +567,10 @@ class RawStringDocument(Document):
             A document type
         metadata : str
             A document metadata
-        is_temporal : bool
-            The temporal flag
+        temporal_collection : bool
+            The temporal colllection
         """
-        super().__init__(uri, doc_type, metadata, is_temporal)
+        super().__init__(uri, doc_type, metadata, temporal_collection)
         self._content = content
 
     @property
@@ -685,7 +685,7 @@ class DocumentFactory:
         doc_type: DocumentType | str | None = None,
         uri: str | None = None,
         metadata: Metadata | None = None,
-        is_temporal: bool = False,
+        temporal_collection: str | None = None,
     ) -> Document:
         """Instantiate Document based on the document or content type.
 
@@ -699,8 +699,8 @@ class DocumentFactory:
             A document URI
         metadata : Metadata | None, default None
             A document metadata
-        is_temporal : bool, default False
-            The temporal flag
+        temporal_collection : str | None, default None
+            The temporal collection
 
         Returns
         -------
@@ -718,7 +718,7 @@ class DocumentFactory:
             content=content,
             uri=uri,
             metadata=metadata,
-            is_temporal=is_temporal,
+            temporal_collection=temporal_collection,
         )
 
     @classmethod
@@ -728,7 +728,7 @@ class DocumentFactory:
         doc_type: DocumentType | str,
         uri: str | None = None,
         metadata: bytes | str | None = None,
-        is_temporal: bool = False,
+        temporal_collection: str | None = None,
     ) -> Document:
         """Instantiate Document based on the document type.
 
@@ -742,8 +742,8 @@ class DocumentFactory:
             A document URI
         metadata : bytes | str | None, default None
             A document metadata
-        is_temporal : bool, default False
-            The temporal flag
+        temporal_collection : str | None, default None
+            The temporal collection
 
         Returns
         -------
@@ -771,7 +771,7 @@ class DocumentFactory:
             doc_type=doc_type,
             uri=uri,
             metadata=metadata,
-            is_temporal=is_temporal,
+            temporal_collection=temporal_collection,
         )
 
     @classmethod

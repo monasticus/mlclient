@@ -94,7 +94,7 @@ def test_read_xml_doc(docs_client):
     assert document.content.getroot().text is None
     assert document.content.getroot().attrib == {}
     assert document.metadata is None
-    assert document.is_temporal is False
+    assert document.temporal_collection is None
 
 
 @responses.activate
@@ -123,7 +123,7 @@ def test_read_xml_doc_using_uri_list(docs_client):
     assert document.content.getroot().text is None
     assert document.content.getroot().attrib == {}
     assert document.metadata is None
-    assert document.is_temporal is False
+    assert document.temporal_collection is None
 
 
 @responses.activate
@@ -147,7 +147,7 @@ def test_read_json_doc(docs_client):
     assert isinstance(document.content, dict)
     assert document.content == {"root": {"child": "data"}}
     assert document.metadata is None
-    assert document.is_temporal is False
+    assert document.temporal_collection is None
 
 
 @responses.activate
@@ -174,7 +174,7 @@ def test_read_json_doc_uri_list(docs_client):
     assert isinstance(document.content, dict)
     assert document.content == {"root": {"child": "data"}}
     assert document.metadata is None
-    assert document.is_temporal is False
+    assert document.temporal_collection is None
 
 
 @responses.activate
@@ -198,7 +198,7 @@ def test_read_text_doc(docs_client):
     assert isinstance(document.content, str)
     assert document.content == 'xquery version "1.0-ml";\n\nfn:current-date()'
     assert document.metadata is None
-    assert document.is_temporal is False
+    assert document.temporal_collection is None
 
 
 @responses.activate
@@ -225,7 +225,7 @@ def test_read_text_doc_uri_list(docs_client):
     assert isinstance(document.content, str)
     assert document.content == 'xquery version "1.0-ml";\n\nfn:current-date()'
     assert document.metadata is None
-    assert document.is_temporal is False
+    assert document.temporal_collection is None
 
 
 @responses.activate
@@ -250,7 +250,7 @@ def test_read_binary_doc(docs_client):
     assert isinstance(document.content, bytes)
     assert document.content == content
     assert document.metadata is None
-    assert document.is_temporal is False
+    assert document.temporal_collection is None
 
 
 @responses.activate
@@ -278,7 +278,7 @@ def test_read_binary_doc_uri_list(docs_client):
     assert isinstance(document.content, bytes)
     assert document.content == content
     assert document.metadata is None
-    assert document.is_temporal is False
+    assert document.temporal_collection is None
 
 
 @responses.activate
@@ -321,7 +321,7 @@ def test_read_existing_and_non_existing_doc(docs_client):
     assert document.content.getroot().text is None
     assert document.content.getroot().attrib == {}
     assert document.metadata is None
-    assert document.is_temporal is False
+    assert document.temporal_collection is None
 
 
 @responses.activate
@@ -409,7 +409,7 @@ def test_read_multiple_docs(docs_client):
     assert xml_doc.content.getroot().text is None
     assert xml_doc.content.getroot().attrib == {}
     assert xml_doc.metadata is None
-    assert xml_doc.is_temporal is False
+    assert xml_doc.temporal_collection is None
 
     json_docs = list(filter(lambda d: d.uri.endswith(".json"), docs))
     assert len(json_docs) == 1
@@ -420,7 +420,7 @@ def test_read_multiple_docs(docs_client):
     assert isinstance(json_doc.content, dict)
     assert json_doc.content == {"root": {"child": "data"}}
     assert json_doc.metadata is None
-    assert json_doc.is_temporal is False
+    assert json_doc.temporal_collection is None
 
     xqy_docs = list(filter(lambda d: d.uri.endswith(".xqy"), docs))
     assert len(xqy_docs) == 1
@@ -431,7 +431,7 @@ def test_read_multiple_docs(docs_client):
     assert isinstance(xqy_doc.content, str)
     assert xqy_doc.content == 'xquery version "1.0-ml";\n\nfn:current-date()'
     assert xqy_doc.metadata is None
-    assert xqy_doc.is_temporal is False
+    assert xqy_doc.temporal_collection is None
 
     zip_docs = list(filter(lambda d: d.uri.endswith(".zip"), docs))
     assert len(zip_docs) == 1
@@ -442,7 +442,7 @@ def test_read_multiple_docs(docs_client):
     assert isinstance(zip_doc.content, bytes)
     assert zip_doc.content == zip_content
     assert zip_doc.metadata is None
-    assert zip_doc.is_temporal is False
+    assert zip_doc.temporal_collection is None
 
 
 @responses.activate
@@ -542,7 +542,7 @@ def test_read_multiple_existing_and_non_existing_docs(docs_client):
     assert xml_doc.content.getroot().text is None
     assert xml_doc.content.getroot().attrib == {}
     assert xml_doc.metadata is None
-    assert xml_doc.is_temporal is False
+    assert xml_doc.temporal_collection is None
 
     json_docs = list(filter(lambda d: d.uri.endswith(".json"), docs))
     assert len(json_docs) == 1
@@ -553,7 +553,7 @@ def test_read_multiple_existing_and_non_existing_docs(docs_client):
     assert isinstance(json_doc.content, dict)
     assert json_doc.content == {"root": {"child": "data"}}
     assert json_doc.metadata is None
-    assert json_doc.is_temporal is False
+    assert json_doc.temporal_collection is None
 
 
 @responses.activate
@@ -617,7 +617,7 @@ def test_read_doc_with_full_metadata(docs_client):
     assert document.metadata.permissions() == []
     assert document.metadata.properties() == {}
     assert document.metadata.quality() == 0
-    assert document.is_temporal is False
+    assert document.temporal_collection is None
 
 
 @responses.activate
@@ -677,7 +677,7 @@ def test_read_doc_with_single_metadata_category(docs_client):
     assert document.metadata.permissions() == []
     assert document.metadata.properties() == {}
     assert document.metadata.quality() is None
-    assert document.is_temporal is False
+    assert document.temporal_collection is None
 
 
 @responses.activate
@@ -737,7 +737,7 @@ def test_read_doc_with_two_metadata_categories(docs_client):
     assert document.metadata.permissions() == []
     assert document.metadata.properties() == {}
     assert document.metadata.quality() == 0
-    assert document.is_temporal is False
+    assert document.temporal_collection is None
 
 
 @responses.activate
@@ -819,7 +819,7 @@ def test_read_doc_with_all_metadata_categories(docs_client):
     assert document.metadata.permissions() == []
     assert document.metadata.properties() == {}
     assert document.metadata.quality() == 0
-    assert document.is_temporal is False
+    assert document.temporal_collection is None
 
 
 @responses.activate
@@ -857,7 +857,7 @@ def test_read_full_metadata_without_content(docs_client):
     assert document.metadata.permissions() == []
     assert document.metadata.properties() == {}
     assert document.metadata.quality() == 0
-    assert document.is_temporal is False
+    assert document.temporal_collection is None
 
 
 @responses.activate
@@ -887,7 +887,7 @@ def test_read_single_metadata_category_without_content(docs_client):
     assert document.metadata.permissions() == []
     assert document.metadata.properties() == {}
     assert document.metadata.quality() is None
-    assert document.is_temporal is False
+    assert document.temporal_collection is None
 
 
 @responses.activate
@@ -929,7 +929,7 @@ def test_read_two_metadata_categories_without_content(docs_client):
     assert document.metadata.permissions() == []
     assert document.metadata.properties() == {}
     assert document.metadata.quality() == 0
-    assert document.is_temporal is False
+    assert document.temporal_collection is None
 
 
 @responses.activate
@@ -993,7 +993,7 @@ def test_read_all_metadata_categories_without_content(docs_client):
     assert document.metadata.permissions() == []
     assert document.metadata.properties() == {}
     assert document.metadata.quality() == 0
-    assert document.is_temporal is False
+    assert document.temporal_collection is None
 
 
 @responses.activate
@@ -1095,7 +1095,7 @@ def test_read_multiple_docs_with_full_metadata(docs_client):
     assert xml_doc.metadata.permissions() == []
     assert xml_doc.metadata.properties() == {}
     assert xml_doc.metadata.quality() == 0
-    assert xml_doc.is_temporal is False
+    assert xml_doc.temporal_collection is None
 
     json_docs = list(filter(lambda d: d.uri.endswith(".json"), docs))
     assert len(json_docs) == 1
@@ -1111,7 +1111,7 @@ def test_read_multiple_docs_with_full_metadata(docs_client):
     assert json_doc.metadata.permissions() == []
     assert json_doc.metadata.properties() == {}
     assert json_doc.metadata.quality() == 1
-    assert json_doc.is_temporal is False
+    assert json_doc.temporal_collection is None
 
 
 @responses.activate
@@ -1205,7 +1205,7 @@ def test_read_multiple_docs_with_single_metadata_category(docs_client):
     assert xml_doc.metadata.permissions() == []
     assert xml_doc.metadata.properties() == {}
     assert xml_doc.metadata.quality() is None
-    assert xml_doc.is_temporal is False
+    assert xml_doc.temporal_collection is None
 
     json_docs = list(filter(lambda d: d.uri.endswith(".json"), docs))
     assert len(json_docs) == 1
@@ -1221,7 +1221,7 @@ def test_read_multiple_docs_with_single_metadata_category(docs_client):
     assert json_doc.metadata.permissions() == []
     assert json_doc.metadata.properties() == {}
     assert json_doc.metadata.quality() is None
-    assert json_doc.is_temporal is False
+    assert json_doc.temporal_collection is None
 
 
 @responses.activate
@@ -1320,7 +1320,7 @@ def test_read_multiple_docs_with_two_metadata_categories(docs_client):
     assert xml_doc.metadata.permissions() == []
     assert xml_doc.metadata.properties() == {}
     assert xml_doc.metadata.quality() == 0
-    assert xml_doc.is_temporal is False
+    assert xml_doc.temporal_collection is None
 
     json_docs = list(filter(lambda d: d.uri.endswith(".json"), docs))
     assert len(json_docs) == 1
@@ -1336,7 +1336,7 @@ def test_read_multiple_docs_with_two_metadata_categories(docs_client):
     assert json_doc.metadata.permissions() == []
     assert json_doc.metadata.properties() == {}
     assert json_doc.metadata.quality() == 1
-    assert json_doc.is_temporal is False
+    assert json_doc.temporal_collection is None
 
 
 @responses.activate
@@ -1460,7 +1460,7 @@ def test_read_multiple_docs_with_all_metadata_categories(docs_client):
     assert xml_doc.metadata.permissions() == []
     assert xml_doc.metadata.properties() == {}
     assert xml_doc.metadata.quality() == 0
-    assert xml_doc.is_temporal is False
+    assert xml_doc.temporal_collection is None
 
     json_docs = list(filter(lambda d: d.uri.endswith(".json"), docs))
     assert len(json_docs) == 1
@@ -1476,7 +1476,7 @@ def test_read_multiple_docs_with_all_metadata_categories(docs_client):
     assert json_doc.metadata.permissions() == []
     assert json_doc.metadata.properties() == {}
     assert json_doc.metadata.quality() == 1
-    assert json_doc.is_temporal is False
+    assert json_doc.temporal_collection is None
 
 
 @responses.activate
@@ -1549,7 +1549,7 @@ def test_read_multiple_docs_full_metadata_without_content(docs_client):
     assert xml_doc.metadata.permissions() == []
     assert xml_doc.metadata.properties() == {}
     assert xml_doc.metadata.quality() == 0
-    assert xml_doc.is_temporal is False
+    assert xml_doc.temporal_collection is None
 
     json_docs = list(filter(lambda d: d.uri.endswith(".json"), docs))
     assert len(json_docs) == 1
@@ -1564,7 +1564,7 @@ def test_read_multiple_docs_full_metadata_without_content(docs_client):
     assert json_doc.metadata.permissions() == []
     assert json_doc.metadata.properties() == {}
     assert json_doc.metadata.quality() == 1
-    assert json_doc.is_temporal is False
+    assert json_doc.temporal_collection is None
 
 
 @responses.activate
@@ -1629,7 +1629,7 @@ def test_read_multiple_docs_single_metadata_category_without_content(docs_client
     assert xml_doc.metadata.permissions() == []
     assert xml_doc.metadata.properties() == {}
     assert xml_doc.metadata.quality() is None
-    assert xml_doc.is_temporal is False
+    assert xml_doc.temporal_collection is None
 
     json_docs = list(filter(lambda d: d.uri.endswith(".json"), docs))
     assert len(json_docs) == 1
@@ -1644,7 +1644,7 @@ def test_read_multiple_docs_single_metadata_category_without_content(docs_client
     assert json_doc.metadata.permissions() == []
     assert json_doc.metadata.properties() == {}
     assert json_doc.metadata.quality() is None
-    assert json_doc.is_temporal is False
+    assert json_doc.temporal_collection is None
 
 
 @responses.activate
@@ -1714,7 +1714,7 @@ def test_read_multiple_docs_two_metadata_categories_without_content(docs_client)
     assert xml_doc.metadata.permissions() == []
     assert xml_doc.metadata.properties() == {}
     assert xml_doc.metadata.quality() == 0
-    assert xml_doc.is_temporal is False
+    assert xml_doc.temporal_collection is None
 
     json_docs = list(filter(lambda d: d.uri.endswith(".json"), docs))
     assert len(json_docs) == 1
@@ -1729,7 +1729,7 @@ def test_read_multiple_docs_two_metadata_categories_without_content(docs_client)
     assert json_doc.metadata.permissions() == []
     assert json_doc.metadata.properties() == {}
     assert json_doc.metadata.quality() == 1
-    assert json_doc.is_temporal is False
+    assert json_doc.temporal_collection is None
 
 
 @responses.activate
@@ -1823,7 +1823,7 @@ def test_read_multiple_docs_all_metadata_categories_without_content(docs_client)
     assert xml_doc.metadata.permissions() == []
     assert xml_doc.metadata.properties() == {}
     assert xml_doc.metadata.quality() == 0
-    assert xml_doc.is_temporal is False
+    assert xml_doc.temporal_collection is None
 
     json_docs = list(filter(lambda d: d.uri.endswith(".json"), docs))
     assert len(json_docs) == 1
@@ -1838,7 +1838,7 @@ def test_read_multiple_docs_all_metadata_categories_without_content(docs_client)
     assert json_doc.metadata.permissions() == []
     assert json_doc.metadata.properties() == {}
     assert json_doc.metadata.quality() == 1
-    assert json_doc.is_temporal is False
+    assert json_doc.temporal_collection is None
 
 
 @responses.activate
@@ -1865,7 +1865,7 @@ def test_read_single_doc_using_custom_database(docs_client):
     assert document.content.getroot().text is None
     assert document.content.getroot().attrib == {}
     assert document.metadata is None
-    assert document.is_temporal is False
+    assert document.temporal_collection is None
 
 
 @responses.activate
@@ -1954,7 +1954,7 @@ def test_read_multiple_docs_using_custom_database(docs_client):
     assert xml_doc.content.getroot().text is None
     assert xml_doc.content.getroot().attrib == {}
     assert xml_doc.metadata is None
-    assert xml_doc.is_temporal is False
+    assert xml_doc.temporal_collection is None
 
     json_docs = list(filter(lambda d: d.uri.endswith(".json"), docs))
     assert len(json_docs) == 1
@@ -1965,7 +1965,7 @@ def test_read_multiple_docs_using_custom_database(docs_client):
     assert isinstance(json_doc.content, dict)
     assert json_doc.content == {"root": {"child": "data"}}
     assert json_doc.metadata is None
-    assert json_doc.is_temporal is False
+    assert json_doc.temporal_collection is None
 
     xqy_docs = list(filter(lambda d: d.uri.endswith(".xqy"), docs))
     assert len(xqy_docs) == 1
@@ -1976,7 +1976,7 @@ def test_read_multiple_docs_using_custom_database(docs_client):
     assert isinstance(xqy_doc.content, str)
     assert xqy_doc.content == 'xquery version "1.0-ml";\n\nfn:current-date()'
     assert xqy_doc.metadata is None
-    assert xqy_doc.is_temporal is False
+    assert xqy_doc.temporal_collection is None
 
     zip_docs = list(filter(lambda d: d.uri.endswith(".zip"), docs))
     assert len(zip_docs) == 1
@@ -1987,7 +1987,7 @@ def test_read_multiple_docs_using_custom_database(docs_client):
     assert isinstance(zip_doc.content, bytes)
     assert zip_doc.content == zip_content
     assert zip_doc.metadata is None
-    assert zip_doc.is_temporal is False
+    assert zip_doc.temporal_collection is None
 
 
 @responses.activate

@@ -1991,7 +1991,7 @@ def test_read_multiple_docs_using_custom_database(docs_client):
 
 
 @responses.activate
-def test_write_raw_document(docs_client):
+def test_create_raw_document(docs_client):
     uri = "/some/dir/doc1.xml"
     content = b"<root><child>data</child></root>"
     doc = RawDocument(content, uri, DocumentType.XML)
@@ -2024,7 +2024,7 @@ def test_write_raw_document(docs_client):
 
 
 @responses.activate
-def test_write_raw_string_document(docs_client):
+def test_create_raw_string_document(docs_client):
     uri = "/some/dir/doc2.json"
     content = '{"root": {"child": "data"}}'
     doc = RawStringDocument(content, uri, DocumentType.JSON)
@@ -2057,7 +2057,7 @@ def test_write_raw_string_document(docs_client):
 
 
 @responses.activate
-def test_write_xml_document(docs_client):
+def test_create_xml_document(docs_client):
     uri = "/some/dir/doc1.xml"
     content_str = "<root><child>data</child></root>"
     content = ElemTree.ElementTree(ElemTree.fromstring(content_str))
@@ -2090,7 +2090,7 @@ def test_write_xml_document(docs_client):
 
 
 @responses.activate
-def test_write_json_document(docs_client):
+def test_create_json_document(docs_client):
     uri = "/some/dir/doc2.json"
     content = {"root": {"child": "data"}}
     doc = JSONDocument(content, uri)
@@ -2123,7 +2123,7 @@ def test_write_json_document(docs_client):
 
 
 @responses.activate
-def test_write_text_document(docs_client):
+def test_create_text_document(docs_client):
     uri = "/some/dir/doc3.xqy"
     content = 'xquery version "1.0-ml";\n\nfn:current-date()'
     doc = TextDocument(content, uri)
@@ -2156,7 +2156,7 @@ def test_write_text_document(docs_client):
 
 
 @responses.activate
-def test_write_binary_document(docs_client):
+def test_create_binary_document(docs_client):
     uri = "/some/dir/doc4.zip"
     content = zlib.compress(b'xquery version "1.0-ml";\n\nfn:current-date()')
     doc = BinaryDocument(content, uri)
@@ -2189,7 +2189,7 @@ def test_write_binary_document(docs_client):
 
 
 @responses.activate
-def test_write_metadata_document_when_doc_exists(docs_client):
+def test_create_metadata_document_when_doc_exists(docs_client):
     uri = "/some/dir/doc1.xml"
     metadata = Metadata(collections=["test-collection"])
     doc = MetadataDocument(uri, metadata)
@@ -2222,7 +2222,7 @@ def test_write_metadata_document_when_doc_exists(docs_client):
 
 
 @responses.activate
-def test_write_metadata_document_when_doc_does_not_exists(docs_client):
+def test_create_metadata_document_when_doc_does_not_exists(docs_client):
     uri = "/some/dir/doc1.xml"
     metadata = Metadata(collections=["test-collection"])
     doc = MetadataDocument(uri, metadata)
@@ -2257,7 +2257,7 @@ def test_write_metadata_document_when_doc_does_not_exists(docs_client):
 
 
 @responses.activate
-def test_write_multiple_documents(docs_client):
+def test_create_multiple_documents(docs_client):
     doc_1_uri = "/some/dir/doc1.xml"
     doc_1_content_str = "<root><child>data</child></root>"
     doc_1_content = ElemTree.ElementTree(ElemTree.fromstring(doc_1_content_str))
@@ -2346,7 +2346,7 @@ def test_write_multiple_documents(docs_client):
 
 
 @responses.activate
-def test_write_raw_document_with_metadata(docs_client):
+def test_create_raw_document_with_metadata(docs_client):
     uri = "/some/dir/doc1.xml"
     content = b"<root><child>data</child></root>"
     metadata = b'{"collections": ["test-collection"]}'
@@ -2380,7 +2380,7 @@ def test_write_raw_document_with_metadata(docs_client):
 
 
 @responses.activate
-def test_write_raw_string_document_with_metadata(docs_client):
+def test_create_raw_string_document_with_metadata(docs_client):
     uri = "/some/dir/doc1.xml"
     content = "<root><child>data</child></root>"
     metadata = '{"collections": ["test-collection"]}'
@@ -2414,7 +2414,7 @@ def test_write_raw_string_document_with_metadata(docs_client):
 
 
 @responses.activate
-def test_write_xml_document_with_metadata(docs_client):
+def test_create_xml_document_with_metadata(docs_client):
     uri = "/some/dir/doc1.xml"
     content_str = "<root><child>data</child></root>"
     content = ElemTree.ElementTree(ElemTree.fromstring(content_str))
@@ -2448,7 +2448,7 @@ def test_write_xml_document_with_metadata(docs_client):
 
 
 @responses.activate
-def test_write_json_document_with_metadata(docs_client):
+def test_create_json_document_with_metadata(docs_client):
     uri = "/some/dir/doc2.json"
     content = {"root": {"child": "data"}}
     metadata = Metadata(collections=["test-collection"])
@@ -2482,7 +2482,7 @@ def test_write_json_document_with_metadata(docs_client):
 
 
 @responses.activate
-def test_write_text_document_with_metadata(docs_client):
+def test_create_text_document_with_metadata(docs_client):
     uri = "/some/dir/doc3.xqy"
     content = 'xquery version "1.0-ml";\n\nfn:current-date()'
     metadata = Metadata(collections=["test-collection"])
@@ -2516,7 +2516,7 @@ def test_write_text_document_with_metadata(docs_client):
 
 
 @responses.activate
-def test_write_binary_document_with_metadata(docs_client):
+def test_create_binary_document_with_metadata(docs_client):
     uri = "/some/dir/doc4.zip"
     content = zlib.compress(b'xquery version "1.0-ml";\n\nfn:current-date()')
     metadata = Metadata(collections=["test-collection"])
@@ -2550,7 +2550,7 @@ def test_write_binary_document_with_metadata(docs_client):
 
 
 @responses.activate
-def test_write_multiple_documents_with_metadata(docs_client):
+def test_create_multiple_documents_with_metadata(docs_client):
     metadata = Metadata(collections=["test-collection"])
 
     doc_1_uri = "/some/dir/doc1.xml"
@@ -2641,7 +2641,7 @@ def test_write_multiple_documents_with_metadata(docs_client):
 
 
 @responses.activate
-def test_write_single_document_with_default_metadata(docs_client):
+def test_create_single_document_with_default_metadata(docs_client):
     default_metadata = Metadata(collections=["test-collection"])
 
     uri = "/some/dir/doc1.xml"
@@ -2676,7 +2676,7 @@ def test_write_single_document_with_default_metadata(docs_client):
 
 
 @responses.activate
-def test_write_multiple_documents_with_default_metadata(docs_client):
+def test_create_multiple_documents_with_default_metadata(docs_client):
     default_metadata = Metadata(collections=["test-collection"])
 
     doc_1_uri = "/some/dir/doc1.xml"
@@ -2764,7 +2764,7 @@ def test_write_multiple_documents_with_default_metadata(docs_client):
 
 
 @responses.activate
-def test_write_only_default_metadata(docs_client):
+def test_create_only_default_metadata(docs_client):
     default_metadata = Metadata(collections=["test-collection"])
 
     builder = MLResponseBuilder()
@@ -2782,7 +2782,7 @@ def test_write_only_default_metadata(docs_client):
 
 
 @responses.activate
-def test_write_single_document_using_custom_database(docs_client):
+def test_create_single_document_using_custom_database(docs_client):
     uri = "/some/dir/doc1.xml"
     content = b"<root><child>data</child></root>"
     doc = RawDocument(content, uri, DocumentType.XML)
@@ -2816,7 +2816,7 @@ def test_write_single_document_using_custom_database(docs_client):
 
 
 @responses.activate
-def test_write_multiple_documents_using_custom_database(docs_client):
+def test_create_multiple_documents_using_custom_database(docs_client):
     doc_1_uri = "/some/dir/doc1.xml"
     doc_1_content_str = "<root><child>data</child></root>"
     doc_1_content = ElemTree.ElementTree(ElemTree.fromstring(doc_1_content_str))

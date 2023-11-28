@@ -42,6 +42,7 @@ class DocumentsClient(MLResourceClient):
         self,
         data: Document | Metadata | list[Document | Metadata],
         database: str | None = None,
+        temporal_collection: str | None = None,
     ) -> dict:
         """Create or update document(s) content or metadata in a MarkLogic database.
 
@@ -52,6 +53,9 @@ class DocumentsClient(MLResourceClient):
         database : str | None, default None
             Perform this operation on the named content database instead
             of the default content database associated with the REST API instance.
+        temporal_collection : str | None, default None
+            Specify the name of a temporal collection into which the documents are
+            to be inserted.
 
         Returns
         -------
@@ -64,7 +68,7 @@ class DocumentsClient(MLResourceClient):
             If MarkLogic returns an error
         """
         body_parts = DocumentsSender.parse(data)
-        call = self._post_call(body_parts, database)
+        call = self._post_call(body_parts, database, temporal_collection)
         resp = self.call(call)
         if not resp.ok:
             resp_body = resp.json()
@@ -153,6 +157,7 @@ class DocumentsClient(MLResourceClient):
         cls,
         body_parts: list[DocumentsBodyPart],
         database: str | None,
+        temporal_collection: str | None,
     ) -> DocumentsPostCall:
         """Prepare a DocumentsPostCall instance.
 
@@ -162,16 +167,23 @@ class DocumentsClient(MLResourceClient):
         ----------
         body_parts : list[DocumentsBodyPart]
             A list of multipart request body parts
-        database : str | None, default None
+        database : str | None
             Perform this operation on the named content database instead
             of the default content database associated with the REST API instance.
+        temporal_collection : str | None
+            Specify the name of a temporal collection into which the documents are
+            to be inserted.
 
         Returns
         -------
         DocumentsPostCall
             A prepared DocumentsPostCall instance
         """
-        return DocumentsPostCall(body_parts=body_parts, database=database)
+        return DocumentsPostCall(
+            body_parts=body_parts,
+            database=database,
+            temporal_collection=temporal_collection,
+        )
 
     @classmethod
     def _get_call(

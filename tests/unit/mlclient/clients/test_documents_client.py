@@ -2903,6 +2903,44 @@ def test_create_multiple_documents_using_custom_database(docs_client):
 
 
 @responses.activate
+def test_create_document_with_temporal_collection(docs_client):
+    uri = "/some/dir/doc1.xml"
+    content = "<root><child>data</child><systemStart/><systemEnd/></root>"
+    doc = RawStringDocument(content, uri, DocumentType.XML)
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/documents")
+    builder.with_request_param("temporal-collection", "temporal-collection")
+    builder.with_response_content_type("application/json; charset=utf-8")
+    builder.with_response_header("vnd.marklogic.document-format", "json")
+    builder.with_response_header(
+        "x-marklogic-system-time",
+        "2023-11-28T06:37:25.824213Z",
+    )
+    builder.with_response_status(200)
+    builder.with_response_body(
+        {
+            "documents": [
+                {
+                    "uri": "/some/dir/doc1.xml",
+                    "mime-type": "application/xml",
+                    "category": ["metadata", "content"],
+                },
+            ],
+        },
+    )
+    builder.build_post()
+
+    resp = docs_client.create(doc, temporal_collection="temporal-collection")
+
+    documents = resp["documents"]
+    assert len(documents) == 1
+    assert documents[0]["uri"] == uri
+    assert documents[0]["mime-type"] == "application/xml"
+    assert documents[0]["category"] == ["metadata", "content"]
+
+
+@responses.activate
 def test_delete_single_document(docs_client):
     uri = "/some/dir/doc1.xml"
 

@@ -3059,3 +3059,25 @@ def test_delete_document_with_non_existing_database(docs_client):
         "[404 Not Found] (XDMP-NOSUCHDB) XDMP-NOSUCHDB: No such database Document"
     )
     assert err.value.args[0] == expected_error
+
+
+@responses.activate
+def test_delete_document_with_temporal_collection(docs_client):
+    uri = "/some/dir/doc1.xml"
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/documents")
+    builder.with_request_param("uri", "/some/dir/doc1.xml")
+    builder.with_request_param("temporal-collection", "temporal-collection")
+    builder.with_response_header(
+        "x-marklogic-system-time",
+        "2023-11-28T06:46:51.297376Z",
+    )
+    builder.with_response_status(204)
+    builder.with_empty_response_body()
+    builder.build_delete()
+
+    try:
+        docs_client.delete(uri, temporal_collection="temporal-collection")
+    except MarkLogicError as err:
+        pytest.fail(str(err))

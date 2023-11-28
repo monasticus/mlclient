@@ -68,7 +68,11 @@ class DocumentsClient(MLResourceClient):
             If MarkLogic returns an error
         """
         body_parts = DocumentsSender.parse(data)
-        call = self._post_call(body_parts, database, temporal_collection)
+        call = self._post_call(
+            body_parts=body_parts,
+            database=database,
+            temporal_collection=temporal_collection,
+        )
         resp = self.call(call)
         if not resp.ok:
             resp_body = resp.json()
@@ -122,6 +126,7 @@ class DocumentsClient(MLResourceClient):
         uris: str | list[str] | tuple[str] | set[str],
         category: str | list | None = None,
         database: str | None = None,
+        temporal_collection: str | None = None,
     ):
         """Delete document(s) content or metadata in a MarkLogic database.
 
@@ -140,13 +145,21 @@ class DocumentsClient(MLResourceClient):
         database : str | None, default None
             Perform this operation on the named content database instead
             of the default content database associated with the REST API instance.
+        temporal_collection : str | None, default None
+            Specify the name of a temporal collection that contains the document(s)
+            to be deleted. Applies to all documents when deleting more than one.
 
         Raises
         ------
         MarkLogicError
             If MarkLogic returns an error
         """
-        call = self._delete_call(uris=uris, category=category, database=database)
+        call = self._delete_call(
+            uris=uris,
+            category=category,
+            database=database,
+            temporal_collection=temporal_collection,
+        )
         resp = self.call(call)
         if not resp.ok:
             resp_body = MLResponseParser.parse(resp)
@@ -237,6 +250,7 @@ class DocumentsClient(MLResourceClient):
         uris: str | list[str] | tuple[str] | set[str],
         category: str | list | None,
         database: str | None,
+        temporal_collection: str | None = None,
     ) -> DocumentsDeleteCall:
         """Prepare a DocumentsDeleteCall instance.
 
@@ -254,13 +268,21 @@ class DocumentsClient(MLResourceClient):
         database : str | None, default None
             Perform this operation on the named content database instead
             of the default content database associated with the REST API instance.
+        temporal_collection : str
+            Specify the name of a temporal collection that contains the document(s)
+            to be deleted. Applies to all documents when deleting more than one.
 
         Returns
         -------
         DocumentsDeleteCall
             A prepared DocumentsDeleteCall instance
         """
-        return DocumentsDeleteCall(uri=uris, category=category, database=database)
+        return DocumentsDeleteCall(
+            uri=uris,
+            category=category,
+            database=database,
+            temporal_collection=temporal_collection,
+        )
 
 
 class DocumentsSender:

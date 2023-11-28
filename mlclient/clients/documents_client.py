@@ -127,6 +127,7 @@ class DocumentsClient(MLResourceClient):
         category: str | list | None = None,
         database: str | None = None,
         temporal_collection: str | None = None,
+        wipe_temporal: bool | None = None,
     ):
         """Delete document(s) content or metadata in a MarkLogic database.
 
@@ -148,6 +149,10 @@ class DocumentsClient(MLResourceClient):
         temporal_collection : str | None, default None
             Specify the name of a temporal collection that contains the document(s)
             to be deleted. Applies to all documents when deleting more than one.
+        wipe_temporal : bool | None, default None
+            Remove all versions of a temporal document rather than performing
+            a temporal delete. You can only use this parameter when you also specify
+            a temporal-collection parameter.
 
         Raises
         ------
@@ -159,6 +164,7 @@ class DocumentsClient(MLResourceClient):
             category=category,
             database=database,
             temporal_collection=temporal_collection,
+            wipe_temporal=wipe_temporal,
         )
         resp = self.call(call)
         if not resp.ok:
@@ -214,13 +220,13 @@ class DocumentsClient(MLResourceClient):
         ----------
         uris : str | list[str] | tuple[str] | set[str]
             One or more URIs for documents in the database.
-        category : str | list | None, default None
+        category : str | list | None
             The category of data to fetch about the requested document.
             Category can be specified multiple times to retrieve any combination
             of content and metadata. Valid categories: content (default), metadata,
             metadata-values, collections, permissions, properties, and quality.
             Use metadata to request all categories except content.
-        database : str | None, default None
+        database : str | None
             Perform this operation on the named content database instead
             of the default content database associated with the REST API instance.
 
@@ -250,7 +256,8 @@ class DocumentsClient(MLResourceClient):
         uris: str | list[str] | tuple[str] | set[str],
         category: str | list | None,
         database: str | None,
-        temporal_collection: str | None = None,
+        temporal_collection: str | None,
+        wipe_temporal: bool | None,
     ) -> DocumentsDeleteCall:
         """Prepare a DocumentsDeleteCall instance.
 
@@ -259,18 +266,22 @@ class DocumentsClient(MLResourceClient):
         uris : str | list[str] | tuple[str] | set[str]
             The URI of a document to delete or for which to remove metadata.
             You can specify multiple documents.
-        category : str | list | None, default None
+        category : str | list | None
             The category of data to fetch about the requested document.
             Category can be specified multiple times to retrieve any combination
             of content and metadata. Valid categories: content (default), metadata,
             metadata-values, collections, permissions, properties, and quality.
             Use metadata to request all categories except content.
-        database : str | None, default None
+        database : str | None
             Perform this operation on the named content database instead
             of the default content database associated with the REST API instance.
-        temporal_collection : str
+        temporal_collection : str | None
             Specify the name of a temporal collection that contains the document(s)
             to be deleted. Applies to all documents when deleting more than one.
+        wipe_temporal : bool | None
+            Remove all versions of a temporal document rather than performing
+            a temporal delete. You can only use this parameter when you also specify
+            a temporal-collection parameter.
 
         Returns
         -------
@@ -282,6 +293,7 @@ class DocumentsClient(MLResourceClient):
             category=category,
             database=database,
             temporal_collection=temporal_collection,
+            wipe_temporal=wipe_temporal,
         )
 
 

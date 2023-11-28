@@ -3081,3 +3081,30 @@ def test_delete_document_with_temporal_collection(docs_client):
         docs_client.delete(uri, temporal_collection="temporal-collection")
     except MarkLogicError as err:
         pytest.fail(str(err))
+
+
+@responses.activate
+def test_delete_document_with_wipe_temporal(docs_client):
+    uri = "/some/dir/doc1.xml"
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/documents")
+    builder.with_request_param("uri", "/some/dir/doc1.xml")
+    builder.with_request_param("temporal-collection", "temporal-collection")
+    builder.with_request_param("result", "wiped")
+    builder.with_response_header(
+        "x-marklogic-system-time",
+        "2023-11-28T09:02:48.09751Z",
+    )
+    builder.with_response_status(204)
+    builder.with_empty_response_body()
+    builder.build_delete()
+
+    try:
+        docs_client.delete(
+            uri,
+            temporal_collection="temporal-collection",
+            wipe_temporal=True,
+        )
+    except MarkLogicError as err:
+        pytest.fail(str(err))

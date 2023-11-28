@@ -866,7 +866,7 @@ def test_delete_documents():
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/v1/documents")
     builder.with_request_param("uri", "/path/to/non-existing/document.xml")
-    builder.with_request_param("result", "wipe")
+    builder.with_request_param("result", "wiped")
     builder.with_response_content_type("application/xml; charset=UTF-8")
     builder.with_response_status(400)
     builder.with_response_body(Path(response_body_path).read_bytes())

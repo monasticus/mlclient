@@ -42,6 +42,7 @@ class DocumentsClient(MLResourceClient):
         self,
         data: Document | Metadata | list[Document | Metadata],
         database: str | None = None,
+        temporal_collection: str | None = None,
     ) -> dict:
         """Create or update document(s) content or metadata in a MarkLogic database.
 
@@ -52,6 +53,9 @@ class DocumentsClient(MLResourceClient):
         database : str | None, default None
             Perform this operation on the named content database instead
             of the default content database associated with the REST API instance.
+        temporal_collection : str | None, default None
+            Specify the name of a temporal collection into which the documents are
+            to be inserted.
 
         Returns
         -------
@@ -64,7 +68,11 @@ class DocumentsClient(MLResourceClient):
             If MarkLogic returns an error
         """
         body_parts = DocumentsSender.parse(data)
-        call = self._post_call(body_parts, database)
+        call = self._post_call(
+            body_parts=body_parts,
+            database=database,
+            temporal_collection=temporal_collection,
+        )
         resp = self.call(call)
         if not resp.ok:
             resp_body = resp.json()
@@ -118,6 +126,8 @@ class DocumentsClient(MLResourceClient):
         uris: str | list[str] | tuple[str] | set[str],
         category: str | list | None = None,
         database: str | None = None,
+        temporal_collection: str | None = None,
+        wipe_temporal: bool | None = None,
     ):
         """Delete document(s) content or metadata in a MarkLogic database.
 
@@ -136,13 +146,26 @@ class DocumentsClient(MLResourceClient):
         database : str | None, default None
             Perform this operation on the named content database instead
             of the default content database associated with the REST API instance.
+        temporal_collection : str | None, default None
+            Specify the name of a temporal collection that contains the document(s)
+            to be deleted. Applies to all documents when deleting more than one.
+        wipe_temporal : bool | None, default None
+            Remove all versions of a temporal document rather than performing
+            a temporal delete. You can only use this parameter when you also specify
+            a temporal-collection parameter.
 
         Raises
         ------
         MarkLogicError
             If MarkLogic returns an error
         """
-        call = self._delete_call(uris=uris, category=category, database=database)
+        call = self._delete_call(
+            uris=uris,
+            category=category,
+            database=database,
+            temporal_collection=temporal_collection,
+            wipe_temporal=wipe_temporal,
+        )
         resp = self.call(call)
         if not resp.ok:
             resp_body = MLResponseParser.parse(resp)
@@ -153,6 +176,7 @@ class DocumentsClient(MLResourceClient):
         cls,
         body_parts: list[DocumentsBodyPart],
         database: str | None,
+        temporal_collection: str | None,
     ) -> DocumentsPostCall:
         """Prepare a DocumentsPostCall instance.
 
@@ -162,16 +186,23 @@ class DocumentsClient(MLResourceClient):
         ----------
         body_parts : list[DocumentsBodyPart]
             A list of multipart request body parts
-        database : str | None, default None
+        database : str | None
             Perform this operation on the named content database instead
             of the default content database associated with the REST API instance.
+        temporal_collection : str | None
+            Specify the name of a temporal collection into which the documents are
+            to be inserted.
 
         Returns
         -------
         DocumentsPostCall
             A prepared DocumentsPostCall instance
         """
-        return DocumentsPostCall(body_parts=body_parts, database=database)
+        return DocumentsPostCall(
+            body_parts=body_parts,
+            database=database,
+            temporal_collection=temporal_collection,
+        )
 
     @classmethod
     def _get_call(
@@ -189,13 +220,13 @@ class DocumentsClient(MLResourceClient):
         ----------
         uris : str | list[str] | tuple[str] | set[str]
             One or more URIs for documents in the database.
-        category : str | list | None, default None
+        category : str | list | None
             The category of data to fetch about the requested document.
             Category can be specified multiple times to retrieve any combination
             of content and metadata. Valid categories: content (default), metadata,
             metadata-values, collections, permissions, properties, and quality.
             Use metadata to request all categories except content.
-        database : str | None, default None
+        database : str | None
             Perform this operation on the named content database instead
             of the default content database associated with the REST API instance.
 
@@ -225,6 +256,8 @@ class DocumentsClient(MLResourceClient):
         uris: str | list[str] | tuple[str] | set[str],
         category: str | list | None,
         database: str | None,
+        temporal_collection: str | None,
+        wipe_temporal: bool | None,
     ) -> DocumentsDeleteCall:
         """Prepare a DocumentsDeleteCall instance.
 
@@ -233,22 +266,35 @@ class DocumentsClient(MLResourceClient):
         uris : str | list[str] | tuple[str] | set[str]
             The URI of a document to delete or for which to remove metadata.
             You can specify multiple documents.
-        category : str | list | None, default None
+        category : str | list | None
             The category of data to fetch about the requested document.
             Category can be specified multiple times to retrieve any combination
             of content and metadata. Valid categories: content (default), metadata,
             metadata-values, collections, permissions, properties, and quality.
             Use metadata to request all categories except content.
-        database : str | None, default None
+        database : str | None
             Perform this operation on the named content database instead
             of the default content database associated with the REST API instance.
+        temporal_collection : str | None
+            Specify the name of a temporal collection that contains the document(s)
+            to be deleted. Applies to all documents when deleting more than one.
+        wipe_temporal : bool | None
+            Remove all versions of a temporal document rather than performing
+            a temporal delete. You can only use this parameter when you also specify
+            a temporal-collection parameter.
 
         Returns
         -------
         DocumentsDeleteCall
             A prepared DocumentsDeleteCall instance
         """
-        return DocumentsDeleteCall(uri=uris, category=category, database=database)
+        return DocumentsDeleteCall(
+            uri=uris,
+            category=category,
+            database=database,
+            temporal_collection=temporal_collection,
+            wipe_temporal=wipe_temporal,
+        )
 
 
 class DocumentsSender:

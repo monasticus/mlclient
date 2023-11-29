@@ -180,13 +180,13 @@ def test_metadata_when_none():
     assert DocumentTestImpl().metadata is None
 
 
-def test_is_temporal():
-    document = DocumentTestImpl(is_temporal=True)
-    assert document.is_temporal is True
+def test_temporal_collection():
+    document = DocumentTestImpl(temporal_collection="some-collection")
+    assert document.temporal_collection == "some-collection"
 
 
-def test_is_temporal_when_none():
-    assert DocumentTestImpl().is_temporal is False
+def test_temporal_collection_when_none():
+    assert DocumentTestImpl().temporal_collection is None
 
 
 def test_content():

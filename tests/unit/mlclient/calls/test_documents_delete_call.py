@@ -101,7 +101,7 @@ def test_fully_parametrized_call_for_single_uri():
         "txid": "transaction",
         "temporal-collection": "Entity-collection",
         "system-time": "2023-09-09T01:01:01.000Z",
-        "result": "wipe",
+        "result": "wiped",
     }
     assert call.body is None
 
@@ -125,6 +125,6 @@ def test_fully_parametrized_call_for_multiple_uris():
         "txid": "transaction",
         "temporal-collection": "Entity-collection",
         "system-time": "2023-09-09T01:01:01.000Z",
-        "result": "wipe",
+        "result": "wiped",
     }
     assert call.body is None

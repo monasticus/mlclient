@@ -309,7 +309,7 @@ class DocumentsDeleteCall(ResourceCall):
     to the /v1/documents REST Resource.
 
     Retrieve document content and/or metadata from the database.
-    Documentation of the REST Resource API: https://docs.marklogic.com/REST/GET/v1/documents
+    Documentation of the REST Resource API: https://docs.marklogic.com/REST/DELETE/v1/documents
     """
 
     _ENDPOINT: str = "/v1/documents"
@@ -379,7 +379,7 @@ class DocumentsDeleteCall(ResourceCall):
         self.add_param(self._TEMPORAL_COLLECTION_PARAM, temporal_collection)
         self.add_param(self._SYSTEM_TIME_PARAM, system_time)
         if wipe_temporal is True:
-            self.add_param(self._RESULT_PARAM, "wipe")
+            self.add_param(self._RESULT_PARAM, "wiped")
 
     @property
     def endpoint(

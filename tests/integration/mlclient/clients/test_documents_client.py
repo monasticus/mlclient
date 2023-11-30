@@ -7,7 +7,8 @@ from mlclient.model import DocumentType, Document, RawDocument
 
 def test_manage_xml_document():
     uri = "/some/dir/doc1.xml"
-    content = b"<root><child>data</child></root>"
+    content = (b'<?xml version="1.0" encoding="UTF-8"?>\n'
+               b'<root><child>data</child></root>')
     doc = RawDocument(content, uri, DocumentType.XML)
 
     _assert_document_does_not_exist(uri)
@@ -42,7 +43,7 @@ def _assert_document_exists_and_confirm_content(
         actual_doc = docs_client.read(expected_doc.uri)
         assert actual_doc.uri == expected_doc.uri
         assert actual_doc.doc_type == expected_doc.doc_type
-        assert expected_doc.content_bytes in actual_doc.content_bytes
+        assert actual_doc.content_bytes == expected_doc.content_bytes
         assert actual_doc.metadata == expected_doc.metadata
         assert actual_doc.temporal_collection == expected_doc.temporal_collection
 

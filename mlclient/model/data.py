@@ -837,7 +837,7 @@ class Metadata:
         collections: list | None = None,
         permissions: list | None = None,
         properties: dict | None = None,
-        quality: int | None = None,
+        quality: int = 0,
         metadata_values: dict | None = None,
     ):
         """Initialize Metadata instance.
@@ -850,7 +850,7 @@ class Metadata:
             Document permissions' list
         properties : dict | None
             Document's properties
-        quality : int | None
+        quality : int
             Document's quality
         metadata_values : dict | None
             Document's metadata values

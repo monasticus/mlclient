@@ -676,7 +676,7 @@ def test_read_doc_with_single_metadata_category(docs_client):
     assert document.metadata.metadata_values() == {}
     assert document.metadata.permissions() == []
     assert document.metadata.properties() == {}
-    assert document.metadata.quality() is None
+    assert document.metadata.quality() == 0
     assert document.temporal_collection is None
 
 
@@ -886,7 +886,7 @@ def test_read_single_metadata_category_without_content(docs_client):
     assert document.metadata.metadata_values() == {}
     assert document.metadata.permissions() == []
     assert document.metadata.properties() == {}
-    assert document.metadata.quality() is None
+    assert document.metadata.quality() == 0
     assert document.temporal_collection is None
 
 
@@ -1204,7 +1204,7 @@ def test_read_multiple_docs_with_single_metadata_category(docs_client):
     assert xml_doc.metadata.metadata_values() == {}
     assert xml_doc.metadata.permissions() == []
     assert xml_doc.metadata.properties() == {}
-    assert xml_doc.metadata.quality() is None
+    assert xml_doc.metadata.quality() == 0
     assert xml_doc.temporal_collection is None
 
     json_docs = list(filter(lambda d: d.uri.endswith(".json"), docs))
@@ -1220,7 +1220,7 @@ def test_read_multiple_docs_with_single_metadata_category(docs_client):
     assert json_doc.metadata.metadata_values() == {}
     assert json_doc.metadata.permissions() == []
     assert json_doc.metadata.properties() == {}
-    assert json_doc.metadata.quality() is None
+    assert json_doc.metadata.quality() == 0
     assert json_doc.temporal_collection is None
 
 
@@ -1628,7 +1628,7 @@ def test_read_multiple_docs_single_metadata_category_without_content(docs_client
     assert xml_doc.metadata.metadata_values() == {}
     assert xml_doc.metadata.permissions() == []
     assert xml_doc.metadata.properties() == {}
-    assert xml_doc.metadata.quality() is None
+    assert xml_doc.metadata.quality() == 0
     assert xml_doc.temporal_collection is None
 
     json_docs = list(filter(lambda d: d.uri.endswith(".json"), docs))
@@ -1643,7 +1643,7 @@ def test_read_multiple_docs_single_metadata_category_without_content(docs_client
     assert json_doc.metadata.metadata_values() == {}
     assert json_doc.metadata.permissions() == []
     assert json_doc.metadata.properties() == {}
-    assert json_doc.metadata.quality() is None
+    assert json_doc.metadata.quality() == 0
     assert json_doc.temporal_collection is None
 
 

@@ -240,7 +240,7 @@ def test_get_quality_when_exists():
 
 def test_get_quality_when_empty():
     metadata = Metadata()
-    assert metadata.quality() is None
+    assert metadata.quality() == 0
 
 
 def test_get_metadata_values_when_exists():
@@ -269,7 +269,7 @@ def test_set_quality_when_not_int():
     metadata = Metadata()
     success = metadata.set_quality("1")
     assert success is False
-    assert metadata.quality() is None
+    assert metadata.quality() == 0
 
 
 def test_add_collection():

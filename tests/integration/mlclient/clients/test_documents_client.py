@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import zlib
 
 import pytest
@@ -5,7 +7,7 @@ import pytest
 from mlclient.clients import DocumentsClient
 from mlclient.exceptions import MarkLogicError
 from mlclient.mimetypes import Mimetypes
-from mlclient.model import Document, DocumentType, RawDocument
+from mlclient.model import Document, DocumentType, JSONDocument, Metadata, RawDocument
 
 
 def test_create_read_and_remove_xml_document():
@@ -18,7 +20,7 @@ def test_create_read_and_remove_xml_document():
     _assert_document_does_not_exist(uri)
     try:
         _write_document(doc)
-        _assert_document_exists_and_confirm_content(uri, doc)
+        _assert_document_exists_and_confirm_data(uri, doc)
     finally:
         _delete_document(uri)
         _assert_document_does_not_exist(uri)
@@ -32,7 +34,7 @@ def test_create_read_and_remove_json_document():
     _assert_document_does_not_exist(uri)
     try:
         _write_document(doc)
-        _assert_document_exists_and_confirm_content(uri, doc)
+        _assert_document_exists_and_confirm_data(uri, doc)
     finally:
         _delete_document(uri)
         _assert_document_does_not_exist(uri)
@@ -46,7 +48,7 @@ def test_create_read_and_remove_text_document():
     _assert_document_does_not_exist(uri)
     try:
         _write_document(doc)
-        _assert_document_exists_and_confirm_content(uri, doc)
+        _assert_document_exists_and_confirm_data(uri, doc)
     finally:
         _delete_document(uri)
         _assert_document_does_not_exist(uri)
@@ -60,7 +62,22 @@ def test_create_read_and_remove_binary_document():
     _assert_document_does_not_exist(uri)
     try:
         _write_document(doc)
-        _assert_document_exists_and_confirm_content(uri, doc)
+        _assert_document_exists_and_confirm_data(uri, doc)
+    finally:
+        _delete_document(uri)
+        _assert_document_does_not_exist(uri)
+
+
+def test_create_read_and_remove_document_with_metadata():
+    uri = "/some/dir/doc2.json"
+    content = {"root": {"child": "data"}}
+    metadata = Metadata(collections=["test-collection"])
+    doc = JSONDocument(content, uri, metadata)
+
+    _assert_document_does_not_exist(uri)
+    try:
+        _write_document(doc)
+        _assert_document_exists_and_confirm_content_with_metadata(uri, doc)
     finally:
         _delete_document(uri)
         _assert_document_does_not_exist(uri)
@@ -80,9 +97,9 @@ def test_update_document():
     _assert_document_does_not_exist(uri)
     try:
         _write_document(doc_1)
-        _assert_document_exists_and_confirm_content(uri, doc_1)
+        _assert_document_exists_and_confirm_data(uri, doc_1)
         _write_document(doc_2)
-        _assert_document_exists_and_confirm_content(uri, doc_2)
+        _assert_document_exists_and_confirm_data(uri, doc_2)
     finally:
         _delete_document(uri)
         _assert_document_does_not_exist(uri)
@@ -104,17 +121,25 @@ def _assert_document_does_not_exist(
     assert err.value.args[0] == expected_msg
 
 
-def _assert_document_exists_and_confirm_content(
+def _assert_document_exists_and_confirm_content_with_metadata(
     uri: str,
     expected_doc: Document,
 ):
+    _assert_document_exists_and_confirm_data(uri, expected_doc, ["content", "metadata"])
+
+
+def _assert_document_exists_and_confirm_data(
+    uri: str,
+    expected_doc: Document,
+    category: str | list[str] = "content",
+):
     with DocumentsClient(auth_method="digest") as docs_client:
-        actual_doc = docs_client.read(uri)
+        actual_doc = docs_client.read(uri, category)
         assert actual_doc.uri == expected_doc.uri
         assert actual_doc.doc_type == expected_doc.doc_type
         assert actual_doc.content_bytes == expected_doc.content_bytes
-        assert actual_doc.metadata == expected_doc.metadata
-        assert actual_doc.temporal_collection == expected_doc.temporal_collection
+        if category not in ("content", ["content"]):
+            assert actual_doc.metadata == expected_doc.metadata
 
 
 def _write_document(

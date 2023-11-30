@@ -8,7 +8,7 @@ from mlclient.mimetypes import Mimetypes
 from mlclient.model import Document, DocumentType, RawDocument
 
 
-def test_manage_xml_document():
+def test_create_read_and_remove_xml_document():
     uri = "/some/dir/doc1.xml"
     content = (
         b'<?xml version="1.0" encoding="UTF-8"?>\n<root><child>data</child></root>'
@@ -17,50 +17,72 @@ def test_manage_xml_document():
 
     _assert_document_does_not_exist(uri)
     try:
-        _create_document(doc)
+        _write_document(doc)
         _assert_document_exists_and_confirm_content(doc)
     finally:
         _delete_document(uri)
         _assert_document_does_not_exist(uri)
 
 
-def test_manage_json_document():
+def test_create_read_and_remove_json_document():
     uri = "/some/dir/doc2.json"
     content = b'{"root": {"child": "data"}}'
     doc = RawDocument(content, uri, DocumentType.JSON)
 
     _assert_document_does_not_exist(uri)
     try:
-        _create_document(doc)
+        _write_document(doc)
         _assert_document_exists_and_confirm_content(doc)
     finally:
         _delete_document(uri)
         _assert_document_does_not_exist(uri)
 
 
-def test_manage_text_document():
+def test_create_read_and_remove_text_document():
     uri = "/some/dir/doc3.xqy"
     content = b'xquery version "1.0-ml";\n\nfn:current-date()'
     doc = RawDocument(content, uri, DocumentType.TEXT)
 
     _assert_document_does_not_exist(uri)
     try:
-        _create_document(doc)
+        _write_document(doc)
         _assert_document_exists_and_confirm_content(doc)
     finally:
         _delete_document(uri)
         _assert_document_does_not_exist(uri)
 
 
-def test_manage_binary_document():
+def test_create_read_and_remove_binary_document():
     uri = "/some/dir/doc4.zip"
     content = zlib.compress(b'xquery version "1.0-ml";\n\nfn:current-date()')
     doc = RawDocument(content, uri, DocumentType.BINARY)
 
     _assert_document_does_not_exist(uri)
     try:
-        _create_document(doc)
+        _write_document(doc)
         _assert_document_exists_and_confirm_content(doc)
+    finally:
+        _delete_document(uri)
+        _assert_document_does_not_exist(uri)
+
+
+def test_update_document():
+    uri = "/some/dir/doc1.xml"
+    content_1 = (
+        b'<?xml version="1.0" encoding="UTF-8"?>\n<root><child>data1</child></root>'
+    )
+    content_2 = (
+        b'<?xml version="1.0" encoding="UTF-8"?>\n<root><child>data2</child></root>'
+    )
+    doc_1 = RawDocument(content_1, uri, DocumentType.XML)
+    doc_2 = RawDocument(content_2, uri, DocumentType.XML)
+
+    _assert_document_does_not_exist(uri)
+    try:
+        _write_document(doc_1)
+        _assert_document_exists_and_confirm_content(doc_1)
+        _write_document(doc_2)
+        _assert_document_exists_and_confirm_content(doc_2)
     finally:
         _delete_document(uri)
         _assert_document_does_not_exist(uri)
@@ -94,7 +116,7 @@ def _assert_document_exists_and_confirm_content(
         assert actual_doc.temporal_collection == expected_doc.temporal_collection
 
 
-def _create_document(
+def _write_document(
     doc: Document,
 ):
     with DocumentsClient(auth_method="digest") as docs_client:

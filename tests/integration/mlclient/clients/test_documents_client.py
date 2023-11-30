@@ -7,7 +7,14 @@ import pytest
 from mlclient.clients import DocumentsClient
 from mlclient.exceptions import MarkLogicError
 from mlclient.mimetypes import Mimetypes
-from mlclient.model import Document, DocumentType, JSONDocument, Metadata, RawDocument
+from mlclient.model import (
+    Document,
+    DocumentType,
+    JSONDocument,
+    Metadata,
+    MetadataDocument,
+    RawDocument,
+)
 
 
 def test_create_read_and_remove_xml_document():
@@ -105,6 +112,25 @@ def test_update_document():
         _assert_document_does_not_exist(uri)
 
 
+def test_update_document_metadata():
+    uri = "/some/dir/doc2.json"
+    content = {"root": {"child": "data"}}
+    metadata = Metadata(collections=["test-metadata"])
+    doc_1 = JSONDocument(content, uri, Metadata())
+    doc_2 = JSONDocument(content, uri, metadata)
+    metadata_doc = MetadataDocument(uri, metadata)
+
+    _assert_document_does_not_exist(uri)
+    try:
+        _write_document(doc_1)
+        _assert_document_exists_and_confirm_content_with_metadata(uri, doc_1)
+        _write_document(metadata_doc)
+        _assert_document_exists_and_confirm_content_with_metadata(uri, doc_2)
+    finally:
+        _delete_document(uri)
+        _assert_document_does_not_exist(uri)
+
+
 def _assert_document_does_not_exist(
     uri: str,
 ):
@@ -150,7 +176,10 @@ def _write_document(
         documents = resp["documents"]
         assert len(documents) == 1
         assert documents[0]["uri"] == doc.uri
-        assert documents[0]["mime-type"] == Mimetypes.get_mimetype(doc.uri)
+        if "content" in documents[0]["category"]:
+            assert documents[0]["mime-type"] == Mimetypes.get_mimetype(doc.uri)
+        else:
+            assert documents[0]["mime-type"] == ""
 
 
 def _delete_document(

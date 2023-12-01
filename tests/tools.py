@@ -132,7 +132,7 @@ class MLResponseBuilder:
         self,
         body,
     ):
-        if self._multipart_mixed_response:
+        if self._multipart_mixed_response and body != b"":
             func = "MLResponseBuilder.with_response_body_part()"
             msg = f"multipart/mixed response set to True: use {func} instead"
             raise RuntimeError(msg)

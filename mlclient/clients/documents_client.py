@@ -479,6 +479,9 @@ class DocumentsReader:
         """
         parsed_resp = MLResponseParser.parse_with_headers(resp)
         if not isinstance(parsed_resp, list):
+            headers, _ = parsed_resp
+            if headers.get(constants.HEADER_NAME_CONTENT_LENGTH) == "0":
+                return []
             return [parsed_resp]
         return parsed_resp
 

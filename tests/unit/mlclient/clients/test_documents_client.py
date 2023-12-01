@@ -468,31 +468,14 @@ def test_read_multiple_non_existing_docs(docs_client):
     builder.with_request_param("uri", "/some/dir/doc5.xml")
     builder.with_request_param("uri", "/some/dir/doc6.xml")
     builder.with_request_param("format", "json")
-    builder.with_response_content_type("application/json; charset=UTF-8")
-    builder.with_response_status(404)
-    builder.with_response_body(
-        {
-            "errorResponse": {
-                "statusCode": 404,
-                "status": "Not Found",
-                "messageCode": "RESTAPI-NODOCUMENT",
-                "message": "RESTAPI-NODOCUMENT: (err:FOER0000) "
-                "Resource or document does not exist:  "
-                f"category: content message: {uris}",
-            },
-        },
-    )
+    builder.with_response_body_multipart_mixed()
+    builder.with_response_status(200)
+    builder.with_empty_response_body()
     builder.build_get()
-    with pytest.raises(MarkLogicError) as err:
-        docs_client.read(uris)
 
-    expected_error = (
-        "[404 Not Found] (RESTAPI-NODOCUMENT) "
-        "RESTAPI-NODOCUMENT: (err:FOER0000) "
-        "Resource or document does not exist:  "
-        f"category: content message: {uris}"
-    )
-    assert err.value.args[0] == expected_error
+    docs = docs_client.read(uris)
+
+    assert docs == []
 
 
 @responses.activate

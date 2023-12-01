@@ -239,14 +239,8 @@ class DocumentsClient(MLResourceClient):
             "uri": uris,
             "category": category,
             "database": database,
+            "data_format": "json",
         }
-        if (
-            category
-            and category != "content"
-            or isinstance(category, list)
-            and category != ["content"]
-        ):
-            params["data_format"] = "json"
 
         return DocumentsGetCall(**params)
 

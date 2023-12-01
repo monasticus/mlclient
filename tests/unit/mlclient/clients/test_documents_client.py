@@ -44,13 +44,14 @@ def test_read_non_existing_doc(docs_client):
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/v1/documents")
     builder.with_request_param("uri", "/some/dir/doc5.xml")
+    builder.with_request_param("format", "json")
     builder.with_response_content_type("application/json; charset=UTF-8")
-    builder.with_response_status(404)
+    builder.with_response_status(500)
     builder.with_response_body(
         {
             "errorResponse": {
-                "statusCode": 404,
-                "status": "Not Found",
+                "statusCode": 500,
+                "status": "Internal Server Error",
                 "messageCode": "RESTAPI-NODOCUMENT",
                 "message": "RESTAPI-NODOCUMENT: (err:FOER0000) "
                 "Resource or document does not exist:  "
@@ -63,7 +64,7 @@ def test_read_non_existing_doc(docs_client):
         docs_client.read(uri)
 
     expected_error = (
-        "[404 Not Found] (RESTAPI-NODOCUMENT) "
+        "[500 Internal Server Error] (RESTAPI-NODOCUMENT) "
         "RESTAPI-NODOCUMENT: (err:FOER0000) "
         "Resource or document does not exist:  "
         f"category: content message: {uri}"
@@ -78,6 +79,7 @@ def test_read_xml_doc(docs_client):
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/v1/documents")
     builder.with_request_param("uri", uri)
+    builder.with_request_param("format", "json")
     builder.with_response_content_type("application/xml; charset=utf-8")
     builder.with_response_header("vnd.marklogic.document-format", "xml")
     builder.with_response_status(200)
@@ -104,6 +106,7 @@ def test_read_xml_doc_using_uri_list(docs_client):
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/v1/documents")
     builder.with_request_param("uri", uri)
+    builder.with_request_param("format", "json")
     builder.with_response_content_type("application/xml; charset=utf-8")
     builder.with_response_header("vnd.marklogic.document-format", "xml")
     builder.with_response_status(200)
@@ -133,6 +136,7 @@ def test_read_json_doc(docs_client):
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/v1/documents")
     builder.with_request_param("uri", uri)
+    builder.with_request_param("format", "json")
     builder.with_response_content_type("application/json; charset=utf-8")
     builder.with_response_header("vnd.marklogic.document-format", "json")
     builder.with_response_status(200)
@@ -157,6 +161,7 @@ def test_read_json_doc_uri_list(docs_client):
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/v1/documents")
     builder.with_request_param("uri", uri)
+    builder.with_request_param("format", "json")
     builder.with_response_content_type("application/json; charset=utf-8")
     builder.with_response_header("vnd.marklogic.document-format", "json")
     builder.with_response_status(200)
@@ -184,6 +189,7 @@ def test_read_text_doc(docs_client):
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/v1/documents")
     builder.with_request_param("uri", uri)
+    builder.with_request_param("format", "json")
     builder.with_response_content_type("application/vnd.marklogic-xdmp; charset=utf-8")
     builder.with_response_status(200)
     builder.with_response_body(b'xquery version "1.0-ml";\n\nfn:current-date()')
@@ -208,6 +214,7 @@ def test_read_text_doc_uri_list(docs_client):
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/v1/documents")
     builder.with_request_param("uri", uri)
+    builder.with_request_param("format", "json")
     builder.with_response_content_type("application/vnd.marklogic-xdmp; charset=utf-8")
     builder.with_response_status(200)
     builder.with_response_body(b'xquery version "1.0-ml";\n\nfn:current-date()')
@@ -236,6 +243,7 @@ def test_read_binary_doc(docs_client):
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/v1/documents")
     builder.with_request_param("uri", uri)
+    builder.with_request_param("format", "json")
     builder.with_response_content_type("application/zip")
     builder.with_response_status(200)
     builder.with_response_body(content)
@@ -261,6 +269,7 @@ def test_read_binary_doc_uri_list(docs_client):
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/v1/documents")
     builder.with_request_param("uri", uri)
+    builder.with_request_param("format", "json")
     builder.with_response_content_type("application/zip")
     builder.with_response_status(200)
     builder.with_response_body(content)
@@ -291,6 +300,7 @@ def test_read_existing_and_non_existing_doc(docs_client):
     builder.with_base_url("http://localhost:8002/v1/documents")
     builder.with_request_param("uri", "/some/dir/doc1.xml")
     builder.with_request_param("uri", "/some/dir/doc5.xml")
+    builder.with_request_param("format", "json")
     builder.with_response_status(200)
     builder.with_response_body_multipart_mixed()
     builder.with_response_documents_body_part(
@@ -340,6 +350,7 @@ def test_read_multiple_docs(docs_client):
     builder.with_request_param("uri", "/some/dir/doc2.json")
     builder.with_request_param("uri", "/some/dir/doc3.xqy")
     builder.with_request_param("uri", "/some/dir/doc4.zip")
+    builder.with_request_param("format", "json")
     builder.with_response_status(200)
     builder.with_response_body_multipart_mixed()
     builder.with_response_documents_body_part(
@@ -456,6 +467,7 @@ def test_read_multiple_non_existing_docs(docs_client):
     builder.with_base_url("http://localhost:8002/v1/documents")
     builder.with_request_param("uri", "/some/dir/doc5.xml")
     builder.with_request_param("uri", "/some/dir/doc6.xml")
+    builder.with_request_param("format", "json")
     builder.with_response_content_type("application/json; charset=UTF-8")
     builder.with_response_status(404)
     builder.with_response_body(
@@ -497,6 +509,7 @@ def test_read_multiple_existing_and_non_existing_docs(docs_client):
     builder.with_request_param("uri", "/some/dir/doc2.json")
     builder.with_request_param("uri", "/some/dir/doc5.xml")
     builder.with_request_param("uri", "/some/dir/doc6.json")
+    builder.with_request_param("format", "json")
     builder.with_response_status(200)
     builder.with_response_body_multipart_mixed()
     builder.with_response_documents_body_part(
@@ -1849,6 +1862,7 @@ def test_read_single_doc_using_custom_database(docs_client):
     builder.with_base_url("http://localhost:8002/v1/documents")
     builder.with_request_param("uri", uri)
     builder.with_request_param("database", "Documents")
+    builder.with_request_param("format", "json")
     builder.with_response_content_type("application/xml; charset=utf-8")
     builder.with_response_header("vnd.marklogic.document-format", "xml")
     builder.with_response_status(200)
@@ -1885,6 +1899,7 @@ def test_read_multiple_docs_using_custom_database(docs_client):
     builder.with_request_param("uri", "/some/dir/doc3.xqy")
     builder.with_request_param("uri", "/some/dir/doc4.zip")
     builder.with_request_param("database", "Documents")
+    builder.with_request_param("format", "json")
     builder.with_response_status(200)
     builder.with_response_body_multipart_mixed()
     builder.with_response_documents_body_part(

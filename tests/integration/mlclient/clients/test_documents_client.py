@@ -26,10 +26,10 @@ def test_create_read_and_remove_xml_document():
 
     _assert_document_does_not_exist(uri)
     try:
-        _write_document(doc)
+        _write_documents(doc)
         _assert_document_exists_and_confirm_data(uri, doc)
     finally:
-        _delete_document(uri)
+        _delete_documents(uri)
         _assert_document_does_not_exist(uri)
 
 
@@ -40,10 +40,10 @@ def test_create_read_and_remove_json_document():
 
     _assert_document_does_not_exist(uri)
     try:
-        _write_document(doc)
+        _write_documents(doc)
         _assert_document_exists_and_confirm_data(uri, doc)
     finally:
-        _delete_document(uri)
+        _delete_documents(uri)
         _assert_document_does_not_exist(uri)
 
 
@@ -54,10 +54,10 @@ def test_create_read_and_remove_text_document():
 
     _assert_document_does_not_exist(uri)
     try:
-        _write_document(doc)
+        _write_documents(doc)
         _assert_document_exists_and_confirm_data(uri, doc)
     finally:
-        _delete_document(uri)
+        _delete_documents(uri)
         _assert_document_does_not_exist(uri)
 
 
@@ -68,10 +68,10 @@ def test_create_read_and_remove_binary_document():
 
     _assert_document_does_not_exist(uri)
     try:
-        _write_document(doc)
+        _write_documents(doc)
         _assert_document_exists_and_confirm_data(uri, doc)
     finally:
-        _delete_document(uri)
+        _delete_documents(uri)
         _assert_document_does_not_exist(uri)
 
 
@@ -83,11 +83,42 @@ def test_create_read_and_remove_document_with_metadata():
 
     _assert_document_does_not_exist(uri)
     try:
-        _write_document(doc)
+        _write_documents(doc)
         _assert_document_exists_and_confirm_content_with_metadata(uri, doc)
     finally:
-        _delete_document(uri)
+        _delete_documents(uri)
         _assert_document_does_not_exist(uri)
+
+
+def test_create_read_and_remove_multiple_documents():
+    doc_1_uri = "/some/dir/doc1.xml"
+    doc_1_content = (
+        b'<?xml version="1.0" encoding="UTF-8"?>\n<root><child>data</child></root>'
+    )
+    doc_1 = RawDocument(doc_1_content, doc_1_uri, DocumentType.XML)
+
+    doc_2_uri = "/some/dir/doc2.json"
+    doc_2_content = b'{"root": {"child": "data"}}'
+    doc_2 = RawDocument(doc_2_content, doc_2_uri, DocumentType.JSON)
+
+    doc_3_uri = "/some/dir/doc3.xqy"
+    doc_3_content = b'xquery version "1.0-ml";\n\nfn:current-date()'
+    doc_3 = RawDocument(doc_3_content, doc_3_uri, DocumentType.TEXT)
+
+    doc_4_uri = "/some/dir/doc4.zip"
+    doc_4_content = zlib.compress(b'xquery version "1.0-ml";\n\nfn:current-date()')
+    doc_4 = RawDocument(doc_4_content, doc_4_uri, DocumentType.BINARY)
+
+    _assert_documents_do_not_exist([doc_1_uri, doc_2_uri, doc_3_uri, doc_4_uri])
+    try:
+        _write_documents([doc_1, doc_2, doc_3, doc_4])
+        _assert_document_exists_and_confirm_data(doc_1_uri, doc_1)
+        _assert_document_exists_and_confirm_data(doc_2_uri, doc_2)
+        _assert_document_exists_and_confirm_data(doc_3_uri, doc_3)
+        _assert_document_exists_and_confirm_data(doc_4_uri, doc_4)
+    finally:
+        _delete_documents([doc_1_uri, doc_2_uri, doc_3_uri, doc_4_uri])
+        _assert_documents_do_not_exist([doc_1_uri, doc_2_uri, doc_3_uri, doc_4_uri])
 
 
 def test_update_document():
@@ -103,12 +134,12 @@ def test_update_document():
 
     _assert_document_does_not_exist(uri)
     try:
-        _write_document(doc_1)
+        _write_documents(doc_1)
         _assert_document_exists_and_confirm_data(uri, doc_1)
-        _write_document(doc_2)
+        _write_documents(doc_2)
         _assert_document_exists_and_confirm_data(uri, doc_2)
     finally:
-        _delete_document(uri)
+        _delete_documents(uri)
         _assert_document_does_not_exist(uri)
 
 
@@ -122,12 +153,12 @@ def test_update_document_metadata():
 
     _assert_document_does_not_exist(uri)
     try:
-        _write_document(doc_1)
+        _write_documents(doc_1)
         _assert_document_exists_and_confirm_content_with_metadata(uri, doc_1)
-        _write_document(metadata_doc)
+        _write_documents(metadata_doc)
         _assert_document_exists_and_confirm_content_with_metadata(uri, doc_2)
     finally:
-        _delete_document(uri)
+        _delete_documents(uri)
         _assert_document_does_not_exist(uri)
 
 
@@ -145,6 +176,13 @@ def _assert_document_does_not_exist(
     ) as err:
         docs_client.read(uri)
     assert err.value.args[0] == expected_msg
+
+
+def _assert_documents_do_not_exist(
+    uris: list,
+):
+    with DocumentsClient(auth_method="digest") as docs_client:
+        assert docs_client.read(uris) == []
 
 
 def _assert_document_exists_and_confirm_content_with_metadata(
@@ -168,22 +206,27 @@ def _assert_document_exists_and_confirm_data(
             assert actual_doc.metadata == expected_doc.metadata
 
 
-def _write_document(
-    doc: Document,
+def _write_documents(
+    docs: Document | Metadata | list[Document | Metadata],
 ):
+    if not isinstance(docs, list):
+        docs = [docs]
     with DocumentsClient(auth_method="digest") as docs_client:
-        resp = docs_client.create(doc)
+        resp = docs_client.create(docs)
         documents = resp["documents"]
-        assert len(documents) == 1
-        assert documents[0]["uri"] == doc.uri
-        if "content" in documents[0]["category"]:
-            assert documents[0]["mime-type"] == Mimetypes.get_mimetype(doc.uri)
-        else:
-            assert documents[0]["mime-type"] == ""
+        assert len(documents) == len(docs)
+        for doc in docs:
+            response_doc = next((d for d in documents if d["uri"] == doc.uri), None)
+            assert response_doc is not None
+            assert response_doc["uri"] == doc.uri
+            if "content" in response_doc["category"]:
+                assert response_doc["mime-type"] == Mimetypes.get_mimetype(doc.uri)
+            else:
+                assert response_doc["mime-type"] == ""
 
 
-def _delete_document(
-    uri: str,
+def _delete_documents(
+    uri: str | list[str],
 ):
     try:
         with DocumentsClient(auth_method="digest") as docs_client:

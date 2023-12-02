@@ -28,8 +28,8 @@ def test_create_read_and_remove_xml_document():
     )
     doc = RawDocument(content, uri, DocumentType.XML)
 
-    _assert_document_does_not_exist(uri)
     try:
+        _assert_document_does_not_exist(uri)
         _write_documents(doc)
         _assert_document_exists_and_confirm_data(uri, doc)
     finally:
@@ -42,8 +42,8 @@ def test_create_read_and_remove_json_document():
     content = b'{"root": {"child": "data"}}'
     doc = RawDocument(content, uri, DocumentType.JSON)
 
-    _assert_document_does_not_exist(uri)
     try:
+        _assert_document_does_not_exist(uri)
         _write_documents(doc)
         _assert_document_exists_and_confirm_data(uri, doc)
     finally:
@@ -56,8 +56,8 @@ def test_create_read_and_remove_text_document():
     content = b'xquery version "1.0-ml";\n\nfn:current-date()'
     doc = RawDocument(content, uri, DocumentType.TEXT)
 
-    _assert_document_does_not_exist(uri)
     try:
+        _assert_document_does_not_exist(uri)
         _write_documents(doc)
         _assert_document_exists_and_confirm_data(uri, doc)
     finally:
@@ -70,8 +70,8 @@ def test_create_read_and_remove_binary_document():
     content = zlib.compress(b'xquery version "1.0-ml";\n\nfn:current-date()')
     doc = RawDocument(content, uri, DocumentType.BINARY)
 
-    _assert_document_does_not_exist(uri)
     try:
+        _assert_document_does_not_exist(uri)
         _write_documents(doc)
         _assert_document_exists_and_confirm_data(uri, doc)
     finally:
@@ -85,8 +85,8 @@ def test_create_read_and_remove_document_with_metadata():
     metadata = Metadata(collections=["test-collection"])
     doc = JSONDocument(content, uri, metadata)
 
-    _assert_document_does_not_exist(uri)
     try:
+        _assert_document_does_not_exist(uri)
         _write_documents(doc)
         _assert_document_exists_and_confirm_content_with_metadata(uri, doc)
     finally:
@@ -113,8 +113,8 @@ def test_create_read_and_remove_multiple_documents():
     doc_4_content = zlib.compress(b'xquery version "1.0-ml";\n\nfn:current-date()')
     doc_4 = RawDocument(doc_4_content, doc_4_uri, DocumentType.BINARY)
 
-    _assert_documents_do_not_exist([doc_1_uri, doc_2_uri, doc_3_uri, doc_4_uri])
     try:
+        _assert_documents_do_not_exist([doc_1_uri, doc_2_uri, doc_3_uri, doc_4_uri])
         _write_documents([doc_1, doc_2, doc_3, doc_4])
         _assert_document_exists_and_confirm_data(doc_1_uri, doc_1)
         _assert_document_exists_and_confirm_data(doc_2_uri, doc_2)
@@ -221,8 +221,8 @@ def test_update_document():
     doc_1 = RawDocument(content_1, uri, DocumentType.XML)
     doc_2 = RawDocument(content_2, uri, DocumentType.XML)
 
-    _assert_document_does_not_exist(uri)
     try:
+        _assert_document_does_not_exist(uri)
         _write_documents(doc_1)
         _assert_document_exists_and_confirm_data(uri, doc_1)
         _write_documents(doc_2)
@@ -240,8 +240,8 @@ def test_update_document_metadata():
     doc_2 = JSONDocument(content, uri, metadata)
     metadata_doc = MetadataDocument(uri, metadata)
 
-    _assert_document_does_not_exist(uri)
     try:
+        _assert_document_does_not_exist(uri)
         _write_documents(doc_1)
         _assert_document_exists_and_confirm_content_with_metadata(uri, doc_1)
         _write_documents(metadata_doc)
@@ -296,19 +296,14 @@ def _assert_document_exists_and_confirm_data(
 
 
 def _write_documents(
-    docs: Document
-    | Metadata
-    | MetadataDocument
-    | list[Document | Metadata | MetadataDocument],
+    docs: Document | Metadata | list[Document | Metadata],
 ):
-    if not isinstance(docs, list):
-        docs = [docs]
     with DocumentsClient(auth_method="digest") as docs_client:
         resp = docs_client.create(docs)
         documents = resp["documents"]
-        expected_docs = [
-            doc for doc in docs if type(doc) not in (Metadata, MetadataDocument)
-        ]
+        if not isinstance(docs, list):
+            docs = [docs]
+        expected_docs = [doc for doc in docs if type(doc) is not Metadata]
         assert len(documents) == len(expected_docs)
         for doc in expected_docs:
             response_doc = next((d for d in documents if d["uri"] == doc.uri), None)

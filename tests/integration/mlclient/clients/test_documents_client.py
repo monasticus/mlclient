@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import zlib
+from xml.etree.ElementTree import ElementTree, fromstring
 
 import pytest
 
@@ -8,12 +9,15 @@ from mlclient.clients import DocumentsClient
 from mlclient.exceptions import MarkLogicError
 from mlclient.mimetypes import Mimetypes
 from mlclient.model import (
+    BinaryDocument,
     Document,
     DocumentType,
     JSONDocument,
     Metadata,
     MetadataDocument,
     RawDocument,
+    TextDocument,
+    XMLDocument,
 )
 
 
@@ -121,6 +125,91 @@ def test_create_read_and_remove_multiple_documents():
         _assert_documents_do_not_exist([doc_1_uri, doc_2_uri, doc_3_uri, doc_4_uri])
 
 
+def test_create_read_and_remove_multiple_documents_with_default_and_custom_metadata():
+    default_metadata_1 = Metadata(collections=["default-collection-1"])
+    default_metadata_2 = Metadata(collections=["default-collection-2"])
+
+    doc_1_uri = "/some/dir/doc1.xml"
+    doc_1_content = ElementTree(fromstring("<root><parent>data</parent></root>"))
+    doc_1 = XMLDocument(doc_1_content, doc_1_uri)
+    doc_1_expected = XMLDocument(doc_1_content, doc_1_uri, Metadata())
+
+    doc_2_uri = "/some/dir/doc2.json"
+    doc_2_content = {"root": {"child": "data"}}
+    doc_2 = JSONDocument(doc_2_content, doc_2_uri)
+    doc_2_expected = JSONDocument(doc_2_content, doc_2_uri, default_metadata_1)
+
+    doc_3_uri = "/some/dir/doc3.xqy"
+    doc_3_content = 'xquery version "1.0-ml";\n\nfn:current-date()'
+    doc_3_metadata = Metadata(collections=["doc-3-collection"])
+    doc_3 = TextDocument(doc_3_content, doc_3_uri, doc_3_metadata)
+    doc_3_expected = doc_3
+
+    doc_4_uri = "/some/dir/doc4.zip"
+    doc_4_content = zlib.compress(b'xquery version "1.0-ml";\n\nfn:current-date()')
+    doc_4 = BinaryDocument(doc_4_content, doc_4_uri)
+    doc_4_expected = BinaryDocument(doc_4_content, doc_4_uri, default_metadata_1)
+
+    doc_5_uri = "/some/dir/doc5.json"
+    doc_5_content = {"root": {"child": "data"}}
+    doc_5_metadata = Metadata(collections=["doc-5-collection"])
+    doc_5 = JSONDocument(doc_5_content, doc_5_uri, doc_5_metadata)
+    doc_5_expected = doc_5
+
+    doc_6_uri = "/some/dir/doc6.json"
+    doc_6_content = {"root": {"child": "data"}}
+    doc_6 = JSONDocument(doc_6_content, doc_6_uri)
+    doc_6_expected = JSONDocument(doc_6_content, doc_6_uri, default_metadata_2)
+
+    try:
+        _assert_documents_do_not_exist(
+            [doc_1_uri, doc_2_uri, doc_3_uri, doc_4_uri, doc_5_uri, doc_6_uri],
+        )
+        _write_documents(
+            [
+                doc_1,
+                default_metadata_1,
+                doc_2,
+                doc_3,
+                doc_4,
+                default_metadata_2,
+                doc_5,
+                doc_6,
+            ],
+        )
+        _assert_document_exists_and_confirm_content_with_metadata(
+            doc_1_uri,
+            doc_1_expected,
+        )
+        _assert_document_exists_and_confirm_content_with_metadata(
+            doc_2_uri,
+            doc_2_expected,
+        )
+        _assert_document_exists_and_confirm_content_with_metadata(
+            doc_3_uri,
+            doc_3_expected,
+        )
+        _assert_document_exists_and_confirm_content_with_metadata(
+            doc_4_uri,
+            doc_4_expected,
+        )
+        _assert_document_exists_and_confirm_content_with_metadata(
+            doc_5_uri,
+            doc_5_expected,
+        )
+        _assert_document_exists_and_confirm_content_with_metadata(
+            doc_6_uri,
+            doc_6_expected,
+        )
+    finally:
+        _delete_documents(
+            [doc_1_uri, doc_2_uri, doc_3_uri, doc_4_uri, doc_5_uri, doc_6_uri],
+        )
+        _assert_documents_do_not_exist(
+            [doc_1_uri, doc_2_uri, doc_3_uri, doc_4_uri, doc_5_uri, doc_6_uri],
+        )
+
+
 def test_update_document():
     uri = "/some/dir/doc1.xml"
     content_1 = (
@@ -207,15 +296,21 @@ def _assert_document_exists_and_confirm_data(
 
 
 def _write_documents(
-    docs: Document | Metadata | list[Document | Metadata],
+    docs: Document
+    | Metadata
+    | MetadataDocument
+    | list[Document | Metadata | MetadataDocument],
 ):
     if not isinstance(docs, list):
         docs = [docs]
     with DocumentsClient(auth_method="digest") as docs_client:
         resp = docs_client.create(docs)
         documents = resp["documents"]
-        assert len(documents) == len(docs)
-        for doc in docs:
+        expected_docs = [
+            doc for doc in docs if type(doc) not in (Metadata, MetadataDocument)
+        ]
+        assert len(documents) == len(expected_docs)
+        for doc in expected_docs:
             response_doc = next((d for d in documents if d["uri"] == doc.uri), None)
             assert response_doc is not None
             assert response_doc["uri"] == doc.uri

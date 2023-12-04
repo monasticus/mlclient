@@ -225,17 +225,24 @@ def test_update_document():
 def test_update_document_metadata():
     uri = "/some/dir/doc2.json"
     content = {"root": {"child": "data"}}
-    metadata = Metadata(collections=["test-metadata"])
-    doc_1 = JSONDocument(content, uri, Metadata())
-    doc_2 = JSONDocument(content, uri, metadata)
-    metadata_doc = MetadataDocument(uri, metadata)
+    metadata_1 = Metadata()
+    metadata_2 = Metadata(collections=["test-metadata"])
+    metadata_1_doc = MetadataDocument(uri, metadata_1)
+    metadata_2_doc = MetadataDocument(uri, metadata_2)
+    doc = JSONDocument(content, uri, metadata_1)
 
     try:
         _assert_document_does_not_exist(uri)
-        _write_documents(doc_1)
-        _assert_documents_exist_and_confirm_content_with_metadata({uri: doc_1})
-        _write_documents(metadata_doc)
-        _assert_documents_exist_and_confirm_content_with_metadata({uri: doc_2})
+        _write_documents(doc)
+        _assert_documents_exist_and_confirm_data(
+            {uri: metadata_1_doc},
+            category=["metadata"],
+        )
+        _write_documents(metadata_2_doc)
+        _assert_documents_exist_and_confirm_data(
+            {uri: metadata_2_doc},
+            category=["metadata"],
+        )
     finally:
         _delete_documents(uri)
         _assert_document_does_not_exist(uri)

@@ -60,7 +60,7 @@ class TestLogsEndpoint:
         with MLResourcesClient(auth_method="digest") as client:
             for i in range(1, 11):
                 client.eval(xquery=f'xdmp:log("Test Log {i}", "error")')
-        sleep(2)
+        sleep(5)
 
     @classmethod
     def _test_error_logs(

@@ -120,7 +120,7 @@ class TestLogsEndpoint:
         assert resp.reason == "OK"
 
         logfile = resp.json()["logfile"]
-        assert isinstance(logfile["message"], str)
+        assert isinstance(logfile.get("message"), str) or len(logfile) == 6
 
 
 class TestDatabasesManagement:

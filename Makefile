@@ -51,3 +51,6 @@ update-linters:
 
 mimetypes:
 	@./scripts/get-mimetypes/get-mimetypes.py
+
+branches:
+	@git branch | grep -E -v "(main)|(bump.*)" | xargs git branch -D

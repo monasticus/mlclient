@@ -132,7 +132,7 @@ class MLResponseBuilder:
         self,
         body,
     ):
-        if self._multipart_mixed_response:
+        if self._multipart_mixed_response and body != b"":
             func = "MLResponseBuilder.with_response_body_part()"
             msg = f"multipart/mixed response set to True: use {func} instead"
             raise RuntimeError(msg)
@@ -298,8 +298,10 @@ class MLResponseBuilder:
             responses_params["headers"] = self._response_headers
         else:
             body, content_type = urllib3.encode_multipart_formdata(
-                self._response_body_fields,
+                self._response_body_fields or [],
             )
+            if self._response_body == b"":
+                body = self._response_body
             content_type = content_type.replace(
                 "multipart/form-data",
                 "multipart/mixed",

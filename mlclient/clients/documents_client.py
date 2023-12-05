@@ -75,7 +75,7 @@ class DocumentsClient(MLResourceClient):
         )
         resp = self.call(call)
         if not resp.ok:
-            resp_body = resp.json()
+            resp_body = MLResponseParser.parse(resp)
             raise MarkLogicError(resp_body["errorResponse"])
         return MLResponseParser.parse(resp)
 
@@ -117,7 +117,7 @@ class DocumentsClient(MLResourceClient):
         call = self._get_call(uris=uris, category=category, database=database)
         resp = self.call(call)
         if not resp.ok:
-            resp_body = resp.json()
+            resp_body = MLResponseParser.parse(resp)
             raise MarkLogicError(resp_body["errorResponse"])
         return DocumentsReader.parse(resp, uris, category)
 
@@ -239,14 +239,8 @@ class DocumentsClient(MLResourceClient):
             "uri": uris,
             "category": category,
             "database": database,
+            "data_format": "json",
         }
-        if (
-            category
-            and category != "content"
-            or isinstance(category, list)
-            and category != ["content"]
-        ):
-            params["data_format"] = "json"
 
         return DocumentsGetCall(**params)
 
@@ -485,6 +479,9 @@ class DocumentsReader:
         """
         parsed_resp = MLResponseParser.parse_with_headers(resp)
         if not isinstance(parsed_resp, list):
+            headers, _ = parsed_resp
+            if headers.get(constants.HEADER_NAME_CONTENT_LENGTH) == "0":
+                return []
             return [parsed_resp]
         return parsed_resp
 

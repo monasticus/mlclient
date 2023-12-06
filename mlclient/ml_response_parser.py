@@ -379,10 +379,12 @@ class MLResponseParser:
             headers = cls._decode_headers(headers, body_part.encoding)
 
         if output_type is str:
-            if body_part.encoding is not None:
-                parsed = body_part.text
-            else:
+            content_type = headers.get(const.HEADER_NAME_CONTENT_TYPE)
+            doc_type = Mimetypes.get_doc_type(content_type)
+            if doc_type is DocumentType.BINARY is not None:
                 parsed = body_part.content
+            else:
+                parsed = body_part.text
         elif output_type is bytes:
             parsed = body_part.content
         else:

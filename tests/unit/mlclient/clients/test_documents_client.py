@@ -155,7 +155,7 @@ def test_read_json_doc(docs_client):
 
 
 @responses.activate
-def test_read_json_doc_uri_list(docs_client):
+def test_read_json_doc_using_uri_list(docs_client):
     uri = "/some/dir/doc2.json"
 
     builder = MLResponseBuilder()
@@ -208,7 +208,7 @@ def test_read_text_doc(docs_client):
 
 
 @responses.activate
-def test_read_text_doc_uri_list(docs_client):
+def test_read_text_doc_using_uri_list(docs_client):
     uri = "/some/dir/doc3.xqy"
 
     builder = MLResponseBuilder()
@@ -262,7 +262,7 @@ def test_read_binary_doc(docs_client):
 
 
 @responses.activate
-def test_read_binary_doc_uri_list(docs_client):
+def test_read_binary_doc_using_uri_list(docs_client):
     uri = "/some/dir/doc4.zip"
     content = zlib.compress(b'xquery version "1.0-ml";\n\nfn:current-date()')
 
@@ -311,8 +311,8 @@ def test_read_existing_and_non_existing_doc(docs_client):
                 'filename="/some/dir/doc1.xml"; '
                 "category=content; "
                 "format=xml",
-                "content": '<?xml version="1.0" encoding="UTF-8"?>\n'
-                "<root><child>data</child></root>",
+                "content": b'<?xml version="1.0" encoding="UTF-8"?>\n'
+                b"<root><child>data</child></root>",
             },
         ),
     )
@@ -373,8 +373,8 @@ def test_read_multiple_docs(docs_client):
                 'filename="/some/dir/doc1.xml"; '
                 "category=content; "
                 "format=xml",
-                "content": '<?xml version="1.0" encoding="UTF-8"?>\n'
-                "<root><child>data</child></root>",
+                "content": b'<?xml version="1.0" encoding="UTF-8"?>\n'
+                b"<root><child>data</child></root>",
             },
         ),
     )
@@ -386,7 +386,7 @@ def test_read_multiple_docs(docs_client):
                 'filename="/some/dir/doc3.xqy"; '
                 "category=content; "
                 "format=text",
-                "content": 'xquery version "1.0-ml";\n\nfn:current-date()',
+                "content": b'xquery version "1.0-ml";\n\nfn:current-date()',
             },
         ),
     )
@@ -398,7 +398,7 @@ def test_read_multiple_docs(docs_client):
                 'filename="/some/dir/doc2.json"; '
                 "category=content; "
                 "format=json",
-                "content": {"root": {"child": "data"}},
+                "content": b'{"root": {"child": "data"}}',
             },
         ),
     )
@@ -503,8 +503,8 @@ def test_read_multiple_existing_and_non_existing_docs(docs_client):
                 'filename="/some/dir/doc1.xml"; '
                 "category=content; "
                 "format=xml",
-                "content": '<?xml version="1.0" encoding="UTF-8"?>\n'
-                "<root><child>data</child></root>",
+                "content": b'<?xml version="1.0" encoding="UTF-8"?>\n'
+                b"<root><child>data</child></root>",
             },
         ),
     )
@@ -516,7 +516,7 @@ def test_read_multiple_existing_and_non_existing_docs(docs_client):
                 'filename="/some/dir/doc2.json"; '
                 "category=content; "
                 "format=json",
-                "content": {"root": {"child": "data"}},
+                "content": b'{"root": {"child": "data"}}',
             },
         ),
     )
@@ -573,13 +573,13 @@ def test_read_doc_with_full_metadata(docs_client):
                 'filename="/some/dir/doc1.xml"; '
                 "category=metadata; "
                 "format=json",
-                "content": {
-                    "collections": [],
-                    "permissions": [],
-                    "properties": {},
-                    "quality": 0,
-                    "metadataValues": {},
-                },
+                "content": b"{"
+                b'"collections": [], '
+                b'"permissions": [], '
+                b'"properties": {}, '
+                b'"quality": 0, '
+                b'"metadataValues": {}'
+                b"}",
             },
         ),
     )
@@ -591,8 +591,8 @@ def test_read_doc_with_full_metadata(docs_client):
                 'filename="/some/dir/doc1.xml"; '
                 "category=content; "
                 "format=xml",
-                "content": '<?xml version="1.0" encoding="UTF-8"?>\n'
-                "<root><child>data</child></root>",
+                "content": b'<?xml version="1.0" encoding="UTF-8"?>\n'
+                b"<root><child>data</child></root>",
             },
         ),
     )
@@ -637,9 +637,7 @@ def test_read_doc_with_single_metadata_category(docs_client):
                 'filename="/some/dir/doc1.xml"; '
                 "category=collections; "
                 "format=json",
-                "content": {
-                    "collections": [],
-                },
+                "content": b'{"collections": []}',
             },
         ),
     )
@@ -651,8 +649,8 @@ def test_read_doc_with_single_metadata_category(docs_client):
                 'filename="/some/dir/doc1.xml"; '
                 "category=content; "
                 "format=xml",
-                "content": '<?xml version="1.0" encoding="UTF-8"?>\n'
-                "<root><child>data</child></root>",
+                "content": b'<?xml version="1.0" encoding="UTF-8"?>\n'
+                b"<root><child>data</child></root>",
             },
         ),
     )
@@ -699,7 +697,7 @@ def test_read_doc_with_two_metadata_categories(docs_client):
                 "category=collections; "
                 "category=quality; "
                 "format=json",
-                "content": {"collections": [], "quality": 0},
+                "content": b'{"collections": [], "quality": 0}',
             },
         ),
     )
@@ -711,8 +709,8 @@ def test_read_doc_with_two_metadata_categories(docs_client):
                 'filename="/some/dir/doc1.xml"; '
                 "category=content; "
                 "format=xml",
-                "content": '<?xml version="1.0" encoding="UTF-8"?>\n'
-                "<root><child>data</child></root>",
+                "content": b'<?xml version="1.0" encoding="UTF-8"?>\n'
+                b"<root><child>data</child></root>",
             },
         ),
     )
@@ -765,13 +763,13 @@ def test_read_doc_with_all_metadata_categories(docs_client):
                 "category=properties; "
                 "category=quality; "
                 "format=json",
-                "content": {
-                    "collections": [],
-                    "permissions": [],
-                    "properties": {},
-                    "quality": 0,
-                    "metadataValues": {},
-                },
+                "content": b"{"
+                b'"collections": [], '
+                b'"permissions": [], '
+                b'"properties": {}, '
+                b'"quality": 0, '
+                b'"metadataValues": {}'
+                b"}",
             },
         ),
     )
@@ -783,8 +781,8 @@ def test_read_doc_with_all_metadata_categories(docs_client):
                 'filename="/some/dir/doc1.xml"; '
                 "category=content; "
                 "format=xml",
-                "content": '<?xml version="1.0" encoding="UTF-8"?>\n'
-                "<root><child>data</child></root>",
+                "content": b'<?xml version="1.0" encoding="UTF-8"?>\n'
+                b"<root><child>data</child></root>",
             },
         ),
     )
@@ -831,13 +829,13 @@ def test_read_full_metadata_without_content(docs_client):
     builder.with_response_header("vnd.marklogic.document-format", "json")
     builder.with_response_status(200)
     builder.with_response_body(
-        {
-            "collections": [],
-            "permissions": [],
-            "properties": {},
-            "quality": 0,
-            "metadataValues": {},
-        },
+        b"{"
+        b'"collections": [], '
+        b'"permissions": [], '
+        b'"properties": {}, '
+        b'"quality": 0, '
+        b'"metadataValues": {}'
+        b"}",
     )
     builder.build_get()
 
@@ -868,7 +866,7 @@ def test_read_single_metadata_category_without_content(docs_client):
     builder.with_response_content_type("application/json; charset=utf-8")
     builder.with_response_header("vnd.marklogic.document-format", "json")
     builder.with_response_status(200)
-    builder.with_response_body({"collections": []})
+    builder.with_response_body(b'{"collections": []}')
     builder.build_get()
 
     document = docs_client.read(uri, category=["collections"])
@@ -907,7 +905,7 @@ def test_read_two_metadata_categories_without_content(docs_client):
                 "category=collections; "
                 "category=quality; "
                 "format=json",
-                "content": {"collections": [], "quality": 0},
+                "content": b'{"collections": [], "quality": 0}',
             },
         ),
     )
@@ -956,13 +954,13 @@ def test_read_all_metadata_categories_without_content(docs_client):
                 "category=properties; "
                 "category=quality; "
                 "format=json",
-                "content": {
-                    "collections": [],
-                    "permissions": [],
-                    "properties": {},
-                    "quality": 0,
-                    "metadataValues": {},
-                },
+                "content": b"{"
+                b'"collections": [], '
+                b'"permissions": [], '
+                b'"properties": {}, '
+                b'"quality": 0, '
+                b'"metadataValues": {}'
+                b"}",
             },
         ),
     )
@@ -1015,8 +1013,8 @@ def test_read_multiple_docs_with_full_metadata(docs_client):
                 'filename="/some/dir/doc1.xml"; '
                 "category=content; "
                 "format=xml",
-                "content": '<?xml version="1.0" encoding="UTF-8"?>\n'
-                "<root><child>data</child></root>",
+                "content": b'<?xml version="1.0" encoding="UTF-8"?>\n'
+                b"<root><child>data</child></root>",
             },
         ),
     )
@@ -1028,13 +1026,13 @@ def test_read_multiple_docs_with_full_metadata(docs_client):
                 'filename="/some/dir/doc1.xml"; '
                 "category=metadata; "
                 "format=json",
-                "content": {
-                    "collections": [],
-                    "permissions": [],
-                    "properties": {},
-                    "quality": 0,
-                    "metadataValues": {},
-                },
+                "content": b"{"
+                b'"collections": [], '
+                b'"permissions": [], '
+                b'"properties": {}, '
+                b'"quality": 0, '
+                b'"metadataValues": {}'
+                b"}",
             },
         ),
     )
@@ -1046,13 +1044,13 @@ def test_read_multiple_docs_with_full_metadata(docs_client):
                 'filename="/some/dir/doc2.json"; '
                 "category=metadata; "
                 "format=json",
-                "content": {
-                    "collections": [],
-                    "permissions": [],
-                    "properties": {},
-                    "quality": 1,
-                    "metadataValues": {},
-                },
+                "content": b"{"
+                b'"collections": [], '
+                b'"permissions": [], '
+                b'"properties": {}, '
+                b'"quality": 1, '
+                b'"metadataValues": {}'
+                b"}",
             },
         ),
     )
@@ -1064,7 +1062,7 @@ def test_read_multiple_docs_with_full_metadata(docs_client):
                 'filename="/some/dir/doc2.json"; '
                 "category=content; "
                 "format=json",
-                "content": {"root": {"child": "data"}},
+                "content": b'{"root": {"child": "data"}}',
             },
         ),
     )
@@ -1133,8 +1131,8 @@ def test_read_multiple_docs_with_single_metadata_category(docs_client):
                 'filename="/some/dir/doc1.xml"; '
                 "category=content; "
                 "format=xml",
-                "content": '<?xml version="1.0" encoding="UTF-8"?>\n'
-                "<root><child>data</child></root>",
+                "content": b'<?xml version="1.0" encoding="UTF-8"?>\n'
+                b"<root><child>data</child></root>",
             },
         ),
     )
@@ -1146,9 +1144,7 @@ def test_read_multiple_docs_with_single_metadata_category(docs_client):
                 'filename="/some/dir/doc1.xml"; '
                 "category=collections; "
                 "format=json",
-                "content": {
-                    "collections": ["xml"],
-                },
+                "content": b'{"collections": ["xml"]}',
             },
         ),
     )
@@ -1160,9 +1156,7 @@ def test_read_multiple_docs_with_single_metadata_category(docs_client):
                 'filename="/some/dir/doc2.json"; '
                 "category=collections; "
                 "format=json",
-                "content": {
-                    "collections": ["json"],
-                },
+                "content": b'{"collections": ["json"]}',
             },
         ),
     )
@@ -1174,7 +1168,7 @@ def test_read_multiple_docs_with_single_metadata_category(docs_client):
                 'filename="/some/dir/doc2.json"; '
                 "category=content; "
                 "format=json",
-                "content": {"root": {"child": "data"}},
+                "content": b'{"root": {"child": "data"}}',
             },
         ),
     )
@@ -1244,8 +1238,8 @@ def test_read_multiple_docs_with_two_metadata_categories(docs_client):
                 'filename="/some/dir/doc1.xml"; '
                 "category=content; "
                 "format=xml",
-                "content": '<?xml version="1.0" encoding="UTF-8"?>\n'
-                "<root><child>data</child></root>",
+                "content": b'<?xml version="1.0" encoding="UTF-8"?>\n'
+                b"<root><child>data</child></root>",
             },
         ),
     )
@@ -1258,10 +1252,7 @@ def test_read_multiple_docs_with_two_metadata_categories(docs_client):
                 "category=collections; "
                 "category=quality; "
                 "format=json",
-                "content": {
-                    "collections": ["xml"],
-                    "quality": 0,
-                },
+                "content": b'{"collections": ["xml"], "quality": 0}',
             },
         ),
     )
@@ -1274,10 +1265,7 @@ def test_read_multiple_docs_with_two_metadata_categories(docs_client):
                 "category=collections; "
                 "category=quality; "
                 "format=json",
-                "content": {
-                    "collections": ["json"],
-                    "quality": 1,
-                },
+                "content": b'{"collections": ["json"], "quality": 1}',
             },
         ),
     )
@@ -1289,7 +1277,7 @@ def test_read_multiple_docs_with_two_metadata_categories(docs_client):
                 'filename="/some/dir/doc2.json"; '
                 "category=content; "
                 "format=json",
-                "content": {"root": {"child": "data"}},
+                "content": b'{"root": {"child": "data"}}',
             },
         ),
     )
@@ -1362,8 +1350,8 @@ def test_read_multiple_docs_with_all_metadata_categories(docs_client):
                 'filename="/some/dir/doc1.xml"; '
                 "category=content; "
                 "format=xml",
-                "content": '<?xml version="1.0" encoding="UTF-8"?>\n'
-                "<root><child>data</child></root>",
+                "content": b'<?xml version="1.0" encoding="UTF-8"?>\n'
+                b"<root><child>data</child></root>",
             },
         ),
     )
@@ -1379,13 +1367,13 @@ def test_read_multiple_docs_with_all_metadata_categories(docs_client):
                 "category=properties; "
                 "category=quality; "
                 "format=json",
-                "content": {
-                    "collections": [],
-                    "permissions": [],
-                    "properties": {},
-                    "quality": 0,
-                    "metadataValues": {},
-                },
+                "content": b"{"
+                b'"collections": [], '
+                b'"permissions": [], '
+                b'"properties": {}, '
+                b'"quality": 0, '
+                b'"metadataValues": {}'
+                b"}",
             },
         ),
     )
@@ -1401,13 +1389,13 @@ def test_read_multiple_docs_with_all_metadata_categories(docs_client):
                 "category=properties; "
                 "category=quality; "
                 "format=json",
-                "content": {
-                    "collections": [],
-                    "permissions": [],
-                    "properties": {},
-                    "quality": 1,
-                    "metadataValues": {},
-                },
+                "content": b"{"
+                b'"collections": [], '
+                b'"permissions": [], '
+                b'"properties": {}, '
+                b'"quality": 1, '
+                b'"metadataValues": {}'
+                b"}",
             },
         ),
     )
@@ -1419,7 +1407,7 @@ def test_read_multiple_docs_with_all_metadata_categories(docs_client):
                 'filename="/some/dir/doc2.json"; '
                 "category=content; "
                 "format=json",
-                "content": {"root": {"child": "data"}},
+                "content": b'{"root": {"child": "data"}}',
             },
         ),
     )
@@ -1497,13 +1485,13 @@ def test_read_multiple_docs_full_metadata_without_content(docs_client):
                 'filename="/some/dir/doc1.xml"; '
                 "category=metadata; "
                 "format=json",
-                "content": {
-                    "collections": [],
-                    "permissions": [],
-                    "properties": {},
-                    "quality": 0,
-                    "metadataValues": {},
-                },
+                "content": b"{"
+                b'"collections": [], '
+                b'"permissions": [], '
+                b'"properties": {}, '
+                b'"quality": 0, '
+                b'"metadataValues": {}'
+                b"}",
             },
         ),
     )
@@ -1515,13 +1503,13 @@ def test_read_multiple_docs_full_metadata_without_content(docs_client):
                 'filename="/some/dir/doc2.json"; '
                 "category=metadata; "
                 "format=json",
-                "content": {
-                    "collections": [],
-                    "permissions": [],
-                    "properties": {},
-                    "quality": 1,
-                    "metadataValues": {},
-                },
+                "content": b"{"
+                b'"collections": [], '
+                b'"permissions": [], '
+                b'"properties": {}, '
+                b'"quality": 1, '
+                b'"metadataValues": {}'
+                b"}",
             },
         ),
     )
@@ -1585,9 +1573,7 @@ def test_read_multiple_docs_single_metadata_category_without_content(docs_client
                 'filename="/some/dir/doc1.xml"; '
                 "category=collections; "
                 "format=json",
-                "content": {
-                    "collections": ["xml"],
-                },
+                "content": b'{"collections": ["xml"]}',
             },
         ),
     )
@@ -1599,9 +1585,7 @@ def test_read_multiple_docs_single_metadata_category_without_content(docs_client
                 'filename="/some/dir/doc2.json"; '
                 "category=collections; "
                 "format=json",
-                "content": {
-                    "collections": ["json"],
-                },
+                "content": b'{"collections": ["json"]}',
             },
         ),
     )
@@ -1667,10 +1651,7 @@ def test_read_multiple_docs_two_metadata_categories_without_content(docs_client)
                 "category=collections; "
                 "category=quality; "
                 "format=json",
-                "content": {
-                    "collections": ["xml"],
-                    "quality": 0,
-                },
+                "content": b'{"collections": ["xml"], "quality": 0}',
             },
         ),
     )
@@ -1683,10 +1664,7 @@ def test_read_multiple_docs_two_metadata_categories_without_content(docs_client)
                 "category=collections; "
                 "category=quality; "
                 "format=json",
-                "content": {
-                    "collections": ["json"],
-                    "quality": 1,
-                },
+                "content": b'{"collections": ["json"], "quality": 1}',
             },
         ),
     )
@@ -1758,13 +1736,13 @@ def test_read_multiple_docs_all_metadata_categories_without_content(docs_client)
                 "category=properties; "
                 "category=quality; "
                 "format=json",
-                "content": {
-                    "collections": [],
-                    "permissions": [],
-                    "properties": {},
-                    "quality": 0,
-                    "metadataValues": {},
-                },
+                "content": b"{"
+                b'"collections": [], '
+                b'"permissions": [], '
+                b'"properties": {}, '
+                b'"quality": 0, '
+                b'"metadataValues": {}'
+                b"}",
             },
         ),
     )
@@ -1780,13 +1758,13 @@ def test_read_multiple_docs_all_metadata_categories_without_content(docs_client)
                 "category=properties; "
                 "category=quality; "
                 "format=json",
-                "content": {
-                    "collections": [],
-                    "permissions": [],
-                    "properties": {},
-                    "quality": 1,
-                    "metadataValues": {},
-                },
+                "content": b"{"
+                b'"collections": [], '
+                b'"permissions": [], '
+                b'"properties": {}, '
+                b'"quality": 1, '
+                b'"metadataValues": {}'
+                b"}",
             },
         ),
     )
@@ -1905,8 +1883,8 @@ def test_read_multiple_docs_using_custom_database(docs_client):
                 'filename="/some/dir/doc1.xml"; '
                 "category=content; "
                 "format=xml",
-                "content": '<?xml version="1.0" encoding="UTF-8"?>\n'
-                "<root><child>data</child></root>",
+                "content": b'<?xml version="1.0" encoding="UTF-8"?>\n'
+                b"<root><child>data</child></root>",
             },
         ),
     )
@@ -1918,7 +1896,7 @@ def test_read_multiple_docs_using_custom_database(docs_client):
                 'filename="/some/dir/doc3.xqy"; '
                 "category=content; "
                 "format=text",
-                "content": 'xquery version "1.0-ml";\n\nfn:current-date()',
+                "content": b'xquery version "1.0-ml";\n\nfn:current-date()',
             },
         ),
     )
@@ -1930,7 +1908,7 @@ def test_read_multiple_docs_using_custom_database(docs_client):
                 'filename="/some/dir/doc2.json"; '
                 "category=content; "
                 "format=json",
-                "content": {"root": {"child": "data"}},
+                "content": b'{"root": {"child": "data"}}',
             },
         ),
     )

@@ -645,7 +645,7 @@ def test_read_multiple_docs_as_string(docs_client):
     assert xml_doc.doc_type == DocumentType.XML
     assert isinstance(xml_doc.content, str)
     assert xml_doc.content == (
-        '<?xml version="1.0" encoding="UTF-8"?>\n' "<root><child>data</child></root>"
+        '<?xml version="1.0" encoding="UTF-8"?>\n<root><child>data</child></root>'
     )
     assert xml_doc.metadata is None
     assert xml_doc.temporal_collection is None
@@ -767,7 +767,7 @@ def test_read_multiple_docs_as_bytes(docs_client):
     assert xml_doc.doc_type == DocumentType.XML
     assert isinstance(xml_doc.content, bytes)
     assert xml_doc.content == (
-        b'<?xml version="1.0" encoding="UTF-8"?>\n' b"<root><child>data</child></root>"
+        b'<?xml version="1.0" encoding="UTF-8"?>\n<root><child>data</child></root>'
     )
     assert xml_doc.metadata is None
     assert xml_doc.temporal_collection is None

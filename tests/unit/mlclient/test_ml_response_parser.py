@@ -1299,7 +1299,7 @@ def test_parse_text_multipart_mixed_response(client):
 
     assert isinstance(parsed_resp[1], str)
     assert parsed_resp[1] == (
-        '<?xml version="1.0" encoding="UTF-8"?>\n' "<root><child>data</child></root>"
+        '<?xml version="1.0" encoding="UTF-8"?>\n<root><child>data</child></root>'
     )
 
     assert isinstance(parsed_resp[2], str)
@@ -1389,7 +1389,7 @@ def test_parse_bytes_multipart_mixed_response(client):
 
     assert isinstance(parsed_resp[1], bytes)
     assert parsed_resp[1] == (
-        b'<?xml version="1.0" encoding="UTF-8"?>\n' b"<root><child>data</child></root>"
+        b'<?xml version="1.0" encoding="UTF-8"?>\n<root><child>data</child></root>'
     )
 
     assert isinstance(parsed_resp[2], bytes)
@@ -1604,7 +1604,7 @@ def test_parse_with_headers_text_multipart_mixed_response(client):
 
     assert isinstance(parsed_resp_2, str)
     assert parsed_resp_2 == (
-        '<?xml version="1.0" encoding="UTF-8"?>\n' "<root><child>data</child></root>"
+        '<?xml version="1.0" encoding="UTF-8"?>\n<root><child>data</child></root>'
     )
     assert headers_2 == {
         "Content-Disposition": "attachment; "
@@ -1719,7 +1719,7 @@ def test_parse_with_headers_bytes_multipart_mixed_response(client):
 
     assert isinstance(parsed_resp_2, bytes)
     assert parsed_resp_2 == (
-        b'<?xml version="1.0" encoding="UTF-8"?>\n' b"<root><child>data</child></root>"
+        b'<?xml version="1.0" encoding="UTF-8"?>\n<root><child>data</child></root>'
     )
     assert headers_2 == {
         "Content-Disposition": "attachment; "

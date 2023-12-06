@@ -377,16 +377,13 @@ class MLResponseParser:
         headers = body_part.headers
         if isinstance(body_part, BodyPart):
             headers = cls._decode_headers(headers, body_part.encoding)
+        content_type = headers.get(const.HEADER_NAME_CONTENT_TYPE)
+        doc_type = Mimetypes.get_doc_type(content_type)
 
-        if output_type is str:
-            content_type = headers.get(const.HEADER_NAME_CONTENT_TYPE)
-            doc_type = Mimetypes.get_doc_type(content_type)
-            if doc_type is DocumentType.BINARY is not None:
-                parsed = body_part.content
-            else:
-                parsed = body_part.text
-        elif output_type is bytes:
+        if output_type is bytes or doc_type is DocumentType.BINARY:
             parsed = body_part.content
+        elif output_type is str:
+            parsed = body_part.text
         else:
             parsed = cls._parse_type_specific(body_part, headers)
 

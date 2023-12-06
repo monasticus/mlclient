@@ -16,6 +16,7 @@ from mlclient.model import (
     Metadata,
     MetadataDocument,
     RawDocument,
+    RawStringDocument,
     TextDocument,
     XMLDocument,
 )
@@ -79,6 +80,38 @@ def test_create_read_and_remove_binary_document():
         _assert_document_does_not_exist(uri)
 
 
+def test_create_read_and_remove_document_using_string_output_type():
+    uri = "/some/dir/doc1.xml"
+    content = (
+        b'<?xml version="1.0" encoding="UTF-8"?>\n<root><child>data</child></root>\n'
+    )
+    doc = RawDocument(content, uri, DocumentType.XML)
+
+    try:
+        _assert_document_does_not_exist(uri)
+        _write_documents(doc)
+        _assert_documents_exist_and_confirm_data({uri: doc}, output_type=str)
+    finally:
+        _delete_documents(uri)
+        _assert_document_does_not_exist(uri)
+
+
+def test_create_read_and_remove_document_using_bytes_output_type():
+    uri = "/some/dir/doc1.xml"
+    content = (
+        b'<?xml version="1.0" encoding="UTF-8"?>\n<root><child>data</child></root>\n'
+    )
+    doc = RawDocument(content, uri, DocumentType.XML)
+
+    try:
+        _assert_document_does_not_exist(uri)
+        _write_documents(doc)
+        _assert_documents_exist_and_confirm_data({uri: doc}, output_type=bytes)
+    finally:
+        _delete_documents(uri)
+        _assert_document_does_not_exist(uri)
+
+
 def test_create_read_and_remove_document_with_metadata():
     uri = "/some/dir/doc2.json"
     content = {"root": {"child": "data"}}
@@ -89,6 +122,58 @@ def test_create_read_and_remove_document_with_metadata():
         _assert_document_does_not_exist(uri)
         _write_documents(doc)
         _assert_documents_exist_and_confirm_content_with_metadata({uri: doc})
+    finally:
+        _delete_documents(uri)
+        _assert_document_does_not_exist(uri)
+
+
+def test_create_read_and_remove_document_with_metadata_using_string_output_type():
+    uri = "/some/dir/doc2.json"
+    content = '{"root":{"child":"data"}}'
+    metadata = (
+        "{"
+        '"collections":["test-collection"],'
+        '"permissions":[],'
+        '"properties":{},'
+        '"quality":0,'
+        '"metadataValues":{}'
+        "}"
+    )
+    doc = RawStringDocument(content, uri, DocumentType.JSON, metadata)
+
+    try:
+        _assert_document_does_not_exist(uri)
+        _write_documents(doc)
+        _assert_documents_exist_and_confirm_content_with_metadata(
+            {uri: doc},
+            output_type=str,
+        )
+    finally:
+        _delete_documents(uri)
+        _assert_document_does_not_exist(uri)
+
+
+def test_create_read_and_remove_document_with_metadata_using_bytes_output_type():
+    uri = "/some/dir/doc2.json"
+    content = b'{"root":{"child":"data"}}'
+    metadata = (
+        b"{"
+        b'"collections":["test-collection"],'
+        b'"permissions":[],'
+        b'"properties":{},'
+        b'"quality":0,'
+        b'"metadataValues":{}'
+        b"}"
+    )
+    doc = RawDocument(content, uri, DocumentType.JSON, metadata)
+
+    try:
+        _assert_document_does_not_exist(uri)
+        _write_documents(doc)
+        _assert_documents_exist_and_confirm_content_with_metadata(
+            {uri: doc},
+            output_type=bytes,
+        )
     finally:
         _delete_documents(uri)
         _assert_document_does_not_exist(uri)
@@ -123,6 +208,73 @@ def test_create_read_and_remove_multiple_documents():
                 doc_3_uri: doc_3,
                 doc_4_uri: doc_4,
             },
+        )
+    finally:
+        _delete_documents([doc_1_uri, doc_2_uri, doc_3_uri, doc_4_uri])
+        _assert_documents_do_not_exist([doc_1_uri, doc_2_uri, doc_3_uri, doc_4_uri])
+
+
+def test_create_read_and_remove_multiple_documents_using_string_output_type():
+    doc_1_uri = "/some/dir/doc1.xml"
+    doc_1_content = (
+        b'<?xml version="1.0" encoding="UTF-8"?>\n<root><child>data</child></root>'
+    )
+    doc_1 = RawDocument(doc_1_content, doc_1_uri, DocumentType.XML)
+
+    doc_2_uri = "/some/dir/doc2.json"
+    doc_2_content = b'{"root":{"child":"data"}}'
+    doc_2 = RawDocument(doc_2_content, doc_2_uri, DocumentType.JSON)
+
+    doc_3_uri = "/some/dir/doc3.xqy"
+    doc_3_content = b'xquery version "1.0-ml";\n\nfn:current-date()'
+    doc_3 = RawDocument(doc_3_content, doc_3_uri, DocumentType.TEXT)
+
+    try:
+        _assert_documents_do_not_exist([doc_1_uri, doc_2_uri, doc_3_uri])
+        _write_documents([doc_1, doc_2, doc_3])
+        _assert_documents_exist_and_confirm_data(
+            {
+                doc_1_uri: doc_1,
+                doc_2_uri: doc_2,
+                doc_3_uri: doc_3,
+            },
+            output_type=str,
+        )
+    finally:
+        _delete_documents([doc_1_uri, doc_2_uri, doc_3_uri])
+        _assert_documents_do_not_exist([doc_1_uri, doc_2_uri, doc_3_uri])
+
+
+def test_create_read_and_remove_multiple_documents_using_bytes_output_type():
+    doc_1_uri = "/some/dir/doc1.xml"
+    doc_1_content = (
+        b'<?xml version="1.0" encoding="UTF-8"?>\n<root><child>data</child></root>'
+    )
+    doc_1 = RawDocument(doc_1_content, doc_1_uri, DocumentType.XML)
+
+    doc_2_uri = "/some/dir/doc2.json"
+    doc_2_content = b'{"root":{"child":"data"}}'
+    doc_2 = RawDocument(doc_2_content, doc_2_uri, DocumentType.JSON)
+
+    doc_3_uri = "/some/dir/doc3.xqy"
+    doc_3_content = b'xquery version "1.0-ml";\n\nfn:current-date()'
+    doc_3 = RawDocument(doc_3_content, doc_3_uri, DocumentType.TEXT)
+
+    doc_4_uri = "/some/dir/doc4.zip"
+    doc_4_content = zlib.compress(b'xquery version "1.0-ml";\n\nfn:current-date()')
+    doc_4 = RawDocument(doc_4_content, doc_4_uri, DocumentType.BINARY)
+
+    try:
+        _assert_documents_do_not_exist([doc_1_uri, doc_2_uri, doc_3_uri, doc_4_uri])
+        _write_documents([doc_1, doc_2, doc_3, doc_4])
+        _assert_documents_exist_and_confirm_data(
+            {
+                doc_1_uri: doc_1,
+                doc_2_uri: doc_2,
+                doc_3_uri: doc_3,
+                doc_4_uri: doc_4,
+            },
+            output_type=bytes,
         )
     finally:
         _delete_documents([doc_1_uri, doc_2_uri, doc_3_uri, doc_4_uri])
@@ -273,16 +425,26 @@ def _assert_documents_do_not_exist(
 
 def _assert_documents_exist_and_confirm_content_with_metadata(
     expected: dict,
+    output_type: type | None = None,
 ):
-    _assert_documents_exist_and_confirm_data(expected, ["content", "metadata"])
+    _assert_documents_exist_and_confirm_data(
+        expected,
+        ["content", "metadata"],
+        output_type,
+    )
 
 
 def _assert_documents_exist_and_confirm_data(
     expected: dict,
     category: str | list[str] = "content",
+    output_type: type | None = None,
 ):
     with DocumentsClient(auth_method="digest") as docs_client:
-        actual_docs = docs_client.read(list(expected.keys()), category)
+        actual_docs = docs_client.read(
+            list(expected.keys()),
+            category,
+            output_type=output_type,
+        )
         for actual_doc in actual_docs:
             expected_doc = next(
                 (doc for uri, doc in expected.items() if uri == actual_doc.uri),
@@ -291,7 +453,12 @@ def _assert_documents_exist_and_confirm_data(
             assert expected_doc is not None
             assert actual_doc.uri == expected_doc.uri
             assert actual_doc.doc_type == expected_doc.doc_type
-            assert actual_doc.content_bytes == expected_doc.content_bytes
+            if output_type is str:
+                assert actual_doc.content == expected_doc.content_string
+            elif output_type is bytes:
+                assert actual_doc.content == expected_doc.content_bytes
+            else:
+                assert actual_doc.content_bytes == expected_doc.content_bytes
             if category not in ("content", ["content"]):
                 assert actual_doc.metadata == expected_doc.metadata
 

@@ -84,6 +84,7 @@ class DocumentsClient(MLResourceClient):
         uris: str | list[str] | tuple[str] | set[str],
         category: str | list | None = None,
         database: str | None = None,
+        output_type: type | None = None,
     ) -> Document | list[Document]:
         """Return document(s) content or metadata from a MarkLogic database.
 
@@ -103,6 +104,8 @@ class DocumentsClient(MLResourceClient):
         database : str | None, default None
             Perform this operation on the named content database instead
             of the default content database associated with the REST API instance.
+        output_type : type | None, default None
+            A raw output type (supported: str, bytes)
 
         Returns
         -------
@@ -119,7 +122,7 @@ class DocumentsClient(MLResourceClient):
         if not resp.ok:
             resp_body = MLResponseParser.parse(resp)
             raise MarkLogicError(resp_body["errorResponse"])
-        return DocumentsReader.parse(resp, uris, category)
+        return DocumentsReader.parse(resp, uris, category, output_type)
 
     def delete(
         self,
@@ -430,6 +433,7 @@ class DocumentsReader:
         resp: Response,
         uris: str | list[str] | tuple[str] | set[str],
         category: str | list | None,
+        output_type: type | None = None,
     ) -> Document | list[Document]:
         """Parse a MarkLogic response to Documents.
 
@@ -445,17 +449,19 @@ class DocumentsReader:
             of content and metadata. Valid categories: content (default), metadata,
             metadata-values, collections, permissions, properties, and quality.
             Use metadata to request all categories except content.
+        output_type : type | None, default None
+            A raw output type (supported: str, bytes)
 
         Returns
         -------
         Document | list[Document]
             A single Document instance or their list depending on uris type.
         """
-        parsed_resp = cls._parse_response(resp)
+        parsed_resp = cls._parse_response(resp, output_type)
         content_type = resp.headers.get(constants.HEADER_NAME_CONTENT_TYPE)
         is_multipart = content_type.startswith(constants.HEADER_MULTIPART_MIXED)
         documents_data = cls._pre_format_data(parsed_resp, is_multipart, uris, category)
-        docs = cls._parse_to_documents(documents_data)
+        docs = cls._parse_to_documents(documents_data, output_type)
         if isinstance(uris, str):
             return docs[0]
         return docs
@@ -464,6 +470,7 @@ class DocumentsReader:
     def _parse_response(
         cls,
         resp: Response,
+        output_type: type | None,
     ) -> list[tuple]:
         """Parse a response from a MarkLogic server.
 
@@ -471,13 +478,15 @@ class DocumentsReader:
         ----------
         resp : Response
             A MarkLogic Server response
+        output_type : type | None, default None
+            A raw output type (supported: str, bytes)
 
         Returns
         -------
         list[tuple]
             A parsed response parts with headers
         """
-        parsed_resp = MLResponseParser.parse_with_headers(resp)
+        parsed_resp = MLResponseParser.parse_with_headers(resp, output_type)
         if not isinstance(parsed_resp, list):
             headers, _ = parsed_resp
             if headers.get(constants.HEADER_NAME_CONTENT_LENGTH) == "0":
@@ -594,8 +603,33 @@ class DocumentsReader:
         else:
             yield {
                 "uri": uri,
-                "metadata": cls._parse_metadata(parsed_resp_body),
+                "metadata": cls._pre_format_metadata(parsed_resp_body),
             }
+
+    @classmethod
+    def _pre_format_metadata(
+        cls,
+        raw_metadata: dict | bytes | str,
+    ) -> dict | bytes | str:
+        """Prepare raw metadata from a MarkLogic server response.
+
+        For the dict type it replaces metadataValues key to metadata_values (if exists).
+
+        Parameters
+        ----------
+        raw_metadata : dict | bytes | str
+            A raw metadata returned by a MarkLogic server
+
+        Returns
+        -------
+        dict | bytes | str
+            Metadata prepared to a Document instantiation.
+        """
+        if isinstance(raw_metadata, dict) and "metadataValues" in raw_metadata:
+            raw_metadata["metadata_values"] = raw_metadata["metadataValues"]
+            del raw_metadata["metadataValues"]
+
+        return raw_metadata
 
     @classmethod
     def _expect_categories(
@@ -651,36 +685,14 @@ class DocumentsReader:
             }
         return {
             "uri": content_disp.filename,
-            "metadata": cls._parse_metadata(parsed_resp_body),
+            "metadata": cls._pre_format_metadata(parsed_resp_body),
         }
-
-    @classmethod
-    def _parse_metadata(
-        cls,
-        raw_metadata: dict,
-    ) -> Metadata:
-        """Parse metadata from a response to a Metadata instance.
-
-        Parameters
-        ----------
-        raw_metadata : dict
-            A raw metadata returned by a MarkLogic server
-
-        Returns
-        -------
-        Metadata
-            A parsed Metadata instance.
-        """
-        if "metadataValues" in raw_metadata:
-            raw_metadata["metadata_values"] = raw_metadata["metadataValues"]
-            del raw_metadata["metadataValues"]
-
-        return Metadata(**raw_metadata)
 
     @classmethod
     def _parse_to_documents(
         cls,
         documents_data: Iterator[dict],
+        output_type: type | None,
     ) -> list[Document]:
         """Parse pre-formatted data to a list of Document instances.
 
@@ -688,6 +700,8 @@ class DocumentsReader:
         ----------
         documents_data : Iterator[dict]
             An iterator of pre-formatted data in form of dictionaries
+        output_type : type | None
+            A raw output type (supported: str, bytes)
 
         Returns
         -------
@@ -695,13 +709,15 @@ class DocumentsReader:
             A list of parsed Document instances
         """
         return [
-            cls._parse_to_document(document_data) for document_data in documents_data
+            cls._parse_to_document(document_data, output_type)
+            for document_data in documents_data
         ]
 
     @classmethod
     def _parse_to_document(
         cls,
         document_data: dict,
+        output_type: type | None,
     ) -> Document:
         """Parse pre-formatted data to a Document instance.
 
@@ -709,6 +725,8 @@ class DocumentsReader:
         ----------
         document_data : dict
             Pre-formatted data in form of a dictionary
+        output_type : type | None
+            A raw output type (supported: str, bytes)
 
         Returns
         -------
@@ -719,7 +737,14 @@ class DocumentsReader:
         doc_format = document_data.get("format")
         content = document_data.get("content")
         metadata = document_data.get("metadata")
-        return DocumentFactory.build_document(
+
+        if output_type in (bytes, str):
+            factory_function = DocumentFactory.build_raw_document
+        else:
+            metadata = Metadata(**metadata) if metadata else metadata
+            factory_function = DocumentFactory.build_document
+
+        return factory_function(
             content=content,
             doc_type=doc_format,
             uri=uri,

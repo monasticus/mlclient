@@ -7,6 +7,7 @@ import pytest
 import responses
 
 from mlclient import MLResourcesClient, MLResponseParser
+from mlclient.calls.model import DocumentsBodyPart
 from tests import tools
 from tests.tools import MLResponseBuilder
 
@@ -1125,6 +1126,621 @@ def test_parse_bytes_with_headers_non_multipart_mixed_response_binary(client):
         "vnd.marklogic.document-format": "binary",
         "Content-Type": "application/zip",
         "Content-Length": "51",
+    }
+
+
+@responses.activate
+def test_parse_multipart_mixed_response(client):
+    uris = [
+        "/some/dir/doc1.xml",
+        "/some/dir/doc2.json",
+        "/some/dir/doc3.xqy",
+        "/some/dir/doc4.zip",
+    ]
+
+    zip_content = zlib.compress(b'xquery version "1.0-ml";\n\nfn:current-date()')
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/documents")
+    builder.with_request_param("uri", "/some/dir/doc1.xml")
+    builder.with_request_param("uri", "/some/dir/doc2.json")
+    builder.with_request_param("uri", "/some/dir/doc3.xqy")
+    builder.with_request_param("uri", "/some/dir/doc4.zip")
+    builder.with_response_status(200)
+    builder.with_response_body_multipart_mixed()
+    builder.with_response_documents_body_part(
+        DocumentsBodyPart(
+            **{
+                "content-type": "application/zip",
+                "content-disposition": "attachment; "
+                'filename="/some/dir/doc4.zip"; '
+                "category=content; "
+                "format=binary",
+                "content": zip_content,
+            },
+        ),
+    )
+    builder.with_response_documents_body_part(
+        DocumentsBodyPart(
+            **{
+                "content-type": "application/xml",
+                "content-disposition": "attachment; "
+                'filename="/some/dir/doc1.xml"; '
+                "category=content; "
+                "format=xml",
+                "content": b'<?xml version="1.0" encoding="UTF-8"?>\n'
+                b"<root><child>data</child></root>",
+            },
+        ),
+    )
+    builder.with_response_documents_body_part(
+        DocumentsBodyPart(
+            **{
+                "content-type": "application/vnd.marklogic-xdmp",
+                "content-disposition": "attachment; "
+                'filename="/some/dir/doc3.xqy"; '
+                "category=content; "
+                "format=text",
+                "content": b'xquery version "1.0-ml";\n\nfn:current-date()',
+            },
+        ),
+    )
+    builder.with_response_documents_body_part(
+        DocumentsBodyPart(
+            **{
+                "content-type": "application/json",
+                "content-disposition": "attachment; "
+                'filename="/some/dir/doc2.json"; '
+                "category=content; "
+                "format=json",
+                "content": b'{"root": {"child": "data"}}',
+            },
+        ),
+    )
+    builder.build_get()
+
+    resp = client.get_documents(uri=uris)
+    parsed_resp = MLResponseParser.parse(resp)
+
+    assert isinstance(parsed_resp, list)
+
+    assert isinstance(parsed_resp[0], bytes)
+    assert parsed_resp[0] == zip_content
+
+    assert isinstance(parsed_resp[1], ElemTree.ElementTree)
+    assert parsed_resp[1].getroot().tag == "root"
+    assert parsed_resp[1].getroot().text is None
+    assert parsed_resp[1].getroot().attrib == {}
+
+    assert isinstance(parsed_resp[2], str)
+    assert parsed_resp[2] == 'xquery version "1.0-ml";\n\nfn:current-date()'
+
+    assert isinstance(parsed_resp[3], dict)
+    assert parsed_resp[3] == {"root": {"child": "data"}}
+
+
+@responses.activate
+def test_parse_text_multipart_mixed_response(client):
+    uris = [
+        "/some/dir/doc1.xml",
+        "/some/dir/doc2.json",
+        "/some/dir/doc3.xqy",
+        "/some/dir/doc4.zip",
+    ]
+
+    zip_content = zlib.compress(b'xquery version "1.0-ml";\n\nfn:current-date()')
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/documents")
+    builder.with_request_param("uri", "/some/dir/doc1.xml")
+    builder.with_request_param("uri", "/some/dir/doc2.json")
+    builder.with_request_param("uri", "/some/dir/doc3.xqy")
+    builder.with_request_param("uri", "/some/dir/doc4.zip")
+    builder.with_response_status(200)
+    builder.with_response_body_multipart_mixed()
+    builder.with_response_documents_body_part(
+        DocumentsBodyPart(
+            **{
+                "content-type": "application/zip",
+                "content-disposition": "attachment; "
+                'filename="/some/dir/doc4.zip"; '
+                "category=content; "
+                "format=binary",
+                "content": zip_content,
+            },
+        ),
+    )
+    builder.with_response_documents_body_part(
+        DocumentsBodyPart(
+            **{
+                "content-type": "application/xml",
+                "content-disposition": "attachment; "
+                'filename="/some/dir/doc1.xml"; '
+                "category=content; "
+                "format=xml",
+                "content": b'<?xml version="1.0" encoding="UTF-8"?>\n'
+                b"<root><child>data</child></root>",
+            },
+        ),
+    )
+    builder.with_response_documents_body_part(
+        DocumentsBodyPart(
+            **{
+                "content-type": "application/vnd.marklogic-xdmp",
+                "content-disposition": "attachment; "
+                'filename="/some/dir/doc3.xqy"; '
+                "category=content; "
+                "format=text",
+                "content": b'xquery version "1.0-ml";\n\nfn:current-date()',
+            },
+        ),
+    )
+    builder.with_response_documents_body_part(
+        DocumentsBodyPart(
+            **{
+                "content-type": "application/json",
+                "content-disposition": "attachment; "
+                'filename="/some/dir/doc2.json"; '
+                "category=content; "
+                "format=json",
+                "content": b'{"root":{"child":"data"}}',
+            },
+        ),
+    )
+    builder.build_get()
+
+    resp = client.get_documents(uri=uris)
+    parsed_resp = MLResponseParser.parse(resp, output_type=str)
+
+    assert isinstance(parsed_resp, list)
+
+    assert isinstance(parsed_resp[0], bytes)
+    assert parsed_resp[0] == zip_content
+
+    assert isinstance(parsed_resp[1], str)
+    assert parsed_resp[1] == (
+        '<?xml version="1.0" encoding="UTF-8"?>\n<root><child>data</child></root>'
+    )
+
+    assert isinstance(parsed_resp[2], str)
+    assert parsed_resp[2] == 'xquery version "1.0-ml";\n\nfn:current-date()'
+
+    assert isinstance(parsed_resp[3], str)
+    assert parsed_resp[3] == '{"root":{"child":"data"}}'
+
+
+@responses.activate
+def test_parse_bytes_multipart_mixed_response(client):
+    uris = [
+        "/some/dir/doc1.xml",
+        "/some/dir/doc2.json",
+        "/some/dir/doc3.xqy",
+        "/some/dir/doc4.zip",
+    ]
+
+    zip_content = zlib.compress(b'xquery version "1.0-ml";\n\nfn:current-date()')
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/documents")
+    builder.with_request_param("uri", "/some/dir/doc1.xml")
+    builder.with_request_param("uri", "/some/dir/doc2.json")
+    builder.with_request_param("uri", "/some/dir/doc3.xqy")
+    builder.with_request_param("uri", "/some/dir/doc4.zip")
+    builder.with_response_status(200)
+    builder.with_response_body_multipart_mixed()
+    builder.with_response_documents_body_part(
+        DocumentsBodyPart(
+            **{
+                "content-type": "application/zip",
+                "content-disposition": "attachment; "
+                'filename="/some/dir/doc4.zip"; '
+                "category=content; "
+                "format=binary",
+                "content": zip_content,
+            },
+        ),
+    )
+    builder.with_response_documents_body_part(
+        DocumentsBodyPart(
+            **{
+                "content-type": "application/xml",
+                "content-disposition": "attachment; "
+                'filename="/some/dir/doc1.xml"; '
+                "category=content; "
+                "format=xml",
+                "content": b'<?xml version="1.0" encoding="UTF-8"?>\n'
+                b"<root><child>data</child></root>",
+            },
+        ),
+    )
+    builder.with_response_documents_body_part(
+        DocumentsBodyPart(
+            **{
+                "content-type": "application/vnd.marklogic-xdmp",
+                "content-disposition": "attachment; "
+                'filename="/some/dir/doc3.xqy"; '
+                "category=content; "
+                "format=text",
+                "content": b'xquery version "1.0-ml";\n\nfn:current-date()',
+            },
+        ),
+    )
+    builder.with_response_documents_body_part(
+        DocumentsBodyPart(
+            **{
+                "content-type": "application/json",
+                "content-disposition": "attachment; "
+                'filename="/some/dir/doc2.json"; '
+                "category=content; "
+                "format=json",
+                "content": b'{"root":{"child":"data"}}',
+            },
+        ),
+    )
+    builder.build_get()
+
+    resp = client.get_documents(uri=uris)
+    parsed_resp = MLResponseParser.parse(resp, output_type=bytes)
+
+    assert isinstance(parsed_resp, list)
+
+    assert isinstance(parsed_resp[0], bytes)
+    assert parsed_resp[0] == zip_content
+
+    assert isinstance(parsed_resp[1], bytes)
+    assert parsed_resp[1] == (
+        b'<?xml version="1.0" encoding="UTF-8"?>\n<root><child>data</child></root>'
+    )
+
+    assert isinstance(parsed_resp[2], bytes)
+    assert parsed_resp[2] == b'xquery version "1.0-ml";\n\nfn:current-date()'
+
+    assert isinstance(parsed_resp[3], bytes)
+    assert parsed_resp[3] == b'{"root":{"child":"data"}}'
+
+
+@responses.activate
+def test_parse_with_headers_multipart_mixed_response(client):
+    uris = [
+        "/some/dir/doc1.xml",
+        "/some/dir/doc2.json",
+        "/some/dir/doc3.xqy",
+        "/some/dir/doc4.zip",
+    ]
+
+    zip_content = zlib.compress(b'xquery version "1.0-ml";\n\nfn:current-date()')
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/documents")
+    builder.with_request_param("uri", "/some/dir/doc1.xml")
+    builder.with_request_param("uri", "/some/dir/doc2.json")
+    builder.with_request_param("uri", "/some/dir/doc3.xqy")
+    builder.with_request_param("uri", "/some/dir/doc4.zip")
+    builder.with_response_status(200)
+    builder.with_response_body_multipart_mixed()
+    builder.with_response_documents_body_part(
+        DocumentsBodyPart(
+            **{
+                "content-type": "application/zip",
+                "content-disposition": "attachment; "
+                'filename="/some/dir/doc4.zip"; '
+                "category=content; "
+                "format=binary",
+                "content": zip_content,
+            },
+        ),
+    )
+    builder.with_response_documents_body_part(
+        DocumentsBodyPart(
+            **{
+                "content-type": "application/xml",
+                "content-disposition": "attachment; "
+                'filename="/some/dir/doc1.xml"; '
+                "category=content; "
+                "format=xml",
+                "content": b'<?xml version="1.0" encoding="UTF-8"?>\n'
+                b"<root><child>data</child></root>",
+            },
+        ),
+    )
+    builder.with_response_documents_body_part(
+        DocumentsBodyPart(
+            **{
+                "content-type": "application/vnd.marklogic-xdmp",
+                "content-disposition": "attachment; "
+                'filename="/some/dir/doc3.xqy"; '
+                "category=content; "
+                "format=text",
+                "content": b'xquery version "1.0-ml";\n\nfn:current-date()',
+            },
+        ),
+    )
+    builder.with_response_documents_body_part(
+        DocumentsBodyPart(
+            **{
+                "content-type": "application/json",
+                "content-disposition": "attachment; "
+                'filename="/some/dir/doc2.json"; '
+                "category=content; "
+                "format=json",
+                "content": b'{"root": {"child": "data"}}',
+            },
+        ),
+    )
+    builder.build_get()
+
+    resp = client.get_documents(uri=uris)
+    parsed_resp_list = MLResponseParser.parse_with_headers(resp)
+
+    assert isinstance(parsed_resp_list, list)
+
+    headers_1, parsed_resp_1 = parsed_resp_list[0]
+    headers_2, parsed_resp_2 = parsed_resp_list[1]
+    headers_3, parsed_resp_3 = parsed_resp_list[2]
+    headers_4, parsed_resp_4 = parsed_resp_list[3]
+
+    assert isinstance(parsed_resp_1, bytes)
+    assert parsed_resp_1 == zip_content
+    assert headers_1 == {
+        "Content-Disposition": "attachment; "
+        'filename="/some/dir/doc4.zip"; category=content; format=binary',
+        "Content-Type": "application/zip",
+    }
+
+    assert isinstance(parsed_resp_2, ElemTree.ElementTree)
+    assert parsed_resp_2.getroot().tag == "root"
+    assert parsed_resp_2.getroot().text is None
+    assert parsed_resp_2.getroot().attrib == {}
+    assert headers_2 == {
+        "Content-Disposition": "attachment; "
+        'filename="/some/dir/doc1.xml"; category=content; format=xml',
+        "Content-Type": "application/xml",
+    }
+
+    assert isinstance(parsed_resp_3, str)
+    assert parsed_resp_3 == 'xquery version "1.0-ml";\n\nfn:current-date()'
+    assert headers_3 == {
+        "Content-Disposition": "attachment; "
+        'filename="/some/dir/doc3.xqy"; category=content; format=text',
+        "Content-Type": "application/vnd.marklogic-xdmp",
+    }
+
+    assert isinstance(parsed_resp_4, dict)
+    assert parsed_resp_4 == {"root": {"child": "data"}}
+    assert headers_4 == {
+        "Content-Disposition": "attachment; "
+        'filename="/some/dir/doc2.json"; category=content; format=json',
+        "Content-Type": "application/json",
+    }
+
+
+@responses.activate
+def test_parse_with_headers_text_multipart_mixed_response(client):
+    uris = [
+        "/some/dir/doc1.xml",
+        "/some/dir/doc2.json",
+        "/some/dir/doc3.xqy",
+        "/some/dir/doc4.zip",
+    ]
+
+    zip_content = zlib.compress(b'xquery version "1.0-ml";\n\nfn:current-date()')
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/documents")
+    builder.with_request_param("uri", "/some/dir/doc1.xml")
+    builder.with_request_param("uri", "/some/dir/doc2.json")
+    builder.with_request_param("uri", "/some/dir/doc3.xqy")
+    builder.with_request_param("uri", "/some/dir/doc4.zip")
+    builder.with_response_status(200)
+    builder.with_response_body_multipart_mixed()
+    builder.with_response_documents_body_part(
+        DocumentsBodyPart(
+            **{
+                "content-type": "application/zip",
+                "content-disposition": "attachment; "
+                'filename="/some/dir/doc4.zip"; '
+                "category=content; "
+                "format=binary",
+                "content": zip_content,
+            },
+        ),
+    )
+    builder.with_response_documents_body_part(
+        DocumentsBodyPart(
+            **{
+                "content-type": "application/xml",
+                "content-disposition": "attachment; "
+                'filename="/some/dir/doc1.xml"; '
+                "category=content; "
+                "format=xml",
+                "content": b'<?xml version="1.0" encoding="UTF-8"?>\n'
+                b"<root><child>data</child></root>",
+            },
+        ),
+    )
+    builder.with_response_documents_body_part(
+        DocumentsBodyPart(
+            **{
+                "content-type": "application/vnd.marklogic-xdmp",
+                "content-disposition": "attachment; "
+                'filename="/some/dir/doc3.xqy"; '
+                "category=content; "
+                "format=text",
+                "content": b'xquery version "1.0-ml";\n\nfn:current-date()',
+            },
+        ),
+    )
+    builder.with_response_documents_body_part(
+        DocumentsBodyPart(
+            **{
+                "content-type": "application/json",
+                "content-disposition": "attachment; "
+                'filename="/some/dir/doc2.json"; '
+                "category=content; "
+                "format=json",
+                "content": b'{"root":{"child":"data"}}',
+            },
+        ),
+    )
+    builder.build_get()
+
+    resp = client.get_documents(uri=uris)
+    parsed_resp_list = MLResponseParser.parse_with_headers(resp, output_type=str)
+
+    assert isinstance(parsed_resp_list, list)
+
+    headers_1, parsed_resp_1 = parsed_resp_list[0]
+    headers_2, parsed_resp_2 = parsed_resp_list[1]
+    headers_3, parsed_resp_3 = parsed_resp_list[2]
+    headers_4, parsed_resp_4 = parsed_resp_list[3]
+
+    assert isinstance(parsed_resp_1, bytes)
+    assert parsed_resp_1 == zip_content
+    assert headers_1 == {
+        "Content-Disposition": "attachment; "
+        'filename="/some/dir/doc4.zip"; category=content; format=binary',
+        "Content-Type": "application/zip",
+    }
+
+    assert isinstance(parsed_resp_2, str)
+    assert parsed_resp_2 == (
+        '<?xml version="1.0" encoding="UTF-8"?>\n<root><child>data</child></root>'
+    )
+    assert headers_2 == {
+        "Content-Disposition": "attachment; "
+        'filename="/some/dir/doc1.xml"; category=content; format=xml',
+        "Content-Type": "application/xml",
+    }
+
+    assert isinstance(parsed_resp_3, str)
+    assert parsed_resp_3 == 'xquery version "1.0-ml";\n\nfn:current-date()'
+    assert headers_3 == {
+        "Content-Disposition": "attachment; "
+        'filename="/some/dir/doc3.xqy"; category=content; format=text',
+        "Content-Type": "application/vnd.marklogic-xdmp",
+    }
+
+    assert isinstance(parsed_resp_4, str)
+    assert parsed_resp_4 == '{"root":{"child":"data"}}'
+    assert headers_4 == {
+        "Content-Disposition": "attachment; "
+        'filename="/some/dir/doc2.json"; category=content; format=json',
+        "Content-Type": "application/json",
+    }
+
+
+@responses.activate
+def test_parse_with_headers_bytes_multipart_mixed_response(client):
+    uris = [
+        "/some/dir/doc1.xml",
+        "/some/dir/doc2.json",
+        "/some/dir/doc3.xqy",
+        "/some/dir/doc4.zip",
+    ]
+
+    zip_content = zlib.compress(b'xquery version "1.0-ml";\n\nfn:current-date()')
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/documents")
+    builder.with_request_param("uri", "/some/dir/doc1.xml")
+    builder.with_request_param("uri", "/some/dir/doc2.json")
+    builder.with_request_param("uri", "/some/dir/doc3.xqy")
+    builder.with_request_param("uri", "/some/dir/doc4.zip")
+    builder.with_response_status(200)
+    builder.with_response_body_multipart_mixed()
+    builder.with_response_documents_body_part(
+        DocumentsBodyPart(
+            **{
+                "content-type": "application/zip",
+                "content-disposition": "attachment; "
+                'filename="/some/dir/doc4.zip"; '
+                "category=content; "
+                "format=binary",
+                "content": zip_content,
+            },
+        ),
+    )
+    builder.with_response_documents_body_part(
+        DocumentsBodyPart(
+            **{
+                "content-type": "application/xml",
+                "content-disposition": "attachment; "
+                'filename="/some/dir/doc1.xml"; '
+                "category=content; "
+                "format=xml",
+                "content": b'<?xml version="1.0" encoding="UTF-8"?>\n'
+                b"<root><child>data</child></root>",
+            },
+        ),
+    )
+    builder.with_response_documents_body_part(
+        DocumentsBodyPart(
+            **{
+                "content-type": "application/vnd.marklogic-xdmp",
+                "content-disposition": "attachment; "
+                'filename="/some/dir/doc3.xqy"; '
+                "category=content; "
+                "format=text",
+                "content": b'xquery version "1.0-ml";\n\nfn:current-date()',
+            },
+        ),
+    )
+    builder.with_response_documents_body_part(
+        DocumentsBodyPart(
+            **{
+                "content-type": "application/json",
+                "content-disposition": "attachment; "
+                'filename="/some/dir/doc2.json"; '
+                "category=content; "
+                "format=json",
+                "content": b'{"root":{"child":"data"}}',
+            },
+        ),
+    )
+    builder.build_get()
+
+    resp = client.get_documents(uri=uris)
+    parsed_resp_list = MLResponseParser.parse_with_headers(resp, output_type=bytes)
+
+    assert isinstance(parsed_resp_list, list)
+
+    headers_1, parsed_resp_1 = parsed_resp_list[0]
+    headers_2, parsed_resp_2 = parsed_resp_list[1]
+    headers_3, parsed_resp_3 = parsed_resp_list[2]
+    headers_4, parsed_resp_4 = parsed_resp_list[3]
+
+    assert isinstance(parsed_resp_1, bytes)
+    assert parsed_resp_1 == zip_content
+    assert headers_1 == {
+        "Content-Disposition": "attachment; "
+        'filename="/some/dir/doc4.zip"; category=content; format=binary',
+        "Content-Type": "application/zip",
+    }
+
+    assert isinstance(parsed_resp_2, bytes)
+    assert parsed_resp_2 == (
+        b'<?xml version="1.0" encoding="UTF-8"?>\n<root><child>data</child></root>'
+    )
+    assert headers_2 == {
+        "Content-Disposition": "attachment; "
+        'filename="/some/dir/doc1.xml"; category=content; format=xml',
+        "Content-Type": "application/xml",
+    }
+
+    assert isinstance(parsed_resp_3, bytes)
+    assert parsed_resp_3 == b'xquery version "1.0-ml";\n\nfn:current-date()'
+    assert headers_3 == {
+        "Content-Disposition": "attachment; "
+        'filename="/some/dir/doc3.xqy"; category=content; format=text',
+        "Content-Type": "application/vnd.marklogic-xdmp",
+    }
+
+    assert isinstance(parsed_resp_4, bytes)
+    assert parsed_resp_4 == b'{"root":{"child":"data"}}'
+    assert headers_4 == {
+        "Content-Disposition": "attachment; "
+        'filename="/some/dir/doc2.json"; category=content; format=json',
+        "Content-Type": "application/json",
     }
 
 

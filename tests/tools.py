@@ -223,33 +223,34 @@ class MLResponseBuilder:
         self,
     ):
         self.with_method("GET")
-        self.build()
+        return self.build()
 
     def build_delete(
         self,
     ):
         self.with_method("DELETE")
-        self.build()
+        return self.build()
 
     def build_post(
         self,
     ):
         self.with_method("POST")
-        self.build()
+        return self.build()
 
     def build_put(
         self,
     ):
         self.with_method("PUT")
-        self.build()
+        return self.build()
 
     def build(
         self,
     ):
         self._validate()
         request_url, responses_params = self._build()
-        self._finalize(request_url, responses_params)
+        resp_obj = self._finalize(request_url, responses_params)
         self.__init__()
+        return resp_obj
 
     def _validate(
         self,
@@ -320,30 +321,32 @@ class MLResponseBuilder:
         responses_params: dict,
     ):
         if self._method == "GET":
-            self._finalize_get(request_url, responses_params)
-        elif self._method == "DELETE":
-            self._finalize_delete(request_url, responses_params)
-        elif self._method == "POST":
-            self._finalize_post(
+            return self._finalize_get(request_url, responses_params)
+        if self._method == "DELETE":
+            return self._finalize_delete(request_url, responses_params)
+        if self._method == "POST":
+            return self._finalize_post(
                 request_url,
                 responses_params,
                 self._request_content_type,
                 self._request_body,
             )
-        elif self._method == "PUT":
-            self._finalize_put(
+        if self._method == "PUT":
+            return self._finalize_put(
                 request_url,
                 responses_params,
                 self._request_content_type,
                 self._request_body,
             )
+        msg = "MLResponseBuilder - supported methods are: GET, DELETE, POST, PUT"
+        raise RuntimeError(msg)
 
     @staticmethod
     def _finalize_get(
         request_url: str,
         responses_params: dict,
     ):
-        responses.get(
+        return responses.get(
             request_url,
             **responses_params,
         )
@@ -353,7 +356,7 @@ class MLResponseBuilder:
         request_url: str,
         responses_params: dict,
     ):
-        responses.delete(
+        return responses.delete(
             request_url,
             **responses_params,
         )
@@ -372,7 +375,7 @@ class MLResponseBuilder:
             elif request_content_type.startswith("application/json"):
                 match = [matchers.json_params_matcher(request_body)]
                 responses_params["match"] = match
-        responses.post(
+        return responses.post(
             request_url,
             **responses_params,
         )
@@ -391,7 +394,7 @@ class MLResponseBuilder:
             elif request_content_type.startswith("application/json"):
                 match = [matchers.json_params_matcher(request_body)]
                 responses_params["match"] = match
-        responses.put(
+        return responses.put(
             request_url,
             **responses_params,
         )

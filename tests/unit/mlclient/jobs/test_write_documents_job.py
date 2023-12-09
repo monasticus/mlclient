@@ -45,15 +45,15 @@ def test_basic_job():
             ],
         },
     )
-    resp_obj = builder.build_post()
+    builder.build_post()
 
     job = WriteDocumentsJob(thread_count=1, batch_size=5)
     job.with_client_config(auth_method="digest")
     job.with_documents_input(docs)
     job.start()
     job.wait_completion()
-
-    assert resp_obj.call_count == 1
+    calls = responses.calls
+    assert len(calls) == 1
 
 
 def _get_test_docs(

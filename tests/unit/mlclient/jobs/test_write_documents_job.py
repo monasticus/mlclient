@@ -14,37 +14,7 @@ def test_basic_job():
     builder.with_response_content_type("application/json; charset=utf-8")
     builder.with_response_header("vnd.marklogic.document-format", "json")
     builder.with_response_status(200)
-    builder.with_response_body(
-        {
-            "documents": [
-                {
-                    "uri": "/some/dir/doc1.xml",
-                    "mime-type": "application/xml",
-                    "category": ["metadata", "content"],
-                },
-                {
-                    "uri": "/some/dir/doc2.xml",
-                    "mime-type": "application/xml",
-                    "category": ["metadata", "content"],
-                },
-                {
-                    "uri": "/some/dir/doc3.xml",
-                    "mime-type": "application/xml",
-                    "category": ["metadata", "content"],
-                },
-                {
-                    "uri": "/some/dir/doc4.xml",
-                    "mime-type": "application/xml",
-                    "category": ["metadata", "content"],
-                },
-                {
-                    "uri": "/some/dir/doc5.xml",
-                    "mime-type": "application/xml",
-                    "category": ["metadata", "content"],
-                },
-            ],
-        },
-    )
+    builder.with_response_body(_get_test_response_body(5))
     builder.build_post()
 
     job = WriteDocumentsJob(thread_count=1, batch_size=5)
@@ -66,37 +36,7 @@ def test_job_with_custom_database():
     builder.with_response_content_type("application/json; charset=utf-8")
     builder.with_response_header("vnd.marklogic.document-format", "json")
     builder.with_response_status(200)
-    builder.with_response_body(
-        {
-            "documents": [
-                {
-                    "uri": "/some/dir/doc1.xml",
-                    "mime-type": "application/xml",
-                    "category": ["metadata", "content"],
-                },
-                {
-                    "uri": "/some/dir/doc2.xml",
-                    "mime-type": "application/xml",
-                    "category": ["metadata", "content"],
-                },
-                {
-                    "uri": "/some/dir/doc3.xml",
-                    "mime-type": "application/xml",
-                    "category": ["metadata", "content"],
-                },
-                {
-                    "uri": "/some/dir/doc4.xml",
-                    "mime-type": "application/xml",
-                    "category": ["metadata", "content"],
-                },
-                {
-                    "uri": "/some/dir/doc5.xml",
-                    "mime-type": "application/xml",
-                    "category": ["metadata", "content"],
-                },
-            ],
-        },
-    )
+    builder.with_response_body(_get_test_response_body(5))
     builder.build_post()
 
     job = WriteDocumentsJob(thread_count=1, batch_size=5)
@@ -109,6 +49,27 @@ def test_job_with_custom_database():
     assert len(calls) == 1
 
 
+@responses.activate
+def test_multi_thread_job():
+    docs = _get_test_docs(150)
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/documents")
+    builder.with_response_content_type("application/json; charset=utf-8")
+    builder.with_response_header("vnd.marklogic.document-format", "json")
+    builder.with_response_status(200)
+    builder.with_response_body(_get_test_response_body(150))
+    builder.build_post()
+
+    job = WriteDocumentsJob(batch_size=5)
+    job.with_client_config(auth_method="digest")
+    job.with_documents_input(docs)
+    job.start()
+    job.wait_completion()
+    calls = responses.calls
+    assert len(calls) >= 30
+
+
 def _get_test_docs(
     count: int,
 ):
@@ -116,3 +77,18 @@ def _get_test_docs(
         uri = f"/some/dir/doc{i+1}.xml"
         content = b"<root><child>data</child></root>"
         yield RawDocument(content, uri, DocumentType.XML)
+
+
+def _get_test_response_body(
+    count: int,
+) -> dict:
+    return {
+        "documents": [
+            {
+                "uri": f"/some/dir/doc{i+1}.xml",
+                "mime-type": "application/xml",
+                "category": ["metadata", "content"],
+            }
+            for i in range(count)
+        ],
+    }

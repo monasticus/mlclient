@@ -58,7 +58,7 @@ class WriteDocumentsJob:
         for _ in range(self._thread_count):
             self._executor.submit(self._start)
 
-    def wait_completion(
+    def await_completion(
         self,
     ):
         self._input_queue.join()

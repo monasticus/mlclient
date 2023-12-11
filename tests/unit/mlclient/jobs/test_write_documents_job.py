@@ -21,7 +21,7 @@ def test_basic_job():
     job.with_client_config(auth_method="digest")
     job.with_documents_input(docs)
     job.start()
-    job.wait_completion()
+    job.await_completion()
     calls = responses.calls
     assert len(calls) == 1
 
@@ -44,7 +44,7 @@ def test_job_with_custom_database():
     job.with_documents_input(docs)
     job.with_database("Documents")
     job.start()
-    job.wait_completion()
+    job.await_completion()
     calls = responses.calls
     assert len(calls) == 1
 
@@ -65,7 +65,7 @@ def test_multi_thread_job():
     job.with_client_config(auth_method="digest")
     job.with_documents_input(docs)
     job.start()
-    job.wait_completion()
+    job.await_completion()
     calls = responses.calls
     assert len(calls) >= 30
 

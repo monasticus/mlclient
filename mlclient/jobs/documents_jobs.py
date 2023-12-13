@@ -76,25 +76,37 @@ class WriteDocumentsJob:
     ):
         with DocumentsClient(**self._config) as client:
             while True:
-                batch = []
-                for _ in range(self._batch_size):
-                    item = self._input_queue.get()
-                    self._input_queue.task_done()
-                    if item is None:
-                        break
-                    logger.debug("Getting [%s] from the queue", item.uri)
-                    batch.append(item)
+                batch = self._populate_batch()
                 if len(batch) > 0:
-                    try:
-                        client.create(data=batch, database=self._database)
-                    except Exception:
-                        logger.exception(
-                            "An unexpected error occurred while writing documents",
-                        )
-
+                    self._send_batch(batch, client)
                 if len(batch) < self._batch_size:
                     logger.debug("No more documents in the queue. Closing a worker...")
                     break
+
+    def _populate_batch(
+        self,
+    ) -> list:
+        batch = []
+        for _ in range(self._batch_size):
+            item = self._input_queue.get()
+            self._input_queue.task_done()
+            if item is None:
+                break
+            logger.debug("Getting [%s] from the queue", item.uri)
+            batch.append(item)
+        return batch
+
+    def _send_batch(
+        self,
+        batch: list,
+        client: DocumentsClient,
+    ):
+        try:
+            client.create(data=batch, database=self._database)
+        except Exception:
+            logger.exception(
+                "An unexpected error occurred while writing documents",
+            )
 
     @staticmethod
     def _get_max_num_of_threads():
@@ -102,8 +114,8 @@ class WriteDocumentsJob:
 
     @staticmethod
     def _populate_queue_with_documents_input(
-        q,
-        thread_count,
+        q: queue.Queue,
+        thread_count: int,
         documents: list[Document] | Iterator[Document],
     ):
         for document in documents:

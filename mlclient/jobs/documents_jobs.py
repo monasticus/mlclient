@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 import os
 import queue
 import uuid
@@ -9,6 +10,8 @@ from typing import Iterator
 
 from mlclient.clients import DocumentsClient
 from mlclient.model import Document
+
+logger = logging.getLogger(__name__)
 
 
 class WriteDocumentsJob:
@@ -50,6 +53,7 @@ class WriteDocumentsJob:
     def start(
         self,
     ):
+        logger.info("Starting job [%s]", self._id)
         self._executor = ThreadPoolExecutor(
             max_workers=self._thread_count,
             thread_name_prefix=f"write_documents_job_{self._id}",
@@ -61,21 +65,11 @@ class WriteDocumentsJob:
     def await_completion(
         self,
     ):
+        if not self._input_queue.empty():
+            logger.info("Waiting for job [%s] completion", self._id)
         self._input_queue.join()
         self._executor.shutdown()
         self._executor = None
-
-    @staticmethod
-    def _populate_queue_with_documents_input(
-        q,
-        thread_count,
-        documents: list[Document] | Iterator[Document],
-    ):
-        for document in documents:
-            print(f"Putting {document.uri} to queue")
-            q.put(document)
-        for _ in range(thread_count):
-            q.put(None)
 
     def _start(
         self,
@@ -87,22 +81,33 @@ class WriteDocumentsJob:
                     item = self._input_queue.get()
                     self._input_queue.task_done()
                     if item is None:
-                        print("Getting None from queue")
                         break
-                    print(f"Getting {item.uri} from queue")
+                    logger.debug("Getting [%s] from the queue", item.uri)
                     batch.append(item)
                 if len(batch) > 0:
                     try:
                         client.create(data=batch, database=self._database)
-                    except Exception as err:
-                        print(
-                            f"An unexpected error occurred while writing documents: {err}",
+                    except Exception:
+                        logger.exception(
+                            "An unexpected error occurred while writing documents",
                         )
 
                 if len(batch) < self._batch_size:
-                    print(f"Closing worker, batch {len(batch)}")
+                    logger.debug("No more documents in the queue. Closing a worker...")
                     break
 
     @staticmethod
     def _get_max_num_of_threads():
         return min(32, (os.cpu_count() or 1) + 4)  # Num of CPUs + 4
+
+    @staticmethod
+    def _populate_queue_with_documents_input(
+        q,
+        thread_count,
+        documents: list[Document] | Iterator[Document],
+    ):
+        for document in documents:
+            logger.debug("Putting [%s] into the queue", document.uri)
+            q.put(document)
+        for _ in range(thread_count):
+            q.put(None)

@@ -146,7 +146,7 @@ class WriteDocumentsJob:
     def _start(
         self,
     ):
-        """Write documents in batches until queue is not empty.
+        """Write documents in batches until queue is empty.
 
         Once DocumentsClient is initialized, it populates batches and writes them
         into a MarkLogicDatabase. When a batch size is lower than configured,

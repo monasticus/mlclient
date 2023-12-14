@@ -8,6 +8,7 @@ requirements.txt
 # PyTest
 /**/.pytest_cache/
 /**/.coverage
+.benchmarks
 
 # PyCharm
 .idea

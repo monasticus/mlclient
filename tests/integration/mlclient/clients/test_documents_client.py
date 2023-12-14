@@ -3,14 +3,8 @@ from __future__ import annotations
 import zlib
 from xml.etree.ElementTree import ElementTree, fromstring
 
-import pytest
-
-from mlclient.clients import DocumentsClient
-from mlclient.exceptions import MarkLogicError
-from mlclient.mimetypes import Mimetypes
 from mlclient.model import (
     BinaryDocument,
-    Document,
     DocumentType,
     JSONDocument,
     Metadata,
@@ -20,6 +14,7 @@ from mlclient.model import (
     TextDocument,
     XMLDocument,
 )
+from tests.utils import documents_client as docs_client_utils
 
 
 def test_create_read_and_remove_xml_document():
@@ -30,12 +25,12 @@ def test_create_read_and_remove_xml_document():
     doc = RawDocument(content, uri, DocumentType.XML)
 
     try:
-        _assert_document_does_not_exist(uri)
-        _write_documents(doc)
-        _assert_documents_exist_and_confirm_data({uri: doc})
+        docs_client_utils.assert_document_does_not_exist(uri)
+        docs_client_utils.write_documents(doc)
+        docs_client_utils.assert_documents_exist_and_confirm_data({uri: doc})
     finally:
-        _delete_documents(uri)
-        _assert_document_does_not_exist(uri)
+        docs_client_utils.delete_documents(uri)
+        docs_client_utils.assert_document_does_not_exist(uri)
 
 
 def test_create_read_and_remove_json_document():
@@ -44,12 +39,12 @@ def test_create_read_and_remove_json_document():
     doc = RawDocument(content, uri, DocumentType.JSON)
 
     try:
-        _assert_document_does_not_exist(uri)
-        _write_documents(doc)
-        _assert_documents_exist_and_confirm_data({uri: doc})
+        docs_client_utils.assert_document_does_not_exist(uri)
+        docs_client_utils.write_documents(doc)
+        docs_client_utils.assert_documents_exist_and_confirm_data({uri: doc})
     finally:
-        _delete_documents(uri)
-        _assert_document_does_not_exist(uri)
+        docs_client_utils.delete_documents(uri)
+        docs_client_utils.assert_document_does_not_exist(uri)
 
 
 def test_create_read_and_remove_text_document():
@@ -58,12 +53,12 @@ def test_create_read_and_remove_text_document():
     doc = RawDocument(content, uri, DocumentType.TEXT)
 
     try:
-        _assert_document_does_not_exist(uri)
-        _write_documents(doc)
-        _assert_documents_exist_and_confirm_data({uri: doc})
+        docs_client_utils.assert_document_does_not_exist(uri)
+        docs_client_utils.write_documents(doc)
+        docs_client_utils.assert_documents_exist_and_confirm_data({uri: doc})
     finally:
-        _delete_documents(uri)
-        _assert_document_does_not_exist(uri)
+        docs_client_utils.delete_documents(uri)
+        docs_client_utils.assert_document_does_not_exist(uri)
 
 
 def test_create_read_and_remove_binary_document():
@@ -72,12 +67,12 @@ def test_create_read_and_remove_binary_document():
     doc = RawDocument(content, uri, DocumentType.BINARY)
 
     try:
-        _assert_document_does_not_exist(uri)
-        _write_documents(doc)
-        _assert_documents_exist_and_confirm_data({uri: doc})
+        docs_client_utils.assert_document_does_not_exist(uri)
+        docs_client_utils.write_documents(doc)
+        docs_client_utils.assert_documents_exist_and_confirm_data({uri: doc})
     finally:
-        _delete_documents(uri)
-        _assert_document_does_not_exist(uri)
+        docs_client_utils.delete_documents(uri)
+        docs_client_utils.assert_document_does_not_exist(uri)
 
 
 def test_create_read_and_remove_document_using_string_output_type():
@@ -88,12 +83,15 @@ def test_create_read_and_remove_document_using_string_output_type():
     doc = RawDocument(content, uri, DocumentType.XML)
 
     try:
-        _assert_document_does_not_exist(uri)
-        _write_documents(doc)
-        _assert_documents_exist_and_confirm_data({uri: doc}, output_type=str)
+        docs_client_utils.assert_document_does_not_exist(uri)
+        docs_client_utils.write_documents(doc)
+        docs_client_utils.assert_documents_exist_and_confirm_data(
+            {uri: doc},
+            output_type=str,
+        )
     finally:
-        _delete_documents(uri)
-        _assert_document_does_not_exist(uri)
+        docs_client_utils.delete_documents(uri)
+        docs_client_utils.assert_document_does_not_exist(uri)
 
 
 def test_create_read_and_remove_document_using_bytes_output_type():
@@ -104,12 +102,15 @@ def test_create_read_and_remove_document_using_bytes_output_type():
     doc = RawDocument(content, uri, DocumentType.XML)
 
     try:
-        _assert_document_does_not_exist(uri)
-        _write_documents(doc)
-        _assert_documents_exist_and_confirm_data({uri: doc}, output_type=bytes)
+        docs_client_utils.assert_document_does_not_exist(uri)
+        docs_client_utils.write_documents(doc)
+        docs_client_utils.assert_documents_exist_and_confirm_data(
+            {uri: doc},
+            output_type=bytes,
+        )
     finally:
-        _delete_documents(uri)
-        _assert_document_does_not_exist(uri)
+        docs_client_utils.delete_documents(uri)
+        docs_client_utils.assert_document_does_not_exist(uri)
 
 
 def test_create_read_and_remove_document_with_metadata():
@@ -119,12 +120,14 @@ def test_create_read_and_remove_document_with_metadata():
     doc = JSONDocument(content, uri, metadata)
 
     try:
-        _assert_document_does_not_exist(uri)
-        _write_documents(doc)
-        _assert_documents_exist_and_confirm_content_with_metadata({uri: doc})
+        docs_client_utils.assert_document_does_not_exist(uri)
+        docs_client_utils.write_documents(doc)
+        docs_client_utils.assert_documents_exist_and_confirm_content_with_metadata(
+            {uri: doc},
+        )
     finally:
-        _delete_documents(uri)
-        _assert_document_does_not_exist(uri)
+        docs_client_utils.delete_documents(uri)
+        docs_client_utils.assert_document_does_not_exist(uri)
 
 
 def test_create_read_and_remove_document_with_metadata_using_string_output_type():
@@ -142,15 +145,15 @@ def test_create_read_and_remove_document_with_metadata_using_string_output_type(
     doc = RawStringDocument(content, uri, DocumentType.JSON, metadata)
 
     try:
-        _assert_document_does_not_exist(uri)
-        _write_documents(doc)
-        _assert_documents_exist_and_confirm_content_with_metadata(
+        docs_client_utils.assert_document_does_not_exist(uri)
+        docs_client_utils.write_documents(doc)
+        docs_client_utils.assert_documents_exist_and_confirm_content_with_metadata(
             {uri: doc},
             output_type=str,
         )
     finally:
-        _delete_documents(uri)
-        _assert_document_does_not_exist(uri)
+        docs_client_utils.delete_documents(uri)
+        docs_client_utils.assert_document_does_not_exist(uri)
 
 
 def test_create_read_and_remove_document_with_metadata_using_bytes_output_type():
@@ -168,15 +171,15 @@ def test_create_read_and_remove_document_with_metadata_using_bytes_output_type()
     doc = RawDocument(content, uri, DocumentType.JSON, metadata)
 
     try:
-        _assert_document_does_not_exist(uri)
-        _write_documents(doc)
-        _assert_documents_exist_and_confirm_content_with_metadata(
+        docs_client_utils.assert_document_does_not_exist(uri)
+        docs_client_utils.write_documents(doc)
+        docs_client_utils.assert_documents_exist_and_confirm_content_with_metadata(
             {uri: doc},
             output_type=bytes,
         )
     finally:
-        _delete_documents(uri)
-        _assert_document_does_not_exist(uri)
+        docs_client_utils.delete_documents(uri)
+        docs_client_utils.assert_document_does_not_exist(uri)
 
 
 def test_create_read_and_remove_multiple_documents():
@@ -199,9 +202,11 @@ def test_create_read_and_remove_multiple_documents():
     doc_4 = RawDocument(doc_4_content, doc_4_uri, DocumentType.BINARY)
 
     try:
-        _assert_documents_do_not_exist([doc_1_uri, doc_2_uri, doc_3_uri, doc_4_uri])
-        _write_documents([doc_1, doc_2, doc_3, doc_4])
-        _assert_documents_exist_and_confirm_data(
+        docs_client_utils.assert_documents_do_not_exist(
+            [doc_1_uri, doc_2_uri, doc_3_uri, doc_4_uri],
+        )
+        docs_client_utils.write_documents([doc_1, doc_2, doc_3, doc_4])
+        docs_client_utils.assert_documents_exist_and_confirm_data(
             {
                 doc_1_uri: doc_1,
                 doc_2_uri: doc_2,
@@ -210,8 +215,10 @@ def test_create_read_and_remove_multiple_documents():
             },
         )
     finally:
-        _delete_documents([doc_1_uri, doc_2_uri, doc_3_uri, doc_4_uri])
-        _assert_documents_do_not_exist([doc_1_uri, doc_2_uri, doc_3_uri, doc_4_uri])
+        docs_client_utils.delete_documents([doc_1_uri, doc_2_uri, doc_3_uri, doc_4_uri])
+        docs_client_utils.assert_documents_do_not_exist(
+            [doc_1_uri, doc_2_uri, doc_3_uri, doc_4_uri],
+        )
 
 
 def test_create_read_and_remove_multiple_documents_using_string_output_type():
@@ -230,9 +237,11 @@ def test_create_read_and_remove_multiple_documents_using_string_output_type():
     doc_3 = RawDocument(doc_3_content, doc_3_uri, DocumentType.TEXT)
 
     try:
-        _assert_documents_do_not_exist([doc_1_uri, doc_2_uri, doc_3_uri])
-        _write_documents([doc_1, doc_2, doc_3])
-        _assert_documents_exist_and_confirm_data(
+        docs_client_utils.assert_documents_do_not_exist(
+            [doc_1_uri, doc_2_uri, doc_3_uri],
+        )
+        docs_client_utils.write_documents([doc_1, doc_2, doc_3])
+        docs_client_utils.assert_documents_exist_and_confirm_data(
             {
                 doc_1_uri: doc_1,
                 doc_2_uri: doc_2,
@@ -241,8 +250,10 @@ def test_create_read_and_remove_multiple_documents_using_string_output_type():
             output_type=str,
         )
     finally:
-        _delete_documents([doc_1_uri, doc_2_uri, doc_3_uri])
-        _assert_documents_do_not_exist([doc_1_uri, doc_2_uri, doc_3_uri])
+        docs_client_utils.delete_documents([doc_1_uri, doc_2_uri, doc_3_uri])
+        docs_client_utils.assert_documents_do_not_exist(
+            [doc_1_uri, doc_2_uri, doc_3_uri],
+        )
 
 
 def test_create_read_and_remove_multiple_documents_using_bytes_output_type():
@@ -265,9 +276,11 @@ def test_create_read_and_remove_multiple_documents_using_bytes_output_type():
     doc_4 = RawDocument(doc_4_content, doc_4_uri, DocumentType.BINARY)
 
     try:
-        _assert_documents_do_not_exist([doc_1_uri, doc_2_uri, doc_3_uri, doc_4_uri])
-        _write_documents([doc_1, doc_2, doc_3, doc_4])
-        _assert_documents_exist_and_confirm_data(
+        docs_client_utils.assert_documents_do_not_exist(
+            [doc_1_uri, doc_2_uri, doc_3_uri, doc_4_uri],
+        )
+        docs_client_utils.write_documents([doc_1, doc_2, doc_3, doc_4])
+        docs_client_utils.assert_documents_exist_and_confirm_data(
             {
                 doc_1_uri: doc_1,
                 doc_2_uri: doc_2,
@@ -277,8 +290,10 @@ def test_create_read_and_remove_multiple_documents_using_bytes_output_type():
             output_type=bytes,
         )
     finally:
-        _delete_documents([doc_1_uri, doc_2_uri, doc_3_uri, doc_4_uri])
-        _assert_documents_do_not_exist([doc_1_uri, doc_2_uri, doc_3_uri, doc_4_uri])
+        docs_client_utils.delete_documents([doc_1_uri, doc_2_uri, doc_3_uri, doc_4_uri])
+        docs_client_utils.assert_documents_do_not_exist(
+            [doc_1_uri, doc_2_uri, doc_3_uri, doc_4_uri],
+        )
 
 
 def test_create_read_and_remove_multiple_documents_with_default_and_custom_metadata():
@@ -318,10 +333,10 @@ def test_create_read_and_remove_multiple_documents_with_default_and_custom_metad
     doc_6_expected = JSONDocument(doc_6_content, doc_6_uri, default_metadata_2)
 
     try:
-        _assert_documents_do_not_exist(
+        docs_client_utils.assert_documents_do_not_exist(
             [doc_1_uri, doc_2_uri, doc_3_uri, doc_4_uri, doc_5_uri, doc_6_uri],
         )
-        _write_documents(
+        docs_client_utils.write_documents(
             [
                 doc_1,
                 default_metadata_1,
@@ -333,7 +348,7 @@ def test_create_read_and_remove_multiple_documents_with_default_and_custom_metad
                 doc_6,
             ],
         )
-        _assert_documents_exist_and_confirm_content_with_metadata(
+        docs_client_utils.assert_documents_exist_and_confirm_content_with_metadata(
             {
                 doc_1_uri: doc_1_expected,
                 doc_2_uri: doc_2_expected,
@@ -344,10 +359,10 @@ def test_create_read_and_remove_multiple_documents_with_default_and_custom_metad
             },
         )
     finally:
-        _delete_documents(
+        docs_client_utils.delete_documents(
             [doc_1_uri, doc_2_uri, doc_3_uri, doc_4_uri, doc_5_uri, doc_6_uri],
         )
-        _assert_documents_do_not_exist(
+        docs_client_utils.assert_documents_do_not_exist(
             [doc_1_uri, doc_2_uri, doc_3_uri, doc_4_uri, doc_5_uri, doc_6_uri],
         )
 
@@ -364,14 +379,14 @@ def test_update_document():
     doc_2 = RawDocument(content_2, uri, DocumentType.XML)
 
     try:
-        _assert_document_does_not_exist(uri)
-        _write_documents(doc_1)
-        _assert_documents_exist_and_confirm_data({uri: doc_1})
-        _write_documents(doc_2)
-        _assert_documents_exist_and_confirm_data({uri: doc_2})
+        docs_client_utils.assert_document_does_not_exist(uri)
+        docs_client_utils.write_documents(doc_1)
+        docs_client_utils.assert_documents_exist_and_confirm_data({uri: doc_1})
+        docs_client_utils.write_documents(doc_2)
+        docs_client_utils.assert_documents_exist_and_confirm_data({uri: doc_2})
     finally:
-        _delete_documents(uri)
-        _assert_document_does_not_exist(uri)
+        docs_client_utils.delete_documents(uri)
+        docs_client_utils.assert_document_does_not_exist(uri)
 
 
 def test_update_document_metadata():
@@ -384,110 +399,17 @@ def test_update_document_metadata():
     doc = JSONDocument(content, uri, metadata_1)
 
     try:
-        _assert_document_does_not_exist(uri)
-        _write_documents(doc)
-        _assert_documents_exist_and_confirm_data(
+        docs_client_utils.assert_document_does_not_exist(uri)
+        docs_client_utils.write_documents(doc)
+        docs_client_utils.assert_documents_exist_and_confirm_data(
             {uri: metadata_1_doc},
             category=["metadata"],
         )
-        _write_documents(metadata_2_doc)
-        _assert_documents_exist_and_confirm_data(
+        docs_client_utils.write_documents(metadata_2_doc)
+        docs_client_utils.assert_documents_exist_and_confirm_data(
             {uri: metadata_2_doc},
             category=["metadata"],
         )
     finally:
-        _delete_documents(uri)
-        _assert_document_does_not_exist(uri)
-
-
-def _assert_document_does_not_exist(
-    uri: str,
-):
-    expected_msg = (
-        "[500 Internal Server Error] (RESTAPI-NODOCUMENT) "
-        "RESTAPI-NODOCUMENT: (err:FOER0000) "
-        "Resource or document does not exist:  "
-        f"category: content message: {uri}"
-    )
-    with DocumentsClient(auth_method="digest") as docs_client, pytest.raises(
-        MarkLogicError,
-    ) as err:
-        docs_client.read(uri)
-    assert err.value.args[0] == expected_msg
-
-
-def _assert_documents_do_not_exist(
-    uris: list,
-):
-    with DocumentsClient(auth_method="digest") as docs_client:
-        assert docs_client.read(uris) == []
-
-
-def _assert_documents_exist_and_confirm_content_with_metadata(
-    expected: dict,
-    output_type: type | None = None,
-):
-    _assert_documents_exist_and_confirm_data(
-        expected,
-        ["content", "metadata"],
-        output_type,
-    )
-
-
-def _assert_documents_exist_and_confirm_data(
-    expected: dict,
-    category: str | list[str] = "content",
-    output_type: type | None = None,
-):
-    with DocumentsClient(auth_method="digest") as docs_client:
-        actual_docs = docs_client.read(
-            list(expected.keys()),
-            category,
-            output_type=output_type,
-        )
-        for actual_doc in actual_docs:
-            expected_doc = next(
-                (doc for uri, doc in expected.items() if uri == actual_doc.uri),
-                None,
-            )
-            assert expected_doc is not None
-            assert actual_doc.uri == expected_doc.uri
-            assert actual_doc.doc_type == expected_doc.doc_type
-            if output_type is str:
-                assert actual_doc.content == expected_doc.content_string
-            elif output_type is bytes:
-                assert actual_doc.content == expected_doc.content_bytes
-            else:
-                assert actual_doc.content_bytes == expected_doc.content_bytes
-            if category not in ("content", ["content"]):
-                assert actual_doc.metadata == expected_doc.metadata
-
-
-def _write_documents(
-    docs: Document | Metadata | list[Document | Metadata],
-):
-    with DocumentsClient(auth_method="digest") as docs_client:
-        resp = docs_client.create(docs)
-        documents = resp["documents"]
-        if not isinstance(docs, list):
-            docs = [docs]
-        expected_docs = [doc for doc in docs if type(doc) is not Metadata]
-        assert len(documents) == len(expected_docs)
-        for doc in expected_docs:
-            response_doc = next((d for d in documents if d["uri"] == doc.uri), None)
-            assert response_doc is not None
-            assert response_doc["uri"] == doc.uri
-            if "content" in response_doc["category"]:
-                assert response_doc["mime-type"] == Mimetypes.get_mimetype(doc.uri)
-            else:
-                assert response_doc["mime-type"] == ""
-
-
-def _delete_documents(
-    uri: str | list[str],
-):
-    try:
-        with DocumentsClient(auth_method="digest") as docs_client:
-            docs_client.delete(uri)
-    except MarkLogicError as err:
-        pytest.fail(str(err))
+        docs_client_utils.delete_documents(uri)
+        docs_client_utils.assert_document_does_not_exist(uri)

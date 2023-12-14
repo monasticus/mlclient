@@ -24,6 +24,9 @@ def test_basic_job():
     job.await_completion()
     calls = responses.calls
     assert len(calls) == 1
+    assert job.completed_count == 5
+    assert len(job.successful) == 5
+    assert len(job.failed) == 0
 
 
 @responses.activate
@@ -47,6 +50,9 @@ def test_job_with_custom_database():
     job.await_completion()
     calls = responses.calls
     assert len(calls) == 1
+    assert job.completed_count == 5
+    assert len(job.successful) == 5
+    assert len(job.failed) == 0
 
 
 @responses.activate
@@ -68,6 +74,40 @@ def test_multi_thread_job():
     job.await_completion()
     calls = responses.calls
     assert len(calls) >= 30
+    assert job.completed_count == 150
+    assert len(job.successful) == 150
+    assert len(job.failed) == 0
+
+
+@responses.activate
+def test_failing_job():
+    docs = _get_test_docs(5)
+
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/documents")
+    builder.with_response_content_type("application/json; charset=utf-8")
+    builder.with_response_status(401)
+    builder.with_response_body(
+        {
+            "errorResponse": {
+                "statusCode": 401,
+                "status": "Unauthorized",
+                "message": "401 Unauthorized",
+            },
+        },
+    )
+    builder.build_post()
+
+    job = WriteDocumentsJob(thread_count=1, batch_size=5)
+    job.with_client_config()
+    job.with_documents_input(docs)
+    job.start()
+    job.await_completion()
+    calls = responses.calls
+    assert len(calls) == 1
+    assert job.completed_count == 5
+    assert len(job.successful) == 0
+    assert len(job.failed) == 5
 
 
 def _get_test_docs(

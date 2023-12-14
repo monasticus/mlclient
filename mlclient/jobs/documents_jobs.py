@@ -45,6 +45,8 @@ class WriteDocumentsJob:
         self._input: list = []
         self._input_queue: queue.Queue = queue.Queue()
         self._executor: ThreadPoolExecutor | None = None
+        self._successful = []
+        self._failed = []
 
     def with_client_config(
         self,
@@ -111,6 +113,36 @@ class WriteDocumentsJob:
         self._executor.shutdown()
         self._executor = None
 
+    @property
+    def completed_count(
+        self,
+    ) -> int:
+        """A number of processed documents."""
+        return len(self.completed)
+
+    @property
+    def completed(
+        self,
+    ) -> list[str]:
+        """A list of processed documents."""
+        completed = self.successful
+        completed.extend(self.failed)
+        return completed
+
+    @property
+    def successful(
+        self,
+    ) -> list[str]:
+        """A list of successfully processed documents."""
+        return list(self._successful)
+
+    @property
+    def failed(
+        self,
+    ) -> list[str]:
+        """A list of processed documents that failed to be written."""
+        return list(self._failed)
+
     def _start(
         self,
     ):
@@ -170,7 +202,9 @@ class WriteDocumentsJob:
         """
         try:
             client.create(data=batch, database=self._database)
+            self._successful.extend([doc.uri for doc in batch])
         except Exception:
+            self._failed.extend([doc.uri for doc in batch])
             logger.exception(
                 "An unexpected error occurred while writing documents",
             )

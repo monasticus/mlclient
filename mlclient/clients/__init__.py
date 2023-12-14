@@ -1,6 +1,6 @@
 """The ML Clients package.
 
-This package contains Python API to connect with MarkLogic server using carious clients.
+This package contains Python API to connect with MarkLogic server using various clients.
 It contains the following modules
 
     * ml_client

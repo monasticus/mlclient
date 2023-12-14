@@ -7,8 +7,8 @@ from cleo.testers.command_tester import CommandTester
 from mlclient import MLConfiguration
 from mlclient.cli import MLCLIentApplication
 from mlclient.exceptions import WrongParametersError
-from tests import tools
-from tests.tools import MLResponseBuilder
+from tests.utils import MLResponseBuilder
+from tests.utils import resources as resources_utils
 
 
 @pytest.fixture(autouse=True)
@@ -54,7 +54,7 @@ def test_command_call_eval_basic():
     builder.with_response_body_part("string", "")
     builder.build_post()
 
-    file_path = tools.get_test_resource_path(__file__, "xquery-code.xqy")
+    file_path = resources_utils.get_test_resource_path(__file__, "xquery-code.xqy")
     tester = _get_tester("call eval")
     tester.execute(f"-e test {file_path}")
 
@@ -79,7 +79,7 @@ def test_command_call_eval_custom_rest_server():
     builder.with_response_body_part("string", "")
     builder.build_post()
 
-    file_path = tools.get_test_resource_path(__file__, "xquery-code.xqy")
+    file_path = resources_utils.get_test_resource_path(__file__, "xquery-code.xqy")
     tester = _get_tester("call eval")
     tester.execute(f"-e test -s manage {file_path}")
 
@@ -110,7 +110,7 @@ def test_command_call_eval_with_vars():
     builder.with_response_body_part("string", "")
     builder.build_post()
 
-    file_path = tools.get_test_resource_path(__file__, "xquery-code.xqy")
+    file_path = resources_utils.get_test_resource_path(__file__, "xquery-code.xqy")
     tester = _get_tester("call eval")
     tester.execute(f"-e test {file_path} --var VARIABLE_1=X --var VARIABLE_2=Y")
 
@@ -195,7 +195,7 @@ def test_command_call_eval_custom_database():
     builder.with_response_body_part("string", "")
     builder.build_post()
 
-    file_path = tools.get_test_resource_path(__file__, "xquery-code.xqy")
+    file_path = resources_utils.get_test_resource_path(__file__, "xquery-code.xqy")
     tester = _get_tester("call eval")
     tester.execute(f"-e test -d custom-db {file_path}")
 
@@ -221,7 +221,7 @@ def test_command_call_eval_custom_txid():
     builder.with_response_body_part("string", "")
     builder.build_post()
 
-    file_path = tools.get_test_resource_path(__file__, "xquery-code.xqy")
+    file_path = resources_utils.get_test_resource_path(__file__, "xquery-code.xqy")
     tester = _get_tester("call eval")
     tester.execute(f"-e test -t transaction-id {file_path}")
 

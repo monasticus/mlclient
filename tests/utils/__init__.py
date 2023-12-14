@@ -25,43 +25,7 @@ from mlclient.constants import (
     HEADER_NAME_PRIMITIVE,
     HEADER_X_WWW_FORM_URLENCODED,
 )
-
-_SCRIPT_DIR = Path(__file__).resolve()
-_RESOURCES_DIR = "resources"
-_COMMON_RESOURCES_DIR = "common"
-TESTS_PATH = Path(_SCRIPT_DIR).parent
-RESOURCES_PATH = next(TESTS_PATH.glob(_RESOURCES_DIR))
-COMMON_RESOURCES_PATH = next(RESOURCES_PATH.glob(_COMMON_RESOURCES_DIR))
-
-
-def list_resources(
-    test_path: str,
-) -> list[str]:
-    test_resources_path = get_test_resources_path(test_path)
-    return os.listdir(test_resources_path)
-
-
-def get_test_resource_path(
-    test_path: str,
-    resource: str,
-) -> str:
-    test_resources_path = get_test_resources_path(test_path)
-    return next(Path(test_resources_path).glob(resource)).as_posix()
-
-
-def get_common_resource_path(
-    resource: str,
-) -> str:
-    return next(COMMON_RESOURCES_PATH.glob(resource)).as_posix()
-
-
-def get_test_resources_path(
-    test_path: str,
-) -> str:
-    tests_path = TESTS_PATH.as_posix()
-    resources_rel_path = test_path.replace(tests_path, "")[1:-3]
-    resources_rel_path = resources_rel_path.replace("_", "-")
-    return next(Path(RESOURCES_PATH).glob(resources_rel_path)).as_posix()
+from tests.utils import resources as resources_utils
 
 
 class MLResponseBuilder:
@@ -223,33 +187,34 @@ class MLResponseBuilder:
         self,
     ):
         self.with_method("GET")
-        self.build()
+        return self.build()
 
     def build_delete(
         self,
     ):
         self.with_method("DELETE")
-        self.build()
+        return self.build()
 
     def build_post(
         self,
     ):
         self.with_method("POST")
-        self.build()
+        return self.build()
 
     def build_put(
         self,
     ):
         self.with_method("PUT")
-        self.build()
+        return self.build()
 
     def build(
         self,
     ):
         self._validate()
         request_url, responses_params = self._build()
-        self._finalize(request_url, responses_params)
+        resp_obj = self._finalize(request_url, responses_params)
         self.__init__()
+        return resp_obj
 
     def _validate(
         self,
@@ -320,30 +285,32 @@ class MLResponseBuilder:
         responses_params: dict,
     ):
         if self._method == "GET":
-            self._finalize_get(request_url, responses_params)
-        elif self._method == "DELETE":
-            self._finalize_delete(request_url, responses_params)
-        elif self._method == "POST":
-            self._finalize_post(
+            return self._finalize_get(request_url, responses_params)
+        if self._method == "DELETE":
+            return self._finalize_delete(request_url, responses_params)
+        if self._method == "POST":
+            return self._finalize_post(
                 request_url,
                 responses_params,
                 self._request_content_type,
                 self._request_body,
             )
-        elif self._method == "PUT":
-            self._finalize_put(
+        if self._method == "PUT":
+            return self._finalize_put(
                 request_url,
                 responses_params,
                 self._request_content_type,
                 self._request_body,
             )
+        msg = "MLResponseBuilder - supported methods are: GET, DELETE, POST, PUT"
+        raise RuntimeError(msg)
 
     @staticmethod
     def _finalize_get(
         request_url: str,
         responses_params: dict,
     ):
-        responses.get(
+        return responses.get(
             request_url,
             **responses_params,
         )
@@ -353,7 +320,7 @@ class MLResponseBuilder:
         request_url: str,
         responses_params: dict,
     ):
-        responses.delete(
+        return responses.delete(
             request_url,
             **responses_params,
         )
@@ -372,7 +339,7 @@ class MLResponseBuilder:
             elif request_content_type.startswith("application/json"):
                 match = [matchers.json_params_matcher(request_body)]
                 responses_params["match"] = match
-        responses.post(
+        return responses.post(
             request_url,
             **responses_params,
         )
@@ -391,7 +358,7 @@ class MLResponseBuilder:
             elif request_content_type.startswith("application/json"):
                 match = [matchers.json_params_matcher(request_body)]
                 responses_params["match"] = match
-        responses.put(
+        return responses.put(
             request_url,
             **responses_params,
         )
@@ -673,7 +640,9 @@ class MLResponseBuilder:
             path = file_name
         else:
             file_name = inspect.stack()[3].function.replace("_", "-") + f".{ext}"
-            path = get_test_resources_path(test_path) + os.sep + file_name
+            path = (
+                resources_utils.get_test_resources_path(test_path) + os.sep + file_name
+            )
 
         with Path(path).open("w") as file:
             file.write(response_body_text)
@@ -683,7 +652,7 @@ class MLResponseBuilder:
 
         return [
             f"response_body_path = "
-            f'tools.get_test_resource_path(__file__, "{file_name}")',
+            f'resources_utils.get_test_resource_path(__file__, "{file_name}")',
             "builder.with_response_body(Path(response_body_path).read_bytes())",
         ]
 

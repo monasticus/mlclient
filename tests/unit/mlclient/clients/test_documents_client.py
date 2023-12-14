@@ -19,8 +19,8 @@ from mlclient.model import (
     TextDocument,
     XMLDocument,
 )
-from tests import tools
-from tests.tools import MLResponseBuilder
+from tests.utils import MLResponseBuilder
+from tests.utils import resources as resources_utils
 
 
 @pytest.fixture(autouse=True)
@@ -3365,7 +3365,7 @@ def test_delete_document_with_custom_database(docs_client):
 def test_delete_document_with_non_existing_database(docs_client):
     uri = "/some/dir/doc1.xml"
 
-    response_body_path = tools.get_test_resource_path(
+    response_body_path = resources_utils.get_test_resource_path(
         __file__,
         "test-delete-document-with-non-existing-database.xml",
     )

@@ -3,8 +3,8 @@ from pathlib import Path
 import responses
 
 from mlclient import MLClient
-from tests import tools
-from tests.tools import MLResponseBuilder
+from tests.utils import MLResponseBuilder
+from tests.utils import resources as resources_utils
 
 
 def test_connection():
@@ -38,7 +38,10 @@ def test_get():
     builder.with_base_url("http://localhost:8002/manage/v2/servers")
     builder.with_response_content_type("application/xml; charset=UTF-8")
     builder.with_response_status(200)
-    response_body_path = tools.get_test_resource_path(__file__, "test-get-response.xml")
+    response_body_path = resources_utils.get_test_resource_path(
+        __file__,
+        "test-get-response.xml",
+    )
     builder.with_response_body(Path(response_body_path).read_bytes())
     builder.build_get()
 
@@ -57,7 +60,7 @@ def test_get_with_customized_params_and_headers():
     builder.with_request_param("format", "json")
     builder.with_response_content_type("application/json; charset=UTF-8")
     builder.with_response_status(200)
-    response_body_path = tools.get_test_resource_path(
+    response_body_path = resources_utils.get_test_resource_path(
         __file__,
         "test-get-with-customized-params-response.json",
     )
@@ -84,7 +87,7 @@ def test_post():
     builder.with_base_url("http://localhost:8002/manage/v2/databases/Documents")
     builder.with_response_content_type("application/xml; charset=UTF-8")
     builder.with_response_status(400)
-    response_body_path = tools.get_test_resource_path(
+    response_body_path = resources_utils.get_test_resource_path(
         __file__,
         "test-post-response.xml",
     )
@@ -161,7 +164,10 @@ def test_put():
     builder.with_base_url("http://localhost:8002/v1/documents")
     builder.with_response_content_type("application/xml; charset=UTF-8")
     builder.with_response_status(400)
-    response_body_path = tools.get_test_resource_path(__file__, "test-put-response.xml")
+    response_body_path = resources_utils.get_test_resource_path(
+        __file__,
+        "test-put-response.xml",
+    )
     builder.with_response_body(Path(response_body_path).read_bytes())
     builder.build_put()
 

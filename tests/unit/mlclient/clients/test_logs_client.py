@@ -5,7 +5,7 @@ import responses
 
 from mlclient.clients import LogsClient, LogType
 from mlclient.exceptions import MarkLogicError
-from tests.tools import MLResponseBuilder
+from tests.utils import MLResponseBuilder
 
 ENDPOINT = "/manage/v2/logs"
 

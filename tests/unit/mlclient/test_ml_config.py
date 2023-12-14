@@ -11,7 +11,7 @@ from mlclient.exceptions import (
     NoSuchAppServerError,
 )
 from mlclient.ml_config import MLAppServerConfiguration
-from tests import tools
+from tests.utils import resources as resources_utils
 
 _SCRIPT_DIR = Path(__file__).resolve().parent
 
@@ -22,21 +22,21 @@ def _setup_and_teardown():
     ml_client_dir = Path(constants.ML_CLIENT_DIR)
     if not ml_client_dir.exists() or not ml_client_dir.is_dir():
         ml_client_dir.mkdir()
-    for file_name in tools.list_resources(__file__):
-        file_path = tools.get_test_resource_path(__file__, file_name)
+    for file_name in resources_utils.list_resources(__file__):
+        file_path = resources_utils.get_test_resource_path(__file__, file_name)
         shutil.copy(file_path, constants.ML_CLIENT_DIR)
 
     yield
 
     # Teardown
-    for file_name in tools.list_resources(__file__):
+    for file_name in resources_utils.list_resources(__file__):
         Path(f"{constants.ML_CLIENT_DIR}/{file_name}").unlink()
     if ml_client_dir.exists() and not os.listdir(constants.ML_CLIENT_DIR):
         ml_client_dir.rmdir()
 
 
 def test_from_file():
-    path = tools.get_test_resource_path(__file__, "mlclient-test.yaml")
+    path = resources_utils.get_test_resource_path(__file__, "mlclient-test.yaml")
     config = MLConfiguration.from_file(path)
     assert config.model_dump() == {
         "app_name": "my-marklogic-app",
@@ -85,7 +85,10 @@ def test_from_file():
 
 
 def test_from_file_default_values():
-    path = tools.get_test_resource_path(__file__, "mlclient-test-default.yaml")
+    path = resources_utils.get_test_resource_path(
+        __file__,
+        "mlclient-test-default.yaml",
+    )
     config = MLConfiguration.from_file(path)
     assert config.model_dump() == {
         "app_name": "my-default-app",

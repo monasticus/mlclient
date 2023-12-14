@@ -8,8 +8,8 @@ import responses
 
 from mlclient import MLResourcesClient, MLResponseParser
 from mlclient.calls.model import DocumentsBodyPart
-from tests import tools
-from tests.tools import MLResponseBuilder
+from tests.utils import MLResponseBuilder
+from tests.utils import resources as resources_utils
 
 
 @pytest.fixture(scope="module")
@@ -32,7 +32,10 @@ def _setup_and_teardown(client):
 def test_parse_error_response_html(client):
     xqy = "'missing-quote"
 
-    response_body_path = tools.get_test_resource_path(__file__, "error-response.html")
+    response_body_path = resources_utils.get_test_resource_path(
+        __file__,
+        "error-response.html",
+    )
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/v1/eval")
     builder.with_request_body({"xquery": xqy})
@@ -55,7 +58,10 @@ def test_parse_error_response_html(client):
 def test_parse_text_error_response_html(client):
     xqy = "'missing-quote"
 
-    response_body_path = tools.get_test_resource_path(__file__, "error-response.html")
+    response_body_path = resources_utils.get_test_resource_path(
+        __file__,
+        "error-response.html",
+    )
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/v1/eval")
     builder.with_request_body({"xquery": xqy})
@@ -78,7 +84,10 @@ def test_parse_text_error_response_html(client):
 def test_parse_bytes_error_response_html(client):
     xqy = "'missing-quote"
 
-    response_body_path = tools.get_test_resource_path(__file__, "error-response.html")
+    response_body_path = resources_utils.get_test_resource_path(
+        __file__,
+        "error-response.html",
+    )
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/v1/eval")
     builder.with_request_body({"xquery": xqy})
@@ -101,7 +110,10 @@ def test_parse_bytes_error_response_html(client):
 def test_parse_with_headers_error_response_html(client):
     xqy = "'missing-quote"
 
-    response_body_path = tools.get_test_resource_path(__file__, "error-response.html")
+    response_body_path = resources_utils.get_test_resource_path(
+        __file__,
+        "error-response.html",
+    )
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/v1/eval")
     builder.with_request_body({"xquery": xqy})
@@ -128,7 +140,10 @@ def test_parse_with_headers_error_response_html(client):
 def test_parse_text_with_headers_error_response_html(client):
     xqy = "'missing-quote"
 
-    response_body_path = tools.get_test_resource_path(__file__, "error-response.html")
+    response_body_path = resources_utils.get_test_resource_path(
+        __file__,
+        "error-response.html",
+    )
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/v1/eval")
     builder.with_request_body({"xquery": xqy})
@@ -155,7 +170,10 @@ def test_parse_text_with_headers_error_response_html(client):
 def test_parse_bytes_with_headers_error_response_html(client):
     xqy = "'missing-quote"
 
-    response_body_path = tools.get_test_resource_path(__file__, "error-response.html")
+    response_body_path = resources_utils.get_test_resource_path(
+        __file__,
+        "error-response.html",
+    )
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/v1/eval")
     builder.with_request_body({"xquery": xqy})
@@ -180,7 +198,10 @@ def test_parse_bytes_with_headers_error_response_html(client):
 
 @responses.activate
 def test_parse_error_response_xml(client):
-    response_body_path = tools.get_test_resource_path(__file__, "error-response.xml")
+    response_body_path = resources_utils.get_test_resource_path(
+        __file__,
+        "error-response.xml",
+    )
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/v1/documents")
     builder.with_request_param("uri", "/some/dir/doc1.xml")
@@ -206,7 +227,10 @@ def test_parse_error_response_xml(client):
 
 @responses.activate
 def test_parse_text_error_response_xml(client):
-    response_body_path = tools.get_test_resource_path(__file__, "error-response.xml")
+    response_body_path = resources_utils.get_test_resource_path(
+        __file__,
+        "error-response.xml",
+    )
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/v1/documents")
     builder.with_request_param("uri", "/some/dir/doc1.xml")
@@ -232,7 +256,10 @@ def test_parse_text_error_response_xml(client):
 
 @responses.activate
 def test_parse_bytes_error_response_xml(client):
-    response_body_path = tools.get_test_resource_path(__file__, "error-response.xml")
+    response_body_path = resources_utils.get_test_resource_path(
+        __file__,
+        "error-response.xml",
+    )
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/v1/documents")
     builder.with_request_param("uri", "/some/dir/doc1.xml")
@@ -258,7 +285,10 @@ def test_parse_bytes_error_response_xml(client):
 
 @responses.activate
 def test_parse_with_headers_error_response_xml(client):
-    response_body_path = tools.get_test_resource_path(__file__, "error-response.xml")
+    response_body_path = resources_utils.get_test_resource_path(
+        __file__,
+        "error-response.xml",
+    )
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/v1/documents")
     builder.with_request_param("uri", "/some/dir/doc1.xml")
@@ -288,7 +318,10 @@ def test_parse_with_headers_error_response_xml(client):
 
 @responses.activate
 def test_parse_text_with_headers_error_response_xml(client):
-    response_body_path = tools.get_test_resource_path(__file__, "error-response.xml")
+    response_body_path = resources_utils.get_test_resource_path(
+        __file__,
+        "error-response.xml",
+    )
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/v1/documents")
     builder.with_request_param("uri", "/some/dir/doc1.xml")
@@ -318,7 +351,10 @@ def test_parse_text_with_headers_error_response_xml(client):
 
 @responses.activate
 def test_parse_bytes_with_headers_error_response_xml(client):
-    response_body_path = tools.get_test_resource_path(__file__, "error-response.xml")
+    response_body_path = resources_utils.get_test_resource_path(
+        __file__,
+        "error-response.xml",
+    )
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/v1/documents")
     builder.with_request_param("uri", "/some/dir/doc1.xml")

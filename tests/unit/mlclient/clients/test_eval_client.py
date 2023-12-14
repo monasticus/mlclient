@@ -11,8 +11,8 @@ from mlclient.exceptions import (
     UnsupportedFileExtensionError,
     WrongParametersError,
 )
-from tests import tools
-from tests.tools import MLResponseBuilder
+from tests.utils import MLResponseBuilder
+from tests.utils import resources as resources_utils
 
 
 @pytest.fixture(autouse=True)
@@ -256,7 +256,10 @@ def test_eval_file_xquery(eval_client):
         builder.with_empty_response_body()
         builder.build_post()
 
-        file_path = tools.get_test_resource_path(__file__, f"xquery-code.{ext}")
+        file_path = resources_utils.get_test_resource_path(
+            __file__,
+            f"xquery-code.{ext}",
+        )
         resp = eval_client.eval(file=file_path)
 
         assert resp == []
@@ -273,7 +276,10 @@ def test_eval_file_javascript(eval_client):
         builder.with_empty_response_body()
         builder.build_post()
 
-        file_path = tools.get_test_resource_path(__file__, f"javascript-code.{ext}")
+        file_path = resources_utils.get_test_resource_path(
+            __file__,
+            f"javascript-code.{ext}",
+        )
         resp = eval_client.eval(file=file_path)
 
         assert resp == []
@@ -281,7 +287,10 @@ def test_eval_file_javascript(eval_client):
 
 @responses.activate
 def test_eval_with_marklogic_error(eval_client):
-    error_path = tools.get_test_resource_path(__file__, "marklogic-error.html")
+    error_path = resources_utils.get_test_resource_path(
+        __file__,
+        "marklogic-error.html",
+    )
     code = "declare variable $local:VARIABLE external; $local:VARIABLE"
 
     builder = MLResponseBuilder()
@@ -315,7 +324,7 @@ def test_eval_file_unknown_extension(eval_client):
 
 
 def test_eval_mixed_file_and_raw_xquery(eval_client):
-    file_path = tools.get_test_resource_path(__file__, "xquery-code.xq")
+    file_path = resources_utils.get_test_resource_path(__file__, "xquery-code.xq")
     with pytest.raises(WrongParametersError) as err:
         eval_client.eval(file=file_path, xq="()")
 
@@ -324,7 +333,7 @@ def test_eval_mixed_file_and_raw_xquery(eval_client):
 
 
 def test_eval_mixed_file_and_raw_javascript(eval_client):
-    file_path = tools.get_test_resource_path(__file__, "javascript-code.js")
+    file_path = resources_utils.get_test_resource_path(__file__, "javascript-code.js")
     with pytest.raises(WrongParametersError) as err:
         eval_client.eval(file=file_path, js="Sequence.from([]);")
 

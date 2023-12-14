@@ -9,8 +9,8 @@ from cleo.testers.command_tester import CommandTester
 from mlclient import MLConfiguration
 from mlclient.cli import MLCLIentApplication
 from mlclient.exceptions import InvalidLogTypeError
-from tests import tools
-from tests.tools import MLResponseBuilder
+from tests.utils import MLResponseBuilder
+from tests.utils import resources as resources_utils
 
 ENDPOINT = "/manage/v2/logs"
 
@@ -743,7 +743,10 @@ def test_command_call_output_of_logs_list(logs_list_items):
     assert tester.command.option("environment") == "test"
     assert tester.command.option("list") is True
 
-    expected_output_path = tools.get_test_resource_path(__file__, "output-full.txt")
+    expected_output_path = resources_utils.get_test_resource_path(
+        __file__,
+        "output-full.txt",
+    )
     expected_output = Path(expected_output_path).read_text()
     assert command_output == expected_output
 
@@ -766,7 +769,10 @@ def test_command_call_output_of_logs_list_for_app_server(logs_list_items):
     assert tester.command.option("app-server") == "manage"
     assert tester.command.option("list") is True
 
-    expected_output_path = tools.get_test_resource_path(__file__, "output-server.txt")
+    expected_output_path = resources_utils.get_test_resource_path(
+        __file__,
+        "output-server.txt",
+    )
     expected_output = Path(expected_output_path).read_text()
     assert command_output == expected_output
 
@@ -789,7 +795,10 @@ def test_command_call_output_of_logs_list_for_task_server(logs_list_items):
     assert tester.command.option("app-server") == "0"
     assert tester.command.option("list") is True
 
-    expected_output_path = tools.get_test_resource_path(__file__, "output-task.txt")
+    expected_output_path = resources_utils.get_test_resource_path(
+        __file__,
+        "output-task.txt",
+    )
     expected_output = Path(expected_output_path).read_text()
     assert command_output == expected_output
 
@@ -812,7 +821,10 @@ def test_command_call_output_of_logs_list_empty(logs_list_items):
     assert tester.command.option("app-server") == "9999"
     assert tester.command.option("list") is True
 
-    expected_output_path = tools.get_test_resource_path(__file__, "output-empty.txt")
+    expected_output_path = resources_utils.get_test_resource_path(
+        __file__,
+        "output-empty.txt",
+    )
     expected_output = Path(expected_output_path).read_text()
     assert command_output == expected_output
 

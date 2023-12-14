@@ -2,7 +2,7 @@ import responses
 
 from mlclient.jobs import WriteDocumentsJob
 from mlclient.model import DocumentType, RawDocument
-from tests.tools import MLResponseBuilder
+from tests.utils import MLResponseBuilder
 
 
 @responses.activate

@@ -5,8 +5,8 @@ import responses
 
 from mlclient import MLResourcesClient
 from mlclient.calls.model import DocumentsBodyPart
-from tests import tools
-from tests.tools import MLResponseBuilder
+from tests.utils import MLResponseBuilder
+from tests.utils import resources as resources_utils
 
 
 @pytest.fixture()
@@ -49,7 +49,10 @@ def test_eval(xquery):
 
 @responses.activate()
 def test_get_logs():
-    response_body_path = tools.get_test_resource_path(__file__, "test-get-logs.json")
+    response_body_path = resources_utils.get_test_resource_path(
+        __file__,
+        "test-get-logs.json",
+    )
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/manage/v2/logs")
     builder.with_request_param("format", "json")
@@ -68,7 +71,7 @@ def test_get_logs():
 
 @responses.activate()
 def test_get_databases():
-    response_body_path = tools.get_test_resource_path(
+    response_body_path = resources_utils.get_test_resource_path(
         __file__,
         "test-get-databases.json",
     )
@@ -93,7 +96,7 @@ def test_get_databases():
 def test_post_databases():
     body = '<database-properties xmlns="http://marklogic.com/manage" />'
 
-    response_body_path = tools.get_test_resource_path(
+    response_body_path = resources_utils.get_test_resource_path(
         __file__,
         "test-post-databases.xml",
     )
@@ -116,7 +119,7 @@ def test_post_databases():
 
 @responses.activate()
 def test_get_database():
-    response_body_path = tools.get_test_resource_path(
+    response_body_path = resources_utils.get_test_resource_path(
         __file__,
         "test-get-database.json",
     )
@@ -139,7 +142,7 @@ def test_get_database():
 
 @responses.activate()
 def test_post_database():
-    response_body_path = tools.get_test_resource_path(
+    response_body_path = resources_utils.get_test_resource_path(
         __file__,
         "test-post-database.xml",
     )
@@ -179,7 +182,7 @@ def test_delete_database():
 
 @responses.activate()
 def test_get_database_properties():
-    response_body_path = tools.get_test_resource_path(
+    response_body_path = resources_utils.get_test_resource_path(
         __file__,
         "test-get-database-properties.json",
     )
@@ -202,7 +205,7 @@ def test_get_database_properties():
 
 @responses.activate()
 def test_put_database_properties():
-    response_body_path = tools.get_test_resource_path(
+    response_body_path = resources_utils.get_test_resource_path(
         __file__,
         "test-put-database-properties.json",
     )
@@ -229,7 +232,10 @@ def test_put_database_properties():
 
 @responses.activate()
 def test_get_servers():
-    response_body_path = tools.get_test_resource_path(__file__, "test-get-servers.json")
+    response_body_path = resources_utils.get_test_resource_path(
+        __file__,
+        "test-get-servers.json",
+    )
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/manage/v2/servers")
     builder.with_request_param("format", "json")
@@ -249,7 +255,10 @@ def test_get_servers():
 
 @responses.activate()
 def test_post_servers():
-    response_body_path = tools.get_test_resource_path(__file__, "test-post-servers.xml")
+    response_body_path = resources_utils.get_test_resource_path(
+        __file__,
+        "test-post-servers.xml",
+    )
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/manage/v2/servers")
     builder.with_request_param("group-id", "Default")
@@ -275,7 +284,10 @@ def test_post_servers():
 
 @responses.activate()
 def test_get_server():
-    response_body_path = tools.get_test_resource_path(__file__, "test-get-server.json")
+    response_body_path = resources_utils.get_test_resource_path(
+        __file__,
+        "test-get-server.json",
+    )
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/manage/v2/servers/App-Services")
     builder.with_request_param("group-id", "Default")
@@ -300,7 +312,7 @@ def test_get_server():
 
 @responses.activate()
 def test_delete_server():
-    response_body_path = tools.get_test_resource_path(
+    response_body_path = resources_utils.get_test_resource_path(
         __file__,
         "test-delete-server.xml",
     )
@@ -324,7 +336,7 @@ def test_delete_server():
 
 @responses.activate()
 def test_get_server_properties():
-    response_body_path = tools.get_test_resource_path(
+    response_body_path = resources_utils.get_test_resource_path(
         __file__,
         "test-get-server-properties.json",
     )
@@ -352,7 +364,7 @@ def test_get_server_properties():
 
 @responses.activate()
 def test_put_server_properties():
-    response_body_path = tools.get_test_resource_path(
+    response_body_path = resources_utils.get_test_resource_path(
         __file__,
         "test-put-server-properties.json",
     )
@@ -381,7 +393,10 @@ def test_put_server_properties():
 
 @responses.activate()
 def test_get_forests():
-    response_body_path = tools.get_test_resource_path(__file__, "test-get-forests.json")
+    response_body_path = resources_utils.get_test_resource_path(
+        __file__,
+        "test-get-forests.json",
+    )
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/manage/v2/forests")
     builder.with_request_param("format", "json")
@@ -404,7 +419,10 @@ def test_get_forests():
 def test_post_forests():
     body = '<forest-create xmlns="http://marklogic.com/manage" />'
 
-    response_body_path = tools.get_test_resource_path(__file__, "test-post-forests.xml")
+    response_body_path = resources_utils.get_test_resource_path(
+        __file__,
+        "test-post-forests.xml",
+    )
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/manage/v2/forests")
     builder.with_response_content_type("application/xml; charset=UTF-8")
@@ -422,7 +440,10 @@ def test_post_forests():
 def test_put_forests():
     body = '<forest-migrate xmlns="http://marklogic.com/manage" />'
 
-    response_body_path = tools.get_test_resource_path(__file__, "test-put-forests.xml")
+    response_body_path = resources_utils.get_test_resource_path(
+        __file__,
+        "test-put-forests.xml",
+    )
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/manage/v2/forests")
     builder.with_response_content_type("application/xml; charset=UTF-8")
@@ -442,7 +463,10 @@ def test_put_forests():
 
 @responses.activate()
 def test_get_forest():
-    response_body_path = tools.get_test_resource_path(__file__, "test-get-forest.json")
+    response_body_path = resources_utils.get_test_resource_path(
+        __file__,
+        "test-get-forest.json",
+    )
 
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/manage/v2/forests/Documents")
@@ -463,7 +487,10 @@ def test_get_forest():
 
 @responses.activate()
 def test_post_forest():
-    response_body_path = tools.get_test_resource_path(__file__, "test-post-forest.xml")
+    response_body_path = resources_utils.get_test_resource_path(
+        __file__,
+        "test-post-forest.xml",
+    )
 
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/manage/v2/forests/aaa")
@@ -501,7 +528,7 @@ def test_delete_forest():
 
 @responses.activate()
 def test_get_forest_properties():
-    response_body_path = tools.get_test_resource_path(
+    response_body_path = resources_utils.get_test_resource_path(
         __file__,
         "test-get-forest-properties.json",
     )
@@ -524,7 +551,7 @@ def test_get_forest_properties():
 
 @responses.activate()
 def test_put_forest_properties():
-    response_body_path = tools.get_test_resource_path(
+    response_body_path = resources_utils.get_test_resource_path(
         __file__,
         "test-put-forest-properties.json",
     )
@@ -551,7 +578,10 @@ def test_put_forest_properties():
 
 @responses.activate()
 def test_get_roles():
-    response_body_path = tools.get_test_resource_path(__file__, "test-get-roles.json")
+    response_body_path = resources_utils.get_test_resource_path(
+        __file__,
+        "test-get-roles.json",
+    )
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/manage/v2/roles")
     builder.with_request_param("format", "json")
@@ -573,7 +603,10 @@ def test_get_roles():
 def test_post_roles():
     body = '<role-properties xmlns="http://marklogic.com/manage/role/properties" />'
 
-    response_body_path = tools.get_test_resource_path(__file__, "test-post-roles.xml")
+    response_body_path = resources_utils.get_test_resource_path(
+        __file__,
+        "test-post-roles.xml",
+    )
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/manage/v2/roles")
     builder.with_response_content_type("application/xml; charset=UTF-8")
@@ -590,7 +623,10 @@ def test_post_roles():
 
 @responses.activate()
 def test_get_role():
-    response_body_path = tools.get_test_resource_path(__file__, "test-get-role.json")
+    response_body_path = resources_utils.get_test_resource_path(
+        __file__,
+        "test-get-role.json",
+    )
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/manage/v2/roles/admin")
     builder.with_request_param("format", "json")
@@ -625,7 +661,7 @@ def test_delete_role():
 
 @responses.activate()
 def test_get_role_properties():
-    response_body_path = tools.get_test_resource_path(
+    response_body_path = resources_utils.get_test_resource_path(
         __file__,
         "test-get-role-properties.json",
     )
@@ -646,7 +682,7 @@ def test_get_role_properties():
 
 @responses.activate()
 def test_put_role_properties():
-    response_body_path = tools.get_test_resource_path(
+    response_body_path = resources_utils.get_test_resource_path(
         __file__,
         "test-put-role-properties.json",
     )
@@ -676,7 +712,10 @@ def test_put_role_properties():
 
 @responses.activate()
 def test_get_users():
-    response_body_path = tools.get_test_resource_path(__file__, "test-get-users.json")
+    response_body_path = resources_utils.get_test_resource_path(
+        __file__,
+        "test-get-users.json",
+    )
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/manage/v2/users")
     builder.with_request_param("format", "json")
@@ -698,7 +737,10 @@ def test_get_users():
 def test_post_users():
     body = '<user-properties xmlns="http://marklogic.com/manage/user/properties" />'
 
-    response_body_path = tools.get_test_resource_path(__file__, "test-post-users.xml")
+    response_body_path = resources_utils.get_test_resource_path(
+        __file__,
+        "test-post-users.xml",
+    )
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/manage/v2/users")
     builder.with_response_content_type("application/xml; charset=UTF-8")
@@ -715,7 +757,10 @@ def test_post_users():
 
 @responses.activate()
 def test_get_user():
-    response_body_path = tools.get_test_resource_path(__file__, "test-get-user.json")
+    response_body_path = resources_utils.get_test_resource_path(
+        __file__,
+        "test-get-user.json",
+    )
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/manage/v2/users/admin")
     builder.with_request_param("format", "json")
@@ -735,7 +780,10 @@ def test_get_user():
 
 @responses.activate()
 def test_delete_user():
-    response_body_path = tools.get_test_resource_path(__file__, "test-delete-user.xml")
+    response_body_path = resources_utils.get_test_resource_path(
+        __file__,
+        "test-delete-user.xml",
+    )
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/manage/v2/users/custom-user")
     builder.with_response_content_type("application/xml; charset=UTF-8")
@@ -752,7 +800,7 @@ def test_delete_user():
 
 @responses.activate()
 def test_get_user_properties():
-    response_body_path = tools.get_test_resource_path(
+    response_body_path = resources_utils.get_test_resource_path(
         __file__,
         "test-get-user-properties.json",
     )
@@ -773,7 +821,7 @@ def test_get_user_properties():
 
 @responses.activate()
 def test_put_user_properties():
-    response_body_path = tools.get_test_resource_path(
+    response_body_path = resources_utils.get_test_resource_path(
         __file__,
         "test-put-user-properties.json",
     )
@@ -800,7 +848,7 @@ def test_put_user_properties():
 
 @responses.activate()
 def test_get_documents():
-    response_body_path = tools.get_test_resource_path(
+    response_body_path = resources_utils.get_test_resource_path(
         __file__,
         "test-get-documents.json",
     )
@@ -831,7 +879,7 @@ def test_post_documents():
         "content": {"root": "data"},
     }
 
-    response_body_path = tools.get_test_resource_path(
+    response_body_path = resources_utils.get_test_resource_path(
         __file__,
         "test-post-documents.json",
     )
@@ -859,7 +907,7 @@ def test_post_documents():
 
 @responses.activate()
 def test_delete_documents():
-    response_body_path = tools.get_test_resource_path(
+    response_body_path = resources_utils.get_test_resource_path(
         __file__,
         "test-delete-documents.xml",
     )

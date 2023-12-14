@@ -3,7 +3,7 @@ import responses
 
 from mlclient import MLResourceClient
 from mlclient.calls import EvalCall
-from tests.tools import MLResponseBuilder
+from tests.utils import MLResponseBuilder
 
 
 @pytest.fixture()

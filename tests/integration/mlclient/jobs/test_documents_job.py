@@ -5,7 +5,7 @@ import pytest
 from mlclient.clients import DocumentsClient
 from mlclient.exceptions import MarkLogicError
 from mlclient.jobs import WriteDocumentsJob
-from mlclient.model import RawDocument, DocumentType
+from mlclient.model import DocumentType, RawDocument
 
 
 def test_write_job_with_documents_input():
@@ -24,7 +24,10 @@ def test_write_job_with_documents_input():
         assert len(job.successful) == 100
         assert len(job.failed) == 0
 
-        _assert_documents_exist_and_confirm_data({doc.uri: doc for doc in docs}, output_type=bytes)
+        _assert_documents_exist_and_confirm_data(
+            {doc.uri: doc for doc in docs},
+            output_type=bytes,
+        )
     finally:
         _delete_documents(uris)
         _assert_documents_do_not_exist(uris)
@@ -33,7 +36,9 @@ def test_write_job_with_documents_input():
 def _generate_docs(
     count: int = 100,
 ):
-    content = b'<?xml version="1.0" encoding="UTF-8"?>\n<root><child>data</child></root>'
+    content = (
+        b'<?xml version="1.0" encoding="UTF-8"?>\n<root><child>data</child></root>'
+    )
     for i in range(count):
         yield RawDocument(
             content=content,
@@ -86,5 +91,3 @@ def _delete_documents(
             docs_client.delete(uri)
     except MarkLogicError as err:
         pytest.fail(str(err))
-
-

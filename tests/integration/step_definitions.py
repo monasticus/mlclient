@@ -6,12 +6,14 @@ from requests import Response
 from mlclient import MLResourceClient, MLResponseParser
 from mlclient.calls import EvalCall
 
+INPUT_DELIMITER = "|"
+
 
 @given(
     "I initialized an MLResourceClient's connection",
     target_fixture="client",
 )
-def init_client():
+def init_client() -> MLResourceClient:
     client = MLResourceClient(auth_method="digest")
     client.connect()
     return client
@@ -21,7 +23,10 @@ def init_client():
     parsers.parse("I prepared the following {lang} code\n{code}"),
     target_fixture="call_config",
 )
-def prepare_code(lang, code):
+def prepare_code(
+    lang: str,
+    code: str,
+) -> dict:
     code = parse_step_input(code)
     return {lang: code}
 
@@ -30,20 +35,29 @@ def prepare_code(lang, code):
     parsers.parse("I set the following variables\n{variables}"),
     target_fixture="call_config",
 )
-def set_variables(variables, call_config):
+def set_variables(
+    variables: str,
+    call_config: dict,
+) -> dict:
     variables = parse_step_input(variables)
     call_config["variables"] = variables[0]
     return call_config
 
 
 @when("I call the EvalCall", target_fixture="response")
-def call_eval(client, call_config):
+def call_eval(
+    client: MLResourceClient,
+    call_config: dict,
+) -> Response:
     call = EvalCall(**call_config)
     return client.call(call)
 
 
 @then(parsers.parse("I get a successful multipart response\n{expected_parts}"))
-def verify_response(response: Response, expected_parts):
+def verify_response(
+    response: Response,
+    expected_parts: str,
+):
     expected_parts = parse_step_input(expected_parts)
 
     parsed_resp = MLResponseParser.parse(response, str)
@@ -57,7 +71,9 @@ def verify_response(response: Response, expected_parts):
 
 
 @then("I close the connection")
-def close_client(client):
+def close_client(
+    client: MLResourceClient,
+):
     client.disconnect()
     assert not client.is_connected()
 
@@ -66,20 +82,25 @@ def parse_step_input(
     step_input: str,
 ) -> str | list[dict]:
     lines = step_input.split("\n")
-    delimiters_count = lines[0].count("|")
+    delimiters_count = lines[0].count(INPUT_DELIMITER)
     is_table = delimiters_count > 0
     if not is_table:
         return step_input
 
-    headings = [cell.strip() for cell in lines[0].split("|")][1:-1]
+    return _parse_step_input_table(lines, delimiters_count)
+
+
+def _parse_step_input_table(
+    input_lines: list[str],
+    delimiters_count: int,
+) -> list[dict]:
+    headings = [cell.strip() for cell in input_lines[0].split(INPUT_DELIMITER)][1:-1]
     rows = []
-    for line in lines[1:]:
-        if line.count("|") != delimiters_count:
+    for line in input_lines[1:]:
+        if line.count(INPUT_DELIMITER) != delimiters_count:
             raise
-        cells = [cell.strip() for cell in line.split("|")][1:-1]
-        row = {}
-        for i, heading in enumerate(headings):
-            row[heading] = cells[i]
+        cells = [cell.strip() for cell in line.split(INPUT_DELIMITER)][1:-1]
+        row = {heading: cells[i] for i, heading in enumerate(headings)}
         rows.append(row)
 
     return rows

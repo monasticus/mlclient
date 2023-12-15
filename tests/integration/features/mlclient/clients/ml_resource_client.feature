@@ -6,7 +6,9 @@ Feature: Test MLResourceClient
     And I prepared the following xquery code
       """
       xquery version '1.0-ml';
+
       declare variable $element as element() external;
+
       <new-parent>{$element/child::element()}</new-parent>
       """
     And I set the following variables

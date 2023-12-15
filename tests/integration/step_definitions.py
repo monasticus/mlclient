@@ -1,12 +1,10 @@
 from __future__ import annotations
 
-from pytest_bdd import given, parsers, scenarios, then, when
+from pytest_bdd import given, parsers, then, when
 from requests import Response
 
 from mlclient import MLResourceClient, MLResponseParser
 from mlclient.calls import EvalCall
-
-scenarios("ml_resource_client.feature")
 
 
 @given(
@@ -85,3 +83,16 @@ def parse_step_input(
         rows.append(row)
 
     return rows
+
+
+__all__ = [
+    # given
+    "init_client",
+    "prepare_code",
+    "set_variables",
+    # when
+    "call_eval",
+    # then
+    "verify_response",
+    "close_client",
+]

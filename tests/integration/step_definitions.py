@@ -3,18 +3,25 @@ from __future__ import annotations
 from pytest_bdd import given, parsers, then, when
 from requests import Response
 
-from mlclient import MLResourceClient, MLResponseParser
+from mlclient import MLResourceClient, MLResourcesClient, MLResponseParser
 from mlclient.calls import EvalCall
 
 INPUT_DELIMITER = "|"
 
 
 @given(
-    "I initialized an MLResourceClient's connection",
+    parsers.parse("I initialized an {client_type}'s connection"),
     target_fixture="client",
 )
-def init_client() -> MLResourceClient:
-    client = MLResourceClient(auth_method="digest")
+def init_client(
+    client_type: str,
+) -> MLResourceClient:
+    if client_type == "MLResourceClient":
+        client = MLResourceClient(auth_method="digest")
+    elif client_type == "MLResourcesClient":
+        client = MLResourcesClient(auth_method="digest")
+    else:
+        raise
     client.connect()
     return client
 
@@ -51,6 +58,14 @@ def call_eval(
 ) -> Response:
     call = EvalCall(**call_config)
     return client.call(call)
+
+
+@when("I evaluate the code", target_fixture="response")
+def eval_code(
+    client: MLResourcesClient,
+    call_config: dict,
+) -> Response:
+    return client.eval(**call_config)
 
 
 @then(parsers.parse("I get a successful multipart response\n{expected_parts}"))
@@ -113,6 +128,7 @@ __all__ = [
     "set_variables",
     # when
     "call_eval",
+    "eval_code",
     # then
     "verify_response",
     "close_client",

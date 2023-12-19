@@ -1,7 +1,10 @@
 from __future__ import annotations
 
+import datetime
+
 from pytest_bdd import given, parsers, then, when
 from requests import Response
+from time import sleep
 
 from mlclient import MLResourceClient, MLResourcesClient, MLResponseParser
 from mlclient.calls import EvalCall
@@ -51,6 +54,31 @@ def set_variables(
     return call_config
 
 
+@given(
+    parsers.parse("I produce {count} test logs\n{pattern}"),
+    target_fixture="test_logs_count",
+)
+def produce_logs(
+    count: str,
+    pattern: str,
+) -> int:
+    count = int(count)
+    with MLResourcesClient(auth_method="digest") as client:
+        for i in range(1, count + 1):
+            log = pattern.replace("<i>", str(i))
+            client.eval(xquery=f'xdmp:log("{log}", "error")')
+    return count
+
+
+@given(
+    parsers.parse("I wait {seconds} second(s)"),
+)
+def wait(
+    seconds: str,
+):
+    sleep(int(seconds))
+
+
 @when("I call the EvalCall", target_fixture="response")
 def call_eval(
     client: MLResourceClient,
@@ -68,8 +96,34 @@ def eval_code(
     return client.eval(**call_config)
 
 
-@then(parsers.parse("I get a successful multipart response\n{expected_parts}"))
+@when(
+    parsers.parse("I get {logs_type} logs\n{params}"),
+    target_fixture="response",
+)
+def get_logs(
+    client: MLResourcesClient,
+    logs_type: str,
+    params: str,
+) -> Response:
+    params = parse_step_input(params)[0]
+    for time_param in ["start_time", "end_time"]:
+        if time_param in params:
+            params[time_param] = params[time_param].replace("<today>", str(datetime.date.today()))
+    params["filename"] = f"{client.port}_{logs_type.capitalize()}Log.txt",
+    params["data_format"] = "json"
+    return client.get_logs(**params)
+
+
+@then(parsers.parse("I get a successful response"))
 def verify_response(
+    response: Response,
+):
+    assert response.status_code == 200
+    assert response.reason == "OK"
+
+
+@then(parsers.parse("I get a successful multipart response\n{expected_parts}"))
+def verify_multipart_response(
     response: Response,
     expected_parts: str,
 ):
@@ -131,5 +185,6 @@ __all__ = [
     "eval_code",
     # then
     "verify_response",
+    "verify_multipart_response",
     "close_client",
 ]

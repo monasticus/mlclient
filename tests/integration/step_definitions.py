@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 import datetime
+from time import sleep
 
 from pytest_bdd import given, parsers, then, when
 from requests import Response
-from time import sleep
 
 from mlclient import MLResourceClient, MLResourcesClient, MLResponseParser
 from mlclient.calls import EvalCall
@@ -61,12 +61,12 @@ def set_variables(
 def produce_logs(
     count: str,
     pattern: str,
+    client: MLResourcesClient,
 ) -> int:
     count = int(count)
-    with MLResourcesClient(auth_method="digest") as client:
-        for i in range(1, count + 1):
-            log = pattern.replace("<i>", str(i))
-            client.eval(xquery=f'xdmp:log("{log}", "error")')
+    for i in range(1, count + 1):
+        log = pattern.replace("<i>", str(i))
+        client.eval(xquery=f'xdmp:log("{log}", "error")')
     return count
 
 
@@ -108,8 +108,11 @@ def get_logs(
     params = parse_step_input(params)[0]
     for time_param in ["start_time", "end_time"]:
         if time_param in params:
-            params[time_param] = params[time_param].replace("<today>", str(datetime.date.today()))
-    params["filename"] = f"{client.port}_{logs_type.capitalize()}Log.txt",
+            params[time_param] = params[time_param].replace(
+                "<today>",
+                str(datetime.date.today()),
+            )
+    params["filename"] = (f"{client.port}_{logs_type.capitalize()}Log.txt",)
     params["data_format"] = "json"
     return client.get_logs(**params)
 
@@ -147,6 +150,16 @@ def close_client(
     assert not client.is_connected()
 
 
+@then("I find produced logs")
+def verify_produced_logs(
+    test_logs_count: int,
+    response: Response,
+):
+    logfile = response.json()["logfile"]
+    logs_count = len(logfile["log"])
+    assert logs_count % test_logs_count == 0
+
+
 def parse_step_input(
     step_input: str,
 ) -> str | list[dict]:
@@ -173,18 +186,3 @@ def _parse_step_input_table(
         rows.append(row)
 
     return rows
-
-
-__all__ = [
-    # given
-    "init_client",
-    "prepare_code",
-    "set_variables",
-    # when
-    "call_eval",
-    "eval_code",
-    # then
-    "verify_response",
-    "verify_multipart_response",
-    "close_client",
-]

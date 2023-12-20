@@ -22,13 +22,14 @@ Feature: Test MLResourcesClient
 
   Scenario: Test /manage/v2/logs endpoint (ErrorLog.txt)
 
-    Given I produce 10 test logs
+    Given I initialized an MLResourcesClient's connection
+    And I produce 10 test logs
       """
       Test Log <i>
       """
     And I wait 1 second(s)
-    And I initialized an MLResourcesClient's connection
     When I get error logs
       | start_time | regex           |
       | <today>    | Test Log .{1,2} |
     Then I get a successful response
+    And I find produced logs

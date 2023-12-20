@@ -166,7 +166,6 @@ def verify_requests_producing_logs(
     response: Response,
 ):
     logfile = response.json()["logfile"]
-    assert isinstance(logfile["message"], str)
 
     logs = logfile["message"].split("\n")
     eval_logs = [
@@ -175,6 +174,20 @@ def verify_requests_producing_logs(
         if '"POST /v1/eval HTTP/1.1"' in log and "python-requests" in log
     ]
     assert len(eval_logs) >= test_logs_count
+
+
+@then(parsers.parse("I confirm returned {logs_type} logs structure"))
+def verify_requests_producing_logs(
+    logs_type: str,
+    response: Response,
+):
+    logfile = response.json()["logfile"]
+    if logs_type in ["request", "access"]:
+        assert "log" not in logfile
+        assert isinstance(logfile.get("message"), str) or len(logfile) == 6
+    elif logs_type == "error":
+        assert "message" not in logfile
+        assert isinstance(logfile.get("log"), list) or len(logfile) == 6
 
 
 def parse_step_input(

@@ -29,7 +29,23 @@ Feature: Test MLResourcesClient
       """
     And I wait 1 second(s)
     When I get error logs
-      | start_time | regex           |
-      | <today>    | Test Log .{1,2} |
+      | data_format | start_time | regex           |
+      | json        | <today>    | Test Log .{1,2} |
     Then I get a successful response
     And I find produced logs
+    And I close the connection
+
+  Scenario: Test /manage/v2/logs endpoint (AccessLog.txt)
+
+    Given I initialized an MLResourcesClient's connection
+    And I produce 10 test logs
+      """
+      Test Log <i>
+      """
+    And I wait 1 second(s)
+    When I get access logs
+      | data_format |
+      | json        |
+    Then I get a successful response
+    And I find requests producing logs
+    And I close the connection

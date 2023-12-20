@@ -160,6 +160,23 @@ def verify_produced_logs(
     assert logs_count % test_logs_count == 0
 
 
+@then("I find requests producing logs")
+def verify_requests_producing_logs(
+    test_logs_count: int,
+    response: Response,
+):
+    logfile = response.json()["logfile"]
+    assert isinstance(logfile["message"], str)
+
+    logs = logfile["message"].split("\n")
+    eval_logs = [
+        log
+        for log in logs
+        if '"POST /v1/eval HTTP/1.1"' in log and "python-requests" in log
+    ]
+    assert len(eval_logs) >= test_logs_count
+
+
 def parse_step_input(
     step_input: str,
 ) -> str | list[dict]:

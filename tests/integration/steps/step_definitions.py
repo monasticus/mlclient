@@ -9,7 +9,7 @@ from requests import Response
 from mlclient import MLResourceClient, MLResourcesClient, MLResponseParser
 from mlclient.calls import EvalCall
 
-INPUT_DELIMITER = "|"
+from .common import parse_step_input
 
 
 @given(
@@ -177,7 +177,7 @@ def verify_requests_producing_logs(
 
 
 @then(parsers.parse("I confirm returned {logs_type} logs structure"))
-def verify_requests_producing_logs(
+def verify_logs_structure(
     logs_type: str,
     response: Response,
 ):
@@ -188,31 +188,3 @@ def verify_requests_producing_logs(
     elif logs_type == "error":
         assert "message" not in logfile
         assert isinstance(logfile.get("log"), list) or len(logfile) == 6
-
-
-def parse_step_input(
-    step_input: str,
-) -> str | list[dict]:
-    lines = step_input.split("\n")
-    delimiters_count = lines[0].count(INPUT_DELIMITER)
-    is_table = delimiters_count > 0
-    if not is_table:
-        return step_input
-
-    return _parse_step_input_table(lines, delimiters_count)
-
-
-def _parse_step_input_table(
-    input_lines: list[str],
-    delimiters_count: int,
-) -> list[dict]:
-    headings = [cell.strip() for cell in input_lines[0].split(INPUT_DELIMITER)][1:-1]
-    rows = []
-    for line in input_lines[1:]:
-        if line.count(INPUT_DELIMITER) != delimiters_count:
-            raise
-        cells = [cell.strip() for cell in line.split(INPUT_DELIMITER)][1:-1]
-        row = {heading: cells[i] for i, heading in enumerate(headings)}
-        rows.append(row)
-
-    return rows

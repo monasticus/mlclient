@@ -3,7 +3,7 @@ Feature: Test MLResourceClient
   Scenario: Test a simple call
 
     Given I initialized an MLResourceClient's connection
-    And I prepared the following xquery code
+    And I prepared the following xquery code to eval
       """
       xquery version '1.0-ml';
 
@@ -11,7 +11,7 @@ Feature: Test MLResourceClient
 
       <new-parent>{$element/child::element()}</new-parent>
       """
-    And I set the following variables
+    And I set the following variables for the code
       | element                   |
       | <parent><child/></parent> |
     When I call the EvalCall

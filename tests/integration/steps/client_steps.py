@@ -28,6 +28,31 @@ def init_client(
     return client
 
 
+@given(
+    parsers.parse("I prepared the following {lang} code to eval\n{code}"),
+    target_fixture="call_config",
+)
+def prepare_code(
+    lang: str,
+    code: str,
+) -> dict:
+    code = parse_step_input(code)
+    return {lang: code}
+
+
+@given(
+    parsers.parse("I set the following variables for the code\n{variables}"),
+    target_fixture="call_config",
+)
+def set_variables(
+    variables: str,
+    call_config: dict,
+) -> dict:
+    variables = parse_step_input(variables)
+    call_config["variables"] = variables[0]
+    return call_config
+
+
 @when("I call the EvalCall", target_fixture="response")
 def call_eval(
     client: MLResourceClient,

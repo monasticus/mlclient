@@ -6,33 +6,6 @@ from pytest_bdd import given, parsers
 
 from mlclient import MLResourcesClient
 
-from .common import parse_step_input
-
-
-@given(
-    parsers.parse("I prepared the following {lang} code\n{code}"),
-    target_fixture="call_config",
-)
-def prepare_code(
-    lang: str,
-    code: str,
-) -> dict:
-    code = parse_step_input(code)
-    return {lang: code}
-
-
-@given(
-    parsers.parse("I set the following variables\n{variables}"),
-    target_fixture="call_config",
-)
-def set_variables(
-    variables: str,
-    call_config: dict,
-) -> dict:
-    variables = parse_step_input(variables)
-    call_config["variables"] = variables[0]
-    return call_config
-
 
 @given(
     parsers.parse("I produce {count} test logs\n{pattern}"),

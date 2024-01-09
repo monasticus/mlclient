@@ -3,10 +3,19 @@ from __future__ import annotations
 from typing import ClassVar
 
 import pytest
+from pytest_bdd import scenarios
 from requests import Response
 
 from mlclient import MLResourcesClient, MLResponseParser
 from mlclient.calls.model import DocumentsBodyPart
+
+scenarios("../../../features/mlclient/clients/ml_resources_client.feature")
+
+pytest_plugins = [
+    "tests.integration.steps.client_steps",
+    "tests.integration.steps.responses",
+    "tests.integration.steps.setup",
+]
 
 
 class TestDatabasesManagement:

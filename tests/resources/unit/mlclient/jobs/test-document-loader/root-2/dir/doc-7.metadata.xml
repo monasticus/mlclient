@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rapi:metadata xmlns:rapi="http://marklogic.com/rest-api">
+    <rapi:collections>
+        <rapi:collection>xml-doc-7-xml-metadata</rapi:collection>
+    </rapi:collections>
+</rapi:metadata>

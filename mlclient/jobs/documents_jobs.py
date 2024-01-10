@@ -11,11 +11,13 @@ import os
 import queue
 import uuid
 from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
 from threading import Thread
-from typing import Iterable
+from typing import Generator, Iterable
 
 from mlclient.clients import DocumentsClient
-from mlclient.model import Document
+from mlclient.mimetypes import Mimetypes
+from mlclient.model import Document, DocumentFactory
 
 logger = logging.getLogger(__name__)
 
@@ -238,3 +240,52 @@ class WriteDocumentsJob:
             q.put(document)
         for _ in range(thread_count):
             q.put(None)
+
+
+class DocumentsLoader:
+    @classmethod
+    def load(
+        cls,
+        path: str,
+    ) -> Generator[Document]:
+        for dir_path, _, file_names in os.walk(path):
+            for file_name in file_names:
+                file_path = os.path.join(dir_path, file_name)
+                with Path(file_path).open("rb") as file:
+                    yield DocumentFactory.build_raw_document(
+                        content=file.read(),
+                        doc_type=Mimetypes.get_doc_type(file_path),
+                        uri=file_path.replace(path, ""),
+                    )
+
+    # @classmethod
+    # def load(
+    #     cls,
+    #     path: str,
+    #     thread_count: int = 4,
+    # ) -> Generator[Document]:
+    #     file_paths = queue.Queue()
+    #     Thread(
+    #         target=cls._populate_queue_with_paths_input,
+    #         args=(file_paths, path, thread_count),
+    #     ).start()
+    #
+    #     executor = ThreadPoolExecutor(
+    #         max_workers=thread_count,
+    #         thread_name_prefix=f"load_documents_to_memory",
+    #     )
+    #
+    #     for _ in range(thread_count):
+    #         self._executor.submit(self._load)
+    #
+    # @staticmethod
+    # def _populate_queue_with_paths_input(
+    #     q: queue.Queue,
+    #     path: str,
+    #     thread_count: int,
+    # ):
+    #     for dir_path, _, file_names in os.walk(path):
+    #         for file_name in file_names:
+    #             q.put(os.path.join(dir_path, file_name))
+    #     for _ in range(thread_count):
+    #         q.put(None)

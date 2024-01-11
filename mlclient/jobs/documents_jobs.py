@@ -247,6 +247,7 @@ class DocumentsLoader:
     def load(
         cls,
         path: str,
+        uri_prefix: str = "",
     ) -> Generator[Document]:
         for dir_path, _, file_names in os.walk(path):
             for file_name in file_names:
@@ -256,7 +257,7 @@ class DocumentsLoader:
                     yield DocumentFactory.build_raw_document(
                         content=Path(file_path).open("rb").read(),
                         doc_type=Mimetypes.get_doc_type(file_path),
-                        uri=file_path.replace(path, ""),
+                        uri=file_path.replace(path, uri_prefix),
                         metadata=metadata,
                     )
 

@@ -128,3 +128,33 @@ def test_load_documents_with_metadata():
     assert doc_7.content == b"<root><parent><child>value-7</child></parent></root>"
     assert doc_7.metadata == b'{"collections": ["xml-doc-7-json-metadata"]}'
     assert doc_7.temporal_collection is None
+
+
+def test_load_documents_with_custom_uri_prefix():
+    path = f"{TEST_RESOURCES_PATH}/root-1"
+
+    docs = DocumentsLoader.load(path, uri_prefix="/custom-root")
+    assert type(docs) is GeneratorType
+
+    docs = list(docs)
+    assert len(docs) == 4
+
+    doc_1 = next((doc for doc in docs if doc.uri == "/dir/doc-1.xml"), None)
+    assert doc_1 is None
+    doc_1 = next((doc for doc in docs if doc.uri == "/custom-root/dir/doc-1.xml"), None)
+    assert doc_1 is not None
+
+    doc_2 = next((doc for doc in docs if doc.uri == "/dir/doc-2.json"), None)
+    assert doc_2 is None
+    doc_2 = next((doc for doc in docs if doc.uri == "/custom-root/dir/doc-2.json"), None)
+    assert doc_2 is not None
+
+    doc_3 = next((doc for doc in docs if doc.uri == "/dir/doc-3.xml"), None)
+    assert doc_3 is None
+    doc_3 = next((doc for doc in docs if doc.uri == "/custom-root/dir/doc-3.xml"), None)
+    assert doc_3 is not None
+
+    doc_4 = next((doc for doc in docs if doc.uri == "/dir/doc-4.json"), None)
+    assert doc_4 is None
+    doc_4 = next((doc for doc in docs if doc.uri == "/custom-root/dir/doc-4.json"), None)
+    assert doc_4 is not None

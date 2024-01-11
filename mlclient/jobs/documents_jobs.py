@@ -256,14 +256,20 @@ class DocumentsLoader:
         for dir_path, _, file_names in os.walk(path):
             for file_name in file_names:
                 if not file_name.endswith((".metadata.json", ".metadata.xml")):
-                    file_path = os.path.join(dir_path, file_name)
+                    file_path = str(Path(dir_path) / file_name)
                     metadata = cls._get_metadata(file_path, raw)
-                    yield DocumentFactory.build_raw_document(
-                        content=Path(file_path).open("rb").read(),
-                        doc_type=Mimetypes.get_doc_type(file_path),
-                        uri=file_path.replace(path, uri_prefix),
-                        metadata=metadata,
-                    )
+                    if raw:
+                        factory_function = DocumentFactory.build_raw_document
+                    else:
+                        factory_function = DocumentFactory.build_document
+
+                    with Path(file_path).open("rb") as file:
+                        yield factory_function(
+                            content=file.read(),
+                            doc_type=Mimetypes.get_doc_type(file_path),
+                            uri=file_path.replace(path, uri_prefix),
+                            metadata=metadata,
+                        )
 
     @classmethod
     def _get_metadata(
@@ -271,21 +277,20 @@ class DocumentsLoader:
         file_path: str,
         raw: bool,
     ) -> bytes | Metadata | None:
-        file_path_without_ext = os.path.splitext(file_path)[0]
         metadata_paths = [
-            f"{file_path_without_ext}.metadata.json",
-            f"{file_path_without_ext}.metadata.xml",
+            Path(file_path).with_suffix(".metadata.json"),
+            Path(file_path).with_suffix(".metadata.xml"),
         ]
         metadata_file_path = next(
-            (path for path in metadata_paths if Path(path).is_file()),
+            (path for path in metadata_paths if path.is_file()),
             None,
         )
         if metadata_file_path:
             if raw:
-                return Path(metadata_file_path).open("rb").read()
+                return metadata_file_path.open("rb").read()
 
-            with Path(metadata_file_path).open() as metadata_file:
-                if metadata_file_path.endswith(".json"):
+            with metadata_file_path.open() as metadata_file:
+                if metadata_file_path.suffix == ".json":
                     raw_metadata = json.load(metadata_file)
                 else:
                     raw_metadata = xmltodict.parse(
@@ -295,7 +300,7 @@ class DocumentsLoader:
                     ).get("metadata")
                     if "collections" in raw_metadata:
                         collections = raw_metadata["collections"]["collection"]
-                        if type(collections) is not list:
+                        if not isinstance(collections, list):
                             collections = [collections]
                         raw_metadata["collections"] = collections
                 if "metadataValues" in raw_metadata:

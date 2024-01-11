@@ -6,6 +6,7 @@ It exports high-level class to perform bulk operations in a MarkLogic server:
 """
 from __future__ import annotations
 
+import json
 import logging
 import os
 import queue
@@ -15,9 +16,11 @@ from pathlib import Path
 from threading import Thread
 from typing import Generator, Iterable
 
+import xmltodict
+
 from mlclient.clients import DocumentsClient
 from mlclient.mimetypes import Mimetypes
-from mlclient.model import Document, DocumentFactory
+from mlclient.model import Document, DocumentFactory, Metadata
 
 logger = logging.getLogger(__name__)
 
@@ -248,12 +251,13 @@ class DocumentsLoader:
         cls,
         path: str,
         uri_prefix: str = "",
+        raw: bool = True,
     ) -> Generator[Document]:
         for dir_path, _, file_names in os.walk(path):
             for file_name in file_names:
                 if not file_name.endswith((".metadata.json", ".metadata.xml")):
                     file_path = os.path.join(dir_path, file_name)
-                    metadata = cls._get_metadata(file_path)
+                    metadata = cls._get_metadata(file_path, raw)
                     yield DocumentFactory.build_raw_document(
                         content=Path(file_path).open("rb").read(),
                         doc_type=Mimetypes.get_doc_type(file_path),
@@ -265,7 +269,8 @@ class DocumentsLoader:
     def _get_metadata(
         cls,
         file_path: str,
-    ) -> bytes | None:
+        raw: bool,
+    ) -> bytes | Metadata | None:
         file_path_without_ext = os.path.splitext(file_path)[0]
         metadata_paths = [
             f"{file_path_without_ext}.metadata.json",
@@ -276,7 +281,27 @@ class DocumentsLoader:
             None,
         )
         if metadata_file_path:
-            return Path(metadata_file_path).open("rb").read()
+            if raw:
+                return Path(metadata_file_path).open("rb").read()
+
+            with Path(metadata_file_path).open() as metadata_file:
+                if metadata_file_path.endswith(".json"):
+                    raw_metadata = json.load(metadata_file)
+                else:
+                    raw_metadata = xmltodict.parse(
+                        metadata_file.read(),
+                        process_namespaces=True,
+                        namespaces={"http://marklogic.com/rest-api": None},
+                    ).get("metadata")
+                    if "collections" in raw_metadata:
+                        collections = raw_metadata["collections"]["collection"]
+                        if type(collections) is not list:
+                            collections = [collections]
+                        raw_metadata["collections"] = collections
+                if "metadataValues" in raw_metadata:
+                    raw_metadata["metadata_values"] = raw_metadata["metadataValues"]
+                    del raw_metadata["metadataValues"]
+                return Metadata(**raw_metadata)
         return None
 
     # @classmethod

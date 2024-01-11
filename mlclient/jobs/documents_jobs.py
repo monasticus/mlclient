@@ -250,13 +250,33 @@ class DocumentsLoader:
     ) -> Generator[Document]:
         for dir_path, _, file_names in os.walk(path):
             for file_name in file_names:
-                file_path = os.path.join(dir_path, file_name)
-                with Path(file_path).open("rb") as file:
+                if not file_name.endswith((".metadata.json", ".metadata.xml")):
+                    file_path = os.path.join(dir_path, file_name)
+                    metadata = cls._get_metadata(file_path)
                     yield DocumentFactory.build_raw_document(
-                        content=file.read(),
+                        content=Path(file_path).open("rb").read(),
                         doc_type=Mimetypes.get_doc_type(file_path),
                         uri=file_path.replace(path, ""),
+                        metadata=metadata,
                     )
+
+    @classmethod
+    def _get_metadata(
+        cls,
+        file_path: str,
+    ) -> bytes | None:
+        file_path_without_ext = os.path.splitext(file_path)[0]
+        metadata_paths = [
+            f"{file_path_without_ext}.metadata.json",
+            f"{file_path_without_ext}.metadata.xml",
+        ]
+        metadata_file_path = next(
+            (path for path in metadata_paths if Path(path).is_file()),
+            None,
+        )
+        if metadata_file_path:
+            return Path(metadata_file_path).open("rb").read()
+        return None
 
     # @classmethod
     # def load(

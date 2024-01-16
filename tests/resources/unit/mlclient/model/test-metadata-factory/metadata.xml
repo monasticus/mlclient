@@ -2,7 +2,6 @@
 <rapi:metadata xmlns:rapi="http://marklogic.com/rest-api">
     <rapi:collections>
         <rapi:collection>collection-1</rapi:collection>
-        <rapi:collection>collection-2</rapi:collection>
     </rapi:collections>
     <rapi:permissions>
         <rapi:permission>

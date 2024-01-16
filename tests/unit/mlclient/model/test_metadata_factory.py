@@ -13,7 +13,7 @@ def test_from_json_file():
     actual_metadata = MetadataFactory.from_file(metadata_file_path)
 
     expected_metadata_json = {
-        "collections": ["collection-2", "collection-1"],
+        "collections": ["collection-1"],
         "permissions": [
             {"role-name": "role-1", "capabilities": ["read"]},
             {"role-name": "role-2", "capabilities": ["update", "read"]},
@@ -42,7 +42,7 @@ def test_from_xml_file():
     actual_metadata = MetadataFactory.from_file(metadata_file_path)
 
     expected_metadata_json = {
-        "collections": ["collection-2", "collection-1"],
+        "collections": ["collection-1"],
         "permissions": [
             {"role-name": "role-1", "capabilities": ["read"]},
             {"role-name": "role-2", "capabilities": ["update", "read"]},
@@ -73,8 +73,7 @@ def test_from_json_file_raw():
     expected_metadata = (
         b"{\n"
         b'  "collections": [\n'
-        b'    "collection-1",\n'
-        b'    "collection-2"\n'
+        b'    "collection-1"\n'
         b"  ],\n"
         b'  "permissions": [\n'
         b"    {\n"
@@ -119,7 +118,6 @@ def test_from_xml_file_raw():
         b'<rapi:metadata xmlns:rapi="http://marklogic.com/rest-api">\n'
         b"    <rapi:collections>\n"
         b"        <rapi:collection>collection-1</rapi:collection>\n"
-        b"        <rapi:collection>collection-2</rapi:collection>\n"
         b"    </rapi:collections>\n"
         b"    <rapi:permissions>\n"
         b"        <rapi:permission>\n"

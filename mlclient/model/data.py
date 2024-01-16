@@ -860,12 +860,12 @@ class MetadataFactory:
                 "http://marklogic.com/xdmp/property": None,
             },
         ).get("metadata")
-        for wrapper, element in cls._XML_MAPPINGS.items():
-            if wrapper in raw_metadata:
-                collections = raw_metadata[wrapper][element]
-                if not isinstance(collections, list):
-                    collections = [collections]
-                raw_metadata[wrapper] = collections
+        for items, item in cls._XML_MAPPINGS.items():
+            if items in raw_metadata:
+                values = raw_metadata[items][item]
+                if not isinstance(values, list):
+                    values = [values]
+                raw_metadata[items] = values
         if "permissions" in raw_metadata:
             permissions = []
             for permission in raw_metadata["permissions"]:

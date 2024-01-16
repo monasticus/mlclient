@@ -15,7 +15,6 @@ from pathlib import Path
 from threading import Thread
 from typing import Generator, Iterable
 
-
 from mlclient.clients import DocumentsClient
 from mlclient.mimetypes import Mimetypes
 from mlclient.model import Document, DocumentFactory, Metadata, MetadataFactory

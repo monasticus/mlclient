@@ -260,21 +260,31 @@ class DocumentsLoader:
                     continue
 
                 file_path = str(Path(dir_path) / file_name)
-                metadata = cls._get_metadata(file_path, raw)
-                if raw:
-                    factory_function = DocumentFactory.build_raw_document
-                else:
-                    factory_function = DocumentFactory.build_document
-                with Path(file_path).open("rb") as file:
-                    yield factory_function(
-                        content=file.read(),
-                        doc_type=Mimetypes.get_doc_type(file_path),
-                        uri=file_path.replace(path, uri_prefix),
-                        metadata=metadata,
-                    )
+                uri = file_path.replace(path, uri_prefix)
+                yield cls._load_document(file_path, uri, raw)
 
     @classmethod
-    def _get_metadata(
+    def _load_document(
+        cls,
+        file_path: str,
+        uri: str,
+        raw: bool,
+    ) -> Document:
+        metadata = cls._load_metadata(file_path, raw)
+        if raw:
+            factory_function = DocumentFactory.build_raw_document
+        else:
+            factory_function = DocumentFactory.build_document
+        with Path(file_path).open("rb") as file:
+            return factory_function(
+                content=file.read(),
+                doc_type=Mimetypes.get_doc_type(file_path),
+                uri=uri,
+                metadata=metadata,
+            )
+
+    @classmethod
+    def _load_metadata(
         cls,
         file_path: str,
         raw: bool,

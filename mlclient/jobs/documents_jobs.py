@@ -6,7 +6,6 @@ It exports high-level class to perform bulk operations in a MarkLogic server:
 """
 from __future__ import annotations
 
-import json
 import logging
 import os
 import queue
@@ -16,11 +15,10 @@ from pathlib import Path
 from threading import Thread
 from typing import Generator, Iterable
 
-import xmltodict
 
 from mlclient.clients import DocumentsClient
 from mlclient.mimetypes import Mimetypes
-from mlclient.model import Document, DocumentFactory, Metadata
+from mlclient.model import Document, DocumentFactory, Metadata, MetadataFactory
 
 logger = logging.getLogger(__name__)
 
@@ -282,31 +280,11 @@ class DocumentsLoader:
             Path(file_path).with_suffix(".metadata.xml"),
         ]
         metadata_file_path = next(
-            (path for path in metadata_paths if path.is_file()),
+            (str(path) for path in metadata_paths if path.is_file()),
             None,
         )
         if metadata_file_path:
-            if raw:
-                return metadata_file_path.open("rb").read()
-
-            with metadata_file_path.open() as metadata_file:
-                if metadata_file_path.suffix == ".json":
-                    raw_metadata = json.load(metadata_file)
-                else:
-                    raw_metadata = xmltodict.parse(
-                        metadata_file.read(),
-                        process_namespaces=True,
-                        namespaces={"http://marklogic.com/rest-api": None},
-                    ).get("metadata")
-                    if "collections" in raw_metadata:
-                        collections = raw_metadata["collections"]["collection"]
-                        if not isinstance(collections, list):
-                            collections = [collections]
-                        raw_metadata["collections"] = collections
-                if "metadataValues" in raw_metadata:
-                    raw_metadata["metadata_values"] = raw_metadata["metadataValues"]
-                    del raw_metadata["metadataValues"]
-                return Metadata(**raw_metadata)
+            return MetadataFactory.from_file(metadata_file_path, raw)
         return None
 
     # @classmethod

@@ -37,9 +37,11 @@ import re
 import xml.etree.ElementTree as ElemTree
 from abc import ABCMeta, abstractmethod
 from enum import Enum
+from pathlib import Path
 from typing import Any, ClassVar, List
 from xml.dom import minidom
 
+import xmltodict
 from pydantic import BaseModel, Field
 
 logger = logging.getLogger(__name__)
@@ -803,6 +805,38 @@ class DocumentFactory:
             )
             raise NotImplementedError(msg)
         return impl
+
+
+class MetadataFactory:
+    @classmethod
+    def from_file(
+        cls,
+        file_path: str,
+        raw: bool = False,
+    ) -> Metadata | bytes:
+        file_path = Path(file_path)
+        if raw:
+            return file_path.open("rb").read()
+
+        with file_path.open() as file:
+            if file_path.suffix == ".json":
+                raw_metadata = json.load(file)
+            else:
+                raw_metadata = xmltodict.parse(
+                    file.read(),
+                    process_namespaces=True,
+                    namespaces={"http://marklogic.com/rest-api": None},
+                ).get("metadata")
+                if "collections" in raw_metadata:
+                    collections = raw_metadata["collections"]["collection"]
+                    if not isinstance(collections, list):
+                        collections = [collections]
+                    raw_metadata["collections"] = collections
+
+        if "metadataValues" in raw_metadata:
+            raw_metadata["metadata_values"] = raw_metadata["metadataValues"]
+            del raw_metadata["metadataValues"]
+        return Metadata(**raw_metadata)
 
 
 class Metadata:

@@ -47,6 +47,7 @@ from .data import (
     JSONDocument,
     Metadata,
     MetadataDocument,
+    MetadataFactory,
     Mimetype,
     Permission,
     RawDocument,
@@ -56,6 +57,7 @@ from .data import (
 )
 
 __all__ = [
+    "MetadataFactory",
     "DocumentFactory",
     "Document",
     "RawDocument",

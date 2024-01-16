@@ -1,0 +1,30 @@
+{
+  "collections": [
+    "collection-1",
+    "collection-2"
+  ],
+  "permissions": [
+    {
+      "role-name": "role-1",
+      "capabilities": [
+        "read"
+      ]
+    },
+    {
+      "role-name": "role-2",
+      "capabilities": [
+        "update",
+        "read"
+      ]
+    }
+  ],
+  "properties": {
+    "prop-name-1": "prop-value-1",
+    "prop-name-2": "prop-value-2"
+  },
+  "quality": 1,
+  "metadataValues": {
+    "meta-name-1": "meta-1",
+    "meta-name-2": "meta-2"
+  }
+}

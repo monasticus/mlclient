@@ -808,6 +808,12 @@ class DocumentFactory:
 
 
 class MetadataFactory:
+    _XML_MAPPINGS: ClassVar[dict] = {
+        "collections": "collection",
+        "permissions": "permission",
+        "metadata-values": "metadata-value",
+    }
+
     @classmethod
     def from_file(
         cls,
@@ -821,21 +827,66 @@ class MetadataFactory:
         with file_path.open() as file:
             if file_path.suffix == ".json":
                 raw_metadata = json.load(file)
+                if "permissions" in raw_metadata:
+                    permissions = []
+                    for perm in raw_metadata["permissions"]:
+                        role_name = perm["role-name"]
+                        capabilities = perm["capabilities"]
+                        permissions.append(
+                            Permission(
+                                role_name=role_name,
+                                capabilities=set(capabilities),
+                            ),
+                        )
+                    raw_metadata["permissions"] = permissions
+                if "metadataValues" in raw_metadata:
+                    raw_metadata["metadata_values"] = raw_metadata["metadataValues"]
+                    del raw_metadata["metadataValues"]
             else:
                 raw_metadata = xmltodict.parse(
                     file.read(),
                     process_namespaces=True,
-                    namespaces={"http://marklogic.com/rest-api": None},
+                    namespaces={
+                        "http://marklogic.com/rest-api": None,
+                        "http://marklogic.com/xdmp/property": None,
+                    },
                 ).get("metadata")
-                if "collections" in raw_metadata:
-                    collections = raw_metadata["collections"]["collection"]
-                    if not isinstance(collections, list):
-                        collections = [collections]
-                    raw_metadata["collections"] = collections
+                for wrapper, element in cls._XML_MAPPINGS.items():
+                    if wrapper in raw_metadata:
+                        collections = raw_metadata[wrapper][element]
+                        if not isinstance(collections, list):
+                            collections = [collections]
+                        raw_metadata[wrapper] = collections
+                if "permissions" in raw_metadata:
+                    permissions = []
+                    for perm in raw_metadata["permissions"]:
+                        role_name = perm["role-name"]
+                        capability = perm["capability"]
+                        existing_perm = next(
+                            filter(lambda p: p.role_name() == role_name, permissions),
+                            None,
+                        )
+                        if existing_perm is None:
+                            permissions.append(
+                                Permission(
+                                    role_name=role_name,
+                                    capabilities={capability},
+                                ),
+                            )
+                        else:
+                            existing_perm.add_capability(capability)
+                    raw_metadata["permissions"] = permissions
+                if "metadata-values" in raw_metadata:
+                    metadata_values = {}
+                    for metadata_value in raw_metadata["metadata-values"]:
+                        key = metadata_value["@key"]
+                        value = metadata_value["#text"]
+                        metadata_values[key] = value
+                    raw_metadata["metadata_values"] = metadata_values
+                    del raw_metadata["metadata-values"]
+                if "quality" in raw_metadata:
+                    raw_metadata["quality"] = int(raw_metadata["quality"])
 
-        if "metadataValues" in raw_metadata:
-            raw_metadata["metadata_values"] = raw_metadata["metadataValues"]
-            del raw_metadata["metadataValues"]
         return Metadata(**raw_metadata)
 
 

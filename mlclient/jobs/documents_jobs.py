@@ -243,6 +243,10 @@ class WriteDocumentsJob:
 
 
 class DocumentsLoader:
+    _JSON_METADATA_SUFFIX = ".metadata.json"
+    _XML_METADATA_SUFFIX = ".metadata.xml"
+    _METADATA_SUFFIXES = (_JSON_METADATA_SUFFIX, _XML_METADATA_SUFFIX)
+
     @classmethod
     def load(
         cls,
@@ -252,21 +256,22 @@ class DocumentsLoader:
     ) -> Generator[Document]:
         for dir_path, _, file_names in os.walk(path):
             for file_name in file_names:
-                if not file_name.endswith((".metadata.json", ".metadata.xml")):
-                    file_path = str(Path(dir_path) / file_name)
-                    metadata = cls._get_metadata(file_path, raw)
-                    if raw:
-                        factory_function = DocumentFactory.build_raw_document
-                    else:
-                        factory_function = DocumentFactory.build_document
+                if file_name.endswith(cls._METADATA_SUFFIXES):
+                    continue
 
-                    with Path(file_path).open("rb") as file:
-                        yield factory_function(
-                            content=file.read(),
-                            doc_type=Mimetypes.get_doc_type(file_path),
-                            uri=file_path.replace(path, uri_prefix),
-                            metadata=metadata,
-                        )
+                file_path = str(Path(dir_path) / file_name)
+                metadata = cls._get_metadata(file_path, raw)
+                if raw:
+                    factory_function = DocumentFactory.build_raw_document
+                else:
+                    factory_function = DocumentFactory.build_document
+                with Path(file_path).open("rb") as file:
+                    yield factory_function(
+                        content=file.read(),
+                        doc_type=Mimetypes.get_doc_type(file_path),
+                        uri=file_path.replace(path, uri_prefix),
+                        metadata=metadata,
+                    )
 
     @classmethod
     def _get_metadata(
@@ -275,8 +280,8 @@ class DocumentsLoader:
         raw: bool,
     ) -> bytes | Metadata | None:
         metadata_paths = [
-            Path(file_path).with_suffix(".metadata.json"),
-            Path(file_path).with_suffix(".metadata.xml"),
+            Path(file_path).with_suffix(cls._JSON_METADATA_SUFFIX),
+            Path(file_path).with_suffix(cls._XML_METADATA_SUFFIX),
         ]
         metadata_file_path = next(
             (str(path) for path in metadata_paths if path.is_file()),

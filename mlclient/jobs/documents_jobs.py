@@ -10,7 +10,7 @@ import logging
 import os
 import queue
 import uuid
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from threading import Thread
 from typing import Generator, Iterable
@@ -253,15 +253,25 @@ class DocumentsLoader:
         path: str,
         uri_prefix: str = "",
         raw: bool = True,
+        thread_count: int = 4,
     ) -> Generator[Document]:
-        for dir_path, _, file_names in os.walk(path):
-            for file_name in file_names:
-                if file_name.endswith(cls._METADATA_SUFFIXES):
-                    continue
+        futures = []
+        with ThreadPoolExecutor(
+            max_workers=thread_count,
+            thread_name_prefix="load_documents_to_memory",
+        ) as executor:
+            for dir_path, _, file_names in os.walk(path):
+                for file_name in file_names:
+                    if file_name.endswith(cls._METADATA_SUFFIXES):
+                        continue
 
-                file_path = str(Path(dir_path) / file_name)
-                uri = file_path.replace(path, uri_prefix)
-                yield cls._load_document(file_path, uri, raw)
+                    file_path = str(Path(dir_path) / file_name)
+                    uri = file_path.replace(path, uri_prefix)
+                    future = executor.submit(cls._load_document, file_path, uri, raw)
+                    futures.append(future)
+
+        for future in as_completed(futures):
+            yield future.result()
 
     @classmethod
     def _load_document(
@@ -300,35 +310,3 @@ class DocumentsLoader:
         if metadata_file_path:
             return MetadataFactory.from_file(metadata_file_path, raw)
         return None
-
-    # @classmethod
-    # def load(
-    #     cls,
-    #     path: str,
-    #     thread_count: int = 4,
-    # ) -> Generator[Document]:
-    #     file_paths = queue.Queue()
-    #     Thread(
-    #         target=cls._populate_queue_with_paths_input,
-    #         args=(file_paths, path, thread_count),
-    #     ).start()
-    #
-    #     executor = ThreadPoolExecutor(
-    #         max_workers=thread_count,
-    #         thread_name_prefix=f"load_documents_to_memory",
-    #     )
-    #
-    #     for _ in range(thread_count):
-    #         self._executor.submit(self._load)
-    #
-    # @staticmethod
-    # def _populate_queue_with_paths_input(
-    #     q: queue.Queue,
-    #     path: str,
-    #     thread_count: int,
-    # ):
-    #     for dir_path, _, file_names in os.walk(path):
-    #         for file_name in file_names:
-    #             q.put(os.path.join(dir_path, file_name))
-    #     for _ in range(thread_count):
-    #         q.put(None)

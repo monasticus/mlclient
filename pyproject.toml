@@ -63,6 +63,7 @@ autodoc-pydantic = "^2.0.1"
 poetry-bumpversion = "<0.3.1"
 responses = "^0.23.3"
 deepdiff = "^6.7.1"
+mimeograph = "^1.1.0"
 
 [tool.poetry.group.sub.dependencies]
 cryptography = "^41.0.6"

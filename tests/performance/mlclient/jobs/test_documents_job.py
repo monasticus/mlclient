@@ -50,7 +50,7 @@ def test_writing_thousand_docs_with_12_threads_default_batch(
 def test_writing_thousand_docs_with_24_threads_default_batch(
     benchmark,
 ):
-    _perform_parametrized_test(benchmark, docs_count=1000, thread_count=12)
+    _perform_parametrized_test(benchmark, docs_count=1000, thread_count=24)
 
 
 def test_writing_thousand_docs_with_4_threads_batch_100(
@@ -92,7 +92,7 @@ def test_writing_thousand_docs_with_24_threads_batch_100(
     _perform_parametrized_test(
         benchmark,
         docs_count=1000,
-        thread_count=12,
+        thread_count=24,
         batch_size=100,
     )
 
@@ -136,7 +136,7 @@ def test_writing_thousand_docs_with_24_threads_batch_200(
     _perform_parametrized_test(
         benchmark,
         docs_count=1000,
-        thread_count=12,
+        thread_count=24,
         batch_size=200,
     )
 
@@ -180,7 +180,7 @@ def test_writing_thousand_docs_with_24_threads_batch_300(
     _perform_parametrized_test(
         benchmark,
         docs_count=1000,
-        thread_count=12,
+        thread_count=24,
         batch_size=300,
     )
 

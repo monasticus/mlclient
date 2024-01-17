@@ -254,14 +254,20 @@ class DocumentsLoader:
         uri_prefix: str = "",
         raw: bool = True,
     ) -> Generator[Document]:
-        for dir_path, _, file_names in os.walk(path):
-            for file_name in file_names:
-                if file_name.endswith(cls._METADATA_SUFFIXES):
-                    continue
+        if Path(path).is_file():
+            file_path = path
+            path = Path(path)
+            uri = file_path.replace(str(path.parent), uri_prefix)
+            yield cls._load_document(file_path, uri, raw)
+        else:
+            for dir_path, _, file_names in os.walk(path):
+                for file_name in file_names:
+                    if file_name.endswith(cls._METADATA_SUFFIXES):
+                        continue
 
-                file_path = str(Path(dir_path) / file_name)
-                uri = file_path.replace(path, uri_prefix)
-                yield cls._load_document(file_path, uri, raw)
+                    file_path = str(Path(dir_path) / file_name)
+                    uri = file_path.replace(path, uri_prefix)
+                    yield cls._load_document(file_path, uri, raw)
 
     @classmethod
     def _load_document(

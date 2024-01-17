@@ -93,7 +93,6 @@ def test_load_documents_with_metadata():
         b"    </rapi:collections>\n"
         b"</rapi:metadata>"
     )
-
     assert doc_3.temporal_collection is None
 
     doc_4 = next((doc for doc in docs if doc.uri == "/dir/doc-4.json"), None)
@@ -248,3 +247,86 @@ def test_load_documents_and_parse():
     assert type(doc_7.metadata) is Metadata
     assert doc_7.metadata.collections() == ["xml-doc-7-json-metadata"]
     assert doc_7.temporal_collection is None
+
+
+def test_load_document():
+    path = f"{TEST_RESOURCES_PATH}/root-1/dir/doc-1.xml"
+
+    docs = DocumentsLoader.load(path)
+    assert type(docs) is GeneratorType
+
+    docs = list(docs)
+    assert len(docs) == 1
+
+    doc = docs[0]
+    assert doc is not None
+    assert type(doc) is RawDocument
+    assert doc.uri == "/doc-1.xml"
+    assert doc.doc_type == DocumentType.XML
+    assert doc.content == b"<root><parent><child>value-1</child></parent></root>"
+    assert doc.metadata is None
+    assert doc.temporal_collection is None
+
+
+def test_load_document_with_metadata():
+    path = f"{TEST_RESOURCES_PATH}/root-2/dir/doc-3.xml"
+
+    docs = DocumentsLoader.load(path)
+    assert type(docs) is GeneratorType
+
+    docs = list(docs)
+    assert len(docs) == 1
+
+    doc = docs[0]
+    assert doc is not None
+    assert type(doc) is RawDocument
+    assert doc.uri == "/doc-3.xml"
+    assert doc.doc_type == DocumentType.XML
+    assert doc.content == b"<root><parent><child>value-3</child></parent></root>"
+    assert doc.metadata == (
+        b'<?xml version="1.0" encoding="utf-8"?>\n'
+        b'<rapi:metadata xmlns:rapi="http://marklogic.com/rest-api">\n'
+        b"    <rapi:collections>\n"
+        b"        <rapi:collection>xml-doc-3</rapi:collection>\n"
+        b"    </rapi:collections>\n"
+        b"</rapi:metadata>"
+    )
+    assert doc.temporal_collection is None
+
+
+def test_load_document_with_custom_uri_prefix():
+    path = f"{TEST_RESOURCES_PATH}/root-1/dir/doc-1.xml"
+
+    docs = DocumentsLoader.load(path, uri_prefix="/custom-root/dir")
+    assert type(docs) is GeneratorType
+
+    docs = list(docs)
+    assert len(docs) == 1
+
+    doc = docs[0]
+    assert doc is not None
+    assert type(doc) is RawDocument
+    assert doc.uri == "/custom-root/dir/doc-1.xml"
+    assert doc.doc_type == DocumentType.XML
+    assert doc.content == b"<root><parent><child>value-1</child></parent></root>"
+    assert doc.metadata is None
+    assert doc.temporal_collection is None
+
+
+def test_load_document_and_parse():
+    path = f"{TEST_RESOURCES_PATH}/root-1/dir/doc-1.xml"
+
+    docs = DocumentsLoader.load(path, raw=False)
+    assert type(docs) is GeneratorType
+
+    docs = list(docs)
+    assert len(docs) == 1
+
+    doc = docs[0]
+    assert doc is not None
+    assert type(doc) is XMLDocument
+    assert doc.uri == "/doc-1.xml"
+    assert doc.doc_type == DocumentType.XML
+    assert doc.content == b"<root><parent><child>value-1</child></parent></root>"
+    assert doc.metadata is None
+    assert doc.temporal_collection is None

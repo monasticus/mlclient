@@ -10,7 +10,7 @@ import logging
 import os
 import queue
 import uuid
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from threading import Thread
 from typing import Generator, Iterable
@@ -253,25 +253,15 @@ class DocumentsLoader:
         path: str,
         uri_prefix: str = "",
         raw: bool = True,
-        thread_count: int = 4,
     ) -> Generator[Document]:
-        futures = []
-        with ThreadPoolExecutor(
-            max_workers=thread_count,
-            thread_name_prefix="load_documents_to_memory",
-        ) as executor:
-            for dir_path, _, file_names in os.walk(path):
-                for file_name in file_names:
-                    if file_name.endswith(cls._METADATA_SUFFIXES):
-                        continue
+        for dir_path, _, file_names in os.walk(path):
+            for file_name in file_names:
+                if file_name.endswith(cls._METADATA_SUFFIXES):
+                    continue
 
-                    file_path = str(Path(dir_path) / file_name)
-                    uri = file_path.replace(path, uri_prefix)
-                    future = executor.submit(cls._load_document, file_path, uri, raw)
-                    futures.append(future)
-
-        for future in as_completed(futures):
-            yield future.result()
+                file_path = str(Path(dir_path) / file_name)
+                uri = file_path.replace(path, uri_prefix)
+                yield cls._load_document(file_path, uri, raw)
 
     @classmethod
     def _load_document(

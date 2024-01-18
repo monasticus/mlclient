@@ -28,6 +28,8 @@ This package exports the following classes:
         A Document implementation representing a single MarkLogic document's metadata.
     * DocumentFactory
         A factory class instantiating a Document implementation classes.
+    * MetadataFactory
+        A factory class instantiating a Metadata class from a file.
     * Metadata
         A class representing MarkLogic's document metadata.
     * Permission:

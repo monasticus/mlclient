@@ -371,6 +371,10 @@ class DocumentsLoader:
             (str(path) for path in metadata_paths if path.is_file()),
             None,
         )
-        if metadata_file_path:
-            return MetadataFactory.from_file(metadata_file_path, raw)
-        return None
+        if not metadata_file_path:
+            return None
+
+        if raw:
+            with Path(metadata_file_path).open("rb") as metadata_file:
+                return metadata_file.read()
+        return MetadataFactory.from_file(metadata_file_path)

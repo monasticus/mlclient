@@ -21,6 +21,8 @@ It exports 5 classes:
         A Document implementation representing a single MarkLogic document's metadata.
     * DocumentFactory
         A factory class instantiating a Document implementation classes.
+    * MetadataFactory
+        A factory class instantiating a Metadata class from a file.
     * Metadata
         A class representing MarkLogic's document metadata.
     * Permission:
@@ -782,6 +784,20 @@ class DocumentFactory:
         content: ElemTree.Element | dict | str | bytes | None,
         doc_type: DocumentType | None,
     ):
+        """Return Document's implementation based on document type or content.
+
+        Parameters
+        ----------
+        content : ElemTree.Element | dict | str | bytes | None
+            A document content
+        doc_type : DocumentType | None
+            A document type
+
+        Returns
+        -------
+        Document
+            A Document's subclass reference
+        """
         if doc_type == DocumentType.XML:
             impl = XMLDocument
         elif doc_type == DocumentType.JSON:
@@ -808,6 +824,8 @@ class DocumentFactory:
 
 
 class MetadataFactory:
+    """A factory class instantiating a Metadata class from a file."""
+
     _XML_MAPPINGS: ClassVar[dict] = {
         "collections": "collection",
         "permissions": "permission",
@@ -818,12 +836,20 @@ class MetadataFactory:
     def from_file(
         cls,
         file_path: str,
-        raw: bool = False,
-    ) -> Metadata | bytes:
-        file_path = Path(file_path)
-        if raw:
-            return file_path.open("rb").read()
+    ) -> Metadata:
+        """Initialize a Metadata instance from a file.
 
+        Parameters
+        ----------
+        file_path : str
+            A metadata file path
+
+        Returns
+        -------
+        Metadata
+            A Metadata instance
+        """
+        file_path = Path(file_path)
         with file_path.open() as file:
             if file_path.suffix == ".json":
                 return cls._from_json_file(file)
@@ -834,6 +860,7 @@ class MetadataFactory:
         cls,
         file: TextIO,
     ) -> Metadata:
+        """Initialize a Metadata instance from a JSON file."""
         raw_metadata = json.load(file)
         if "permissions" in raw_metadata:
             permissions = []
@@ -852,6 +879,7 @@ class MetadataFactory:
         cls,
         file: TextIO,
     ) -> Metadata:
+        """Initialize a Metadata instance from an XML file."""
         raw_metadata = xmltodict.parse(
             file.read(),
             process_namespaces=True,

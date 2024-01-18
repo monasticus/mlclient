@@ -6,10 +6,12 @@ It exports high-level class to perform bulk operations in a MarkLogic server:
 """
 from __future__ import annotations
 
+import json
 import logging
 import os
 import queue
 import uuid
+import xml.etree.ElementTree as ElemTree
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from threading import Thread
@@ -17,7 +19,13 @@ from typing import Generator, Iterable
 
 from mlclient.clients import DocumentsClient
 from mlclient.mimetypes import Mimetypes
-from mlclient.model import Document, DocumentFactory, Metadata, MetadataFactory
+from mlclient.model import (
+    Document,
+    DocumentFactory,
+    DocumentType,
+    Metadata,
+    MetadataFactory,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -276,18 +284,39 @@ class DocumentsLoader:
         uri: str,
         raw: bool,
     ) -> Document:
+        doc_type = Mimetypes.get_doc_type(file_path)
+        content = cls._load_content(file_path, raw, doc_type)
         metadata = cls._load_metadata(file_path, raw)
+
         if raw:
             factory_function = DocumentFactory.build_raw_document
         else:
             factory_function = DocumentFactory.build_document
+
+        return factory_function(
+            content=content,
+            doc_type=doc_type,
+            uri=uri,
+            metadata=metadata,
+        )
+
+    @classmethod
+    def _load_content(
+        cls,
+        file_path: str,
+        raw: bool,
+        doc_type: DocumentType,
+    ) -> bytes | str | ElemTree.Element | dict:
         with Path(file_path).open("rb") as file:
-            return factory_function(
-                content=file.read(),
-                doc_type=Mimetypes.get_doc_type(file_path),
-                uri=uri,
-                metadata=metadata,
-            )
+            content_bytes = file.read()
+
+        if raw or doc_type == DocumentType.BINARY:
+            return content_bytes
+        if doc_type == DocumentType.TEXT:
+            return content_bytes.decode("UTF-8")
+        if doc_type == DocumentType.XML:
+            return ElemTree.fromstring(content_bytes)
+        return json.loads(content_bytes)
 
     @classmethod
     def _load_metadata(

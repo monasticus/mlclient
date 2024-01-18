@@ -1,7 +1,9 @@
+import xml.etree.ElementTree as ElemTree
 from types import GeneratorType
 
 from mlclient.jobs import DocumentsLoader
 from mlclient.model import (
+    Document,
     DocumentType,
     JSONDocument,
     Metadata,
@@ -184,7 +186,7 @@ def test_load_documents_and_parse():
     assert doc_1 is not None
     assert type(doc_1) is XMLDocument
     assert doc_1.doc_type == DocumentType.XML
-    assert doc_1.content == b"<root><parent><child>value-1</child></parent></root>"
+    _assert_xml_content_with_value(doc_1, "value-1")
     assert doc_1.metadata is None
     assert doc_1.temporal_collection is None
 
@@ -192,7 +194,7 @@ def test_load_documents_and_parse():
     assert doc_2 is not None
     assert type(doc_2) is JSONDocument
     assert doc_2.doc_type == DocumentType.JSON
-    assert doc_2.content == b'{"root": {"parent": {"child": "value-2"}}}'
+    assert doc_2.content == {"root": {"parent": {"child": "value-2"}}}
     assert doc_2.metadata is not None
     assert type(doc_2.metadata) is Metadata
     assert doc_2.metadata.collections() == ["json-doc-2"]
@@ -202,7 +204,7 @@ def test_load_documents_and_parse():
     assert doc_3 is not None
     assert type(doc_3) is XMLDocument
     assert doc_3.doc_type == DocumentType.XML
-    assert doc_3.content == b"<root><parent><child>value-3</child></parent></root>"
+    _assert_xml_content_with_value(doc_3, "value-3")
     assert doc_3.metadata is not None
     assert type(doc_3.metadata) is Metadata
     assert doc_3.metadata.collections() == ["xml-doc-3"]
@@ -212,7 +214,7 @@ def test_load_documents_and_parse():
     assert doc_4 is not None
     assert type(doc_4) is JSONDocument
     assert doc_4.doc_type == DocumentType.JSON
-    assert doc_4.content == b'{"root": {"parent": {"child": "value-4"}}}'
+    assert doc_4.content == {"root": {"parent": {"child": "value-4"}}}
     assert doc_4.metadata is not None
     assert type(doc_4.metadata) is Metadata
     assert doc_4.metadata.collections() == ["json-doc-4"]
@@ -222,7 +224,7 @@ def test_load_documents_and_parse():
     assert doc_5 is not None
     assert type(doc_5) is XMLDocument
     assert doc_5.doc_type == DocumentType.XML
-    assert doc_5.content == b"<root><parent><child>value-5</child></parent></root>"
+    _assert_xml_content_with_value(doc_5, "value-5")
     assert doc_5.metadata is not None
     assert type(doc_5.metadata) is Metadata
     assert doc_5.metadata.collections() == ["xml-doc-5"]
@@ -232,7 +234,7 @@ def test_load_documents_and_parse():
     assert doc_6 is not None
     assert type(doc_6) is JSONDocument
     assert doc_6.doc_type == DocumentType.JSON
-    assert doc_6.content == b'{"root": {"parent": {"child": "value-6"}}}'
+    assert doc_6.content == {"root": {"parent": {"child": "value-6"}}}
     assert doc_6.metadata is not None
     assert type(doc_6.metadata) is Metadata
     assert doc_6.metadata.collections() == ["json-doc-6-json-metadata"]
@@ -242,7 +244,7 @@ def test_load_documents_and_parse():
     assert doc_7 is not None
     assert type(doc_7) is XMLDocument
     assert doc_7.doc_type == DocumentType.XML
-    assert doc_7.content == b"<root><parent><child>value-7</child></parent></root>"
+    _assert_xml_content_with_value(doc_7, "value-7")
     assert doc_7.metadata is not None
     assert type(doc_7.metadata) is Metadata
     assert doc_7.metadata.collections() == ["xml-doc-7-json-metadata"]
@@ -327,6 +329,27 @@ def test_load_document_and_parse():
     assert type(doc) is XMLDocument
     assert doc.uri == "/doc-1.xml"
     assert doc.doc_type == DocumentType.XML
-    assert doc.content == b"<root><parent><child>value-1</child></parent></root>"
+    _assert_xml_content_with_value(doc, "value-1")
     assert doc.metadata is None
     assert doc.temporal_collection is None
+    assert doc.content.tag == "root"
+
+
+def _assert_xml_content_with_value(
+    doc: Document,
+    value: str,
+):
+    assert isinstance(doc.content, ElemTree.Element)
+    assert doc.content.tag == "root"
+
+    children = list(doc.content)
+    assert len(children) == 1
+    assert children[0].tag == "parent"
+
+    grandchildren = list(children[0])
+    assert len(grandchildren) == 1
+    assert grandchildren[0].tag == "child"
+    assert grandchildren[0].text == value
+
+    grand_grandchildren = list(grandchildren[0])
+    assert len(grand_grandchildren) == 0

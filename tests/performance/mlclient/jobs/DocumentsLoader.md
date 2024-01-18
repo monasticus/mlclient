@@ -68,6 +68,10 @@ DocumentsLoader class has been tested using two implementations:
           yield future.result()
   ```
 
+> **Note:**  
+> **test_load_*** and **test_load_and_parse_*** tests actually did the same job then because of a bug.
+> The real performance difference is visible in an additional section (_Fixed content parsing results_)
+
 ### Sequential processing results
 
 ```text
@@ -235,9 +239,40 @@ Legend:
 ======================== 8 passed in 611.34s (0:10:11) =========================
 ```
 
+### Fixed content parsing results
+
+```text
+============================== test session starts ==============================
+platform linux -- Python 3.8.10, pytest-7.4.3, pluggy-1.3.0
+benchmark: 4.0.0 (defaults: timer=time.perf_counter disable_gc=False min_rounds=5 min_time=0.000005 max_time=1.0 calibration_precision=10 warmup=False warmup_iterations=100000)
+rootdir: /home/tom/workspace/projects/mlclient
+configfile: pyproject.toml
+plugins: mock-3.12.0, benchmark-4.0.0, bdd-7.0.1, cov-4.1.0
+collected 8 items                                                                                                                            
+
+tests/performance/mlclient/jobs/test_documents_loader.py ........                                                                      [100%]
+
+
+-------------------------------------------------------------------------------------------------------------------- benchmark: 8 tests -------------------------------------------------------------------------------------------------------------------
+Name (time in us)                                    Min                        Max                       Mean                    StdDev                     Median                       IQR            Outliers         OPS            Rounds  Iterations
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+test_load_5_documents                           593.9810 (1.0)             654.5870 (1.0)             605.7946 (1.0)             14.4556 (1.0)             600.0640 (1.0)             13.3350 (1.0)           3;1  1,650.7245 (1.0)          20           1
+test_load_and_parse_5_documents                 665.1380 (1.12)          1,360.6550 (2.08)            712.5424 (1.18)            34.3978 (2.38)            708.0005 (1.18)            22.6330 (1.70)        83;47  1,403.4253 (0.85)       1236           1
+test_load_500_documents                      58,242.3920 (98.05)        63,196.8110 (96.54)        59,616.1956 (98.41)        1,147.0313 (79.35)        59,393.7025 (98.98)          657.5160 (49.31)         2;3     16.7740 (0.01)         16           1
+test_load_and_parse_500_documents            66,027.7440 (111.16)       72,078.3620 (110.11)       67,791.9057 (111.91)       1,731.2131 (119.76)       67,098.5595 (111.82)       1,198.2470 (89.86)         3;2     14.7510 (0.01)         14           1
+test_load_15000_documents                 1,744,253.8370 (>1000.0)   1,824,750.6850 (>1000.0)   1,790,758.3410 (>1000.0)     34,940.0164 (>1000.0)   1,807,945.8770 (>1000.0)     57,754.9295 (>1000.0)       1;0      0.5584 (0.00)          5           1
+test_load_and_parse_15000_documents       2,317,425.4300 (>1000.0)   5,047,720.4530 (>1000.0)   3,131,237.7100 (>1000.0)  1,105,884.2549 (>1000.0)   2,634,236.7930 (>1000.0)  1,059,512.2928 (>1000.0)       1;0      0.3194 (0.00)          5           1
+test_load_200000_documents               22,241,490.1900 (>1000.0)  28,613,605.0660 (>1000.0)  24,388,385.5062 (>1000.0)  2,598,804.2425 (>1000.0)  23,801,741.6510 (>1000.0)  3,459,545.9100 (>1000.0)       1;0      0.0410 (0.00)          5           1
+test_load_and_parse_200000_documents     27,872,848.8200 (>1000.0)  32,869,848.8020 (>1000.0)  30,964,209.7946 (>1000.0)  2,058,879.9387 (>1000.0)  30,642,659.4650 (>1000.0)  2,935,881.1730 (>1000.0)       1;0      0.0323 (0.00)          5           1
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Legend:
+  Outliers: 1 Standard Deviation from Mean; 1.5 IQR (InterQuartile Range) from 1st Quartile and 3rd Quartile.
+  OPS: Operations Per Second, computed as 1 / Mean
+======================== 8 passed in 561.10s (0:09:21) ========================
+```
+
 ## Conclusion
 
 Loading documents into memory is so fast that it costs time to initialize and manage threads with ThreadPoolExecutor.
 That's why the sequential processing implementation will be applied.
-
-Interesting is that parsing documents to XMLDocument class is not time-consuming but actually similar to RawDocument

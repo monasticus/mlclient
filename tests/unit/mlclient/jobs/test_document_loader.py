@@ -1,4 +1,6 @@
+import io
 import xml.etree.ElementTree as ElemTree
+import zipfile
 from types import GeneratorType
 
 from mlclient.jobs import DocumentsLoader
@@ -40,19 +42,22 @@ def test_load_documents():
     assert doc_2.metadata is None
     assert doc_2.temporal_collection is None
 
-    doc_3 = next((doc for doc in docs if doc.uri == "/dir/doc-3.xml"), None)
+    doc_3 = next((doc for doc in docs if doc.uri == "/dir/doc-3.xqy"), None)
     assert doc_3 is not None
     assert type(doc_3) is RawDocument
-    assert doc_3.doc_type == DocumentType.XML
-    assert doc_3.content == b"<root><parent><child>value-3</child></parent></root>"
+    assert doc_3.doc_type == DocumentType.TEXT
+    assert doc_3.content == b'xquery version "1.0-ml";\n\nfn:current-date()'
     assert doc_3.metadata is None
     assert doc_3.temporal_collection is None
 
-    doc_4 = next((doc for doc in docs if doc.uri == "/dir/doc-4.json"), None)
+    doc_4 = next((doc for doc in docs if doc.uri == "/dir/doc-4.zip"), None)
     assert doc_4 is not None
     assert type(doc_4) is RawDocument
-    assert doc_4.doc_type == DocumentType.JSON
-    assert doc_4.content == b'{"root": {"parent": {"child": "value-4"}}}'
+    assert doc_4.doc_type == DocumentType.BINARY
+    with zipfile.ZipFile(io.BytesIO(doc_4.content)) as zip_file:
+        assert zip_file.namelist() == ["doc-3.xqy"]
+        with zip_file.open("doc-3.xqy") as xqy_file:
+            assert xqy_file.read() == doc_3.content
     assert doc_4.metadata is None
     assert doc_4.temporal_collection is None
 
@@ -159,22 +164,22 @@ def test_load_documents_with_custom_uri_prefix():
     )
     assert doc_2 is not None
 
-    doc_3 = next((doc for doc in docs if doc.uri == "/dir/doc-3.xml"), None)
+    doc_3 = next((doc for doc in docs if doc.uri == "/dir/doc-3.xqy"), None)
     assert doc_3 is None
-    doc_3 = next((doc for doc in docs if doc.uri == "/custom-root/dir/doc-3.xml"), None)
+    doc_3 = next((doc for doc in docs if doc.uri == "/custom-root/dir/doc-3.xqy"), None)
     assert doc_3 is not None
 
-    doc_4 = next((doc for doc in docs if doc.uri == "/dir/doc-4.json"), None)
+    doc_4 = next((doc for doc in docs if doc.uri == "/dir/doc-4.zip"), None)
     assert doc_4 is None
     doc_4 = next(
-        (doc for doc in docs if doc.uri == "/custom-root/dir/doc-4.json"),
+        (doc for doc in docs if doc.uri == "/custom-root/dir/doc-4.zip"),
         None,
     )
     assert doc_4 is not None
 
 
 def test_load_documents_and_parse():
-    path = f"{TEST_RESOURCES_PATH}/root-2"
+    path = f"{TEST_RESOURCES_PATH}"
 
     docs = DocumentsLoader.load(path, raw=False)
     assert type(docs) is GeneratorType

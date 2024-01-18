@@ -74,7 +74,6 @@ class DocumentsClient(MLResourceClient):
             temporal_collection=temporal_collection,
         )
         resp = self.call(call)
-        # MLResponseBuilder.generate_builder_code(resp)
         if not resp.ok:
             resp_body = MLResponseParser.parse(resp)
             raise MarkLogicError(resp_body["errorResponse"])

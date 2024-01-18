@@ -296,6 +296,66 @@ def test_load_documents_and_parse():
 def test_load_document():
     path = f"{TEST_RESOURCES_PATH}/root-1/dir/doc-1.xml"
 
+    doc = DocumentsLoader.load_document(path)
+    assert doc is not None
+    assert type(doc) is RawDocument
+    assert doc.uri is None
+    assert doc.doc_type == DocumentType.XML
+    assert doc.content == b"<root><parent><child>value-1</child></parent></root>"
+    assert doc.metadata is None
+    assert doc.temporal_collection is None
+
+
+def test_load_document_with_uri():
+    path = f"{TEST_RESOURCES_PATH}/root-1/dir/doc-1.xml"
+
+    doc = DocumentsLoader.load_document(path, uri="/dir/doc-1.xml")
+    assert doc is not None
+    assert type(doc) is RawDocument
+    assert doc.uri == "/dir/doc-1.xml"
+    assert doc.doc_type == DocumentType.XML
+    assert doc.content == b"<root><parent><child>value-1</child></parent></root>"
+    assert doc.metadata is None
+    assert doc.temporal_collection is None
+
+
+def test_load_document_with_metadata():
+    path = f"{TEST_RESOURCES_PATH}/root-2/dir/doc-3.xml"
+
+    doc = DocumentsLoader.load_document(path)
+    assert doc is not None
+    assert type(doc) is RawDocument
+    assert doc.uri is None
+    assert doc.doc_type == DocumentType.XML
+    assert doc.content == b"<root><parent><child>value-3</child></parent></root>"
+    assert doc.metadata == (
+        b'<?xml version="1.0" encoding="utf-8"?>\n'
+        b'<rapi:metadata xmlns:rapi="http://marklogic.com/rest-api">\n'
+        b"    <rapi:collections>\n"
+        b"        <rapi:collection>xml-doc-3</rapi:collection>\n"
+        b"    </rapi:collections>\n"
+        b"</rapi:metadata>"
+    )
+    assert doc.temporal_collection is None
+
+
+def test_load_document_and_parse():
+    path = f"{TEST_RESOURCES_PATH}/root-1/dir/doc-1.xml"
+
+    doc = DocumentsLoader.load_document(path, raw=False)
+    assert doc is not None
+    assert type(doc) is XMLDocument
+    assert doc.uri is None
+    assert doc.doc_type == DocumentType.XML
+    _assert_xml_content_with_value(doc, "value-1")
+    assert doc.metadata is None
+    assert doc.temporal_collection is None
+    assert doc.content.tag == "root"
+
+
+def test_load_document_as_documents():
+    path = f"{TEST_RESOURCES_PATH}/root-1/dir/doc-1.xml"
+
     docs = DocumentsLoader.load(path)
     assert type(docs) is GeneratorType
 
@@ -312,33 +372,7 @@ def test_load_document():
     assert doc.temporal_collection is None
 
 
-def test_load_document_with_metadata():
-    path = f"{TEST_RESOURCES_PATH}/root-2/dir/doc-3.xml"
-
-    docs = DocumentsLoader.load(path)
-    assert type(docs) is GeneratorType
-
-    docs = list(docs)
-    assert len(docs) == 1
-
-    doc = docs[0]
-    assert doc is not None
-    assert type(doc) is RawDocument
-    assert doc.uri == "/doc-3.xml"
-    assert doc.doc_type == DocumentType.XML
-    assert doc.content == b"<root><parent><child>value-3</child></parent></root>"
-    assert doc.metadata == (
-        b'<?xml version="1.0" encoding="utf-8"?>\n'
-        b'<rapi:metadata xmlns:rapi="http://marklogic.com/rest-api">\n'
-        b"    <rapi:collections>\n"
-        b"        <rapi:collection>xml-doc-3</rapi:collection>\n"
-        b"    </rapi:collections>\n"
-        b"</rapi:metadata>"
-    )
-    assert doc.temporal_collection is None
-
-
-def test_load_document_with_custom_uri_prefix():
+def test_load_document_as_documents_with_custom_uri_prefix():
     path = f"{TEST_RESOURCES_PATH}/root-1/dir/doc-1.xml"
 
     docs = DocumentsLoader.load(path, uri_prefix="/custom-root/dir")
@@ -357,7 +391,7 @@ def test_load_document_with_custom_uri_prefix():
     assert doc.temporal_collection is None
 
 
-def test_load_document_and_parse():
+def test_load_document_as_documents_and_parse():
     path = f"{TEST_RESOURCES_PATH}/root-1/dir/doc-1.xml"
 
     docs = DocumentsLoader.load(path, raw=False)

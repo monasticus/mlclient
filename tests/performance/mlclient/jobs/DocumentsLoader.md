@@ -27,7 +27,7 @@ DocumentsLoader class has been tested using two implementations:
 
               file_path = str(Path(dir_path) / file_name)
               uri = file_path.replace(path, uri_prefix)
-              yield cls._load_document(file_path, uri, raw)
+              yield cls.load_document(file_path, uri, raw)
   ```
 
 - parallel processing
@@ -61,7 +61,7 @@ DocumentsLoader class has been tested using two implementations:
   
                   file_path = str(Path(dir_path) / file_name)
                   uri = file_path.replace(path, uri_prefix)
-                  future = executor.submit(cls._load_document, file_path, uri, raw)
+                  future = executor.submit(cls.load_document, file_path, uri, raw)
                   futures.append(future)
   
       for future in as_completed(futures):

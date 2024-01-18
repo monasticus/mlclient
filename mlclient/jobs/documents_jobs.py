@@ -305,7 +305,7 @@ class DocumentsLoader:
             file_path = path
             path = Path(path)
             uri = file_path.replace(str(path.parent), uri_prefix)
-            yield cls._load_document(file_path, uri, raw)
+            yield cls.load_document(file_path, uri, raw)
         else:
             for dir_path, _, file_names in os.walk(path):
                 for file_name in file_names:
@@ -314,14 +314,14 @@ class DocumentsLoader:
 
                     file_path = str(Path(dir_path) / file_name)
                     uri = file_path.replace(path, uri_prefix)
-                    yield cls._load_document(file_path, uri, raw)
+                    yield cls.load_document(file_path, uri, raw)
 
     @classmethod
-    def _load_document(
+    def load_document(
         cls,
         file_path: str,
-        uri: str,
-        raw: bool,
+        uri: str | None = None,
+        raw: bool = True,
     ) -> Document:
         doc_type = Mimetypes.get_doc_type(file_path)
         content = cls._load_content(file_path, raw, doc_type)

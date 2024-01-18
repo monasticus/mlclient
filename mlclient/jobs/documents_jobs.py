@@ -52,11 +52,12 @@ class WriteDocumentsJob:
         self._batch_size: int = batch_size
         self._config: dict = {}
         self._database: str | None = None
-        self._input: list = []
+        self._pre_input_queue: queue.Queue = queue.Queue()
         self._input_queue: queue.Queue = queue.Queue()
         self._executor: ThreadPoolExecutor | None = None
         self._successful = []
         self._failed = []
+        Thread(target=self._start_conveyor_belt).start()
 
     def with_client_config(
         self,
@@ -89,29 +90,37 @@ class WriteDocumentsJob:
         path: str,
         uri_prefix: str = "",
     ):
+        """Load files under a directory and add parsed Documents to the job's input.
+
+        Parameters
+        ----------
+        path : str
+            An input directory with files to be written into a MarkLogic database
+        uri_prefix : str, default ""
+            An URI prefix to be put before files' relative path
+        """
         documents = DocumentsLoader.load(path, uri_prefix)
-        self.with_documents_input(documents)
+        self._pre_input_queue.put(documents)
 
     def with_documents_input(
         self,
         documents: Iterable[Document],
     ):
-        """Set the job's input in form of Documents' Iterable.
+        """Add Documents to the job's input.
 
         Parameters
         ----------
         documents : Iterable[Document]
             Documents to be written into a MarkLogic database
         """
-        Thread(
-            target=self._populate_queue_with_documents_input,
-            args=(self._input_queue, self._thread_count, documents),
-        ).start()
+        self._pre_input_queue.put(documents)
 
     def start(
         self,
     ):
         """Start a job's execution."""
+        self._stop_conveyor_belt()
+
         logger.info("Starting job [%s]", self._id)
         self._executor = ThreadPoolExecutor(
             max_workers=self._thread_count,
@@ -160,6 +169,39 @@ class WriteDocumentsJob:
     ) -> list[str]:
         """A list of processed documents that failed to be written."""
         return list(self._failed)
+
+    def _start_conveyor_belt(
+        self,
+    ):
+        """Populate an input queue with Documents in an infinitive loop.
+
+        It is meant to be executed in a separated thread. Whenever any input
+        is consumed it lends in a PRE-INPUT QUEUE first to allow for several inputs.
+        Then it is moved to an INPUT QUEUE. Thanks to that we can be sure all data
+        is placed before "poison pills". Once the job is started, there's no way
+        to add anything else to process. It puts "poison pills" at the end
+        of the INPUT QUEUE to close each initialized thread.
+        """
+        logger.info("Starting a conveyor belt for input documents")
+        while True:
+            documents = self._pre_input_queue.get()
+            self._pre_input_queue.task_done()
+            if documents is None:
+                break
+
+            for document in documents:
+                logger.debug("Putting [%s] into the queue", document.uri)
+                self._input_queue.put(document)
+
+        for _ in range(self._thread_count):
+            self._input_queue.put(None)
+
+    def _stop_conveyor_belt(
+        self,
+    ):
+        """Stop the infinitive loop populating an input queue with Documents."""
+        logger.info("Stopping a conveyor belt for input documents")
+        self._pre_input_queue.put(None)
 
     def _start(
         self,
@@ -231,31 +273,6 @@ class WriteDocumentsJob:
     def _get_max_num_of_threads():
         """Get a maximum number of ThreadPoolExecutor workers."""
         return min(32, (os.cpu_count() or 1) + 4)  # Num of CPUs + 4
-
-    @staticmethod
-    def _populate_queue_with_documents_input(
-        q: queue.Queue,
-        thread_count: int,
-        documents: Iterable[Document],
-    ):
-        """Populate a queue with Documents.
-
-        It puts "poison pills" at the end of the queue to close each initialized thread.
-
-        Parameters
-        ----------
-        q : queue.Queue
-            A queue to populate
-        thread_count : int
-            A number of threads (to determine poison pills' number)
-        documents : Iterable[Document]
-            Documents to be written into a MarkLogic database
-        """
-        for document in documents:
-            logger.debug("Putting [%s] into the queue", document.uri)
-            q.put(document)
-        for _ in range(thread_count):
-            q.put(None)
 
 
 class DocumentsLoader:

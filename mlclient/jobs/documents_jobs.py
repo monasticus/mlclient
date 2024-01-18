@@ -3,6 +3,8 @@
 It exports high-level class to perform bulk operations in a MarkLogic server:
     * WriteDocumentsJob
         A multi-thread job writing documents into a MarkLogic database.
+    * DocumentsLoader
+        A class parsing files into Documents.
 """
 from __future__ import annotations
 
@@ -290,6 +292,8 @@ class WriteDocumentsJob:
 
 
 class DocumentsLoader:
+    """A class parsing files into Documents."""
+
     _JSON_METADATA_SUFFIX = ".metadata.json"
     _XML_METADATA_SUFFIX = ".metadata.xml"
     _METADATA_SUFFIXES = (_JSON_METADATA_SUFFIX, _XML_METADATA_SUFFIX)
@@ -301,6 +305,30 @@ class DocumentsLoader:
         uri_prefix: str = "",
         raw: bool = True,
     ) -> Generator[Document]:
+        """Load documents from files under a path.
+
+        When the path points to a file - yields a single Document with URI set to
+        the file name. Otherwise, yields documents with URIs without the input path
+        at the beginning. Both option can be customized with the uri_prefix parameter.
+        When the raw flag is true, all documents are parsed to RawDocument with bytes
+        content and metadata.
+        Metadata is identified for a file at the same level with .metadata.json or
+        .metadata.xml suffix.
+
+        Parameters
+        ----------
+        path : str
+            A path to a directory or a single file.
+        uri_prefix : str, default ""
+            URIs prefix to apply
+        raw : bool, default True
+            A flag indicating whether files should be parsed to a RawDocument
+
+        Returns
+        -------
+        Generator[Document]
+            A generator of Document instances
+        """
         if Path(path).is_file():
             file_path = path
             path = Path(path)
@@ -319,13 +347,36 @@ class DocumentsLoader:
     @classmethod
     def load_document(
         cls,
-        file_path: str,
+        path: str,
         uri: str | None = None,
         raw: bool = True,
     ) -> Document:
-        doc_type = Mimetypes.get_doc_type(file_path)
-        content = cls._load_content(file_path, raw, doc_type)
-        metadata = cls._load_metadata(file_path, raw)
+        """Load a document from a file.
+
+        By default, returns a Document without URI. It can be customized with
+        the uri parameter.
+        When the raw flag is true, the document is parsed to RawDocument with bytes
+        content and metadata.
+        Metadata is identified for a file at the same level with .metadata.json or
+        .metadata.xml suffix.
+
+        Parameters
+        ----------
+        path : str
+            A file path
+        uri : str | None, default None
+            URI to set for a document.
+        raw : bool, default True
+            A flag indicating whether file should be parsed to a RawDocument
+
+        Returns
+        -------
+        Document
+            A Document instance
+        """
+        doc_type = Mimetypes.get_doc_type(path)
+        content = cls._load_content(path, raw, doc_type)
+        metadata = cls._load_metadata(path, raw)
 
         if raw:
             factory_function = DocumentFactory.build_raw_document
@@ -342,11 +393,31 @@ class DocumentsLoader:
     @classmethod
     def _load_content(
         cls,
-        file_path: str,
+        path: str,
         raw: bool,
         doc_type: DocumentType,
     ) -> bytes | str | ElemTree.Element | dict:
-        with Path(file_path).open("rb") as file:
+        """Load document's content.
+
+        If the raw flag is switched off - it parses content based on a file type.
+        Binary files are not being parsed, text files are parsed to str, xml files
+        to ElementTree.Element and JSON files to a dict.
+
+        Parameters
+        ----------
+        path : str
+            A document path
+        raw : bool, default True
+            A flag indicating whether raw bytes should be returned
+        doc_type : DocumentType
+            A document type
+
+        Returns
+        -------
+        bytes | str | ElemTree.Element | dict
+            Document's content
+        """
+        with Path(path).open("rb") as file:
             content_bytes = file.read()
 
         if raw or doc_type == DocumentType.BINARY:
@@ -360,12 +431,29 @@ class DocumentsLoader:
     @classmethod
     def _load_metadata(
         cls,
-        file_path: str,
+        path: str,
         raw: bool,
     ) -> bytes | Metadata | None:
+        """Load document's metadata
+
+        It looks for a file with the same name and .metadata.json or .metadata.xml
+        suffix and returns raw bytes or Metadata instance if found.
+
+        Parameters
+        ----------
+        path : str
+            A document path
+        raw : bool, default True
+            A flag indicating whether raw bytes should be returned
+
+        Returns
+        -------
+        bytes | Metadata | None
+            Document's metadata or None
+        """
         metadata_paths = [
-            Path(file_path).with_suffix(cls._JSON_METADATA_SUFFIX),
-            Path(file_path).with_suffix(cls._XML_METADATA_SUFFIX),
+            Path(path).with_suffix(cls._JSON_METADATA_SUFFIX),
+            Path(path).with_suffix(cls._XML_METADATA_SUFFIX),
         ]
         metadata_file_path = next(
             (str(path) for path in metadata_paths if path.is_file()),

@@ -141,6 +141,20 @@ class WriteDocumentsJob:
         self._executor = None
 
     @property
+    def thread_count(
+        self,
+    ) -> int:
+        """A number of threads."""
+        return self._thread_count
+
+    @property
+    def batch_size(
+        self,
+    ) -> int:
+        """A number of documents in a single batch."""
+        return self._batch_size
+
+    @property
     def completed_count(
         self,
     ) -> int:

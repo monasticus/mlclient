@@ -19,6 +19,8 @@ def test_basic_job_with_documents_input():
     builder.build_post()
 
     job = WriteDocumentsJob(thread_count=1, batch_size=5)
+    assert job.thread_count == 1
+    assert job.batch_size == 5
     job.with_client_config(auth_method="digest")
     job.with_documents_input(docs)
     job.start()
@@ -42,6 +44,8 @@ def test_basic_job_with_filesystem_input():
 
     input_path = resources_utils.get_test_resources_path(__file__)
     job = WriteDocumentsJob(thread_count=1, batch_size=5)
+    assert job.thread_count == 1
+    assert job.batch_size == 5
     job.with_client_config(auth_method="digest")
     job.with_filesystem_input(input_path, "/root/dir")
     job.start()
@@ -66,6 +70,8 @@ def test_basic_job_with_several_inputs():
     builder.build_post()
 
     job = WriteDocumentsJob(thread_count=1, batch_size=50)
+    assert job.thread_count == 1
+    assert job.batch_size == 50
     job.with_client_config(auth_method="digest")
     job.with_documents_input(docs[:2500])
     job.with_documents_input(docs[2500:])
@@ -92,6 +98,8 @@ def test_job_with_custom_database():
     builder.build_post()
 
     job = WriteDocumentsJob(thread_count=1, batch_size=5)
+    assert job.thread_count == 1
+    assert job.batch_size == 5
     job.with_client_config(auth_method="digest")
     job.with_documents_input(docs)
     job.with_database("Documents")
@@ -117,6 +125,8 @@ def test_multi_thread_job():
     builder.build_post()
 
     job = WriteDocumentsJob(batch_size=5)
+    assert job.thread_count > 1
+    assert job.batch_size == 5
     job.with_client_config(auth_method="digest")
     job.with_documents_input(docs)
     job.start()
@@ -148,6 +158,8 @@ def test_failing_job():
     builder.build_post()
 
     job = WriteDocumentsJob(thread_count=1, batch_size=5)
+    assert job.thread_count == 1
+    assert job.batch_size == 5
     job.with_client_config()
     job.with_documents_input(docs)
     job.start()

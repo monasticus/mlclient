@@ -3,10 +3,11 @@ import responses
 from mlclient.jobs import WriteDocumentsJob
 from mlclient.model import DocumentType, RawDocument
 from tests.utils import MLResponseBuilder
+from tests.utils import resources as resources_utils
 
 
 @responses.activate
-def test_basic_job():
+def test_basic_job_with_documents_input():
     docs = _get_test_docs(5)
 
     builder = MLResponseBuilder()
@@ -20,6 +21,29 @@ def test_basic_job():
     job = WriteDocumentsJob(thread_count=1, batch_size=5)
     job.with_client_config(auth_method="digest")
     job.with_documents_input(docs)
+    job.start()
+    job.await_completion()
+    calls = responses.calls
+    assert len(calls) == 1
+    assert job.completed_count == 5
+    assert len(job.successful) == 5
+    assert len(job.failed) == 0
+
+
+@responses.activate
+def test_basic_job_with_filesystem_input():
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/documents")
+    builder.with_response_content_type("application/json; charset=utf-8")
+    builder.with_response_header("vnd.marklogic.document-format", "json")
+    builder.with_response_status(200)
+    builder.with_response_body(_get_test_response_body(5))
+    builder.build_post()
+
+    input_path = resources_utils.get_test_resources_path(__file__)
+    job = WriteDocumentsJob(thread_count=1, batch_size=5)
+    job.with_client_config(auth_method="digest")
+    job.with_filesystem_input(input_path, "/root/dir")
     job.start()
     job.await_completion()
     calls = responses.calls

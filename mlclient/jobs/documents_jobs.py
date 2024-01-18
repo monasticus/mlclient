@@ -84,6 +84,14 @@ class WriteDocumentsJob:
         """
         self._database = database
 
+    def with_filesystem_input(
+        self,
+        path: str,
+        uri_prefix: str = "",
+    ):
+        documents = DocumentsLoader.load(path, uri_prefix)
+        self.with_documents_input(documents)
+
     def with_documents_input(
         self,
         documents: Iterable[Document],

@@ -92,12 +92,12 @@ class WriteDocumentsJob:
         path: str,
         uri_prefix: str = "",
     ):
-        """Load files under a directory and add parsed Documents to the job's input.
+        """Load files and add parsed Documents to the job's input.
 
         Parameters
         ----------
         path : str
-            An input directory with files to be written into a MarkLogic database
+            An input path with file(s) to be written into a MarkLogic database
         uri_prefix : str, default ""
             An URI prefix to be put before files' relative path
         """

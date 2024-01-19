@@ -3,9 +3,10 @@ from __future__ import annotations
 import shutil
 
 import pytest
-from mimeo import MimeoConfig, MimeoConfigFactory, Mimeograph
+from mimeo import MimeoConfig, MimeoConfigFactory
 
 from mlclient.jobs import DocumentsLoader
+from tests.utils import documents_client as docs_client_utils
 from tests.utils import resources as resources_utils
 
 TEST_RESOURCES_PATH = resources_utils.get_test_resources_path(__file__)
@@ -14,17 +15,17 @@ TEST_RESOURCES_PATH = resources_utils.get_test_resources_path(__file__)
 @pytest.fixture(scope="module", autouse=True)
 def _setup_and_teardown():
     # Setup
-    mimeo_configs = [
-        _get_mimeo_config("output/output-5", 5),
-        _get_mimeo_config("output/output-500", 500),
-        _get_mimeo_config("output/output-15000", 15000),
-        _get_mimeo_config("output/output-200000", 200000),
+    mimeo_config_path = resources_utils.get_test_resource_path(
+        __file__,
+        "mimeo-config.json",
+    )
+    docs_configs = [
+        (mimeo_config_path, f"{TEST_RESOURCES_PATH}/output/output-5", 5),
+        (mimeo_config_path, f"{TEST_RESOURCES_PATH}/output/output-500", 500),
+        (mimeo_config_path, f"{TEST_RESOURCES_PATH}/output/output-15000", 15000),
+        (mimeo_config_path, f"{TEST_RESOURCES_PATH}/output/output-200000", 200000),
     ]
-
-    with Mimeograph() as mimeo:
-        for mimeo_config in mimeo_configs:
-            config_id = f"config-{mimeo_config.templates[0].count}"
-            mimeo.submit((config_id, mimeo_config))
+    docs_client_utils.generate_docs_with_mimeo(docs_configs)
 
     yield
 

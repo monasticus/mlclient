@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import pytest
+from mimeo import MimeoConfig, MimeoConfigFactory, Mimeograph
 
 from mlclient.clients import DocumentsClient
 from mlclient.exceptions import MarkLogicError
@@ -116,3 +117,26 @@ def generate_docs(
             uri=f"/some/dir/doc{i+1}.xml",
             doc_type=document_type,
         )
+
+
+def generate_docs_with_mimeo(
+    docs_configs: list[tuple[str, str, int]],
+):
+    mimeo_configs = (_get_mimeo_config(*docs_config) for docs_config in docs_configs)
+
+    with Mimeograph() as mimeo:
+        for mimeo_config in mimeo_configs:
+            config_id = f"config-{mimeo_config.templates[0].count}"
+            mimeo.submit((config_id, mimeo_config))
+
+
+def _get_mimeo_config(
+    mimeo_config_path: str,
+    output_path: str,
+    count: int = -1,
+) -> MimeoConfig:
+    mimeo_config = MimeoConfigFactory.parse(mimeo_config_path)
+    mimeo_config.output.directory_path = output_path
+    if count > 0:
+        mimeo_config.templates[0].count = count
+    return mimeo_config

@@ -434,7 +434,7 @@ class DocumentsLoader:
         path: str,
         raw: bool,
     ) -> bytes | Metadata | None:
-        """Load document's metadata
+        """Load document's metadata.
 
         It looks for a file with the same name and .metadata.json or .metadata.xml
         suffix and returns raw bytes or Metadata instance if found.

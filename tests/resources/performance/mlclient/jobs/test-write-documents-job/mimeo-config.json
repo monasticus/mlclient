@@ -1,16 +1,14 @@
 {
   "output": {
     "xml_declaration": true,
-    "indent": 4,
     "file_name": "doc"
   },
   "_templates_": [
     {
       "count": 5,
       "model": {
-        "SomeEntity": {
-          "ChildNode1": "{auto_increment}",
-          "ChildNode2": "{key}"
+        "root": {
+          "child": "data"
         }
       }
     }

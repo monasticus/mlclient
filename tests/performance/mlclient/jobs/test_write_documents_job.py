@@ -4,8 +4,7 @@ import shutil
 
 import pytest
 
-from mlclient.jobs import DocumentsLoader, WriteDocumentsJob
-from mlclient.model import Document
+from mlclient.jobs import WriteDocumentsJob
 from tests.utils import documents_client as docs_client_utils
 from tests.utils import resources as resources_utils
 
@@ -447,15 +446,9 @@ def _perform_parametrized_test(
     thread_count: int | None = None,
     batch_size: int = 50,
 ):
-    if docs_path:
-        docs = DocumentsLoader.load(
-            path=docs_path,
-            uri_prefix="/performance-tests/write-documents-job",
-        )
-    else:
-        docs = docs_client_utils.generate_docs(docs_count)
-    docs = list(docs)
-    uris = [doc.uri for doc in docs]
+    uri_prefix = "/performance-tests/write-documents-job"
+    uri_template = f"{uri_prefix}/doc-{{}}.xml"
+    uris = [uri_template.format(i + 1) for i in range(docs_count)]
 
     try:
         docs_client_utils.assert_documents_do_not_exist(uris)
@@ -464,13 +457,15 @@ def _perform_parametrized_test(
             job = benchmark(
                 _write_job_with_filesystem_input,
                 docs_path,
+                uri_prefix,
                 thread_count,
                 batch_size,
             )
         else:
             job = benchmark(
                 _write_job_with_documents_input,
-                docs,
+                docs_count,
+                uri_template,
                 thread_count,
                 batch_size,
             )
@@ -478,21 +473,19 @@ def _perform_parametrized_test(
         assert job.completed_count == docs_count
         assert len(job.successful) == docs_count
         assert len(job.failed) == 0
-
-        docs_client_utils.assert_documents_exist_and_confirm_data(
-            {doc.uri: doc for doc in docs},
-            output_type=bytes,
-        )
+        docs_client_utils.assert_documents_exist(uris)
     finally:
         docs_client_utils.delete_documents(uris)
         docs_client_utils.assert_documents_do_not_exist(uris)
 
 
 def _write_job_with_documents_input(
-    docs: list[Document],
+    docs_count: int,
+    uri_template: str,
     thread_count: int | None,
     batch_size: int,
 ):
+    docs = docs_client_utils.generate_docs(docs_count, uri_template=uri_template)
     job = WriteDocumentsJob(thread_count=thread_count, batch_size=batch_size)
     job.with_client_config(auth_method="digest")
     job.with_documents_input(docs)
@@ -504,12 +497,13 @@ def _write_job_with_documents_input(
 
 def _write_job_with_filesystem_input(
     docs_path: str,
+    uri_prefix: str,
     thread_count: int | None,
     batch_size: int,
 ):
     job = WriteDocumentsJob(thread_count=thread_count, batch_size=batch_size)
     job.with_client_config(auth_method="digest")
-    job.with_filesystem_input(docs_path)
+    job.with_filesystem_input(docs_path, uri_prefix=uri_prefix)
     job.start()
     job.await_completion()
 

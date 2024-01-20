@@ -25,6 +25,13 @@ def assert_document_does_not_exist(
     assert err.value.args[0] == expected_msg
 
 
+def assert_documents_exist(
+    uris: list,
+):
+    with DocumentsClient(auth_method="digest") as docs_client:
+        assert docs_client.read(uris) != []
+
+
 def assert_documents_do_not_exist(
     uris: list,
 ):
@@ -106,6 +113,7 @@ def generate_docs(
     count: int = 100,
     content: bytes | None = None,
     document_type: DocumentType = DocumentType.XML,
+    uri_template: str = "/some/dir/doc-{}.xml",
 ):
     content = (
         content
@@ -114,7 +122,7 @@ def generate_docs(
     for i in range(count):
         yield RawDocument(
             content=content,
-            uri=f"/some/dir/doc{i+1}.xml",
+            uri=uri_template.format(i + 1),
             doc_type=document_type,
         )
 

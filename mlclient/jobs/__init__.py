@@ -9,11 +9,13 @@ It contains the following modules
 This package exports the following classes:
     * WriteDocumentsJob
         A multi-thread job writing documents into a MarkLogic database.
+    * DocumentsLoader
+        A class parsing files into Documents.
 
 Examples
 --------
 >>> from mlclient.jobs import WriteDocumentsJob
 """
-from .documents_jobs import WriteDocumentsJob
+from .documents_jobs import DocumentsLoader, WriteDocumentsJob
 
-__all__ = ["WriteDocumentsJob"]
+__all__ = ["WriteDocumentsJob", "DocumentsLoader"]

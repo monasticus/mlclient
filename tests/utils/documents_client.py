@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import pytest
+from mimeo import MimeoConfig, MimeoConfigFactory, Mimeograph
 
 from mlclient.clients import DocumentsClient
 from mlclient.exceptions import MarkLogicError
@@ -22,6 +23,13 @@ def assert_document_does_not_exist(
     ) as err:
         docs_client.read(uri)
     assert err.value.args[0] == expected_msg
+
+
+def assert_documents_exist(
+    uris: list,
+):
+    with DocumentsClient(auth_method="digest") as docs_client:
+        assert docs_client.read(uris) != []
 
 
 def assert_documents_do_not_exist(
@@ -105,6 +113,7 @@ def generate_docs(
     count: int = 100,
     content: bytes | None = None,
     document_type: DocumentType = DocumentType.XML,
+    uri_template: str = "/some/dir/doc-{}.xml",
 ):
     content = (
         content
@@ -113,6 +122,29 @@ def generate_docs(
     for i in range(count):
         yield RawDocument(
             content=content,
-            uri=f"/some/dir/doc{i+1}.xml",
+            uri=uri_template.format(i + 1),
             doc_type=document_type,
         )
+
+
+def generate_docs_with_mimeo(
+    docs_configs: list[tuple[str, str, int]],
+):
+    mimeo_configs = (_get_mimeo_config(*docs_config) for docs_config in docs_configs)
+
+    with Mimeograph() as mimeo:
+        for mimeo_config in mimeo_configs:
+            config_id = f"config-{mimeo_config.templates[0].count}"
+            mimeo.submit((config_id, mimeo_config))
+
+
+def _get_mimeo_config(
+    mimeo_config_path: str,
+    output_path: str,
+    count: int = -1,
+) -> MimeoConfig:
+    mimeo_config = MimeoConfigFactory.parse(mimeo_config_path)
+    mimeo_config.output.directory_path = output_path
+    if count > 0:
+        mimeo_config.templates[0].count = count
+    return mimeo_config

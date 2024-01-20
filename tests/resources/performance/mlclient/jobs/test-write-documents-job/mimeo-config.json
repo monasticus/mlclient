@@ -1,0 +1,16 @@
+{
+  "output": {
+    "xml_declaration": true,
+    "file_name": "doc"
+  },
+  "_templates_": [
+    {
+      "count": 5,
+      "model": {
+        "root": {
+          "child": "data"
+        }
+      }
+    }
+  ]
+}

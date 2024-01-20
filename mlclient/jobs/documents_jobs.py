@@ -3,19 +3,31 @@
 It exports high-level class to perform bulk operations in a MarkLogic server:
     * WriteDocumentsJob
         A multi-thread job writing documents into a MarkLogic database.
+    * DocumentsLoader
+        A class parsing files into Documents.
 """
 from __future__ import annotations
 
+import json
 import logging
 import os
 import queue
 import uuid
+import xml.etree.ElementTree as ElemTree
 from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
 from threading import Thread
-from typing import Iterable
+from typing import Generator, Iterable
 
 from mlclient.clients import DocumentsClient
-from mlclient.model import Document
+from mlclient.mimetypes import Mimetypes
+from mlclient.model import (
+    Document,
+    DocumentFactory,
+    DocumentType,
+    Metadata,
+    MetadataFactory,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -42,11 +54,12 @@ class WriteDocumentsJob:
         self._batch_size: int = batch_size
         self._config: dict = {}
         self._database: str | None = None
-        self._input: list = []
+        self._pre_input_queue: queue.Queue = queue.Queue()
         self._input_queue: queue.Queue = queue.Queue()
         self._executor: ThreadPoolExecutor | None = None
         self._successful = []
         self._failed = []
+        Thread(target=self._start_conveyor_belt).start()
 
     def with_client_config(
         self,
@@ -74,26 +87,42 @@ class WriteDocumentsJob:
         """
         self._database = database
 
+    def with_filesystem_input(
+        self,
+        path: str,
+        uri_prefix: str = "",
+    ):
+        """Load files and add parsed Documents to the job's input.
+
+        Parameters
+        ----------
+        path : str
+            An input path with file(s) to be written into a MarkLogic database
+        uri_prefix : str, default ""
+            An URI prefix to be put before files' relative path
+        """
+        documents = DocumentsLoader.load(path, uri_prefix)
+        self._pre_input_queue.put(documents)
+
     def with_documents_input(
         self,
         documents: Iterable[Document],
     ):
-        """Set the job's input in form of Documents' Iterable.
+        """Add Documents to the job's input.
 
         Parameters
         ----------
         documents : Iterable[Document]
             Documents to be written into a MarkLogic database
         """
-        Thread(
-            target=self._populate_queue_with_documents_input,
-            args=(self._input_queue, self._thread_count, documents),
-        ).start()
+        self._pre_input_queue.put(documents)
 
     def start(
         self,
     ):
         """Start a job's execution."""
+        self._stop_conveyor_belt()
+
         logger.info("Starting job [%s]", self._id)
         self._executor = ThreadPoolExecutor(
             max_workers=self._thread_count,
@@ -112,6 +141,20 @@ class WriteDocumentsJob:
         self._input_queue.join()
         self._executor.shutdown()
         self._executor = None
+
+    @property
+    def thread_count(
+        self,
+    ) -> int:
+        """A number of threads."""
+        return self._thread_count
+
+    @property
+    def batch_size(
+        self,
+    ) -> int:
+        """A number of documents in a single batch."""
+        return self._batch_size
 
     @property
     def completed_count(
@@ -142,6 +185,39 @@ class WriteDocumentsJob:
     ) -> list[str]:
         """A list of processed documents that failed to be written."""
         return list(self._failed)
+
+    def _start_conveyor_belt(
+        self,
+    ):
+        """Populate an input queue with Documents in an infinitive loop.
+
+        It is meant to be executed in a separated thread. Whenever any input
+        is consumed it lends in a PRE-INPUT QUEUE first to allow for several inputs.
+        Then it is moved to an INPUT QUEUE. Thanks to that we can be sure all data
+        is placed before "poison pills". Once the job is started, there's no way
+        to add anything else to process. It puts "poison pills" at the end
+        of the INPUT QUEUE to close each initialized thread.
+        """
+        logger.info("Starting a conveyor belt for input documents")
+        while True:
+            documents = self._pre_input_queue.get()
+            self._pre_input_queue.task_done()
+            if documents is None:
+                break
+
+            for document in documents:
+                logger.debug("Putting [%s] into the queue", document.uri)
+                self._input_queue.put(document)
+
+        for _ in range(self._thread_count):
+            self._input_queue.put(None)
+
+    def _stop_conveyor_belt(
+        self,
+    ):
+        """Stop the infinitive loop populating an input queue with Documents."""
+        logger.info("Stopping a conveyor belt for input documents")
+        self._pre_input_queue.put(None)
 
     def _start(
         self,
@@ -214,27 +290,179 @@ class WriteDocumentsJob:
         """Get a maximum number of ThreadPoolExecutor workers."""
         return min(32, (os.cpu_count() or 1) + 4)  # Num of CPUs + 4
 
-    @staticmethod
-    def _populate_queue_with_documents_input(
-        q: queue.Queue,
-        thread_count: int,
-        documents: Iterable[Document],
-    ):
-        """Populate a queue with Documents.
 
-        It puts "poison pills" at the end of the queue to close each initialized thread.
+class DocumentsLoader:
+    """A class parsing files into Documents."""
+
+    _JSON_METADATA_SUFFIX = ".metadata.json"
+    _XML_METADATA_SUFFIX = ".metadata.xml"
+    _METADATA_SUFFIXES = (_JSON_METADATA_SUFFIX, _XML_METADATA_SUFFIX)
+
+    @classmethod
+    def load(
+        cls,
+        path: str,
+        uri_prefix: str = "",
+        raw: bool = True,
+    ) -> Generator[Document]:
+        """Load documents from files under a path.
+
+        When the path points to a file - yields a single Document with URI set to
+        the file name. Otherwise, yields documents with URIs without the input path
+        at the beginning. Both option can be customized with the uri_prefix parameter.
+        When the raw flag is true, all documents are parsed to RawDocument with bytes
+        content and metadata.
+        Metadata is identified for a file at the same level with .metadata.json or
+        .metadata.xml suffix.
 
         Parameters
         ----------
-        q : queue.Queue
-            A queue to populate
-        thread_count : int
-            A number of threads (to determine poison pills' number)
-        documents : Iterable[Document]
-            Documents to be written into a MarkLogic database
+        path : str
+            A path to a directory or a single file.
+        uri_prefix : str, default ""
+            URIs prefix to apply
+        raw : bool, default True
+            A flag indicating whether files should be parsed to a RawDocument
+
+        Returns
+        -------
+        Generator[Document]
+            A generator of Document instances
         """
-        for document in documents:
-            logger.debug("Putting [%s] into the queue", document.uri)
-            q.put(document)
-        for _ in range(thread_count):
-            q.put(None)
+        if Path(path).is_file():
+            file_path = path
+            path = Path(path)
+            uri = file_path.replace(str(path.parent), uri_prefix)
+            yield cls.load_document(file_path, uri, raw)
+        else:
+            for dir_path, _, file_names in os.walk(path):
+                for file_name in file_names:
+                    if file_name.endswith(cls._METADATA_SUFFIXES):
+                        continue
+
+                    file_path = str(Path(dir_path) / file_name)
+                    uri = file_path.replace(path, uri_prefix)
+                    yield cls.load_document(file_path, uri, raw)
+
+    @classmethod
+    def load_document(
+        cls,
+        path: str,
+        uri: str | None = None,
+        raw: bool = True,
+    ) -> Document:
+        """Load a document from a file.
+
+        By default, returns a Document without URI. It can be customized with
+        the uri parameter.
+        When the raw flag is true, the document is parsed to RawDocument with bytes
+        content and metadata.
+        Metadata is identified for a file at the same level with .metadata.json or
+        .metadata.xml suffix.
+
+        Parameters
+        ----------
+        path : str
+            A file path
+        uri : str | None, default None
+            URI to set for a document.
+        raw : bool, default True
+            A flag indicating whether file should be parsed to a RawDocument
+
+        Returns
+        -------
+        Document
+            A Document instance
+        """
+        doc_type = Mimetypes.get_doc_type(path)
+        content = cls._load_content(path, raw, doc_type)
+        metadata = cls._load_metadata(path, raw)
+
+        if raw:
+            factory_function = DocumentFactory.build_raw_document
+        else:
+            factory_function = DocumentFactory.build_document
+
+        return factory_function(
+            content=content,
+            doc_type=doc_type,
+            uri=uri,
+            metadata=metadata,
+        )
+
+    @classmethod
+    def _load_content(
+        cls,
+        path: str,
+        raw: bool,
+        doc_type: DocumentType,
+    ) -> bytes | str | ElemTree.Element | dict:
+        """Load document's content.
+
+        If the raw flag is switched off - it parses content based on a file type.
+        Binary files are not being parsed, text files are parsed to str, xml files
+        to ElementTree.Element and JSON files to a dict.
+
+        Parameters
+        ----------
+        path : str
+            A document path
+        raw : bool, default True
+            A flag indicating whether raw bytes should be returned
+        doc_type : DocumentType
+            A document type
+
+        Returns
+        -------
+        bytes | str | ElemTree.Element | dict
+            Document's content
+        """
+        with Path(path).open("rb") as file:
+            content_bytes = file.read()
+
+        if raw or doc_type == DocumentType.BINARY:
+            return content_bytes
+        if doc_type == DocumentType.TEXT:
+            return content_bytes.decode("UTF-8")
+        if doc_type == DocumentType.XML:
+            return ElemTree.fromstring(content_bytes)
+        return json.loads(content_bytes)
+
+    @classmethod
+    def _load_metadata(
+        cls,
+        path: str,
+        raw: bool,
+    ) -> bytes | Metadata | None:
+        """Load document's metadata.
+
+        It looks for a file with the same name and .metadata.json or .metadata.xml
+        suffix and returns raw bytes or Metadata instance if found.
+
+        Parameters
+        ----------
+        path : str
+            A document path
+        raw : bool, default True
+            A flag indicating whether raw bytes should be returned
+
+        Returns
+        -------
+        bytes | Metadata | None
+            Document's metadata or None
+        """
+        metadata_paths = [
+            Path(path).with_suffix(cls._JSON_METADATA_SUFFIX),
+            Path(path).with_suffix(cls._XML_METADATA_SUFFIX),
+        ]
+        metadata_file_path = next(
+            (str(path) for path in metadata_paths if path.is_file()),
+            None,
+        )
+        if not metadata_file_path:
+            return None
+
+        if raw:
+            with Path(metadata_file_path).open("rb") as metadata_file:
+                return metadata_file.read()
+        return MetadataFactory.from_file(metadata_file_path)

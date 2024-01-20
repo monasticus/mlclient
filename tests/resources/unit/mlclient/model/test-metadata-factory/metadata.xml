@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rapi:metadata xmlns:rapi="http://marklogic.com/rest-api">
+    <rapi:collections>
+        <rapi:collection>collection-1</rapi:collection>
+    </rapi:collections>
+    <rapi:permissions>
+        <rapi:permission>
+            <rapi:role-name>role-1</rapi:role-name>
+            <rapi:capability>read</rapi:capability>
+        </rapi:permission>
+        <rapi:permission>
+            <rapi:role-name>role-2</rapi:role-name>
+            <rapi:capability>update</rapi:capability>
+        </rapi:permission>
+        <rapi:permission>
+            <rapi:role-name>role-2</rapi:role-name>
+            <rapi:capability>read</rapi:capability>
+        </rapi:permission>
+    </rapi:permissions>
+    <prop:properties xmlns:prop="http://marklogic.com/xdmp/property">
+        <prop-name-1>prop-value-1</prop-name-1>
+        <prop-name-2>prop-value-2</prop-name-2>
+    </prop:properties>
+    <rapi:quality>1</rapi:quality>
+    <rapi:metadata-values>
+        <rapi:metadata-value key="meta-name-1">meta-1</rapi:metadata-value>
+        <rapi:metadata-value key="meta-name-2">meta-2</rapi:metadata-value>
+    </rapi:metadata-values>
+</rapi:metadata>

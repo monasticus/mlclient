@@ -21,6 +21,8 @@ It exports 5 classes:
         A Document implementation representing a single MarkLogic document's metadata.
     * DocumentFactory
         A factory class instantiating a Document implementation classes.
+    * MetadataFactory
+        A factory class instantiating a Metadata class from a file.
     * Metadata
         A class representing MarkLogic's document metadata.
     * Permission:
@@ -37,9 +39,11 @@ import re
 import xml.etree.ElementTree as ElemTree
 from abc import ABCMeta, abstractmethod
 from enum import Enum
-from typing import Any, ClassVar, List
+from pathlib import Path
+from typing import Any, ClassVar, List, TextIO
 from xml.dom import minidom
 
+import xmltodict
 from pydantic import BaseModel, Field
 
 logger = logging.getLogger(__name__)
@@ -780,6 +784,20 @@ class DocumentFactory:
         content: ElemTree.Element | dict | str | bytes | None,
         doc_type: DocumentType | None,
     ):
+        """Return Document's implementation based on document type or content.
+
+        Parameters
+        ----------
+        content : ElemTree.Element | dict | str | bytes | None
+            A document content
+        doc_type : DocumentType | None
+            A document type
+
+        Returns
+        -------
+        Document
+            A Document's subclass reference
+        """
         if doc_type == DocumentType.XML:
             impl = XMLDocument
         elif doc_type == DocumentType.JSON:
@@ -803,6 +821,104 @@ class DocumentFactory:
             )
             raise NotImplementedError(msg)
         return impl
+
+
+class MetadataFactory:
+    """A factory class instantiating a Metadata class from a file."""
+
+    _XML_MAPPINGS: ClassVar[dict] = {
+        "collections": "collection",
+        "permissions": "permission",
+        "metadata-values": "metadata-value",
+    }
+
+    @classmethod
+    def from_file(
+        cls,
+        file_path: str,
+    ) -> Metadata:
+        """Initialize a Metadata instance from a file.
+
+        Parameters
+        ----------
+        file_path : str
+            A metadata file path
+
+        Returns
+        -------
+        Metadata
+            A Metadata instance
+        """
+        file_path = Path(file_path)
+        with file_path.open() as file:
+            if file_path.suffix == ".json":
+                return cls._from_json_file(file)
+            return cls._from_xml_file(file)
+
+    @classmethod
+    def _from_json_file(
+        cls,
+        file: TextIO,
+    ) -> Metadata:
+        """Initialize a Metadata instance from a JSON file."""
+        raw_metadata = json.load(file)
+        if "permissions" in raw_metadata:
+            permissions = []
+            for permission in raw_metadata["permissions"]:
+                role_name = permission["role-name"]
+                capabilities = permission["capabilities"]
+                permissions.append(Permission(role_name, set(capabilities)))
+            raw_metadata["permissions"] = permissions
+        if "metadataValues" in raw_metadata:
+            raw_metadata["metadata_values"] = raw_metadata["metadataValues"]
+            del raw_metadata["metadataValues"]
+        return Metadata(**raw_metadata)
+
+    @classmethod
+    def _from_xml_file(
+        cls,
+        file: TextIO,
+    ) -> Metadata:
+        """Initialize a Metadata instance from an XML file."""
+        raw_metadata = xmltodict.parse(
+            file.read(),
+            process_namespaces=True,
+            namespaces={
+                "http://marklogic.com/rest-api": None,
+                "http://marklogic.com/xdmp/property": None,
+            },
+        ).get("metadata")
+        for items, item in cls._XML_MAPPINGS.items():
+            if items in raw_metadata:
+                values = raw_metadata[items][item]
+                if not isinstance(values, list):
+                    values = [values]
+                raw_metadata[items] = values
+        if "permissions" in raw_metadata:
+            permissions = []
+            for permission in raw_metadata["permissions"]:
+                role_name = permission["role-name"]
+                capability = permission["capability"]
+                existing_perm = next(
+                    (p for p in permissions if p.role_name() == role_name),
+                    None,
+                )
+                if existing_perm is None:
+                    permissions.append(Permission(role_name, {capability}))
+                else:
+                    existing_perm.add_capability(capability)
+            raw_metadata["permissions"] = permissions
+        if "metadata-values" in raw_metadata:
+            metadata_values = {}
+            for metadata_value in raw_metadata["metadata-values"]:
+                key = metadata_value["@key"]
+                value = metadata_value["#text"]
+                metadata_values[key] = value
+            raw_metadata["metadata_values"] = metadata_values
+            del raw_metadata["metadata-values"]
+        if "quality" in raw_metadata:
+            raw_metadata["quality"] = int(raw_metadata["quality"])
+        return Metadata(**raw_metadata)
 
 
 class Metadata:

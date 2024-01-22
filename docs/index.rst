@@ -19,6 +19,9 @@ MLClient - MarkLogic instance in your hands
     :alt: Python Version Support Badge
 
 ML Client is a python library providing a python API to manage a MarkLogic instance.
+Furthermore, it includes a Command Line Interface.
+
+Below you can find a few examples of basic usage. Read more in the deep documentation.
 
 -------------------
 

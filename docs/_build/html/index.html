@@ -4,22 +4,23 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MLClient - MarkLogic instance in your hands &mdash; MLClient 0.1.0 documentation</title>
+  <title>MLClient - MarkLogic instance in your hands &mdash; MLClient 0.4.0 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/autodoc_pydantic.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
         <script src="_static/jquery.js?v=5d32c60e"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js?v=2389946f"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js?v=4e78f113"></script>
         <script src="_static/doctools.js?v=888ff710"></script>
         <script src="_static/sphinx_highlight.js?v=4825356b"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="mlclient package" href="mlclient/mlclient.html" /> 
+    <link rel="next" title="mlclient package" href="api/mlclient/mlclient.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -43,7 +44,11 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Python API:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="mlclient/mlclient.html">mlclient package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/mlclient/mlclient.html">mlclient package</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="user/pythonapi.html">Python API</a></li>
 </ul>
 
         </div>
@@ -75,7 +80,9 @@
 <a class="reference external image-reference" href="https://github.com/monasticus/mlclient"><img alt="Tag Badge" src="https://img.shields.io/badge/GitHub-monasticus%2Fmlclient-white?style=plastic&amp;logo=github&amp;color=white" /></a>
 <a class="reference external image-reference" href="https://github.com/monasticus/mlclient/blob/main/LICENSE"><img alt="License Badge" src="https://img.shields.io/github/license/monasticus/mlclient?label=License&amp;style=plastic" /></a>
 <a class="reference external image-reference" href="https://www.python.org/"><img alt="Python Version Support Badge" src="https://img.shields.io/pypi/pyversions/mlclient?label=Python&amp;style=plastic" /></a>
-<p>ML Client is a python library providing a python API to manage a MarkLogic instance.</p>
+<p>ML Client is a python library providing a python API to manage a MarkLogic instance.
+Furthermore, it includes a Command Line Interface.</p>
+<p>Below you can find a few examples of basic usage. Read more in the deep documentation.</p>
 <hr class="docutils" />
 <p>Low-level MLClient:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient</span> <span class="kn">import</span> <span class="n">MLClient</span>
@@ -118,10 +125,32 @@
 <span class="go">--6a5df7d535c71968--</span>
 </pre></div>
 </div>
+<p>Parsing response:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient</span> <span class="kn">import</span> <span class="n">MLResourceClient</span><span class="p">,</span> <span class="n">MLResponseParser</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">config</span> <span class="o">=</span> <span class="p">{</span>
+<span class="gp">... </span>    <span class="s2">&quot;host&quot;</span><span class="p">:</span> <span class="s2">&quot;localhost&quot;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="s2">&quot;port&quot;</span><span class="p">:</span> <span class="mi">8002</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="s2">&quot;username&quot;</span><span class="p">:</span> <span class="s2">&quot;admin&quot;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="s2">&quot;password&quot;</span><span class="p">:</span> <span class="s2">&quot;admin&quot;</span><span class="p">,</span>
+<span class="gp">... </span><span class="p">}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">MLResourceClient</span><span class="p">(</span><span class="o">**</span><span class="n">config</span><span class="p">)</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">resp</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="n">xquery</span><span class="o">=</span><span class="s2">&quot;xdmp:database() =&gt; xdmp:database-name()&quot;</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="n">parsed_resp</span> <span class="o">=</span> <span class="n">MLResponseParser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">resp</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="n">parsed_resp</span><span class="p">)</span>
+<span class="gp">...</span>
+<span class="go">App-Services</span>
+</pre></div>
+</div>
 <div class="toctree-wrapper compound">
 <p class="caption" role="heading"><span class="caption-text">Python API:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="mlclient/mlclient.html">mlclient package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/mlclient/mlclient.html">mlclient package</a></li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">User Guide:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="user/pythonapi.html">Python API</a></li>
 </ul>
 </div>
 </section>
@@ -138,7 +167,7 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="mlclient/mlclient.html" class="btn btn-neutral float-right" title="mlclient package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="api/mlclient/mlclient.html" class="btn btn-neutral float-right" title="mlclient package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

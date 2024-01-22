@@ -3,16 +3,17 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mlclient.exceptions &mdash; MLClient 0.1.0 documentation</title>
+  <title>mlclient.exceptions &mdash; MLClient 0.4.0 documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/autodoc_pydantic.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
         <script src="../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=2389946f"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=4e78f113"></script>
         <script src="../../_static/doctools.js?v=888ff710"></script>
         <script src="../../_static/sphinx_highlight.js?v=4825356b"></script>
     <script src="../../_static/js/theme.js"></script>
@@ -41,7 +42,11 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Python API:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../mlclient/mlclient.html">mlclient package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/mlclient/mlclient.html">mlclient package</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../user/pythonapi.html">Python API</a></li>
 </ul>
 
         </div>
@@ -76,22 +81,141 @@
 <span class="sd">        A custom Exception class for wrong parameters.</span>
 <span class="sd">    * UnsupportedFormatError</span>
 <span class="sd">        A custom Exception class for an unsupported format.</span>
+<span class="sd">    * MLClientDirectoryNotFoundError</span>
+<span class="sd">        A custom Exception class for a non-existing MLClient configuration directory.</span>
+<span class="sd">    * MLClientEnvironmentNotFoundError</span>
+<span class="sd">        A custom Exception class for a non-existing MLClient environment.</span>
+<span class="sd">    * NoSuchAppServerError</span>
+<span class="sd">        A custom Exception class for a non-existing app server configuration.</span>
+<span class="sd">    * NotARestServerError</span>
+<span class="sd">        A custom Exception class for a regular App-Server used as a REST Server.</span>
+<span class="sd">    * NoRestServerConfiguredError</span>
+<span class="sd">        A custom Exception class for no REST Server configured when required.</span>
+<span class="sd">    * MarkLogicError</span>
+<span class="sd">        A custom Exception class representing MarkLogic errors.</span>
+<span class="sd">    * UnsupportedFileExtensionError</span>
+<span class="sd">        A custom Exception class for an unsupported file extension.</span>
+<span class="sd">    * ResourceNotFoundError</span>
+<span class="sd">        A custom Exception class for a not found resource.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
 
 
-<div class="viewcode-block" id="WrongParametersError"><a class="viewcode-back" href="../../mlclient/mlclient.html#mlclient.exceptions.WrongParametersError">[docs]</a><span class="k">class</span> <span class="nc">WrongParametersError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+<div class="viewcode-block" id="WrongParametersError"><a class="viewcode-back" href="../../api/mlclient/mlclient.html#mlclient.exceptions.WrongParametersError">[docs]</a><span class="k">class</span> <span class="nc">WrongParametersError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;A custom Exception class for wrong parameters.</span>
 
 <span class="sd">    Raised when attempting to call a REST Resource with incorrect parameters.</span>
 <span class="sd">    &quot;&quot;&quot;</span></div>
 
 
-<div class="viewcode-block" id="UnsupportedFormatError"><a class="viewcode-back" href="../../mlclient/mlclient.html#mlclient.exceptions.UnsupportedFormatError">[docs]</a><span class="k">class</span> <span class="nc">UnsupportedFormatError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+<div class="viewcode-block" id="UnsupportedFormatError"><a class="viewcode-back" href="../../api/mlclient/mlclient.html#mlclient.exceptions.UnsupportedFormatError">[docs]</a><span class="k">class</span> <span class="nc">UnsupportedFormatError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;A custom Exception class for an unsupported format.</span>
 
-<span class="sd">    Raised when getting an accept header for a format.</span>
+<span class="sd">    Raised when getting an Accept header for a format.</span>
 <span class="sd">    &quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="MLClientDirectoryNotFoundError"><a class="viewcode-back" href="../../api/mlclient/mlclient.html#mlclient.exceptions.MLClientDirectoryNotFoundError">[docs]</a><span class="k">class</span> <span class="nc">MLClientDirectoryNotFoundError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A custom Exception class for a non-existing MLClient configuration directory.</span>
+
+<span class="sd">    Raised when initializing an MLConfiguration from an environment.</span>
+<span class="sd">    &quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="MLClientEnvironmentNotFoundError"><a class="viewcode-back" href="../../api/mlclient/mlclient.html#mlclient.exceptions.MLClientEnvironmentNotFoundError">[docs]</a><span class="k">class</span> <span class="nc">MLClientEnvironmentNotFoundError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A custom Exception class for a non-existing MLClient environment.</span>
+
+<span class="sd">    Raised when initializing an MLConfiguration from an environment.</span>
+<span class="sd">    &quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="NoSuchAppServerError"><a class="viewcode-back" href="../../api/mlclient/mlclient.html#mlclient.exceptions.NoSuchAppServerError">[docs]</a><span class="k">class</span> <span class="nc">NoSuchAppServerError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A custom Exception class for a non-existing app server configuration.</span>
+
+<span class="sd">    Raised when getting an app server config from an MLConfiguration instance.</span>
+<span class="sd">    &quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="NotARestServerError"><a class="viewcode-back" href="../../api/mlclient/mlclient.html#mlclient.exceptions.NotARestServerError">[docs]</a><span class="k">class</span> <span class="nc">NotARestServerError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A custom Exception class for a regular App-Server used as a REST Server.</span>
+
+<span class="sd">    Raised while getting an app server config not being a REST server.</span>
+<span class="sd">    &quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="NoRestServerConfiguredError"><a class="viewcode-back" href="../../api/mlclient/mlclient.html#mlclient.exceptions.NoRestServerConfiguredError">[docs]</a><span class="k">class</span> <span class="nc">NoRestServerConfiguredError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A custom Exception class for no REST Server configured when required.</span>
+
+<span class="sd">    Raised while getting an app server config when no REST server is configured.</span>
+<span class="sd">    &quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="InvalidLogTypeError"><a class="viewcode-back" href="../../api/mlclient/mlclient.html#mlclient.exceptions.InvalidLogTypeError">[docs]</a><span class="k">class</span> <span class="nc">InvalidLogTypeError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A custom Exception class for an invalid log type.</span>
+
+<span class="sd">    Raised while getting LogType enum for a value different from error, access</span>
+<span class="sd">    and request.</span>
+<span class="sd">    &quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="MarkLogicError"><a class="viewcode-back" href="../../api/mlclient/mlclient.html#mlclient.exceptions.MarkLogicError">[docs]</a><span class="k">class</span> <span class="nc">MarkLogicError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A custom Exception class representing MarkLogic errors.</span>
+
+<span class="sd">    Raised whenever an ML server returns an error.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">error</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize MarkLogicError instance.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        error : dict | str</span>
+<span class="sd">            An error response object or a raw error message</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">error</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="n">status_code</span> <span class="o">=</span> <span class="n">error</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;statusCode&quot;</span><span class="p">)</span>
+            <span class="n">status</span> <span class="o">=</span> <span class="n">error</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;status&quot;</span><span class="p">)</span>
+            <span class="n">msg_code</span> <span class="o">=</span> <span class="n">error</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;messageCode&quot;</span><span class="p">)</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="n">error</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;message&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">msg_code</span><span class="p">:</span>
+                <span class="n">error_msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;[</span><span class="si">{</span><span class="n">status_code</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">status</span><span class="si">}</span><span class="s2">] (</span><span class="si">{</span><span class="n">msg_code</span><span class="si">}</span><span class="s2">) </span><span class="si">{</span><span class="n">msg</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">error_msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;[</span><span class="si">{</span><span class="n">status_code</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">status</span><span class="si">}</span><span class="s2">] </span><span class="si">{</span><span class="n">msg</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">error_msg</span> <span class="o">=</span> <span class="n">error</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">error_msg</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="UnsupportedFileExtensionError"><a class="viewcode-back" href="../../api/mlclient/mlclient.html#mlclient.exceptions.UnsupportedFileExtensionError">[docs]</a><span class="k">class</span> <span class="nc">UnsupportedFileExtensionError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A custom Exception class for an unsupported file extension.</span>
+
+<span class="sd">    Raised while evaluating code from file with unsupported extension.</span>
+<span class="sd">    &quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="ResourceNotFoundError"><a class="viewcode-back" href="../../api/mlclient/mlclient.html#mlclient.exceptions.ResourceNotFoundError">[docs]</a><span class="k">class</span> <span class="nc">ResourceNotFoundError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A custom Exception class for a not found resource.</span>
+
+<span class="sd">    Raised while attempting to get a resource that does exist.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">resource_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize ResourceNotFoundError exception with details.</span>
+
+<span class="sd">        Extends Exception constructor with a custom message.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        resource_name : str</span>
+<span class="sd">            A resource name</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No such resource: [</span><span class="si">{</span><span class="n">resource_name</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">)</span></div>
 </pre></div>
 
            </div>

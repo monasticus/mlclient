@@ -1,0 +1,1710 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mlclient.clients.ml_client &mdash; MLClient 0.4.0 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/autodoc_pydantic.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=4e78f113"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            MLClient
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Python API:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/mlclient/mlclient.html">mlclient package</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../user/pythonapi.html">Python API</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">MLClient</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">mlclient.clients.ml_client</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for mlclient.clients.ml_client</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;The ML Client module.</span>
+
+<span class="sd">It exports 3 classes:</span>
+<span class="sd">    * MLClient</span>
+<span class="sd">        A low-level class used to send simple HTTP requests to a MarkLogic instance.</span>
+<span class="sd">    * MLResourceClient</span>
+<span class="sd">        An MLClient subclass calling ResourceCall implementation classes.</span>
+<span class="sd">    * MLResourcesClient</span>
+<span class="sd">        An MLResourceClient subclass supporting REST Resources of the MarkLogic server.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">from</span> <span class="nn">types</span> <span class="kn">import</span> <span class="n">TracebackType</span>
+
+<span class="kn">from</span> <span class="nn">requests</span> <span class="kn">import</span> <span class="n">Response</span><span class="p">,</span> <span class="n">Session</span>
+<span class="kn">from</span> <span class="nn">requests.adapters</span> <span class="kn">import</span> <span class="n">HTTPAdapter</span><span class="p">,</span> <span class="n">Retry</span>
+<span class="kn">from</span> <span class="nn">requests.auth</span> <span class="kn">import</span> <span class="n">AuthBase</span><span class="p">,</span> <span class="n">HTTPBasicAuth</span><span class="p">,</span> <span class="n">HTTPDigestAuth</span>
+
+<span class="kn">from</span> <span class="nn">mlclient</span> <span class="kn">import</span> <span class="n">constants</span> <span class="k">as</span> <span class="n">const</span>
+<span class="kn">from</span> <span class="nn">mlclient.calls</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">DatabaseDeleteCall</span><span class="p">,</span>
+    <span class="n">DatabaseGetCall</span><span class="p">,</span>
+    <span class="n">DatabasePostCall</span><span class="p">,</span>
+    <span class="n">DatabasePropertiesGetCall</span><span class="p">,</span>
+    <span class="n">DatabasePropertiesPutCall</span><span class="p">,</span>
+    <span class="n">DatabasesGetCall</span><span class="p">,</span>
+    <span class="n">DatabasesPostCall</span><span class="p">,</span>
+    <span class="n">DocumentsDeleteCall</span><span class="p">,</span>
+    <span class="n">DocumentsGetCall</span><span class="p">,</span>
+    <span class="n">DocumentsPostCall</span><span class="p">,</span>
+    <span class="n">EvalCall</span><span class="p">,</span>
+    <span class="n">ForestDeleteCall</span><span class="p">,</span>
+    <span class="n">ForestGetCall</span><span class="p">,</span>
+    <span class="n">ForestPostCall</span><span class="p">,</span>
+    <span class="n">ForestPropertiesGetCall</span><span class="p">,</span>
+    <span class="n">ForestPropertiesPutCall</span><span class="p">,</span>
+    <span class="n">ForestsGetCall</span><span class="p">,</span>
+    <span class="n">ForestsPostCall</span><span class="p">,</span>
+    <span class="n">ForestsPutCall</span><span class="p">,</span>
+    <span class="n">LogsCall</span><span class="p">,</span>
+    <span class="n">ResourceCall</span><span class="p">,</span>
+    <span class="n">RoleDeleteCall</span><span class="p">,</span>
+    <span class="n">RoleGetCall</span><span class="p">,</span>
+    <span class="n">RolePropertiesGetCall</span><span class="p">,</span>
+    <span class="n">RolePropertiesPutCall</span><span class="p">,</span>
+    <span class="n">RolesGetCall</span><span class="p">,</span>
+    <span class="n">RolesPostCall</span><span class="p">,</span>
+    <span class="n">ServerDeleteCall</span><span class="p">,</span>
+    <span class="n">ServerGetCall</span><span class="p">,</span>
+    <span class="n">ServerPropertiesGetCall</span><span class="p">,</span>
+    <span class="n">ServerPropertiesPutCall</span><span class="p">,</span>
+    <span class="n">ServersGetCall</span><span class="p">,</span>
+    <span class="n">ServersPostCall</span><span class="p">,</span>
+    <span class="n">UserDeleteCall</span><span class="p">,</span>
+    <span class="n">UserGetCall</span><span class="p">,</span>
+    <span class="n">UserPropertiesGetCall</span><span class="p">,</span>
+    <span class="n">UserPropertiesPutCall</span><span class="p">,</span>
+    <span class="n">UsersGetCall</span><span class="p">,</span>
+    <span class="n">UsersPostCall</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">mlclient.calls.model</span> <span class="kn">import</span> <span class="n">DocumentsBodyPart</span>
+<span class="kn">from</span> <span class="nn">mlclient.mimetypes</span> <span class="kn">import</span> <span class="n">Mimetypes</span>
+<span class="kn">from</span> <span class="nn">mlclient.model</span> <span class="kn">import</span> <span class="n">DocumentType</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="MLClient"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.MLClient">[docs]</a><span class="k">class</span> <span class="nc">MLClient</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A low-level class used to send simple HTTP requests to a MarkLogic instance.</span>
+
+<span class="sd">    Using configuration details provided it allows you to hit MarkLogic&#39;s endpoints.</span>
+<span class="sd">    It can connect with the MarkLogic Server as a Context Manager or explicitly by</span>
+<span class="sd">    using the connect method.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    protocol : str</span>
+<span class="sd">        a protocol used for HTTP requests (http / https)</span>
+<span class="sd">    host : str</span>
+<span class="sd">        a host name</span>
+<span class="sd">    port : int</span>
+<span class="sd">        an App Service port</span>
+<span class="sd">    auth_method : str</span>
+<span class="sd">        an authorization method (basic / digest)</span>
+<span class="sd">    username : str</span>
+<span class="sd">        a username</span>
+<span class="sd">    password : str</span>
+<span class="sd">        a password</span>
+<span class="sd">    base_url : str</span>
+<span class="sd">        a base url built based on the protocol, the host name and the port provided</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; from mlclient import MLClient</span>
+<span class="sd">    &gt;&gt;&gt; config = {</span>
+<span class="sd">    ...     &quot;host&quot;: &quot;localhost&quot;,</span>
+<span class="sd">    ...     &quot;port&quot;: 8002,</span>
+<span class="sd">    ...     &quot;username&quot;: &quot;admin&quot;,</span>
+<span class="sd">    ...     &quot;password&quot;: &quot;admin&quot;,</span>
+<span class="sd">    ... }</span>
+<span class="sd">    &gt;&gt;&gt; with MLClient(**config) as client:</span>
+<span class="sd">    ...     resp = client.post(</span>
+<span class="sd">    ...         endpoint=&quot;/v1/eval&quot;,</span>
+<span class="sd">    ...         body={&quot;xquery&quot;: &quot;xdmp:database() =&gt; xdmp:database-name()&quot;})</span>
+<span class="sd">    ...     print(resp.text)</span>
+<span class="sd">    ...</span>
+<span class="sd">    --6a5df7d535c71968</span>
+<span class="sd">    Content-Type: text/plain</span>
+<span class="sd">    X-Primitive: string</span>
+<span class="sd">    App-Services</span>
+<span class="sd">    --6a5df7d535c71968--</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">_DEFAULT_RETRY_STRATEGY</span> <span class="o">=</span> <span class="n">Retry</span><span class="p">(</span>
+        <span class="n">connect</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+        <span class="n">allowed_methods</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>  <span class="c1"># any</span>
+        <span class="n">backoff_factor</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">protocol</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;http&quot;</span><span class="p">,</span>
+        <span class="n">host</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;localhost&quot;</span><span class="p">,</span>
+        <span class="n">port</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">8002</span><span class="p">,</span>
+        <span class="n">auth_method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;basic&quot;</span><span class="p">,</span>
+        <span class="n">username</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;admin&quot;</span><span class="p">,</span>
+        <span class="n">password</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;admin&quot;</span><span class="p">,</span>
+        <span class="n">retry</span><span class="p">:</span> <span class="n">Retry</span> <span class="o">=</span> <span class="n">_DEFAULT_RETRY_STRATEGY</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize MLClient instance.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        protocol : str, default &quot;http&quot;</span>
+<span class="sd">            A protocol used for HTTP requests (http / https)</span>
+<span class="sd">        host : str, default &quot;localhost&quot;</span>
+<span class="sd">            A host name</span>
+<span class="sd">        port : int, default 8002</span>
+<span class="sd">            An App Service port</span>
+<span class="sd">        auth_method : str, default &quot;basic&quot;</span>
+<span class="sd">            An authorization method (basic / digest)</span>
+<span class="sd">        username : str, default &quot;admin&quot;</span>
+<span class="sd">            A username</span>
+<span class="sd">        password : str, default &quot;admin&quot;</span>
+<span class="sd">            A password</span>
+<span class="sd">        retry : Retry, default Retry(connect=5,allowed_methods=None,backoff_factor=0.5)</span>
+<span class="sd">            A retry strategy</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">protocol</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">protocol</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">host</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">host</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">port</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">port</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">auth_method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">auth_method</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">username</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">username</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">password</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">password</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">base_url</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">protocol</span><span class="si">}</span><span class="s2">://</span><span class="si">{</span><span class="n">host</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">port</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_retry</span><span class="p">:</span> <span class="n">Retry</span> <span class="o">=</span> <span class="n">retry</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sess</span><span class="p">:</span> <span class="n">Session</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">auth_impl</span> <span class="o">=</span> <span class="n">HTTPBasicAuth</span> <span class="k">if</span> <span class="n">auth_method</span> <span class="o">==</span> <span class="s2">&quot;basic&quot;</span> <span class="k">else</span> <span class="n">HTTPDigestAuth</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_auth</span><span class="p">:</span> <span class="n">AuthBase</span> <span class="o">=</span> <span class="n">auth_impl</span><span class="p">(</span><span class="n">username</span><span class="p">,</span> <span class="n">password</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__enter__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Enter the MLClient instance.</span>
+
+<span class="sd">        It starts an HTTP session.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        self : MLClient</span>
+<span class="sd">            A MLClient instance</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="k">def</span> <span class="fm">__exit__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">exc_type</span><span class="p">:</span> <span class="nb">type</span><span class="p">,</span>
+        <span class="n">exc_val</span><span class="p">:</span> <span class="ne">BaseException</span><span class="p">,</span>
+        <span class="n">exc_tb</span><span class="p">:</span> <span class="n">TracebackType</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Exit the MLClient instance.</span>
+
+<span class="sd">        It closes an HTTP session.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        exc_type : type | None</span>
+<span class="sd">            An exception&#39;s type</span>
+<span class="sd">        exc_val : BaseException | None</span>
+<span class="sd">            An exception&#39;s value</span>
+<span class="sd">        exc_tb  TracebackType | None</span>
+<span class="sd">            An exception&#39;s traceback</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">disconnect</span><span class="p">()</span>
+
+<div class="viewcode-block" id="MLClient.connect"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.MLClient.connect">[docs]</a>    <span class="k">def</span> <span class="nf">connect</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Start an HTTP session.&quot;&quot;&quot;</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Initiating a connection&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sess</span> <span class="o">=</span> <span class="n">Session</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sess</span><span class="o">.</span><span class="n">mount</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">base_url</span><span class="p">,</span> <span class="n">HTTPAdapter</span><span class="p">(</span><span class="n">max_retries</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_retry</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="MLClient.disconnect"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.MLClient.disconnect">[docs]</a>    <span class="k">def</span> <span class="nf">disconnect</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Close an HTTP session.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sess</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Closing a connection&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_sess</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_sess</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="MLClient.is_connected"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.MLClient.is_connected">[docs]</a>    <span class="k">def</span> <span class="nf">is_connected</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a connection status.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        bool</span>
+<span class="sd">            True if the client has started a connection; otherwise False</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sess</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="MLClient.get"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.MLClient.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">endpoint</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">params</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">headers</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Send a GET request.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        endpoint : str</span>
+<span class="sd">            A REST endpoint to call</span>
+<span class="sd">        params : dict</span>
+<span class="sd">            Request parameters</span>
+<span class="sd">        headers : dict</span>
+<span class="sd">            Request headers</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Response</span>
+<span class="sd">            An HTTP response</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="s2">&quot;GET&quot;</span><span class="p">,</span> <span class="n">endpoint</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">headers</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MLClient.post"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.MLClient.post">[docs]</a>    <span class="k">def</span> <span class="nf">post</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">endpoint</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">params</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">headers</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">body</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Send a POST request.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        endpoint : str</span>
+<span class="sd">            A REST endpoint to call</span>
+<span class="sd">        params : dict</span>
+<span class="sd">            Request parameters</span>
+<span class="sd">        headers : dict</span>
+<span class="sd">            Request headers</span>
+<span class="sd">        body : str | dict</span>
+<span class="sd">            A request body</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Response</span>
+<span class="sd">            An HTTP response</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="s2">&quot;POST&quot;</span><span class="p">,</span> <span class="n">endpoint</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">headers</span><span class="p">,</span> <span class="n">body</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MLClient.put"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.MLClient.put">[docs]</a>    <span class="k">def</span> <span class="nf">put</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">endpoint</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">params</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">headers</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">body</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Send a PUT request.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        endpoint : str</span>
+<span class="sd">            A REST endpoint to call</span>
+<span class="sd">        params : dict</span>
+<span class="sd">            Request parameters</span>
+<span class="sd">        headers : dict</span>
+<span class="sd">            Request headers</span>
+<span class="sd">        body : str | dict</span>
+<span class="sd">            A request body</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Response</span>
+<span class="sd">            An HTTP response</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="s2">&quot;PUT&quot;</span><span class="p">,</span> <span class="n">endpoint</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">headers</span><span class="p">,</span> <span class="n">body</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MLClient.delete_"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.MLClient.delete_">[docs]</a>    <span class="k">def</span> <span class="nf">delete_</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">endpoint</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">params</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">headers</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Send a DELETE request.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        endpoint : str</span>
+<span class="sd">            A REST endpoint to call</span>
+<span class="sd">        params : dict</span>
+<span class="sd">            Request parameters</span>
+<span class="sd">        headers : dict</span>
+<span class="sd">            Request headers</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Response</span>
+<span class="sd">            An HTTP response</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="s2">&quot;DELETE&quot;</span><span class="p">,</span> <span class="n">endpoint</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">headers</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MLClient.request"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.MLClient.request">[docs]</a>    <span class="k">def</span> <span class="nf">request</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">method</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">endpoint</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">params</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">headers</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">body</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Send an HTTP request.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        method : str</span>
+<span class="sd">            An HTTP request method</span>
+<span class="sd">        endpoint : str</span>
+<span class="sd">            A REST endpoint to call</span>
+<span class="sd">        params : dict</span>
+<span class="sd">            Request parameters</span>
+<span class="sd">        headers : dict</span>
+<span class="sd">            Request headers</span>
+<span class="sd">        body : str | dict</span>
+<span class="sd">            A request body</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Response</span>
+<span class="sd">            An HTTP response</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_connected</span><span class="p">():</span>
+            <span class="n">url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">base_url</span> <span class="o">+</span> <span class="n">endpoint</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">headers</span><span class="p">:</span>
+                <span class="n">headers</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">params</span><span class="p">:</span>
+                <span class="n">params</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">request</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;auth&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_auth</span><span class="p">,</span>
+                <span class="s2">&quot;params&quot;</span><span class="p">:</span> <span class="n">params</span><span class="p">,</span>
+                <span class="s2">&quot;headers&quot;</span><span class="p">:</span> <span class="n">headers</span><span class="p">,</span>
+            <span class="p">}</span>
+            <span class="k">if</span> <span class="n">body</span><span class="p">:</span>
+                <span class="n">content_type</span> <span class="o">=</span> <span class="n">headers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">const</span><span class="o">.</span><span class="n">HEADER_NAME_CONTENT_TYPE</span><span class="p">)</span>
+                <span class="n">doc_type</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">Mimetypes</span><span class="o">.</span><span class="n">get_doc_type</span><span class="p">(</span><span class="n">content_type</span><span class="p">)</span> <span class="k">if</span> <span class="n">content_type</span> <span class="k">else</span> <span class="kc">None</span>
+                <span class="p">)</span>
+                <span class="k">if</span> <span class="n">doc_type</span> <span class="o">==</span> <span class="n">DocumentType</span><span class="o">.</span><span class="n">JSON</span><span class="p">:</span>
+                    <span class="n">request</span><span class="p">[</span><span class="s2">&quot;json&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">body</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">request</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">body</span>
+
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Sending a request... </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">method</span><span class="o">.</span><span class="n">upper</span><span class="p">(),</span> <span class="n">endpoint</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sess</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="o">**</span><span class="n">request</span><span class="p">)</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+            <span class="s2">&quot;A request attempt failure: </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2"> -- MLClient is not connected&quot;</span><span class="p">,</span>
+            <span class="n">method</span><span class="o">.</span><span class="n">upper</span><span class="p">(),</span>
+            <span class="n">endpoint</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="kc">None</span></div></div>
+
+
+<div class="viewcode-block" id="MLResourceClient"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.MLResourceClient">[docs]</a><span class="k">class</span> <span class="nc">MLResourceClient</span><span class="p">(</span><span class="n">MLClient</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;An MLClient subclass calling ResourceCall implementation classes.</span>
+
+<span class="sd">    It can connect with the MarkLogic Server as a Context Manager or explicitly by</span>
+<span class="sd">    using the connect method.</span>
+
+<span class="sd">    You can call ML REST Resource by using the call() method accepting a ResourceCall</span>
+<span class="sd">    implementation classes.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    All attributes are inherited from the MLClient superclass.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; from mlclient import MLResourceClient</span>
+<span class="sd">    &gt;&gt;&gt; from mlclient.calls import EvalCall</span>
+<span class="sd">    &gt;&gt;&gt; config = {</span>
+<span class="sd">    ...     &quot;host&quot;: &quot;localhost&quot;,</span>
+<span class="sd">    ...     &quot;port&quot;: 8002,</span>
+<span class="sd">    ...     &quot;username&quot;: &quot;admin&quot;,</span>
+<span class="sd">    ...     &quot;password&quot;: &quot;admin&quot;,</span>
+<span class="sd">    ... }</span>
+<span class="sd">    &gt;&gt;&gt; with MLResourceClient(**config) as client:</span>
+<span class="sd">    ...     eval_call = EvalCall(xquery=&quot;xdmp:database() =&gt; xdmp:database-name()&quot;)</span>
+<span class="sd">    ...     resp = client.call(eval_call)</span>
+<span class="sd">    ...     print(resp.text)</span>
+<span class="sd">    ...</span>
+<span class="sd">    --6a5df7d535c71968</span>
+<span class="sd">    Content-Type: text/plain</span>
+<span class="sd">    X-Primitive: string</span>
+<span class="sd">    App-Services</span>
+<span class="sd">    --6a5df7d535c71968--</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="MLResourceClient.call"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.MLResourceClient.call">[docs]</a>    <span class="k">def</span> <span class="nf">call</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">call</span><span class="p">:</span> <span class="n">ResourceCall</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Send a custom request to a MarkLogic endpoint.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        call : ResourceCall</span>
+<span class="sd">            A specific endpoint call implementation</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Response</span>
+<span class="sd">            An HTTP response</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="p">(</span>
+            <span class="n">method</span><span class="o">=</span><span class="n">call</span><span class="o">.</span><span class="n">method</span><span class="p">,</span>
+            <span class="n">endpoint</span><span class="o">=</span><span class="n">call</span><span class="o">.</span><span class="n">endpoint</span><span class="p">,</span>
+            <span class="n">params</span><span class="o">=</span><span class="n">call</span><span class="o">.</span><span class="n">params</span><span class="p">,</span>
+            <span class="n">headers</span><span class="o">=</span><span class="n">call</span><span class="o">.</span><span class="n">headers</span><span class="p">,</span>
+            <span class="n">body</span><span class="o">=</span><span class="n">call</span><span class="o">.</span><span class="n">body</span><span class="p">,</span>
+        <span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="MLResourcesClient"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.MLResourcesClient">[docs]</a><span class="k">class</span> <span class="nc">MLResourcesClient</span><span class="p">(</span><span class="n">MLResourceClient</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;An MLResourceClient subclass supporting REST Resources of the MarkLogic server.</span>
+
+<span class="sd">    It can connect with the MarkLogic Server as a Context Manager or explicitly by</span>
+<span class="sd">    using the connect method.</span>
+
+<span class="sd">    There are two ways to call ML REST Resources:</span>
+<span class="sd">    - by using defined methods corresponding to a resource (e.g. /v1/eval -&gt; eval())</span>
+<span class="sd">    - by using the call() method accepting a ResourceCall implementation classes.</span>
+
+<span class="sd">    This class can be treated as an example of MLClient class extension for your own</span>
+<span class="sd">    dedicated APIs or as a superclass for your client.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    All attributes are inherited from the MLClient superclass.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; from mlclient import MLResourcesClient</span>
+<span class="sd">    &gt;&gt;&gt; config = {</span>
+<span class="sd">    ...     &quot;host&quot;: &quot;localhost&quot;,</span>
+<span class="sd">    ...     &quot;port&quot;: 8002,</span>
+<span class="sd">    ...     &quot;username&quot;: &quot;admin&quot;,</span>
+<span class="sd">    ...     &quot;password&quot;: &quot;admin&quot;,</span>
+<span class="sd">    ... }</span>
+<span class="sd">    &gt;&gt;&gt; with MLResourcesClient(**config) as client:</span>
+<span class="sd">    ...     resp = client.eval(xquery=&quot;xdmp:database() =&gt; xdmp:database-name()&quot;)</span>
+<span class="sd">    ...     print(resp.text)</span>
+<span class="sd">    ...</span>
+<span class="sd">    --6a5df7d535c71968</span>
+<span class="sd">    Content-Type: text/plain</span>
+<span class="sd">    X-Primitive: string</span>
+<span class="sd">    App-Services</span>
+<span class="sd">    --6a5df7d535c71968--</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="MLResourcesClient.eval"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.MLResourcesClient.eval">[docs]</a>    <span class="k">def</span> <span class="nf">eval</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">xquery</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">javascript</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">variables</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">database</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">txid</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Send a POST request to the /v1/eval endpoint.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        xquery : str</span>
+<span class="sd">            The query to evaluate, expressed using XQuery.</span>
+<span class="sd">            You must include either this parameter or the javascript parameter,</span>
+<span class="sd">            but not both.</span>
+<span class="sd">        javascript : str</span>
+<span class="sd">            The query to evaluate, expressed using server-side JavaScript.</span>
+<span class="sd">            You must include either this parameter or the xquery parameter,</span>
+<span class="sd">            but not both.</span>
+<span class="sd">        variables</span>
+<span class="sd">            External variables to pass to the query during evaluation</span>
+<span class="sd">        database</span>
+<span class="sd">            Perform this operation on the named content database</span>
+<span class="sd">            instead of the default content database associated with the REST API</span>
+<span class="sd">            instance. The database can be identified by name or by database id.</span>
+<span class="sd">        txid</span>
+<span class="sd">            The transaction identifier of the multi-statement transaction</span>
+<span class="sd">            in which to service this request.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Response</span>
+<span class="sd">            An HTTP response</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">call</span> <span class="o">=</span> <span class="n">EvalCall</span><span class="p">(</span>
+            <span class="n">xquery</span><span class="o">=</span><span class="n">xquery</span><span class="p">,</span>
+            <span class="n">javascript</span><span class="o">=</span><span class="n">javascript</span><span class="p">,</span>
+            <span class="n">variables</span><span class="o">=</span><span class="n">variables</span><span class="p">,</span>
+            <span class="n">database</span><span class="o">=</span><span class="n">database</span><span class="p">,</span>
+            <span class="n">txid</span><span class="o">=</span><span class="n">txid</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">call</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MLResourcesClient.get_logs"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.MLResourcesClient.get_logs">[docs]</a>    <span class="k">def</span> <span class="nf">get_logs</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">data_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">host</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">start_time</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">end_time</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">regex</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Send a GET request to the /manage/v2/logs endpoint.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        filename : str</span>
+<span class="sd">            The log file to be returned.</span>
+<span class="sd">        data_format : str</span>
+<span class="sd">            The format of the data in the log file. The supported formats are xml, json</span>
+<span class="sd">            or html.</span>
+<span class="sd">        host : str</span>
+<span class="sd">            The host from which to return the log data.</span>
+<span class="sd">        start_time : str</span>
+<span class="sd">            The start time for the log data.</span>
+<span class="sd">        end_time : str</span>
+<span class="sd">            The end time for the log data.</span>
+<span class="sd">        regex : str</span>
+<span class="sd">            Filters the log data, based on a regular expression.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Response</span>
+<span class="sd">            An HTTP response</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">call</span> <span class="o">=</span> <span class="n">LogsCall</span><span class="p">(</span>
+            <span class="n">filename</span><span class="o">=</span><span class="n">filename</span><span class="p">,</span>
+            <span class="n">data_format</span><span class="o">=</span><span class="n">data_format</span><span class="p">,</span>
+            <span class="n">host</span><span class="o">=</span><span class="n">host</span><span class="p">,</span>
+            <span class="n">start_time</span><span class="o">=</span><span class="n">start_time</span><span class="p">,</span>
+            <span class="n">end_time</span><span class="o">=</span><span class="n">end_time</span><span class="p">,</span>
+            <span class="n">regex</span><span class="o">=</span><span class="n">regex</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">call</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MLResourcesClient.get_databases"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.MLResourcesClient.get_databases">[docs]</a>    <span class="k">def</span> <span class="nf">get_databases</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">data_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">view</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Send a GET request to the /manage/v2/databases endpoint.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        data_format : str</span>
+<span class="sd">            The format of the returned data. Can be either html, json, or xml (default).</span>
+<span class="sd">        view : str</span>
+<span class="sd">            A specific view of the returned data.</span>
+<span class="sd">            Can be schema, properties-schema, metrics, package, describe, or default.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Response</span>
+<span class="sd">            An HTTP response</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">call</span> <span class="o">=</span> <span class="n">DatabasesGetCall</span><span class="p">(</span><span class="n">data_format</span><span class="o">=</span><span class="n">data_format</span><span class="p">,</span> <span class="n">view</span><span class="o">=</span><span class="n">view</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">call</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MLResourcesClient.post_databases"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.MLResourcesClient.post_databases">[docs]</a>    <span class="k">def</span> <span class="nf">post_databases</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">body</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Send a POST request to the /manage/v2/databases endpoint.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        body : str | dict</span>
+<span class="sd">            A database properties in XML or JSON format.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Response</span>
+<span class="sd">            An HTTP response</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">call</span> <span class="o">=</span> <span class="n">DatabasesPostCall</span><span class="p">(</span><span class="n">body</span><span class="o">=</span><span class="n">body</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">call</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MLResourcesClient.get_database"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.MLResourcesClient.get_database">[docs]</a>    <span class="k">def</span> <span class="nf">get_database</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">database</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">data_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">view</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Send a GET request to the /manage/v2/databases/{id|name} endpoint.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        database : str</span>
+<span class="sd">            A database identifier. The database can be identified either by ID or name.</span>
+<span class="sd">        data_format : str</span>
+<span class="sd">            The format of the returned data. Can be either html, json, or xml (default).</span>
+<span class="sd">            This parameter is not meaningful with view=edit.</span>
+<span class="sd">        view : str</span>
+<span class="sd">            A specific view of the returned data.</span>
+<span class="sd">            Can be properties-schema, package, describe, config, counts, edit, status,</span>
+<span class="sd">            forest-storage, or default.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Response</span>
+<span class="sd">            An HTTP response</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">call</span> <span class="o">=</span> <span class="n">DatabaseGetCall</span><span class="p">(</span><span class="n">database</span><span class="o">=</span><span class="n">database</span><span class="p">,</span> <span class="n">data_format</span><span class="o">=</span><span class="n">data_format</span><span class="p">,</span> <span class="n">view</span><span class="o">=</span><span class="n">view</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">call</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MLResourcesClient.post_database"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.MLResourcesClient.post_database">[docs]</a>    <span class="k">def</span> <span class="nf">post_database</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">database</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">body</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Send a POST request to the /manage/v2/databases/{id|name} endpoint.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        database : str</span>
+<span class="sd">            A database identifier. The database can be identified either by ID or name.</span>
+<span class="sd">        body : str | dict</span>
+<span class="sd">            A database properties in XML or JSON format.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Response</span>
+<span class="sd">            An HTTP response</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">call</span> <span class="o">=</span> <span class="n">DatabasePostCall</span><span class="p">(</span><span class="n">database</span><span class="o">=</span><span class="n">database</span><span class="p">,</span> <span class="n">body</span><span class="o">=</span><span class="n">body</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">call</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MLResourcesClient.delete_database"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.MLResourcesClient.delete_database">[docs]</a>    <span class="k">def</span> <span class="nf">delete_database</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">database</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">forest_delete</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Send a DELETE request to the /manage/v2/databases/{id|name} endpoint.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        database : str</span>
+<span class="sd">            A database identifier. The database can be identified either by ID or name.</span>
+<span class="sd">        forest_delete : str</span>
+<span class="sd">            Specifies to delete the forests attached to the database.</span>
+<span class="sd">            If unspecified, the forests will not be affected.</span>
+<span class="sd">            If &quot;configuration&quot; is specified, the forest configuration will be removed</span>
+<span class="sd">            but public forest data will remain.</span>
+<span class="sd">            If &quot;data&quot; is specified, the forest configuration and data will be removed.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Response</span>
+<span class="sd">            An HTTP response</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">call</span> <span class="o">=</span> <span class="n">DatabaseDeleteCall</span><span class="p">(</span><span class="n">database</span><span class="o">=</span><span class="n">database</span><span class="p">,</span> <span class="n">forest_delete</span><span class="o">=</span><span class="n">forest_delete</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">call</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MLResourcesClient.get_database_properties"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.MLResourcesClient.get_database_properties">[docs]</a>    <span class="k">def</span> <span class="nf">get_database_properties</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">database</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">data_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Send a GET request to the /manage/v2/databases/{id|name}/properties endpoint.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        database : str</span>
+<span class="sd">            A database identifier. The database can be identified either by ID or name.</span>
+<span class="sd">        data_format : str</span>
+<span class="sd">            The format of the returned data. Can be either json or xml (default).</span>
+<span class="sd">            This parameter overrides the Accept header if both are present.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Response</span>
+<span class="sd">            An HTTP response</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">call</span> <span class="o">=</span> <span class="n">DatabasePropertiesGetCall</span><span class="p">(</span><span class="n">database</span><span class="o">=</span><span class="n">database</span><span class="p">,</span> <span class="n">data_format</span><span class="o">=</span><span class="n">data_format</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">call</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MLResourcesClient.put_database_properties"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.MLResourcesClient.put_database_properties">[docs]</a>    <span class="k">def</span> <span class="nf">put_database_properties</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">database</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">body</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Send a PUT request to the /manage/v2/databases/{id|name}/properties endpoint.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        database : str</span>
+<span class="sd">            A database identifier. The database can be identified either by ID or name.</span>
+<span class="sd">        body : str | dict</span>
+<span class="sd">            A database properties in XML or JSON format.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Response</span>
+<span class="sd">            An HTTP response</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">call</span> <span class="o">=</span> <span class="n">DatabasePropertiesPutCall</span><span class="p">(</span><span class="n">database</span><span class="o">=</span><span class="n">database</span><span class="p">,</span> <span class="n">body</span><span class="o">=</span><span class="n">body</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">call</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MLResourcesClient.get_servers"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.MLResourcesClient.get_servers">[docs]</a>    <span class="k">def</span> <span class="nf">get_servers</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">data_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">group_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">view</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">full_refs</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Send a GET request to the /manage/v2/servers endpoint.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        data_format : str</span>
+<span class="sd">            The format of the returned data. Can be either html, json, or xml (default).</span>
+<span class="sd">        group_id : str</span>
+<span class="sd">            Specifies to return only the servers in the specified group.</span>
+<span class="sd">            The group can be identified either by id or name.</span>
+<span class="sd">            If not specified, the response includes information about all App Servers.</span>
+<span class="sd">        view : str</span>
+<span class="sd">            A specific view of the returned data.</span>
+<span class="sd">            Can be schema, properties-schema, metrics, package, describe, or default.</span>
+<span class="sd">        full_refs : bool</span>
+<span class="sd">            If set to true, full detail is returned for all relationship references.</span>
+<span class="sd">            A value of false (the default) indicates to return detail only for first</span>
+<span class="sd">            references. This parameter is not meaningful with view=package.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Response</span>
+<span class="sd">            An HTTP response</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">call</span> <span class="o">=</span> <span class="n">ServersGetCall</span><span class="p">(</span>
+            <span class="n">data_format</span><span class="o">=</span><span class="n">data_format</span><span class="p">,</span>
+            <span class="n">group_id</span><span class="o">=</span><span class="n">group_id</span><span class="p">,</span>
+            <span class="n">view</span><span class="o">=</span><span class="n">view</span><span class="p">,</span>
+            <span class="n">full_refs</span><span class="o">=</span><span class="n">full_refs</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">call</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MLResourcesClient.post_servers"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.MLResourcesClient.post_servers">[docs]</a>    <span class="k">def</span> <span class="nf">post_servers</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">body</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">,</span>
+        <span class="n">group_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">server_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Send a POST request to the /manage/v2/servers endpoint.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        body : str | dict</span>
+<span class="sd">            A database properties in XML or JSON format.</span>
+<span class="sd">        group_id : str</span>
+<span class="sd">            The id or name of the group to which the App Server belongs.</span>
+<span class="sd">            The group must be specified by this parameter or by the group-name property</span>
+<span class="sd">            in the request payload. If it is specified in both places, the values</span>
+<span class="sd">            must be the same.</span>
+<span class="sd">        server_type : str</span>
+<span class="sd">            The type of App Server to create.</span>
+<span class="sd">            The App Server type must be specified by this parameter or in the request</span>
+<span class="sd">            payload. If it is specified in both places, the values must be the same.</span>
+<span class="sd">            The valid types are: http, odbc, xdbc, or webdav.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Response</span>
+<span class="sd">            An HTTP response</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">call</span> <span class="o">=</span> <span class="n">ServersPostCall</span><span class="p">(</span><span class="n">body</span><span class="o">=</span><span class="n">body</span><span class="p">,</span> <span class="n">group_id</span><span class="o">=</span><span class="n">group_id</span><span class="p">,</span> <span class="n">server_type</span><span class="o">=</span><span class="n">server_type</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">call</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MLResourcesClient.get_server"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.MLResourcesClient.get_server">[docs]</a>    <span class="k">def</span> <span class="nf">get_server</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">server</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">group_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">data_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">view</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">host_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">full_refs</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">modules</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Send a GET request to the /manage/v2/servers/{id|name} endpoint.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        server : str</span>
+<span class="sd">            A server identifier. The server can be identified either by ID or name.</span>
+<span class="sd">        group_id : str</span>
+<span class="sd">            The id or name of the group to which the App Server belongs.</span>
+<span class="sd">            This parameter is required.</span>
+<span class="sd">        data_format : str</span>
+<span class="sd">            The format of the returned data. Can be either html, json, or xml (default).</span>
+<span class="sd">        view : str</span>
+<span class="sd">            A specific view of the returned data.</span>
+<span class="sd">            Can be properties-schema, config, edit, package, describe, status,</span>
+<span class="sd">            xdmp:server-status or default.</span>
+<span class="sd">        host_id : str</span>
+<span class="sd">            Meaningful only when view=status. Specifies to return the status</span>
+<span class="sd">            for the server in the specified host. The host can be identified</span>
+<span class="sd">            either by id or name.</span>
+<span class="sd">        full_refs : bool</span>
+<span class="sd">            If set to true, full detail is returned for all relationship references.</span>
+<span class="sd">            A value of false (the default) indicates to return detail only for first</span>
+<span class="sd">            references. This parameter is not meaningful with view=package.</span>
+<span class="sd">        modules : bool</span>
+<span class="sd">            Meaningful only with view=package. Whether to include a manifest</span>
+<span class="sd">            of the modules database for the App Server in the results, if one exists.</span>
+<span class="sd">            It is an error to request a modules database manifest for an App Server</span>
+<span class="sd">            that uses the filesystem for modules. Default: false.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Response</span>
+<span class="sd">            An HTTP response</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">call</span> <span class="o">=</span> <span class="n">ServerGetCall</span><span class="p">(</span>
+            <span class="n">server</span><span class="o">=</span><span class="n">server</span><span class="p">,</span>
+            <span class="n">group_id</span><span class="o">=</span><span class="n">group_id</span><span class="p">,</span>
+            <span class="n">data_format</span><span class="o">=</span><span class="n">data_format</span><span class="p">,</span>
+            <span class="n">view</span><span class="o">=</span><span class="n">view</span><span class="p">,</span>
+            <span class="n">host_id</span><span class="o">=</span><span class="n">host_id</span><span class="p">,</span>
+            <span class="n">full_refs</span><span class="o">=</span><span class="n">full_refs</span><span class="p">,</span>
+            <span class="n">modules</span><span class="o">=</span><span class="n">modules</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">call</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MLResourcesClient.delete_server"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.MLResourcesClient.delete_server">[docs]</a>    <span class="k">def</span> <span class="nf">delete_server</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">server</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">group_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Send a DELETE request to the /manage/v2/servers/{id|name} endpoint.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        server : str</span>
+<span class="sd">            A server identifier. The server can be identified either by ID or name.</span>
+<span class="sd">        group_id : str</span>
+<span class="sd">            The id or name of the group to which the App Server belongs.</span>
+<span class="sd">            This parameter is required.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Response</span>
+<span class="sd">            An HTTP response</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">call</span> <span class="o">=</span> <span class="n">ServerDeleteCall</span><span class="p">(</span><span class="n">server</span><span class="o">=</span><span class="n">server</span><span class="p">,</span> <span class="n">group_id</span><span class="o">=</span><span class="n">group_id</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">call</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MLResourcesClient.get_server_properties"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.MLResourcesClient.get_server_properties">[docs]</a>    <span class="k">def</span> <span class="nf">get_server_properties</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">server</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">group_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">data_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Send a GET request to the /manage/v2/servers/{id|name}/properties endpoint.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        server : str</span>
+<span class="sd">            A server identifier. The server can be identified either by ID or name.</span>
+<span class="sd">        group_id : str</span>
+<span class="sd">            The id or name of the group to which the App Server belongs.</span>
+<span class="sd">            This parameter is required.</span>
+<span class="sd">        data_format : str</span>
+<span class="sd">            The format of the returned data. Can be either json or xml (default).</span>
+<span class="sd">            This parameter overrides the Accept header if both are present.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Response</span>
+<span class="sd">            An HTTP response</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">call</span> <span class="o">=</span> <span class="n">ServerPropertiesGetCall</span><span class="p">(</span>
+            <span class="n">server</span><span class="o">=</span><span class="n">server</span><span class="p">,</span>
+            <span class="n">group_id</span><span class="o">=</span><span class="n">group_id</span><span class="p">,</span>
+            <span class="n">data_format</span><span class="o">=</span><span class="n">data_format</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">call</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MLResourcesClient.put_server_properties"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.MLResourcesClient.put_server_properties">[docs]</a>    <span class="k">def</span> <span class="nf">put_server_properties</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">server</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">group_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">body</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Send a PUT request to the /manage/v2/servers/{id|name}/properties endpoint.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        server : str</span>
+<span class="sd">            A server identifier. The server can be identified either by ID or name.</span>
+<span class="sd">        group_id : str</span>
+<span class="sd">            The id or name of the group to which the App Server belongs.</span>
+<span class="sd">            This parameter is required.</span>
+<span class="sd">        body : str | dict</span>
+<span class="sd">            A database properties in XML or JSON format.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Response</span>
+<span class="sd">            An HTTP response</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">call</span> <span class="o">=</span> <span class="n">ServerPropertiesPutCall</span><span class="p">(</span><span class="n">server</span><span class="o">=</span><span class="n">server</span><span class="p">,</span> <span class="n">group_id</span><span class="o">=</span><span class="n">group_id</span><span class="p">,</span> <span class="n">body</span><span class="o">=</span><span class="n">body</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">call</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MLResourcesClient.get_forests"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.MLResourcesClient.get_forests">[docs]</a>    <span class="k">def</span> <span class="nf">get_forests</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">data_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">view</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">database</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">group</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">host</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">full_refs</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Send a GET request to the /manage/v2/forests endpoint.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        data_format : str</span>
+<span class="sd">            The format of the returned data. Can be either html, json, or xml (default).</span>
+<span class="sd">        view : str</span>
+<span class="sd">            A specific view of the returned data.</span>
+<span class="sd">            Can be either describe, default, status, metrics, schema, storage,</span>
+<span class="sd">            or properties-schema.</span>
+<span class="sd">        database : str</span>
+<span class="sd">            Returns a summary of the forests for the specified database.</span>
+<span class="sd">            The database can be identified either by id or name.</span>
+<span class="sd">        group : str</span>
+<span class="sd">            Returns a summary of the forests for the specified group.</span>
+<span class="sd">            The group can be identified either by id or name.</span>
+<span class="sd">        host : str</span>
+<span class="sd">            Returns a summary of the forests for the specified host.</span>
+<span class="sd">            The host can be identified either by id or name.</span>
+<span class="sd">        full_refs : bool</span>
+<span class="sd">            If set to true, full detail is returned for all relationship references.</span>
+<span class="sd">            A value of false (the default) indicates to return detail only for first</span>
+<span class="sd">            references.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Response</span>
+<span class="sd">            An HTTP response</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">call</span> <span class="o">=</span> <span class="n">ForestsGetCall</span><span class="p">(</span>
+            <span class="n">data_format</span><span class="o">=</span><span class="n">data_format</span><span class="p">,</span>
+            <span class="n">view</span><span class="o">=</span><span class="n">view</span><span class="p">,</span>
+            <span class="n">database</span><span class="o">=</span><span class="n">database</span><span class="p">,</span>
+            <span class="n">group</span><span class="o">=</span><span class="n">group</span><span class="p">,</span>
+            <span class="n">host</span><span class="o">=</span><span class="n">host</span><span class="p">,</span>
+            <span class="n">full_refs</span><span class="o">=</span><span class="n">full_refs</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">call</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MLResourcesClient.post_forests"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.MLResourcesClient.post_forests">[docs]</a>    <span class="k">def</span> <span class="nf">post_forests</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">body</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">,</span>
+        <span class="n">wait_for_forest_to_mount</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Send a POST request to the /manage/v2/forests endpoint.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        body : str | dict</span>
+<span class="sd">            A database properties in XML or JSON format.</span>
+<span class="sd">        wait_for_forest_to_mount : bool</span>
+<span class="sd">            Whether to wait for the new forest to mount before sending a response</span>
+<span class="sd">            to this request. Allowed values: true (default) or false.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Response</span>
+<span class="sd">            An HTTP response</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">call</span> <span class="o">=</span> <span class="n">ForestsPostCall</span><span class="p">(</span>
+            <span class="n">body</span><span class="o">=</span><span class="n">body</span><span class="p">,</span>
+            <span class="n">wait_for_forest_to_mount</span><span class="o">=</span><span class="n">wait_for_forest_to_mount</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">call</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MLResourcesClient.put_forests"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.MLResourcesClient.put_forests">[docs]</a>    <span class="k">def</span> <span class="nf">put_forests</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">body</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Send a PUT request to the /manage/v2/forests endpoint.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        body : str | dict</span>
+<span class="sd">            A database properties in XML or JSON format.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Response</span>
+<span class="sd">            An HTTP response</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">call</span> <span class="o">=</span> <span class="n">ForestsPutCall</span><span class="p">(</span><span class="n">body</span><span class="o">=</span><span class="n">body</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">call</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MLResourcesClient.get_forest"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.MLResourcesClient.get_forest">[docs]</a>    <span class="k">def</span> <span class="nf">get_forest</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">forest</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">data_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">view</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Send a GET request to the /manage/v2/forests/{id|name} endpoint.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        forest : str</span>
+<span class="sd">            A forest identifier. The forest can be identified either by ID or name.</span>
+<span class="sd">        data_format : str</span>
+<span class="sd">            The format of the returned data. Can be either html, json, or xml (default).</span>
+<span class="sd">        view : str</span>
+<span class="sd">            A specific view of the returned data.</span>
+<span class="sd">            Can be properties-schema, config, edit, package, describe, status,</span>
+<span class="sd">            xdmp:server-status or default.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Response</span>
+<span class="sd">            An HTTP response</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">call</span> <span class="o">=</span> <span class="n">ForestGetCall</span><span class="p">(</span><span class="n">forest</span><span class="o">=</span><span class="n">forest</span><span class="p">,</span> <span class="n">data_format</span><span class="o">=</span><span class="n">data_format</span><span class="p">,</span> <span class="n">view</span><span class="o">=</span><span class="n">view</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">call</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MLResourcesClient.post_forest"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.MLResourcesClient.post_forest">[docs]</a>    <span class="k">def</span> <span class="nf">post_forest</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">forest</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">body</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Send a POST request to the /manage/v2/forests/{id|name} endpoint.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        forest : str</span>
+<span class="sd">            A forest identifier. The forest can be identified either by ID or name.</span>
+<span class="sd">        body : dict</span>
+<span class="sd">            A list of properties. Need to include the &#39;state&#39; property</span>
+<span class="sd">            (the type of state change to initiate).</span>
+<span class="sd">            Allowed values: clear, merge, restart, attach, detach, retire, employ.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Response</span>
+<span class="sd">            An HTTP response</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">call</span> <span class="o">=</span> <span class="n">ForestPostCall</span><span class="p">(</span><span class="n">forest</span><span class="o">=</span><span class="n">forest</span><span class="p">,</span> <span class="n">body</span><span class="o">=</span><span class="n">body</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">call</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MLResourcesClient.delete_forest"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.MLResourcesClient.delete_forest">[docs]</a>    <span class="k">def</span> <span class="nf">delete_forest</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">forest</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">level</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">replicas</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Send a DELETE request to the /manage/v2/forests/{id|name} endpoint.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        forest : str</span>
+<span class="sd">            A forest identifier. The forest can be identified either by ID or name.</span>
+<span class="sd">        level : str</span>
+<span class="sd">            The type of state change to initiate. Allowed values: full, config-only.</span>
+<span class="sd">            A config-only deletion removes only the forest configuration;</span>
+<span class="sd">            the data contained in the forest remains on disk.</span>
+<span class="sd">            A full deletion removes both the forest configuration and the data.</span>
+<span class="sd">        replicas : str</span>
+<span class="sd">            Determines how to process the replicas.</span>
+<span class="sd">            Allowed values: detach to detach the replica but keep it;</span>
+<span class="sd">            delete to detach and delete the replica.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Response</span>
+<span class="sd">            An HTTP response</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">call</span> <span class="o">=</span> <span class="n">ForestDeleteCall</span><span class="p">(</span><span class="n">forest</span><span class="o">=</span><span class="n">forest</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="n">level</span><span class="p">,</span> <span class="n">replicas</span><span class="o">=</span><span class="n">replicas</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">call</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MLResourcesClient.get_forest_properties"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.MLResourcesClient.get_forest_properties">[docs]</a>    <span class="k">def</span> <span class="nf">get_forest_properties</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">forest</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">data_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Send a GET request to the /manage/v2/forests/{id|name}/properties endpoint.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        forest : str</span>
+<span class="sd">            A forest identifier. The forest can be identified either by ID or name.</span>
+<span class="sd">        data_format : str</span>
+<span class="sd">            The format of the returned data. Can be either json or xml (default).</span>
+<span class="sd">            This parameter overrides the Accept header if both are present.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Response</span>
+<span class="sd">            An HTTP response</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">call</span> <span class="o">=</span> <span class="n">ForestPropertiesGetCall</span><span class="p">(</span><span class="n">forest</span><span class="o">=</span><span class="n">forest</span><span class="p">,</span> <span class="n">data_format</span><span class="o">=</span><span class="n">data_format</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">call</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MLResourcesClient.put_forest_properties"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.MLResourcesClient.put_forest_properties">[docs]</a>    <span class="k">def</span> <span class="nf">put_forest_properties</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">forest</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">body</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Send a PUT request to the /manage/v2/databases/{id|name}/properties endpoint.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        forest : str</span>
+<span class="sd">            A forest identifier. The forest can be identified either by ID or name.</span>
+<span class="sd">        body : str | dict</span>
+<span class="sd">            A forest properties in XML or JSON format.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Response</span>
+<span class="sd">            An HTTP response</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">call</span> <span class="o">=</span> <span class="n">ForestPropertiesPutCall</span><span class="p">(</span><span class="n">forest</span><span class="o">=</span><span class="n">forest</span><span class="p">,</span> <span class="n">body</span><span class="o">=</span><span class="n">body</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">call</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MLResourcesClient.get_roles"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.MLResourcesClient.get_roles">[docs]</a>    <span class="k">def</span> <span class="nf">get_roles</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">data_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">view</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Send a GET request to the /manage/v2/roles endpoint.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        data_format : str</span>
+<span class="sd">            The format of the returned data. Can be either html, json, or xml (default).</span>
+<span class="sd">        view : str</span>
+<span class="sd">            A specific view of the returned data. Can be: describe, or default.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Response</span>
+<span class="sd">            An HTTP response</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">call</span> <span class="o">=</span> <span class="n">RolesGetCall</span><span class="p">(</span><span class="n">data_format</span><span class="o">=</span><span class="n">data_format</span><span class="p">,</span> <span class="n">view</span><span class="o">=</span><span class="n">view</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">call</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MLResourcesClient.post_roles"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.MLResourcesClient.post_roles">[docs]</a>    <span class="k">def</span> <span class="nf">post_roles</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">body</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Send a POST request to the /manage/v2/roles endpoint.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        body : str | dict</span>
+<span class="sd">            A role properties in XML or JSON format.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Response</span>
+<span class="sd">            An HTTP response</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">call</span> <span class="o">=</span> <span class="n">RolesPostCall</span><span class="p">(</span><span class="n">body</span><span class="o">=</span><span class="n">body</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">call</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MLResourcesClient.get_role"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.MLResourcesClient.get_role">[docs]</a>    <span class="k">def</span> <span class="nf">get_role</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">role</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">data_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">view</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Send a GET request to the /manage/v2/roles/{id|name} endpoint.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        role : str</span>
+<span class="sd">            A role identifier. The role can be identified either by ID or name.</span>
+<span class="sd">        data_format : str</span>
+<span class="sd">            The format of the returned data. Can be either html, json, or xml (default).</span>
+<span class="sd">        view : str</span>
+<span class="sd">            A specific view of the returned data. Can be: describe, or default.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Response</span>
+<span class="sd">            An HTTP response</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">call</span> <span class="o">=</span> <span class="n">RoleGetCall</span><span class="p">(</span><span class="n">role</span><span class="o">=</span><span class="n">role</span><span class="p">,</span> <span class="n">data_format</span><span class="o">=</span><span class="n">data_format</span><span class="p">,</span> <span class="n">view</span><span class="o">=</span><span class="n">view</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">call</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MLResourcesClient.delete_role"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.MLResourcesClient.delete_role">[docs]</a>    <span class="k">def</span> <span class="nf">delete_role</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">role</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Send a DELETE request to the /manage/v2/roles/{id|name} endpoint.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        role : str</span>
+<span class="sd">            A role identifier. The role can be identified either by ID or name.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Response</span>
+<span class="sd">            An HTTP response</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">call</span> <span class="o">=</span> <span class="n">RoleDeleteCall</span><span class="p">(</span><span class="n">role</span><span class="o">=</span><span class="n">role</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">call</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MLResourcesClient.get_role_properties"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.MLResourcesClient.get_role_properties">[docs]</a>    <span class="k">def</span> <span class="nf">get_role_properties</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">role</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">data_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Send a GET request to the /manage/v2/roles/{id|name}/properties endpoint.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        role : str</span>
+<span class="sd">            A role identifier. The role can be identified either by ID or name.</span>
+<span class="sd">        data_format : str</span>
+<span class="sd">            The format of the returned data. Can be either json or xml (default).</span>
+<span class="sd">            This parameter overrides the Accept header if both are present.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Response</span>
+<span class="sd">            An HTTP response</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">call</span> <span class="o">=</span> <span class="n">RolePropertiesGetCall</span><span class="p">(</span><span class="n">role</span><span class="o">=</span><span class="n">role</span><span class="p">,</span> <span class="n">data_format</span><span class="o">=</span><span class="n">data_format</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">call</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MLResourcesClient.put_role_properties"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.MLResourcesClient.put_role_properties">[docs]</a>    <span class="k">def</span> <span class="nf">put_role_properties</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">role</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">body</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Send a PUT request to the /manage/v2/roles/{id|name}/properties endpoint.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        role : str</span>
+<span class="sd">            A role identifier. The role can be identified either by ID or name.</span>
+<span class="sd">        body : str | dict</span>
+<span class="sd">            A role properties in XML or JSON format.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Response</span>
+<span class="sd">            An HTTP response</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">call</span> <span class="o">=</span> <span class="n">RolePropertiesPutCall</span><span class="p">(</span><span class="n">role</span><span class="o">=</span><span class="n">role</span><span class="p">,</span> <span class="n">body</span><span class="o">=</span><span class="n">body</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">call</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MLResourcesClient.get_users"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.MLResourcesClient.get_users">[docs]</a>    <span class="k">def</span> <span class="nf">get_users</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">data_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">view</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Send a GET request to the /manage/v2/users endpoint.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        data_format : str</span>
+<span class="sd">            The format of the returned data. Can be either html, json, or xml (default).</span>
+<span class="sd">        view : str</span>
+<span class="sd">            A specific view of the returned data. Can be: describe, or default.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Response</span>
+<span class="sd">            An HTTP response</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">call</span> <span class="o">=</span> <span class="n">UsersGetCall</span><span class="p">(</span><span class="n">data_format</span><span class="o">=</span><span class="n">data_format</span><span class="p">,</span> <span class="n">view</span><span class="o">=</span><span class="n">view</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">call</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MLResourcesClient.post_users"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.MLResourcesClient.post_users">[docs]</a>    <span class="k">def</span> <span class="nf">post_users</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">body</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Send a POST request to the /manage/v2/users endpoint.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        body : str | dict</span>
+<span class="sd">            A user properties in XML or JSON format.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Response</span>
+<span class="sd">            An HTTP response</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">call</span> <span class="o">=</span> <span class="n">UsersPostCall</span><span class="p">(</span><span class="n">body</span><span class="o">=</span><span class="n">body</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">call</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MLResourcesClient.get_user"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.MLResourcesClient.get_user">[docs]</a>    <span class="k">def</span> <span class="nf">get_user</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">user</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">data_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">view</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Send a GET request to the /manage/v2/users/{id|name} endpoint.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        user : str</span>
+<span class="sd">            A user identifier. The user can be identified either by ID or name.</span>
+<span class="sd">        data_format : str</span>
+<span class="sd">            The format of the returned data. Can be either html, json, or xml (default).</span>
+<span class="sd">        view : str</span>
+<span class="sd">            A specific view of the returned data. Can be: describe, or default.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Response</span>
+<span class="sd">            An HTTP response</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">call</span> <span class="o">=</span> <span class="n">UserGetCall</span><span class="p">(</span><span class="n">user</span><span class="o">=</span><span class="n">user</span><span class="p">,</span> <span class="n">data_format</span><span class="o">=</span><span class="n">data_format</span><span class="p">,</span> <span class="n">view</span><span class="o">=</span><span class="n">view</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">call</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MLResourcesClient.delete_user"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.MLResourcesClient.delete_user">[docs]</a>    <span class="k">def</span> <span class="nf">delete_user</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">user</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Send a DELETE request to the /manage/v2/users/{id|name} endpoint.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        user : str</span>
+<span class="sd">            A user identifier. The user can be identified either by ID or name.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Response</span>
+<span class="sd">            An HTTP response</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">call</span> <span class="o">=</span> <span class="n">UserDeleteCall</span><span class="p">(</span><span class="n">user</span><span class="o">=</span><span class="n">user</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">call</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MLResourcesClient.get_user_properties"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.MLResourcesClient.get_user_properties">[docs]</a>    <span class="k">def</span> <span class="nf">get_user_properties</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">user</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">data_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Send a GET request to the /manage/v2/users/{id|name}/properties endpoint.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        user : str</span>
+<span class="sd">            A user identifier. The user can be identified either by ID or name.</span>
+<span class="sd">        data_format : str</span>
+<span class="sd">            The format of the returned data. Can be either json or xml (default).</span>
+<span class="sd">            This parameter overrides the Accept header if both are present.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Response</span>
+<span class="sd">            An HTTP response</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">call</span> <span class="o">=</span> <span class="n">UserPropertiesGetCall</span><span class="p">(</span><span class="n">user</span><span class="o">=</span><span class="n">user</span><span class="p">,</span> <span class="n">data_format</span><span class="o">=</span><span class="n">data_format</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">call</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MLResourcesClient.put_user_properties"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.MLResourcesClient.put_user_properties">[docs]</a>    <span class="k">def</span> <span class="nf">put_user_properties</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">user</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">body</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Send a PUT request to the /manage/v2/users/{id|name}/properties endpoint.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        user : str</span>
+<span class="sd">            A user identifier. The user can be identified either by ID or name.</span>
+<span class="sd">        body : str | dict</span>
+<span class="sd">            A user properties in XML or JSON format.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Response</span>
+<span class="sd">            An HTTP response</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        NotImplementedError</span>
+<span class="sd">            If the call&#39;s method is not GET, POST, PUT nor DELETE.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">call</span> <span class="o">=</span> <span class="n">UserPropertiesPutCall</span><span class="p">(</span><span class="n">user</span><span class="o">=</span><span class="n">user</span><span class="p">,</span> <span class="n">body</span><span class="o">=</span><span class="n">body</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">call</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MLResourcesClient.get_documents"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.MLResourcesClient.get_documents">[docs]</a>    <span class="k">def</span> <span class="nf">get_documents</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">uri</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span><span class="p">,</span>
+        <span class="n">database</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">category</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">data_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">timestamp</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">transform</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">transform_params</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">txid</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Send a GET request to the /v1/documents endpoint.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        uri : str | list</span>
+<span class="sd">            One or more URIs for documents in the database.</span>
+<span class="sd">            If you specify multiple URIs, the Accept header must be multipart/mixed.</span>
+<span class="sd">        database : str</span>
+<span class="sd">            Perform this operation on the named content database instead</span>
+<span class="sd">            of the default content database associated with the REST API instance.</span>
+<span class="sd">            Using an alternative database requires the &quot;eval-in&quot; privilege.</span>
+<span class="sd">        category : str</span>
+<span class="sd">            The category of data to fetch about the requested document.</span>
+<span class="sd">            Category can be specified multiple times to retrieve any combination</span>
+<span class="sd">            of content and metadata. Valid categories: content (default), metadata,</span>
+<span class="sd">            metadata-values, collections, permissions, properties, and quality.</span>
+<span class="sd">            Use metadata to request all categories except content.</span>
+<span class="sd">        data_format : str</span>
+<span class="sd">            The expected format of metadata returned in the response.</span>
+<span class="sd">            Accepted values: xml or json.</span>
+<span class="sd">            This parameter does not affect document content.</span>
+<span class="sd">            For metadata, this parameter overrides the MIME type in the Accept header,</span>
+<span class="sd">            except when the Accept header is multipart/mixed.</span>
+<span class="sd">        timestamp : str</span>
+<span class="sd">            A timestamp returned in the ML-Effective-Timestamp header of a previous</span>
+<span class="sd">            request. Use this parameter to fetch documents based on the contents</span>
+<span class="sd">            of the database at a fixed point-in-time.</span>
+<span class="sd">        transform : str</span>
+<span class="sd">            Names a content transformation previously installed via</span>
+<span class="sd">            the /config/transforms service. The service applies the transformation</span>
+<span class="sd">            to all documents prior to constructing the response.</span>
+<span class="sd">        transform_params : str</span>
+<span class="sd">            A transform parameter names and values. For example, { &quot;myparam&quot;: 1 }.</span>
+<span class="sd">            Transform parameters are passed to the transform named in the transform</span>
+<span class="sd">            parameter.</span>
+<span class="sd">        txid : str</span>
+<span class="sd">            The transaction identifier of the multi-statement transaction in which</span>
+<span class="sd">            to service this request. Use the /transactions service to create and manage</span>
+<span class="sd">            multi-statement transactions.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Response</span>
+<span class="sd">            An HTTP response</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">call</span> <span class="o">=</span> <span class="n">DocumentsGetCall</span><span class="p">(</span>
+            <span class="n">uri</span><span class="o">=</span><span class="n">uri</span><span class="p">,</span>
+            <span class="n">database</span><span class="o">=</span><span class="n">database</span><span class="p">,</span>
+            <span class="n">category</span><span class="o">=</span><span class="n">category</span><span class="p">,</span>
+            <span class="n">data_format</span><span class="o">=</span><span class="n">data_format</span><span class="p">,</span>
+            <span class="n">timestamp</span><span class="o">=</span><span class="n">timestamp</span><span class="p">,</span>
+            <span class="n">transform</span><span class="o">=</span><span class="n">transform</span><span class="p">,</span>
+            <span class="n">transform_params</span><span class="o">=</span><span class="n">transform_params</span><span class="p">,</span>
+            <span class="n">txid</span><span class="o">=</span><span class="n">txid</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">call</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MLResourcesClient.post_documents"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.MLResourcesClient.post_documents">[docs]</a>    <span class="k">def</span> <span class="nf">post_documents</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">body_parts</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">DocumentsBodyPart</span><span class="p">],</span>
+        <span class="n">database</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">transform</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">transform_params</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">txid</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">temporal_collection</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">system_time</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Send a POST request to the /v1/documents endpoint.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        body_parts : list[DocumentsBodyPart]</span>
+<span class="sd">            A list of multipart request body parts</span>
+<span class="sd">        database : str</span>
+<span class="sd">            Perform this operation on the named content database instead</span>
+<span class="sd">            of the default content database associated with the REST API instance.</span>
+<span class="sd">            Using an alternative database requires the &quot;eval-in&quot; privilege.</span>
+<span class="sd">        transform : str</span>
+<span class="sd">            Names a content transformation previously installed via</span>
+<span class="sd">            the /config/transforms service. The service applies the transformation</span>
+<span class="sd">            to all documents prior to constructing the response.</span>
+<span class="sd">        transform_params : str</span>
+<span class="sd">            A transform parameter names and values. For example, { &quot;myparam&quot;: 1 }.</span>
+<span class="sd">            Transform parameters are passed to the transform named in the transform</span>
+<span class="sd">            parameter.</span>
+<span class="sd">        txid : str</span>
+<span class="sd">            The transaction identifier of the multi-statement transaction in which</span>
+<span class="sd">            to service this request. Use the /transactions service to create and manage</span>
+<span class="sd">            multi-statement transactions.</span>
+<span class="sd">        temporal_collection : str</span>
+<span class="sd">            Specify the name of a temporal collection into which the documents are</span>
+<span class="sd">            to be inserted.</span>
+<span class="sd">        system_time : str</span>
+<span class="sd">            Set the system start time for the insertion or update.</span>
+<span class="sd">            This time will override the system time set by MarkLogic.</span>
+<span class="sd">            Ignored if temporal-collection is not included in the request.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Response</span>
+<span class="sd">            An HTTP response</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">call</span> <span class="o">=</span> <span class="n">DocumentsPostCall</span><span class="p">(</span>
+            <span class="n">body_parts</span><span class="o">=</span><span class="n">body_parts</span><span class="p">,</span>
+            <span class="n">database</span><span class="o">=</span><span class="n">database</span><span class="p">,</span>
+            <span class="n">transform</span><span class="o">=</span><span class="n">transform</span><span class="p">,</span>
+            <span class="n">transform_params</span><span class="o">=</span><span class="n">transform_params</span><span class="p">,</span>
+            <span class="n">txid</span><span class="o">=</span><span class="n">txid</span><span class="p">,</span>
+            <span class="n">temporal_collection</span><span class="o">=</span><span class="n">temporal_collection</span><span class="p">,</span>
+            <span class="n">system_time</span><span class="o">=</span><span class="n">system_time</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">call</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MLResourcesClient.delete_documents"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.MLResourcesClient.delete_documents">[docs]</a>    <span class="k">def</span> <span class="nf">delete_documents</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">uri</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span><span class="p">,</span>
+        <span class="n">database</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">category</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">txid</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">temporal_collection</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">system_time</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">wipe_temporal</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Send a DELETE request to the /v1/documents endpoint.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        uri : str | list</span>
+<span class="sd">            One or more URIs for documents in the database.</span>
+<span class="sd">            If you specify multiple URIs, the Accept header must be multipart/mixed.</span>
+<span class="sd">        database : str</span>
+<span class="sd">            Perform this operation on the named content database instead</span>
+<span class="sd">            of the default content database associated with the REST API instance.</span>
+<span class="sd">            Using an alternative database requires the &quot;eval-in&quot; privilege.</span>
+<span class="sd">        category : str | list</span>
+<span class="sd">            The category of data to fetch about the requested document.</span>
+<span class="sd">            Category can be specified multiple times to retrieve any combination</span>
+<span class="sd">            of content and metadata. Valid categories: content (default), metadata,</span>
+<span class="sd">            metadata-values, collections, permissions, properties, and quality.</span>
+<span class="sd">            Use metadata to request all categories except content.</span>
+<span class="sd">        txid : str</span>
+<span class="sd">            The transaction identifier of the multi-statement transaction in which</span>
+<span class="sd">            to service this request. Use the /transactions service to create and manage</span>
+<span class="sd">            multi-statement transactions.</span>
+<span class="sd">        temporal_collection : str</span>
+<span class="sd">            Specify the name of a temporal collection into which the documents are</span>
+<span class="sd">            to be inserted.</span>
+<span class="sd">        system_time : str</span>
+<span class="sd">            Set the system start time for the insertion or update.</span>
+<span class="sd">            This time will override the system time set by MarkLogic.</span>
+<span class="sd">            Ignored if temporal-collection is not included in the request.</span>
+<span class="sd">        wipe_temporal : bool</span>
+<span class="sd">            Remove all versions of a temporal document rather than performing</span>
+<span class="sd">            a temporal delete. You can only use this parameter when you also specify</span>
+<span class="sd">            a temporal-collection parameter.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Response</span>
+<span class="sd">            An HTTP response</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">call</span> <span class="o">=</span> <span class="n">DocumentsDeleteCall</span><span class="p">(</span>
+            <span class="n">uri</span><span class="o">=</span><span class="n">uri</span><span class="p">,</span>
+            <span class="n">database</span><span class="o">=</span><span class="n">database</span><span class="p">,</span>
+            <span class="n">category</span><span class="o">=</span><span class="n">category</span><span class="p">,</span>
+            <span class="n">txid</span><span class="o">=</span><span class="n">txid</span><span class="p">,</span>
+            <span class="n">temporal_collection</span><span class="o">=</span><span class="n">temporal_collection</span><span class="p">,</span>
+            <span class="n">system_time</span><span class="o">=</span><span class="n">system_time</span><span class="p">,</span>
+            <span class="n">wipe_temporal</span><span class="o">=</span><span class="n">wipe_temporal</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">call</span><span class="p">)</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Tomasz Aniołowski.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

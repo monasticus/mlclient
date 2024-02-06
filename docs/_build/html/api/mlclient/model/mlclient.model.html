@@ -1,0 +1,1257 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mlclient.model package &mdash; MLClient 0.4.0 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/autodoc_pydantic.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=4e78f113"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Python API" href="../../../user/pythonapi.html" />
+    <link rel="prev" title="mlclient.calls package" href="../calls/mlclient.calls.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            MLClient
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Python API:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../mlclient.html">mlclient package</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../mlclient.html#mlclient.MLClient"><code class="docutils literal notranslate"><span class="pre">MLClient</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../mlclient.html#mlclient.MLManager"><code class="docutils literal notranslate"><span class="pre">MLManager</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../mlclient.html#mlclient.MLResourceClient"><code class="docutils literal notranslate"><span class="pre">MLResourceClient</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../mlclient.html#mlclient.MLResourcesClient"><code class="docutils literal notranslate"><span class="pre">MLResourcesClient</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../mlclient.html#mlclient.MLResponseParser"><code class="docutils literal notranslate"><span class="pre">MLResponseParser</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../calls/mlclient.calls.html">mlclient.calls package</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">mlclient.model package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#mlclient.model.BinaryDocument"><code class="docutils literal notranslate"><span class="pre">BinaryDocument</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.BinaryDocument.content"><code class="docutils literal notranslate"><span class="pre">BinaryDocument.content</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.BinaryDocument.content_bytes"><code class="docutils literal notranslate"><span class="pre">BinaryDocument.content_bytes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.BinaryDocument.content_string"><code class="docutils literal notranslate"><span class="pre">BinaryDocument.content_string</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#mlclient.model.Document"><code class="docutils literal notranslate"><span class="pre">Document</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.Document.content"><code class="docutils literal notranslate"><span class="pre">Document.content</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.Document.content_bytes"><code class="docutils literal notranslate"><span class="pre">Document.content_bytes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.Document.content_string"><code class="docutils literal notranslate"><span class="pre">Document.content_string</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.Document.doc_type"><code class="docutils literal notranslate"><span class="pre">Document.doc_type</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.Document.metadata"><code class="docutils literal notranslate"><span class="pre">Document.metadata</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.Document.temporal_collection"><code class="docutils literal notranslate"><span class="pre">Document.temporal_collection</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.Document.uri"><code class="docutils literal notranslate"><span class="pre">Document.uri</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#mlclient.model.DocumentFactory"><code class="docutils literal notranslate"><span class="pre">DocumentFactory</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.DocumentFactory.build_document"><code class="docutils literal notranslate"><span class="pre">DocumentFactory.build_document()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.DocumentFactory.build_raw_document"><code class="docutils literal notranslate"><span class="pre">DocumentFactory.build_raw_document()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#mlclient.model.DocumentType"><code class="docutils literal notranslate"><span class="pre">DocumentType</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.DocumentType.BINARY"><code class="docutils literal notranslate"><span class="pre">DocumentType.BINARY</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.DocumentType.JSON"><code class="docutils literal notranslate"><span class="pre">DocumentType.JSON</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.DocumentType.TEXT"><code class="docutils literal notranslate"><span class="pre">DocumentType.TEXT</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.DocumentType.XML"><code class="docutils literal notranslate"><span class="pre">DocumentType.XML</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#mlclient.model.JSONDocument"><code class="docutils literal notranslate"><span class="pre">JSONDocument</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.JSONDocument.content"><code class="docutils literal notranslate"><span class="pre">JSONDocument.content</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.JSONDocument.content_bytes"><code class="docutils literal notranslate"><span class="pre">JSONDocument.content_bytes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.JSONDocument.content_string"><code class="docutils literal notranslate"><span class="pre">JSONDocument.content_string</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#mlclient.model.Metadata"><code class="docutils literal notranslate"><span class="pre">Metadata</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.Metadata.add_collection"><code class="docutils literal notranslate"><span class="pre">Metadata.add_collection()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.Metadata.add_permission"><code class="docutils literal notranslate"><span class="pre">Metadata.add_permission()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.Metadata.collections"><code class="docutils literal notranslate"><span class="pre">Metadata.collections()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.Metadata.metadata_values"><code class="docutils literal notranslate"><span class="pre">Metadata.metadata_values()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.Metadata.permissions"><code class="docutils literal notranslate"><span class="pre">Metadata.permissions()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.Metadata.properties"><code class="docutils literal notranslate"><span class="pre">Metadata.properties()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.Metadata.put_metadata_value"><code class="docutils literal notranslate"><span class="pre">Metadata.put_metadata_value()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.Metadata.put_property"><code class="docutils literal notranslate"><span class="pre">Metadata.put_property()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.Metadata.quality"><code class="docutils literal notranslate"><span class="pre">Metadata.quality()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.Metadata.remove_collection"><code class="docutils literal notranslate"><span class="pre">Metadata.remove_collection()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.Metadata.remove_metadata_value"><code class="docutils literal notranslate"><span class="pre">Metadata.remove_metadata_value()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.Metadata.remove_permission"><code class="docutils literal notranslate"><span class="pre">Metadata.remove_permission()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.Metadata.remove_property"><code class="docutils literal notranslate"><span class="pre">Metadata.remove_property()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.Metadata.set_quality"><code class="docutils literal notranslate"><span class="pre">Metadata.set_quality()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.Metadata.to_json"><code class="docutils literal notranslate"><span class="pre">Metadata.to_json()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.Metadata.to_json_string"><code class="docutils literal notranslate"><span class="pre">Metadata.to_json_string()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.Metadata.to_xml"><code class="docutils literal notranslate"><span class="pre">Metadata.to_xml()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.Metadata.to_xml_string"><code class="docutils literal notranslate"><span class="pre">Metadata.to_xml_string()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#mlclient.model.MetadataDocument"><code class="docutils literal notranslate"><span class="pre">MetadataDocument</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.MetadataDocument.content"><code class="docutils literal notranslate"><span class="pre">MetadataDocument.content</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.MetadataDocument.content_bytes"><code class="docutils literal notranslate"><span class="pre">MetadataDocument.content_bytes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.MetadataDocument.content_string"><code class="docutils literal notranslate"><span class="pre">MetadataDocument.content_string</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#mlclient.model.MetadataFactory"><code class="docutils literal notranslate"><span class="pre">MetadataFactory</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.MetadataFactory.from_file"><code class="docutils literal notranslate"><span class="pre">MetadataFactory.from_file()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#mlclient.model.Mimetype"><code class="docutils literal notranslate"><span class="pre">Mimetype</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.Mimetype.document_type"><code class="docutils literal notranslate"><span class="pre">Mimetype.document_type</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.Mimetype.extensions"><code class="docutils literal notranslate"><span class="pre">Mimetype.extensions</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.Mimetype.mime_type"><code class="docutils literal notranslate"><span class="pre">Mimetype.mime_type</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#mlclient.model.Permission"><code class="docutils literal notranslate"><span class="pre">Permission</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.Permission.EXECUTE"><code class="docutils literal notranslate"><span class="pre">Permission.EXECUTE</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.Permission.INSERT"><code class="docutils literal notranslate"><span class="pre">Permission.INSERT</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.Permission.READ"><code class="docutils literal notranslate"><span class="pre">Permission.READ</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.Permission.UPDATE"><code class="docutils literal notranslate"><span class="pre">Permission.UPDATE</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.Permission.UPDATE_NODE"><code class="docutils literal notranslate"><span class="pre">Permission.UPDATE_NODE</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.Permission.add_capability"><code class="docutils literal notranslate"><span class="pre">Permission.add_capability()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.Permission.capabilities"><code class="docutils literal notranslate"><span class="pre">Permission.capabilities()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.Permission.remove_capability"><code class="docutils literal notranslate"><span class="pre">Permission.remove_capability()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.Permission.role_name"><code class="docutils literal notranslate"><span class="pre">Permission.role_name()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.Permission.to_json"><code class="docutils literal notranslate"><span class="pre">Permission.to_json()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#mlclient.model.RawDocument"><code class="docutils literal notranslate"><span class="pre">RawDocument</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.RawDocument.content"><code class="docutils literal notranslate"><span class="pre">RawDocument.content</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.RawDocument.content_bytes"><code class="docutils literal notranslate"><span class="pre">RawDocument.content_bytes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.RawDocument.content_string"><code class="docutils literal notranslate"><span class="pre">RawDocument.content_string</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#mlclient.model.RawStringDocument"><code class="docutils literal notranslate"><span class="pre">RawStringDocument</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.RawStringDocument.content"><code class="docutils literal notranslate"><span class="pre">RawStringDocument.content</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.RawStringDocument.content_bytes"><code class="docutils literal notranslate"><span class="pre">RawStringDocument.content_bytes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.RawStringDocument.content_string"><code class="docutils literal notranslate"><span class="pre">RawStringDocument.content_string</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#mlclient.model.TextDocument"><code class="docutils literal notranslate"><span class="pre">TextDocument</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.TextDocument.content"><code class="docutils literal notranslate"><span class="pre">TextDocument.content</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.TextDocument.content_bytes"><code class="docutils literal notranslate"><span class="pre">TextDocument.content_bytes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.TextDocument.content_string"><code class="docutils literal notranslate"><span class="pre">TextDocument.content_string</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#mlclient.model.XMLDocument"><code class="docutils literal notranslate"><span class="pre">XMLDocument</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.XMLDocument.content"><code class="docutils literal notranslate"><span class="pre">XMLDocument.content</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.XMLDocument.content_bytes"><code class="docutils literal notranslate"><span class="pre">XMLDocument.content_bytes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.XMLDocument.content_string"><code class="docutils literal notranslate"><span class="pre">XMLDocument.content_string</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../mlclient.html#module-mlclient.ml_config">mlclient.ml_config module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../mlclient.html#module-mlclient.constants">mlclient.constants module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../mlclient.html#module-mlclient.exceptions">mlclient.exceptions module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../mlclient.html#module-mlclient.utils">mlclient.utils module</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../user/pythonapi.html">Python API</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">MLClient</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../mlclient.html">mlclient package</a></li>
+      <li class="breadcrumb-item active">mlclient.model package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../_sources/api/mlclient/model/mlclient.model.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-mlclient.model">
+<span id="mlclient-model-package"></span><h1>mlclient.model package<a class="headerlink" href="#module-mlclient.model" title="Permalink to this heading"></a></h1>
+<p>The ML Model package.</p>
+<p>It contains modules with a corresponding Python representation of MarkLogic-related
+data structures:</p>
+<blockquote>
+<div><ul class="simple">
+<li><dl class="simple">
+<dt>data</dt><dd><p>The ML Data module.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</div></blockquote>
+<p>This package exports the following classes:</p>
+<blockquote>
+<div><ul class="simple">
+<li><dl class="simple">
+<dt>DocumentType</dt><dd><p>An enumeration class representing document types.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>Document</dt><dd><p>A class representing a single MarkLogic document.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>JSONDocument</dt><dd><p>A Document implementation representing a single MarkLogic JSON document.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>XMLDocument</dt><dd><p>A Document implementation representing a single MarkLogic XML document.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>TextDocument</dt><dd><p>A Document implementation representing a single MarkLogic TEXT document.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>BinaryDocument</dt><dd><p>A Document implementation representing a single MarkLogic BINARY document.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>RawDocument</dt><dd><p>A Document implementation representing a single MarkLogic document.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>RawStringDocument</dt><dd><p>A Document implementation representing a single MarkLogic document.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>MetadataDocument</dt><dd><p>A Document implementation representing a single MarkLogic document’s metadata.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>DocumentFactory</dt><dd><p>A factory class instantiating a Document implementation classes.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>MetadataFactory</dt><dd><p>A factory class instantiating a Metadata class from a file.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>Metadata</dt><dd><p>A class representing MarkLogic’s document metadata.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>Permission:</dt><dd><p>A class representing MarkLogic’s document permission.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>Mimetype</dt><dd><p>A class representing mime type</p>
+</dd>
+</dl>
+</li>
+</ul>
+</div></blockquote>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient.model</span> <span class="kn">import</span> <span class="n">Document</span><span class="p">,</span> <span class="n">DocumentType</span><span class="p">,</span> <span class="n">Metadata</span>
+</pre></div>
+</div>
+<dl class="py class">
+<dt class="sig sig-object py" id="mlclient.model.BinaryDocument">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mlclient.model.</span></span><span class="sig-name descname"><span class="pre">BinaryDocument</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">content</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bytes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uri</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#mlclient.model.Metadata" title="mlclient.model.Metadata"><span class="pre">Metadata</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temporal_collection</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/mlclient/model/data.html#BinaryDocument"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.model.BinaryDocument" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mlclient.model.Document" title="mlclient.model.data.Document"><code class="xref py py-class docutils literal notranslate"><span class="pre">Document</span></code></a></p>
+<p>A Document implementation representing a single MarkLogic BINARY document.</p>
+<p>This implementation stores content in bytes format.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="mlclient.model.BinaryDocument.content">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">content</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bytes</span></em><a class="headerlink" href="#mlclient.model.BinaryDocument.content" title="Permalink to this definition"></a></dt>
+<dd><p>A document content.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A document’s content</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bytes</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mlclient.model.BinaryDocument.content_bytes">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">content_bytes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bytes</span></em><a class="headerlink" href="#mlclient.model.BinaryDocument.content_bytes" title="Permalink to this definition"></a></dt>
+<dd><p>A document content bytes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A document’s content bytes</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bytes</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mlclient.model.BinaryDocument.content_string">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">content_string</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#mlclient.model.BinaryDocument.content_string" title="Permalink to this definition"></a></dt>
+<dd><p>A document content bytes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A document’s content bytes</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mlclient.model.Document">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mlclient.model.</span></span><span class="sig-name descname"><span class="pre">Document</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">uri</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">doc_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#mlclient.model.DocumentType" title="mlclient.model.DocumentType"><span class="pre">DocumentType</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">DocumentType.XML</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#mlclient.model.Metadata" title="mlclient.model.Metadata"><span class="pre">Metadata</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temporal_collection</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/mlclient/model/data.html#Document"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.model.Document" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>An abstract class representing a single MarkLogic document.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="mlclient.model.Document.content">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">content</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Any</span></em><a class="headerlink" href="#mlclient.model.Document.content" title="Permalink to this definition"></a></dt>
+<dd><p>A document content.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A document’s content</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>Any</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mlclient.model.Document.content_bytes">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">content_bytes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bytes</span></em><a class="headerlink" href="#mlclient.model.Document.content_bytes" title="Permalink to this definition"></a></dt>
+<dd><p>A document content bytes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A document’s content bytes</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bytes</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mlclient.model.Document.content_string">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">content_string</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#mlclient.model.Document.content_string" title="Permalink to this definition"></a></dt>
+<dd><p>A document content in string format.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A document’s content in string format</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mlclient.model.Document.doc_type">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">doc_type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#mlclient.model.DocumentType" title="mlclient.model.DocumentType"><span class="pre">DocumentType</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#mlclient.model.Document.doc_type" title="Permalink to this definition"></a></dt>
+<dd><p>A document type.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mlclient.model.Document.metadata">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">metadata</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#mlclient.model.Metadata" title="mlclient.model.data.Metadata"><span class="pre">Metadata</span></a></em><a class="headerlink" href="#mlclient.model.Document.metadata" title="Permalink to this definition"></a></dt>
+<dd><p>A document metadata.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mlclient.model.Document.temporal_collection">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">temporal_collection</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#mlclient.model.Document.temporal_collection" title="Permalink to this definition"></a></dt>
+<dd><p>The temporal collection.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mlclient.model.Document.uri">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">uri</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#mlclient.model.Document.uri" title="Permalink to this definition"></a></dt>
+<dd><p>A document URI.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mlclient.model.DocumentFactory">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mlclient.model.</span></span><span class="sig-name descname"><span class="pre">DocumentFactory</span></span><a class="reference internal" href="../../../_modules/mlclient/model/data.html#DocumentFactory"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.model.DocumentFactory" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A factory class instantiating a Document implementation classes.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="mlclient.model.DocumentFactory.build_document">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">build_document</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">content</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ElemTree.Element</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bytes</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">doc_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#mlclient.model.DocumentType" title="mlclient.model.DocumentType"><span class="pre">DocumentType</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uri</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#mlclient.model.Metadata" title="mlclient.model.Metadata"><span class="pre">Metadata</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temporal_collection</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#mlclient.model.Document" title="mlclient.model.Document"><span class="pre">Document</span></a></span></span><a class="reference internal" href="../../../_modules/mlclient/model/data.html#DocumentFactory.build_document"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.model.DocumentFactory.build_document" title="Permalink to this definition"></a></dt>
+<dd><p>Instantiate Document based on the document or content type.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>content</strong> (<em>ElemTree.Element</em><em> | </em><em>dict</em><em> | </em><em>str</em><em> | </em><em>bytes</em><em> | </em><em>None</em><em>, </em><em>default None</em>) – A document content</p></li>
+<li><p><strong>doc_type</strong> (<a class="reference internal" href="#mlclient.model.DocumentType" title="mlclient.model.DocumentType"><em>DocumentType</em></a><em> | </em><em>str</em><em> | </em><em>None</em><em>, </em><em>default None</em>) – A document type</p></li>
+<li><p><strong>uri</strong> (<em>str</em><em> | </em><em>None</em><em>, </em><em>default None</em>) – A document URI</p></li>
+<li><p><strong>metadata</strong> (<a class="reference internal" href="#mlclient.model.Metadata" title="mlclient.model.Metadata"><em>Metadata</em></a><em> | </em><em>None</em><em>, </em><em>default None</em>) – A document metadata</p></li>
+<li><p><strong>temporal_collection</strong> (<em>str</em><em> | </em><em>None</em><em>, </em><em>default None</em>) – The temporal collection</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A Document implementation instance</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#mlclient.model.Document" title="mlclient.model.Document">Document</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mlclient.model.DocumentFactory.build_raw_document">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">build_raw_document</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">content</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bytes</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">doc_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#mlclient.model.DocumentType" title="mlclient.model.DocumentType"><span class="pre">DocumentType</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uri</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bytes</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temporal_collection</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#mlclient.model.Document" title="mlclient.model.Document"><span class="pre">Document</span></a></span></span><a class="reference internal" href="../../../_modules/mlclient/model/data.html#DocumentFactory.build_raw_document"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.model.DocumentFactory.build_raw_document" title="Permalink to this definition"></a></dt>
+<dd><p>Instantiate Document based on the document type.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>content</strong> (<em>bytes</em><em> | </em><em>str</em>) – A document content</p></li>
+<li><p><strong>doc_type</strong> (<a class="reference internal" href="#mlclient.model.DocumentType" title="mlclient.model.DocumentType"><em>DocumentType</em></a><em> | </em><em>str</em>) – A document type</p></li>
+<li><p><strong>uri</strong> (<em>str</em><em> | </em><em>None</em><em>, </em><em>default None</em>) – A document URI</p></li>
+<li><p><strong>metadata</strong> (<em>bytes</em><em> | </em><em>str</em><em> | </em><em>None</em><em>, </em><em>default None</em>) – A document metadata</p></li>
+<li><p><strong>temporal_collection</strong> (<em>str</em><em> | </em><em>None</em><em>, </em><em>default None</em>) – The temporal collection</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A raw Document implementation instance</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#mlclient.model.Document" title="mlclient.model.Document">Document</a></p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>NotImplementedError</strong> – If content type is neither bytes nor str</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mlclient.model.DocumentType">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mlclient.model.</span></span><span class="sig-name descname"><span class="pre">DocumentType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/mlclient/model/data.html#DocumentType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.model.DocumentType" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></p>
+<p>An enumeration class representing document types.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mlclient.model.DocumentType.BINARY">
+<span class="sig-name descname"><span class="pre">BINARY</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'binary'</span></em><a class="headerlink" href="#mlclient.model.DocumentType.BINARY" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mlclient.model.DocumentType.JSON">
+<span class="sig-name descname"><span class="pre">JSON</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'json'</span></em><a class="headerlink" href="#mlclient.model.DocumentType.JSON" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mlclient.model.DocumentType.TEXT">
+<span class="sig-name descname"><span class="pre">TEXT</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'text'</span></em><a class="headerlink" href="#mlclient.model.DocumentType.TEXT" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mlclient.model.DocumentType.XML">
+<span class="sig-name descname"><span class="pre">XML</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'xml'</span></em><a class="headerlink" href="#mlclient.model.DocumentType.XML" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mlclient.model.JSONDocument">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mlclient.model.</span></span><span class="sig-name descname"><span class="pre">JSONDocument</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">content</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uri</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#mlclient.model.Metadata" title="mlclient.model.Metadata"><span class="pre">Metadata</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temporal_collection</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/mlclient/model/data.html#JSONDocument"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.model.JSONDocument" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mlclient.model.Document" title="mlclient.model.data.Document"><code class="xref py py-class docutils literal notranslate"><span class="pre">Document</span></code></a></p>
+<p>A Document implementation representing a single MarkLogic JSON document.</p>
+<p>This implementation stores content in dict format.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="mlclient.model.JSONDocument.content">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">content</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span></em><a class="headerlink" href="#mlclient.model.JSONDocument.content" title="Permalink to this definition"></a></dt>
+<dd><p>A document content.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A document’s content</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mlclient.model.JSONDocument.content_bytes">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">content_bytes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bytes</span></em><a class="headerlink" href="#mlclient.model.JSONDocument.content_bytes" title="Permalink to this definition"></a></dt>
+<dd><p>A document content bytes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A document’s content bytes</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bytes</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mlclient.model.JSONDocument.content_string">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">content_string</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#mlclient.model.JSONDocument.content_string" title="Permalink to this definition"></a></dt>
+<dd><p>A document content in string format.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A document’s content in string format</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mlclient.model.Metadata">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mlclient.model.</span></span><span class="sig-name descname"><span class="pre">Metadata</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">collections</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">permissions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">properties</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quality</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata_values</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/mlclient/model/data.html#Metadata"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.model.Metadata" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A class representing MarkLogic’s document metadata.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="mlclient.model.Metadata.add_collection">
+<span class="sig-name descname"><span class="pre">add_collection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">collection</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../../../_modules/mlclient/model/data.html#Metadata.add_collection"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.model.Metadata.add_collection" title="Permalink to this definition"></a></dt>
+<dd><p>Assign a new collection to document.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>collection</strong> (<em>str</em>) – A document’s new collection</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>allow</strong> – True if the collection is non-blank value, and it does not appear already
+in document’s collections. Otherwise, False.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mlclient.model.Metadata.add_permission">
+<span class="sig-name descname"><span class="pre">add_permission</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">role_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">capability</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../../../_modules/mlclient/model/data.html#Metadata.add_permission"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.model.Metadata.add_permission" title="Permalink to this definition"></a></dt>
+<dd><p>Assign a new permission to document.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>role_name</strong> (<em>str</em>) – a permission’s role name</p></li>
+<li><p><strong>capability</strong> (<em>str</em>) – a permission’s capability</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if there’s no such capability assigned to this role already, and it is
+a correct one. Otherwise, False.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mlclient.model.Metadata.collections">
+<span class="sig-name descname"><span class="pre">collections</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="reference internal" href="../../../_modules/mlclient/model/data.html#Metadata.collections"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.model.Metadata.collections" title="Permalink to this definition"></a></dt>
+<dd><p>Return document’s collections.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mlclient.model.Metadata.metadata_values">
+<span class="sig-name descname"><span class="pre">metadata_values</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="../../../_modules/mlclient/model/data.html#Metadata.metadata_values"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.model.Metadata.metadata_values" title="Permalink to this definition"></a></dt>
+<dd><p>Return document’s metadata values.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mlclient.model.Metadata.permissions">
+<span class="sig-name descname"><span class="pre">permissions</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="reference internal" href="../../../_modules/mlclient/model/data.html#Metadata.permissions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.model.Metadata.permissions" title="Permalink to this definition"></a></dt>
+<dd><p>Return document’s permissions.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mlclient.model.Metadata.properties">
+<span class="sig-name descname"><span class="pre">properties</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="../../../_modules/mlclient/model/data.html#Metadata.properties"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.model.Metadata.properties" title="Permalink to this definition"></a></dt>
+<dd><p>Return document’s properties.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mlclient.model.Metadata.put_metadata_value">
+<span class="sig-name descname"><span class="pre">put_metadata_value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/mlclient/model/data.html#Metadata.put_metadata_value"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.model.Metadata.put_metadata_value" title="Permalink to this definition"></a></dt>
+<dd><p>Assign a new metadata value to document.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>str</em>) – A metadata name</p></li>
+<li><p><strong>value</strong> (<em>str</em>) – A metadata value</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mlclient.model.Metadata.put_property">
+<span class="sig-name descname"><span class="pre">put_property</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/mlclient/model/data.html#Metadata.put_property"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.model.Metadata.put_property" title="Permalink to this definition"></a></dt>
+<dd><p>Assign a new property to document.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>str</em>) – A property name</p></li>
+<li><p><strong>value</strong> (<em>str</em>) – A property value</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mlclient.model.Metadata.quality">
+<span class="sig-name descname"><span class="pre">quality</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="reference internal" href="../../../_modules/mlclient/model/data.html#Metadata.quality"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.model.Metadata.quality" title="Permalink to this definition"></a></dt>
+<dd><p>Return document’s quality.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mlclient.model.Metadata.remove_collection">
+<span class="sig-name descname"><span class="pre">remove_collection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">collection</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../../../_modules/mlclient/model/data.html#Metadata.remove_collection"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.model.Metadata.remove_collection" title="Permalink to this definition"></a></dt>
+<dd><p>Remove a collection from document.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>collection</strong> (<em>str</em>) – A document’s collection</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>allow</strong> – True if the collection is assigned to the document. Otherwise, False.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mlclient.model.Metadata.remove_metadata_value">
+<span class="sig-name descname"><span class="pre">remove_metadata_value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../../../_modules/mlclient/model/data.html#Metadata.remove_metadata_value"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.model.Metadata.remove_metadata_value" title="Permalink to this definition"></a></dt>
+<dd><p>Remove a metadata value from document.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>name</strong> (<em>str</em>) – A metadata name</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if the document has a metadata with such name. Otherwise, False.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mlclient.model.Metadata.remove_permission">
+<span class="sig-name descname"><span class="pre">remove_permission</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">role_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">capability</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../../../_modules/mlclient/model/data.html#Metadata.remove_permission"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.model.Metadata.remove_permission" title="Permalink to this definition"></a></dt>
+<dd><p>Remove a permission from document.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>role_name</strong> (<em>str</em>) – A permission’s role name</p></li>
+<li><p><strong>capability</strong> (<em>str</em>) – A permission’s capability</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if the capability is assigned to the role for a document.
+Otherwise, False.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mlclient.model.Metadata.remove_property">
+<span class="sig-name descname"><span class="pre">remove_property</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../../../_modules/mlclient/model/data.html#Metadata.remove_property"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.model.Metadata.remove_property" title="Permalink to this definition"></a></dt>
+<dd><p>Remove a property from document.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>name</strong> (<em>str</em>) – A property name</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if the document has a property with such name. Otherwise, False.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mlclient.model.Metadata.set_quality">
+<span class="sig-name descname"><span class="pre">set_quality</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">quality</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../../../_modules/mlclient/model/data.html#Metadata.set_quality"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.model.Metadata.set_quality" title="Permalink to this definition"></a></dt>
+<dd><p>Set document’s quality.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>quality</strong> (<em>int</em>) – A document’s new quality</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>allow</strong> – True if value provided is an integer. Otherwise, False.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mlclient.model.Metadata.to_json">
+<span class="sig-name descname"><span class="pre">to_json</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="../../../_modules/mlclient/model/data.html#Metadata.to_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.model.Metadata.to_json" title="Permalink to this definition"></a></dt>
+<dd><p>Return a JSON representation of the Metadata instance.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mlclient.model.Metadata.to_json_string">
+<span class="sig-name descname"><span class="pre">to_json_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">indent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../../../_modules/mlclient/model/data.html#Metadata.to_json_string"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.model.Metadata.to_json_string" title="Permalink to this definition"></a></dt>
+<dd><p>Return a stringified JSON representation of the Metadata instance.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>indent</strong> (<em>int</em><em> | </em><em>None</em>) – A number of spaces per indent level</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Metadata in a stringified JSON representation</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mlclient.model.Metadata.to_xml">
+<span class="sig-name descname"><span class="pre">to_xml</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ElementTree</span></span></span><a class="reference internal" href="../../../_modules/mlclient/model/data.html#Metadata.to_xml"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.model.Metadata.to_xml" title="Permalink to this definition"></a></dt>
+<dd><p>Return an XML representation of the Metadata instance.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mlclient.model.Metadata.to_xml_string">
+<span class="sig-name descname"><span class="pre">to_xml_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">indent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../../../_modules/mlclient/model/data.html#Metadata.to_xml_string"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.model.Metadata.to_xml_string" title="Permalink to this definition"></a></dt>
+<dd><p>Return a stringified XML representation of the Metadata instance.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>indent</strong> (<em>int</em><em> | </em><em>None</em>) – A number of spaces per indent level</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Metadata in a stringified XML representation</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mlclient.model.MetadataDocument">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mlclient.model.</span></span><span class="sig-name descname"><span class="pre">MetadataDocument</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">uri</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#mlclient.model.Metadata" title="mlclient.model.data.Metadata"><span class="pre">Metadata</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/mlclient/model/data.html#MetadataDocument"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.model.MetadataDocument" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mlclient.model.Document" title="mlclient.model.data.Document"><code class="xref py py-class docutils literal notranslate"><span class="pre">Document</span></code></a></p>
+<p>A Document implementation representing a single MarkLogic document’s metadata.</p>
+<p>This implementation does not store any content.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="mlclient.model.MetadataDocument.content">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">content</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#mlclient.model.MetadataDocument.content" title="Permalink to this definition"></a></dt>
+<dd><p>A document content.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A document’s content</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mlclient.model.MetadataDocument.content_bytes">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">content_bytes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#mlclient.model.MetadataDocument.content_bytes" title="Permalink to this definition"></a></dt>
+<dd><p>A document content bytes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A document’s content bytes</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mlclient.model.MetadataDocument.content_string">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">content_string</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#mlclient.model.MetadataDocument.content_string" title="Permalink to this definition"></a></dt>
+<dd><p>A document content in string format.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A document’s content in string format</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mlclient.model.MetadataFactory">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mlclient.model.</span></span><span class="sig-name descname"><span class="pre">MetadataFactory</span></span><a class="reference internal" href="../../../_modules/mlclient/model/data.html#MetadataFactory"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.model.MetadataFactory" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A factory class instantiating a Metadata class from a file.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="mlclient.model.MetadataFactory.from_file">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#mlclient.model.Metadata" title="mlclient.model.data.Metadata"><span class="pre">Metadata</span></a></span></span><a class="reference internal" href="../../../_modules/mlclient/model/data.html#MetadataFactory.from_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.model.MetadataFactory.from_file" title="Permalink to this definition"></a></dt>
+<dd><p>Initialize a Metadata instance from a file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>file_path</strong> (<em>str</em>) – A metadata file path</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A Metadata instance</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#mlclient.model.Metadata" title="mlclient.model.Metadata">Metadata</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class pydantic_model">
+<dt class="sig sig-object py" id="mlclient.model.Mimetype">
+<em class="property"><span class="pre">pydantic</span> <span class="pre">model</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mlclient.model.</span></span><span class="sig-name descname"><span class="pre">Mimetype</span></span><a class="reference internal" href="../../../_modules/mlclient/model/data.html#Mimetype"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.model.Mimetype" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></p>
+<p>A class representing a mime type.</p>
+<p><details  class="autodoc_pydantic_collapsable_json">
+<summary>Show JSON schema</summary><div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">   </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Mimetype&quot;</span><span class="p">,</span>
+<span class="w">   </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;A class representing a mime type.&quot;</span><span class="p">,</span>
+<span class="w">   </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;object&quot;</span><span class="p">,</span>
+<span class="w">   </span><span class="nt">&quot;properties&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;mime-type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">         </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Mime-Type&quot;</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;extensions&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">         </span><span class="nt">&quot;items&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span>
+<span class="w">         </span><span class="p">},</span>
+<span class="w">         </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Extensions&quot;</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;array&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;doc-type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">         </span><span class="nt">&quot;$ref&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;#/$defs/DocumentType&quot;</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">   </span><span class="p">},</span>
+<span class="w">   </span><span class="nt">&quot;$defs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;DocumentType&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">         </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;An enumeration class representing document types.&quot;</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;enum&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">            </span><span class="s2">&quot;xml&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="s2">&quot;json&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="s2">&quot;binary&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="s2">&quot;text&quot;</span>
+<span class="w">         </span><span class="p">],</span>
+<span class="w">         </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;DocumentType&quot;</span><span class="p">,</span>
+<span class="w">         </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">   </span><span class="p">},</span>
+<span class="w">   </span><span class="nt">&quot;required&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="s2">&quot;mime-type&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;extensions&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">&quot;doc-type&quot;</span>
+<span class="w">   </span><span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</details></p><dl class="field-list simple">
+<dt class="field-odd">Fields<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">document_type</span> <span class="pre">(mlclient.model.data.DocumentType)</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">extensions</span> <span class="pre">(List[str])</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">mime_type</span> <span class="pre">(str)</span></code></p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="mlclient.model.Mimetype.document_type">
+<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">document_type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#mlclient.model.DocumentType" title="mlclient.model.DocumentType"><span class="pre">DocumentType</span></a></em><em class="property"> <span class="pre">[Required]</span></em><em class="property"> <span class="pre">(alias</span> <span class="pre">'doc-type')</span></em><a class="headerlink" href="#mlclient.model.Mimetype.document_type" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="mlclient.model.Mimetype.extensions">
+<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">extensions</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#mlclient.model.Mimetype.extensions" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="mlclient.model.Mimetype.mime_type">
+<em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">mime_type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"> <span class="pre">[Required]</span></em><em class="property"> <span class="pre">(alias</span> <span class="pre">'mime-type')</span></em><a class="headerlink" href="#mlclient.model.Mimetype.mime_type" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mlclient.model.Permission">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mlclient.model.</span></span><span class="sig-name descname"><span class="pre">Permission</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">role_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">capabilities</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">set</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/mlclient/model/data.html#Permission"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.model.Permission" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A class representing MarkLogic’s document permission.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mlclient.model.Permission.EXECUTE">
+<span class="sig-name descname"><span class="pre">EXECUTE</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'execute'</span></em><a class="headerlink" href="#mlclient.model.Permission.EXECUTE" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mlclient.model.Permission.INSERT">
+<span class="sig-name descname"><span class="pre">INSERT</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'insert'</span></em><a class="headerlink" href="#mlclient.model.Permission.INSERT" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mlclient.model.Permission.READ">
+<span class="sig-name descname"><span class="pre">READ</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'read'</span></em><a class="headerlink" href="#mlclient.model.Permission.READ" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mlclient.model.Permission.UPDATE">
+<span class="sig-name descname"><span class="pre">UPDATE</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'update'</span></em><a class="headerlink" href="#mlclient.model.Permission.UPDATE" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mlclient.model.Permission.UPDATE_NODE">
+<span class="sig-name descname"><span class="pre">UPDATE_NODE</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'update-node'</span></em><a class="headerlink" href="#mlclient.model.Permission.UPDATE_NODE" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mlclient.model.Permission.add_capability">
+<span class="sig-name descname"><span class="pre">add_capability</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">capability</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../../../_modules/mlclient/model/data.html#Permission.add_capability"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.model.Permission.add_capability" title="Permalink to this definition"></a></dt>
+<dd><p>Assign a new capability to the role.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>capability</strong> (<em>str</em>) – a permission’s capability</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>allow</strong> – True if there’s no such capability assigned to this role already, and it is
+a correct one. Otherwise, False.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mlclient.model.Permission.capabilities">
+<span class="sig-name descname"><span class="pre">capabilities</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">set</span></span></span><a class="reference internal" href="../../../_modules/mlclient/model/data.html#Permission.capabilities"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.model.Permission.capabilities" title="Permalink to this definition"></a></dt>
+<dd><p>Return permission’s capabilities.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mlclient.model.Permission.remove_capability">
+<span class="sig-name descname"><span class="pre">remove_capability</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">capability</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../../../_modules/mlclient/model/data.html#Permission.remove_capability"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.model.Permission.remove_capability" title="Permalink to this definition"></a></dt>
+<dd><p>Remove a capability from the role.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>capability</strong> (<em>str</em>) – a permission’s capability</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>allow</strong> – True if the capability is assigned to the role.
+Otherwise, False.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mlclient.model.Permission.role_name">
+<span class="sig-name descname"><span class="pre">role_name</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../../../_modules/mlclient/model/data.html#Permission.role_name"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.model.Permission.role_name" title="Permalink to this definition"></a></dt>
+<dd><p>Return permission’s role name.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mlclient.model.Permission.to_json">
+<span class="sig-name descname"><span class="pre">to_json</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="../../../_modules/mlclient/model/data.html#Permission.to_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.model.Permission.to_json" title="Permalink to this definition"></a></dt>
+<dd><p>Return a JSON representation of the Permission instance.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mlclient.model.RawDocument">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mlclient.model.</span></span><span class="sig-name descname"><span class="pre">RawDocument</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">content</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bytes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uri</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">doc_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#mlclient.model.DocumentType" title="mlclient.model.DocumentType"><span class="pre">DocumentType</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">DocumentType.XML</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bytes</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temporal_collection</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/mlclient/model/data.html#RawDocument"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.model.RawDocument" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mlclient.model.Document" title="mlclient.model.data.Document"><code class="xref py py-class docutils literal notranslate"><span class="pre">Document</span></code></a></p>
+<p>A Document implementation representing a single MarkLogic document.</p>
+<p>This implementation stores content in bytes format.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="mlclient.model.RawDocument.content">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">content</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bytes</span></em><a class="headerlink" href="#mlclient.model.RawDocument.content" title="Permalink to this definition"></a></dt>
+<dd><p>A document content.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A document’s content</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bytes</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mlclient.model.RawDocument.content_bytes">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">content_bytes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bytes</span></em><a class="headerlink" href="#mlclient.model.RawDocument.content_bytes" title="Permalink to this definition"></a></dt>
+<dd><p>A document content bytes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A document’s content bytes</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bytes</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mlclient.model.RawDocument.content_string">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">content_string</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#mlclient.model.RawDocument.content_string" title="Permalink to this definition"></a></dt>
+<dd><p>A document content in string format.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A document’s content in string format</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mlclient.model.RawStringDocument">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mlclient.model.</span></span><span class="sig-name descname"><span class="pre">RawStringDocument</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">content</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uri</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">doc_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#mlclient.model.DocumentType" title="mlclient.model.DocumentType"><span class="pre">DocumentType</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">DocumentType.XML</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temporal_collection</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/mlclient/model/data.html#RawStringDocument"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.model.RawStringDocument" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mlclient.model.Document" title="mlclient.model.data.Document"><code class="xref py py-class docutils literal notranslate"><span class="pre">Document</span></code></a></p>
+<p>A Document implementation representing a single MarkLogic document.</p>
+<p>This implementation stores content in a string format.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="mlclient.model.RawStringDocument.content">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">content</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#mlclient.model.RawStringDocument.content" title="Permalink to this definition"></a></dt>
+<dd><p>A document content.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A document’s content</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mlclient.model.RawStringDocument.content_bytes">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">content_bytes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bytes</span></em><a class="headerlink" href="#mlclient.model.RawStringDocument.content_bytes" title="Permalink to this definition"></a></dt>
+<dd><p>A document content bytes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A document’s content bytes</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bytes</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mlclient.model.RawStringDocument.content_string">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">content_string</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#mlclient.model.RawStringDocument.content_string" title="Permalink to this definition"></a></dt>
+<dd><p>A document content in string format.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A document’s content in string format</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mlclient.model.TextDocument">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mlclient.model.</span></span><span class="sig-name descname"><span class="pre">TextDocument</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">content</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uri</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#mlclient.model.Metadata" title="mlclient.model.Metadata"><span class="pre">Metadata</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temporal_collection</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/mlclient/model/data.html#TextDocument"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.model.TextDocument" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mlclient.model.Document" title="mlclient.model.data.Document"><code class="xref py py-class docutils literal notranslate"><span class="pre">Document</span></code></a></p>
+<p>A Document implementation representing a single MarkLogic TEXT document.</p>
+<p>This implementation stores content in a string format.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="mlclient.model.TextDocument.content">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">content</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#mlclient.model.TextDocument.content" title="Permalink to this definition"></a></dt>
+<dd><p>A document content.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A document’s content</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mlclient.model.TextDocument.content_bytes">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">content_bytes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bytes</span></em><a class="headerlink" href="#mlclient.model.TextDocument.content_bytes" title="Permalink to this definition"></a></dt>
+<dd><p>A document content bytes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A document’s content bytes</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bytes</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mlclient.model.TextDocument.content_string">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">content_string</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#mlclient.model.TextDocument.content_string" title="Permalink to this definition"></a></dt>
+<dd><p>A document content in string format.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A document’s content in string format</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mlclient.model.XMLDocument">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mlclient.model.</span></span><span class="sig-name descname"><span class="pre">XMLDocument</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">content</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ElemTree.ElementTree</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uri</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#mlclient.model.Metadata" title="mlclient.model.Metadata"><span class="pre">Metadata</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temporal_collection</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/mlclient/model/data.html#XMLDocument"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.model.XMLDocument" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#mlclient.model.Document" title="mlclient.model.data.Document"><code class="xref py py-class docutils literal notranslate"><span class="pre">Document</span></code></a></p>
+<p>A Document implementation representing a single MarkLogic XML document.</p>
+<p>This implementation stores content in ElemTree.ElementTree format.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="mlclient.model.XMLDocument.content">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">content</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ElementTree</span></em><a class="headerlink" href="#mlclient.model.XMLDocument.content" title="Permalink to this definition"></a></dt>
+<dd><p>A document content.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A document’s content</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>ElemTree.ElementTree</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mlclient.model.XMLDocument.content_bytes">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">content_bytes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bytes</span></em><a class="headerlink" href="#mlclient.model.XMLDocument.content_bytes" title="Permalink to this definition"></a></dt>
+<dd><p>A document content bytes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A document’s content bytes</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bytes</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mlclient.model.XMLDocument.content_string">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">content_string</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#mlclient.model.XMLDocument.content_string" title="Permalink to this definition"></a></dt>
+<dd><p>A document content in string format.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A document’s content in string format</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../calls/mlclient.calls.html" class="btn btn-neutral float-left" title="mlclient.calls package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../../../user/pythonapi.html" class="btn btn-neutral float-right" title="Python API" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Tomasz Aniołowski.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

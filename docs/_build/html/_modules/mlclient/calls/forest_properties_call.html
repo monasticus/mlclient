@@ -3,16 +3,17 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mlclient.calls.forest_properties_call &mdash; MLClient 0.1.0 documentation</title>
+  <title>mlclient.calls.forest_properties_call &mdash; MLClient 0.4.0 documentation</title>
       <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/autodoc_pydantic.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
         <script src="../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=2389946f"></script>
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=4e78f113"></script>
         <script src="../../../_static/doctools.js?v=888ff710"></script>
         <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -41,7 +42,11 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Python API:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../mlclient/mlclient.html">mlclient package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/mlclient/mlclient.html">mlclient package</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../user/pythonapi.html">Python API</a></li>
 </ul>
 
         </div>
@@ -87,7 +92,7 @@
 <span class="kn">from</span> <span class="nn">mlclient.calls</span> <span class="kn">import</span> <span class="n">ResourceCall</span>
 
 
-<div class="viewcode-block" id="ForestPropertiesGetCall"><a class="viewcode-back" href="../../../mlclient/calls/mlclient.calls.html#mlclient.calls.ForestPropertiesGetCall">[docs]</a><span class="k">class</span> <span class="nc">ForestPropertiesGetCall</span><span class="p">(</span><span class="n">ResourceCall</span><span class="p">):</span>
+<div class="viewcode-block" id="ForestPropertiesGetCall"><a class="viewcode-back" href="../../../api/mlclient/calls/mlclient.calls.html#mlclient.calls.ForestPropertiesGetCall">[docs]</a><span class="k">class</span> <span class="nc">ForestPropertiesGetCall</span><span class="p">(</span><span class="n">ResourceCall</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;A GET request to get forest properties.</span>
 
 <span class="sd">    A ResourceCall implementation representing a single GET request</span>
@@ -106,9 +111,9 @@
     <span class="n">_SUPPORTED_FORMATS</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;xml&quot;</span><span class="p">,</span> <span class="s2">&quot;json&quot;</span><span class="p">,</span> <span class="s2">&quot;html&quot;</span><span class="p">]</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span>
-            <span class="n">forest</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-            <span class="n">data_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;xml&quot;</span><span class="p">,</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">forest</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">data_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;xml&quot;</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize ForestPropertiesGetCall instance.</span>
 
@@ -123,14 +128,16 @@
         <span class="n">data_format</span> <span class="o">=</span> <span class="n">data_format</span> <span class="k">if</span> <span class="n">data_format</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="s2">&quot;xml&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_validate_params</span><span class="p">(</span><span class="n">data_format</span><span class="p">)</span>
 
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="s2">&quot;GET&quot;</span><span class="p">,</span>
-                         <span class="n">accept</span><span class="o">=</span><span class="n">utils</span><span class="o">.</span><span class="n">get_accept_header_for_format</span><span class="p">(</span><span class="n">data_format</span><span class="p">))</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">method</span><span class="o">=</span><span class="s2">&quot;GET&quot;</span><span class="p">,</span>
+            <span class="n">accept</span><span class="o">=</span><span class="n">utils</span><span class="o">.</span><span class="n">get_accept_header_for_format</span><span class="p">(</span><span class="n">data_format</span><span class="p">),</span>
+        <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_forest</span> <span class="o">=</span> <span class="n">forest</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">add_param</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_FORMAT_PARAM</span><span class="p">,</span> <span class="n">data_format</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">endpoint</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span>
+        <span class="bp">self</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;An endpoint for the Forest Properties call.</span>
 
@@ -143,8 +150,8 @@
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">_validate_params</span><span class="p">(</span>
-            <span class="bp">cls</span><span class="p">,</span>
-            <span class="n">data_format</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="bp">cls</span><span class="p">,</span>
+        <span class="n">data_format</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="k">if</span> <span class="n">data_format</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_SUPPORTED_FORMATS</span><span class="p">:</span>
             <span class="n">joined_supported_formats</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">_SUPPORTED_FORMATS</span><span class="p">)</span>
@@ -152,7 +159,7 @@
             <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">WrongParametersError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="ForestPropertiesPutCall"><a class="viewcode-back" href="../../../mlclient/calls/mlclient.calls.html#mlclient.calls.ForestPropertiesPutCall">[docs]</a><span class="k">class</span> <span class="nc">ForestPropertiesPutCall</span><span class="p">(</span><span class="n">ResourceCall</span><span class="p">):</span>
+<div class="viewcode-block" id="ForestPropertiesPutCall"><a class="viewcode-back" href="../../../api/mlclient/calls/mlclient.calls.html#mlclient.calls.ForestPropertiesPutCall">[docs]</a><span class="k">class</span> <span class="nc">ForestPropertiesPutCall</span><span class="p">(</span><span class="n">ResourceCall</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;A PUT request to modify forest properties.</span>
 
 <span class="sd">    A ResourceCall implementation representing a single PUT request</span>
@@ -166,9 +173,9 @@
     <span class="n">_ENDPOINT_TEMPLATE</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;/manage/v2/forests/</span><span class="si">{}</span><span class="s2">/properties&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span>
-            <span class="n">forest</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-            <span class="n">body</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">,</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">forest</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">body</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize ForestPropertiesPutCall instance.</span>
 
@@ -183,14 +190,12 @@
         <span class="n">content_type</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">get_content_type_header_for_data</span><span class="p">(</span><span class="n">body</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">content_type</span> <span class="o">==</span> <span class="n">constants</span><span class="o">.</span><span class="n">HEADER_JSON</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">body</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="n">body</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">body</span><span class="p">)</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="s2">&quot;PUT&quot;</span><span class="p">,</span>
-                         <span class="n">content_type</span><span class="o">=</span><span class="n">content_type</span><span class="p">,</span>
-                         <span class="n">body</span><span class="o">=</span><span class="n">body</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="s2">&quot;PUT&quot;</span><span class="p">,</span> <span class="n">content_type</span><span class="o">=</span><span class="n">content_type</span><span class="p">,</span> <span class="n">body</span><span class="o">=</span><span class="n">body</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_forest</span> <span class="o">=</span> <span class="n">forest</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">endpoint</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span>
+        <span class="bp">self</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;An endpoint for the Forest Properties call.</span>
 
@@ -203,12 +208,14 @@
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">_validate_params</span><span class="p">(</span>
-            <span class="bp">cls</span><span class="p">,</span>
-            <span class="n">body</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">,</span>
+        <span class="bp">cls</span><span class="p">,</span>
+        <span class="n">body</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="k">if</span> <span class="n">body</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">body</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s2">&quot;^</span><span class="se">\\</span><span class="s2">s*$&quot;</span><span class="p">,</span> <span class="n">body</span><span class="p">):</span>
-            <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;No request body provided for &quot;</span>
-                   <span class="s2">&quot;PUT /manage/v2/forests/{id|name}/properties!&quot;</span><span class="p">)</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="s2">&quot;No request body provided for &quot;</span>
+                <span class="s2">&quot;PUT /manage/v2/forests/{id|name}/properties!&quot;</span>
+            <span class="p">)</span>
             <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">WrongParametersError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
 </pre></div>
 

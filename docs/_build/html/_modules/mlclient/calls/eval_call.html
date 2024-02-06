@@ -3,16 +3,17 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mlclient.calls.eval_call &mdash; MLClient 0.1.0 documentation</title>
+  <title>mlclient.calls.eval_call &mdash; MLClient 0.4.0 documentation</title>
       <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/autodoc_pydantic.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
         <script src="../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=2389946f"></script>
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=4e78f113"></script>
         <script src="../../../_static/doctools.js?v=888ff710"></script>
         <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -41,7 +42,11 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Python API:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../mlclient/mlclient.html">mlclient package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/mlclient/mlclient.html">mlclient package</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../user/pythonapi.html">Python API</a></li>
 </ul>
 
         </div>
@@ -77,13 +82,14 @@
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
 
+<span class="kn">import</span> <span class="nn">re</span>
 <span class="kn">from</span> <span class="nn">json</span> <span class="kn">import</span> <span class="n">dumps</span>
 
 <span class="kn">from</span> <span class="nn">mlclient</span> <span class="kn">import</span> <span class="n">constants</span><span class="p">,</span> <span class="n">exceptions</span>
 <span class="kn">from</span> <span class="nn">mlclient.calls</span> <span class="kn">import</span> <span class="n">ResourceCall</span>
 
 
-<div class="viewcode-block" id="EvalCall"><a class="viewcode-back" href="../../../mlclient/calls/mlclient.calls.html#mlclient.calls.EvalCall">[docs]</a><span class="k">class</span> <span class="nc">EvalCall</span><span class="p">(</span><span class="n">ResourceCall</span><span class="p">):</span>
+<div class="viewcode-block" id="EvalCall"><a class="viewcode-back" href="../../../api/mlclient/calls/mlclient.calls.html#mlclient.calls.EvalCall">[docs]</a><span class="k">class</span> <span class="nc">EvalCall</span><span class="p">(</span><span class="n">ResourceCall</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;A POST request to evaluate an ad-hoc query.</span>
 
 <span class="sd">    A ResourceCall implementation representing a single request</span>
@@ -102,12 +108,12 @@
     <span class="n">_TXID_PARAM</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;txid&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span>
-            <span class="n">xquery</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-            <span class="n">javascript</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-            <span class="n">variables</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-            <span class="n">database</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-            <span class="n">txid</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">xquery</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">javascript</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">variables</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">database</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">txid</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize EvalCall instance.</span>
 
@@ -133,16 +139,18 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_validate_params</span><span class="p">(</span><span class="n">xquery</span><span class="p">,</span> <span class="n">javascript</span><span class="p">)</span>
 
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="n">constants</span><span class="o">.</span><span class="n">METHOD_POST</span><span class="p">,</span>
-                         <span class="n">accept</span><span class="o">=</span><span class="n">constants</span><span class="o">.</span><span class="n">HEADER_MULTIPART_MIXED</span><span class="p">,</span>
-                         <span class="n">content_type</span><span class="o">=</span><span class="n">constants</span><span class="o">.</span><span class="n">HEADER_X_WWW_FORM_URLENCODED</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">method</span><span class="o">=</span><span class="n">constants</span><span class="o">.</span><span class="n">METHOD_POST</span><span class="p">,</span>
+            <span class="n">accept</span><span class="o">=</span><span class="n">constants</span><span class="o">.</span><span class="n">HEADER_MULTIPART_MIXED</span><span class="p">,</span>
+            <span class="n">content_type</span><span class="o">=</span><span class="n">constants</span><span class="o">.</span><span class="n">HEADER_X_WWW_FORM_URLENCODED</span><span class="p">,</span>
+        <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">add_param</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_DATABASE_PARAM</span><span class="p">,</span> <span class="n">database</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">add_param</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_TXID_PARAM</span><span class="p">,</span> <span class="n">txid</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">body</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_body</span><span class="p">(</span><span class="n">xquery</span><span class="p">,</span> <span class="n">javascript</span><span class="p">,</span> <span class="n">variables</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">endpoint</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span>
+        <span class="bp">self</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;An endpoint for the Eval call.</span>
 
@@ -155,9 +163,9 @@
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">_validate_params</span><span class="p">(</span>
-            <span class="bp">cls</span><span class="p">,</span>
-            <span class="n">xquery</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-            <span class="n">javascript</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="bp">cls</span><span class="p">,</span>
+        <span class="n">xquery</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">javascript</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">xquery</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">javascript</span><span class="p">:</span>
             <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;You must include either the xquery or the javascript parameter!&quot;</span>
@@ -168,10 +176,10 @@
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">_build_body</span><span class="p">(</span>
-            <span class="bp">cls</span><span class="p">,</span>
-            <span class="n">xquery</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-            <span class="n">javascript</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-            <span class="n">variables</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
+        <span class="bp">cls</span><span class="p">,</span>
+        <span class="n">xquery</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">javascript</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">variables</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="n">code_lang</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_XQ_PARAM</span> <span class="k">if</span> <span class="n">xquery</span> <span class="k">else</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_JS_PARAM</span>
         <span class="n">code_to_eval</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_normalize_code</span><span class="p">(</span><span class="n">xquery</span> <span class="k">if</span> <span class="n">xquery</span> <span class="k">else</span> <span class="n">javascript</span><span class="p">)</span>
@@ -182,10 +190,10 @@
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_normalize_code</span><span class="p">(</span>
-            <span class="n">code</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">code</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="p">):</span>
-        <span class="n">one_line_code</span> <span class="o">=</span> <span class="n">code</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">)</span>
-        <span class="k">return</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">one_line_code</span><span class="o">.</span><span class="n">split</span><span class="p">())</span></div>
+        <span class="n">code</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s*\n\s*&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="n">code</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">code</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span></div>
 </pre></div>
 
            </div>

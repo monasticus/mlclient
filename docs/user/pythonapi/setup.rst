@@ -1,5 +1,5 @@
-Project Integration
-===================
+Setup
+=====
 
 When using **ML Client** in your application it can be helpful to setup **ML Client**'s configuration.
 It will make it easier to use ``mlclient`` lib without explicit use of ML configuration parameters.
@@ -36,17 +36,17 @@ This code will work in every subdirectory of the ``migration-app`` project as it
 
 ``MLConfiguration`` class allows you to get a specific app service config::
 
-   >>> from mlclient import MLConfiguration
+   >>> from mlclient import MLConfiguration, MLResourcesClient, MLResponseParser
    >>> ml_config = MLConfiguration.from_environment("local")
    >>> app_config = ml_config.provide_config("content")
-   >>> with MLResourceClient(**app_config) as client:
+   >>> with MLResourcesClient(**app_config) as client:
    ...     resp = client.eval(xquery="xdmp:database() => xdmp:database-name()")
    ...     parsed_resp = MLResponseParser.parse(resp)
    ...
 
 
 .. note::
-   If you would like to use MLConfiguration class without project integration,
+   If you would like to use MLConfiguration class without setting up an environment,
    you can use ``MLConfiguration.from_file()`` method::
 
        >>> from mlclient import MLConfiguration
@@ -60,9 +60,10 @@ MLManager class
 
 To make it easier, ``mlclient`` lib provides you a ``MLManager`` class with the highest-level API.
 The same logic as in the above example we will achieve in fewer steps::
-   >>> from mlclient import MLManager
+
+   >>> from mlclient import MLManager, MLResponseParser
    >>> ml_manager = MLManager("local")
-   >>> with ml_manager.get_resource_client("content") as client:
+   >>> with ml_manager.get_resources_client("content") as client:
    ...     resp = client.eval(xquery="xdmp:database() => xdmp:database-name()")
    ...     parsed_resp = MLResponseParser.parse(resp)
    ...

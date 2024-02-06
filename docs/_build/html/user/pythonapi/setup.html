@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Setup &mdash; MLClient 0.4.0 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/autodoc_pydantic.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=4e78f113"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="prev" title="Python API" href="../pythonapi.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            MLClient
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Python API:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api/mlclient/mlclient.html">mlclient package</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../pythonapi.html">Python API</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Setup</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#yaml-configuration-file">YAML Configuration file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#mlconfiguration-class">MLConfiguration class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#mlmanager-class">MLManager class</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">MLClient</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../pythonapi.html">Python API</a></li>
+      <li class="breadcrumb-item active">Setup</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/user/pythonapi/setup.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="setup">
+<h1>Setup<a class="headerlink" href="#setup" title="Permalink to this heading"></a></h1>
+<p>When using <strong>ML Client</strong> in your application it can be helpful to setup <strong>ML Client</strong>’s configuration.
+It will make it easier to use <code class="docutils literal notranslate"><span class="pre">mlclient</span></code> lib without explicit use of ML configuration parameters.
+Using a YAML file, you’re able to easily get a configuration for a MLClient instance.</p>
+<section id="yaml-configuration-file">
+<h2>YAML Configuration file<a class="headerlink" href="#yaml-configuration-file" title="Permalink to this heading"></a></h2>
+<p>Assume you want to manage your ML application called <em>migration-app</em>.
+First create a <code class="docutils literal notranslate"><span class="pre">.mlclient</span></code> directory in root of your project and a YAML file within:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>migration-app
+├── .mlclient
+│   └── mlclient-local.yaml
+├── src
+├── tests
+└── pyproject.toml
+</pre></div>
+</div>
+<p>YAML file:</p>
+<blockquote>
+<div><div class="highlight-YAML notranslate"><div class="highlight"><pre><span></span><span class="nt">app-name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">migration-app</span>
+<span class="nt">host</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">localhost</span>
+<span class="nt">username</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">admin</span>
+<span class="nt">password</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">admin</span>
+<span class="nt">protocol</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">http</span>
+<span class="nt">app-servers</span><span class="p">:</span>
+
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">manage</span>
+<span class="w">    </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8002</span>
+<span class="w">    </span><span class="nt">auth</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">basic</span>
+
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">content</span>
+<span class="w">    </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8100</span>
+<span class="w">    </span><span class="nt">auth</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">basic</span>
+
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">modules</span>
+<span class="w">    </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8101</span>
+<span class="w">    </span><span class="nt">auth</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">basic</span>
+
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">schemas</span>
+<span class="w">    </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8102</span>
+<span class="w">    </span><span class="nt">auth</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">basic</span>
+
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">test</span>
+<span class="w">    </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8103</span>
+<span class="w">    </span><span class="nt">auth</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">basic</span>
+</pre></div>
+</div>
+</div></blockquote>
+</section>
+<section id="mlconfiguration-class">
+<h2>MLConfiguration class<a class="headerlink" href="#mlconfiguration-class" title="Permalink to this heading"></a></h2>
+<p>Having the configuration file, you can instantiate <code class="docutils literal notranslate"><span class="pre">MLConfiguration</span></code> class using your environment:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient</span> <span class="kn">import</span> <span class="n">MLConfiguration</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ml_config</span> <span class="o">=</span> <span class="n">MLConfiguration</span><span class="o">.</span><span class="n">from_environment</span><span class="p">(</span><span class="s2">&quot;local&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ml_config</span>
+<span class="go">MLConfiguration(app_name=&#39;migration-app&#39;, protocol=&#39;http&#39;, host=&#39;localhost&#39;, username=&#39;admin&#39;, password=&#39;admin&#39;, app_servers=[MLAppServerConfiguration(identifier=&#39;manage&#39;, port=8002, auth=&lt;AuthMethod.BASIC: &#39;basic&#39;&gt;), MLAppServerConfiguration(identifier=&#39;content&#39;, port=8100, auth=&lt;AuthMethod.BASIC: &#39;basic&#39;&gt;), MLAppServerConfiguration(identifier=&#39;modules&#39;, port=8101, auth=&lt;AuthMethod.BASIC: &#39;basic&#39;&gt;), MLAppServerConfiguration(identifier=&#39;schemas&#39;, port=8102, auth=&lt;AuthMethod.BASIC: &#39;basic&#39;&gt;), MLAppServerConfiguration(identifier=&#39;test&#39;, port=8103, auth=&lt;AuthMethod.BASIC: &#39;basic&#39;&gt;)])</span>
+</pre></div>
+</div>
+<p>This code will work in every subdirectory of the <code class="docutils literal notranslate"><span class="pre">migration-app</span></code> project as it looks for <code class="docutils literal notranslate"><span class="pre">.mlclient</span></code> recursively.</p>
+<p><code class="docutils literal notranslate"><span class="pre">MLConfiguration</span></code> class allows you to get a specific app service config:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient</span> <span class="kn">import</span> <span class="n">MLConfiguration</span><span class="p">,</span> <span class="n">MLResourcesClient</span><span class="p">,</span> <span class="n">MLResponseParser</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ml_config</span> <span class="o">=</span> <span class="n">MLConfiguration</span><span class="o">.</span><span class="n">from_environment</span><span class="p">(</span><span class="s2">&quot;local&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">app_config</span> <span class="o">=</span> <span class="n">ml_config</span><span class="o">.</span><span class="n">provide_config</span><span class="p">(</span><span class="s2">&quot;content&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">MLResourcesClient</span><span class="p">(</span><span class="o">**</span><span class="n">app_config</span><span class="p">)</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">resp</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="n">xquery</span><span class="o">=</span><span class="s2">&quot;xdmp:database() =&gt; xdmp:database-name()&quot;</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="n">parsed_resp</span> <span class="o">=</span> <span class="n">MLResponseParser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">resp</span><span class="p">)</span>
+<span class="gp">...</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If you would like to use MLConfiguration class without setting up an environment,
+you can use <code class="docutils literal notranslate"><span class="pre">MLConfiguration.from_file()</span></code> method:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient</span> <span class="kn">import</span> <span class="n">MLConfiguration</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ml_config</span> <span class="o">=</span> <span class="n">MLConfiguration</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="s2">&quot;mlclient.yaml&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ml_config</span>
+<span class="go">MLConfiguration(app_name=&#39;migration-app&#39;, protocol=&#39;http&#39;, host=&#39;localhost&#39;, username=&#39;admin&#39;, password=&#39;admin&#39;, app_servers=[MLAppServerConfiguration(identifier=&#39;manage&#39;, port=8002, auth=&lt;AuthMethod.BASIC: &#39;basic&#39;&gt;), MLAppServerConfiguration(identifier=&#39;content&#39;, port=8100, auth=&lt;AuthMethod.BASIC: &#39;basic&#39;&gt;), MLAppServerConfiguration(identifier=&#39;modules&#39;, port=8101, auth=&lt;AuthMethod.BASIC: &#39;basic&#39;&gt;), MLAppServerConfiguration(identifier=&#39;schemas&#39;, port=8102, auth=&lt;AuthMethod.BASIC: &#39;basic&#39;&gt;), MLAppServerConfiguration(identifier=&#39;test&#39;, port=8103, auth=&lt;AuthMethod.BASIC: &#39;basic&#39;&gt;)])</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="mlmanager-class">
+<h2>MLManager class<a class="headerlink" href="#mlmanager-class" title="Permalink to this heading"></a></h2>
+<p>To make it easier, <code class="docutils literal notranslate"><span class="pre">mlclient</span></code> lib provides you a <code class="docutils literal notranslate"><span class="pre">MLManager</span></code> class with the highest-level API.
+The same logic as in the above example we will achieve in fewer steps:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient</span> <span class="kn">import</span> <span class="n">MLManager</span><span class="p">,</span> <span class="n">MLResponseParser</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ml_manager</span> <span class="o">=</span> <span class="n">MLManager</span><span class="p">(</span><span class="s2">&quot;local&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">ml_manager</span><span class="o">.</span><span class="n">get_resources_client</span><span class="p">(</span><span class="s2">&quot;content&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">resp</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="n">xquery</span><span class="o">=</span><span class="s2">&quot;xdmp:database() =&gt; xdmp:database-name()&quot;</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="n">parsed_resp</span> <span class="o">=</span> <span class="n">MLResponseParser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">resp</span><span class="p">)</span>
+<span class="gp">...</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><code class="docutils literal notranslate"><span class="pre">MLManager</span></code> is accessible only using ML Client Environments.</p>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../pythonapi.html" class="btn btn-neutral float-left" title="Python API" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Tomasz Aniołowski.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

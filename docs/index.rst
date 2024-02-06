@@ -94,6 +94,8 @@ Parsing response::
    :maxdepth: 1
    :caption: User Guide:
 
+   user/setup
+   user/cli
    user/pythonapi
 
 

@@ -1,9 +1,2 @@
 Python API
 ==========
-
-.. toctree::
-   :maxdepth: 2
-   :caption: User Guide:
-
-   pythonapi/setup
-   pythonapi/cli

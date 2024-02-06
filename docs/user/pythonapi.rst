@@ -6,3 +6,4 @@ Python API
    :caption: User Guide:
 
    pythonapi/setup
+   pythonapi/cli

@@ -25,20 +25,17 @@ from mlclient.cli.commands import CallEvalCommand, CallLogsCommand
 class MLCLIentApplication(Application):
     """An ML Client Command Line Cleo Application."""
 
-    _APP_NAME = "MLCLIent"
+    _APP_NAME = "ml"
+    _DISPLAY_NAME = "MLCLIent"
 
     def __init__(
         self,
     ):
         """Initialize MLCLIentApplication instance."""
         super().__init__(self._APP_NAME, ml_client_version)
+        self.set_display_name(self._DISPLAY_NAME)
         self.add(CallLogsCommand())
         self.add(CallEvalCommand())
-
-    @property
-    def display_name(self) -> str:
-        """The application name to display."""
-        return self._name
 
     def create_io(
         self,

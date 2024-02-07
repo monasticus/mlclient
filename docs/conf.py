@@ -9,7 +9,7 @@ import mlclient
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = 'MLClient'
-copyright = '2023, Tomasz Aniołowski'
+copyright = '2024, Tomasz Aniołowski'
 author = 'Tomasz Aniołowski'
 release = '0.4.0'
 

@@ -20,7 +20,7 @@ First create a ``.mlclient`` directory in root of your project and a YAML file w
 
 YAML file:
 
-   .. literalinclude:: mlclient-local.yaml
+   .. literalinclude:: setup/mlclient-local.yaml
       :language: YAML
 
 MLConfiguration class

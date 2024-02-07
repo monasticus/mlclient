@@ -23,5 +23,6 @@ def test_main_sys_exit_0():
 
 def test_app_properties():
     app = MLCLIentApplication()
+    assert app.name == "ml"
     assert app.display_name == "MLCLIent"
     assert app.version == mlclient.__version__

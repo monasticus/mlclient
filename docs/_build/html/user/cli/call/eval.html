@@ -52,7 +52,15 @@
 <li class="toctree-l1"><a class="reference internal" href="../../setup.html">Setup</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../../cli.html">Command Line Interface</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="../call.html">call</a><ul class="current">
-<li class="toctree-l3 current"><a class="current reference internal" href="#">call eval</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">call eval</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#evaluate-code-from-a-file">Evaluate code from a file</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#evaluate-raw-xquery-code">Evaluate raw xquery code</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#evaluate-raw-javascript-code">Evaluate raw javascript code</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#evaluate-code-with-variables">Evaluate code with variables</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#evaluate-code-with-variables-within-a-namespace">Evaluate code with variables within a namespace</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#evaluate-code-on-a-custom-database">Evaluate code on a custom database</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -88,6 +96,88 @@
              
   <section id="call-eval">
 <h1>call eval<a class="headerlink" href="#call-eval" title="Permalink to this heading"></a></h1>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>Description:
+  Sends a GET request to the /v1/eval endpoint
+
+Usage:
+  call eval [options] [--] &lt;code&gt;
+
+Arguments:
+  code                           The code to evaluate (a file path or raw xqy/js code)
+
+Options:
+  -e, --environment=ENVIRONMENT  The ML Client environment name [default: &quot;local&quot;]
+  -s, --rest-server=REST-SERVER  The ML REST Server environmental id
+      --var=VAR                  A variable to be used in the code (multiple values allowed)
+  -x, --xquery                   If set, the code will be treated as raw xquery
+  -j, --javascript               If set, the code will be treated as raw javascript
+  -d, --database=DATABASE        Evaluate the code on the named content database
+  -t, --txid=TXID                The transaction identifier of the multi-statement transaction
+
+  -h, --help                     Display help for the given command. When no command is given display help for the list command.
+  -q, --quiet                    Do not output any message.
+  -V, --version                  Display this application version.
+      --ansi                     Force ANSI output.
+      --no-ansi                  Disable ANSI output.
+  -n, --no-interaction           Do not ask any interactive question.
+  -v|vv|vvv, --verbose           Increase the verbosity of messages: 1 for normal output, 2 for more verbose output and 3 for debug.
+</pre></div>
+</div>
+<section id="evaluate-code-from-a-file">
+<h2>Evaluate code from a file<a class="headerlink" href="#evaluate-code-from-a-file" title="Permalink to this heading"></a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ml<span class="w"> </span>call<span class="w"> </span><span class="nb">eval</span><span class="w"> </span>-s<span class="w"> </span>app-services<span class="w"> </span>./xqy-code-to-eval.xqy
+</pre></div>
+</div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ml<span class="w"> </span>call<span class="w"> </span><span class="nb">eval</span><span class="w"> </span>-s<span class="w"> </span>app-services<span class="w"> </span>./js-code-to-eval.js
+</pre></div>
+</div>
+</section>
+<section id="evaluate-raw-xquery-code">
+<h2>Evaluate raw xquery code<a class="headerlink" href="#evaluate-raw-xquery-code" title="Permalink to this heading"></a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ml<span class="w"> </span>call<span class="w"> </span><span class="nb">eval</span><span class="w"> </span>-s<span class="w"> </span>app-services<span class="w"> </span>-x<span class="w"> </span><span class="s1">&#39;fn:current-dateTime()&#39;</span>
+</pre></div>
+</div>
+</section>
+<section id="evaluate-raw-javascript-code">
+<h2>Evaluate raw javascript code<a class="headerlink" href="#evaluate-raw-javascript-code" title="Permalink to this heading"></a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ml<span class="w"> </span>call<span class="w"> </span><span class="nb">eval</span><span class="w"> </span>-s<span class="w"> </span>app-services<span class="w"> </span>-j<span class="w"> </span><span class="s1">&#39;fn.currentDateTime()&#39;</span>
+</pre></div>
+</div>
+</section>
+<section id="evaluate-code-with-variables">
+<h2>Evaluate code with variables<a class="headerlink" href="#evaluate-code-with-variables" title="Permalink to this heading"></a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ml<span class="w"> </span>call<span class="w"> </span><span class="nb">eval</span><span class="w"> </span>-s<span class="w"> </span>app-services<span class="w"> </span>-var<span class="w"> </span><span class="nv">DAYS</span><span class="o">=</span><span class="m">5</span><span class="w"> </span>./xqy-code-to-eval.xqy
+</pre></div>
+</div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ml<span class="w"> </span>call<span class="w"> </span><span class="nb">eval</span><span class="w"> </span>-s<span class="w"> </span>app-services<span class="w"> </span>-x<span class="w"> </span>--var<span class="w"> </span><span class="nv">DAYS</span><span class="o">=</span><span class="m">5</span><span class="w"> </span><span class="s1">&#39;</span>
+<span class="s1">&gt; declare variable $DAYS external;</span>
+<span class="s1">&gt;</span>
+<span class="s1">&gt; fn:current-dateTime() - xs:dayTimeDuration(&quot;P&quot; || $DAYS || &quot;D&quot;)&#39;</span>
+</pre></div>
+</div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ml<span class="w"> </span>call<span class="w"> </span><span class="nb">eval</span><span class="w"> </span>-s<span class="w"> </span>app-services<span class="w"> </span>-j<span class="w"> </span>--var<span class="w"> </span><span class="nv">days</span><span class="o">=</span><span class="m">5</span><span class="w"> </span><span class="s1">&#39;</span>
+<span class="s1">&gt; fn.currentDateTime().subtract(xs.dayTimeDuration(`P${days}D`))&#39;</span>
+</pre></div>
+</div>
+</section>
+<section id="evaluate-code-with-variables-within-a-namespace">
+<h2>Evaluate code with variables within a namespace<a class="headerlink" href="#evaluate-code-with-variables-within-a-namespace" title="Permalink to this heading"></a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ml<span class="w"> </span>call<span class="w"> </span><span class="nb">eval</span><span class="w"> </span><span class="se">\</span>
+&gt;<span class="w"> </span>-s<span class="w"> </span>app-services<span class="w"> </span><span class="se">\</span>
+&gt;<span class="w"> </span>-x<span class="w"> </span><span class="se">\</span>
+&gt;<span class="w"> </span>--var<span class="w"> </span><span class="o">{</span>http://www.w3.org/2005/xquery-local-functions<span class="o">}</span><span class="nv">DAYS</span><span class="o">=</span><span class="m">5</span><span class="w"> </span><span class="s1">&#39;</span>
+<span class="s1">&gt; declare variable $local:DAYS external;</span>
+<span class="s1">&gt;</span>
+<span class="s1">&gt; fn:current-dateTime() - xs:dayTimeDuration(&quot;P&quot; || $local:DAYS || &quot;D&quot;)&#39;</span>
+</pre></div>
+</div>
+</section>
+<section id="evaluate-code-on-a-custom-database">
+<h2>Evaluate code on a custom database<a class="headerlink" href="#evaluate-code-on-a-custom-database" title="Permalink to this heading"></a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ml<span class="w"> </span>call<span class="w"> </span><span class="nb">eval</span><span class="w"> </span>-s<span class="w"> </span>app-services<span class="w"> </span>-d<span class="w"> </span>Security<span class="w"> </span>./xqy-code-to-eval.xqy
+</pre></div>
+</div>
+</section>
 </section>
 
 

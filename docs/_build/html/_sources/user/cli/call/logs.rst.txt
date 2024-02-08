@@ -40,21 +40,47 @@ List log file names
 Get all logs
 ------------
 
+*8002_ErrorLog.txt*
+
 .. code-block:: bash
 
     ml call logs -a 8002
+
+*8002_ErrorLog.txt*
 
 .. code-block:: bash
 
     ml call logs -a 8002 -l error
 
+*8002_AccessLog.txt*
+
 .. code-block:: bash
 
     ml call logs -a 8002 -l access
 
+*8002_RequestLog.txt*
+
 .. code-block:: bash
 
     ml call logs -a 8002 -l request
+
+*ErrorLog.txt*
+
+.. code-block:: bash
+
+    ml call logs
+
+*TaskServer_ErrorLog.txt*
+
+.. code-block:: bash
+
+    ml call logs -a TaskServer
+
+*TaskServer_ErrorLog.txt*
+
+.. code-block:: bash
+
+    ml call logs -a 0
 
 
 Get limited logs
@@ -102,3 +128,7 @@ RegEx
 .. code-block:: bash
 
     ml call logs -a 8002 -r 'Memory [^1]{1,2}%'
+
+.. code-block:: bash
+
+    ml call logs -a 8002 -f 2024-02-01 -t 2024-02-03 -r 'Memory [^1]{1,2}%'

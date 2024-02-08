@@ -128,16 +128,32 @@ Options:
 </section>
 <section id="get-all-logs">
 <h2>Get all logs<a class="headerlink" href="#get-all-logs" title="Permalink to this heading"></a></h2>
+<p><em>8002_ErrorLog.txt</em></p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ml<span class="w"> </span>call<span class="w"> </span>logs<span class="w"> </span>-a<span class="w"> </span><span class="m">8002</span>
 </pre></div>
 </div>
+<p><em>8002_ErrorLog.txt</em></p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ml<span class="w"> </span>call<span class="w"> </span>logs<span class="w"> </span>-a<span class="w"> </span><span class="m">8002</span><span class="w"> </span>-l<span class="w"> </span>error
 </pre></div>
 </div>
+<p><em>8002_AccessLog.txt</em></p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ml<span class="w"> </span>call<span class="w"> </span>logs<span class="w"> </span>-a<span class="w"> </span><span class="m">8002</span><span class="w"> </span>-l<span class="w"> </span>access
 </pre></div>
 </div>
+<p><em>8002_RequestLog.txt</em></p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ml<span class="w"> </span>call<span class="w"> </span>logs<span class="w"> </span>-a<span class="w"> </span><span class="m">8002</span><span class="w"> </span>-l<span class="w"> </span>request
+</pre></div>
+</div>
+<p><em>ErrorLog.txt</em></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ml<span class="w"> </span>call<span class="w"> </span>logs
+</pre></div>
+</div>
+<p><em>TaskServer_ErrorLog.txt</em></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ml<span class="w"> </span>call<span class="w"> </span>logs<span class="w"> </span>-a<span class="w"> </span>TaskServer
+</pre></div>
+</div>
+<p><em>TaskServer_ErrorLog.txt</em></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ml<span class="w"> </span>call<span class="w"> </span>logs<span class="w"> </span>-a<span class="w"> </span><span class="m">0</span>
 </pre></div>
 </div>
 </section>
@@ -174,6 +190,9 @@ Options:
 </pre></div>
 </div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ml<span class="w"> </span>call<span class="w"> </span>logs<span class="w"> </span>-a<span class="w"> </span><span class="m">8002</span><span class="w"> </span>-r<span class="w"> </span><span class="s1">&#39;Memory [^1]{1,2}%&#39;</span>
+</pre></div>
+</div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ml<span class="w"> </span>call<span class="w"> </span>logs<span class="w"> </span>-a<span class="w"> </span><span class="m">8002</span><span class="w"> </span>-f<span class="w"> </span><span class="m">2024</span>-02-01<span class="w"> </span>-t<span class="w"> </span><span class="m">2024</span>-02-03<span class="w"> </span>-r<span class="w"> </span><span class="s1">&#39;Memory [^1]{1,2}%&#39;</span>
 </pre></div>
 </div>
 </section>

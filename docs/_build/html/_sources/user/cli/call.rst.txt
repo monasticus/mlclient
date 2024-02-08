@@ -15,4 +15,5 @@ The ``call`` namespace provides you an interface to call common MarkLogic resour
    :caption: Commands:
 
    call/eval
+   call/logs
 

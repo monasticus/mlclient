@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+import functools
 import inspect
 import json
+import operator
 import os
 import urllib.parse
 import zlib
@@ -676,7 +678,7 @@ class MLResponseBuilder:
         build_parts = [
             [elem] if not isinstance(elem, list) else elem for elem in build_parts
         ]
-        return sum(build_parts, [])
+        return functools.reduce(operator.iconcat, build_parts, [])
 
     @classmethod
     def _move_resp_body_path_line_to_front(

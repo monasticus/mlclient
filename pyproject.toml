@@ -66,7 +66,7 @@ deepdiff = "^6.7.1"
 mimeograph = "^1.1.0"
 
 [tool.poetry.group.sub.dependencies]
-cryptography = "^41.0.6"
+cryptography = "^42"
 
 [tool.poetry.scripts]
 ml = "mlclient.cli:main"
@@ -99,13 +99,13 @@ skip_glob=[
 ]
 
 [tool.ruff]
-select = [
+lint.select = [
     "F", "E", "W", "C90", "N", "D", "UP", "B", "A", "COM", "C4", "EM", "EXE", "ISC", "G", "PIE", "T20",
     "PT", "Q", "RSE", "RET", "SLF", "SIM", "ARG", "PTH", "ERA", "PD", "PGH", "PL", "TRY", "RUF", "FLY",
     "ASYNC", "FA", "FIX", "PERF", "FURB", "LOG"
 #    , "CPY"
 ]
-ignore = []
+lint.ignore = []
 exclude = [
     ".git",
     ".github",
@@ -121,16 +121,16 @@ exclude = [
     "docs",
     "scripts"
 ]
-ignore-init-module-imports = true
+lint.ignore-init-module-imports = true
 target-version = "py38"
 
-[tool.ruff.pydocstyle]
+[tool.ruff.lint.pydocstyle]
 convention = "numpy"
 
-[tool.ruff.mccabe]
+[tool.ruff.lint.mccabe]
 max-complexity = 10
 
-[tool.ruff.per-file-ignores]
+[tool.ruff.lint.per-file-ignores]
 "mlclient/ml_config.py" = [
     "UP006", # allow using List instead of list for pydantic
     "PLR6301" # allow for a non-static method as it is defined by the Pydantic lib

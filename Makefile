@@ -47,7 +47,7 @@ publish:
 	@poetry --build publish
 
 update-linters:
-	@poetry run ruff linter --format=json > ./meta/linters/linters.json
+	@poetry run ruff linter --output-format=json > ./meta/linters/linters.json
 
 mimetypes:
 	@./scripts/get-mimetypes/get-mimetypes.py

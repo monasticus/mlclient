@@ -54,6 +54,7 @@
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Core</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#clients">Clients</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#overview">Overview</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#high-level-clients">High-level clients</a></li>
 </ul>
 </li>
 </ul>
@@ -99,6 +100,40 @@ They provide a simple and intuitive API that covers all the functionality of eac
 Low-level clients are the foundation of MLClient. They use <a class="reference internal" href="../../api/mlclient/calls/mlclient.calls.html#mlclient.calls.ResourceCall" title="mlclient.calls.ResourceCall"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResourceCall</span></code></a> objects to represent the parameters of any endpoint.
 You can use low-level clients to send raw requests to the server.
 You can learn more about high-level and low-level clients in the following sections.</p>
+</section>
+<section id="high-level-clients">
+<h3>High-level clients<a class="headerlink" href="#high-level-clients" title="Permalink to this heading"></a></h3>
+<p>High-level clients are designed for specific endpoints of MarkLogic Server and database.
+They allow you to manage configuration or documents in MarkLogic with ease.
+Each client ensures that you can perform all the operations in the corresponding area.
+For example, some of the high-level clients are:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Client</p></th>
+<th class="head"><p>Endpoint</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../api/mlclient/clients/mlclient.clients.html#mlclient.clients.DocumentsClient" title="mlclient.clients.DocumentsClient"><code class="xref py py-class docutils literal notranslate"><span class="pre">DocumentsClient</span></code></a></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">/v1/documents</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../../api/mlclient/clients/mlclient.clients.html#mlclient.clients.EvalClient" title="mlclient.clients.EvalClient"><code class="xref py py-class docutils literal notranslate"><span class="pre">EvalClient</span></code></a></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">/v1/eval</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../../api/mlclient/clients/mlclient.clients.html#mlclient.clients.LogsClient" title="mlclient.clients.LogsClient"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogsClient</span></code></a></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">/manage/v2/logs</span></code></p></td>
+</tr>
+</tbody>
+</table>
+<section id="documentsclient">
+<h4>DocumentsClient<a class="headerlink" href="#documentsclient" title="Permalink to this heading"></a></h4>
+</section>
+<section id="evalclient">
+<h4>EvalClient<a class="headerlink" href="#evalclient" title="Permalink to this heading"></a></h4>
+</section>
+<section id="logsclient">
+<h4>LogsClient<a class="headerlink" href="#logsclient" title="Permalink to this heading"></a></h4>
+</section>
 </section>
 </section>
 </section>

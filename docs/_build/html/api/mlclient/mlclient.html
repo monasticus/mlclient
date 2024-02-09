@@ -138,6 +138,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#mlclient.ml_config.MLAppServerConfiguration.port"><code class="docutils literal notranslate"><span class="pre">MLAppServerConfiguration.port</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#mlclient.ml_config.MLAppServerConfiguration.rest"><code class="docutils literal notranslate"><span class="pre">MLAppServerConfiguration.rest</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#mlclient.ml_config.MLAppServerConfiguration.serialize_auth"><code class="docutils literal notranslate"><span class="pre">MLAppServerConfiguration.serialize_auth()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.ml_config.MLAppServerConfiguration.model_computed_fields"><code class="docutils literal notranslate"><span class="pre">MLAppServerConfiguration.model_computed_fields</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#mlclient.ml_config.MLConfiguration"><code class="docutils literal notranslate"><span class="pre">MLConfiguration</span></code></a><ul>
@@ -150,6 +151,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#mlclient.ml_config.MLConfiguration.from_environment"><code class="docutils literal notranslate"><span class="pre">MLConfiguration.from_environment()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#mlclient.ml_config.MLConfiguration.from_file"><code class="docutils literal notranslate"><span class="pre">MLConfiguration.from_file()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#mlclient.ml_config.MLConfiguration.provide_config"><code class="docutils literal notranslate"><span class="pre">MLConfiguration.provide_config()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.ml_config.MLConfiguration.model_computed_fields"><code class="docutils literal notranslate"><span class="pre">MLConfiguration.model_computed_fields</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#mlclient.ml_config.MLConfiguration.rest_servers"><code class="docutils literal notranslate"><span class="pre">MLConfiguration.rest_servers</span></code></a></li>
 </ul>
 </li>
@@ -1900,6 +1902,12 @@ It exports the following classes:</p>
 <dd><p>Serialize auth field.</p>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mlclient.ml_config.MLAppServerConfiguration.model_computed_fields">
+<span class="sig-name descname"><span class="pre">model_computed_fields</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ComputedFieldInfo</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></em><a class="headerlink" href="#mlclient.ml_config.MLAppServerConfiguration.model_computed_fields" title="Permalink to this definition"></a></dt>
+<dd><p>A dictionary of computed field names and their corresponding <cite>ComputedFieldInfo</cite> objects.</p>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py class pydantic_model">
@@ -2118,6 +2126,12 @@ to be recognized: mlclient-&lt;environment-name&gt;.yaml.</p>
 <dd class="field-odd"><p>dict</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mlclient.ml_config.MLConfiguration.model_computed_fields">
+<span class="sig-name descname"><span class="pre">model_computed_fields</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ComputedFieldInfo</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></em><a class="headerlink" href="#mlclient.ml_config.MLConfiguration.model_computed_fields" title="Permalink to this definition"></a></dt>
+<dd><p>A dictionary of computed field names and their corresponding <cite>ComputedFieldInfo</cite> objects.</p>
 </dd></dl>
 
 <dl class="py property">

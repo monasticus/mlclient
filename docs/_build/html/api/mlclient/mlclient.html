@@ -125,6 +125,8 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="calls/mlclient.calls.html">mlclient.calls package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="clients/mlclient.clients.html">mlclient.clients package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="jobs/mlclient.jobs.html">mlclient.jobs package</a></li>
 <li class="toctree-l2"><a class="reference internal" href="model/mlclient.model.html">mlclient.model package</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-mlclient.ml_config">mlclient.ml_config module</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#mlclient.ml_config.AuthMethod"><code class="docutils literal notranslate"><span class="pre">AuthMethod</span></code></a><ul>
@@ -596,7 +598,7 @@ to perform on your instance.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mlclient.MLManager.get_documents_client">
-<span class="sig-name descname"><span class="pre">get_documents_client</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">app_server_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DocumentsClient</span></span></span><a class="reference internal" href="../../_modules/mlclient/ml_manager.html#MLManager.get_documents_client"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.MLManager.get_documents_client" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_documents_client</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">app_server_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="clients/mlclient.clients.html#mlclient.clients.DocumentsClient" title="mlclient.clients.DocumentsClient"><span class="pre">DocumentsClient</span></a></span></span><a class="reference internal" href="../../_modules/mlclient/ml_manager.html#MLManager.get_documents_client"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.MLManager.get_documents_client" title="Permalink to this definition"></a></dt>
 <dd><p>Initialize a DocumentsClient instance for a specific App Server.</p>
 <p>If the no identifier is provided - it returns a client of a first configured
 REST server within an environment.</p>
@@ -608,7 +610,7 @@ REST server within an environment.</p>
 <dd class="field-even"><p>A DocumentsClient instance</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>DocumentsClient</p>
+<dd class="field-odd"><p><a class="reference internal" href="clients/mlclient.clients.html#mlclient.clients.DocumentsClient" title="mlclient.clients.DocumentsClient">DocumentsClient</a></p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
 <dd class="field-even"><ul class="simple">
@@ -622,7 +624,7 @@ REST server within an environment.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mlclient.MLManager.get_eval_client">
-<span class="sig-name descname"><span class="pre">get_eval_client</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">app_server_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">EvalClient</span></span></span><a class="reference internal" href="../../_modules/mlclient/ml_manager.html#MLManager.get_eval_client"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.MLManager.get_eval_client" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_eval_client</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">app_server_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="clients/mlclient.clients.html#mlclient.clients.EvalClient" title="mlclient.clients.EvalClient"><span class="pre">EvalClient</span></a></span></span><a class="reference internal" href="../../_modules/mlclient/ml_manager.html#MLManager.get_eval_client"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.MLManager.get_eval_client" title="Permalink to this definition"></a></dt>
 <dd><p>Initialize a EvalClient instance for a specific App Server.</p>
 <p>If the no identifier is provided - it returns a client of a first configured
 REST server within an environment.</p>
@@ -634,7 +636,7 @@ REST server within an environment.</p>
 <dd class="field-even"><p>A EvalClient instance</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>EvalClient</p>
+<dd class="field-odd"><p><a class="reference internal" href="clients/mlclient.clients.html#mlclient.clients.EvalClient" title="mlclient.clients.EvalClient">EvalClient</a></p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
 <dd class="field-even"><ul class="simple">
@@ -648,7 +650,7 @@ REST server within an environment.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mlclient.MLManager.get_logs_client">
-<span class="sig-name descname"><span class="pre">get_logs_client</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">app_server_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">LogsClient</span></span></span><a class="reference internal" href="../../_modules/mlclient/ml_manager.html#MLManager.get_logs_client"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.MLManager.get_logs_client" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_logs_client</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">app_server_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="clients/mlclient.clients.html#mlclient.clients.LogsClient" title="mlclient.clients.LogsClient"><span class="pre">LogsClient</span></a></span></span><a class="reference internal" href="../../_modules/mlclient/ml_manager.html#MLManager.get_logs_client"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.MLManager.get_logs_client" title="Permalink to this definition"></a></dt>
 <dd><p>Initialize a LogsClient instance for a specific App Server.</p>
 <p>If the no identifier is provided - it returns a client of a first configured
 REST server within an environment.</p>
@@ -660,7 +662,7 @@ REST server within an environment.</p>
 <dd class="field-even"><p>A LogsClient instance</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>LogsClient</p>
+<dd class="field-odd"><p><a class="reference internal" href="clients/mlclient.clients.html#mlclient.clients.LogsClient" title="mlclient.clients.LogsClient">LogsClient</a></p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
 <dd class="field-even"><ul class="simple">
@@ -1763,6 +1765,8 @@ type of corresponding part.</p>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="calls/mlclient.calls.html">mlclient.calls package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="clients/mlclient.clients.html">mlclient.clients package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jobs/mlclient.jobs.html">mlclient.jobs package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="model/mlclient.model.html">mlclient.model package</a></li>
 </ul>
 </div>

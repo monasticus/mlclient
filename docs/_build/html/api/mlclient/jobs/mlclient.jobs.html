@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mlclient.jobs package &mdash; MLClient 0.4.0 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/autodoc_pydantic.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=4e78f113"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="mlclient.model package" href="../model/mlclient.model.html" />
+    <link rel="prev" title="mlclient.clients package" href="../clients/mlclient.clients.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            MLClient
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Python API:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../mlclient.html">mlclient package</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../mlclient.html#mlclient.MLClient"><code class="docutils literal notranslate"><span class="pre">MLClient</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../mlclient.html#mlclient.MLManager"><code class="docutils literal notranslate"><span class="pre">MLManager</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../mlclient.html#mlclient.MLResourceClient"><code class="docutils literal notranslate"><span class="pre">MLResourceClient</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../mlclient.html#mlclient.MLResourcesClient"><code class="docutils literal notranslate"><span class="pre">MLResourcesClient</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../mlclient.html#mlclient.MLResponseParser"><code class="docutils literal notranslate"><span class="pre">MLResponseParser</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../calls/mlclient.calls.html">mlclient.calls package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../clients/mlclient.clients.html">mlclient.clients package</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">mlclient.jobs package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#mlclient.jobs.DocumentsLoader"><code class="docutils literal notranslate"><span class="pre">DocumentsLoader</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.jobs.DocumentsLoader.load"><code class="docutils literal notranslate"><span class="pre">DocumentsLoader.load()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.jobs.DocumentsLoader.load_document"><code class="docutils literal notranslate"><span class="pre">DocumentsLoader.load_document()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#mlclient.jobs.WriteDocumentsJob"><code class="docutils literal notranslate"><span class="pre">WriteDocumentsJob</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.jobs.WriteDocumentsJob.await_completion"><code class="docutils literal notranslate"><span class="pre">WriteDocumentsJob.await_completion()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.jobs.WriteDocumentsJob.batch_size"><code class="docutils literal notranslate"><span class="pre">WriteDocumentsJob.batch_size</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.jobs.WriteDocumentsJob.completed"><code class="docutils literal notranslate"><span class="pre">WriteDocumentsJob.completed</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.jobs.WriteDocumentsJob.completed_count"><code class="docutils literal notranslate"><span class="pre">WriteDocumentsJob.completed_count</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.jobs.WriteDocumentsJob.failed"><code class="docutils literal notranslate"><span class="pre">WriteDocumentsJob.failed</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.jobs.WriteDocumentsJob.start"><code class="docutils literal notranslate"><span class="pre">WriteDocumentsJob.start()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.jobs.WriteDocumentsJob.successful"><code class="docutils literal notranslate"><span class="pre">WriteDocumentsJob.successful</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.jobs.WriteDocumentsJob.thread_count"><code class="docutils literal notranslate"><span class="pre">WriteDocumentsJob.thread_count</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.jobs.WriteDocumentsJob.with_client_config"><code class="docutils literal notranslate"><span class="pre">WriteDocumentsJob.with_client_config()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.jobs.WriteDocumentsJob.with_database"><code class="docutils literal notranslate"><span class="pre">WriteDocumentsJob.with_database()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.jobs.WriteDocumentsJob.with_documents_input"><code class="docutils literal notranslate"><span class="pre">WriteDocumentsJob.with_documents_input()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.jobs.WriteDocumentsJob.with_filesystem_input"><code class="docutils literal notranslate"><span class="pre">WriteDocumentsJob.with_filesystem_input()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../model/mlclient.model.html">mlclient.model package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../mlclient.html#module-mlclient.ml_config">mlclient.ml_config module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../mlclient.html#module-mlclient.constants">mlclient.constants module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../mlclient.html#module-mlclient.exceptions">mlclient.exceptions module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../mlclient.html#module-mlclient.utils">mlclient.utils module</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../user/setup.html">Setup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../user/cli.html">Command Line Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../user/pythonapi.html">Python API</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">MLClient</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../mlclient.html">mlclient package</a></li>
+      <li class="breadcrumb-item active">mlclient.jobs package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../_sources/api/mlclient/jobs/mlclient.jobs.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-mlclient.jobs">
+<span id="mlclient-jobs-package"></span><h1>mlclient.jobs package<a class="headerlink" href="#module-mlclient.jobs" title="Permalink to this heading"></a></h1>
+<p>The ML Jobs package.</p>
+<p>This package contains Python API to perform various operations.
+It contains the following modules</p>
+<blockquote>
+<div><ul class="simple">
+<li><dl class="simple">
+<dt>documents_jobs</dt><dd><p>The ML Documents Jobs module.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</div></blockquote>
+<dl class="simple">
+<dt>This package exports the following classes:</dt><dd><ul class="simple">
+<li><dl class="simple">
+<dt>WriteDocumentsJob</dt><dd><p>A multi-thread job writing documents into a MarkLogic database.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>DocumentsLoader</dt><dd><p>A class parsing files into Documents.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient.jobs</span> <span class="kn">import</span> <span class="n">WriteDocumentsJob</span>
+</pre></div>
+</div>
+<dl class="py class">
+<dt class="sig sig-object py" id="mlclient.jobs.DocumentsLoader">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mlclient.jobs.</span></span><span class="sig-name descname"><span class="pre">DocumentsLoader</span></span><a class="reference internal" href="../../../_modules/mlclient/jobs/documents_jobs.html#DocumentsLoader"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.jobs.DocumentsLoader" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A class parsing files into Documents.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="mlclient.jobs.DocumentsLoader.load">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uri_prefix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raw</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Generator</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../model/mlclient.model.html#mlclient.model.Document" title="mlclient.model.Document"><span class="pre">Document</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/mlclient/jobs/documents_jobs.html#DocumentsLoader.load"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.jobs.DocumentsLoader.load" title="Permalink to this definition"></a></dt>
+<dd><p>Load documents from files under a path.</p>
+<p>When the path points to a file - yields a single Document with URI set to
+the file name. Otherwise, yields documents with URIs without the input path
+at the beginning. Both option can be customized with the uri_prefix parameter.
+When the raw flag is true, all documents are parsed to RawDocument with bytes
+content and metadata.
+Metadata is identified for a file at the same level with .metadata.json or
+.metadata.xml suffix.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> (<em>str</em>) – A path to a directory or a single file.</p></li>
+<li><p><strong>uri_prefix</strong> (<em>str</em><em>, </em><em>default &quot;&quot;</em>) – URIs prefix to apply</p></li>
+<li><p><strong>raw</strong> (<em>bool</em><em>, </em><em>default True</em>) – A flag indicating whether files should be parsed to a RawDocument</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A generator of Document instances</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Generator[<a class="reference internal" href="../model/mlclient.model.html#mlclient.model.Document" title="mlclient.model.Document">Document</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mlclient.jobs.DocumentsLoader.load_document">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load_document</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uri</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raw</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="../model/mlclient.model.html#mlclient.model.Document" title="mlclient.model.Document"><span class="pre">Document</span></a></span></span><a class="reference internal" href="../../../_modules/mlclient/jobs/documents_jobs.html#DocumentsLoader.load_document"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.jobs.DocumentsLoader.load_document" title="Permalink to this definition"></a></dt>
+<dd><p>Load a document from a file.</p>
+<p>By default, returns a Document without URI. It can be customized with
+the uri parameter.
+When the raw flag is true, the document is parsed to RawDocument with bytes
+content and metadata.
+Metadata is identified for a file at the same level with .metadata.json or
+.metadata.xml suffix.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> (<em>str</em>) – A file path</p></li>
+<li><p><strong>uri</strong> (<em>str</em><em> | </em><em>None</em><em>, </em><em>default None</em>) – URI to set for a document.</p></li>
+<li><p><strong>raw</strong> (<em>bool</em><em>, </em><em>default True</em>) – A flag indicating whether file should be parsed to a RawDocument</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A Document instance</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="../model/mlclient.model.html#mlclient.model.Document" title="mlclient.model.Document">Document</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mlclient.jobs.WriteDocumentsJob">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mlclient.jobs.</span></span><span class="sig-name descname"><span class="pre">WriteDocumentsJob</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">thread_count</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">50</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/mlclient/jobs/documents_jobs.html#WriteDocumentsJob"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.jobs.WriteDocumentsJob" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A multi-thread job writing documents into a MarkLogic database.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="mlclient.jobs.WriteDocumentsJob.await_completion">
+<span class="sig-name descname"><span class="pre">await_completion</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/mlclient/jobs/documents_jobs.html#WriteDocumentsJob.await_completion"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.jobs.WriteDocumentsJob.await_completion" title="Permalink to this definition"></a></dt>
+<dd><p>Await a job’s completion.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mlclient.jobs.WriteDocumentsJob.batch_size">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">batch_size</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#mlclient.jobs.WriteDocumentsJob.batch_size" title="Permalink to this definition"></a></dt>
+<dd><p>A number of documents in a single batch.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mlclient.jobs.WriteDocumentsJob.completed">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">completed</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#mlclient.jobs.WriteDocumentsJob.completed" title="Permalink to this definition"></a></dt>
+<dd><p>A list of processed documents.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mlclient.jobs.WriteDocumentsJob.completed_count">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">completed_count</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#mlclient.jobs.WriteDocumentsJob.completed_count" title="Permalink to this definition"></a></dt>
+<dd><p>A number of processed documents.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mlclient.jobs.WriteDocumentsJob.failed">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">failed</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#mlclient.jobs.WriteDocumentsJob.failed" title="Permalink to this definition"></a></dt>
+<dd><p>A list of processed documents that failed to be written.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mlclient.jobs.WriteDocumentsJob.start">
+<span class="sig-name descname"><span class="pre">start</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/mlclient/jobs/documents_jobs.html#WriteDocumentsJob.start"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.jobs.WriteDocumentsJob.start" title="Permalink to this definition"></a></dt>
+<dd><p>Start a job’s execution.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mlclient.jobs.WriteDocumentsJob.successful">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">successful</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#mlclient.jobs.WriteDocumentsJob.successful" title="Permalink to this definition"></a></dt>
+<dd><p>A list of successfully processed documents.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mlclient.jobs.WriteDocumentsJob.thread_count">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">thread_count</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#mlclient.jobs.WriteDocumentsJob.thread_count" title="Permalink to this definition"></a></dt>
+<dd><p>A number of threads.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mlclient.jobs.WriteDocumentsJob.with_client_config">
+<span class="sig-name descname"><span class="pre">with_client_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/mlclient/jobs/documents_jobs.html#WriteDocumentsJob.with_client_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.jobs.WriteDocumentsJob.with_client_config" title="Permalink to this definition"></a></dt>
+<dd><p>Set DocumentsClient configuration.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>config</strong> – Keyword arguments to be passed for a DocumentsClient instance.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mlclient.jobs.WriteDocumentsJob.with_database">
+<span class="sig-name descname"><span class="pre">with_database</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">database</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/mlclient/jobs/documents_jobs.html#WriteDocumentsJob.with_database"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.jobs.WriteDocumentsJob.with_database" title="Permalink to this definition"></a></dt>
+<dd><p>Set a database name.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>database</strong> (<em>str</em>) – A database name</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mlclient.jobs.WriteDocumentsJob.with_documents_input">
+<span class="sig-name descname"><span class="pre">with_documents_input</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">documents</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../model/mlclient.model.html#mlclient.model.Document" title="mlclient.model.data.Document"><span class="pre">Document</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/mlclient/jobs/documents_jobs.html#WriteDocumentsJob.with_documents_input"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.jobs.WriteDocumentsJob.with_documents_input" title="Permalink to this definition"></a></dt>
+<dd><p>Add Documents to the job’s input.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>documents</strong> (<em>Iterable</em><em>[</em><a class="reference internal" href="../model/mlclient.model.html#mlclient.model.Document" title="mlclient.model.Document"><em>Document</em></a><em>]</em>) – Documents to be written into a MarkLogic database</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mlclient.jobs.WriteDocumentsJob.with_filesystem_input">
+<span class="sig-name descname"><span class="pre">with_filesystem_input</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uri_prefix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/mlclient/jobs/documents_jobs.html#WriteDocumentsJob.with_filesystem_input"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.jobs.WriteDocumentsJob.with_filesystem_input" title="Permalink to this definition"></a></dt>
+<dd><p>Load files and add parsed Documents to the job’s input.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> (<em>str</em>) – An input path with file(s) to be written into a MarkLogic database</p></li>
+<li><p><strong>uri_prefix</strong> (<em>str</em><em>, </em><em>default &quot;&quot;</em>) – An URI prefix to be put before files’ relative path</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../clients/mlclient.clients.html" class="btn btn-neutral float-left" title="mlclient.clients package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../model/mlclient.model.html" class="btn btn-neutral float-right" title="mlclient.model package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Tomasz Aniołowski.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

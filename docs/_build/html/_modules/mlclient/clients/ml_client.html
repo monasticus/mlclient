@@ -144,7 +144,7 @@
 <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="MLClient"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.MLClient">[docs]</a><span class="k">class</span> <span class="nc">MLClient</span><span class="p">:</span>
+<div class="viewcode-block" id="MLClient"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.clients.MLClient">[docs]</a><span class="k">class</span> <span class="nc">MLClient</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;A low-level class used to send simple HTTP requests to a MarkLogic instance.</span>
 
 <span class="sd">    Using configuration details provided it allows you to hit MarkLogic&#39;s endpoints.</span>
@@ -273,7 +273,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">disconnect</span><span class="p">()</span>
 
-<div class="viewcode-block" id="MLClient.connect"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.MLClient.connect">[docs]</a>    <span class="k">def</span> <span class="nf">connect</span><span class="p">(</span>
+<div class="viewcode-block" id="MLClient.connect"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.clients.MLClient.connect">[docs]</a>    <span class="k">def</span> <span class="nf">connect</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Start an HTTP session.&quot;&quot;&quot;</span>
@@ -281,7 +281,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_sess</span> <span class="o">=</span> <span class="n">Session</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_sess</span><span class="o">.</span><span class="n">mount</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">base_url</span><span class="p">,</span> <span class="n">HTTPAdapter</span><span class="p">(</span><span class="n">max_retries</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_retry</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="MLClient.disconnect"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.MLClient.disconnect">[docs]</a>    <span class="k">def</span> <span class="nf">disconnect</span><span class="p">(</span>
+<div class="viewcode-block" id="MLClient.disconnect"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.clients.MLClient.disconnect">[docs]</a>    <span class="k">def</span> <span class="nf">disconnect</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Close an HTTP session.&quot;&quot;&quot;</span>
@@ -290,7 +290,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_sess</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_sess</span> <span class="o">=</span> <span class="kc">None</span></div>
 
-<div class="viewcode-block" id="MLClient.is_connected"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.MLClient.is_connected">[docs]</a>    <span class="k">def</span> <span class="nf">is_connected</span><span class="p">(</span>
+<div class="viewcode-block" id="MLClient.is_connected"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.clients.MLClient.is_connected">[docs]</a>    <span class="k">def</span> <span class="nf">is_connected</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a connection status.</span>
@@ -302,7 +302,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sess</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span></div>
 
-<div class="viewcode-block" id="MLClient.get"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.MLClient.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span>
+<div class="viewcode-block" id="MLClient.get"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.clients.MLClient.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">endpoint</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">params</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -326,7 +326,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="s2">&quot;GET&quot;</span><span class="p">,</span> <span class="n">endpoint</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">headers</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="MLClient.post"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.MLClient.post">[docs]</a>    <span class="k">def</span> <span class="nf">post</span><span class="p">(</span>
+<div class="viewcode-block" id="MLClient.post"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.clients.MLClient.post">[docs]</a>    <span class="k">def</span> <span class="nf">post</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">endpoint</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">params</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -353,7 +353,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="s2">&quot;POST&quot;</span><span class="p">,</span> <span class="n">endpoint</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">headers</span><span class="p">,</span> <span class="n">body</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="MLClient.put"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.MLClient.put">[docs]</a>    <span class="k">def</span> <span class="nf">put</span><span class="p">(</span>
+<div class="viewcode-block" id="MLClient.put"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.clients.MLClient.put">[docs]</a>    <span class="k">def</span> <span class="nf">put</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">endpoint</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">params</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -380,7 +380,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="s2">&quot;PUT&quot;</span><span class="p">,</span> <span class="n">endpoint</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">headers</span><span class="p">,</span> <span class="n">body</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="MLClient.delete_"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.MLClient.delete_">[docs]</a>    <span class="k">def</span> <span class="nf">delete_</span><span class="p">(</span>
+<div class="viewcode-block" id="MLClient.delete_"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.clients.MLClient.delete_">[docs]</a>    <span class="k">def</span> <span class="nf">delete_</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">endpoint</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">params</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -404,7 +404,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="s2">&quot;DELETE&quot;</span><span class="p">,</span> <span class="n">endpoint</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">headers</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="MLClient.request"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.MLClient.request">[docs]</a>    <span class="k">def</span> <span class="nf">request</span><span class="p">(</span>
+<div class="viewcode-block" id="MLClient.request"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.clients.MLClient.request">[docs]</a>    <span class="k">def</span> <span class="nf">request</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">method</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">endpoint</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -464,7 +464,7 @@
         <span class="k">return</span> <span class="kc">None</span></div></div>
 
 
-<div class="viewcode-block" id="MLResourceClient"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.MLResourceClient">[docs]</a><span class="k">class</span> <span class="nc">MLResourceClient</span><span class="p">(</span><span class="n">MLClient</span><span class="p">):</span>
+<div class="viewcode-block" id="MLResourceClient"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.clients.MLResourceClient">[docs]</a><span class="k">class</span> <span class="nc">MLResourceClient</span><span class="p">(</span><span class="n">MLClient</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;An MLClient subclass calling ResourceCall implementation classes.</span>
 
 <span class="sd">    It can connect with the MarkLogic Server as a Context Manager or explicitly by</span>
@@ -499,7 +499,7 @@
 <span class="sd">    --6a5df7d535c71968--</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="MLResourceClient.call"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.MLResourceClient.call">[docs]</a>    <span class="k">def</span> <span class="nf">call</span><span class="p">(</span>
+<div class="viewcode-block" id="MLResourceClient.call"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.clients.MLResourceClient.call">[docs]</a>    <span class="k">def</span> <span class="nf">call</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">call</span><span class="p">:</span> <span class="n">ResourceCall</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span><span class="p">:</span>
@@ -524,7 +524,7 @@
         <span class="p">)</span></div></div>
 
 
-<div class="viewcode-block" id="MLResourcesClient"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.MLResourcesClient">[docs]</a><span class="k">class</span> <span class="nc">MLResourcesClient</span><span class="p">(</span><span class="n">MLResourceClient</span><span class="p">):</span>
+<div class="viewcode-block" id="MLResourcesClient"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.clients.MLResourcesClient">[docs]</a><span class="k">class</span> <span class="nc">MLResourcesClient</span><span class="p">(</span><span class="n">MLResourceClient</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;An MLResourceClient subclass supporting REST Resources of the MarkLogic server.</span>
 
 <span class="sd">    It can connect with the MarkLogic Server as a Context Manager or explicitly by</span>
@@ -561,7 +561,7 @@
 <span class="sd">    --6a5df7d535c71968--</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="MLResourcesClient.eval"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.MLResourcesClient.eval">[docs]</a>    <span class="k">def</span> <span class="nf">eval</span><span class="p">(</span>
+<div class="viewcode-block" id="MLResourcesClient.eval"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.clients.MLResourcesClient.eval">[docs]</a>    <span class="k">def</span> <span class="nf">eval</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">xquery</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">javascript</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -605,7 +605,7 @@
         <span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">call</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="MLResourcesClient.get_logs"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.MLResourcesClient.get_logs">[docs]</a>    <span class="k">def</span> <span class="nf">get_logs</span><span class="p">(</span>
+<div class="viewcode-block" id="MLResourcesClient.get_logs"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.clients.MLResourcesClient.get_logs">[docs]</a>    <span class="k">def</span> <span class="nf">get_logs</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">data_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -647,7 +647,7 @@
         <span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">call</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="MLResourcesClient.get_databases"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.MLResourcesClient.get_databases">[docs]</a>    <span class="k">def</span> <span class="nf">get_databases</span><span class="p">(</span>
+<div class="viewcode-block" id="MLResourcesClient.get_databases"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.clients.MLResourcesClient.get_databases">[docs]</a>    <span class="k">def</span> <span class="nf">get_databases</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">data_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">view</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -670,7 +670,7 @@
         <span class="n">call</span> <span class="o">=</span> <span class="n">DatabasesGetCall</span><span class="p">(</span><span class="n">data_format</span><span class="o">=</span><span class="n">data_format</span><span class="p">,</span> <span class="n">view</span><span class="o">=</span><span class="n">view</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">call</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="MLResourcesClient.post_databases"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.MLResourcesClient.post_databases">[docs]</a>    <span class="k">def</span> <span class="nf">post_databases</span><span class="p">(</span>
+<div class="viewcode-block" id="MLResourcesClient.post_databases"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.clients.MLResourcesClient.post_databases">[docs]</a>    <span class="k">def</span> <span class="nf">post_databases</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">body</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span><span class="p">:</span>
@@ -689,7 +689,7 @@
         <span class="n">call</span> <span class="o">=</span> <span class="n">DatabasesPostCall</span><span class="p">(</span><span class="n">body</span><span class="o">=</span><span class="n">body</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">call</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="MLResourcesClient.get_database"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.MLResourcesClient.get_database">[docs]</a>    <span class="k">def</span> <span class="nf">get_database</span><span class="p">(</span>
+<div class="viewcode-block" id="MLResourcesClient.get_database"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.clients.MLResourcesClient.get_database">[docs]</a>    <span class="k">def</span> <span class="nf">get_database</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">database</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">data_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -717,7 +717,7 @@
         <span class="n">call</span> <span class="o">=</span> <span class="n">DatabaseGetCall</span><span class="p">(</span><span class="n">database</span><span class="o">=</span><span class="n">database</span><span class="p">,</span> <span class="n">data_format</span><span class="o">=</span><span class="n">data_format</span><span class="p">,</span> <span class="n">view</span><span class="o">=</span><span class="n">view</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">call</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="MLResourcesClient.post_database"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.MLResourcesClient.post_database">[docs]</a>    <span class="k">def</span> <span class="nf">post_database</span><span class="p">(</span>
+<div class="viewcode-block" id="MLResourcesClient.post_database"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.clients.MLResourcesClient.post_database">[docs]</a>    <span class="k">def</span> <span class="nf">post_database</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">database</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">body</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">,</span>
@@ -739,7 +739,7 @@
         <span class="n">call</span> <span class="o">=</span> <span class="n">DatabasePostCall</span><span class="p">(</span><span class="n">database</span><span class="o">=</span><span class="n">database</span><span class="p">,</span> <span class="n">body</span><span class="o">=</span><span class="n">body</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">call</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="MLResourcesClient.delete_database"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.MLResourcesClient.delete_database">[docs]</a>    <span class="k">def</span> <span class="nf">delete_database</span><span class="p">(</span>
+<div class="viewcode-block" id="MLResourcesClient.delete_database"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.clients.MLResourcesClient.delete_database">[docs]</a>    <span class="k">def</span> <span class="nf">delete_database</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">database</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">forest_delete</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -765,7 +765,7 @@
         <span class="n">call</span> <span class="o">=</span> <span class="n">DatabaseDeleteCall</span><span class="p">(</span><span class="n">database</span><span class="o">=</span><span class="n">database</span><span class="p">,</span> <span class="n">forest_delete</span><span class="o">=</span><span class="n">forest_delete</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">call</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="MLResourcesClient.get_database_properties"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.MLResourcesClient.get_database_properties">[docs]</a>    <span class="k">def</span> <span class="nf">get_database_properties</span><span class="p">(</span>
+<div class="viewcode-block" id="MLResourcesClient.get_database_properties"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.clients.MLResourcesClient.get_database_properties">[docs]</a>    <span class="k">def</span> <span class="nf">get_database_properties</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">database</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">data_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -788,7 +788,7 @@
         <span class="n">call</span> <span class="o">=</span> <span class="n">DatabasePropertiesGetCall</span><span class="p">(</span><span class="n">database</span><span class="o">=</span><span class="n">database</span><span class="p">,</span> <span class="n">data_format</span><span class="o">=</span><span class="n">data_format</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">call</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="MLResourcesClient.put_database_properties"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.MLResourcesClient.put_database_properties">[docs]</a>    <span class="k">def</span> <span class="nf">put_database_properties</span><span class="p">(</span>
+<div class="viewcode-block" id="MLResourcesClient.put_database_properties"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.clients.MLResourcesClient.put_database_properties">[docs]</a>    <span class="k">def</span> <span class="nf">put_database_properties</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">database</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">body</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">,</span>
@@ -810,7 +810,7 @@
         <span class="n">call</span> <span class="o">=</span> <span class="n">DatabasePropertiesPutCall</span><span class="p">(</span><span class="n">database</span><span class="o">=</span><span class="n">database</span><span class="p">,</span> <span class="n">body</span><span class="o">=</span><span class="n">body</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">call</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="MLResourcesClient.get_servers"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.MLResourcesClient.get_servers">[docs]</a>    <span class="k">def</span> <span class="nf">get_servers</span><span class="p">(</span>
+<div class="viewcode-block" id="MLResourcesClient.get_servers"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.clients.MLResourcesClient.get_servers">[docs]</a>    <span class="k">def</span> <span class="nf">get_servers</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">data_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">group_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -848,7 +848,7 @@
         <span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">call</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="MLResourcesClient.post_servers"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.MLResourcesClient.post_servers">[docs]</a>    <span class="k">def</span> <span class="nf">post_servers</span><span class="p">(</span>
+<div class="viewcode-block" id="MLResourcesClient.post_servers"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.clients.MLResourcesClient.post_servers">[docs]</a>    <span class="k">def</span> <span class="nf">post_servers</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">body</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">,</span>
         <span class="n">group_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -879,7 +879,7 @@
         <span class="n">call</span> <span class="o">=</span> <span class="n">ServersPostCall</span><span class="p">(</span><span class="n">body</span><span class="o">=</span><span class="n">body</span><span class="p">,</span> <span class="n">group_id</span><span class="o">=</span><span class="n">group_id</span><span class="p">,</span> <span class="n">server_type</span><span class="o">=</span><span class="n">server_type</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">call</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="MLResourcesClient.get_server"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.MLResourcesClient.get_server">[docs]</a>    <span class="k">def</span> <span class="nf">get_server</span><span class="p">(</span>
+<div class="viewcode-block" id="MLResourcesClient.get_server"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.clients.MLResourcesClient.get_server">[docs]</a>    <span class="k">def</span> <span class="nf">get_server</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">server</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">group_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -934,7 +934,7 @@
         <span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">call</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="MLResourcesClient.delete_server"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.MLResourcesClient.delete_server">[docs]</a>    <span class="k">def</span> <span class="nf">delete_server</span><span class="p">(</span>
+<div class="viewcode-block" id="MLResourcesClient.delete_server"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.clients.MLResourcesClient.delete_server">[docs]</a>    <span class="k">def</span> <span class="nf">delete_server</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">server</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">group_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -957,7 +957,7 @@
         <span class="n">call</span> <span class="o">=</span> <span class="n">ServerDeleteCall</span><span class="p">(</span><span class="n">server</span><span class="o">=</span><span class="n">server</span><span class="p">,</span> <span class="n">group_id</span><span class="o">=</span><span class="n">group_id</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">call</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="MLResourcesClient.get_server_properties"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.MLResourcesClient.get_server_properties">[docs]</a>    <span class="k">def</span> <span class="nf">get_server_properties</span><span class="p">(</span>
+<div class="viewcode-block" id="MLResourcesClient.get_server_properties"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.clients.MLResourcesClient.get_server_properties">[docs]</a>    <span class="k">def</span> <span class="nf">get_server_properties</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">server</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">group_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -988,7 +988,7 @@
         <span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">call</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="MLResourcesClient.put_server_properties"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.MLResourcesClient.put_server_properties">[docs]</a>    <span class="k">def</span> <span class="nf">put_server_properties</span><span class="p">(</span>
+<div class="viewcode-block" id="MLResourcesClient.put_server_properties"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.clients.MLResourcesClient.put_server_properties">[docs]</a>    <span class="k">def</span> <span class="nf">put_server_properties</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">server</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">group_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -1014,7 +1014,7 @@
         <span class="n">call</span> <span class="o">=</span> <span class="n">ServerPropertiesPutCall</span><span class="p">(</span><span class="n">server</span><span class="o">=</span><span class="n">server</span><span class="p">,</span> <span class="n">group_id</span><span class="o">=</span><span class="n">group_id</span><span class="p">,</span> <span class="n">body</span><span class="o">=</span><span class="n">body</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">call</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="MLResourcesClient.get_forests"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.MLResourcesClient.get_forests">[docs]</a>    <span class="k">def</span> <span class="nf">get_forests</span><span class="p">(</span>
+<div class="viewcode-block" id="MLResourcesClient.get_forests"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.clients.MLResourcesClient.get_forests">[docs]</a>    <span class="k">def</span> <span class="nf">get_forests</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">data_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">view</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -1062,7 +1062,7 @@
         <span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">call</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="MLResourcesClient.post_forests"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.MLResourcesClient.post_forests">[docs]</a>    <span class="k">def</span> <span class="nf">post_forests</span><span class="p">(</span>
+<div class="viewcode-block" id="MLResourcesClient.post_forests"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.clients.MLResourcesClient.post_forests">[docs]</a>    <span class="k">def</span> <span class="nf">post_forests</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">body</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">,</span>
         <span class="n">wait_for_forest_to_mount</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -1088,7 +1088,7 @@
         <span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">call</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="MLResourcesClient.put_forests"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.MLResourcesClient.put_forests">[docs]</a>    <span class="k">def</span> <span class="nf">put_forests</span><span class="p">(</span>
+<div class="viewcode-block" id="MLResourcesClient.put_forests"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.clients.MLResourcesClient.put_forests">[docs]</a>    <span class="k">def</span> <span class="nf">put_forests</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">body</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span><span class="p">:</span>
@@ -1107,7 +1107,7 @@
         <span class="n">call</span> <span class="o">=</span> <span class="n">ForestsPutCall</span><span class="p">(</span><span class="n">body</span><span class="o">=</span><span class="n">body</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">call</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="MLResourcesClient.get_forest"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.MLResourcesClient.get_forest">[docs]</a>    <span class="k">def</span> <span class="nf">get_forest</span><span class="p">(</span>
+<div class="viewcode-block" id="MLResourcesClient.get_forest"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.clients.MLResourcesClient.get_forest">[docs]</a>    <span class="k">def</span> <span class="nf">get_forest</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">forest</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">data_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -1134,7 +1134,7 @@
         <span class="n">call</span> <span class="o">=</span> <span class="n">ForestGetCall</span><span class="p">(</span><span class="n">forest</span><span class="o">=</span><span class="n">forest</span><span class="p">,</span> <span class="n">data_format</span><span class="o">=</span><span class="n">data_format</span><span class="p">,</span> <span class="n">view</span><span class="o">=</span><span class="n">view</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">call</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="MLResourcesClient.post_forest"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.MLResourcesClient.post_forest">[docs]</a>    <span class="k">def</span> <span class="nf">post_forest</span><span class="p">(</span>
+<div class="viewcode-block" id="MLResourcesClient.post_forest"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.clients.MLResourcesClient.post_forest">[docs]</a>    <span class="k">def</span> <span class="nf">post_forest</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">forest</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">body</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">,</span>
@@ -1158,7 +1158,7 @@
         <span class="n">call</span> <span class="o">=</span> <span class="n">ForestPostCall</span><span class="p">(</span><span class="n">forest</span><span class="o">=</span><span class="n">forest</span><span class="p">,</span> <span class="n">body</span><span class="o">=</span><span class="n">body</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">call</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="MLResourcesClient.delete_forest"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.MLResourcesClient.delete_forest">[docs]</a>    <span class="k">def</span> <span class="nf">delete_forest</span><span class="p">(</span>
+<div class="viewcode-block" id="MLResourcesClient.delete_forest"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.clients.MLResourcesClient.delete_forest">[docs]</a>    <span class="k">def</span> <span class="nf">delete_forest</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">forest</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">level</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -1188,7 +1188,7 @@
         <span class="n">call</span> <span class="o">=</span> <span class="n">ForestDeleteCall</span><span class="p">(</span><span class="n">forest</span><span class="o">=</span><span class="n">forest</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="n">level</span><span class="p">,</span> <span class="n">replicas</span><span class="o">=</span><span class="n">replicas</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">call</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="MLResourcesClient.get_forest_properties"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.MLResourcesClient.get_forest_properties">[docs]</a>    <span class="k">def</span> <span class="nf">get_forest_properties</span><span class="p">(</span>
+<div class="viewcode-block" id="MLResourcesClient.get_forest_properties"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.clients.MLResourcesClient.get_forest_properties">[docs]</a>    <span class="k">def</span> <span class="nf">get_forest_properties</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">forest</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">data_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -1211,7 +1211,7 @@
         <span class="n">call</span> <span class="o">=</span> <span class="n">ForestPropertiesGetCall</span><span class="p">(</span><span class="n">forest</span><span class="o">=</span><span class="n">forest</span><span class="p">,</span> <span class="n">data_format</span><span class="o">=</span><span class="n">data_format</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">call</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="MLResourcesClient.put_forest_properties"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.MLResourcesClient.put_forest_properties">[docs]</a>    <span class="k">def</span> <span class="nf">put_forest_properties</span><span class="p">(</span>
+<div class="viewcode-block" id="MLResourcesClient.put_forest_properties"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.clients.MLResourcesClient.put_forest_properties">[docs]</a>    <span class="k">def</span> <span class="nf">put_forest_properties</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">forest</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">body</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">,</span>
@@ -1233,7 +1233,7 @@
         <span class="n">call</span> <span class="o">=</span> <span class="n">ForestPropertiesPutCall</span><span class="p">(</span><span class="n">forest</span><span class="o">=</span><span class="n">forest</span><span class="p">,</span> <span class="n">body</span><span class="o">=</span><span class="n">body</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">call</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="MLResourcesClient.get_roles"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.MLResourcesClient.get_roles">[docs]</a>    <span class="k">def</span> <span class="nf">get_roles</span><span class="p">(</span>
+<div class="viewcode-block" id="MLResourcesClient.get_roles"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.clients.MLResourcesClient.get_roles">[docs]</a>    <span class="k">def</span> <span class="nf">get_roles</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">data_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">view</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -1255,7 +1255,7 @@
         <span class="n">call</span> <span class="o">=</span> <span class="n">RolesGetCall</span><span class="p">(</span><span class="n">data_format</span><span class="o">=</span><span class="n">data_format</span><span class="p">,</span> <span class="n">view</span><span class="o">=</span><span class="n">view</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">call</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="MLResourcesClient.post_roles"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.MLResourcesClient.post_roles">[docs]</a>    <span class="k">def</span> <span class="nf">post_roles</span><span class="p">(</span>
+<div class="viewcode-block" id="MLResourcesClient.post_roles"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.clients.MLResourcesClient.post_roles">[docs]</a>    <span class="k">def</span> <span class="nf">post_roles</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">body</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span><span class="p">:</span>
@@ -1274,7 +1274,7 @@
         <span class="n">call</span> <span class="o">=</span> <span class="n">RolesPostCall</span><span class="p">(</span><span class="n">body</span><span class="o">=</span><span class="n">body</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">call</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="MLResourcesClient.get_role"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.MLResourcesClient.get_role">[docs]</a>    <span class="k">def</span> <span class="nf">get_role</span><span class="p">(</span>
+<div class="viewcode-block" id="MLResourcesClient.get_role"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.clients.MLResourcesClient.get_role">[docs]</a>    <span class="k">def</span> <span class="nf">get_role</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">role</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">data_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -1299,7 +1299,7 @@
         <span class="n">call</span> <span class="o">=</span> <span class="n">RoleGetCall</span><span class="p">(</span><span class="n">role</span><span class="o">=</span><span class="n">role</span><span class="p">,</span> <span class="n">data_format</span><span class="o">=</span><span class="n">data_format</span><span class="p">,</span> <span class="n">view</span><span class="o">=</span><span class="n">view</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">call</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="MLResourcesClient.delete_role"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.MLResourcesClient.delete_role">[docs]</a>    <span class="k">def</span> <span class="nf">delete_role</span><span class="p">(</span>
+<div class="viewcode-block" id="MLResourcesClient.delete_role"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.clients.MLResourcesClient.delete_role">[docs]</a>    <span class="k">def</span> <span class="nf">delete_role</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">role</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span><span class="p">:</span>
@@ -1318,7 +1318,7 @@
         <span class="n">call</span> <span class="o">=</span> <span class="n">RoleDeleteCall</span><span class="p">(</span><span class="n">role</span><span class="o">=</span><span class="n">role</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">call</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="MLResourcesClient.get_role_properties"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.MLResourcesClient.get_role_properties">[docs]</a>    <span class="k">def</span> <span class="nf">get_role_properties</span><span class="p">(</span>
+<div class="viewcode-block" id="MLResourcesClient.get_role_properties"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.clients.MLResourcesClient.get_role_properties">[docs]</a>    <span class="k">def</span> <span class="nf">get_role_properties</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">role</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">data_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -1341,7 +1341,7 @@
         <span class="n">call</span> <span class="o">=</span> <span class="n">RolePropertiesGetCall</span><span class="p">(</span><span class="n">role</span><span class="o">=</span><span class="n">role</span><span class="p">,</span> <span class="n">data_format</span><span class="o">=</span><span class="n">data_format</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">call</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="MLResourcesClient.put_role_properties"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.MLResourcesClient.put_role_properties">[docs]</a>    <span class="k">def</span> <span class="nf">put_role_properties</span><span class="p">(</span>
+<div class="viewcode-block" id="MLResourcesClient.put_role_properties"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.clients.MLResourcesClient.put_role_properties">[docs]</a>    <span class="k">def</span> <span class="nf">put_role_properties</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">role</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">body</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">,</span>
@@ -1363,7 +1363,7 @@
         <span class="n">call</span> <span class="o">=</span> <span class="n">RolePropertiesPutCall</span><span class="p">(</span><span class="n">role</span><span class="o">=</span><span class="n">role</span><span class="p">,</span> <span class="n">body</span><span class="o">=</span><span class="n">body</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">call</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="MLResourcesClient.get_users"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.MLResourcesClient.get_users">[docs]</a>    <span class="k">def</span> <span class="nf">get_users</span><span class="p">(</span>
+<div class="viewcode-block" id="MLResourcesClient.get_users"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.clients.MLResourcesClient.get_users">[docs]</a>    <span class="k">def</span> <span class="nf">get_users</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">data_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">view</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -1385,7 +1385,7 @@
         <span class="n">call</span> <span class="o">=</span> <span class="n">UsersGetCall</span><span class="p">(</span><span class="n">data_format</span><span class="o">=</span><span class="n">data_format</span><span class="p">,</span> <span class="n">view</span><span class="o">=</span><span class="n">view</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">call</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="MLResourcesClient.post_users"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.MLResourcesClient.post_users">[docs]</a>    <span class="k">def</span> <span class="nf">post_users</span><span class="p">(</span>
+<div class="viewcode-block" id="MLResourcesClient.post_users"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.clients.MLResourcesClient.post_users">[docs]</a>    <span class="k">def</span> <span class="nf">post_users</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">body</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span><span class="p">:</span>
@@ -1404,7 +1404,7 @@
         <span class="n">call</span> <span class="o">=</span> <span class="n">UsersPostCall</span><span class="p">(</span><span class="n">body</span><span class="o">=</span><span class="n">body</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">call</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="MLResourcesClient.get_user"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.MLResourcesClient.get_user">[docs]</a>    <span class="k">def</span> <span class="nf">get_user</span><span class="p">(</span>
+<div class="viewcode-block" id="MLResourcesClient.get_user"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.clients.MLResourcesClient.get_user">[docs]</a>    <span class="k">def</span> <span class="nf">get_user</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">user</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">data_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -1429,7 +1429,7 @@
         <span class="n">call</span> <span class="o">=</span> <span class="n">UserGetCall</span><span class="p">(</span><span class="n">user</span><span class="o">=</span><span class="n">user</span><span class="p">,</span> <span class="n">data_format</span><span class="o">=</span><span class="n">data_format</span><span class="p">,</span> <span class="n">view</span><span class="o">=</span><span class="n">view</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">call</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="MLResourcesClient.delete_user"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.MLResourcesClient.delete_user">[docs]</a>    <span class="k">def</span> <span class="nf">delete_user</span><span class="p">(</span>
+<div class="viewcode-block" id="MLResourcesClient.delete_user"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.clients.MLResourcesClient.delete_user">[docs]</a>    <span class="k">def</span> <span class="nf">delete_user</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">user</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span><span class="p">:</span>
@@ -1448,7 +1448,7 @@
         <span class="n">call</span> <span class="o">=</span> <span class="n">UserDeleteCall</span><span class="p">(</span><span class="n">user</span><span class="o">=</span><span class="n">user</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">call</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="MLResourcesClient.get_user_properties"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.MLResourcesClient.get_user_properties">[docs]</a>    <span class="k">def</span> <span class="nf">get_user_properties</span><span class="p">(</span>
+<div class="viewcode-block" id="MLResourcesClient.get_user_properties"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.clients.MLResourcesClient.get_user_properties">[docs]</a>    <span class="k">def</span> <span class="nf">get_user_properties</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">user</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">data_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -1471,7 +1471,7 @@
         <span class="n">call</span> <span class="o">=</span> <span class="n">UserPropertiesGetCall</span><span class="p">(</span><span class="n">user</span><span class="o">=</span><span class="n">user</span><span class="p">,</span> <span class="n">data_format</span><span class="o">=</span><span class="n">data_format</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">call</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="MLResourcesClient.put_user_properties"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.MLResourcesClient.put_user_properties">[docs]</a>    <span class="k">def</span> <span class="nf">put_user_properties</span><span class="p">(</span>
+<div class="viewcode-block" id="MLResourcesClient.put_user_properties"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.clients.MLResourcesClient.put_user_properties">[docs]</a>    <span class="k">def</span> <span class="nf">put_user_properties</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">user</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">body</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">,</span>
@@ -1498,7 +1498,7 @@
         <span class="n">call</span> <span class="o">=</span> <span class="n">UserPropertiesPutCall</span><span class="p">(</span><span class="n">user</span><span class="o">=</span><span class="n">user</span><span class="p">,</span> <span class="n">body</span><span class="o">=</span><span class="n">body</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">call</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="MLResourcesClient.get_documents"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.MLResourcesClient.get_documents">[docs]</a>    <span class="k">def</span> <span class="nf">get_documents</span><span class="p">(</span>
+<div class="viewcode-block" id="MLResourcesClient.get_documents"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.clients.MLResourcesClient.get_documents">[docs]</a>    <span class="k">def</span> <span class="nf">get_documents</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">uri</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span><span class="p">,</span>
         <span class="n">database</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -1566,7 +1566,7 @@
         <span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">call</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="MLResourcesClient.post_documents"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.MLResourcesClient.post_documents">[docs]</a>    <span class="k">def</span> <span class="nf">post_documents</span><span class="p">(</span>
+<div class="viewcode-block" id="MLResourcesClient.post_documents"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.clients.MLResourcesClient.post_documents">[docs]</a>    <span class="k">def</span> <span class="nf">post_documents</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">body_parts</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">DocumentsBodyPart</span><span class="p">],</span>
         <span class="n">database</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -1622,7 +1622,7 @@
         <span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">call</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="MLResourcesClient.delete_documents"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.MLResourcesClient.delete_documents">[docs]</a>    <span class="k">def</span> <span class="nf">delete_documents</span><span class="p">(</span>
+<div class="viewcode-block" id="MLResourcesClient.delete_documents"><a class="viewcode-back" href="../../../api/mlclient/mlclient.html#mlclient.clients.MLResourcesClient.delete_documents">[docs]</a>    <span class="k">def</span> <span class="nf">delete_documents</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">uri</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span><span class="p">,</span>
         <span class="n">database</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>

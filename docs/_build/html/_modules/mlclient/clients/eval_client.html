@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mlclient.clients.eval_client &mdash; MLClient 0.4.0 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/autodoc_pydantic.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=4e78f113"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            MLClient
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Python API:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/mlclient/mlclient.html">mlclient package</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../user/setup.html">Setup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../user/cli.html">Command Line Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../user/pythonapi.html">Python API</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">MLClient</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">mlclient.clients.eval_client</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for mlclient.clients.eval_client</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;The ML Eval Client module.</span>
+
+<span class="sd">It exports high-level classes to easily evaluate code in MarkLogic server:</span>
+<span class="sd">    * EvalClient</span>
+<span class="sd">        An MLResourceClient calling /v1/eval endpoint.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span> <span class="nn">xml.etree.ElementTree</span> <span class="k">as</span> <span class="nn">ElemTree</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+
+<span class="kn">from</span> <span class="nn">mlclient.calls</span> <span class="kn">import</span> <span class="n">EvalCall</span>
+<span class="kn">from</span> <span class="nn">mlclient.clients</span> <span class="kn">import</span> <span class="n">MLResourceClient</span>
+<span class="kn">from</span> <span class="nn">mlclient.exceptions</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">MarkLogicError</span><span class="p">,</span>
+    <span class="n">UnsupportedFileExtensionError</span><span class="p">,</span>
+    <span class="n">WrongParametersError</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">mlclient.ml_response_parser</span> <span class="kn">import</span> <span class="n">MLResponseParser</span>
+
+<span class="n">LOCAL_NS</span> <span class="o">=</span> <span class="s2">&quot;http://www.w3.org/2005/xquery-local-functions&quot;</span>
+
+
+<div class="viewcode-block" id="EvalClient"><a class="viewcode-back" href="../../../api/mlclient/clients/mlclient.clients.html#mlclient.clients.EvalClient">[docs]</a><span class="k">class</span> <span class="nc">EvalClient</span><span class="p">(</span><span class="n">MLResourceClient</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;An MLResourceClient calling /v1/eval endpoint.</span>
+
+<span class="sd">    It is a high-level class parsing MarkLogic response and extracting values from</span>
+<span class="sd">    the server.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">_XQUERY_FILE_EXT</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;xq&quot;</span><span class="p">,</span> <span class="s2">&quot;xql&quot;</span><span class="p">,</span> <span class="s2">&quot;xqm&quot;</span><span class="p">,</span> <span class="s2">&quot;xqu&quot;</span><span class="p">,</span> <span class="s2">&quot;xquery&quot;</span><span class="p">,</span> <span class="s2">&quot;xqy&quot;</span><span class="p">)</span>
+    <span class="n">_JAVASCRIPT_FILE_EXT</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;js&quot;</span><span class="p">,</span> <span class="s2">&quot;sjs&quot;</span><span class="p">)</span>
+    <span class="n">_SUPPORTED_FILE_EXT</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">extension</span>
+        <span class="k">for</span> <span class="n">extensions</span> <span class="ow">in</span> <span class="p">[</span><span class="n">_XQUERY_FILE_EXT</span><span class="p">,</span> <span class="n">_JAVASCRIPT_FILE_EXT</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">extension</span> <span class="ow">in</span> <span class="n">extensions</span>
+    <span class="p">)</span>
+
+<div class="viewcode-block" id="EvalClient.eval"><a class="viewcode-back" href="../../../api/mlclient/clients/mlclient.clients.html#mlclient.clients.EvalClient.eval">[docs]</a>    <span class="k">def</span> <span class="nf">eval</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">file</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">xq</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">js</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">variables</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">database</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">txid</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">output_type</span><span class="p">:</span> <span class="nb">type</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="p">(</span>
+        <span class="nb">bytes</span>
+        <span class="o">|</span> <span class="nb">str</span>
+        <span class="o">|</span> <span class="nb">int</span>
+        <span class="o">|</span> <span class="nb">float</span>
+        <span class="o">|</span> <span class="nb">bool</span>
+        <span class="o">|</span> <span class="nb">dict</span>
+        <span class="o">|</span> <span class="n">ElemTree</span><span class="o">.</span><span class="n">ElementTree</span>
+        <span class="o">|</span> <span class="n">ElemTree</span><span class="o">.</span><span class="n">Element</span>
+        <span class="o">|</span> <span class="nb">list</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Evaluate code in a MarkLogic server and get results.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        file : str | None, default None</span>
+<span class="sd">            A file path of a code to evaluate</span>
+<span class="sd">        xq : str | None, default None</span>
+<span class="sd">            A raw XQuery code to evaluate</span>
+<span class="sd">        js : str | None, default None</span>
+<span class="sd">            A raw JavaScript code to evaluate</span>
+<span class="sd">        variables : dict | None, default None</span>
+<span class="sd">            External variables to pass to the query during evaluation</span>
+<span class="sd">        database : str | None, default None</span>
+<span class="sd">            Perform this operation on the named content database</span>
+<span class="sd">            instead of the default content database associated with the REST API</span>
+<span class="sd">            instance. The database can be identified by name or by database id.</span>
+<span class="sd">        txid : str | None, default None</span>
+<span class="sd">            The transaction identifier of the multi-statement transaction</span>
+<span class="sd">            in which to service this request.</span>
+<span class="sd">        output_type : type | None, default None</span>
+<span class="sd">            A raw output type (supported: str, bytes)</span>
+<span class="sd">        kwargs : dict</span>
+<span class="sd">            Key value arguments used as variables</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        bytes | str | int | float | bool | dict |</span>
+<span class="sd">        ElemTree.ElementTree | ElemTree.Element |</span>
+<span class="sd">        list</span>
+<span class="sd">            A code evaluation result</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        MarkLogicError</span>
+<span class="sd">            If MarkLogic returns an error</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_validate_params</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">xq</span><span class="p">,</span> <span class="n">js</span><span class="p">)</span>
+        <span class="n">call</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_call</span><span class="p">(</span>
+            <span class="n">file</span><span class="o">=</span><span class="n">file</span><span class="p">,</span>
+            <span class="n">xq</span><span class="o">=</span><span class="n">xq</span><span class="p">,</span>
+            <span class="n">js</span><span class="o">=</span><span class="n">js</span><span class="p">,</span>
+            <span class="n">variables</span><span class="o">=</span><span class="n">variables</span><span class="p">,</span>
+            <span class="n">database</span><span class="o">=</span><span class="n">database</span><span class="p">,</span>
+            <span class="n">txid</span><span class="o">=</span><span class="n">txid</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">resp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">call</span><span class="p">)</span>
+        <span class="n">parsed_resp</span> <span class="o">=</span> <span class="n">MLResponseParser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">resp</span><span class="p">,</span> <span class="n">output_type</span><span class="o">=</span><span class="n">output_type</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">resp</span><span class="o">.</span><span class="n">ok</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">MarkLogicError</span><span class="p">(</span><span class="n">parsed_resp</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">parsed_resp</span></div>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">_get_call</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span>
+        <span class="n">file</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">xq</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">js</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">variables</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">database</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">txid</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">EvalCall</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Prepare an EvalCall instance.</span>
+
+<span class="sd">        It initializes an EvalCall instance with adjusted parameters. It combines</span>
+<span class="sd">        variables with kwargs. It also uses a file content if provided to use as</span>
+<span class="sd">        xquery / javascript value.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        file : str | None</span>
+<span class="sd">            A file path of a code to evaluate</span>
+<span class="sd">        xq : str | None</span>
+<span class="sd">            A raw XQuery code to evaluate</span>
+<span class="sd">        js : str | None</span>
+<span class="sd">            A raw JavaScript code to evaluate</span>
+<span class="sd">        variables : dict | None</span>
+<span class="sd">            External variables to pass to the query during evaluation</span>
+<span class="sd">        database : str | None</span>
+<span class="sd">            Perform this operation on the named content database</span>
+<span class="sd">            instead of the default content database associated with the REST API</span>
+<span class="sd">            instance. The database can be identified by name or by database id.</span>
+<span class="sd">        txid : str | None</span>
+<span class="sd">            The transaction identifier of the multi-statement transaction</span>
+<span class="sd">            in which to service this request.</span>
+<span class="sd">        kwargs : dict</span>
+<span class="sd">            Key value arguments used as variables</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        EvalCall</span>
+<span class="sd">            A prepared EvalCall instance</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        UnsupportedFileExtensionError</span>
+<span class="sd">            If the file path provided includes unsupported extension.</span>
+<span class="sd">        WrongParametersError</span>
+<span class="sd">            If the xquery and javascript were not provided or provided both</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;xquery&quot;</span><span class="p">:</span> <span class="n">xq</span><span class="p">,</span>
+            <span class="s2">&quot;javascript&quot;</span><span class="p">:</span> <span class="n">js</span><span class="p">,</span>
+            <span class="s2">&quot;variables&quot;</span><span class="p">:</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_get_variables</span><span class="p">(</span><span class="n">variables</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">),</span>
+            <span class="s2">&quot;database&quot;</span><span class="p">:</span> <span class="n">database</span><span class="p">,</span>
+            <span class="s2">&quot;txid&quot;</span><span class="p">:</span> <span class="n">txid</span><span class="p">,</span>
+        <span class="p">}</span>
+
+        <span class="k">if</span> <span class="n">file</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">file</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">_XQUERY_FILE_EXT</span><span class="p">):</span>
+                <span class="n">lang</span> <span class="o">=</span> <span class="s2">&quot;xquery&quot;</span>
+            <span class="k">elif</span> <span class="n">file</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">_JAVASCRIPT_FILE_EXT</span><span class="p">):</span>
+                <span class="n">lang</span> <span class="o">=</span> <span class="s2">&quot;javascript&quot;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">extensions</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">_SUPPORTED_FILE_EXT</span><span class="p">)</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Unknown file extension! Supported extensions are: </span><span class="si">{</span><span class="n">extensions</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="k">raise</span> <span class="n">UnsupportedFileExtensionError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+            <span class="n">params</span><span class="p">[</span><span class="n">lang</span><span class="p">]</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">file</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">EvalCall</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_get_variables</span><span class="p">(</span>
+        <span class="n">variables</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">kwargs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Combine variables with kwargs.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        variables : dict | None</span>
+<span class="sd">            External variables to pass to the query during evaluation</span>
+<span class="sd">        kwargs : dict</span>
+<span class="sd">            Key value arguments used as variables</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        dict</span>
+<span class="sd">            External variables to pass to the query during evaluation</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">variables</span><span class="p">:</span>
+            <span class="n">variables</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">variables</span>
+        <span class="k">return</span> <span class="n">kwargs</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_validate_params</span><span class="p">(</span>
+        <span class="n">file</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">xq</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">js</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Validate parameters.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        file : str | None</span>
+<span class="sd">            A file path of a code to evaluate</span>
+<span class="sd">        xq : str | None</span>
+<span class="sd">            A raw XQuery code to evaluate</span>
+<span class="sd">        js : str | None</span>
+<span class="sd">            A raw JavaScript code to evaluate</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        WrongParametersError</span>
+<span class="sd">            If the file parameter has been provided together with xq or js</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">file</span> <span class="ow">and</span> <span class="n">xq</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;You cannot include both the file and the xquery parameter!&quot;</span>
+            <span class="k">raise</span> <span class="n">WrongParametersError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">file</span> <span class="ow">and</span> <span class="n">js</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;You cannot include both the file and the javascript parameter!&quot;</span>
+            <span class="k">raise</span> <span class="n">WrongParametersError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Tomasz Aniołowski.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

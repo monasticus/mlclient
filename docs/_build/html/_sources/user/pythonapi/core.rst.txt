@@ -74,7 +74,7 @@ READ
 
     >>> manager = MLManager("local")
     >>> with manager.get_documents_client("app-services") as docs_client:
-    ...    doc = docs_client.read("/doc-1.xml", output_type=str)
+    ...     doc = docs_client.read("/doc-1.xml", output_type=str)
 
     >>> doc
     <mlclient.model.data.RawStringDocument object at 0x7f9200980400>
@@ -97,7 +97,7 @@ READ
 
     >>> manager = MLManager("local")
     >>> with manager.get_documents_client("app-services") as docs_client:
-    ...    doc = docs_client.read("/doc-1.xml", output_type=bytes)
+    ...     doc = docs_client.read("/doc-1.xml", output_type=bytes)
 
     >>> doc
     <mlclient.model.data.RawDocument object at 0x7f9200980490>
@@ -120,7 +120,7 @@ READ
 
     >>> manager = MLManager("local")
     >>> with manager.get_documents_client("app-services") as docs_client:
-    ...    doc = docs_client.read("/doc-1.xml", category=["content", "metadata"])
+    ...     doc = docs_client.read("/doc-1.xml", category=["content", "metadata"])
 
     >>> doc.metadata
     <mlclient.model.data.Metadata object at 0x7f9200980eb0>
@@ -147,23 +147,23 @@ READ
     >>> from mlclient import MLManager
 
     >>> uris = [
-    ...   "/some/dir/doc1.xml",
-    ...   "/some/dir/doc2.json",
-    ...   "/some/dir/doc3.xqy",
-    ...   "/some/dir/doc4.zip",
+    ...     "/doc-1.xml",
+    ...     "/doc-2.json",
+    ...     "/some/dir/doc3.xqy",
+    ...     "/some/dir/doc4.zip",
     ... ]
     >>> manager = MLManager("local")
     >>> with manager.get_documents_client("app-services") as docs_client:
-    ...    docs = docs_client.read(uris)
+    ...     docs = docs_client.read(uris)
 
     >>> len(docs)
     4
 
-    >>> xml_doc = next(doc for doc in docs if doc.uri == "/some/dir/doc1.xml")
+    >>> xml_doc = next(doc for doc in docs if doc.uri == "/doc-1.xml")
     >>> xml_doc
     <mlclient.model.data.XMLDocument object at 0x7f9200920a00>
 
-    >>> json_doc = next(doc for doc in docs if doc.uri == "/some/dir/doc2.json")
+    >>> json_doc = next(doc for doc in docs if doc.uri == "/doc-2.json")
     >>> json_doc
     <mlclient.model.data.JSONDocument object at 0x7f9200920430>
 
@@ -183,10 +183,175 @@ READ
 
     >>> manager = MLManager("local")
     >>> with manager.get_documents_client("app-services") as docs_client:
-    ...    doc = docs_client.read("/doc-1.xml", database="App-Services")
+    ...     doc = docs_client.read("/doc-1.xml", database="App-Services")
 
     >>> doc
     <mlclient.model.data.XMLDocument object at 0x7f92009b4700>
+
+
+CREATE / UPDATE
+"""""""""""""""
+
+**Put a document**
+
+.. code-block:: python
+
+    >>> from mlclient import MLManager
+    >>> from mlclient.model import DocumentFactory
+
+    >>> uri = "/doc-2.json"
+    >>> content = {"root": {"child": "data"}}
+    >>> doc = DocumentFactory.build_document(uri=uri, content=content)
+    >>> doc
+    <mlclient.model.data.JSONDocument object at 0x7f9200920f70>
+
+    >>> manager = MLManager("local")
+    >>> with manager.get_documents_client("app-services") as docs_client:
+    ...     resp = docs_client.create(doc)
+    >>> resp
+    {'documents': [{'uri': '/doc-2.json', 'mime-type': 'application/json', 'category': ['metadata', 'content']}]}
+
+
+**Put a document with metadata**
+
+.. code-block:: python
+
+    >>> from mlclient import MLManager
+    >>> from mlclient.model import DocumentFactory, Metadata
+
+    >>> uri = "/doc-2.json"
+    >>> content = {"root": {"child": "data"}}
+    >>> metadata = Metadata(collections=["some-collection"])
+    >>> doc = DocumentFactory.build_document(uri=uri, content=content, metadata=metadata)
+
+    >>> manager = MLManager("local")
+    >>> with manager.get_documents_client("app-services") as docs_client:
+    ...     resp = docs_client.create(doc)
+    >>> resp
+    {'documents': [{'uri': '/doc-2.json', 'mime-type': 'application/json', 'category': ['metadata', 'content']}]}
+
+
+**Put a raw document**
+
+.. code-block:: python
+
+    >>> from mlclient import MLManager
+    >>> from mlclient.model import DocumentFactory, DocumentType
+
+    >>> uri = "/doc-1.xml"
+    >>> content = b"<root><child>data</child></root>"
+    >>> doc = DocumentFactory.build_raw_document(
+    ...     uri=uri,
+    ...     content=content,
+    ...     doc_type=DocumentType.XML,
+    ... )
+    >>> doc
+    <mlclient.model.data.RawDocument object at 0x7f9200929430>
+
+    >>> manager = MLManager("local")
+    >>> with manager.get_documents_client("app-services") as docs_client:
+    ...     resp = docs_client.create(doc)
+    >>> resp
+    {'documents': [{'uri': '/doc-1.xml', 'mime-type': 'application/xml', 'category': ['metadata', 'content']}]}
+
+
+**Put a raw document with metadata**
+
+.. code-block:: python
+
+    >>> from mlclient import MLManager
+    >>> from mlclient.model import DocumentFactory, DocumentType
+
+    >>> uri = "/doc-1.xml"
+    >>> content = b"<root><child>data</child></root>"
+    >>> metadata = b'{"collections": ["some-collection"]}'
+    >>> doc = DocumentFactory.build_raw_document(
+    ...     uri=uri,
+    ...     content=content,
+    ...     doc_type=DocumentType.XML,
+    ...     metadata=metadata,
+    ... )
+
+    >>> manager = MLManager("local")
+    >>> with manager.get_documents_client("app-services") as docs_client:
+    ...     resp = docs_client.create(doc)
+    >>> resp
+    {'documents': [{'uri': '/doc-1.xml', 'mime-type': 'application/xml', 'category': ['metadata', 'content']}]}
+
+**Update document's metadata**
+
+.. code-block:: python
+
+    >>> from mlclient import MLManager
+    >>> from mlclient.model import Metadata, MetadataDocument
+
+    >>> uri = "/doc-2.json"
+    >>> metadata = Metadata(collections=["some-collection"])
+    >>> doc = MetadataDocument(uri, metadata)
+    >>> doc
+    <mlclient.model.data.MetadataDocument object at 0x7f9200929e20>
+
+    >>> manager = MLManager("local")
+    >>> with manager.get_documents_client("app-services") as docs_client:
+    ...     resp = docs_client.create(doc)
+    >>> resp
+    {'documents': [{'uri': '/doc-2.json', 'mime-type': '', 'category': ['metadata']}]}
+
+
+**Put multiple documents**
+
+.. code-block:: python
+
+    >>> from mlclient import MLManager
+    >>> from mlclient.model import DocumentFactory, DocumentType
+    
+    >>> uri_1 = "/doc-1.xml"
+    >>> content_1 = b"<root><child>data</child></root>"
+    >>> doc_1 = DocumentFactory.build_raw_document(
+    ...     uri=uri_1,
+    ...     content=content_1,
+    ...     doc_type=DocumentType.XML,
+    ... )
+
+    >>> uri_2 = "/doc-2.json"
+    >>> content_2 = {"root": {"child": "data"}}
+    >>> doc_2 = DocumentFactory.build_document(uri=uri_2, content=content_2)
+    
+
+    >>> manager = MLManager("local")
+    >>> with manager.get_documents_client("app-services") as docs_client:
+    ...     resp = docs_client.create([doc_1, doc_2])
+    >>> resp
+    {'documents': [{'uri': '/doc-1.xml', 'mime-type': 'application/xml', 'category': ['metadata', 'content']}, {'uri': '/doc-2.json', 'mime-type': 'application/json', 'category': ['metadata', 'content']}]}
+
+
+**Put documents with default metadata**
+
+.. code-block:: python
+
+    >>> from mlclient import MLManager
+    >>> from mlclient.model import DocumentFactory, DocumentType, Metadata
+    
+    >>> default_metadata = Metadata(collections=["some-collection"])
+    
+    >>> uri_1 = "/doc-1.xml"
+    >>> content_1 = b"<root><child>data</child></root>"
+    >>> doc_1 = DocumentFactory.build_raw_document(
+    ...     uri=uri_1,
+    ...     content=content_1,
+    ...     doc_type=DocumentType.XML,
+    ... )
+
+    >>> uri_2 = "/doc-2.json"
+    >>> content_2 = {"root": {"child": "data"}}
+    >>> doc_2 = DocumentFactory.build_document(uri=uri_2, content=content_2)
+    
+
+    >>> manager = MLManager("local")
+    >>> with manager.get_documents_client("app-services") as docs_client:
+    ...     resp = docs_client.create([default_metadata, doc_1, doc_2])
+    >>> resp
+    {'documents': [{'uri': '/doc-1.xml', 'mime-type': 'application/xml', 'category': ['metadata', 'content']}, {'uri': '/doc-2.json', 'mime-type': 'application/json', 'category': ['metadata', 'content']}]}
 
 
 EvalClient

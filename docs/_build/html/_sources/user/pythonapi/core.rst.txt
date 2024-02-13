@@ -149,8 +149,8 @@ READ
     >>> uris = [
     ...     "/doc-1.xml",
     ...     "/doc-2.json",
-    ...     "/some/dir/doc3.xqy",
-    ...     "/some/dir/doc4.zip",
+    ...     "/doc-3.xqy",
+    ...     "/doc-4.zip",
     ... ]
     >>> manager = MLManager("local")
     >>> with manager.get_documents_client("app-services") as docs_client:
@@ -167,11 +167,11 @@ READ
     >>> json_doc
     <mlclient.model.data.JSONDocument object at 0x7f9200920430>
 
-    >>> text_doc = next(doc for doc in docs if doc.uri == "/some/dir/doc3.xqy")
+    >>> text_doc = next(doc for doc in docs if doc.uri == "/doc-3.xqy")
     >>> text_doc
     <mlclient.model.data.TextDocument object at 0x7f9200920e20>
 
-    >>> bin_doc = next(doc for doc in docs if doc.uri == "/some/dir/doc4.zip")
+    >>> bin_doc = next(doc for doc in docs if doc.uri == "/doc-4.zip")
     >>> bin_doc
     <mlclient.model.data.BinaryDocument object at 0x7f9200920970>
 
@@ -278,6 +278,25 @@ CREATE / UPDATE
     >>> resp
     {'documents': [{'uri': '/doc-1.xml', 'mime-type': 'application/xml', 'category': ['metadata', 'content']}]}
 
+**Put a document to a custom database**
+
+.. code-block:: python
+
+    >>> from mlclient import MLManager
+    >>> from mlclient.model import DocumentFactory
+
+    >>> uri = "/doc-2.json"
+    >>> content = {"root": {"child": "data"}}
+    >>> doc = DocumentFactory.build_document(uri=uri, content=content)
+    >>> doc
+    <mlclient.model.data.JSONDocument object at 0x7f9200920f70>
+
+    >>> manager = MLManager("local")
+    >>> with manager.get_documents_client("app-services") as docs_client:
+    ...     resp = docs_client.create(doc, database="Documents")
+    >>> resp
+    {'documents': [{'uri': '/doc-2.json', 'mime-type': 'application/json', 'category': ['metadata', 'content']}]}
+
 **Update document's metadata**
 
 .. code-block:: python
@@ -352,6 +371,85 @@ CREATE / UPDATE
     ...     resp = docs_client.create([default_metadata, doc_1, doc_2])
     >>> resp
     {'documents': [{'uri': '/doc-1.xml', 'mime-type': 'application/xml', 'category': ['metadata', 'content']}, {'uri': '/doc-2.json', 'mime-type': 'application/json', 'category': ['metadata', 'content']}]}
+
+
+DELETE
+""""""
+
+**Delete a document**
+
+.. code-block:: python
+
+    >>> from mlclient import MLManager
+    
+    >>> manager = MLManager("local")
+    >>> with manager.get_documents_client("app-services") as docs_client:
+    ...     docs_client.delete("/doc-1.xml")
+
+
+**Delete multiple documents**
+
+.. code-block:: python
+
+    >>> from mlclient import MLManager
+    
+    >>> uris = [
+    ...     "/doc-1.xml",
+    ...     "/doc-2.json",
+    ...     "/doc-3.xqy",
+    ...     "/doc-4.zip",
+    ... ]
+    >>> manager = MLManager("local")
+    >>> with manager.get_documents_client("app-services") as docs_client:
+    ...     docs_client.delete(uris)
+
+
+**Delete a document from a custom database**
+
+.. code-block:: python
+
+    >>> from mlclient import MLManager
+
+    >>> manager = MLManager("local")
+    >>> with manager.get_documents_client("app-services") as docs_client:
+    ...     docs_client.delete("/doc-1.xml", database="Documents")
+
+
+**Delete document's metadata**
+
+.. code-block:: python
+
+    >>> from mlclient import MLManager
+    
+    >>> manager = MLManager("local")
+    >>> with manager.get_documents_client("app-services") as docs_client:
+    ...     docs_client.delete("/doc-1.xml", category=["properties", "collections"])
+
+
+**Delete a temporal document**
+
+.. code-block:: python
+
+    >>> from mlclient import MLManager
+    
+    >>> manager = MLManager("local")
+    >>> with manager.get_documents_client("app-services") as docs_client:
+    ...     docs_client.delete("/doc-1.xml", temporal_collection="temporal-collection")
+
+
+**Wipe a temporal document**
+
+.. code-block:: python
+
+    >>> from mlclient import MLManager
+    
+    >>> manager = MLManager("local")
+    >>> with manager.get_documents_client("app-services") as docs_client:
+    ...     docs_client.delete(
+    ...        "/doc-1.xml",
+    ...        temporal_collection="temporal-collection",
+    ...        wipe_temporal=True,
+    ... )
 
 
 EvalClient

@@ -127,6 +127,148 @@ For example, some of the high-level clients are:</p>
 </table>
 <section id="documentsclient">
 <h4>DocumentsClient<a class="headerlink" href="#documentsclient" title="Permalink to this heading"></a></h4>
+<section id="read">
+<h5>READ<a class="headerlink" href="#read" title="Permalink to this heading"></a></h5>
+<p><strong>Read a document</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient</span> <span class="kn">import</span> <span class="n">MLManager</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">manager</span> <span class="o">=</span> <span class="n">MLManager</span><span class="p">(</span><span class="s2">&quot;local&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">manager</span><span class="o">.</span><span class="n">get_documents_client</span><span class="p">(</span><span class="s2">&quot;app-services&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">docs_client</span><span class="p">:</span>
+<span class="gp">... </span>   <span class="n">doc</span> <span class="o">=</span> <span class="n">docs_client</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;/doc-1.xml&quot;</span><span class="p">)</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">doc</span>
+<span class="go">&lt;mlclient.model.data.XMLDocument object at 0x7f9200980070&gt;</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">doc</span><span class="o">.</span><span class="n">doc_type</span>
+<span class="go">&lt;DocumentType.XML: &#39;xml&#39;&gt;</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">doc</span><span class="o">.</span><span class="n">uri</span>
+<span class="go">&#39;/doc-1.xml&#39;</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">doc</span><span class="o">.</span><span class="n">content</span>
+<span class="go">&lt;xml.etree.ElementTree.ElementTree object at 0x7f920095be20&gt;</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">doc</span><span class="o">.</span><span class="n">content_string</span>
+<span class="go">&#39;&#39;&#39;&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span>
+<span class="go">&lt;SomeEntity&gt;</span>
+<span class="go">    &lt;ChildNode1&gt;00001&lt;/ChildNode1&gt;</span>
+<span class="go">    &lt;ChildNode2&gt;888e2050-7148-42c4-b33a-b3dd3505b87b&lt;/ChildNode2&gt;</span>
+<span class="go">&lt;/SomeEntity&gt;&#39;&#39;&#39;</span>
+</pre></div>
+</div>
+<p><strong>Read a document as string</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient</span> <span class="kn">import</span> <span class="n">MLManager</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">manager</span> <span class="o">=</span> <span class="n">MLManager</span><span class="p">(</span><span class="s2">&quot;local&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">manager</span><span class="o">.</span><span class="n">get_documents_client</span><span class="p">(</span><span class="s2">&quot;app-services&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">docs_client</span><span class="p">:</span>
+<span class="gp">... </span>   <span class="n">doc</span> <span class="o">=</span> <span class="n">docs_client</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;/doc-1.xml&quot;</span><span class="p">,</span> <span class="n">output_type</span><span class="o">=</span><span class="nb">str</span><span class="p">)</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">doc</span>
+<span class="go">&lt;mlclient.model.data.RawStringDocument object at 0x7f9200980400&gt;</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">doc</span><span class="o">.</span><span class="n">doc_type</span>
+<span class="go">&lt;DocumentType.XML: &#39;xml&#39;&gt;</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">doc</span><span class="o">.</span><span class="n">content</span>
+<span class="go">&#39;&#39;&#39;&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span>
+<span class="go">&lt;SomeEntity&gt;</span>
+<span class="go">    &lt;ChildNode1&gt;00001&lt;/ChildNode1&gt;</span>
+<span class="go">    &lt;ChildNode2&gt;888e2050-7148-42c4-b33a-b3dd3505b87b&lt;/ChildNode2&gt;</span>
+<span class="go">&lt;/SomeEntity&gt;&#39;&#39;&#39;</span>
+</pre></div>
+</div>
+<p><strong>Read a document as bytes</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient</span> <span class="kn">import</span> <span class="n">MLManager</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">manager</span> <span class="o">=</span> <span class="n">MLManager</span><span class="p">(</span><span class="s2">&quot;local&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">manager</span><span class="o">.</span><span class="n">get_documents_client</span><span class="p">(</span><span class="s2">&quot;app-services&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">docs_client</span><span class="p">:</span>
+<span class="gp">... </span>   <span class="n">doc</span> <span class="o">=</span> <span class="n">docs_client</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;/doc-1.xml&quot;</span><span class="p">,</span> <span class="n">output_type</span><span class="o">=</span><span class="nb">bytes</span><span class="p">)</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">doc</span>
+<span class="go">&lt;mlclient.model.data.RawDocument object at 0x7f9200980490&gt;</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">doc</span><span class="o">.</span><span class="n">doc_type</span>
+<span class="go">&lt;DocumentType.XML: &#39;xml&#39;&gt;</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">doc</span><span class="o">.</span><span class="n">content</span>
+<span class="go">b&#39;&#39;&#39;&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span>
+<span class="go">&lt;SomeEntity&gt;</span>
+<span class="go">    &lt;ChildNode1&gt;00001&lt;/ChildNode1&gt;</span>
+<span class="go">    &lt;ChildNode2&gt;888e2050-7148-42c4-b33a-b3dd3505b87b&lt;/ChildNode2&gt;</span>
+<span class="go">&lt;/SomeEntity&gt;&#39;&#39;&#39;</span>
+</pre></div>
+</div>
+<p><strong>Read a document with metadata</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient</span> <span class="kn">import</span> <span class="n">MLManager</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">manager</span> <span class="o">=</span> <span class="n">MLManager</span><span class="p">(</span><span class="s2">&quot;local&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">manager</span><span class="o">.</span><span class="n">get_documents_client</span><span class="p">(</span><span class="s2">&quot;app-services&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">docs_client</span><span class="p">:</span>
+<span class="gp">... </span>   <span class="n">doc</span> <span class="o">=</span> <span class="n">docs_client</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;/doc-1.xml&quot;</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;content&quot;</span><span class="p">,</span> <span class="s2">&quot;metadata&quot;</span><span class="p">])</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">doc</span><span class="o">.</span><span class="n">metadata</span>
+<span class="go">&lt;mlclient.model.data.Metadata object at 0x7f9200980eb0&gt;</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">doc</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">to_json</span><span class="p">()</span>
+<span class="go">{&#39;collections&#39;: [], &#39;permissions&#39;: [], &#39;properties&#39;: {}, &#39;quality&#39;: 0, &#39;metadataValues&#39;: {}}</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">doc</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">to_xml_string</span><span class="p">(</span><span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+<span class="go">&#39;&#39;&#39;&lt;?xml version=\&#39;1.0\&#39; encoding=\&#39;utf-8\&#39;?&gt;</span>
+<span class="go">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span>
+<span class="go">&lt;rapi:metadata xmlns:rapi=&quot;http://marklogic.com/rest-api&quot;&gt;</span>
+<span class="go">    &lt;rapi:collections/&gt;</span>
+<span class="go">    &lt;rapi:permissions/&gt;</span>
+<span class="go">    &lt;prop:properties xmlns:prop=&quot;http://marklogic.com/xdmp/property&quot;/&gt;</span>
+<span class="go">    &lt;rapi:quality&gt;0&lt;/rapi:quality&gt;</span>
+<span class="go">    &lt;rapi:metadata-values/&gt;</span>
+<span class="go">&lt;/rapi:metadata&gt;</span>
+<span class="go">&#39;&#39;&#39;</span>
+</pre></div>
+</div>
+<p><strong>Read multiple documents</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient</span> <span class="kn">import</span> <span class="n">MLManager</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">uris</span> <span class="o">=</span> <span class="p">[</span>
+<span class="gp">... </span>  <span class="s2">&quot;/some/dir/doc1.xml&quot;</span><span class="p">,</span>
+<span class="gp">... </span>  <span class="s2">&quot;/some/dir/doc2.json&quot;</span><span class="p">,</span>
+<span class="gp">... </span>  <span class="s2">&quot;/some/dir/doc3.xqy&quot;</span><span class="p">,</span>
+<span class="gp">... </span>  <span class="s2">&quot;/some/dir/doc4.zip&quot;</span><span class="p">,</span>
+<span class="gp">... </span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">manager</span> <span class="o">=</span> <span class="n">MLManager</span><span class="p">(</span><span class="s2">&quot;local&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">manager</span><span class="o">.</span><span class="n">get_documents_client</span><span class="p">(</span><span class="s2">&quot;app-services&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">docs_client</span><span class="p">:</span>
+<span class="gp">... </span>   <span class="n">docs</span> <span class="o">=</span> <span class="n">docs_client</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">uris</span><span class="p">)</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">len</span><span class="p">(</span><span class="n">docs</span><span class="p">)</span>
+<span class="go">4</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">xml_doc</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">doc</span> <span class="k">for</span> <span class="n">doc</span> <span class="ow">in</span> <span class="n">docs</span> <span class="k">if</span> <span class="n">doc</span><span class="o">.</span><span class="n">uri</span> <span class="o">==</span> <span class="s2">&quot;/some/dir/doc1.xml&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">xml_doc</span>
+<span class="go">&lt;mlclient.model.data.XMLDocument object at 0x7f9200920a00&gt;</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">json_doc</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">doc</span> <span class="k">for</span> <span class="n">doc</span> <span class="ow">in</span> <span class="n">docs</span> <span class="k">if</span> <span class="n">doc</span><span class="o">.</span><span class="n">uri</span> <span class="o">==</span> <span class="s2">&quot;/some/dir/doc2.json&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">json_doc</span>
+<span class="go">&lt;mlclient.model.data.JSONDocument object at 0x7f9200920430&gt;</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">text_doc</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">doc</span> <span class="k">for</span> <span class="n">doc</span> <span class="ow">in</span> <span class="n">docs</span> <span class="k">if</span> <span class="n">doc</span><span class="o">.</span><span class="n">uri</span> <span class="o">==</span> <span class="s2">&quot;/some/dir/doc3.xqy&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">text_doc</span>
+<span class="go">&lt;mlclient.model.data.TextDocument object at 0x7f9200920e20&gt;</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">bin_doc</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">doc</span> <span class="k">for</span> <span class="n">doc</span> <span class="ow">in</span> <span class="n">docs</span> <span class="k">if</span> <span class="n">doc</span><span class="o">.</span><span class="n">uri</span> <span class="o">==</span> <span class="s2">&quot;/some/dir/doc4.zip&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">bin_doc</span>
+<span class="go">&lt;mlclient.model.data.BinaryDocument object at 0x7f9200920970&gt;</span>
+</pre></div>
+</div>
+<p><strong>Read documents from a custom database</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient</span> <span class="kn">import</span> <span class="n">MLManager</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">manager</span> <span class="o">=</span> <span class="n">MLManager</span><span class="p">(</span><span class="s2">&quot;local&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">manager</span><span class="o">.</span><span class="n">get_documents_client</span><span class="p">(</span><span class="s2">&quot;app-services&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">docs_client</span><span class="p">:</span>
+<span class="gp">... </span>   <span class="n">doc</span> <span class="o">=</span> <span class="n">docs_client</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;/doc-1.xml&quot;</span><span class="p">,</span> <span class="n">database</span><span class="o">=</span><span class="s2">&quot;App-Services&quot;</span><span class="p">)</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">doc</span>
+<span class="go">&lt;mlclient.model.data.XMLDocument object at 0x7f92009b4700&gt;</span>
+</pre></div>
+</div>
+</section>
 </section>
 <section id="evalclient">
 <h4>EvalClient<a class="headerlink" href="#evalclient" title="Permalink to this heading"></a></h4>

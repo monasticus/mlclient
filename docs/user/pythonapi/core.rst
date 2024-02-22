@@ -455,5 +455,138 @@ DELETE
 EvalClient
 ^^^^^^^^^^
 
+**Evaluate code from a file**
+
+.. code-block:: python
+
+    >>> from mlclient import MLManager
+
+    >>> manager = MLManager("local")
+    >>> with manager.get_eval_client() as client:
+    ...     result = client.eval("./xqy-code-to-eval.xqy)
+    ...     result = client.eval("./js-code-to-eval.js)
+
+
+**Evaluate raw xquery code**
+
+.. code-block:: python
+
+    >>> from mlclient import MLManager
+
+    >>> with MLManager("local").get_eval_client() as client:
+    ...     result = client.eval(xq="fn:current-dateTime()")
+    >>> result
+    datetime.datetime(2024, 2, 22, 11, 38, 32, 709484, tzinfo=datetime.timezone.utc)
+
+
+**Evaluate raw javascript code**
+
+.. code-block:: python
+
+    >>> from mlclient import MLManager
+
+    >>> with MLManager("local").get_eval_client() as client:
+    ...     result = client.eval(js="fn.currentDateTime()")
+    >>> result
+    datetime.datetime(2024, 2, 22, 11, 39, 22, 264102, tzinfo=datetime.timezone.utc)
+
+
+**Evaluate code with variables**
+
+.. code-block:: python
+
+    >>> from mlclient import MLManager
+
+    >>> xq = '''
+    ... declare variable $DAYS external;
+    ...
+    ... fn:current-dateTime() - xs:dayTimeDuration("P" || $DAYS || "D")'''
+
+    >>> with MLManager("local").get_eval_client() as client:
+    ...     result = client.eval(
+    ...         xq=xq,
+    ...         variables={"DAYS": 5},
+    ...     )
+    >>> result
+    datetime.datetime(2024, 2, 17, 12, 17, 49, 556376, tzinfo=datetime.timezone.utc)
+
+
+.. code-block:: python
+
+    >>> from mlclient import MLManager
+
+    >>> xq = '''
+    ... declare variable $DAYS external;
+    ...
+    ... fn:current-dateTime() - xs:dayTimeDuration("P" || $DAYS || "D")'''
+
+    >>> with MLManager("local").get_eval_client() as client:
+    ...     result = client.eval(
+    ...         xq=xq,
+    ...         DAYS=5,
+    ...     )
+    >>> result
+    datetime.datetime(2024, 2, 17, 12, 19, 45, 225135, tzinfo=datetime.timezone.utc)
+
+
+**Evaluate code with variables within a namespace**
+
+.. code-block:: python
+
+    >>> from mlclient import MLManager
+
+    >>> xq = '''
+    ... declare variable $local:DAYS external;
+    ...
+    ... fn:current-dateTime() - xs:dayTimeDuration("P" || $local:DAYS || "D")'''
+
+    >>> with MLManager("local").get_eval_client() as client:
+    ...     result = client.eval(
+    ...         xq=xq,
+    ...         variables={
+    ...             "{http://www.w3.org/2005/xquery-local-functions}DAYS": 5,
+    ...         },
+    ...     )
+    >>> result
+    datetime.datetime(2024, 2, 17, 12, 21, 28, 547853, tzinfo=datetime.timezone.utc)
+
+
+**Evaluate code on a custom database**
+
+.. code-block:: python
+
+    >>> from mlclient import MLManager
+
+    >>> with MLManager("local").get_eval_client() as client:
+    ...     result = client.eval(
+    ...         xq="xdmp:database() => xdmp:database-name()",
+    ...         database="Documents",
+    ...     )
+    >>> result
+    'Documents'
+
+
+**Evaluate code and get raw data**
+
+.. code-block:: python
+
+    >>> from mlclient import MLManager
+
+    >>> with MLManager("local").get_eval_client() as client:
+    ...     result = client.eval(xq="fn:current-dateTime()", output_type=str)
+    >>> result
+    '2024-02-22T12:24:40.362014Z'
+
+
+.. code-block:: python
+
+    >>> from mlclient import MLManager
+
+    >>> with MLManager("local").get_eval_client() as client:
+    ...     result = client.eval(xq="fn:current-dateTime()", output_type=bytes)
+    >>> result
+    b'2024-02-22T12:24:53.677793Z'
+
+
 LogsClient
 ^^^^^^^^^^

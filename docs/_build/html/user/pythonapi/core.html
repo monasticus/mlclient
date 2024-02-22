@@ -495,6 +495,114 @@ For example, some of the high-level clients are:</p>
 </section>
 <section id="evalclient">
 <h4>EvalClient<a class="headerlink" href="#evalclient" title="Permalink to this heading"></a></h4>
+<p><strong>Evaluate code from a file</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient</span> <span class="kn">import</span> <span class="n">MLManager</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">manager</span> <span class="o">=</span> <span class="n">MLManager</span><span class="p">(</span><span class="s2">&quot;local&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">manager</span><span class="o">.</span><span class="n">get_eval_client</span><span class="p">()</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="s2">&quot;./xqy-code-to-eval.xqy)</span>
+<span class="gp">... </span>    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="s2">&quot;./js-code-to-eval.js)</span>
+</pre></div>
+</div>
+<p><strong>Evaluate raw xquery code</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient</span> <span class="kn">import</span> <span class="n">MLManager</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">MLManager</span><span class="p">(</span><span class="s2">&quot;local&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">get_eval_client</span><span class="p">()</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="n">xq</span><span class="o">=</span><span class="s2">&quot;fn:current-dateTime()&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span>
+<span class="go">datetime.datetime(2024, 2, 22, 11, 38, 32, 709484, tzinfo=datetime.timezone.utc)</span>
+</pre></div>
+</div>
+<p><strong>Evaluate raw javascript code</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient</span> <span class="kn">import</span> <span class="n">MLManager</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">MLManager</span><span class="p">(</span><span class="s2">&quot;local&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">get_eval_client</span><span class="p">()</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="n">js</span><span class="o">=</span><span class="s2">&quot;fn.currentDateTime()&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span>
+<span class="go">datetime.datetime(2024, 2, 22, 11, 39, 22, 264102, tzinfo=datetime.timezone.utc)</span>
+</pre></div>
+</div>
+<p><strong>Evaluate code with variables</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient</span> <span class="kn">import</span> <span class="n">MLManager</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">xq</span> <span class="o">=</span> <span class="s1">&#39;&#39;&#39;</span>
+<span class="gp">... </span><span class="s1">declare variable $DAYS external;</span>
+<span class="gp">...</span>
+<span class="gp">... </span><span class="s1">fn:current-dateTime() - xs:dayTimeDuration(&quot;P&quot; || $DAYS || &quot;D&quot;)&#39;&#39;&#39;</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">MLManager</span><span class="p">(</span><span class="s2">&quot;local&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">get_eval_client</span><span class="p">()</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span>
+<span class="gp">... </span>        <span class="n">xq</span><span class="o">=</span><span class="n">xq</span><span class="p">,</span>
+<span class="gp">... </span>        <span class="n">variables</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;DAYS&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">},</span>
+<span class="gp">... </span>    <span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span>
+<span class="go">datetime.datetime(2024, 2, 17, 12, 17, 49, 556376, tzinfo=datetime.timezone.utc)</span>
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient</span> <span class="kn">import</span> <span class="n">MLManager</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">xq</span> <span class="o">=</span> <span class="s1">&#39;&#39;&#39;</span>
+<span class="gp">... </span><span class="s1">declare variable $DAYS external;</span>
+<span class="gp">...</span>
+<span class="gp">... </span><span class="s1">fn:current-dateTime() - xs:dayTimeDuration(&quot;P&quot; || $DAYS || &quot;D&quot;)&#39;&#39;&#39;</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">MLManager</span><span class="p">(</span><span class="s2">&quot;local&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">get_eval_client</span><span class="p">()</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span>
+<span class="gp">... </span>        <span class="n">xq</span><span class="o">=</span><span class="n">xq</span><span class="p">,</span>
+<span class="gp">... </span>        <span class="n">DAYS</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span>
+<span class="go">datetime.datetime(2024, 2, 17, 12, 19, 45, 225135, tzinfo=datetime.timezone.utc)</span>
+</pre></div>
+</div>
+<p><strong>Evaluate code with variables within a namespace</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient</span> <span class="kn">import</span> <span class="n">MLManager</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">xq</span> <span class="o">=</span> <span class="s1">&#39;&#39;&#39;</span>
+<span class="gp">... </span><span class="s1">declare variable $local:DAYS external;</span>
+<span class="gp">...</span>
+<span class="gp">... </span><span class="s1">fn:current-dateTime() - xs:dayTimeDuration(&quot;P&quot; || $local:DAYS || &quot;D&quot;)&#39;&#39;&#39;</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">MLManager</span><span class="p">(</span><span class="s2">&quot;local&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">get_eval_client</span><span class="p">()</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span>
+<span class="gp">... </span>        <span class="n">xq</span><span class="o">=</span><span class="n">xq</span><span class="p">,</span>
+<span class="gp">... </span>        <span class="n">variables</span><span class="o">=</span><span class="p">{</span>
+<span class="gp">... </span>            <span class="s2">&quot;{http://www.w3.org/2005/xquery-local-functions}DAYS&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+<span class="gp">... </span>        <span class="p">},</span>
+<span class="gp">... </span>    <span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span>
+<span class="go">datetime.datetime(2024, 2, 17, 12, 21, 28, 547853, tzinfo=datetime.timezone.utc)</span>
+</pre></div>
+</div>
+<p><strong>Evaluate code on a custom database</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient</span> <span class="kn">import</span> <span class="n">MLManager</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">MLManager</span><span class="p">(</span><span class="s2">&quot;local&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">get_eval_client</span><span class="p">()</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span>
+<span class="gp">... </span>        <span class="n">xq</span><span class="o">=</span><span class="s2">&quot;xdmp:database() =&gt; xdmp:database-name()&quot;</span><span class="p">,</span>
+<span class="gp">... </span>        <span class="n">database</span><span class="o">=</span><span class="s2">&quot;Documents&quot;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span>
+<span class="go">&#39;Documents&#39;</span>
+</pre></div>
+</div>
+<p><strong>Evaluate code and get raw data</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient</span> <span class="kn">import</span> <span class="n">MLManager</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">MLManager</span><span class="p">(</span><span class="s2">&quot;local&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">get_eval_client</span><span class="p">()</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="n">xq</span><span class="o">=</span><span class="s2">&quot;fn:current-dateTime()&quot;</span><span class="p">,</span> <span class="n">output_type</span><span class="o">=</span><span class="nb">str</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span>
+<span class="go">&#39;2024-02-22T12:24:40.362014Z&#39;</span>
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient</span> <span class="kn">import</span> <span class="n">MLManager</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">MLManager</span><span class="p">(</span><span class="s2">&quot;local&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">get_eval_client</span><span class="p">()</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="n">xq</span><span class="o">=</span><span class="s2">&quot;fn:current-dateTime()&quot;</span><span class="p">,</span> <span class="n">output_type</span><span class="o">=</span><span class="nb">bytes</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span>
+<span class="go">b&#39;2024-02-22T12:24:53.677793Z&#39;</span>
+</pre></div>
+</div>
 </section>
 <section id="logsclient">
 <h4>LogsClient<a class="headerlink" href="#logsclient" title="Permalink to this heading"></a></h4>

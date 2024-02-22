@@ -770,3 +770,20 @@ LogsClient
     ...         regex="Memory [^1]{1,2}%",
     ...     )
 
+
+Low-level clients
+-----------------
+
+Low-level clients offer a basic HTTP client functionality that is compatible with MarkLogic Server configuration.
+They also work with :class:`~mlclient.calls.ResourceCall` objects, which are python representations of MarkLogic resources’ calls.
+You can use low-level clients to send customized requests that are not supported by the high-level client API,
+or to handle the responses yourself.
+Moreover, you can customize low-level clients to implement python api for your own resources.
+
+====================================  =======================================================================================================================================================
+Client                                Description
+====================================  =======================================================================================================================================================
+:class:`~mlclient.MLClient`           The lowest level client that accepts ML configuration and sends HTTP requests
+:class:`~mlclient.MLResourceClient`   A client that provides an additional :meth:`~mlclient.MLResourceClient.call` method that works with :class:`~mlclient.calls.ResourceCall` objects
+:class:`~mlclient.MLResourcesClient`  A facade client that offers methods for all :class:`~mlclient.ResourceCall` implementations (and thus all ML Resources endpoints)
+====================================  =======================================================================================================================================================

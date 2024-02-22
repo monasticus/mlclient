@@ -601,6 +601,8 @@ LogsClient
 
     >>> with MLManager("local").get_logs_client() as client:
     ...     logs = client.get_logs(app_server=8002)
+    >>> list(logs)[0]
+    {'timestamp': '2024-01-09T13:30:51.187Z', 'level': 'error', 'message': 'Test Log 1'}
 
 
 .. code-block:: python
@@ -610,6 +612,8 @@ LogsClient
 
     >>> with MLManager("local").get_logs_client() as client:
     ...     logs = client.get_logs(app_server=8002, log_type=LogType.ERROR)
+    >>> list(logs)[0]
+    {'timestamp': '2024-01-09T13:30:51.187Z', 'level': 'error', 'message': 'Test Log 1'}
 
 
 *8002_AccessLog.txt*
@@ -621,6 +625,9 @@ LogsClient
 
     >>> with MLManager("local").get_logs_client() as client:
     ...     logs = client.get_logs(app_server=8002, log_type=LogType.ACCESS)
+    >>> list(logs)[0]
+    {'message': '172.17.0.1 - - [22/Feb/2024:12:13:18 +0000] "POST /v1/eval HTTP/1.1" 401 209 - "python-requests/2.31.0"'}
+
 
 
 *8002_RequestLog.txt*
@@ -632,6 +639,8 @@ LogsClient
 
     >>> with MLManager("local").get_logs_client() as client:
     ...     logs = client.get_logs(app_server=8002, log_type=LogType.REQUEST)
+    >>> list(logs)[0]
+    {'message': '{"time":"2024-02-22T12:38:27Z", "url":"/manage/v2/logs?format=json", "user":"admin", "elapsedTime":1.801654, "requests":1, "valueCacheHits":5743, "valueCacheMisses":349701, "regexpCacheHits":5278, "regexpCacheMisses":10, "fsProgramCacheMisses":1, "fsMainModuleSequenceCacheMisses":1, "fsLibraryModuleCacheMisses":226, "compileTime":0.757087, "runTime":1.043248}'}
 
 
 *ErrorLog.txt*
@@ -651,7 +660,7 @@ LogsClient
     >>> from mlclient import MLManager
 
     >>> with MLManager("local").get_logs_client() as client:
-    ...     logs = client.get_logs(app_server=0)
+    ...     logs = client.get_logs(app_server="TaskServer")
 
 
 .. code-block:: python
@@ -659,4 +668,106 @@ LogsClient
     >>> from mlclient import MLManager
 
     >>> with MLManager("local").get_logs_client() as client:
-    ...     logs = client.get_logs(app_server="TaskServer")
+    ...     logs = client.get_logs(app_server=0)
+
+
+**Get limited logs**
+
+*Time frames*
+
+.. note::
+
+    ``start_time``, ``end_time`` and ``regex`` arguments work only for error logs
+
+
+.. code-block:: python
+
+    >>> from mlclient import MLManager
+
+    >>> with MLManager("local").get_logs_client() as client:
+    ...     logs = client.get_logs(app_server=8002, start_time="10:00")
+
+
+.. code-block:: python
+
+    >>> from mlclient import MLManager
+
+    >>> with MLManager("local").get_logs_client() as client:
+    ...     logs = client.get_logs(app_server=8002, end_time="12:00")
+
+
+.. code-block:: python
+
+    >>> from mlclient import MLManager
+
+    >>> with MLManager("local").get_logs_client() as client:
+    ...     logs = client.get_logs(
+    ...         app_server=8002,
+    ...         start_time="10:00",
+    ...         end_time="12:00",
+    ...     )
+
+
+.. code-block:: python
+
+    >>> from mlclient import MLManager
+
+    >>> with MLManager("local").get_logs_client() as client:
+    ...     logs = client.get_logs(
+    ...         app_server=8002,
+    ...         start_time="2024-02-01",
+    ...         end_time="2024-02-03",
+    ...     )
+
+
+.. code-block:: python
+
+    >>> from mlclient import MLManager
+
+    >>> with MLManager("local").get_logs_client() as client:
+    ...     logs = client.get_logs(
+    ...         app_server=8002,
+    ...         start_time="2024-02-01 10:00",
+    ...         end_time="2024-02-03",
+    ...     )
+
+
+*RegEx*
+
+.. code-block:: python
+
+    >>> from mlclient import MLManager
+
+    >>> with MLManager("local").get_logs_client() as client:
+    ...     logs = client.get_logs(app_server=8002, regex="Forest Meters")
+
+
+.. code-block:: python
+
+    >>> from mlclient import MLManager
+
+    >>> with MLManager("local").get_logs_client() as client:
+    ...     logs = client.get_logs(app_server=8002, regex="Forest M.*")
+
+
+.. code-block:: python
+
+    >>> from mlclient import MLManager
+
+    >>> with MLManager("local").get_logs_client() as client:
+    ...     logs = client.get_logs(app_server=8002, regex="Memory [^1]{1,2}%")
+
+
+.. code-block:: python
+
+    >>> from mlclient import MLManager
+
+    >>> with MLManager("local").get_logs_client() as client:
+    ...     logs = client.get_logs(
+    ...         app_server=8002,
+    ...         start_time="2024-02-01",
+    ...         end_time="2024-02-03",
+    ...         regex="Memory [^1]{1,2}%",
+    ...     )
+
+

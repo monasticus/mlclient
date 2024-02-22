@@ -1,48 +1,16 @@
-====
-Core
-====
-
-Clients
-=======
-
-Overview
---------
-
-MLClient offers two types of clients to access a MarkLogic Server: high-level and low-level.
-High-level clients are designed for specific endpoints, such as ``/v1/documents``.
-They provide a simple and intuitive API that covers all the functionality of each endpoint.
-Low-level clients are the foundation of MLClient. They use :class:`~mlclient.calls.ResourceCall` objects to represent the parameters of any endpoint.
-You can use low-level clients to send raw requests to the server.
-You can learn more about high-level and low-level clients in the following sections.
-
-High-level clients
-------------------
-
-High-level clients are designed for specific endpoints of MarkLogic Server and database.
-They allow you to manage configuration or documents in MarkLogic with ease.
-Each client ensures that you can perform all the operations in the corresponding area.
-For example, some of the high-level clients are:
-
-==========================================  ===================
-Client                                      Endpoint
-==========================================  ===================
-:class:`~mlclient.clients.DocumentsClient`  ``/v1/documents``
-:class:`~mlclient.clients.EvalClient`       ``/v1/eval``
-:class:`~mlclient.clients.LogsClient`       ``/manage/v2/logs``
-==========================================  ===================
-
+===============
 DocumentsClient
-^^^^^^^^^^^^^^^
+===============
 
 READ
-""""
+====
 
 **Read a document**
 
 .. code-block:: python
 
     >>> from mlclient import MLManager
-    
+
     >>> manager = MLManager("local")
     >>> with manager.get_documents_client("app-services") as docs_client:
     ...    doc = docs_client.read("/doc-1.xml")
@@ -190,7 +158,7 @@ READ
 
 
 CREATE / UPDATE
-"""""""""""""""
+===============
 
 **Put a document**
 
@@ -323,7 +291,7 @@ CREATE / UPDATE
 
     >>> from mlclient import MLManager
     >>> from mlclient.model import DocumentFactory, DocumentType
-    
+
     >>> uri_1 = "/doc-1.xml"
     >>> content_1 = b"<root><child>data</child></root>"
     >>> doc_1 = DocumentFactory.build_raw_document(
@@ -335,7 +303,7 @@ CREATE / UPDATE
     >>> uri_2 = "/doc-2.json"
     >>> content_2 = {"root": {"child": "data"}}
     >>> doc_2 = DocumentFactory.build_document(uri=uri_2, content=content_2)
-    
+
 
     >>> manager = MLManager("local")
     >>> with manager.get_documents_client("app-services") as docs_client:
@@ -350,9 +318,9 @@ CREATE / UPDATE
 
     >>> from mlclient import MLManager
     >>> from mlclient.model import DocumentFactory, DocumentType, Metadata
-    
+
     >>> default_metadata = Metadata(collections=["some-collection"])
-    
+
     >>> uri_1 = "/doc-1.xml"
     >>> content_1 = b"<root><child>data</child></root>"
     >>> doc_1 = DocumentFactory.build_raw_document(
@@ -364,7 +332,7 @@ CREATE / UPDATE
     >>> uri_2 = "/doc-2.json"
     >>> content_2 = {"root": {"child": "data"}}
     >>> doc_2 = DocumentFactory.build_document(uri=uri_2, content=content_2)
-    
+
 
     >>> manager = MLManager("local")
     >>> with manager.get_documents_client("app-services") as docs_client:
@@ -374,14 +342,14 @@ CREATE / UPDATE
 
 
 DELETE
-""""""
+======
 
 **Delete a document**
 
 .. code-block:: python
 
     >>> from mlclient import MLManager
-    
+
     >>> manager = MLManager("local")
     >>> with manager.get_documents_client("app-services") as docs_client:
     ...     docs_client.delete("/doc-1.xml")
@@ -392,7 +360,7 @@ DELETE
 .. code-block:: python
 
     >>> from mlclient import MLManager
-    
+
     >>> uris = [
     ...     "/doc-1.xml",
     ...     "/doc-2.json",
@@ -420,7 +388,7 @@ DELETE
 .. code-block:: python
 
     >>> from mlclient import MLManager
-    
+
     >>> manager = MLManager("local")
     >>> with manager.get_documents_client("app-services") as docs_client:
     ...     docs_client.delete("/doc-1.xml", category=["properties", "collections"])
@@ -431,7 +399,7 @@ DELETE
 .. code-block:: python
 
     >>> from mlclient import MLManager
-    
+
     >>> manager = MLManager("local")
     >>> with manager.get_documents_client("app-services") as docs_client:
     ...     docs_client.delete("/doc-1.xml", temporal_collection="temporal-collection")
@@ -442,7 +410,7 @@ DELETE
 .. code-block:: python
 
     >>> from mlclient import MLManager
-    
+
     >>> manager = MLManager("local")
     >>> with manager.get_documents_client("app-services") as docs_client:
     ...     docs_client.delete(
@@ -450,323 +418,4 @@ DELETE
     ...        temporal_collection="temporal-collection",
     ...        wipe_temporal=True,
     ... )
-
-
-EvalClient
-^^^^^^^^^^
-
-**Evaluate code from a file**
-
-.. code-block:: python
-
-    >>> from mlclient import MLManager
-
-    >>> manager = MLManager("local")
-    >>> with manager.get_eval_client() as client:
-    ...     result = client.eval("./xqy-code-to-eval.xqy)
-    ...     result = client.eval("./js-code-to-eval.js)
-
-
-**Evaluate raw xquery code**
-
-.. code-block:: python
-
-    >>> from mlclient import MLManager
-
-    >>> with MLManager("local").get_eval_client() as client:
-    ...     result = client.eval(xq="fn:current-dateTime()")
-    >>> result
-    datetime.datetime(2024, 2, 22, 11, 38, 32, 709484, tzinfo=datetime.timezone.utc)
-
-
-**Evaluate raw javascript code**
-
-.. code-block:: python
-
-    >>> from mlclient import MLManager
-
-    >>> with MLManager("local").get_eval_client() as client:
-    ...     result = client.eval(js="fn.currentDateTime()")
-    >>> result
-    datetime.datetime(2024, 2, 22, 11, 39, 22, 264102, tzinfo=datetime.timezone.utc)
-
-
-**Evaluate code with variables**
-
-.. code-block:: python
-
-    >>> from mlclient import MLManager
-
-    >>> xq = '''
-    ... declare variable $DAYS external;
-    ...
-    ... fn:current-dateTime() - xs:dayTimeDuration("P" || $DAYS || "D")'''
-
-    >>> with MLManager("local").get_eval_client() as client:
-    ...     result = client.eval(
-    ...         xq=xq,
-    ...         variables={"DAYS": 5},
-    ...     )
-    >>> result
-    datetime.datetime(2024, 2, 17, 12, 17, 49, 556376, tzinfo=datetime.timezone.utc)
-
-
-.. code-block:: python
-
-    >>> from mlclient import MLManager
-
-    >>> xq = '''
-    ... declare variable $DAYS external;
-    ...
-    ... fn:current-dateTime() - xs:dayTimeDuration("P" || $DAYS || "D")'''
-
-    >>> with MLManager("local").get_eval_client() as client:
-    ...     result = client.eval(
-    ...         xq=xq,
-    ...         DAYS=5,
-    ...     )
-    >>> result
-    datetime.datetime(2024, 2, 17, 12, 19, 45, 225135, tzinfo=datetime.timezone.utc)
-
-
-**Evaluate code with variables within a namespace**
-
-.. code-block:: python
-
-    >>> from mlclient import MLManager
-
-    >>> xq = '''
-    ... declare variable $local:DAYS external;
-    ...
-    ... fn:current-dateTime() - xs:dayTimeDuration("P" || $local:DAYS || "D")'''
-
-    >>> with MLManager("local").get_eval_client() as client:
-    ...     result = client.eval(
-    ...         xq=xq,
-    ...         variables={
-    ...             "{http://www.w3.org/2005/xquery-local-functions}DAYS": 5,
-    ...         },
-    ...     )
-    >>> result
-    datetime.datetime(2024, 2, 17, 12, 21, 28, 547853, tzinfo=datetime.timezone.utc)
-
-
-**Evaluate code on a custom database**
-
-.. code-block:: python
-
-    >>> from mlclient import MLManager
-
-    >>> with MLManager("local").get_eval_client() as client:
-    ...     result = client.eval(
-    ...         xq="xdmp:database() => xdmp:database-name()",
-    ...         database="Documents",
-    ...     )
-    >>> result
-    'Documents'
-
-
-**Evaluate code and get raw data**
-
-.. code-block:: python
-
-    >>> from mlclient import MLManager
-
-    >>> with MLManager("local").get_eval_client() as client:
-    ...     result = client.eval(xq="fn:current-dateTime()", output_type=str)
-    >>> result
-    '2024-02-22T12:24:40.362014Z'
-
-
-.. code-block:: python
-
-    >>> from mlclient import MLManager
-
-    >>> with MLManager("local").get_eval_client() as client:
-    ...     result = client.eval(xq="fn:current-dateTime()", output_type=bytes)
-    >>> result
-    b'2024-02-22T12:24:53.677793Z'
-
-
-LogsClient
-^^^^^^^^^^
-
-**Get all logs**
-
-*8002_ErrorLog.txt*
-
-.. code-block:: python
-
-    >>> from mlclient import MLManager
-
-    >>> with MLManager("local").get_logs_client() as client:
-    ...     logs = client.get_logs(app_server=8002)
-    >>> list(logs)[0]
-    {'timestamp': '2024-01-09T13:30:51.187Z', 'level': 'error', 'message': 'Test Log 1'}
-
-
-.. code-block:: python
-
-    >>> from mlclient import MLManager
-    >>> from mlclient.clients import LogType
-
-    >>> with MLManager("local").get_logs_client() as client:
-    ...     logs = client.get_logs(app_server=8002, log_type=LogType.ERROR)
-    >>> list(logs)[0]
-    {'timestamp': '2024-01-09T13:30:51.187Z', 'level': 'error', 'message': 'Test Log 1'}
-
-
-*8002_AccessLog.txt*
-
-.. code-block:: python
-
-    >>> from mlclient import MLManager
-    >>> from mlclient.clients import LogType
-
-    >>> with MLManager("local").get_logs_client() as client:
-    ...     logs = client.get_logs(app_server=8002, log_type=LogType.ACCESS)
-    >>> list(logs)[0]
-    {'message': '172.17.0.1 - - [22/Feb/2024:12:13:18 +0000] "POST /v1/eval HTTP/1.1" 401 209 - "python-requests/2.31.0"'}
-
-
-
-*8002_RequestLog.txt*
-
-.. code-block:: python
-
-    >>> from mlclient import MLManager
-    >>> from mlclient.clients import LogType
-
-    >>> with MLManager("local").get_logs_client() as client:
-    ...     logs = client.get_logs(app_server=8002, log_type=LogType.REQUEST)
-    >>> list(logs)[0]
-    {'message': '{"time":"2024-02-22T12:38:27Z", "url":"/manage/v2/logs?format=json", "user":"admin", "elapsedTime":1.801654, "requests":1, "valueCacheHits":5743, "valueCacheMisses":349701, "regexpCacheHits":5278, "regexpCacheMisses":10, "fsProgramCacheMisses":1, "fsMainModuleSequenceCacheMisses":1, "fsLibraryModuleCacheMisses":226, "compileTime":0.757087, "runTime":1.043248}'}
-
-
-*ErrorLog.txt*
-
-.. code-block:: python
-
-    >>> from mlclient import MLManager
-
-    >>> with MLManager("local").get_logs_client() as client:
-    ...     logs = client.get_logs()
-
-
-*TaskServer_ErrorLog.txt*
-
-.. code-block:: python
-
-    >>> from mlclient import MLManager
-
-    >>> with MLManager("local").get_logs_client() as client:
-    ...     logs = client.get_logs(app_server="TaskServer")
-
-
-.. code-block:: python
-
-    >>> from mlclient import MLManager
-
-    >>> with MLManager("local").get_logs_client() as client:
-    ...     logs = client.get_logs(app_server=0)
-
-
-**Get limited logs**
-
-*Time frames*
-
-.. note::
-
-    ``start_time``, ``end_time`` and ``regex`` arguments work only for error logs
-
-
-.. code-block:: python
-
-    >>> from mlclient import MLManager
-
-    >>> with MLManager("local").get_logs_client() as client:
-    ...     logs = client.get_logs(app_server=8002, start_time="10:00")
-
-
-.. code-block:: python
-
-    >>> from mlclient import MLManager
-
-    >>> with MLManager("local").get_logs_client() as client:
-    ...     logs = client.get_logs(app_server=8002, end_time="12:00")
-
-
-.. code-block:: python
-
-    >>> from mlclient import MLManager
-
-    >>> with MLManager("local").get_logs_client() as client:
-    ...     logs = client.get_logs(
-    ...         app_server=8002,
-    ...         start_time="10:00",
-    ...         end_time="12:00",
-    ...     )
-
-
-.. code-block:: python
-
-    >>> from mlclient import MLManager
-
-    >>> with MLManager("local").get_logs_client() as client:
-    ...     logs = client.get_logs(
-    ...         app_server=8002,
-    ...         start_time="2024-02-01",
-    ...         end_time="2024-02-03",
-    ...     )
-
-
-.. code-block:: python
-
-    >>> from mlclient import MLManager
-
-    >>> with MLManager("local").get_logs_client() as client:
-    ...     logs = client.get_logs(
-    ...         app_server=8002,
-    ...         start_time="2024-02-01 10:00",
-    ...         end_time="2024-02-03",
-    ...     )
-
-
-*RegEx*
-
-.. code-block:: python
-
-    >>> from mlclient import MLManager
-
-    >>> with MLManager("local").get_logs_client() as client:
-    ...     logs = client.get_logs(app_server=8002, regex="Forest Meters")
-
-
-.. code-block:: python
-
-    >>> from mlclient import MLManager
-
-    >>> with MLManager("local").get_logs_client() as client:
-    ...     logs = client.get_logs(app_server=8002, regex="Forest M.*")
-
-
-.. code-block:: python
-
-    >>> from mlclient import MLManager
-
-    >>> with MLManager("local").get_logs_client() as client:
-    ...     logs = client.get_logs(app_server=8002, regex="Memory [^1]{1,2}%")
-
-
-.. code-block:: python
-
-    >>> from mlclient import MLManager
-
-    >>> with MLManager("local").get_logs_client() as client:
-    ...     logs = client.get_logs(
-    ...         app_server=8002,
-    ...         start_time="2024-02-01",
-    ...         end_time="2024-02-03",
-    ...         regex="Memory [^1]{1,2}%",
-    ...     )
 

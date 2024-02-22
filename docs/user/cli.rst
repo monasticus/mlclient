@@ -33,7 +33,7 @@ MLClient provides you a nice command line interface using `cleo <https://github.
 
 .. toctree::
    :maxdepth: 1
-   :caption: Commands:
+   :hidden:
 
    cli/call
 

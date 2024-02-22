@@ -5,6 +5,6 @@ Use the Python library MLClient with a simple and intuitive API that offers a wi
 
 .. toctree::
    :maxdepth: 1
-   :caption: Features:
+   :hidden:
 
    pythonapi/core

@@ -590,3 +590,73 @@ EvalClient
 
 LogsClient
 ^^^^^^^^^^
+
+**Get all logs**
+
+*8002_ErrorLog.txt*
+
+.. code-block:: python
+
+    >>> from mlclient import MLManager
+
+    >>> with MLManager("local").get_logs_client() as client:
+    ...     logs = client.get_logs(app_server=8002)
+
+
+.. code-block:: python
+
+    >>> from mlclient import MLManager
+    >>> from mlclient.clients import LogType
+
+    >>> with MLManager("local").get_logs_client() as client:
+    ...     logs = client.get_logs(app_server=8002, log_type=LogType.ERROR)
+
+
+*8002_AccessLog.txt*
+
+.. code-block:: python
+
+    >>> from mlclient import MLManager
+    >>> from mlclient.clients import LogType
+
+    >>> with MLManager("local").get_logs_client() as client:
+    ...     logs = client.get_logs(app_server=8002, log_type=LogType.ACCESS)
+
+
+*8002_RequestLog.txt*
+
+.. code-block:: python
+
+    >>> from mlclient import MLManager
+    >>> from mlclient.clients import LogType
+
+    >>> with MLManager("local").get_logs_client() as client:
+    ...     logs = client.get_logs(app_server=8002, log_type=LogType.REQUEST)
+
+
+*ErrorLog.txt*
+
+.. code-block:: python
+
+    >>> from mlclient import MLManager
+
+    >>> with MLManager("local").get_logs_client() as client:
+    ...     logs = client.get_logs()
+
+
+*TaskServer_ErrorLog.txt*
+
+.. code-block:: python
+
+    >>> from mlclient import MLManager
+
+    >>> with MLManager("local").get_logs_client() as client:
+    ...     logs = client.get_logs(app_server=0)
+
+
+.. code-block:: python
+
+    >>> from mlclient import MLManager
+
+    >>> with MLManager("local").get_logs_client() as client:
+    ...     logs = client.get_logs(app_server="TaskServer")

@@ -606,6 +606,57 @@ For example, some of the high-level clients are:</p>
 </section>
 <section id="logsclient">
 <h4>LogsClient<a class="headerlink" href="#logsclient" title="Permalink to this heading"></a></h4>
+<p><strong>Get all logs</strong></p>
+<p><em>8002_ErrorLog.txt</em></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient</span> <span class="kn">import</span> <span class="n">MLManager</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">MLManager</span><span class="p">(</span><span class="s2">&quot;local&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">get_logs_client</span><span class="p">()</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">logs</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">get_logs</span><span class="p">(</span><span class="n">app_server</span><span class="o">=</span><span class="mi">8002</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient</span> <span class="kn">import</span> <span class="n">MLManager</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient.clients</span> <span class="kn">import</span> <span class="n">LogType</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">MLManager</span><span class="p">(</span><span class="s2">&quot;local&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">get_logs_client</span><span class="p">()</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">logs</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">get_logs</span><span class="p">(</span><span class="n">app_server</span><span class="o">=</span><span class="mi">8002</span><span class="p">,</span> <span class="n">log_type</span><span class="o">=</span><span class="n">LogType</span><span class="o">.</span><span class="n">ERROR</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><em>8002_AccessLog.txt</em></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient</span> <span class="kn">import</span> <span class="n">MLManager</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient.clients</span> <span class="kn">import</span> <span class="n">LogType</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">MLManager</span><span class="p">(</span><span class="s2">&quot;local&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">get_logs_client</span><span class="p">()</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">logs</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">get_logs</span><span class="p">(</span><span class="n">app_server</span><span class="o">=</span><span class="mi">8002</span><span class="p">,</span> <span class="n">log_type</span><span class="o">=</span><span class="n">LogType</span><span class="o">.</span><span class="n">ACCESS</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><em>8002_RequestLog.txt</em></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient</span> <span class="kn">import</span> <span class="n">MLManager</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient.clients</span> <span class="kn">import</span> <span class="n">LogType</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">MLManager</span><span class="p">(</span><span class="s2">&quot;local&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">get_logs_client</span><span class="p">()</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">logs</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">get_logs</span><span class="p">(</span><span class="n">app_server</span><span class="o">=</span><span class="mi">8002</span><span class="p">,</span> <span class="n">log_type</span><span class="o">=</span><span class="n">LogType</span><span class="o">.</span><span class="n">REQUEST</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><em>ErrorLog.txt</em></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient</span> <span class="kn">import</span> <span class="n">MLManager</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">MLManager</span><span class="p">(</span><span class="s2">&quot;local&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">get_logs_client</span><span class="p">()</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">logs</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">get_logs</span><span class="p">()</span>
+</pre></div>
+</div>
+<p><em>TaskServer_ErrorLog.txt</em></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient</span> <span class="kn">import</span> <span class="n">MLManager</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">MLManager</span><span class="p">(</span><span class="s2">&quot;local&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">get_logs_client</span><span class="p">()</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">logs</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">get_logs</span><span class="p">(</span><span class="n">app_server</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient</span> <span class="kn">import</span> <span class="n">MLManager</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">MLManager</span><span class="p">(</span><span class="s2">&quot;local&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">get_logs_client</span><span class="p">()</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">logs</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">get_logs</span><span class="p">(</span><span class="n">app_server</span><span class="o">=</span><span class="s2">&quot;TaskServer&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
 </section>
 </section>
 </section>

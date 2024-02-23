@@ -103,7 +103,13 @@
 <li><p><a class="reference internal" href="#logsclient" id="id6">LogsClient</a></p></li>
 </ul>
 </li>
-<li><p><a class="reference internal" href="#low-level-clients" id="id7">Low-level clients</a></p></li>
+<li><p><a class="reference internal" href="#low-level-clients" id="id7">Low-level clients</a></p>
+<ul>
+<li><p><a class="reference internal" href="#mlclient" id="id8">MLClient</a></p></li>
+<li><p><a class="reference internal" href="#mlresourceclient" id="id9">MLResourceClient</a></p></li>
+<li><p><a class="reference internal" href="#mlresourcesclient" id="id10">MLResourcesClient</a></p></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -792,6 +798,99 @@ Moreover, you can customize low-level clients to implement python api for your o
 </tr>
 </tbody>
 </table>
+<section id="mlclient">
+<h4><a class="toc-backref" href="#contents" role="doc-backlink">MLClient</a><a class="headerlink" href="#mlclient" title="Permalink to this heading"></a></h4>
+<p>The lowest level client that accepts ML configuration and sends HTTP requests.</p>
+<section id="connection">
+<h5>Connection<a class="headerlink" href="#connection" title="Permalink to this heading"></a></h5>
+<p>The easiest way to start a connection is to initialize <a class="reference internal" href="../../api/mlclient/mlclient.html#mlclient.MLClient" title="mlclient.MLClient"><code class="xref py py-class docutils literal notranslate"><span class="pre">MLClient</span></code></a> as a context manager:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient</span> <span class="kn">import</span> <span class="n">MLClient</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">MLClient</span><span class="p">()</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">resp</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/manage/v2/servers&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>If you would like to explicitly connect and disconnect a client, however, you can do it as below:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient</span> <span class="kn">import</span> <span class="n">MLClient</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">client</span> <span class="o">=</span> <span class="n">MLClient</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">client</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">resp</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/manage/v2/servers&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">client</span><span class="o">.</span><span class="n">disconnect</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>To check if a client is connected you can use <a class="reference internal" href="../../api/mlclient/mlclient.html#mlclient.MLClient.is_connected" title="mlclient.MLClient.is_connected"><code class="xref py py-meth docutils literal notranslate"><span class="pre">is_connected()</span></code></a> method:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient</span> <span class="kn">import</span> <span class="n">MLClient</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">client</span> <span class="o">=</span> <span class="n">MLClient</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">client</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">client</span><span class="o">.</span><span class="n">is_connected</span><span class="p">()</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">client</span><span class="o">.</span><span class="n">disconnect</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">client</span><span class="o">.</span><span class="n">is_connected</span><span class="p">()</span>
+<span class="go">False</span>
+</pre></div>
+</div>
+</section>
+<section id="get-request">
+<h5>GET request<a class="headerlink" href="#get-request" title="Permalink to this heading"></a></h5>
+<p><em>A simple GET request</em></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient</span> <span class="kn">import</span> <span class="n">MLClient</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">MLClient</span><span class="p">()</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">resp</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/manage/v2/servers&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><em>Custom parameters and headers</em></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient</span> <span class="kn">import</span> <span class="n">MLClient</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">MLClient</span><span class="p">()</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">resp</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+<span class="gp">... </span>        <span class="s2">&quot;/manage/v2/servers&quot;</span><span class="p">,</span>
+<span class="gp">... </span>        <span class="n">params</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;format&quot;</span><span class="p">:</span> <span class="s2">&quot;json&quot;</span><span class="p">},</span>
+<span class="gp">... </span>        <span class="n">headers</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;custom-header&quot;</span><span class="p">:</span> <span class="s2">&quot;custom-value&quot;</span><span class="p">},</span>
+<span class="gp">... </span>    <span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="post-request">
+<h5>POST request<a class="headerlink" href="#post-request" title="Permalink to this heading"></a></h5>
+<p><em>A simple POST request</em></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient</span> <span class="kn">import</span> <span class="n">MLClient</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">MLClient</span><span class="p">()</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">resp</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">post</span><span class="p">(</span>
+<span class="gp">... </span>        <span class="s2">&quot;/manage/v2/databases&quot;</span><span class="p">,</span>
+<span class="gp">... </span>        <span class="n">body</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;database-name&quot;</span><span class="p">:</span> <span class="s2">&quot;CustomDatabase&quot;</span><span class="p">},</span>
+<span class="gp">... </span>    <span class="p">)</span>
+</pre></div>
+</div>
+<p><em>Custom parameters and headers</em></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient</span> <span class="kn">import</span> <span class="n">MLClient</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">MLClient</span><span class="p">()</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">resp</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">post</span><span class="p">(</span>
+<span class="gp">... </span>        <span class="s2">&quot;/v1/eval&quot;</span><span class="p">,</span>
+<span class="gp">... </span>        <span class="n">body</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;xquery&quot;</span><span class="p">:</span> <span class="s2">&quot;fn:current-dateTime()&quot;</span><span class="p">},</span>
+<span class="gp">... </span>        <span class="n">params</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;database&quot;</span><span class="p">:</span> <span class="s2">&quot;Documents&quot;</span><span class="p">},</span>
+<span class="gp">... </span>        <span class="n">headers</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;Content-Type&quot;</span><span class="p">:</span> <span class="s2">&quot;application/x-www-form-urlencoded&quot;</span><span class="p">},</span>
+<span class="gp">... </span>    <span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="put-request">
+<h5>PUT request<a class="headerlink" href="#put-request" title="Permalink to this heading"></a></h5>
+</section>
+<section id="delete-request">
+<h5>DELETE request<a class="headerlink" href="#delete-request" title="Permalink to this heading"></a></h5>
+</section>
+</section>
+<section id="mlresourceclient">
+<h4><a class="toc-backref" href="#contents" role="doc-backlink">MLResourceClient</a><a class="headerlink" href="#mlresourceclient" title="Permalink to this heading"></a></h4>
+</section>
+<section id="mlresourcesclient">
+<h4><a class="toc-backref" href="#contents" role="doc-backlink">MLResourcesClient</a><a class="headerlink" href="#mlresourcesclient" title="Permalink to this heading"></a></h4>
+</section>
 </section>
 </section>
 </section>

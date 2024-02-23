@@ -794,3 +794,122 @@ Client                                Description
 :class:`~mlclient.MLResourceClient`   A client that provides an additional :meth:`~mlclient.MLResourceClient.call` method that works with :class:`~mlclient.calls.ResourceCall` objects
 :class:`~mlclient.MLResourcesClient`  A facade client that offers methods for all :class:`~mlclient.ResourceCall` implementations (and thus all ML Resources endpoints)
 ====================================  =======================================================================================================================================================
+
+MLClient
+^^^^^^^^
+
+The lowest level client that accepts ML configuration and sends HTTP requests.
+
+Connection
+""""""""""
+
+The easiest way to start a connection is to initialize :class:`~mlclient.MLClient` as a context manager:
+
+.. code-block:: python
+
+    >>> from mlclient import MLClient
+
+    >>> with MLClient() as client:
+    ...     resp = client.get("/manage/v2/servers")
+
+
+If you would like to explicitly connect and disconnect a client, however, you can do it as below:
+
+.. code-block:: python
+
+    >>> from mlclient import MLClient
+
+    >>> client = MLClient()
+    >>> client.connect()
+    >>> resp = client.get("/manage/v2/servers")
+    >>> client.disconnect()
+
+
+To check if a client is connected you can use :meth:`~mlclient.MLClient.is_connected` method:
+
+.. code-block:: python
+
+    >>> from mlclient import MLClient
+
+    >>> client = MLClient()
+    >>> client.connect()
+    >>> client.is_connected()
+    True
+    >>> client.disconnect()
+    >>> client.is_connected()
+    False
+
+
+GET request
+"""""""""""
+
+*A simple GET request*
+
+.. code-block:: python
+
+    >>> from mlclient import MLClient
+
+    >>> with MLClient() as client:
+    ...     resp = client.get("/manage/v2/servers")
+
+
+*Custom parameters and headers*
+
+.. code-block:: python
+
+    >>> from mlclient import MLClient
+
+    >>> with MLClient() as client:
+    ...     resp = client.get(
+    ...         "/manage/v2/servers",
+    ...         params={"format": "json"},
+    ...         headers={"custom-header": "custom-value"},
+    ...     )
+
+
+POST request
+""""""""""""
+
+*A simple POST request*
+
+.. code-block:: python
+
+    >>> from mlclient import MLClient
+
+    >>> with MLClient() as client:
+    ...     resp = client.post(
+    ...         "/manage/v2/databases",
+    ...         body={"database-name": "CustomDatabase"},
+    ...     )
+
+
+*Custom parameters and headers*
+
+.. code-block:: python
+
+    >>> from mlclient import MLClient
+
+    >>> with MLClient() as client:
+    ...     resp = client.post(
+    ...         "/v1/eval",
+    ...         body={"xquery": "fn:current-dateTime()"},
+    ...         params={"database": "Documents"},
+    ...         headers={"Content-Type": "application/x-www-form-urlencoded"},
+    ...     )
+
+
+PUT request
+"""""""""""
+
+
+DELETE request
+""""""""""""""
+
+
+MLResourceClient
+^^^^^^^^^^^^^^^^
+
+
+MLResourcesClient
+^^^^^^^^^^^^^^^^^
+

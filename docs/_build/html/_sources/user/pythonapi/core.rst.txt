@@ -2,6 +2,11 @@
 Core
 ====
 
+.. contents::
+   :local:
+   :backlinks: top
+   :depth: 3
+
 Clients
 =======
 

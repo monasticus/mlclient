@@ -91,10 +91,27 @@
              
   <section id="core">
 <h1>Core<a class="headerlink" href="#core" title="Permalink to this heading"></a></h1>
+<nav class="contents local" id="contents">
+<ul class="simple">
+<li><p><a class="reference internal" href="#clients" id="id1">Clients</a></p>
+<ul>
+<li><p><a class="reference internal" href="#overview" id="id2">Overview</a></p></li>
+<li><p><a class="reference internal" href="#high-level-clients" id="id3">High-level clients</a></p>
+<ul>
+<li><p><a class="reference internal" href="#documentsclient" id="id4">DocumentsClient</a></p></li>
+<li><p><a class="reference internal" href="#evalclient" id="id5">EvalClient</a></p></li>
+<li><p><a class="reference internal" href="#logsclient" id="id6">LogsClient</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#low-level-clients" id="id7">Low-level clients</a></p></li>
+</ul>
+</li>
+</ul>
+</nav>
 <section id="clients">
-<h2>Clients<a class="headerlink" href="#clients" title="Permalink to this heading"></a></h2>
+<h2><a class="toc-backref" href="#contents" role="doc-backlink">Clients</a><a class="headerlink" href="#clients" title="Permalink to this heading"></a></h2>
 <section id="overview">
-<h3>Overview<a class="headerlink" href="#overview" title="Permalink to this heading"></a></h3>
+<h3><a class="toc-backref" href="#contents" role="doc-backlink">Overview</a><a class="headerlink" href="#overview" title="Permalink to this heading"></a></h3>
 <p>MLClient offers two types of clients to access a MarkLogic Server: high-level and low-level.
 High-level clients are designed for specific endpoints, such as <code class="docutils literal notranslate"><span class="pre">/v1/documents</span></code>.
 They provide a simple and intuitive API that covers all the functionality of each endpoint.
@@ -103,7 +120,7 @@ You can use low-level clients to send raw requests to the server.
 You can learn more about high-level and low-level clients in the following sections.</p>
 </section>
 <section id="high-level-clients">
-<h3>High-level clients<a class="headerlink" href="#high-level-clients" title="Permalink to this heading"></a></h3>
+<h3><a class="toc-backref" href="#contents" role="doc-backlink">High-level clients</a><a class="headerlink" href="#high-level-clients" title="Permalink to this heading"></a></h3>
 <p>High-level clients are designed for specific endpoints of MarkLogic Server and database.
 They allow you to manage configuration or documents in MarkLogic with ease.
 Each client ensures that you can perform all the operations in the corresponding area.
@@ -127,7 +144,7 @@ For example, some of the high-level clients are:</p>
 </tbody>
 </table>
 <section id="documentsclient">
-<h4>DocumentsClient<a class="headerlink" href="#documentsclient" title="Permalink to this heading"></a></h4>
+<h4><a class="toc-backref" href="#contents" role="doc-backlink">DocumentsClient</a><a class="headerlink" href="#documentsclient" title="Permalink to this heading"></a></h4>
 <section id="read">
 <h5>READ<a class="headerlink" href="#read" title="Permalink to this heading"></a></h5>
 <p><strong>Read a document</strong></p>
@@ -495,7 +512,7 @@ For example, some of the high-level clients are:</p>
 </section>
 </section>
 <section id="evalclient">
-<h4>EvalClient<a class="headerlink" href="#evalclient" title="Permalink to this heading"></a></h4>
+<h4><a class="toc-backref" href="#contents" role="doc-backlink">EvalClient</a><a class="headerlink" href="#evalclient" title="Permalink to this heading"></a></h4>
 <p><strong>Evaluate code from a file</strong></p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient</span> <span class="kn">import</span> <span class="n">MLManager</span>
 
@@ -606,7 +623,7 @@ For example, some of the high-level clients are:</p>
 </div>
 </section>
 <section id="logsclient">
-<h4>LogsClient<a class="headerlink" href="#logsclient" title="Permalink to this heading"></a></h4>
+<h4><a class="toc-backref" href="#contents" role="doc-backlink">LogsClient</a><a class="headerlink" href="#logsclient" title="Permalink to this heading"></a></h4>
 <p><strong>Get all logs</strong></p>
 <p><em>8002_ErrorLog.txt</em></p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient</span> <span class="kn">import</span> <span class="n">MLManager</span>
@@ -747,7 +764,7 @@ For example, some of the high-level clients are:</p>
 </section>
 </section>
 <section id="low-level-clients">
-<h3>Low-level clients<a class="headerlink" href="#low-level-clients" title="Permalink to this heading"></a></h3>
+<h3><a class="toc-backref" href="#contents" role="doc-backlink">Low-level clients</a><a class="headerlink" href="#low-level-clients" title="Permalink to this heading"></a></h3>
 <p>Low-level clients offer a basic HTTP client functionality that is compatible with MarkLogic Server configuration.
 They also work with <a class="reference internal" href="../../api/mlclient/calls/mlclient.calls.html#mlclient.calls.ResourceCall" title="mlclient.calls.ResourceCall"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResourceCall</span></code></a> objects, which are python representations of MarkLogic resources’ calls.
 You can use low-level clients to send customized requests that are not supported by the high-level client API,

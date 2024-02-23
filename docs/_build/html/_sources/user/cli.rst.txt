@@ -32,7 +32,6 @@ MLClient provides you a nice command line interface using `cleo <https://github.
     All MLClient commands use MLClient Configuration. To set it up, see :doc:`./setup`.
 
 .. toctree::
-   :maxdepth: 1
    :hidden:
 
    cli/call

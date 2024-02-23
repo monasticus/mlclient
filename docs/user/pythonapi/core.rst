@@ -596,7 +596,8 @@ EvalClient
 LogsClient
 ^^^^^^^^^^
 
-**Get all logs**
+Get all logs
+""""""""""""
 
 *8002_ErrorLog.txt*
 
@@ -676,9 +677,10 @@ LogsClient
     ...     logs = client.get_logs(app_server=0)
 
 
-**Get limited logs**
+Get limited logs
+""""""""""""""""
 
-*Time frames*
+**Time frames**
 
 .. note::
 
@@ -737,7 +739,7 @@ LogsClient
     ...     )
 
 
-*RegEx*
+**RegEx**
 
 .. code-block:: python
 

@@ -66,7 +66,7 @@ deepdiff = "^6.7.1"
 mimeograph = "^1.1.0"
 
 [tool.poetry.group.sub.dependencies]
-cryptography = "^42"
+cryptography = "^42.0.4"
 
 [tool.poetry.scripts]
 ml = "mlclient.cli:main"

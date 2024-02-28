@@ -125,6 +125,8 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="calls/mlclient.calls.html">mlclient.calls package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="clients/mlclient.clients.html">mlclient.clients package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="jobs/mlclient.jobs.html">mlclient.jobs package</a></li>
 <li class="toctree-l2"><a class="reference internal" href="model/mlclient.model.html">mlclient.model package</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-mlclient.ml_config">mlclient.ml_config module</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#mlclient.ml_config.AuthMethod"><code class="docutils literal notranslate"><span class="pre">AuthMethod</span></code></a><ul>
@@ -138,6 +140,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#mlclient.ml_config.MLAppServerConfiguration.port"><code class="docutils literal notranslate"><span class="pre">MLAppServerConfiguration.port</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#mlclient.ml_config.MLAppServerConfiguration.rest"><code class="docutils literal notranslate"><span class="pre">MLAppServerConfiguration.rest</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#mlclient.ml_config.MLAppServerConfiguration.serialize_auth"><code class="docutils literal notranslate"><span class="pre">MLAppServerConfiguration.serialize_auth()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.ml_config.MLAppServerConfiguration.model_computed_fields"><code class="docutils literal notranslate"><span class="pre">MLAppServerConfiguration.model_computed_fields</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#mlclient.ml_config.MLConfiguration"><code class="docutils literal notranslate"><span class="pre">MLConfiguration</span></code></a><ul>
@@ -150,6 +153,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#mlclient.ml_config.MLConfiguration.from_environment"><code class="docutils literal notranslate"><span class="pre">MLConfiguration.from_environment()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#mlclient.ml_config.MLConfiguration.from_file"><code class="docutils literal notranslate"><span class="pre">MLConfiguration.from_file()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#mlclient.ml_config.MLConfiguration.provide_config"><code class="docutils literal notranslate"><span class="pre">MLConfiguration.provide_config()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.ml_config.MLConfiguration.model_computed_fields"><code class="docutils literal notranslate"><span class="pre">MLConfiguration.model_computed_fields</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#mlclient.ml_config.MLConfiguration.rest_servers"><code class="docutils literal notranslate"><span class="pre">MLConfiguration.rest_servers</span></code></a></li>
 </ul>
 </li>
@@ -577,7 +581,7 @@ to perform on your instance.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mlclient.MLManager.get_client">
-<span class="sig-name descname"><span class="pre">get_client</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">app_server_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#mlclient.MLClient" title="mlclient.clients.ml_client.MLClient"><span class="pre">MLClient</span></a></span></span><a class="reference internal" href="../../_modules/mlclient/ml_manager.html#MLManager.get_client"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.MLManager.get_client" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_client</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">app_server_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="clients/mlclient.clients.html#mlclient.clients.MLClient" title="mlclient.clients.ml_client.MLClient"><span class="pre">MLClient</span></a></span></span><a class="reference internal" href="../../_modules/mlclient/ml_manager.html#MLManager.get_client"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.MLManager.get_client" title="Permalink to this definition"></a></dt>
 <dd><p>Initialize an MLClient instance for a specific App Server.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -594,7 +598,7 @@ to perform on your instance.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mlclient.MLManager.get_documents_client">
-<span class="sig-name descname"><span class="pre">get_documents_client</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">app_server_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DocumentsClient</span></span></span><a class="reference internal" href="../../_modules/mlclient/ml_manager.html#MLManager.get_documents_client"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.MLManager.get_documents_client" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_documents_client</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">app_server_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="clients/mlclient.clients.html#mlclient.clients.DocumentsClient" title="mlclient.clients.DocumentsClient"><span class="pre">DocumentsClient</span></a></span></span><a class="reference internal" href="../../_modules/mlclient/ml_manager.html#MLManager.get_documents_client"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.MLManager.get_documents_client" title="Permalink to this definition"></a></dt>
 <dd><p>Initialize a DocumentsClient instance for a specific App Server.</p>
 <p>If the no identifier is provided - it returns a client of a first configured
 REST server within an environment.</p>
@@ -606,7 +610,7 @@ REST server within an environment.</p>
 <dd class="field-even"><p>A DocumentsClient instance</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>DocumentsClient</p>
+<dd class="field-odd"><p><a class="reference internal" href="clients/mlclient.clients.html#mlclient.clients.DocumentsClient" title="mlclient.clients.DocumentsClient">DocumentsClient</a></p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
 <dd class="field-even"><ul class="simple">
@@ -620,7 +624,7 @@ REST server within an environment.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mlclient.MLManager.get_eval_client">
-<span class="sig-name descname"><span class="pre">get_eval_client</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">app_server_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">EvalClient</span></span></span><a class="reference internal" href="../../_modules/mlclient/ml_manager.html#MLManager.get_eval_client"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.MLManager.get_eval_client" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_eval_client</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">app_server_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="clients/mlclient.clients.html#mlclient.clients.EvalClient" title="mlclient.clients.EvalClient"><span class="pre">EvalClient</span></a></span></span><a class="reference internal" href="../../_modules/mlclient/ml_manager.html#MLManager.get_eval_client"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.MLManager.get_eval_client" title="Permalink to this definition"></a></dt>
 <dd><p>Initialize a EvalClient instance for a specific App Server.</p>
 <p>If the no identifier is provided - it returns a client of a first configured
 REST server within an environment.</p>
@@ -632,7 +636,7 @@ REST server within an environment.</p>
 <dd class="field-even"><p>A EvalClient instance</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>EvalClient</p>
+<dd class="field-odd"><p><a class="reference internal" href="clients/mlclient.clients.html#mlclient.clients.EvalClient" title="mlclient.clients.EvalClient">EvalClient</a></p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
 <dd class="field-even"><ul class="simple">
@@ -646,7 +650,7 @@ REST server within an environment.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mlclient.MLManager.get_logs_client">
-<span class="sig-name descname"><span class="pre">get_logs_client</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">app_server_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">LogsClient</span></span></span><a class="reference internal" href="../../_modules/mlclient/ml_manager.html#MLManager.get_logs_client"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.MLManager.get_logs_client" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_logs_client</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">app_server_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="clients/mlclient.clients.html#mlclient.clients.LogsClient" title="mlclient.clients.LogsClient"><span class="pre">LogsClient</span></a></span></span><a class="reference internal" href="../../_modules/mlclient/ml_manager.html#MLManager.get_logs_client"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.MLManager.get_logs_client" title="Permalink to this definition"></a></dt>
 <dd><p>Initialize a LogsClient instance for a specific App Server.</p>
 <p>If the no identifier is provided - it returns a client of a first configured
 REST server within an environment.</p>
@@ -658,7 +662,7 @@ REST server within an environment.</p>
 <dd class="field-even"><p>A LogsClient instance</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>LogsClient</p>
+<dd class="field-odd"><p><a class="reference internal" href="clients/mlclient.clients.html#mlclient.clients.LogsClient" title="mlclient.clients.LogsClient">LogsClient</a></p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
 <dd class="field-even"><ul class="simple">
@@ -701,7 +705,7 @@ REST server within an environment.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="mlclient.MLResourceClient">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mlclient.</span></span><span class="sig-name descname"><span class="pre">MLResourceClient</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">protocol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'http'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">host</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'localhost'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">8002</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auth_method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'basic'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">username</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'admin'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">password</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'admin'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">retry</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Retry</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">Retry(total=10,</span> <span class="pre">connect=5,</span> <span class="pre">read=None,</span> <span class="pre">redirect=None,</span> <span class="pre">status=None)</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mlclient/clients/ml_client.html#MLResourceClient"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.MLResourceClient" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="#mlclient.MLClient" title="mlclient.clients.ml_client.MLClient"><code class="xref py py-class docutils literal notranslate"><span class="pre">MLClient</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="clients/mlclient.clients.html#mlclient.clients.MLClient" title="mlclient.clients.ml_client.MLClient"><code class="xref py py-class docutils literal notranslate"><span class="pre">MLClient</span></code></a></p>
 <p>An MLClient subclass calling ResourceCall implementation classes.</p>
 <p>It can connect with the MarkLogic Server as a Context Manager or explicitly by
 using the connect method.</p>
@@ -755,7 +759,7 @@ implementation classes.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="mlclient.MLResourcesClient">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mlclient.</span></span><span class="sig-name descname"><span class="pre">MLResourcesClient</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">protocol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'http'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">host</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'localhost'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">8002</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auth_method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'basic'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">username</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'admin'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">password</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'admin'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">retry</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Retry</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">Retry(total=10,</span> <span class="pre">connect=5,</span> <span class="pre">read=None,</span> <span class="pre">redirect=None,</span> <span class="pre">status=None)</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mlclient/clients/ml_client.html#MLResourcesClient"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.MLResourcesClient" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="#mlclient.MLResourceClient" title="mlclient.clients.ml_client.MLResourceClient"><code class="xref py py-class docutils literal notranslate"><span class="pre">MLResourceClient</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="clients/mlclient.clients.html#mlclient.clients.MLResourceClient" title="mlclient.clients.ml_client.MLResourceClient"><code class="xref py py-class docutils literal notranslate"><span class="pre">MLResourceClient</span></code></a></p>
 <p>An MLResourceClient subclass supporting REST Resources of the MarkLogic server.</p>
 <p>It can connect with the MarkLogic Server as a Context Manager or explicitly by
 using the connect method.</p>
@@ -1761,6 +1765,8 @@ type of corresponding part.</p>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="calls/mlclient.calls.html">mlclient.calls package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="clients/mlclient.clients.html">mlclient.clients package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jobs/mlclient.jobs.html">mlclient.jobs package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="model/mlclient.model.html">mlclient.model package</a></li>
 </ul>
 </div>
@@ -1898,6 +1904,12 @@ It exports the following classes:</p>
 <dt class="sig sig-object py" id="mlclient.ml_config.MLAppServerConfiguration.serialize_auth">
 <span class="sig-name descname"><span class="pre">serialize_auth</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">auth_method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#mlclient.ml_config.AuthMethod" title="mlclient.ml_config.AuthMethod"><span class="pre">AuthMethod</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">_info</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/mlclient/ml_config.html#MLAppServerConfiguration.serialize_auth"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.ml_config.MLAppServerConfiguration.serialize_auth" title="Permalink to this definition"></a></dt>
 <dd><p>Serialize auth field.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mlclient.ml_config.MLAppServerConfiguration.model_computed_fields">
+<span class="sig-name descname"><span class="pre">model_computed_fields</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ComputedFieldInfo</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></em><a class="headerlink" href="#mlclient.ml_config.MLAppServerConfiguration.model_computed_fields" title="Permalink to this definition"></a></dt>
+<dd><p>A dictionary of computed field names and their corresponding <cite>ComputedFieldInfo</cite> objects.</p>
 </dd></dl>
 
 </dd></dl>
@@ -2118,6 +2130,12 @@ to be recognized: mlclient-&lt;environment-name&gt;.yaml.</p>
 <dd class="field-odd"><p>dict</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mlclient.ml_config.MLConfiguration.model_computed_fields">
+<span class="sig-name descname"><span class="pre">model_computed_fields</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ComputedFieldInfo</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></em><a class="headerlink" href="#mlclient.ml_config.MLConfiguration.model_computed_fields" title="Permalink to this definition"></a></dt>
+<dd><p>A dictionary of computed field names and their corresponding <cite>ComputedFieldInfo</cite> objects.</p>
 </dd></dl>
 
 <dl class="py property">

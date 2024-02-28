@@ -11,8 +11,7 @@ The ``call`` namespace provides you an interface to call common MarkLogic resour
 
 
 .. toctree::
-   :maxdepth: 1
-   :caption: Commands:
+   :hidden:
 
    call/eval
    call/logs

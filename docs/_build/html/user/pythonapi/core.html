@@ -1,0 +1,947 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Core &mdash; MLClient 0.4.0 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/autodoc_pydantic.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=4e78f113"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="prev" title="Python API" href="../pythonapi.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            MLClient
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Python API:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api/mlclient/mlclient.html">mlclient package</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../setup.html">Setup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cli.html">Command Line Interface</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../pythonapi.html">Python API</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Core</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#clients">Clients</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#overview">Overview</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#high-level-clients">High-level clients</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#low-level-clients">Low-level clients</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">MLClient</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../pythonapi.html">Python API</a></li>
+      <li class="breadcrumb-item active">Core</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/user/pythonapi/core.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="core">
+<h1>Core<a class="headerlink" href="#core" title="Permalink to this heading"></a></h1>
+<nav class="contents local" id="contents">
+<ul class="simple">
+<li><p><a class="reference internal" href="#clients" id="id1">Clients</a></p>
+<ul>
+<li><p><a class="reference internal" href="#overview" id="id2">Overview</a></p></li>
+<li><p><a class="reference internal" href="#high-level-clients" id="id3">High-level clients</a></p>
+<ul>
+<li><p><a class="reference internal" href="#documentsclient" id="id4">DocumentsClient</a></p></li>
+<li><p><a class="reference internal" href="#evalclient" id="id5">EvalClient</a></p></li>
+<li><p><a class="reference internal" href="#logsclient" id="id6">LogsClient</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#low-level-clients" id="id7">Low-level clients</a></p>
+<ul>
+<li><p><a class="reference internal" href="#mlclient" id="id8">MLClient</a></p></li>
+<li><p><a class="reference internal" href="#mlresourceclient" id="id9">MLResourceClient</a></p></li>
+<li><p><a class="reference internal" href="#mlresourcesclient" id="id10">MLResourcesClient</a></p></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+<section id="clients">
+<h2><a class="toc-backref" href="#contents" role="doc-backlink">Clients</a><a class="headerlink" href="#clients" title="Permalink to this heading"></a></h2>
+<section id="overview">
+<h3><a class="toc-backref" href="#contents" role="doc-backlink">Overview</a><a class="headerlink" href="#overview" title="Permalink to this heading"></a></h3>
+<p>MLClient offers two types of clients to access a MarkLogic Server: high-level and low-level.
+High-level clients are designed for specific endpoints, such as <code class="docutils literal notranslate"><span class="pre">/v1/documents</span></code>.
+They provide a simple and intuitive API that covers all the functionality of each endpoint.
+Low-level clients are the foundation of MLClient. They use <a class="reference internal" href="../../api/mlclient/calls/mlclient.calls.html#mlclient.calls.ResourceCall" title="mlclient.calls.ResourceCall"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResourceCall</span></code></a> objects to represent the parameters of any endpoint.
+You can use low-level clients to send raw requests to the server.
+You can learn more about high-level and low-level clients in the following sections.</p>
+</section>
+<section id="high-level-clients">
+<h3><a class="toc-backref" href="#contents" role="doc-backlink">High-level clients</a><a class="headerlink" href="#high-level-clients" title="Permalink to this heading"></a></h3>
+<p>High-level clients are designed for specific endpoints of MarkLogic Server and database.
+They allow you to manage configuration or documents in MarkLogic with ease.
+Each client ensures that you can perform all the operations in the corresponding area.
+For example, some of the high-level clients are:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Client</p></th>
+<th class="head"><p>Endpoint</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../api/mlclient/clients/mlclient.clients.html#mlclient.clients.DocumentsClient" title="mlclient.clients.DocumentsClient"><code class="xref py py-class docutils literal notranslate"><span class="pre">DocumentsClient</span></code></a></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">/v1/documents</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../../api/mlclient/clients/mlclient.clients.html#mlclient.clients.EvalClient" title="mlclient.clients.EvalClient"><code class="xref py py-class docutils literal notranslate"><span class="pre">EvalClient</span></code></a></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">/v1/eval</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../../api/mlclient/clients/mlclient.clients.html#mlclient.clients.LogsClient" title="mlclient.clients.LogsClient"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogsClient</span></code></a></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">/manage/v2/logs</span></code></p></td>
+</tr>
+</tbody>
+</table>
+<section id="documentsclient">
+<h4><a class="toc-backref" href="#contents" role="doc-backlink">DocumentsClient</a><a class="headerlink" href="#documentsclient" title="Permalink to this heading"></a></h4>
+<section id="read">
+<h5>READ<a class="headerlink" href="#read" title="Permalink to this heading"></a></h5>
+<p><strong>Read a document</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient</span> <span class="kn">import</span> <span class="n">MLManager</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">manager</span> <span class="o">=</span> <span class="n">MLManager</span><span class="p">(</span><span class="s2">&quot;local&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">manager</span><span class="o">.</span><span class="n">get_documents_client</span><span class="p">(</span><span class="s2">&quot;app-services&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">docs_client</span><span class="p">:</span>
+<span class="gp">... </span>   <span class="n">doc</span> <span class="o">=</span> <span class="n">docs_client</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;/doc-1.xml&quot;</span><span class="p">)</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">doc</span>
+<span class="go">&lt;mlclient.model.data.XMLDocument object at 0x7f9200980070&gt;</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">doc</span><span class="o">.</span><span class="n">doc_type</span>
+<span class="go">&lt;DocumentType.XML: &#39;xml&#39;&gt;</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">doc</span><span class="o">.</span><span class="n">uri</span>
+<span class="go">&#39;/doc-1.xml&#39;</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">doc</span><span class="o">.</span><span class="n">content</span>
+<span class="go">&lt;xml.etree.ElementTree.ElementTree object at 0x7f920095be20&gt;</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">doc</span><span class="o">.</span><span class="n">content_string</span>
+<span class="go">&#39;&#39;&#39;&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span>
+<span class="go">&lt;SomeEntity&gt;</span>
+<span class="go">    &lt;ChildNode1&gt;00001&lt;/ChildNode1&gt;</span>
+<span class="go">    &lt;ChildNode2&gt;888e2050-7148-42c4-b33a-b3dd3505b87b&lt;/ChildNode2&gt;</span>
+<span class="go">&lt;/SomeEntity&gt;&#39;&#39;&#39;</span>
+</pre></div>
+</div>
+<p><strong>Read a document as string</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient</span> <span class="kn">import</span> <span class="n">MLManager</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">manager</span> <span class="o">=</span> <span class="n">MLManager</span><span class="p">(</span><span class="s2">&quot;local&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">manager</span><span class="o">.</span><span class="n">get_documents_client</span><span class="p">(</span><span class="s2">&quot;app-services&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">docs_client</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">doc</span> <span class="o">=</span> <span class="n">docs_client</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;/doc-1.xml&quot;</span><span class="p">,</span> <span class="n">output_type</span><span class="o">=</span><span class="nb">str</span><span class="p">)</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">doc</span>
+<span class="go">&lt;mlclient.model.data.RawStringDocument object at 0x7f9200980400&gt;</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">doc</span><span class="o">.</span><span class="n">doc_type</span>
+<span class="go">&lt;DocumentType.XML: &#39;xml&#39;&gt;</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">doc</span><span class="o">.</span><span class="n">content</span>
+<span class="go">&#39;&#39;&#39;&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span>
+<span class="go">&lt;SomeEntity&gt;</span>
+<span class="go">    &lt;ChildNode1&gt;00001&lt;/ChildNode1&gt;</span>
+<span class="go">    &lt;ChildNode2&gt;888e2050-7148-42c4-b33a-b3dd3505b87b&lt;/ChildNode2&gt;</span>
+<span class="go">&lt;/SomeEntity&gt;&#39;&#39;&#39;</span>
+</pre></div>
+</div>
+<p><strong>Read a document as bytes</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient</span> <span class="kn">import</span> <span class="n">MLManager</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">manager</span> <span class="o">=</span> <span class="n">MLManager</span><span class="p">(</span><span class="s2">&quot;local&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">manager</span><span class="o">.</span><span class="n">get_documents_client</span><span class="p">(</span><span class="s2">&quot;app-services&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">docs_client</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">doc</span> <span class="o">=</span> <span class="n">docs_client</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;/doc-1.xml&quot;</span><span class="p">,</span> <span class="n">output_type</span><span class="o">=</span><span class="nb">bytes</span><span class="p">)</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">doc</span>
+<span class="go">&lt;mlclient.model.data.RawDocument object at 0x7f9200980490&gt;</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">doc</span><span class="o">.</span><span class="n">doc_type</span>
+<span class="go">&lt;DocumentType.XML: &#39;xml&#39;&gt;</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">doc</span><span class="o">.</span><span class="n">content</span>
+<span class="go">b&#39;&#39;&#39;&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span>
+<span class="go">&lt;SomeEntity&gt;</span>
+<span class="go">    &lt;ChildNode1&gt;00001&lt;/ChildNode1&gt;</span>
+<span class="go">    &lt;ChildNode2&gt;888e2050-7148-42c4-b33a-b3dd3505b87b&lt;/ChildNode2&gt;</span>
+<span class="go">&lt;/SomeEntity&gt;&#39;&#39;&#39;</span>
+</pre></div>
+</div>
+<p><strong>Read a document with metadata</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient</span> <span class="kn">import</span> <span class="n">MLManager</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">manager</span> <span class="o">=</span> <span class="n">MLManager</span><span class="p">(</span><span class="s2">&quot;local&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">manager</span><span class="o">.</span><span class="n">get_documents_client</span><span class="p">(</span><span class="s2">&quot;app-services&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">docs_client</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">doc</span> <span class="o">=</span> <span class="n">docs_client</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;/doc-1.xml&quot;</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;content&quot;</span><span class="p">,</span> <span class="s2">&quot;metadata&quot;</span><span class="p">])</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">doc</span><span class="o">.</span><span class="n">metadata</span>
+<span class="go">&lt;mlclient.model.data.Metadata object at 0x7f9200980eb0&gt;</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">doc</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">to_json</span><span class="p">()</span>
+<span class="go">{&#39;collections&#39;: [], &#39;permissions&#39;: [], &#39;properties&#39;: {}, &#39;quality&#39;: 0, &#39;metadataValues&#39;: {}}</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">doc</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">to_xml_string</span><span class="p">(</span><span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+<span class="go">&#39;&#39;&#39;&lt;?xml version=\&#39;1.0\&#39; encoding=\&#39;utf-8\&#39;?&gt;</span>
+<span class="go">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span>
+<span class="go">&lt;rapi:metadata xmlns:rapi=&quot;http://marklogic.com/rest-api&quot;&gt;</span>
+<span class="go">    &lt;rapi:collections/&gt;</span>
+<span class="go">    &lt;rapi:permissions/&gt;</span>
+<span class="go">    &lt;prop:properties xmlns:prop=&quot;http://marklogic.com/xdmp/property&quot;/&gt;</span>
+<span class="go">    &lt;rapi:quality&gt;0&lt;/rapi:quality&gt;</span>
+<span class="go">    &lt;rapi:metadata-values/&gt;</span>
+<span class="go">&lt;/rapi:metadata&gt;</span>
+<span class="go">&#39;&#39;&#39;</span>
+</pre></div>
+</div>
+<p><strong>Read multiple documents</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient</span> <span class="kn">import</span> <span class="n">MLManager</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">uris</span> <span class="o">=</span> <span class="p">[</span>
+<span class="gp">... </span>    <span class="s2">&quot;/doc-1.xml&quot;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="s2">&quot;/doc-2.json&quot;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="s2">&quot;/doc-3.xqy&quot;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="s2">&quot;/doc-4.zip&quot;</span><span class="p">,</span>
+<span class="gp">... </span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">manager</span> <span class="o">=</span> <span class="n">MLManager</span><span class="p">(</span><span class="s2">&quot;local&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">manager</span><span class="o">.</span><span class="n">get_documents_client</span><span class="p">(</span><span class="s2">&quot;app-services&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">docs_client</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">docs</span> <span class="o">=</span> <span class="n">docs_client</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">uris</span><span class="p">)</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">len</span><span class="p">(</span><span class="n">docs</span><span class="p">)</span>
+<span class="go">4</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">xml_doc</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">doc</span> <span class="k">for</span> <span class="n">doc</span> <span class="ow">in</span> <span class="n">docs</span> <span class="k">if</span> <span class="n">doc</span><span class="o">.</span><span class="n">uri</span> <span class="o">==</span> <span class="s2">&quot;/doc-1.xml&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">xml_doc</span>
+<span class="go">&lt;mlclient.model.data.XMLDocument object at 0x7f9200920a00&gt;</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">json_doc</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">doc</span> <span class="k">for</span> <span class="n">doc</span> <span class="ow">in</span> <span class="n">docs</span> <span class="k">if</span> <span class="n">doc</span><span class="o">.</span><span class="n">uri</span> <span class="o">==</span> <span class="s2">&quot;/doc-2.json&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">json_doc</span>
+<span class="go">&lt;mlclient.model.data.JSONDocument object at 0x7f9200920430&gt;</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">text_doc</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">doc</span> <span class="k">for</span> <span class="n">doc</span> <span class="ow">in</span> <span class="n">docs</span> <span class="k">if</span> <span class="n">doc</span><span class="o">.</span><span class="n">uri</span> <span class="o">==</span> <span class="s2">&quot;/doc-3.xqy&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">text_doc</span>
+<span class="go">&lt;mlclient.model.data.TextDocument object at 0x7f9200920e20&gt;</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">bin_doc</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">doc</span> <span class="k">for</span> <span class="n">doc</span> <span class="ow">in</span> <span class="n">docs</span> <span class="k">if</span> <span class="n">doc</span><span class="o">.</span><span class="n">uri</span> <span class="o">==</span> <span class="s2">&quot;/doc-4.zip&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">bin_doc</span>
+<span class="go">&lt;mlclient.model.data.BinaryDocument object at 0x7f9200920970&gt;</span>
+</pre></div>
+</div>
+<p><strong>Read documents from a custom database</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient</span> <span class="kn">import</span> <span class="n">MLManager</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">manager</span> <span class="o">=</span> <span class="n">MLManager</span><span class="p">(</span><span class="s2">&quot;local&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">manager</span><span class="o">.</span><span class="n">get_documents_client</span><span class="p">(</span><span class="s2">&quot;app-services&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">docs_client</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">doc</span> <span class="o">=</span> <span class="n">docs_client</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;/doc-1.xml&quot;</span><span class="p">,</span> <span class="n">database</span><span class="o">=</span><span class="s2">&quot;App-Services&quot;</span><span class="p">)</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">doc</span>
+<span class="go">&lt;mlclient.model.data.XMLDocument object at 0x7f92009b4700&gt;</span>
+</pre></div>
+</div>
+</section>
+<section id="create-update">
+<h5>CREATE / UPDATE<a class="headerlink" href="#create-update" title="Permalink to this heading"></a></h5>
+<p><strong>Put a document</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient</span> <span class="kn">import</span> <span class="n">MLManager</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient.model</span> <span class="kn">import</span> <span class="n">DocumentFactory</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">uri</span> <span class="o">=</span> <span class="s2">&quot;/doc-2.json&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">content</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;root&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;child&quot;</span><span class="p">:</span> <span class="s2">&quot;data&quot;</span><span class="p">}}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">doc</span> <span class="o">=</span> <span class="n">DocumentFactory</span><span class="o">.</span><span class="n">build_document</span><span class="p">(</span><span class="n">uri</span><span class="o">=</span><span class="n">uri</span><span class="p">,</span> <span class="n">content</span><span class="o">=</span><span class="n">content</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">doc</span>
+<span class="go">&lt;mlclient.model.data.JSONDocument object at 0x7f9200920f70&gt;</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">manager</span> <span class="o">=</span> <span class="n">MLManager</span><span class="p">(</span><span class="s2">&quot;local&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">manager</span><span class="o">.</span><span class="n">get_documents_client</span><span class="p">(</span><span class="s2">&quot;app-services&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">docs_client</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">resp</span> <span class="o">=</span> <span class="n">docs_client</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">doc</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">resp</span>
+<span class="go">{&#39;documents&#39;: [{&#39;uri&#39;: &#39;/doc-2.json&#39;, &#39;mime-type&#39;: &#39;application/json&#39;, &#39;category&#39;: [&#39;metadata&#39;, &#39;content&#39;]}]}</span>
+</pre></div>
+</div>
+<p><strong>Put a document with metadata</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient</span> <span class="kn">import</span> <span class="n">MLManager</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient.model</span> <span class="kn">import</span> <span class="n">DocumentFactory</span><span class="p">,</span> <span class="n">Metadata</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">uri</span> <span class="o">=</span> <span class="s2">&quot;/doc-2.json&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">content</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;root&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;child&quot;</span><span class="p">:</span> <span class="s2">&quot;data&quot;</span><span class="p">}}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">metadata</span> <span class="o">=</span> <span class="n">Metadata</span><span class="p">(</span><span class="n">collections</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;some-collection&quot;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">doc</span> <span class="o">=</span> <span class="n">DocumentFactory</span><span class="o">.</span><span class="n">build_document</span><span class="p">(</span><span class="n">uri</span><span class="o">=</span><span class="n">uri</span><span class="p">,</span> <span class="n">content</span><span class="o">=</span><span class="n">content</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="n">metadata</span><span class="p">)</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">manager</span> <span class="o">=</span> <span class="n">MLManager</span><span class="p">(</span><span class="s2">&quot;local&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">manager</span><span class="o">.</span><span class="n">get_documents_client</span><span class="p">(</span><span class="s2">&quot;app-services&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">docs_client</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">resp</span> <span class="o">=</span> <span class="n">docs_client</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">doc</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">resp</span>
+<span class="go">{&#39;documents&#39;: [{&#39;uri&#39;: &#39;/doc-2.json&#39;, &#39;mime-type&#39;: &#39;application/json&#39;, &#39;category&#39;: [&#39;metadata&#39;, &#39;content&#39;]}]}</span>
+</pre></div>
+</div>
+<p><strong>Put a raw document</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient</span> <span class="kn">import</span> <span class="n">MLManager</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient.model</span> <span class="kn">import</span> <span class="n">DocumentFactory</span><span class="p">,</span> <span class="n">DocumentType</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">uri</span> <span class="o">=</span> <span class="s2">&quot;/doc-1.xml&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">content</span> <span class="o">=</span> <span class="sa">b</span><span class="s2">&quot;&lt;root&gt;&lt;child&gt;data&lt;/child&gt;&lt;/root&gt;&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">doc</span> <span class="o">=</span> <span class="n">DocumentFactory</span><span class="o">.</span><span class="n">build_raw_document</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">uri</span><span class="o">=</span><span class="n">uri</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">content</span><span class="o">=</span><span class="n">content</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">doc_type</span><span class="o">=</span><span class="n">DocumentType</span><span class="o">.</span><span class="n">XML</span><span class="p">,</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">doc</span>
+<span class="go">&lt;mlclient.model.data.RawDocument object at 0x7f9200929430&gt;</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">manager</span> <span class="o">=</span> <span class="n">MLManager</span><span class="p">(</span><span class="s2">&quot;local&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">manager</span><span class="o">.</span><span class="n">get_documents_client</span><span class="p">(</span><span class="s2">&quot;app-services&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">docs_client</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">resp</span> <span class="o">=</span> <span class="n">docs_client</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">doc</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">resp</span>
+<span class="go">{&#39;documents&#39;: [{&#39;uri&#39;: &#39;/doc-1.xml&#39;, &#39;mime-type&#39;: &#39;application/xml&#39;, &#39;category&#39;: [&#39;metadata&#39;, &#39;content&#39;]}]}</span>
+</pre></div>
+</div>
+<p><strong>Put a raw document with metadata</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient</span> <span class="kn">import</span> <span class="n">MLManager</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient.model</span> <span class="kn">import</span> <span class="n">DocumentFactory</span><span class="p">,</span> <span class="n">DocumentType</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">uri</span> <span class="o">=</span> <span class="s2">&quot;/doc-1.xml&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">content</span> <span class="o">=</span> <span class="sa">b</span><span class="s2">&quot;&lt;root&gt;&lt;child&gt;data&lt;/child&gt;&lt;/root&gt;&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">metadata</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;{&quot;collections&quot;: [&quot;some-collection&quot;]}&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">doc</span> <span class="o">=</span> <span class="n">DocumentFactory</span><span class="o">.</span><span class="n">build_raw_document</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">uri</span><span class="o">=</span><span class="n">uri</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">content</span><span class="o">=</span><span class="n">content</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">doc_type</span><span class="o">=</span><span class="n">DocumentType</span><span class="o">.</span><span class="n">XML</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">metadata</span><span class="o">=</span><span class="n">metadata</span><span class="p">,</span>
+<span class="gp">... </span><span class="p">)</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">manager</span> <span class="o">=</span> <span class="n">MLManager</span><span class="p">(</span><span class="s2">&quot;local&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">manager</span><span class="o">.</span><span class="n">get_documents_client</span><span class="p">(</span><span class="s2">&quot;app-services&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">docs_client</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">resp</span> <span class="o">=</span> <span class="n">docs_client</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">doc</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">resp</span>
+<span class="go">{&#39;documents&#39;: [{&#39;uri&#39;: &#39;/doc-1.xml&#39;, &#39;mime-type&#39;: &#39;application/xml&#39;, &#39;category&#39;: [&#39;metadata&#39;, &#39;content&#39;]}]}</span>
+</pre></div>
+</div>
+<p><strong>Put a document to a custom database</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient</span> <span class="kn">import</span> <span class="n">MLManager</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient.model</span> <span class="kn">import</span> <span class="n">DocumentFactory</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">uri</span> <span class="o">=</span> <span class="s2">&quot;/doc-2.json&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">content</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;root&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;child&quot;</span><span class="p">:</span> <span class="s2">&quot;data&quot;</span><span class="p">}}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">doc</span> <span class="o">=</span> <span class="n">DocumentFactory</span><span class="o">.</span><span class="n">build_document</span><span class="p">(</span><span class="n">uri</span><span class="o">=</span><span class="n">uri</span><span class="p">,</span> <span class="n">content</span><span class="o">=</span><span class="n">content</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">doc</span>
+<span class="go">&lt;mlclient.model.data.JSONDocument object at 0x7f9200920f70&gt;</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">manager</span> <span class="o">=</span> <span class="n">MLManager</span><span class="p">(</span><span class="s2">&quot;local&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">manager</span><span class="o">.</span><span class="n">get_documents_client</span><span class="p">(</span><span class="s2">&quot;app-services&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">docs_client</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">resp</span> <span class="o">=</span> <span class="n">docs_client</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span> <span class="n">database</span><span class="o">=</span><span class="s2">&quot;Documents&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">resp</span>
+<span class="go">{&#39;documents&#39;: [{&#39;uri&#39;: &#39;/doc-2.json&#39;, &#39;mime-type&#39;: &#39;application/json&#39;, &#39;category&#39;: [&#39;metadata&#39;, &#39;content&#39;]}]}</span>
+</pre></div>
+</div>
+<p><strong>Update document’s metadata</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient</span> <span class="kn">import</span> <span class="n">MLManager</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient.model</span> <span class="kn">import</span> <span class="n">Metadata</span><span class="p">,</span> <span class="n">MetadataDocument</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">uri</span> <span class="o">=</span> <span class="s2">&quot;/doc-2.json&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">metadata</span> <span class="o">=</span> <span class="n">Metadata</span><span class="p">(</span><span class="n">collections</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;some-collection&quot;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">doc</span> <span class="o">=</span> <span class="n">MetadataDocument</span><span class="p">(</span><span class="n">uri</span><span class="p">,</span> <span class="n">metadata</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">doc</span>
+<span class="go">&lt;mlclient.model.data.MetadataDocument object at 0x7f9200929e20&gt;</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">manager</span> <span class="o">=</span> <span class="n">MLManager</span><span class="p">(</span><span class="s2">&quot;local&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">manager</span><span class="o">.</span><span class="n">get_documents_client</span><span class="p">(</span><span class="s2">&quot;app-services&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">docs_client</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">resp</span> <span class="o">=</span> <span class="n">docs_client</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">doc</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">resp</span>
+<span class="go">{&#39;documents&#39;: [{&#39;uri&#39;: &#39;/doc-2.json&#39;, &#39;mime-type&#39;: &#39;&#39;, &#39;category&#39;: [&#39;metadata&#39;]}]}</span>
+</pre></div>
+</div>
+<p><strong>Put multiple documents</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient</span> <span class="kn">import</span> <span class="n">MLManager</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient.model</span> <span class="kn">import</span> <span class="n">DocumentFactory</span><span class="p">,</span> <span class="n">DocumentType</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">uri_1</span> <span class="o">=</span> <span class="s2">&quot;/doc-1.xml&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">content_1</span> <span class="o">=</span> <span class="sa">b</span><span class="s2">&quot;&lt;root&gt;&lt;child&gt;data&lt;/child&gt;&lt;/root&gt;&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">doc_1</span> <span class="o">=</span> <span class="n">DocumentFactory</span><span class="o">.</span><span class="n">build_raw_document</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">uri</span><span class="o">=</span><span class="n">uri_1</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">content</span><span class="o">=</span><span class="n">content_1</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">doc_type</span><span class="o">=</span><span class="n">DocumentType</span><span class="o">.</span><span class="n">XML</span><span class="p">,</span>
+<span class="gp">... </span><span class="p">)</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">uri_2</span> <span class="o">=</span> <span class="s2">&quot;/doc-2.json&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">content_2</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;root&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;child&quot;</span><span class="p">:</span> <span class="s2">&quot;data&quot;</span><span class="p">}}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">doc_2</span> <span class="o">=</span> <span class="n">DocumentFactory</span><span class="o">.</span><span class="n">build_document</span><span class="p">(</span><span class="n">uri</span><span class="o">=</span><span class="n">uri_2</span><span class="p">,</span> <span class="n">content</span><span class="o">=</span><span class="n">content_2</span><span class="p">)</span>
+
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">manager</span> <span class="o">=</span> <span class="n">MLManager</span><span class="p">(</span><span class="s2">&quot;local&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">manager</span><span class="o">.</span><span class="n">get_documents_client</span><span class="p">(</span><span class="s2">&quot;app-services&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">docs_client</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">resp</span> <span class="o">=</span> <span class="n">docs_client</span><span class="o">.</span><span class="n">create</span><span class="p">([</span><span class="n">doc_1</span><span class="p">,</span> <span class="n">doc_2</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">resp</span>
+<span class="go">{&#39;documents&#39;: [{&#39;uri&#39;: &#39;/doc-1.xml&#39;, &#39;mime-type&#39;: &#39;application/xml&#39;, &#39;category&#39;: [&#39;metadata&#39;, &#39;content&#39;]}, {&#39;uri&#39;: &#39;/doc-2.json&#39;, &#39;mime-type&#39;: &#39;application/json&#39;, &#39;category&#39;: [&#39;metadata&#39;, &#39;content&#39;]}]}</span>
+</pre></div>
+</div>
+<p><strong>Put documents with default metadata</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient</span> <span class="kn">import</span> <span class="n">MLManager</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient.model</span> <span class="kn">import</span> <span class="n">DocumentFactory</span><span class="p">,</span> <span class="n">DocumentType</span><span class="p">,</span> <span class="n">Metadata</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">default_metadata</span> <span class="o">=</span> <span class="n">Metadata</span><span class="p">(</span><span class="n">collections</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;some-collection&quot;</span><span class="p">])</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">uri_1</span> <span class="o">=</span> <span class="s2">&quot;/doc-1.xml&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">content_1</span> <span class="o">=</span> <span class="sa">b</span><span class="s2">&quot;&lt;root&gt;&lt;child&gt;data&lt;/child&gt;&lt;/root&gt;&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">doc_1</span> <span class="o">=</span> <span class="n">DocumentFactory</span><span class="o">.</span><span class="n">build_raw_document</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">uri</span><span class="o">=</span><span class="n">uri_1</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">content</span><span class="o">=</span><span class="n">content_1</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">doc_type</span><span class="o">=</span><span class="n">DocumentType</span><span class="o">.</span><span class="n">XML</span><span class="p">,</span>
+<span class="gp">... </span><span class="p">)</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">uri_2</span> <span class="o">=</span> <span class="s2">&quot;/doc-2.json&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">content_2</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;root&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;child&quot;</span><span class="p">:</span> <span class="s2">&quot;data&quot;</span><span class="p">}}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">doc_2</span> <span class="o">=</span> <span class="n">DocumentFactory</span><span class="o">.</span><span class="n">build_document</span><span class="p">(</span><span class="n">uri</span><span class="o">=</span><span class="n">uri_2</span><span class="p">,</span> <span class="n">content</span><span class="o">=</span><span class="n">content_2</span><span class="p">)</span>
+
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">manager</span> <span class="o">=</span> <span class="n">MLManager</span><span class="p">(</span><span class="s2">&quot;local&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">manager</span><span class="o">.</span><span class="n">get_documents_client</span><span class="p">(</span><span class="s2">&quot;app-services&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">docs_client</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">resp</span> <span class="o">=</span> <span class="n">docs_client</span><span class="o">.</span><span class="n">create</span><span class="p">([</span><span class="n">default_metadata</span><span class="p">,</span> <span class="n">doc_1</span><span class="p">,</span> <span class="n">doc_2</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">resp</span>
+<span class="go">{&#39;documents&#39;: [{&#39;uri&#39;: &#39;/doc-1.xml&#39;, &#39;mime-type&#39;: &#39;application/xml&#39;, &#39;category&#39;: [&#39;metadata&#39;, &#39;content&#39;]}, {&#39;uri&#39;: &#39;/doc-2.json&#39;, &#39;mime-type&#39;: &#39;application/json&#39;, &#39;category&#39;: [&#39;metadata&#39;, &#39;content&#39;]}]}</span>
+</pre></div>
+</div>
+</section>
+<section id="delete">
+<h5>DELETE<a class="headerlink" href="#delete" title="Permalink to this heading"></a></h5>
+<p><strong>Delete a document</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient</span> <span class="kn">import</span> <span class="n">MLManager</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">manager</span> <span class="o">=</span> <span class="n">MLManager</span><span class="p">(</span><span class="s2">&quot;local&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">manager</span><span class="o">.</span><span class="n">get_documents_client</span><span class="p">(</span><span class="s2">&quot;app-services&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">docs_client</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">docs_client</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="s2">&quot;/doc-1.xml&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>Delete multiple documents</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient</span> <span class="kn">import</span> <span class="n">MLManager</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">uris</span> <span class="o">=</span> <span class="p">[</span>
+<span class="gp">... </span>    <span class="s2">&quot;/doc-1.xml&quot;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="s2">&quot;/doc-2.json&quot;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="s2">&quot;/doc-3.xqy&quot;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="s2">&quot;/doc-4.zip&quot;</span><span class="p">,</span>
+<span class="gp">... </span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">manager</span> <span class="o">=</span> <span class="n">MLManager</span><span class="p">(</span><span class="s2">&quot;local&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">manager</span><span class="o">.</span><span class="n">get_documents_client</span><span class="p">(</span><span class="s2">&quot;app-services&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">docs_client</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">docs_client</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">uris</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>Delete a document from a custom database</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient</span> <span class="kn">import</span> <span class="n">MLManager</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">manager</span> <span class="o">=</span> <span class="n">MLManager</span><span class="p">(</span><span class="s2">&quot;local&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">manager</span><span class="o">.</span><span class="n">get_documents_client</span><span class="p">(</span><span class="s2">&quot;app-services&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">docs_client</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">docs_client</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="s2">&quot;/doc-1.xml&quot;</span><span class="p">,</span> <span class="n">database</span><span class="o">=</span><span class="s2">&quot;Documents&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>Delete document’s metadata</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient</span> <span class="kn">import</span> <span class="n">MLManager</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">manager</span> <span class="o">=</span> <span class="n">MLManager</span><span class="p">(</span><span class="s2">&quot;local&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">manager</span><span class="o">.</span><span class="n">get_documents_client</span><span class="p">(</span><span class="s2">&quot;app-services&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">docs_client</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">docs_client</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="s2">&quot;/doc-1.xml&quot;</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;properties&quot;</span><span class="p">,</span> <span class="s2">&quot;collections&quot;</span><span class="p">])</span>
+</pre></div>
+</div>
+<p><strong>Delete a temporal document</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient</span> <span class="kn">import</span> <span class="n">MLManager</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">manager</span> <span class="o">=</span> <span class="n">MLManager</span><span class="p">(</span><span class="s2">&quot;local&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">manager</span><span class="o">.</span><span class="n">get_documents_client</span><span class="p">(</span><span class="s2">&quot;app-services&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">docs_client</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">docs_client</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="s2">&quot;/doc-1.xml&quot;</span><span class="p">,</span> <span class="n">temporal_collection</span><span class="o">=</span><span class="s2">&quot;temporal-collection&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>Wipe a temporal document</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient</span> <span class="kn">import</span> <span class="n">MLManager</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">manager</span> <span class="o">=</span> <span class="n">MLManager</span><span class="p">(</span><span class="s2">&quot;local&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">manager</span><span class="o">.</span><span class="n">get_documents_client</span><span class="p">(</span><span class="s2">&quot;app-services&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">docs_client</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">docs_client</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span>
+<span class="gp">... </span>       <span class="s2">&quot;/doc-1.xml&quot;</span><span class="p">,</span>
+<span class="gp">... </span>       <span class="n">temporal_collection</span><span class="o">=</span><span class="s2">&quot;temporal-collection&quot;</span><span class="p">,</span>
+<span class="gp">... </span>       <span class="n">wipe_temporal</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="gp">... </span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="evalclient">
+<h4><a class="toc-backref" href="#contents" role="doc-backlink">EvalClient</a><a class="headerlink" href="#evalclient" title="Permalink to this heading"></a></h4>
+<p><strong>Evaluate code from a file</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient</span> <span class="kn">import</span> <span class="n">MLManager</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">manager</span> <span class="o">=</span> <span class="n">MLManager</span><span class="p">(</span><span class="s2">&quot;local&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">manager</span><span class="o">.</span><span class="n">get_eval_client</span><span class="p">()</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="s2">&quot;./xqy-code-to-eval.xqy)</span>
+<span class="gp">... </span>    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="s2">&quot;./js-code-to-eval.js)</span>
+</pre></div>
+</div>
+<p><strong>Evaluate raw xquery code</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient</span> <span class="kn">import</span> <span class="n">MLManager</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">MLManager</span><span class="p">(</span><span class="s2">&quot;local&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">get_eval_client</span><span class="p">()</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="n">xq</span><span class="o">=</span><span class="s2">&quot;fn:current-dateTime()&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span>
+<span class="go">datetime.datetime(2024, 2, 22, 11, 38, 32, 709484, tzinfo=datetime.timezone.utc)</span>
+</pre></div>
+</div>
+<p><strong>Evaluate raw javascript code</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient</span> <span class="kn">import</span> <span class="n">MLManager</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">MLManager</span><span class="p">(</span><span class="s2">&quot;local&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">get_eval_client</span><span class="p">()</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="n">js</span><span class="o">=</span><span class="s2">&quot;fn.currentDateTime()&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span>
+<span class="go">datetime.datetime(2024, 2, 22, 11, 39, 22, 264102, tzinfo=datetime.timezone.utc)</span>
+</pre></div>
+</div>
+<p><strong>Evaluate code with variables</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient</span> <span class="kn">import</span> <span class="n">MLManager</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">xq</span> <span class="o">=</span> <span class="s1">&#39;&#39;&#39;</span>
+<span class="gp">... </span><span class="s1">declare variable $DAYS external;</span>
+<span class="gp">...</span>
+<span class="gp">... </span><span class="s1">fn:current-dateTime() - xs:dayTimeDuration(&quot;P&quot; || $DAYS || &quot;D&quot;)&#39;&#39;&#39;</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">MLManager</span><span class="p">(</span><span class="s2">&quot;local&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">get_eval_client</span><span class="p">()</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span>
+<span class="gp">... </span>        <span class="n">xq</span><span class="o">=</span><span class="n">xq</span><span class="p">,</span>
+<span class="gp">... </span>        <span class="n">variables</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;DAYS&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">},</span>
+<span class="gp">... </span>    <span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span>
+<span class="go">datetime.datetime(2024, 2, 17, 12, 17, 49, 556376, tzinfo=datetime.timezone.utc)</span>
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient</span> <span class="kn">import</span> <span class="n">MLManager</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">xq</span> <span class="o">=</span> <span class="s1">&#39;&#39;&#39;</span>
+<span class="gp">... </span><span class="s1">declare variable $DAYS external;</span>
+<span class="gp">...</span>
+<span class="gp">... </span><span class="s1">fn:current-dateTime() - xs:dayTimeDuration(&quot;P&quot; || $DAYS || &quot;D&quot;)&#39;&#39;&#39;</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">MLManager</span><span class="p">(</span><span class="s2">&quot;local&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">get_eval_client</span><span class="p">()</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span>
+<span class="gp">... </span>        <span class="n">xq</span><span class="o">=</span><span class="n">xq</span><span class="p">,</span>
+<span class="gp">... </span>        <span class="n">DAYS</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span>
+<span class="go">datetime.datetime(2024, 2, 17, 12, 19, 45, 225135, tzinfo=datetime.timezone.utc)</span>
+</pre></div>
+</div>
+<p><strong>Evaluate code with variables within a namespace</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient</span> <span class="kn">import</span> <span class="n">MLManager</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">xq</span> <span class="o">=</span> <span class="s1">&#39;&#39;&#39;</span>
+<span class="gp">... </span><span class="s1">declare variable $local:DAYS external;</span>
+<span class="gp">...</span>
+<span class="gp">... </span><span class="s1">fn:current-dateTime() - xs:dayTimeDuration(&quot;P&quot; || $local:DAYS || &quot;D&quot;)&#39;&#39;&#39;</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">MLManager</span><span class="p">(</span><span class="s2">&quot;local&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">get_eval_client</span><span class="p">()</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span>
+<span class="gp">... </span>        <span class="n">xq</span><span class="o">=</span><span class="n">xq</span><span class="p">,</span>
+<span class="gp">... </span>        <span class="n">variables</span><span class="o">=</span><span class="p">{</span>
+<span class="gp">... </span>            <span class="s2">&quot;{http://www.w3.org/2005/xquery-local-functions}DAYS&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+<span class="gp">... </span>        <span class="p">},</span>
+<span class="gp">... </span>    <span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span>
+<span class="go">datetime.datetime(2024, 2, 17, 12, 21, 28, 547853, tzinfo=datetime.timezone.utc)</span>
+</pre></div>
+</div>
+<p><strong>Evaluate code on a custom database</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient</span> <span class="kn">import</span> <span class="n">MLManager</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">MLManager</span><span class="p">(</span><span class="s2">&quot;local&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">get_eval_client</span><span class="p">()</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span>
+<span class="gp">... </span>        <span class="n">xq</span><span class="o">=</span><span class="s2">&quot;xdmp:database() =&gt; xdmp:database-name()&quot;</span><span class="p">,</span>
+<span class="gp">... </span>        <span class="n">database</span><span class="o">=</span><span class="s2">&quot;Documents&quot;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span>
+<span class="go">&#39;Documents&#39;</span>
+</pre></div>
+</div>
+<p><strong>Evaluate code and get raw data</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient</span> <span class="kn">import</span> <span class="n">MLManager</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">MLManager</span><span class="p">(</span><span class="s2">&quot;local&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">get_eval_client</span><span class="p">()</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="n">xq</span><span class="o">=</span><span class="s2">&quot;fn:current-dateTime()&quot;</span><span class="p">,</span> <span class="n">output_type</span><span class="o">=</span><span class="nb">str</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span>
+<span class="go">&#39;2024-02-22T12:24:40.362014Z&#39;</span>
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient</span> <span class="kn">import</span> <span class="n">MLManager</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">MLManager</span><span class="p">(</span><span class="s2">&quot;local&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">get_eval_client</span><span class="p">()</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="n">xq</span><span class="o">=</span><span class="s2">&quot;fn:current-dateTime()&quot;</span><span class="p">,</span> <span class="n">output_type</span><span class="o">=</span><span class="nb">bytes</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span>
+<span class="go">b&#39;2024-02-22T12:24:53.677793Z&#39;</span>
+</pre></div>
+</div>
+</section>
+<section id="logsclient">
+<h4><a class="toc-backref" href="#contents" role="doc-backlink">LogsClient</a><a class="headerlink" href="#logsclient" title="Permalink to this heading"></a></h4>
+<section id="get-all-logs">
+<h5>Get all logs<a class="headerlink" href="#get-all-logs" title="Permalink to this heading"></a></h5>
+<p><em>8002_ErrorLog.txt</em></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient</span> <span class="kn">import</span> <span class="n">MLManager</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">MLManager</span><span class="p">(</span><span class="s2">&quot;local&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">get_logs_client</span><span class="p">()</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">logs</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">get_logs</span><span class="p">(</span><span class="n">app_server</span><span class="o">=</span><span class="mi">8002</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">list</span><span class="p">(</span><span class="n">logs</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+<span class="go">{&#39;timestamp&#39;: &#39;2024-01-09T13:30:51.187Z&#39;, &#39;level&#39;: &#39;error&#39;, &#39;message&#39;: &#39;Test Log 1&#39;}</span>
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient</span> <span class="kn">import</span> <span class="n">MLManager</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient.clients</span> <span class="kn">import</span> <span class="n">LogType</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">MLManager</span><span class="p">(</span><span class="s2">&quot;local&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">get_logs_client</span><span class="p">()</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">logs</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">get_logs</span><span class="p">(</span><span class="n">app_server</span><span class="o">=</span><span class="mi">8002</span><span class="p">,</span> <span class="n">log_type</span><span class="o">=</span><span class="n">LogType</span><span class="o">.</span><span class="n">ERROR</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">list</span><span class="p">(</span><span class="n">logs</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+<span class="go">{&#39;timestamp&#39;: &#39;2024-01-09T13:30:51.187Z&#39;, &#39;level&#39;: &#39;error&#39;, &#39;message&#39;: &#39;Test Log 1&#39;}</span>
+</pre></div>
+</div>
+<p><em>8002_AccessLog.txt</em></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient</span> <span class="kn">import</span> <span class="n">MLManager</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient.clients</span> <span class="kn">import</span> <span class="n">LogType</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">MLManager</span><span class="p">(</span><span class="s2">&quot;local&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">get_logs_client</span><span class="p">()</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">logs</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">get_logs</span><span class="p">(</span><span class="n">app_server</span><span class="o">=</span><span class="mi">8002</span><span class="p">,</span> <span class="n">log_type</span><span class="o">=</span><span class="n">LogType</span><span class="o">.</span><span class="n">ACCESS</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">list</span><span class="p">(</span><span class="n">logs</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+<span class="go">{&#39;message&#39;: &#39;172.17.0.1 - - [22/Feb/2024:12:13:18 +0000] &quot;POST /v1/eval HTTP/1.1&quot; 401 209 - &quot;python-requests/2.31.0&quot;&#39;}</span>
+</pre></div>
+</div>
+<p><em>8002_RequestLog.txt</em></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient</span> <span class="kn">import</span> <span class="n">MLManager</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient.clients</span> <span class="kn">import</span> <span class="n">LogType</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">MLManager</span><span class="p">(</span><span class="s2">&quot;local&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">get_logs_client</span><span class="p">()</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">logs</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">get_logs</span><span class="p">(</span><span class="n">app_server</span><span class="o">=</span><span class="mi">8002</span><span class="p">,</span> <span class="n">log_type</span><span class="o">=</span><span class="n">LogType</span><span class="o">.</span><span class="n">REQUEST</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">list</span><span class="p">(</span><span class="n">logs</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+<span class="go">{&#39;message&#39;: &#39;{&quot;time&quot;:&quot;2024-02-22T12:38:27Z&quot;, &quot;url&quot;:&quot;/manage/v2/logs?format=json&quot;, &quot;user&quot;:&quot;admin&quot;, &quot;elapsedTime&quot;:1.801654, &quot;requests&quot;:1, &quot;valueCacheHits&quot;:5743, &quot;valueCacheMisses&quot;:349701, &quot;regexpCacheHits&quot;:5278, &quot;regexpCacheMisses&quot;:10, &quot;fsProgramCacheMisses&quot;:1, &quot;fsMainModuleSequenceCacheMisses&quot;:1, &quot;fsLibraryModuleCacheMisses&quot;:226, &quot;compileTime&quot;:0.757087, &quot;runTime&quot;:1.043248}&#39;}</span>
+</pre></div>
+</div>
+<p><em>ErrorLog.txt</em></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient</span> <span class="kn">import</span> <span class="n">MLManager</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">MLManager</span><span class="p">(</span><span class="s2">&quot;local&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">get_logs_client</span><span class="p">()</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">logs</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">get_logs</span><span class="p">()</span>
+</pre></div>
+</div>
+<p><em>TaskServer_ErrorLog.txt</em></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient</span> <span class="kn">import</span> <span class="n">MLManager</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">MLManager</span><span class="p">(</span><span class="s2">&quot;local&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">get_logs_client</span><span class="p">()</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">logs</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">get_logs</span><span class="p">(</span><span class="n">app_server</span><span class="o">=</span><span class="s2">&quot;TaskServer&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient</span> <span class="kn">import</span> <span class="n">MLManager</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">MLManager</span><span class="p">(</span><span class="s2">&quot;local&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">get_logs_client</span><span class="p">()</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">logs</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">get_logs</span><span class="p">(</span><span class="n">app_server</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="get-limited-logs">
+<h5>Get limited logs<a class="headerlink" href="#get-limited-logs" title="Permalink to this heading"></a></h5>
+<p><strong>Time frames</strong></p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><code class="docutils literal notranslate"><span class="pre">start_time</span></code>, <code class="docutils literal notranslate"><span class="pre">end_time</span></code> and <code class="docutils literal notranslate"><span class="pre">regex</span></code> arguments work only for error logs</p>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient</span> <span class="kn">import</span> <span class="n">MLManager</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">MLManager</span><span class="p">(</span><span class="s2">&quot;local&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">get_logs_client</span><span class="p">()</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">logs</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">get_logs</span><span class="p">(</span><span class="n">app_server</span><span class="o">=</span><span class="mi">8002</span><span class="p">,</span> <span class="n">start_time</span><span class="o">=</span><span class="s2">&quot;10:00&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient</span> <span class="kn">import</span> <span class="n">MLManager</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">MLManager</span><span class="p">(</span><span class="s2">&quot;local&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">get_logs_client</span><span class="p">()</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">logs</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">get_logs</span><span class="p">(</span><span class="n">app_server</span><span class="o">=</span><span class="mi">8002</span><span class="p">,</span> <span class="n">end_time</span><span class="o">=</span><span class="s2">&quot;12:00&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient</span> <span class="kn">import</span> <span class="n">MLManager</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">MLManager</span><span class="p">(</span><span class="s2">&quot;local&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">get_logs_client</span><span class="p">()</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">logs</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">get_logs</span><span class="p">(</span>
+<span class="gp">... </span>        <span class="n">app_server</span><span class="o">=</span><span class="mi">8002</span><span class="p">,</span>
+<span class="gp">... </span>        <span class="n">start_time</span><span class="o">=</span><span class="s2">&quot;10:00&quot;</span><span class="p">,</span>
+<span class="gp">... </span>        <span class="n">end_time</span><span class="o">=</span><span class="s2">&quot;12:00&quot;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient</span> <span class="kn">import</span> <span class="n">MLManager</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">MLManager</span><span class="p">(</span><span class="s2">&quot;local&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">get_logs_client</span><span class="p">()</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">logs</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">get_logs</span><span class="p">(</span>
+<span class="gp">... </span>        <span class="n">app_server</span><span class="o">=</span><span class="mi">8002</span><span class="p">,</span>
+<span class="gp">... </span>        <span class="n">start_time</span><span class="o">=</span><span class="s2">&quot;2024-02-01&quot;</span><span class="p">,</span>
+<span class="gp">... </span>        <span class="n">end_time</span><span class="o">=</span><span class="s2">&quot;2024-02-03&quot;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient</span> <span class="kn">import</span> <span class="n">MLManager</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">MLManager</span><span class="p">(</span><span class="s2">&quot;local&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">get_logs_client</span><span class="p">()</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">logs</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">get_logs</span><span class="p">(</span>
+<span class="gp">... </span>        <span class="n">app_server</span><span class="o">=</span><span class="mi">8002</span><span class="p">,</span>
+<span class="gp">... </span>        <span class="n">start_time</span><span class="o">=</span><span class="s2">&quot;2024-02-01 10:00&quot;</span><span class="p">,</span>
+<span class="gp">... </span>        <span class="n">end_time</span><span class="o">=</span><span class="s2">&quot;2024-02-03&quot;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>RegEx</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient</span> <span class="kn">import</span> <span class="n">MLManager</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">MLManager</span><span class="p">(</span><span class="s2">&quot;local&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">get_logs_client</span><span class="p">()</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">logs</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">get_logs</span><span class="p">(</span><span class="n">app_server</span><span class="o">=</span><span class="mi">8002</span><span class="p">,</span> <span class="n">regex</span><span class="o">=</span><span class="s2">&quot;Forest Meters&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient</span> <span class="kn">import</span> <span class="n">MLManager</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">MLManager</span><span class="p">(</span><span class="s2">&quot;local&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">get_logs_client</span><span class="p">()</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">logs</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">get_logs</span><span class="p">(</span><span class="n">app_server</span><span class="o">=</span><span class="mi">8002</span><span class="p">,</span> <span class="n">regex</span><span class="o">=</span><span class="s2">&quot;Forest M.*&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient</span> <span class="kn">import</span> <span class="n">MLManager</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">MLManager</span><span class="p">(</span><span class="s2">&quot;local&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">get_logs_client</span><span class="p">()</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">logs</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">get_logs</span><span class="p">(</span><span class="n">app_server</span><span class="o">=</span><span class="mi">8002</span><span class="p">,</span> <span class="n">regex</span><span class="o">=</span><span class="s2">&quot;Memory [^1]{1,2}%&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient</span> <span class="kn">import</span> <span class="n">MLManager</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">MLManager</span><span class="p">(</span><span class="s2">&quot;local&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">get_logs_client</span><span class="p">()</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">logs</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">get_logs</span><span class="p">(</span>
+<span class="gp">... </span>        <span class="n">app_server</span><span class="o">=</span><span class="mi">8002</span><span class="p">,</span>
+<span class="gp">... </span>        <span class="n">start_time</span><span class="o">=</span><span class="s2">&quot;2024-02-01&quot;</span><span class="p">,</span>
+<span class="gp">... </span>        <span class="n">end_time</span><span class="o">=</span><span class="s2">&quot;2024-02-03&quot;</span><span class="p">,</span>
+<span class="gp">... </span>        <span class="n">regex</span><span class="o">=</span><span class="s2">&quot;Memory [^1]{1,2}%&quot;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+<section id="low-level-clients">
+<h3><a class="toc-backref" href="#contents" role="doc-backlink">Low-level clients</a><a class="headerlink" href="#low-level-clients" title="Permalink to this heading"></a></h3>
+<p>Low-level clients offer a basic HTTP client functionality that is compatible with MarkLogic Server configuration.
+They also work with <a class="reference internal" href="../../api/mlclient/calls/mlclient.calls.html#mlclient.calls.ResourceCall" title="mlclient.calls.ResourceCall"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResourceCall</span></code></a> objects, which are python representations of MarkLogic resources’ calls.
+You can use low-level clients to send customized requests that are not supported by the high-level client API,
+or to handle the responses yourself.
+Moreover, you can customize low-level clients to implement python api for your own resources.</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Client</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../api/mlclient/mlclient.html#mlclient.MLClient" title="mlclient.MLClient"><code class="xref py py-class docutils literal notranslate"><span class="pre">MLClient</span></code></a></p></td>
+<td><p>The lowest level client that accepts ML configuration and sends HTTP requests</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../../api/mlclient/mlclient.html#mlclient.MLResourceClient" title="mlclient.MLResourceClient"><code class="xref py py-class docutils literal notranslate"><span class="pre">MLResourceClient</span></code></a></p></td>
+<td><p>A client that provides an additional <a class="reference internal" href="../../api/mlclient/mlclient.html#mlclient.MLResourceClient.call" title="mlclient.MLResourceClient.call"><code class="xref py py-meth docutils literal notranslate"><span class="pre">call()</span></code></a> method that works with <a class="reference internal" href="../../api/mlclient/calls/mlclient.calls.html#mlclient.calls.ResourceCall" title="mlclient.calls.ResourceCall"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResourceCall</span></code></a> objects</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../../api/mlclient/mlclient.html#mlclient.MLResourcesClient" title="mlclient.MLResourcesClient"><code class="xref py py-class docutils literal notranslate"><span class="pre">MLResourcesClient</span></code></a></p></td>
+<td><p>A facade client that offers methods for all <code class="xref py py-class docutils literal notranslate"><span class="pre">ResourceCall</span></code> implementations (and thus all ML Resources endpoints)</p></td>
+</tr>
+</tbody>
+</table>
+<section id="mlclient">
+<h4><a class="toc-backref" href="#contents" role="doc-backlink">MLClient</a><a class="headerlink" href="#mlclient" title="Permalink to this heading"></a></h4>
+<p>The lowest level client that accepts ML configuration and sends HTTP requests.</p>
+<section id="connection">
+<h5>Connection<a class="headerlink" href="#connection" title="Permalink to this heading"></a></h5>
+<p>The easiest way to start a connection is to initialize <a class="reference internal" href="../../api/mlclient/mlclient.html#mlclient.MLClient" title="mlclient.MLClient"><code class="xref py py-class docutils literal notranslate"><span class="pre">MLClient</span></code></a> as a context manager:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient</span> <span class="kn">import</span> <span class="n">MLClient</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">MLClient</span><span class="p">()</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">resp</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/manage/v2/servers&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>If you would like to explicitly connect and disconnect a client, however, you can do it as below:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient</span> <span class="kn">import</span> <span class="n">MLClient</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">client</span> <span class="o">=</span> <span class="n">MLClient</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">client</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">resp</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/manage/v2/servers&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">client</span><span class="o">.</span><span class="n">disconnect</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>To check if a client is connected you can use <a class="reference internal" href="../../api/mlclient/mlclient.html#mlclient.MLClient.is_connected" title="mlclient.MLClient.is_connected"><code class="xref py py-meth docutils literal notranslate"><span class="pre">is_connected()</span></code></a> method:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient</span> <span class="kn">import</span> <span class="n">MLClient</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">client</span> <span class="o">=</span> <span class="n">MLClient</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">client</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">client</span><span class="o">.</span><span class="n">is_connected</span><span class="p">()</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">client</span><span class="o">.</span><span class="n">disconnect</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">client</span><span class="o">.</span><span class="n">is_connected</span><span class="p">()</span>
+<span class="go">False</span>
+</pre></div>
+</div>
+</section>
+<section id="get-request">
+<h5>GET request<a class="headerlink" href="#get-request" title="Permalink to this heading"></a></h5>
+<p><em>A simple GET request</em></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient</span> <span class="kn">import</span> <span class="n">MLClient</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">MLClient</span><span class="p">()</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">resp</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/manage/v2/servers&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><em>Custom parameters and headers</em></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient</span> <span class="kn">import</span> <span class="n">MLClient</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">MLClient</span><span class="p">()</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">resp</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+<span class="gp">... </span>        <span class="s2">&quot;/manage/v2/servers&quot;</span><span class="p">,</span>
+<span class="gp">... </span>        <span class="n">params</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;format&quot;</span><span class="p">:</span> <span class="s2">&quot;json&quot;</span><span class="p">},</span>
+<span class="gp">... </span>        <span class="n">headers</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;custom-header&quot;</span><span class="p">:</span> <span class="s2">&quot;custom-value&quot;</span><span class="p">},</span>
+<span class="gp">... </span>    <span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="post-request">
+<h5>POST request<a class="headerlink" href="#post-request" title="Permalink to this heading"></a></h5>
+<p><em>A simple POST request</em></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient</span> <span class="kn">import</span> <span class="n">MLClient</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">MLClient</span><span class="p">()</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">resp</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">post</span><span class="p">(</span>
+<span class="gp">... </span>        <span class="s2">&quot;/manage/v2/databases&quot;</span><span class="p">,</span>
+<span class="gp">... </span>        <span class="n">body</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;database-name&quot;</span><span class="p">:</span> <span class="s2">&quot;CustomDatabase&quot;</span><span class="p">},</span>
+<span class="gp">... </span>    <span class="p">)</span>
+</pre></div>
+</div>
+<p><em>Custom parameters and headers</em></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient</span> <span class="kn">import</span> <span class="n">MLClient</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">MLClient</span><span class="p">()</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">resp</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">post</span><span class="p">(</span>
+<span class="gp">... </span>        <span class="s2">&quot;/v1/eval&quot;</span><span class="p">,</span>
+<span class="gp">... </span>        <span class="n">body</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;xquery&quot;</span><span class="p">:</span> <span class="s2">&quot;fn:current-dateTime()&quot;</span><span class="p">},</span>
+<span class="gp">... </span>        <span class="n">params</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;database&quot;</span><span class="p">:</span> <span class="s2">&quot;Documents&quot;</span><span class="p">},</span>
+<span class="gp">... </span>        <span class="n">headers</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;Content-Type&quot;</span><span class="p">:</span> <span class="s2">&quot;application/x-www-form-urlencoded&quot;</span><span class="p">},</span>
+<span class="gp">... </span>    <span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="put-request">
+<h5>PUT request<a class="headerlink" href="#put-request" title="Permalink to this heading"></a></h5>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient</span> <span class="kn">import</span> <span class="n">MLClient</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">MLClient</span><span class="p">()</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">resp</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">put</span><span class="p">(</span>
+<span class="gp">... </span>        <span class="s2">&quot;/manage/v2/databases/CustomDatabase/properties&quot;</span><span class="p">,</span>
+<span class="gp">... </span>        <span class="n">body</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;enabled&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">},</span>
+<span class="gp">... </span>        <span class="n">headers</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;Content-Type&quot;</span><span class="p">:</span> <span class="s2">&quot;application/json&quot;</span><span class="p">}</span>
+<span class="gp">... </span>    <span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="delete-request">
+<h5>DELETE request<a class="headerlink" href="#delete-request" title="Permalink to this heading"></a></h5>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient</span> <span class="kn">import</span> <span class="n">MLClient</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">MLClient</span><span class="p">()</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">resp</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span>
+<span class="gp">... </span>        <span class="s2">&quot;/manage/v2/databases/CustomDatabase&quot;</span><span class="p">,</span>
+<span class="gp">... </span>        <span class="n">params</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;forest-delete&quot;</span><span class="p">:</span> <span class="s2">&quot;configuration&quot;</span><span class="p">}</span>
+<span class="gp">... </span>    <span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="mlresourceclient">
+<h4><a class="toc-backref" href="#contents" role="doc-backlink">MLResourceClient</a><a class="headerlink" href="#mlresourceclient" title="Permalink to this heading"></a></h4>
+</section>
+<section id="mlresourcesclient">
+<h4><a class="toc-backref" href="#contents" role="doc-backlink">MLResourcesClient</a><a class="headerlink" href="#mlresourcesclient" title="Permalink to this heading"></a></h4>
+</section>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../pythonapi.html" class="btn btn-neutral float-left" title="Python API" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Tomasz Aniołowski.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

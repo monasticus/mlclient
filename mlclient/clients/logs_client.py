@@ -139,6 +139,7 @@ class LogsClient(MLResourceClient):
         """Return a logs list from a MarkLogic server.
 
         Result of this method is a parsed dict of log files with 3 keys:
+
         * source: points to origin log list items
         * parsed: points to parsed log list items
           includes a filename, server, log type and a number of days

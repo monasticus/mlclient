@@ -21,7 +21,7 @@
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
     <link rel="next" title="Setup" href="../../../user/setup.html" />
-    <link rel="prev" title="mlclient.calls package" href="../calls/mlclient.calls.html" /> 
+    <link rel="prev" title="mlclient.jobs package" href="../jobs/mlclient.jobs.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -52,6 +52,8 @@
 <li class="toctree-l2"><a class="reference internal" href="../mlclient.html#mlclient.MLResourcesClient"><code class="docutils literal notranslate"><span class="pre">MLResourcesClient</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="../mlclient.html#mlclient.MLResponseParser"><code class="docutils literal notranslate"><span class="pre">MLResponseParser</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="../calls/mlclient.calls.html">mlclient.calls package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../clients/mlclient.clients.html">mlclient.clients package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../jobs/mlclient.jobs.html">mlclient.jobs package</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">mlclient.model package</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#mlclient.model.BinaryDocument"><code class="docutils literal notranslate"><span class="pre">BinaryDocument</span></code></a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#mlclient.model.BinaryDocument.content"><code class="docutils literal notranslate"><span class="pre">BinaryDocument.content</span></code></a></li>
@@ -122,6 +124,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#mlclient.model.Mimetype.document_type"><code class="docutils literal notranslate"><span class="pre">Mimetype.document_type</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#mlclient.model.Mimetype.extensions"><code class="docutils literal notranslate"><span class="pre">Mimetype.extensions</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#mlclient.model.Mimetype.mime_type"><code class="docutils literal notranslate"><span class="pre">Mimetype.mime_type</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mlclient.model.Mimetype.model_computed_fields"><code class="docutils literal notranslate"><span class="pre">Mimetype.model_computed_fields</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#mlclient.model.Permission"><code class="docutils literal notranslate"><span class="pre">Permission</span></code></a><ul>
@@ -935,6 +938,12 @@ Otherwise, False.</p>
 <em class="property"><span class="pre">field</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">mime_type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"> <span class="pre">[Required]</span></em><em class="property"> <span class="pre">(alias</span> <span class="pre">'mime-type')</span></em><a class="headerlink" href="#mlclient.model.Mimetype.mime_type" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mlclient.model.Mimetype.model_computed_fields">
+<span class="sig-name descname"><span class="pre">model_computed_fields</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ComputedFieldInfo</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></em><a class="headerlink" href="#mlclient.model.Mimetype.model_computed_fields" title="Permalink to this definition"></a></dt>
+<dd><p>A dictionary of computed field names and their corresponding <cite>ComputedFieldInfo</cite> objects.</p>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
@@ -1229,7 +1238,7 @@ Otherwise, False.</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="../calls/mlclient.calls.html" class="btn btn-neutral float-left" title="mlclient.calls package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../jobs/mlclient.jobs.html" class="btn btn-neutral float-left" title="mlclient.jobs package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="../../../user/setup.html" class="btn btn-neutral float-right" title="Setup" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

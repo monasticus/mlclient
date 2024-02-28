@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mlclient.clients.logs_client &mdash; MLClient 0.4.0 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/autodoc_pydantic.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=4e78f113"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            MLClient
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Python API:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/mlclient/mlclient.html">mlclient package</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../user/setup.html">Setup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../user/cli.html">Command Line Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../user/pythonapi.html">Python API</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">MLClient</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">mlclient.clients.logs_client</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for mlclient.clients.logs_client</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;The ML Logs Client module.</span>
+
+<span class="sd">It exports high-level classes to easily read MarkLogic logs:</span>
+<span class="sd">    * LogsClient</span>
+<span class="sd">        An MLResourceClient calling /manage/v2/logs endpoint.</span>
+<span class="sd">    * LogType</span>
+<span class="sd">        An enumeration class representing MarkLogic log types.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">from</span> <span class="nn">enum</span> <span class="kn">import</span> <span class="n">Enum</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Iterator</span>
+
+<span class="kn">from</span> <span class="nn">mlclient.calls</span> <span class="kn">import</span> <span class="n">LogsCall</span>
+<span class="kn">from</span> <span class="nn">mlclient.clients</span> <span class="kn">import</span> <span class="n">MLResourceClient</span>
+<span class="kn">from</span> <span class="nn">mlclient.exceptions</span> <span class="kn">import</span> <span class="n">InvalidLogTypeError</span><span class="p">,</span> <span class="n">MarkLogicError</span>
+
+
+<div class="viewcode-block" id="LogType"><a class="viewcode-back" href="../../../api/mlclient/clients/mlclient.clients.html#mlclient.clients.LogType">[docs]</a><span class="k">class</span> <span class="nc">LogType</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;An enumeration class representing MarkLogic log types.&quot;&quot;&quot;</span>
+
+    <span class="n">ERROR</span> <span class="o">=</span> <span class="s2">&quot;ErrorLog&quot;</span>
+    <span class="n">ACCESS</span> <span class="o">=</span> <span class="s2">&quot;AccessLog&quot;</span>
+    <span class="n">REQUEST</span> <span class="o">=</span> <span class="s2">&quot;RequestLog&quot;</span>
+    <span class="n">AUDIT</span> <span class="o">=</span> <span class="s2">&quot;AuditLog&quot;</span>
+
+<div class="viewcode-block" id="LogType.get"><a class="viewcode-back" href="../../../api/mlclient/clients/mlclient.clients.html#mlclient.clients.LogType.get">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span>
+        <span class="n">logs_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">LogType</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get a specific LogType enum for a string value.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        logs_type : str,</span>
+<span class="sd">            A log type</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        LogType</span>
+<span class="sd">            A LogType enum</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">logs_type</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;error&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">LogType</span><span class="o">.</span><span class="n">ERROR</span>
+        <span class="k">if</span> <span class="n">logs_type</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;access&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">LogType</span><span class="o">.</span><span class="n">ACCESS</span>
+        <span class="k">if</span> <span class="n">logs_type</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;request&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">LogType</span><span class="o">.</span><span class="n">REQUEST</span>
+        <span class="k">if</span> <span class="n">logs_type</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;audit&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">LogType</span><span class="o">.</span><span class="n">AUDIT</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Invalid log type! Allowed values are: error, access, request.&quot;</span>
+        <span class="k">raise</span> <span class="n">InvalidLogTypeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="fm">__lt__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">other</span><span class="p">:</span> <span class="n">LogType</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Compare LogTypes with LT operator.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        other : LogType</span>
+<span class="sd">            An other LogType instance</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        bool</span>
+<span class="sd">            A comparison result.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">&lt;</span> <span class="n">other</span><span class="o">.</span><span class="n">value</span></div>
+
+
+<div class="viewcode-block" id="LogsClient"><a class="viewcode-back" href="../../../api/mlclient/clients/mlclient.clients.html#mlclient.clients.LogsClient">[docs]</a><span class="k">class</span> <span class="nc">LogsClient</span><span class="p">(</span><span class="n">MLResourceClient</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;An MLResourceClient calling /manage/v2/logs endpoint.</span>
+
+<span class="sd">    It is a high-level class parsing MarkLogic response and extracting logs from</span>
+<span class="sd">    the server.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">_LOG_TYPES_RE</span> <span class="o">=</span> <span class="s2">&quot;|&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">value</span><span class="p">[:</span><span class="o">-</span><span class="mi">3</span><span class="p">]</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">LogType</span><span class="p">)</span>
+    <span class="n">_FILENAME_RE</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">rf</span><span class="s2">&quot;((.+)_)?(</span><span class="si">{</span><span class="n">_LOG_TYPES_RE</span><span class="si">}</span><span class="s2">)Log(_([1-6]))?\.txt&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="LogsClient.get_logs"><a class="viewcode-back" href="../../../api/mlclient/clients/mlclient.clients.html#mlclient.clients.LogsClient.get_logs">[docs]</a>    <span class="k">def</span> <span class="nf">get_logs</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">app_server</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">log_type</span><span class="p">:</span> <span class="n">LogType</span> <span class="o">=</span> <span class="n">LogType</span><span class="o">.</span><span class="n">ERROR</span><span class="p">,</span>
+        <span class="n">start_time</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">end_time</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">regex</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">host</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="nb">dict</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return logs from a MarkLogic server.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        app_server : int | str | None, default None</span>
+<span class="sd">            An app server (port) with logs to retrieve</span>
+<span class="sd">        log_type : LogType, default LogType.ERROR</span>
+<span class="sd">            A log type</span>
+<span class="sd">        start_time : str | None, default None</span>
+<span class="sd">            A start time to search error logs</span>
+<span class="sd">        end_time : str | None, default None</span>
+<span class="sd">            An end time to search error logs</span>
+<span class="sd">        regex : str | None, default None</span>
+<span class="sd">            A regex to search error logs</span>
+<span class="sd">        host : str | None, default None</span>
+<span class="sd">            A host name with logs to retrieve</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Iterator[dict]</span>
+<span class="sd">            A log details generator.</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        MarkLogicError</span>
+<span class="sd">            If MarkLogic returns an error (most likely XDMP-NOSUCHHOST)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">call</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_call</span><span class="p">(</span>
+            <span class="n">app_server</span><span class="o">=</span><span class="n">app_server</span><span class="p">,</span>
+            <span class="n">log_type</span><span class="o">=</span><span class="n">log_type</span><span class="p">,</span>
+            <span class="n">start_time</span><span class="o">=</span><span class="n">start_time</span><span class="p">,</span>
+            <span class="n">end_time</span><span class="o">=</span><span class="n">end_time</span><span class="p">,</span>
+            <span class="n">regex</span><span class="o">=</span><span class="n">regex</span><span class="p">,</span>
+            <span class="n">host</span><span class="o">=</span><span class="n">host</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">resp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">call</span><span class="p">)</span>
+        <span class="n">resp_body</span> <span class="o">=</span> <span class="n">resp</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">resp</span><span class="o">.</span><span class="n">ok</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">MarkLogicError</span><span class="p">(</span><span class="n">resp_body</span><span class="p">[</span><span class="s2">&quot;errorResponse&quot;</span><span class="p">])</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parse_logs</span><span class="p">(</span><span class="n">log_type</span><span class="p">,</span> <span class="n">resp_body</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="LogsClient.get_logs_list"><a class="viewcode-back" href="../../../api/mlclient/clients/mlclient.clients.html#mlclient.clients.LogsClient.get_logs_list">[docs]</a>    <span class="k">def</span> <span class="nf">get_logs_list</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a logs list from a MarkLogic server.</span>
+
+<span class="sd">        Result of this method is a parsed dict of log files with 3 keys:</span>
+
+<span class="sd">        * source: points to origin log list items</span>
+<span class="sd">        * parsed: points to parsed log list items</span>
+<span class="sd">          includes a filename, server, log type and a number of days</span>
+<span class="sd">        * grouped: points to a dictionary</span>
+<span class="sd">          { &lt;server&gt;: { &lt;log-type&gt;: { &lt;num-of-days&gt;: &lt;file-name&gt; } } }</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        list</span>
+<span class="sd">            A parsed list of log files in the MarkLogic server</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        MarkLogicError</span>
+<span class="sd">            If MarkLogic returns an error</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">call</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_call</span><span class="p">()</span>
+
+        <span class="n">resp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">call</span><span class="p">)</span>
+        <span class="n">resp_body</span> <span class="o">=</span> <span class="n">resp</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+        <span class="k">if</span> <span class="s2">&quot;errorResponse&quot;</span> <span class="ow">in</span> <span class="n">resp_body</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">MarkLogicError</span><span class="p">(</span><span class="n">resp_body</span><span class="p">[</span><span class="s2">&quot;errorResponse&quot;</span><span class="p">])</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parse_logs_list</span><span class="p">(</span><span class="n">resp_body</span><span class="p">)</span></div>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_get_call</span><span class="p">(</span>
+        <span class="n">app_server</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">log_type</span><span class="p">:</span> <span class="n">LogType</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">start_time</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">end_time</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">regex</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">host</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">LogsCall</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Prepare a LogsCall instance.</span>
+
+<span class="sd">        It initializes a LogsCall instance with adjusted parameters. When log type</span>
+<span class="sd">        is not ERROR, search params are ignored: start_time, end_time and regex.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        app_server : int | str | None, default None</span>
+<span class="sd">            An app server (port) with logs to retrieve</span>
+<span class="sd">        log_type : LogType | None, default None</span>
+<span class="sd">            A log type</span>
+<span class="sd">        start_time : str | None, default None</span>
+<span class="sd">            A start time to search error logs</span>
+<span class="sd">        end_time : str | None, default None</span>
+<span class="sd">            An end time to search error logs</span>
+<span class="sd">        regex : str | None, default None</span>
+<span class="sd">            A regex to search error logs</span>
+<span class="sd">        host : str | None, default None</span>
+<span class="sd">            The host from which to return the log data.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        LogsCall</span>
+<span class="sd">            A prepared LogsCall instance</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">app_server</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;0&quot;</span><span class="p">]:</span>
+            <span class="n">app_server</span> <span class="o">=</span> <span class="s2">&quot;TaskServer&quot;</span>
+        <span class="k">if</span> <span class="n">log_type</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">file_name</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">elif</span> <span class="n">app_server</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">file_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">log_type</span><span class="o">.</span><span class="n">value</span><span class="si">}</span><span class="s2">.txt&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">file_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">app_server</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">log_type</span><span class="o">.</span><span class="n">value</span><span class="si">}</span><span class="s2">.txt&quot;</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;filename&quot;</span><span class="p">:</span> <span class="n">file_name</span><span class="p">,</span>
+            <span class="s2">&quot;data_format&quot;</span><span class="p">:</span> <span class="s2">&quot;json&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;host&quot;</span><span class="p">:</span> <span class="n">host</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="k">if</span> <span class="n">log_type</span> <span class="o">==</span> <span class="n">LogType</span><span class="o">.</span><span class="n">ERROR</span><span class="p">:</span>
+            <span class="n">params</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;start_time&quot;</span><span class="p">:</span> <span class="n">start_time</span><span class="p">,</span>
+                    <span class="s2">&quot;end_time&quot;</span><span class="p">:</span> <span class="n">end_time</span><span class="p">,</span>
+                    <span class="s2">&quot;regex&quot;</span><span class="p">:</span> <span class="n">regex</span><span class="p">,</span>
+                <span class="p">},</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">LogsCall</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_parse_logs</span><span class="p">(</span>
+        <span class="n">log_type</span><span class="p">:</span> <span class="n">LogType</span><span class="p">,</span>
+        <span class="n">resp_body</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="nb">dict</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Parse MarkLogic logs depending on their type.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        log_type : LogType</span>
+<span class="sd">            A log type</span>
+<span class="sd">        resp_body : dict</span>
+<span class="sd">            A JSON response body from an MarkLogic server</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Iterator[dict]</span>
+<span class="sd">            A log details generator.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">logfile</span> <span class="o">=</span> <span class="n">resp_body</span><span class="p">[</span><span class="s2">&quot;logfile&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">log_type</span> <span class="o">==</span> <span class="n">LogType</span><span class="o">.</span><span class="n">ERROR</span><span class="p">:</span>
+            <span class="n">logs</span> <span class="o">=</span> <span class="n">logfile</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;log&quot;</span><span class="p">,</span> <span class="p">())</span>
+            <span class="k">return</span> <span class="nb">iter</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">logs</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">log</span><span class="p">:</span> <span class="n">log</span><span class="p">[</span><span class="s2">&quot;timestamp&quot;</span><span class="p">]))</span>
+        <span class="k">if</span> <span class="s2">&quot;message&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">logfile</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">iter</span><span class="p">([])</span>
+        <span class="k">return</span> <span class="p">({</span><span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="n">log</span><span class="p">}</span> <span class="k">for</span> <span class="n">log</span> <span class="ow">in</span> <span class="n">logfile</span><span class="p">[</span><span class="s2">&quot;message&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">))</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">_parse_logs_list</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span>
+        <span class="n">resp_body</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Parse MarkLogic logs list.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        resp_body : dict</span>
+<span class="sd">            A JSON response body from an MarkLogic server</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        dict</span>
+<span class="sd">            A compiled information about ML log files</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">source_items</span> <span class="o">=</span> <span class="n">resp_body</span><span class="p">[</span><span class="s2">&quot;log-default-list&quot;</span><span class="p">][</span><span class="s2">&quot;list-items&quot;</span><span class="p">][</span><span class="s2">&quot;list-item&quot;</span><span class="p">]</span>
+        <span class="n">parsed</span> <span class="o">=</span> <span class="p">[</span><span class="bp">cls</span><span class="o">.</span><span class="n">_parse_log_file</span><span class="p">(</span><span class="n">log_item</span><span class="p">)</span> <span class="k">for</span> <span class="n">log_item</span> <span class="ow">in</span> <span class="n">source_items</span><span class="p">]</span>
+        <span class="n">grouped</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_group_log_files</span><span class="p">(</span><span class="n">parsed</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">&quot;source&quot;</span><span class="p">:</span> <span class="n">source_items</span><span class="p">,</span>
+            <span class="s2">&quot;parsed&quot;</span><span class="p">:</span> <span class="n">parsed</span><span class="p">,</span>
+            <span class="s2">&quot;grouped&quot;</span><span class="p">:</span> <span class="n">grouped</span><span class="p">,</span>
+        <span class="p">}</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">_parse_log_file</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span>
+        <span class="n">source_log_item</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Parse MarkLogic logs list item.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        source_log_item : dict</span>
+<span class="sd">            A source item of log list received from an ML server.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        dict</span>
+<span class="sd">            A parsed log item</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">file_name</span> <span class="o">=</span> <span class="n">source_log_item</span><span class="p">[</span><span class="s2">&quot;nameref&quot;</span><span class="p">]</span>
+        <span class="n">match</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_FILENAME_RE</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">file_name</span><span class="p">)</span>
+        <span class="n">server</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">log_type</span> <span class="o">=</span> <span class="n">LogType</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>
+        <span class="n">days_ago</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span> <span class="ow">or</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">&quot;file-name&quot;</span><span class="p">:</span> <span class="n">file_name</span><span class="p">,</span>
+            <span class="s2">&quot;server&quot;</span><span class="p">:</span> <span class="n">server</span><span class="p">,</span>
+            <span class="s2">&quot;log-type&quot;</span><span class="p">:</span> <span class="n">log_type</span><span class="p">,</span>
+            <span class="s2">&quot;days-ago&quot;</span><span class="p">:</span> <span class="n">days_ago</span><span class="p">,</span>
+        <span class="p">}</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_group_log_files</span><span class="p">(</span>
+        <span class="n">parsed_log_items</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">],</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Group parsed logs items.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        parsed_log_items : list[dict]</span>
+<span class="sd">            Parsed log items</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        dict</span>
+<span class="sd">            Log items grouped by server, log type and number of days</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">grouped</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">parsed_log_items</span><span class="p">:</span>
+            <span class="n">file_name</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="s2">&quot;file-name&quot;</span><span class="p">]</span>
+            <span class="n">server</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="s2">&quot;server&quot;</span><span class="p">]</span>
+            <span class="n">log_type</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="s2">&quot;log-type&quot;</span><span class="p">]</span>
+            <span class="n">days_ago</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="s2">&quot;days-ago&quot;</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="n">server</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">grouped</span><span class="p">:</span>
+                <span class="n">grouped</span><span class="p">[</span><span class="n">server</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">if</span> <span class="n">log_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">grouped</span><span class="p">[</span><span class="n">server</span><span class="p">]:</span>
+                <span class="n">grouped</span><span class="p">[</span><span class="n">server</span><span class="p">][</span><span class="n">log_type</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">grouped</span><span class="p">[</span><span class="n">server</span><span class="p">][</span><span class="n">log_type</span><span class="p">][</span><span class="n">days_ago</span><span class="p">]</span> <span class="o">=</span> <span class="n">file_name</span>
+
+        <span class="k">return</span> <span class="n">grouped</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Tomasz Aniołowski.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

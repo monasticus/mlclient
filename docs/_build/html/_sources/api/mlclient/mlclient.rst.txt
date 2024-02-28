@@ -11,6 +11,8 @@ mlclient package
    :maxdepth: 1
 
    calls/mlclient.calls
+   clients/mlclient.clients
+   jobs/mlclient.jobs
    model/mlclient.model
 
 mlclient.ml_config module

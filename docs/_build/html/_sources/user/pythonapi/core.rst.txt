@@ -901,9 +901,30 @@ POST request
 PUT request
 """""""""""
 
+.. code-block:: python
+
+    >>> from mlclient import MLClient
+
+    >>> with MLClient() as client:
+    ...     resp = client.put(
+    ...         "/manage/v2/databases/CustomDatabase/properties",
+    ...         body={"enabled": False},
+    ...         headers={"Content-Type": "application/json"}
+    ...     )
+
 
 DELETE request
 """"""""""""""
+
+.. code-block:: python
+
+    >>> from mlclient import MLClient
+
+    >>> with MLClient() as client:
+    ...     resp = client.delete(
+    ...         "/manage/v2/databases/CustomDatabase",
+    ...         params={"forest-delete": "configuration"}
+    ...     )
 
 
 MLResourceClient

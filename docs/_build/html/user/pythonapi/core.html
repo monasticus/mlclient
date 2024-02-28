@@ -880,9 +880,28 @@ Moreover, you can customize low-level clients to implement python api for your o
 </section>
 <section id="put-request">
 <h5>PUT request<a class="headerlink" href="#put-request" title="Permalink to this heading"></a></h5>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient</span> <span class="kn">import</span> <span class="n">MLClient</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">MLClient</span><span class="p">()</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">resp</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">put</span><span class="p">(</span>
+<span class="gp">... </span>        <span class="s2">&quot;/manage/v2/databases/CustomDatabase/properties&quot;</span><span class="p">,</span>
+<span class="gp">... </span>        <span class="n">body</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;enabled&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">},</span>
+<span class="gp">... </span>        <span class="n">headers</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;Content-Type&quot;</span><span class="p">:</span> <span class="s2">&quot;application/json&quot;</span><span class="p">}</span>
+<span class="gp">... </span>    <span class="p">)</span>
+</pre></div>
+</div>
 </section>
 <section id="delete-request">
 <h5>DELETE request<a class="headerlink" href="#delete-request" title="Permalink to this heading"></a></h5>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mlclient</span> <span class="kn">import</span> <span class="n">MLClient</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">MLClient</span><span class="p">()</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">resp</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span>
+<span class="gp">... </span>        <span class="s2">&quot;/manage/v2/databases/CustomDatabase&quot;</span><span class="p">,</span>
+<span class="gp">... </span>        <span class="n">params</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;forest-delete&quot;</span><span class="p">:</span> <span class="s2">&quot;configuration&quot;</span><span class="p">}</span>
+<span class="gp">... </span>    <span class="p">)</span>
+</pre></div>
+</div>
 </section>
 </section>
 <section id="mlresourceclient">

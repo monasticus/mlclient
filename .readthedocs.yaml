@@ -11,8 +11,9 @@ build:
   jobs:
     pre_create_environment:
       - pip install poetry
+      - poetry self add poetry-plugin-export
     pre_install:
-      - poetry export -f requirements.txt -o requirements.txt --without-hashes
+      - poetry export -f requirements.txt -o requirements.txt --with=docs --without-hashes
     post_install:
       - pip install -e .
 

@@ -9,9 +9,16 @@ build:
   tools:
     python: "3.11"
   jobs:
-    pre_build:
+    pre_create_environment:
       - pip install poetry
-      - poetry install
+    pre_install:
+      - poetry export -f requirements.txt -o requirements.txt --without-hashes
+    post_install:
+      - pip install -e .
 
 sphinx:
   configuration: docs/conf.py
+
+python:
+  install:
+    - requirements: requirements.txt

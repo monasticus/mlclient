@@ -10,6 +10,7 @@ authors = ["Tomasz Aniołowski <tomasz.maciej.aniolowski@gmail.com>"]
 license = "MIT"
 readme = "README.md"
 repository = "https://github.com/monasticus/mlclient"
+documentation = "https://mlclient.readthedocs.io/en/0.4.0"
 keywords = ["MarkLogic", "marklogic", "database", "client", "data", "xml", "json", "NoSQL", "nosql"]
 classifiers = [
     "License :: OSI Approved :: MIT License",
@@ -78,6 +79,8 @@ ml = "mlclient.cli:main"
 
 [tool.poetry_bumpversion.file."mlclient/__init__.py"]
 [tool.poetry_bumpversion.file."docs/conf.py"]
+[tool.poetry_bumpversion.file."pyproject.toml"]
+[tool.poetry_bumpversion.file."README.md"]
 
 [tool.pytest.ini_options]
 pythonpath = ["."]

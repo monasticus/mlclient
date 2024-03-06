@@ -24,6 +24,7 @@ classifiers = [
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
     "License :: OSI Approved :: MIT License",
     "Topic :: Database",
     "Topic :: Database :: Database Engines/Servers",
@@ -42,22 +43,22 @@ include = [
 [tool.poetry.dependencies]
 python = "^3.8"
 requests = "^2.31.0"
-python-dateutil = "^2.8.2"
+python-dateutil = "^2.9.0.post0"
 requests-toolbelt = "^1.0.0"
-pydantic = "^2.5.2"
+pydantic = "^2.6.3"
 pyyaml = "^6.0.1"
-cleo = "^2.0.1"
-urllib3 = "^2.1.0"
+cleo = "^2.1.0"
+urllib3 = "^2.2.1"
 xmltodict = "^0.13.0"
 
 [tool.poetry.group.dev.dependencies]
 ruff = "*"
-isort = "^5.12.0"
-pytest = "^7.4.3"
+isort = "^5.13.2"
+pytest = "^7.4.4"
 pytest-cov = "^4.1.0"
-pytest-mock = "^3.11.1"
+pytest-mock = "^3.12.0"
 pytest-benchmark = "^4.0.0"
-pytest-bdd = "^7.0.1"
+pytest-bdd = "^7.1.1"
 poetry-bumpversion = "<0.3.1"
 responses = "^0.23.3"
 deepdiff = "^6.7.1"

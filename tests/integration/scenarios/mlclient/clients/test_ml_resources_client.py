@@ -7,7 +7,7 @@ from pytest_bdd import scenarios
 from requests import Response
 
 from mlclient import MLResourcesClient, MLResponseParser
-from mlclient.calls.model import DocumentsBodyPart
+from mlclient.structures.calls import DocumentsBodyPart
 
 scenarios("../../../features/mlclient/clients/ml_resources_client.feature")
 

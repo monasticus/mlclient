@@ -5,7 +5,7 @@ from pathlib import Path
 import pytest
 import responses
 
-from mlclient.calls.model import DocumentsBodyPart
+from mlclient.structures.calls import DocumentsBodyPart
 from mlclient.clients import DocumentsClient
 from mlclient.exceptions import MarkLogicError
 from mlclient.structures import (

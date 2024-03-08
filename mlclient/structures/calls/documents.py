@@ -1,4 +1,4 @@
-"""The Documents Call Model module.
+"""The Documents Call Structures module.
 
 This module contains an API for /v1/documents call body.
 It exports the following classes:

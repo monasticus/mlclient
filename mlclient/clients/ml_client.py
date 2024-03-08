@@ -59,7 +59,7 @@ from mlclient.calls import (
     UsersGetCall,
     UsersPostCall,
 )
-from mlclient.calls.model import DocumentsBodyPart
+from mlclient.structures.calls import DocumentsBodyPart
 from mlclient.mimetypes import Mimetypes
 from mlclient.structures import DocumentType
 

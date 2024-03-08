@@ -18,7 +18,7 @@ from urllib3.fields import RequestField
 
 from mlclient import constants, exceptions, utils
 from mlclient.calls import ResourceCall
-from mlclient.calls.model import (
+from mlclient.structures.calls import (
     Category,
     ContentDispositionSerializer,
     DocumentsBodyPart,

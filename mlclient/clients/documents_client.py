@@ -12,7 +12,7 @@ from requests import Response
 
 from mlclient import constants
 from mlclient.calls import DocumentsDeleteCall, DocumentsGetCall, DocumentsPostCall
-from mlclient.calls.model import (
+from mlclient.structures.calls import (
     Category,
     ContentDispositionSerializer,
     DocumentsBodyPart,

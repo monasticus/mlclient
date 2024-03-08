@@ -18,7 +18,6 @@ from requests_toolbelt.multipart.decoder import BodyPart
 from responses import matchers
 from urllib3.fields import RequestField
 
-from mlclient.calls.model import ContentDispositionSerializer, DocumentsBodyPart
 from mlclient.constants import (
     HEADER_JSON,
     HEADER_MULTIPART_MIXED,
@@ -27,6 +26,7 @@ from mlclient.constants import (
     HEADER_NAME_PRIMITIVE,
     HEADER_X_WWW_FORM_URLENCODED,
 )
+from mlclient.structures.calls import ContentDispositionSerializer, DocumentsBodyPart
 from tests.utils import resources as resources_utils
 
 

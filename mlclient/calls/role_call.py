@@ -6,6 +6,7 @@ It exports 2 classes:
     * RoleDeleteCall
         A DELETE request to remove a role.
 """
+
 from __future__ import annotations
 
 from typing import ClassVar

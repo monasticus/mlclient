@@ -4,7 +4,7 @@ import pytest
 import responses
 
 from mlclient import MLResourcesClient
-from mlclient.calls.model import DocumentsBodyPart
+from mlclient.structures.calls import DocumentsBodyPart
 from tests.utils import MLResponseBuilder
 from tests.utils import resources as resources_utils
 

@@ -1,10 +1,10 @@
-"""The ML Calls Model package.
+"""The ML Calls Structures package.
 
 It contains modules with a corresponding Python representation of
 ML calls-specific data structures:
 
     * documents
-        The Documents Call Model module.
+        The Documents Call Structures module.
 
 This package exports the following classes:
 
@@ -25,8 +25,9 @@ This package exports the following classes:
 
 Examples
 --------
->>> from mlclient.calls.model import DocumentsBodyPart
+>>> from mlclient.structures.calls import DocumentsBodyPart
 """
+
 from .documents import (
     Category,
     ContentDispositionSerializer,

@@ -1,11 +1,11 @@
-from mlclient.calls.model import (
+from mlclient.structures import DocumentType
+from mlclient.structures.calls import (
     ContentDispositionSerializer,
     DocumentsBodyPartType,
     DocumentsContentDisposition,
     Extract,
     Repair,
 )
-from mlclient.model import DocumentType
 
 
 def test_serialize_inline():

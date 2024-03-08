@@ -6,6 +6,7 @@ It exports 2 classes:
     * ForestPropertiesPutCall
         A PUT request to modify forest properties.
 """
+
 from __future__ import annotations
 
 import json

@@ -8,6 +8,7 @@ It exports 1 class:
     * DocumentsDeleteCall
         A DELETE request to remove documents, or reset document metadata.
 """
+
 from __future__ import annotations
 
 import json
@@ -18,12 +19,12 @@ from urllib3.fields import RequestField
 
 from mlclient import constants, exceptions, utils
 from mlclient.calls import ResourceCall
-from mlclient.calls.model import (
+from mlclient.constants import HEADER_JSON
+from mlclient.structures.calls import (
     Category,
     ContentDispositionSerializer,
     DocumentsBodyPart,
 )
-from mlclient.constants import HEADER_JSON
 
 
 class DocumentsGetCall(ResourceCall):

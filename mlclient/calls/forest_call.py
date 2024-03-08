@@ -8,6 +8,7 @@ It exports 3 classes:
     * ForestDeleteCall
         A DELETE request to remove a forest.
 """
+
 from __future__ import annotations
 
 from typing import ClassVar

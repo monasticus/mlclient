@@ -6,7 +6,7 @@ from mimeo import MimeoConfig, MimeoConfigFactory, Mimeograph
 from mlclient.clients import DocumentsClient
 from mlclient.exceptions import MarkLogicError
 from mlclient.mimetypes import Mimetypes
-from mlclient.model import Document, DocumentType, Metadata, RawDocument
+from mlclient.structures import Document, DocumentType, Metadata, RawDocument
 
 
 def assert_document_does_not_exist(

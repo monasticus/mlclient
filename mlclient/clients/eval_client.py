@@ -4,6 +4,7 @@ It exports high-level classes to easily evaluate code in MarkLogic server:
     * EvalClient
         An MLResourceClient calling /v1/eval endpoint.
 """
+
 from __future__ import annotations
 
 import xml.etree.ElementTree as ElemTree

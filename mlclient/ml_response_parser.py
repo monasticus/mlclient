@@ -4,6 +4,7 @@ It exports 1 class:
     * MLResponseParser
         A MarkLogic HTTP response parser.
 """
+
 from __future__ import annotations
 
 import json
@@ -18,7 +19,7 @@ from requests_toolbelt.multipart.decoder import BodyPart
 
 from mlclient import constants as const
 from mlclient.mimetypes import Mimetypes
-from mlclient.model import DocumentType
+from mlclient.structures import DocumentType
 
 
 class MLResponseParser:

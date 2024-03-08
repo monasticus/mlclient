@@ -1,4 +1,4 @@
-"""The Documents Call Model module.
+"""The Documents Call Structures module.
 
 This module contains an API for /v1/documents call body.
 It exports the following classes:
@@ -18,6 +18,7 @@ It exports the following classes:
     * ContentDispositionSerializer
         A Content-Disposition header serializer.
 """
+
 from __future__ import annotations
 
 from enum import Enum
@@ -26,7 +27,7 @@ from typing import List, Optional, Union
 from pydantic import BaseModel, Field, field_validator
 
 from mlclient.constants import HEADER_JSON
-from mlclient.model import DocumentType
+from mlclient.structures import DocumentType
 from mlclient.utils import BiDict
 
 

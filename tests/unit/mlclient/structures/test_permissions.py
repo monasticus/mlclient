@@ -1,4 +1,4 @@
-from mlclient.model import Permission
+from mlclient.structures import Permission
 
 
 def test_permissions_are_equal():

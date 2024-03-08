@@ -4,6 +4,7 @@ It exports high-level class to perform CRUD operations in a MarkLogic server:
     * DocumentsClient
         An MLResourceClient calling /v1/documents endpoint.
 """
+
 from __future__ import annotations
 
 from typing import Any, Iterator
@@ -12,23 +13,23 @@ from requests import Response
 
 from mlclient import constants
 from mlclient.calls import DocumentsDeleteCall, DocumentsGetCall, DocumentsPostCall
-from mlclient.calls.model import (
-    Category,
-    ContentDispositionSerializer,
-    DocumentsBodyPart,
-    DocumentsContentDisposition,
-)
 from mlclient.clients import MLResourceClient
 from mlclient.exceptions import MarkLogicError
 from mlclient.mimetypes import Mimetypes
 from mlclient.ml_response_parser import MLResponseParser
-from mlclient.model import (
+from mlclient.structures import (
     Document,
     DocumentFactory,
     Metadata,
     MetadataDocument,
     RawDocument,
     RawStringDocument,
+)
+from mlclient.structures.calls import (
+    Category,
+    ContentDispositionSerializer,
+    DocumentsBodyPart,
+    DocumentsContentDisposition,
 )
 
 

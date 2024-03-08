@@ -4,6 +4,7 @@ It exports an implementation for 'call eval' command:
     * CallEvalCommand
         Sends a GET request to the /v1/eval endpoint.
 """
+
 from __future__ import annotations
 
 from cleo.commands.command import Command

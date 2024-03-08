@@ -1,7 +1,7 @@
 import responses
 
 from mlclient.jobs import WriteDocumentsJob
-from mlclient.model import DocumentType, RawDocument
+from mlclient.structures import DocumentType, RawDocument
 from tests.utils import MLResponseBuilder
 from tests.utils import resources as resources_utils
 

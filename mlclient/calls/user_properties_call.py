@@ -6,6 +6,7 @@ It exports 2 classes:
     * UserPropertiesPutCall
         A PUT request to modify user properties.
 """
+
 from __future__ import annotations
 
 import json

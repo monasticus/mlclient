@@ -4,7 +4,7 @@ import zipfile
 from types import GeneratorType
 
 from mlclient.jobs import DocumentsLoader
-from mlclient.model import (
+from mlclient.structures import (
     BinaryDocument,
     Document,
     DocumentType,

@@ -8,6 +8,7 @@ It exports 3 classes:
     * ForestsPutCall
         A PUT request to perform an operation on forests.
 """
+
 from __future__ import annotations
 
 import json

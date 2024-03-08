@@ -10,6 +10,7 @@ It exports a single function and a single class:
     * MLCLIentApplication
         An ML Client Command Line Cleo Application.
 """
+
 from .app import MLCLIentApplication, main
 
 __all__ = ["MLCLIentApplication", "main"]

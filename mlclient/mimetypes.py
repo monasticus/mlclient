@@ -5,6 +5,7 @@ This module extracts a class fetching mimetypes with file extensions and documen
     * Mimetypes
         The Mimetypes utilities provider.
 """
+
 from __future__ import annotations
 
 from typing import ClassVar
@@ -12,7 +13,7 @@ from typing import ClassVar
 import yaml
 
 from mlclient import utils
-from mlclient.model import DocumentType, Mimetype
+from mlclient.structures import DocumentType, Mimetype
 
 
 class Mimetypes:

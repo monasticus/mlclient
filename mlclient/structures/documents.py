@@ -30,6 +30,7 @@ It exports 5 classes:
     * Mimetype
         A class representing mime type.
 """
+
 from __future__ import annotations
 
 import copy

@@ -6,6 +6,7 @@ It exports 2 classes:
     * RolePropertiesPutCall
         A PUT request to modify role properties.
 """
+
 from __future__ import annotations
 
 import json

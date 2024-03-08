@@ -12,6 +12,7 @@ It exports the following commands:
     * CallLogsCommand
         Sends a GET request to the /manage/v2/logs endpoint.
 """
+
 from .call_eval import CallEvalCommand
 from .call_logs import CallLogsCommand
 

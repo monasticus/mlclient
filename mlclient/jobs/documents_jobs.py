@@ -6,6 +6,7 @@ It exports high-level class to perform bulk operations in a MarkLogic server:
     * DocumentsLoader
         A class parsing files into Documents.
 """
+
 from __future__ import annotations
 
 import json
@@ -21,7 +22,7 @@ from typing import Generator, Iterable
 
 from mlclient.clients import DocumentsClient
 from mlclient.mimetypes import Mimetypes
-from mlclient.model import (
+from mlclient.structures import (
     Document,
     DocumentFactory,
     DocumentType,

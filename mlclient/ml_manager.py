@@ -5,6 +5,7 @@ It exports the following class:
     * MLManager
         A high-level class managing a MarkLogic instance.
 """
+
 from __future__ import annotations
 
 from mlclient import MLClient, MLConfiguration, MLResourcesClient

@@ -15,6 +15,7 @@ It also exports a single class:
     * BiDict
         A bidirectional dictionary.
 """
+
 from __future__ import annotations
 
 import importlib.resources as pkg_resources

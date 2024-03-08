@@ -6,6 +6,7 @@ It exports high-level class to perform bulk operations in a MarkLogic server:
     * DocumentsLoader
         A class parsing files into Documents.
 """
+
 from __future__ import annotations
 
 import json

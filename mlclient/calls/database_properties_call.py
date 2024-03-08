@@ -6,6 +6,7 @@ It exports 2 classes:
     * DatabasePropertiesPutCall
         A PUT request to modify database properties.
 """
+
 from __future__ import annotations
 
 import json

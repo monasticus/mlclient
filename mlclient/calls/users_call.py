@@ -6,6 +6,7 @@ It exports 2 classes:
     * UsersPostCall
         A POST request to create a new user.
 """
+
 from __future__ import annotations
 
 import json

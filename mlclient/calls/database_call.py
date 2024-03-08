@@ -8,6 +8,7 @@ It exports 3 classes:
     * DatabaseDeleteCall
         A DELETE request to remove a database from a cluster.
 """
+
 from __future__ import annotations
 
 import json

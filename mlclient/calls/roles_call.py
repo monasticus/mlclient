@@ -6,6 +6,7 @@ It exports 2 classes:
     * RolesPostCall
         A POST request to create a new role.
 """
+
 from __future__ import annotations
 
 import json

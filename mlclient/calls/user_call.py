@@ -6,6 +6,7 @@ It exports 2 classes:
     * UserDeleteCall
         A DELETE request to remove a user.
 """
+
 from __future__ import annotations
 
 from typing import ClassVar

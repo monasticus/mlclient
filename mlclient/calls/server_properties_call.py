@@ -6,6 +6,7 @@ It exports 2 classes:
     * ServerPropertiesPutCall
         A PUT request to modify app server properties.
 """
+
 from __future__ import annotations
 
 import json

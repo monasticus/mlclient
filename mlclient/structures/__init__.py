@@ -41,6 +41,7 @@ Examples
 --------
 >>> from mlclient.structures import Document, DocumentType, Metadata
 """
+
 from .documents import (
     BinaryDocument,
     Document,

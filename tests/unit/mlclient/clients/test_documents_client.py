@@ -5,7 +5,6 @@ from pathlib import Path
 import pytest
 import responses
 
-from mlclient.structures.calls import DocumentsBodyPart
 from mlclient.clients import DocumentsClient
 from mlclient.exceptions import MarkLogicError
 from mlclient.structures import (
@@ -19,6 +18,7 @@ from mlclient.structures import (
     TextDocument,
     XMLDocument,
 )
+from mlclient.structures.calls import DocumentsBodyPart
 from tests.utils import MLResponseBuilder
 from tests.utils import resources as resources_utils
 

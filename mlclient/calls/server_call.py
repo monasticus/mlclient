@@ -6,6 +6,7 @@ It exports 2 classes:
     * ServerDeleteCall
         A DELETE request to remove an app server.
 """
+
 from __future__ import annotations
 
 from typing import ClassVar

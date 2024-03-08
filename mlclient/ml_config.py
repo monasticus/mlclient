@@ -10,6 +10,7 @@ It exports the following classes:
     * AuthMethod
         An enumeration class representing authorization methods.
 """
+
 from __future__ import annotations
 
 from enum import Enum

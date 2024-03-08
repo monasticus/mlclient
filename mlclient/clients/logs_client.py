@@ -6,6 +6,7 @@ It exports high-level classes to easily read MarkLogic logs:
     * LogType
         An enumeration class representing MarkLogic log types.
 """
+
 from __future__ import annotations
 
 import re

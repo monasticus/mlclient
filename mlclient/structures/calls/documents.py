@@ -18,6 +18,7 @@ It exports the following classes:
     * ContentDispositionSerializer
         A Content-Disposition header serializer.
 """
+
 from __future__ import annotations
 
 from enum import Enum

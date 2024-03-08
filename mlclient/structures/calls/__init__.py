@@ -27,6 +27,7 @@ Examples
 --------
 >>> from mlclient.structures.calls import DocumentsBodyPart
 """
+
 from .documents import (
     Category,
     ContentDispositionSerializer,

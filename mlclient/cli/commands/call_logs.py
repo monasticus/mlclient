@@ -4,6 +4,7 @@ It exports an implementation for 'call logs' command:
     * CallLogsCommand
         Sends a GET request to the /manage/v2/logs endpoint.
 """
+
 from __future__ import annotations
 
 from typing import Iterator

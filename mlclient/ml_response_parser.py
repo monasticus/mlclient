@@ -4,6 +4,7 @@ It exports 1 class:
     * MLResponseParser
         A MarkLogic HTTP response parser.
 """
+
 from __future__ import annotations
 
 import json

@@ -8,6 +8,7 @@ It exports 3 classes:
     * MLResourcesClient
         An MLResourceClient subclass supporting REST Resources of the MarkLogic server.
 """
+
 from __future__ import annotations
 
 import logging
@@ -59,9 +60,9 @@ from mlclient.calls import (
     UsersGetCall,
     UsersPostCall,
 )
-from mlclient.structures.calls import DocumentsBodyPart
 from mlclient.mimetypes import Mimetypes
 from mlclient.structures import DocumentType
+from mlclient.structures.calls import DocumentsBodyPart
 
 logger = logging.getLogger(__name__)
 

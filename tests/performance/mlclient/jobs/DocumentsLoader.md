@@ -11,7 +11,7 @@ DocumentsLoader class has been tested using two implementations:
   from pathlib import Path
   from typing import Generator
 
-  from mlclient.model import Document
+  from mlclient.structures import Document
   
   @classmethod
   def load(
@@ -39,7 +39,7 @@ DocumentsLoader class has been tested using two implementations:
   from pathlib import Path
   from typing import Generator
   
-  from mlclient.model import Document
+  from mlclient.structures import Document
   
   @classmethod
   def load(

@@ -1,6 +1,6 @@
 from xml.etree.ElementTree import Element, ElementTree, fromstring
 
-from mlclient.model import Document, DocumentType, XMLDocument
+from mlclient.structures import Document, DocumentType, XMLDocument
 
 
 def test_is_document_subclass():

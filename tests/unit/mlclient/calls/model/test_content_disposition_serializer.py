@@ -5,7 +5,7 @@ from mlclient.calls.model import (
     Extract,
     Repair,
 )
-from mlclient.model import DocumentType
+from mlclient.structures import DocumentType
 
 
 def test_serialize_inline():

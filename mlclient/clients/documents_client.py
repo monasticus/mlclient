@@ -22,7 +22,7 @@ from mlclient.clients import MLResourceClient
 from mlclient.exceptions import MarkLogicError
 from mlclient.mimetypes import Mimetypes
 from mlclient.ml_response_parser import MLResponseParser
-from mlclient.model import (
+from mlclient.structures import (
     Document,
     DocumentFactory,
     Metadata,

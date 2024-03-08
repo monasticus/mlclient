@@ -12,7 +12,7 @@ from typing import ClassVar
 import yaml
 
 from mlclient import utils
-from mlclient.model import DocumentType, Mimetype
+from mlclient.structures import DocumentType, Mimetype
 
 
 class Mimetypes:

@@ -1,6 +1,6 @@
 from deepdiff import DeepDiff
 
-from mlclient.model import MetadataFactory
+from mlclient.structures import MetadataFactory
 from tests.utils import resources as resources_utils
 
 

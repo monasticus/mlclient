@@ -61,7 +61,7 @@ from mlclient.calls import (
 )
 from mlclient.calls.model import DocumentsBodyPart
 from mlclient.mimetypes import Mimetypes
-from mlclient.model import DocumentType
+from mlclient.structures import DocumentType
 
 logger = logging.getLogger(__name__)
 

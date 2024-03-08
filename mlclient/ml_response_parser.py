@@ -18,7 +18,7 @@ from requests_toolbelt.multipart.decoder import BodyPart
 
 from mlclient import constants as const
 from mlclient.mimetypes import Mimetypes
-from mlclient.model import DocumentType
+from mlclient.structures import DocumentType
 
 
 class MLResponseParser:

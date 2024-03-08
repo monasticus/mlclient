@@ -8,7 +8,7 @@ import responses
 from mlclient.calls.model import DocumentsBodyPart
 from mlclient.clients import DocumentsClient
 from mlclient.exceptions import MarkLogicError
-from mlclient.model import (
+from mlclient.structures import (
     BinaryDocument,
     DocumentType,
     JSONDocument,

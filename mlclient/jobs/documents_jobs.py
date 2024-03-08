@@ -21,7 +21,7 @@ from typing import Generator, Iterable
 
 from mlclient.clients import DocumentsClient
 from mlclient.mimetypes import Mimetypes
-from mlclient.model import (
+from mlclient.structures import (
     Document,
     DocumentFactory,
     DocumentType,

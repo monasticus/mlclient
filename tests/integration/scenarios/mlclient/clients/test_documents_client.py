@@ -3,7 +3,7 @@ from __future__ import annotations
 import zlib
 from xml.etree.ElementTree import ElementTree, fromstring
 
-from mlclient.model import (
+from mlclient.structures import (
     BinaryDocument,
     DocumentType,
     JSONDocument,

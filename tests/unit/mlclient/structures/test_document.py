@@ -1,4 +1,4 @@
-from mlclient.model import Document, DocumentType, Metadata, Permission
+from mlclient.structures import Document, DocumentType, Metadata, Permission
 
 
 class DocumentTestImpl(Document):

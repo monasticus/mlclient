@@ -53,36 +53,47 @@ class MLCLIentApplication(Application):
         formatter.set_style("time", Style(foreground="green", options=["bold"]))
         formatter.set_style("log-level", Style(foreground="cyan", options=["bold"]))
 
-        CliKitHandler.setup_for(io)
+        CleoAppHandler.setup_for(io)
         return io
 
 
-class CliKitHandler(logging.Handler):
+class CleoAppHandler(logging.Handler):
     _LEVELS: ClassVar[dict] = {
         logging.CRITICAL: Verbosity.NORMAL,
         logging.ERROR: Verbosity.NORMAL,
         logging.WARNING: Verbosity.NORMAL,
-        logging.INFO: Verbosity.VERY_VERBOSE,
-        logging.DEBUG: Verbosity.DEBUG,
+        logging.INFO: Verbosity.VERBOSE,
+        logging.DEBUG: Verbosity.VERY_VERBOSE,
     }
 
     def __init__(self, io: IO, level=logging.NOTSET):
         super().__init__(level=level)
         self.io = io
+        formatter = io.output.formatter
+        formatter.set_style("mlclient", Style(foreground="light_gray", options=["italic"]))
+        formatter.set_style("mlclient_err", Style(foreground="red", options=["italic"]))
 
     def emit(self, record: logging.LogRecord):
-        text = record.getMessage()
+        text = self.format(record)
         level = self._LEVELS[record.levelno]
         if record.levelno >= logging.WARNING:
-            self.io.write_error_line(text, verbosity=level)
+            styled = f"<mlclient_err>{text}</>"
+            self.io.write_line(styled, verbosity=level)
         else:
-            self.io.write_line(text, verbosity=level)
+            styled = f"<mlclient>{text}</>"
+            self.io.write_line(styled, verbosity=level)
 
     @classmethod
     def setup_for(cls, io: IO):
-        log = logging.getLogger("mlclient")
-        log.setLevel(logging.DEBUG)
-        log.handlers = [cls(io)]
+        logger = logging.getLogger("mlclient")
+        origin_handler = next(h for h in logger.handlers if h.name == "console")
+        origin_formatter = origin_handler.formatter
+
+        cleo_handler = cls(io)
+        cleo_handler.setFormatter(origin_formatter)
+
+        logger.setLevel(logging.DEBUG)
+        logger.handlers = [cleo_handler]
 
 
 def main() -> int:

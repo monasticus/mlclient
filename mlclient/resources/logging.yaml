@@ -1,0 +1,24 @@
+version: 1
+
+disable_existing_loggers: no
+
+formatters:
+  regular:
+    format: '[mlclient] %(asctime)s - %(levelname)-5s - [%(threadName)s] - %(message)s'
+
+handlers:
+  console:
+    class: logging.StreamHandler
+    level: INFO
+    formatter: regular
+    stream: ext://sys.stdout
+
+loggers:
+  mlclient:
+    level: INFO
+    handlers: [console]
+    propagate: no
+
+root:
+  level: WARNING
+  handlers: [console]

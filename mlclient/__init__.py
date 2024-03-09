@@ -37,6 +37,11 @@ Examples
 >>> from mlclient import MLResourcesClient
 """
 
+import logging.config
+
+import yaml
+
+from . import utils
 from .clients import LOCAL_NS, MLClient, MLResourceClient, MLResourcesClient
 from .ml_config import MLConfiguration
 from .ml_manager import MLManager
@@ -53,3 +58,7 @@ __all__ = [
     "MLConfiguration",
     "MLManager",
 ]
+
+with utils.get_resource("logging.yaml") as config_file:
+    config = yaml.safe_load(config_file.read())
+    logging.config.dictConfig(config)

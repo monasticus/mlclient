@@ -41,6 +41,7 @@ import logging.config
 
 import yaml
 
+from haggis.logs import add_logging_level
 from . import utils
 from .clients import LOCAL_NS, MLClient, MLResourceClient, MLResourcesClient
 from .ml_config import MLConfiguration
@@ -59,6 +60,7 @@ __all__ = [
     "MLManager",
 ]
 
+add_logging_level("FINE", logging.DEBUG - 1)
 with utils.get_resource("logging.yaml") as config_file:
     config = yaml.safe_load(config_file.read())
     logging.config.dictConfig(config)

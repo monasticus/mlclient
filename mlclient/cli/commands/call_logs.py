@@ -133,7 +133,7 @@ class CallLogsCommand(Command):
 
         manager = MLManager(environment)
         with manager.get_logs_client(rest_server) as client:
-            self.info(f"Getting logs list using REST App-Server {client.base_url}\n")
+            self.info(f"Getting logs list using REST App-Server {client.base_url}")
             return client.get_logs_list()
 
     def _get_log_files_rows(
@@ -212,6 +212,7 @@ class CallLogsCommand(Command):
         rows: list[list[str]],
     ):
         """Render a table with MarkLogic log files."""
+        self.line("")
         if len(rows) > 0:
             table = self.table()
             table.set_header_title("MARKLOGIC LOG FILES")
@@ -228,6 +229,7 @@ class CallLogsCommand(Command):
         """Print MarkLogic logs."""
         logs = self._get_logs()
         parsed_logs = self._parse_logs(logs)
+        self.line("")
         for info, msg in parsed_logs:
             self._io.write(info)
             self._io.write(msg, new_line=True, type=Type.RAW)
@@ -250,7 +252,7 @@ class CallLogsCommand(Command):
                 file_name = f"{app_port}_{log_type.value}.txt"
             self.info(
                 f"Getting {file_name} logs "
-                f"using REST App-Server {client.base_url}\n",
+                f"using REST App-Server {client.base_url}",
             )
             return client.get_logs(
                 app_server=app_port,

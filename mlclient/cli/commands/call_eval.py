@@ -102,6 +102,7 @@ class CallEvalCommand(Command):
         eval_params = self._get_eval_params()
         results = self._call_eval(eval_params)
 
+        self._io.write("\n")
         self._io.write(results, new_line=True, type=Type.RAW)
         return 0
 
@@ -143,5 +144,5 @@ class CallEvalCommand(Command):
 
         manager = MLManager(environment)
         with manager.get_eval_client(rest_server) as client:
-            self.info(f"Evaluating code using REST App-Server {client.base_url}\n")
+            self.info(f"Evaluating code using REST App-Server {client.base_url}")
             return client.eval(**eval_params)

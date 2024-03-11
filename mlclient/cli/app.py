@@ -59,32 +59,53 @@ class MLCLIentApplication(Application):
 
 class CleoAppHandler(logging.Handler):
     _LEVELS: ClassVar[dict] = {
-        logging.CRITICAL: Verbosity.NORMAL,
-        logging.ERROR: Verbosity.NORMAL,
-        logging.WARNING: Verbosity.NORMAL,
-        logging.INFO: Verbosity.VERBOSE,
-        logging.DEBUG: Verbosity.VERY_VERBOSE,
+        logging.CRITICAL: {
+            "verbosity": Verbosity.NORMAL,
+            "style": "mlclient_critical",
+        },
+        logging.ERROR: {
+            "verbosity": Verbosity.NORMAL,
+            "style": "mlclient_error",
+        },
+        logging.WARNING: {
+            "verbosity": Verbosity.NORMAL,
+            "style": "mlclient_warning",
+        },
+        logging.INFO: {
+            "verbosity": Verbosity.VERBOSE,
+            "style": "mlclient_info",
+        },
+        logging.DEBUG: {
+            "verbosity": Verbosity.VERY_VERBOSE,
+            "style": "mlclient_debug",
+        },
+        logging.FINE: {
+            "verbosity": Verbosity.DEBUG,
+            "style": "mlclient_fine",
+        },
     }
 
     def __init__(self, io: IO, level=logging.NOTSET):
         super().__init__(level=level)
         self.io = io
-        formatter = io.output.formatter
-        formatter.set_style("mlclient", Style(foreground="light_gray", options=["italic"]))
-        formatter.set_style("mlclient_err", Style(foreground="red", options=["italic"]))
 
     def emit(self, record: logging.LogRecord):
-        text = self.format(record)
-        level = self._LEVELS[record.levelno]
-        if record.levelno >= logging.WARNING:
-            styled = f"<mlclient_err>{text}</>"
-            self.io.write_line(styled, verbosity=level)
-        else:
-            styled = f"<mlclient>{text}</>"
-            self.io.write_line(styled, verbosity=level)
+        verbosity = self._LEVELS[record.levelno]["verbosity"]
+        style = self._LEVELS[record.levelno]["style"]
+        styled_text = f"<{style}>{self.format(record)}</>"
+        self.io.write_line(styled_text, verbosity=verbosity)
 
     @classmethod
     def setup_for(cls, io: IO):
+        options = ["italic"]
+        formatter = io.output.formatter
+        formatter.set_style("mlclient_fine", Style(foreground="cyan", options=options))
+        formatter.set_style("mlclient_debug", Style(foreground="light_cyan", options=options))
+        formatter.set_style("mlclient_info", Style(foreground="light_green", options=options))
+        formatter.set_style("mlclient_warning", Style(foreground="yellow", options=options))
+        formatter.set_style("mlclient_error", Style(foreground="red", options=options))
+        formatter.set_style("mlclient_critical", Style(foreground="light_red", options=options))
+
         logger = logging.getLogger("mlclient")
         origin_handler = next(h for h in logger.handlers if h.name == "console")
         origin_formatter = origin_handler.formatter
@@ -92,7 +113,7 @@ class CleoAppHandler(logging.Handler):
         cleo_handler = cls(io)
         cleo_handler.setFormatter(origin_formatter)
 
-        logger.setLevel(logging.DEBUG)
+        logger.setLevel(logging.FINE)
         logger.handlers = [cleo_handler]
 
 

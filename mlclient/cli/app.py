@@ -100,11 +100,23 @@ class CleoAppHandler(logging.Handler):
         options = ["italic"]
         formatter = io.output.formatter
         formatter.set_style("mlclient_fine", Style(foreground="cyan", options=options))
-        formatter.set_style("mlclient_debug", Style(foreground="light_cyan", options=options))
-        formatter.set_style("mlclient_info", Style(foreground="light_green", options=options))
-        formatter.set_style("mlclient_warning", Style(foreground="yellow", options=options))
+        formatter.set_style(
+            "mlclient_debug",
+            Style(foreground="light_cyan", options=options),
+        )
+        formatter.set_style(
+            "mlclient_info",
+            Style(foreground="light_green", options=options),
+        )
+        formatter.set_style(
+            "mlclient_warning",
+            Style(foreground="yellow", options=options),
+        )
         formatter.set_style("mlclient_error", Style(foreground="red", options=options))
-        formatter.set_style("mlclient_critical", Style(foreground="light_red", options=options))
+        formatter.set_style(
+            "mlclient_critical",
+            Style(foreground="light_red", options=options),
+        )
 
         logger = logging.getLogger("mlclient")
         origin_handler = next(h for h in logger.handlers if h.name == "console")

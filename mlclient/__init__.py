@@ -40,8 +40,8 @@ Examples
 import logging.config
 
 import yaml
-
 from haggis.logs import add_logging_level
+
 from . import utils
 from .clients import LOCAL_NS, MLClient, MLResourceClient, MLResourcesClient
 from .ml_config import MLConfiguration

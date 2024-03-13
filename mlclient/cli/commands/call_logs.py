@@ -251,8 +251,7 @@ class CallLogsCommand(Command):
             else:
                 file_name = f"{app_port}_{log_type.value}.txt"
             self.info(
-                f"Getting {file_name} logs "
-                f"using REST App-Server {client.base_url}",
+                f"Getting {file_name} logs using REST App-Server {client.base_url}",
             )
             return client.get_logs(
                 app_server=app_port,

@@ -8,6 +8,7 @@ It exports 1 class:
 from __future__ import annotations
 
 import json
+import logging
 import xml.etree.ElementTree as ElemTree
 from datetime import datetime
 from typing import ClassVar
@@ -20,6 +21,8 @@ from requests_toolbelt.multipart.decoder import BodyPart
 from mlclient import constants as const
 from mlclient.mimetypes import Mimetypes
 from mlclient.structures import DocumentType
+
+logger = logging.getLogger(__name__)
 
 
 class MLResponseParser:
@@ -101,7 +104,9 @@ class MLResponseParser:
         list
             A parsed response body
         """
+        logger.fine("Attempt to parse a response")
         if response.ok and int(response.headers.get("Content-Length")) == 0:
+            logger.fine("No content to parse")
             return []
 
         if output_type == str:
@@ -131,7 +136,9 @@ class MLResponseParser:
         tuple
             A parsed response body with headers
         """
+        logger.fine("Attempt to parse a response")
         if response.ok and int(response.headers.get("Content-Length")) == 0:
+            logger.fine("No content to parse")
             return response.headers, []
 
         if output_type == str:
@@ -180,6 +187,7 @@ class MLResponseParser:
                 error = cls._parse_xml_error(response)
             else:
                 error = cls._parse_html_error(response)
+            logger.warning("MarkLogic error occurred [%s]", error)
             if with_headers:
                 return response.headers, error
             return error
@@ -224,6 +232,7 @@ class MLResponseParser:
                 error = json.dumps(json_error)
             else:
                 error = cls._parse_html_error(response)
+            logger.warning("MarkLogic error occurred [%s]", error)
             if with_headers:
                 return response.headers, error
             return error
@@ -268,6 +277,7 @@ class MLResponseParser:
                 error = json.dumps(json_error).encode("utf-8")
             else:
                 error = cls._parse_html_error(response).encode("utf-8")
+            logger.warning("MarkLogic error occurred [%s]", error)
             if with_headers:
                 return response.headers, error
             return error
@@ -383,10 +393,13 @@ class MLResponseParser:
 
         if output_type is bytes or doc_type is DocumentType.BINARY:
             parsed = body_part.content
+            logger.fine("Returning binary response part value")
         elif output_type is str:
             parsed = body_part.text
+            logger.fine("Response part parsed to text value: [%s]", parsed)
         else:
             parsed = cls._parse_type_specific(body_part, headers)
+            logger.fine("Response part parsed value: [%s]", parsed)
 
         if not with_headers:
             return parsed

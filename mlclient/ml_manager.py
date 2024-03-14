@@ -8,9 +8,13 @@ It exports the following class:
 
 from __future__ import annotations
 
+import logging
+
 from mlclient import MLClient, MLConfiguration, MLResourcesClient
 from mlclient.clients import DocumentsClient, EvalClient, LogsClient
 from mlclient.exceptions import NoRestServerConfiguredError, NotARestServerError
+
+logger = logging.getLogger(__name__)
 
 
 class MLManager:
@@ -251,13 +255,21 @@ class MLManager:
             If an identifier has not been provided and there's no REST servers
             configured for the environment
         """
+        logger.debug("Verifying the app server id [%s]", app_server_id or "")
         if app_server_id is None:
+            logger.debug("No id provided - trying to identify any REST app server")
             if len(self.config.rest_servers) == 0:
                 env = self.environment_name
                 msg = f"No REST server is configured for the [{env}] environment."
                 raise NoRestServerConfiguredError(msg)
-            return self.config.rest_servers[0]
+            app_server_id = self.config.rest_servers[0]
+            logger.debug("Identified REST app server id: [%s]", app_server_id)
+            return app_server_id
         if app_server_id not in self.config.rest_servers:
             msg = f"[{app_server_id}] App-Server is not configured as a REST one."
             raise NotARestServerError(msg)
+        logger.debug(
+            "The [%s] app server has been verified as a REST one.",
+            app_server_id,
+        )
         return app_server_id

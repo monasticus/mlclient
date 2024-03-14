@@ -104,7 +104,7 @@ class MLResponseParser:
         list
             A parsed response body
         """
-        logger.fine("Attempt to parse a response")
+        logger.debug("Attempt to parse a response")
         if response.ok and int(response.headers.get("Content-Length")) == 0:
             logger.fine("No content to parse")
             return []
@@ -136,7 +136,7 @@ class MLResponseParser:
         tuple
             A parsed response body with headers
         """
-        logger.fine("Attempt to parse a response")
+        logger.debug("Attempt to parse a response")
         if response.ok and int(response.headers.get("Content-Length")) == 0:
             logger.fine("No content to parse")
             return response.headers, []

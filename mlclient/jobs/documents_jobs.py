@@ -60,7 +60,10 @@ class WriteDocumentsJob:
         self._executor: ThreadPoolExecutor | None = None
         self._successful = []
         self._failed = []
-        Thread(target=self._start_conveyor_belt).start()
+        Thread(
+            target=self._start_conveyor_belt,
+            name=f"write_documents_job_{self._id}",
+        ).start()
 
     def with_client_config(
         self,
@@ -142,6 +145,12 @@ class WriteDocumentsJob:
         self._input_queue.join()
         self._executor.shutdown()
         self._executor = None
+        logger.info(
+            "Job [%s] has been completed with overall documents count [%d] and successful [%d]",
+            self._id,
+            self.completed_count,
+            len(self.successful),
+        )
 
     @property
     def thread_count(
@@ -277,14 +286,13 @@ class WriteDocumentsJob:
         MarkLogicError
             If MarkLogic returns an error
         """
+        batch_uris = [doc.uri for doc in batch]
         try:
             client.create(data=batch, database=self._database)
-            self._successful.extend([doc.uri for doc in batch])
+            self._successful.extend(batch_uris)
         except Exception:
-            self._failed.extend([doc.uri for doc in batch])
-            logger.exception(
-                "An unexpected error occurred while writing documents",
-            )
+            self._failed.extend(batch_uris)
+            logger.exception("An unexpected error occurred while writing documents")
 
     @staticmethod
     def _get_max_num_of_threads():
@@ -336,6 +344,7 @@ class DocumentsLoader:
             uri = file_path.replace(str(path.parent), uri_prefix)
             yield cls.load_document(file_path, uri, raw)
         else:
+            logger.debug("Loading documents from [%s] directory", path)
             for dir_path, _, file_names in os.walk(path):
                 for file_name in file_names:
                     if file_name.endswith(cls._METADATA_SUFFIXES):
@@ -463,6 +472,7 @@ class DocumentsLoader:
         if not metadata_file_path:
             return None
 
+        logger.fine("Document [%s] loaded with metadata [%s]", path, metadata_file_path)
         if raw:
             with Path(metadata_file_path).open("rb") as metadata_file:
                 return metadata_file.read()

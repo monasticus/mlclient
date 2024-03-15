@@ -22,6 +22,7 @@ from cleo.io.io import IO
 from cleo.io.outputs.output import Output, Verbosity
 
 from mlclient import __version__ as ml_client_version
+from mlclient import setup_logger
 from mlclient.cli.commands import CallEvalCommand, CallLogsCommand
 
 
@@ -131,6 +132,7 @@ class CleoAppHandler(logging.Handler):
 
 def main() -> int:
     """Run an MLCLIent Application."""
+    setup_logger()
     return MLCLIentApplication().run()
 
 

@@ -48,6 +48,13 @@ from .ml_config import MLConfiguration
 from .ml_manager import MLManager
 from .ml_response_parser import MLResponseParser
 
+
+def setup_logger():
+    with utils.get_resource("logging.yaml") as config_file:
+        config = yaml.safe_load(config_file.read())
+        logging.config.dictConfig(config)
+
+
 __version__ = "0.4.1"
 __all__ = [
     "__version__",
@@ -58,9 +65,7 @@ __all__ = [
     "MLResponseParser",
     "MLConfiguration",
     "MLManager",
+    "setup_logger",
 ]
 
 add_logging_level("FINE", logging.DEBUG - 1)
-with utils.get_resource("logging.yaml") as config_file:
-    config = yaml.safe_load(config_file.read())
-    logging.config.dictConfig(config)

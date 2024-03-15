@@ -50,6 +50,7 @@ from .ml_response_parser import MLResponseParser
 
 
 def setup_logger():
+    """Set up MLClient logging configuration."""
     with utils.get_resource("logging.yaml") as config_file:
         config = yaml.safe_load(config_file.read())
         logging.config.dictConfig(config)

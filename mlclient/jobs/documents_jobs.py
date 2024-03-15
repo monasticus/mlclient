@@ -146,7 +146,8 @@ class WriteDocumentsJob:
         self._executor.shutdown()
         self._executor = None
         logger.info(
-            "Job [%s] has been completed with overall documents count [%d] and successful [%d]",
+            "Job [%s] has been completed "
+            "with overall documents count [%d] and successful [%d]",
             self._id,
             self.completed_count,
             len(self.successful),

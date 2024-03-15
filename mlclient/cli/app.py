@@ -59,6 +59,8 @@ class MLCLIentApplication(Application):
 
 
 class CleoAppHandler(logging.Handler):
+    """A logger handler integrating ML Client  logs with the Cleo Application."""
+
     _LEVELS: ClassVar[dict] = {
         logging.CRITICAL: {
             "verbosity": Verbosity.NORMAL,
@@ -86,18 +88,31 @@ class CleoAppHandler(logging.Handler):
         },
     }
 
-    def __init__(self, io: IO, level=logging.NOTSET):
+    def __init__(
+        self,
+        io: IO,
+        level: int = logging.NOTSET,
+    ):
+        """Initialize CleoAppHandler instance."""
         super().__init__(level=level)
         self.io = io
 
-    def emit(self, record: logging.LogRecord):
+    def emit(
+        self,
+        record: logging.LogRecord,
+    ):
+        """Emit a LogRecord."""
         verbosity = self._LEVELS[record.levelno]["verbosity"]
         style = self._LEVELS[record.levelno]["style"]
         styled_text = f"<{style}>{self.format(record)}</>"
         self.io.write_line(styled_text, verbosity=verbosity)
 
     @classmethod
-    def setup_for(cls, io: IO):
+    def setup_for(
+        cls,
+        io: IO,
+    ):
+        """Set up MLClient logs handler and format for an IO."""
         options = ["italic"]
         formatter = io.output.formatter
         formatter.set_style("mlclient_fine", Style(foreground="cyan", options=options))

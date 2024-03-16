@@ -37,10 +37,24 @@ Examples
 >>> from mlclient import MLResourcesClient
 """
 
+import logging.config
+
+import yaml
+from haggis.logs import add_logging_level
+
+from . import utils
 from .clients import LOCAL_NS, MLClient, MLResourceClient, MLResourcesClient
 from .ml_config import MLConfiguration
 from .ml_manager import MLManager
 from .ml_response_parser import MLResponseParser
+
+
+def setup_logger():
+    """Set up MLClient logging configuration."""
+    with utils.get_resource("logging.yaml") as config_file:
+        config = yaml.safe_load(config_file.read())
+        logging.config.dictConfig(config)
+
 
 __version__ = "0.4.1"
 __all__ = [
@@ -52,4 +66,7 @@ __all__ = [
     "MLResponseParser",
     "MLConfiguration",
     "MLManager",
+    "setup_logger",
 ]
+
+add_logging_level("FINE", logging.DEBUG - 1)

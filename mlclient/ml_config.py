@@ -13,6 +13,7 @@ It exports the following classes:
 
 from __future__ import annotations
 
+import logging
 from enum import Enum
 from pathlib import Path
 from typing import List
@@ -26,6 +27,8 @@ from mlclient.exceptions import (
     MLClientEnvironmentNotFoundError,
     NoSuchAppServerError,
 )
+
+logger = logging.getLogger(__name__)
 
 
 class AuthMethod(Enum):
@@ -102,6 +105,7 @@ class MLConfiguration(BaseModel):
         dict
             A configuration dictionary for an MLClient initialization
         """
+        logger.debug("Getting configuration for the [%s] app server", app_server_id)
         ml_config = self.model_dump(exclude={"app_name", "app_servers"})
         app_server_gen = (
             app_server
@@ -143,6 +147,10 @@ class MLConfiguration(BaseModel):
         MLClientEnvironmentNotFoundError
             If there's no .mlclient/mlclient-<environment_name>.yaml file
         """
+        logger.debug(
+            "Loading MLClient configuration for the environment: [%s]",
+            environment_name,
+        )
         env_file_path = cls._find_mlclient_environment(environment_name)
         return cls.from_file(env_file_path)
 
@@ -163,6 +171,7 @@ class MLConfiguration(BaseModel):
         MLConfiguration
             An MLConfiguration instance
         """
+        logger.info("Loading MLClient configuration from the file: [%s]", file_path)
         source_config = cls._get_source_config(file_path)
         return MLConfiguration(**source_config)
 
@@ -199,6 +208,7 @@ class MLConfiguration(BaseModel):
                 f"[{environment_name}]!"
             )
             raise MLClientEnvironmentNotFoundError(msg)
+        logger.debug("MLClient configuration file found: [%s]", env_file_name)
         return env_file_path.as_posix()
 
     @classmethod
@@ -237,6 +247,10 @@ class MLConfiguration(BaseModel):
             None,
         )
         if mlclient_dir:
+            logger.debug(
+                "MLClient configuration home directory found: [%s]",
+                mlclient_dir,
+            )
             return mlclient_dir.as_posix()
         return cls._find_mlclient_directory(path.parent)
 

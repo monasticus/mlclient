@@ -1,0 +1,16 @@
+version: '3'
+services:
+  ml10:
+    image: marklogicdb/marklogic-db:latest-10.0
+    container_name: ml10
+    environment:
+      MARKLOGIC_INIT: "true"
+      MARKLOGIC_ADMIN_USERNAME: "admin"
+      MARKLOGIC_ADMIN_PASSWORD: "admin"
+    ports:
+      - "8000-8002:8000-8002"
+    volumes:
+      - marklogic_logs:/var/opt/MarkLogic/Logs
+
+volumes:
+  marklogic_logs:

@@ -47,7 +47,7 @@
     docker compose version
     ```
 
-3. Build a container
+3. Build containers
 
    ```shell
    docker compose up -d

@@ -50,6 +50,7 @@ pyyaml = "^6.0.1"
 cleo = "^2.1.0"
 urllib3 = "^2.2.1"
 xmltodict = "^0.13.0"
+hagis = "^0.8.7"
 
 [tool.poetry.group.dev.dependencies]
 ruff = "*"

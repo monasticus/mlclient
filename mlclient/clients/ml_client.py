@@ -200,7 +200,7 @@ class MLClient:
         self,
     ):
         """Start an HTTP session."""
-        logger.debug("Initiating a connection")
+        logger.debug("Initiating a connection with %s", self.base_url)
         self._sess = Session()
         self._sess.mount(self.base_url, HTTPAdapter(max_retries=self._retry))
 
@@ -376,8 +376,18 @@ class MLClient:
                 else:
                     request["data"] = body
 
-            logger.debug("Sending a request... %s %s", method.upper(), endpoint)
-            return self._sess.request(method, url, **request)
+            logger.fine(
+                "Request details: %s",
+                " ".join(
+                    f"{k} [{v if k != 'auth' else v.__class__.__name__}]"
+                    for k, v in request.items()
+                ),
+            )
+            logger.info("Sending a request... %s %s", method.upper(), endpoint)
+            resp = self._sess.request(method, url, **request)
+            logger.debug("Response retrieved")
+            logger.fine("Response body: %s", resp.text)
+            return resp
 
         logger.warning(
             "A request attempt failure: %s %s -- MLClient is not connected",

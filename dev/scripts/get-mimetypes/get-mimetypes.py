@@ -8,7 +8,7 @@ xqy_file_name = "get-mimetypes.xqy"
 xqy_file_path = next(Path(__file__).parent.glob(xqy_file_name))
 
 target_dir = "mlclient/resources"
-target_dir_path = next(Path(__file__).parent.parent.parent.glob(target_dir))
+target_dir_path = next(Path(__file__).parent.parent.parent.parent.glob(target_dir))
 target_file_name = "mimetypes.yaml"
 target_file_path = f"{target_dir_path.absolute()}/{target_file_name}"
 

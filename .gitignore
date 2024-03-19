@@ -14,7 +14,6 @@ requirements.txt
 .idea
 
 # Custom
-.mlclient
-!dev/.mlclient
+/.mlclient
 tmp
 main.py

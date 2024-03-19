@@ -1,6 +1,6 @@
 # MLClient Developer Workspace
 
-## Setup docker
+## Setup environment
 
 1. Install docker
     ```shell
@@ -51,4 +51,12 @@
 
    ```shell
    docker compose up -d
+   docker compose exec -it dev sh -c "cd /mlclient && poetry install"
+   ```
+
+4. Run mlclient in an isolated container within a network
+
+   ```shell
+   docker compose exec dev bash
+   cd /mlclient && poetry shell
    ```

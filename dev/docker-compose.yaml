@@ -2,9 +2,18 @@ version: '3'
 
 services:
 
-  single_node:
+  dev:
+    build: .
+    container_name: dev
+    volumes:
+      - ..:/mlclient
+    networks:
+      - external_net
+    tty: true
+
+  ml_single_node:
     image: marklogicdb/marklogic-db:latest-10.0
-    container_name: single_node
+    container_name: ml_single_node
     hostname: localhost
     environment:
       MARKLOGIC_INIT: "true"
@@ -15,14 +24,14 @@ services:
       - "8000-8010:8000-8010"
       - "7997:7997"
     volumes:
-      - single_node_logs:/var/opt/MarkLogic/Logs
+      - ml_single_node_logs:/var/opt/MarkLogic/Logs
     networks:
       - external_net
-  
-  cluster_node1:
+
+  ml_cluster_node1:
     image: marklogicdb/marklogic-db:latest-10.0
-    container_name: cluster_node1
-    hostname: cluster_node1
+    container_name: ml_cluster_node1
+    hostname: ml_cluster_node1
     dns_search: ""
     environment:
       MARKLOGIC_INIT: "true"
@@ -30,54 +39,54 @@ services:
       MARKLOGIC_ADMIN_PASSWORD: "admin"
       TZ: "Europe/Prague"
     volumes:
-      - cluster_node1_logs:/var/opt/MarkLogic
+      - ml_cluster_node1_logs:/var/opt/MarkLogic
     ports:
       - "7100-7110:8000-8010"
       - "7197:7997"
     networks:
       - external_net
 
-  cluster_node2:
+  ml_cluster_node2:
     image: marklogicdb/marklogic-db:latest-10.0
-    container_name: cluster_node2
-    hostname: cluster_node2
+    container_name: ml_cluster_node2
+    hostname: ml_cluster_node2
     dns_search: ""
     environment:
       MARKLOGIC_INIT: "true"
       MARKLOGIC_ADMIN_USERNAME: "admin"
       MARKLOGIC_ADMIN_PASSWORD: "admin"
       MARKLOGIC_JOIN_CLUSTER: "true"
-      MARKLOGIC_BOOTSTRAP_HOST: "cluster_node1"
+      MARKLOGIC_BOOTSTRAP_HOST: "ml_cluster_node1"
       TZ: "Europe/Prague"
     volumes:
-      - cluster_node2_logs:/var/opt/MarkLogic
+      - ml_cluster_node2_logs:/var/opt/MarkLogic
     ports:
       - "7200-7210:8000-8010"
       - "7297:7997"
     depends_on:
-      - cluster_node1
+      - ml_cluster_node1
     networks:
       - external_net
 
-  cluster_node3:
+  ml_cluster_node3:
     image: marklogicdb/marklogic-db:latest-10.0
-    container_name: cluster_node3
-    hostname: cluster_node3
+    container_name: ml_cluster_node3
+    hostname: ml_cluster_node3
     dns_search: ""
     environment:
       MARKLOGIC_INIT: "true"
       MARKLOGIC_ADMIN_USERNAME: "admin"
       MARKLOGIC_ADMIN_PASSWORD: "admin"
       MARKLOGIC_JOIN_CLUSTER: "true"
-      MARKLOGIC_BOOTSTRAP_HOST: "cluster_node1"
+      MARKLOGIC_BOOTSTRAP_HOST: "ml_cluster_node1"
       TZ: "Europe/Prague"
     volumes:
-      - cluster_node3_logs:/var/opt/MarkLogic
+      - ml_cluster_node3_logs:/var/opt/MarkLogic
     ports:
       - "7300-7310:8000-8010"
       - "7397:7997"
     depends_on:
-      - cluster_node1
+      - ml_cluster_node1
     networks:
       - external_net
 
@@ -85,7 +94,7 @@ networks:
   external_net: {}
 
 volumes:
-  single_node_logs:
-  cluster_node1_logs:
-  cluster_node2_logs:
-  cluster_node3_logs:
+  ml_single_node_logs:
+  ml_cluster_node1_logs:
+  ml_cluster_node2_logs:
+  ml_cluster_node3_logs:

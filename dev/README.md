@@ -58,5 +58,5 @@
 
    ```shell
    docker compose exec dev bash
-   cd /mlclient && poetry shell
+   poetry shell
    ```

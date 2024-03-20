@@ -1,11 +1,15 @@
 from __future__ import annotations
 
+import json
+from pathlib import Path
+
 import pytest
 import responses
 
 from mlclient.clients import LogsClient, LogType
 from mlclient.exceptions import MarkLogicError
 from tests.utils import MLResponseBuilder
+from tests.utils import resources as resources_utils
 
 ENDPOINT = "/manage/v2/logs"
 
@@ -729,115 +733,19 @@ def test_get_audit_logs_empty(logs_client):
 
 @responses.activate
 def test_get_logs_list(logs_client):
-    items = [
-        {
-            "uriref": f"{ENDPOINT}?filename=8001_AccessLog.txt&host=localhost",
-            "nameref": "8001_AccessLog.txt",
-            "roleref": "localhost",
-        },
-        {
-            "uriref": f"{ENDPOINT}?filename=8002_AccessLog_1.txt&host=localhost",
-            "nameref": "8002_AccessLog_1.txt",
-            "roleref": "localhost",
-        },
-        {
-            "uriref": f"{ENDPOINT}?filename=8001_RequestLog.txt&host=localhost",
-            "nameref": "8001_RequestLog.txt",
-            "roleref": "localhost",
-        },
-        {
-            "uriref": f"{ENDPOINT}?filename=8002_RequestLog_1.txt&host=localhost",
-            "nameref": "8002_RequestLog_1.txt",
-            "roleref": "localhost",
-        },
-        {
-            "uriref": f"{ENDPOINT}?filename=8001_ErrorLog.txt&host=localhost",
-            "nameref": "8001_ErrorLog.txt",
-            "roleref": "localhost",
-        },
-        {
-            "uriref": f"{ENDPOINT}?filename=8002_ErrorLog_1.txt&host=localhost",
-            "nameref": "8002_ErrorLog_1.txt",
-            "roleref": "localhost",
-        },
-        {
-            "uriref": f"{ENDPOINT}?filename=TaskServer_AccessLog.txt&host=localhost",
-            "nameref": "TaskServer_AccessLog.txt",
-            "roleref": "localhost",
-        },
-        {
-            "uriref": f"{ENDPOINT}?filename=TaskServer_AccessLog_1.txt&host=localhost",
-            "nameref": "TaskServer_AccessLog_1.txt",
-            "roleref": "localhost",
-        },
-        {
-            "uriref": f"{ENDPOINT}?filename=TaskServer_RequestLog.txt&host=localhost",
-            "nameref": "TaskServer_RequestLog.txt",
-            "roleref": "localhost",
-        },
-        {
-            "uriref": f"{ENDPOINT}?filename=TaskServer_RequestLog_1.txt&host=localhost",
-            "nameref": "TaskServer_RequestLog_1.txt",
-            "roleref": "localhost",
-        },
-        {
-            "uriref": f"{ENDPOINT}?filename=TaskServer_ErrorLog.txt&host=localhost",
-            "nameref": "TaskServer_ErrorLog.txt",
-            "roleref": "localhost",
-        },
-        {
-            "uriref": f"{ENDPOINT}?filename=TaskServer_ErrorLog_1.txt&host=localhost",
-            "nameref": "TaskServer_ErrorLog_1.txt",
-            "roleref": "localhost",
-        },
-        {
-            "uriref": f"{ENDPOINT}?filename=AccessLog.txt&host=localhost",
-            "nameref": "AccessLog.txt",
-            "roleref": "localhost",
-        },
-        {
-            "uriref": f"{ENDPOINT}?filename=AccessLog_1.txt&host=localhost",
-            "nameref": "AccessLog_1.txt",
-            "roleref": "localhost",
-        },
-        {
-            "uriref": f"{ENDPOINT}?filename=RequestLog.txt&host=localhost",
-            "nameref": "RequestLog.txt",
-            "roleref": "localhost",
-        },
-        {
-            "uriref": f"{ENDPOINT}?filename=RequestLog_1.txt&host=localhost",
-            "nameref": "RequestLog_1.txt",
-            "roleref": "localhost",
-        },
-        {
-            "uriref": f"{ENDPOINT}?filename=ErrorLog.txt&host=localhost",
-            "nameref": "ErrorLog.txt",
-            "roleref": "localhost",
-        },
-        {
-            "uriref": f"{ENDPOINT}?filename=ErrorLog_1.txt&host=localhost",
-            "nameref": "ErrorLog_1.txt",
-            "roleref": "localhost",
-        },
-        {
-            "uriref": f"{ENDPOINT}?filename=AuditLog.txt&host=localhost",
-            "nameref": "AuditLog.txt",
-            "roleref": "localhost",
-        },
-        {
-            "uriref": f"{ENDPOINT}?filename=AuditLog_1.txt&host=localhost",
-            "nameref": "AuditLog_1.txt",
-            "roleref": "localhost",
-        },
-    ]
+    response_body_path = resources_utils.get_test_resource_path(
+        __file__,
+        "logs-list-response-single-node.json",
+    )
+    with Path(response_body_path).open() as file:
+        response_body_json = json.load(file)
 
     builder = MLResponseBuilder()
     builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
     builder.with_request_param("format", "json")
     builder.with_response_content_type("application/json; charset=UTF-8")
     builder.with_response_status(200)
-    builder.with_response_body(builder.logs_list_body(items))
+    builder.with_response_body(response_body_json)
     builder.build_get()
 
     logs_list = logs_client.get_logs_list()
@@ -856,7 +764,7 @@ def test_get_logs_list(logs_client):
     assert len(grouped) == 4
 
     assert logs_list == {
-        "source": items,
+        "source": response_body_json["log-default-list"]["list-items"]["list-item"],
         "parsed": [
             {
                 "file-name": "8001_AccessLog.txt",

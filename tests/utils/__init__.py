@@ -390,18 +390,6 @@ class MLResponseBuilder:
             logs_body["logfile"]["message"] = "\n".join(logs)
         return logs_body
 
-    @staticmethod
-    def logs_list_body(
-        items: list[dict],
-    ) -> dict:
-        return {
-            "log-default-list": {
-                "list-items": {
-                    "list-item": items,
-                },
-            },
-        }
-
     @classmethod
     def generate_builder_code(
         cls,

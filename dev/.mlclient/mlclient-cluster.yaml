@@ -1,0 +1,18 @@
+app-name: app
+host: ml_cluster_node1
+#host: ml_cluster_node2
+#host: ml_cluster_node3
+username: admin
+password: admin
+protocol: http
+app-servers:
+
+  - id: manage
+    port: 8002
+    auth: digest
+    rest: true
+
+  - id: app-services
+    port: 8000
+    auth: digest
+    rest: true

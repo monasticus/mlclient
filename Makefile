@@ -42,16 +42,16 @@ ml-stop:
 
 linters:
 	poetry update ruff
-	@./meta/linters/look_for_new_linters.py
+	@./dev/scripts/linters/look_for_new_linters.py
 
 publish:
 	@poetry --build publish
 
 update-linters:
-	@poetry run ruff linter --output-format=json > ./meta/linters/linters.json
+	@poetry run ruff linter --output-format=json > ./dev/scripts/linters/linters.json
 
 mimetypes:
-	@./scripts/get-mimetypes/get-mimetypes.py
+	@poetry run python ./dev/scripts/get-mimetypes/get-mimetypes.py
 
 branches:
 	@git branch | grep -E -v "(main)|(bump.*)" | xargs git branch -D

@@ -13,13 +13,13 @@ def main():
 
 
 def _get_known_linters():
-    linters = Path("meta/linters/linters.json").read_text()
+    linters = Path("dev/scripts/linters/linters.json").read_text()
     return json.loads(linters)
 
 
 def _get_latest_linters(
 ) -> list:
-    linters = subprocess.check_output(["ruff", "linter", "--format=json"])
+    linters = subprocess.check_output(["ruff", "linter", "--output-format=json"])
     return json.loads(linters)
 
 

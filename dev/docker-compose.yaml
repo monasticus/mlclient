@@ -1,0 +1,100 @@
+version: '3'
+
+services:
+
+  dev:
+    build: .
+    container_name: dev
+    volumes:
+      - ..:/mlclient
+    networks:
+      - external_net
+    tty: true
+
+  ml_single_node:
+    image: marklogicdb/marklogic-db:latest-10.0
+    container_name: ml_single_node
+    hostname: localhost
+    environment:
+      MARKLOGIC_INIT: "true"
+      MARKLOGIC_ADMIN_USERNAME: "admin"
+      MARKLOGIC_ADMIN_PASSWORD: "admin"
+      TZ: "Europe/Prague"
+    ports:
+      - "8000-8010:8000-8010"
+      - "7997:7997"
+    volumes:
+      - ml_single_node_logs:/var/opt/MarkLogic/Logs
+    networks:
+      - external_net
+
+  ml_cluster_node1:
+    image: marklogicdb/marklogic-db:latest-10.0
+    container_name: ml_cluster_node1
+    hostname: ml_cluster_node1
+    dns_search: ""
+    environment:
+      MARKLOGIC_INIT: "true"
+      MARKLOGIC_ADMIN_USERNAME: "admin"
+      MARKLOGIC_ADMIN_PASSWORD: "admin"
+      TZ: "Europe/Prague"
+    volumes:
+      - ml_cluster_node1_logs:/var/opt/MarkLogic
+    ports:
+      - "7100-7110:8000-8010"
+      - "7197:7997"
+    networks:
+      - external_net
+
+  ml_cluster_node2:
+    image: marklogicdb/marklogic-db:latest-10.0
+    container_name: ml_cluster_node2
+    hostname: ml_cluster_node2
+    dns_search: ""
+    environment:
+      MARKLOGIC_INIT: "true"
+      MARKLOGIC_ADMIN_USERNAME: "admin"
+      MARKLOGIC_ADMIN_PASSWORD: "admin"
+      MARKLOGIC_JOIN_CLUSTER: "true"
+      MARKLOGIC_BOOTSTRAP_HOST: "ml_cluster_node1"
+      TZ: "Europe/Prague"
+    volumes:
+      - ml_cluster_node2_logs:/var/opt/MarkLogic
+    ports:
+      - "7200-7210:8000-8010"
+      - "7297:7997"
+    depends_on:
+      - ml_cluster_node1
+    networks:
+      - external_net
+
+  ml_cluster_node3:
+    image: marklogicdb/marklogic-db:latest-10.0
+    container_name: ml_cluster_node3
+    hostname: ml_cluster_node3
+    dns_search: ""
+    environment:
+      MARKLOGIC_INIT: "true"
+      MARKLOGIC_ADMIN_USERNAME: "admin"
+      MARKLOGIC_ADMIN_PASSWORD: "admin"
+      MARKLOGIC_JOIN_CLUSTER: "true"
+      MARKLOGIC_BOOTSTRAP_HOST: "ml_cluster_node1"
+      TZ: "Europe/Prague"
+    volumes:
+      - ml_cluster_node3_logs:/var/opt/MarkLogic
+    ports:
+      - "7300-7310:8000-8010"
+      - "7397:7997"
+    depends_on:
+      - ml_cluster_node1
+    networks:
+      - external_net
+
+networks:
+  external_net: {}
+
+volumes:
+  ml_single_node_logs:
+  ml_cluster_node1_logs:
+  ml_cluster_node2_logs:
+  ml_cluster_node3_logs:

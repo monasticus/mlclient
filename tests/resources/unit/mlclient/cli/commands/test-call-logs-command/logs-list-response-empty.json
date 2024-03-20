@@ -1,0 +1,19 @@
+{
+  "log-default-list": {
+    "meta": {
+      "uri": "/manage/v2/logs",
+      "current-time": "2024-03-19T13:49:35.600338+01:00",
+      "elapsed-time": {
+        "units": "sec",
+        "value": 0.008892
+      }
+    },
+    "list-items": {
+      "list-count": {
+        "units": "quantity",
+        "value": 0
+      },
+      "list-item": []
+    }
+  }
+}

@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import json
-from pathlib import Path
 
 import pytest
 import responses
@@ -733,12 +731,10 @@ def test_get_audit_logs_empty(logs_client):
 
 @responses.activate
 def test_get_logs_list(logs_client):
-    response_body_path = resources_utils.get_test_resource_path(
+    response_body_json = resources_utils.get_test_resource_json(
         __file__,
         "logs-list-response-single-node.json",
     )
-    with Path(response_body_path).open() as file:
-        response_body_json = json.load(file)
 
     builder = MLResponseBuilder()
     builder.with_base_url(f"http://localhost:8002{ENDPOINT}")

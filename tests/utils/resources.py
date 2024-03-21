@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import os
 from pathlib import Path
 
@@ -16,6 +17,15 @@ def list_resources(
 ) -> list[str]:
     test_resources_path = get_test_resources_path(test_path)
     return os.listdir(test_resources_path)
+
+
+def get_test_resource_json(
+    test_path: str,
+    resource: str,
+) -> dict:
+    test_resource_path = get_test_resource_path(test_path, resource)
+    with Path(test_resource_path).open() as file:
+        return json.load(file)
 
 
 def get_test_resource_path(

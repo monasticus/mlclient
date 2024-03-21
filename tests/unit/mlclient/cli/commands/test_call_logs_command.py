@@ -43,12 +43,10 @@ def ml_config() -> MLConfiguration:
 
 @pytest.fixture(autouse=True)
 def logs_list_response() -> dict:
-    response_body_path = resources_utils.get_test_resource_path(
+    return resources_utils.get_test_resource_json(
         __file__,
         "logs-list-response-single-node.json",
     )
-    with Path(response_body_path).open() as file:
-        return json.load(file)
 
 
 @pytest.fixture(autouse=True)
@@ -326,12 +324,10 @@ def test_command_call_logs_host():
 
 @responses.activate
 def test_command_call_logs_list():
-    response_body_path = resources_utils.get_test_resource_path(
+    response_body_json = resources_utils.get_test_resource_json(
         __file__,
         "logs-list-response-empty.json",
     )
-    with Path(response_body_path).open() as file:
-        response_body_json = json.load(file)
     builder = MLResponseBuilder()
     builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
     builder.with_request_param("format", "json")

@@ -8,7 +8,7 @@ It exports an implementation for 'call logs' command:
 from __future__ import annotations
 
 from functools import lru_cache
-from typing import Iterator
+from typing import Iterator, Generator
 
 from cleo.commands.command import Command
 from cleo.helpers import option
@@ -123,7 +123,7 @@ class CallLogsCommand(Command):
     ):
         """Print MarkLogic log files in a table."""
         logs_list = self._get_logs_list()
-        rows = self._get_log_files_rows(logs_list)
+        rows = list(self._get_log_files_rows(logs_list))
         self._render_log_files_table(rows)
 
     def _get_logs_list(
@@ -137,28 +137,24 @@ class CallLogsCommand(Command):
     def _get_log_files_rows(
         self,
         logs_list: dict,
-    ) -> list[list[str]]:
+    ) -> Generator[list[str]]:
         """Get rows to build a table with log files."""
         grouped_logs = logs_list["grouped"]
 
-        rows = []
         logs_hosts = sorted(grouped_logs)
         ml_client_host = self._get_logs_client().host
         for logs_host_index, logs_host in enumerate(logs_hosts):
-            if len(grouped_logs) > 1 or logs_host == ml_client_host:
-                rows.append([TableCell(f"- {logs_host.upper()} -", colspan=2)])
-                rows.append(self.table_separator())
+            if len(grouped_logs) > 1 or logs_host != ml_client_host:
+                yield [TableCell(f"- {logs_host.upper()} -", colspan=2)]
+                yield self.table_separator()
 
-            self._populate_rows_from_host_lvl(rows, logs_list, logs_host)
+            yield from self._populate_rows_from_host_lvl(logs_list, logs_host)
 
             if logs_host_index < len(grouped_logs) - 1:
-                rows.append(self.table_separator())
-
-        return rows
+                yield self.table_separator()
 
     def _populate_rows_from_host_lvl(
         self,
-        rows: list,
         logs_list: dict,
         host: str,
     ):
@@ -172,14 +168,13 @@ class CallLogsCommand(Command):
         )
         for server_index, server_key in enumerate(servers):
             server = None if server_key == self._NONE_SERVER_KEY else server_key
-            self._populate_rows_from_server_lvl(rows, logs_list, host, server)
+            yield from self._populate_rows_from_server_lvl(logs_list, host, server)
 
             if server_index < len(servers) - 1:
-                rows.append(self.table_separator())
+                yield self.table_separator()
 
     def _populate_rows_from_server_lvl(
         self,
-        rows: list,
         logs_list: dict,
         host: str,
         server: str | None,
@@ -190,8 +185,7 @@ class CallLogsCommand(Command):
         server_logs = grouped_logs[host][server]
         log_types = sorted(server_logs.keys())
         for log_type_index, log_type in enumerate(log_types):
-            self._populate_rows_from_log_type_lvl(
-                rows,
+            yield from self._populate_rows_from_log_type_lvl(
                 logs_list,
                 host,
                 server,
@@ -199,11 +193,10 @@ class CallLogsCommand(Command):
             )
 
             if log_type_index < len(log_types) - 1:
-                rows.append(["", ""])
+                yield ["", ""]
 
     def _populate_rows_from_log_type_lvl(
         self,
-        rows: list,
         logs_list: dict,
         host: str,
         server: str | None,
@@ -225,7 +218,7 @@ class CallLogsCommand(Command):
                 if log["nameref"] == file_name and log["roleref"] == host
             )
             url = f"{ml_url}{endpoint}"
-            rows.append([file_name, url])
+            yield [file_name, url]
 
     def _render_log_files_table(
         self,

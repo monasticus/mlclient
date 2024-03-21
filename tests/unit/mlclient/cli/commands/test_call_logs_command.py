@@ -16,10 +16,35 @@ ENDPOINT = "/manage/v2/logs"
 
 
 @pytest.fixture(autouse=True)
-def ml_config() -> MLConfiguration:
+def ml_config_single_node() -> MLConfiguration:
     config = {
         "app-name": "my-marklogic-app",
         "host": "localhost",
+        "username": "admin",
+        "password": "admin",
+        "protocol": "http",
+        "app-servers": [
+            {
+                "id": "manage",
+                "port": 8002,
+                "auth": "basic",
+                "rest": True,
+            },
+            {
+                "id": "content",
+                "port": 8100,
+                "auth": "basic",
+            },
+        ],
+    }
+    return MLConfiguration(**config)
+
+
+@pytest.fixture(autouse=True)
+def ml_config_cluster() -> MLConfiguration:
+    config = {
+        "app-name": "my-marklogic-app",
+        "host": "ml_cluster_node1",
         "username": "admin",
         "password": "admin",
         "protocol": "http",
@@ -57,10 +82,19 @@ def logs_list_from_cluster_response() -> dict:
 
 
 @pytest.fixture(autouse=True)
-def _setup(mocker, ml_config):
+def _setup(mocker, ml_config_single_node, ml_config_cluster):
     # Setup
+    original_method = MLConfiguration.from_environment
+
+    def config_from_environment(environment_name: str):
+        if environment_name == "test":
+            return ml_config_single_node
+        if environment_name == "test-cluster":
+            return ml_config_cluster
+        return original_method(environment_name)
+
     target = "mlclient.ml_config.MLConfiguration.from_environment"
-    mocker.patch(target, return_value=ml_config)
+    mocker.patch(target, side_effect=config_from_environment)
 
 
 @responses.activate
@@ -659,7 +693,7 @@ def test_command_call_output_of_logs_list(logs_list_response):
 
     expected_output_path = resources_utils.get_test_resource_path(
         __file__,
-        "output-full.txt",
+        "output-single-node-full.txt",
     )
     expected_output = Path(expected_output_path).read_text()
     assert command_output == expected_output
@@ -685,7 +719,7 @@ def test_command_call_output_of_logs_list_for_app_server(logs_list_response):
 
     expected_output_path = resources_utils.get_test_resource_path(
         __file__,
-        "output-server.txt",
+        "output-single-node-server.txt",
     )
     expected_output = Path(expected_output_path).read_text()
     assert command_output == expected_output
@@ -711,7 +745,7 @@ def test_command_call_output_of_logs_list_for_task_server(logs_list_response):
 
     expected_output_path = resources_utils.get_test_resource_path(
         __file__,
-        "output-task.txt",
+        "output-single-node-task.txt",
     )
     expected_output = Path(expected_output_path).read_text()
     assert command_output == expected_output
@@ -720,7 +754,7 @@ def test_command_call_output_of_logs_list_for_task_server(logs_list_response):
 @responses.activate
 def test_command_call_output_of_logs_list_from_cluster(logs_list_from_cluster_response):
     builder = MLResponseBuilder()
-    builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
+    builder.with_base_url(f"http://ml_cluster_node1:8002{ENDPOINT}")
     builder.with_request_param("format", "json")
     builder.with_response_content_type("application/json; charset=UTF-8")
     builder.with_response_status(200)
@@ -736,7 +770,7 @@ def test_command_call_output_of_logs_list_from_cluster(logs_list_from_cluster_re
 
     expected_output_path = resources_utils.get_test_resource_path(
         __file__,
-        "output-full-cluster.txt",
+        "output-cluster-full.txt",
     )
     expected_output = Path(expected_output_path).read_text()
     assert command_output == expected_output

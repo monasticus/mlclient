@@ -7,6 +7,7 @@ It exports an implementation for 'call logs' command:
 
 from __future__ import annotations
 
+from functools import lru_cache
 from typing import Iterator
 
 from cleo.commands.command import Command
@@ -129,11 +130,7 @@ class CallLogsCommand(Command):
         self,
     ) -> dict:
         """Retrieve logs list using LogsClient."""
-        environment = self.option("environment")
-        rest_server = self.option("rest-server")
-
-        manager = MLManager(environment)
-        with manager.get_logs_client(rest_server) as client:
+        with self._get_logs_client() as client:
             self.info(f"Getting logs list using REST App-Server {client.base_url}")
             return client.get_logs_list()
 
@@ -144,43 +141,46 @@ class CallLogsCommand(Command):
         """Get rows to build a table with log files."""
         grouped_logs = logs_list["grouped"]
 
-        app_port = self._get_app_port()
-        ml_client = self._get_logs_client()
-        ml_url = ml_client.base_url
-        ml_host = ml_client.host
         rows = []
-        for host_index, host in enumerate(sorted(grouped_logs)):
-            if len(grouped_logs) > 1 or host == ml_host:
-                rows.append([TableCell(f"- {host.upper()} -", colspan=2)])
+        logs_hosts = sorted(grouped_logs)
+        ml_client_host = self._get_logs_client().host
+        for logs_host_index, logs_host in enumerate(logs_hosts):
+            if len(grouped_logs) > 1 or logs_host == ml_client_host:
+                rows.append([TableCell(f"- {logs_host.upper()} -", colspan=2)])
                 rows.append(self.table_separator())
-            servers = sorted(
-                server if server is not None else self._NONE_SERVER_KEY
-                for server in grouped_logs[host]
-                if app_port is None or str(app_port) == server
-            )
-            for server_index, server_key in enumerate(servers):
-                server = None if server_key == self._NONE_SERVER_KEY else server_key
-                self._populate_rows_from_server_lvl(
-                    rows,
-                    logs_list,
-                    ml_url,
-                    host,
-                    server,
-                )
 
-                if server_index < len(servers) - 1:
-                    rows.append(self.table_separator())
-            if host_index < len(grouped_logs) - 1:
+            self._populate_rows_from_host_lvl(rows, logs_list, logs_host)
+
+            if logs_host_index < len(grouped_logs) - 1:
                 rows.append(self.table_separator())
 
         return rows
 
-    @classmethod
-    def _populate_rows_from_server_lvl(
-        cls,
+    def _populate_rows_from_host_lvl(
+        self,
         rows: list,
         logs_list: dict,
-        ml_url: str,
+        host: str,
+    ):
+        grouped_logs = logs_list["grouped"]
+
+        app_port = self._get_app_port()
+        servers = sorted(
+            server if server is not None else self._NONE_SERVER_KEY
+            for server in grouped_logs[host]
+            if app_port is None or str(app_port) == server
+        )
+        for server_index, server_key in enumerate(servers):
+            server = None if server_key == self._NONE_SERVER_KEY else server_key
+            self._populate_rows_from_server_lvl(rows, logs_list, host, server)
+
+            if server_index < len(servers) - 1:
+                rows.append(self.table_separator())
+
+    def _populate_rows_from_server_lvl(
+        self,
+        rows: list,
+        logs_list: dict,
         host: str,
         server: str | None,
     ):
@@ -190,10 +190,9 @@ class CallLogsCommand(Command):
         server_logs = grouped_logs[host][server]
         log_types = sorted(server_logs.keys())
         for log_type_index, log_type in enumerate(log_types):
-            cls._populate_rows_from_log_type_lvl(
+            self._populate_rows_from_log_type_lvl(
                 rows,
                 logs_list,
-                ml_url,
                 host,
                 server,
                 log_type,
@@ -202,11 +201,10 @@ class CallLogsCommand(Command):
             if log_type_index < len(log_types) - 1:
                 rows.append(["", ""])
 
-    @staticmethod
     def _populate_rows_from_log_type_lvl(
+        self,
         rows: list,
         logs_list: dict,
-        ml_url: str,
         host: str,
         server: str | None,
         log_type: LogType,
@@ -214,6 +212,8 @@ class CallLogsCommand(Command):
         """Populate rows with server log files of a specific type."""
         source_logs = logs_list["source"]
         grouped_logs = logs_list["grouped"]
+
+        ml_url = self._get_logs_client().base_url
 
         server_logs = grouped_logs[host][server]
         type_logs = server_logs[log_type]
@@ -319,9 +319,20 @@ class CallLogsCommand(Command):
                 app_port = named_app_port
         return app_port
 
-    def _get_logs_client(self):
+    def _get_logs_client(
+        self,
+    ):
         """Get LogsClient instance."""
         environment = self.option("environment")
         rest_server = self.option("rest-server")
-        manager = MLManager(environment)
-        return manager.get_logs_client(rest_server)
+        return _get_cached_logs_client(environment, rest_server)
+
+
+@lru_cache
+def _get_cached_logs_client(
+    environment: str,
+    rest_server: str,
+):
+    """Get LogsClient instance."""
+    manager = MLManager(environment)
+    return manager.get_logs_client(rest_server)

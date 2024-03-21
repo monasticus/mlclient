@@ -13,6 +13,7 @@ from cleo.commands.command import Command
 from cleo.helpers import option
 from cleo.io.inputs.option import Option
 from cleo.io.outputs.output import Type
+from cleo.ui.table_cell import TableCell
 
 from mlclient import MLManager
 from mlclient.clients import LogType
@@ -144,18 +145,32 @@ class CallLogsCommand(Command):
         grouped_logs = logs_list["grouped"]
 
         app_port = self._get_app_port()
-        ml_url = self._get_logs_client().base_url
+        ml_client = self._get_logs_client()
+        ml_url = ml_client.base_url
+        ml_host = ml_client.host
         rows = []
-        servers = sorted(
-            server if server is not None else self._NONE_SERVER_KEY
-            for server in grouped_logs
-            if app_port is None or str(app_port) == server
-        )
-        for server_index, server_key in enumerate(servers):
-            server = None if server_key == self._NONE_SERVER_KEY else server_key
-            self._populate_rows_from_server_lvl(rows, logs_list, ml_url, server)
+        for host_index, host in enumerate(sorted(grouped_logs)):
+            if len(grouped_logs) > 1 or host == ml_host:
+                rows.append([TableCell(f"- {host.upper()} -", colspan=2)])
+                rows.append(self.table_separator())
+            servers = sorted(
+                server if server is not None else self._NONE_SERVER_KEY
+                for server in grouped_logs[host]
+                if app_port is None or str(app_port) == server
+            )
+            for server_index, server_key in enumerate(servers):
+                server = None if server_key == self._NONE_SERVER_KEY else server_key
+                self._populate_rows_from_server_lvl(
+                    rows,
+                    logs_list,
+                    ml_url,
+                    host,
+                    server,
+                )
 
-            if server_index < len(servers) - 1:
+                if server_index < len(servers) - 1:
+                    rows.append(self.table_separator())
+            if host_index < len(grouped_logs) - 1:
                 rows.append(self.table_separator())
 
         return rows
@@ -166,18 +181,20 @@ class CallLogsCommand(Command):
         rows: list,
         logs_list: dict,
         ml_url: str,
+        host: str,
         server: str | None,
     ):
         """Populate rows with server log files."""
         grouped_logs = logs_list["grouped"]
 
-        server_logs = grouped_logs[server]
+        server_logs = grouped_logs[host][server]
         log_types = sorted(server_logs.keys())
         for log_type_index, log_type in enumerate(log_types):
             cls._populate_rows_from_log_type_lvl(
                 rows,
                 logs_list,
                 ml_url,
+                host,
                 server,
                 log_type,
             )
@@ -190,6 +207,7 @@ class CallLogsCommand(Command):
         rows: list,
         logs_list: dict,
         ml_url: str,
+        host: str,
         server: str | None,
         log_type: LogType,
     ):
@@ -197,12 +215,14 @@ class CallLogsCommand(Command):
         source_logs = logs_list["source"]
         grouped_logs = logs_list["grouped"]
 
-        server_logs = grouped_logs[server]
+        server_logs = grouped_logs[host][server]
         type_logs = server_logs[log_type]
         for days in sorted(type_logs):
             file_name = type_logs[days]
             endpoint = next(
-                log["uriref"] for log in source_logs if log["nameref"] == file_name
+                log["uriref"]
+                for log in source_logs
+                if log["nameref"] == file_name and log["roleref"] == host
             )
             url = f"{ml_url}{endpoint}"
             rows.append([file_name, url])

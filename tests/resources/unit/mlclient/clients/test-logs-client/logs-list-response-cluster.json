@@ -1,0 +1,110 @@
+{
+  "log-default-list": {
+    "meta": {
+      "uri": "/manage/v2/logs",
+      "current-time": "2024-03-19T13:49:35.600338+01:00",
+      "elapsed-time": {
+        "units": "sec",
+        "value": 0.008892
+      }
+    },
+    "list-items": {
+      "list-count": {
+        "units": "quantity",
+        "value": 18
+      },
+      "list-item": [
+        {
+          "uriref": "/manage/v2/logs?filename=8000_AccessLog.txt&host=ml_cluster_node3",
+          "nameref": "8000_AccessLog.txt",
+          "roleref": "ml_cluster_node3"
+        },
+        {
+          "uriref": "/manage/v2/logs?filename=8001_AccessLog_1.txt&host=ml_cluster_node3",
+          "nameref": "8001_AccessLog_1.txt",
+          "roleref": "ml_cluster_node3"
+        },
+        {
+          "uriref": "/manage/v2/logs?filename=8002_AccessLog.txt&host=ml_cluster_node3",
+          "nameref": "8002_AccessLog.txt",
+          "roleref": "ml_cluster_node3"
+        },
+        {
+          "uriref": "/manage/v2/logs?filename=8002_RequestLog.txt&host=ml_cluster_node3",
+          "nameref": "8002_RequestLog.txt",
+          "roleref": "ml_cluster_node3"
+        },
+        {
+          "uriref": "/manage/v2/logs?filename=ErrorLog_1.txt&host=ml_cluster_node3",
+          "nameref": "ErrorLog_1.txt",
+          "roleref": "ml_cluster_node3"
+        },
+        {
+          "uriref": "/manage/v2/logs?filename=ErrorLog.txt&host=ml_cluster_node3",
+          "nameref": "ErrorLog.txt",
+          "roleref": "ml_cluster_node3"
+        },
+        {
+          "uriref": "/manage/v2/logs?filename=8000_AccessLog.txt&host=ml_cluster_node2",
+          "nameref": "8000_AccessLog.txt",
+          "roleref": "ml_cluster_node2"
+        },
+        {
+          "uriref": "/manage/v2/logs?filename=8001_AccessLog_1.txt&host=ml_cluster_node2",
+          "nameref": "8001_AccessLog_1.txt",
+          "roleref": "ml_cluster_node2"
+        },
+        {
+          "uriref": "/manage/v2/logs?filename=8002_AccessLog.txt&host=ml_cluster_node2",
+          "nameref": "8002_AccessLog.txt",
+          "roleref": "ml_cluster_node2"
+        },
+        {
+          "uriref": "/manage/v2/logs?filename=8002_RequestLog.txt&host=ml_cluster_node2",
+          "nameref": "8002_RequestLog.txt",
+          "roleref": "ml_cluster_node2"
+        },
+        {
+          "uriref": "/manage/v2/logs?filename=ErrorLog_1.txt&host=ml_cluster_node2",
+          "nameref": "ErrorLog_1.txt",
+          "roleref": "ml_cluster_node2"
+        },
+        {
+          "uriref": "/manage/v2/logs?filename=ErrorLog.txt&host=ml_cluster_node2",
+          "nameref": "ErrorLog.txt",
+          "roleref": "ml_cluster_node2"
+        },
+        {
+          "uriref": "/manage/v2/logs?filename=8000_AccessLog.txt&host=ml_cluster_node1",
+          "nameref": "8000_AccessLog.txt",
+          "roleref": "ml_cluster_node1"
+        },
+        {
+          "uriref": "/manage/v2/logs?filename=8001_AccessLog_1.txt&host=ml_cluster_node1",
+          "nameref": "8001_AccessLog_1.txt",
+          "roleref": "ml_cluster_node1"
+        },
+        {
+          "uriref": "/manage/v2/logs?filename=8002_AccessLog.txt&host=ml_cluster_node1",
+          "nameref": "8002_AccessLog.txt",
+          "roleref": "ml_cluster_node1"
+        },
+        {
+          "uriref": "/manage/v2/logs?filename=8002_RequestLog.txt&host=ml_cluster_node1",
+          "nameref": "8002_RequestLog.txt",
+          "roleref": "ml_cluster_node1"
+        },
+        {
+          "uriref": "/manage/v2/logs?filename=ErrorLog_1.txt&host=ml_cluster_node1",
+          "nameref": "ErrorLog_1.txt",
+          "roleref": "ml_cluster_node1"
+        },
+        {
+          "uriref": "/manage/v2/logs?filename=ErrorLog.txt&host=ml_cluster_node1",
+          "nameref": "ErrorLog.txt",
+          "roleref": "ml_cluster_node1"
+        }
+      ]
+    }
+  }
+}

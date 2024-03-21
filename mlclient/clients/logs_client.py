@@ -296,11 +296,13 @@ class LogsClient(MLResourceClient):
             A parsed log item
         """
         file_name = source_log_item["nameref"]
+        host = source_log_item["roleref"]
         match = cls._FILENAME_RE.match(file_name)
         server = match.group(2)
         log_type = LogType.get(match.group(3))
         days_ago = int(match.group(5) or 0)
         return {
+            "host": host,
             "file-name": file_name,
             "server": server,
             "log-type": log_type,
@@ -325,15 +327,18 @@ class LogsClient(MLResourceClient):
         """
         grouped = {}
         for item in parsed_log_items:
+            host = item["host"]
             file_name = item["file-name"]
             server = item["server"]
             log_type = item["log-type"]
             days_ago = item["days-ago"]
 
-            if server not in grouped:
-                grouped[server] = {}
-            if log_type not in grouped[server]:
-                grouped[server][log_type] = {}
-            grouped[server][log_type][days_ago] = file_name
+            if host not in grouped:
+                grouped[host] = {}
+            if server not in grouped[host]:
+                grouped[host][server] = {}
+            if log_type not in grouped[host][server]:
+                grouped[host][server][log_type] = {}
+            grouped[host][server][log_type][days_ago] = file_name
 
         return grouped

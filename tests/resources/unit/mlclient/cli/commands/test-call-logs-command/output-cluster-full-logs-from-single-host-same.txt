@@ -1,0 +1,16 @@
+Getting logs list using REST App-Server http://ml_cluster_node1:8002
+
+┌──────────────────────┬────────────────────────── MARKLOGIC LOG FILES ──────────────────────────────────────────────────┐
+│ FILENAME             │ URL                                                                                             │
+├──────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ 8000_AccessLog.txt   │ http://ml_cluster_node1:8002/manage/v2/logs?filename=8000_AccessLog.txt&host=ml_cluster_node1   │
+├──────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ 8001_AccessLog_1.txt │ http://ml_cluster_node1:8002/manage/v2/logs?filename=8001_AccessLog_1.txt&host=ml_cluster_node1 │
+├──────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ 8002_AccessLog.txt   │ http://ml_cluster_node1:8002/manage/v2/logs?filename=8002_AccessLog.txt&host=ml_cluster_node1   │
+│                      │                                                                                                 │
+│ 8002_RequestLog.txt  │ http://ml_cluster_node1:8002/manage/v2/logs?filename=8002_RequestLog.txt&host=ml_cluster_node1  │
+├──────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ ErrorLog.txt         │ http://ml_cluster_node1:8002/manage/v2/logs?filename=ErrorLog.txt&host=ml_cluster_node1         │
+│ ErrorLog_1.txt       │ http://ml_cluster_node1:8002/manage/v2/logs?filename=ErrorLog_1.txt&host=ml_cluster_node1       │
+└──────────────────────┴─────────────────────────────────────────────────────────────────────────────────────────────────┘

@@ -667,9 +667,51 @@ def test_command_call_logs_output_for_xml_logs():
 
 
 @responses.activate
-def test_command_call_output_of_logs_list(logs_list_response):
+@pytest.mark.parametrize(
+    "args, host, response_path, output_path",
+    [
+        (
+            "-e test --list",
+            "localhost",
+            "logs-list-response-single-node.json",
+            "output-single-node-full.txt",
+        ),
+        (
+            "-e test -a manage --list",
+            "localhost",
+            "logs-list-response-single-node.json",
+            "output-single-node-server.txt",
+        ),
+        (
+            "-e test -a 0 --list",
+            "localhost",
+            "logs-list-response-single-node.json",
+            "output-single-node-task.txt",
+        ),
+        (
+            "-e test-cluster --list",
+            "ml_cluster_node1",
+            "logs-list-response-cluster.json",
+            "output-cluster-full.txt",
+        ),
+        (
+            "-e test-cluster --list",
+            "ml_cluster_node1",
+            "logs-list-response-cluster-logs-from-single-node.json",
+            "output-cluster-full-logs-from-single-host.txt",
+        ),
+        (
+            "-e test -a 9999 --list",
+            "localhost",
+            "logs-list-response-single-node.json",
+            "output-empty.txt",
+        ),
+    ],
+)
+def test_command_call_output_of_logs_list(args, host, response_path, output_path):
+    logs_list_response = resources_utils.get_test_resource_json(__file__, response_path)
     builder = MLResponseBuilder()
-    builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
+    builder.with_base_url(f"http://{host}:8002{ENDPOINT}")
     builder.with_request_param("format", "json")
     builder.with_response_content_type("application/json; charset=UTF-8")
     builder.with_response_status(200)
@@ -677,181 +719,10 @@ def test_command_call_output_of_logs_list(logs_list_response):
     builder.build_get()
 
     tester = _get_tester("call logs")
-    tester.execute("-e test --list")
+    tester.execute(args)
     command_output = tester.io.fetch_output()
 
-    assert tester.command.option("environment") == "test"
-    assert tester.command.option("list") is True
-
-    expected_output_path = resources_utils.get_test_resource_path(
-        __file__,
-        "output-single-node-full.txt",
-    )
-    expected_output = Path(expected_output_path).read_text()
-    assert command_output == expected_output
-
-
-@responses.activate
-def test_command_call_output_of_logs_list_for_app_server(logs_list_response):
-    builder = MLResponseBuilder()
-    builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
-    builder.with_request_param("format", "json")
-    builder.with_response_content_type("application/json; charset=UTF-8")
-    builder.with_response_status(200)
-    builder.with_response_body(logs_list_response)
-    builder.build_get()
-
-    tester = _get_tester("call logs")
-    tester.execute("-e test -a manage --list")
-    command_output = tester.io.fetch_output()
-
-    assert tester.command.option("environment") == "test"
-    assert tester.command.option("app-server") == "manage"
-    assert tester.command.option("list") is True
-
-    expected_output_path = resources_utils.get_test_resource_path(
-        __file__,
-        "output-single-node-server.txt",
-    )
-    expected_output = Path(expected_output_path).read_text()
-    assert command_output == expected_output
-
-
-@responses.activate
-def test_command_call_output_of_logs_list_for_task_server(logs_list_response):
-    builder = MLResponseBuilder()
-    builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
-    builder.with_request_param("format", "json")
-    builder.with_response_content_type("application/json; charset=UTF-8")
-    builder.with_response_status(200)
-    builder.with_response_body(logs_list_response)
-    builder.build_get()
-
-    tester = _get_tester("call logs")
-    tester.execute("-e test -a 0 --list")
-    command_output = tester.io.fetch_output()
-
-    assert tester.command.option("environment") == "test"
-    assert tester.command.option("app-server") == "0"
-    assert tester.command.option("list") is True
-
-    expected_output_path = resources_utils.get_test_resource_path(
-        __file__,
-        "output-single-node-task.txt",
-    )
-    expected_output = Path(expected_output_path).read_text()
-    assert command_output == expected_output
-
-
-@responses.activate
-def test_command_call_output_of_logs_list_from_cluster():
-    logs_list_from_cluster_response = resources_utils.get_test_resource_json(
-        __file__,
-        "logs-list-response-cluster.json",
-    )
-    builder = MLResponseBuilder()
-    builder.with_base_url(f"http://ml_cluster_node1:8002{ENDPOINT}")
-    builder.with_request_param("format", "json")
-    builder.with_response_content_type("application/json; charset=UTF-8")
-    builder.with_response_status(200)
-    builder.with_response_body(logs_list_from_cluster_response)
-    builder.build_get()
-
-    tester = _get_tester("call logs")
-    tester.execute("-e test-cluster --list")
-    command_output = tester.io.fetch_output()
-
-    assert tester.command.option("environment") == "test-cluster"
-    assert tester.command.option("list") is True
-
-    expected_output_path = resources_utils.get_test_resource_path(
-        __file__,
-        "output-cluster-full.txt",
-    )
-    expected_output = Path(expected_output_path).read_text()
-    assert command_output == expected_output
-
-
-@responses.activate
-def test_command_call_output_of_logs_list_from_cluster_logs_from_single_node_same():
-    logs_list_from_cluster_response = resources_utils.get_test_resource_json(
-        __file__,
-        "logs-list-response-cluster-logs-from-single-node-same.json",
-    )
-    builder = MLResponseBuilder()
-    builder.with_base_url(f"http://ml_cluster_node1:8002{ENDPOINT}")
-    builder.with_request_param("format", "json")
-    builder.with_response_content_type("application/json; charset=UTF-8")
-    builder.with_response_status(200)
-    builder.with_response_body(logs_list_from_cluster_response)
-    builder.build_get()
-
-    tester = _get_tester("call logs")
-    tester.execute("-e test-cluster --list")
-    command_output = tester.io.fetch_output()
-
-    assert tester.command.option("environment") == "test-cluster"
-    assert tester.command.option("list") is True
-
-    expected_output_path = resources_utils.get_test_resource_path(
-        __file__,
-        "output-cluster-full-logs-from-single-host-same.txt",
-    )
-    expected_output = Path(expected_output_path).read_text()
-    assert command_output == expected_output
-
-
-@responses.activate
-def test_command_call_output_of_logs_list_from_cluster_logs_from_single_node_other():
-    logs_list_from_cluster_response = resources_utils.get_test_resource_json(
-        __file__,
-        "logs-list-response-cluster-logs-from-single-node-other.json",
-    )
-    builder = MLResponseBuilder()
-    builder.with_base_url(f"http://ml_cluster_node1:8002{ENDPOINT}")
-    builder.with_request_param("format", "json")
-    builder.with_response_content_type("application/json; charset=UTF-8")
-    builder.with_response_status(200)
-    builder.with_response_body(logs_list_from_cluster_response)
-    builder.build_get()
-
-    tester = _get_tester("call logs")
-    tester.execute("-e test-cluster --list")
-    command_output = tester.io.fetch_output()
-
-    assert tester.command.option("environment") == "test-cluster"
-    assert tester.command.option("list") is True
-
-    expected_output_path = resources_utils.get_test_resource_path(
-        __file__,
-        "output-cluster-full-logs-from-single-host-other.txt",
-    )
-    expected_output = Path(expected_output_path).read_text()
-    assert command_output == expected_output
-
-
-@responses.activate
-def test_command_call_output_of_logs_list_empty(logs_list_response):
-    builder = MLResponseBuilder()
-    builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
-    builder.with_request_param("format", "json")
-    builder.with_response_content_type("application/json; charset=UTF-8")
-    builder.with_response_status(200)
-    builder.with_response_body(logs_list_response)
-    builder.build_get()
-
-    tester = _get_tester("call logs")
-    tester.execute("-e test -a 9999 --list")
-    command_output = tester.io.fetch_output()
-
-    assert tester.command.option("environment") == "test"
-    assert tester.command.option("app-server") == "9999"
-    assert tester.command.option("list") is True
-
-    expected_output_path = resources_utils.get_test_resource_path(
-        __file__,
-        "output-empty.txt",
-    )
+    expected_output_path = resources_utils.get_test_resource_path(__file__, output_path)
     expected_output = Path(expected_output_path).read_text()
     assert command_output == expected_output
 

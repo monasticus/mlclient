@@ -122,10 +122,13 @@ class CallLogsCommand(Command):
     ):
         """Print MarkLogic log files in a table."""
         logs_list = self._get_logs_list()
-        hosts = sorted(logs_list["grouped"])
-        for host in hosts:
-            rows = list(self._get_log_files_rows(logs_list, host))
-            self._render_log_files_table(host, rows)
+        logs_hosts = sorted(
+            host for host in logs_list["grouped"] if self.option("host") in [None, host]
+        )
+        self.line("")
+        for logs_host in logs_hosts:
+            rows = list(self._get_log_files_rows(logs_list, logs_host))
+            self._render_log_files_table(logs_host, rows)
 
     def _get_logs_list(
         self,
@@ -209,7 +212,6 @@ class CallLogsCommand(Command):
         rows: list[list[str]],
     ):
         """Render a table with MarkLogic log files."""
-        self.line("")
         if len(rows) > 0:
             table = self.table()
             table.set_header_title(f"MARKLOGIC LOG FILES ({host})")

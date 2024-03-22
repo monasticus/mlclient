@@ -668,7 +668,7 @@ def test_command_call_logs_output_for_xml_logs():
 
 @responses.activate
 @pytest.mark.parametrize(
-    "args, host, response_path, output_path",
+    ("args", "host", "response_path", "output_path"),
     [
         (
             "-e test --list",
@@ -701,10 +701,34 @@ def test_command_call_logs_output_for_xml_logs():
             "output-cluster-full-logs-from-single-host.txt",
         ),
         (
+            "-e test -H localhost --list",
+            "localhost",
+            "logs-list-response-single-node.json",
+            "output-single-node-full.txt",
+        ),
+        (
+            "-e test-cluster -H ml_cluster_node2 --list",
+            "ml_cluster_node1",
+            "logs-list-response-cluster.json",
+            "output-cluster-host.txt",
+        ),
+        (
+            "-e test -H non-existing --list",
+            "localhost",
+            "logs-list-response-single-node.json",
+            "output-single-node-empty.txt",
+        ),
+        (
+            "-e test-cluster -H non-existing --list",
+            "ml_cluster_node1",
+            "logs-list-response-cluster.json",
+            "output-cluster-empty.txt",
+        ),
+        (
             "-e test -a 9999 --list",
             "localhost",
             "logs-list-response-single-node.json",
-            "output-empty.txt",
+            "output-single-node-empty.txt",
         ),
     ],
 )

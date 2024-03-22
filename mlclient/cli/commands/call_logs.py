@@ -14,7 +14,6 @@ from cleo.commands.command import Command
 from cleo.helpers import option
 from cleo.io.inputs.option import Option
 from cleo.io.outputs.output import Type
-from cleo.ui.table_cell import TableCell
 
 from mlclient import MLManager
 from mlclient.clients import LogType
@@ -123,8 +122,10 @@ class CallLogsCommand(Command):
     ):
         """Print MarkLogic log files in a table."""
         logs_list = self._get_logs_list()
-        rows = list(self._get_log_files_rows(logs_list))
-        self._render_log_files_table(rows)
+        hosts = sorted(logs_list["grouped"])
+        for host in hosts:
+            rows = list(self._get_log_files_rows(logs_list, host))
+            self._render_log_files_table(host, rows)
 
     def _get_logs_list(
         self,
@@ -137,27 +138,9 @@ class CallLogsCommand(Command):
     def _get_log_files_rows(
         self,
         logs_list: dict,
+        host: str,
     ) -> Generator[list[str]]:
         """Get rows to build a table with log files."""
-        grouped_logs = logs_list["grouped"]
-
-        logs_hosts = sorted(grouped_logs)
-        ml_client_host = self._get_logs_client().host
-        for logs_host_index, logs_host in enumerate(logs_hosts):
-            if len(grouped_logs) > 1 or logs_host != ml_client_host:
-                yield [TableCell(f"- {logs_host.upper()} -", colspan=2)]
-                yield self.table_separator()
-
-            yield from self._populate_rows_from_host_lvl(logs_list, logs_host)
-
-            if logs_host_index < len(grouped_logs) - 1:
-                yield self.table_separator()
-
-    def _populate_rows_from_host_lvl(
-        self,
-        logs_list: dict,
-        host: str,
-    ):
         grouped_logs = logs_list["grouped"]
 
         app_port = self._get_app_port()
@@ -222,13 +205,14 @@ class CallLogsCommand(Command):
 
     def _render_log_files_table(
         self,
+        host: str,
         rows: list[list[str]],
     ):
         """Render a table with MarkLogic log files."""
         self.line("")
         if len(rows) > 0:
             table = self.table()
-            table.set_header_title("MARKLOGIC LOG FILES")
+            table.set_header_title(f"MARKLOGIC LOG FILES ({host})")
             table.set_headers(["FILENAME", "URL"])
             table.set_style("box")
             table.set_rows(rows)

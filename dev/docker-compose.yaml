@@ -14,7 +14,7 @@ services:
   ml_single_node:
     image: marklogicdb/marklogic-db:latest-10.0
     container_name: ml_single_node
-    hostname: localhost
+    hostname: ml_single_node
     environment:
       MARKLOGIC_INIT: "true"
       MARKLOGIC_ADMIN_USERNAME: "admin"

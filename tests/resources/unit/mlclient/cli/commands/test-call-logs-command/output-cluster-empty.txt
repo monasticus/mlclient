@@ -1,2 +1,0 @@
-Getting logs list using REST App-Server http://ml_cluster_node1:8002
-

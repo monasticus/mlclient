@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from pathlib import Path
 
 import pytest
@@ -359,7 +360,7 @@ def test_command_call_logs_host():
 def test_command_call_logs_list():
     response_body_json = resources_utils.get_test_resource_json(
         __file__,
-        "logs-list-response-empty.json",
+        "logs-list-response-single-node.json",
     )
     builder = MLResponseBuilder()
     builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
@@ -682,41 +683,23 @@ def test_command_call_logs_output_for_xml_logs():
             "logs-list-response-single-node.json",
             "output-single-node-server.txt",
         ),
-        (  # single node - logs list for an existing host
+        (  # single node - logs list for a host
             "-e test -H localhost --list",
             "localhost",
             "logs-list-response-single-node.json",
             "output-single-node-full.txt",
         ),
-        (  # single node - logs list for a non-existing host
-            "-e test -H non-existing --list",
-            "localhost",
-            "logs-list-response-single-node.json",
-            "output-single-node-empty.txt",
-        ),
-        (  # single node - logs list for an existing host and a specific app server
+        (  # single node - logs list for a host and a specific app server
             "-e test -H localhost -a manage --list",
             "localhost",
             "logs-list-response-single-node.json",
             "output-single-node-server.txt",
         ),
-        (  # single node - logs list for a non-existing host and a specific app server
-            "-e test -H non-existing -a manage --list",
-            "localhost",
-            "logs-list-response-single-node.json",
-            "output-single-node-empty.txt",
-        ),
-        (  # cluster - logs list for all hosts
+        (  # cluster - logs list for all hosts with logs
             "-e test-cluster --list",
             "ml_cluster_node1",
             "logs-list-response-cluster.json",
             "output-cluster-full.txt",
-        ),
-        (  # cluster - logs list for a single host
-            "-e test-cluster --list",
-            "ml_cluster_node1",
-            "logs-list-response-cluster-logs-from-single-node.json",
-            "output-cluster-full-logs-from-single-host.txt",
         ),
         (  # cluster - logs list for a specific app server
             "-e test-cluster -a manage --list",
@@ -724,35 +707,29 @@ def test_command_call_logs_output_for_xml_logs():
             "logs-list-response-cluster.json",
             "output-cluster-server.txt",
         ),
-        (  # cluster - logs list for an existing host
+        (  # cluster - logs list for a host
             "-e test-cluster -H ml_cluster_node2 --list",
             "ml_cluster_node1",
-            "logs-list-response-cluster.json",
+            "logs-list-response-cluster-logs-from-single-node.json",
             "output-cluster-host.txt",
         ),
-        (  # cluster - logs list for a non-existing host
-            "-e test-cluster -H non-existing --list",
-            "ml_cluster_node1",
-            "logs-list-response-cluster.json",
-            "output-cluster-empty.txt",
-        ),
-        (  # cluster - logs list for an existing host and a specific app server
+        (  # cluster - logs list for a host and a specific app server
             "-e test-cluster -H ml_cluster_node2 -a manage --list",
             "ml_cluster_node1",
-            "logs-list-response-cluster.json",
+            "logs-list-response-cluster-logs-from-single-node.json",
             "output-cluster-host-and-server.txt",
-        ),
-        (  # cluster - logs list for a non-existing host and a specific app server
-            "-e test-cluster -H non-existing -a manage --list",
-            "ml_cluster_node1",
-            "logs-list-response-cluster.json",
-            "output-cluster-empty.txt",
         ),
         (  # task server log files
             "-e test -a 0 --list",
             "localhost",
             "logs-list-response-single-node.json",
             "output-single-node-task.txt",
+        ),
+        (  # no log files
+            "-e test --list",
+            "localhost",
+            "logs-list-response-no-logs.json",
+            "output-single-node-empty.txt",
         ),
         (  # no corresponding log files
             "-e test -a 9999 --list",
@@ -763,10 +740,14 @@ def test_command_call_logs_output_for_xml_logs():
     ],
 )
 def test_command_call_output_of_logs_list(args, host, response_path, output_path):
+    host_param_match = re.search(r"-H\s+(\S+)", args)
+    host_param = host_param_match.group(1) if host_param_match else None
+
     logs_list_response = resources_utils.get_test_resource_json(__file__, response_path)
     builder = MLResponseBuilder()
     builder.with_base_url(f"http://{host}:8002{ENDPOINT}")
     builder.with_request_param("format", "json")
+    builder.with_request_param("host", host_param)
     builder.with_response_content_type("application/json; charset=UTF-8")
     builder.with_response_status(200)
     builder.with_response_body(logs_list_response)

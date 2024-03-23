@@ -75,7 +75,8 @@ class MLResponseBuilder:
         key: str,
         value: Any,
     ):
-        self._request_params.append((key, value))
+        if value is not None:
+            self._request_params.append((key, value))
 
     def with_request_content_type(
         self,

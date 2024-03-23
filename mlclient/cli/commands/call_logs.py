@@ -122,9 +122,7 @@ class CallLogsCommand(Command):
     ):
         """Print MarkLogic log files in a table."""
         logs_list = self._get_logs_list()
-        logs_hosts = sorted(
-            host for host in logs_list["grouped"] if self.option("host") in [None, host]
-        )
+        logs_hosts = sorted(host for host in logs_list["grouped"])
         self.line("")
         for logs_host in logs_hosts:
             rows = list(self._get_log_files_rows(logs_list, logs_host))
@@ -134,9 +132,10 @@ class CallLogsCommand(Command):
         self,
     ) -> dict:
         """Retrieve logs list using LogsClient."""
+        host = self.option("host")
         with self._get_logs_client() as client:
             self.info(f"Getting logs list using REST App-Server {client.base_url}")
-            return client.get_logs_list()
+            return client.get_logs_list(host)
 
     def _get_log_files_rows(
         self,

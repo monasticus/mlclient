@@ -39,7 +39,7 @@ services:
       MARKLOGIC_ADMIN_PASSWORD: "admin"
       TZ: "Europe/Prague"
     volumes:
-      - ml_cluster_node1_logs:/var/opt/MarkLogic
+      - ml_cluster_node1_logs:/var/opt/MarkLogic/Logs
     ports:
       - "7100-7110:8000-8010"
       - "7197:7997"
@@ -59,7 +59,7 @@ services:
       MARKLOGIC_BOOTSTRAP_HOST: "ml_cluster_node1"
       TZ: "Europe/Prague"
     volumes:
-      - ml_cluster_node2_logs:/var/opt/MarkLogic
+      - ml_cluster_node2_logs:/var/opt/MarkLogic/Logs
     ports:
       - "7200-7210:8000-8010"
       - "7297:7997"
@@ -81,7 +81,7 @@ services:
       MARKLOGIC_BOOTSTRAP_HOST: "ml_cluster_node1"
       TZ: "Europe/Prague"
     volumes:
-      - ml_cluster_node3_logs:/var/opt/MarkLogic
+      - ml_cluster_node3_logs:/var/opt/MarkLogic/Logs
     ports:
       - "7300-7310:8000-8010"
       - "7397:7997"

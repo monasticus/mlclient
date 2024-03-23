@@ -136,6 +136,7 @@ class LogsClient(MLResourceClient):
 
     def get_logs_list(
         self,
+        host: str | None = None,
     ) -> dict:
         """Return a logs list from a MarkLogic server.
 
@@ -145,7 +146,12 @@ class LogsClient(MLResourceClient):
         * parsed: points to parsed log list items
           includes a filename, server, log type and a number of days
         * grouped: points to a dictionary
-          { <server>: { <log-type>: { <num-of-days>: <file-name> } } }
+          { <host>: { <server>: { <log-type>: { <num-of-days>: <file-name> } } } }
+
+        Parameters
+        ----------
+        host : str | None, default None
+            A host name with log files to retrieve
 
         Returns
         -------
@@ -157,7 +163,7 @@ class LogsClient(MLResourceClient):
         MarkLogicError
             If MarkLogic returns an error
         """
-        call = self._get_call()
+        call = self._get_call(host=host)
 
         resp = self.call(call)
         resp_body = resp.json()

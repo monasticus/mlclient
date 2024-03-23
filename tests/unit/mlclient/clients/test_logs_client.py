@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from pathlib import Path
+
 import pytest
 import responses
 
@@ -1223,6 +1225,118 @@ def test_get_logs_list_from_multiple_nodes_cluster(logs_client):
 
 
 @responses.activate
+def test_get_logs_list_from_multiple_nodes_cluster_for_single_host(logs_client):
+    response_body_json = resources_utils.get_test_resource_json(
+        __file__,
+        "logs-list-response-cluster-one-node-only.json",
+    )
+
+    builder = MLResponseBuilder()
+    builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
+    builder.with_request_param("format", "json")
+    builder.with_request_param("host", "ml_cluster_node3")
+    builder.with_response_content_type("application/json; charset=UTF-8")
+    builder.with_response_status(200)
+    builder.with_response_body(response_body_json)
+    builder.build_get()
+
+    logs_list = logs_client.get_logs_list(host="ml_cluster_node3")
+    assert isinstance(logs_list, dict)
+
+    source = logs_list["source"]
+    assert isinstance(source, list)
+    assert len(source) == 6
+
+    parsed = logs_list["parsed"]
+    assert isinstance(parsed, list)
+    assert len(parsed) == 6
+
+    grouped = logs_list["grouped"]
+    assert isinstance(grouped, dict)
+    assert len(grouped) == 1
+
+    host_grouped = grouped["ml_cluster_node3"]
+    assert isinstance(host_grouped, dict)
+    assert len(host_grouped) == 4
+
+    assert logs_list == {
+        "source": response_body_json["log-default-list"]["list-items"]["list-item"],
+        "parsed": [
+            {
+                "host": "ml_cluster_node3",
+                "file-name": "8000_AccessLog.txt",
+                "server": "8000",
+                "log-type": LogType.ACCESS,
+                "days-ago": 0,
+            },
+            {
+                "host": "ml_cluster_node3",
+                "file-name": "8001_AccessLog_1.txt",
+                "server": "8001",
+                "log-type": LogType.ACCESS,
+                "days-ago": 1,
+            },
+            {
+                "host": "ml_cluster_node3",
+                "file-name": "8002_AccessLog.txt",
+                "server": "8002",
+                "log-type": LogType.ACCESS,
+                "days-ago": 0,
+            },
+            {
+                "host": "ml_cluster_node3",
+                "file-name": "8002_RequestLog.txt",
+                "server": "8002",
+                "log-type": LogType.REQUEST,
+                "days-ago": 0,
+            },
+            {
+                "host": "ml_cluster_node3",
+                "file-name": "ErrorLog_1.txt",
+                "server": None,
+                "log-type": LogType.ERROR,
+                "days-ago": 1,
+            },
+            {
+                "host": "ml_cluster_node3",
+                "file-name": "ErrorLog.txt",
+                "server": None,
+                "log-type": LogType.ERROR,
+                "days-ago": 0,
+            },
+        ],
+        "grouped": {
+            "ml_cluster_node3": {
+                "8000": {
+                    LogType.ACCESS: {
+                        0: "8000_AccessLog.txt",
+                    },
+                },
+                "8001": {
+                    LogType.ACCESS: {
+                        1: "8001_AccessLog_1.txt",
+                    },
+                },
+                "8002": {
+                    LogType.ACCESS: {
+                        0: "8002_AccessLog.txt",
+                    },
+                    LogType.REQUEST: {
+                        0: "8002_RequestLog.txt",
+                    },
+                },
+                None: {
+                    LogType.ERROR: {
+                        0: "ErrorLog.txt",
+                        1: "ErrorLog_1.txt",
+                    },
+                },
+            },
+        },
+    }
+
+
+@responses.activate
 def test_get_logs_list_unauthorized(logs_client):
     builder = MLResponseBuilder()
     builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
@@ -1244,4 +1358,28 @@ def test_get_logs_list_unauthorized(logs_client):
         logs_client.get_logs_list()
 
     expected_error = "[401 Unauthorized] 401 Unauthorized"
+    assert err.value.args[0] == expected_error
+
+
+@responses.activate
+def test_get_logs_list_no_such_host(logs_client):
+    response_body_path = resources_utils.get_test_resource_path(
+        __file__,
+        "no-such-host.json",
+    )
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/manage/v2/logs")
+    builder.with_request_param("format", "json")
+    builder.with_request_param("host", "non-existing-host")
+    builder.with_response_content_type("application/json; charset=UTF-8")
+    builder.with_response_status(404)
+    builder.with_response_body(Path(response_body_path).read_bytes())
+    builder.build_get()
+    with pytest.raises(MarkLogicError) as err:
+        logs_client.get_logs_list(host="non-existing-host")
+
+    expected_error = (
+        "[404 Not Found] (XDMP-NOSUCHHOST) XDMP-NOSUCHHOST: "
+        'xdmp:host("non-existing-host") -- No such host non-existing-host'
+    )
     assert err.value.args[0] == expected_error

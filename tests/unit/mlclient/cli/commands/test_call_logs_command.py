@@ -670,61 +670,91 @@ def test_command_call_logs_output_for_xml_logs():
 @pytest.mark.parametrize(
     ("args", "host", "response_path", "output_path"),
     [
-        (
+        (  # single node - logs list
             "-e test --list",
             "localhost",
             "logs-list-response-single-node.json",
             "output-single-node-full.txt",
         ),
-        (
+        (  # single node - logs list for a specific app server
             "-e test -a manage --list",
             "localhost",
             "logs-list-response-single-node.json",
             "output-single-node-server.txt",
         ),
-        (
-            "-e test -a 0 --list",
-            "localhost",
-            "logs-list-response-single-node.json",
-            "output-single-node-task.txt",
-        ),
-        (
-            "-e test-cluster --list",
-            "ml_cluster_node1",
-            "logs-list-response-cluster.json",
-            "output-cluster-full.txt",
-        ),
-        (
-            "-e test-cluster --list",
-            "ml_cluster_node1",
-            "logs-list-response-cluster-logs-from-single-node.json",
-            "output-cluster-full-logs-from-single-host.txt",
-        ),
-        (
+        (  # single node - logs list for an existing host
             "-e test -H localhost --list",
             "localhost",
             "logs-list-response-single-node.json",
             "output-single-node-full.txt",
         ),
-        (
-            "-e test-cluster -H ml_cluster_node2 --list",
-            "ml_cluster_node1",
-            "logs-list-response-cluster.json",
-            "output-cluster-host.txt",
-        ),
-        (
+        (  # single node - logs list for a non-existing host
             "-e test -H non-existing --list",
             "localhost",
             "logs-list-response-single-node.json",
             "output-single-node-empty.txt",
         ),
-        (
+        (  # single node - logs list for an existing host and a specific app server
+            "-e test -H localhost -a manage --list",
+            "localhost",
+            "logs-list-response-single-node.json",
+            "output-single-node-server.txt",
+        ),
+        (  # single node - logs list for a non-existing host and a specific app server
+            "-e test -H non-existing -a manage --list",
+            "localhost",
+            "logs-list-response-single-node.json",
+            "output-single-node-empty.txt",
+        ),
+        (  # cluster - logs list for all hosts
+            "-e test-cluster --list",
+            "ml_cluster_node1",
+            "logs-list-response-cluster.json",
+            "output-cluster-full.txt",
+        ),
+        (  # cluster - logs list for a single host
+            "-e test-cluster --list",
+            "ml_cluster_node1",
+            "logs-list-response-cluster-logs-from-single-node.json",
+            "output-cluster-full-logs-from-single-host.txt",
+        ),
+        (  # cluster - logs list for a specific app server
+            "-e test-cluster -a manage --list",
+            "ml_cluster_node1",
+            "logs-list-response-cluster.json",
+            "output-cluster-server.txt",
+        ),
+        (  # cluster - logs list for an existing host
+            "-e test-cluster -H ml_cluster_node2 --list",
+            "ml_cluster_node1",
+            "logs-list-response-cluster.json",
+            "output-cluster-host.txt",
+        ),
+        (  # cluster - logs list for a non-existing host
             "-e test-cluster -H non-existing --list",
             "ml_cluster_node1",
             "logs-list-response-cluster.json",
             "output-cluster-empty.txt",
         ),
-        (
+        (  # cluster - logs list for an existing host and a specific app server
+            "-e test-cluster -H ml_cluster_node2 -a manage --list",
+            "ml_cluster_node1",
+            "logs-list-response-cluster.json",
+            "output-cluster-host-and-server.txt",
+        ),
+        (  # cluster - logs list for a non-existing host and a specific app server
+            "-e test-cluster -H non-existing -a manage --list",
+            "ml_cluster_node1",
+            "logs-list-response-cluster.json",
+            "output-cluster-empty.txt",
+        ),
+        (  # task server log files
+            "-e test -a 0 --list",
+            "localhost",
+            "logs-list-response-single-node.json",
+            "output-single-node-task.txt",
+        ),
+        (  # no corresponding log files
             "-e test -a 9999 --list",
             "localhost",
             "logs-list-response-single-node.json",

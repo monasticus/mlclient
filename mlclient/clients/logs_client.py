@@ -137,7 +137,7 @@ class LogsClient(MLResourceClient):
     def get_logs_list(
         self,
         host: str | None = None,
-    ) -> dict:
+    ) -> dict | None:
         """Return a logs list from a MarkLogic server.
 
         Result of this method is a parsed dict of log files with 3 keys:
@@ -155,7 +155,7 @@ class LogsClient(MLResourceClient):
 
         Returns
         -------
-        list
+        dict
             A parsed list of log files in the MarkLogic server
 
         Raises
@@ -274,9 +274,15 @@ class LogsClient(MLResourceClient):
         dict
             A compiled information about ML log files
         """
-        source_items = resp_body["log-default-list"]["list-items"]["list-item"]
-        parsed = [cls._parse_log_file(log_item) for log_item in source_items]
-        grouped = cls._group_log_files(parsed)
+        count = resp_body["log-default-list"]["list-items"]["list-count"]["value"]
+        if count > 0:
+            source_items = resp_body["log-default-list"]["list-items"]["list-item"]
+            parsed = [cls._parse_log_file(log_item) for log_item in source_items]
+            grouped = cls._group_log_files(parsed)
+        else:
+            source_items = []
+            parsed = []
+            grouped = {}
 
         return {
             "source": source_items,

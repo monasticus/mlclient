@@ -731,6 +731,76 @@ def test_get_audit_logs_empty(logs_client):
 
 
 @responses.activate
+def test_get_logs_list_unauthorized(logs_client):
+    builder = MLResponseBuilder()
+    builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
+    builder.with_request_param("format", "json")
+    builder.with_response_content_type("application/json; charset=UTF-8")
+    builder.with_response_status(401)
+    builder.with_response_body(
+        {
+            "errorResponse": {
+                "statusCode": 401,
+                "status": "Unauthorized",
+                "message": "401 Unauthorized",
+            },
+        },
+    )
+    builder.build_get()
+
+    with pytest.raises(MarkLogicError) as err:
+        logs_client.get_logs_list()
+
+    expected_error = "[401 Unauthorized] 401 Unauthorized"
+    assert err.value.args[0] == expected_error
+
+
+@responses.activate
+def test_get_logs_list_no_such_host(logs_client):
+    response_body_path = resources_utils.get_test_resource_path(
+        __file__,
+        "no-such-host.json",
+    )
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/manage/v2/logs")
+    builder.with_request_param("format", "json")
+    builder.with_request_param("host", "non-existing-host")
+    builder.with_response_content_type("application/json; charset=UTF-8")
+    builder.with_response_status(404)
+    builder.with_response_body(Path(response_body_path).read_bytes())
+    builder.build_get()
+    with pytest.raises(MarkLogicError) as err:
+        logs_client.get_logs_list(host="non-existing-host")
+
+    expected_error = (
+        "[404 Not Found] (XDMP-NOSUCHHOST) XDMP-NOSUCHHOST: "
+        'xdmp:host("non-existing-host") -- No such host non-existing-host'
+    )
+    assert err.value.args[0] == expected_error
+
+
+@responses.activate
+def test_get_logs_list_empty(logs_client):
+    response_body_json = resources_utils.get_test_resource_json(
+        __file__,
+        "logs-list-response-no-logs.json",
+    )
+    builder = MLResponseBuilder()
+    builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
+    builder.with_request_param("format", "json")
+    builder.with_response_body(response_body_json)
+    builder.build_get()
+
+    logs_list = logs_client.get_logs_list()
+
+    assert logs_list == {
+        "source": [],
+        "parsed": [],
+        "grouped": {},
+    }
+
+
+@responses.activate
 def test_get_logs_list_from_single_node_cluster(logs_client):
     response_body_json = resources_utils.get_test_resource_json(
         __file__,
@@ -1334,52 +1404,3 @@ def test_get_logs_list_from_multiple_nodes_cluster_for_single_host(logs_client):
             },
         },
     }
-
-
-@responses.activate
-def test_get_logs_list_unauthorized(logs_client):
-    builder = MLResponseBuilder()
-    builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
-    builder.with_request_param("format", "json")
-    builder.with_response_content_type("application/json; charset=UTF-8")
-    builder.with_response_status(401)
-    builder.with_response_body(
-        {
-            "errorResponse": {
-                "statusCode": 401,
-                "status": "Unauthorized",
-                "message": "401 Unauthorized",
-            },
-        },
-    )
-    builder.build_get()
-
-    with pytest.raises(MarkLogicError) as err:
-        logs_client.get_logs_list()
-
-    expected_error = "[401 Unauthorized] 401 Unauthorized"
-    assert err.value.args[0] == expected_error
-
-
-@responses.activate
-def test_get_logs_list_no_such_host(logs_client):
-    response_body_path = resources_utils.get_test_resource_path(
-        __file__,
-        "no-such-host.json",
-    )
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/manage/v2/logs")
-    builder.with_request_param("format", "json")
-    builder.with_request_param("host", "non-existing-host")
-    builder.with_response_content_type("application/json; charset=UTF-8")
-    builder.with_response_status(404)
-    builder.with_response_body(Path(response_body_path).read_bytes())
-    builder.build_get()
-    with pytest.raises(MarkLogicError) as err:
-        logs_client.get_logs_list(host="non-existing-host")
-
-    expected_error = (
-        "[404 Not Found] (XDMP-NOSUCHHOST) XDMP-NOSUCHHOST: "
-        'xdmp:host("non-existing-host") -- No such host non-existing-host'
-    )
-    assert err.value.args[0] == expected_error

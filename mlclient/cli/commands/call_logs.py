@@ -163,8 +163,8 @@ class CallLogsCommand(Command):
         logs_list: dict,
         host: str,
         server: str | None,
-    ):
-        """Populate rows with server log files."""
+    ) -> Generator[list[str]]:
+        """Get rows with server log files."""
         grouped_logs = logs_list["grouped"]
 
         server_logs = grouped_logs[host][server]
@@ -186,8 +186,8 @@ class CallLogsCommand(Command):
         host: str,
         server: str | None,
         log_type: LogType,
-    ):
-        """Populate rows with server log files of a specific type."""
+    ) -> Generator[list[str]]:
+        """Get rows with server log files of a specific type."""
         source_logs = logs_list["source"]
         grouped_logs = logs_list["grouped"]
 
@@ -311,6 +311,6 @@ def _get_cached_logs_client(
     environment: str,
     rest_server: str,
 ):
-    """Get LogsClient instance."""
+    """Get cached LogsClient instance."""
     manager = MLManager(environment)
     return manager.get_logs_client(rest_server)

@@ -1,0 +1,8 @@
+{
+  "errorResponse": {
+    "statusCode": "404",
+    "status": "Not Found",
+    "messageCode": "XDMP-NOSUCHHOST",
+    "message": "XDMP-NOSUCHHOST: xdmp:host(\"non-existing-host\") -- No such host non-existing-host"
+  }
+}

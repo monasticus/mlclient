@@ -7,7 +7,8 @@ It exports an implementation for 'call logs' command:
 
 from __future__ import annotations
 
-from typing import Iterator
+from functools import lru_cache
+from typing import Generator, Iterator
 
 from cleo.commands.command import Command
 from cleo.helpers import option
@@ -121,101 +122,99 @@ class CallLogsCommand(Command):
     ):
         """Print MarkLogic log files in a table."""
         logs_list = self._get_logs_list()
-        rows = self._get_log_files_rows(logs_list)
-        self._render_log_files_table(rows)
+        logs_hosts = sorted(host for host in logs_list["grouped"])
+        app_port = self._get_app_port()
+        self.line("")
+        for logs_host in logs_hosts:
+            rows = list(self._get_log_files_rows(logs_list, logs_host, app_port))
+            self._render_log_files_table(logs_host, rows)
 
     def _get_logs_list(
         self,
     ) -> dict:
         """Retrieve logs list using LogsClient."""
-        environment = self.option("environment")
-        rest_server = self.option("rest-server")
-
-        manager = MLManager(environment)
-        with manager.get_logs_client(rest_server) as client:
+        host = self.option("host")
+        with self._get_logs_client() as client:
             self.info(f"Getting logs list using REST App-Server {client.base_url}")
-            return client.get_logs_list()
+            return client.get_logs_list(host)
 
     def _get_log_files_rows(
         self,
         logs_list: dict,
-    ) -> list[list[str]]:
+        host: str,
+        app_port: int | str,
+    ) -> Generator[list[str]]:
         """Get rows to build a table with log files."""
         grouped_logs = logs_list["grouped"]
 
-        app_port = self._get_app_port()
-        ml_url = self._get_logs_client().base_url
-        rows = []
         servers = sorted(
             server if server is not None else self._NONE_SERVER_KEY
-            for server in grouped_logs
+            for server in grouped_logs[host]
             if app_port is None or str(app_port) == server
         )
         for server_index, server_key in enumerate(servers):
             server = None if server_key == self._NONE_SERVER_KEY else server_key
-            self._populate_rows_from_server_lvl(rows, logs_list, ml_url, server)
+            yield from self._populate_rows_from_server_lvl(logs_list, host, server)
 
             if server_index < len(servers) - 1:
-                rows.append(self.table_separator())
+                yield self.table_separator()
 
-        return rows
-
-    @classmethod
     def _populate_rows_from_server_lvl(
-        cls,
-        rows: list,
+        self,
         logs_list: dict,
-        ml_url: str,
+        host: str,
         server: str | None,
-    ):
-        """Populate rows with server log files."""
+    ) -> Generator[list[str]]:
+        """Get rows with server log files."""
         grouped_logs = logs_list["grouped"]
 
-        server_logs = grouped_logs[server]
+        server_logs = grouped_logs[host][server]
         log_types = sorted(server_logs.keys())
         for log_type_index, log_type in enumerate(log_types):
-            cls._populate_rows_from_log_type_lvl(
-                rows,
+            yield from self._populate_rows_from_log_type_lvl(
                 logs_list,
-                ml_url,
+                host,
                 server,
                 log_type,
             )
 
             if log_type_index < len(log_types) - 1:
-                rows.append(["", ""])
+                yield ["", ""]
 
-    @staticmethod
     def _populate_rows_from_log_type_lvl(
-        rows: list,
+        self,
         logs_list: dict,
-        ml_url: str,
+        host: str,
         server: str | None,
         log_type: LogType,
-    ):
-        """Populate rows with server log files of a specific type."""
+    ) -> Generator[list[str]]:
+        """Get rows with server log files of a specific type."""
         source_logs = logs_list["source"]
         grouped_logs = logs_list["grouped"]
 
-        server_logs = grouped_logs[server]
+        ml_url = self._get_logs_client().base_url
+
+        server_logs = grouped_logs[host][server]
         type_logs = server_logs[log_type]
         for days in sorted(type_logs):
             file_name = type_logs[days]
             endpoint = next(
-                log["uriref"] for log in source_logs if log["nameref"] == file_name
+                log["uriref"]
+                for log in source_logs
+                if log["nameref"] == file_name and log["roleref"] == host
             )
             url = f"{ml_url}{endpoint}"
-            rows.append([file_name, url])
+            yield [file_name, url]
 
     def _render_log_files_table(
         self,
+        host: str,
         rows: list[list[str]],
     ):
         """Render a table with MarkLogic log files."""
-        self.line("")
         if len(rows) > 0:
             table = self.table()
-            table.set_header_title("MARKLOGIC LOG FILES")
+            table.set_header_title(f"MARKLOGIC LOG FILES ({host})")
             table.set_headers(["FILENAME", "URL"])
             table.set_style("box")
             table.set_rows(rows)
@@ -279,7 +278,7 @@ class CallLogsCommand(Command):
 
     def _get_app_port(
         self,
-    ):
+    ) -> int | str:
         """Identify app port to be used."""
         environment = self.option("environment")
         app_port = self.option("app-server")
@@ -299,9 +298,20 @@ class CallLogsCommand(Command):
                 app_port = named_app_port
         return app_port
 
-    def _get_logs_client(self):
+    def _get_logs_client(
+        self,
+    ):
         """Get LogsClient instance."""
         environment = self.option("environment")
         rest_server = self.option("rest-server")
-        manager = MLManager(environment)
-        return manager.get_logs_client(rest_server)
+        return _get_cached_logs_client(environment, rest_server)
+
+
+@lru_cache
+def _get_cached_logs_client(
+    environment: str,
+    rest_server: str,
+):
+    """Get cached LogsClient instance."""
+    manager = MLManager(environment)
+    return manager.get_logs_client(rest_server)

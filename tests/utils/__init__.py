@@ -75,7 +75,8 @@ class MLResponseBuilder:
         key: str,
         value: Any,
     ):
-        self._request_params.append((key, value))
+        if value is not None:
+            self._request_params.append((key, value))
 
     def with_request_content_type(
         self,
@@ -389,18 +390,6 @@ class MLResponseBuilder:
         if len(logs) > 0:
             logs_body["logfile"]["message"] = "\n".join(logs)
         return logs_body
-
-    @staticmethod
-    def logs_list_body(
-        items: list[dict],
-    ) -> dict:
-        return {
-            "log-default-list": {
-                "list-items": {
-                    "list-item": items,
-                },
-            },
-        }
 
     @classmethod
     def generate_builder_code(

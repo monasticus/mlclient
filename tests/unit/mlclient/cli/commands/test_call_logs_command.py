@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from pathlib import Path
 
 import pytest
@@ -16,7 +17,7 @@ ENDPOINT = "/manage/v2/logs"
 
 
 @pytest.fixture(autouse=True)
-def ml_config() -> MLConfiguration:
+def ml_config_single_node() -> MLConfiguration:
     config = {
         "app-name": "my-marklogic-app",
         "host": "localhost",
@@ -41,116 +42,52 @@ def ml_config() -> MLConfiguration:
 
 
 @pytest.fixture(autouse=True)
-def logs_list_items() -> list:
-    return [
-        {
-            "uriref": f"{ENDPOINT}?filename=8001_AccessLog.txt&host=localhost",
-            "nameref": "8001_AccessLog.txt",
-            "roleref": "localhost",
-        },
-        {
-            "uriref": f"{ENDPOINT}?filename=8002_AccessLog_1.txt&host=localhost",
-            "nameref": "8002_AccessLog_1.txt",
-            "roleref": "localhost",
-        },
-        {
-            "uriref": f"{ENDPOINT}?filename=8001_RequestLog.txt&host=localhost",
-            "nameref": "8001_RequestLog.txt",
-            "roleref": "localhost",
-        },
-        {
-            "uriref": f"{ENDPOINT}?filename=8002_RequestLog_1.txt&host=localhost",
-            "nameref": "8002_RequestLog_1.txt",
-            "roleref": "localhost",
-        },
-        {
-            "uriref": f"{ENDPOINT}?filename=8001_ErrorLog.txt&host=localhost",
-            "nameref": "8001_ErrorLog.txt",
-            "roleref": "localhost",
-        },
-        {
-            "uriref": f"{ENDPOINT}?filename=8002_ErrorLog_1.txt&host=localhost",
-            "nameref": "8002_ErrorLog_1.txt",
-            "roleref": "localhost",
-        },
-        {
-            "uriref": f"{ENDPOINT}?filename=TaskServer_AccessLog.txt&host=localhost",
-            "nameref": "TaskServer_AccessLog.txt",
-            "roleref": "localhost",
-        },
-        {
-            "uriref": f"{ENDPOINT}?filename=TaskServer_AccessLog_1.txt&host=localhost",
-            "nameref": "TaskServer_AccessLog_1.txt",
-            "roleref": "localhost",
-        },
-        {
-            "uriref": f"{ENDPOINT}?filename=TaskServer_RequestLog.txt&host=localhost",
-            "nameref": "TaskServer_RequestLog.txt",
-            "roleref": "localhost",
-        },
-        {
-            "uriref": f"{ENDPOINT}?filename=TaskServer_RequestLog_1.txt&host=localhost",
-            "nameref": "TaskServer_RequestLog_1.txt",
-            "roleref": "localhost",
-        },
-        {
-            "uriref": f"{ENDPOINT}?filename=TaskServer_ErrorLog.txt&host=localhost",
-            "nameref": "TaskServer_ErrorLog.txt",
-            "roleref": "localhost",
-        },
-        {
-            "uriref": f"{ENDPOINT}?filename=TaskServer_ErrorLog_1.txt&host=localhost",
-            "nameref": "TaskServer_ErrorLog_1.txt",
-            "roleref": "localhost",
-        },
-        {
-            "uriref": f"{ENDPOINT}?filename=AccessLog.txt&host=localhost",
-            "nameref": "AccessLog.txt",
-            "roleref": "localhost",
-        },
-        {
-            "uriref": f"{ENDPOINT}?filename=AccessLog_1.txt&host=localhost",
-            "nameref": "AccessLog_1.txt",
-            "roleref": "localhost",
-        },
-        {
-            "uriref": f"{ENDPOINT}?filename=RequestLog.txt&host=localhost",
-            "nameref": "RequestLog.txt",
-            "roleref": "localhost",
-        },
-        {
-            "uriref": f"{ENDPOINT}?filename=RequestLog_1.txt&host=localhost",
-            "nameref": "RequestLog_1.txt",
-            "roleref": "localhost",
-        },
-        {
-            "uriref": f"{ENDPOINT}?filename=ErrorLog.txt&host=localhost",
-            "nameref": "ErrorLog.txt",
-            "roleref": "localhost",
-        },
-        {
-            "uriref": f"{ENDPOINT}?filename=ErrorLog_1.txt&host=localhost",
-            "nameref": "ErrorLog_1.txt",
-            "roleref": "localhost",
-        },
-        {
-            "uriref": f"{ENDPOINT}?filename=AuditLog.txt&host=localhost",
-            "nameref": "AuditLog.txt",
-            "roleref": "localhost",
-        },
-        {
-            "uriref": f"{ENDPOINT}?filename=AuditLog_1.txt&host=localhost",
-            "nameref": "AuditLog_1.txt",
-            "roleref": "localhost",
-        },
-    ]
+def ml_config_cluster() -> MLConfiguration:
+    config = {
+        "app-name": "my-marklogic-app",
+        "host": "ml_cluster_node1",
+        "username": "admin",
+        "password": "admin",
+        "protocol": "http",
+        "app-servers": [
+            {
+                "id": "manage",
+                "port": 8002,
+                "auth": "basic",
+                "rest": True,
+            },
+            {
+                "id": "content",
+                "port": 8100,
+                "auth": "basic",
+            },
+        ],
+    }
+    return MLConfiguration(**config)
 
 
 @pytest.fixture(autouse=True)
-def _setup(mocker, ml_config):
+def logs_list_response() -> dict:
+    return resources_utils.get_test_resource_json(
+        __file__,
+        "logs-list-response-single-node.json",
+    )
+
+
+@pytest.fixture(autouse=True)
+def _setup(mocker, ml_config_single_node, ml_config_cluster):
     # Setup
+    original_method = MLConfiguration.from_environment
+
+    def config_from_environment(environment_name: str):
+        if environment_name == "test":
+            return ml_config_single_node
+        if environment_name == "test-cluster":
+            return ml_config_cluster
+        return original_method(environment_name)
+
     target = "mlclient.ml_config.MLConfiguration.from_environment"
-    mocker.patch(target, return_value=ml_config)
+    mocker.patch(target, side_effect=config_from_environment)
 
 
 @responses.activate
@@ -421,10 +358,14 @@ def test_command_call_logs_host():
 
 @responses.activate
 def test_command_call_logs_list():
+    response_body_json = resources_utils.get_test_resource_json(
+        __file__,
+        "logs-list-response-single-node.json",
+    )
     builder = MLResponseBuilder()
     builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
     builder.with_request_param("format", "json")
-    builder.with_response_body(builder.logs_list_body([]))
+    builder.with_response_body(response_body_json)
     builder.build_get()
 
     tester = _get_tester("call logs")
@@ -727,104 +668,96 @@ def test_command_call_logs_output_for_xml_logs():
 
 
 @responses.activate
-def test_command_call_output_of_logs_list(logs_list_items):
+@pytest.mark.parametrize(
+    ("args", "host", "response_path", "output_path"),
+    [
+        (  # single node - logs list
+            "-e test --list",
+            "localhost",
+            "logs-list-response-single-node.json",
+            "output-single-node-full.txt",
+        ),
+        (  # single node - logs list for a specific app server
+            "-e test -a manage --list",
+            "localhost",
+            "logs-list-response-single-node.json",
+            "output-single-node-server.txt",
+        ),
+        (  # single node - logs list for a host
+            "-e test -H localhost --list",
+            "localhost",
+            "logs-list-response-single-node.json",
+            "output-single-node-full.txt",
+        ),
+        (  # single node - logs list for a host and a specific app server
+            "-e test -H localhost -a manage --list",
+            "localhost",
+            "logs-list-response-single-node.json",
+            "output-single-node-server.txt",
+        ),
+        (  # cluster - logs list for all hosts with logs
+            "-e test-cluster --list",
+            "ml_cluster_node1",
+            "logs-list-response-cluster.json",
+            "output-cluster-full.txt",
+        ),
+        (  # cluster - logs list for a specific app server
+            "-e test-cluster -a manage --list",
+            "ml_cluster_node1",
+            "logs-list-response-cluster.json",
+            "output-cluster-server.txt",
+        ),
+        (  # cluster - logs list for a host
+            "-e test-cluster -H ml_cluster_node2 --list",
+            "ml_cluster_node1",
+            "logs-list-response-cluster-logs-from-single-node.json",
+            "output-cluster-host.txt",
+        ),
+        (  # cluster - logs list for a host and a specific app server
+            "-e test-cluster -H ml_cluster_node2 -a manage --list",
+            "ml_cluster_node1",
+            "logs-list-response-cluster-logs-from-single-node.json",
+            "output-cluster-host-and-server.txt",
+        ),
+        (  # task server log files
+            "-e test -a 0 --list",
+            "localhost",
+            "logs-list-response-single-node.json",
+            "output-single-node-task.txt",
+        ),
+        (  # no log files
+            "-e test --list",
+            "localhost",
+            "logs-list-response-no-logs.json",
+            "output-single-node-empty.txt",
+        ),
+        (  # no corresponding log files
+            "-e test -a 9999 --list",
+            "localhost",
+            "logs-list-response-single-node.json",
+            "output-single-node-empty.txt",
+        ),
+    ],
+)
+def test_command_call_output_of_logs_list(args, host, response_path, output_path):
+    host_param_match = re.search(r"-H\s+(\S+)", args)
+    host_param = host_param_match.group(1) if host_param_match else None
+
+    logs_list_response = resources_utils.get_test_resource_json(__file__, response_path)
     builder = MLResponseBuilder()
-    builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
+    builder.with_base_url(f"http://{host}:8002{ENDPOINT}")
     builder.with_request_param("format", "json")
+    builder.with_request_param("host", host_param)
     builder.with_response_content_type("application/json; charset=UTF-8")
     builder.with_response_status(200)
-    builder.with_response_body(builder.logs_list_body(logs_list_items))
+    builder.with_response_body(logs_list_response)
     builder.build_get()
 
     tester = _get_tester("call logs")
-    tester.execute("-e test --list")
+    tester.execute(args)
     command_output = tester.io.fetch_output()
 
-    assert tester.command.option("environment") == "test"
-    assert tester.command.option("list") is True
-
-    expected_output_path = resources_utils.get_test_resource_path(
-        __file__,
-        "output-full.txt",
-    )
-    expected_output = Path(expected_output_path).read_text()
-    assert command_output == expected_output
-
-
-@responses.activate
-def test_command_call_output_of_logs_list_for_app_server(logs_list_items):
-    builder = MLResponseBuilder()
-    builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
-    builder.with_request_param("format", "json")
-    builder.with_response_content_type("application/json; charset=UTF-8")
-    builder.with_response_status(200)
-    builder.with_response_body(builder.logs_list_body(logs_list_items))
-    builder.build_get()
-
-    tester = _get_tester("call logs")
-    tester.execute("-e test -a manage --list")
-    command_output = tester.io.fetch_output()
-
-    assert tester.command.option("environment") == "test"
-    assert tester.command.option("app-server") == "manage"
-    assert tester.command.option("list") is True
-
-    expected_output_path = resources_utils.get_test_resource_path(
-        __file__,
-        "output-server.txt",
-    )
-    expected_output = Path(expected_output_path).read_text()
-    assert command_output == expected_output
-
-
-@responses.activate
-def test_command_call_output_of_logs_list_for_task_server(logs_list_items):
-    builder = MLResponseBuilder()
-    builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
-    builder.with_request_param("format", "json")
-    builder.with_response_content_type("application/json; charset=UTF-8")
-    builder.with_response_status(200)
-    builder.with_response_body(builder.logs_list_body(logs_list_items))
-    builder.build_get()
-
-    tester = _get_tester("call logs")
-    tester.execute("-e test -a 0 --list")
-    command_output = tester.io.fetch_output()
-
-    assert tester.command.option("environment") == "test"
-    assert tester.command.option("app-server") == "0"
-    assert tester.command.option("list") is True
-
-    expected_output_path = resources_utils.get_test_resource_path(
-        __file__,
-        "output-task.txt",
-    )
-    expected_output = Path(expected_output_path).read_text()
-    assert command_output == expected_output
-
-
-@responses.activate
-def test_command_call_output_of_logs_list_empty(logs_list_items):
-    builder = MLResponseBuilder()
-    builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
-    builder.with_request_param("format", "json")
-    builder.with_response_content_type("application/json; charset=UTF-8")
-    builder.with_response_status(200)
-    builder.with_response_body(builder.logs_list_body(logs_list_items))
-    builder.build_get()
-
-    tester = _get_tester("call logs")
-    tester.execute("-e test -a 9999 --list")
-    command_output = tester.io.fetch_output()
-
-    assert tester.command.option("environment") == "test"
-    assert tester.command.option("app-server") == "9999"
-    assert tester.command.option("list") is True
-
-    expected_output_path = resources_utils.get_test_resource_path(
-        __file__,
-        "output-empty.txt",
-    )
+    expected_output_path = resources_utils.get_test_resource_path(__file__, output_path)
     expected_output = Path(expected_output_path).read_text()
     assert command_output == expected_output
 

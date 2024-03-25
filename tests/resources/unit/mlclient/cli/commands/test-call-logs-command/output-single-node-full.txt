@@ -1,6 +1,6 @@
 Getting logs list using REST App-Server http://localhost:8002
 
-┌─────────────────────────────┬─────────────────── MARKLOGIC LOG FILES ──────────────────────────────────────────────────┐
+┌─────────────────────────────┬───────────── MARKLOGIC LOG FILES (localhost) ────────────────────────────────────────────┐
 │ FILENAME                    │ URL                                                                                      │
 ├─────────────────────────────┼──────────────────────────────────────────────────────────────────────────────────────────┤
 │ 8001_AccessLog.txt          │ http://localhost:8002/manage/v2/logs?filename=8001_AccessLog.txt&host=localhost          │

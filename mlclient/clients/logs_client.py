@@ -136,6 +136,7 @@ class LogsClient(MLResourceClient):
 
     def get_logs_list(
         self,
+        host: str | None = None,
     ) -> dict:
         """Return a logs list from a MarkLogic server.
 
@@ -145,11 +146,16 @@ class LogsClient(MLResourceClient):
         * parsed: points to parsed log list items
           includes a filename, server, log type and a number of days
         * grouped: points to a dictionary
-          { <server>: { <log-type>: { <num-of-days>: <file-name> } } }
+          { <host>: { <server>: { <log-type>: { <num-of-days>: <file-name> } } } }
+
+        Parameters
+        ----------
+        host : str | None, default None
+            A host name with log files to retrieve
 
         Returns
         -------
-        list
+        dict
             A parsed list of log files in the MarkLogic server
 
         Raises
@@ -157,7 +163,7 @@ class LogsClient(MLResourceClient):
         MarkLogicError
             If MarkLogic returns an error
         """
-        call = self._get_call()
+        call = self._get_call(host=host)
 
         resp = self.call(call)
         resp_body = resp.json()
@@ -268,9 +274,15 @@ class LogsClient(MLResourceClient):
         dict
             A compiled information about ML log files
         """
-        source_items = resp_body["log-default-list"]["list-items"]["list-item"]
-        parsed = [cls._parse_log_file(log_item) for log_item in source_items]
-        grouped = cls._group_log_files(parsed)
+        count = resp_body["log-default-list"]["list-items"]["list-count"]["value"]
+        if count > 0:
+            source_items = resp_body["log-default-list"]["list-items"]["list-item"]
+            parsed = [cls._parse_log_file(log_item) for log_item in source_items]
+            grouped = cls._group_log_files(parsed)
+        else:
+            source_items = []
+            parsed = []
+            grouped = {}
 
         return {
             "source": source_items,
@@ -296,11 +308,13 @@ class LogsClient(MLResourceClient):
             A parsed log item
         """
         file_name = source_log_item["nameref"]
+        host = source_log_item["roleref"]
         match = cls._FILENAME_RE.match(file_name)
         server = match.group(2)
         log_type = LogType.get(match.group(3))
         days_ago = int(match.group(5) or 0)
         return {
+            "host": host,
             "file-name": file_name,
             "server": server,
             "log-type": log_type,
@@ -325,15 +339,18 @@ class LogsClient(MLResourceClient):
         """
         grouped = {}
         for item in parsed_log_items:
+            host = item["host"]
             file_name = item["file-name"]
             server = item["server"]
             log_type = item["log-type"]
             days_ago = item["days-ago"]
 
-            if server not in grouped:
-                grouped[server] = {}
-            if log_type not in grouped[server]:
-                grouped[server][log_type] = {}
-            grouped[server][log_type][days_ago] = file_name
+            if host not in grouped:
+                grouped[host] = {}
+            if server not in grouped[host]:
+                grouped[host][server] = {}
+            if log_type not in grouped[host][server]:
+                grouped[host][server][log_type] = {}
+            grouped[host][server][log_type][days_ago] = file_name
 
         return grouped

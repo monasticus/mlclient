@@ -12,16 +12,16 @@ imports:
 	@poetry run isort .
 
 lint:
-	-@poetry run ruff .
+	-@poetry run ruff check .
 
 lintp:
-	-@poetry run ruff . --preview
+	-@poetry run ruff check . --preview
 
 lint-fix:
-	-@poetry run ruff . --fix
+	-@poetry run ruff check . --fix
 
 lintp-fix:
-	-@poetry run ruff . --preview --fix
+	-@poetry run ruff check . --preview --fix
 
 format: imports lint-fix
 	@poetry run ruff format .

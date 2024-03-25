@@ -137,7 +137,7 @@ class LogsClient(MLResourceClient):
     def get_logs_list(
         self,
         host: str | None = None,
-    ) -> dict | None:
+    ) -> dict:
         """Return a logs list from a MarkLogic server.
 
         Result of this method is a parsed dict of log files with 3 keys:

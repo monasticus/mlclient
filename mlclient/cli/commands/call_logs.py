@@ -123,9 +123,10 @@ class CallLogsCommand(Command):
         """Print MarkLogic log files in a table."""
         logs_list = self._get_logs_list()
         logs_hosts = sorted(host for host in logs_list["grouped"])
+        app_port = self._get_app_port()
         self.line("")
         for logs_host in logs_hosts:
-            rows = list(self._get_log_files_rows(logs_list, logs_host))
+            rows = list(self._get_log_files_rows(logs_list, logs_host, app_port))
             self._render_log_files_table(logs_host, rows)
 
     def _get_logs_list(
@@ -141,11 +142,11 @@ class CallLogsCommand(Command):
         self,
         logs_list: dict,
         host: str,
+        app_port: int | str,
     ) -> Generator[list[str]]:
         """Get rows to build a table with log files."""
         grouped_logs = logs_list["grouped"]
 
-        app_port = self._get_app_port()
         servers = sorted(
             server if server is not None else self._NONE_SERVER_KEY
             for server in grouped_logs[host]
@@ -277,7 +278,7 @@ class CallLogsCommand(Command):
 
     def _get_app_port(
         self,
-    ):
+    ) -> int | str:
         """Identify app port to be used."""
         environment = self.option("environment")
         app_port = self.option("app-server")

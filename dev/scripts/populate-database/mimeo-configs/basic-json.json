@@ -1,0 +1,19 @@
+{
+  "output": {
+    "format": "json",
+    "indent": 2,
+    "directory_path": "output/some/dir",
+    "file_name": "doc"
+  },
+  "_templates_": [
+    {
+      "count": 125,
+      "model": {
+        "SomeEntity": {
+          "ChildNode1": "{auto_increment}",
+          "ChildNode2": "{key}"
+        }
+      }
+    }
+  ]
+}

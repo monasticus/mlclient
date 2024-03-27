@@ -90,7 +90,6 @@ addopts = ["--strict-markers", "--benchmark-autosave"]
 markers = [
     "ml_access" # marks tests requiring an ML access
 ]
-log_cli = true
 
 [tool.coverage.report]
 show_missing = true

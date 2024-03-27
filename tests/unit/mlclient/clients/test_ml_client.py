@@ -25,6 +25,7 @@ def test_context_mng():
     assert not client.is_connected()
 
 
+@responses.activate
 def test_request_when_disconnected():
     response_body_path = resources_utils.get_test_resource_path(
         __file__,
@@ -37,7 +38,7 @@ def test_request_when_disconnected():
     builder.with_response_body(Path(response_body_path).read_bytes())
     builder.build_get()
 
-    client = MLClient(auth_method="digest")
+    client = MLClient()
 
     assert not client.is_connected()
     resp = client.get("/manage/v2/servers")
@@ -69,7 +70,7 @@ def test_get():
     builder.with_response_body(Path(response_body_path).read_bytes())
     builder.build_get()
 
-    with MLClient(auth_method="digest") as client:
+    with MLClient() as client:
         resp = client.get("/manage/v2/servers")
 
     assert resp.request.method == "GET"
@@ -91,7 +92,7 @@ def test_get_with_customized_params_and_headers():
     builder.with_response_body(Path(response_body_path).read_bytes())
     builder.build_get()
 
-    with MLClient(auth_method="digest") as client:
+    with MLClient() as client:
         resp = client.get(
             "/manage/v2/servers",
             params={"format": "json"},
@@ -118,7 +119,7 @@ def test_post():
     builder.with_response_body(Path(response_body_path).read_bytes())
     builder.build_post()
 
-    with MLClient(auth_method="digest") as client:
+    with MLClient() as client:
         resp = client.post("/manage/v2/databases/Documents")
 
     assert resp.request.method == "POST"
@@ -138,7 +139,7 @@ def test_post_with_customized_params_and_headers_and_body_different_than_json():
     builder.with_empty_response_body()
     builder.build_post()
 
-    with MLClient(auth_method="digest") as client:
+    with MLClient() as client:
         resp = client.post(
             "/v1/eval",
             body={"xquery": "()"},
@@ -166,7 +167,7 @@ def test_post_with_customized_params_and_headers_and_json_body():
     builder.with_empty_response_body()
     builder.build_post()
 
-    with MLClient(auth_method="digest") as client:
+    with MLClient() as client:
         resp = client.post(
             "/manage/v2/databases/Documents",
             body={"operation": "clear-database"},
@@ -195,7 +196,7 @@ def test_put():
     builder.with_response_body(Path(response_body_path).read_bytes())
     builder.build_put()
 
-    with MLClient(auth_method="digest") as client:
+    with MLClient() as client:
         resp = client.put("/v1/documents")
 
     assert resp.request.method == "PUT"
@@ -215,7 +216,7 @@ def test_put_with_customized_params_and_headers_and_body_different_than_json():
     builder.with_empty_response_body()
     builder.build_put()
 
-    with MLClient(auth_method="digest") as client:
+    with MLClient() as client:
         resp = client.put(
             "/v1/documents",
             body="<document/>",
@@ -243,7 +244,7 @@ def test_put_with_customized_params_and_headers_and_json_body():
     builder.with_empty_response_body()
     builder.build_put()
 
-    with MLClient(auth_method="digest") as client:
+    with MLClient() as client:
         resp = client.put(
             "/v1/documents",
             body={"document": {}},
@@ -267,7 +268,7 @@ def test_delete():
     builder.with_empty_response_body()
     builder.build_delete()
 
-    with MLClient(auth_method="digest") as client:
+    with MLClient() as client:
         resp = client.delete_("/manage/v2/databases/custom-db")
 
     assert resp.request.method == "DELETE"
@@ -286,7 +287,7 @@ def test_delete_with_customized_params_and_headers():
     builder.with_empty_response_body()
     builder.build()
 
-    with MLClient(auth_method="digest") as client:
+    with MLClient() as client:
         resp = client.delete_(
             "/manage/v2/databases/custom-db",
             params={"format": "json"},

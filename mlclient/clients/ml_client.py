@@ -15,7 +15,6 @@ import logging
 from types import TracebackType
 
 from requests import Response, Session
-from requests import request as requests_request
 from requests.adapters import HTTPAdapter, Retry
 from requests.auth import AuthBase, HTTPBasicAuth, HTTPDigestAuth
 
@@ -410,7 +409,9 @@ class MLClient:
                 method.upper(),
                 endpoint,
             )
-            resp = requests_request(method, url, **request)
+            with Session() as sess:
+                sess.mount(self.base_url, HTTPAdapter(max_retries=self._retry))
+                resp = sess.request(method, url, **request)
 
         return resp
 

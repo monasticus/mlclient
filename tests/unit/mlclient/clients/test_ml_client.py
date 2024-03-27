@@ -25,11 +25,29 @@ def test_context_mng():
     assert not client.is_connected()
 
 
-def test_request_when_disconnected():
-    client = MLClient()
+def test_request_when_disconnected(caplog):
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/manage/v2/servers")
+    builder.with_response_content_type("application/xml; charset=UTF-8")
+    builder.with_response_status(200)
+    response_body_path = resources_utils.get_test_resource_path(
+        __file__,
+        "test-get-response.xml",
+    )
+    builder.with_response_body(Path(response_body_path).read_bytes())
+    builder.build_get()
+
+    client = MLClient(auth_method="digest")
     resp = client.get("/manage/v2/servers")
 
-    assert resp is None
+    assert resp.request.method == "GET"
+    assert "?" not in resp.request.url
+    assert resp.status_code == 200
+    assert (
+        "MLClient is not connected -- "
+        "A request will be sent in an ad-hoc initialized session "
+        "(GET /manage/v2/servers)"
+    ) in caplog.text
 
 
 @responses.activate

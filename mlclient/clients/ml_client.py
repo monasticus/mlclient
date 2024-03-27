@@ -15,6 +15,7 @@ import logging
 from types import TracebackType
 
 from requests import Response, Session
+from requests import request as requests_request
 from requests.adapters import HTTPAdapter, Retry
 from requests.auth import AuthBase, HTTPBasicAuth, HTTPDigestAuth
 
@@ -230,7 +231,7 @@ class MLClient:
         endpoint: str,
         params: dict | None = None,
         headers: dict | None = None,
-    ) -> Response | None:
+    ) -> Response:
         """Send a GET request.
 
         Parameters
@@ -255,7 +256,7 @@ class MLClient:
         params: dict | None = None,
         headers: dict | None = None,
         body: str | dict | None = None,
-    ) -> Response | None:
+    ) -> Response:
         """Send a POST request.
 
         Parameters
@@ -282,7 +283,7 @@ class MLClient:
         params: dict | None = None,
         headers: dict | None = None,
         body: str | dict | None = None,
-    ) -> Response | None:
+    ) -> Response:
         """Send a PUT request.
 
         Parameters
@@ -308,7 +309,7 @@ class MLClient:
         endpoint: str,
         params: dict | None = None,
         headers: dict | None = None,
-    ) -> Response | None:
+    ) -> Response:
         """Send a DELETE request.
 
         Parameters
@@ -334,7 +335,7 @@ class MLClient:
         params: dict | None = None,
         headers: dict | None = None,
         body: str | dict | None = None,
-    ):
+    ) -> Response:
         """Send an HTTP request.
 
         Parameters
@@ -355,46 +356,47 @@ class MLClient:
         Response
             An HTTP response
         """
-        if self.is_connected():
-            url = self.base_url + endpoint
-            if not headers:
-                headers = {}
-            if not params:
-                params = {}
-            request = {
-                "auth": self._auth,
-                "params": params,
-                "headers": headers,
-            }
-            if body:
-                content_type = headers.get(const.HEADER_NAME_CONTENT_TYPE)
-                doc_type = (
-                    Mimetypes.get_doc_type(content_type) if content_type else None
-                )
-                if doc_type == DocumentType.JSON:
-                    request["json"] = body
-                else:
-                    request["data"] = body
+        url = self.base_url + endpoint
+        if not headers:
+            headers = {}
+        if not params:
+            params = {}
+        request = {
+            "auth": self._auth,
+            "params": params,
+            "headers": headers,
+        }
+        if body:
+            content_type = headers.get(const.HEADER_NAME_CONTENT_TYPE)
+            doc_type = Mimetypes.get_doc_type(content_type) if content_type else None
+            if doc_type == DocumentType.JSON:
+                request["json"] = body
+            else:
+                request["data"] = body
 
-            logger.fine(
-                "Request details: %s",
-                " ".join(
-                    f"{k} [{v if k != 'auth' else v.__class__.__name__}]"
-                    for k, v in request.items()
-                ),
-            )
-            logger.info("Sending a request... %s %s", method.upper(), endpoint)
-            resp = self._sess.request(method, url, **request)
-            logger.debug("Response retrieved")
-            logger.fine("Response body: %s", resp.text)
-            return resp
-
-        logger.warning(
-            "A request attempt failure: %s %s -- MLClient is not connected",
-            method.upper(),
-            endpoint,
+        logger.fine(
+            "Request details: %s",
+            " ".join(
+                f"{k} [{v if k != 'auth' else v.__class__.__name__}]"
+                for k, v in request.items()
+            ),
         )
-        return None
+        logger.info("Sending a request... %s %s", method.upper(), endpoint)
+
+        if self.is_connected():
+            resp = self._sess.request(method, url, **request)
+        else:
+            logger.warning(
+                "MLClient is not connected -- "
+                "A request will be sent in an ad-hoc initialized session (%s %s)",
+                method.upper(),
+                endpoint,
+            )
+            resp = requests_request(method, url, **request)
+
+        logger.debug("Response retrieved")
+        logger.fine("Response body: %s", resp.text)
+        return resp
 
 
 class MLResourceClient(MLClient):

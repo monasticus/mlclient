@@ -184,6 +184,9 @@ max-complexity = 10
 "tests/unit/mlclient/calls/test_eval_call.py" = [
     "W291" # allow trailing whitespace in multiline string for testing purpose
 ]
+"tests/unit/mlclient/clients/test_ml_client.py" = [
+    "ERA001" # allow commented-out code to await for pytest bug fix
+]
 "tests/utils/__init__.py" = [
     "T201" # allow printing by MLResponseBuilder
 ]

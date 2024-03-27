@@ -356,15 +356,23 @@ class MLClient:
         Response
             An HTTP response
         """
-        url = self.base_url + endpoint
-        if not headers:
-            headers = {}
-        if not params:
-            params = {}
+        request = self._prepare_request(params, headers, body)
+        resp = self._send_request(method, endpoint, request)
+        logger.debug("Response retrieved")
+        logger.fine("Response body: %s", resp.text)
+        return resp
+
+    def _prepare_request(
+        self,
+        params: dict | None = None,
+        headers: dict | None = None,
+        body: str | dict | None = None,
+    ) -> dict:
+        """Prepare a request details."""
         request = {
+            "params": params or {},
+            "headers": headers or {},
             "auth": self._auth,
-            "params": params,
-            "headers": headers,
         }
         if body:
             content_type = headers.get(const.HEADER_NAME_CONTENT_TYPE)
@@ -381,8 +389,18 @@ class MLClient:
                 for k, v in request.items()
             ),
         )
+        return request
+
+    def _send_request(
+        self,
+        method: str,
+        endpoint: str,
+        request: dict,
+    ) -> Response:
+        """Send a request."""
         logger.info("Sending a request... %s %s", method.upper(), endpoint)
 
+        url = self.base_url + endpoint
         if self.is_connected():
             resp = self._sess.request(method, url, **request)
         else:
@@ -394,8 +412,6 @@ class MLClient:
             )
             resp = requests_request(method, url, **request)
 
-        logger.debug("Response retrieved")
-        logger.fine("Response body: %s", resp.text)
         return resp
 
 

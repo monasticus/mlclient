@@ -409,9 +409,9 @@ class MLClient:
                 method.upper(),
                 endpoint,
             )
-            with Session() as sess:
-                sess.mount(self.base_url, HTTPAdapter(max_retries=self._retry))
-                resp = sess.request(method, url, **request)
+            self.connect()
+            resp = self._sess.request(method, url, **request)
+            self.disconnect()
 
         return resp
 

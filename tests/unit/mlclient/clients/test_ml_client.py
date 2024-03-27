@@ -25,27 +25,52 @@ def test_context_mng():
     assert not client.is_connected()
 
 
-def test_request_when_disconnected():
-    client = MLClient()
-    resp = client.get("/manage/v2/servers")
-
-    assert resp is None
-
-
 @responses.activate
-def test_get():
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/manage/v2/servers")
-    builder.with_response_content_type("application/xml; charset=UTF-8")
-    builder.with_response_status(200)
+def test_request_when_disconnected():
     response_body_path = resources_utils.get_test_resource_path(
         __file__,
         "test-get-response.xml",
     )
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/manage/v2/servers")
+    builder.with_response_content_type("application/xml; charset=UTF-8")
+    builder.with_response_status(200)
     builder.with_response_body(Path(response_body_path).read_bytes())
     builder.build_get()
 
-    with MLClient(auth_method="digest") as client:
+    client = MLClient()
+
+    assert not client.is_connected()
+    resp = client.get("/manage/v2/servers")
+    assert resp.request.method == "GET"
+    assert "?" not in resp.request.url
+    assert resp.status_code == 200
+
+    # This assertion works only from the clients package level.
+    # It should be uncommented once the following bug is addressed:
+    # https://github.com/pytest-dev/pytest/issues/7335
+    #
+    # assert (
+    #     "MLClient is not connected -- "
+    #     "A request will be sent in an ad-hoc initialized session "
+    #     "(GET /manage/v2/servers)"
+    # ) in caplog.text
+
+
+@responses.activate
+def test_get():
+    response_body_path = resources_utils.get_test_resource_path(
+        __file__,
+        "test-get-response.xml",
+    )
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/manage/v2/servers")
+    builder.with_response_content_type("application/xml; charset=UTF-8")
+    builder.with_response_status(200)
+    builder.with_response_body(Path(response_body_path).read_bytes())
+    builder.build_get()
+
+    with MLClient() as client:
         resp = client.get("/manage/v2/servers")
 
     assert resp.request.method == "GET"
@@ -55,19 +80,19 @@ def test_get():
 
 @responses.activate
 def test_get_with_customized_params_and_headers():
+    response_body_path = resources_utils.get_test_resource_path(
+        __file__,
+        "test-get-with-customized-params-response.json",
+    )
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/manage/v2/servers")
     builder.with_request_param("format", "json")
     builder.with_response_content_type("application/json; charset=UTF-8")
     builder.with_response_status(200)
-    response_body_path = resources_utils.get_test_resource_path(
-        __file__,
-        "test-get-with-customized-params-response.json",
-    )
     builder.with_response_body(Path(response_body_path).read_bytes())
     builder.build_get()
 
-    with MLClient(auth_method="digest") as client:
+    with MLClient() as client:
         resp = client.get(
             "/manage/v2/servers",
             params={"format": "json"},
@@ -83,18 +108,18 @@ def test_get_with_customized_params_and_headers():
 
 @responses.activate
 def test_post():
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/manage/v2/databases/Documents")
-    builder.with_response_content_type("application/xml; charset=UTF-8")
-    builder.with_response_status(400)
     response_body_path = resources_utils.get_test_resource_path(
         __file__,
         "test-post-response.xml",
     )
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/manage/v2/databases/Documents")
+    builder.with_response_content_type("application/xml; charset=UTF-8")
+    builder.with_response_status(400)
     builder.with_response_body(Path(response_body_path).read_bytes())
     builder.build_post()
 
-    with MLClient(auth_method="digest") as client:
+    with MLClient() as client:
         resp = client.post("/manage/v2/databases/Documents")
 
     assert resp.request.method == "POST"
@@ -114,7 +139,7 @@ def test_post_with_customized_params_and_headers_and_body_different_than_json():
     builder.with_empty_response_body()
     builder.build_post()
 
-    with MLClient(auth_method="digest") as client:
+    with MLClient() as client:
         resp = client.post(
             "/v1/eval",
             body={"xquery": "()"},
@@ -142,7 +167,7 @@ def test_post_with_customized_params_and_headers_and_json_body():
     builder.with_empty_response_body()
     builder.build_post()
 
-    with MLClient(auth_method="digest") as client:
+    with MLClient() as client:
         resp = client.post(
             "/manage/v2/databases/Documents",
             body={"operation": "clear-database"},
@@ -160,18 +185,18 @@ def test_post_with_customized_params_and_headers_and_json_body():
 
 @responses.activate
 def test_put():
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/documents")
-    builder.with_response_content_type("application/xml; charset=UTF-8")
-    builder.with_response_status(400)
     response_body_path = resources_utils.get_test_resource_path(
         __file__,
         "test-put-response.xml",
     )
+    builder = MLResponseBuilder()
+    builder.with_base_url("http://localhost:8002/v1/documents")
+    builder.with_response_content_type("application/xml; charset=UTF-8")
+    builder.with_response_status(400)
     builder.with_response_body(Path(response_body_path).read_bytes())
     builder.build_put()
 
-    with MLClient(auth_method="digest") as client:
+    with MLClient() as client:
         resp = client.put("/v1/documents")
 
     assert resp.request.method == "PUT"
@@ -191,7 +216,7 @@ def test_put_with_customized_params_and_headers_and_body_different_than_json():
     builder.with_empty_response_body()
     builder.build_put()
 
-    with MLClient(auth_method="digest") as client:
+    with MLClient() as client:
         resp = client.put(
             "/v1/documents",
             body="<document/>",
@@ -219,7 +244,7 @@ def test_put_with_customized_params_and_headers_and_json_body():
     builder.with_empty_response_body()
     builder.build_put()
 
-    with MLClient(auth_method="digest") as client:
+    with MLClient() as client:
         resp = client.put(
             "/v1/documents",
             body={"document": {}},
@@ -243,7 +268,7 @@ def test_delete():
     builder.with_empty_response_body()
     builder.build_delete()
 
-    with MLClient(auth_method="digest") as client:
+    with MLClient() as client:
         resp = client.delete_("/manage/v2/databases/custom-db")
 
     assert resp.request.method == "DELETE"
@@ -262,7 +287,7 @@ def test_delete_with_customized_params_and_headers():
     builder.with_empty_response_body()
     builder.build()
 
-    with MLClient(auth_method="digest") as client:
+    with MLClient() as client:
         resp = client.delete_(
             "/manage/v2/databases/custom-db",
             params={"format": "json"},

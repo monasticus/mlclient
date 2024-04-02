@@ -58,8 +58,7 @@ class WriteDocumentsJob:
         self._pre_input_queue: queue.Queue = queue.Queue()
         self._input_queue: queue.Queue = queue.Queue()
         self._executor: ThreadPoolExecutor | None = None
-        self._successful = []
-        self._failed = []
+        self._status = DocumentJobStatus()
         Thread(
             target=self._start_conveyor_belt,
             name=f"write_documents_job_{self._id}",
@@ -149,8 +148,8 @@ class WriteDocumentsJob:
             "Job [%s] has been completed "
             "with overall documents count [%d] and successful [%d]",
             self._id,
-            self.completed_count,
-            len(self.successful),
+            self.status.completed,
+            self.status.successful,
         )
 
     @property
@@ -168,34 +167,11 @@ class WriteDocumentsJob:
         return self._batch_size
 
     @property
-    def completed_count(
+    def status(
         self,
-    ) -> int:
-        """A number of processed documents."""
-        return len(self.completed)
-
-    @property
-    def completed(
-        self,
-    ) -> list[str]:
-        """A list of processed documents."""
-        completed = self.successful
-        completed.extend(self.failed)
-        return completed
-
-    @property
-    def successful(
-        self,
-    ) -> list[str]:
-        """A list of successfully processed documents."""
-        return list(self._successful)
-
-    @property
-    def failed(
-        self,
-    ) -> list[str]:
-        """A list of processed documents that failed to be written."""
-        return list(self._failed)
+    ) -> DocumentJobStatus:
+        """A status of the job."""
+        return self._status
 
     def _start_conveyor_belt(
         self,
@@ -290,9 +266,9 @@ class WriteDocumentsJob:
         batch_uris = [doc.uri for doc in batch]
         try:
             client.create(data=batch, database=self._database)
-            self._successful.extend(batch_uris)
+            self._status.add_successful_docs(batch_uris)
         except Exception:
-            self._failed.extend(batch_uris)
+            self._status.add_failed_docs(batch_uris)
             logger.exception("An unexpected error occurred while writing documents")
 
     @staticmethod

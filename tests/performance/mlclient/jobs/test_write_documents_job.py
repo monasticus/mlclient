@@ -470,9 +470,9 @@ def _perform_parametrized_test(
                 batch_size,
             )
 
-        assert job.completed_count == docs_count
-        assert len(job.successful) == docs_count
-        assert len(job.failed) == 0
+        assert job.status.completed == docs_count
+        assert job.status.successful == docs_count
+        assert job.status.failed == 0
         docs_client_utils.assert_documents_exist(uris)
     finally:
         docs_client_utils.delete_documents(uris)

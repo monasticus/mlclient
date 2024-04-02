@@ -33,6 +33,245 @@ from mlclient.structures import (
 logger = logging.getLogger(__name__)
 
 
+class ReadDocumentsJob:
+    """A multi-thread job reading documents from a MarkLogic database."""
+
+    def __init__(
+        self,
+        thread_count: int | None = None,
+        batch_size: int = 50,
+    ):
+        """Initialize ReadDocumentsJob instance.
+
+        Parameters
+        ----------
+        thread_count : int | None, default None
+            A number of threads
+        batch_size : int, default 50
+            A number of documents in a single batch
+        """
+        self._id: str = str(uuid.uuid4())
+        self._thread_count: int = thread_count or self._get_max_num_of_threads()
+        self._batch_size: int = batch_size
+        self._config: dict = {}
+        self._database: str | None = None
+        self._pre_input_queue: queue.Queue = queue.Queue()
+        self._input_queue: queue.Queue = queue.Queue()
+        self._output_queue: queue.Queue = queue.Queue()
+        self._executor: ThreadPoolExecutor | None = None
+        self._status = DocumentJobStatus()
+        Thread(
+            target=self._start_conveyor_belt,
+            name=f"read_documents_job_{self._id}",
+        ).start()
+
+    def with_client_config(
+        self,
+        **config,
+    ):
+        """Set DocumentsClient configuration.
+
+        Parameters
+        ----------
+        config
+            Keyword arguments to be passed for a DocumentsClient instance.
+        """
+        self._config = config
+
+    def with_database(
+        self,
+        database: str,
+    ):
+        """Set a database name.
+
+        Parameters
+        ----------
+        database : str
+            A database name
+        """
+        self._database = database
+
+    def with_uris_input(
+        self,
+        uris: Iterable[str],
+    ):
+        """Add URIs to the job's input.
+
+        Parameters
+        ----------
+        uris : Iterable[str]
+            URIs to be red from a MarkLogic database
+        """
+        self._pre_input_queue.put(uris)
+
+    def start(
+        self,
+    ):
+        """Start a job's execution."""
+        self._stop_conveyor_belt()
+
+        logger.info("Starting job [%s]", self._id)
+        self._executor = ThreadPoolExecutor(
+            max_workers=self._thread_count,
+            thread_name_prefix=f"read_documents_job_{self._id}",
+        )
+
+        for _ in range(self._thread_count):
+            self._executor.submit(self._start)
+
+    def get_documents(
+        self,
+    ):
+        if self._executor is not None:
+            self.await_completion()
+
+        docs = []
+        while not self._output_queue.empty():
+            docs.append(self._output_queue.get())
+        return docs
+
+    def await_completion(
+        self,
+    ):
+        """Await a job's completion."""
+        if not self._input_queue.empty():
+            logger.info("Waiting for job [%s] completion", self._id)
+        self._input_queue.join()
+        self._executor.shutdown()
+        self._executor = None
+        logger.info(
+            "Job [%s] has been completed "
+            "with overall documents count [%d] and successful [%d]",
+            self._id,
+            self.status.completed,
+            self.status.successful,
+        )
+
+    @property
+    def thread_count(
+        self,
+    ) -> int:
+        """A number of threads."""
+        return self._thread_count
+
+    @property
+    def batch_size(
+        self,
+    ) -> int:
+        """A number of documents in a single batch."""
+        return self._batch_size
+
+    @property
+    def status(
+        self,
+    ) -> DocumentJobStatus:
+        """A status of the job."""
+        return self._status
+
+    def _start_conveyor_belt(
+        self,
+    ):
+        """Populate an input queue with URIs in an infinitive loop.
+
+        It is meant to be executed in a separated thread. Whenever any input
+        is consumed it lends in a PRE-INPUT QUEUE first to allow for several inputs.
+        Then it is moved to an INPUT QUEUE. Thanks to that we can be sure all data
+        is placed before "poison pills". Once the job is started, there's no way
+        to add anything else to process. It puts "poison pills" at the end
+        of the INPUT QUEUE to close each initialized thread.
+        """
+        logger.info("Starting a conveyor belt for input URIs")
+        while True:
+            uris = self._pre_input_queue.get()
+            self._pre_input_queue.task_done()
+            if uris is None:
+                break
+
+            for uri in uris:
+                logger.debug("Putting [%s] into the queue", uri)
+                self._input_queue.put(uri)
+
+        for _ in range(self._thread_count):
+            self._input_queue.put(None)
+
+    def _stop_conveyor_belt(
+        self,
+    ):
+        """Stop the infinitive loop populating an input queue with URIs."""
+        logger.info("Stopping a conveyor belt for input documents")
+        self._pre_input_queue.put(None)
+
+    def _start(
+        self,
+    ):
+        """Read documents in batches until queue is empty.
+
+        Once DocumentsClient is initialized, it populates batches and reads them
+        from a MarkLogic database. When a batch size is lower than configured,
+        the infinitive loop is stopped.
+        """
+        with DocumentsClient(**self._config) as client:
+            while True:
+                batch = self._populate_batch()
+                if len(batch) > 0:
+                    self._send_batch(batch, client)
+                if len(batch) < self._batch_size:
+                    logger.debug("No more URIs in the queue. Closing a worker...")
+                    break
+
+    def _populate_batch(
+        self,
+    ) -> list[str]:
+        """Populate a URIs' batch.
+
+        Returns
+        -------
+        batch : list[str]
+            A batch with URIs
+        """
+        batch = []
+        for _ in range(self._batch_size):
+            item = self._input_queue.get()
+            self._input_queue.task_done()
+            if item is None:
+                break
+            logger.debug("Getting [%s] from the queue", item)
+            batch.append(item)
+        return batch
+
+    def _send_batch(
+        self,
+        batch: list[str],
+        client: DocumentsClient,
+    ):
+        """Send a URIs' batch to /v1/documents endpoint.
+
+        Parameters
+        ----------
+        batch : list[str]
+            A batch with documents
+        client : DocumentsClient
+            A DocumentsClient instance to call documents endpoint.
+
+        Raises
+        ------
+        MarkLogicError
+            If MarkLogic returns an error
+        """
+        try:
+            for doc in client.read(uris=batch, database=self._database):
+                self._output_queue.put(doc)
+            self._status.add_successful_docs(batch)
+        except Exception:
+            self._status.add_failed_docs(batch)
+            logger.exception("An unexpected error occurred while reading documents")
+
+    @staticmethod
+    def _get_max_num_of_threads():
+        """Get a maximum number of ThreadPoolExecutor workers."""
+        return min(32, (os.cpu_count() or 1) + 4)  # Num of CPUs + 4
+
+
 class WriteDocumentsJob:
     """A multi-thread job writing documents into a MarkLogic database."""
 

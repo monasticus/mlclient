@@ -17,6 +17,16 @@ Examples
 >>> from mlclient.jobs import WriteDocumentsJob
 """
 
-from .documents_jobs import DocumentJobStatus, DocumentsLoader, WriteDocumentsJob
+from .documents_jobs import (
+    DocumentJobStatus,
+    DocumentsLoader,
+    ReadDocumentsJob,
+    WriteDocumentsJob,
+)
 
-__all__ = ["DocumentJobStatus", "WriteDocumentsJob", "DocumentsLoader"]
+__all__ = [
+    "DocumentJobStatus",
+    "ReadDocumentsJob",
+    "WriteDocumentsJob",
+    "DocumentsLoader",
+]

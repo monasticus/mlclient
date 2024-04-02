@@ -478,3 +478,65 @@ class DocumentsLoader:
             with Path(metadata_file_path).open("rb") as metadata_file:
                 return metadata_file.read()
         return MetadataFactory.from_file(metadata_file_path)
+
+
+class DocumentJobStatus:
+    def __init__(
+        self,
+    ):
+        self._successful_docs = []
+        self._failed_docs = []
+
+    @property
+    def completed(
+        self,
+    ) -> int:
+        return len(self._successful_docs) + len(self._failed_docs)
+
+    @property
+    def successful(
+        self,
+    ) -> int:
+        return len(self._successful_docs)
+
+    @property
+    def failed(
+        self,
+    ) -> int:
+        return len(self._failed_docs)
+
+    @property
+    def successful_docs(
+        self,
+    ) -> list[str]:
+        return self._successful_docs.copy()
+
+    @property
+    def failed_docs(
+        self,
+    ) -> list[str]:
+        return self._failed_docs.copy()
+
+    def add_successful_doc(
+        self,
+        uri: str,
+    ) -> None:
+        self._successful_docs.append(uri)
+
+    def add_successful_docs(
+        self,
+        uris: list[str],
+    ) -> None:
+        self._successful_docs.extend(uris)
+
+    def add_failed_doc(
+        self,
+        uri: str,
+    ) -> None:
+        self._failed_docs.append(uri)
+
+    def add_failed_docs(
+        self,
+        uris: list[str],
+    ) -> None:
+        self._failed_docs.extend(uris)

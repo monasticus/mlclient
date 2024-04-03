@@ -1,8 +1,10 @@
 import responses
 
 from mlclient.jobs import ReadDocumentsJob
+from mlclient.structures import XMLDocument, DocumentType
 from mlclient.structures.calls import DocumentsBodyPart
 from tests.utils import MLResponseBuilder
+import xml.etree.ElementTree as ElemTree
 
 
 @responses.activate
@@ -17,79 +19,13 @@ def test_basic_job():
 
     builder = MLResponseBuilder()
     builder.with_base_url("http://localhost:8002/v1/documents")
-    builder.with_request_param("uri", "/some/dir/doc1.xml")
-    builder.with_request_param("uri", "/some/dir/doc2.xml")
-    builder.with_request_param("uri", "/some/dir/doc3.xml")
-    builder.with_request_param("uri", "/some/dir/doc4.xml")
-    builder.with_request_param("uri", "/some/dir/doc5.xml")
+    for uri in uris:
+        builder.with_request_param("uri", uri)
     builder.with_request_param("format", "json")
     builder.with_response_body_multipart_mixed()
     builder.with_response_status(200)
-    builder.with_response_documents_body_part(
-        DocumentsBodyPart(
-            **{
-                "content-type": "application/xml",
-                "content-disposition": "attachment; "
-                'filename="/some/dir/doc1.xml"; '
-                "category=content; "
-                "format=xml",
-                "content": b'<?xml version="1.0" encoding="UTF-8"?>\n'
-                b"<root><child>data1</child></root>",
-            },
-        ),
-    )
-    builder.with_response_documents_body_part(
-        DocumentsBodyPart(
-            **{
-                "content-type": "application/xml",
-                "content-disposition": "attachment; "
-                'filename="/some/dir/doc1.xml"; '
-                "category=content; "
-                "format=xml",
-                "content": b'<?xml version="1.0" encoding="UTF-8"?>\n'
-                b"<root><child>data2</child></root>",
-            },
-        ),
-    )
-    builder.with_response_documents_body_part(
-        DocumentsBodyPart(
-            **{
-                "content-type": "application/xml",
-                "content-disposition": "attachment; "
-                'filename="/some/dir/doc1.xml"; '
-                "category=content; "
-                "format=xml",
-                "content": b'<?xml version="1.0" encoding="UTF-8"?>\n'
-                b"<root><child>data3</child></root>",
-            },
-        ),
-    )
-    builder.with_response_documents_body_part(
-        DocumentsBodyPart(
-            **{
-                "content-type": "application/xml",
-                "content-disposition": "attachment; "
-                'filename="/some/dir/doc1.xml"; '
-                "category=content; "
-                "format=xml",
-                "content": b'<?xml version="1.0" encoding="UTF-8"?>\n'
-                b"<root><child>data4</child></root>",
-            },
-        ),
-    )
-    builder.with_response_documents_body_part(
-        DocumentsBodyPart(
-            **{
-                "content-type": "application/xml",
-                "content-disposition": "attachment; "
-                'filename="/some/dir/doc1.xml"; '
-                "category=content; "
-                "format=xml",
-                "content": b'<?xml version="1.0" encoding="UTF-8"?>\n'
-                b"<root><child>data5</child></root>",
-            },
-        ),
-    )
+    for document_body_part in _get_test_response_body(len(uris)):
+        builder.with_response_documents_body_part(document_body_part)
     builder.build_get()
 
     job = ReadDocumentsJob(thread_count=1, batch_size=5)
@@ -101,6 +37,38 @@ def test_basic_job():
     docs = job.get_documents()
     calls = responses.calls
     assert len(calls) == 1
-    assert job.status.completed == 5
-    assert job.status.successful == 5
+    assert job.status.completed == len(uris)
+    assert job.status.successful == len(uris)
     assert job.status.failed == 0
+    for i, uri in enumerate(uris):
+        doc = next(doc for doc in docs if doc.uri == uri)
+        assert isinstance(doc, XMLDocument)
+        assert doc.uri == uri
+        assert doc.doc_type == DocumentType.XML
+        assert doc.metadata is None
+        assert doc.temporal_collection is None
+        assert isinstance(doc.content, ElemTree.ElementTree)
+        assert doc.content.getroot().tag == "root"
+        assert doc.content.getroot().attrib == {}
+        children = list(doc.content.getroot())
+        assert len(children) == 1
+        assert children[0].tag == "child"
+        assert children[0].text == f"data{i+1}"
+        assert children[0].attrib == {}
+
+
+def _get_test_response_body(
+    count: int,
+) -> dict:
+    for i in range(count):
+        yield DocumentsBodyPart(
+            **{
+                "content-type": "application/xml",
+                "content-disposition": "attachment; "
+                f'filename="/some/dir/doc{i+1}.xml"; '
+                "category=content; "
+                "format=xml",
+                "content": '<?xml version="1.0" encoding="UTF-8"?>\n'
+                f"<root><child>data{i+1}</child></root>",
+            },
+        )

@@ -1,27 +1,31 @@
 from __future__ import annotations
 
+import logging
 import shutil
+from pathlib import Path
 
 from mimeo import MimeoConfigFactory, Mimeograph
 
-from mlclient import MLConfiguration
+from mlclient import MLConfiguration, setup_logger
 from mlclient.jobs import WriteDocumentsJob
+
+_SCRIPT_DIR = Path(__file__).resolve().parent
 
 ##########################################
 #             TO CUSTOMIZE               #
 ##########################################
 
-# ENV = "single"
-ENV = "cluster"
-REST_SERVER = "app-services"
-DATABASE = None
+ENV = "single"
+# ENV = "cluster"
+REST_SERVER = "manage"
+DATABASE = "Documents"
 # DATABASE = "App-Services"
 
 ##########################################
 
 MIMEO_CONFIG_PATHS = [
-    "mimeo-configs/basic-xml.json",
-    "mimeo-configs/basic-json.json",
+    f"{_SCRIPT_DIR}/mimeo-configs/basic-xml.json",
+    f"{_SCRIPT_DIR}/mimeo-configs/basic-json.json",
 ]
 MIMEO_OUTPUT_ROOT = "output"
 MIMEO_CUSTOM_COUNT = None
@@ -58,6 +62,9 @@ def populate_database(
     job.start()
     job.await_completion()
 
+
+setup_logger()
+logging.getLogger("mlclient").setLevel(logging.DEBUG)
 
 generate_docs(
     mimeo_config_paths=MIMEO_CONFIG_PATHS,

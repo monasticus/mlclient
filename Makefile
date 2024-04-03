@@ -34,24 +34,8 @@ integration-test:
 
 test: unit-test integration-test
 
-ml-start:
-	@sudo /etc/init.d/MarkLogic start
-
-ml-stop:
-	@sudo /etc/init.d/MarkLogic stop
-
-linters:
-	poetry update ruff
-	@./dev/scripts/linters/look_for_new_linters.py
-
 publish:
 	@poetry --build publish
-
-update-linters:
-	@poetry run ruff linter --output-format=json > ./dev/scripts/linters/linters.json
-
-mimetypes:
-	@poetry run python ./dev/scripts/get-mimetypes/get-mimetypes.py
 
 branches:
 	@git branch | grep -E -v "(main)|(bump.*)" | xargs git branch -D

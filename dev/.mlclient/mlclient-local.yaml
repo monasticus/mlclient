@@ -1,0 +1,16 @@
+app-name: app
+host: localhost
+username: admin
+password: admin
+protocol: http
+app-servers:
+
+  - id: manage
+    port: 8002
+    auth: digest
+    rest: true
+
+  - id: app-services
+    port: 8000
+    auth: digest
+    rest: true

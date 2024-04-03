@@ -4,11 +4,13 @@ from pathlib import Path
 
 from mlclient import MLManager
 
+_SCRIPT_DIR = Path(__file__).resolve().parent
+
 xqy_file_name = "get-mimetypes.xqy"
-xqy_file_path = next(Path(__file__).parent.glob(xqy_file_name))
+xqy_file_path = next(_SCRIPT_DIR.glob(xqy_file_name))
 
 target_dir = "mlclient/resources"
-target_dir_path = next(Path(__file__).parent.parent.parent.parent.glob(target_dir))
+target_dir_path = next(_SCRIPT_DIR.parent.parent.parent.glob(target_dir))
 target_file_name = "mimetypes.yaml"
 target_file_path = f"{target_dir_path.absolute()}/{target_file_name}"
 

@@ -25,6 +25,7 @@ def test_basic_job_with_documents_input():
     job.with_documents_input(docs)
     job.start()
     job.await_completion()
+
     calls = responses.calls
     assert len(calls) == 1
     assert job.status.completed == 5
@@ -50,6 +51,7 @@ def test_basic_job_with_filesystem_input():
     job.with_filesystem_input(input_path, "/root/dir")
     job.start()
     job.await_completion()
+
     calls = responses.calls
     assert len(calls) == 1
     assert job.status.completed == 5
@@ -58,7 +60,7 @@ def test_basic_job_with_filesystem_input():
 
 
 @responses.activate
-def test_basic_job_with_several_inputs():
+def test_basic_job_with_multiple_inputs():
     docs = list(_get_test_docs(5000))
 
     builder = MLResponseBuilder()
@@ -66,7 +68,7 @@ def test_basic_job_with_several_inputs():
     builder.with_response_content_type("application/json; charset=utf-8")
     builder.with_response_header("vnd.marklogic.document-format", "json")
     builder.with_response_status(200)
-    builder.with_response_body(_get_test_response_body(5))
+    builder.with_response_body(_get_test_response_body(5000))
     builder.build_post()
 
     job = WriteDocumentsJob(thread_count=1, batch_size=50)
@@ -77,6 +79,7 @@ def test_basic_job_with_several_inputs():
     job.with_documents_input(docs[2500:])
     job.start()
     job.await_completion()
+
     calls = responses.calls
     assert len(calls) == 100
     assert job.status.completed == 5000
@@ -105,6 +108,7 @@ def test_job_with_custom_database():
     job.with_database("Documents")
     job.start()
     job.await_completion()
+
     calls = responses.calls
     assert len(calls) == 1
     assert job.status.completed == 5
@@ -131,6 +135,7 @@ def test_multi_thread_job():
     job.with_documents_input(docs)
     job.start()
     job.await_completion()
+
     calls = responses.calls
     assert len(calls) >= 30
     assert job.status.completed == 150
@@ -164,6 +169,7 @@ def test_failing_job():
     job.with_documents_input(docs)
     job.start()
     job.await_completion()
+
     calls = responses.calls
     assert len(calls) == 1
     assert job.status.completed == 5

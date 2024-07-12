@@ -1,12 +1,15 @@
 from __future__ import annotations
 
+import xml.etree.ElementTree as ElemTree
+from typing import Iterable
+
+import pytest
 import responses
 
 from mlclient.jobs import ReadDocumentsJob
-from mlclient.structures import XMLDocument, DocumentType, Document
+from mlclient.structures import Document, DocumentType, XMLDocument
 from mlclient.structures.calls import DocumentsBodyPart
 from tests.utils import MLResponseBuilder
-import xml.etree.ElementTree as ElemTree
 
 
 @responses.activate
@@ -80,6 +83,42 @@ def test_job_with_custom_database():
     _confirm_documents_content(uris, docs)
 
 
+@pytest.mark.asyncio()
+async def test_multi_thread_job():
+    @responses.activate
+    async def run():
+        uris_count = 150
+        document_body_parts = list(_get_test_document_body_parts(uris_count))
+
+        builder = MLResponseBuilder()
+        builder.with_base_url("http://localhost:8002/v1/documents")
+        builder.build_with_docs_callback(document_body_parts)
+
+        uris = [f"/some/dir/doc{i+1}.xml" for i in range(uris_count)]
+        job = ReadDocumentsJob(batch_size=5)
+        assert job.thread_count > 1
+        assert job.batch_size == 5
+        job.with_client_config(auth_method="digest")
+        job.with_uris_input(uris)
+        job.start()
+        docs = job.get_documents()
+
+        if len(docs) != uris_count:
+            return False
+
+        calls = responses.calls
+        assert len(calls) >= 30
+        assert job.status.completed == uris_count
+        assert job.status.successful == uris_count
+        assert job.status.failed == 0
+        _confirm_documents_content(uris, docs)
+        return True
+
+    all_docs_processed = False
+    while not all_docs_processed:
+        all_docs_processed = await run()
+
+
 @responses.activate
 def test_failing_job():
     uris_count = 5
@@ -136,7 +175,7 @@ def _setup_responses(uris: list[str], **kwargs):
 
 def _get_test_document_body_parts(
     count: int,
-) -> dict:
+) -> Iterable[DocumentsBodyPart]:
     for i in range(count):
         yield DocumentsBodyPart(
             **{

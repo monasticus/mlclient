@@ -8,11 +8,11 @@ import os
 import urllib.parse
 import zlib
 from pathlib import Path
-from typing import Any
+from typing import Any, Iterable
 
 import responses
 import urllib3
-from requests import Response
+from requests import PreparedRequest, Response
 from requests_toolbelt import MultipartDecoder
 from requests_toolbelt.multipart.decoder import BodyPart
 from responses import matchers
@@ -218,6 +218,89 @@ class MLResponseBuilder:
         resp_obj = self._finalize(request_url, responses_params)
         self.__init__()
         return resp_obj
+
+    def build_with_docs_callback(
+        self,
+        docs_body_parts: Iterable[DocumentsBodyPart],
+    ):
+        def request_callback(
+            request: PreparedRequest,
+        ) -> tuple:
+            uris = request.params["uri"]
+            if isinstance(uris, list):
+                headers, body = _for_multiple_uris(uris)
+            else:
+                headers, body = _for_single_uri(uris)
+            headers["Content-Length"] = str(len(body))
+            return 200, headers, body
+
+        def _for_multiple_uris(
+            uris: list,
+        ) -> tuple[dict, bytes]:
+            response_body_fields = []
+            for uri in uris:
+                body_part = _find_body_part(uri)
+                if body_part is None:
+                    continue
+                data = body_part.content
+                if isinstance(data, dict):
+                    data = json.dumps(data)
+                content_disp = ContentDispositionSerializer.deserialize(
+                    body_part.content_disposition,
+                )
+                req_field = RequestField(
+                    name="--ignore--",
+                    data=data,
+                    headers={
+                        "Content-Disposition": content_disp,
+                        "Content-Type": body_part.content_type,
+                    },
+                )
+                response_body_fields.append(req_field)
+            body, content_type = urllib3.encode_multipart_formdata(
+                response_body_fields,
+            )
+            content_type = content_type.replace(
+                "multipart/form-data",
+                "multipart/mixed",
+            )
+            headers = {
+                "Content-Type": content_type,
+            }
+            return headers, body
+
+        def _for_single_uri(
+            uri: str,
+        ) -> tuple[dict, bytes]:
+            body_part = _find_body_part(uri)
+            content_type = f"{body_part.content_type}; charset=utf-8"
+            if isinstance(body_part.content, dict):
+                body = json.dumps(body_part.content)
+            else:
+                body = body_part.content
+            headers = {
+                "Content-Type": content_type,
+                "vnd.marklogic.document-format": body_part.content_disposition.format_.value,
+            }
+            return headers, body
+
+        def _find_body_part(
+            uri: str,
+        ) -> DocumentsBodyPart | None:
+            return next(
+                (
+                    part
+                    for part in docs_body_parts
+                    if part.content_disposition.filename == uri
+                ),
+                None,
+            )
+
+        responses.add_callback(
+            responses.GET,
+            self._base_url,
+            callback=request_callback,
+        )
 
     def _validate(
         self,

@@ -31,6 +31,7 @@ from mlclient.structures.calls import (
     DocumentsBodyPart,
     DocumentsContentDisposition,
 )
+from tests.utils import MLResponseBuilder
 
 
 class DocumentsClient(MLResourceClient):
@@ -120,6 +121,7 @@ class DocumentsClient(MLResourceClient):
         """
         call = self._get_call(uris=uris, category=category, database=database)
         resp = self.call(call)
+        MLResponseBuilder.generate_builder_code(resp)
         if not resp.ok:
             resp_body = MLResponseParser.parse(resp)
             raise MarkLogicError(resp_body["errorResponse"])

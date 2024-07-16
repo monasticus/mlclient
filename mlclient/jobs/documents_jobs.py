@@ -259,6 +259,7 @@ class ReadDocumentsJob(DocumentsJob):
         """
         super().__init__("read", thread_count, batch_size)
         self._output_queue: queue.Queue = queue.Queue()
+        self._categories = ["content"]
 
     def with_uris_input(
         self,
@@ -272,6 +273,24 @@ class ReadDocumentsJob(DocumentsJob):
             URIs to be red from a MarkLogic database
         """
         self._pre_input_queue.put(uris)
+
+    def with_metadata(
+        self,
+        *args,
+    ):
+        """Add metadata category/ies to retrieve from a MarkLogic server.
+
+        When no category is provided, full metadata will be gathered.
+
+        Parameters
+        ----------
+        args :
+            Metadata categories to be red from a MarkLogic server
+        """
+        if len(args) == 0:
+            self._categories.append("metadata")
+        else:
+            self._categories.extend(args)
 
     def get_documents(
         self,
@@ -305,7 +324,15 @@ class ReadDocumentsJob(DocumentsJob):
             If MarkLogic returns an error
         """
         try:
-            for doc in client.read(uris=batch, database=self._database):
+            if self._categories != ["content"]:
+                category = list(dict.fromkeys(self._categories))
+            else:
+                category = None
+            for doc in client.read(
+                uris=batch,
+                database=self._database,
+                category=category,
+            ):
                 self._output_queue.put(doc)
             self._status.add_successful_docs(batch)
         except Exception:

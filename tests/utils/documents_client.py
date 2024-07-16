@@ -114,14 +114,26 @@ def generate_docs(
     content: bytes | None = None,
     document_type: DocumentType = DocumentType.XML,
     uri_template: str = "/some/dir/doc-{}.xml",
+    with_metadata: bool = False,
 ):
     content = (
         content
         or b'<?xml version="1.0" encoding="UTF-8"?>\n<root><child>data</child></root>'
     )
+    metadata = None
+    if with_metadata:
+        metadata = (
+            Metadata(
+                collections=["test-collection"],
+                quality=5,
+            )
+            .to_json_string()
+            .encode("utf-8")
+        )
     for i in range(count):
         yield RawDocument(
             content=content,
+            metadata=metadata,
             uri=uri_template.format(i + 1),
             doc_type=document_type,
         )

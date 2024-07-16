@@ -278,9 +278,10 @@ class MLResponseBuilder:
                 body = json.dumps(body_part.content)
             else:
                 body = body_part.content
+            doc_format = body_part.content_disposition.format_.value
             headers = {
                 "Content-Type": content_type,
-                "vnd.marklogic.document-format": body_part.content_disposition.format_.value,
+                "vnd.marklogic.document-format": doc_format,
             }
             return headers, body
 

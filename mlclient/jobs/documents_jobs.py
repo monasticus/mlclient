@@ -5,6 +5,8 @@ It exports high-level class to perform bulk operations in a MarkLogic server:
         An abstract class for jobs managing documents from a MarkLogic database.
     * WriteDocumentsJob
         A multi-thread job writing documents into a MarkLogic database.
+    * ReadDocumentsJob
+        A multi-thread job reading documents from a MarkLogic database.
     * DocumentsLoader
         A class parsing files into Documents.
 """
@@ -597,9 +599,12 @@ class DocumentsLoader:
 
 
 class DocumentJobStatus:
+    """A class representing documents job status."""
+
     def __init__(
         self,
     ):
+        """Initialize DocumentJobStatus instance."""
         self._successful_docs = []
         self._failed_docs = []
 
@@ -607,52 +612,61 @@ class DocumentJobStatus:
     def completed(
         self,
     ) -> int:
+        """Return number of completed documents."""
         return len(self._successful_docs) + len(self._failed_docs)
 
     @property
     def successful(
         self,
     ) -> int:
+        """Return number of successfully completed documents."""
         return len(self._successful_docs)
 
     @property
     def failed(
         self,
     ) -> int:
+        """Return number of completed documents that failed."""
         return len(self._failed_docs)
 
     @property
     def successful_docs(
         self,
     ) -> list[str]:
+        """Return number of successfully completed documents' URIs."""
         return self._successful_docs.copy()
 
     @property
     def failed_docs(
         self,
     ) -> list[str]:
+        """Return number of completed documents' URIs that failed."""
         return self._failed_docs.copy()
 
     def add_successful_doc(
         self,
         uri: str,
     ) -> None:
+        """Add a successfully completed document URI."""
         self._successful_docs.append(uri)
 
     def add_successful_docs(
         self,
         uris: list[str],
     ) -> None:
+        """Add successfully completed documents' URIs."""
         self._successful_docs.extend(uris)
 
     def add_failed_doc(
         self,
         uri: str,
     ) -> None:
+        """Add a completed document URI that failed."""
         self._failed_docs.append(uri)
 
     def add_failed_docs(
         self,
         uris: list[str],
     ) -> None:
+        """Add completed documents' URIs that failed."""
         self._failed_docs.extend(uris)

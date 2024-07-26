@@ -23,7 +23,11 @@ def _parse_step_input_table(
     rows = []
     for line in input_lines[1:]:
         if line.count(INPUT_DELIMITER) != delimiters_count:
-            raise
+            msg = (
+                f"Incorrect number of columns at line: [{line}]! "
+                f"Expected: [{delimiters_count}], got: [{line.count(INPUT_DELIMITER)}]",
+            )
+            raise ValueError(msg)
         cells = [cell.strip() for cell in line.split(INPUT_DELIMITER)][1:-1]
         row = {heading: cells[i] for i, heading in enumerate(headings)}
         rows.append(row)

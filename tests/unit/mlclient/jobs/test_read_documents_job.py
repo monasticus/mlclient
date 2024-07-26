@@ -89,7 +89,7 @@ def test_job_with_full_metadata():
     uris_count = 5
     uris = [f"/some/dir/doc{i+1}.xml" for i in range(uris_count)]
 
-    _setup_responses(uris, metadata=["quality"])
+    _setup_responses(uris, metadata=["metadata"])
 
     job = ReadDocumentsJob(thread_count=1, batch_size=5)
     assert job.thread_count == 1

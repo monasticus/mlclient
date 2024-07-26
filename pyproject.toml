@@ -132,7 +132,6 @@ exclude = [
     "docs",
     "scripts"
 ]
-lint.ignore-init-module-imports = true
 target-version = "py38"
 
 [tool.ruff.lint.pydocstyle]

@@ -109,9 +109,9 @@ class MLResponseParser:
             logger.fine("No content to parse")
             return []
 
-        if output_type == str:
+        if output_type is str:
             return cls._parse_text(response)
-        if output_type == bytes:
+        if output_type is bytes:
             return cls._parse_bytes(response)
 
         return cls._parse(response)
@@ -141,9 +141,9 @@ class MLResponseParser:
             logger.fine("No content to parse")
             return response.headers, []
 
-        if output_type == str:
+        if output_type is str:
             return cls._parse_text(response, with_headers=True)
-        if output_type == bytes:
+        if output_type is bytes:
             return cls._parse_bytes(response, with_headers=True)
 
         return cls._parse(response, with_headers=True)

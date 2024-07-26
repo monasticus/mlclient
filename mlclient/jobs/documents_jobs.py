@@ -246,7 +246,7 @@ class ReadDocumentsJob(DocumentsJob):
     def __init__(
         self,
         thread_count: int | None = None,
-        batch_size: int = 50,
+        batch_size: int = 300,
     ):
         """Initialize ReadDocumentsJob instance.
 
@@ -254,7 +254,7 @@ class ReadDocumentsJob(DocumentsJob):
         ----------
         thread_count : int | None, default None
             A number of threads
-        batch_size : int, default 50
+        batch_size : int, default 300
             A number of URIs in a single batch
         """
         super().__init__("read", thread_count, batch_size)

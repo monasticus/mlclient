@@ -29,14 +29,14 @@ def assert_documents_exist(
     uris: list,
 ):
     with DocumentsClient(auth_method="digest") as docs_client:
-        assert docs_client.read(uris) != []
+        assert docs_client.read(uris, output_type=bytes) != []
 
 
 def assert_documents_do_not_exist(
     uris: list,
 ):
     with DocumentsClient(auth_method="digest") as docs_client:
-        assert docs_client.read(uris) == []
+        assert docs_client.read(uris, output_type=bytes) == []
 
 
 def assert_documents_exist_and_confirm_content_with_metadata(

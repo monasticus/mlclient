@@ -248,7 +248,7 @@ class ReadDocumentsJob(DocumentsJob):
     def __init__(
         self,
         thread_count: int | None = None,
-        batch_size: int = 300,
+        batch_size: int = 400,
     ):
         """Initialize ReadDocumentsJob instance.
 
@@ -262,19 +262,6 @@ class ReadDocumentsJob(DocumentsJob):
         super().__init__("read", thread_count, batch_size)
         self._output_queue: queue.Queue = queue.Queue()
         self._categories = ["content"]
-
-    def with_uris_input(
-        self,
-        uris: Iterable[str],
-    ):
-        """Add URIs to the job's input.
-
-        Parameters
-        ----------
-        uris : Iterable[str]
-            URIs to be red from a MarkLogic database
-        """
-        self._pre_input_queue.put(uris)
 
     def with_metadata(
         self,
@@ -293,6 +280,19 @@ class ReadDocumentsJob(DocumentsJob):
             self._categories.append("metadata")
         else:
             self._categories.extend(args)
+
+    def with_uris_input(
+        self,
+        uris: Iterable[str],
+    ):
+        """Add URIs to the job's input.
+
+        Parameters
+        ----------
+        uris : Iterable[str]
+            URIs to be red from a MarkLogic database
+        """
+        self._pre_input_queue.put(uris)
 
     def get_documents(
         self,

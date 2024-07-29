@@ -45,10 +45,10 @@ def test_reading_docs_with_default_threads_batch_200(
     _perform_parametrized_test(benchmark, docs_count=NUMBER_OF_DOCS, batch_size=200)
 
 
-def test_reading_docs_with_default_threads_batch_400(
+def test_reading_docs_with_default_threads_batch_300(
     benchmark,
 ):
-    _perform_parametrized_test(benchmark, docs_count=NUMBER_OF_DOCS, batch_size=400)
+    _perform_parametrized_test(benchmark, docs_count=NUMBER_OF_DOCS, batch_size=300)
 
 
 def test_reading_docs_with_default_threads_batch_500(
@@ -199,47 +199,47 @@ def test_reading_docs_with_24_threads_batch_200(
     )
 
 
-def test_reading_docs_with_4_threads_batch_400(
+def test_reading_docs_with_4_threads_batch_300(
     benchmark,
 ):
     _perform_parametrized_test(
         benchmark,
         docs_count=NUMBER_OF_DOCS,
         thread_count=4,
-        batch_size=400,
+        batch_size=300,
     )
 
 
-def test_reading_docs_with_8_threads_batch_400(
+def test_reading_docs_with_8_threads_batch_300(
     benchmark,
 ):
     _perform_parametrized_test(
         benchmark,
         docs_count=NUMBER_OF_DOCS,
         thread_count=8,
-        batch_size=400,
+        batch_size=300,
     )
 
 
-def test_reading_docs_with_12_threads_batch_400(
+def test_reading_docs_with_12_threads_batch_300(
     benchmark,
 ):
     _perform_parametrized_test(
         benchmark,
         docs_count=NUMBER_OF_DOCS,
         thread_count=12,
-        batch_size=400,
+        batch_size=300,
     )
 
 
-def test_reading_docs_with_24_threads_batch_400(
+def test_reading_docs_with_24_threads_batch_300(
     benchmark,
 ):
     _perform_parametrized_test(
         benchmark,
         docs_count=NUMBER_OF_DOCS,
         thread_count=24,
-        batch_size=400,
+        batch_size=300,
     )
 
 
@@ -511,7 +511,7 @@ def _perform_parametrized_test(
     benchmark,
     docs_count: int,
     thread_count: int | None = None,
-    batch_size: int = 300,
+    batch_size: int = 400,
 ):
     uri_prefix = "/performance-tests/read-documents-job"
     uri_template = f"{uri_prefix}/doc-{{}}.xml"

@@ -1,0 +1,20 @@
+app-name: app
+host: localhost
+username: admin
+password: admin
+protocol: http
+app-servers:
+
+  - id: manage
+    port: 7102
+#    port: 7202
+#    port: 7302
+    auth: digest
+    rest: true
+
+  - id: app-services
+    port: 7100
+#    port: 7200
+#    port: 7300
+    auth: digest
+    rest: true

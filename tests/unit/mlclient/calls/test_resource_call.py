@@ -59,10 +59,10 @@ def test_custom_params():
 def test_params_encapsulation():
     call = ResourceCallTestImpl()
     params = call.params
-    assert {} == params
+    assert params == {}
 
     params["custom-param"] = "custom-value"
-    assert {"custom-param": "custom-value"} == params
+    assert params == {"custom-param": "custom-value"}
 
     assert call.params == {}
 

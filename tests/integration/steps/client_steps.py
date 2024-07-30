@@ -23,7 +23,11 @@ def init_client(
     elif client_type == "MLResourcesClient":
         client = MLResourcesClient(auth_method="digest")
     else:
-        raise
+        msg = (
+            f"Incorrect client type! "
+            f"Expected: [MLResourceClient, MLResourcesClient], got: [{client_type}]"
+        )
+        raise ValueError(msg)
     client.connect()
     return client
 

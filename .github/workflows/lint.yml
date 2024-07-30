@@ -21,4 +21,4 @@ jobs:
           make install
 
       - name: Lint with Ruff
-        run: poetry run ruff --output-format=github .
+        run: poetry run ruff check --output-format=github .

@@ -4,6 +4,8 @@ import json
 import subprocess
 from pathlib import Path
 
+_SCRIPT_DIR = Path(__file__).resolve().parent
+
 
 def main():
     known_linters = _get_known_linters()
@@ -13,7 +15,7 @@ def main():
 
 
 def _get_known_linters():
-    linters = Path("dev/scripts/linters/linters.json").read_text()
+    linters = Path(f"{_SCRIPT_DIR}/linters.json").read_text()
     return json.loads(linters)
 
 

@@ -11,10 +11,11 @@ from mlclient.jobs import ReadDocumentsJob
 from mlclient.structures import Document, DocumentType, XMLDocument
 from mlclient.structures.calls import DocumentsBodyPart
 from tests.utils import MLResponseBuilder
+from tests.utils import filesystem as fs_utils
 
 
 @responses.activate
-def test_basic_job_with_uris_input():
+def test_basic_job_with_documents_output():
     uris_count = 5
     uris = [f"/some/dir/doc{i+1}.xml" for i in range(uris_count)]
 
@@ -34,6 +35,34 @@ def test_basic_job_with_uris_input():
     assert job.status.successful == uris_count
     assert job.status.failed == 0
     _confirm_documents_data(uris, docs)
+
+
+@responses.activate
+def test_basic_job_with_filesystem_output():
+    uris_count = 5
+    uris = [f"/some/dir/doc{i+1}.xml" for i in range(uris_count)]
+
+    _setup_responses(uris)
+
+    output_dir = "output"
+    try:
+        job = ReadDocumentsJob(thread_count=1, batch_size=5)
+        assert job.thread_count == 1
+        assert job.batch_size == 5
+        job.with_client_config(auth_method="digest")
+        job.with_uris_input(uris)
+        job.with_filesystem_output(output_dir)
+        job.start()
+        job.await_completion()
+
+        calls = responses.calls
+        assert len(calls) == 1
+        assert job.status.completed == uris_count
+        assert job.status.successful == uris_count
+        assert job.status.failed == 0
+        # confirm documents data
+    finally:
+        fs_utils.safe_rmdir(output_dir)
 
 
 @responses.activate

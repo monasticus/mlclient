@@ -13,6 +13,7 @@ It exports high-level class to perform bulk operations in a MarkLogic server:
 
 from __future__ import annotations
 
+import asyncio
 import json
 import logging
 import os
@@ -24,6 +25,8 @@ from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from threading import Thread
 from typing import Generator, Iterable
+
+import aiofiles
 
 from mlclient.clients import DocumentsClient
 from mlclient.mimetypes import Mimetypes
@@ -261,7 +264,28 @@ class ReadDocumentsJob(DocumentsJob):
         """
         super().__init__("read", thread_count, batch_size)
         self._output_queue: queue.Queue = queue.Queue()
-        self._categories = ["content"]
+        self._categories: list[str] = ["content"]
+        self._fs_output_path: Path | None = None
+        self._fs_output_thread: Thread | None = None
+
+    def start(
+        self,
+    ):
+        if self._fs_output_path is not None:
+            self._fs_output_thread = Thread(
+                target=self._save_documents,
+                name=f"{self._type}_documents_job_{self._id}_save",
+            )
+            self._fs_output_thread.start()
+        super().start()
+
+    def await_completion(
+        self,
+    ):
+        super().await_completion()
+        if self._fs_output_thread is not None:
+            self._output_queue.put(None)
+            self._fs_output_thread.join()
 
     def with_metadata(
         self,
@@ -293,6 +317,12 @@ class ReadDocumentsJob(DocumentsJob):
             URIs to be red from a MarkLogic database
         """
         self._pre_input_queue.put(uris)
+
+    def with_filesystem_output(
+        self,
+        output_path: str,
+    ):
+        self._fs_output_path = Path(output_path).resolve().absolute()
 
     def get_documents(
         self,
@@ -340,6 +370,26 @@ class ReadDocumentsJob(DocumentsJob):
         except Exception:
             self._status.add_failed_docs(batch)
             logger.exception("An unexpected error occurred while reading documents")
+
+    def _save_documents(
+        self,
+    ):
+        async def _save():
+            while True:
+                doc: Document = self._output_queue.get()
+                if doc is None:
+                    break
+
+                doc_path = self._fs_output_path / doc.uri[1:]
+                doc_path.parent.mkdir(parents=True, exist_ok=True)
+                logger.debug("Writing data into file [%s]", doc_path)
+                async with aiofiles.open(doc_path, mode="wb") as file:
+                    await file.write(doc.content_bytes)
+
+        try:
+            asyncio.run(_save())
+        except:
+            logger.exception("An unexpected occurred!")
 
 
 class WriteDocumentsJob(DocumentsJob):

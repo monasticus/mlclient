@@ -239,6 +239,34 @@ def test_failing_job():
     assert len(docs) == 0
 
 
+@responses.activate
+def test_failing_filesystem_write_step():
+    uris_count = 5
+    uris = [f"/some/dir/doc{i+1}.xml" for i in range(uris_count)]
+
+    _setup_responses(uris)
+
+    output_dir = str(Path(__file__).resolve())
+    assert Path(output_dir).exists()
+    try:
+        job = ReadDocumentsJob(thread_count=1, batch_size=5)
+        assert job.thread_count == 1
+        assert job.batch_size == 5
+        job.with_client_config(auth_method="digest")
+        job.with_uris_input(uris)
+        job.with_filesystem_output(output_dir)
+        job.start()
+        job.await_completion()
+
+        calls = responses.calls
+        assert len(calls) == 1
+        assert job.report.completed == uris_count
+        assert job.report.successful == 0
+        assert job.report.failed == uris_count
+    finally:
+        assert Path(output_dir).exists()
+
+
 def _setup_responses(
     uris: list[str],
     metadata: list[str] | None = None,

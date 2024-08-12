@@ -366,8 +366,8 @@ class ReadDocumentsJob(DocumentsJob):
                 database=self._database,
                 category=category,
             ):
+                self._report.add_successful_doc(doc.uri)
                 self._output_queue.put(doc)
-            self._report.add_successful_docs(batch)
         except Exception as err:
             self._report.add_failed_docs(batch, err)
             logger.exception("An unexpected error occurred while reading documents")
@@ -764,7 +764,7 @@ class DocumentJobReport:
                 status=DocumentStatus.failure,
                 details=DocumentStatusDetails(
                     error=str(err.__class__.__name__),
-                    message=err.args[0],
+                    message=str(err),
                 ),
             ),
         )
@@ -775,6 +775,7 @@ class DocumentJobReport:
     ):
         """Add a document report."""
         self._doc_reports[report.uri] = report
+        print()
 
 
 class DocumentStatus(Enum):

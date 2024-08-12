@@ -9,6 +9,14 @@ It exports high-level class to perform bulk operations in a MarkLogic server:
         A multi-thread job reading documents from a MarkLogic database.
     * DocumentsLoader
         A class parsing files into Documents.
+    * DocumentJobReport
+        A class representing a documents job report.
+    * DocumentReport
+        A class representing a document's report.
+    * DocumentStatus
+        A document's status enum.
+    * DocumentReport
+        A class representing a document's status details.
 """
 
 from __future__ import annotations
@@ -799,18 +807,24 @@ class DocumentJobReport:
         return self._doc_reports.get(uri)
 
 
+class DocumentReport(BaseModel):
+    """A class representing a document's report."""
+
+    uri: str
+    status: DocumentStatus
+    details: DocumentStatusDetails = None
+
+
 class DocumentStatus(Enum):
+    """A document's status enum."""
+
     success: str = "SUCCESS"
     failure: str = "FAILURE"
     pending: str = "PENDING"
 
 
 class DocumentStatusDetails(BaseModel):
+    """A class representing a document's status details."""
+
     error: type
     message: str
-
-
-class DocumentReport(BaseModel):
-    uri: str
-    status: DocumentStatus
-    details: DocumentStatusDetails = None

@@ -268,12 +268,14 @@ def test_failing_filesystem_write_step():
         assert job.report.completed == uris_count
         assert job.report.successful == 0
         assert job.report.failed == uris_count
+
+        dir_path = output_dir_path.absolute() / "some/dir"
         for uri in uris:
             doc_report = job.report.get_doc_report(uri)
-            assert doc_report.details.error == NotADirectoryError
+            assert doc_report.details.error is NotADirectoryError
             assert (
                 doc_report.details.message
-                == f"[Errno 20] Not a directory: '{output_dir_path.absolute() / 'some/dir'}'"
+                == f"[Errno 20] Not a directory: '{dir_path}'"
             )
     finally:
         assert output_dir_path.exists()

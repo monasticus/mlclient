@@ -229,7 +229,7 @@ def test_get_doc_report_failed():
     doc_report = report.get_doc_report("/some/uri-1.xml")
     assert doc_report.uri == "/some/uri-1.xml"
     assert doc_report.status == DocumentStatus.failure
-    assert doc_report.details.error == RuntimeError
+    assert doc_report.details.error is RuntimeError
     assert doc_report.details.message == "Some error"
 
 

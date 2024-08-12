@@ -1,5 +1,6 @@
 import responses
 
+from mlclient.exceptions import MarkLogicError
 from mlclient.jobs import WriteDocumentsJob
 from mlclient.structures import DocumentType, RawDocument
 from tests.utils import MLResponseBuilder
@@ -175,6 +176,10 @@ def test_failing_job():
     assert job.report.completed == 5
     assert job.report.successful == 0
     assert job.report.failed == 5
+    for doc in docs:
+        doc_report = job.report.get_doc_report(doc.uri)
+        assert doc_report.details.error == MarkLogicError
+        assert doc_report.details.message == "[401 Unauthorized] 401 Unauthorized"
 
 
 def _get_test_docs(

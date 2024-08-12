@@ -8,6 +8,7 @@ from typing import Iterable
 import pytest
 import responses
 
+from mlclient.exceptions import MarkLogicError
 from mlclient.jobs import ReadDocumentsJob
 from mlclient.structures import Document, DocumentType, XMLDocument
 from mlclient.structures.calls import DocumentsBodyPart
@@ -236,6 +237,10 @@ def test_failing_job():
     assert job.report.completed == uris_count
     assert job.report.successful == 0
     assert job.report.failed == uris_count
+    for uri in uris:
+        doc_report = job.report.get_doc_report(uri)
+        assert doc_report.details.error == MarkLogicError
+        assert doc_report.details.message == "[401 Unauthorized] 401 Unauthorized"
     assert len(docs) == 0
 
 
@@ -246,15 +251,15 @@ def test_failing_filesystem_write_step():
 
     _setup_responses(uris)
 
-    output_dir = str(Path(__file__).resolve())
-    assert Path(output_dir).exists()
+    output_dir_path = Path(__file__).resolve()
+    assert output_dir_path.exists()
     try:
         job = ReadDocumentsJob(thread_count=1, batch_size=5)
         assert job.thread_count == 1
         assert job.batch_size == 5
         job.with_client_config(auth_method="digest")
         job.with_uris_input(uris)
-        job.with_filesystem_output(output_dir)
+        job.with_filesystem_output(str(output_dir_path))
         job.start()
         job.await_completion()
 
@@ -263,8 +268,15 @@ def test_failing_filesystem_write_step():
         assert job.report.completed == uris_count
         assert job.report.successful == 0
         assert job.report.failed == uris_count
+        for uri in uris:
+            doc_report = job.report.get_doc_report(uri)
+            assert doc_report.details.error == NotADirectoryError
+            assert (
+                doc_report.details.message
+                == f"[Errno 20] Not a directory: '{output_dir_path.absolute() / 'some/dir'}'"
+            )
     finally:
-        assert Path(output_dir).exists()
+        assert output_dir_path.exists()
 
 
 def _setup_responses(

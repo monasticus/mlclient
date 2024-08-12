@@ -396,6 +396,11 @@ class ReadDocumentsJob(DocumentsJob):
                     logger.debug("Writing data into file [%s]", doc_path)
                     async with aiofiles.open(doc_path, mode="wb") as file:
                         await file.write(doc.content_bytes)
+                    if doc.metadata is not None:
+                        metadata_path = doc_path.with_suffix(".metadata.json")
+                        logger.debug("Writing metadata into file [%s]", metadata_path)
+                        async with aiofiles.open(metadata_path, mode="wb") as file:
+                            await file.write(doc.metadata)
                 except Exception as err:
                     self._report.add_failed_doc(doc.uri, err)
 

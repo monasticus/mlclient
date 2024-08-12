@@ -66,7 +66,7 @@ class Document(metaclass=ABCMeta):
         self,
         uri: str | None = None,
         doc_type: DocumentType | None = DocumentType.XML,
-        metadata: Metadata | None = None,
+        metadata: Metadata | bytes | str | None = None,
         temporal_collection: str | None = None,
     ):
         """Initialize Document instance.
@@ -80,7 +80,7 @@ class Document(metaclass=ABCMeta):
         metadata : Metadata
             A document metadata
         temporal_collection : str | None
-            The temporal colllection
+            The temporal collection
         """
         self._uri = self._get_non_blank_uri(uri)
         self._doc_type = doc_type
@@ -172,7 +172,7 @@ class Document(metaclass=ABCMeta):
     @property
     def metadata(
         self,
-    ) -> Metadata:
+    ) -> Metadata | bytes | str:
         """A document metadata."""
         return copy.copy(self._metadata)
 

@@ -1,3 +1,5 @@
+from copy import copy
+
 from mlclient.jobs import DocumentJobReport
 from mlclient.jobs.documents_jobs import DocumentReport, DocumentStatus
 
@@ -205,3 +207,15 @@ def test_full_report_encapsulation():
     assert report.successful == 1
     assert report.failed == 0
     assert report.full["/some/uri-1.xml"].status == DocumentStatus.success
+
+
+def test_copy():
+    report = DocumentJobReport()
+    report.add_successful_doc("/some/uri-1.xml")
+    assert report.successful == 1
+
+    report_copy = copy(report)
+    report_copy.add_successful_doc("/some/uri-2.xml")
+    assert report_copy.successful == 2
+
+    assert report.successful == 1

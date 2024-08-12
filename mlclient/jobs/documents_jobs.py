@@ -22,6 +22,7 @@ import uuid
 import xml.etree.ElementTree as ElemTree
 from abc import ABCMeta, abstractmethod
 from concurrent.futures import ThreadPoolExecutor
+from copy import copy
 from enum import Enum
 from pathlib import Path
 from threading import Thread
@@ -153,7 +154,7 @@ class DocumentsJob(metaclass=ABCMeta):
         self,
     ) -> DocumentJobReport:
         """A status of the job."""
-        return self._report
+        return copy(self._report)
 
     def _start_conveyor_belt(
         self,
@@ -658,6 +659,12 @@ class DocumentJobReport:
         """Initialize DocumentJobStatus instance."""
         self._doc_reports: dict[str, DocumentReport] = {}
 
+    def __copy__(self):
+        report_copy = self.__class__()
+        for report in self._doc_reports.values():
+            report_copy.add_doc_report(report)
+        return report_copy
+
     @property
     def pending(
         self,
@@ -784,7 +791,6 @@ class DocumentJobReport:
     ):
         """Add a document report."""
         self._doc_reports[report.uri] = report
-        print()
 
 
 class DocumentStatus(Enum):

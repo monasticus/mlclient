@@ -719,6 +719,15 @@ class DocumentJobReport:
             if report.status == DocumentStatus.failure
         ]
 
+    @property
+    def full(
+        self,
+    ) -> dict[str, DocumentReport]:
+        return {
+            uri: report.model_copy(deep=True)
+            for uri, report in self._doc_reports.items()
+        }
+
     def add_pending_docs(
         self,
         uris: list[str],

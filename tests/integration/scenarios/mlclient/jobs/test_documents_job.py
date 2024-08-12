@@ -1,9 +1,10 @@
 from __future__ import annotations
 
-import json
+from pathlib import Path
 
 from mlclient.jobs import ReadDocumentsJob, WriteDocumentsJob
 from tests.utils import documents_client as docs_client_utils
+from tests.utils import filesystem as fs_utils
 
 
 def test_write_job_with_documents_input():
@@ -31,7 +32,7 @@ def test_write_job_with_documents_input():
         docs_client_utils.assert_documents_do_not_exist(uris)
 
 
-def test_read_job_with_uris_input():
+def test_read_job_with_documents_output():
     written_docs = list(docs_client_utils.generate_docs())
     uris = [doc.uri for doc in written_docs]
 
@@ -62,10 +63,12 @@ def test_read_job_with_uris_input():
         docs_client_utils.assert_documents_do_not_exist(uris)
 
 
-def test_read_job_with_uris_input_and_metadata():
-    written_docs = list(docs_client_utils.generate_docs(with_metadata=True))
+def test_read_job_with_filesystem_output():
+    written_docs = list(docs_client_utils.generate_docs())
     uris = [doc.uri for doc in written_docs]
 
+    output_dir = str(Path(__file__).resolve().parent / "output")
+    assert not Path(output_dir).exists()
     try:
         # WRITE
         job = WriteDocumentsJob()
@@ -78,18 +81,19 @@ def test_read_job_with_uris_input_and_metadata():
         job = ReadDocumentsJob()
         job.with_client_config(auth_method="digest")
         job.with_uris_input(uris)
-        job.with_metadata()
+        job.with_filesystem_output(output_dir)
         job.start()
-        read_docs = job.get_documents()
-        for actual_doc in read_docs:
-            expected_doc = next(
-                doc for doc in written_docs if actual_doc.uri == doc.uri
-            )
-            expected_doc_metadata = json.loads(expected_doc.metadata)
-            assert expected_doc.doc_type == actual_doc.doc_type
-            assert expected_doc.content_bytes == actual_doc.content_bytes
-            assert expected_doc_metadata == actual_doc.metadata.to_json()
-            assert expected_doc.temporal_collection == actual_doc.temporal_collection
+        job.await_completion()
+        assert Path(output_dir).exists()
+        assert len([p for p in Path(output_dir).rglob("*") if p.is_file()]) == len(uris)
+        for uri in uris:
+            expected_doc = next(doc for doc in written_docs if uri == doc.uri)
+            file_path = Path(output_dir) / uri[1:]
+            assert file_path.exists()
+            with file_path.open("rb") as file:
+                assert expected_doc.content_bytes == file.read()
     finally:
         docs_client_utils.delete_documents(uris)
         docs_client_utils.assert_documents_do_not_exist(uris)
+        fs_utils.safe_rmdir(output_dir)
+        assert not Path(output_dir).exists()

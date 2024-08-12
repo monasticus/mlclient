@@ -17,7 +17,7 @@ def test_add_doc_report():
     report.add_doc_report(
         DocumentReport(
             uri="/some/uri-1.xml",
-            report="PENDING",
+            status="PENDING",
         ),
     )
     assert report.pending == 1
@@ -31,7 +31,7 @@ def test_add_doc_report():
     report.add_doc_report(
         DocumentReport(
             uri="/some/uri-2.xml",
-            report="PENDING",
+            status="PENDING",
         ),
     )
     assert report.pending == 2
@@ -45,7 +45,7 @@ def test_add_doc_report():
     report.add_doc_report(
         DocumentReport(
             uri="/some/uri-1.xml",
-            report="SUCCESS",
+            status="SUCCESS",
         ),
     )
     assert report.pending == 1
@@ -59,7 +59,7 @@ def test_add_doc_report():
     report.add_doc_report(
         DocumentReport(
             uri="/some/uri-2.xml",
-            report="FAILURE",
+            status="FAILURE",
         ),
     )
     assert report.pending == 0
@@ -73,7 +73,7 @@ def test_add_doc_report():
     report.add_doc_report(
         DocumentReport(
             uri="/some/uri-3.xml",
-            report="SUCCESS",
+            status="SUCCESS",
         ),
     )
     assert report.pending == 0
@@ -122,7 +122,7 @@ def test_add_doc():
     assert report.successful_docs == ["/some/uri-1.xml"]
     assert report.failed_docs == []
 
-    report.add_failed_doc("/some/uri-2.xml", Exception("Some error"))
+    report.add_failed_doc("/some/uri-2.xml", RuntimeError("Some error"))
     assert report.pending == 0
     assert report.completed == 2
     assert report.successful == 1
@@ -171,7 +171,7 @@ def test_add_docs():
 
     report.add_failed_docs(
         ["/some/uri-2.xml", "/some/uri-4.xml"],
-        Exception("Some error"),
+        RuntimeError("Some error"),
     )
     assert report.pending == 0
     assert report.completed == 4
@@ -193,6 +193,44 @@ def test_add_docs():
         "/some/uri-5.xml",
     ]
     assert report.failed_docs == ["/some/uri-2.xml", "/some/uri-4.xml"]
+
+
+def test_get_doc_report_non_existing():
+    report = DocumentJobReport()
+
+    doc_report = report.get_doc_report("/some/uri-1.xml")
+    assert doc_report is None
+
+
+def test_get_doc_report_pending():
+    report = DocumentJobReport()
+    report.add_pending_doc("/some/uri-1.xml")
+
+    doc_report = report.get_doc_report("/some/uri-1.xml")
+    assert doc_report.uri == "/some/uri-1.xml"
+    assert doc_report.status == DocumentStatus.pending
+    assert doc_report.details is None
+
+
+def test_get_doc_report_successful():
+    report = DocumentJobReport()
+    report.add_successful_doc("/some/uri-1.xml")
+
+    doc_report = report.get_doc_report("/some/uri-1.xml")
+    assert doc_report.uri == "/some/uri-1.xml"
+    assert doc_report.status == DocumentStatus.success
+    assert doc_report.details is None
+
+
+def test_get_doc_report_failed():
+    report = DocumentJobReport()
+    report.add_failed_doc("/some/uri-1.xml", RuntimeError("Some error"))
+
+    doc_report = report.get_doc_report("/some/uri-1.xml")
+    assert doc_report.uri == "/some/uri-1.xml"
+    assert doc_report.status == DocumentStatus.failure
+    assert doc_report.details.error == RuntimeError
+    assert doc_report.details.message == "Some error"
 
 
 def test_full_report_encapsulation():

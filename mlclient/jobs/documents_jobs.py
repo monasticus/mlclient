@@ -779,7 +779,7 @@ class DocumentJobReport:
                 uri=uri,
                 status=DocumentStatus.failure,
                 details=DocumentStatusDetails(
-                    error=str(err.__class__.__name__),
+                    error=err.__class__,
                     message=str(err),
                 ),
             ),
@@ -792,6 +792,12 @@ class DocumentJobReport:
         """Add a document report."""
         self._doc_reports[report.uri] = report
 
+    def get_doc_report(
+        self,
+        uri: str,
+    ):
+        return self._doc_reports.get(uri)
+
 
 class DocumentStatus(Enum):
     success: str = "SUCCESS"
@@ -800,7 +806,7 @@ class DocumentStatus(Enum):
 
 
 class DocumentStatusDetails(BaseModel):
-    error: str
+    error: type
     message: str
 
 

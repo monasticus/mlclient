@@ -22,11 +22,13 @@ import uuid
 import xml.etree.ElementTree as ElemTree
 from abc import ABCMeta, abstractmethod
 from concurrent.futures import ThreadPoolExecutor
+from enum import Enum
 from pathlib import Path
 from threading import Thread
 from typing import Generator, Iterable
 
 import aiofiles
+from pydantic import BaseModel
 
 from mlclient.clients import DocumentsClient
 from mlclient.mimetypes import Mimetypes
@@ -68,7 +70,7 @@ class DocumentsJob(metaclass=ABCMeta):
         self._pre_input_queue: queue.Queue = queue.Queue()
         self._input_queue: queue.Queue = queue.Queue()
         self._executor: ThreadPoolExecutor | None = None
-        self._status = DocumentJobStatus()
+        self._report = DocumentJobReport()
         Thread(
             target=self._start_conveyor_belt,
             name=f"{self._type}_documents_job_{self._id}",
@@ -128,8 +130,8 @@ class DocumentsJob(metaclass=ABCMeta):
             "Job [%s] has been completed "
             "with overall documents count [%d] and successful [%d]",
             self._id,
-            self.status.completed,
-            self.status.successful,
+            self.report.completed,
+            self.report.successful,
         )
 
     @property
@@ -147,11 +149,11 @@ class DocumentsJob(metaclass=ABCMeta):
         return self._batch_size
 
     @property
-    def status(
+    def report(
         self,
-    ) -> DocumentJobStatus:
+    ) -> DocumentJobReport:
         """A status of the job."""
-        return self._status
+        return self._report
 
     def _start_conveyor_belt(
         self,
@@ -173,10 +175,9 @@ class DocumentsJob(metaclass=ABCMeta):
                 break
 
             for input_item in input_items:
-                logger.debug(
-                    "Putting [%s] into the queue",
-                    input_item.uri if isinstance(input_item, Document) else input_item,
-                )
+                uri = input_item.uri if isinstance(input_item, Document) else input_item
+                logger.debug("Putting [%s] into the queue", uri)
+                self._report.add_pending_doc(uri)
                 self._input_queue.put(input_item)
 
         for _ in range(self._thread_count):
@@ -366,9 +367,9 @@ class ReadDocumentsJob(DocumentsJob):
                 category=category,
             ):
                 self._output_queue.put(doc)
-            self._status.add_successful_docs(batch)
-        except Exception:
-            self._status.add_failed_docs(batch)
+            self._report.add_successful_docs(batch)
+        except Exception as err:
+            self._report.add_failed_docs(batch, err)
             logger.exception("An unexpected error occurred while reading documents")
 
     def _save_documents(
@@ -380,16 +381,16 @@ class ReadDocumentsJob(DocumentsJob):
                 if doc is None:
                     break
 
-                doc_path = self._fs_output_path / doc.uri[1:]
-                doc_path.parent.mkdir(parents=True, exist_ok=True)
-                logger.debug("Writing data into file [%s]", doc_path)
-                async with aiofiles.open(doc_path, mode="wb") as file:
-                    await file.write(doc.content_bytes)
+                try:
+                    doc_path = self._fs_output_path / doc.uri[1:]
+                    doc_path.parent.mkdir(parents=True, exist_ok=True)
+                    logger.debug("Writing data into file [%s]", doc_path)
+                    async with aiofiles.open(doc_path, mode="wb") as file:
+                        await file.write(doc.content_bytes)
+                except Exception as err:
+                    self._report.add_failed_doc(doc.uri, err)
 
-        try:
-            asyncio.run(_save())
-        except:
-            logger.exception("An unexpected occurred!")
+        asyncio.run(_save())
 
 
 class WriteDocumentsJob(DocumentsJob):
@@ -463,9 +464,9 @@ class WriteDocumentsJob(DocumentsJob):
         batch_uris = [doc.uri for doc in batch]
         try:
             client.create(data=batch, database=self._database)
-            self._status.add_successful_docs(batch_uris)
-        except Exception:
-            self._status.add_failed_docs(batch_uris)
+            self._report.add_successful_docs(batch_uris)
+        except Exception as err:
+            self._report.add_failed_docs(batch_uris, err)
             logger.exception("An unexpected error occurred while writing documents")
 
 
@@ -648,75 +649,146 @@ class DocumentsLoader:
         return MetadataFactory.from_file(metadata_file_path)
 
 
-class DocumentJobStatus:
-    """A class representing documents job status."""
+class DocumentJobReport:
+    """A class representing documents job report."""
 
     def __init__(
         self,
     ):
         """Initialize DocumentJobStatus instance."""
-        self._successful_docs = []
-        self._failed_docs = []
+        self._doc_reports: dict[str, DocumentReport] = {}
+
+    @property
+    def pending(
+        self,
+    ) -> int:
+        """Return number of pending documents."""
+        return len(self.pending_docs)
 
     @property
     def completed(
         self,
     ) -> int:
         """Return number of completed documents."""
-        return len(self._successful_docs) + len(self._failed_docs)
+        return self.successful + self.failed
 
     @property
     def successful(
         self,
     ) -> int:
         """Return number of successfully completed documents."""
-        return len(self._successful_docs)
+        return len(self.successful_docs)
 
     @property
     def failed(
         self,
     ) -> int:
         """Return number of completed documents that failed."""
-        return len(self._failed_docs)
+        return len(self.failed_docs)
+
+    @property
+    def pending_docs(
+        self,
+    ) -> list[str]:
+        """Return number of pending documents' URIs."""
+        return [
+            uri
+            for uri, report in self._doc_reports.items()
+            if report.status == DocumentStatus.pending
+        ]
 
     @property
     def successful_docs(
         self,
     ) -> list[str]:
         """Return number of successfully completed documents' URIs."""
-        return self._successful_docs.copy()
+        return [
+            uri
+            for uri, report in self._doc_reports.items()
+            if report.status == DocumentStatus.success
+        ]
 
     @property
     def failed_docs(
         self,
     ) -> list[str]:
         """Return number of completed documents' URIs that failed."""
-        return self._failed_docs.copy()
+        return [
+            uri
+            for uri, report in self._doc_reports.items()
+            if report.status == DocumentStatus.failure
+        ]
 
-    def add_successful_doc(
+    def add_pending_docs(
         self,
-        uri: str,
-    ) -> None:
-        """Add a successfully completed document URI."""
-        self._successful_docs.append(uri)
+        uris: list[str],
+    ):
+        for uri in uris:
+            self.add_pending_doc(uri)
 
     def add_successful_docs(
         self,
         uris: list[str],
-    ) -> None:
-        """Add successfully completed documents' URIs."""
-        self._successful_docs.extend(uris)
-
-    def add_failed_doc(
-        self,
-        uri: str,
-    ) -> None:
-        """Add a completed document URI that failed."""
-        self._failed_docs.append(uri)
+    ):
+        for uri in uris:
+            self.add_successful_doc(uri)
 
     def add_failed_docs(
         self,
         uris: list[str],
-    ) -> None:
-        """Add completed documents' URIs that failed."""
-        self._failed_docs.extend(uris)
+        err: Exception,
+    ):
+        for uri in uris:
+            self.add_failed_doc(uri, err)
+
+    def add_pending_doc(
+        self,
+        uri: str,
+    ):
+        self.add_doc_report(DocumentReport(uri=uri, status=DocumentStatus.pending))
+
+    def add_successful_doc(
+        self,
+        uri: str,
+    ):
+        self.add_doc_report(DocumentReport(uri=uri, status=DocumentStatus.success))
+
+    def add_failed_doc(
+        self,
+        uri: str,
+        err: Exception,
+    ):
+        self.add_doc_report(
+            DocumentReport(
+                uri=uri,
+                status=DocumentStatus.failure,
+                details=DocumentStatusDetails(
+                    error=str(err.__class__.__name__),
+                    message=err.args[0],
+                ),
+            ),
+        )
+
+    def add_doc_report(
+        self,
+        report: DocumentReport,
+    ):
+        """Add a document report."""
+        self._doc_reports[report.uri] = report
+
+
+class DocumentStatus(Enum):
+    success: str = "SUCCESS"
+    failure: str = "FAILURE"
+    pending: str = "PENDING"
+
+
+class DocumentStatusDetails(BaseModel):
+    error: str
+    message: str
+
+
+class DocumentReport(BaseModel):
+    uri: str
+    status: DocumentStatus
+    details: DocumentStatusDetails = None

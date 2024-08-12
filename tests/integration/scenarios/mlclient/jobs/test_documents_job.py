@@ -18,9 +18,9 @@ def test_write_job_with_documents_input():
         job.with_documents_input(docs)
         job.start()
         job.await_completion()
-        assert job.status.completed == len(uris)
-        assert job.status.successful == len(uris)
-        assert job.status.failed == 0
+        assert job.report.completed == len(uris)
+        assert job.report.successful == len(uris)
+        assert job.report.failed == 0
 
         docs_client_utils.assert_documents_exist_and_confirm_data(
             {doc.uri: doc for doc in docs},

@@ -18,14 +18,14 @@ Examples
 """
 
 from .documents_jobs import (
-    DocumentJobStatus,
+    DocumentJobReport,
     DocumentsLoader,
     ReadDocumentsJob,
     WriteDocumentsJob,
 )
 
 __all__ = [
-    "DocumentJobStatus",
+    "DocumentJobReport",
     "ReadDocumentsJob",
     "WriteDocumentsJob",
     "DocumentsLoader",

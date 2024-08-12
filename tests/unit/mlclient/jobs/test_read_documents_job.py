@@ -32,9 +32,9 @@ def test_basic_job_with_documents_output():
 
     calls = responses.calls
     assert len(calls) == 1
-    assert job.status.completed == uris_count
-    assert job.status.successful == uris_count
-    assert job.status.failed == 0
+    assert job.report.completed == uris_count
+    assert job.report.successful == uris_count
+    assert job.report.failed == 0
     _confirm_documents_data(uris, docs)
 
 
@@ -59,9 +59,9 @@ def test_basic_job_with_filesystem_output():
 
         calls = responses.calls
         assert len(calls) == 1
-        assert job.status.completed == uris_count
-        assert job.status.successful == uris_count
-        assert job.status.failed == 0
+        assert job.report.completed == uris_count
+        assert job.report.successful == uris_count
+        assert job.report.failed == 0
         _confirm_filesystem_data(uris, output_dir)
     finally:
         fs_utils.safe_rmdir(output_dir)
@@ -86,9 +86,9 @@ def test_basic_job_with_multiple_inputs():
 
     calls = responses.calls
     assert len(calls) == 1
-    assert job.status.completed == uris_count
-    assert job.status.successful == uris_count
-    assert job.status.failed == 0
+    assert job.report.completed == uris_count
+    assert job.report.successful == uris_count
+    assert job.report.failed == 0
     _confirm_documents_data(uris, docs)
 
 
@@ -110,9 +110,9 @@ def test_job_with_custom_database():
 
     calls = responses.calls
     assert len(calls) == 1
-    assert job.status.completed == uris_count
-    assert job.status.successful == uris_count
-    assert job.status.failed == 0
+    assert job.report.completed == uris_count
+    assert job.report.successful == uris_count
+    assert job.report.failed == 0
     _confirm_documents_data(uris, docs)
 
 
@@ -134,9 +134,9 @@ def test_job_with_full_metadata():
 
     calls = responses.calls
     assert len(calls) == 1
-    assert job.status.completed == uris_count
-    assert job.status.successful == uris_count
-    assert job.status.failed == 0
+    assert job.report.completed == uris_count
+    assert job.report.successful == uris_count
+    assert job.report.failed == 0
     _confirm_documents_data(uris, docs, metadata=["metadata"])
 
 
@@ -158,9 +158,9 @@ def test_job_with_some_metadata_categories():
 
     calls = responses.calls
     assert len(calls) == 1
-    assert job.status.completed == uris_count
-    assert job.status.successful == uris_count
-    assert job.status.failed == 0
+    assert job.report.completed == uris_count
+    assert job.report.successful == uris_count
+    assert job.report.failed == 0
     _confirm_documents_data(uris, docs, metadata=["quality"])
 
 
@@ -189,9 +189,9 @@ async def test_multi_thread_job():
 
         calls = responses.calls
         assert len(calls) >= 30
-        assert job.status.completed == uris_count
-        assert job.status.successful == uris_count
-        assert job.status.failed == 0
+        assert job.report.completed == uris_count
+        assert job.report.successful == uris_count
+        assert job.report.failed == 0
         _confirm_documents_data(uris, docs)
         return True
 
@@ -233,9 +233,9 @@ def test_failing_job():
 
     calls = responses.calls
     assert len(calls) == 1
-    assert job.status.completed == uris_count
-    assert job.status.successful == 0
-    assert job.status.failed == uris_count
+    assert job.report.completed == uris_count
+    assert job.report.successful == 0
+    assert job.report.failed == uris_count
     assert len(docs) == 0
 
 

@@ -524,9 +524,9 @@ def _perform_parametrized_test(
         batch_size,
     )
 
-    assert job.status.completed == docs_count
-    assert job.status.successful == docs_count
-    assert job.status.failed == 0
+    assert job.report.completed == docs_count
+    assert job.report.successful == docs_count
+    assert job.report.failed == 0
 
 
 def _write_job_with_documents_input(

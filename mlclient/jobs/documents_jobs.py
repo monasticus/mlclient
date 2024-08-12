@@ -366,15 +366,15 @@ class ReadDocumentsJob(DocumentsJob):
             If MarkLogic returns an error
         """
         try:
+            kwargs = {
+                "uris": batch,
+                "database": self._database,
+            }
             if self._categories != ["content"]:
-                category = list(dict.fromkeys(self._categories))
-            else:
-                category = None
-            for doc in client.read(
-                uris=batch,
-                database=self._database,
-                category=category,
-            ):
+                kwargs["category"] = list(dict.fromkeys(self._categories))
+            if self._fs_output_path is not None:
+                kwargs["output_type"] = bytes
+            for doc in client.read(**kwargs):
                 self._report.add_successful_doc(doc.uri)
                 self._output_queue.put(doc)
         except Exception as err:

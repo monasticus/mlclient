@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import xml.etree.ElementTree as ElemTree
+from pathlib import Path
 from typing import Iterable
 
 import pytest
@@ -44,7 +45,8 @@ def test_basic_job_with_filesystem_output():
 
     _setup_responses(uris)
 
-    output_dir = "output"
+    output_dir = str(Path(__file__).resolve().parent / "output")
+    assert not Path(output_dir).exists()
     try:
         job = ReadDocumentsJob(thread_count=1, batch_size=5)
         assert job.thread_count == 1
@@ -60,9 +62,10 @@ def test_basic_job_with_filesystem_output():
         assert job.status.completed == uris_count
         assert job.status.successful == uris_count
         assert job.status.failed == 0
-        # confirm documents data
+        _confirm_filesystem_data(uris, output_dir)
     finally:
         fs_utils.safe_rmdir(output_dir)
+        assert not Path(output_dir).exists()
 
 
 @responses.activate
@@ -340,3 +343,19 @@ def _confirm_documents_data(
         assert children[0].tag == "child"
         assert children[0].text == f"data{i+1}"
         assert children[0].attrib == {}
+
+
+def _confirm_filesystem_data(
+    uris: list[str],
+    output_path: str,
+):
+    assert Path(output_path).exists()
+    assert len([p for p in Path(output_path).rglob("*") if p.is_file()]) == len(uris)
+    for i, uri in enumerate(uris):
+        file_path = Path(output_path) / uri[1:]
+        assert file_path.exists()
+        with file_path.open("r") as file:
+            assert file.readlines() == [
+                '<?xml version="1.0" encoding="UTF-8"?>\n',
+                f"<root><child>data{i+1}</child></root>",
+            ]

@@ -12,7 +12,7 @@ def safe_rmdir(
     if not abs_path.is_relative_to(_tests_root()):
         msg = (
             f"You're trying to remove [{abs_path}] directory. "
-            f"It is not allowed in the safe mode!"
+            "It is not allowed in the safe mode!"
         )
         raise RuntimeError(msg)
     shutil.rmtree(abs_path, ignore_errors=True)

@@ -402,12 +402,12 @@ class ReadDocumentsJob(DocumentsJob):
                 try:
                     doc_path = self._fs_output_path / doc.uri[1:]
                     doc_path.parent.mkdir(parents=True, exist_ok=True)
-                    logger.debug("Writing data into file [%s]", doc_path)
+                    logger.fine("Writing data into file [%s]", doc_path)
                     async with aiofiles.open(doc_path, mode="wb") as file:
                         await file.write(doc.content_bytes)
                     if doc.metadata is not None:
                         metadata_path = doc_path.with_suffix(".metadata.json")
-                        logger.debug("Writing metadata into file [%s]", metadata_path)
+                        logger.fine("Writing metadata into file [%s]", metadata_path)
                         async with aiofiles.open(metadata_path, mode="wb") as file:
                             await file.write(doc.metadata)
                 except Exception as err:
@@ -720,34 +720,22 @@ class DocumentJobReport:
     def pending_docs(
         self,
     ) -> list[str]:
-        """Return number of pending documents' URIs."""
-        return [
-            uri
-            for uri, report in self._doc_reports.items()
-            if report.status == DocumentStatus.pending
-        ]
+        """Return pending documents' URIs."""
+        return self._get_docs_by_status(DocumentStatus.pending)
 
     @property
     def successful_docs(
         self,
     ) -> list[str]:
-        """Return number of successfully completed documents' URIs."""
-        return [
-            uri
-            for uri, report in self._doc_reports.items()
-            if report.status == DocumentStatus.success
-        ]
+        """Return successfully completed documents' URIs."""
+        return self._get_docs_by_status(DocumentStatus.success)
 
     @property
     def failed_docs(
         self,
     ) -> list[str]:
-        """Return number of completed documents' URIs that failed."""
-        return [
-            uri
-            for uri, report in self._doc_reports.items()
-            if report.status == DocumentStatus.failure
-        ]
+        """Return completed documents' URIs that failed."""
+        return self._get_docs_by_status(DocumentStatus.failure)
 
     @property
     def full(
@@ -828,6 +816,15 @@ class DocumentJobReport:
     ):
         """Return a document report."""
         return self._doc_reports.get(uri)
+
+    def _get_docs_by_status(
+        self,
+        status: DocumentStatus,
+    ) -> list[str]:
+        """Return documents' URIs having a specific status."""
+        return [
+            uri for uri, report in self._doc_reports.items() if report.status == status
+        ]
 
 
 class DocumentReport(BaseModel):

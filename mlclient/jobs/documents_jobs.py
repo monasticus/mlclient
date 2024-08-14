@@ -9,10 +9,19 @@ It exports high-level class to perform bulk operations in a MarkLogic server:
         A multi-thread job reading documents from a MarkLogic database.
     * DocumentsLoader
         A class parsing files into Documents.
+    * DocumentJobReport
+        A class representing a documents job report.
+    * DocumentReport
+        A class representing a document's report.
+    * DocumentStatus
+        A document's status enum.
+    * DocumentReport
+        A class representing a document's status details.
 """
 
 from __future__ import annotations
 
+import asyncio
 import json
 import logging
 import os
@@ -21,9 +30,14 @@ import uuid
 import xml.etree.ElementTree as ElemTree
 from abc import ABCMeta, abstractmethod
 from concurrent.futures import ThreadPoolExecutor
+from copy import copy
+from enum import Enum
 from pathlib import Path
 from threading import Thread
 from typing import Generator, Iterable
+
+import aiofiles
+from pydantic import BaseModel
 
 from mlclient.clients import DocumentsClient
 from mlclient.mimetypes import Mimetypes
@@ -65,7 +79,7 @@ class DocumentsJob(metaclass=ABCMeta):
         self._pre_input_queue: queue.Queue = queue.Queue()
         self._input_queue: queue.Queue = queue.Queue()
         self._executor: ThreadPoolExecutor | None = None
-        self._status = DocumentJobStatus()
+        self._report = DocumentJobReport()
         Thread(
             target=self._start_conveyor_belt,
             name=f"{self._type}_documents_job_{self._id}",
@@ -125,8 +139,8 @@ class DocumentsJob(metaclass=ABCMeta):
             "Job [%s] has been completed "
             "with overall documents count [%d] and successful [%d]",
             self._id,
-            self.status.completed,
-            self.status.successful,
+            self.report.completed,
+            self.report.successful,
         )
 
     @property
@@ -144,11 +158,11 @@ class DocumentsJob(metaclass=ABCMeta):
         return self._batch_size
 
     @property
-    def status(
+    def report(
         self,
-    ) -> DocumentJobStatus:
+    ) -> DocumentJobReport:
         """A status of the job."""
-        return self._status
+        return copy(self._report)
 
     def _start_conveyor_belt(
         self,
@@ -170,10 +184,9 @@ class DocumentsJob(metaclass=ABCMeta):
                 break
 
             for input_item in input_items:
-                logger.debug(
-                    "Putting [%s] into the queue",
-                    input_item.uri if isinstance(input_item, Document) else input_item,
-                )
+                uri = input_item.uri if isinstance(input_item, Document) else input_item
+                logger.debug("Putting [%s] into the queue", uri)
+                self._report.add_pending_doc(uri)
                 self._input_queue.put(input_item)
 
         for _ in range(self._thread_count):
@@ -261,7 +274,30 @@ class ReadDocumentsJob(DocumentsJob):
         """
         super().__init__("read", thread_count, batch_size)
         self._output_queue: queue.Queue = queue.Queue()
-        self._categories = ["content"]
+        self._categories: list[str] = ["content"]
+        self._fs_output_path: Path | None = None
+        self._fs_output_thread: Thread | None = None
+
+    def start(
+        self,
+    ):
+        """Start a job's execution."""
+        if self._fs_output_path is not None:
+            self._fs_output_thread = Thread(
+                target=self._save_documents,
+                name=f"{self._type}_documents_job_{self._id}_save",
+            )
+            self._fs_output_thread.start()
+        super().start()
+
+    def await_completion(
+        self,
+    ):
+        """Await a job's completion."""
+        super().await_completion()
+        if self._fs_output_thread is not None:
+            self._output_queue.put(None)
+            self._fs_output_thread.join()
 
     def with_metadata(
         self,
@@ -293,6 +329,19 @@ class ReadDocumentsJob(DocumentsJob):
             URIs to be red from a MarkLogic database
         """
         self._pre_input_queue.put(uris)
+
+    def with_filesystem_output(
+        self,
+        output_path: str,
+    ):
+        """Set filesystem output directory to save documents inside.
+
+        Parameters
+        ----------
+        output_path : str
+            A directory path to save documents output
+        """
+        self._fs_output_path = Path(output_path).resolve().absolute()
 
     def get_documents(
         self,
@@ -326,20 +375,45 @@ class ReadDocumentsJob(DocumentsJob):
             If MarkLogic returns an error
         """
         try:
+            kwargs = {
+                "uris": batch,
+                "database": self._database,
+            }
             if self._categories != ["content"]:
-                category = list(dict.fromkeys(self._categories))
-            else:
-                category = None
-            for doc in client.read(
-                uris=batch,
-                database=self._database,
-                category=category,
-            ):
+                kwargs["category"] = list(dict.fromkeys(self._categories))
+            if self._fs_output_path is not None:
+                kwargs["output_type"] = bytes
+            for doc in client.read(**kwargs):
+                self._report.add_successful_doc(doc.uri)
                 self._output_queue.put(doc)
-            self._status.add_successful_docs(batch)
-        except Exception:
-            self._status.add_failed_docs(batch)
+        except Exception as err:
+            self._report.add_failed_docs(batch, err)
             logger.exception("An unexpected error occurred while reading documents")
+
+    def _save_documents(
+        self,
+    ):
+        async def _save():
+            while True:
+                doc: Document = self._output_queue.get()
+                if doc is None:
+                    break
+
+                try:
+                    doc_path = self._fs_output_path / doc.uri[1:]
+                    doc_path.parent.mkdir(parents=True, exist_ok=True)
+                    logger.fine("Writing data into file [%s]", doc_path)
+                    async with aiofiles.open(doc_path, mode="wb") as file:
+                        await file.write(doc.content_bytes)
+                    if doc.metadata is not None:
+                        metadata_path = doc_path.with_suffix(".metadata.json")
+                        logger.fine("Writing metadata into file [%s]", metadata_path)
+                        async with aiofiles.open(metadata_path, mode="wb") as file:
+                            await file.write(doc.metadata)
+                except Exception as err:
+                    self._report.add_failed_doc(doc.uri, err)
+
+        asyncio.run(_save())
 
 
 class WriteDocumentsJob(DocumentsJob):
@@ -413,9 +487,9 @@ class WriteDocumentsJob(DocumentsJob):
         batch_uris = [doc.uri for doc in batch]
         try:
             client.create(data=batch, database=self._database)
-            self._status.add_successful_docs(batch_uris)
-        except Exception:
-            self._status.add_failed_docs(batch_uris)
+            self._report.add_successful_docs(batch_uris)
+        except Exception as err:
+            self._report.add_failed_docs(batch_uris, err)
             logger.exception("An unexpected error occurred while writing documents")
 
 
@@ -598,75 +672,179 @@ class DocumentsLoader:
         return MetadataFactory.from_file(metadata_file_path)
 
 
-class DocumentJobStatus:
-    """A class representing documents job status."""
+class DocumentJobReport:
+    """A class representing documents job report."""
 
     def __init__(
         self,
     ):
-        """Initialize DocumentJobStatus instance."""
-        self._successful_docs = []
-        self._failed_docs = []
+        """Initialize DocumentJobReport instance."""
+        self._doc_reports: dict[str, DocumentReport] = {}
+
+    def __copy__(self):
+        """Copy DocumentJobReport instance."""
+        report_copy = self.__class__()
+        for report in self._doc_reports.values():
+            report_copy.add_doc_report(report)
+        return report_copy
+
+    @property
+    def pending(
+        self,
+    ) -> int:
+        """Return number of pending documents."""
+        return len(self.pending_docs)
 
     @property
     def completed(
         self,
     ) -> int:
         """Return number of completed documents."""
-        return len(self._successful_docs) + len(self._failed_docs)
+        return self.successful + self.failed
 
     @property
     def successful(
         self,
     ) -> int:
         """Return number of successfully completed documents."""
-        return len(self._successful_docs)
+        return len(self.successful_docs)
 
     @property
     def failed(
         self,
     ) -> int:
         """Return number of completed documents that failed."""
-        return len(self._failed_docs)
+        return len(self.failed_docs)
+
+    @property
+    def pending_docs(
+        self,
+    ) -> list[str]:
+        """Return pending documents' URIs."""
+        return self._get_docs_by_status(DocumentStatus.pending)
 
     @property
     def successful_docs(
         self,
     ) -> list[str]:
-        """Return number of successfully completed documents' URIs."""
-        return self._successful_docs.copy()
+        """Return successfully completed documents' URIs."""
+        return self._get_docs_by_status(DocumentStatus.success)
 
     @property
     def failed_docs(
         self,
     ) -> list[str]:
-        """Return number of completed documents' URIs that failed."""
-        return self._failed_docs.copy()
+        """Return completed documents' URIs that failed."""
+        return self._get_docs_by_status(DocumentStatus.failure)
 
-    def add_successful_doc(
+    @property
+    def full(
         self,
-        uri: str,
-    ) -> None:
-        """Add a successfully completed document URI."""
-        self._successful_docs.append(uri)
+    ) -> dict[str, DocumentReport]:
+        """Return full documents job report."""
+        return {
+            uri: report.model_copy(deep=True)
+            for uri, report in self._doc_reports.items()
+        }
+
+    def add_pending_docs(
+        self,
+        uris: list[str],
+    ):
+        """Add pending documents' reports."""
+        for uri in uris:
+            self.add_pending_doc(uri)
 
     def add_successful_docs(
         self,
         uris: list[str],
-    ) -> None:
-        """Add successfully completed documents' URIs."""
-        self._successful_docs.extend(uris)
-
-    def add_failed_doc(
-        self,
-        uri: str,
-    ) -> None:
-        """Add a completed document URI that failed."""
-        self._failed_docs.append(uri)
+    ):
+        """Add successfully completed documents' reports."""
+        for uri in uris:
+            self.add_successful_doc(uri)
 
     def add_failed_docs(
         self,
         uris: list[str],
-    ) -> None:
-        """Add completed documents' URIs that failed."""
-        self._failed_docs.extend(uris)
+        err: Exception,
+    ):
+        """Add failed documents' reports."""
+        for uri in uris:
+            self.add_failed_doc(uri, err)
+
+    def add_pending_doc(
+        self,
+        uri: str,
+    ):
+        """Add a pending document report."""
+        self.add_doc_report(DocumentReport(uri=uri, status=DocumentStatus.pending))
+
+    def add_successful_doc(
+        self,
+        uri: str,
+    ):
+        """Add a successfully completed document report."""
+        self.add_doc_report(DocumentReport(uri=uri, status=DocumentStatus.success))
+
+    def add_failed_doc(
+        self,
+        uri: str,
+        err: Exception,
+    ):
+        """Add a failed document report."""
+        self.add_doc_report(
+            DocumentReport(
+                uri=uri,
+                status=DocumentStatus.failure,
+                details=DocumentStatusDetails(
+                    error=err.__class__,
+                    message=str(err),
+                ),
+            ),
+        )
+
+    def add_doc_report(
+        self,
+        report: DocumentReport,
+    ):
+        """Add a document report."""
+        self._doc_reports[report.uri] = report
+
+    def get_doc_report(
+        self,
+        uri: str,
+    ):
+        """Return a document report."""
+        return self._doc_reports.get(uri)
+
+    def _get_docs_by_status(
+        self,
+        status: DocumentStatus,
+    ) -> list[str]:
+        """Return documents' URIs having a specific status."""
+        return [
+            uri for uri, report in self._doc_reports.items() if report.status == status
+        ]
+
+
+class DocumentReport(BaseModel):
+    """A class representing a document's report."""
+
+    uri: str
+    status: DocumentStatus
+    details: DocumentStatusDetails = None
+
+
+class DocumentStatus(Enum):
+    """A document's status enum."""
+
+    success: str = "SUCCESS"
+    failure: str = "FAILURE"
+    pending: str = "PENDING"
+
+
+class DocumentStatusDetails(BaseModel):
+    """A class representing a document's status details."""
+
+    error: type
+    message: str

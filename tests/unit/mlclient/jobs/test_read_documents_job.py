@@ -2,19 +2,22 @@ from __future__ import annotations
 
 import json
 import xml.etree.ElementTree as ElemTree
+from pathlib import Path
 from typing import Iterable
 
 import pytest
 import responses
 
+from mlclient.exceptions import MarkLogicError
 from mlclient.jobs import ReadDocumentsJob
 from mlclient.structures import Document, DocumentType, XMLDocument
 from mlclient.structures.calls import DocumentsBodyPart
 from tests.utils import MLResponseBuilder
+from tests.utils import filesystem as fs_utils
 
 
 @responses.activate
-def test_basic_job_with_uris_input():
+def test_basic_job_with_documents_output():
     uris_count = 5
     uris = [f"/some/dir/doc{i+1}.xml" for i in range(uris_count)]
 
@@ -30,10 +33,40 @@ def test_basic_job_with_uris_input():
 
     calls = responses.calls
     assert len(calls) == 1
-    assert job.status.completed == uris_count
-    assert job.status.successful == uris_count
-    assert job.status.failed == 0
+    assert job.report.completed == uris_count
+    assert job.report.successful == uris_count
+    assert job.report.failed == 0
     _confirm_documents_data(uris, docs)
+
+
+@responses.activate
+def test_basic_job_with_filesystem_output():
+    uris_count = 5
+    uris = [f"/some/dir/doc{i+1}.xml" for i in range(uris_count)]
+
+    _setup_responses(uris)
+
+    output_dir = str(Path(__file__).resolve().parent / "output")
+    assert not Path(output_dir).exists()
+    try:
+        job = ReadDocumentsJob(thread_count=1, batch_size=5)
+        assert job.thread_count == 1
+        assert job.batch_size == 5
+        job.with_client_config(auth_method="digest")
+        job.with_uris_input(uris)
+        job.with_filesystem_output(output_dir)
+        job.start()
+        job.await_completion()
+
+        calls = responses.calls
+        assert len(calls) == 1
+        assert job.report.completed == uris_count
+        assert job.report.successful == uris_count
+        assert job.report.failed == 0
+        _confirm_filesystem_data(uris, output_dir)
+    finally:
+        fs_utils.safe_rmdir(output_dir)
+        assert not Path(output_dir).exists()
 
 
 @responses.activate
@@ -54,10 +87,120 @@ def test_basic_job_with_multiple_inputs():
 
     calls = responses.calls
     assert len(calls) == 1
-    assert job.status.completed == uris_count
-    assert job.status.successful == uris_count
-    assert job.status.failed == 0
+    assert job.report.completed == uris_count
+    assert job.report.successful == uris_count
+    assert job.report.failed == 0
     _confirm_documents_data(uris, docs)
+
+
+@responses.activate
+def test_job_with_documents_output_and_full_metadata():
+    uris_count = 5
+    uris = [f"/some/dir/doc{i+1}.xml" for i in range(uris_count)]
+
+    _setup_responses(uris, metadata=["metadata"])
+
+    job = ReadDocumentsJob(thread_count=1, batch_size=5)
+    assert job.thread_count == 1
+    assert job.batch_size == 5
+    job.with_client_config(auth_method="digest")
+    job.with_uris_input(uris)
+    job.with_metadata()
+    job.start()
+    docs = job.get_documents()
+
+    calls = responses.calls
+    assert len(calls) == 1
+    assert job.report.completed == uris_count
+    assert job.report.successful == uris_count
+    assert job.report.failed == 0
+    _confirm_documents_data(uris, docs, metadata=["metadata"])
+
+
+@responses.activate
+def test_job_with_documents_output_and_some_metadata_categories():
+    uris_count = 5
+    uris = [f"/some/dir/doc{i+1}.xml" for i in range(uris_count)]
+
+    _setup_responses(uris, metadata=["quality"])
+
+    job = ReadDocumentsJob(thread_count=1, batch_size=5)
+    assert job.thread_count == 1
+    assert job.batch_size == 5
+    job.with_client_config(auth_method="digest")
+    job.with_uris_input(uris)
+    job.with_metadata("quality")
+    job.start()
+    docs = job.get_documents()
+
+    calls = responses.calls
+    assert len(calls) == 1
+    assert job.report.completed == uris_count
+    assert job.report.successful == uris_count
+    assert job.report.failed == 0
+    _confirm_documents_data(uris, docs, metadata=["quality"])
+
+
+@responses.activate
+def test_basic_job_with_filesystem_output_and_full_metadata():
+    uris_count = 5
+    uris = [f"/some/dir/doc{i+1}.xml" for i in range(uris_count)]
+
+    _setup_responses(uris, metadata=["metadata"])
+
+    output_dir = str(Path(__file__).resolve().parent / "output")
+    assert not Path(output_dir).exists()
+    try:
+        job = ReadDocumentsJob(thread_count=1, batch_size=5)
+        assert job.thread_count == 1
+        assert job.batch_size == 5
+        job.with_client_config(auth_method="digest")
+        job.with_uris_input(uris)
+        job.with_metadata()
+        job.with_filesystem_output(output_dir)
+        job.start()
+        job.await_completion()
+
+        calls = responses.calls
+        assert len(calls) == 1
+        assert job.report.completed == uris_count
+        assert job.report.successful == uris_count
+        assert job.report.failed == 0
+        _confirm_filesystem_data(uris, output_dir, metadata=["metadata"])
+    finally:
+        fs_utils.safe_rmdir(output_dir)
+        assert not Path(output_dir).exists()
+
+
+@responses.activate
+def test_basic_job_with_filesystem_output_and_some_metadata_categories():
+    uris_count = 5
+    uris = [f"/some/dir/doc{i+1}.xml" for i in range(uris_count)]
+
+    _setup_responses(uris, metadata=["quality"])
+
+    output_dir = str(Path(__file__).resolve().parent / "output")
+    assert not Path(output_dir).exists()
+    try:
+        job = ReadDocumentsJob(thread_count=1, batch_size=5)
+        assert job.thread_count == 1
+        assert job.batch_size == 5
+        job.with_client_config(auth_method="digest")
+        job.with_uris_input(uris)
+        job.with_metadata("quality")
+        job.with_filesystem_output(output_dir)
+        job.start()
+        job.await_completion()
+
+        calls = responses.calls
+        assert len(calls) == 1
+        assert job.report.completed == uris_count
+        assert job.report.successful == uris_count
+        assert job.report.failed == 0
+        _confirm_filesystem_data(uris, output_dir, metadata=["quality"])
+    finally:
+        fs_utils.safe_rmdir(output_dir)
+        assert not Path(output_dir).exists()
 
 
 @responses.activate
@@ -78,58 +221,10 @@ def test_job_with_custom_database():
 
     calls = responses.calls
     assert len(calls) == 1
-    assert job.status.completed == uris_count
-    assert job.status.successful == uris_count
-    assert job.status.failed == 0
+    assert job.report.completed == uris_count
+    assert job.report.successful == uris_count
+    assert job.report.failed == 0
     _confirm_documents_data(uris, docs)
-
-
-@responses.activate
-def test_job_with_full_metadata():
-    uris_count = 5
-    uris = [f"/some/dir/doc{i+1}.xml" for i in range(uris_count)]
-
-    _setup_responses(uris, metadata=["metadata"])
-
-    job = ReadDocumentsJob(thread_count=1, batch_size=5)
-    assert job.thread_count == 1
-    assert job.batch_size == 5
-    job.with_client_config(auth_method="digest")
-    job.with_uris_input(uris)
-    job.with_metadata()
-    job.start()
-    docs = job.get_documents()
-
-    calls = responses.calls
-    assert len(calls) == 1
-    assert job.status.completed == uris_count
-    assert job.status.successful == uris_count
-    assert job.status.failed == 0
-    _confirm_documents_data(uris, docs, metadata=["metadata"])
-
-
-@responses.activate
-def test_job_with_some_metadata_categories():
-    uris_count = 5
-    uris = [f"/some/dir/doc{i+1}.xml" for i in range(uris_count)]
-
-    _setup_responses(uris, metadata=["quality"])
-
-    job = ReadDocumentsJob(thread_count=1, batch_size=5)
-    assert job.thread_count == 1
-    assert job.batch_size == 5
-    job.with_client_config(auth_method="digest")
-    job.with_uris_input(uris)
-    job.with_metadata("quality")
-    job.start()
-    docs = job.get_documents()
-
-    calls = responses.calls
-    assert len(calls) == 1
-    assert job.status.completed == uris_count
-    assert job.status.successful == uris_count
-    assert job.status.failed == 0
-    _confirm_documents_data(uris, docs, metadata=["quality"])
 
 
 @pytest.mark.asyncio()
@@ -157,9 +252,9 @@ async def test_multi_thread_job():
 
         calls = responses.calls
         assert len(calls) >= 30
-        assert job.status.completed == uris_count
-        assert job.status.successful == uris_count
-        assert job.status.failed == 0
+        assert job.report.completed == uris_count
+        assert job.report.successful == uris_count
+        assert job.report.failed == 0
         _confirm_documents_data(uris, docs)
         return True
 
@@ -201,10 +296,51 @@ def test_failing_job():
 
     calls = responses.calls
     assert len(calls) == 1
-    assert job.status.completed == uris_count
-    assert job.status.successful == 0
-    assert job.status.failed == uris_count
+    assert job.report.completed == uris_count
+    assert job.report.successful == 0
+    assert job.report.failed == uris_count
+    for uri in uris:
+        doc_report = job.report.get_doc_report(uri)
+        assert doc_report.details.error == MarkLogicError
+        assert doc_report.details.message == "[401 Unauthorized] 401 Unauthorized"
     assert len(docs) == 0
+
+
+@responses.activate
+def test_failing_filesystem_write_step():
+    uris_count = 5
+    uris = [f"/some/dir/doc{i+1}.xml" for i in range(uris_count)]
+
+    _setup_responses(uris)
+
+    output_dir_path = Path(__file__).resolve()
+    assert output_dir_path.exists()
+    try:
+        job = ReadDocumentsJob(thread_count=1, batch_size=5)
+        assert job.thread_count == 1
+        assert job.batch_size == 5
+        job.with_client_config(auth_method="digest")
+        job.with_uris_input(uris)
+        job.with_filesystem_output(str(output_dir_path))
+        job.start()
+        job.await_completion()
+
+        calls = responses.calls
+        assert len(calls) == 1
+        assert job.report.completed == uris_count
+        assert job.report.successful == 0
+        assert job.report.failed == uris_count
+
+        dir_path = output_dir_path.absolute() / "some/dir"
+        for uri in uris:
+            doc_report = job.report.get_doc_report(uri)
+            assert doc_report.details.error is NotADirectoryError
+            assert (
+                doc_report.details.message
+                == f"[Errno 20] Not a directory: '{dir_path}'"
+            )
+    finally:
+        assert output_dir_path.exists()
 
 
 def _setup_responses(
@@ -311,3 +447,47 @@ def _confirm_documents_data(
         assert children[0].tag == "child"
         assert children[0].text == f"data{i+1}"
         assert children[0].attrib == {}
+
+
+def _confirm_filesystem_data(
+    uris: list[str],
+    output_path: str,
+    metadata: list[str] | None = None,
+):
+    assert Path(output_path).exists()
+    expected_file_count = len(uris) * 2 if metadata else len(uris)
+    assert (
+        len([p for p in Path(output_path).rglob("*") if p.is_file()])
+        == expected_file_count
+    )
+    for i, uri in enumerate(uris):
+        file_path = Path(output_path) / uri[1:]
+        assert file_path.exists()
+        with file_path.open("r") as file:
+            assert file.readlines() == [
+                '<?xml version="1.0" encoding="UTF-8"?>\n',
+                f"<root><child>data{i+1}</child></root>",
+            ]
+        if metadata:
+            metadata_file_path = file_path.with_suffix(".metadata.json")
+            assert metadata_file_path.exists()
+            with metadata_file_path.open("r") as metadata_file:
+                doc_metadata = json.load(metadata_file)
+            if "metadata" in metadata:
+                metadata = [
+                    "quality",
+                    "collections",
+                    "permissions",
+                    "properties",
+                    "metadata_values",
+                ]
+            assert "quality" not in metadata or doc_metadata["quality"] == 5
+            assert "collections" not in metadata or doc_metadata["collections"] == [
+                "test-collection",
+            ]
+            assert "permissions" not in metadata or doc_metadata["permissions"] == []
+            assert "properties" not in metadata or doc_metadata["properties"] == {}
+            assert (
+                "metadata_values" not in metadata
+                or doc_metadata["metadataValues"] == {}
+            )

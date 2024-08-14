@@ -9,6 +9,10 @@ It contains the following modules
 This package exports the following classes:
     * WriteDocumentsJob
         A multi-thread job writing documents into a MarkLogic database.
+    * ReadDocumentsJob
+        A multi-thread job reading documents from a MarkLogic database.
+    * DocumentJobReport
+        A class representing a documents job report.
     * DocumentsLoader
         A class parsing files into Documents.
 
@@ -18,14 +22,14 @@ Examples
 """
 
 from .documents_jobs import (
-    DocumentJobStatus,
+    DocumentJobReport,
     DocumentsLoader,
     ReadDocumentsJob,
     WriteDocumentsJob,
 )
 
 __all__ = [
-    "DocumentJobStatus",
+    "DocumentJobReport",
     "ReadDocumentsJob",
     "WriteDocumentsJob",
     "DocumentsLoader",

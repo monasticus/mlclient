@@ -1,5 +1,6 @@
 import responses
 
+from mlclient.exceptions import MarkLogicError
 from mlclient.jobs import WriteDocumentsJob
 from mlclient.structures import DocumentType, RawDocument
 from tests.utils import MLResponseBuilder
@@ -28,9 +29,9 @@ def test_basic_job_with_documents_input():
 
     calls = responses.calls
     assert len(calls) == 1
-    assert job.status.completed == 5
-    assert job.status.successful == 5
-    assert job.status.failed == 0
+    assert job.report.completed == 5
+    assert job.report.successful == 5
+    assert job.report.failed == 0
 
 
 @responses.activate
@@ -54,9 +55,9 @@ def test_basic_job_with_filesystem_input():
 
     calls = responses.calls
     assert len(calls) == 1
-    assert job.status.completed == 5
-    assert job.status.successful == 5
-    assert job.status.failed == 0
+    assert job.report.completed == 5
+    assert job.report.successful == 5
+    assert job.report.failed == 0
 
 
 @responses.activate
@@ -82,9 +83,9 @@ def test_basic_job_with_multiple_inputs():
 
     calls = responses.calls
     assert len(calls) == 100
-    assert job.status.completed == 5000
-    assert job.status.successful == 5000
-    assert job.status.failed == 0
+    assert job.report.completed == 5000
+    assert job.report.successful == 5000
+    assert job.report.failed == 0
 
 
 @responses.activate
@@ -111,9 +112,9 @@ def test_job_with_custom_database():
 
     calls = responses.calls
     assert len(calls) == 1
-    assert job.status.completed == 5
-    assert job.status.successful == 5
-    assert job.status.failed == 0
+    assert job.report.completed == 5
+    assert job.report.successful == 5
+    assert job.report.failed == 0
 
 
 @responses.activate
@@ -138,9 +139,9 @@ def test_multi_thread_job():
 
     calls = responses.calls
     assert len(calls) >= 30
-    assert job.status.completed == 150
-    assert job.status.successful == 150
-    assert job.status.failed == 0
+    assert job.report.completed == 150
+    assert job.report.successful == 150
+    assert job.report.failed == 0
 
 
 @responses.activate
@@ -172,9 +173,13 @@ def test_failing_job():
 
     calls = responses.calls
     assert len(calls) == 1
-    assert job.status.completed == 5
-    assert job.status.successful == 0
-    assert job.status.failed == 5
+    assert job.report.completed == 5
+    assert job.report.successful == 0
+    assert job.report.failed == 5
+    for doc in docs:
+        doc_report = job.report.get_doc_report(doc.uri)
+        assert doc_report.details.error == MarkLogicError
+        assert doc_report.details.message == "[401 Unauthorized] 401 Unauthorized"
 
 
 def _get_test_docs(

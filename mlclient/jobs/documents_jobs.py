@@ -281,6 +281,7 @@ class ReadDocumentsJob(DocumentsJob):
     def start(
         self,
     ):
+        """Start a job's execution."""
         if self._fs_output_path is not None:
             self._fs_output_thread = Thread(
                 target=self._save_documents,
@@ -292,6 +293,7 @@ class ReadDocumentsJob(DocumentsJob):
     def await_completion(
         self,
     ):
+        """Await a job's completion."""
         super().await_completion()
         if self._fs_output_thread is not None:
             self._output_queue.put(None)
@@ -332,6 +334,13 @@ class ReadDocumentsJob(DocumentsJob):
         self,
         output_path: str,
     ):
+        """Set filesystem output directory to save documents inside.
+
+        Parameters
+        ----------
+        output_path : str
+            A directory path to save documents output
+        """
         self._fs_output_path = Path(output_path).resolve().absolute()
 
     def get_documents(
@@ -669,10 +678,11 @@ class DocumentJobReport:
     def __init__(
         self,
     ):
-        """Initialize DocumentJobStatus instance."""
+        """Initialize DocumentJobReport instance."""
         self._doc_reports: dict[str, DocumentReport] = {}
 
     def __copy__(self):
+        """Copy DocumentJobReport instance."""
         report_copy = self.__class__()
         for report in self._doc_reports.values():
             report_copy.add_doc_report(report)
@@ -743,6 +753,7 @@ class DocumentJobReport:
     def full(
         self,
     ) -> dict[str, DocumentReport]:
+        """Return full documents job report."""
         return {
             uri: report.model_copy(deep=True)
             for uri, report in self._doc_reports.items()
@@ -752,6 +763,7 @@ class DocumentJobReport:
         self,
         uris: list[str],
     ):
+        """Add pending documents' reports."""
         for uri in uris:
             self.add_pending_doc(uri)
 
@@ -759,6 +771,7 @@ class DocumentJobReport:
         self,
         uris: list[str],
     ):
+        """Add successfully completed documents' reports."""
         for uri in uris:
             self.add_successful_doc(uri)
 
@@ -767,6 +780,7 @@ class DocumentJobReport:
         uris: list[str],
         err: Exception,
     ):
+        """Add failed documents' reports."""
         for uri in uris:
             self.add_failed_doc(uri, err)
 
@@ -774,12 +788,14 @@ class DocumentJobReport:
         self,
         uri: str,
     ):
+        """Add a pending document report."""
         self.add_doc_report(DocumentReport(uri=uri, status=DocumentStatus.pending))
 
     def add_successful_doc(
         self,
         uri: str,
     ):
+        """Add a successfully completed document report."""
         self.add_doc_report(DocumentReport(uri=uri, status=DocumentStatus.success))
 
     def add_failed_doc(
@@ -787,6 +803,7 @@ class DocumentJobReport:
         uri: str,
         err: Exception,
     ):
+        """Add a failed document report."""
         self.add_doc_report(
             DocumentReport(
                 uri=uri,
@@ -809,6 +826,7 @@ class DocumentJobReport:
         self,
         uri: str,
     ):
+        """Return a document report."""
         return self._doc_reports.get(uri)
 
 

@@ -23,8 +23,11 @@ lint-fix:
 lintp-fix:
 	-@poetry run ruff check . --preview --fix
 
-format: imports lint-fix
+format: imports
+	@poetry run ruff format . > /dev/null 2>&1
 	@poetry run ruff format .
+	@poetry run ruff check . --fix
+
 
 unit-test:
 	@poetry run pytest --cov=mlclient tests/unit

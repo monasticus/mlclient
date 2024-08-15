@@ -75,7 +75,7 @@ class DocumentsClient(MLResourceClient):
             temporal_collection=temporal_collection,
         )
         resp = self.call(call)
-        if not resp.ok:
+        if not resp.is_success:
             resp_body = MLResponseParser.parse(resp)
             raise MarkLogicError(resp_body["errorResponse"])
         return MLResponseParser.parse(resp)
@@ -120,7 +120,7 @@ class DocumentsClient(MLResourceClient):
         """
         call = self._get_call(uris=uris, category=category, database=database)
         resp = self.call(call)
-        if not resp.ok:
+        if not resp.is_success:
             resp_body = MLResponseParser.parse(resp)
             raise MarkLogicError(resp_body["errorResponse"])
         return DocumentsReader.parse(resp, uris, category, output_type)
@@ -171,7 +171,7 @@ class DocumentsClient(MLResourceClient):
             wipe_temporal=wipe_temporal,
         )
         resp = self.call(call)
-        if not resp.ok:
+        if not resp.is_success:
             resp_body = MLResponseParser.parse(resp)
             raise MarkLogicError(resp_body["errorResponse"])
 

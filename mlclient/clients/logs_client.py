@@ -129,7 +129,7 @@ class LogsClient(MLResourceClient):
 
         resp = self.call(call)
         resp_body = resp.json()
-        if not resp.ok:
+        if not resp.is_success:
             raise MarkLogicError(resp_body["errorResponse"])
 
         return self._parse_logs(log_type, resp_body)

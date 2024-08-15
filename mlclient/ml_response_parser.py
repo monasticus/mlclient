@@ -13,7 +13,7 @@ import xml.etree.ElementTree as ElemTree
 from datetime import datetime
 from typing import ClassVar
 
-from requests import Response
+from httpx import Response
 from requests.structures import CaseInsensitiveDict
 from requests_toolbelt import MultipartDecoder
 from requests_toolbelt.multipart.decoder import BodyPart
@@ -105,7 +105,7 @@ class MLResponseParser:
             A parsed response body
         """
         logger.debug("Attempt to parse a response")
-        if response.ok and int(response.headers.get("Content-Length")) == 0:
+        if response.is_success and int(response.headers.get("Content-Length")) == 0:
             logger.fine("No content to parse")
             return []
 
@@ -137,7 +137,7 @@ class MLResponseParser:
             A parsed response body with headers
         """
         logger.debug("Attempt to parse a response")
-        if response.ok and int(response.headers.get("Content-Length")) == 0:
+        if response.is_success and int(response.headers.get("Content-Length")) == 0:
             logger.fine("No content to parse")
             return response.headers, []
 
@@ -180,7 +180,7 @@ class MLResponseParser:
             A parsed response body
         """
         content_type = response.headers.get(const.HEADER_NAME_CONTENT_TYPE)
-        if not response.ok:
+        if not response.is_success:
             if content_type.startswith(const.HEADER_JSON):
                 error = response.json()
             elif content_type.startswith(const.HEADER_XML):
@@ -223,7 +223,7 @@ class MLResponseParser:
             A parsed response body in string format
         """
         content_type = response.headers.get(const.HEADER_NAME_CONTENT_TYPE)
-        if not response.ok:
+        if not response.is_success:
             if content_type.startswith(const.HEADER_JSON):
                 json_error = response.json()
                 error = json.dumps(json_error)
@@ -268,7 +268,7 @@ class MLResponseParser:
             A parsed response body in bytes format
         """
         content_type = response.headers.get(const.HEADER_NAME_CONTENT_TYPE)
-        if not response.ok:
+        if not response.is_success:
             if content_type.startswith(const.HEADER_JSON):
                 json_error = response.json()
                 error = json.dumps(json_error).encode("utf-8")

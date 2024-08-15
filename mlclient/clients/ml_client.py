@@ -14,9 +14,7 @@ from __future__ import annotations
 import logging
 from types import TracebackType
 
-from requests import Response, Session
-from requests.adapters import HTTPAdapter, Retry
-from requests.auth import AuthBase, HTTPBasicAuth, HTTPDigestAuth
+from httpx import Auth, BasicAuth, Client, DigestAuth, HTTPTransport, Response
 
 from mlclient import constants as const
 from mlclient.calls import (
@@ -113,12 +111,6 @@ class MLClient:
     --6a5df7d535c71968--
     """
 
-    _DEFAULT_RETRY_STRATEGY = Retry(
-        connect=5,
-        allowed_methods=None,  # any
-        backoff_factor=0.5,
-    )
-
     def __init__(
         self,
         protocol: str = "http",
@@ -127,7 +119,6 @@ class MLClient:
         auth_method: str = "basic",
         username: str = "admin",
         password: str = "admin",
-        retry: Retry = _DEFAULT_RETRY_STRATEGY,
     ):
         """Initialize MLClient instance.
 
@@ -155,10 +146,9 @@ class MLClient:
         self.username: str = username
         self.password: str = password
         self.base_url: str = f"{protocol}://{host}:{port}"
-        self._retry: Retry = retry
-        self._sess: Session | None = None
-        auth_impl = HTTPBasicAuth if auth_method == "basic" else HTTPDigestAuth
-        self._auth: AuthBase = auth_impl(username, password)
+        self._client: Client | None = None
+        auth_impl = BasicAuth if auth_method == "basic" else DigestAuth
+        self._auth: Auth = auth_impl(username, password)
 
     def __enter__(
         self,
@@ -201,17 +191,16 @@ class MLClient:
     ):
         """Start an HTTP session."""
         logger.debug("Initiating a connection with %s", self.base_url)
-        self._sess = Session()
-        self._sess.mount(self.base_url, HTTPAdapter(max_retries=self._retry))
+        self._client = Client(transport=HTTPTransport(retries=5))
 
     def disconnect(
         self,
     ):
         """Close an HTTP session."""
-        if self._sess:
+        if self._client:
             logger.debug("Closing a connection")
-            self._sess.close()
-            self._sess = None
+            self._client.close()
+            self._client = None
 
     def is_connected(
         self,
@@ -223,7 +212,7 @@ class MLClient:
         bool
             True if the client has started a connection; otherwise False
         """
-        return self._sess is not None
+        return self._client is not None
 
     def get(
         self,
@@ -401,7 +390,7 @@ class MLClient:
 
         url = self.base_url + endpoint
         if self.is_connected():
-            resp = self._sess.request(method, url, **request)
+            resp = self._client.request(method, url, **request)
         else:
             logger.warning(
                 "MLClient is not connected -- "
@@ -409,9 +398,8 @@ class MLClient:
                 method.upper(),
                 endpoint,
             )
-            with Session() as sess:
-                sess.mount(self.base_url, HTTPAdapter(max_retries=self._retry))
-                resp = sess.request(method, url, **request)
+            with Client(transport=HTTPTransport(retries=5)) as client:
+                resp = client.request(method, url, **request)
 
         return resp
 

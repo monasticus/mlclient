@@ -106,7 +106,7 @@ class EvalClient(MLResourceClient):
         )
         resp = self.call(call)
         parsed_resp = MLResponseParser.parse(resp, output_type=output_type)
-        if not resp.ok:
+        if not resp.is_success:
             raise MarkLogicError(parsed_resp)
         return parsed_resp
 

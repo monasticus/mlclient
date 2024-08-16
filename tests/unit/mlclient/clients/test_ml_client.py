@@ -1,9 +1,10 @@
 from pathlib import Path
 
-import responses
+import httpx
+import respx
+from httpx import Response
 
 from mlclient import MLClient
-from tests.utils import MLResponseBuilder
 from tests.utils import resources as resources_utils
 
 
@@ -25,26 +26,31 @@ def test_context_mng():
     assert not client.is_connected()
 
 
-@responses.activate
+@respx.mock
 def test_request_when_disconnected():
     response_body_path = resources_utils.get_test_resource_path(
         __file__,
         "test-get-response.xml",
     )
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/manage/v2/servers")
-    builder.with_response_content_type("application/xml; charset=UTF-8")
-    builder.with_response_status(200)
-    builder.with_response_body(Path(response_body_path).read_bytes())
-    builder.build_get()
+    respx.request(
+        method="GET",
+        url="http://localhost:8002/manage/v2/servers",
+    ).mock(
+        return_value=Response(
+            status_code=200,
+            content=Path(response_body_path).read_bytes(),
+            headers={"Content-Type": "application/xml; charset=UTF-8"},
+        ),
+    )
 
     client = MLClient()
 
     assert not client.is_connected()
     resp = client.get("/manage/v2/servers")
-    assert resp.request.method == "GET"
-    assert "?" not in resp.request.url
-    assert resp.status_code == 200
+    assert not client.is_connected()
+    assert resp.status_code == httpx.codes.OK
+    assert resp.content == Path(response_body_path).read_bytes()
+    assert resp.headers.get("Content-Type") == "application/xml; charset=UTF-8"
 
     # This assertion works only from the clients package level.
     # It should be uncommented once the following bug is addressed:
@@ -57,40 +63,48 @@ def test_request_when_disconnected():
     # ) in caplog.text
 
 
-@responses.activate
+@respx.mock
 def test_get():
     response_body_path = resources_utils.get_test_resource_path(
         __file__,
         "test-get-response.xml",
     )
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/manage/v2/servers")
-    builder.with_response_content_type("application/xml; charset=UTF-8")
-    builder.with_response_status(200)
-    builder.with_response_body(Path(response_body_path).read_bytes())
-    builder.build_get()
+    respx.request(
+        method="GET",
+        url="http://localhost:8002/manage/v2/servers",
+    ).mock(
+        return_value=Response(
+            status_code=200,
+            content=Path(response_body_path).read_bytes(),
+            headers={"Content-Type": "application/xml; charset=UTF-8"},
+        ),
+    )
 
     with MLClient() as client:
         resp = client.get("/manage/v2/servers")
+    assert resp.status_code == httpx.codes.OK
+    assert resp.content == Path(response_body_path).read_bytes()
+    assert resp.headers.get("Content-Type") == "application/xml; charset=UTF-8"
 
-    assert resp.request.method == "GET"
-    assert "?" not in resp.request.url
-    assert resp.status_code == 200
 
-
-@responses.activate
+@respx.mock
 def test_get_with_customized_params_and_headers():
     response_body_path = resources_utils.get_test_resource_path(
         __file__,
         "test-get-with-customized-params-response.json",
     )
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/manage/v2/servers")
-    builder.with_request_param("format", "json")
-    builder.with_response_content_type("application/json; charset=UTF-8")
-    builder.with_response_status(200)
-    builder.with_response_body(Path(response_body_path).read_bytes())
-    builder.build_get()
+    respx.request(
+        method="GET",
+        url="http://localhost:8002/manage/v2/servers",
+        params={"format": "json"},
+        headers={"custom-header": "custom-value"},
+    ).mock(
+        return_value=Response(
+            status_code=200,
+            content=Path(response_body_path).read_bytes(),
+            headers={"Content-Type": "application/xml; charset=UTF-8"},
+        ),
+    )
 
     with MLClient() as client:
         resp = client.get(
@@ -98,46 +112,49 @@ def test_get_with_customized_params_and_headers():
             params={"format": "json"},
             headers={"custom-header": "custom-value"},
         )
-
-    assert resp.request.method == "GET"
-    assert "?format=json" in resp.request.url
-    assert "custom-header" in resp.request.headers
-    assert resp.request.headers["custom-header"] == "custom-value"
-    assert resp.status_code == 200
+    assert resp.status_code == httpx.codes.OK
+    assert resp.content == Path(response_body_path).read_bytes()
+    assert resp.headers.get("Content-Type") == "application/xml; charset=UTF-8"
 
 
-@responses.activate
+@respx.mock
 def test_post():
     response_body_path = resources_utils.get_test_resource_path(
         __file__,
         "test-post-response.xml",
     )
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/manage/v2/databases/Documents")
-    builder.with_response_content_type("application/xml; charset=UTF-8")
-    builder.with_response_status(400)
-    builder.with_response_body(Path(response_body_path).read_bytes())
-    builder.build_post()
+    respx.request(
+        method="POST",
+        url="http://localhost:8002/manage/v2/databases/Documents",
+    ).mock(
+        return_value=Response(
+            status_code=400,
+            content=Path(response_body_path).read_bytes(),
+            headers={"Content-Type": "application/xml; charset=UTF-8"},
+        ),
+    )
 
     with MLClient() as client:
         resp = client.post("/manage/v2/databases/Documents")
-
-    assert resp.request.method == "POST"
-    assert "?" not in resp.request.url
-    assert resp.request.body is None
-    assert resp.status_code == 400
+    assert resp.status_code == httpx.codes.BAD_REQUEST
+    assert resp.content == Path(response_body_path).read_bytes()
+    assert resp.headers.get("Content-Type") == "application/xml; charset=UTF-8"
 
 
-@responses.activate
+@respx.mock
 def test_post_with_customized_params_and_headers_and_body_different_than_json():
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/eval")
-    builder.with_request_content_type("application/x-www-form-urlencoded")
-    builder.with_request_param("database", "Documents")
-    builder.with_request_body({"xquery": "()"})
-    builder.with_response_status(200)
-    builder.with_empty_response_body()
-    builder.build_post()
+    respx.request(
+        method="POST",
+        url="http://localhost:8002/v1/eval",
+        params={"database": "Documents"},
+        headers={"Content-Type": "application/x-www-form-urlencoded"},
+        data={"xquery": "()"},
+    ).mock(
+        return_value=Response(
+            status_code=200,
+            content=b"",
+        ),
+    )
 
     with MLClient() as client:
         resp = client.post(
@@ -146,26 +163,25 @@ def test_post_with_customized_params_and_headers_and_body_different_than_json():
             params={"database": "Documents"},
             headers={"Content-Type": "application/x-www-form-urlencoded"},
         )
-
-    assert resp.request.method == "POST"
-    assert "?database=Documents" in resp.request.url
-    assert "Content-Type" in resp.request.headers
-    assert resp.request.headers["Content-Type"] == "application/x-www-form-urlencoded"
-    assert resp.request.body == "xquery=%28%29"
-    assert resp.status_code == 200
+    assert resp.status_code == httpx.codes.OK
+    assert resp.content == b""
 
 
-@responses.activate
+@respx.mock
 def test_post_with_customized_params_and_headers_and_json_body():
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/manage/v2/databases/Documents")
-    builder.with_request_content_type("application/json")
-    builder.with_request_param("format", "json")
-    builder.with_request_body({"operation": "clear-database"})
-    builder.with_response_content_type("application/json; charset=UTF-8")
-    builder.with_response_status(200)
-    builder.with_empty_response_body()
-    builder.build_post()
+    respx.request(
+        method="POST",
+        url="http://localhost:8002/manage/v2/databases/Documents",
+        params={"format": "json"},
+        headers={"Content-Type": "application/json"},
+        json={"operation": "clear-database"},
+    ).mock(
+        return_value=Response(
+            status_code=200,
+            content=b"",
+            headers={"Content-Type": "application/json; charset=UTF-8"},
+        ),
+    )
 
     with MLClient() as client:
         resp = client.post(
@@ -174,47 +190,51 @@ def test_post_with_customized_params_and_headers_and_json_body():
             params={"format": "json"},
             headers={"Content-Type": "application/json"},
         )
-
-    assert resp.request.method == "POST"
-    assert "?format=json" in resp.request.url
-    assert "Content-Type" in resp.request.headers
-    assert resp.request.headers["Content-Type"] == "application/json"
-    assert resp.request.body == b'{"operation": "clear-database"}'
-    assert resp.status_code == 200
+    assert resp.status_code == httpx.codes.OK
+    assert resp.content == b""
+    assert resp.headers.get("Content-Type") == "application/json; charset=UTF-8"
 
 
-@responses.activate
+@respx.mock
 def test_put():
     response_body_path = resources_utils.get_test_resource_path(
         __file__,
         "test-put-response.xml",
     )
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/documents")
-    builder.with_response_content_type("application/xml; charset=UTF-8")
-    builder.with_response_status(400)
-    builder.with_response_body(Path(response_body_path).read_bytes())
-    builder.build_put()
+    respx.request(
+        method="PUT",
+        url="http://localhost:8002/v1/documents",
+    ).mock(
+        return_value=Response(
+            status_code=400,
+            content=Path(response_body_path).read_bytes(),
+            headers={"Content-Type": "application/xml; charset=UTF-8"},
+        ),
+    )
 
     with MLClient() as client:
         resp = client.put("/v1/documents")
-
-    assert resp.request.method == "PUT"
-    assert "?" not in resp.request.url
-    assert resp.request.body is None
-    assert resp.status_code == 400
+    assert resp.status_code == httpx.codes.BAD_REQUEST
+    assert resp.content == Path(response_body_path).read_bytes()
+    assert resp.headers.get("Content-Type") == "application/xml; charset=UTF-8"
 
 
-@responses.activate
+@respx.mock
 def test_put_with_customized_params_and_headers_and_body_different_than_json():
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/documents")
-    builder.with_request_content_type("application/xml")
-    builder.with_request_param("database", "Documents")
-    builder.with_request_param("uri", "/doc.xml")
-    builder.with_response_status(201)
-    builder.with_empty_response_body()
-    builder.build_put()
+    respx.request(
+        method="PUT",
+        url="http://localhost:8002/v1/documents",
+        headers={"Content-Type": "application/xml"},
+        params={
+            "database": "Documents",
+            "uri": "/doc.xml",
+        },
+    ).mock(
+        return_value=Response(
+            status_code=201,
+            content=b"",
+        ),
+    )
 
     with MLClient() as client:
         resp = client.put(
@@ -223,26 +243,27 @@ def test_put_with_customized_params_and_headers_and_body_different_than_json():
             params={"database": "Documents", "uri": "/doc.xml"},
             headers={"Content-Type": "application/xml"},
         )
-
-    assert resp.request.method == "PUT"
-    assert "?database=Documents" in resp.request.url
-    assert "Content-Type" in resp.request.headers
-    assert resp.request.headers["Content-Type"] == "application/xml"
-    assert resp.request.body == "<document/>"
-    assert resp.status_code == 201
+    assert resp.status_code == httpx.codes.CREATED
+    assert resp.content == b""
 
 
-@responses.activate
+@respx.mock
 def test_put_with_customized_params_and_headers_and_json_body():
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/documents")
-    builder.with_request_content_type("application/json")
-    builder.with_request_param("database", "Documents")
-    builder.with_request_param("uri", "/doc.json")
-    builder.with_request_body({"document": {}})
-    builder.with_response_status(201)
-    builder.with_empty_response_body()
-    builder.build_put()
+    respx.request(
+        method="PUT",
+        url="http://localhost:8002/v1/documents",
+        headers={"Content-Type": "application/json"},
+        params={
+            "database": "Documents",
+            "uri": "/doc.json",
+        },
+        json={"document": {}},
+    ).mock(
+        return_value=Response(
+            status_code=201,
+            content=b"",
+        ),
+    )
 
     with MLClient() as client:
         resp = client.put(
@@ -251,41 +272,41 @@ def test_put_with_customized_params_and_headers_and_json_body():
             params={"database": "Documents", "uri": "/doc.json"},
             headers={"Content-Type": "application/json"},
         )
-
-    assert resp.request.method == "PUT"
-    assert "?database=Documents" in resp.request.url
-    assert "Content-Type" in resp.request.headers
-    assert resp.request.headers["Content-Type"] == "application/json"
-    assert resp.request.body == b'{"document": {}}'
-    assert resp.status_code == 201
+    assert resp.status_code == httpx.codes.CREATED
+    assert resp.content == b""
 
 
-@responses.activate
+@respx.mock
 def test_delete():
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/manage/v2/databases/custom-db")
-    builder.with_response_status(204)
-    builder.with_empty_response_body()
-    builder.build_delete()
+    respx.request(
+        method="DELETE",
+        url="http://localhost:8002/manage/v2/databases/custom-db",
+    ).mock(
+        return_value=Response(
+            status_code=204,
+            content=b"",
+        ),
+    )
 
     with MLClient() as client:
         resp = client.delete_("/manage/v2/databases/custom-db")
-
-    assert resp.request.method == "DELETE"
-    assert "?" not in resp.request.url
-    assert resp.status_code == 204
-    assert not resp.text
+    assert resp.status_code == httpx.codes.NO_CONTENT
+    assert resp.content == b""
 
 
-@responses.activate
+@respx.mock
 def test_delete_with_customized_params_and_headers():
-    builder = MLResponseBuilder()
-    builder.with_method("DELETE")
-    builder.with_base_url("http://localhost:8002/manage/v2/databases/custom-db")
-    builder.with_request_param("format", "json")
-    builder.with_response_status(204)
-    builder.with_empty_response_body()
-    builder.build()
+    respx.request(
+        method="DELETE",
+        url="http://localhost:8002/manage/v2/databases/custom-db",
+        params={"format": "json"},
+        headers={"custom-header": "custom-value"},
+    ).mock(
+        return_value=Response(
+            status_code=204,
+            content=b"",
+        ),
+    )
 
     with MLClient() as client:
         resp = client.delete_(
@@ -293,10 +314,5 @@ def test_delete_with_customized_params_and_headers():
             params={"format": "json"},
             headers={"custom-header": "custom-value"},
         )
-
-    assert resp.request.method == "DELETE"
-    assert "?format=json" in resp.request.url
-    assert "custom-header" in resp.request.headers
-    assert resp.request.headers["custom-header"] == "custom-value"
-    assert resp.status_code == 204
-    assert not resp.text
+    assert resp.status_code == httpx.codes.NO_CONTENT
+    assert resp.content == b""

@@ -11,6 +11,22 @@ TESTS_PATH = Path(_SCRIPT_DIR).parent.parent
 RESOURCES_PATH = next(TESTS_PATH.glob(_RESOURCES_DIR))
 
 
+def get_test_resources(
+    test_path: str,
+) -> dict:
+    resources = {}
+    for resource in list_resources(test_path):
+        abs_path = get_test_resource_path(test_path, resource)
+        resources[resource] = {
+            "abs_path": abs_path,
+            "bytes": Path(abs_path).read_bytes(),
+            "str": Path(abs_path).read_text(),
+        }
+        if abs_path.endswith(".json"):
+            resources[resource]["json"] = get_test_resource_json(test_path, resource)
+    return resources
+
+
 def list_resources(
     test_path: str,
 ) -> list[str]:

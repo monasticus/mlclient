@@ -1,10 +1,11 @@
 import xml.etree.ElementTree as ElemTree
 import zlib
 from datetime import date, datetime
-from pathlib import Path
 
 import pytest
 import responses
+import respx
+from httpx import Response
 
 from mlclient import MLResourcesClient, MLResponseParser
 from mlclient.structures.calls import DocumentsBodyPart
@@ -28,23 +29,50 @@ def _setup_and_teardown(client):
     client.disconnect()
 
 
-@responses.activate
+RESOURCES = resources_utils.get_test_resources(__file__)
+ml_mock = respx.mock(base_url="http://localhost:8002", assert_all_called=False)
+ml_mock.post(
+    "/v1/eval",
+    headers={"Content-Type": "application/x-www-form-urlencoded"},
+    data={"xquery": "'missing-quote"},
+    name="html-error",
+).mock(
+    return_value=Response(
+        status_code=500,
+        headers={"Content-Type": "text/html; charset=utf-8"},
+        content=RESOURCES["error-response.html"]["bytes"],
+    ),
+)
+ml_mock.delete(
+    "/v1/documents",
+    params={
+        "uri": "/some/dir/doc1.xml",
+        "database": "Document",
+    },
+    name="xml-error",
+).mock(
+    return_value=Response(
+        status_code=404,
+        headers={"Content-Type": "application/xml; charset=UTF-8"},
+        content=RESOURCES["error-response.xml"]["bytes"],
+    ),
+)
+ml_mock.get(
+    "/v1/documents",
+    params={"uri": "/some/dir/doc.xml"},
+    name="json-error",
+).mock(
+    return_value=Response(
+        status_code=404,
+        headers={"Content-Type": "application/json; charset=UTF-8"},
+        json=RESOURCES["error-response.json"]["json"],
+    ),
+)
+
+
+@ml_mock
 def test_parse_error_response_html(client):
-    xqy = "'missing-quote"
-
-    response_body_path = resources_utils.get_test_resource_path(
-        __file__,
-        "error-response.html",
-    )
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/eval")
-    builder.with_request_body({"xquery": xqy})
-    builder.with_response_content_type("text/html; charset=utf-8")
-    builder.with_response_status(500)
-    builder.with_response_body(Path(response_body_path).read_bytes())
-    builder.build_post()
-
-    resp = client.eval(xquery=xqy)
+    resp = client.eval(xquery="'missing-quote")
     parsed_resp = MLResponseParser.parse(resp)
 
     assert isinstance(parsed_resp, str)
@@ -54,23 +82,9 @@ def test_parse_error_response_html(client):
     )
 
 
-@responses.activate
+@ml_mock
 def test_parse_text_error_response_html(client):
-    xqy = "'missing-quote"
-
-    response_body_path = resources_utils.get_test_resource_path(
-        __file__,
-        "error-response.html",
-    )
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/eval")
-    builder.with_request_body({"xquery": xqy})
-    builder.with_response_content_type("text/html; charset=utf-8")
-    builder.with_response_status(500)
-    builder.with_response_body(Path(response_body_path).read_bytes())
-    builder.build_post()
-
-    resp = client.eval(xquery=xqy)
+    resp = client.eval(xquery="'missing-quote")
     parsed_resp = MLResponseParser.parse(resp, output_type=str)
 
     assert isinstance(parsed_resp, str)
@@ -80,23 +94,9 @@ def test_parse_text_error_response_html(client):
     )
 
 
-@responses.activate
+@ml_mock
 def test_parse_bytes_error_response_html(client):
-    xqy = "'missing-quote"
-
-    response_body_path = resources_utils.get_test_resource_path(
-        __file__,
-        "error-response.html",
-    )
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/eval")
-    builder.with_request_body({"xquery": xqy})
-    builder.with_response_content_type("text/html; charset=utf-8")
-    builder.with_response_status(500)
-    builder.with_response_body(Path(response_body_path).read_bytes())
-    builder.build_post()
-
-    resp = client.eval(xquery=xqy)
+    resp = client.eval(xquery="'missing-quote")
     parsed_resp = MLResponseParser.parse(resp, output_type=bytes)
 
     assert isinstance(parsed_resp, bytes)
@@ -106,23 +106,9 @@ def test_parse_bytes_error_response_html(client):
     )
 
 
-@responses.activate
+@ml_mock
 def test_parse_with_headers_error_response_html(client):
-    xqy = "'missing-quote"
-
-    response_body_path = resources_utils.get_test_resource_path(
-        __file__,
-        "error-response.html",
-    )
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/eval")
-    builder.with_request_body({"xquery": xqy})
-    builder.with_response_content_type("text/html; charset=utf-8")
-    builder.with_response_status(500)
-    builder.with_response_body(Path(response_body_path).read_bytes())
-    builder.build_post()
-
-    resp = client.eval(xquery=xqy)
+    resp = client.eval(xquery="'missing-quote")
     headers, parsed_resp = MLResponseParser.parse_with_headers(resp)
 
     assert isinstance(parsed_resp, str)
@@ -136,23 +122,9 @@ def test_parse_with_headers_error_response_html(client):
     }
 
 
-@responses.activate
+@ml_mock
 def test_parse_text_with_headers_error_response_html(client):
-    xqy = "'missing-quote"
-
-    response_body_path = resources_utils.get_test_resource_path(
-        __file__,
-        "error-response.html",
-    )
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/eval")
-    builder.with_request_body({"xquery": xqy})
-    builder.with_response_content_type("text/html; charset=utf-8")
-    builder.with_response_status(500)
-    builder.with_response_body(Path(response_body_path).read_bytes())
-    builder.build_post()
-
-    resp = client.eval(xquery=xqy)
+    resp = client.eval(xquery="'missing-quote")
     headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=str)
 
     assert isinstance(parsed_resp, str)
@@ -166,23 +138,9 @@ def test_parse_text_with_headers_error_response_html(client):
     }
 
 
-@responses.activate
+@ml_mock
 def test_parse_bytes_with_headers_error_response_html(client):
-    xqy = "'missing-quote"
-
-    response_body_path = resources_utils.get_test_resource_path(
-        __file__,
-        "error-response.html",
-    )
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/eval")
-    builder.with_request_body({"xquery": xqy})
-    builder.with_response_content_type("text/html; charset=utf-8")
-    builder.with_response_status(500)
-    builder.with_response_body(Path(response_body_path).read_bytes())
-    builder.build_post()
-
-    resp = client.eval(xquery=xqy)
+    resp = client.eval(xquery="'missing-quote")
     headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=bytes)
 
     assert isinstance(parsed_resp, bytes)
@@ -196,21 +154,8 @@ def test_parse_bytes_with_headers_error_response_html(client):
     }
 
 
-@responses.activate
+@ml_mock
 def test_parse_error_response_xml(client):
-    response_body_path = resources_utils.get_test_resource_path(
-        __file__,
-        "error-response.xml",
-    )
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/documents")
-    builder.with_request_param("uri", "/some/dir/doc1.xml")
-    builder.with_request_param("database", "Document")
-    builder.with_response_content_type("application/xml; charset=UTF-8")
-    builder.with_response_status(404)
-    builder.with_response_body(Path(response_body_path).read_bytes())
-    builder.build_delete()
-
     resp = client.delete_documents(uri="/some/dir/doc1.xml", database="Document")
     parsed_resp = MLResponseParser.parse(resp)
 
@@ -225,21 +170,8 @@ def test_parse_error_response_xml(client):
     }
 
 
-@responses.activate
+@ml_mock
 def test_parse_text_error_response_xml(client):
-    response_body_path = resources_utils.get_test_resource_path(
-        __file__,
-        "error-response.xml",
-    )
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/documents")
-    builder.with_request_param("uri", "/some/dir/doc1.xml")
-    builder.with_request_param("database", "Document")
-    builder.with_response_content_type("application/xml; charset=UTF-8")
-    builder.with_response_status(404)
-    builder.with_response_body(Path(response_body_path).read_bytes())
-    builder.build_delete()
-
     resp = client.delete_documents(uri="/some/dir/doc1.xml", database="Document")
     parsed_resp = MLResponseParser.parse(resp, output_type=str)
 
@@ -254,21 +186,8 @@ def test_parse_text_error_response_xml(client):
     )
 
 
-@responses.activate
+@ml_mock
 def test_parse_bytes_error_response_xml(client):
-    response_body_path = resources_utils.get_test_resource_path(
-        __file__,
-        "error-response.xml",
-    )
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/documents")
-    builder.with_request_param("uri", "/some/dir/doc1.xml")
-    builder.with_request_param("database", "Document")
-    builder.with_response_content_type("application/xml; charset=UTF-8")
-    builder.with_response_status(404)
-    builder.with_response_body(Path(response_body_path).read_bytes())
-    builder.build_delete()
-
     resp = client.delete_documents(uri="/some/dir/doc1.xml", database="Document")
     parsed_resp = MLResponseParser.parse(resp, output_type=bytes)
 
@@ -283,21 +202,8 @@ def test_parse_bytes_error_response_xml(client):
     )
 
 
-@responses.activate
+@ml_mock
 def test_parse_with_headers_error_response_xml(client):
-    response_body_path = resources_utils.get_test_resource_path(
-        __file__,
-        "error-response.xml",
-    )
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/documents")
-    builder.with_request_param("uri", "/some/dir/doc1.xml")
-    builder.with_request_param("database", "Document")
-    builder.with_response_content_type("application/xml; charset=UTF-8")
-    builder.with_response_status(404)
-    builder.with_response_body(Path(response_body_path).read_bytes())
-    builder.build_delete()
-
     resp = client.delete_documents(uri="/some/dir/doc1.xml", database="Document")
     headers, parsed_resp = MLResponseParser.parse_with_headers(resp)
 
@@ -316,21 +222,8 @@ def test_parse_with_headers_error_response_xml(client):
     }
 
 
-@responses.activate
+@ml_mock
 def test_parse_text_with_headers_error_response_xml(client):
-    response_body_path = resources_utils.get_test_resource_path(
-        __file__,
-        "error-response.xml",
-    )
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/documents")
-    builder.with_request_param("uri", "/some/dir/doc1.xml")
-    builder.with_request_param("database", "Document")
-    builder.with_response_content_type("application/xml; charset=UTF-8")
-    builder.with_response_status(404)
-    builder.with_response_body(Path(response_body_path).read_bytes())
-    builder.build_delete()
-
     resp = client.delete_documents(uri="/some/dir/doc1.xml", database="Document")
     headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=str)
 
@@ -349,21 +242,8 @@ def test_parse_text_with_headers_error_response_xml(client):
     }
 
 
-@responses.activate
+@ml_mock
 def test_parse_bytes_with_headers_error_response_xml(client):
-    response_body_path = resources_utils.get_test_resource_path(
-        __file__,
-        "error-response.xml",
-    )
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/documents")
-    builder.with_request_param("uri", "/some/dir/doc1.xml")
-    builder.with_request_param("database", "Document")
-    builder.with_response_content_type("application/xml; charset=UTF-8")
-    builder.with_response_status(404)
-    builder.with_response_body(Path(response_body_path).read_bytes())
-    builder.build_delete()
-
     resp = client.delete_documents(uri="/some/dir/doc1.xml", database="Document")
     headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=bytes)
 
@@ -382,58 +262,18 @@ def test_parse_bytes_with_headers_error_response_xml(client):
     }
 
 
-@responses.activate
+@ml_mock
 def test_parse_error_response_json(client):
-    uri = "/some/dir/doc.xml"
-    error = {
-        "errorResponse": {
-            "statusCode": 404,
-            "status": "Not Found",
-            "messageCode": "RESTAPI-NODOCUMENT",
-            "message": "RESTAPI-NODOCUMENT: (err:FOER0000) "
-            "Resource or document does not exist:  "
-            "category: content message: /some/dir/doc.xml",
-        },
-    }
-
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/documents")
-    builder.with_request_param("uri", uri)
-    builder.with_response_content_type("application/json; charset=UTF-8")
-    builder.with_response_status(404)
-    builder.with_response_body(error)
-    builder.build_get()
-
-    resp = client.get_documents(uri=uri)
+    resp = client.get_documents(uri="/some/dir/doc.xml")
     parsed_resp = MLResponseParser.parse(resp)
 
     assert isinstance(parsed_resp, dict)
-    assert parsed_resp == error
+    assert parsed_resp == RESOURCES["error-response.json"]["json"]
 
 
-@responses.activate
+@ml_mock
 def test_parse_text_error_response_json(client):
-    uri = "/some/dir/doc.xml"
-    error = {
-        "errorResponse": {
-            "statusCode": 404,
-            "status": "Not Found",
-            "messageCode": "RESTAPI-NODOCUMENT",
-            "message": "RESTAPI-NODOCUMENT: (err:FOER0000) "
-            "Resource or document does not exist:  "
-            "category: content message: /some/dir/doc.xml",
-        },
-    }
-
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/documents")
-    builder.with_request_param("uri", uri)
-    builder.with_response_content_type("application/json; charset=UTF-8")
-    builder.with_response_status(404)
-    builder.with_response_body(error)
-    builder.build_get()
-
-    resp = client.get_documents(uri=uri)
+    resp = client.get_documents(uri="/some/dir/doc.xml")
     parsed_resp = MLResponseParser.parse(resp, output_type=str)
 
     assert isinstance(parsed_resp, str)
@@ -443,34 +283,15 @@ def test_parse_text_error_response_json(client):
         '"status": "Not Found", '
         '"messageCode": "RESTAPI-NODOCUMENT", '
         '"message": "RESTAPI-NODOCUMENT: (err:FOER0000) '
-        f'Resource or document does not exist:  category: content message: {uri}"'
+        "Resource or document does not exist:  "
+        'category: content message: /some/dir/doc.xml"'
         "}}"
     )
 
 
-@responses.activate
+@ml_mock
 def test_parse_bytes_error_response_json(client):
-    uri = "/some/dir/doc.xml"
-    error = {
-        "errorResponse": {
-            "statusCode": 404,
-            "status": "Not Found",
-            "messageCode": "RESTAPI-NODOCUMENT",
-            "message": "RESTAPI-NODOCUMENT: (err:FOER0000) "
-            "Resource or document does not exist:  "
-            "category: content message: /some/dir/doc.xml",
-        },
-    }
-
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/documents")
-    builder.with_request_param("uri", uri)
-    builder.with_response_content_type("application/json; charset=UTF-8")
-    builder.with_response_status(404)
-    builder.with_response_body(error)
-    builder.build_get()
-
-    resp = client.get_documents(uri=uri)
+    resp = client.get_documents(uri="/some/dir/doc.xml")
     parsed_resp = MLResponseParser.parse(resp, output_type=bytes)
 
     assert isinstance(parsed_resp, bytes)
@@ -480,68 +301,28 @@ def test_parse_bytes_error_response_json(client):
         b'"status": "Not Found", '
         b'"messageCode": "RESTAPI-NODOCUMENT", '
         b'"message": "RESTAPI-NODOCUMENT: (err:FOER0000) '
-        + "Resource or document does not exist:  "
-        f'category: content message: {uri}"'.encode()
-        + b"}}"
+        b"Resource or document does not exist:  "
+        b'category: content message: /some/dir/doc.xml"'
+        b"}}"
     )
 
 
-@responses.activate
+@ml_mock
 def test_parse_with_headers_error_response_json(client):
-    uri = "/some/dir/doc.xml"
-    error = {
-        "errorResponse": {
-            "statusCode": 404,
-            "status": "Not Found",
-            "messageCode": "RESTAPI-NODOCUMENT",
-            "message": "RESTAPI-NODOCUMENT: (err:FOER0000) "
-            "Resource or document does not exist:  "
-            "category: content message: /some/dir/doc.xml",
-        },
-    }
-
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/documents")
-    builder.with_request_param("uri", uri)
-    builder.with_response_content_type("application/json; charset=UTF-8")
-    builder.with_response_status(404)
-    builder.with_response_body(error)
-    builder.build_get()
-
-    resp = client.get_documents(uri=uri)
+    resp = client.get_documents(uri="/some/dir/doc.xml")
     headers, parsed_resp = MLResponseParser.parse_with_headers(resp)
 
     assert isinstance(parsed_resp, dict)
-    assert parsed_resp == error
+    assert parsed_resp == RESOURCES["error-response.json"]["json"]
     assert headers == {
         "Content-Type": "application/json; charset=UTF-8",
         "Content-Length": "230",
     }
 
 
-@responses.activate
+@ml_mock
 def test_parse_text_with_headers_error_response_json(client):
-    uri = "/some/dir/doc.xml"
-    error = {
-        "errorResponse": {
-            "statusCode": 404,
-            "status": "Not Found",
-            "messageCode": "RESTAPI-NODOCUMENT",
-            "message": "RESTAPI-NODOCUMENT: (err:FOER0000) "
-            "Resource or document does not exist:  "
-            "category: content message: /some/dir/doc.xml",
-        },
-    }
-
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/documents")
-    builder.with_request_param("uri", uri)
-    builder.with_response_content_type("application/json; charset=UTF-8")
-    builder.with_response_status(404)
-    builder.with_response_body(error)
-    builder.build_get()
-
-    resp = client.get_documents(uri=uri)
+    resp = client.get_documents(uri="/some/dir/doc.xml")
     headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=str)
 
     assert isinstance(parsed_resp, str)
@@ -564,29 +345,9 @@ def test_parse_text_with_headers_error_response_json(client):
     }
 
 
-@responses.activate
+@ml_mock
 def test_parse_bytes_with_headers_error_response_json(client):
-    uri = "/some/dir/doc.xml"
-    error = {
-        "errorResponse": {
-            "statusCode": 404,
-            "status": "Not Found",
-            "messageCode": "RESTAPI-NODOCUMENT",
-            "message": "RESTAPI-NODOCUMENT: (err:FOER0000) "
-            "Resource or document does not exist:  "
-            "category: content message: /some/dir/doc.xml",
-        },
-    }
-
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/documents")
-    builder.with_request_param("uri", uri)
-    builder.with_response_content_type("application/json; charset=UTF-8")
-    builder.with_response_status(404)
-    builder.with_response_body(error)
-    builder.build_get()
-
-    resp = client.get_documents(uri=uri)
+    resp = client.get_documents(uri="/some/dir/doc.xml")
     headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=bytes)
 
     assert isinstance(parsed_resp, bytes)

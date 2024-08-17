@@ -68,6 +68,34 @@ ml_mock.get(
         json=RESOURCES["error-response.json"]["json"],
     ),
 )
+ml_mock.get(
+    "/v1/documents",
+    params={"uri": "/some/dir/doc1.xml"},
+    name="non-multipart-mixed-xml",
+).mock(
+    return_value=Response(
+        status_code=200,
+        headers={
+            "Content-Type": "application/xml; charset=utf-8",
+            "vnd.marklogic.document-format": "xml",
+        },
+        content='<?xml version="1.0" encoding="UTF-8"?>\n<root/>',
+    ),
+)
+ml_mock.get(
+    "/v1/documents",
+    params={"uri": "/some/dir/doc2.json"},
+    name="non-multipart-mixed-json",
+).mock(
+    return_value=Response(
+        status_code=200,
+        headers={
+            "Content-Type": "application/json; charset=utf-8",
+            "vnd.marklogic.document-format": "json",
+        },
+        content='{"root":{"child":"data2"}}',
+    ),
+)
 
 
 @ml_mock
@@ -370,20 +398,9 @@ def test_parse_bytes_with_headers_error_response_json(client):
     }
 
 
-@responses.activate
+@ml_mock
 def test_parse_non_multipart_mixed_response_xml(client):
-    uri = "/some/dir/doc1.xml"
-
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/documents")
-    builder.with_request_param("uri", uri)
-    builder.with_response_content_type("application/xml; charset=utf-8")
-    builder.with_response_header("vnd.marklogic.document-format", "xml")
-    builder.with_response_status(200)
-    builder.with_response_body('<?xml version="1.0" encoding="UTF-8"?>\n<root/>')
-    builder.build_get()
-
-    resp = client.get_documents(uri=uri)
+    resp = client.get_documents(uri="/some/dir/doc1.xml")
     parsed_resp = MLResponseParser.parse(resp)
 
     assert isinstance(parsed_resp, ElemTree.ElementTree)
@@ -392,62 +409,27 @@ def test_parse_non_multipart_mixed_response_xml(client):
     assert parsed_resp.getroot().attrib == {}
 
 
-@responses.activate
+@ml_mock
 def test_parse_text_non_multipart_mixed_response_xml(client):
-    uri = "/some/dir/doc1.xml"
-    content = '<?xml version="1.0" encoding="UTF-8"?>\n<root/>'
-
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/documents")
-    builder.with_request_param("uri", uri)
-    builder.with_response_content_type("application/xml; charset=utf-8")
-    builder.with_response_header("vnd.marklogic.document-format", "xml")
-    builder.with_response_status(200)
-    builder.with_response_body(content)
-    builder.build_get()
-
-    resp = client.get_documents(uri=uri)
+    resp = client.get_documents(uri="/some/dir/doc1.xml")
     parsed_resp = MLResponseParser.parse(resp, output_type=str)
 
     assert isinstance(parsed_resp, str)
-    assert parsed_resp == content
+    assert parsed_resp == '<?xml version="1.0" encoding="UTF-8"?>\n<root/>'
 
 
-@responses.activate
+@ml_mock
 def test_parse_bytes_non_multipart_mixed_response_xml(client):
-    uri = "/some/dir/doc1.xml"
-    content = '<?xml version="1.0" encoding="UTF-8"?>\n<root/>'
-
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/documents")
-    builder.with_request_param("uri", uri)
-    builder.with_response_content_type("application/xml; charset=utf-8")
-    builder.with_response_header("vnd.marklogic.document-format", "xml")
-    builder.with_response_status(200)
-    builder.with_response_body(content)
-    builder.build_get()
-
-    resp = client.get_documents(uri=uri)
+    resp = client.get_documents(uri="/some/dir/doc1.xml")
     parsed_resp = MLResponseParser.parse(resp, output_type=bytes)
 
     assert isinstance(parsed_resp, bytes)
-    assert parsed_resp == content.encode("utf-8")
+    assert parsed_resp == b'<?xml version="1.0" encoding="UTF-8"?>\n<root/>'
 
 
-@responses.activate
+@ml_mock
 def test_parse_with_headers_non_multipart_mixed_response_xml(client):
-    uri = "/some/dir/doc1.xml"
-
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/documents")
-    builder.with_request_param("uri", uri)
-    builder.with_response_content_type("application/xml; charset=utf-8")
-    builder.with_response_header("vnd.marklogic.document-format", "xml")
-    builder.with_response_status(200)
-    builder.with_response_body('<?xml version="1.0" encoding="UTF-8"?>\n<root/>')
-    builder.build_get()
-
-    resp = client.get_documents(uri=uri)
+    resp = client.get_documents(uri="/some/dir/doc1.xml")
     headers, parsed_resp = MLResponseParser.parse_with_headers(resp)
 
     assert isinstance(parsed_resp, ElemTree.ElementTree)
@@ -461,20 +443,9 @@ def test_parse_with_headers_non_multipart_mixed_response_xml(client):
     }
 
 
-@responses.activate
+@ml_mock
 def test_parse_text_with_headers_non_multipart_mixed_response_xml(client):
-    uri = "/some/dir/doc1.xml"
-
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/documents")
-    builder.with_request_param("uri", uri)
-    builder.with_response_content_type("application/xml; charset=utf-8")
-    builder.with_response_header("vnd.marklogic.document-format", "xml")
-    builder.with_response_status(200)
-    builder.with_response_body('<?xml version="1.0" encoding="UTF-8"?>\n<root/>')
-    builder.build_get()
-
-    resp = client.get_documents(uri=uri)
+    resp = client.get_documents(uri="/some/dir/doc1.xml")
     headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=str)
 
     assert isinstance(parsed_resp, str)
@@ -486,20 +457,9 @@ def test_parse_text_with_headers_non_multipart_mixed_response_xml(client):
     }
 
 
-@responses.activate
+@ml_mock
 def test_parse_bytes_with_headers_non_multipart_mixed_response_xml(client):
-    uri = "/some/dir/doc1.xml"
-
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/documents")
-    builder.with_request_param("uri", uri)
-    builder.with_response_content_type("application/xml; charset=utf-8")
-    builder.with_response_header("vnd.marklogic.document-format", "xml")
-    builder.with_response_status(200)
-    builder.with_response_body('<?xml version="1.0" encoding="UTF-8"?>\n<root/>')
-    builder.build_get()
-
-    resp = client.get_documents(uri=uri)
+    resp = client.get_documents(uri="/some/dir/doc1.xml")
     headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=bytes)
 
     assert isinstance(parsed_resp, bytes)
@@ -511,82 +471,36 @@ def test_parse_bytes_with_headers_non_multipart_mixed_response_xml(client):
     }
 
 
-@responses.activate
+@ml_mock
 def test_parse_non_multipart_mixed_response_json(client):
-    uri = "/some/dir/doc2.json"
-
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/documents")
-    builder.with_request_param("uri", uri)
-    builder.with_response_content_type("application/json; charset=utf-8")
-    builder.with_response_header("vnd.marklogic.document-format", "json")
-    builder.with_response_status(200)
-    builder.with_response_body('{"root":{"child":"data2"}}')
-    builder.build_get()
-
-    resp = client.get_documents(uri=uri)
+    resp = client.get_documents(uri="/some/dir/doc2.json")
     parsed_resp = MLResponseParser.parse(resp)
 
     assert isinstance(parsed_resp, dict)
     assert parsed_resp == {"root": {"child": "data2"}}
 
 
-@responses.activate
+@ml_mock
 def test_parse_text_non_multipart_mixed_response_json(client):
-    uri = "/some/dir/doc2.json"
-    content = '{"root":{"child":"data2"}}'
-
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/documents")
-    builder.with_request_param("uri", uri)
-    builder.with_response_content_type("application/json; charset=utf-8")
-    builder.with_response_header("vnd.marklogic.document-format", "json")
-    builder.with_response_status(200)
-    builder.with_response_body(content)
-    builder.build_get()
-
-    resp = client.get_documents(uri=uri)
+    resp = client.get_documents(uri="/some/dir/doc2.json")
     parsed_resp = MLResponseParser.parse(resp, output_type=str)
 
     assert isinstance(parsed_resp, str)
-    assert parsed_resp == content
+    assert parsed_resp == '{"root":{"child":"data2"}}'
 
 
-@responses.activate
+@ml_mock
 def test_parse_bytes_non_multipart_mixed_response_json(client):
-    uri = "/some/dir/doc2.json"
-    content = '{"root":{"child":"data2"}}'
-
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/documents")
-    builder.with_request_param("uri", uri)
-    builder.with_response_content_type("application/json; charset=utf-8")
-    builder.with_response_header("vnd.marklogic.document-format", "json")
-    builder.with_response_status(200)
-    builder.with_response_body(content)
-    builder.build_get()
-
-    resp = client.get_documents(uri=uri)
+    resp = client.get_documents(uri="/some/dir/doc2.json")
     parsed_resp = MLResponseParser.parse(resp, output_type=bytes)
 
     assert isinstance(parsed_resp, bytes)
-    assert parsed_resp == content.encode("utf-8")
+    assert parsed_resp == b'{"root":{"child":"data2"}}'
 
 
-@responses.activate
+@ml_mock
 def test_parse_with_headers_non_multipart_mixed_response_json(client):
-    uri = "/some/dir/doc2.json"
-
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/documents")
-    builder.with_request_param("uri", uri)
-    builder.with_response_content_type("application/json; charset=utf-8")
-    builder.with_response_header("vnd.marklogic.document-format", "json")
-    builder.with_response_status(200)
-    builder.with_response_body('{"root":{"child":"data2"}}')
-    builder.build_get()
-
-    resp = client.get_documents(uri=uri)
+    resp = client.get_documents(uri="/some/dir/doc2.json")
     headers, parsed_resp = MLResponseParser.parse_with_headers(resp)
 
     assert isinstance(parsed_resp, dict)
@@ -598,25 +512,13 @@ def test_parse_with_headers_non_multipart_mixed_response_json(client):
     }
 
 
-@responses.activate
+@ml_mock
 def test_parse_text_with_headers_non_multipart_mixed_response_json(client):
-    uri = "/some/dir/doc2.json"
-    content = '{"root":{"child":"data2"}}'
-
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/documents")
-    builder.with_request_param("uri", uri)
-    builder.with_response_content_type("application/json; charset=utf-8")
-    builder.with_response_header("vnd.marklogic.document-format", "json")
-    builder.with_response_status(200)
-    builder.with_response_body(content)
-    builder.build_get()
-
-    resp = client.get_documents(uri=uri)
+    resp = client.get_documents(uri="/some/dir/doc2.json")
     headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=str)
 
     assert isinstance(parsed_resp, str)
-    assert parsed_resp == content
+    assert parsed_resp == '{"root":{"child":"data2"}}'
     assert headers == {
         "vnd.marklogic.document-format": "json",
         "Content-Type": "application/json; charset=utf-8",
@@ -624,25 +526,13 @@ def test_parse_text_with_headers_non_multipart_mixed_response_json(client):
     }
 
 
-@responses.activate
+@ml_mock
 def test_parse_bytes_with_headers_non_multipart_mixed_response_json(client):
-    uri = "/some/dir/doc2.json"
-    content = '{"root":{"child":"data2"}}'
-
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/documents")
-    builder.with_request_param("uri", uri)
-    builder.with_response_content_type("application/json; charset=utf-8")
-    builder.with_response_header("vnd.marklogic.document-format", "json")
-    builder.with_response_status(200)
-    builder.with_response_body(content)
-    builder.build_get()
-
-    resp = client.get_documents(uri=uri)
+    resp = client.get_documents(uri="/some/dir/doc2.json")
     headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=bytes)
 
     assert isinstance(parsed_resp, bytes)
-    assert parsed_resp == content.encode("utf-8")
+    assert parsed_resp == b'{"root":{"child":"data2"}}'
     assert headers == {
         "vnd.marklogic.document-format": "json",
         "Content-Type": "application/json; charset=utf-8",

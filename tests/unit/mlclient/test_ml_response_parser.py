@@ -96,6 +96,34 @@ ml_mock.get(
         content='{"root":{"child":"data2"}}',
     ),
 )
+ml_mock.get(
+    "/v1/documents",
+    params={"uri": "/some/dir/doc3.xqy"},
+    name="non-multipart-mixed-text",
+).mock(
+    return_value=Response(
+        status_code=200,
+        headers={
+            "Content-Type": "application/vnd.marklogic-xdmp; charset=utf-8",
+            "vnd.marklogic.document-format": "text",
+        },
+        content=b'xquery version "1.0-ml";\n\nfn:current-date()',
+    ),
+)
+ml_mock.get(
+    "/v1/documents",
+    params={"uri": "/some/dir/doc4.zip"},
+    name="non-multipart-mixed-binary",
+).mock(
+    return_value=Response(
+        status_code=200,
+        headers={
+            "Content-Type": "application/zip",
+            "vnd.marklogic.document-format": "binary",
+        },
+        content=zlib.compress(b'xquery version "1.0-ml";\n\nfn:current-date()'),
+    ),
+)
 
 
 @ml_mock
@@ -540,80 +568,36 @@ def test_parse_bytes_with_headers_non_multipart_mixed_response_json(client):
     }
 
 
-@responses.activate
+@ml_mock
 def test_parse_non_multipart_mixed_response_text(client):
-    uri = "/some/dir/doc3.xqy"
-
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/documents")
-    builder.with_request_param("uri", uri)
-    builder.with_response_content_type("application/vnd.marklogic-xdmp; charset=utf-8")
-    builder.with_response_header("vnd.marklogic.document-format", "text")
-    builder.with_response_status(200)
-    builder.with_response_body(b'xquery version "1.0-ml";\n\nfn:current-date()')
-    builder.build_get()
-
-    resp = client.get_documents(uri=uri)
+    resp = client.get_documents(uri="/some/dir/doc3.xqy")
     parsed_resp = MLResponseParser.parse(resp)
 
     assert isinstance(parsed_resp, str)
     assert parsed_resp == 'xquery version "1.0-ml";\n\nfn:current-date()'
 
 
-@responses.activate
+@ml_mock
 def test_parse_text_non_multipart_mixed_response_text(client):
-    uri = "/some/dir/doc3.xqy"
-
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/documents")
-    builder.with_request_param("uri", uri)
-    builder.with_response_content_type("application/vnd.marklogic-xdmp; charset=utf-8")
-    builder.with_response_header("vnd.marklogic.document-format", "text")
-    builder.with_response_status(200)
-    builder.with_response_body(b'xquery version "1.0-ml";\n\nfn:current-date()')
-    builder.build_get()
-
-    resp = client.get_documents(uri=uri)
+    resp = client.get_documents(uri="/some/dir/doc3.xqy")
     parsed_resp = MLResponseParser.parse(resp, output_type=str)
 
     assert isinstance(parsed_resp, str)
     assert parsed_resp == 'xquery version "1.0-ml";\n\nfn:current-date()'
 
 
-@responses.activate
+@ml_mock
 def test_parse_bytes_non_multipart_mixed_response_text(client):
-    uri = "/some/dir/doc3.xqy"
-
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/documents")
-    builder.with_request_param("uri", uri)
-    builder.with_response_content_type("application/vnd.marklogic-xdmp; charset=utf-8")
-    builder.with_response_header("vnd.marklogic.document-format", "text")
-    builder.with_response_status(200)
-    builder.with_response_body(b'xquery version "1.0-ml";\n\nfn:current-date()')
-    builder.build_get()
-
-    resp = client.get_documents(uri=uri)
+    resp = client.get_documents(uri="/some/dir/doc3.xqy")
     parsed_resp = MLResponseParser.parse(resp, output_type=bytes)
 
     assert isinstance(parsed_resp, bytes)
     assert parsed_resp == b'xquery version "1.0-ml";\n\nfn:current-date()'
 
 
-@responses.activate
+@ml_mock
 def test_parse_with_headers_non_multipart_mixed_response_text(client):
-    uri = "/some/dir/doc3.xqy"
-
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/documents")
-    builder.with_request_param("uri", uri)
-    builder.with_response_content_type("application/vnd.marklogic-xdmp; charset=utf-8")
-    builder.with_response_header("vnd.marklogic.document-format", "text")
-    builder.with_response_status(200)
-    builder.with_response_body(b'xquery version "1.0-ml";\n\nfn:current-date()')
-    builder.build_get()
-
-    resp = client.get_documents(uri=uri)
+    resp = client.get_documents(uri="/some/dir/doc3.xqy")
     headers, parsed_resp = MLResponseParser.parse_with_headers(resp)
 
     assert isinstance(parsed_resp, str)
@@ -625,20 +609,9 @@ def test_parse_with_headers_non_multipart_mixed_response_text(client):
     }
 
 
-@responses.activate
+@ml_mock
 def test_parse_text_with_headers_non_multipart_mixed_response_text(client):
-    uri = "/some/dir/doc3.xqy"
-
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/documents")
-    builder.with_request_param("uri", uri)
-    builder.with_response_content_type("application/vnd.marklogic-xdmp; charset=utf-8")
-    builder.with_response_header("vnd.marklogic.document-format", "text")
-    builder.with_response_status(200)
-    builder.with_response_body(b'xquery version "1.0-ml";\n\nfn:current-date()')
-    builder.build_get()
-
-    resp = client.get_documents(uri=uri)
+    resp = client.get_documents(uri="/some/dir/doc3.xqy")
     headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=str)
 
     assert isinstance(parsed_resp, str)
@@ -650,20 +623,9 @@ def test_parse_text_with_headers_non_multipart_mixed_response_text(client):
     }
 
 
-@responses.activate
+@ml_mock
 def test_parse_bytes_with_headers_non_multipart_mixed_response_text(client):
-    uri = "/some/dir/doc3.xqy"
-
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/documents")
-    builder.with_request_param("uri", uri)
-    builder.with_response_content_type("application/vnd.marklogic-xdmp; charset=utf-8")
-    builder.with_response_header("vnd.marklogic.document-format", "text")
-    builder.with_response_status(200)
-    builder.with_response_body(b'xquery version "1.0-ml";\n\nfn:current-date()')
-    builder.build_get()
-
-    resp = client.get_documents(uri=uri)
+    resp = client.get_documents(uri="/some/dir/doc3.xqy")
     headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=bytes)
 
     assert isinstance(parsed_resp, bytes)
@@ -675,88 +637,48 @@ def test_parse_bytes_with_headers_non_multipart_mixed_response_text(client):
     }
 
 
-@responses.activate
+@ml_mock
 def test_parse_non_multipart_mixed_response_binary(client):
-    uri = "/some/dir/doc4.zip"
-    content = zlib.compress(b'xquery version "1.0-ml";\n\nfn:current-date()')
-
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/documents")
-    builder.with_request_param("uri", uri)
-    builder.with_response_content_type("application/zip")
-    builder.with_response_status(200)
-    builder.with_response_body(content)
-    builder.with_response_header("vnd.marklogic.document-format", "binary")
-    builder.build_get()
-
-    resp = client.get_documents(uri=uri)
+    resp = client.get_documents(uri="/some/dir/doc4.zip")
     parsed_resp = MLResponseParser.parse(resp)
 
     assert isinstance(parsed_resp, bytes)
-    assert parsed_resp == content
+    assert parsed_resp == zlib.compress(
+        b'xquery version "1.0-ml";\n\nfn:current-date()',
+    )
 
 
-@responses.activate
+@ml_mock
 def test_parse_text_non_multipart_mixed_response_binary(client):
-    uri = "/some/dir/doc4.zip"
-    content = zlib.compress(b'xquery version "1.0-ml";\n\nfn:current-date()')
-
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/documents")
-    builder.with_request_param("uri", uri)
-    builder.with_response_content_type("application/zip")
-    builder.with_response_status(200)
-    builder.with_response_body(content)
-    builder.with_response_header("vnd.marklogic.document-format", "binary")
-    builder.build_get()
-
-    resp = client.get_documents(uri=uri)
+    resp = client.get_documents(uri="/some/dir/doc4.zip")
     parsed_resp = MLResponseParser.parse(resp, output_type=str)
 
     assert isinstance(parsed_resp, bytes)
-    assert parsed_resp == content
+    assert parsed_resp == zlib.compress(
+        b'xquery version "1.0-ml";\n\nfn:current-date()',
+    )
 
 
-@responses.activate
+@ml_mock
 def test_parse_bytes_non_multipart_mixed_response_binary(client):
-    uri = "/some/dir/doc4.zip"
-    content = zlib.compress(b'xquery version "1.0-ml";\n\nfn:current-date()')
-
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/documents")
-    builder.with_request_param("uri", uri)
-    builder.with_response_content_type("application/zip")
-    builder.with_response_status(200)
-    builder.with_response_body(content)
-    builder.with_response_header("vnd.marklogic.document-format", "binary")
-    builder.build_get()
-
-    resp = client.get_documents(uri=uri)
+    resp = client.get_documents(uri="/some/dir/doc4.zip")
     parsed_resp = MLResponseParser.parse(resp, output_type=bytes)
 
     assert isinstance(parsed_resp, bytes)
-    assert parsed_resp == content
+    assert parsed_resp == zlib.compress(
+        b'xquery version "1.0-ml";\n\nfn:current-date()',
+    )
 
 
-@responses.activate
+@ml_mock
 def test_parse_with_headers_non_multipart_mixed_response_binary(client):
-    uri = "/some/dir/doc4.zip"
-    content = zlib.compress(b'xquery version "1.0-ml";\n\nfn:current-date()')
-
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/documents")
-    builder.with_request_param("uri", uri)
-    builder.with_response_content_type("application/zip")
-    builder.with_response_status(200)
-    builder.with_response_body(content)
-    builder.with_response_header("vnd.marklogic.document-format", "binary")
-    builder.build_get()
-
-    resp = client.get_documents(uri=uri)
+    resp = client.get_documents(uri="/some/dir/doc4.zip")
     headers, parsed_resp = MLResponseParser.parse_with_headers(resp)
 
     assert isinstance(parsed_resp, bytes)
-    assert parsed_resp == content
+    assert parsed_resp == zlib.compress(
+        b'xquery version "1.0-ml";\n\nfn:current-date()',
+    )
     assert headers == {
         "vnd.marklogic.document-format": "binary",
         "Content-Type": "application/zip",
@@ -764,25 +686,15 @@ def test_parse_with_headers_non_multipart_mixed_response_binary(client):
     }
 
 
-@responses.activate
+@ml_mock
 def test_parse_text_with_headers_non_multipart_mixed_response_binary(client):
-    uri = "/some/dir/doc4.zip"
-    content = zlib.compress(b'xquery version "1.0-ml";\n\nfn:current-date()')
-
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/documents")
-    builder.with_request_param("uri", uri)
-    builder.with_response_content_type("application/zip")
-    builder.with_response_status(200)
-    builder.with_response_body(content)
-    builder.with_response_header("vnd.marklogic.document-format", "binary")
-    builder.build_get()
-
-    resp = client.get_documents(uri=uri)
+    resp = client.get_documents(uri="/some/dir/doc4.zip")
     headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=str)
 
     assert isinstance(parsed_resp, bytes)
-    assert parsed_resp == content
+    assert parsed_resp == zlib.compress(
+        b'xquery version "1.0-ml";\n\nfn:current-date()',
+    )
     assert headers == {
         "vnd.marklogic.document-format": "binary",
         "Content-Type": "application/zip",
@@ -790,25 +702,15 @@ def test_parse_text_with_headers_non_multipart_mixed_response_binary(client):
     }
 
 
-@responses.activate
+@ml_mock
 def test_parse_bytes_with_headers_non_multipart_mixed_response_binary(client):
-    uri = "/some/dir/doc4.zip"
-    content = zlib.compress(b'xquery version "1.0-ml";\n\nfn:current-date()')
-
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/documents")
-    builder.with_request_param("uri", uri)
-    builder.with_response_content_type("application/zip")
-    builder.with_response_status(200)
-    builder.with_response_body(content)
-    builder.with_response_header("vnd.marklogic.document-format", "binary")
-    builder.build_get()
-
-    resp = client.get_documents(uri=uri)
+    resp = client.get_documents(uri="/some/dir/doc4.zip")
     headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=bytes)
 
     assert isinstance(parsed_resp, bytes)
-    assert parsed_resp == content
+    assert parsed_resp == zlib.compress(
+        b'xquery version "1.0-ml";\n\nfn:current-date()',
+    )
     assert headers == {
         "vnd.marklogic.document-format": "binary",
         "Content-Type": "application/zip",

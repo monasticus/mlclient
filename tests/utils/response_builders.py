@@ -94,6 +94,10 @@ class MLRespXMocker:
             self._resp_mock.response.headers = Headers()
         self._resp_mock.response.headers[name] = value
 
+    def with_empty_response_body(self):
+        self.with_response_body(b"")
+        self.with_response_header("Content-Length", "0")
+
     def with_response_body(self, body: bytes | str | dict):
         if isinstance(body, dict):
             self._resp_mock.response.json = body

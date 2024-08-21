@@ -1,0 +1,219 @@
+from __future__ import annotations
+
+import json
+from typing import Any, List, Optional, Union
+
+import respx
+import urllib3
+from httpx import Headers
+from pydantic import BaseModel, ConfigDict
+from urllib3.fields import RequestField
+
+from mlclient.constants import HEADER_X_WWW_FORM_URLENCODED
+from mlclient.structures.calls import ContentDispositionSerializer, DocumentsBodyPart
+
+
+class RespXRequest(BaseModel):
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
+    name: Optional[str] = None
+    url: str = ""
+    method: str = ""
+    params: Optional[List[tuple]] = None
+    headers: Optional[Headers] = None
+    content: Optional[Union[bytes, str]] = None
+    data: Optional[dict] = None
+    json: Optional[dict] = None
+
+
+class RespXResponse(BaseModel):
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
+    status_code: int = -1
+    headers: Optional[Headers] = None
+    content: Optional[Union[bytes, str]] = None
+    json: Optional[dict] = None
+    body_parts: Optional[list[RequestField]] = None
+
+
+class RespXMock(BaseModel):
+    request: RespXRequest = RespXRequest()
+    response: RespXResponse = RespXResponse()
+
+
+class MLRespXMocker:
+    def __init__(self, base_url: str | None = None):
+        self._mock = respx.mock(base_url=base_url, assert_all_called=False)
+        self._resp_mock = RespXMock()
+
+    @property
+    def mock(self):
+        return self._mock
+
+    def with_name(self, name: str):
+        self._resp_mock.request.name = name
+
+    def with_url(self, url: str):
+        self._resp_mock.request.url = url
+
+    def with_method(self, method: str):
+        self._resp_mock.request.method = method
+
+    def with_request_param(self, name: str, value: str):
+        if not self._resp_mock.request.params:
+            self._resp_mock.request.params = []
+        self._resp_mock.request.params.append((name, value))
+
+    def with_request_content_type(self, content_type: str):
+        self.with_request_header("Content-Type", content_type)
+
+    def with_request_header(self, name: str, value: str):
+        if not self._resp_mock.request.headers:
+            self._resp_mock.request.headers = Headers()
+        self._resp_mock.request.headers[name] = value
+
+    def with_request_body(self, body: bytes | str | dict):
+        if (
+            self._resp_mock.request.headers.get("content-type")
+            == HEADER_X_WWW_FORM_URLENCODED
+        ):
+            self._resp_mock.request.data = body
+        elif isinstance(body, dict):
+            self._resp_mock.request.json = body
+        else:
+            self._resp_mock.request.content = body
+
+    def with_response_code(self, status_code: int):
+        self._resp_mock.response.status_code = status_code
+
+    def with_response_content_type(self, content_type: str):
+        self.with_response_header("Content-Type", content_type)
+
+    def with_response_header(self, name: str, value: str):
+        if not self._resp_mock.response.headers:
+            self._resp_mock.response.headers = Headers()
+        self._resp_mock.response.headers[name] = value
+
+    def with_response_body(self, body: bytes | str | dict):
+        if isinstance(body, dict):
+            self._resp_mock.response.json = body
+        else:
+            self._resp_mock.response.content = body
+
+    def with_response_body_part(
+        self,
+        x_primitive: str | None,
+        body_part_content: Any,
+        content_type: str | None = None,
+    ):
+        if not self._resp_mock.response.body_parts:
+            self._resp_mock.response.body_parts = []
+
+        if content_type is not None:
+            ...
+        elif x_primitive in ["array", "map"]:
+            content_type = "application/json"
+        elif x_primitive in ["document-node()", "element()"]:
+            content_type = "application/xml"
+        else:
+            content_type = "text/plain"
+
+        headers = {"Content-Type": content_type}
+        if x_primitive is not None:
+            headers["X-Primitive"] = x_primitive
+
+        req_field = RequestField(
+            name="--ignore--",
+            data=body_part_content,
+            headers=headers,
+        )
+        self._resp_mock.response.body_parts.append(req_field)
+
+    def with_response_documents_body_part(
+        self,
+        body_part: DocumentsBodyPart,
+    ):
+        if not self._resp_mock.response.body_parts:
+            self._resp_mock.response.body_parts = []
+
+        data = body_part.content
+        if isinstance(data, dict):
+            data = json.dumps(data)
+        content_disp = ContentDispositionSerializer.deserialize(
+            body_part.content_disposition,
+        )
+        req_field = RequestField(
+            name="--ignore--",
+            data=data,
+            headers={
+                "Content-Disposition": content_disp,
+                "Content-Type": body_part.content_type,
+            },
+        )
+        self._resp_mock.response.body_parts.append(req_field)
+
+    def mock_get(
+        self,
+    ):
+        self.with_method("GET")
+        return self.mock_response()
+
+    def mock_delete(
+        self,
+    ):
+        self.with_method("DELETE")
+        return self.mock_response()
+
+    def mock_post(
+        self,
+    ):
+        self.with_method("POST")
+        return self.mock_response()
+
+    def mock_put(
+        self,
+    ):
+        self.with_method("PUT")
+        return self.mock_response()
+
+    def mock_response(
+        self,
+    ):
+        self._validate()
+        self._setup_response_body()
+        self._mock.request(
+            **self._resp_mock.request.model_dump(exclude_none=True),
+        ).respond(
+            **self._resp_mock.response.model_dump(
+                exclude={"body_parts"},
+                exclude_none=True,
+            ),
+        )
+        self._resp_mock = RespXMock()
+
+    def _validate(self):
+        bodies = [
+            body
+            for body in [
+                self._resp_mock.response.content,
+                self._resp_mock.response.json,
+                self._resp_mock.response.body_parts,
+            ]
+            if body is not None
+        ]
+        if len(bodies) > 1:
+            msg = "You can't set more than 1 response body"
+            raise RuntimeError(msg)
+
+    def _setup_response_body(self):
+        if self._resp_mock.response.body_parts is not None:
+            body, content_type = urllib3.encode_multipart_formdata(
+                self._resp_mock.response.body_parts,
+            )
+            content_type = content_type.replace(
+                "multipart/form-data",
+                "multipart/mixed",
+            )
+            self.with_response_content_type(content_type)
+            self._resp_mock.response.body_parts = None
+            self._resp_mock.response.content = body

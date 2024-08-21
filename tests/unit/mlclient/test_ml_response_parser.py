@@ -4,13 +4,12 @@ from datetime import date, datetime
 
 import pytest
 import responses
-import respx
-from httpx import Response
 
 from mlclient import MLResourcesClient, MLResponseParser
 from mlclient.structures.calls import DocumentsBodyPart
 from tests.utils import MLResponseBuilder
 from tests.utils import resources as resources_utils
+from tests.utils.response_builders import MLRespXMocker
 
 
 @pytest.fixture(scope="module")
@@ -30,100 +29,73 @@ def _setup_and_teardown(client):
 
 
 RESOURCES = resources_utils.get_test_resources(__file__)
-ml_mock = respx.mock(base_url="http://localhost:8002", assert_all_called=False)
-ml_mock.post(
-    "/v1/eval",
-    headers={"Content-Type": "application/x-www-form-urlencoded"},
-    data={"xquery": "'missing-quote"},
-    name="html-error",
-).mock(
-    return_value=Response(
-        status_code=500,
-        headers={"Content-Type": "text/html; charset=utf-8"},
-        content=RESOURCES["error-response.html"]["bytes"],
-    ),
+ml_mocker = MLRespXMocker(base_url="http://localhost:8002")
+
+ml_mocker.with_name("html-error")
+ml_mocker.with_url("/v1/eval")
+ml_mocker.with_request_content_type("application/x-www-form-urlencoded")
+ml_mocker.with_request_body({"xquery": "'missing-quote"})
+ml_mocker.with_response_code(500)
+ml_mocker.with_response_content_type("text/html; charset=utf-8")
+ml_mocker.with_response_body(RESOURCES["error-response.html"]["bytes"])
+ml_mocker.mock_post()
+
+ml_mocker.with_name("xml-error")
+ml_mocker.with_url("/v1/documents")
+ml_mocker.with_request_param("uri", "/some/dir/doc1.xml")
+ml_mocker.with_request_param("database", "Document")
+ml_mocker.with_response_code(404)
+ml_mocker.with_response_content_type("application/xml; charset=UTF-8")
+ml_mocker.with_response_body(RESOURCES["error-response.xml"]["bytes"])
+ml_mocker.mock_delete()
+
+ml_mocker.with_name("json-error")
+ml_mocker.with_url("/v1/documents")
+ml_mocker.with_request_param("uri", "/some/dir/doc.xml")
+ml_mocker.with_response_code(404)
+ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+ml_mocker.with_response_body(RESOURCES["error-response.json"]["json"])
+ml_mocker.mock_get()
+
+ml_mocker.with_name("non-multipart-mixed-xml")
+ml_mocker.with_url("/v1/documents")
+ml_mocker.with_request_param("uri", "/some/dir/doc1.xml")
+ml_mocker.with_response_code(200)
+ml_mocker.with_response_content_type("application/xml; charset=utf-8")
+ml_mocker.with_response_header("vnd.marklogic.document-format", "xml")
+ml_mocker.with_response_body('<?xml version="1.0" encoding="UTF-8"?>\n<root/>')
+ml_mocker.mock_get()
+
+ml_mocker.with_name("non-multipart-mixed-json")
+ml_mocker.with_url("/v1/documents")
+ml_mocker.with_request_param("uri", "/some/dir/doc2.json")
+ml_mocker.with_response_code(200)
+ml_mocker.with_response_content_type("application/json; charset=utf-8")
+ml_mocker.with_response_header("vnd.marklogic.document-format", "json")
+ml_mocker.with_response_body('{"root":{"child":"data2"}}')
+ml_mocker.mock_get()
+
+ml_mocker.with_name("non-multipart-mixed-text")
+ml_mocker.with_url("/v1/documents")
+ml_mocker.with_request_param("uri", "/some/dir/doc3.xqy")
+ml_mocker.with_response_code(200)
+ml_mocker.with_response_content_type("application/vnd.marklogic-xdmp; charset=utf-8")
+ml_mocker.with_response_header("vnd.marklogic.document-format", "text")
+ml_mocker.with_response_body(b'xquery version "1.0-ml";\n\nfn:current-date()')
+ml_mocker.mock_get()
+
+ml_mocker.with_name("non-multipart-mixed-binary")
+ml_mocker.with_url("/v1/documents")
+ml_mocker.with_request_param("uri", "/some/dir/doc4.zip")
+ml_mocker.with_response_code(200)
+ml_mocker.with_response_content_type("application/zip")
+ml_mocker.with_response_header("vnd.marklogic.document-format", "binary")
+ml_mocker.with_response_body(
+    zlib.compress(b'xquery version "1.0-ml";\n\nfn:current-date()'),
 )
-ml_mock.delete(
-    "/v1/documents",
-    params={
-        "uri": "/some/dir/doc1.xml",
-        "database": "Document",
-    },
-    name="xml-error",
-).mock(
-    return_value=Response(
-        status_code=404,
-        headers={"Content-Type": "application/xml; charset=UTF-8"},
-        content=RESOURCES["error-response.xml"]["bytes"],
-    ),
-)
-ml_mock.get(
-    "/v1/documents",
-    params={"uri": "/some/dir/doc.xml"},
-    name="json-error",
-).mock(
-    return_value=Response(
-        status_code=404,
-        headers={"Content-Type": "application/json; charset=UTF-8"},
-        json=RESOURCES["error-response.json"]["json"],
-    ),
-)
-ml_mock.get(
-    "/v1/documents",
-    params={"uri": "/some/dir/doc1.xml"},
-    name="non-multipart-mixed-xml",
-).mock(
-    return_value=Response(
-        status_code=200,
-        headers={
-            "Content-Type": "application/xml; charset=utf-8",
-            "vnd.marklogic.document-format": "xml",
-        },
-        content='<?xml version="1.0" encoding="UTF-8"?>\n<root/>',
-    ),
-)
-ml_mock.get(
-    "/v1/documents",
-    params={"uri": "/some/dir/doc2.json"},
-    name="non-multipart-mixed-json",
-).mock(
-    return_value=Response(
-        status_code=200,
-        headers={
-            "Content-Type": "application/json; charset=utf-8",
-            "vnd.marklogic.document-format": "json",
-        },
-        content='{"root":{"child":"data2"}}',
-    ),
-)
-ml_mock.get(
-    "/v1/documents",
-    params={"uri": "/some/dir/doc3.xqy"},
-    name="non-multipart-mixed-text",
-).mock(
-    return_value=Response(
-        status_code=200,
-        headers={
-            "Content-Type": "application/vnd.marklogic-xdmp; charset=utf-8",
-            "vnd.marklogic.document-format": "text",
-        },
-        content=b'xquery version "1.0-ml";\n\nfn:current-date()',
-    ),
-)
-ml_mock.get(
-    "/v1/documents",
-    params={"uri": "/some/dir/doc4.zip"},
-    name="non-multipart-mixed-binary",
-).mock(
-    return_value=Response(
-        status_code=200,
-        headers={
-            "Content-Type": "application/zip",
-            "vnd.marklogic.document-format": "binary",
-        },
-        content=zlib.compress(b'xquery version "1.0-ml";\n\nfn:current-date()'),
-    ),
-)
+ml_mocker.mock_get()
+
+ml_mock = ml_mocker.mock
 
 
 @ml_mock

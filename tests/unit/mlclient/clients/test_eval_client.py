@@ -3,7 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-import responses
+import respx
 
 from mlclient.clients import LOCAL_NS, EvalClient
 from mlclient.exceptions import (
@@ -11,8 +11,8 @@ from mlclient.exceptions import (
     UnsupportedFileExtensionError,
     WrongParametersError,
 )
-from tests.utils import MLResponseBuilder
 from tests.utils import resources as resources_utils
+from tests.utils.response_builders import MLRespXMocker
 
 
 @pytest.fixture(autouse=True)
@@ -29,145 +29,155 @@ def _setup_and_teardown(eval_client):
     eval_client.disconnect()
 
 
-@responses.activate
+@respx.mock
 def test_eval_raw_xquery_empty(eval_client):
     code = "()"
 
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/eval")
-    builder.with_request_body({"xquery": code})
-    builder.with_empty_response_body()
-    builder.build_post()
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/v1/eval")
+    ml_mocker.with_request_content_type("application/x-www-form-urlencoded")
+    ml_mocker.with_request_body({"xquery": code})
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_empty_response_body()
+    ml_mocker.mock_post()
 
     resp = eval_client.eval(xq=code)
 
     assert resp == []
 
 
-@responses.activate
+@respx.mock
 def test_eval_raw_xquery_single_item(eval_client):
     code = "''"
 
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/eval")
-    builder.with_request_body({"xquery": code})
-    builder.with_response_body_multipart_mixed()
-    builder.with_response_body_part("string", "")
-    builder.build_post()
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/v1/eval")
+    ml_mocker.with_request_content_type("application/x-www-form-urlencoded")
+    ml_mocker.with_request_body({"xquery": code})
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body_part("string", "")
+    ml_mocker.mock_post()
 
     resp = eval_client.eval(xq=code)
 
     assert resp == ""
 
 
-@responses.activate
+@respx.mock
 def test_eval_raw_xquery_multiple_items(eval_client):
     code = "('',1)"
 
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/eval")
-    builder.with_request_body({"xquery": code})
-    builder.with_response_body_multipart_mixed()
-    builder.with_response_body_part("string", "")
-    builder.with_response_body_part("integer", "1")
-    builder.build_post()
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/v1/eval")
+    ml_mocker.with_request_content_type("application/x-www-form-urlencoded")
+    ml_mocker.with_request_body({"xquery": code})
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body_part("string", "")
+    ml_mocker.with_response_body_part("integer", "1")
+    ml_mocker.mock_post()
 
     resp = eval_client.eval(xq=code)
 
     assert resp == ["", 1]
 
 
-@responses.activate
+@respx.mock
 def test_eval_raw_javascript_empty(eval_client):
     code = "Sequence.from([]);"
 
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/eval")
-    builder.with_request_body({"javascript": code})
-    builder.with_empty_response_body()
-    builder.build_post()
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/v1/eval")
+    ml_mocker.with_request_content_type("application/x-www-form-urlencoded")
+    ml_mocker.with_request_body({"javascript": code})
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_empty_response_body()
+    ml_mocker.mock_post()
 
     resp = eval_client.eval(js=code)
 
     assert resp == []
 
 
-@responses.activate
+@respx.mock
 def test_eval_raw_javascript_single_item(eval_client):
     code = "''"
 
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/eval")
-    builder.with_request_body({"javascript": code})
-    builder.with_response_body_multipart_mixed()
-    builder.with_response_body_part("string", "")
-    builder.build_post()
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/v1/eval")
+    ml_mocker.with_request_content_type("application/x-www-form-urlencoded")
+    ml_mocker.with_request_body({"javascript": code})
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body_part("string", "")
+    ml_mocker.mock_post()
 
     resp = eval_client.eval(js=code)
 
     assert resp == ""
 
 
-@responses.activate
+@respx.mock
 def test_eval_raw_javascript_multiple_items(eval_client):
     code = "Sequence.from(['', 1]);"
 
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/eval")
-    builder.with_request_body({"javascript": code})
-    builder.with_response_body_multipart_mixed()
-    builder.with_response_body_part("string", "")
-    builder.with_response_body_part("integer", "1")
-    builder.build_post()
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/v1/eval")
+    ml_mocker.with_request_content_type("application/x-www-form-urlencoded")
+    ml_mocker.with_request_body({"javascript": code})
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body_part("string", "")
+    ml_mocker.with_response_body_part("integer", "1")
+    ml_mocker.mock_post()
 
     resp = eval_client.eval(js=code)
 
     assert resp == ["", 1]
 
 
-@responses.activate
+@respx.mock
 def test_eval_variables_explicit(eval_client):
     code = "declare variable $VARIABLE as xs:string external; $VARIABLE"
 
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/eval")
-    builder.with_request_body(
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/v1/eval")
+    ml_mocker.with_request_content_type("application/x-www-form-urlencoded")
+    ml_mocker.with_request_body(
         {
             "xquery": code,
             "vars": '{"VARIABLE": "X"}',
         },
     )
-    builder.with_response_body_multipart_mixed()
-    builder.with_response_body_part("string", "X")
-    builder.build_post()
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body_part("string", "X")
+    ml_mocker.mock_post()
 
     resp = eval_client.eval(xq=code, variables={"VARIABLE": "X"})
 
     assert resp == "X"
 
 
-@responses.activate
+@respx.mock
 def test_eval_variables_using_kwargs(eval_client):
     code = "declare variable $VARIABLE as xs:string external; $VARIABLE"
 
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/eval")
-    builder.with_request_body(
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/v1/eval")
+    ml_mocker.with_request_content_type("application/x-www-form-urlencoded")
+    ml_mocker.with_request_body(
         {
             "xquery": code,
             "vars": '{"VARIABLE": "X"}',
         },
     )
-    builder.with_response_body_multipart_mixed()
-    builder.with_response_body_part("string", "X")
-    builder.build_post()
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body_part("string", "X")
+    ml_mocker.mock_post()
 
     resp = eval_client.eval(xq=code, VARIABLE="X")
 
     assert resp == "X"
 
 
-@responses.activate
+@respx.mock
 def test_eval_variables_explicit_with_kwargs(eval_client):
     code = (
         "declare variable $INTEGER1 external; "
@@ -175,86 +185,94 @@ def test_eval_variables_explicit_with_kwargs(eval_client):
         "$INTEGER1 + $INTEGER2"
     )
 
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/eval")
-    builder.with_request_body(
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/v1/eval")
+    ml_mocker.with_request_content_type("application/x-www-form-urlencoded")
+    ml_mocker.with_request_body(
         {
             "xquery": code,
             "vars": '{"INTEGER1": 1, "INTEGER2": 2}',
         },
     )
-    builder.with_response_body_multipart_mixed()
-    builder.with_response_body_part("integer", "3")
-    builder.build_post()
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body_part("integer", "3")
+    ml_mocker.mock_post()
 
     resp = eval_client.eval(xq=code, variables={"INTEGER1": 1}, INTEGER2=2)
 
     assert resp == 3
 
 
-@responses.activate
+@respx.mock
 def test_eval_variables_using_namespace(eval_client):
     code = "declare variable $local:VARIABLE as xs:string external; $local:VARIABLE"
 
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/eval")
-    builder.with_request_body(
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/v1/eval")
+    ml_mocker.with_request_content_type("application/x-www-form-urlencoded")
+    ml_mocker.with_request_body(
         {
             "xquery": code,
             "vars": f'{{"{{{LOCAL_NS}}}VARIABLE": "X"}}',
         },
     )
-    builder.with_response_body_multipart_mixed()
-    builder.with_response_body_part("string", "X")
-    builder.build_post()
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body_part("string", "X")
+    ml_mocker.mock_post()
 
     resp = eval_client.eval(xq=code, variables={f"{{{LOCAL_NS}}}VARIABLE": "X"})
 
     assert resp == "X"
 
 
-@responses.activate
+@respx.mock
 def test_eval_using_database_param(eval_client):
     code = "()"
 
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/eval")
-    builder.with_request_param("database", "Documents")
-    builder.with_request_body({"xquery": code})
-    builder.with_empty_response_body()
-    builder.build_post()
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/v1/eval")
+    ml_mocker.with_request_param("database", "Documents")
+    ml_mocker.with_request_content_type("application/x-www-form-urlencoded")
+    ml_mocker.with_request_body({"xquery": code})
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_empty_response_body()
+    ml_mocker.mock_post()
 
     resp = eval_client.eval(xq=code, database="Documents")
 
     assert resp == []
 
 
-@responses.activate
+@respx.mock
 def test_eval_using_txid_param(eval_client):
     code = "()"
 
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/eval")
-    builder.with_request_param("txid", "transaction-id")
-    builder.with_request_body({"xquery": code})
-    builder.with_empty_response_body()
-    builder.build_post()
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/v1/eval")
+    ml_mocker.with_request_param("txid", "transaction-id")
+    ml_mocker.with_request_content_type("application/x-www-form-urlencoded")
+    ml_mocker.with_request_body({"xquery": code})
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_empty_response_body()
+    ml_mocker.mock_post()
 
     resp = eval_client.eval(xq=code, txid="transaction-id")
 
     assert resp == []
 
 
-@responses.activate
+@respx.mock
 def test_eval_file_xquery(eval_client):
     code = 'xquery version "1.0-ml"; ()'
 
-    builder = MLResponseBuilder()
+    ml_mocker = MLRespXMocker(use_router=False)
     for ext in ["xq", "xql", "xqm", "xqu", "xquery", "xqy"]:
-        builder.with_base_url("http://localhost:8002/v1/eval")
-        builder.with_request_body({"xquery": code})
-        builder.with_empty_response_body()
-        builder.build_post()
+        ml_mocker.with_url("http://localhost:8002/v1/eval")
+        ml_mocker.with_request_content_type("application/x-www-form-urlencoded")
+        ml_mocker.with_request_body({"xquery": code})
+        ml_mocker.with_response_code(200)
+        ml_mocker.with_empty_response_body()
+        ml_mocker.mock_post()
 
         file_path = resources_utils.get_test_resource_path(
             __file__,
@@ -265,16 +283,18 @@ def test_eval_file_xquery(eval_client):
         assert resp == []
 
 
-@responses.activate
+@respx.mock
 def test_eval_file_javascript(eval_client):
     code = "'use strict'; Sequence.from([]);"
 
-    builder = MLResponseBuilder()
+    ml_mocker = MLRespXMocker(use_router=False)
     for ext in ["js", "sjs"]:
-        builder.with_base_url("http://localhost:8002/v1/eval")
-        builder.with_request_body({"javascript": code})
-        builder.with_empty_response_body()
-        builder.build_post()
+        ml_mocker.with_url("http://localhost:8002/v1/eval")
+        ml_mocker.with_request_content_type("application/x-www-form-urlencoded")
+        ml_mocker.with_request_body({"javascript": code})
+        ml_mocker.with_response_code(200)
+        ml_mocker.with_empty_response_body()
+        ml_mocker.mock_post()
 
         file_path = resources_utils.get_test_resource_path(
             __file__,
@@ -285,7 +305,7 @@ def test_eval_file_javascript(eval_client):
         assert resp == []
 
 
-@responses.activate
+@respx.mock
 def test_eval_with_marklogic_error(eval_client):
     error_path = resources_utils.get_test_resource_path(
         __file__,
@@ -293,12 +313,14 @@ def test_eval_with_marklogic_error(eval_client):
     )
     code = "declare variable $local:VARIABLE external; $local:VARIABLE"
 
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/eval")
-    builder.with_request_body({"xquery": code})
-    builder.with_response_status(400)
-    builder.with_response_body(Path(error_path).read_bytes())
-    builder.build_post()
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/v1/eval")
+    ml_mocker.with_request_content_type("application/x-www-form-urlencoded")
+    ml_mocker.with_request_body({"xquery": code})
+    ml_mocker.with_response_code(400)
+    ml_mocker.with_response_content_type("text/html; charset=utf-8")
+    ml_mocker.with_response_body(Path(error_path).read_bytes())
+    ml_mocker.mock_post()
 
     with pytest.raises(MarkLogicError) as err:
         eval_client.eval(xq=code)
@@ -357,16 +379,17 @@ def test_eval_no_code_params(eval_client):
     assert err.value.args[0] == expected_msg
 
 
-@responses.activate
+@respx.mock
 def test_eval_with_str_output_type(eval_client):
     code = "element root {}"
 
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/eval")
-    builder.with_request_body({"xquery": code})
-    builder.with_response_body_multipart_mixed()
-    builder.with_response_body_part("element", "<root/>")
-    builder.build_post()
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/v1/eval")
+    ml_mocker.with_request_content_type("application/x-www-form-urlencoded")
+    ml_mocker.with_request_body({"xquery": code})
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body_part("element", "<root/>")
+    ml_mocker.mock_post()
 
     resp = eval_client.eval(xq=code, output_type=str)
 
@@ -374,16 +397,17 @@ def test_eval_with_str_output_type(eval_client):
     assert resp == "<root/>"
 
 
-@responses.activate
+@respx.mock
 def test_eval_with_bytes_output_type(eval_client):
     code = "element root {}"
 
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/eval")
-    builder.with_request_body({"xquery": code})
-    builder.with_response_body_multipart_mixed()
-    builder.with_response_body_part("element", "<root/>")
-    builder.build_post()
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/v1/eval")
+    ml_mocker.with_request_content_type("application/x-www-form-urlencoded")
+    ml_mocker.with_request_body({"xquery": code})
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body_part("element", "<root/>")
+    ml_mocker.mock_post()
 
     resp = eval_client.eval(xq=code, output_type=bytes)
 

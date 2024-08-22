@@ -1,12 +1,12 @@
 from pathlib import Path
 
 import pytest
-import responses
+import respx
 
 from mlclient import MLResourcesClient
 from mlclient.structures.calls import DocumentsBodyPart
-from tests.utils import MLResponseBuilder
 from tests.utils import resources as resources_utils
+from tests.utils.response_builders import MLRespXMocker
 
 
 @pytest.fixture()
@@ -19,12 +19,12 @@ def xquery():
     """
 
 
-@responses.activate()
+@respx.mock
 def test_eval(xquery):
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/eval")
-    builder.with_request_content_type("application/x-www-form-urlencoded")
-    builder.with_request_body(
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/v1/eval")
+    ml_mocker.with_request_content_type("application/x-www-form-urlencoded")
+    ml_mocker.with_request_body(
         {
             "xquery": "xquery version '1.0-ml';"
             " declare variable $element as element() external;"
@@ -32,10 +32,9 @@ def test_eval(xquery):
             "vars": '{"element": "<parent><child/></parent>"}',
         },
     )
-    builder.with_response_body_multipart_mixed()
-    builder.with_response_status(200)
-    builder.with_response_body_part("element()", "<new-parent><child/></new-parent>")
-    builder.build_post()
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body_part("element()", "<new-parent><child/></new-parent>")
+    ml_mocker.mock_post()
 
     with MLResourcesClient() as client:
         resp = client.eval(
@@ -47,20 +46,20 @@ def test_eval(xquery):
     assert "<new-parent><child/></new-parent>" in resp.text
 
 
-@responses.activate()
+@respx.mock
 def test_get_logs():
     response_body_path = resources_utils.get_test_resource_path(
         __file__,
         "test-get-logs.json",
     )
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/manage/v2/logs")
-    builder.with_request_param("format", "json")
-    builder.with_request_param("filename", "ErrorLog.txt")
-    builder.with_response_content_type("application/json; charset=UTF-8")
-    builder.with_response_status(200)
-    builder.with_response_body(Path(response_body_path).read_bytes())
-    builder.build_get()
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/manage/v2/logs")
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_param("filename", "ErrorLog.txt")
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body(Path(response_body_path).read_bytes())
+    ml_mocker.mock_get()
 
     with MLResourcesClient() as client:
         resp = client.get_logs(filename="ErrorLog.txt", data_format="json")
@@ -69,20 +68,20 @@ def test_get_logs():
     assert "logfile" in resp.json()
 
 
-@responses.activate()
+@respx.mock
 def test_get_databases():
     response_body_path = resources_utils.get_test_resource_path(
         __file__,
         "test-get-databases.json",
     )
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/manage/v2/databases")
-    builder.with_request_param("format", "json")
-    builder.with_request_param("view", "default")
-    builder.with_response_content_type("application/json; charset=UTF-8")
-    builder.with_response_status(200)
-    builder.with_response_body(Path(response_body_path).read_bytes())
-    builder.build_get()
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/manage/v2/databases")
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_param("view", "default")
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body(Path(response_body_path).read_bytes())
+    ml_mocker.mock_get()
 
     with MLResourcesClient() as client:
         resp = client.get_databases(data_format="json")
@@ -92,7 +91,7 @@ def test_get_databases():
     assert resp.json()["database-default-list"]["meta"]["uri"] == expected_uri
 
 
-@responses.activate()
+@respx.mock
 def test_post_databases():
     body = '<database-properties xmlns="http://marklogic.com/manage" />'
 
@@ -100,12 +99,12 @@ def test_post_databases():
         __file__,
         "test-post-databases.xml",
     )
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/manage/v2/databases")
-    builder.with_response_content_type("application/xml; charset=UTF-8")
-    builder.with_response_status(400)
-    builder.with_response_body(Path(response_body_path).read_bytes())
-    builder.build_post()
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/manage/v2/databases")
+    ml_mocker.with_response_content_type("application/xml; charset=UTF-8")
+    ml_mocker.with_response_code(400)
+    ml_mocker.with_response_body(Path(response_body_path).read_bytes())
+    ml_mocker.mock_post()
 
     with MLResourcesClient() as client:
         resp = client.post_databases(body=body)
@@ -117,20 +116,20 @@ def test_post_databases():
     ) in resp.text
 
 
-@responses.activate()
+@respx.mock
 def test_get_database():
     response_body_path = resources_utils.get_test_resource_path(
         __file__,
         "test-get-database.json",
     )
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/manage/v2/databases/Documents")
-    builder.with_request_param("format", "json")
-    builder.with_request_param("view", "default")
-    builder.with_response_content_type("application/json; charset=UTF-8")
-    builder.with_response_status(200)
-    builder.with_response_body(Path(response_body_path).read_bytes())
-    builder.build_get()
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/manage/v2/databases/Documents")
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_param("view", "default")
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body(Path(response_body_path).read_bytes())
+    ml_mocker.mock_get()
 
     with MLResourcesClient() as client:
         resp = client.get_database(database="Documents", data_format="json")
@@ -140,20 +139,20 @@ def test_get_database():
     assert resp.json()["database-default"]["meta"]["uri"] == expected_uri
 
 
-@responses.activate()
+@respx.mock
 def test_post_database():
     response_body_path = resources_utils.get_test_resource_path(
         __file__,
         "test-post-database.xml",
     )
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/manage/v2/databases/Documents")
-    builder.with_request_content_type("application/json")
-    builder.with_request_body({"operation": "clear-database"})
-    builder.with_response_content_type("application/xml; charset=UTF-8")
-    builder.with_response_status(200)
-    builder.with_response_body(Path(response_body_path).read_bytes())
-    builder.build_post()
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/manage/v2/databases/Documents")
+    ml_mocker.with_request_content_type("application/json")
+    ml_mocker.with_request_body({"operation": "clear-database"})
+    ml_mocker.with_response_content_type("application/xml; charset=UTF-8")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body(Path(response_body_path).read_bytes())
+    ml_mocker.mock_post()
 
     with MLResourcesClient() as client:
         resp = client.post_database(
@@ -165,13 +164,13 @@ def test_post_database():
     assert not resp.text
 
 
-@responses.activate()
+@respx.mock
 def test_delete_database():
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/manage/v2/databases/custom-db")
-    builder.with_response_status(204)
-    builder.with_empty_response_body()
-    builder.build_delete()
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/manage/v2/databases/custom-db")
+    ml_mocker.with_response_code(204)
+    ml_mocker.with_empty_response_body()
+    ml_mocker.mock_delete()
 
     with MLResourcesClient() as client:
         resp = client.delete_database(database="custom-db")
@@ -180,21 +179,21 @@ def test_delete_database():
     assert not resp.text
 
 
-@responses.activate()
+@respx.mock
 def test_get_database_properties():
     response_body_path = resources_utils.get_test_resource_path(
         __file__,
         "test-get-database-properties.json",
     )
-    builder = MLResponseBuilder()
-    builder.with_base_url(
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(
         "http://localhost:8002/manage/v2/databases/Documents/properties",
     )
-    builder.with_request_param("format", "json")
-    builder.with_response_content_type("application/json; charset=UTF-8")
-    builder.with_response_status(200)
-    builder.with_response_body(Path(response_body_path).read_bytes())
-    builder.build_get()
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body(Path(response_body_path).read_bytes())
+    ml_mocker.mock_get()
 
     with MLResourcesClient() as client:
         resp = client.get_database_properties(database="Documents", data_format="json")
@@ -203,22 +202,22 @@ def test_get_database_properties():
     assert resp.json()["database-name"] == "Documents"
 
 
-@responses.activate()
+@respx.mock
 def test_put_database_properties():
     response_body_path = resources_utils.get_test_resource_path(
         __file__,
         "test-put-database-properties.json",
     )
-    builder = MLResponseBuilder()
-    builder.with_base_url(
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(
         "http://localhost:8002/manage/v2/databases/non-existing-db/properties",
     )
-    builder.with_request_content_type("application/json")
-    builder.with_request_body({"database-name": "custom-db"})
-    builder.with_response_content_type("application/json; charset=UTF-8")
-    builder.with_response_status(404)
-    builder.with_response_body(Path(response_body_path).read_bytes())
-    builder.build_put()
+    ml_mocker.with_request_content_type("application/json")
+    ml_mocker.with_request_body({"database-name": "custom-db"})
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_response_code(404)
+    ml_mocker.with_response_body(Path(response_body_path).read_bytes())
+    ml_mocker.mock_put()
 
     with MLResourcesClient() as client:
         resp = client.put_database_properties(
@@ -230,20 +229,20 @@ def test_put_database_properties():
     assert resp.json()["errorResponse"]["messageCode"] == "XDMP-NOSUCHDB"
 
 
-@responses.activate()
+@respx.mock
 def test_get_servers():
     response_body_path = resources_utils.get_test_resource_path(
         __file__,
         "test-get-servers.json",
     )
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/manage/v2/servers")
-    builder.with_request_param("format", "json")
-    builder.with_request_param("view", "default")
-    builder.with_response_content_type("application/json; charset=UTF-8")
-    builder.with_response_status(200)
-    builder.with_response_body(Path(response_body_path).read_bytes())
-    builder.build_get()
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/manage/v2/servers")
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_param("view", "default")
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body(Path(response_body_path).read_bytes())
+    ml_mocker.mock_get()
 
     with MLResourcesClient() as client:
         resp = client.get_servers(data_format="json")
@@ -253,20 +252,20 @@ def test_get_servers():
     assert resp.json()["server-default-list"]["meta"]["uri"] == expected_uri
 
 
-@responses.activate()
+@respx.mock
 def test_post_servers():
     response_body_path = resources_utils.get_test_resource_path(
         __file__,
         "test-post-servers.xml",
     )
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/manage/v2/servers")
-    builder.with_request_param("group-id", "Default")
-    builder.with_request_param("server-type", "http")
-    builder.with_response_content_type("application/xml; charset=UTF-8")
-    builder.with_response_status(400)
-    builder.with_response_body(Path(response_body_path).read_bytes())
-    builder.build_post()
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/manage/v2/servers")
+    ml_mocker.with_request_param("group-id", "Default")
+    ml_mocker.with_request_param("server-type", "http")
+    ml_mocker.with_response_content_type("application/xml; charset=UTF-8")
+    ml_mocker.with_response_code(400)
+    ml_mocker.with_response_body(Path(response_body_path).read_bytes())
+    ml_mocker.mock_post()
 
     with MLResourcesClient() as client:
         resp = client.post_servers(
@@ -282,21 +281,21 @@ def test_post_servers():
     ) in resp.text
 
 
-@responses.activate()
+@respx.mock
 def test_get_server():
     response_body_path = resources_utils.get_test_resource_path(
         __file__,
         "test-get-server.json",
     )
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/manage/v2/servers/App-Services")
-    builder.with_request_param("group-id", "Default")
-    builder.with_request_param("format", "json")
-    builder.with_request_param("view", "default")
-    builder.with_response_content_type("application/json; charset=UTF-8")
-    builder.with_response_status(200)
-    builder.with_response_body(Path(response_body_path).read_bytes())
-    builder.build_get()
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/manage/v2/servers/App-Services")
+    ml_mocker.with_request_param("group-id", "Default")
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_param("view", "default")
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body(Path(response_body_path).read_bytes())
+    ml_mocker.mock_get()
 
     with MLResourcesClient() as client:
         resp = client.get_server(
@@ -310,19 +309,19 @@ def test_get_server():
     assert resp.json()["server-default"]["meta"]["uri"] == expected_uri
 
 
-@responses.activate()
+@respx.mock
 def test_delete_server():
     response_body_path = resources_utils.get_test_resource_path(
         __file__,
         "test-delete-server.xml",
     )
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/manage/v2/servers/Non-existing-server")
-    builder.with_request_param("group-id", "Non-existing-group")
-    builder.with_response_content_type("application/xml; charset=UTF-8")
-    builder.with_response_status(404)
-    builder.with_response_body(Path(response_body_path).read_bytes())
-    builder.build_delete()
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/manage/v2/servers/Non-existing-server")
+    ml_mocker.with_request_param("group-id", "Non-existing-group")
+    ml_mocker.with_response_content_type("application/xml; charset=UTF-8")
+    ml_mocker.with_response_code(404)
+    ml_mocker.with_response_body(Path(response_body_path).read_bytes())
+    ml_mocker.mock_delete()
 
     with MLResourcesClient() as client:
         resp = client.delete_server(
@@ -334,22 +333,22 @@ def test_delete_server():
     assert "No such group Non-existing-group" in resp.text
 
 
-@responses.activate()
+@respx.mock
 def test_get_server_properties():
     response_body_path = resources_utils.get_test_resource_path(
         __file__,
         "test-get-server-properties.json",
     )
-    builder = MLResponseBuilder()
-    builder.with_base_url(
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(
         "http://localhost:8002/manage/v2/servers/App-Services/properties",
     )
-    builder.with_request_param("group-id", "Default")
-    builder.with_request_param("format", "json")
-    builder.with_response_content_type("application/json; charset=UTF-8")
-    builder.with_response_status(200)
-    builder.with_response_body(Path(response_body_path).read_bytes())
-    builder.build_get()
+    ml_mocker.with_request_param("group-id", "Default")
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body(Path(response_body_path).read_bytes())
+    ml_mocker.mock_get()
 
     with MLResourcesClient() as client:
         resp = client.get_server_properties(
@@ -362,23 +361,23 @@ def test_get_server_properties():
     assert resp.json()["server-name"] == "App-Services"
 
 
-@responses.activate()
+@respx.mock
 def test_put_server_properties():
     response_body_path = resources_utils.get_test_resource_path(
         __file__,
         "test-put-server-properties.json",
     )
-    builder = MLResponseBuilder()
-    builder.with_base_url(
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(
         "http://localhost:8002/manage/v2/servers/non-existing-server/properties",
     )
-    builder.with_request_content_type("application/json")
-    builder.with_request_param("group-id", "non-existing-group")
-    builder.with_request_body({"server-name": "non-existing-server"})
-    builder.with_response_content_type("application/json; charset=UTF-8")
-    builder.with_response_status(404)
-    builder.with_response_body(Path(response_body_path).read_bytes())
-    builder.build_put()
+    ml_mocker.with_request_content_type("application/json")
+    ml_mocker.with_request_param("group-id", "non-existing-group")
+    ml_mocker.with_request_body({"server-name": "non-existing-server"})
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_response_code(404)
+    ml_mocker.with_response_body(Path(response_body_path).read_bytes())
+    ml_mocker.mock_put()
 
     with MLResourcesClient() as client:
         resp = client.put_server_properties(
@@ -391,21 +390,21 @@ def test_put_server_properties():
     assert resp.json()["errorResponse"]["messageCode"] == "XDMP-NOSUCHGROUP"
 
 
-@responses.activate()
+@respx.mock
 def test_get_forests():
     response_body_path = resources_utils.get_test_resource_path(
         __file__,
         "test-get-forests.json",
     )
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/manage/v2/forests")
-    builder.with_request_param("format", "json")
-    builder.with_request_param("view", "default")
-    builder.with_request_param("database-id", "Documents")
-    builder.with_response_content_type("application/json; charset=UTF-8")
-    builder.with_response_status(200)
-    builder.with_response_body(Path(response_body_path).read_bytes())
-    builder.build_get()
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/manage/v2/forests")
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_param("view", "default")
+    ml_mocker.with_request_param("database-id", "Documents")
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body(Path(response_body_path).read_bytes())
+    ml_mocker.mock_get()
 
     with MLResourcesClient() as client:
         resp = client.get_forests(data_format="json", database="Documents")
@@ -415,7 +414,7 @@ def test_get_forests():
     assert resp.json()["forest-default-list"]["meta"]["uri"] == expected_uri
 
 
-@responses.activate()
+@respx.mock
 def test_post_forests():
     body = '<forest-create xmlns="http://marklogic.com/manage" />'
 
@@ -423,12 +422,12 @@ def test_post_forests():
         __file__,
         "test-post-forests.xml",
     )
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/manage/v2/forests")
-    builder.with_response_content_type("application/xml; charset=UTF-8")
-    builder.with_response_status(500)
-    builder.with_response_body(Path(response_body_path).read_bytes())
-    builder.build_post()
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/manage/v2/forests")
+    ml_mocker.with_response_content_type("application/xml; charset=UTF-8")
+    ml_mocker.with_response_code(500)
+    ml_mocker.with_response_body(Path(response_body_path).read_bytes())
+    ml_mocker.mock_post()
 
     with MLResourcesClient() as client:
         resp = client.post_forests(body=body)
@@ -436,7 +435,7 @@ def test_post_forests():
     assert resp.status_code == 500
 
 
-@responses.activate()
+@respx.mock
 def test_put_forests():
     body = '<forest-migrate xmlns="http://marklogic.com/manage" />'
 
@@ -444,12 +443,12 @@ def test_put_forests():
         __file__,
         "test-put-forests.xml",
     )
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/manage/v2/forests")
-    builder.with_response_content_type("application/xml; charset=UTF-8")
-    builder.with_response_status(400)
-    builder.with_response_body(Path(response_body_path).read_bytes())
-    builder.build_put()
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/manage/v2/forests")
+    ml_mocker.with_response_content_type("application/xml; charset=UTF-8")
+    ml_mocker.with_response_code(400)
+    ml_mocker.with_response_body(Path(response_body_path).read_bytes())
+    ml_mocker.mock_put()
 
     with MLResourcesClient() as client:
         resp = client.put_forests(body=body)
@@ -461,21 +460,21 @@ def test_put_forests():
     ) in resp.text
 
 
-@responses.activate()
+@respx.mock
 def test_get_forest():
     response_body_path = resources_utils.get_test_resource_path(
         __file__,
         "test-get-forest.json",
     )
 
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/manage/v2/forests/Documents")
-    builder.with_request_param("format", "json")
-    builder.with_request_param("view", "default")
-    builder.with_response_content_type("application/json; charset=UTF-8")
-    builder.with_response_status(200)
-    builder.with_response_body(Path(response_body_path).read_bytes())
-    builder.build_get()
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/manage/v2/forests/Documents")
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_param("view", "default")
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body(Path(response_body_path).read_bytes())
+    ml_mocker.mock_get()
 
     with MLResourcesClient() as client:
         resp = client.get_forest(forest="Documents", data_format="json")
@@ -485,39 +484,37 @@ def test_get_forest():
     assert resp.json()["forest-default"]["meta"]["uri"] == expected_uri
 
 
-@responses.activate()
+@respx.mock
 def test_post_forest():
     response_body_path = resources_utils.get_test_resource_path(
         __file__,
         "test-post-forest.xml",
     )
 
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/manage/v2/forests/aaa")
-    builder.with_request_content_type("application/x-www-form-urlencoded")
-    builder.with_request_body({"state": "clear"})
-    builder.with_response_content_type("application/xml; charset=UTF-8")
-    builder.with_response_status(404)
-    builder.with_response_body(Path(response_body_path).read_bytes())
-    builder.build_post()
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/manage/v2/forests/aaa")
+    ml_mocker.with_request_content_type("application/x-www-form-urlencoded")
+    ml_mocker.with_request_body({"state": "clear"})
+    ml_mocker.with_response_content_type("application/xml; charset=UTF-8")
+    ml_mocker.with_response_code(404)
+    ml_mocker.with_response_body(Path(response_body_path).read_bytes())
+    ml_mocker.mock_post()
 
     with MLResourcesClient() as client:
         resp = client.post_forest(forest="aaa", body={"state": "clear"})
-        MLResponseBuilder.generate_builder_code(resp, True, __file__)
 
     assert resp.status_code == 404
     assert "XDMP-NOSUCHFOREST" in resp.text
 
 
-@responses.activate()
+@respx.mock
 def test_delete_forest():
-    builder = MLResponseBuilder()
-    builder.with_method("DELETE")
-    builder.with_base_url("http://localhost:8002/manage/v2/forests/aaa")
-    builder.with_request_param("level", "full")
-    builder.with_response_status(204)
-    builder.with_empty_response_body()
-    builder.build()
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/manage/v2/forests/aaa")
+    ml_mocker.with_request_param("level", "full")
+    ml_mocker.with_response_code(204)
+    ml_mocker.with_empty_response_body()
+    ml_mocker.mock_delete()
 
     with MLResourcesClient() as client:
         resp = client.delete_forest(forest="aaa", level="full")
@@ -526,21 +523,21 @@ def test_delete_forest():
     assert not resp.text
 
 
-@responses.activate()
+@respx.mock
 def test_get_forest_properties():
     response_body_path = resources_utils.get_test_resource_path(
         __file__,
         "test-get-forest-properties.json",
     )
-    builder = MLResponseBuilder()
-    builder.with_base_url(
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(
         "http://localhost:8002/manage/v2/forests/Documents/properties",
     )
-    builder.with_request_param("format", "json")
-    builder.with_response_content_type("application/json; charset=UTF-8")
-    builder.with_response_status(200)
-    builder.with_response_body(Path(response_body_path).read_bytes())
-    builder.build_get()
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body(Path(response_body_path).read_bytes())
+    ml_mocker.mock_get()
 
     with MLResourcesClient() as client:
         resp = client.get_forest_properties(forest="Documents", data_format="json")
@@ -549,22 +546,22 @@ def test_get_forest_properties():
     assert resp.json()["forest-name"] == "Documents"
 
 
-@responses.activate()
+@respx.mock
 def test_put_forest_properties():
     response_body_path = resources_utils.get_test_resource_path(
         __file__,
         "test-put-forest-properties.json",
     )
-    builder = MLResponseBuilder()
-    builder.with_base_url(
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(
         "http://localhost:8002/manage/v2/forests/non-existing-forest/properties",
     )
-    builder.with_request_content_type("application/json")
-    builder.with_request_body({"forest-name": "custom-forest"})
-    builder.with_response_content_type("application/json; charset=UTF-8")
-    builder.with_response_status(404)
-    builder.with_response_body(Path(response_body_path).read_bytes())
-    builder.build_put()
+    ml_mocker.with_request_content_type("application/json")
+    ml_mocker.with_request_body({"forest-name": "custom-forest"})
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_response_code(404)
+    ml_mocker.with_response_body(Path(response_body_path).read_bytes())
+    ml_mocker.mock_put()
 
     with MLResourcesClient() as client:
         resp = client.put_forest_properties(
@@ -576,20 +573,20 @@ def test_put_forest_properties():
     assert resp.json()["errorResponse"]["messageCode"] == "XDMP-NOSUCHFOREST"
 
 
-@responses.activate()
+@respx.mock
 def test_get_roles():
     response_body_path = resources_utils.get_test_resource_path(
         __file__,
         "test-get-roles.json",
     )
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/manage/v2/roles")
-    builder.with_request_param("format", "json")
-    builder.with_request_param("view", "default")
-    builder.with_response_content_type("application/json; charset=UTF-8")
-    builder.with_response_status(200)
-    builder.with_response_body(Path(response_body_path).read_bytes())
-    builder.build_get()
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/manage/v2/roles")
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_param("view", "default")
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body(Path(response_body_path).read_bytes())
+    ml_mocker.mock_get()
 
     with MLResourcesClient() as client:
         resp = client.get_roles(data_format="json")
@@ -599,7 +596,7 @@ def test_get_roles():
     assert resp.json()["role-default-list"]["meta"]["uri"] == expected_uri
 
 
-@responses.activate()
+@respx.mock
 def test_post_roles():
     body = '<role-properties xmlns="http://marklogic.com/manage/role/properties" />'
 
@@ -607,12 +604,12 @@ def test_post_roles():
         __file__,
         "test-post-roles.xml",
     )
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/manage/v2/roles")
-    builder.with_response_content_type("application/xml; charset=UTF-8")
-    builder.with_response_status(400)
-    builder.with_response_body(Path(response_body_path).read_bytes())
-    builder.build_post()
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/manage/v2/roles")
+    ml_mocker.with_response_content_type("application/xml; charset=UTF-8")
+    ml_mocker.with_response_code(400)
+    ml_mocker.with_response_body(Path(response_body_path).read_bytes())
+    ml_mocker.mock_post()
 
     with MLResourcesClient() as client:
         resp = client.post_roles(body=body)
@@ -621,20 +618,20 @@ def test_post_roles():
     assert "Payload has errors in structure, content-type or values." in resp.text
 
 
-@responses.activate()
+@respx.mock
 def test_get_role():
     response_body_path = resources_utils.get_test_resource_path(
         __file__,
         "test-get-role.json",
     )
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/manage/v2/roles/admin")
-    builder.with_request_param("format", "json")
-    builder.with_request_param("view", "default")
-    builder.with_response_content_type("application/json; charset=UTF-8")
-    builder.with_response_status(200)
-    builder.with_response_body(Path(response_body_path).read_bytes())
-    builder.build_get()
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/manage/v2/roles/admin")
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_param("view", "default")
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body(Path(response_body_path).read_bytes())
+    ml_mocker.mock_get()
 
     with MLResourcesClient() as client:
         resp = client.get_role(role="admin", data_format="json")
@@ -644,13 +641,13 @@ def test_get_role():
     assert resp.json()["role-default"]["meta"]["uri"] == expected_uri
 
 
-@responses.activate()
+@respx.mock
 def test_delete_role():
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/manage/v2/roles/custom-role")
-    builder.with_response_status(204)
-    builder.with_empty_response_body()
-    builder.build_delete()
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/manage/v2/roles/custom-role")
+    ml_mocker.with_response_code(204)
+    ml_mocker.with_empty_response_body()
+    ml_mocker.mock_delete()
 
     with MLResourcesClient() as client:
         resp = client.delete_role(role="custom-role")
@@ -659,19 +656,19 @@ def test_delete_role():
     assert not resp.text
 
 
-@responses.activate()
+@respx.mock
 def test_get_role_properties():
     response_body_path = resources_utils.get_test_resource_path(
         __file__,
         "test-get-role-properties.json",
     )
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/manage/v2/roles/admin/properties")
-    builder.with_request_param("format", "json")
-    builder.with_response_content_type("application/json; charset=UTF-8")
-    builder.with_response_status(200)
-    builder.with_response_body(Path(response_body_path).read_bytes())
-    builder.build_get()
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/manage/v2/roles/admin/properties")
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body(Path(response_body_path).read_bytes())
+    ml_mocker.mock_get()
 
     with MLResourcesClient() as client:
         resp = client.get_role_properties(role="admin", data_format="json")
@@ -680,22 +677,22 @@ def test_get_role_properties():
     assert resp.json()["role-name"] == "admin"
 
 
-@responses.activate()
+@respx.mock
 def test_put_role_properties():
     response_body_path = resources_utils.get_test_resource_path(
         __file__,
         "test-put-role-properties.json",
     )
-    builder = MLResponseBuilder()
-    builder.with_base_url(
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(
         "http://localhost:8002/manage/v2/roles/non-existing-role/properties",
     )
-    builder.with_request_content_type("application/json")
-    builder.with_request_body({"role-name": "custom-db"})
-    builder.with_response_content_type("application/json; charset=UTF-8")
-    builder.with_response_status(400)
-    builder.with_response_body(Path(response_body_path).read_bytes())
-    builder.build_put()
+    ml_mocker.with_request_content_type("application/json")
+    ml_mocker.with_request_body({"role-name": "custom-db"})
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_response_code(400)
+    ml_mocker.with_response_body(Path(response_body_path).read_bytes())
+    ml_mocker.mock_put()
 
     with MLResourcesClient() as client:
         resp = client.put_role_properties(
@@ -710,20 +707,20 @@ def test_put_role_properties():
     ) in resp.text
 
 
-@responses.activate()
+@respx.mock
 def test_get_users():
     response_body_path = resources_utils.get_test_resource_path(
         __file__,
         "test-get-users.json",
     )
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/manage/v2/users")
-    builder.with_request_param("format", "json")
-    builder.with_request_param("view", "default")
-    builder.with_response_content_type("application/json; charset=UTF-8")
-    builder.with_response_status(200)
-    builder.with_response_body(Path(response_body_path).read_bytes())
-    builder.build_get()
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/manage/v2/users")
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_param("view", "default")
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body(Path(response_body_path).read_bytes())
+    ml_mocker.mock_get()
 
     with MLResourcesClient() as client:
         resp = client.get_users(data_format="json")
@@ -733,7 +730,7 @@ def test_get_users():
     assert resp.json()["user-default-list"]["meta"]["uri"] == expected_uri
 
 
-@responses.activate()
+@respx.mock
 def test_post_users():
     body = '<user-properties xmlns="http://marklogic.com/manage/user/properties" />'
 
@@ -741,12 +738,12 @@ def test_post_users():
         __file__,
         "test-post-users.xml",
     )
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/manage/v2/users")
-    builder.with_response_content_type("application/xml; charset=UTF-8")
-    builder.with_response_status(400)
-    builder.with_response_body(Path(response_body_path).read_bytes())
-    builder.build_post()
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/manage/v2/users")
+    ml_mocker.with_response_content_type("application/xml; charset=UTF-8")
+    ml_mocker.with_response_code(400)
+    ml_mocker.with_response_body(Path(response_body_path).read_bytes())
+    ml_mocker.mock_post()
 
     with MLResourcesClient() as client:
         resp = client.post_users(body=body)
@@ -755,20 +752,20 @@ def test_post_users():
     assert "Payload has errors in structure, content-type or values." in resp.text
 
 
-@responses.activate()
+@respx.mock
 def test_get_user():
     response_body_path = resources_utils.get_test_resource_path(
         __file__,
         "test-get-user.json",
     )
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/manage/v2/users/admin")
-    builder.with_request_param("format", "json")
-    builder.with_request_param("view", "default")
-    builder.with_response_content_type("application/json; charset=UTF-8")
-    builder.with_response_status(200)
-    builder.with_response_body(Path(response_body_path).read_bytes())
-    builder.build_get()
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/manage/v2/users/admin")
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_param("view", "default")
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body(Path(response_body_path).read_bytes())
+    ml_mocker.mock_get()
 
     with MLResourcesClient() as client:
         resp = client.get_user(user="admin", data_format="json")
@@ -778,18 +775,18 @@ def test_get_user():
     assert resp.json()["user-default"]["meta"]["uri"] == expected_uri
 
 
-@responses.activate()
+@respx.mock
 def test_delete_user():
     response_body_path = resources_utils.get_test_resource_path(
         __file__,
         "test-delete-user.xml",
     )
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/manage/v2/users/custom-user")
-    builder.with_response_content_type("application/xml; charset=UTF-8")
-    builder.with_response_status(404)
-    builder.with_response_body(Path(response_body_path).read_bytes())
-    builder.build_delete()
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/manage/v2/users/custom-user")
+    ml_mocker.with_response_content_type("application/xml; charset=UTF-8")
+    ml_mocker.with_response_code(404)
+    ml_mocker.with_response_body(Path(response_body_path).read_bytes())
+    ml_mocker.mock_delete()
 
     with MLResourcesClient() as client:
         resp = client.delete_user(user="custom-user")
@@ -798,19 +795,19 @@ def test_delete_user():
     assert "User does not exist: custom-user" in resp.text
 
 
-@responses.activate()
+@respx.mock
 def test_get_user_properties():
     response_body_path = resources_utils.get_test_resource_path(
         __file__,
         "test-get-user-properties.json",
     )
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/manage/v2/users/admin/properties")
-    builder.with_request_param("format", "json")
-    builder.with_response_content_type("application/json; charset=UTF-8")
-    builder.with_response_status(200)
-    builder.with_response_body(Path(response_body_path).read_bytes())
-    builder.build_get()
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/manage/v2/users/admin/properties")
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body(Path(response_body_path).read_bytes())
+    ml_mocker.mock_get()
 
     with MLResourcesClient() as client:
         resp = client.get_user_properties(user="admin", data_format="json")
@@ -819,22 +816,22 @@ def test_get_user_properties():
     assert resp.json()["user-name"] == "admin"
 
 
-@responses.activate()
+@respx.mock
 def test_put_user_properties():
     response_body_path = resources_utils.get_test_resource_path(
         __file__,
         "test-put-user-properties.json",
     )
-    builder = MLResponseBuilder()
-    builder.with_base_url(
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(
         "http://localhost:8002/manage/v2/users/non-existing-user/properties",
     )
-    builder.with_request_content_type("application/json")
-    builder.with_request_body({"user-name": "custom-db"})
-    builder.with_response_content_type("application/json; charset=UTF-8")
-    builder.with_response_status(404)
-    builder.with_response_body(Path(response_body_path).read_bytes())
-    builder.build_put()
+    ml_mocker.with_request_content_type("application/json")
+    ml_mocker.with_request_body({"user-name": "custom-db"})
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_response_code(404)
+    ml_mocker.with_response_body(Path(response_body_path).read_bytes())
+    ml_mocker.mock_put()
 
     with MLResourcesClient() as client:
         resp = client.put_user_properties(
@@ -846,20 +843,20 @@ def test_put_user_properties():
     assert resp.json()["errorResponse"]["messageCode"] == "SEC-USERDNE"
 
 
-@responses.activate()
+@respx.mock
 def test_get_documents():
     response_body_path = resources_utils.get_test_resource_path(
         __file__,
         "test-get-documents.json",
     )
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/documents")
-    builder.with_request_param("uri", "/path/to/non-existing/document.xml")
-    builder.with_request_param("format", "json")
-    builder.with_response_content_type("application/json; charset=UTF-8")
-    builder.with_response_status(500)
-    builder.with_response_body(Path(response_body_path).read_bytes())
-    builder.build_get()
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/v1/documents")
+    ml_mocker.with_request_param("uri", "/path/to/non-existing/document.xml")
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_response_code(500)
+    ml_mocker.with_response_body(Path(response_body_path).read_bytes())
+    ml_mocker.mock_get()
 
     with MLResourcesClient() as client:
         resp = client.get_documents(
@@ -871,7 +868,7 @@ def test_get_documents():
     assert resp.json()["errorResponse"]["messageCode"] == "RESTAPI-NODOCUMENT"
 
 
-@responses.activate()
+@respx.mock
 def test_post_documents():
     body_part = {
         "content-type": "application/json",
@@ -883,12 +880,12 @@ def test_post_documents():
         __file__,
         "test-post-documents.json",
     )
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/documents")
-    builder.with_response_content_type("application/json; charset=UTF-8")
-    builder.with_response_status(500)
-    builder.with_response_body(Path(response_body_path).read_bytes())
-    builder.build_post()
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/v1/documents")
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_response_code(500)
+    ml_mocker.with_response_body(Path(response_body_path).read_bytes())
+    ml_mocker.mock_post()
 
     with MLResourcesClient() as client:
         resp = client.post_documents(body_parts=[DocumentsBodyPart(**body_part)])
@@ -905,20 +902,20 @@ def test_post_documents():
     }
 
 
-@responses.activate()
+@respx.mock
 def test_delete_documents():
     response_body_path = resources_utils.get_test_resource_path(
         __file__,
         "test-delete-documents.xml",
     )
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/documents")
-    builder.with_request_param("uri", "/path/to/non-existing/document.xml")
-    builder.with_request_param("result", "wiped")
-    builder.with_response_content_type("application/xml; charset=UTF-8")
-    builder.with_response_status(400)
-    builder.with_response_body(Path(response_body_path).read_bytes())
-    builder.build_delete()
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/v1/documents")
+    ml_mocker.with_request_param("uri", "/path/to/non-existing/document.xml")
+    ml_mocker.with_request_param("result", "wiped")
+    ml_mocker.with_response_content_type("application/xml; charset=UTF-8")
+    ml_mocker.with_response_code(400)
+    ml_mocker.with_response_body(Path(response_body_path).read_bytes())
+    ml_mocker.mock_delete()
 
     with MLResourcesClient() as client:
         resp = client.delete_documents(

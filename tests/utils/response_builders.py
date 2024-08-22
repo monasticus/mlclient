@@ -7,6 +7,7 @@ import respx
 import urllib3
 from httpx import Headers
 from pydantic import BaseModel, ConfigDict
+from respx import MockRouter
 from urllib3.fields import RequestField
 
 from mlclient.constants import HEADER_X_WWW_FORM_URLENCODED
@@ -42,13 +43,18 @@ class RespXMock(BaseModel):
 
 
 class MLRespXMocker:
-    def __init__(self, base_url: str | None = None):
-        self._mock = respx.mock(base_url=base_url, assert_all_called=False)
+    def __init__(self, use_router: bool = True, router_base_url: str | None = None):
+        if use_router:
+            self._mock = respx.mock(base_url=router_base_url, assert_all_called=False)
+        else:
+            self._mock = respx
         self._resp_mock = RespXMock()
 
     @property
-    def mock(self):
-        return self._mock
+    def router(self) -> MockRouter | None:
+        if isinstance(self._mock, MockRouter):
+            return self._mock
+        return None
 
     def with_name(self, name: str):
         self._resp_mock.request.name = name

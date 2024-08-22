@@ -2,10 +2,10 @@ from pathlib import Path
 
 import httpx
 import respx
-from httpx import Response
 
 from mlclient import MLClient
 from tests.utils import resources as resources_utils
+from tests.utils.response_builders import MLRespXMocker
 
 
 def test_connection():
@@ -32,16 +32,12 @@ def test_request_when_disconnected():
         __file__,
         "test-get-response.xml",
     )
-    respx.request(
-        method="GET",
-        url="http://localhost:8002/manage/v2/servers",
-    ).mock(
-        return_value=Response(
-            status_code=200,
-            content=Path(response_body_path).read_bytes(),
-            headers={"Content-Type": "application/xml; charset=UTF-8"},
-        ),
-    )
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/manage/v2/servers")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body(Path(response_body_path).read_bytes())
+    ml_mocker.with_response_content_type("application/xml; charset=UTF-8")
+    ml_mocker.mock_get()
 
     client = MLClient()
 
@@ -69,16 +65,12 @@ def test_get():
         __file__,
         "test-get-response.xml",
     )
-    respx.request(
-        method="GET",
-        url="http://localhost:8002/manage/v2/servers",
-    ).mock(
-        return_value=Response(
-            status_code=200,
-            content=Path(response_body_path).read_bytes(),
-            headers={"Content-Type": "application/xml; charset=UTF-8"},
-        ),
-    )
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/manage/v2/servers")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body(Path(response_body_path).read_bytes())
+    ml_mocker.with_response_content_type("application/xml; charset=UTF-8")
+    ml_mocker.mock_get()
 
     with MLClient() as client:
         resp = client.get("/manage/v2/servers")
@@ -93,18 +85,14 @@ def test_get_with_customized_params_and_headers():
         __file__,
         "test-get-with-customized-params-response.json",
     )
-    respx.request(
-        method="GET",
-        url="http://localhost:8002/manage/v2/servers",
-        params={"format": "json"},
-        headers={"custom-header": "custom-value"},
-    ).mock(
-        return_value=Response(
-            status_code=200,
-            content=Path(response_body_path).read_bytes(),
-            headers={"Content-Type": "application/xml; charset=UTF-8"},
-        ),
-    )
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/manage/v2/servers")
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_header("custom-header", "custom-value")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body(Path(response_body_path).read_bytes())
+    ml_mocker.with_response_content_type("application/xml; charset=UTF-8")
+    ml_mocker.mock_get()
 
     with MLClient() as client:
         resp = client.get(
@@ -123,16 +111,12 @@ def test_post():
         __file__,
         "test-post-response.xml",
     )
-    respx.request(
-        method="POST",
-        url="http://localhost:8002/manage/v2/databases/Documents",
-    ).mock(
-        return_value=Response(
-            status_code=400,
-            content=Path(response_body_path).read_bytes(),
-            headers={"Content-Type": "application/xml; charset=UTF-8"},
-        ),
-    )
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/manage/v2/databases/Documents")
+    ml_mocker.with_response_code(400)
+    ml_mocker.with_response_body(Path(response_body_path).read_bytes())
+    ml_mocker.with_response_content_type("application/xml; charset=UTF-8")
+    ml_mocker.mock_post()
 
     with MLClient() as client:
         resp = client.post("/manage/v2/databases/Documents")
@@ -143,18 +127,14 @@ def test_post():
 
 @respx.mock
 def test_post_with_customized_params_and_headers_and_body_different_than_json():
-    respx.request(
-        method="POST",
-        url="http://localhost:8002/v1/eval",
-        params={"database": "Documents"},
-        headers={"Content-Type": "application/x-www-form-urlencoded"},
-        data={"xquery": "()"},
-    ).mock(
-        return_value=Response(
-            status_code=200,
-            content=b"",
-        ),
-    )
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/v1/eval")
+    ml_mocker.with_request_param("database", "Documents")
+    ml_mocker.with_request_content_type("application/x-www-form-urlencoded")
+    ml_mocker.with_request_body({"xquery": "()"})
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_empty_response_body()
+    ml_mocker.mock_post()
 
     with MLClient() as client:
         resp = client.post(
@@ -169,19 +149,15 @@ def test_post_with_customized_params_and_headers_and_body_different_than_json():
 
 @respx.mock
 def test_post_with_customized_params_and_headers_and_json_body():
-    respx.request(
-        method="POST",
-        url="http://localhost:8002/manage/v2/databases/Documents",
-        params={"format": "json"},
-        headers={"Content-Type": "application/json"},
-        json={"operation": "clear-database"},
-    ).mock(
-        return_value=Response(
-            status_code=200,
-            content=b"",
-            headers={"Content-Type": "application/json; charset=UTF-8"},
-        ),
-    )
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/manage/v2/databases/Documents")
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_content_type("application/json")
+    ml_mocker.with_request_body({"operation": "clear-database"})
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_empty_response_body()
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.mock_post()
 
     with MLClient() as client:
         resp = client.post(
@@ -201,16 +177,12 @@ def test_put():
         __file__,
         "test-put-response.xml",
     )
-    respx.request(
-        method="PUT",
-        url="http://localhost:8002/v1/documents",
-    ).mock(
-        return_value=Response(
-            status_code=400,
-            content=Path(response_body_path).read_bytes(),
-            headers={"Content-Type": "application/xml; charset=UTF-8"},
-        ),
-    )
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/v1/documents")
+    ml_mocker.with_response_code(400)
+    ml_mocker.with_response_body(Path(response_body_path).read_bytes())
+    ml_mocker.with_response_content_type("application/xml; charset=UTF-8")
+    ml_mocker.mock_put()
 
     with MLClient() as client:
         resp = client.put("/v1/documents")
@@ -221,20 +193,15 @@ def test_put():
 
 @respx.mock
 def test_put_with_customized_params_and_headers_and_body_different_than_json():
-    respx.request(
-        method="PUT",
-        url="http://localhost:8002/v1/documents",
-        headers={"Content-Type": "application/xml"},
-        params={
-            "database": "Documents",
-            "uri": "/doc.xml",
-        },
-    ).mock(
-        return_value=Response(
-            status_code=201,
-            content=b"",
-        ),
-    )
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/v1/documents")
+    ml_mocker.with_request_param("database", "Documents")
+    ml_mocker.with_request_param("uri", "/doc.xml")
+    ml_mocker.with_request_content_type("application/xml")
+    ml_mocker.with_request_body("<document/>")
+    ml_mocker.with_response_code(201)
+    ml_mocker.with_empty_response_body()
+    ml_mocker.mock_put()
 
     with MLClient() as client:
         resp = client.put(
@@ -249,21 +216,15 @@ def test_put_with_customized_params_and_headers_and_body_different_than_json():
 
 @respx.mock
 def test_put_with_customized_params_and_headers_and_json_body():
-    respx.request(
-        method="PUT",
-        url="http://localhost:8002/v1/documents",
-        headers={"Content-Type": "application/json"},
-        params={
-            "database": "Documents",
-            "uri": "/doc.json",
-        },
-        json={"document": {}},
-    ).mock(
-        return_value=Response(
-            status_code=201,
-            content=b"",
-        ),
-    )
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/v1/documents")
+    ml_mocker.with_request_param("database", "Documents")
+    ml_mocker.with_request_param("uri", "/doc.json")
+    ml_mocker.with_request_content_type("application/json")
+    ml_mocker.with_request_body({"document": {}})
+    ml_mocker.with_response_code(201)
+    ml_mocker.with_empty_response_body()
+    ml_mocker.mock_put()
 
     with MLClient() as client:
         resp = client.put(
@@ -278,15 +239,11 @@ def test_put_with_customized_params_and_headers_and_json_body():
 
 @respx.mock
 def test_delete():
-    respx.request(
-        method="DELETE",
-        url="http://localhost:8002/manage/v2/databases/custom-db",
-    ).mock(
-        return_value=Response(
-            status_code=204,
-            content=b"",
-        ),
-    )
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/manage/v2/databases/custom-db")
+    ml_mocker.with_response_code(204)
+    ml_mocker.with_empty_response_body()
+    ml_mocker.mock_delete()
 
     with MLClient() as client:
         resp = client.delete_("/manage/v2/databases/custom-db")
@@ -296,17 +253,13 @@ def test_delete():
 
 @respx.mock
 def test_delete_with_customized_params_and_headers():
-    respx.request(
-        method="DELETE",
-        url="http://localhost:8002/manage/v2/databases/custom-db",
-        params={"format": "json"},
-        headers={"custom-header": "custom-value"},
-    ).mock(
-        return_value=Response(
-            status_code=204,
-            content=b"",
-        ),
-    )
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/manage/v2/databases/custom-db")
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_header("custom-header", "custom-value")
+    ml_mocker.with_response_code(204)
+    ml_mocker.with_empty_response_body()
+    ml_mocker.mock_delete()
 
     with MLClient() as client:
         resp = client.delete_(

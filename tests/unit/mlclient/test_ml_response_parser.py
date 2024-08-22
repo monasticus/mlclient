@@ -10,8 +10,8 @@ from tests.utils import resources as resources_utils
 from tests.utils.response_builders import MLRespXMocker
 
 RESOURCES = resources_utils.get_test_resources(__file__)
-ml_mocker = MLRespXMocker(base_url="http://localhost:8002")
-ml_mock = ml_mocker.mock
+ml_mocker = MLRespXMocker(router_base_url="http://localhost:8002")
+ml_mock = ml_mocker.router
 
 
 @pytest.fixture(scope="module")
@@ -1785,7 +1785,8 @@ ml_mocker.with_request_body(
 )
 ml_mocker.with_response_code(200)
 ml_mocker.with_response_body_part(
-    "map", '{"float":1.1, "int":1, "bool":true, "str":"value", "int_str":"1"}',
+    "map",
+    '{"float":1.1, "int":1, "bool":true, "str":"value", "int_str":"1"}',
 )
 ml_mocker.mock_post()
 
@@ -2003,7 +2004,8 @@ ml_mocker.with_request_content_type("application/x-www-form-urlencoded")
 ml_mocker.with_request_body({"xquery": "document { element root {} }"})
 ml_mocker.with_response_code(200)
 ml_mocker.with_response_body_part(
-    "document-node()", '<?xml version="1.0" encoding="UTF-8"?>\n<root/>',
+    "document-node()",
+    '<?xml version="1.0" encoding="UTF-8"?>\n<root/>',
 )
 ml_mocker.mock_post()
 
@@ -2165,7 +2167,8 @@ ml_mocker.with_request_body(
 )
 ml_mocker.with_response_code(200)
 ml_mocker.with_response_body_part(
-    "directory-query", 'cts:directory-query("/root/", "infinity")',
+    "directory-query",
+    'cts:directory-query("/root/", "infinity")',
 )
 ml_mocker.with_response_body_part("string", "plain text")
 ml_mocker.mock_post()

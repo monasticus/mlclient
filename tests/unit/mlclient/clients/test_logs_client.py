@@ -3,19 +3,19 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-import responses
+import respx
 
 from mlclient.clients import LogsClient, LogType
 from mlclient.exceptions import MarkLogicError
-from tests.utils import MLResponseBuilder
 from tests.utils import resources as resources_utils
+from tests.utils.response_builders import MLRespXMocker
 
 ENDPOINT = "/manage/v2/logs"
 
 
 @pytest.fixture(autouse=True)
 def logs_client() -> LogsClient:
-    return LogsClient()
+    return LogsClient(auth_method="digest")
 
 
 @pytest.fixture(autouse=True)
@@ -27,15 +27,16 @@ def _setup_and_teardown(logs_client):
     logs_client.disconnect()
 
 
-@responses.activate
+@respx.mock
 def test_get_logs_no_such_host(logs_client):
-    builder = MLResponseBuilder()
-    builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
-    builder.with_request_param("format", "json")
-    builder.with_request_param("filename", "8002_ErrorLog.txt")
-    builder.with_request_param("host", "non-existing-host")
-    builder.with_response_status(404)
-    builder.with_response_body(
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(f"http://localhost:8002{ENDPOINT}")
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_param("filename", "8002_ErrorLog.txt")
+    ml_mocker.with_request_param("host", "non-existing-host")
+    ml_mocker.with_response_code(404)
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_response_body(
         {
             "errorResponse": {
                 "statusCode": "404",
@@ -46,7 +47,7 @@ def test_get_logs_no_such_host(logs_client):
             },
         },
     )
-    builder.build_get()
+    ml_mocker.mock_get()
 
     with pytest.raises(MarkLogicError) as err:
         logs_client.get_logs(8002, host="non-existing-host")
@@ -59,15 +60,15 @@ def test_get_logs_no_such_host(logs_client):
     assert err.value.args[0] == expected_error
 
 
-@responses.activate
+@respx.mock
 def test_get_logs_unauthorized(logs_client):
-    builder = MLResponseBuilder()
-    builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
-    builder.with_request_param("format", "json")
-    builder.with_request_param("filename", "ErrorLog.txt")
-    builder.with_response_content_type("application/json; charset=utf-8")
-    builder.with_response_status(401)
-    builder.with_response_body(
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(f"http://localhost:8002{ENDPOINT}")
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_param("filename", "ErrorLog.txt")
+    ml_mocker.with_response_code(401)
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_response_body(
         {
             "errorResponse": {
                 "statusCode": 401,
@@ -76,7 +77,7 @@ def test_get_logs_unauthorized(logs_client):
             },
         },
     )
-    builder.build_get()
+    ml_mocker.mock_get()
 
     with pytest.raises(MarkLogicError) as err:
         logs_client.get_logs()
@@ -85,30 +86,32 @@ def test_get_logs_unauthorized(logs_client):
     assert err.value.args[0] == expected_error
 
 
-@responses.activate
+@respx.mock
 def test_get_logs_empty(logs_client):
-    builder = MLResponseBuilder()
-    builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
-    builder.with_request_param("format", "json")
-    builder.with_request_param("filename", "8002_ErrorLog.txt")
-    builder.with_response_body(builder.error_logs_body([]))
-    builder.build_get()
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(f"http://localhost:8002{ENDPOINT}")
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_param("filename", "8002_ErrorLog.txt")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_response_body(ml_mocker.error_logs_body([]))
+    ml_mocker.mock_get()
 
     logs = logs_client.get_logs(8002)
 
     assert next(logs, None) is None
 
 
-@responses.activate
+@respx.mock
 def test_get_logs_without_port(logs_client):
-    builder = MLResponseBuilder()
-    builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
-    builder.with_request_param("format", "json")
-    builder.with_request_param("filename", "ErrorLog.txt")
-    builder.with_response_content_type("application/json; charset=UTF-8")
-    builder.with_response_status(200)
-    builder.with_response_body(
-        builder.error_logs_body(
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(f"http://localhost:8002{ENDPOINT}")
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_param("filename", "ErrorLog.txt")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_response_body(
+        ml_mocker.error_logs_body(
             [
                 ("2023-09-01T00:00:00Z", "info", "Log message 1"),
                 ("2023-09-01T00:00:01Z", "warning", "Log message 2"),
@@ -116,7 +119,7 @@ def test_get_logs_without_port(logs_client):
             ],
         ),
     )
-    builder.build_get()
+    ml_mocker.mock_get()
 
     logs = logs_client.get_logs()
     logs = list(logs)
@@ -139,14 +142,16 @@ def test_get_logs_without_port(logs_client):
     }
 
 
-@responses.activate
+@respx.mock
 def test_get_logs_using_string_port(logs_client):
-    builder = MLResponseBuilder()
-    builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
-    builder.with_request_param("format", "json")
-    builder.with_request_param("filename", "8002_ErrorLog.txt")
-    builder.with_response_body(
-        builder.error_logs_body(
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(f"http://localhost:8002{ENDPOINT}")
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_param("filename", "8002_ErrorLog.txt")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_response_body(
+        ml_mocker.error_logs_body(
             [
                 ("2023-09-01T00:00:00Z", "info", "Log message 1"),
                 ("2023-09-01T00:00:01Z", "warning", "Log message 2"),
@@ -154,7 +159,7 @@ def test_get_logs_using_string_port(logs_client):
             ],
         ),
     )
-    builder.build_get()
+    ml_mocker.mock_get()
 
     logs = logs_client.get_logs("8002")
     logs = list(logs)
@@ -177,14 +182,16 @@ def test_get_logs_using_string_port(logs_client):
     }
 
 
-@responses.activate
+@respx.mock
 def test_get_task_server_logs(logs_client):
-    builder = MLResponseBuilder()
-    builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
-    builder.with_request_param("format", "json")
-    builder.with_request_param("filename", "TaskServer_ErrorLog.txt")
-    builder.with_response_body(
-        builder.error_logs_body(
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(f"http://localhost:8002{ENDPOINT}")
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_param("filename", "TaskServer_ErrorLog.txt")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_response_body(
+        ml_mocker.error_logs_body(
             [
                 ("2023-09-01T00:00:00Z", "info", "Log message 1"),
                 ("2023-09-01T00:00:01Z", "warning", "Log message 2"),
@@ -192,7 +199,7 @@ def test_get_task_server_logs(logs_client):
             ],
         ),
     )
-    builder.build_get()
+    ml_mocker.mock_get()
 
     logs = logs_client.get_logs("TaskServer")
     logs = list(logs)
@@ -215,14 +222,16 @@ def test_get_task_server_logs(logs_client):
     }
 
 
-@responses.activate
+@respx.mock
 def test_get_task_server_logs_using_int_port(logs_client):
-    builder = MLResponseBuilder()
-    builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
-    builder.with_request_param("format", "json")
-    builder.with_request_param("filename", "TaskServer_ErrorLog.txt")
-    builder.with_response_body(
-        builder.error_logs_body(
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(f"http://localhost:8002{ENDPOINT}")
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_param("filename", "TaskServer_ErrorLog.txt")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_response_body(
+        ml_mocker.error_logs_body(
             [
                 ("2023-09-01T00:00:00Z", "info", "Log message 1"),
                 ("2023-09-01T00:00:01Z", "warning", "Log message 2"),
@@ -230,7 +239,7 @@ def test_get_task_server_logs_using_int_port(logs_client):
             ],
         ),
     )
-    builder.build_get()
+    ml_mocker.mock_get()
 
     logs = logs_client.get_logs(0)
     logs = list(logs)
@@ -253,14 +262,16 @@ def test_get_task_server_logs_using_int_port(logs_client):
     }
 
 
-@responses.activate
+@respx.mock
 def test_get_error_logs(logs_client):
-    builder = MLResponseBuilder()
-    builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
-    builder.with_request_param("format", "json")
-    builder.with_request_param("filename", "8002_ErrorLog.txt")
-    builder.with_response_body(
-        builder.error_logs_body(
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(f"http://localhost:8002{ENDPOINT}")
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_param("filename", "8002_ErrorLog.txt")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_response_body(
+        ml_mocker.error_logs_body(
             [
                 ("2023-09-01T00:00:00Z", "info", "Log message 1"),
                 ("2023-09-01T00:00:01Z", "warning", "Log message 2"),
@@ -268,7 +279,7 @@ def test_get_error_logs(logs_client):
             ],
         ),
     )
-    builder.build_get()
+    ml_mocker.mock_get()
 
     logs = logs_client.get_logs(8002)
     logs = list(logs)
@@ -291,17 +302,19 @@ def test_get_error_logs(logs_client):
     }
 
 
-@responses.activate
+@respx.mock
 def test_get_error_logs_with_search_params(logs_client):
-    builder = MLResponseBuilder()
-    builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
-    builder.with_request_param("format", "json")
-    builder.with_request_param("filename", "8002_ErrorLog.txt")
-    builder.with_request_param("start", "2023-09-01T00:00:00")
-    builder.with_request_param("end", "2023-09-01T23:59:00")
-    builder.with_request_param("regex", "Log message")
-    builder.with_response_body(
-        builder.error_logs_body(
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(f"http://localhost:8002{ENDPOINT}")
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_param("filename", "8002_ErrorLog.txt")
+    ml_mocker.with_request_param("start", "2023-09-01T00:00:00")
+    ml_mocker.with_request_param("end", "2023-09-01T23:59:00")
+    ml_mocker.with_request_param("regex", "Log message")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_response_body(
+        ml_mocker.error_logs_body(
             [
                 ("2023-09-01T00:00:00Z", "info", "Log message 1"),
                 ("2023-09-01T00:00:01Z", "warning", "Log message 2"),
@@ -309,7 +322,7 @@ def test_get_error_logs_with_search_params(logs_client):
             ],
         ),
     )
-    builder.build_get()
+    ml_mocker.mock_get()
 
     logs = logs_client.get_logs(
         8002,
@@ -337,18 +350,20 @@ def test_get_error_logs_with_search_params(logs_client):
     }
 
 
-@responses.activate
+@respx.mock
 def test_get_error_logs_fully_customized(logs_client):
-    builder = MLResponseBuilder()
-    builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
-    builder.with_request_param("format", "json")
-    builder.with_request_param("filename", "8002_ErrorLog.txt")
-    builder.with_request_param("host", "some-host")
-    builder.with_request_param("start", "2023-09-01T00:00:00")
-    builder.with_request_param("end", "2023-09-01T23:59:00")
-    builder.with_request_param("regex", "Log message")
-    builder.with_response_body(
-        builder.error_logs_body(
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(f"http://localhost:8002{ENDPOINT}")
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_param("filename", "8002_ErrorLog.txt")
+    ml_mocker.with_request_param("host", "some-host")
+    ml_mocker.with_request_param("start", "2023-09-01T00:00:00")
+    ml_mocker.with_request_param("end", "2023-09-01T23:59:00")
+    ml_mocker.with_request_param("regex", "Log message")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_response_body(
+        ml_mocker.error_logs_body(
             [
                 ("2023-09-01T00:00:00Z", "info", "Log message 1"),
                 ("2023-09-01T00:00:01Z", "warning", "Log message 2"),
@@ -356,7 +371,7 @@ def test_get_error_logs_fully_customized(logs_client):
             ],
         ),
     )
-    builder.build_get()
+    ml_mocker.mock_get()
 
     logs = logs_client.get_logs(
         8002,
@@ -385,14 +400,16 @@ def test_get_error_logs_fully_customized(logs_client):
     }
 
 
-@responses.activate
+@respx.mock
 def test_get_error_logs_empty(logs_client):
-    builder = MLResponseBuilder()
-    builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
-    builder.with_request_param("format", "json")
-    builder.with_request_param("filename", "8002_ErrorLog.txt")
-    builder.with_response_body(builder.error_logs_body([]))
-    builder.build_get()
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(f"http://localhost:8002{ENDPOINT}")
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_param("filename", "8002_ErrorLog.txt")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_response_body(ml_mocker.error_logs_body([]))
+    ml_mocker.mock_get()
 
     logs = logs_client.get_logs(8002)
     logs = list(logs)
@@ -400,7 +417,7 @@ def test_get_error_logs_empty(logs_client):
     assert len(logs) == 0
 
 
-@responses.activate
+@respx.mock
 def test_get_access_logs(logs_client):
     raw_logs = [
         (
@@ -414,12 +431,14 @@ def test_get_access_logs(logs_client):
             '401 104 - "python-requests/2.31.0"'
         ),
     ]
-    builder = MLResponseBuilder()
-    builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
-    builder.with_request_param("format", "json")
-    builder.with_request_param("filename", "8002_AccessLog.txt")
-    builder.with_response_body(builder.non_error_logs_body(raw_logs))
-    builder.build_get()
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(f"http://localhost:8002{ENDPOINT}")
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_param("filename", "8002_AccessLog.txt")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_response_body(ml_mocker.non_error_logs_body(raw_logs))
+    ml_mocker.mock_get()
 
     logs = logs_client.get_logs(8002, log_type=LogType.ACCESS)
     logs = list(logs)
@@ -433,7 +452,7 @@ def test_get_access_logs(logs_client):
     }
 
 
-@responses.activate
+@respx.mock
 def test_get_access_logs_with_search_params(logs_client):
     raw_logs = [
         (
@@ -447,12 +466,14 @@ def test_get_access_logs_with_search_params(logs_client):
             '401 104 - "python-requests/2.31.0"'
         ),
     ]
-    builder = MLResponseBuilder()
-    builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
-    builder.with_request_param("format", "json")
-    builder.with_request_param("filename", "8002_AccessLog.txt")
-    builder.with_response_body(builder.non_error_logs_body(raw_logs))
-    builder.build_get()
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(f"http://localhost:8002{ENDPOINT}")
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_param("filename", "8002_AccessLog.txt")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_response_body(ml_mocker.non_error_logs_body(raw_logs))
+    ml_mocker.mock_get()
 
     logs = logs_client.get_logs(
         8002,
@@ -472,14 +493,16 @@ def test_get_access_logs_with_search_params(logs_client):
     }
 
 
-@responses.activate
+@respx.mock
 def test_get_access_logs_empty(logs_client):
-    builder = MLResponseBuilder()
-    builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
-    builder.with_request_param("format", "json")
-    builder.with_request_param("filename", "8002_AccessLog.txt")
-    builder.with_response_body(builder.non_error_logs_body([]))
-    builder.build_get()
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(f"http://localhost:8002{ENDPOINT}")
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_param("filename", "8002_AccessLog.txt")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_response_body(ml_mocker.non_error_logs_body([]))
+    ml_mocker.mock_get()
 
     logs = logs_client.get_logs(8002, log_type=LogType.ACCESS)
     logs = list(logs)
@@ -487,7 +510,7 @@ def test_get_access_logs_empty(logs_client):
     assert len(logs) == 0
 
 
-@responses.activate
+@respx.mock
 def test_get_request_logs(logs_client):
     raw_logs = [
         (
@@ -534,12 +557,14 @@ def test_get_request_logs(logs_client):
             "}"
         ),
     ]
-    builder = MLResponseBuilder()
-    builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
-    builder.with_request_param("format", "json")
-    builder.with_request_param("filename", "8002_RequestLog.txt")
-    builder.with_response_body(builder.non_error_logs_body(raw_logs))
-    builder.build_get()
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(f"http://localhost:8002{ENDPOINT}")
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_param("filename", "8002_RequestLog.txt")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_response_body(ml_mocker.non_error_logs_body(raw_logs))
+    ml_mocker.mock_get()
 
     logs = logs_client.get_logs(8002, log_type=LogType.REQUEST)
     logs = list(logs)
@@ -553,7 +578,7 @@ def test_get_request_logs(logs_client):
     }
 
 
-@responses.activate
+@respx.mock
 def test_get_request_logs_with_search_params(logs_client):
     raw_logs = [
         (
@@ -600,12 +625,14 @@ def test_get_request_logs_with_search_params(logs_client):
             "}"
         ),
     ]
-    builder = MLResponseBuilder()
-    builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
-    builder.with_request_param("format", "json")
-    builder.with_request_param("filename", "8002_RequestLog.txt")
-    builder.with_response_body(builder.non_error_logs_body(raw_logs))
-    builder.build_get()
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(f"http://localhost:8002{ENDPOINT}")
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_param("filename", "8002_RequestLog.txt")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_response_body(ml_mocker.non_error_logs_body(raw_logs))
+    ml_mocker.mock_get()
 
     logs = logs_client.get_logs(
         8002,
@@ -625,14 +652,16 @@ def test_get_request_logs_with_search_params(logs_client):
     }
 
 
-@responses.activate
+@respx.mock
 def test_get_request_logs_empty(logs_client):
-    builder = MLResponseBuilder()
-    builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
-    builder.with_request_param("format", "json")
-    builder.with_request_param("filename", "8002_RequestLog.txt")
-    builder.with_response_body(builder.non_error_logs_body([]))
-    builder.build_get()
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(f"http://localhost:8002{ENDPOINT}")
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_param("filename", "8002_RequestLog.txt")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_response_body(ml_mocker.non_error_logs_body([]))
+    ml_mocker.mock_get()
 
     logs = logs_client.get_logs(8002, log_type=LogType.REQUEST)
     logs = list(logs)
@@ -640,7 +669,7 @@ def test_get_request_logs_empty(logs_client):
     assert len(logs) == 0
 
 
-@responses.activate
+@respx.mock
 def test_get_audit_logs(logs_client):
     raw_logs = [
         (
@@ -653,12 +682,14 @@ def test_get_audit_logs(logs_client):
             "file=/data/MarkLogic/groups.xml; success=true;"
         ),
     ]
-    builder = MLResponseBuilder()
-    builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
-    builder.with_request_param("format", "json")
-    builder.with_request_param("filename", "AuditLog.txt")
-    builder.with_response_body(builder.non_error_logs_body(raw_logs))
-    builder.build_get()
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(f"http://localhost:8002{ENDPOINT}")
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_param("filename", "AuditLog.txt")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_response_body(ml_mocker.non_error_logs_body(raw_logs))
+    ml_mocker.mock_get()
 
     logs = logs_client.get_logs(log_type=LogType.AUDIT)
     logs = list(logs)
@@ -675,7 +706,7 @@ def test_get_audit_logs(logs_client):
     }
 
 
-@responses.activate
+@respx.mock
 def test_get_audit_logs_with_search_params(logs_client):
     raw_logs = [
         (
@@ -688,12 +719,14 @@ def test_get_audit_logs_with_search_params(logs_client):
             "file=/data/MarkLogic/groups.xml; success=true;"
         ),
     ]
-    builder = MLResponseBuilder()
-    builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
-    builder.with_request_param("format", "json")
-    builder.with_request_param("filename", "AuditLog.txt")
-    builder.with_response_body(builder.non_error_logs_body(raw_logs))
-    builder.build_get()
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(f"http://localhost:8002{ENDPOINT}")
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_param("filename", "AuditLog.txt")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_response_body(ml_mocker.non_error_logs_body(raw_logs))
+    ml_mocker.mock_get()
 
     logs = logs_client.get_logs(
         log_type=LogType.AUDIT,
@@ -715,14 +748,16 @@ def test_get_audit_logs_with_search_params(logs_client):
     }
 
 
-@responses.activate
+@respx.mock
 def test_get_audit_logs_empty(logs_client):
-    builder = MLResponseBuilder()
-    builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
-    builder.with_request_param("format", "json")
-    builder.with_request_param("filename", "AuditLog.txt")
-    builder.with_response_body(builder.non_error_logs_body([]))
-    builder.build_get()
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(f"http://localhost:8002{ENDPOINT}")
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_param("filename", "AuditLog.txt")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_response_body(ml_mocker.non_error_logs_body([]))
+    ml_mocker.mock_get()
 
     logs = logs_client.get_logs(log_type=LogType.AUDIT)
     logs = list(logs)
@@ -730,14 +765,15 @@ def test_get_audit_logs_empty(logs_client):
     assert len(logs) == 0
 
 
-@responses.activate
+@respx.mock
 def test_get_logs_list_unauthorized(logs_client):
-    builder = MLResponseBuilder()
-    builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
-    builder.with_request_param("format", "json")
-    builder.with_response_content_type("application/json; charset=UTF-8")
-    builder.with_response_status(401)
-    builder.with_response_body(
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(f"http://localhost:8002{ENDPOINT}")
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_response_code(401)
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_response_body(
         {
             "errorResponse": {
                 "statusCode": 401,
@@ -746,7 +782,7 @@ def test_get_logs_list_unauthorized(logs_client):
             },
         },
     )
-    builder.build_get()
+    ml_mocker.mock_get()
 
     with pytest.raises(MarkLogicError) as err:
         logs_client.get_logs_list()
@@ -755,20 +791,21 @@ def test_get_logs_list_unauthorized(logs_client):
     assert err.value.args[0] == expected_error
 
 
-@responses.activate
+@respx.mock
 def test_get_logs_list_no_such_host(logs_client):
     response_body_path = resources_utils.get_test_resource_path(
         __file__,
         "no-such-host.json",
     )
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/manage/v2/logs")
-    builder.with_request_param("format", "json")
-    builder.with_request_param("host", "non-existing-host")
-    builder.with_response_content_type("application/json; charset=UTF-8")
-    builder.with_response_status(404)
-    builder.with_response_body(Path(response_body_path).read_bytes())
-    builder.build_get()
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/manage/v2/logs")
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_param("host", "non-existing-host")
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_response_code(404)
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_response_body(Path(response_body_path).read_bytes())
+    ml_mocker.mock_get()
     with pytest.raises(MarkLogicError) as err:
         logs_client.get_logs_list(host="non-existing-host")
 
@@ -779,17 +816,19 @@ def test_get_logs_list_no_such_host(logs_client):
     assert err.value.args[0] == expected_error
 
 
-@responses.activate
+@respx.mock
 def test_get_logs_list_empty(logs_client):
     response_body_json = resources_utils.get_test_resource_json(
         __file__,
         "logs-list-response-no-logs.json",
     )
-    builder = MLResponseBuilder()
-    builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
-    builder.with_request_param("format", "json")
-    builder.with_response_body(response_body_json)
-    builder.build_get()
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(f"http://localhost:8002{ENDPOINT}")
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_response_body(response_body_json)
+    ml_mocker.mock_get()
 
     logs_list = logs_client.get_logs_list()
 
@@ -800,20 +839,21 @@ def test_get_logs_list_empty(logs_client):
     }
 
 
-@responses.activate
+@respx.mock
 def test_get_logs_list_from_single_node_cluster(logs_client):
     response_body_json = resources_utils.get_test_resource_json(
         __file__,
         "logs-list-response-single-node.json",
     )
 
-    builder = MLResponseBuilder()
-    builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
-    builder.with_request_param("format", "json")
-    builder.with_response_content_type("application/json; charset=UTF-8")
-    builder.with_response_status(200)
-    builder.with_response_body(response_body_json)
-    builder.build_get()
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(f"http://localhost:8002{ENDPOINT}")
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_response_body(response_body_json)
+    ml_mocker.mock_get()
 
     logs_list = logs_client.get_logs_list()
     assert isinstance(logs_list, dict)
@@ -1039,20 +1079,21 @@ def test_get_logs_list_from_single_node_cluster(logs_client):
     }
 
 
-@responses.activate
+@respx.mock
 def test_get_logs_list_from_multiple_nodes_cluster(logs_client):
     response_body_json = resources_utils.get_test_resource_json(
         __file__,
         "logs-list-response-cluster.json",
     )
 
-    builder = MLResponseBuilder()
-    builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
-    builder.with_request_param("format", "json")
-    builder.with_response_content_type("application/json; charset=UTF-8")
-    builder.with_response_status(200)
-    builder.with_response_body(response_body_json)
-    builder.build_get()
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(f"http://localhost:8002{ENDPOINT}")
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_response_body(response_body_json)
+    ml_mocker.mock_get()
 
     logs_list = logs_client.get_logs_list()
     assert isinstance(logs_list, dict)
@@ -1294,21 +1335,22 @@ def test_get_logs_list_from_multiple_nodes_cluster(logs_client):
     }
 
 
-@responses.activate
+@respx.mock
 def test_get_logs_list_from_multiple_nodes_cluster_for_single_host(logs_client):
     response_body_json = resources_utils.get_test_resource_json(
         __file__,
         "logs-list-response-cluster-one-node-only.json",
     )
 
-    builder = MLResponseBuilder()
-    builder.with_base_url(f"http://localhost:8002{ENDPOINT}")
-    builder.with_request_param("format", "json")
-    builder.with_request_param("host", "ml_cluster_node3")
-    builder.with_response_content_type("application/json; charset=UTF-8")
-    builder.with_response_status(200)
-    builder.with_response_body(response_body_json)
-    builder.build_get()
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(f"http://localhost:8002{ENDPOINT}")
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_param("host", "ml_cluster_node3")
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_response_body(response_body_json)
+    ml_mocker.mock_get()
 
     logs_list = logs_client.get_logs_list(host="ml_cluster_node3")
     assert isinstance(logs_list, dict)

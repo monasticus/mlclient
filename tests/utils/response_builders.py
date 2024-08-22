@@ -227,3 +227,28 @@ class MLRespXMocker:
             self.with_response_content_type(content_type)
             self._resp_mock.response.body_parts = None
             self._resp_mock.response.content = body
+
+    @staticmethod
+    def error_logs_body(
+        logs: list[tuple],
+    ):
+        logs_body = {"logfile": {}}
+        if len(logs) > 0:
+            logs_body["logfile"]["log"] = [
+                {
+                    "timestamp": log_tuple[0],
+                    "level": log_tuple[1],
+                    "message": log_tuple[2],
+                }
+                for log_tuple in logs
+            ]
+        return logs_body
+
+    @staticmethod
+    def non_error_logs_body(
+        logs: list[str],
+    ):
+        logs_body = {"logfile": {}}
+        if len(logs) > 0:
+            logs_body["logfile"]["message"] = "\n".join(logs)
+        return logs_body

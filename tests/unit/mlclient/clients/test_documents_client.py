@@ -1,3 +1,6 @@
+from __future__ import annotations
+
+import json
 import xml.etree.ElementTree as ElemTree
 import zlib
 from pathlib import Path
@@ -5,7 +8,9 @@ from pathlib import Path
 import httpx
 import pytest
 import responses
+import urllib3
 from httpx import Response
+from urllib3.fields import RequestField
 
 from mlclient.clients import DocumentsClient
 from mlclient.exceptions import MarkLogicError
@@ -20,57 +25,125 @@ from mlclient.structures import (
     TextDocument,
     XMLDocument,
 )
-from mlclient.structures.calls import DocumentsBodyPart
+from mlclient.structures.calls import ContentDispositionSerializer, DocumentsBodyPart
 from tests.utils import MLResponseBuilder
 from tests.utils import resources as resources_utils
 from tests.utils.ml_mockers import MLRespXMocker
 
+DOC_BODY_PARTS = [
+    DocumentsBodyPart(
+        **{
+            "content-type": "application/zip",
+            "content-disposition": "attachment; "
+            'filename="/some/dir/doc4.zip"; '
+            "category=content; "
+            "format=binary",
+            "content": zlib.compress(b'xquery version "1.0-ml";\n\nfn:current-date()'),
+        },
+    ),
+    DocumentsBodyPart(
+        **{
+            "content-type": "application/xml",
+            "content-disposition": "attachment; "
+            'filename="/some/dir/doc1.xml"; '
+            "category=content; "
+            "format=xml",
+            "content": b'<?xml version="1.0" encoding="UTF-8"?>\n<root/>',
+        },
+    ),
+    DocumentsBodyPart(
+        **{
+            "content-type": "application/vnd.marklogic-xdmp",
+            "content-disposition": "attachment; "
+            'filename="/some/dir/doc3.xqy"; '
+            "category=content; "
+            "format=text",
+            "content": b'xquery version "1.0-ml";\n\nfn:current-date()',
+        },
+    ),
+    DocumentsBodyPart(
+        **{
+            "content-type": "application/json",
+            "content-disposition": "attachment; "
+            'filename="/some/dir/doc2.json"; '
+            "category=content; "
+            "format=json",
+            "content": b'{"root":{"child":"data"}}',
+        },
+    ),
+]
+
+
+def _find_body_part(
+    uri: str,
+) -> DocumentsBodyPart | None:
+    return next(
+        (part for part in DOC_BODY_PARTS if part.content_disposition.filename == uri),
+        None,
+    )
+
 
 def server_get_mock(request: httpx.Request):
-    uri = request.url.params.get_list("uri")
-    if len(uri) == 1:
-        if "/some/dir/doc1.xml" in uri:
-            code = 200
-            headers = {
-                "Content-Type": "application/xml; charset=utf-8",
-                "vnd.marklogic.document-format": "xml",
-            }
-            content = b'<?xml version="1.0" encoding="UTF-8"?>\n<root/>'
-        elif "/some/dir/doc2.json" in uri:
-            code = 200
-            headers = {
-                "Content-Type": "application/json; charset=utf-8",
-                "vnd.marklogic.document-format": "json",
-            }
-            content = b'{"root":{"child":"data"}}'
-        elif "/some/dir/doc3.xqy" in uri:
-            code = 200
-            headers = {
-                "Content-Type": "application/vnd.marklogic-xdmp; charset=utf-8",
-                "vnd.marklogic.document-format": "text",
-            }
-            content = b'xquery version "1.0-ml";\n\nfn:current-date()'
-        elif "/some/dir/doc4.zip" in uri:
-            code = 200
-            headers = {
-                "Content-Type": "application/zip",
-                "vnd.marklogic.document-format": "binary",
-            }
-            content = zlib.compress(b'xquery version "1.0-ml";\n\nfn:current-date()')
-        else:
+    uris = request.url.params.get_list("uri")
+    if len(uris) == 1:
+        body_part = _find_body_part(uris[0])
+        if not body_part:
             code = 500
-            json = {
+            content = {
                 "errorResponse": {
                     "statusCode": code,
                     "status": "Internal Server Error",
                     "messageCode": "RESTAPI-NODOCUMENT",
                     "message": "RESTAPI-NODOCUMENT: (err:FOER0000) "
                     "Resource or document does not exist:  "
-                    f"category: content message: {uri[0]}",
+                    f"category: content message: {uris[0]}",
                 },
             }
-            return Response(status_code=code, json=json)
-        return Response(status_code=code, headers=headers, content=content)
+            return Response(status_code=code, json=content)
+
+        content_type = f"{body_part.content_type}; charset=utf-8"
+        content = body_part.content
+        doc_format = body_part.content_disposition.format_.value
+        headers = {
+            "Content-Type": content_type,
+            "vnd.marklogic.document-format": doc_format,
+        }
+        return Response(status_code=200, headers=headers, content=content)
+
+    response_body_fields = []
+    for uri in uris:
+        body_part = _find_body_part(uri)
+        if body_part is None:
+            continue
+        data = body_part.content
+        if isinstance(data, dict):
+            data = json.dumps(data)
+        content_disp = ContentDispositionSerializer.deserialize(
+            body_part.content_disposition,
+        )
+        req_field = RequestField(
+            name="--ignore--",
+            data=data,
+            headers={
+                "Content-Disposition": content_disp,
+                "Content-Type": body_part.content_type,
+            },
+        )
+        response_body_fields.append(req_field)
+    content, content_type = urllib3.encode_multipart_formdata(
+        response_body_fields,
+    )
+    content_type = content_type.replace(
+        "multipart/form-data",
+        "multipart/mixed",
+    )
+    headers = {
+        "Content-Type": content_type,
+    }
+    if len(response_body_fields) == 0:
+        content = b""
+        headers["Content-Length"] = "0"
+    return Response(status_code=200, headers=headers, content=content)
 
 
 ml_mocker = MLRespXMocker(router_base_url="http://localhost:8002/v1/documents")
@@ -322,33 +395,12 @@ def test_read_doc_as_bytes_using_uri_list(docs_client):
     assert document.temporal_collection is None
 
 
-@responses.activate
+@ml_mocker.router
 def test_read_existing_and_non_existing_doc(docs_client):
     uris = [
         "/some/dir/doc1.xml",
         "/some/dir/doc5.xml",
     ]
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/documents")
-    builder.with_request_param("uri", "/some/dir/doc1.xml")
-    builder.with_request_param("uri", "/some/dir/doc5.xml")
-    builder.with_request_param("format", "json")
-    builder.with_response_status(200)
-    builder.with_response_body_multipart_mixed()
-    builder.with_response_documents_body_part(
-        DocumentsBodyPart(
-            **{
-                "content-type": "application/xml",
-                "content-disposition": "attachment; "
-                'filename="/some/dir/doc1.xml"; '
-                "category=content; "
-                "format=xml",
-                "content": b'<?xml version="1.0" encoding="UTF-8"?>\n'
-                b"<root><child>data</child></root>",
-            },
-        ),
-    )
-    builder.build_get()
 
     docs = docs_client.read(uris)
     assert isinstance(docs, list)
@@ -366,7 +418,7 @@ def test_read_existing_and_non_existing_doc(docs_client):
     assert document.temporal_collection is None
 
 
-@responses.activate
+@ml_mocker.router
 def test_read_multiple_docs(docs_client):
     uris = [
         "/some/dir/doc1.xml",
@@ -374,67 +426,6 @@ def test_read_multiple_docs(docs_client):
         "/some/dir/doc3.xqy",
         "/some/dir/doc4.zip",
     ]
-    zip_content = zlib.compress(b'xquery version "1.0-ml";\n\nfn:current-date()')
-
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/documents")
-    builder.with_request_param("uri", "/some/dir/doc1.xml")
-    builder.with_request_param("uri", "/some/dir/doc2.json")
-    builder.with_request_param("uri", "/some/dir/doc3.xqy")
-    builder.with_request_param("uri", "/some/dir/doc4.zip")
-    builder.with_request_param("format", "json")
-    builder.with_response_status(200)
-    builder.with_response_body_multipart_mixed()
-    builder.with_response_documents_body_part(
-        DocumentsBodyPart(
-            **{
-                "content-type": "application/zip",
-                "content-disposition": "attachment; "
-                'filename="/some/dir/doc4.zip"; '
-                "category=content; "
-                "format=binary",
-                "content": zip_content,
-            },
-        ),
-    )
-    builder.with_response_documents_body_part(
-        DocumentsBodyPart(
-            **{
-                "content-type": "application/xml",
-                "content-disposition": "attachment; "
-                'filename="/some/dir/doc1.xml"; '
-                "category=content; "
-                "format=xml",
-                "content": b'<?xml version="1.0" encoding="UTF-8"?>\n'
-                b"<root><child>data</child></root>",
-            },
-        ),
-    )
-    builder.with_response_documents_body_part(
-        DocumentsBodyPart(
-            **{
-                "content-type": "application/vnd.marklogic-xdmp",
-                "content-disposition": "attachment; "
-                'filename="/some/dir/doc3.xqy"; '
-                "category=content; "
-                "format=text",
-                "content": b'xquery version "1.0-ml";\n\nfn:current-date()',
-            },
-        ),
-    )
-    builder.with_response_documents_body_part(
-        DocumentsBodyPart(
-            **{
-                "content-type": "application/json",
-                "content-disposition": "attachment; "
-                'filename="/some/dir/doc2.json"; '
-                "category=content; "
-                "format=json",
-                "content": b'{"root": {"child": "data"}}',
-            },
-        ),
-    )
-    builder.build_get()
 
     docs = docs_client.read(uris)
 
@@ -476,6 +467,7 @@ def test_read_multiple_docs(docs_client):
     assert xqy_doc.metadata is None
     assert xqy_doc.temporal_collection is None
 
+    zip_content = zlib.compress(b'xquery version "1.0-ml";\n\nfn:current-date()')
     zip_docs = list(filter(lambda d: d.uri.endswith(".zip"), docs))
     assert len(zip_docs) == 1
     zip_doc = zip_docs[0]
@@ -488,7 +480,7 @@ def test_read_multiple_docs(docs_client):
     assert zip_doc.temporal_collection is None
 
 
-@responses.activate
+@ml_mocker.router
 def test_read_multiple_docs_as_string(docs_client):
     uris = [
         "/some/dir/doc1.xml",
@@ -496,67 +488,6 @@ def test_read_multiple_docs_as_string(docs_client):
         "/some/dir/doc3.xqy",
         "/some/dir/doc4.zip",
     ]
-    zip_content = zlib.compress(b'xquery version "1.0-ml";\n\nfn:current-date()')
-
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/documents")
-    builder.with_request_param("uri", "/some/dir/doc1.xml")
-    builder.with_request_param("uri", "/some/dir/doc2.json")
-    builder.with_request_param("uri", "/some/dir/doc3.xqy")
-    builder.with_request_param("uri", "/some/dir/doc4.zip")
-    builder.with_request_param("format", "json")
-    builder.with_response_status(200)
-    builder.with_response_body_multipart_mixed()
-    builder.with_response_documents_body_part(
-        DocumentsBodyPart(
-            **{
-                "content-type": "application/zip",
-                "content-disposition": "attachment; "
-                'filename="/some/dir/doc4.zip"; '
-                "category=content; "
-                "format=binary",
-                "content": zip_content,
-            },
-        ),
-    )
-    builder.with_response_documents_body_part(
-        DocumentsBodyPart(
-            **{
-                "content-type": "application/xml",
-                "content-disposition": "attachment; "
-                'filename="/some/dir/doc1.xml"; '
-                "category=content; "
-                "format=xml",
-                "content": b'<?xml version="1.0" encoding="UTF-8"?>\n'
-                b"<root><child>data</child></root>",
-            },
-        ),
-    )
-    builder.with_response_documents_body_part(
-        DocumentsBodyPart(
-            **{
-                "content-type": "application/vnd.marklogic-xdmp",
-                "content-disposition": "attachment; "
-                'filename="/some/dir/doc3.xqy"; '
-                "category=content; "
-                "format=text",
-                "content": b'xquery version "1.0-ml";\n\nfn:current-date()',
-            },
-        ),
-    )
-    builder.with_response_documents_body_part(
-        DocumentsBodyPart(
-            **{
-                "content-type": "application/json",
-                "content-disposition": "attachment; "
-                'filename="/some/dir/doc2.json"; '
-                "category=content; "
-                "format=json",
-                "content": b'{"root": {"child": "data"}}',
-            },
-        ),
-    )
-    builder.build_get()
 
     docs = docs_client.read(uris, output_type=str)
 
@@ -570,9 +501,7 @@ def test_read_multiple_docs_as_string(docs_client):
     assert xml_doc.uri == "/some/dir/doc1.xml"
     assert xml_doc.doc_type == DocumentType.XML
     assert isinstance(xml_doc.content, str)
-    assert xml_doc.content == (
-        '<?xml version="1.0" encoding="UTF-8"?>\n<root><child>data</child></root>'
-    )
+    assert xml_doc.content == ('<?xml version="1.0" encoding="UTF-8"?>\n<root/>')
     assert xml_doc.metadata is None
     assert xml_doc.temporal_collection is None
 
@@ -583,7 +512,7 @@ def test_read_multiple_docs_as_string(docs_client):
     assert json_doc.uri == "/some/dir/doc2.json"
     assert json_doc.doc_type == DocumentType.JSON
     assert isinstance(json_doc.content, str)
-    assert json_doc.content == '{"root": {"child": "data"}}'
+    assert json_doc.content == '{"root":{"child":"data"}}'
     assert json_doc.metadata is None
     assert json_doc.temporal_collection is None
 
@@ -598,6 +527,7 @@ def test_read_multiple_docs_as_string(docs_client):
     assert xqy_doc.metadata is None
     assert xqy_doc.temporal_collection is None
 
+    zip_content = zlib.compress(b'xquery version "1.0-ml";\n\nfn:current-date()')
     zip_docs = list(filter(lambda d: d.uri.endswith(".zip"), docs))
     assert len(zip_docs) == 1
     zip_doc = zip_docs[0]
@@ -610,7 +540,7 @@ def test_read_multiple_docs_as_string(docs_client):
     assert zip_doc.temporal_collection is None
 
 
-@responses.activate
+@ml_mocker.router
 def test_read_multiple_docs_as_bytes(docs_client):
     uris = [
         "/some/dir/doc1.xml",
@@ -618,67 +548,6 @@ def test_read_multiple_docs_as_bytes(docs_client):
         "/some/dir/doc3.xqy",
         "/some/dir/doc4.zip",
     ]
-    zip_content = zlib.compress(b'xquery version "1.0-ml";\n\nfn:current-date()')
-
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/documents")
-    builder.with_request_param("uri", "/some/dir/doc1.xml")
-    builder.with_request_param("uri", "/some/dir/doc2.json")
-    builder.with_request_param("uri", "/some/dir/doc3.xqy")
-    builder.with_request_param("uri", "/some/dir/doc4.zip")
-    builder.with_request_param("format", "json")
-    builder.with_response_status(200)
-    builder.with_response_body_multipart_mixed()
-    builder.with_response_documents_body_part(
-        DocumentsBodyPart(
-            **{
-                "content-type": "application/zip",
-                "content-disposition": "attachment; "
-                'filename="/some/dir/doc4.zip"; '
-                "category=content; "
-                "format=binary",
-                "content": zip_content,
-            },
-        ),
-    )
-    builder.with_response_documents_body_part(
-        DocumentsBodyPart(
-            **{
-                "content-type": "application/xml",
-                "content-disposition": "attachment; "
-                'filename="/some/dir/doc1.xml"; '
-                "category=content; "
-                "format=xml",
-                "content": b'<?xml version="1.0" encoding="UTF-8"?>\n'
-                b"<root><child>data</child></root>",
-            },
-        ),
-    )
-    builder.with_response_documents_body_part(
-        DocumentsBodyPart(
-            **{
-                "content-type": "application/vnd.marklogic-xdmp",
-                "content-disposition": "attachment; "
-                'filename="/some/dir/doc3.xqy"; '
-                "category=content; "
-                "format=text",
-                "content": b'xquery version "1.0-ml";\n\nfn:current-date()',
-            },
-        ),
-    )
-    builder.with_response_documents_body_part(
-        DocumentsBodyPart(
-            **{
-                "content-type": "application/json",
-                "content-disposition": "attachment; "
-                'filename="/some/dir/doc2.json"; '
-                "category=content; "
-                "format=json",
-                "content": b'{"root": {"child": "data"}}',
-            },
-        ),
-    )
-    builder.build_get()
 
     docs = docs_client.read(uris, output_type=bytes)
 
@@ -692,9 +561,7 @@ def test_read_multiple_docs_as_bytes(docs_client):
     assert xml_doc.uri == "/some/dir/doc1.xml"
     assert xml_doc.doc_type == DocumentType.XML
     assert isinstance(xml_doc.content, bytes)
-    assert xml_doc.content == (
-        b'<?xml version="1.0" encoding="UTF-8"?>\n<root><child>data</child></root>'
-    )
+    assert xml_doc.content == (b'<?xml version="1.0" encoding="UTF-8"?>\n<root/>')
     assert xml_doc.metadata is None
     assert xml_doc.temporal_collection is None
 
@@ -705,7 +572,7 @@ def test_read_multiple_docs_as_bytes(docs_client):
     assert json_doc.uri == "/some/dir/doc2.json"
     assert json_doc.doc_type == DocumentType.JSON
     assert isinstance(json_doc.content, bytes)
-    assert json_doc.content == b'{"root": {"child": "data"}}'
+    assert json_doc.content == b'{"root":{"child":"data"}}'
     assert json_doc.metadata is None
     assert json_doc.temporal_collection is None
 
@@ -720,6 +587,7 @@ def test_read_multiple_docs_as_bytes(docs_client):
     assert xqy_doc.metadata is None
     assert xqy_doc.temporal_collection is None
 
+    zip_content = zlib.compress(b'xquery version "1.0-ml";\n\nfn:current-date()')
     zip_docs = list(filter(lambda d: d.uri.endswith(".zip"), docs))
     assert len(zip_docs) == 1
     zip_doc = zip_docs[0]
@@ -732,29 +600,19 @@ def test_read_multiple_docs_as_bytes(docs_client):
     assert zip_doc.temporal_collection is None
 
 
-@responses.activate
+@ml_mocker.router
 def test_read_multiple_non_existing_docs(docs_client):
     uris = [
         "/some/dir/doc5.xml",
         "/some/dir/doc6.xml",
     ]
 
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/documents")
-    builder.with_request_param("uri", "/some/dir/doc5.xml")
-    builder.with_request_param("uri", "/some/dir/doc6.xml")
-    builder.with_request_param("format", "json")
-    builder.with_response_body_multipart_mixed()
-    builder.with_response_status(200)
-    builder.with_empty_response_body()
-    builder.build_get()
-
     docs = docs_client.read(uris)
 
     assert docs == []
 
 
-@responses.activate
+@ml_mocker.router
 def test_read_multiple_existing_and_non_existing_docs(docs_client):
     uris = [
         "/some/dir/doc1.xml",
@@ -762,41 +620,6 @@ def test_read_multiple_existing_and_non_existing_docs(docs_client):
         "/some/dir/doc5.xml",
         "/some/dir/doc6.json",
     ]
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/documents")
-    builder.with_request_param("uri", "/some/dir/doc1.xml")
-    builder.with_request_param("uri", "/some/dir/doc2.json")
-    builder.with_request_param("uri", "/some/dir/doc5.xml")
-    builder.with_request_param("uri", "/some/dir/doc6.json")
-    builder.with_request_param("format", "json")
-    builder.with_response_status(200)
-    builder.with_response_body_multipart_mixed()
-    builder.with_response_documents_body_part(
-        DocumentsBodyPart(
-            **{
-                "content-type": "application/xml",
-                "content-disposition": "attachment; "
-                'filename="/some/dir/doc1.xml"; '
-                "category=content; "
-                "format=xml",
-                "content": b'<?xml version="1.0" encoding="UTF-8"?>\n'
-                b"<root><child>data</child></root>",
-            },
-        ),
-    )
-    builder.with_response_documents_body_part(
-        DocumentsBodyPart(
-            **{
-                "content-type": "application/json",
-                "content-disposition": "attachment; "
-                'filename="/some/dir/doc2.json"; '
-                "category=content; "
-                "format=json",
-                "content": b'{"root": {"child": "data"}}',
-            },
-        ),
-    )
-    builder.build_get()
 
     docs = docs_client.read(uris)
 
@@ -1338,7 +1161,7 @@ def test_read_multiple_docs_with_full_metadata(docs_client):
                 'filename="/some/dir/doc2.json"; '
                 "category=content; "
                 "format=json",
-                "content": b'{"root": {"child": "data"}}',
+                "content": b'{"root":{"child":"data"}}',
             },
         ),
     )
@@ -1444,7 +1267,7 @@ def test_read_multiple_docs_with_single_metadata_category(docs_client):
                 'filename="/some/dir/doc2.json"; '
                 "category=content; "
                 "format=json",
-                "content": b'{"root": {"child": "data"}}',
+                "content": b'{"root":{"child":"data"}}',
             },
         ),
     )
@@ -1553,7 +1376,7 @@ def test_read_multiple_docs_with_two_metadata_categories(docs_client):
                 'filename="/some/dir/doc2.json"; '
                 "category=content; "
                 "format=json",
-                "content": b'{"root": {"child": "data"}}',
+                "content": b'{"root":{"child":"data"}}',
             },
         ),
     )
@@ -1683,7 +1506,7 @@ def test_read_multiple_docs_with_all_metadata_categories(docs_client):
                 'filename="/some/dir/doc2.json"; '
                 "category=content; "
                 "format=json",
-                "content": b'{"root": {"child": "data"}}',
+                "content": b'{"root":{"child":"data"}}',
             },
         ),
     )
@@ -2184,7 +2007,7 @@ def test_read_multiple_docs_using_custom_database(docs_client):
                 'filename="/some/dir/doc2.json"; '
                 "category=content; "
                 "format=json",
-                "content": b'{"root": {"child": "data"}}',
+                "content": b'{"root":{"child":"data"}}',
             },
         ),
     )
@@ -2278,7 +2101,7 @@ def test_create_raw_document(docs_client):
 @responses.activate
 def test_create_raw_string_document(docs_client):
     uri = "/some/dir/doc2.json"
-    content = '{"root": {"child": "data"}}'
+    content = '{"root":{"child":"data"}}'
     doc = RawStringDocument(content, uri, DocumentType.JSON)
 
     builder = MLResponseBuilder()

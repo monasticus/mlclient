@@ -3,7 +3,7 @@ import respx
 
 from mlclient import MLResourceClient
 from mlclient.calls import EvalCall
-from tests.utils.response_builders import MLRespXMocker
+from tests.utils.ml_mockers import MLRespXMocker
 
 
 @pytest.fixture()

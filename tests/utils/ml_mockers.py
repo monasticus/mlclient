@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from abc import ABCMeta, abstractmethod
 from typing import Any, List, Optional, Union
 
 import respx
@@ -12,6 +13,121 @@ from urllib3.fields import RequestField
 
 from mlclient.constants import HEADER_X_WWW_FORM_URLENCODED
 from mlclient.structures.calls import ContentDispositionSerializer, DocumentsBodyPart
+
+
+class MLMocker(metaclass=ABCMeta):
+    @abstractmethod
+    def with_url(self, url: str):
+        raise NotImplementedError
+
+    @abstractmethod
+    def with_method(self, method: str):
+        raise NotImplementedError
+
+    @abstractmethod
+    def with_request_param(self, name: str, value: str):
+        raise NotImplementedError
+
+    def with_request_content_type(self, content_type: str):
+        self.with_request_header("Content-Type", content_type)
+
+    @abstractmethod
+    def with_request_header(self, name: str, value: str):
+        raise NotImplementedError
+
+    @abstractmethod
+    def with_request_body(self, body: bytes | str | dict):
+        raise NotImplementedError
+
+    @abstractmethod
+    def with_response_code(self, status_code: int):
+        raise NotImplementedError
+
+    def with_response_content_type(self, content_type: str):
+        self.with_response_header("Content-Type", content_type)
+
+    @abstractmethod
+    def with_response_header(self, name: str, value: str):
+        raise NotImplementedError
+
+    def with_empty_response_body(self):
+        self.with_response_body(b"")
+        self.with_response_header("Content-Length", "0")
+
+    @abstractmethod
+    def with_response_body(self, body: bytes | str | dict):
+        raise NotImplementedError
+
+    @abstractmethod
+    def with_response_body_part(
+        self,
+        x_primitive: str | None,
+        body_part_content: Any,
+        content_type: str | None = None,
+    ):
+        raise NotImplementedError
+
+    @abstractmethod
+    def with_response_documents_body_part(
+        self,
+        body_part: DocumentsBodyPart,
+    ):
+        raise NotImplementedError
+
+    def mock_get(
+        self,
+    ):
+        self.with_method("GET")
+        return self.mock_response()
+
+    def mock_delete(
+        self,
+    ):
+        self.with_method("DELETE")
+        return self.mock_response()
+
+    def mock_post(
+        self,
+    ):
+        self.with_method("POST")
+        return self.mock_response()
+
+    def mock_put(
+        self,
+    ):
+        self.with_method("PUT")
+        return self.mock_response()
+
+    @abstractmethod
+    def mock_response(
+        self,
+    ):
+        raise NotImplementedError
+
+    @staticmethod
+    def error_logs_body(
+        logs: list[tuple],
+    ):
+        logs_body = {"logfile": {}}
+        if len(logs) > 0:
+            logs_body["logfile"]["log"] = [
+                {
+                    "timestamp": log_tuple[0],
+                    "level": log_tuple[1],
+                    "message": log_tuple[2],
+                }
+                for log_tuple in logs
+            ]
+        return logs_body
+
+    @staticmethod
+    def non_error_logs_body(
+        logs: list[str],
+    ):
+        logs_body = {"logfile": {}}
+        if len(logs) > 0:
+            logs_body["logfile"]["message"] = "\n".join(logs)
+        return logs_body
 
 
 class RespXRequest(BaseModel):
@@ -42,7 +158,7 @@ class RespXMock(BaseModel):
     response: RespXResponse = RespXResponse()
 
 
-class MLRespXMocker:
+class MLRespXMocker(MLMocker):
     def __init__(self, use_router: bool = True, router_base_url: str | None = None):
         if use_router:
             self._mock = respx.mock(base_url=router_base_url, assert_all_called=False)
@@ -70,9 +186,6 @@ class MLRespXMocker:
             self._resp_mock.request.params = []
         self._resp_mock.request.params.append((name, value))
 
-    def with_request_content_type(self, content_type: str):
-        self.with_request_header("Content-Type", content_type)
-
     def with_request_header(self, name: str, value: str):
         if not self._resp_mock.request.headers:
             self._resp_mock.request.headers = Headers()
@@ -91,9 +204,6 @@ class MLRespXMocker:
 
     def with_response_code(self, status_code: int):
         self._resp_mock.response.status_code = status_code
-
-    def with_response_content_type(self, content_type: str):
-        self.with_response_header("Content-Type", content_type)
 
     def with_response_header(self, name: str, value: str):
         if not self._resp_mock.response.headers:
@@ -162,30 +272,6 @@ class MLRespXMocker:
         )
         self._resp_mock.response.body_parts.append(req_field)
 
-    def mock_get(
-        self,
-    ):
-        self.with_method("GET")
-        return self.mock_response()
-
-    def mock_delete(
-        self,
-    ):
-        self.with_method("DELETE")
-        return self.mock_response()
-
-    def mock_post(
-        self,
-    ):
-        self.with_method("POST")
-        return self.mock_response()
-
-    def mock_put(
-        self,
-    ):
-        self.with_method("PUT")
-        return self.mock_response()
-
     def mock_response(
         self,
     ):
@@ -227,28 +313,3 @@ class MLRespXMocker:
             self.with_response_content_type(content_type)
             self._resp_mock.response.body_parts = None
             self._resp_mock.response.content = body
-
-    @staticmethod
-    def error_logs_body(
-        logs: list[tuple],
-    ):
-        logs_body = {"logfile": {}}
-        if len(logs) > 0:
-            logs_body["logfile"]["log"] = [
-                {
-                    "timestamp": log_tuple[0],
-                    "level": log_tuple[1],
-                    "message": log_tuple[2],
-                }
-                for log_tuple in logs
-            ]
-        return logs_body
-
-    @staticmethod
-    def non_error_logs_body(
-        logs: list[str],
-    ):
-        logs_body = {"logfile": {}}
-        if len(logs) > 0:
-            logs_body["logfile"]["message"] = "\n".join(logs)
-        return logs_body

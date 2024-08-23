@@ -12,7 +12,7 @@ from mlclient.exceptions import (
     WrongParametersError,
 )
 from tests.utils import resources as resources_utils
-from tests.utils.response_builders import MLRespXMocker
+from tests.utils.ml_mockers import MLRespXMocker
 
 
 @pytest.fixture(autouse=True)

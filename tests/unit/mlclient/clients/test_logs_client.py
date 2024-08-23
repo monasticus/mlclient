@@ -8,7 +8,7 @@ import respx
 from mlclient.clients import LogsClient, LogType
 from mlclient.exceptions import MarkLogicError
 from tests.utils import resources as resources_utils
-from tests.utils.response_builders import MLRespXMocker
+from tests.utils.ml_mockers import MLRespXMocker
 
 ENDPOINT = "/manage/v2/logs"
 

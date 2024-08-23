@@ -6,7 +6,7 @@ import respx
 from mlclient import MLResourcesClient
 from mlclient.structures.calls import DocumentsBodyPart
 from tests.utils import resources as resources_utils
-from tests.utils.response_builders import MLRespXMocker
+from tests.utils.ml_mockers import MLRespXMocker
 
 
 @pytest.fixture()

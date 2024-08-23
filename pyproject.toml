@@ -193,3 +193,8 @@ max-complexity = 10
 "tests/utils/__init__.py" = [
     "T201" # allow printing by MLResponseBuilder
 ]
+"tests/utils/ml_mockers.py" = [
+    "T201", # allow printing by MLMocker
+    "UP006", # allow using List instead of list for pydantic
+    "UP007" # allow using Union instead of X | Y for pydantic
+]

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 from abc import ABCMeta, abstractmethod
-from typing import Any, List, Optional, Union
+from typing import Any, Callable, List, Optional, Union
 
 import respx
 import urllib3
@@ -156,6 +156,7 @@ class RespXResponse(BaseModel):
 class RespXMock(BaseModel):
     request: RespXRequest = RespXRequest()
     response: RespXResponse = RespXResponse()
+    side_effect: Optional[Callable] = None
 
 
 class MLRespXMocker(MLMocker):
@@ -275,19 +276,27 @@ class MLRespXMocker(MLMocker):
         )
         self._resp_mock.response.body_parts.append(req_field)
 
+    def with_side_effect(self, side_effect: Callable):
+        self._resp_mock.side_effect = side_effect
+
     def mock_response(
         self,
     ):
-        self._validate()
-        self._setup_response_body()
-        self._mock.request(
-            **self._resp_mock.request.model_dump(exclude_none=True),
-        ).respond(
-            **self._resp_mock.response.model_dump(
-                exclude={"body_parts"},
-                exclude_none=True,
-            ),
-        )
+        if self._resp_mock.side_effect:
+            self._mock.request(
+                **self._resp_mock.request.model_dump(exclude_none=True),
+            ).mock(side_effect=self._resp_mock.side_effect)
+        else:
+            self._validate()
+            self._setup_response_body()
+            self._mock.request(
+                **self._resp_mock.request.model_dump(exclude_none=True),
+            ).respond(
+                **self._resp_mock.response.model_dump(
+                    exclude={"body_parts"},
+                    exclude_none=True,
+                ),
+            )
         self._resp_mock = RespXMock()
 
     def _validate(self):

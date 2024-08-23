@@ -2,8 +2,10 @@ import xml.etree.ElementTree as ElemTree
 import zlib
 from pathlib import Path
 
+import httpx
 import pytest
 import responses
+from httpx import Response
 
 from mlclient.clients import DocumentsClient
 from mlclient.exceptions import MarkLogicError
@@ -21,6 +23,59 @@ from mlclient.structures import (
 from mlclient.structures.calls import DocumentsBodyPart
 from tests.utils import MLResponseBuilder
 from tests.utils import resources as resources_utils
+from tests.utils.ml_mockers import MLRespXMocker
+
+
+def server_get_mock(request: httpx.Request):
+    uri = request.url.params.get_list("uri")
+    if len(uri) == 1:
+        if "/some/dir/doc1.xml" in uri:
+            code = 200
+            headers = {
+                "Content-Type": "application/xml; charset=utf-8",
+                "vnd.marklogic.document-format": "xml",
+            }
+            content = b'<?xml version="1.0" encoding="UTF-8"?>\n<root/>'
+        elif "/some/dir/doc2.json" in uri:
+            code = 200
+            headers = {
+                "Content-Type": "application/json; charset=utf-8",
+                "vnd.marklogic.document-format": "json",
+            }
+            content = b'{"root":{"child":"data"}}'
+        elif "/some/dir/doc3.xqy" in uri:
+            code = 200
+            headers = {
+                "Content-Type": "application/vnd.marklogic-xdmp; charset=utf-8",
+                "vnd.marklogic.document-format": "text",
+            }
+            content = b'xquery version "1.0-ml";\n\nfn:current-date()'
+        elif "/some/dir/doc4.zip" in uri:
+            code = 200
+            headers = {
+                "Content-Type": "application/zip",
+                "vnd.marklogic.document-format": "binary",
+            }
+            content = zlib.compress(b'xquery version "1.0-ml";\n\nfn:current-date()')
+        else:
+            code = 500
+            json = {
+                "errorResponse": {
+                    "statusCode": code,
+                    "status": "Internal Server Error",
+                    "messageCode": "RESTAPI-NODOCUMENT",
+                    "message": "RESTAPI-NODOCUMENT: (err:FOER0000) "
+                    "Resource or document does not exist:  "
+                    f"category: content message: {uri[0]}",
+                },
+            }
+            return Response(status_code=code, json=json)
+        return Response(status_code=code, headers=headers, content=content)
+
+
+ml_mocker = MLRespXMocker(router_base_url="http://localhost:8002/v1/documents")
+ml_mocker.with_side_effect(side_effect=server_get_mock)
+ml_mocker.mock_get()
 
 
 @pytest.fixture(autouse=True)
@@ -37,29 +92,10 @@ def _setup_and_teardown(docs_client):
     docs_client.disconnect()
 
 
-@responses.activate
+@ml_mocker.router
 def test_read_non_existing_doc(docs_client):
     uri = "/some/dir/doc5.xml"
 
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/documents")
-    builder.with_request_param("uri", "/some/dir/doc5.xml")
-    builder.with_request_param("format", "json")
-    builder.with_response_content_type("application/json; charset=UTF-8")
-    builder.with_response_status(500)
-    builder.with_response_body(
-        {
-            "errorResponse": {
-                "statusCode": 500,
-                "status": "Internal Server Error",
-                "messageCode": "RESTAPI-NODOCUMENT",
-                "message": "RESTAPI-NODOCUMENT: (err:FOER0000) "
-                "Resource or document does not exist:  "
-                f"category: content message: {uri}",
-            },
-        },
-    )
-    builder.build_get()
     with pytest.raises(MarkLogicError) as err:
         docs_client.read(uri)
 
@@ -72,19 +108,9 @@ def test_read_non_existing_doc(docs_client):
     assert err.value.args[0] == expected_error
 
 
-@responses.activate
+@ml_mocker.router
 def test_read_xml_doc(docs_client):
     uri = "/some/dir/doc1.xml"
-
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/documents")
-    builder.with_request_param("uri", uri)
-    builder.with_request_param("format", "json")
-    builder.with_response_content_type("application/xml; charset=utf-8")
-    builder.with_response_header("vnd.marklogic.document-format", "xml")
-    builder.with_response_status(200)
-    builder.with_response_body(b'<?xml version="1.0" encoding="UTF-8"?>\n<root/>')
-    builder.build_get()
 
     document = docs_client.read(uri)
 
@@ -99,19 +125,9 @@ def test_read_xml_doc(docs_client):
     assert document.temporal_collection is None
 
 
-@responses.activate
+@ml_mocker.router
 def test_read_xml_doc_using_uri_list(docs_client):
     uri = "/some/dir/doc1.xml"
-
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/documents")
-    builder.with_request_param("uri", uri)
-    builder.with_request_param("format", "json")
-    builder.with_response_content_type("application/xml; charset=utf-8")
-    builder.with_response_header("vnd.marklogic.document-format", "xml")
-    builder.with_response_status(200)
-    builder.with_response_body(b'<?xml version="1.0" encoding="UTF-8"?>\n<root/>')
-    builder.build_get()
 
     docs = docs_client.read([uri])
     assert isinstance(docs, list)
@@ -129,19 +145,9 @@ def test_read_xml_doc_using_uri_list(docs_client):
     assert document.temporal_collection is None
 
 
-@responses.activate
+@ml_mocker.router
 def test_read_json_doc(docs_client):
     uri = "/some/dir/doc2.json"
-
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/documents")
-    builder.with_request_param("uri", uri)
-    builder.with_request_param("format", "json")
-    builder.with_response_content_type("application/json; charset=utf-8")
-    builder.with_response_header("vnd.marklogic.document-format", "json")
-    builder.with_response_status(200)
-    builder.with_response_body(b'{"root":{"child":"data"}}')
-    builder.build_get()
 
     document = docs_client.read(uri)
 
@@ -154,7 +160,7 @@ def test_read_json_doc(docs_client):
     assert document.temporal_collection is None
 
 
-@responses.activate
+@ml_mocker.router
 def test_read_json_doc_using_uri_list(docs_client):
     uri = "/some/dir/doc2.json"
 
@@ -182,19 +188,9 @@ def test_read_json_doc_using_uri_list(docs_client):
     assert document.temporal_collection is None
 
 
-@responses.activate
+@ml_mocker.router
 def test_read_text_doc(docs_client):
     uri = "/some/dir/doc3.xqy"
-
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/documents")
-    builder.with_request_param("uri", uri)
-    builder.with_request_param("format", "json")
-    builder.with_response_content_type("application/vnd.marklogic-xdmp; charset=utf-8")
-    builder.with_response_status(200)
-    builder.with_response_body(b'xquery version "1.0-ml";\n\nfn:current-date()')
-    builder.with_response_header("vnd.marklogic.document-format", "text")
-    builder.build_get()
 
     document = docs_client.read(uri)
 
@@ -207,19 +203,9 @@ def test_read_text_doc(docs_client):
     assert document.temporal_collection is None
 
 
-@responses.activate
+@ml_mocker.router
 def test_read_text_doc_using_uri_list(docs_client):
     uri = "/some/dir/doc3.xqy"
-
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/documents")
-    builder.with_request_param("uri", uri)
-    builder.with_request_param("format", "json")
-    builder.with_response_content_type("application/vnd.marklogic-xdmp; charset=utf-8")
-    builder.with_response_status(200)
-    builder.with_response_body(b'xquery version "1.0-ml";\n\nfn:current-date()')
-    builder.with_response_header("vnd.marklogic.document-format", "text")
-    builder.build_get()
 
     docs = docs_client.read([uri])
     assert isinstance(docs, list)
@@ -235,21 +221,11 @@ def test_read_text_doc_using_uri_list(docs_client):
     assert document.temporal_collection is None
 
 
-@responses.activate
+@ml_mocker.router
 def test_read_binary_doc(docs_client):
     uri = "/some/dir/doc4.zip"
     content = zlib.compress(b'xquery version "1.0-ml";\n\nfn:current-date()')
 
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/documents")
-    builder.with_request_param("uri", uri)
-    builder.with_request_param("format", "json")
-    builder.with_response_content_type("application/zip")
-    builder.with_response_status(200)
-    builder.with_response_body(content)
-    builder.with_response_header("vnd.marklogic.document-format", "binary")
-    builder.build_get()
-
     document = docs_client.read(uri)
 
     assert isinstance(document, BinaryDocument)
@@ -261,20 +237,10 @@ def test_read_binary_doc(docs_client):
     assert document.temporal_collection is None
 
 
-@responses.activate
+@ml_mocker.router
 def test_read_binary_doc_using_uri_list(docs_client):
     uri = "/some/dir/doc4.zip"
     content = zlib.compress(b'xquery version "1.0-ml";\n\nfn:current-date()')
-
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/documents")
-    builder.with_request_param("uri", uri)
-    builder.with_request_param("format", "json")
-    builder.with_response_content_type("application/zip")
-    builder.with_response_status(200)
-    builder.with_response_body(content)
-    builder.with_response_header("vnd.marklogic.document-format", "binary")
-    builder.build_get()
 
     docs = docs_client.read([uri])
     assert isinstance(docs, list)
@@ -290,19 +256,9 @@ def test_read_binary_doc_using_uri_list(docs_client):
     assert document.temporal_collection is None
 
 
-@responses.activate
+@ml_mocker.router
 def test_read_doc_as_string(docs_client):
     uri = "/some/dir/doc1.xml"
-
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/documents")
-    builder.with_request_param("uri", uri)
-    builder.with_request_param("format", "json")
-    builder.with_response_content_type("application/xml; charset=utf-8")
-    builder.with_response_header("vnd.marklogic.document-format", "xml")
-    builder.with_response_status(200)
-    builder.with_response_body(b'<?xml version="1.0" encoding="UTF-8"?>\n<root/>')
-    builder.build_get()
 
     document = docs_client.read(uri, output_type=str)
 
@@ -315,19 +271,9 @@ def test_read_doc_as_string(docs_client):
     assert document.temporal_collection is None
 
 
-@responses.activate
+@ml_mocker.router
 def test_read_doc_as_string_using_uri_list(docs_client):
     uri = "/some/dir/doc1.xml"
-
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/documents")
-    builder.with_request_param("uri", uri)
-    builder.with_request_param("format", "json")
-    builder.with_response_content_type("application/xml; charset=utf-8")
-    builder.with_response_header("vnd.marklogic.document-format", "xml")
-    builder.with_response_status(200)
-    builder.with_response_body(b'<?xml version="1.0" encoding="UTF-8"?>\n<root/>')
-    builder.build_get()
 
     docs = docs_client.read([uri], output_type=str)
     assert isinstance(docs, list)
@@ -343,19 +289,9 @@ def test_read_doc_as_string_using_uri_list(docs_client):
     assert document.temporal_collection is None
 
 
-@responses.activate
+@ml_mocker.router
 def test_read_doc_as_bytes(docs_client):
     uri = "/some/dir/doc2.json"
-
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/documents")
-    builder.with_request_param("uri", uri)
-    builder.with_request_param("format", "json")
-    builder.with_response_content_type("application/json; charset=utf-8")
-    builder.with_response_header("vnd.marklogic.document-format", "json")
-    builder.with_response_status(200)
-    builder.with_response_body(b'{"root":{"child":"data"}}')
-    builder.build_get()
 
     document = docs_client.read(uri, output_type=bytes)
 
@@ -368,19 +304,9 @@ def test_read_doc_as_bytes(docs_client):
     assert document.temporal_collection is None
 
 
-@responses.activate
+@ml_mocker.router
 def test_read_doc_as_bytes_using_uri_list(docs_client):
     uri = "/some/dir/doc2.json"
-
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/documents")
-    builder.with_request_param("uri", uri)
-    builder.with_request_param("format", "json")
-    builder.with_response_content_type("application/json; charset=utf-8")
-    builder.with_response_header("vnd.marklogic.document-format", "json")
-    builder.with_response_status(200)
-    builder.with_response_body(b'{"root":{"child":"data"}}')
-    builder.build_get()
 
     docs = docs_client.read([uri], output_type=bytes)
     assert isinstance(docs, list)

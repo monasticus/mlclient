@@ -182,14 +182,16 @@ class MLRespXMocker(MLMocker):
         self._resp_mock.request.method = method
 
     def with_request_param(self, name: str, value: str):
-        if not self._resp_mock.request.params:
-            self._resp_mock.request.params = []
-        self._resp_mock.request.params.append((name, value))
+        if value is not None:
+            if not self._resp_mock.request.params:
+                self._resp_mock.request.params = []
+            self._resp_mock.request.params.append((name, value))
 
     def with_request_header(self, name: str, value: str):
-        if not self._resp_mock.request.headers:
-            self._resp_mock.request.headers = Headers()
-        self._resp_mock.request.headers[name] = value
+        if value is not None:
+            if not self._resp_mock.request.headers:
+                self._resp_mock.request.headers = Headers()
+            self._resp_mock.request.headers[name] = value
 
     def with_request_body(self, body: bytes | str | dict):
         if (
@@ -206,9 +208,10 @@ class MLRespXMocker(MLMocker):
         self._resp_mock.response.status_code = status_code
 
     def with_response_header(self, name: str, value: str):
-        if not self._resp_mock.response.headers:
-            self._resp_mock.response.headers = Headers()
-        self._resp_mock.response.headers[name] = value
+        if value is not None:
+            if not self._resp_mock.response.headers:
+                self._resp_mock.response.headers = Headers()
+            self._resp_mock.response.headers[name] = value
 
     def with_empty_response_body(self):
         self.with_response_body(b"")

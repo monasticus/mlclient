@@ -1,16 +1,11 @@
 from __future__ import annotations
 
-import json
 import xml.etree.ElementTree as ElemTree
 import zlib
 from pathlib import Path
 
-import httpx
 import pytest
 import responses
-import urllib3
-from httpx import Response
-from urllib3.fields import RequestField
 
 from mlclient.clients import DocumentsClient
 from mlclient.exceptions import MarkLogicError
@@ -25,10 +20,10 @@ from mlclient.structures import (
     TextDocument,
     XMLDocument,
 )
-from mlclient.structures.calls import ContentDispositionSerializer, DocumentsBodyPart
+from mlclient.structures.calls import DocumentsBodyPart
 from tests.utils import MLResponseBuilder
 from tests.utils import resources as resources_utils
-from tests.utils.ml_mockers import MLRespXMocker
+from tests.utils.ml_mockers import MLDocumentsMocker, MLRespXMocker
 
 DOC_BODY_PARTS = [
     DocumentsBodyPart(
@@ -73,81 +68,10 @@ DOC_BODY_PARTS = [
     ),
 ]
 
-
-def _find_body_part(
-    uri: str,
-) -> DocumentsBodyPart | None:
-    return next(
-        (part for part in DOC_BODY_PARTS if part.content_disposition.filename == uri),
-        None,
-    )
-
-
-def server_get_mock(request: httpx.Request):
-    uris = request.url.params.get_list("uri")
-    if len(uris) == 1:
-        body_part = _find_body_part(uris[0])
-        if not body_part:
-            code = 500
-            content = {
-                "errorResponse": {
-                    "statusCode": code,
-                    "status": "Internal Server Error",
-                    "messageCode": "RESTAPI-NODOCUMENT",
-                    "message": "RESTAPI-NODOCUMENT: (err:FOER0000) "
-                    "Resource or document does not exist:  "
-                    f"category: content message: {uris[0]}",
-                },
-            }
-            return Response(status_code=code, json=content)
-
-        content_type = f"{body_part.content_type}; charset=utf-8"
-        content = body_part.content
-        doc_format = body_part.content_disposition.format_.value
-        headers = {
-            "Content-Type": content_type,
-            "vnd.marklogic.document-format": doc_format,
-        }
-        return Response(status_code=200, headers=headers, content=content)
-
-    response_body_fields = []
-    for uri in uris:
-        body_part = _find_body_part(uri)
-        if body_part is None:
-            continue
-        data = body_part.content
-        if isinstance(data, dict):
-            data = json.dumps(data)
-        content_disp = ContentDispositionSerializer.deserialize(
-            body_part.content_disposition,
-        )
-        req_field = RequestField(
-            name="--ignore--",
-            data=data,
-            headers={
-                "Content-Disposition": content_disp,
-                "Content-Type": body_part.content_type,
-            },
-        )
-        response_body_fields.append(req_field)
-    content, content_type = urllib3.encode_multipart_formdata(
-        response_body_fields,
-    )
-    content_type = content_type.replace(
-        "multipart/form-data",
-        "multipart/mixed",
-    )
-    headers = {
-        "Content-Type": content_type,
-    }
-    if len(response_body_fields) == 0:
-        content = b""
-        headers["Content-Length"] = "0"
-    return Response(status_code=200, headers=headers, content=content)
-
+ml_doc_mocker = MLDocumentsMocker(DOC_BODY_PARTS)
 
 ml_mocker = MLRespXMocker(router_base_url="http://localhost:8002/v1/documents")
-ml_mocker.with_side_effect(side_effect=server_get_mock)
+ml_mocker.with_side_effect(side_effect=ml_doc_mocker.get_documents_side_effect)
 ml_mocker.mock_get()
 
 

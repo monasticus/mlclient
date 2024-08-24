@@ -6,7 +6,7 @@ from typing import Any, Callable, List, Optional, Union
 
 import respx
 import urllib3
-from httpx import Headers
+from httpx import Headers, Request, Response
 from pydantic import BaseModel, ConfigDict
 from respx import MockRouter
 from urllib3.fields import RequestField
@@ -325,3 +325,103 @@ class MLRespXMocker(MLMocker):
             self.with_response_content_type(content_type)
             self._resp_mock.response.body_parts = None
             self._resp_mock.response.content = body
+
+
+class MLDocumentsMocker:
+    def __init__(self, document_body_parts: list[DocumentsBodyPart]):
+        self._doc_body_parts = list(document_body_parts)
+
+    def get_documents_side_effect(
+        self,
+        request: Request,
+    ):
+        uris = request.url.params.get_list("uri")
+        return self.get_documents(uris)
+
+    def get_documents(
+        self,
+        uris: list[str],
+    ) -> Response:
+        if len(uris) == 1:
+            return self._for_single_uri(uris[0])
+        return self._for_multiple_uris(uris)
+
+    def _for_single_uri(
+        self,
+        uri: str,
+    ) -> Response:
+        body_part = self._find_body_part(uri)
+        if not body_part:
+            code = 500
+            content = {
+                "errorResponse": {
+                    "statusCode": code,
+                    "status": "Internal Server Error",
+                    "messageCode": "RESTAPI-NODOCUMENT",
+                    "message": "RESTAPI-NODOCUMENT: (err:FOER0000) "
+                    "Resource or document does not exist:  "
+                    f"category: content message: {uri}",
+                },
+            }
+            return Response(status_code=code, json=content)
+
+        content_type = f"{body_part.content_type}; charset=utf-8"
+        content = body_part.content
+        doc_format = body_part.content_disposition.format_.value
+        headers = {
+            "Content-Type": content_type,
+            "vnd.marklogic.document-format": doc_format,
+        }
+        return Response(status_code=200, headers=headers, content=content)
+
+    def _for_multiple_uris(
+        self,
+        uris: list,
+    ) -> Response:
+        response_body_fields = []
+        for uri in uris:
+            body_part = self._find_body_part(uri)
+            if body_part is None:
+                continue
+            data = body_part.content
+            if isinstance(data, dict):
+                data = json.dumps(data)
+            content_disp = ContentDispositionSerializer.deserialize(
+                body_part.content_disposition,
+            )
+            req_field = RequestField(
+                name="--ignore--",
+                data=data,
+                headers={
+                    "Content-Disposition": content_disp,
+                    "Content-Type": body_part.content_type,
+                },
+            )
+            response_body_fields.append(req_field)
+        content, content_type = urllib3.encode_multipart_formdata(
+            response_body_fields,
+        )
+        content_type = content_type.replace(
+            "multipart/form-data",
+            "multipart/mixed",
+        )
+        headers = {
+            "Content-Type": content_type,
+        }
+        if len(response_body_fields) == 0:
+            content = b""
+            headers["Content-Length"] = "0"
+        return Response(status_code=200, headers=headers, content=content)
+
+    def _find_body_part(
+        self,
+        uri: str,
+    ) -> DocumentsBodyPart | None:
+        return next(
+            (
+                part
+                for part in self._doc_body_parts
+                if part.content_disposition.filename == uri
+            ),
+            None,
+        )

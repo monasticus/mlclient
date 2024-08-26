@@ -8,6 +8,7 @@ import respx
 import urllib3
 from httpx import Headers, Request, Response
 from pydantic import BaseModel, ConfigDict
+from requests_toolbelt import MultipartDecoder
 from respx import MockRouter
 from urllib3.fields import RequestField
 
@@ -344,6 +345,28 @@ class MLDocumentsMocker:
         if len(category) == 0:
             category = ["content"]
         return self.get_documents(uris, category)
+
+    def post_documents_side_effect(
+        self,
+        request: Request,
+    ):
+        body_parts = MultipartDecoder.from_response(request).parts
+        document_objects = []
+        for body_part in body_parts:
+            content_disp = ContentDispositionSerializer.serialize(
+                body_part.headers.get(b"Content-Disposition").decode("utf-8"),
+            )
+            document_objects.append(
+                {
+                    "uri": content_disp.filename,
+                    "mime-type": body_part.headers.get(b"Content-Type").decode("utf-8"),
+                    "category": ["metadata", "content"],
+                },
+            )
+
+        headers = {"vnd.marklogic.document-format": "json"}
+        content = {"documents": document_objects}
+        return Response(status_code=200, headers=headers, json=content)
 
     def get_documents(
         self,

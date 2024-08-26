@@ -188,6 +188,8 @@ ml_doc_mocker = MLDocumentsMocker(DOC_BODY_PARTS)
 ml_mocker = MLRespXMocker(router_base_url="http://localhost:8002/v1/documents")
 ml_mocker.with_side_effect(side_effect=ml_doc_mocker.get_documents_side_effect)
 ml_mocker.mock_get()
+ml_mocker.with_side_effect(side_effect=ml_doc_mocker.post_documents_side_effect)
+ml_mocker.mock_post()
 
 
 @pytest.fixture(autouse=True)
@@ -1331,29 +1333,11 @@ def test_read_multiple_docs_using_custom_database(docs_client):
     assert zip_doc.temporal_collection is None
 
 
-@responses.activate
+@ml_mocker.router
 def test_create_raw_document(docs_client):
     uri = "/some/dir/doc1.xml"
     content = b"<root><child>data</child></root>"
     doc = RawDocument(content, uri, DocumentType.XML)
-
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/documents")
-    builder.with_response_content_type("application/json; charset=utf-8")
-    builder.with_response_header("vnd.marklogic.document-format", "json")
-    builder.with_response_status(200)
-    builder.with_response_body(
-        {
-            "documents": [
-                {
-                    "uri": uri,
-                    "mime-type": "application/xml",
-                    "category": ["metadata", "content"],
-                },
-            ],
-        },
-    )
-    builder.build_post()
 
     resp = docs_client.create(doc)
 
@@ -1364,29 +1348,11 @@ def test_create_raw_document(docs_client):
     assert documents[0]["category"] == ["metadata", "content"]
 
 
-@responses.activate
+@ml_mocker.router
 def test_create_raw_string_document(docs_client):
     uri = "/some/dir/doc2.json"
     content = '{"root":{"child":"data"}}'
     doc = RawStringDocument(content, uri, DocumentType.JSON)
-
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/documents")
-    builder.with_response_content_type("application/json; charset=utf-8")
-    builder.with_response_header("vnd.marklogic.document-format", "json")
-    builder.with_response_status(200)
-    builder.with_response_body(
-        {
-            "documents": [
-                {
-                    "uri": uri,
-                    "mime-type": "application/json",
-                    "category": ["metadata", "content"],
-                },
-            ],
-        },
-    )
-    builder.build_post()
 
     resp = docs_client.create(doc)
 
@@ -1397,30 +1363,13 @@ def test_create_raw_string_document(docs_client):
     assert documents[0]["category"] == ["metadata", "content"]
 
 
-@responses.activate
+@ml_mocker.router
 def test_create_xml_document(docs_client):
     uri = "/some/dir/doc1.xml"
     content_str = "<root><child>data</child></root>"
     content = ElemTree.ElementTree(ElemTree.fromstring(content_str))
     doc = XMLDocument(content, uri)
 
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/documents")
-    builder.with_response_content_type("application/json; charset=utf-8")
-    builder.with_response_header("vnd.marklogic.document-format", "json")
-    builder.with_response_body(
-        {
-            "documents": [
-                {
-                    "uri": uri,
-                    "mime-type": "application/xml",
-                    "category": ["metadata", "content"],
-                },
-            ],
-        },
-    )
-    builder.build_post()
-
     resp = docs_client.create(doc)
 
     documents = resp["documents"]
@@ -1430,29 +1379,11 @@ def test_create_xml_document(docs_client):
     assert documents[0]["category"] == ["metadata", "content"]
 
 
-@responses.activate
+@ml_mocker.router
 def test_create_json_document(docs_client):
     uri = "/some/dir/doc2.json"
     content = {"root": {"child": "data"}}
     doc = JSONDocument(content, uri)
-
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/documents")
-    builder.with_response_content_type("application/json; charset=utf-8")
-    builder.with_response_header("vnd.marklogic.document-format", "json")
-    builder.with_response_status(200)
-    builder.with_response_body(
-        {
-            "documents": [
-                {
-                    "uri": uri,
-                    "mime-type": "application/json",
-                    "category": ["metadata", "content"],
-                },
-            ],
-        },
-    )
-    builder.build_post()
 
     resp = docs_client.create(doc)
 
@@ -1463,29 +1394,11 @@ def test_create_json_document(docs_client):
     assert documents[0]["category"] == ["metadata", "content"]
 
 
-@responses.activate
+@ml_mocker.router
 def test_create_text_document(docs_client):
     uri = "/some/dir/doc3.xqy"
     content = 'xquery version "1.0-ml";\n\nfn:current-date()'
     doc = TextDocument(content, uri)
-
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/documents")
-    builder.with_response_content_type("application/json; charset=utf-8")
-    builder.with_response_header("vnd.marklogic.document-format", "json")
-    builder.with_response_status(200)
-    builder.with_response_body(
-        {
-            "documents": [
-                {
-                    "uri": uri,
-                    "mime-type": "application/vnd.marklogic-xdmp",
-                    "category": ["metadata", "content"],
-                },
-            ],
-        },
-    )
-    builder.build_post()
 
     resp = docs_client.create(doc)
 
@@ -1496,29 +1409,11 @@ def test_create_text_document(docs_client):
     assert documents[0]["category"] == ["metadata", "content"]
 
 
-@responses.activate
+@ml_mocker.router
 def test_create_binary_document(docs_client):
     uri = "/some/dir/doc4.zip"
     content = zlib.compress(b'xquery version "1.0-ml";\n\nfn:current-date()')
     doc = BinaryDocument(content, uri)
-
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/documents")
-    builder.with_response_content_type("application/json; charset=utf-8")
-    builder.with_response_header("vnd.marklogic.document-format", "json")
-    builder.with_response_status(200)
-    builder.with_response_body(
-        {
-            "documents": [
-                {
-                    "uri": uri,
-                    "mime-type": "application/zip",
-                    "category": ["metadata", "content"],
-                },
-            ],
-        },
-    )
-    builder.build_post()
 
     resp = docs_client.create(doc)
 

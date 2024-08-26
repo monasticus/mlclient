@@ -450,7 +450,8 @@ class MLDocumentsMocker:
         if "content" in category and "content" in body_part_category:
             return True
         metadata_categories = list(category)
-        metadata_categories.remove("content")
+        if "content" in metadata_categories:
+            metadata_categories.remove("content")
         if len(metadata_categories) != len(body_part_category):
             return False
         return sorted(metadata_categories) == sorted(body_part_category)

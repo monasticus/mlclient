@@ -1424,29 +1424,11 @@ def test_create_binary_document(docs_client):
     assert documents[0]["category"] == ["metadata", "content"]
 
 
-@responses.activate
+@ml_mocker.router
 def test_create_metadata_document_when_doc_exists(docs_client):
     uri = "/some/dir/doc1.xml"
     metadata = Metadata(collections=["test-collection"])
     doc = MetadataDocument(uri, metadata)
-
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/documents")
-    builder.with_response_content_type("application/json; charset=utf-8")
-    builder.with_response_header("vnd.marklogic.document-format", "json")
-    builder.with_response_status(200)
-    builder.with_response_body(
-        {
-            "documents": [
-                {
-                    "uri": "/some/dir/doc1.xml",
-                    "mime-type": "",
-                    "category": ["metadata"],
-                },
-            ],
-        },
-    )
-    builder.build_post()
 
     resp = docs_client.create(doc)
 
@@ -1457,42 +1439,25 @@ def test_create_metadata_document_when_doc_exists(docs_client):
     assert documents[0]["category"] == ["metadata"]
 
 
-@responses.activate
+@ml_mocker.router
 def test_create_metadata_document_when_doc_does_not_exists(docs_client):
-    uri = "/some/dir/doc1.xml"
+    # NON_EXISTING part makes it simulating an error
+    uri = "/some/dir/NON_EXISTING-doc.xml"
     metadata = Metadata(collections=["test-collection"])
     doc = MetadataDocument(uri, metadata)
-
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/documents")
-    builder.with_response_content_type("application/json; charset=UTF-8")
-    builder.with_response_status(500)
-    builder.with_response_body(
-        {
-            "errorResponse": {
-                "statusCode": "500",
-                "status": "Internal Server Error",
-                "messageCode": "XDMP-DOCNOTFOUND",
-                "message": "XDMP-DOCNOTFOUND: "
-                'xdmp:document-set-collections("/some/dir/doc1.xml", "test-collection")'
-                " -- Document not found",
-            },
-        },
-    )
-    builder.build_post()
 
     with pytest.raises(MarkLogicError) as err:
         docs_client.create(doc)
 
     expected_error = (
         "[500 Internal Server Error] (XDMP-DOCNOTFOUND) XDMP-DOCNOTFOUND: "
-        'xdmp:document-set-collections("/some/dir/doc1.xml", "test-collection")'
+        f'xdmp:document-set-collections("{uri}", "test-collection")'
         " -- Document not found"
     )
     assert err.value.args[0] == expected_error
 
 
-@responses.activate
+@ml_mocker.router
 def test_create_multiple_documents(docs_client):
     doc_1_uri = "/some/dir/doc1.xml"
     doc_1_content_str = "<root><child>data</child></root>"
@@ -1510,42 +1475,6 @@ def test_create_multiple_documents(docs_client):
     doc_4_uri = "/some/dir/doc4.zip"
     doc_4_content = zlib.compress(b'xquery version "1.0-ml";\n\nfn:current-date()')
     doc_4 = BinaryDocument(doc_4_content, doc_4_uri)
-
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/documents")
-    builder.with_response_content_type("application/json; charset=utf-8")
-    builder.with_response_header("vnd.marklogic.document-format", "json")
-    builder.with_response_header("Server", "MarkLogic")
-    builder.with_response_header("Connection", "Keep-Alive")
-    builder.with_response_header("Keep-Alive", "timeout=5")
-    builder.with_response_status(200)
-    builder.with_response_body(
-        {
-            "documents": [
-                {
-                    "uri": "/some/dir/doc1.xml",
-                    "mime-type": "application/xml",
-                    "category": ["metadata", "content"],
-                },
-                {
-                    "uri": "/some/dir/doc2.json",
-                    "mime-type": "application/json",
-                    "category": ["metadata", "content"],
-                },
-                {
-                    "uri": "/some/dir/doc3.xqy",
-                    "mime-type": "application/vnd.marklogic-xdmp",
-                    "category": ["metadata", "content"],
-                },
-                {
-                    "uri": "/some/dir/doc4.zip",
-                    "mime-type": "application/zip",
-                    "category": ["metadata", "content"],
-                },
-            ],
-        },
-    )
-    builder.build_post()
 
     resp = docs_client.create([doc_1, doc_2, doc_3, doc_4])
 
@@ -1581,31 +1510,13 @@ def test_create_multiple_documents(docs_client):
     assert doc_4_info["category"] == ["metadata", "content"]
 
 
-@responses.activate
+@ml_mocker.router
 def test_create_raw_document_with_metadata(docs_client):
     uri = "/some/dir/doc1.xml"
     content = b"<root><child>data</child></root>"
     metadata = b'{"collections": ["test-collection"]}'
     doc = RawDocument(content, uri, DocumentType.XML, metadata)
 
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/documents")
-    builder.with_response_content_type("application/json; charset=utf-8")
-    builder.with_response_header("vnd.marklogic.document-format", "json")
-    builder.with_response_status(200)
-    builder.with_response_body(
-        {
-            "documents": [
-                {
-                    "uri": "/some/dir/doc1.xml",
-                    "mime-type": "application/xml",
-                    "category": ["metadata", "content"],
-                },
-            ],
-        },
-    )
-    builder.build_post()
-
     resp = docs_client.create(doc)
 
     documents = resp["documents"]
@@ -1615,31 +1526,13 @@ def test_create_raw_document_with_metadata(docs_client):
     assert documents[0]["category"] == ["metadata", "content"]
 
 
-@responses.activate
+@ml_mocker.router
 def test_create_raw_string_document_with_metadata(docs_client):
     uri = "/some/dir/doc1.xml"
     content = "<root><child>data</child></root>"
     metadata = '{"collections": ["test-collection"]}'
     doc = RawStringDocument(content, uri, DocumentType.XML, metadata)
 
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/documents")
-    builder.with_response_content_type("application/json; charset=utf-8")
-    builder.with_response_header("vnd.marklogic.document-format", "json")
-    builder.with_response_status(200)
-    builder.with_response_body(
-        {
-            "documents": [
-                {
-                    "uri": "/some/dir/doc1.xml",
-                    "mime-type": "application/xml",
-                    "category": ["metadata", "content"],
-                },
-            ],
-        },
-    )
-    builder.build_post()
-
     resp = docs_client.create(doc)
 
     documents = resp["documents"]
@@ -1649,7 +1542,7 @@ def test_create_raw_string_document_with_metadata(docs_client):
     assert documents[0]["category"] == ["metadata", "content"]
 
 
-@responses.activate
+@ml_mocker.router
 def test_create_xml_document_with_metadata(docs_client):
     uri = "/some/dir/doc1.xml"
     content_str = "<root><child>data</child></root>"
@@ -1657,23 +1550,6 @@ def test_create_xml_document_with_metadata(docs_client):
     metadata = Metadata(collections=["test-collection"])
     doc = XMLDocument(content, uri, metadata)
 
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/documents")
-    builder.with_response_content_type("application/json; charset=utf-8")
-    builder.with_response_header("vnd.marklogic.document-format", "json")
-    builder.with_response_body(
-        {
-            "documents": [
-                {
-                    "uri": uri,
-                    "mime-type": "application/xml",
-                    "category": ["metadata", "content"],
-                },
-            ],
-        },
-    )
-    builder.build_post()
-
     resp = docs_client.create(doc)
 
     documents = resp["documents"]
@@ -1683,30 +1559,12 @@ def test_create_xml_document_with_metadata(docs_client):
     assert documents[0]["category"] == ["metadata", "content"]
 
 
-@responses.activate
+@ml_mocker.router
 def test_create_json_document_with_metadata(docs_client):
     uri = "/some/dir/doc2.json"
     content = {"root": {"child": "data"}}
     metadata = Metadata(collections=["test-collection"])
     doc = JSONDocument(content, uri, metadata)
-
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/documents")
-    builder.with_response_content_type("application/json; charset=utf-8")
-    builder.with_response_header("vnd.marklogic.document-format", "json")
-    builder.with_response_status(200)
-    builder.with_response_body(
-        {
-            "documents": [
-                {
-                    "uri": uri,
-                    "mime-type": "application/json",
-                    "category": ["metadata", "content"],
-                },
-            ],
-        },
-    )
-    builder.build_post()
 
     resp = docs_client.create(doc)
 
@@ -1717,30 +1575,12 @@ def test_create_json_document_with_metadata(docs_client):
     assert documents[0]["category"] == ["metadata", "content"]
 
 
-@responses.activate
+@ml_mocker.router
 def test_create_text_document_with_metadata(docs_client):
     uri = "/some/dir/doc3.xqy"
     content = 'xquery version "1.0-ml";\n\nfn:current-date()'
     metadata = Metadata(collections=["test-collection"])
     doc = TextDocument(content, uri, metadata)
-
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/documents")
-    builder.with_response_content_type("application/json; charset=utf-8")
-    builder.with_response_header("vnd.marklogic.document-format", "json")
-    builder.with_response_status(200)
-    builder.with_response_body(
-        {
-            "documents": [
-                {
-                    "uri": uri,
-                    "mime-type": "application/vnd.marklogic-xdmp",
-                    "category": ["metadata", "content"],
-                },
-            ],
-        },
-    )
-    builder.build_post()
 
     resp = docs_client.create(doc)
 
@@ -1751,30 +1591,12 @@ def test_create_text_document_with_metadata(docs_client):
     assert documents[0]["category"] == ["metadata", "content"]
 
 
-@responses.activate
+@ml_mocker.router
 def test_create_binary_document_with_metadata(docs_client):
     uri = "/some/dir/doc4.zip"
     content = zlib.compress(b'xquery version "1.0-ml";\n\nfn:current-date()')
     metadata = Metadata(collections=["test-collection"])
     doc = BinaryDocument(content, uri, metadata)
-
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/documents")
-    builder.with_response_content_type("application/json; charset=utf-8")
-    builder.with_response_header("vnd.marklogic.document-format", "json")
-    builder.with_response_status(200)
-    builder.with_response_body(
-        {
-            "documents": [
-                {
-                    "uri": uri,
-                    "mime-type": "application/zip",
-                    "category": ["metadata", "content"],
-                },
-            ],
-        },
-    )
-    builder.build_post()
 
     resp = docs_client.create(doc)
 
@@ -1785,7 +1607,7 @@ def test_create_binary_document_with_metadata(docs_client):
     assert documents[0]["category"] == ["metadata", "content"]
 
 
-@responses.activate
+@ml_mocker.router
 def test_create_multiple_documents_with_metadata(docs_client):
     metadata = Metadata(collections=["test-collection"])
 
@@ -1806,42 +1628,6 @@ def test_create_multiple_documents_with_metadata(docs_client):
     doc_4_content = zlib.compress(b'xquery version "1.0-ml";\n\nfn:current-date()')
     doc_4 = BinaryDocument(doc_4_content, doc_4_uri, metadata)
 
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/documents")
-    builder.with_response_content_type("application/json; charset=utf-8")
-    builder.with_response_header("vnd.marklogic.document-format", "json")
-    builder.with_response_header("Server", "MarkLogic")
-    builder.with_response_header("Connection", "Keep-Alive")
-    builder.with_response_header("Keep-Alive", "timeout=5")
-    builder.with_response_status(200)
-    builder.with_response_body(
-        {
-            "documents": [
-                {
-                    "uri": "/some/dir/doc1.xml",
-                    "mime-type": "application/xml",
-                    "category": ["metadata", "content"],
-                },
-                {
-                    "uri": "/some/dir/doc2.json",
-                    "mime-type": "application/json",
-                    "category": ["metadata", "content"],
-                },
-                {
-                    "uri": "/some/dir/doc3.xqy",
-                    "mime-type": "application/vnd.marklogic-xdmp",
-                    "category": ["metadata", "content"],
-                },
-                {
-                    "uri": "/some/dir/doc4.zip",
-                    "mime-type": "application/zip",
-                    "category": ["metadata", "content"],
-                },
-            ],
-        },
-    )
-    builder.build_post()
-
     resp = docs_client.create([doc_1, doc_2, doc_3, doc_4])
 
     documents = resp["documents"]
@@ -1876,31 +1662,13 @@ def test_create_multiple_documents_with_metadata(docs_client):
     assert doc_4_info["category"] == ["metadata", "content"]
 
 
-@responses.activate
+@ml_mocker.router
 def test_create_single_document_with_default_metadata(docs_client):
     default_metadata = Metadata(collections=["test-collection"])
 
     uri = "/some/dir/doc1.xml"
     content = b"<root><child>data</child></root>"
     doc = RawDocument(content, uri, DocumentType.XML)
-
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/documents")
-    builder.with_response_content_type("application/json; charset=utf-8")
-    builder.with_response_header("vnd.marklogic.document-format", "json")
-    builder.with_response_status(200)
-    builder.with_response_body(
-        {
-            "documents": [
-                {
-                    "uri": "/some/dir/doc1.xml",
-                    "mime-type": "application/xml",
-                    "category": ["metadata", "content"],
-                },
-            ],
-        },
-    )
-    builder.build_post()
 
     resp = docs_client.create([default_metadata, doc])
 
@@ -1911,7 +1679,7 @@ def test_create_single_document_with_default_metadata(docs_client):
     assert documents[0]["category"] == ["metadata", "content"]
 
 
-@responses.activate
+@ml_mocker.router
 def test_create_multiple_documents_with_default_metadata(docs_client):
     default_metadata = Metadata(collections=["test-collection"])
 
@@ -1931,39 +1699,6 @@ def test_create_multiple_documents_with_default_metadata(docs_client):
     doc_4_uri = "/some/dir/doc4.zip"
     doc_4_content = zlib.compress(b'xquery version "1.0-ml";\n\nfn:current-date()')
     doc_4 = BinaryDocument(doc_4_content, doc_4_uri)
-
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/documents")
-    builder.with_response_content_type("application/json; charset=utf-8")
-    builder.with_response_header("vnd.marklogic.document-format", "json")
-    builder.with_response_status(200)
-    builder.with_response_body(
-        {
-            "documents": [
-                {
-                    "uri": "/some/dir/doc1.xml",
-                    "mime-type": "application/xml",
-                    "category": ["metadata", "content"],
-                },
-                {
-                    "uri": "/some/dir/doc2.json",
-                    "mime-type": "application/json",
-                    "category": ["metadata", "content"],
-                },
-                {
-                    "uri": "/some/dir/doc3.xqy",
-                    "mime-type": "application/vnd.marklogic-xdmp",
-                    "category": ["metadata", "content"],
-                },
-                {
-                    "uri": "/some/dir/doc4.zip",
-                    "mime-type": "application/zip",
-                    "category": ["metadata", "content"],
-                },
-            ],
-        },
-    )
-    builder.build_post()
 
     resp = docs_client.create([default_metadata, doc_1, doc_2, doc_3, doc_4])
 
@@ -1999,17 +1734,9 @@ def test_create_multiple_documents_with_default_metadata(docs_client):
     assert doc_4_info["category"] == ["metadata", "content"]
 
 
-@responses.activate
+@ml_mocker.router
 def test_create_only_default_metadata(docs_client):
     default_metadata = Metadata(collections=["test-collection"])
-
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/documents")
-    builder.with_response_content_type("application/json; charset=utf-8")
-    builder.with_response_header("vnd.marklogic.document-format", "json")
-    builder.with_response_status(200)
-    builder.with_response_body({"documents": []})
-    builder.build_post()
 
     resp = docs_client.create(default_metadata)
 
@@ -2017,30 +1744,11 @@ def test_create_only_default_metadata(docs_client):
     assert len(documents) == 0
 
 
-@responses.activate
+@ml_mocker.router
 def test_create_single_document_using_custom_database(docs_client):
     uri = "/some/dir/doc1.xml"
     content = b"<root><child>data</child></root>"
     doc = RawDocument(content, uri, DocumentType.XML)
-
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/documents")
-    builder.with_request_param("database", "Documents")
-    builder.with_response_content_type("application/json; charset=utf-8")
-    builder.with_response_header("vnd.marklogic.document-format", "json")
-    builder.with_response_status(200)
-    builder.with_response_body(
-        {
-            "documents": [
-                {
-                    "uri": "/some/dir/doc1.xml",
-                    "mime-type": "application/xml",
-                    "category": ["metadata", "content"],
-                },
-            ],
-        },
-    )
-    builder.build_post()
 
     resp = docs_client.create(doc, database="Documents")
 
@@ -2051,7 +1759,7 @@ def test_create_single_document_using_custom_database(docs_client):
     assert documents[0]["category"] == ["metadata", "content"]
 
 
-@responses.activate
+@ml_mocker.router
 def test_create_multiple_documents_using_custom_database(docs_client):
     doc_1_uri = "/some/dir/doc1.xml"
     doc_1_content_str = "<root><child>data</child></root>"
@@ -2069,40 +1777,6 @@ def test_create_multiple_documents_using_custom_database(docs_client):
     doc_4_uri = "/some/dir/doc4.zip"
     doc_4_content = zlib.compress(b'xquery version "1.0-ml";\n\nfn:current-date()')
     doc_4 = BinaryDocument(doc_4_content, doc_4_uri)
-
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/documents")
-    builder.with_request_param("database", "Documents")
-    builder.with_response_content_type("application/json; charset=utf-8")
-    builder.with_response_header("vnd.marklogic.document-format", "json")
-    builder.with_response_status(200)
-    builder.with_response_body(
-        {
-            "documents": [
-                {
-                    "uri": "/some/dir/doc1.xml",
-                    "mime-type": "application/xml",
-                    "category": ["metadata", "content"],
-                },
-                {
-                    "uri": "/some/dir/doc2.json",
-                    "mime-type": "application/json",
-                    "category": ["metadata", "content"],
-                },
-                {
-                    "uri": "/some/dir/doc3.xqy",
-                    "mime-type": "application/vnd.marklogic-xdmp",
-                    "category": ["metadata", "content"],
-                },
-                {
-                    "uri": "/some/dir/doc4.zip",
-                    "mime-type": "application/zip",
-                    "category": ["metadata", "content"],
-                },
-            ],
-        },
-    )
-    builder.build_post()
 
     resp = docs_client.create([doc_1, doc_2, doc_3, doc_4], database="Documents")
 
@@ -2138,34 +1812,11 @@ def test_create_multiple_documents_using_custom_database(docs_client):
     assert doc_4_info["category"] == ["metadata", "content"]
 
 
-@responses.activate
+@ml_mocker.router
 def test_create_document_with_temporal_collection(docs_client):
     uri = "/some/dir/doc1.xml"
     content = "<root><child>data</child><systemStart/><systemEnd/></root>"
     doc = RawStringDocument(content, uri, DocumentType.XML)
-
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/documents")
-    builder.with_request_param("temporal-collection", "temporal-collection")
-    builder.with_response_content_type("application/json; charset=utf-8")
-    builder.with_response_header("vnd.marklogic.document-format", "json")
-    builder.with_response_header(
-        "x-marklogic-system-time",
-        "2023-11-28T06:37:25.824213Z",
-    )
-    builder.with_response_status(200)
-    builder.with_response_body(
-        {
-            "documents": [
-                {
-                    "uri": "/some/dir/doc1.xml",
-                    "mime-type": "application/xml",
-                    "category": ["metadata", "content"],
-                },
-            ],
-        },
-    )
-    builder.build_post()
 
     resp = docs_client.create(doc, temporal_collection="temporal-collection")
 

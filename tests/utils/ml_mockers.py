@@ -16,7 +16,7 @@ from mlclient.constants import HEADER_X_WWW_FORM_URLENCODED
 from mlclient.structures.calls import (
     Category,
     ContentDispositionSerializer,
-    DocumentsBodyPart,
+    DocumentsBodyPart, DocumentsBodyPartType,
 )
 
 
@@ -65,53 +65,53 @@ class MLMocker(metaclass=ABCMeta):
 
     @abstractmethod
     def with_response_body_part(
-        self,
-        x_primitive: str | None,
-        body_part_content: Any,
-        content_type: str | None = None,
+            self,
+            x_primitive: str | None,
+            body_part_content: Any,
+            content_type: str | None = None,
     ):
         raise NotImplementedError
 
     @abstractmethod
     def with_response_documents_body_part(
-        self,
-        body_part: DocumentsBodyPart,
+            self,
+            body_part: DocumentsBodyPart,
     ):
         raise NotImplementedError
 
     def mock_get(
-        self,
+            self,
     ):
         self.with_method("GET")
         return self.mock_response()
 
     def mock_delete(
-        self,
+            self,
     ):
         self.with_method("DELETE")
         return self.mock_response()
 
     def mock_post(
-        self,
+            self,
     ):
         self.with_method("POST")
         return self.mock_response()
 
     def mock_put(
-        self,
+            self,
     ):
         self.with_method("PUT")
         return self.mock_response()
 
     @abstractmethod
     def mock_response(
-        self,
+            self,
     ):
         raise NotImplementedError
 
     @staticmethod
     def error_logs_body(
-        logs: list[tuple],
+            logs: list[tuple],
     ):
         logs_body = {"logfile": {}}
         if len(logs) > 0:
@@ -127,7 +127,7 @@ class MLMocker(metaclass=ABCMeta):
 
     @staticmethod
     def non_error_logs_body(
-        logs: list[str],
+            logs: list[str],
     ):
         logs_body = {"logfile": {}}
         if len(logs) > 0:
@@ -201,8 +201,8 @@ class MLRespXMocker(MLMocker):
 
     def with_request_body(self, body: bytes | str | dict):
         if (
-            self._resp_mock.request.headers.get("content-type")
-            == HEADER_X_WWW_FORM_URLENCODED
+                self._resp_mock.request.headers.get("content-type")
+                == HEADER_X_WWW_FORM_URLENCODED
         ):
             self._resp_mock.request.data = body
         elif isinstance(body, dict):
@@ -230,10 +230,10 @@ class MLRespXMocker(MLMocker):
             self._resp_mock.response.content = body
 
     def with_response_body_part(
-        self,
-        x_primitive: str | None,
-        body_part_content: Any,
-        content_type: str | None = None,
+            self,
+            x_primitive: str | None,
+            body_part_content: Any,
+            content_type: str | None = None,
     ):
         if not self._resp_mock.response.body_parts:
             self._resp_mock.response.body_parts = []
@@ -259,8 +259,8 @@ class MLRespXMocker(MLMocker):
         self._resp_mock.response.body_parts.append(req_field)
 
     def with_response_documents_body_part(
-        self,
-        body_part: DocumentsBodyPart,
+            self,
+            body_part: DocumentsBodyPart,
     ):
         if not self._resp_mock.response.body_parts:
             self._resp_mock.response.body_parts = []
@@ -285,7 +285,7 @@ class MLRespXMocker(MLMocker):
         self._resp_mock.side_effect = side_effect
 
     def mock_response(
-        self,
+            self,
     ):
         if self._resp_mock.side_effect:
             self._mock.request(
@@ -337,8 +337,8 @@ class MLDocumentsMocker:
         self._doc_body_parts = list(document_body_parts)
 
     def get_documents_side_effect(
-        self,
-        request: Request,
+            self,
+            request: Request,
     ):
         uris = request.url.params.get_list("uri")
         category = request.url.params.get_list("category")
@@ -347,8 +347,8 @@ class MLDocumentsMocker:
         return self.get_documents(uris, category)
 
     def post_documents_side_effect(
-        self,
-        request: Request,
+            self,
+            request: Request,
     ):
         body_parts = MultipartDecoder.from_response(request).parts
         document_objects = []
@@ -356,31 +356,73 @@ class MLDocumentsMocker:
             content_disp = ContentDispositionSerializer.serialize(
                 body_part.headers.get(b"Content-Disposition").decode("utf-8"),
             )
-            document_objects.append(
-                {
-                    "uri": content_disp.filename,
-                    "mime-type": body_part.headers.get(b"Content-Type").decode("utf-8"),
-                    "category": ["metadata", "content"],
-                },
-            )
+            if content_disp.body_part_type != DocumentsBodyPartType.ATTACHMENT:
+                continue
+            uri = content_disp.filename
+            if "NON_EXISTING" not in uri:
+                existing_doc_object = next((o for o in document_objects if o.get("uri") == uri), None)
+                if existing_doc_object:
+                    document_objects.remove(existing_doc_object)
+                    if content_disp.category in [None, Category.CONTENT]:
+                        mime_type = body_part.headers.get(b"Content-Type").decode("utf-8")
+                    else:
+                        mime_type = existing_doc_object.get("mime-type")
+                    category = ["metadata", "content"]
+                elif content_disp.category in [None, Category.CONTENT]:
+                    mime_type = body_part.headers.get(b"Content-Type").decode("utf-8")
+                    category = ["metadata", "content"]
+                else:
+                    mime_type = ""
+                    category = ["metadata"]
+                document_objects.append(
+                    {
+                        "uri": content_disp.filename,
+                        "mime-type": mime_type,
+                        "category": category,
+                    },
+                )
+            elif len(body_parts) == 1:
+                metadata = json.loads(body_part.content.decode("utf-8"))
+                if metadata.get("collections") and len(metadata.get("collections")) > 0:
+                    collections = metadata.get("collections")
+                    if len(collections) == 1:
+                        col_str = f'"{collections[0]}"'
+                    else:
+                        col_str = "(" + ", ".join(f'"{c}"' for c in collections) + ")"
+                    operation = f'xdmp:document-set-collections("{uri}", {col_str})'
+                else:
+                    raise NotImplementedError
+                document_objects.append({
+                    "errorResponse": {
+                        "statusCode": "500",
+                        "status": "Internal Server Error",
+                        "messageCode": "XDMP-DOCNOTFOUND",
+                        "message": f"XDMP-DOCNOTFOUND: {operation}"
+                                   " -- Document not found",
+                    },
+                })
 
-        headers = {"vnd.marklogic.document-format": "json"}
+        headers = {"Content-Type": "application/json; charset=UTF-8"}
+        if len(document_objects) == 1 and "errorResponse" in document_objects[0]:
+            return Response(status_code=500, headers=headers, json=document_objects[0])
+
+        headers["vnd.marklogic.document-format"] = "json"
         content = {"documents": document_objects}
         return Response(status_code=200, headers=headers, json=content)
 
     def get_documents(
-        self,
-        uris: list[str],
-        category: list[str],
+            self,
+            uris: list[str],
+            category: list[str],
     ) -> Response:
         if len(uris) == 1 and len(category) == 1:
             return self._for_single_uri(uris[0], category)
         return self._for_multiple_uris(uris, category)
 
     def _for_single_uri(
-        self,
-        uri: str,
-        category: list[str],
+            self,
+            uri: str,
+            category: list[str],
     ) -> Response:
         body_parts = self._find_body_parts(uri, category)
         if len(body_parts) == 0:
@@ -391,11 +433,12 @@ class MLDocumentsMocker:
                     "status": "Internal Server Error",
                     "messageCode": "RESTAPI-NODOCUMENT",
                     "message": "RESTAPI-NODOCUMENT: (err:FOER0000) "
-                    "Resource or document does not exist:  "
-                    f"category: content message: {uri}",
+                               "Resource or document does not exist:  "
+                               f"category: content message: {uri}",
                 },
             }
-            return Response(status_code=code, json=content)
+            headers = {"Content-Type": "application/json; charset=UTF-8"}
+            return Response(status_code=code, headers=headers, json=content)
 
         body_part = body_parts[0]
         content_type = f"{body_part.content_type}; charset=utf-8"
@@ -408,9 +451,9 @@ class MLDocumentsMocker:
         return Response(status_code=200, headers=headers, content=content)
 
     def _for_multiple_uris(
-        self,
-        uris: list,
-        category: list[str],
+            self,
+            uris: list,
+            category: list[str],
     ) -> Response:
         response_body_fields = []
         for uri in uris:
@@ -448,9 +491,9 @@ class MLDocumentsMocker:
         return Response(status_code=200, headers=headers, content=content)
 
     def _find_body_parts(
-        self,
-        uri: str,
-        category: list[str],
+            self,
+            uri: str,
+            category: list[str],
     ) -> list[DocumentsBodyPart] | None:
         return [
             part
@@ -460,9 +503,9 @@ class MLDocumentsMocker:
 
     @staticmethod
     def _match_body_part(
-        uri: str,
-        category: list[str],
-        body_part: DocumentsBodyPart,
+            uri: str,
+            category: list[str],
+            body_part: DocumentsBodyPart,
     ) -> bool:
         if body_part.content_disposition.filename != uri:
             return False

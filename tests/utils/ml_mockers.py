@@ -12,7 +12,11 @@ from respx import MockRouter
 from urllib3.fields import RequestField
 
 from mlclient.constants import HEADER_X_WWW_FORM_URLENCODED
-from mlclient.structures.calls import ContentDispositionSerializer, DocumentsBodyPart
+from mlclient.structures.calls import (
+    Category,
+    ContentDispositionSerializer,
+    DocumentsBodyPart,
+)
 
 
 class MLMocker(metaclass=ABCMeta):
@@ -336,22 +340,27 @@ class MLDocumentsMocker:
         request: Request,
     ):
         uris = request.url.params.get_list("uri")
-        return self.get_documents(uris)
+        category = request.url.params.get_list("category")
+        if len(category) == 0:
+            category = ["content"]
+        return self.get_documents(uris, category)
 
     def get_documents(
         self,
         uris: list[str],
+        category: list[str],
     ) -> Response:
-        if len(uris) == 1:
-            return self._for_single_uri(uris[0])
-        return self._for_multiple_uris(uris)
+        if len(uris) == 1 and len(category) == 1:
+            return self._for_single_uri(uris[0], category)
+        return self._for_multiple_uris(uris, category)
 
     def _for_single_uri(
         self,
         uri: str,
+        category: list[str],
     ) -> Response:
-        body_part = self._find_body_part(uri)
-        if not body_part:
+        body_parts = self._find_body_parts(uri, category)
+        if len(body_parts) == 0:
             code = 500
             content = {
                 "errorResponse": {
@@ -365,6 +374,7 @@ class MLDocumentsMocker:
             }
             return Response(status_code=code, json=content)
 
+        body_part = body_parts[0]
         content_type = f"{body_part.content_type}; charset=utf-8"
         content = body_part.content
         doc_format = body_part.content_disposition.format_.value
@@ -377,27 +387,28 @@ class MLDocumentsMocker:
     def _for_multiple_uris(
         self,
         uris: list,
+        category: list[str],
     ) -> Response:
         response_body_fields = []
         for uri in uris:
-            body_part = self._find_body_part(uri)
-            if body_part is None:
-                continue
-            data = body_part.content
-            if isinstance(data, dict):
-                data = json.dumps(data)
-            content_disp = ContentDispositionSerializer.deserialize(
-                body_part.content_disposition,
-            )
-            req_field = RequestField(
-                name="--ignore--",
-                data=data,
-                headers={
-                    "Content-Disposition": content_disp,
-                    "Content-Type": body_part.content_type,
-                },
-            )
-            response_body_fields.append(req_field)
+            for body_part in self._find_body_parts(uri, category):
+                if body_part is None:
+                    continue
+                data = body_part.content
+                if isinstance(data, dict):
+                    data = json.dumps(data)
+                content_disp = ContentDispositionSerializer.deserialize(
+                    body_part.content_disposition,
+                )
+                req_field = RequestField(
+                    name="--ignore--",
+                    data=data,
+                    headers={
+                        "Content-Disposition": content_disp,
+                        "Content-Type": body_part.content_type,
+                    },
+                )
+                response_body_fields.append(req_field)
         content, content_type = urllib3.encode_multipart_formdata(
             response_body_fields,
         )
@@ -413,15 +424,33 @@ class MLDocumentsMocker:
             headers["Content-Length"] = "0"
         return Response(status_code=200, headers=headers, content=content)
 
-    def _find_body_part(
+    def _find_body_parts(
         self,
         uri: str,
-    ) -> DocumentsBodyPart | None:
-        return next(
-            (
-                part
-                for part in self._doc_body_parts
-                if part.content_disposition.filename == uri
-            ),
-            None,
-        )
+        category: list[str],
+    ) -> list[DocumentsBodyPart] | None:
+        return [
+            part
+            for part in self._doc_body_parts
+            if self._match_body_part(uri, category, part)
+        ]
+
+    @staticmethod
+    def _match_body_part(
+        uri: str,
+        category: list[str],
+        body_part: DocumentsBodyPart,
+    ) -> bool:
+        if body_part.content_disposition.filename != uri:
+            return False
+        body_part_category = body_part.content_disposition.category or Category.CONTENT
+        if isinstance(body_part_category, Category):
+            body_part_category = [body_part_category]
+        body_part_category = [c.value for c in body_part_category]
+        if "content" in category and "content" in body_part_category:
+            return True
+        metadata_categories = list(category)
+        metadata_categories.remove("content")
+        if len(metadata_categories) != len(body_part_category):
+            return False
+        return sorted(metadata_categories) == sorted(body_part_category)

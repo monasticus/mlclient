@@ -5,7 +5,7 @@ import zlib
 from pathlib import Path
 
 import pytest
-import responses
+import respx
 
 from mlclient.clients import DocumentsClient
 from mlclient.exceptions import MarkLogicError
@@ -1827,16 +1827,16 @@ def test_create_document_with_temporal_collection(docs_client):
     assert documents[0]["category"] == ["metadata", "content"]
 
 
-@responses.activate
+@respx.mock
 def test_delete_single_document(docs_client):
     uri = "/some/dir/doc1.xml"
 
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/documents")
-    builder.with_request_param("uri", uri)
-    builder.with_response_status(204)
-    builder.with_empty_response_body()
-    builder.build_delete()
+    mocker = MLRespXMocker(use_router=False)
+    mocker.with_url("http://localhost:8002/v1/documents")
+    mocker.with_request_param("uri", uri)
+    mocker.with_response_code(204)
+    mocker.with_empty_response_body()
+    mocker.mock_delete()
 
     try:
         docs_client.delete(uri)
@@ -1844,7 +1844,7 @@ def test_delete_single_document(docs_client):
         pytest.fail(str(err))
 
 
-@responses.activate
+@respx.mock
 def test_delete_multiple_documents(docs_client):
     uris = [
         "/some/dir/doc1.xml",
@@ -1853,13 +1853,13 @@ def test_delete_multiple_documents(docs_client):
         "/some/dir/doc4.zip",
     ]
 
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/documents")
+    mocker = MLRespXMocker(use_router=False)
+    mocker.with_url("http://localhost:8002/v1/documents")
     for uri in uris:
-        builder.with_request_param("uri", uri)
-    builder.with_response_status(204)
-    builder.with_empty_response_body()
-    builder.build_delete()
+        mocker.with_request_param("uri", uri)
+    mocker.with_response_code(204)
+    mocker.with_empty_response_body()
+    mocker.mock_delete()
 
     try:
         docs_client.delete(uris)
@@ -1867,17 +1867,17 @@ def test_delete_multiple_documents(docs_client):
         pytest.fail(str(err))
 
 
-@responses.activate
+@respx.mock
 def test_delete_document_with_single_category(docs_client):
     uri = "/some/dir/doc1.xml"
 
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/documents")
-    builder.with_request_param("uri", "/some/dir/doc1.xml")
-    builder.with_request_param("category", "collections")
-    builder.with_response_status(204)
-    builder.with_empty_response_body()
-    builder.build_delete()
+    mocker = MLRespXMocker(use_router=False)
+    mocker.with_url("http://localhost:8002/v1/documents")
+    mocker.with_request_param("uri", uri)
+    mocker.with_request_param("category", "collections")
+    mocker.with_response_code(204)
+    mocker.with_empty_response_body()
+    mocker.mock_delete()
 
     try:
         docs_client.delete(uri, category="collections")
@@ -1885,18 +1885,18 @@ def test_delete_document_with_single_category(docs_client):
         pytest.fail(str(err))
 
 
-@responses.activate
+@respx.mock
 def test_delete_document_with_multiple_categories(docs_client):
     uri = "/some/dir/doc1.xml"
 
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/documents")
-    builder.with_request_param("uri", "/some/dir/doc1.xml")
-    builder.with_request_param("category", "properties")
-    builder.with_request_param("category", "collections")
-    builder.with_response_status(204)
-    builder.with_empty_response_body()
-    builder.build_delete()
+    mocker = MLRespXMocker(use_router=False)
+    mocker.with_url("http://localhost:8002/v1/documents")
+    mocker.with_request_param("uri", uri)
+    mocker.with_request_param("category", "properties")
+    mocker.with_request_param("category", "collections")
+    mocker.with_response_code(204)
+    mocker.with_empty_response_body()
+    mocker.mock_delete()
 
     try:
         docs_client.delete(uri, category=["properties", "collections"])
@@ -1904,17 +1904,17 @@ def test_delete_document_with_multiple_categories(docs_client):
         pytest.fail(str(err))
 
 
-@responses.activate
+@respx.mock
 def test_delete_document_with_custom_database(docs_client):
     uri = "/some/dir/doc1.xml"
 
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/documents")
-    builder.with_request_param("uri", "/some/dir/doc1.xml")
-    builder.with_request_param("database", "Documents")
-    builder.with_response_status(204)
-    builder.with_empty_response_body()
-    builder.build_delete()
+    mocker = MLRespXMocker(use_router=False)
+    mocker.with_url("http://localhost:8002/v1/documents")
+    mocker.with_request_param("uri", uri)
+    mocker.with_request_param("database", "Documents")
+    mocker.with_response_code(204)
+    mocker.with_empty_response_body()
+    mocker.mock_delete()
 
     try:
         docs_client.delete(uri, database="Documents")
@@ -1922,7 +1922,7 @@ def test_delete_document_with_custom_database(docs_client):
         pytest.fail(str(err))
 
 
-@responses.activate
+@respx.mock
 def test_delete_document_with_non_existing_database(docs_client):
     uri = "/some/dir/doc1.xml"
 
@@ -1930,14 +1930,15 @@ def test_delete_document_with_non_existing_database(docs_client):
         __file__,
         "test-delete-document-with-non-existing-database.xml",
     )
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/documents")
-    builder.with_request_param("uri", "/some/dir/doc1.xml")
-    builder.with_request_param("database", "Document")
-    builder.with_response_content_type("application/xml; charset=UTF-8")
-    builder.with_response_status(404)
-    builder.with_response_body(Path(response_body_path).read_bytes())
-    builder.build_delete()
+
+    mocker = MLRespXMocker(use_router=False)
+    mocker.with_url("http://localhost:8002/v1/documents")
+    mocker.with_request_param("uri", uri)
+    mocker.with_request_param("database", "Document")
+    mocker.with_response_content_type("application/xml; charset=UTF-8")
+    mocker.with_response_code(404)
+    mocker.with_response_body(Path(response_body_path).read_bytes())
+    mocker.mock_delete()
 
     with pytest.raises(MarkLogicError) as err:
         docs_client.delete(uri, database="Document")
@@ -1948,21 +1949,21 @@ def test_delete_document_with_non_existing_database(docs_client):
     assert err.value.args[0] == expected_error
 
 
-@responses.activate
+@respx.mock
 def test_delete_document_with_temporal_collection(docs_client):
     uri = "/some/dir/doc1.xml"
 
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/documents")
-    builder.with_request_param("uri", "/some/dir/doc1.xml")
-    builder.with_request_param("temporal-collection", "temporal-collection")
-    builder.with_response_header(
+    mocker = MLRespXMocker(use_router=False)
+    mocker.with_url("http://localhost:8002/v1/documents")
+    mocker.with_request_param("uri", uri)
+    mocker.with_request_param("temporal-collection", "temporal-collection")
+    mocker.with_response_header(
         "x-marklogic-system-time",
         "2023-11-28T06:46:51.297376Z",
     )
-    builder.with_response_status(204)
-    builder.with_empty_response_body()
-    builder.build_delete()
+    mocker.with_response_code(204)
+    mocker.with_empty_response_body()
+    mocker.mock_delete()
 
     try:
         docs_client.delete(uri, temporal_collection="temporal-collection")
@@ -1970,22 +1971,22 @@ def test_delete_document_with_temporal_collection(docs_client):
         pytest.fail(str(err))
 
 
-@responses.activate
+@respx.mock
 def test_delete_document_with_wipe_temporal(docs_client):
     uri = "/some/dir/doc1.xml"
 
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/documents")
-    builder.with_request_param("uri", "/some/dir/doc1.xml")
-    builder.with_request_param("temporal-collection", "temporal-collection")
-    builder.with_request_param("result", "wiped")
-    builder.with_response_header(
+    mocker = MLRespXMocker(use_router=False)
+    mocker.with_url("http://localhost:8002/v1/documents")
+    mocker.with_request_param("uri", uri)
+    mocker.with_request_param("temporal-collection", "temporal-collection")
+    mocker.with_request_param("result", "wiped")
+    mocker.with_response_header(
         "x-marklogic-system-time",
         "2023-11-28T09:02:48.09751Z",
     )
-    builder.with_response_status(204)
-    builder.with_empty_response_body()
-    builder.build_delete()
+    mocker.with_response_code(204)
+    mocker.with_empty_response_body()
+    mocker.mock_delete()
 
     try:
         docs_client.delete(

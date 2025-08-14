@@ -124,7 +124,7 @@ class UnsupportedFileExtensionError(Exception):
 class ResourceNotFoundError(Exception):
     """A custom Exception class for a not found resource.
 
-    Raised while attempting to get a resource that does exist.
+    Raised while attempting to get a resource that does not exist.
     """
 
     def __init__(

@@ -117,7 +117,7 @@ def test_remove_capability():
     assert permission.capabilities() == set()
 
 
-def test_remove_capability_when_does_dot_exist():
+def test_remove_capability_when_does_not_exist():
     permission = Permission("custom_role", {Permission.READ})
     success = permission.remove_capability(Permission.UPDATE)
     assert success is False

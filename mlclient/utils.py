@@ -47,13 +47,15 @@ def get_accept_header_for_format(
     UnsupportedFormatError
         If the format provided is not being supported
     """
-    if data_format in ["xml"]:
+    data_format = data_format.lower()
+
+    if data_format == "xml":
         return constants.HEADER_XML
-    if data_format in ["json"]:
+    if data_format == "json":
         return constants.HEADER_JSON
-    if data_format in ["html"]:
+    if data_format == "html":
         return constants.HEADER_HTML
-    if data_format in ["text"]:
+    if data_format == "text":
         return constants.HEADER_PLAIN_TEXT
 
     msg = f"Provided format [{data_format}] is not supported."

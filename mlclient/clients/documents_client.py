@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from typing import Any, Iterator
 
-from requests import Response
+from httpx import Response
 
 from mlclient import constants
 from mlclient.calls import DocumentsDeleteCall, DocumentsGetCall, DocumentsPostCall

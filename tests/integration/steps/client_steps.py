@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import datetime
 
+from httpx import Response
 from pytest_bdd import given, parsers, then, when
-from requests import Response
 
 from mlclient import MLResourceClient, MLResourcesClient
 from mlclient.calls import EvalCall

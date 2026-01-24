@@ -30,6 +30,7 @@ from mlclient.structures.calls import ContentDispositionSerializer, DocumentsBod
 from tests.utils import resources as resources_utils
 
 
+# Support httpx Responses
 class MLResponseBuilder:
     def __init__(
         self,

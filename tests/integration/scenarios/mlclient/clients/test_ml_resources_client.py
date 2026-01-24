@@ -2,9 +2,10 @@ from __future__ import annotations
 
 from typing import ClassVar
 
+import httpx
 import pytest
+from httpx import Response
 from pytest_bdd import scenarios
-from requests import Response
 
 from mlclient import MLResourcesClient, MLResponseParser
 from mlclient.structures.calls import DocumentsBodyPart
@@ -122,8 +123,7 @@ class TestDatabasesManagement:
     ) -> Response:
         with MLResourcesClient(auth_method="digest") as client:
             resp = client.get_databases(data_format="json")
-        assert resp.status_code == 200
-        assert resp.reason == "OK"
+        assert resp.status_code == httpx.codes.OK
 
         return resp
 
@@ -135,8 +135,7 @@ class TestDatabasesManagement:
     ) -> Response:
         with MLResourcesClient(auth_method="digest") as client:
             resp = client.get_database(database=database, data_format="json", view=view)
-        assert resp.status_code == 200
-        assert resp.reason == "OK"
+        assert resp.status_code == httpx.codes.OK
 
         return resp
 
@@ -147,8 +146,7 @@ class TestDatabasesManagement:
     ) -> Response:
         with MLResourcesClient(auth_method="digest") as client:
             resp = client.get_database_properties(database=database, data_format="json")
-        assert resp.status_code == 200
-        assert resp.reason == "OK"
+        assert resp.status_code == httpx.codes.OK
 
         return resp
 
@@ -163,8 +161,7 @@ class TestDatabasesManagement:
                 database=database,
                 body=body,
             )
-        assert resp.status_code == 204
-        assert resp.reason == "No Content"
+        assert resp.status_code == httpx.codes.NO_CONTENT
 
         return resp
 
@@ -174,8 +171,7 @@ class TestDatabasesManagement:
     ):
         with MLResourcesClient(auth_method="digest") as client:
             resp = client.post_databases(cls.TEST_DATABASE_CONFIG)
-        assert resp.status_code == 201
-        assert resp.reason == "Created"
+        assert resp.status_code == httpx.codes.CREATED
 
     @classmethod
     def _delete_database(
@@ -183,8 +179,7 @@ class TestDatabasesManagement:
     ):
         with MLResourcesClient(auth_method="digest") as client:
             resp = client.delete_database(cls.TEST_DATABASE_CONFIG["database-name"])
-        assert resp.status_code == 204
-        assert resp.reason == "No Content"
+        assert resp.status_code == httpx.codes.NO_CONTENT
 
     @classmethod
     def _perform_action_on_database(
@@ -195,8 +190,7 @@ class TestDatabasesManagement:
                 database=cls.TEST_DATABASE_CONFIG["database-name"],
                 body={"operation": "clear-database"},
             )
-        assert resp.status_code == 200
-        assert resp.reason == "OK"
+        assert resp.status_code == httpx.codes.OK
 
 
 class TestServersManagement:
@@ -306,8 +300,7 @@ class TestServersManagement:
     ) -> Response:
         with MLResourcesClient(auth_method="digest") as client:
             resp = client.get_servers(data_format="json")
-        assert resp.status_code == 200
-        assert resp.reason == "OK"
+        assert resp.status_code == httpx.codes.OK
 
         return resp
 
@@ -324,8 +317,7 @@ class TestServersManagement:
                 data_format="json",
                 view=view,
             )
-        assert resp.status_code == 200
-        assert resp.reason == "OK"
+        assert resp.status_code == httpx.codes.OK
 
         return resp
 
@@ -340,8 +332,7 @@ class TestServersManagement:
                 group_id="Default",
                 data_format="json",
             )
-        assert resp.status_code == 200
-        assert resp.reason == "OK"
+        assert resp.status_code == httpx.codes.OK
 
         return resp
 
@@ -357,8 +348,7 @@ class TestServersManagement:
                 group_id="Default",
                 body=body,
             )
-        assert resp.status_code == 204
-        assert resp.reason == "No Content"
+        assert resp.status_code == httpx.codes.NO_CONTENT
 
         return resp
 
@@ -372,8 +362,7 @@ class TestServersManagement:
                 server_type="http",
                 body=cls.TEST_SERVER_CONFIG,
             )
-        assert resp.status_code == 201
-        assert resp.reason == "Created"
+        assert resp.status_code == httpx.codes.CREATED
 
     @classmethod
     def _delete_server(
@@ -384,8 +373,7 @@ class TestServersManagement:
                 server=cls.TEST_SERVER_CONFIG["server-name"],
                 group_id="Default",
             )
-        assert resp.status_code == 202
-        assert resp.reason == "Accepted"
+        assert resp.status_code == httpx.codes.ACCEPTED
 
 
 class TestForestsManagement:
@@ -493,8 +481,7 @@ class TestForestsManagement:
     ) -> Response:
         with MLResourcesClient(auth_method="digest") as client:
             resp = client.get_forests(data_format="json")
-        assert resp.status_code == 200
-        assert resp.reason == "OK"
+        assert resp.status_code == httpx.codes.OK
 
         return resp
 
@@ -506,8 +493,7 @@ class TestForestsManagement:
     ) -> Response:
         with MLResourcesClient(auth_method="digest") as client:
             resp = client.get_forest(forest=forest, data_format="json", view=view)
-        assert resp.status_code == 200
-        assert resp.reason == "OK"
+        assert resp.status_code == httpx.codes.OK
 
         return resp
 
@@ -518,8 +504,7 @@ class TestForestsManagement:
     ) -> Response:
         with MLResourcesClient(auth_method="digest") as client:
             resp = client.get_forest_properties(forest=forest, data_format="json")
-        assert resp.status_code == 200
-        assert resp.reason == "OK"
+        assert resp.status_code == httpx.codes.OK
 
         return resp
 
@@ -534,8 +519,7 @@ class TestForestsManagement:
                 forest=forest,
                 body=body,
             )
-        assert resp.status_code == 204
-        assert resp.reason == "No Content"
+        assert resp.status_code == httpx.codes.NO_CONTENT
 
         return resp
 
@@ -545,8 +529,7 @@ class TestForestsManagement:
     ):
         with MLResourcesClient(auth_method="digest") as client:
             resp = client.post_forests(cls.TEST_FOREST_CONFIG)
-        assert resp.status_code == 201
-        assert resp.reason == "Created"
+        assert resp.status_code == httpx.codes.CREATED
 
     @classmethod
     def _delete_forest(
@@ -557,8 +540,7 @@ class TestForestsManagement:
                 cls.TEST_FOREST_CONFIG["forest-name"],
                 level="full",
             )
-        assert resp.status_code == 204
-        assert resp.reason == "No Content"
+        assert resp.status_code == httpx.codes.NO_CONTENT
 
     @classmethod
     def _initiate_state_change_on_forest(
@@ -569,8 +551,7 @@ class TestForestsManagement:
                 forest=cls.TEST_FOREST_CONFIG["forest-name"],
                 body={"state": "clear"},
             )
-        assert resp.status_code == 200
-        assert resp.reason == "OK"
+        assert resp.status_code == httpx.codes.OK
 
     @classmethod
     def _perform_action_on_forests(
@@ -582,8 +563,7 @@ class TestForestsManagement:
                     "operation": "forest-migrate",
                 },
             )
-        assert resp.status_code == 400
-        assert resp.reason == "Bad Request"
+        assert resp.status_code == httpx.codes.BAD_REQUEST
         err = resp.json()["errorResponse"]
         assert err["messageCode"] == "MANAGE-INVALIDPAYLOAD"
         assert err["message"] == (
@@ -695,8 +675,7 @@ class TestRolesManagement:
     ) -> Response:
         with MLResourcesClient(auth_method="digest") as client:
             resp = client.get_roles(data_format="json")
-        assert resp.status_code == 200
-        assert resp.reason == "OK"
+        assert resp.status_code == httpx.codes.OK
 
         return resp
 
@@ -710,8 +689,7 @@ class TestRolesManagement:
                 role=role,
                 data_format="json",
             )
-        assert resp.status_code == 200
-        assert resp.reason == "OK"
+        assert resp.status_code == httpx.codes.OK
 
         return resp
 
@@ -725,8 +703,7 @@ class TestRolesManagement:
                 role=role,
                 data_format="json",
             )
-        assert resp.status_code == 200
-        assert resp.reason == "OK"
+        assert resp.status_code == httpx.codes.OK
 
         return resp
 
@@ -741,8 +718,7 @@ class TestRolesManagement:
                 role=role,
                 body=body,
             )
-        assert resp.status_code == 204
-        assert resp.reason == "No Content"
+        assert resp.status_code == httpx.codes.NO_CONTENT
 
         return resp
 
@@ -754,8 +730,7 @@ class TestRolesManagement:
             resp = client.post_roles(
                 body=cls.TEST_ROLE_CONFIG,
             )
-        assert resp.status_code == 201
-        assert resp.reason == "Created"
+        assert resp.status_code == httpx.codes.CREATED
 
     @classmethod
     def _delete_role(
@@ -765,8 +740,7 @@ class TestRolesManagement:
             resp = client.delete_role(
                 role=cls.TEST_ROLE_CONFIG["role-name"],
             )
-        assert resp.status_code == 204
-        assert resp.reason == "No Content"
+        assert resp.status_code == httpx.codes.NO_CONTENT
 
 
 class TestUsersManagement:
@@ -871,8 +845,7 @@ class TestUsersManagement:
     ) -> Response:
         with MLResourcesClient(auth_method="digest") as client:
             resp = client.get_users(data_format="json")
-        assert resp.status_code == 200
-        assert resp.reason == "OK"
+        assert resp.status_code == httpx.codes.OK
 
         return resp
 
@@ -886,8 +859,7 @@ class TestUsersManagement:
                 user=user,
                 data_format="json",
             )
-        assert resp.status_code == 200
-        assert resp.reason == "OK"
+        assert resp.status_code == httpx.codes.OK
 
         return resp
 
@@ -901,8 +873,7 @@ class TestUsersManagement:
                 user=user,
                 data_format="json",
             )
-        assert resp.status_code == 200
-        assert resp.reason == "OK"
+        assert resp.status_code == httpx.codes.OK
 
         return resp
 
@@ -917,8 +888,7 @@ class TestUsersManagement:
                 user=user,
                 body=body,
             )
-        assert resp.status_code == 204
-        assert resp.reason == "No Content"
+        assert resp.status_code == httpx.codes.NO_CONTENT
 
         return resp
 
@@ -930,8 +900,7 @@ class TestUsersManagement:
             resp = client.post_users(
                 body=cls.TEST_USER_CONFIG,
             )
-        assert resp.status_code == 201
-        assert resp.reason == "Created"
+        assert resp.status_code == httpx.codes.CREATED
 
     @classmethod
     def _delete_user(
@@ -941,8 +910,7 @@ class TestUsersManagement:
             resp = client.delete_user(
                 user=cls.TEST_USER_CONFIG["user-name"],
             )
-        assert resp.status_code == 204
-        assert resp.reason == "No Content"
+        assert resp.status_code == httpx.codes.NO_CONTENT
 
 
 class TestDocumentsManagement:
@@ -991,8 +959,7 @@ class TestDocumentsManagement:
                 uri=cls.DOCUMENT_BODY_PART_1.content_disposition.filename,
                 data_format="json",
             )
-        assert resp.status_code == 500
-        assert resp.reason == "Internal Server Error"
+        assert resp.status_code == httpx.codes.INTERNAL_SERVER_ERROR
         assert resp.json()["errorResponse"]["messageCode"] == "RESTAPI-NODOCUMENT"
 
     @classmethod
@@ -1004,8 +971,7 @@ class TestDocumentsManagement:
                 uri=cls.DOCUMENT_BODY_PART_1.content_disposition.filename,
                 data_format="json",
             )
-        assert resp.status_code == 200
-        assert resp.reason == "OK"
+        assert resp.status_code == httpx.codes.OK
 
         parsed_resp = MLResponseParser.parse(resp)
         assert parsed_resp == {"root": {"child": "data"}}
@@ -1019,8 +985,7 @@ class TestDocumentsManagement:
                 uri=cls.DOCUMENT_BODY_PART_1.content_disposition.filename,
                 data_format="json",
             )
-        assert resp.status_code == 200
-        assert resp.reason == "OK"
+        assert resp.status_code == httpx.codes.OK
 
         parsed_resp = MLResponseParser.parse(resp)
         assert parsed_resp == {"root2": {"child2": "data2"}}
@@ -1031,8 +996,7 @@ class TestDocumentsManagement:
     ):
         with MLResourcesClient(auth_method="digest") as client:
             resp = client.post_documents(body_parts=[cls.DOCUMENT_BODY_PART_1])
-            assert resp.status_code == 200
-            assert resp.reason == "Bulk Change Written"
+            assert resp.status_code == httpx.codes.OK
 
     @classmethod
     def _update_document(
@@ -1040,8 +1004,7 @@ class TestDocumentsManagement:
     ):
         with MLResourcesClient(auth_method="digest") as client:
             resp = client.post_documents(body_parts=[cls.DOCUMENT_BODY_PART_2])
-            assert resp.status_code == 200
-            assert resp.reason == "Bulk Change Written"
+            assert resp.status_code == httpx.codes.OK
 
     @classmethod
     def _delete_document(
@@ -1051,5 +1014,4 @@ class TestDocumentsManagement:
             resp = client.delete_documents(
                 uri=cls.DOCUMENT_BODY_PART_1.content_disposition.filename,
             )
-            assert resp.status_code == 204
-            assert resp.reason == "Content Deleted"
+            assert resp.status_code == httpx.codes.NO_CONTENT

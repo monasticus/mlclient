@@ -21,7 +21,6 @@ from mlclient.structures import (
     XMLDocument,
 )
 from mlclient.structures.calls import DocumentsBodyPart
-from tests.utils import MLResponseBuilder
 from tests.utils import resources as resources_utils
 from tests.utils.ml_mockers import MLDocumentsMocker, MLRespXMocker
 
@@ -277,16 +276,6 @@ def test_read_json_doc(docs_client):
 @ml_mocker.router
 def test_read_json_doc_using_uri_list(docs_client):
     uri = "/some/dir/doc2.json"
-
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/documents")
-    builder.with_request_param("uri", uri)
-    builder.with_request_param("format", "json")
-    builder.with_response_content_type("application/json; charset=utf-8")
-    builder.with_response_header("vnd.marklogic.document-format", "json")
-    builder.with_response_status(200)
-    builder.with_response_body(b'{"root":{"child":"data"}}')
-    builder.build_get()
 
     docs = docs_client.read([uri])
     assert isinstance(docs, list)

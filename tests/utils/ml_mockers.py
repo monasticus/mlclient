@@ -2,7 +2,8 @@ from __future__ import annotations
 
 import json
 from abc import ABCMeta, abstractmethod
-from typing import Any, Callable, List, Optional, Union
+from contextlib import contextmanager
+from typing import Any, Callable, Iterable, Iterator, List, Optional, Union
 
 import respx
 import urllib3
@@ -334,8 +335,24 @@ class MLRespXMocker(MLMocker):
 
 
 class MLDocumentsMocker:
-    def __init__(self, document_body_parts: list[DocumentsBodyPart]):
-        self._doc_body_parts = list(document_body_parts)
+    def __init__(self, docs: Iterable[DocumentsBodyPart] | None = None):
+        self._doc_body_parts = [] if docs is None else list(docs)
+
+    @contextmanager
+    def scoped(self, *, fresh: bool = True) -> Iterator[MLDocumentsMocker]:
+        docs = self._doc_body_parts.copy()
+        if fresh:
+            self._doc_body_parts = []
+        try:
+            yield self
+        finally:
+            self._doc_body_parts = docs
+
+    def mock_documents(self, docs: Iterable[DocumentsBodyPart]):
+        self._doc_body_parts.extend(docs)
+
+    def mock_document(self, doc: DocumentsBodyPart):
+        self._doc_body_parts.append(doc)
 
     def get_documents_side_effect(
         self,

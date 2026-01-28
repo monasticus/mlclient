@@ -5,11 +5,13 @@ from abc import ABCMeta, abstractmethod
 from contextlib import contextmanager
 from typing import Any, Callable, Iterable, Iterator, List, Optional, Union
 
+import httpx
 import respx
 import urllib3
 from httpx import Headers, Request, Response
 from pydantic import BaseModel, ConfigDict
 from requests_toolbelt import MultipartDecoder
+from requests_toolbelt.multipart.decoder import BodyPart
 from respx import MockRouter
 from urllib3.fields import RequestField
 
@@ -19,6 +21,7 @@ from mlclient.structures.calls import (
     ContentDispositionSerializer,
     DocumentsBodyPart,
     DocumentsBodyPartType,
+    DocumentsContentDisposition,
 )
 
 
@@ -283,8 +286,19 @@ class MLRespXMocker(MLMocker):
         )
         self._resp_mock.response.body_parts.append(req_field)
 
-    def with_side_effect(self, side_effect: Callable):
+    def with_get_side_effect(
+        self,
+        side_effect: Callable,
+    ):
         self._resp_mock.side_effect = side_effect
+        self.mock_get()
+
+    def with_post_side_effect(
+        self,
+        side_effect: Callable,
+    ):
+        self._resp_mock.side_effect = side_effect
+        self.mock_post()
 
     def mock_response(
         self,
@@ -335,11 +349,20 @@ class MLRespXMocker(MLMocker):
 
 
 class MLDocumentsMocker:
-    def __init__(self, docs: Iterable[DocumentsBodyPart] | None = None):
+    NON_EXISTING_TAG = "NON_EXISTING"
+
+    def __init__(
+        self,
+        docs: Iterable[DocumentsBodyPart] | None = None,
+    ):
         self._doc_body_parts = [] if docs is None else list(docs)
 
     @contextmanager
-    def scoped(self, *, fresh: bool = True) -> Iterator[MLDocumentsMocker]:
+    def scoped(
+        self,
+        *,
+        fresh: bool = True,
+    ) -> Iterator[MLDocumentsMocker]:
         docs = self._doc_body_parts.copy()
         if fresh:
             self._doc_body_parts = []
@@ -348,160 +371,287 @@ class MLDocumentsMocker:
         finally:
             self._doc_body_parts = docs
 
-    def mock_documents(self, docs: Iterable[DocumentsBodyPart]):
+    def mock_documents(
+        self,
+        docs: Iterable[DocumentsBodyPart],
+    ):
         self._doc_body_parts.extend(docs)
 
-    def mock_document(self, doc: DocumentsBodyPart):
+    def mock_document(
+        self,
+        doc: DocumentsBodyPart,
+    ):
         self._doc_body_parts.append(doc)
 
     def get_documents_side_effect(
         self,
         request: Request,
-    ):
+    ) -> Response:
         uris = request.url.params.get_list("uri")
         category = request.url.params.get_list("category")
         if len(category) == 0:
             category = ["content"]
-        return self.get_documents(uris, category)
+
+        if len(uris) == 1 and len(category) == 1:
+            return self._build_single_part_response(uris[0], category)
+        return self._build_multipart_response(uris, category)
 
     def post_documents_side_effect(
         self,
         request: Request,
-    ):
-        body_parts = MultipartDecoder.from_response(request).parts
-        document_objects = []
-        for body_part in body_parts:
-            content_disp = ContentDispositionSerializer.serialize(
-                body_part.headers.get(b"Content-Disposition").decode("utf-8"),
-            )
-            if content_disp.body_part_type != DocumentsBodyPartType.ATTACHMENT:
-                continue
-            uri = content_disp.filename
-            if "NON_EXISTING" not in uri:
-                existing_doc_object = next(
-                    (o for o in document_objects if o.get("uri") == uri),
-                    None,
-                )
-                if existing_doc_object:
-                    document_objects.remove(existing_doc_object)
-                    if content_disp.category in [None, Category.CONTENT]:
-                        mime_type = body_part.headers.get(b"Content-Type").decode(
-                            "utf-8",
-                        )
-                    else:
-                        mime_type = existing_doc_object.get("mime-type")
-                    category = ["metadata", "content"]
-                elif content_disp.category in [None, Category.CONTENT]:
-                    mime_type = body_part.headers.get(b"Content-Type").decode("utf-8")
-                    category = ["metadata", "content"]
-                else:
-                    mime_type = ""
-                    category = ["metadata"]
-                document_objects.append(
-                    {
-                        "uri": content_disp.filename,
-                        "mime-type": mime_type,
-                        "category": category,
-                    },
-                )
-            elif len(body_parts) == 1:
-                metadata = json.loads(body_part.content.decode("utf-8"))
-                if metadata.get("collections") and len(metadata.get("collections")) > 0:
-                    collections = metadata.get("collections")
-                    if len(collections) == 1:
-                        col_str = f'"{collections[0]}"'
-                    else:
-                        col_str = "(" + ", ".join(f'"{c}"' for c in collections) + ")"
-                    operation = f'xdmp:document-set-collections("{uri}", {col_str})'
-                else:
-                    raise NotImplementedError
-                document_objects.append(
-                    {
-                        "errorResponse": {
-                            "statusCode": "500",
-                            "status": "Internal Server Error",
-                            "messageCode": "XDMP-DOCNOTFOUND",
-                            "message": f"XDMP-DOCNOTFOUND: {operation}"
-                            " -- Document not found",
-                        },
-                    },
-                )
-
-        headers = {"Content-Type": "application/json; charset=UTF-8"}
-        if len(document_objects) == 1 and "errorResponse" in document_objects[0]:
-            return Response(status_code=500, headers=headers, json=document_objects[0])
-
-        headers["vnd.marklogic.document-format"] = "json"
-        content = {"documents": document_objects}
-        return Response(status_code=200, headers=headers, json=content)
-
-    def get_documents(
-        self,
-        uris: list[str],
-        category: list[str],
     ) -> Response:
-        if len(uris) == 1 and len(category) == 1:
-            return self._for_single_uri(uris[0], category)
-        return self._for_multiple_uris(uris, category)
+        body_parts = MultipartDecoder.from_response(request).parts
+        if len(body_parts) == 1:
+            body_part = body_parts[0]
+            uri = self._get_content_disposition(body_part).filename
+            if uri and self.NON_EXISTING_TAG in uri:
+                return self._build_doc_not_found_error_post_response(uri, body_part)
 
-    def _for_single_uri(
+        doc_objects = self._build_doc_objects(body_parts)
+        return self._build_successful_post_response(doc_objects)
+
+    def _build_single_part_response(
         self,
         uri: str,
         category: list[str],
     ) -> Response:
-        body_parts = self._find_body_parts(uri, category)
+        body_parts = list(self._find_body_parts(uri, category))
         if len(body_parts) == 0:
-            code = 500
-            content = {
-                "errorResponse": {
-                    "statusCode": code,
-                    "status": "Internal Server Error",
-                    "messageCode": "RESTAPI-NODOCUMENT",
-                    "message": "RESTAPI-NODOCUMENT: (err:FOER0000) "
-                    "Resource or document does not exist:  "
-                    f"category: content message: {uri}",
-                },
-            }
-            headers = {"Content-Type": "application/json; charset=UTF-8"}
-            return Response(status_code=code, headers=headers, json=content)
+            return self._build_no_document_error_get_response(uri)
+        return self._build_successful_single_part_get_response(body_parts[0])
 
-        body_part = body_parts[0]
+    def _build_multipart_response(
+        self,
+        uris: list[str],
+        category: list[str],
+    ) -> Response:
+        form_data_fields = self._build_form_data_fields(uris, category)
+        return self._build_successful_multipart_get_response(form_data_fields)
+
+    def _build_form_data_fields(
+        self,
+        uris: list[str],
+        category: list[str],
+    ) -> list[RequestField]:
+        return [
+            self._build_form_data_field(body_part)
+            for uri in uris
+            for body_part in self._find_body_parts(uri, category)
+            if body_part is not None
+        ]
+
+    @staticmethod
+    def _build_form_data_field(
+        body_part: DocumentsBodyPart,
+    ) -> RequestField:
+        data = body_part.content
+        if isinstance(data, dict):
+            data = json.dumps(data)
+        content_disp = ContentDispositionSerializer.deserialize(
+            body_part.content_disposition,
+        )
+        return RequestField(
+            name="--ignore--",
+            data=data,
+            headers={
+                "Content-Disposition": content_disp,
+                "Content-Type": body_part.content_type,
+            },
+        )
+
+    def _find_body_parts(
+        self,
+        uri: str,
+        category: list[str],
+    ) -> Iterable[DocumentsBodyPart]:
+        return (
+            part
+            for part in self._doc_body_parts
+            if self._match_body_part(uri, category, part)
+        )
+
+    @classmethod
+    def _match_body_part(
+        cls,
+        uri: str,
+        category: list[str],
+        body_part: DocumentsBodyPart,
+    ) -> bool:
+        if not cls._filename_matches_uri(body_part, uri):
+            return False
+        body_part_category = cls._get_body_part_category(body_part)
+        if cls._is_expected_content_body_part(category, body_part_category):
+            return True
+        metadata_category = cls._get_body_part_metadata_category(category)
+        return cls._is_expected_metadata_body_part(
+            metadata_category,
+            body_part_category,
+        )
+
+    @staticmethod
+    def _filename_matches_uri(
+        body_part: DocumentsBodyPart,
+        uri: str,
+    ) -> bool:
+        return body_part.content_disposition.filename == uri
+
+    @staticmethod
+    def _get_body_part_category(
+        body_part: DocumentsBodyPart,
+    ) -> list[str]:
+        body_part_category = body_part.content_disposition.category or Category.CONTENT
+        if isinstance(body_part_category, Category):
+            body_part_category = [body_part_category]
+        return [c.value for c in body_part_category]
+
+    @staticmethod
+    def _get_body_part_metadata_category(
+        category: list[str],
+    ) -> list[str]:
+        metadata_category = list(category)
+        if "content" in metadata_category:
+            metadata_category.remove("content")
+        return metadata_category
+
+    @staticmethod
+    def _is_expected_content_body_part(
+        category: list[str],
+        body_part_category: list[str],
+    ) -> bool:
+        return "content" in category and "content" in body_part_category
+
+    @staticmethod
+    def _is_expected_metadata_body_part(
+        metadata_category: list[str],
+        body_part_category: list[str],
+    ) -> bool:
+        if len(metadata_category) != len(body_part_category):
+            return False
+        return sorted(metadata_category) == sorted(body_part_category)
+
+    @classmethod
+    def _build_doc_objects(
+        cls,
+        body_parts: tuple[BodyPart],
+    ) -> list[dict]:
+        doc_objects = []
+        for body_part in body_parts:
+            content_disp = cls._get_content_disposition(body_part)
+            if content_disp.body_part_type == DocumentsBodyPartType.ATTACHMENT:
+                doc_object = cls._build_doc_object(doc_objects, body_part)
+                doc_objects.append(doc_object)
+        return doc_objects
+
+    @classmethod
+    def _build_doc_object(
+        cls,
+        doc_objects: list[dict],
+        body_part: BodyPart,
+    ) -> dict:
+        content_disp = cls._get_content_disposition(body_part)
+        uri = content_disp.filename
+        existing_doc_object = cls._pop_object_with_uri(doc_objects, uri)
+
+        if content_disp.category in [None, Category.CONTENT]:
+            mime_type = cls._get_header_str(body_part, b"Content-Type")
+            category = ["metadata", "content"]
+        elif existing_doc_object:
+            mime_type = existing_doc_object.get("mime-type")
+            category = ["metadata", "content"]
+        else:
+            mime_type = ""
+            category = ["metadata"]
+        return {
+            "uri": uri,
+            "mime-type": mime_type,
+            "category": category,
+        }
+
+    @classmethod
+    def _get_content_disposition(
+        cls,
+        body_part: BodyPart,
+    ) -> DocumentsContentDisposition:
+        return ContentDispositionSerializer.serialize(
+            cls._get_header_str(body_part, b"Content-Disposition"),
+        )
+
+    @staticmethod
+    def _get_header_str(
+        body_part: BodyPart,
+        header: bytes,
+    ) -> str:
+        return body_part.headers.get(header).decode("utf-8")
+
+    @staticmethod
+    def _pop_object_with_uri(
+        items: list[dict],
+        uri: str,
+    ) -> dict | None:
+        for i, item in enumerate(items):
+            if item.get("uri") == uri:
+                return items.pop(i)
+        return None
+
+    @staticmethod
+    def _build_no_document_error_get_response(
+        uri: str,
+    ) -> Response:
+        code = httpx.codes.INTERNAL_SERVER_ERROR
+        content = {
+            "errorResponse": {
+                "statusCode": code,
+                "status": "Internal Server Error",
+                "messageCode": "RESTAPI-NODOCUMENT",
+                "message": "RESTAPI-NODOCUMENT: (err:FOER0000) "
+                "Resource or document does not exist:  "
+                f"category: content message: {uri}",
+            },
+        }
+        headers = {"Content-Type": "application/json; charset=UTF-8"}
+        return Response(status_code=code, headers=headers, json=content)
+
+    @classmethod
+    def _build_doc_not_found_error_post_response(
+        cls,
+        uri: str,
+        body_part: BodyPart,
+    ) -> Response:
+        code = httpx.codes.INTERNAL_SERVER_ERROR
+        operation = cls._get_post_erroneous_operation(uri, body_part)
+        content = {
+            "errorResponse": {
+                "statusCode": code,
+                "status": "Internal Server Error",
+                "messageCode": "XDMP-DOCNOTFOUND",
+                "message": f"XDMP-DOCNOTFOUND: {operation} -- Document not found",
+            },
+        }
+        headers = {"Content-Type": "application/json; charset=UTF-8"}
+        return Response(status_code=code, headers=headers, json=content)
+
+    @staticmethod
+    def _build_successful_single_part_get_response(
+        body_part: DocumentsBodyPart,
+    ) -> Response:
         content_type = f"{body_part.content_type}; charset=utf-8"
-        content = body_part.content
         doc_format = body_part.content_disposition.format_.value
         headers = {
             "Content-Type": content_type,
             "vnd.marklogic.document-format": doc_format,
         }
-        return Response(status_code=200, headers=headers, content=content)
+        return Response(
+            status_code=httpx.codes.OK,
+            headers=headers,
+            content=body_part.content,
+        )
 
-    def _for_multiple_uris(
-        self,
-        uris: list,
-        category: list[str],
+    @staticmethod
+    def _build_successful_multipart_get_response(
+        form_data_fields: list[RequestField],
     ) -> Response:
-        response_body_fields = []
-        for uri in uris:
-            for body_part in self._find_body_parts(uri, category):
-                if body_part is None:
-                    continue
-                data = body_part.content
-                if isinstance(data, dict):
-                    data = json.dumps(data)
-                content_disp = ContentDispositionSerializer.deserialize(
-                    body_part.content_disposition,
-                )
-                req_field = RequestField(
-                    name="--ignore--",
-                    data=data,
-                    headers={
-                        "Content-Disposition": content_disp,
-                        "Content-Type": body_part.content_type,
-                    },
-                )
-                response_body_fields.append(req_field)
         content, content_type = urllib3.encode_multipart_formdata(
-            response_body_fields,
+            form_data_fields,
         )
         content_type = content_type.replace(
             "multipart/form-data",
@@ -510,39 +660,33 @@ class MLDocumentsMocker:
         headers = {
             "Content-Type": content_type,
         }
-        if len(response_body_fields) == 0:
+        if len(form_data_fields) == 0:
             content = b""
             headers["Content-Length"] = "0"
-        return Response(status_code=200, headers=headers, content=content)
-
-    def _find_body_parts(
-        self,
-        uri: str,
-        category: list[str],
-    ) -> list[DocumentsBodyPart] | None:
-        return [
-            part
-            for part in self._doc_body_parts
-            if self._match_body_part(uri, category, part)
-        ]
+        return Response(status_code=httpx.codes.OK, headers=headers, content=content)
 
     @staticmethod
-    def _match_body_part(
+    def _build_successful_post_response(
+        doc_objects: list[dict],
+    ) -> Response:
+        headers = {
+            "Content-Type": "application/json; charset=UTF-8",
+            "vnd.marklogic.document-format": "json",
+        }
+        content = {"documents": doc_objects}
+        return Response(status_code=httpx.codes.OK, headers=headers, json=content)
+
+    @staticmethod
+    def _get_post_erroneous_operation(
         uri: str,
-        category: list[str],
-        body_part: DocumentsBodyPart,
-    ) -> bool:
-        if body_part.content_disposition.filename != uri:
-            return False
-        body_part_category = body_part.content_disposition.category or Category.CONTENT
-        if isinstance(body_part_category, Category):
-            body_part_category = [body_part_category]
-        body_part_category = [c.value for c in body_part_category]
-        if "content" in category and "content" in body_part_category:
-            return True
-        metadata_categories = list(category)
-        if "content" in metadata_categories:
-            metadata_categories.remove("content")
-        if len(metadata_categories) != len(body_part_category):
-            return False
-        return sorted(metadata_categories) == sorted(body_part_category)
+        body_part: BodyPart,
+    ) -> str:
+        metadata = json.loads(body_part.content.decode("utf-8"))
+        if metadata.get("collections") and len(metadata.get("collections")) > 0:
+            collections = metadata.get("collections")
+            if len(collections) == 1:
+                col_str = f'"{collections[0]}"'
+            else:
+                col_str = "(" + ", ".join(f'"{c}"' for c in collections) + ")"
+            return f'xdmp:document-set-collections("{uri}", {col_str})'
+        raise NotImplementedError

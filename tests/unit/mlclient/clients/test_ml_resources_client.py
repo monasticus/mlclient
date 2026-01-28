@@ -1,5 +1,6 @@
 from pathlib import Path
 
+import httpx
 import pytest
 import respx
 
@@ -42,7 +43,7 @@ def test_eval(xquery):
             variables={"element": "<parent><child/></parent>"},
         )
 
-    assert resp.status_code == 200
+    assert resp.status_code == httpx.codes.OK
     assert "<new-parent><child/></new-parent>" in resp.text
 
 
@@ -64,7 +65,7 @@ def test_get_logs():
     with MLResourcesClient() as client:
         resp = client.get_logs(filename="ErrorLog.txt", data_format="json")
 
-    assert resp.status_code == 200
+    assert resp.status_code == httpx.codes.OK
     assert "logfile" in resp.json()
 
 
@@ -87,7 +88,7 @@ def test_get_databases():
         resp = client.get_databases(data_format="json")
 
     expected_uri = "/manage/v2/databases?view=default"
-    assert resp.status_code == 200
+    assert resp.status_code == httpx.codes.OK
     assert resp.json()["database-default-list"]["meta"]["uri"] == expected_uri
 
 
@@ -109,7 +110,7 @@ def test_post_databases():
     with MLResourcesClient() as client:
         resp = client.post_databases(body=body)
 
-    assert resp.status_code == 400
+    assert resp.status_code == httpx.codes.BAD_REQUEST
     assert (
         "Payload has errors in structure, content-type or values. "
         "Database name missing."
@@ -135,7 +136,7 @@ def test_get_database():
         resp = client.get_database(database="Documents", data_format="json")
 
     expected_uri = "/manage/v2/databases/Documents?view=default"
-    assert resp.status_code == 200
+    assert resp.status_code == httpx.codes.OK
     assert resp.json()["database-default"]["meta"]["uri"] == expected_uri
 
 
@@ -160,7 +161,7 @@ def test_post_database():
             body={"operation": "clear-database"},
         )
 
-    assert resp.status_code == 200
+    assert resp.status_code == httpx.codes.OK
     assert not resp.text
 
 
@@ -175,7 +176,7 @@ def test_delete_database():
     with MLResourcesClient() as client:
         resp = client.delete_database(database="custom-db")
 
-    assert resp.status_code == 204
+    assert resp.status_code == httpx.codes.NO_CONTENT
     assert not resp.text
 
 
@@ -198,7 +199,7 @@ def test_get_database_properties():
     with MLResourcesClient() as client:
         resp = client.get_database_properties(database="Documents", data_format="json")
 
-    assert resp.status_code == 200
+    assert resp.status_code == httpx.codes.OK
     assert resp.json()["database-name"] == "Documents"
 
 
@@ -225,7 +226,7 @@ def test_put_database_properties():
             body={"database-name": "custom-db"},
         )
 
-    assert resp.status_code == 404
+    assert resp.status_code == httpx.codes.NOT_FOUND
     assert resp.json()["errorResponse"]["messageCode"] == "XDMP-NOSUCHDB"
 
 
@@ -248,7 +249,7 @@ def test_get_servers():
         resp = client.get_servers(data_format="json")
 
     expected_uri = "/manage/v2/servers?view=default"
-    assert resp.status_code == 200
+    assert resp.status_code == httpx.codes.OK
     assert resp.json()["server-default-list"]["meta"]["uri"] == expected_uri
 
 
@@ -274,7 +275,7 @@ def test_post_servers():
             body='<http-server-properties xmlns="http://marklogic.com/manage" />',
         )
 
-    assert resp.status_code == 400
+    assert resp.status_code == httpx.codes.BAD_REQUEST
     assert (
         "Payload has errors in structure, content-type or values. "
         "Server name missing."
@@ -305,7 +306,7 @@ def test_get_server():
         )
 
     expected_uri = "/manage/v2/servers/App-Services?group-id=Default&view=default"
-    assert resp.status_code == 200
+    assert resp.status_code == httpx.codes.OK
     assert resp.json()["server-default"]["meta"]["uri"] == expected_uri
 
 
@@ -329,7 +330,7 @@ def test_delete_server():
             group_id="Non-existing-group",
         )
 
-    assert resp.status_code == 404
+    assert resp.status_code == httpx.codes.NOT_FOUND
     assert "No such group Non-existing-group" in resp.text
 
 
@@ -357,7 +358,7 @@ def test_get_server_properties():
             data_format="json",
         )
 
-    assert resp.status_code == 200
+    assert resp.status_code == httpx.codes.OK
     assert resp.json()["server-name"] == "App-Services"
 
 
@@ -386,7 +387,7 @@ def test_put_server_properties():
             body={"server-name": "non-existing-server"},
         )
 
-    assert resp.status_code == 404
+    assert resp.status_code == httpx.codes.NOT_FOUND
     assert resp.json()["errorResponse"]["messageCode"] == "XDMP-NOSUCHGROUP"
 
 
@@ -410,7 +411,7 @@ def test_get_forests():
         resp = client.get_forests(data_format="json", database="Documents")
 
     expected_uri = "/manage/v2/forests?view=default&database-id=Documents"
-    assert resp.status_code == 200
+    assert resp.status_code == httpx.codes.OK
     assert resp.json()["forest-default-list"]["meta"]["uri"] == expected_uri
 
 
@@ -432,7 +433,7 @@ def test_post_forests():
     with MLResourcesClient() as client:
         resp = client.post_forests(body=body)
 
-    assert resp.status_code == 500
+    assert resp.status_code == httpx.codes.INTERNAL_SERVER_ERROR
 
 
 @respx.mock
@@ -453,7 +454,7 @@ def test_put_forests():
     with MLResourcesClient() as client:
         resp = client.put_forests(body=body)
 
-    assert resp.status_code == 400
+    assert resp.status_code == httpx.codes.BAD_REQUEST
     assert (
         "Payload has errors in structure, content-type or values. "
         "Cannot validate payload, no forests specified."
@@ -480,7 +481,7 @@ def test_get_forest():
         resp = client.get_forest(forest="Documents", data_format="json")
 
     expected_uri = "/manage/v2/forests/Documents?view=default"
-    assert resp.status_code == 200
+    assert resp.status_code == httpx.codes.OK
     assert resp.json()["forest-default"]["meta"]["uri"] == expected_uri
 
 
@@ -503,7 +504,7 @@ def test_post_forest():
     with MLResourcesClient() as client:
         resp = client.post_forest(forest="aaa", body={"state": "clear"})
 
-    assert resp.status_code == 404
+    assert resp.status_code == httpx.codes.NOT_FOUND
     assert "XDMP-NOSUCHFOREST" in resp.text
 
 
@@ -519,7 +520,7 @@ def test_delete_forest():
     with MLResourcesClient() as client:
         resp = client.delete_forest(forest="aaa", level="full")
 
-    assert resp.status_code == 204
+    assert resp.status_code == httpx.codes.NO_CONTENT
     assert not resp.text
 
 
@@ -542,7 +543,7 @@ def test_get_forest_properties():
     with MLResourcesClient() as client:
         resp = client.get_forest_properties(forest="Documents", data_format="json")
 
-    assert resp.status_code == 200
+    assert resp.status_code == httpx.codes.OK
     assert resp.json()["forest-name"] == "Documents"
 
 
@@ -569,7 +570,7 @@ def test_put_forest_properties():
             body={"forest-name": "custom-forest"},
         )
 
-    assert resp.status_code == 404
+    assert resp.status_code == httpx.codes.NOT_FOUND
     assert resp.json()["errorResponse"]["messageCode"] == "XDMP-NOSUCHFOREST"
 
 
@@ -592,7 +593,7 @@ def test_get_roles():
         resp = client.get_roles(data_format="json")
 
     expected_uri = "/manage/v2/roles?view=default"
-    assert resp.status_code == 200
+    assert resp.status_code == httpx.codes.OK
     assert resp.json()["role-default-list"]["meta"]["uri"] == expected_uri
 
 
@@ -614,7 +615,7 @@ def test_post_roles():
     with MLResourcesClient() as client:
         resp = client.post_roles(body=body)
 
-    assert resp.status_code == 400
+    assert resp.status_code == httpx.codes.BAD_REQUEST
     assert "Payload has errors in structure, content-type or values." in resp.text
 
 
@@ -637,7 +638,7 @@ def test_get_role():
         resp = client.get_role(role="admin", data_format="json")
 
     expected_uri = "/manage/v2/roles/admin?view=default"
-    assert resp.status_code == 200
+    assert resp.status_code == httpx.codes.OK
     assert resp.json()["role-default"]["meta"]["uri"] == expected_uri
 
 
@@ -652,7 +653,7 @@ def test_delete_role():
     with MLResourcesClient() as client:
         resp = client.delete_role(role="custom-role")
 
-    assert resp.status_code == 204
+    assert resp.status_code == httpx.codes.NO_CONTENT
     assert not resp.text
 
 
@@ -673,7 +674,7 @@ def test_get_role_properties():
     with MLResourcesClient() as client:
         resp = client.get_role_properties(role="admin", data_format="json")
 
-    assert resp.status_code == 200
+    assert resp.status_code == httpx.codes.OK
     assert resp.json()["role-name"] == "admin"
 
 
@@ -700,7 +701,7 @@ def test_put_role_properties():
             body={"role-name": "custom-db"},
         )
 
-    assert resp.status_code == 400
+    assert resp.status_code == httpx.codes.BAD_REQUEST
     assert (
         "Payload has errors in structure, content-type or values. "
         "Role non-existing-role does not exist or is not accessible"
@@ -726,7 +727,7 @@ def test_get_users():
         resp = client.get_users(data_format="json")
 
     expected_uri = "/manage/v2/users?view=default"
-    assert resp.status_code == 200
+    assert resp.status_code == httpx.codes.OK
     assert resp.json()["user-default-list"]["meta"]["uri"] == expected_uri
 
 
@@ -748,7 +749,7 @@ def test_post_users():
     with MLResourcesClient() as client:
         resp = client.post_users(body=body)
 
-    assert resp.status_code == 400
+    assert resp.status_code == httpx.codes.BAD_REQUEST
     assert "Payload has errors in structure, content-type or values." in resp.text
 
 
@@ -771,7 +772,7 @@ def test_get_user():
         resp = client.get_user(user="admin", data_format="json")
 
     expected_uri = "/manage/v2/users/admin?view=default"
-    assert resp.status_code == 200
+    assert resp.status_code == httpx.codes.OK
     assert resp.json()["user-default"]["meta"]["uri"] == expected_uri
 
 
@@ -791,7 +792,7 @@ def test_delete_user():
     with MLResourcesClient() as client:
         resp = client.delete_user(user="custom-user")
 
-    assert resp.status_code == 404
+    assert resp.status_code == httpx.codes.NOT_FOUND
     assert "User does not exist: custom-user" in resp.text
 
 
@@ -812,7 +813,7 @@ def test_get_user_properties():
     with MLResourcesClient() as client:
         resp = client.get_user_properties(user="admin", data_format="json")
 
-    assert resp.status_code == 200
+    assert resp.status_code == httpx.codes.OK
     assert resp.json()["user-name"] == "admin"
 
 
@@ -839,7 +840,7 @@ def test_put_user_properties():
             body={"user-name": "custom-db"},
         )
 
-    assert resp.status_code == 404
+    assert resp.status_code == httpx.codes.NOT_FOUND
     assert resp.json()["errorResponse"]["messageCode"] == "SEC-USERDNE"
 
 
@@ -864,7 +865,7 @@ def test_get_documents():
             data_format="json",
         )
 
-    assert resp.status_code == 500
+    assert resp.status_code == httpx.codes.INTERNAL_SERVER_ERROR
     assert resp.json()["errorResponse"]["messageCode"] == "RESTAPI-NODOCUMENT"
 
 
@@ -890,7 +891,7 @@ def test_post_documents():
     with MLResourcesClient() as client:
         resp = client.post_documents(body_parts=[DocumentsBodyPart(**body_part)])
 
-    assert resp.status_code == 500
+    assert resp.status_code == httpx.codes.INTERNAL_SERVER_ERROR
     assert resp.json() == {
         "errorResponse": {
             "statusCode": "500",
@@ -923,7 +924,7 @@ def test_delete_documents():
             wipe_temporal=True,
         )
 
-    assert resp.status_code == 400
+    assert resp.status_code == httpx.codes.BAD_REQUEST
     assert (
         "Endpoint does not support query parameter: "
         "invalid parameters: result "

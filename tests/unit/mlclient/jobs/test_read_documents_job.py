@@ -19,8 +19,7 @@ from tests.utils.ml_mockers import MLDocumentsMocker, MLRespXMocker
 ml_doc_mocker = MLDocumentsMocker()
 
 ml_mocker = MLRespXMocker(router_base_url="http://localhost:8002/v1/documents")
-ml_mocker.with_side_effect(side_effect=ml_doc_mocker.get_documents_side_effect)
-ml_mocker.mock_get()
+ml_mocker.with_get_side_effect(side_effect=ml_doc_mocker.get_documents_side_effect)
 
 
 @ml_mocker.router

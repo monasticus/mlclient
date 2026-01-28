@@ -1,3 +1,4 @@
+import httpx
 import pytest
 import respx
 
@@ -40,5 +41,5 @@ def test_call(xquery):
     with MLResourceClient() as client:
         resp = client.call(eval_call)
 
-    assert resp.status_code == 200
+    assert resp.status_code == httpx.codes.OK
     assert "<new-parent><child/></new-parent>" in resp.text

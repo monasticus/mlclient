@@ -185,10 +185,8 @@ DOC_BODY_PARTS = [
 ml_doc_mocker = MLDocumentsMocker(DOC_BODY_PARTS)
 
 ml_mocker = MLRespXMocker(router_base_url="http://localhost:8002/v1/documents")
-ml_mocker.with_side_effect(side_effect=ml_doc_mocker.get_documents_side_effect)
-ml_mocker.mock_get()
-ml_mocker.with_side_effect(side_effect=ml_doc_mocker.post_documents_side_effect)
-ml_mocker.mock_post()
+ml_mocker.with_get_side_effect(side_effect=ml_doc_mocker.get_documents_side_effect)
+ml_mocker.with_post_side_effect(side_effect=ml_doc_mocker.post_documents_side_effect)
 
 
 @pytest.fixture(autouse=True)
@@ -1431,7 +1429,7 @@ def test_create_metadata_document_when_doc_exists(docs_client):
 @ml_mocker.router
 def test_create_metadata_document_when_doc_does_not_exists(docs_client):
     # NON_EXISTING part makes it simulating an error
-    uri = "/some/dir/NON_EXISTING-doc.xml"
+    uri = f"/some/dir/{MLDocumentsMocker.NON_EXISTING_TAG}-doc.xml"
     metadata = Metadata(collections=["test-collection"])
     doc = MetadataDocument(uri, metadata)
 

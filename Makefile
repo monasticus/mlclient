@@ -1,8 +1,8 @@
 install:
 	@pip install poetry
 	@poetry install
-	@poetry self add 'poetry-bumpversion<0.3.1'
-	@poetry self add poetry-plugin-export
+	@poetry self add 'poetry-bumpversion>=0.3.3'
+	@poetry self add 'poetry-plugin-export<=1.9.0'
 
 update:
 	@poetry update

@@ -18,7 +18,8 @@ jobs:
 
       - name: Install MLClient with poetry
         run: |
-          make install
+          pip install poetry
+          poetry install
 
       - name: Test code with pytest
         run: poetry run pytest tests/unit/

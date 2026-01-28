@@ -9,7 +9,7 @@ import httpx
 import respx
 import urllib3
 from httpx import Headers, Request, Response
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 from requests_toolbelt import MultipartDecoder
 from requests_toolbelt.multipart.decoder import BodyPart
 from respx import MockRouter
@@ -150,7 +150,7 @@ class RespXRequest(BaseModel):
     headers: Optional[Headers] = None
     content: Optional[Union[bytes, str]] = None
     data: Optional[dict] = None
-    json: Optional[dict] = None
+    json_: Optional[dict] = Field(alias="json", default=None)
 
 
 class RespXResponse(BaseModel):
@@ -159,7 +159,7 @@ class RespXResponse(BaseModel):
     status_code: int = -1
     headers: Optional[Headers] = None
     content: Optional[Union[bytes, str]] = None
-    json: Optional[dict] = None
+    json_: Optional[dict] = Field(alias="json", default=None)
     body_parts: Optional[list[RequestField]] = None
 
 
@@ -211,7 +211,7 @@ class MLRespXMocker(MLMocker):
         ):
             self._resp_mock.request.data = body
         elif isinstance(body, dict):
-            self._resp_mock.request.json = body
+            self._resp_mock.request.json_ = body
         else:
             self._resp_mock.request.content = body
 
@@ -230,7 +230,7 @@ class MLRespXMocker(MLMocker):
 
     def with_response_body(self, body: bytes | str | dict):
         if isinstance(body, dict):
-            self._resp_mock.response.json = body
+            self._resp_mock.response.json_ = body
         else:
             self._resp_mock.response.content = body
 
@@ -305,17 +305,24 @@ class MLRespXMocker(MLMocker):
     ):
         if self._resp_mock.side_effect:
             self._mock.request(
-                **self._resp_mock.request.model_dump(exclude_none=True),
+                **self._resp_mock.request.model_dump(
+                    exclude_none=True,
+                    by_alias=True,
+                ),
             ).mock(side_effect=self._resp_mock.side_effect)
         else:
             self._validate()
             self._setup_response_body()
             self._mock.request(
-                **self._resp_mock.request.model_dump(exclude_none=True),
+                **self._resp_mock.request.model_dump(
+                    exclude_none=True,
+                    by_alias=True,
+                ),
             ).respond(
                 **self._resp_mock.response.model_dump(
                     exclude={"body_parts"},
                     exclude_none=True,
+                    by_alias=True,
                 ),
             )
         self._resp_mock = RespXMock()
@@ -325,7 +332,7 @@ class MLRespXMocker(MLMocker):
             body
             for body in [
                 self._resp_mock.response.content,
-                self._resp_mock.response.json,
+                self._resp_mock.response.json_,
                 self._resp_mock.response.body_parts,
             ]
             if body is not None

@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 import json
-import os
 from pathlib import Path
+from typing import Generator
 
 _SCRIPT_DIR = Path(__file__).resolve()
 _RESOURCES_DIR = "resources"
@@ -29,9 +29,12 @@ def get_test_resources(
 
 def list_resources(
     test_path: str,
-) -> list[str]:
+) -> Generator[str]:
     test_resources_path = get_test_resources_path(test_path)
-    return os.listdir(test_resources_path)
+    return (
+        str(p.relative_to(test_resources_path))
+        for p in Path(test_resources_path).iterdir()
+    )
 
 
 def get_test_resource_json(

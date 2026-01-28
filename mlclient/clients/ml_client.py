@@ -12,6 +12,7 @@ It exports 3 classes:
 from __future__ import annotations
 
 import logging
+from collections.abc import Mapping
 from types import TracebackType
 
 from httpx import Auth, BasicAuth, Client, DigestAuth, HTTPTransport, Response
@@ -367,8 +368,10 @@ class MLClient:
             doc_type = Mimetypes.get_doc_type(content_type) if content_type else None
             if doc_type == DocumentType.JSON:
                 request["json"] = body
-            else:
+            elif isinstance(body, Mapping):
                 request["data"] = body
+            else:
+                request["content"] = body
 
         logger.fine(
             "Request details: %s",

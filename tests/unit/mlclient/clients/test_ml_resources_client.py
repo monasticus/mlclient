@@ -10,7 +10,7 @@ from tests.utils import resources as resources_utils
 from tests.utils.ml_mockers import MLRespXMocker
 
 
-@pytest.fixture()
+@pytest.fixture
 def xquery():
     return """xquery version '1.0-ml';
 
@@ -277,8 +277,7 @@ def test_post_servers():
 
     assert resp.status_code == httpx.codes.BAD_REQUEST
     assert (
-        "Payload has errors in structure, content-type or values. "
-        "Server name missing."
+        "Payload has errors in structure, content-type or values. Server name missing."
     ) in resp.text
 
 

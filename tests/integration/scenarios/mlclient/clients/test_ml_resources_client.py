@@ -22,7 +22,7 @@ pytest_plugins = [
 class TestDatabasesManagement:
     TEST_DATABASE_CONFIG: ClassVar[dict] = {"database-name": "TestDB"}
 
-    @pytest.mark.ml_access()
+    @pytest.mark.ml_access
     def test_db_management(
         self,
     ):
@@ -379,7 +379,7 @@ class TestServersManagement:
 class TestForestsManagement:
     TEST_FOREST_CONFIG: ClassVar[dict] = {"forest-name": "test-forest-1"}
 
-    @pytest.mark.ml_access()
+    @pytest.mark.ml_access
     def test_forest_management(
         self,
     ):

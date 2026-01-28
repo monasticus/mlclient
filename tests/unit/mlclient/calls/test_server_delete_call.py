@@ -3,7 +3,7 @@ import pytest
 from mlclient.calls import ServerDeleteCall
 
 
-@pytest.fixture()
+@pytest.fixture
 def default_server_delete_call():
     """Returns an ServerDeleteCall instance"""
     return ServerDeleteCall(server="App-Services", group_id="Default")

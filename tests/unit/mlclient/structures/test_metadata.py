@@ -30,7 +30,7 @@ def __assert_permissions_are_equal(
         assert this_capabilities.difference(that_capabilities) == set()
 
 
-@pytest.fixture()
+@pytest.fixture
 def metadata():
     collections = ["collection-1", "collection-2"]
     permissions = [

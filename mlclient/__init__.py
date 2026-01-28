@@ -58,14 +58,14 @@ def setup_logger():
 
 __version__ = "0.4.1"
 __all__ = [
-    "__version__",
     "LOCAL_NS",
     "MLClient",
+    "MLConfiguration",
+    "MLManager",
     "MLResourceClient",
     "MLResourcesClient",
     "MLResponseParser",
-    "MLConfiguration",
-    "MLManager",
+    "__version__",
     "setup_logger",
 ]
 

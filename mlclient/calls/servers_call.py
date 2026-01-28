@@ -187,6 +187,6 @@ class ServersPostCall(ResourceCall):
             joined_supported_server_types = ", ".join(cls._SUPPORTED_SERVER_TYPES)
             msg = f"The supported server types are: {joined_supported_server_types}"
             raise exceptions.WrongParametersError(msg)
-        if body is None or isinstance(body, str) and re.search("^\\s*$", body):
+        if body is None or (isinstance(body, str) and re.search("^\\s*$", body)):
             msg = "No request body provided for POST /manage/v2/servers!"
             raise exceptions.WrongParametersError(msg)

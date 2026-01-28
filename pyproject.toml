@@ -171,7 +171,8 @@ max-complexity = 10
 ]
 "mlclient/structures/*" = [
     "UP006", # allow using List instead of list for pydantic
-    "UP007" # allow using Union instead of X | Y for pydantic
+    "UP007", # allow using Union instead of X | Y for pydantic
+    "UP045", # allow using Optional instead of X | None for pydantic
 ]
 "mlclient/structures/documents.py" = [
     "PLR0913" # allow many arguments as they depend on ML structure
@@ -196,5 +197,6 @@ max-complexity = 10
 "tests/utils/ml_mockers.py" = [
     "T201", # allow printing by MLMocker
     "UP006", # allow using List instead of list for pydantic
-    "UP007" # allow using Union instead of X | Y for pydantic
+    "UP007", # allow using Union instead of X | Y for pydantic
+    "UP045", # allow using Optional instead of X | None for pydantic
 ]

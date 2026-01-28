@@ -7,7 +7,7 @@ from mlclient.calls import EvalCall
 from tests.utils.ml_mockers import MLRespXMocker
 
 
-@pytest.fixture()
+@pytest.fixture
 def xquery():
     return """xquery version '1.0-ml';
 

@@ -149,6 +149,6 @@ def _get_test_docs(
     count: int,
 ):
     for i in range(count):
-        uri = f"/some/dir/doc{i+1}.xml"
+        uri = f"/some/dir/doc{i + 1}.xml"
         content = b"<root><child>data</child></root>"
         yield RawDocument(content, uri, DocumentType.XML)

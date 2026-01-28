@@ -5,7 +5,7 @@ from mlclient.calls import DocumentsPostCall
 from mlclient.structures.calls import DocumentsBodyPart
 
 
-@pytest.fixture()
+@pytest.fixture
 def default_body_part():
     body_part = {
         "content-disposition": {
@@ -17,7 +17,7 @@ def default_body_part():
     return DocumentsBodyPart(**body_part)
 
 
-@pytest.fixture()
+@pytest.fixture
 def default_databases_post_call(default_body_part):
     """Returns an DocumentsPostCall instance"""
     return DocumentsPostCall(body_parts=[default_body_part])

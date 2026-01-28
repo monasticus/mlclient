@@ -37,11 +37,11 @@ from .eval_client import EvalClient, LOCAL_NS
 from .logs_client import LogsClient, LogType
 
 __all__ = [
-    "EvalClient",
     "LOCAL_NS",
+    "DocumentsClient",
+    "EvalClient",
     "LogType",
     "LogsClient",
-    "DocumentsClient",
     "MLClient",
     "MLResourceClient",
     "MLResourcesClient",

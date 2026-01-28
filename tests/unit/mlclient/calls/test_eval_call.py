@@ -4,7 +4,7 @@ from mlclient import exceptions
 from mlclient.calls import EvalCall
 
 
-@pytest.fixture()
+@pytest.fixture
 def default_eval_call():
     """Return an EvalCall instance with a required parameter only."""
     return EvalCall(xquery="()")
@@ -82,16 +82,13 @@ def test_body_is_normalized():
 
     call = EvalCall(xquery=xquery, variables={"data": "custom-value"})
 
-    assert (
-        call.body
-        == {  # No new line in the xquery code
-            "xquery": "xquery version '1.0-ml'; "
-            "declare variable $data as xs:string? external; "
-            "let $a = if (fn:empty($data)) then 'default' else $data "
-            "return $a",
-            "vars": '{"data": "custom-value"}',
-        }
-    )
+    assert call.body == {  # No new line in the xquery code
+        "xquery": "xquery version '1.0-ml'; "
+        "declare variable $data as xs:string? external; "
+        "let $a = if (fn:empty($data)) then 'default' else $data "
+        "return $a",
+        "vars": '{"data": "custom-value"}',
+    }
 
 
 def test_body_normalization_does_not_break_code():
@@ -109,16 +106,13 @@ def test_body_normalization_does_not_break_code():
 
     call = EvalCall(xquery=xquery, variables={"data": "custom-value"})
 
-    assert (
-        call.body
-        == {  # No new line in the xquery code
-            "xquery": "xquery version '1.0-ml'; "
-            "declare variable $data as xs:string? external; "
-            "let $a = if (fn:empty($data)) then '    default' else $data "
-            "return $a",
-            "vars": '{"data": "custom-value"}',
-        }
-    )
+    assert call.body == {  # No new line in the xquery code
+        "xquery": "xquery version '1.0-ml'; "
+        "declare variable $data as xs:string? external; "
+        "let $a = if (fn:empty($data)) then '    default' else $data "
+        "return $a",
+        "vars": '{"data": "custom-value"}',
+    }
 
 
 def test_fully_parametrized_xquery_call():

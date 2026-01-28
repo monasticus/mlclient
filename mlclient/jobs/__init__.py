@@ -30,7 +30,7 @@ from .documents_jobs import (
 
 __all__ = [
     "DocumentJobReport",
+    "DocumentsLoader",
     "ReadDocumentsJob",
     "WriteDocumentsJob",
-    "DocumentsLoader",
 ]

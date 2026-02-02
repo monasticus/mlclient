@@ -15,7 +15,8 @@ import logging
 from collections.abc import Mapping
 from types import TracebackType
 
-from httpx import Auth, BasicAuth, Client, DigestAuth, HTTPTransport, Response
+from httpx import Auth, BasicAuth, Client, DigestAuth, Response
+from httpx_retries import Retry, RetryTransport
 
 from mlclient import constants as const
 from mlclient.calls import (
@@ -112,6 +113,11 @@ class MLClient:
     --6a5df7d535c71968--
     """
 
+    _DEFAULT_RETRY_STRATEGY = Retry(
+        total=5,
+        backoff_factor=0.5,
+    )
+
     def __init__(
         self,
         protocol: str = "http",
@@ -120,6 +126,7 @@ class MLClient:
         auth_method: str = "basic",
         username: str = "admin",
         password: str = "admin",
+        retry: Retry | None = None,
     ):
         """Initialize MLClient instance.
 
@@ -137,7 +144,7 @@ class MLClient:
             A username
         password : str, default "admin"
             A password
-        retry : Retry, default Retry(connect=5,allowed_methods=None,backoff_factor=0.5)
+        retry : Retry, default Retry(total=5,backoff_factor=0.5)
             A retry strategy
         """
         self.protocol: str = protocol
@@ -147,6 +154,7 @@ class MLClient:
         self.username: str = username
         self.password: str = password
         self.base_url: str = f"{protocol}://{host}:{port}"
+        self._retry: Retry = retry or self._DEFAULT_RETRY_STRATEGY
         self._client: Client | None = None
         auth_impl = BasicAuth if auth_method == "basic" else DigestAuth
         self._auth: Auth = auth_impl(username, password)
@@ -192,7 +200,7 @@ class MLClient:
     ):
         """Start an HTTP session."""
         logger.debug("Initiating a connection with %s", self.base_url)
-        self._client = Client(transport=HTTPTransport(retries=5))
+        self._client = Client(transport=RetryTransport(retry=self._retry))
 
     def disconnect(
         self,
@@ -401,7 +409,7 @@ class MLClient:
                 method.upper(),
                 endpoint,
             )
-            with Client(transport=HTTPTransport(retries=5)) as client:
+            with Client(transport=RetryTransport(retry=self._retry)) as client:
                 resp = client.request(method, url, **request)
 
         return resp

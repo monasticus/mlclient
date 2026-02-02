@@ -560,14 +560,12 @@ class DocumentsReader:
                 yield partial_data
             elif content_disp.filename not in pre_formatted_data:
                 pre_formatted_data[content_disp.filename] = partial_data
+            elif content_disp.category == Category.CONTENT:
+                pre_formatted_data[content_disp.filename].update(partial_data)
+                yield pre_formatted_data[content_disp.filename]
             else:
-                data = pre_formatted_data[content_disp.filename]
-                if content_disp.category == Category.CONTENT:
-                    data.update(partial_data)
-                    yield data
-                else:
-                    partial_data.update(data)
-                    yield partial_data
+                partial_data.update(pre_formatted_data[content_disp.filename])
+                yield partial_data
 
     @classmethod
     def _pre_format_document(

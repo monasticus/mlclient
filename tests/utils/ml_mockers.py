@@ -382,13 +382,13 @@ class MLDocumentsMocker:
         self,
         docs: Iterable[DocumentsBodyPart],
     ):
-        self._doc_body_parts.extend(docs)
+        self.mock_document(*docs)
 
     def mock_document(
         self,
-        doc: DocumentsBodyPart,
+        *docs: DocumentsBodyPart,
     ):
-        self._doc_body_parts.append(doc)
+        self._doc_body_parts.extend(docs)
 
     def get_documents_side_effect(
         self,

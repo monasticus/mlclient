@@ -20,165 +20,16 @@ from mlclient.structures import (
     TextDocument,
     XMLDocument,
 )
-from mlclient.structures.calls import DocumentsBodyPart
+from tests.utils import data as test_data
 from tests.utils import resources as resources_utils
+from tests.utils.data import MetadataSpec
 from tests.utils.ml_mockers import MLDocumentsMocker, MLRespXMocker
 
 DOC_BODY_PARTS = [
-    DocumentsBodyPart(
-        **{
-            "content-type": "application/zip",
-            "content-disposition": "attachment; "
-            'filename="/some/dir/doc4.zip"; '
-            "category=content; "
-            "format=binary",
-            "content": zlib.compress(b'xquery version "1.0-ml";\n\nfn:current-date()'),
-        },
-    ),
-    DocumentsBodyPart(
-        **{
-            "content-type": "application/xml",
-            "content-disposition": "attachment; "
-            'filename="/some/dir/doc1.xml"; '
-            "category=content; "
-            "format=xml",
-            "content": b'<?xml version="1.0" encoding="UTF-8"?>\n<root/>',
-        },
-    ),
-    DocumentsBodyPart(
-        **{
-            "content-type": "application/vnd.marklogic-xdmp",
-            "content-disposition": "attachment; "
-            'filename="/some/dir/doc3.xqy"; '
-            "category=content; "
-            "format=text",
-            "content": b'xquery version "1.0-ml";\n\nfn:current-date()',
-        },
-    ),
-    DocumentsBodyPart(
-        **{
-            "content-type": "application/json",
-            "content-disposition": "attachment; "
-            'filename="/some/dir/doc2.json"; '
-            "category=content; "
-            "format=json",
-            "content": b'{"root":{"child":"data"}}',
-        },
-    ),
-    DocumentsBodyPart(
-        **{
-            "content-type": "application/json",
-            "content-disposition": "attachment; "
-            'filename="/some/dir/doc1.xml"; '
-            "category=metadata; "
-            "format=json",
-            "content": b"{"
-            b'"collections": ["xml"], '
-            b'"permissions": [], '
-            b'"properties": {}, '
-            b'"quality": 0, '
-            b'"metadataValues": {}'
-            b"}",
-        },
-    ),
-    DocumentsBodyPart(
-        **{
-            "content-type": "application/json",
-            "content-disposition": "attachment; "
-            'filename="/some/dir/doc1.xml"; '
-            "category=collections; "
-            "format=json",
-            "content": b'{"collections": ["xml"]}',
-        },
-    ),
-    DocumentsBodyPart(
-        **{
-            "content-type": "application/json",
-            "content-disposition": "attachment; "
-            'filename="/some/dir/doc1.xml"; '
-            "category=collections; "
-            "category=quality; "
-            "format=json",
-            "content": b'{"collections": ["xml"], "quality": 0}',
-        },
-    ),
-    DocumentsBodyPart(
-        **{
-            "content-type": "application/json",
-            "content-disposition": "attachment; "
-            'filename="/some/dir/doc1.xml"; '
-            "category=metadata-values; "
-            "category=collections; "
-            "category=permissions; "
-            "category=properties; "
-            "category=quality; "
-            "format=json",
-            "content": b"{"
-            b'"collections": ["xml"], '
-            b'"permissions": [], '
-            b'"properties": {}, '
-            b'"quality": 0, '
-            b'"metadataValues": {}'
-            b"}",
-        },
-    ),
-    DocumentsBodyPart(
-        **{
-            "content-type": "application/json",
-            "content-disposition": "attachment; "
-            'filename="/some/dir/doc2.json"; '
-            "category=metadata; "
-            "format=json",
-            "content": b"{"
-            b'"collections": ["json"], '
-            b'"permissions": [], '
-            b'"properties": {}, '
-            b'"quality": 1, '
-            b'"metadataValues": {}'
-            b"}",
-        },
-    ),
-    DocumentsBodyPart(
-        **{
-            "content-type": "application/json",
-            "content-disposition": "attachment; "
-            'filename="/some/dir/doc2.json"; '
-            "category=collections; "
-            "format=json",
-            "content": b'{"collections": ["json"]}',
-        },
-    ),
-    DocumentsBodyPart(
-        **{
-            "content-type": "application/json",
-            "content-disposition": "attachment; "
-            'filename="/some/dir/doc2.json"; '
-            "category=collections; "
-            "category=quality; "
-            "format=json",
-            "content": b'{"collections": ["json"], "quality": 1}',
-        },
-    ),
-    DocumentsBodyPart(
-        **{
-            "content-type": "application/json",
-            "content-disposition": "attachment; "
-            'filename="/some/dir/doc2.json"; '
-            "category=collections; "
-            "category=metadata-values; "
-            "category=permissions; "
-            "category=properties; "
-            "category=quality; "
-            "format=json",
-            "content": b"{"
-            b'"collections": ["json"], '
-            b'"permissions": [], '
-            b'"properties": {}, '
-            b'"quality": 1, '
-            b'"metadataValues": {}'
-            b"}",
-        },
-    ),
+    test_data.binary_doc_body_part("/some/dir/doc4.zip"),
+    test_data.xml_doc_body_part("/some/dir/doc1.xml"),
+    test_data.text_doc_body_part("/some/dir/doc3.xqy"),
+    test_data.json_doc_body_part("/some/dir/doc2.json"),
 ]
 
 
@@ -681,9 +532,17 @@ def test_read_multiple_existing_and_non_existing_docs(docs_client):
 
 @ml_mocker.router
 def test_read_doc_with_full_metadata(docs_client):
-    uri = "/some/dir/doc1.xml"
+    with ml_doc_mocker.scoped(fresh=False):
+        ml_doc_mocker.mock_document(
+            test_data.doc_full_metadata_body_part(
+                "/some/dir/doc1.xml",
+                MetadataSpec(collections=["xml"]),
+                metadata_category=True,
+            ),
+        )
+        uri = "/some/dir/doc1.xml"
 
-    document = docs_client.read(uri, category=["content", "metadata"])
+        document = docs_client.read(uri, category=["content", "metadata"])
 
     assert isinstance(document, XMLDocument)
     assert document.uri == uri
@@ -703,9 +562,16 @@ def test_read_doc_with_full_metadata(docs_client):
 
 @ml_mocker.router
 def test_read_doc_with_single_metadata_category(docs_client):
-    uri = "/some/dir/doc1.xml"
+    with ml_doc_mocker.scoped(fresh=False):
+        ml_doc_mocker.mock_document(
+            test_data.doc_metadata_body_part(
+                "/some/dir/doc1.xml",
+                MetadataSpec(collections=["xml"]),
+            ),
+        )
+        uri = "/some/dir/doc1.xml"
 
-    document = docs_client.read(uri, category=["content", "collections"])
+        document = docs_client.read(uri, category=["content", "collections"])
 
     assert isinstance(document, XMLDocument)
     assert document.uri == uri
@@ -725,9 +591,16 @@ def test_read_doc_with_single_metadata_category(docs_client):
 
 @ml_mocker.router
 def test_read_doc_with_two_metadata_categories(docs_client):
-    uri = "/some/dir/doc1.xml"
+    with ml_doc_mocker.scoped(fresh=False):
+        ml_doc_mocker.mock_document(
+            test_data.doc_metadata_body_part(
+                "/some/dir/doc1.xml",
+                MetadataSpec(collections=["xml"], quality=0),
+            ),
+        )
+        uri = "/some/dir/doc1.xml"
 
-    document = docs_client.read(uri, category=["content", "collections", "quality"])
+        document = docs_client.read(uri, category=["content", "collections", "quality"])
 
     assert isinstance(document, XMLDocument)
     assert document.uri == uri
@@ -747,19 +620,59 @@ def test_read_doc_with_two_metadata_categories(docs_client):
 
 @ml_mocker.router
 def test_read_doc_with_all_metadata_categories(docs_client):
-    uri = "/some/dir/doc1.xml"
+    with ml_doc_mocker.scoped(fresh=False):
+        ml_doc_mocker.mock_document(
+            test_data.doc_full_metadata_body_part(
+                "/some/dir/doc1.xml",
+                MetadataSpec(collections=["xml"]),
+            ),
+        )
+        uri = "/some/dir/doc1.xml"
 
-    document = docs_client.read(
-        uri,
-        category=[
-            "content",
-            "metadata-values",
-            "collections",
-            "permissions",
-            "properties",
-            "quality",
-        ],
-    )
+        document = docs_client.read(
+            uri,
+            category=[
+                "content",
+                "metadata-values",
+                "collections",
+                "permissions",
+                "properties",
+                "quality",
+            ],
+        )
+
+    assert isinstance(document, XMLDocument)
+    assert document.uri == uri
+    assert document.doc_type == DocumentType.XML
+    assert isinstance(document.content, ElemTree.ElementTree)
+    assert document.content.getroot().tag == "root"
+    assert document.content.getroot().text is None
+    assert document.content.getroot().attrib == {}
+    assert document.metadata is not None
+    assert document.metadata.collections() == ["xml"]
+    assert document.metadata.metadata_values() == {}
+    assert document.metadata.permissions() == []
+    assert document.metadata.properties() == {}
+    assert document.metadata.quality() == 0
+    assert document.temporal_collection is None
+
+
+@ml_mocker.router
+def test_read_doc_with_full_metadata_when_content_follows_metadata_in_response(
+    docs_client,
+):
+    with ml_doc_mocker.scoped():
+        ml_doc_mocker.mock_document(
+            test_data.doc_full_metadata_body_part(
+                "/some/dir/doc1.xml",
+                MetadataSpec(collections=["xml"]),
+                metadata_category=True,
+            ),
+            test_data.xml_doc_body_part("/some/dir/doc1.xml"),
+        )
+        uri = "/some/dir/doc1.xml"
+
+        document = docs_client.read(uri, category=["content", "metadata"])
 
     assert isinstance(document, XMLDocument)
     assert document.uri == uri
@@ -779,9 +692,17 @@ def test_read_doc_with_all_metadata_categories(docs_client):
 
 @ml_mocker.router
 def test_read_full_metadata_without_content(docs_client):
-    uri = "/some/dir/doc1.xml"
+    with ml_doc_mocker.scoped(fresh=False):
+        ml_doc_mocker.mock_document(
+            test_data.doc_full_metadata_body_part(
+                "/some/dir/doc1.xml",
+                MetadataSpec(collections=["xml"]),
+                metadata_category=True,
+            ),
+        )
+        uri = "/some/dir/doc1.xml"
 
-    document = docs_client.read(uri, category=["metadata"])
+        document = docs_client.read(uri, category=["metadata"])
 
     assert isinstance(document, MetadataDocument)
     assert document.uri == uri
@@ -798,9 +719,16 @@ def test_read_full_metadata_without_content(docs_client):
 
 @ml_mocker.router
 def test_read_single_metadata_category_without_content(docs_client):
-    uri = "/some/dir/doc1.xml"
+    with ml_doc_mocker.scoped(fresh=False):
+        ml_doc_mocker.mock_document(
+            test_data.doc_metadata_body_part(
+                "/some/dir/doc1.xml",
+                MetadataSpec(collections=["xml"]),
+            ),
+        )
+        uri = "/some/dir/doc1.xml"
 
-    document = docs_client.read(uri, category=["collections"])
+        document = docs_client.read(uri, category=["collections"])
 
     assert isinstance(document, MetadataDocument)
     assert document.uri == uri
@@ -817,9 +745,16 @@ def test_read_single_metadata_category_without_content(docs_client):
 
 @ml_mocker.router
 def test_read_two_metadata_categories_without_content(docs_client):
-    uri = "/some/dir/doc1.xml"
+    with ml_doc_mocker.scoped(fresh=False):
+        ml_doc_mocker.mock_document(
+            test_data.doc_metadata_body_part(
+                "/some/dir/doc1.xml",
+                MetadataSpec(collections=["xml"], quality=0),
+            ),
+        )
+        uri = "/some/dir/doc1.xml"
 
-    document = docs_client.read(uri, category=["collections", "quality"])
+        document = docs_client.read(uri, category=["collections", "quality"])
 
     assert isinstance(document, MetadataDocument)
     assert document.uri == uri
@@ -836,18 +771,25 @@ def test_read_two_metadata_categories_without_content(docs_client):
 
 @ml_mocker.router
 def test_read_all_metadata_categories_without_content(docs_client):
-    uri = "/some/dir/doc1.xml"
+    with ml_doc_mocker.scoped(fresh=False):
+        ml_doc_mocker.mock_document(
+            test_data.doc_full_metadata_body_part(
+                "/some/dir/doc1.xml",
+                MetadataSpec(collections=["xml"]),
+            ),
+        )
+        uri = "/some/dir/doc1.xml"
 
-    document = docs_client.read(
-        uri,
-        category=[
-            "metadata-values",
-            "collections",
-            "permissions",
-            "properties",
-            "quality",
-        ],
-    )
+        document = docs_client.read(
+            uri,
+            category=[
+                "metadata-values",
+                "collections",
+                "permissions",
+                "properties",
+                "quality",
+            ],
+        )
 
     assert isinstance(document, MetadataDocument)
     assert document.uri == uri
@@ -864,12 +806,25 @@ def test_read_all_metadata_categories_without_content(docs_client):
 
 @ml_mocker.router
 def test_read_multiple_docs_with_full_metadata(docs_client):
-    uris = [
-        "/some/dir/doc1.xml",
-        "/some/dir/doc2.json",
-    ]
+    with ml_doc_mocker.scoped(fresh=False):
+        ml_doc_mocker.mock_document(
+            test_data.doc_full_metadata_body_part(
+                "/some/dir/doc1.xml",
+                MetadataSpec(collections=["xml"]),
+                metadata_category=True,
+            ),
+            test_data.doc_full_metadata_body_part(
+                "/some/dir/doc2.json",
+                MetadataSpec(collections=["json"], quality=1),
+                metadata_category=True,
+            ),
+        )
+        uris = [
+            "/some/dir/doc1.xml",
+            "/some/dir/doc2.json",
+        ]
 
-    docs = docs_client.read(uris, category=["content", "metadata"])
+        docs = docs_client.read(uris, category=["content", "metadata"])
 
     assert isinstance(docs, list)
     assert len(docs) == 2
@@ -911,12 +866,23 @@ def test_read_multiple_docs_with_full_metadata(docs_client):
 
 @ml_mocker.router
 def test_read_multiple_docs_with_single_metadata_category(docs_client):
-    uris = [
-        "/some/dir/doc1.xml",
-        "/some/dir/doc2.json",
-    ]
+    with ml_doc_mocker.scoped(fresh=False):
+        ml_doc_mocker.mock_document(
+            test_data.doc_metadata_body_part(
+                "/some/dir/doc1.xml",
+                MetadataSpec(collections=["xml"]),
+            ),
+            test_data.doc_metadata_body_part(
+                "/some/dir/doc2.json",
+                MetadataSpec(collections=["json"]),
+            ),
+        )
+        uris = [
+            "/some/dir/doc1.xml",
+            "/some/dir/doc2.json",
+        ]
 
-    docs = docs_client.read(uris, category=["content", "collections"])
+        docs = docs_client.read(uris, category=["content", "collections"])
 
     assert isinstance(docs, list)
     assert len(docs) == 2
@@ -958,12 +924,23 @@ def test_read_multiple_docs_with_single_metadata_category(docs_client):
 
 @ml_mocker.router
 def test_read_multiple_docs_with_two_metadata_categories(docs_client):
-    uris = [
-        "/some/dir/doc1.xml",
-        "/some/dir/doc2.json",
-    ]
+    with ml_doc_mocker.scoped(fresh=False):
+        ml_doc_mocker.mock_document(
+            test_data.doc_metadata_body_part(
+                "/some/dir/doc1.xml",
+                MetadataSpec(collections=["xml"], quality=0),
+            ),
+            test_data.doc_metadata_body_part(
+                "/some/dir/doc2.json",
+                MetadataSpec(collections=["json"], quality=1),
+            ),
+        )
+        uris = [
+            "/some/dir/doc1.xml",
+            "/some/dir/doc2.json",
+        ]
 
-    docs = docs_client.read(uris, category=["content", "collections", "quality"])
+        docs = docs_client.read(uris, category=["content", "collections", "quality"])
 
     assert isinstance(docs, list)
     assert len(docs) == 2
@@ -1005,22 +982,33 @@ def test_read_multiple_docs_with_two_metadata_categories(docs_client):
 
 @ml_mocker.router
 def test_read_multiple_docs_with_all_metadata_categories(docs_client):
-    uris = [
-        "/some/dir/doc1.xml",
-        "/some/dir/doc2.json",
-    ]
+    with ml_doc_mocker.scoped(fresh=False):
+        ml_doc_mocker.mock_document(
+            test_data.doc_full_metadata_body_part(
+                "/some/dir/doc1.xml",
+                MetadataSpec(collections=["xml"]),
+            ),
+            test_data.doc_full_metadata_body_part(
+                "/some/dir/doc2.json",
+                MetadataSpec(collections=["json"], quality=1),
+            ),
+        )
+        uris = [
+            "/some/dir/doc1.xml",
+            "/some/dir/doc2.json",
+        ]
 
-    docs = docs_client.read(
-        uris,
-        category=[
-            "content",
-            "metadata-values",
-            "collections",
-            "permissions",
-            "properties",
-            "quality",
-        ],
-    )
+        docs = docs_client.read(
+            uris,
+            category=[
+                "content",
+                "metadata-values",
+                "collections",
+                "permissions",
+                "properties",
+                "quality",
+            ],
+        )
 
     assert isinstance(docs, list)
     assert len(docs) == 2
@@ -1062,12 +1050,25 @@ def test_read_multiple_docs_with_all_metadata_categories(docs_client):
 
 @ml_mocker.router
 def test_read_multiple_docs_full_metadata_without_content(docs_client):
-    uris = [
-        "/some/dir/doc1.xml",
-        "/some/dir/doc2.json",
-    ]
+    with ml_doc_mocker.scoped(fresh=False):
+        ml_doc_mocker.mock_document(
+            test_data.doc_full_metadata_body_part(
+                "/some/dir/doc1.xml",
+                MetadataSpec(collections=["xml"]),
+                metadata_category=True,
+            ),
+            test_data.doc_full_metadata_body_part(
+                "/some/dir/doc2.json",
+                MetadataSpec(collections=["json"], quality=1),
+                metadata_category=True,
+            ),
+        )
+        uris = [
+            "/some/dir/doc1.xml",
+            "/some/dir/doc2.json",
+        ]
 
-    docs = docs_client.read(uris, category=["metadata"])
+        docs = docs_client.read(uris, category=["metadata"])
 
     assert isinstance(docs, list)
     assert len(docs) == 2
@@ -1105,12 +1106,23 @@ def test_read_multiple_docs_full_metadata_without_content(docs_client):
 
 @ml_mocker.router
 def test_read_multiple_docs_single_metadata_category_without_content(docs_client):
-    uris = [
-        "/some/dir/doc1.xml",
-        "/some/dir/doc2.json",
-    ]
+    with ml_doc_mocker.scoped(fresh=False):
+        ml_doc_mocker.mock_document(
+            test_data.doc_metadata_body_part(
+                "/some/dir/doc1.xml",
+                MetadataSpec(collections=["xml"]),
+            ),
+            test_data.doc_metadata_body_part(
+                "/some/dir/doc2.json",
+                MetadataSpec(collections=["json"]),
+            ),
+        )
+        uris = [
+            "/some/dir/doc1.xml",
+            "/some/dir/doc2.json",
+        ]
 
-    docs = docs_client.read(uris, category=["collections"])
+        docs = docs_client.read(uris, category=["collections"])
 
     assert isinstance(docs, list)
     assert len(docs) == 2
@@ -1148,12 +1160,23 @@ def test_read_multiple_docs_single_metadata_category_without_content(docs_client
 
 @ml_mocker.router
 def test_read_multiple_docs_two_metadata_categories_without_content(docs_client):
-    uris = [
-        "/some/dir/doc1.xml",
-        "/some/dir/doc2.json",
-    ]
+    with ml_doc_mocker.scoped(fresh=False):
+        ml_doc_mocker.mock_document(
+            test_data.doc_metadata_body_part(
+                "/some/dir/doc1.xml",
+                MetadataSpec(collections=["xml"], quality=0),
+            ),
+            test_data.doc_metadata_body_part(
+                "/some/dir/doc2.json",
+                MetadataSpec(collections=["json"], quality=1),
+            ),
+        )
+        uris = [
+            "/some/dir/doc1.xml",
+            "/some/dir/doc2.json",
+        ]
 
-    docs = docs_client.read(uris, category=["collections", "quality"])
+        docs = docs_client.read(uris, category=["collections", "quality"])
 
     assert isinstance(docs, list)
     assert len(docs) == 2
@@ -1191,21 +1214,32 @@ def test_read_multiple_docs_two_metadata_categories_without_content(docs_client)
 
 @ml_mocker.router
 def test_read_multiple_docs_all_metadata_categories_without_content(docs_client):
-    uris = [
-        "/some/dir/doc1.xml",
-        "/some/dir/doc2.json",
-    ]
+    with ml_doc_mocker.scoped(fresh=False):
+        ml_doc_mocker.mock_document(
+            test_data.doc_full_metadata_body_part(
+                "/some/dir/doc1.xml",
+                MetadataSpec(collections=["xml"]),
+            ),
+            test_data.doc_full_metadata_body_part(
+                "/some/dir/doc2.json",
+                MetadataSpec(collections=["json"], quality=1),
+            ),
+        )
+        uris = [
+            "/some/dir/doc1.xml",
+            "/some/dir/doc2.json",
+        ]
 
-    docs = docs_client.read(
-        uris,
-        category=[
-            "metadata-values",
-            "collections",
-            "permissions",
-            "properties",
-            "quality",
-        ],
-    )
+        docs = docs_client.read(
+            uris,
+            category=[
+                "metadata-values",
+                "collections",
+                "permissions",
+                "properties",
+                "quality",
+            ],
+        )
 
     assert isinstance(docs, list)
     assert len(docs) == 2

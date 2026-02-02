@@ -24,10 +24,10 @@ ml_mocker.with_get_side_effect(side_effect=ml_doc_mocker.get_documents_side_effe
 
 @ml_mocker.router
 def test_basic_job_with_documents_output():
-    with ml_doc_mocker.scoped() as dm:
+    with ml_doc_mocker.scoped():
         uris_count = 5
         uris = [f"/some/dir/doc{i + 1}.xml" for i in range(uris_count)]
-        dm.mock_documents(_get_test_document_body_parts(uris_count))
+        ml_doc_mocker.mock_document(*_get_test_document_body_parts(uris_count))
 
         job = ReadDocumentsJob(thread_count=1, batch_size=5)
         assert job.thread_count == 1
@@ -48,10 +48,10 @@ def test_basic_job_with_documents_output():
 
 @ml_mocker.router
 def test_basic_job_with_filesystem_output():
-    with ml_doc_mocker.scoped() as dm:
+    with ml_doc_mocker.scoped():
         uris_count = 5
         uris = [f"/some/dir/doc{i + 1}.xml" for i in range(uris_count)]
-        dm.mock_documents(_get_test_document_body_parts(uris_count))
+        ml_doc_mocker.mock_document(*_get_test_document_body_parts(uris_count))
 
         output_dir = str(Path(__file__).resolve().parent / "output")
         assert not Path(output_dir).exists()
@@ -83,10 +83,10 @@ def test_basic_job_with_filesystem_output():
 
 @ml_mocker.router
 def test_basic_job_with_multiple_inputs():
-    with ml_doc_mocker.scoped() as dm:
+    with ml_doc_mocker.scoped():
         uris_count = 500
         uris = [f"/some/dir/doc{i + 1}.xml" for i in range(uris_count)]
-        dm.mock_documents(_get_test_document_body_parts(uris_count))
+        ml_doc_mocker.mock_document(*_get_test_document_body_parts(uris_count))
 
         job = ReadDocumentsJob(thread_count=1, batch_size=500)
         assert job.thread_count == 1
@@ -108,11 +108,11 @@ def test_basic_job_with_multiple_inputs():
 
 @ml_mocker.router
 def test_job_with_documents_output_and_full_metadata():
-    with ml_doc_mocker.scoped() as dm:
+    with ml_doc_mocker.scoped():
         uris_count = 5
         uris = [f"/some/dir/doc{i + 1}.xml" for i in range(uris_count)]
-        dm.mock_documents(
-            _get_test_document_body_parts(uris_count, metadata=["metadata"]),
+        ml_doc_mocker.mock_document(
+            *_get_test_document_body_parts(uris_count, metadata=["metadata"]),
         )
 
         job = ReadDocumentsJob(thread_count=1, batch_size=5)
@@ -138,11 +138,11 @@ def test_job_with_documents_output_and_full_metadata():
 
 @ml_mocker.router
 def test_job_with_documents_output_and_some_metadata_categories():
-    with ml_doc_mocker.scoped() as dm:
+    with ml_doc_mocker.scoped():
         uris_count = 5
         uris = [f"/some/dir/doc{i + 1}.xml" for i in range(uris_count)]
-        dm.mock_documents(
-            _get_test_document_body_parts(uris_count, metadata=["quality"]),
+        ml_doc_mocker.mock_document(
+            *_get_test_document_body_parts(uris_count, metadata=["quality"]),
         )
 
         job = ReadDocumentsJob(thread_count=1, batch_size=5)
@@ -168,11 +168,11 @@ def test_job_with_documents_output_and_some_metadata_categories():
 
 @ml_mocker.router
 def test_basic_job_with_filesystem_output_and_full_metadata():
-    with ml_doc_mocker.scoped() as dm:
+    with ml_doc_mocker.scoped():
         uris_count = 5
         uris = [f"/some/dir/doc{i + 1}.xml" for i in range(uris_count)]
-        dm.mock_documents(
-            _get_test_document_body_parts(uris_count, metadata=["metadata"]),
+        ml_doc_mocker.mock_document(
+            *_get_test_document_body_parts(uris_count, metadata=["metadata"]),
         )
 
         output_dir = str(Path(__file__).resolve().parent / "output")
@@ -206,11 +206,11 @@ def test_basic_job_with_filesystem_output_and_full_metadata():
 
 @ml_mocker.router
 def test_basic_job_with_filesystem_output_and_some_metadata_categories():
-    with ml_doc_mocker.scoped() as dm:
+    with ml_doc_mocker.scoped():
         uris_count = 5
         uris = [f"/some/dir/doc{i + 1}.xml" for i in range(uris_count)]
-        dm.mock_documents(
-            _get_test_document_body_parts(uris_count, metadata=["quality"]),
+        ml_doc_mocker.mock_document(
+            *_get_test_document_body_parts(uris_count, metadata=["quality"]),
         )
 
         output_dir = str(Path(__file__).resolve().parent / "output")
@@ -244,10 +244,10 @@ def test_basic_job_with_filesystem_output_and_some_metadata_categories():
 
 @ml_mocker.router
 def test_job_with_custom_database():
-    with ml_doc_mocker.scoped() as dm:
+    with ml_doc_mocker.scoped():
         uris_count = 5
         uris = [f"/some/dir/doc{i + 1}.xml" for i in range(uris_count)]
-        dm.mock_documents(_get_test_document_body_parts(uris_count))
+        ml_doc_mocker.mock_document(*_get_test_document_body_parts(uris_count))
 
         job = ReadDocumentsJob(thread_count=1, batch_size=5)
         assert job.thread_count == 1
@@ -274,10 +274,10 @@ def test_job_with_custom_database():
 async def test_multi_thread_job():
     @ml_mocker.router
     async def run():
-        with ml_doc_mocker.scoped() as dm:
+        with ml_doc_mocker.scoped():
             uris_count = 150
             uris = [f"/some/dir/doc{i + 1}.xml" for i in range(uris_count)]
-            dm.mock_documents(_get_test_document_body_parts(uris_count))
+            ml_doc_mocker.mock_document(*_get_test_document_body_parts(uris_count))
 
             job = ReadDocumentsJob(batch_size=5)
             assert job.thread_count > 1
@@ -352,10 +352,10 @@ def test_failing_job():
 
 @ml_mocker.router
 def test_failing_filesystem_write_step():
-    with ml_doc_mocker.scoped() as dm:
+    with ml_doc_mocker.scoped():
         uris_count = 5
         uris = [f"/some/dir/doc{i + 1}.xml" for i in range(uris_count)]
-        dm.mock_documents(_get_test_document_body_parts(uris_count))
+        ml_doc_mocker.mock_document(*_get_test_document_body_parts(uris_count))
 
         output_dir_path = Path(__file__).resolve()
         assert output_dir_path.exists()

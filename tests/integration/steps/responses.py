@@ -54,7 +54,7 @@ def verify_requests_producing_logs(
     eval_logs = [
         log
         for log in logs
-        if '"POST /v1/eval HTTP/1.1"' in log and "python-requests" in log
+        if '"POST /v1/eval HTTP/1.1"' in log and "python-httpx" in log
     ]
     assert len(eval_logs) >= test_logs_count
 

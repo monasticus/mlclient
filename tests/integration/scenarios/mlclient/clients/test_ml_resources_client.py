@@ -5,6 +5,7 @@ from typing import ClassVar
 import httpx
 import pytest
 from httpx import Response
+from httpx_retries import Retry
 from pytest_bdd import scenarios
 
 from mlclient import MLResourcesClient, MLResponseParser
@@ -19,34 +20,44 @@ pytest_plugins = [
 ]
 
 
+@pytest.fixture(scope="class")
+def ml_client():
+    with MLResourcesClient(
+        auth_method="digest", retry=Retry(total=15, backoff_factor=0.5),
+    ) as client:
+        yield client
+
+
 class TestDatabasesManagement:
     TEST_DATABASE_CONFIG: ClassVar[dict] = {"database-name": "TestDB"}
 
     @pytest.mark.ml_access
     def test_db_management(
         self,
+        ml_client: MLResourcesClient,
     ):
         init_count = -1
         try:
-            init_count = self._init_check()
+            init_count = self._init_check(ml_client)
 
-            self._create_database()
-            self._middle_check(init_count)
+            self._create_database(ml_client)
+            self._middle_check(ml_client, init_count)
 
-            self._check_database_config()
-            self._update_database_properties()
-            self._check_database_properties()
+            self._check_database_config(ml_client)
+            self._update_database_properties(ml_client)
+            self._check_database_properties(ml_client)
 
-            self._perform_action_on_database()
+            self._perform_action_on_database(ml_client)
         finally:
-            self._delete_database()
-            self._final_check(init_count)
+            self._delete_database(ml_client)
+            self._final_check(ml_client, init_count)
 
     @classmethod
     def _init_check(
         cls,
+        client: MLResourcesClient,
     ) -> int:
-        resp = cls._get_databases()
+        resp = cls._get_databases(client)
 
         data = resp.json()["database-default-list"]["list-items"]
         databases = data["list-item"]
@@ -58,9 +69,10 @@ class TestDatabasesManagement:
     @classmethod
     def _middle_check(
         cls,
+        client: MLResourcesClient,
         init_count: int,
     ):
-        resp = cls._get_databases()
+        resp = cls._get_databases(client)
 
         data = resp.json()["database-default-list"]["list-items"]
         databases = data["list-item"]
@@ -73,9 +85,10 @@ class TestDatabasesManagement:
     @classmethod
     def _final_check(
         cls,
+        client: MLResourcesClient,
         init_count: int,
     ):
-        resp = cls._get_databases()
+        resp = cls._get_databases(client)
 
         data = resp.json()["database-default-list"]["list-items"]
         databases = data["list-item"]
@@ -88,8 +101,10 @@ class TestDatabasesManagement:
     @classmethod
     def _check_database_config(
         cls,
+        client: MLResourcesClient,
     ):
         resp = cls._get_database(
+            client,
             cls.TEST_DATABASE_CONFIG["database-name"],
             view="config",
         )
@@ -100,8 +115,10 @@ class TestDatabasesManagement:
     @classmethod
     def _update_database_properties(
         cls,
+        client: MLResourcesClient,
     ):
         cls._put_database_properties(
+            client,
             cls.TEST_DATABASE_CONFIG["database-name"],
             {"enabled": False},
         )
@@ -109,8 +126,10 @@ class TestDatabasesManagement:
     @classmethod
     def _check_database_properties(
         cls,
+        client: MLResourcesClient,
     ):
         resp = cls._get_database_properties(
+            client,
             cls.TEST_DATABASE_CONFIG["database-name"],
         )
         database_props = resp.json()
@@ -120,9 +139,9 @@ class TestDatabasesManagement:
     @classmethod
     def _get_databases(
         cls,
+        client: MLResourcesClient,
     ) -> Response:
-        with MLResourcesClient(auth_method="digest") as client:
-            resp = client.get_databases(data_format="json")
+        resp = client.get_databases(data_format="json")
         assert resp.status_code == httpx.codes.OK
 
         return resp
@@ -130,11 +149,11 @@ class TestDatabasesManagement:
     @classmethod
     def _get_database(
         cls,
+        client: MLResourcesClient,
         database: str,
         view: str,
     ) -> Response:
-        with MLResourcesClient(auth_method="digest") as client:
-            resp = client.get_database(database=database, data_format="json", view=view)
+        resp = client.get_database(database=database, data_format="json", view=view)
         assert resp.status_code == httpx.codes.OK
 
         return resp
@@ -142,10 +161,10 @@ class TestDatabasesManagement:
     @classmethod
     def _get_database_properties(
         cls,
+        client: MLResourcesClient,
         database: str,
     ) -> Response:
-        with MLResourcesClient(auth_method="digest") as client:
-            resp = client.get_database_properties(database=database, data_format="json")
+        resp = client.get_database_properties(database=database, data_format="json")
         assert resp.status_code == httpx.codes.OK
 
         return resp
@@ -153,14 +172,14 @@ class TestDatabasesManagement:
     @classmethod
     def _put_database_properties(
         cls,
+        client: MLResourcesClient,
         database: str,
         body: dict,
     ) -> Response:
-        with MLResourcesClient(auth_method="digest") as client:
-            resp = client.put_database_properties(
-                database=database,
-                body=body,
-            )
+        resp = client.put_database_properties(
+            database=database,
+            body=body,
+        )
         assert resp.status_code == httpx.codes.NO_CONTENT
 
         return resp
@@ -168,28 +187,28 @@ class TestDatabasesManagement:
     @classmethod
     def _create_database(
         cls,
+        client: MLResourcesClient,
     ):
-        with MLResourcesClient(auth_method="digest") as client:
-            resp = client.post_databases(cls.TEST_DATABASE_CONFIG)
+        resp = client.post_databases(cls.TEST_DATABASE_CONFIG)
         assert resp.status_code == httpx.codes.CREATED
 
     @classmethod
     def _delete_database(
         cls,
+        client: MLResourcesClient,
     ):
-        with MLResourcesClient(auth_method="digest") as client:
-            resp = client.delete_database(cls.TEST_DATABASE_CONFIG["database-name"])
+        resp = client.delete_database(cls.TEST_DATABASE_CONFIG["database-name"])
         assert resp.status_code == httpx.codes.NO_CONTENT
 
     @classmethod
     def _perform_action_on_database(
         cls,
+        client: MLResourcesClient,
     ):
-        with MLResourcesClient(auth_method="digest") as client:
-            resp = client.post_database(
-                database=cls.TEST_DATABASE_CONFIG["database-name"],
-                body={"operation": "clear-database"},
-            )
+        resp = client.post_database(
+            database=cls.TEST_DATABASE_CONFIG["database-name"],
+            body={"operation": "clear-database"},
+        )
         assert resp.status_code == httpx.codes.OK
 
 
@@ -203,25 +222,27 @@ class TestServersManagement:
 
     def test_servers_management(
         self,
+        ml_client: MLResourcesClient,
     ):
         init_count = -1
         try:
-            init_count = self._init_check()
-            self._create_server()
-            self._middle_check(init_count)
+            init_count = self._init_check(ml_client)
+            self._create_server(ml_client)
+            self._middle_check(ml_client, init_count)
 
-            self._check_server_config()
-            self._update_server_properties()
-            self._check_server_properties()
+            self._check_server_config(ml_client)
+            self._update_server_properties(ml_client)
+            self._check_server_properties(ml_client)
         finally:
-            self._delete_server()
-            self._final_check(init_count)
+            self._delete_server(ml_client)
+            self._final_check(ml_client, init_count)
 
     @classmethod
     def _init_check(
         cls,
+        client: MLResourcesClient,
     ) -> int:
-        resp = cls._get_servers()
+        resp = cls._get_servers(client)
 
         data = resp.json()["server-default-list"]["list-items"]
         servers = data["list-item"]
@@ -233,9 +254,10 @@ class TestServersManagement:
     @classmethod
     def _middle_check(
         cls,
+        client: MLResourcesClient,
         init_count: int,
     ):
-        resp = cls._get_servers()
+        resp = cls._get_servers(client)
 
         data = resp.json()["server-default-list"]["list-items"]
         servers = data["list-item"]
@@ -248,9 +270,10 @@ class TestServersManagement:
     @classmethod
     def _final_check(
         cls,
+        client: MLResourcesClient,
         init_count: int,
     ):
-        resp = cls._get_servers()
+        resp = cls._get_servers(client)
 
         data = resp.json()["server-default-list"]["list-items"]
         servers = data["list-item"]
@@ -263,8 +286,10 @@ class TestServersManagement:
     @classmethod
     def _check_server_config(
         cls,
+        client: MLResourcesClient,
     ):
         resp = cls._get_server(
+            client,
             cls.TEST_SERVER_CONFIG["server-name"],
             view="config",
         )
@@ -276,8 +301,10 @@ class TestServersManagement:
     @classmethod
     def _update_server_properties(
         cls,
+        client: MLResourcesClient,
     ):
         cls._put_server_properties(
+            client,
             cls.TEST_SERVER_CONFIG["server-name"],
             {"enabled": False},
         )
@@ -285,8 +312,10 @@ class TestServersManagement:
     @classmethod
     def _check_server_properties(
         cls,
+        client: MLResourcesClient,
     ):
         resp = cls._get_server_properties(
+            client,
             cls.TEST_SERVER_CONFIG["server-name"],
         )
         server_props = resp.json()
@@ -297,9 +326,9 @@ class TestServersManagement:
     @classmethod
     def _get_servers(
         cls,
+        client: MLResourcesClient,
     ) -> Response:
-        with MLResourcesClient(auth_method="digest") as client:
-            resp = client.get_servers(data_format="json")
+        resp = client.get_servers(data_format="json")
         assert resp.status_code == httpx.codes.OK
 
         return resp
@@ -307,16 +336,16 @@ class TestServersManagement:
     @classmethod
     def _get_server(
         cls,
+        client: MLResourcesClient,
         server: str,
         view: str,
     ) -> Response:
-        with MLResourcesClient(auth_method="digest") as client:
-            resp = client.get_server(
-                server=server,
-                group_id="Default",
-                data_format="json",
-                view=view,
-            )
+        resp = client.get_server(
+            server=server,
+            group_id="Default",
+            data_format="json",
+            view=view,
+        )
         assert resp.status_code == httpx.codes.OK
 
         return resp
@@ -324,14 +353,14 @@ class TestServersManagement:
     @classmethod
     def _get_server_properties(
         cls,
+        client: MLResourcesClient,
         server: str,
     ) -> Response:
-        with MLResourcesClient(auth_method="digest") as client:
-            resp = client.get_server_properties(
-                server=server,
-                group_id="Default",
-                data_format="json",
-            )
+        resp = client.get_server_properties(
+            server=server,
+            group_id="Default",
+            data_format="json",
+        )
         assert resp.status_code == httpx.codes.OK
 
         return resp
@@ -339,15 +368,15 @@ class TestServersManagement:
     @classmethod
     def _put_server_properties(
         cls,
+        client: MLResourcesClient,
         server: str,
         body: dict,
     ) -> Response:
-        with MLResourcesClient(auth_method="digest") as client:
-            resp = client.put_server_properties(
-                server=server,
-                group_id="Default",
-                body=body,
-            )
+        resp = client.put_server_properties(
+            server=server,
+            group_id="Default",
+            body=body,
+        )
         assert resp.status_code == httpx.codes.NO_CONTENT
 
         return resp
@@ -355,24 +384,24 @@ class TestServersManagement:
     @classmethod
     def _create_server(
         cls,
+        client: MLResourcesClient,
     ):
-        with MLResourcesClient(auth_method="digest") as client:
-            resp = client.post_servers(
-                group_id="Default",
-                server_type="http",
-                body=cls.TEST_SERVER_CONFIG,
-            )
+        resp = client.post_servers(
+            group_id="Default",
+            server_type="http",
+            body=cls.TEST_SERVER_CONFIG,
+        )
         assert resp.status_code == httpx.codes.CREATED
 
     @classmethod
     def _delete_server(
         cls,
+        client: MLResourcesClient,
     ):
-        with MLResourcesClient(auth_method="digest") as client:
-            resp = client.delete_server(
-                server=cls.TEST_SERVER_CONFIG["server-name"],
-                group_id="Default",
-            )
+        resp = client.delete_server(
+            server=cls.TEST_SERVER_CONFIG["server-name"],
+            group_id="Default",
+        )
         assert resp.status_code == httpx.codes.ACCEPTED
 
 
@@ -382,29 +411,31 @@ class TestForestsManagement:
     @pytest.mark.ml_access
     def test_forest_management(
         self,
+        ml_client: MLResourcesClient,
     ):
         init_count = -1
         try:
-            init_count = self._init_check()
+            init_count = self._init_check(ml_client)
 
-            self._create_forest()
-            self._middle_check(init_count)
+            self._create_forest(ml_client)
+            self._middle_check(ml_client, init_count)
 
-            self._check_forest_config()
-            self._update_forest_properties()
-            self._check_forest_properties()
+            self._check_forest_config(ml_client)
+            self._update_forest_properties(ml_client)
+            self._check_forest_properties(ml_client)
 
-            self._initiate_state_change_on_forest()
-            self._perform_action_on_forests()
+            self._initiate_state_change_on_forest(ml_client)
+            self._perform_action_on_forests(ml_client)
         finally:
-            self._delete_forest()
-            self._final_check(init_count)
+            self._delete_forest(ml_client)
+            self._final_check(ml_client, init_count)
 
     @classmethod
     def _init_check(
         cls,
+        client: MLResourcesClient,
     ) -> int:
-        resp = cls._get_forests()
+        resp = cls._get_forests(client)
 
         data = resp.json()["forest-default-list"]["list-items"]
         forests = data["list-item"]
@@ -416,9 +447,10 @@ class TestForestsManagement:
     @classmethod
     def _middle_check(
         cls,
+        client: MLResourcesClient,
         init_count: int,
     ):
-        resp = cls._get_forests()
+        resp = cls._get_forests(client)
 
         data = resp.json()["forest-default-list"]["list-items"]
         forests = data["list-item"]
@@ -431,9 +463,10 @@ class TestForestsManagement:
     @classmethod
     def _final_check(
         cls,
+        client: MLResourcesClient,
         init_count: int,
     ):
-        resp = cls._get_forests()
+        resp = cls._get_forests(client)
 
         data = resp.json()["forest-default-list"]["list-items"]
         forests = data["list-item"]
@@ -446,8 +479,10 @@ class TestForestsManagement:
     @classmethod
     def _check_forest_config(
         cls,
+        client: MLResourcesClient,
     ):
         resp = cls._get_forest(
+            client,
             cls.TEST_FOREST_CONFIG["forest-name"],
             view="config",
         )
@@ -458,8 +493,10 @@ class TestForestsManagement:
     @classmethod
     def _update_forest_properties(
         cls,
+        client: MLResourcesClient,
     ):
         cls._put_forest_properties(
+            client,
             cls.TEST_FOREST_CONFIG["forest-name"],
             {"rebalancer-enable": False},
         )
@@ -467,8 +504,10 @@ class TestForestsManagement:
     @classmethod
     def _check_forest_properties(
         cls,
+        client: MLResourcesClient,
     ):
         resp = cls._get_forest_properties(
+            client,
             cls.TEST_FOREST_CONFIG["forest-name"],
         )
         forest_props = resp.json()
@@ -478,9 +517,9 @@ class TestForestsManagement:
     @classmethod
     def _get_forests(
         cls,
+        client: MLResourcesClient,
     ) -> Response:
-        with MLResourcesClient(auth_method="digest") as client:
-            resp = client.get_forests(data_format="json")
+        resp = client.get_forests(data_format="json")
         assert resp.status_code == httpx.codes.OK
 
         return resp
@@ -488,11 +527,11 @@ class TestForestsManagement:
     @classmethod
     def _get_forest(
         cls,
+        client: MLResourcesClient,
         forest: str,
         view: str,
     ) -> Response:
-        with MLResourcesClient(auth_method="digest") as client:
-            resp = client.get_forest(forest=forest, data_format="json", view=view)
+        resp = client.get_forest(forest=forest, data_format="json", view=view)
         assert resp.status_code == httpx.codes.OK
 
         return resp
@@ -500,10 +539,10 @@ class TestForestsManagement:
     @classmethod
     def _get_forest_properties(
         cls,
+        client: MLResourcesClient,
         forest: str,
     ) -> Response:
-        with MLResourcesClient(auth_method="digest") as client:
-            resp = client.get_forest_properties(forest=forest, data_format="json")
+        resp = client.get_forest_properties(forest=forest, data_format="json")
         assert resp.status_code == httpx.codes.OK
 
         return resp
@@ -511,14 +550,14 @@ class TestForestsManagement:
     @classmethod
     def _put_forest_properties(
         cls,
+        client: MLResourcesClient,
         forest: str,
         body: dict,
     ) -> Response:
-        with MLResourcesClient(auth_method="digest") as client:
-            resp = client.put_forest_properties(
-                forest=forest,
-                body=body,
-            )
+        resp = client.put_forest_properties(
+            forest=forest,
+            body=body,
+        )
         assert resp.status_code == httpx.codes.NO_CONTENT
 
         return resp
@@ -526,43 +565,43 @@ class TestForestsManagement:
     @classmethod
     def _create_forest(
         cls,
+        client: MLResourcesClient,
     ):
-        with MLResourcesClient(auth_method="digest") as client:
-            resp = client.post_forests(cls.TEST_FOREST_CONFIG)
+        resp = client.post_forests(cls.TEST_FOREST_CONFIG)
         assert resp.status_code == httpx.codes.CREATED
 
     @classmethod
     def _delete_forest(
         cls,
+        client: MLResourcesClient,
     ):
-        with MLResourcesClient(auth_method="digest") as client:
-            resp = client.delete_forest(
-                cls.TEST_FOREST_CONFIG["forest-name"],
-                level="full",
-            )
+        resp = client.delete_forest(
+            cls.TEST_FOREST_CONFIG["forest-name"],
+            level="full",
+        )
         assert resp.status_code == httpx.codes.NO_CONTENT
 
     @classmethod
     def _initiate_state_change_on_forest(
         cls,
+        client: MLResourcesClient,
     ):
-        with MLResourcesClient(auth_method="digest") as client:
-            resp = client.post_forest(
-                forest=cls.TEST_FOREST_CONFIG["forest-name"],
-                body={"state": "clear"},
-            )
+        resp = client.post_forest(
+            forest=cls.TEST_FOREST_CONFIG["forest-name"],
+            body={"state": "clear"},
+        )
         assert resp.status_code == httpx.codes.OK
 
     @classmethod
     def _perform_action_on_forests(
         cls,
+        client: MLResourcesClient,
     ):
-        with MLResourcesClient(auth_method="digest") as client:
-            resp = client.put_forests(
-                body={
-                    "operation": "forest-migrate",
-                },
-            )
+        resp = client.put_forests(
+            body={
+                "operation": "forest-migrate",
+            },
+        )
         assert resp.status_code == httpx.codes.BAD_REQUEST
         err = resp.json()["errorResponse"]
         assert err["messageCode"] == "MANAGE-INVALIDPAYLOAD"
@@ -581,25 +620,27 @@ class TestRolesManagement:
 
     def test_roles_management(
         self,
+        ml_client: MLResourcesClient,
     ):
         init_count = -1
         try:
-            init_count = self._init_check()
-            self._create_role()
-            self._middle_check(init_count)
+            init_count = self._init_check(ml_client)
+            self._create_role(ml_client)
+            self._middle_check(ml_client, init_count)
 
-            self._check_role_config()
-            self._update_role_properties()
-            self._check_role_properties()
+            self._check_role_config(ml_client)
+            self._update_role_properties(ml_client)
+            self._check_role_properties(ml_client)
         finally:
-            self._delete_role()
-            self._final_check(init_count)
+            self._delete_role(ml_client)
+            self._final_check(ml_client, init_count)
 
     @classmethod
     def _init_check(
         cls,
+        client: MLResourcesClient,
     ) -> int:
-        resp = cls._get_roles()
+        resp = cls._get_roles(client)
 
         data = resp.json()["role-default-list"]["list-items"]
         roles = data["list-item"]
@@ -611,9 +652,10 @@ class TestRolesManagement:
     @classmethod
     def _middle_check(
         cls,
+        client: MLResourcesClient,
         init_count: int,
     ):
-        resp = cls._get_roles()
+        resp = cls._get_roles(client)
 
         data = resp.json()["role-default-list"]["list-items"]
         roles = data["list-item"]
@@ -626,9 +668,10 @@ class TestRolesManagement:
     @classmethod
     def _final_check(
         cls,
+        client: MLResourcesClient,
         init_count: int,
     ):
-        resp = cls._get_roles()
+        resp = cls._get_roles(client)
 
         data = resp.json()["role-default-list"]["list-items"]
         roles = data["list-item"]
@@ -641,8 +684,10 @@ class TestRolesManagement:
     @classmethod
     def _check_role_config(
         cls,
+        client: MLResourcesClient,
     ):
         resp = cls._get_role(
+            client,
             cls.TEST_ROLE_CONFIG["role-name"],
         )
         role_config = resp.json()["role-default"]
@@ -652,8 +697,10 @@ class TestRolesManagement:
     @classmethod
     def _update_role_properties(
         cls,
+        client: MLResourcesClient,
     ):
         cls._put_role_properties(
+            client,
             cls.TEST_ROLE_CONFIG["role-name"],
             {"description": cls.TEST_ROLE_CONFIG["description"].upper()},
         )
@@ -661,8 +708,10 @@ class TestRolesManagement:
     @classmethod
     def _check_role_properties(
         cls,
+        client: MLResourcesClient,
     ):
         resp = cls._get_role_properties(
+            client,
             cls.TEST_ROLE_CONFIG["role-name"],
         )
         role_config = resp.json()
@@ -672,9 +721,9 @@ class TestRolesManagement:
     @classmethod
     def _get_roles(
         cls,
+        client: MLResourcesClient,
     ) -> Response:
-        with MLResourcesClient(auth_method="digest") as client:
-            resp = client.get_roles(data_format="json")
+        resp = client.get_roles(data_format="json")
         assert resp.status_code == httpx.codes.OK
 
         return resp
@@ -682,13 +731,13 @@ class TestRolesManagement:
     @classmethod
     def _get_role(
         cls,
+        client: MLResourcesClient,
         role: str,
     ) -> Response:
-        with MLResourcesClient(auth_method="digest") as client:
-            resp = client.get_role(
-                role=role,
-                data_format="json",
-            )
+        resp = client.get_role(
+            role=role,
+            data_format="json",
+        )
         assert resp.status_code == httpx.codes.OK
 
         return resp
@@ -696,13 +745,13 @@ class TestRolesManagement:
     @classmethod
     def _get_role_properties(
         cls,
+        client: MLResourcesClient,
         role: str,
     ) -> Response:
-        with MLResourcesClient(auth_method="digest") as client:
-            resp = client.get_role_properties(
-                role=role,
-                data_format="json",
-            )
+        resp = client.get_role_properties(
+            role=role,
+            data_format="json",
+        )
         assert resp.status_code == httpx.codes.OK
 
         return resp
@@ -710,14 +759,14 @@ class TestRolesManagement:
     @classmethod
     def _put_role_properties(
         cls,
+        client: MLResourcesClient,
         role: str,
         body: dict,
     ) -> Response:
-        with MLResourcesClient(auth_method="digest") as client:
-            resp = client.put_role_properties(
-                role=role,
-                body=body,
-            )
+        resp = client.put_role_properties(
+            role=role,
+            body=body,
+        )
         assert resp.status_code == httpx.codes.NO_CONTENT
 
         return resp
@@ -725,21 +774,21 @@ class TestRolesManagement:
     @classmethod
     def _create_role(
         cls,
+        client: MLResourcesClient,
     ):
-        with MLResourcesClient(auth_method="digest") as client:
-            resp = client.post_roles(
-                body=cls.TEST_ROLE_CONFIG,
-            )
+        resp = client.post_roles(
+            body=cls.TEST_ROLE_CONFIG,
+        )
         assert resp.status_code == httpx.codes.CREATED
 
     @classmethod
     def _delete_role(
         cls,
+        client: MLResourcesClient,
     ):
-        with MLResourcesClient(auth_method="digest") as client:
-            resp = client.delete_role(
-                role=cls.TEST_ROLE_CONFIG["role-name"],
-            )
+        resp = client.delete_role(
+            role=cls.TEST_ROLE_CONFIG["role-name"],
+        )
         assert resp.status_code == httpx.codes.NO_CONTENT
 
 
@@ -751,25 +800,27 @@ class TestUsersManagement:
 
     def test_users_management(
         self,
+        ml_client: MLResourcesClient,
     ):
         init_count = -1
         try:
-            init_count = self._init_check()
-            self._create_user()
-            self._middle_check(init_count)
+            init_count = self._init_check(ml_client)
+            self._create_user(ml_client)
+            self._middle_check(ml_client, init_count)
 
-            self._check_user_config()
-            self._update_user_properties()
-            self._check_user_properties()
+            self._check_user_config(ml_client)
+            self._update_user_properties(ml_client)
+            self._check_user_properties(ml_client)
         finally:
-            self._delete_user()
-            self._final_check(init_count)
+            self._delete_user(ml_client)
+            self._final_check(ml_client, init_count)
 
     @classmethod
     def _init_check(
         cls,
+        client: MLResourcesClient,
     ) -> int:
-        resp = cls._get_users()
+        resp = cls._get_users(client)
 
         data = resp.json()["user-default-list"]["list-items"]
         users = data["list-item"]
@@ -781,9 +832,10 @@ class TestUsersManagement:
     @classmethod
     def _middle_check(
         cls,
+        client: MLResourcesClient,
         init_count: int,
     ):
-        resp = cls._get_users()
+        resp = cls._get_users(client)
 
         data = resp.json()["user-default-list"]["list-items"]
         users = data["list-item"]
@@ -796,9 +848,10 @@ class TestUsersManagement:
     @classmethod
     def _final_check(
         cls,
+        client: MLResourcesClient,
         init_count: int,
     ):
-        resp = cls._get_users()
+        resp = cls._get_users(client)
 
         data = resp.json()["user-default-list"]["list-items"]
         users = data["list-item"]
@@ -811,8 +864,10 @@ class TestUsersManagement:
     @classmethod
     def _check_user_config(
         cls,
+        client: MLResourcesClient,
     ):
         resp = cls._get_user(
+            client,
             cls.TEST_USER_CONFIG["user-name"],
         )
         user_config = resp.json()["user-default"]
@@ -822,8 +877,10 @@ class TestUsersManagement:
     @classmethod
     def _update_user_properties(
         cls,
+        client: MLResourcesClient,
     ):
         cls._put_user_properties(
+            client,
             cls.TEST_USER_CONFIG["user-name"],
             {"description": cls.TEST_USER_CONFIG["description"].upper()},
         )
@@ -831,8 +888,10 @@ class TestUsersManagement:
     @classmethod
     def _check_user_properties(
         cls,
+        client: MLResourcesClient,
     ):
         resp = cls._get_user_properties(
+            client,
             cls.TEST_USER_CONFIG["user-name"],
         )
         user_config = resp.json()
@@ -842,9 +901,9 @@ class TestUsersManagement:
     @classmethod
     def _get_users(
         cls,
+        client: MLResourcesClient,
     ) -> Response:
-        with MLResourcesClient(auth_method="digest") as client:
-            resp = client.get_users(data_format="json")
+        resp = client.get_users(data_format="json")
         assert resp.status_code == httpx.codes.OK
 
         return resp
@@ -852,13 +911,13 @@ class TestUsersManagement:
     @classmethod
     def _get_user(
         cls,
+        client: MLResourcesClient,
         user: str,
     ) -> Response:
-        with MLResourcesClient(auth_method="digest") as client:
-            resp = client.get_user(
-                user=user,
-                data_format="json",
-            )
+        resp = client.get_user(
+            user=user,
+            data_format="json",
+        )
         assert resp.status_code == httpx.codes.OK
 
         return resp
@@ -866,13 +925,13 @@ class TestUsersManagement:
     @classmethod
     def _get_user_properties(
         cls,
+        client: MLResourcesClient,
         user: str,
     ) -> Response:
-        with MLResourcesClient(auth_method="digest") as client:
-            resp = client.get_user_properties(
-                user=user,
-                data_format="json",
-            )
+        resp = client.get_user_properties(
+            user=user,
+            data_format="json",
+        )
         assert resp.status_code == httpx.codes.OK
 
         return resp
@@ -880,14 +939,14 @@ class TestUsersManagement:
     @classmethod
     def _put_user_properties(
         cls,
+        client: MLResourcesClient,
         user: str,
         body: dict,
     ) -> Response:
-        with MLResourcesClient(auth_method="digest") as client:
-            resp = client.put_user_properties(
-                user=user,
-                body=body,
-            )
+        resp = client.put_user_properties(
+            user=user,
+            body=body,
+        )
         assert resp.status_code == httpx.codes.NO_CONTENT
 
         return resp
@@ -895,21 +954,21 @@ class TestUsersManagement:
     @classmethod
     def _create_user(
         cls,
+        client: MLResourcesClient,
     ):
-        with MLResourcesClient(auth_method="digest") as client:
-            resp = client.post_users(
-                body=cls.TEST_USER_CONFIG,
-            )
+        resp = client.post_users(
+            body=cls.TEST_USER_CONFIG,
+        )
         assert resp.status_code == httpx.codes.CREATED
 
     @classmethod
     def _delete_user(
         cls,
+        client: MLResourcesClient,
     ):
-        with MLResourcesClient(auth_method="digest") as client:
-            resp = client.delete_user(
-                user=cls.TEST_USER_CONFIG["user-name"],
-            )
+        resp = client.delete_user(
+            user=cls.TEST_USER_CONFIG["user-name"],
+        )
         assert resp.status_code == httpx.codes.NO_CONTENT
 
 
@@ -937,40 +996,41 @@ class TestDocumentsManagement:
 
     def test_docs_management(
         self,
+        ml_client: MLResourcesClient,
     ):
         try:
-            self._check_does_not_exist()
+            self._check_does_not_exist(ml_client)
 
-            self._create_document()
-            self._check_created()
+            self._create_document(ml_client)
+            self._check_created(ml_client)
 
-            self._update_document()
-            self._check_updated()
+            self._update_document(ml_client)
+            self._check_updated(ml_client)
         finally:
-            self._delete_document()
-            self._check_does_not_exist()
+            self._delete_document(ml_client)
+            self._check_does_not_exist(ml_client)
 
     @classmethod
     def _check_does_not_exist(
         cls,
+        client: MLResourcesClient,
     ):
-        with MLResourcesClient(auth_method="digest") as client:
-            resp = client.get_documents(
-                uri=cls.DOCUMENT_BODY_PART_1.content_disposition.filename,
-                data_format="json",
-            )
+        resp = client.get_documents(
+            uri=cls.DOCUMENT_BODY_PART_1.content_disposition.filename,
+            data_format="json",
+        )
         assert resp.status_code == httpx.codes.INTERNAL_SERVER_ERROR
         assert resp.json()["errorResponse"]["messageCode"] == "RESTAPI-NODOCUMENT"
 
     @classmethod
     def _check_created(
         cls,
+        client: MLResourcesClient,
     ):
-        with MLResourcesClient(auth_method="digest") as client:
-            resp = client.get_documents(
-                uri=cls.DOCUMENT_BODY_PART_1.content_disposition.filename,
-                data_format="json",
-            )
+        resp = client.get_documents(
+            uri=cls.DOCUMENT_BODY_PART_1.content_disposition.filename,
+            data_format="json",
+        )
         assert resp.status_code == httpx.codes.OK
 
         parsed_resp = MLResponseParser.parse(resp)
@@ -979,12 +1039,12 @@ class TestDocumentsManagement:
     @classmethod
     def _check_updated(
         cls,
+        client: MLResourcesClient,
     ):
-        with MLResourcesClient(auth_method="digest") as client:
-            resp = client.get_documents(
-                uri=cls.DOCUMENT_BODY_PART_1.content_disposition.filename,
-                data_format="json",
-            )
+        resp = client.get_documents(
+            uri=cls.DOCUMENT_BODY_PART_1.content_disposition.filename,
+            data_format="json",
+        )
         assert resp.status_code == httpx.codes.OK
 
         parsed_resp = MLResponseParser.parse(resp)
@@ -993,25 +1053,25 @@ class TestDocumentsManagement:
     @classmethod
     def _create_document(
         cls,
+        client: MLResourcesClient,
     ):
-        with MLResourcesClient(auth_method="digest") as client:
-            resp = client.post_documents(body_parts=[cls.DOCUMENT_BODY_PART_1])
-            assert resp.status_code == httpx.codes.OK
+        resp = client.post_documents(body_parts=[cls.DOCUMENT_BODY_PART_1])
+        assert resp.status_code == httpx.codes.OK
 
     @classmethod
     def _update_document(
         cls,
+        client: MLResourcesClient,
     ):
-        with MLResourcesClient(auth_method="digest") as client:
-            resp = client.post_documents(body_parts=[cls.DOCUMENT_BODY_PART_2])
-            assert resp.status_code == httpx.codes.OK
+        resp = client.post_documents(body_parts=[cls.DOCUMENT_BODY_PART_2])
+        assert resp.status_code == httpx.codes.OK
 
     @classmethod
     def _delete_document(
         cls,
+        client: MLResourcesClient,
     ):
-        with MLResourcesClient(auth_method="digest") as client:
-            resp = client.delete_documents(
-                uri=cls.DOCUMENT_BODY_PART_1.content_disposition.filename,
-            )
-            assert resp.status_code == httpx.codes.NO_CONTENT
+        resp = client.delete_documents(
+            uri=cls.DOCUMENT_BODY_PART_1.content_disposition.filename,
+        )
+        assert resp.status_code == httpx.codes.NO_CONTENT

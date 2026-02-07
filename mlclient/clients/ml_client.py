@@ -371,7 +371,7 @@ class MLClient:
             "headers": headers or {},
             "auth": self._auth,
         }
-        if body:
+        if body is not None:
             content_type = headers.get(const.HEADER_NAME_CONTENT_TYPE)
             doc_type = Mimetypes.get_doc_type(content_type) if content_type else None
             if doc_type == DocumentType.JSON:

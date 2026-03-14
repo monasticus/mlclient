@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mlclient.calls.servers_call &mdash; MLClient 0.4.0 documentation</title>
+  <title>mlclient.calls.servers_call &mdash; MLClient 0.4.1 documentation</title>
       <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/autodoc_pydantic.css" type="text/css" />
@@ -13,9 +13,9 @@
   
         <script src="../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=4e78f113"></script>
-        <script src="../../../_static/doctools.js?v=888ff710"></script>
-        <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
+        <script src="../../../_static/documentation_options.js?v=c87aa342"></script>
+        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
@@ -66,6 +66,7 @@
   <ul class="wy-breadcrumbs">
       <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+          <li class="breadcrumb-item"><a href="../../mlclient.html">mlclient</a></li>
       <li class="breadcrumb-item active">mlclient.calls.servers_call</li>
       <li class="wy-breadcrumbs-aside">
       </li>
@@ -84,17 +85,20 @@
 <span class="sd">    * ServersPostCall</span>
 <span class="sd">        A POST request to create a new app server.</span>
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
 
-<span class="kn">import</span> <span class="nn">json</span>
-<span class="kn">import</span> <span class="nn">re</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">ClassVar</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
-<span class="kn">from</span> <span class="nn">mlclient</span> <span class="kn">import</span> <span class="n">constants</span><span class="p">,</span> <span class="n">exceptions</span><span class="p">,</span> <span class="n">utils</span>
-<span class="kn">from</span> <span class="nn">mlclient.calls</span> <span class="kn">import</span> <span class="n">ResourceCall</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">ClassVar</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">mlclient</span><span class="w"> </span><span class="kn">import</span> <span class="n">constants</span><span class="p">,</span> <span class="n">exceptions</span><span class="p">,</span> <span class="n">utils</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mlclient.calls</span><span class="w"> </span><span class="kn">import</span> <span class="n">ResourceCall</span>
 
 
-<div class="viewcode-block" id="ServersGetCall"><a class="viewcode-back" href="../../../api/mlclient/calls/mlclient.calls.html#mlclient.calls.ServersGetCall">[docs]</a><span class="k">class</span> <span class="nc">ServersGetCall</span><span class="p">(</span><span class="n">ResourceCall</span><span class="p">):</span>
+<div class="viewcode-block" id="ServersGetCall">
+<a class="viewcode-back" href="../../../api/mlclient/calls/mlclient.calls.html#mlclient.calls.ServersGetCall">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">ServersGetCall</span><span class="p">(</span><span class="n">ResourceCall</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;A GET request to get app servers summary.</span>
 
 <span class="sd">    A ResourceCall implementation representing a single GET request</span>
@@ -124,7 +128,7 @@
         <span class="s2">&quot;properties-schema&quot;</span><span class="p">,</span>
     <span class="p">]</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">data_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;xml&quot;</span><span class="p">,</span>
         <span class="n">group_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -165,7 +169,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">add_param</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_FULL_REFS_PARAM</span><span class="p">,</span> <span class="n">full_refs</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">endpoint</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">endpoint</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;An endpoint for the Servers call.</span>
@@ -178,7 +182,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ENDPOINT</span>
 
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">_validate_params</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_validate_params</span><span class="p">(</span>
         <span class="bp">cls</span><span class="p">,</span>
         <span class="n">data_format</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">view</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -193,7 +197,10 @@
             <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">WrongParametersError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="ServersPostCall"><a class="viewcode-back" href="../../../api/mlclient/calls/mlclient.calls.html#mlclient.calls.ServersPostCall">[docs]</a><span class="k">class</span> <span class="nc">ServersPostCall</span><span class="p">(</span><span class="n">ResourceCall</span><span class="p">):</span>
+
+<div class="viewcode-block" id="ServersPostCall">
+<a class="viewcode-back" href="../../../api/mlclient/calls/mlclient.calls.html#mlclient.calls.ServersPostCall">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">ServersPostCall</span><span class="p">(</span><span class="n">ResourceCall</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;A POST request to create a new app server.</span>
 
 <span class="sd">    A ResourceCall implementation representing a single POST request</span>
@@ -210,7 +217,7 @@
 
     <span class="n">_SUPPORTED_SERVER_TYPES</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;http&quot;</span><span class="p">,</span> <span class="s2">&quot;odbc&quot;</span><span class="p">,</span> <span class="s2">&quot;xdbc&quot;</span><span class="p">,</span> <span class="s2">&quot;webdav&quot;</span><span class="p">]</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">body</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">,</span>
         <span class="n">group_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -242,7 +249,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">add_param</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_SERVER_TYPE_PARAM</span><span class="p">,</span> <span class="n">server_type</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">endpoint</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">endpoint</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;An endpoint for the Servers call.</span>
@@ -255,7 +262,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ENDPOINT</span>
 
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">_validate_params</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_validate_params</span><span class="p">(</span>
         <span class="bp">cls</span><span class="p">,</span>
         <span class="n">server_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">body</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">,</span>
@@ -264,9 +271,10 @@
             <span class="n">joined_supported_server_types</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">_SUPPORTED_SERVER_TYPES</span><span class="p">)</span>
             <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;The supported server types are: </span><span class="si">{</span><span class="n">joined_supported_server_types</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">WrongParametersError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">body</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">body</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s2">&quot;^</span><span class="se">\\</span><span class="s2">s*$&quot;</span><span class="p">,</span> <span class="n">body</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">body</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">body</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s2">&quot;^</span><span class="se">\\</span><span class="s2">s*$&quot;</span><span class="p">,</span> <span class="n">body</span><span class="p">)):</span>
             <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;No request body provided for POST /manage/v2/servers!&quot;</span>
             <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">WrongParametersError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
 </pre></div>
 
            </div>

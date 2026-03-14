@@ -632,7 +632,7 @@ Get all logs
     >>> with MLManager("local").get_logs_client() as client:
     ...     logs = client.get_logs(app_server=8002, log_type=LogType.ACCESS)
     >>> list(logs)[0]
-    {'message': '172.17.0.1 - - [22/Feb/2024:12:13:18 +0000] "POST /v1/eval HTTP/1.1" 401 209 - "python-requests/2.31.0"'}
+    {'message': '172.17.0.1 - - [22/Feb/2024:12:13:18 +0000] "POST /v1/eval HTTP/1.1" 401 209 - "python-httpx/0.27.0"'}
 
 
 
@@ -800,6 +800,11 @@ MLClient
 
 The lowest level client that accepts ML configuration and sends HTTP requests.
 
+Internally, ``MLClient`` uses ``httpx``. Its default retry strategy is intentionally
+conservative: transport-level retries are enabled for idempotent methods only.
+If you need a different policy, pass a custom ``retry`` strategy when initializing
+the client.
+
 Connection
 """"""""""
 
@@ -933,4 +938,3 @@ MLResourceClient
 
 MLResourcesClient
 ^^^^^^^^^^^^^^^^^
-

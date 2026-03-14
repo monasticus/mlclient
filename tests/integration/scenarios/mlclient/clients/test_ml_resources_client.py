@@ -5,7 +5,6 @@ from typing import ClassVar
 import httpx
 import pytest
 from httpx import Response
-from httpx_retries import Retry
 from pytest_bdd import scenarios
 
 from mlclient import MLResourcesClient, MLResponseParser
@@ -23,7 +22,7 @@ pytest_plugins = [
 @pytest.fixture(scope="class")
 def ml_client():
     with MLResourcesClient(
-        auth_method="digest", retry=Retry(total=15, backoff_factor=0.5),
+        auth_method="digest",
     ) as client:
         yield client
 

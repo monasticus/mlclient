@@ -5,7 +5,8 @@ mlclient package
    :members:
    :undoc-members:
    :show-inheritance:
-   :exclude-members: MLConfiguration
+   :exclude-members: MLClient, MLConfiguration, MLResourceClient, MLResourcesClient
+   :no-index:
 
 .. toctree::
    :maxdepth: 1

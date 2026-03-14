@@ -13,8 +13,7 @@ import xml.etree.ElementTree as ElemTree
 from datetime import datetime
 from typing import ClassVar
 
-from httpx import Response
-from requests.structures import CaseInsensitiveDict
+from httpx import Headers, Response
 from requests_toolbelt import MultipartDecoder
 from requests_toolbelt.multipart.decoder import BodyPart
 
@@ -409,7 +408,7 @@ class MLResponseParser:
     def _parse_type_specific(
         cls,
         body_part: BodyPart | Response,
-        headers: CaseInsensitiveDict,
+        headers: Headers,
     ) -> (
         bytes
         | str
@@ -428,7 +427,7 @@ class MLResponseParser:
         ----------
         body_part : BodyPart | Response
             An HTTP response body or body part taken from MarkLogic instance
-        headers : CaseInsensitiveDict
+        headers : Headers
             HTTP headers
 
         Returns
@@ -456,7 +455,7 @@ class MLResponseParser:
     def _decode_headers(
         headers: dict,
         encoding: str,
-    ) -> CaseInsensitiveDict:
+    ) -> Headers:
         """Decode HTTP headers from bytes format.
 
         Parameters
@@ -468,11 +467,11 @@ class MLResponseParser:
 
         Returns
         -------
-        CaseInsensitiveDict
+        Headers
             Decoded HTTP headers
         """
         headers_dict = {
             name.decode(encoding): value.decode(encoding)
             for name, value in headers.items()
         }
-        return CaseInsensitiveDict(**headers_dict)
+        return Headers(headers_dict)

@@ -3,7 +3,6 @@ from __future__ import annotations
 import datetime
 
 from httpx import Response
-from httpx_retries import Retry
 from pytest_bdd import given, parsers, then, when
 
 from mlclient import MLResourceClient, MLResourcesClient
@@ -21,11 +20,11 @@ def init_client(
 ) -> MLResourceClient:
     if client_type == "MLResourceClient":
         client = MLResourceClient(
-            auth_method="digest", retry=Retry(total=15, backoff_factor=0.5),
+            auth_method="digest",
         )
     elif client_type == "MLResourcesClient":
         client = MLResourcesClient(
-            auth_method="digest", retry=Retry(total=15, backoff_factor=0.5),
+            auth_method="digest",
         )
     else:
         msg = (

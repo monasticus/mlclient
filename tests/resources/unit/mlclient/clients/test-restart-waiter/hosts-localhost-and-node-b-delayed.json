@@ -1,0 +1,16 @@
+{
+  "host-default-list": {
+    "list-items": {
+      "list-item": [
+        {
+          "nameref": "localhost",
+          "idref": "localhost-id"
+        },
+        {
+          "nameref": "node-b",
+          "idref": "node-b-id"
+        }
+      ]
+    }
+  }
+}

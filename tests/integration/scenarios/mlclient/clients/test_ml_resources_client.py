@@ -402,6 +402,7 @@ class TestServersManagement:
             group_id="Default",
         )
         assert resp.status_code == httpx.codes.ACCEPTED
+        client.wait_for_restart_completion(resp)
 
 
 class TestForestsManagement:

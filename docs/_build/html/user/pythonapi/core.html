@@ -161,7 +161,7 @@ For example, some of the high-level clients are:</p>
 <span class="gp">... </span>   <span class="n">doc</span> <span class="o">=</span> <span class="n">docs_client</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;/doc-1.xml&quot;</span><span class="p">)</span>
 
 <span class="gp">&gt;&gt;&gt; </span><span class="n">doc</span>
-<span class="go">&lt;mlclient.model.data.XMLDocument object at 0x7f9200980070&gt;</span>
+<span class="go">&lt;mlclient.structures.documents.XMLDocument object at 0x7f9200980070&gt;</span>
 
 <span class="gp">&gt;&gt;&gt; </span><span class="n">doc</span><span class="o">.</span><span class="n">doc_type</span>
 <span class="go">&lt;DocumentType.XML: &#39;xml&#39;&gt;</span>
@@ -188,7 +188,7 @@ For example, some of the high-level clients are:</p>
 <span class="gp">... </span>    <span class="n">doc</span> <span class="o">=</span> <span class="n">docs_client</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;/doc-1.xml&quot;</span><span class="p">,</span> <span class="n">output_type</span><span class="o">=</span><span class="nb">str</span><span class="p">)</span>
 
 <span class="gp">&gt;&gt;&gt; </span><span class="n">doc</span>
-<span class="go">&lt;mlclient.model.data.RawStringDocument object at 0x7f9200980400&gt;</span>
+<span class="go">&lt;mlclient.structures.documents.RawStringDocument object at 0x7f9200980400&gt;</span>
 
 <span class="gp">&gt;&gt;&gt; </span><span class="n">doc</span><span class="o">.</span><span class="n">doc_type</span>
 <span class="go">&lt;DocumentType.XML: &#39;xml&#39;&gt;</span>
@@ -209,7 +209,7 @@ For example, some of the high-level clients are:</p>
 <span class="gp">... </span>    <span class="n">doc</span> <span class="o">=</span> <span class="n">docs_client</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;/doc-1.xml&quot;</span><span class="p">,</span> <span class="n">output_type</span><span class="o">=</span><span class="nb">bytes</span><span class="p">)</span>
 
 <span class="gp">&gt;&gt;&gt; </span><span class="n">doc</span>
-<span class="go">&lt;mlclient.model.data.RawDocument object at 0x7f9200980490&gt;</span>
+<span class="go">&lt;mlclient.structures.documents.RawDocument object at 0x7f9200980490&gt;</span>
 
 <span class="gp">&gt;&gt;&gt; </span><span class="n">doc</span><span class="o">.</span><span class="n">doc_type</span>
 <span class="go">&lt;DocumentType.XML: &#39;xml&#39;&gt;</span>
@@ -230,7 +230,7 @@ For example, some of the high-level clients are:</p>
 <span class="gp">... </span>    <span class="n">doc</span> <span class="o">=</span> <span class="n">docs_client</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;/doc-1.xml&quot;</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;content&quot;</span><span class="p">,</span> <span class="s2">&quot;metadata&quot;</span><span class="p">])</span>
 
 <span class="gp">&gt;&gt;&gt; </span><span class="n">doc</span><span class="o">.</span><span class="n">metadata</span>
-<span class="go">&lt;mlclient.model.data.Metadata object at 0x7f9200980eb0&gt;</span>
+<span class="go">&lt;mlclient.structures.documents.Metadata object at 0x7f9200980eb0&gt;</span>
 
 <span class="gp">&gt;&gt;&gt; </span><span class="n">doc</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">to_json</span><span class="p">()</span>
 <span class="go">{&#39;collections&#39;: [], &#39;permissions&#39;: [], &#39;properties&#39;: {}, &#39;quality&#39;: 0, &#39;metadataValues&#39;: {}}</span>
@@ -266,19 +266,19 @@ For example, some of the high-level clients are:</p>
 
 <span class="gp">&gt;&gt;&gt; </span><span class="n">xml_doc</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">doc</span> <span class="k">for</span> <span class="n">doc</span> <span class="ow">in</span> <span class="n">docs</span> <span class="k">if</span> <span class="n">doc</span><span class="o">.</span><span class="n">uri</span> <span class="o">==</span> <span class="s2">&quot;/doc-1.xml&quot;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">xml_doc</span>
-<span class="go">&lt;mlclient.model.data.XMLDocument object at 0x7f9200920a00&gt;</span>
+<span class="go">&lt;mlclient.structures.documents.XMLDocument object at 0x7f9200920a00&gt;</span>
 
 <span class="gp">&gt;&gt;&gt; </span><span class="n">json_doc</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">doc</span> <span class="k">for</span> <span class="n">doc</span> <span class="ow">in</span> <span class="n">docs</span> <span class="k">if</span> <span class="n">doc</span><span class="o">.</span><span class="n">uri</span> <span class="o">==</span> <span class="s2">&quot;/doc-2.json&quot;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">json_doc</span>
-<span class="go">&lt;mlclient.model.data.JSONDocument object at 0x7f9200920430&gt;</span>
+<span class="go">&lt;mlclient.structures.documents.JSONDocument object at 0x7f9200920430&gt;</span>
 
 <span class="gp">&gt;&gt;&gt; </span><span class="n">text_doc</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">doc</span> <span class="k">for</span> <span class="n">doc</span> <span class="ow">in</span> <span class="n">docs</span> <span class="k">if</span> <span class="n">doc</span><span class="o">.</span><span class="n">uri</span> <span class="o">==</span> <span class="s2">&quot;/doc-3.xqy&quot;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">text_doc</span>
-<span class="go">&lt;mlclient.model.data.TextDocument object at 0x7f9200920e20&gt;</span>
+<span class="go">&lt;mlclient.structures.documents.TextDocument object at 0x7f9200920e20&gt;</span>
 
 <span class="gp">&gt;&gt;&gt; </span><span class="n">bin_doc</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">doc</span> <span class="k">for</span> <span class="n">doc</span> <span class="ow">in</span> <span class="n">docs</span> <span class="k">if</span> <span class="n">doc</span><span class="o">.</span><span class="n">uri</span> <span class="o">==</span> <span class="s2">&quot;/doc-4.zip&quot;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">bin_doc</span>
-<span class="go">&lt;mlclient.model.data.BinaryDocument object at 0x7f9200920970&gt;</span>
+<span class="go">&lt;mlclient.structures.documents.BinaryDocument object at 0x7f9200920970&gt;</span>
 </pre></div>
 </div>
 <p><strong>Read documents from a custom database</strong></p>
@@ -289,7 +289,7 @@ For example, some of the high-level clients are:</p>
 <span class="gp">... </span>    <span class="n">doc</span> <span class="o">=</span> <span class="n">docs_client</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;/doc-1.xml&quot;</span><span class="p">,</span> <span class="n">database</span><span class="o">=</span><span class="s2">&quot;App-Services&quot;</span><span class="p">)</span>
 
 <span class="gp">&gt;&gt;&gt; </span><span class="n">doc</span>
-<span class="go">&lt;mlclient.model.data.XMLDocument object at 0x7f92009b4700&gt;</span>
+<span class="go">&lt;mlclient.structures.documents.XMLDocument object at 0x7f92009b4700&gt;</span>
 </pre></div>
 </div>
 </section>
@@ -297,13 +297,13 @@ For example, some of the high-level clients are:</p>
 <h5>CREATE / UPDATE<a class="headerlink" href="#create-update" title="Link to this heading"></a></h5>
 <p><strong>Put a document</strong></p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mlclient</span><span class="w"> </span><span class="kn">import</span> <span class="n">MLManager</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mlclient.model</span><span class="w"> </span><span class="kn">import</span> <span class="n">DocumentFactory</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mlclient.structures</span><span class="w"> </span><span class="kn">import</span> <span class="n">DocumentFactory</span>
 
 <span class="gp">&gt;&gt;&gt; </span><span class="n">uri</span> <span class="o">=</span> <span class="s2">&quot;/doc-2.json&quot;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">content</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;root&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;child&quot;</span><span class="p">:</span> <span class="s2">&quot;data&quot;</span><span class="p">}}</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">doc</span> <span class="o">=</span> <span class="n">DocumentFactory</span><span class="o">.</span><span class="n">build_document</span><span class="p">(</span><span class="n">uri</span><span class="o">=</span><span class="n">uri</span><span class="p">,</span> <span class="n">content</span><span class="o">=</span><span class="n">content</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">doc</span>
-<span class="go">&lt;mlclient.model.data.JSONDocument object at 0x7f9200920f70&gt;</span>
+<span class="go">&lt;mlclient.structures.documents.JSONDocument object at 0x7f9200920f70&gt;</span>
 
 <span class="gp">&gt;&gt;&gt; </span><span class="n">manager</span> <span class="o">=</span> <span class="n">MLManager</span><span class="p">(</span><span class="s2">&quot;local&quot;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">manager</span><span class="o">.</span><span class="n">get_documents_client</span><span class="p">(</span><span class="s2">&quot;app-services&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">docs_client</span><span class="p">:</span>
@@ -314,7 +314,7 @@ For example, some of the high-level clients are:</p>
 </div>
 <p><strong>Put a document with metadata</strong></p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mlclient</span><span class="w"> </span><span class="kn">import</span> <span class="n">MLManager</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mlclient.model</span><span class="w"> </span><span class="kn">import</span> <span class="n">DocumentFactory</span><span class="p">,</span> <span class="n">Metadata</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mlclient.structures</span><span class="w"> </span><span class="kn">import</span> <span class="n">DocumentFactory</span><span class="p">,</span> <span class="n">Metadata</span>
 
 <span class="gp">&gt;&gt;&gt; </span><span class="n">uri</span> <span class="o">=</span> <span class="s2">&quot;/doc-2.json&quot;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">content</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;root&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;child&quot;</span><span class="p">:</span> <span class="s2">&quot;data&quot;</span><span class="p">}}</span>
@@ -330,7 +330,7 @@ For example, some of the high-level clients are:</p>
 </div>
 <p><strong>Put a raw document</strong></p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mlclient</span><span class="w"> </span><span class="kn">import</span> <span class="n">MLManager</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mlclient.model</span><span class="w"> </span><span class="kn">import</span> <span class="n">DocumentFactory</span><span class="p">,</span> <span class="n">DocumentType</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mlclient.structures</span><span class="w"> </span><span class="kn">import</span> <span class="n">DocumentFactory</span><span class="p">,</span> <span class="n">DocumentType</span>
 
 <span class="gp">&gt;&gt;&gt; </span><span class="n">uri</span> <span class="o">=</span> <span class="s2">&quot;/doc-1.xml&quot;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">content</span> <span class="o">=</span> <span class="sa">b</span><span class="s2">&quot;&lt;root&gt;&lt;child&gt;data&lt;/child&gt;&lt;/root&gt;&quot;</span>
@@ -340,7 +340,7 @@ For example, some of the high-level clients are:</p>
 <span class="gp">... </span>    <span class="n">doc_type</span><span class="o">=</span><span class="n">DocumentType</span><span class="o">.</span><span class="n">XML</span><span class="p">,</span>
 <span class="gp">... </span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">doc</span>
-<span class="go">&lt;mlclient.model.data.RawDocument object at 0x7f9200929430&gt;</span>
+<span class="go">&lt;mlclient.structures.documents.RawDocument object at 0x7f9200929430&gt;</span>
 
 <span class="gp">&gt;&gt;&gt; </span><span class="n">manager</span> <span class="o">=</span> <span class="n">MLManager</span><span class="p">(</span><span class="s2">&quot;local&quot;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">manager</span><span class="o">.</span><span class="n">get_documents_client</span><span class="p">(</span><span class="s2">&quot;app-services&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">docs_client</span><span class="p">:</span>
@@ -351,7 +351,7 @@ For example, some of the high-level clients are:</p>
 </div>
 <p><strong>Put a raw document with metadata</strong></p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mlclient</span><span class="w"> </span><span class="kn">import</span> <span class="n">MLManager</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mlclient.model</span><span class="w"> </span><span class="kn">import</span> <span class="n">DocumentFactory</span><span class="p">,</span> <span class="n">DocumentType</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mlclient.structures</span><span class="w"> </span><span class="kn">import</span> <span class="n">DocumentFactory</span><span class="p">,</span> <span class="n">DocumentType</span>
 
 <span class="gp">&gt;&gt;&gt; </span><span class="n">uri</span> <span class="o">=</span> <span class="s2">&quot;/doc-1.xml&quot;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">content</span> <span class="o">=</span> <span class="sa">b</span><span class="s2">&quot;&lt;root&gt;&lt;child&gt;data&lt;/child&gt;&lt;/root&gt;&quot;</span>
@@ -372,13 +372,13 @@ For example, some of the high-level clients are:</p>
 </div>
 <p><strong>Put a document to a custom database</strong></p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mlclient</span><span class="w"> </span><span class="kn">import</span> <span class="n">MLManager</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mlclient.model</span><span class="w"> </span><span class="kn">import</span> <span class="n">DocumentFactory</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mlclient.structures</span><span class="w"> </span><span class="kn">import</span> <span class="n">DocumentFactory</span>
 
 <span class="gp">&gt;&gt;&gt; </span><span class="n">uri</span> <span class="o">=</span> <span class="s2">&quot;/doc-2.json&quot;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">content</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;root&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;child&quot;</span><span class="p">:</span> <span class="s2">&quot;data&quot;</span><span class="p">}}</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">doc</span> <span class="o">=</span> <span class="n">DocumentFactory</span><span class="o">.</span><span class="n">build_document</span><span class="p">(</span><span class="n">uri</span><span class="o">=</span><span class="n">uri</span><span class="p">,</span> <span class="n">content</span><span class="o">=</span><span class="n">content</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">doc</span>
-<span class="go">&lt;mlclient.model.data.JSONDocument object at 0x7f9200920f70&gt;</span>
+<span class="go">&lt;mlclient.structures.documents.JSONDocument object at 0x7f9200920f70&gt;</span>
 
 <span class="gp">&gt;&gt;&gt; </span><span class="n">manager</span> <span class="o">=</span> <span class="n">MLManager</span><span class="p">(</span><span class="s2">&quot;local&quot;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">manager</span><span class="o">.</span><span class="n">get_documents_client</span><span class="p">(</span><span class="s2">&quot;app-services&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">docs_client</span><span class="p">:</span>
@@ -389,13 +389,13 @@ For example, some of the high-level clients are:</p>
 </div>
 <p><strong>Update document’s metadata</strong></p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mlclient</span><span class="w"> </span><span class="kn">import</span> <span class="n">MLManager</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mlclient.model</span><span class="w"> </span><span class="kn">import</span> <span class="n">Metadata</span><span class="p">,</span> <span class="n">MetadataDocument</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mlclient.structures</span><span class="w"> </span><span class="kn">import</span> <span class="n">Metadata</span><span class="p">,</span> <span class="n">MetadataDocument</span>
 
 <span class="gp">&gt;&gt;&gt; </span><span class="n">uri</span> <span class="o">=</span> <span class="s2">&quot;/doc-2.json&quot;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">metadata</span> <span class="o">=</span> <span class="n">Metadata</span><span class="p">(</span><span class="n">collections</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;some-collection&quot;</span><span class="p">])</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">doc</span> <span class="o">=</span> <span class="n">MetadataDocument</span><span class="p">(</span><span class="n">uri</span><span class="p">,</span> <span class="n">metadata</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">doc</span>
-<span class="go">&lt;mlclient.model.data.MetadataDocument object at 0x7f9200929e20&gt;</span>
+<span class="go">&lt;mlclient.structures.documents.MetadataDocument object at 0x7f9200929e20&gt;</span>
 
 <span class="gp">&gt;&gt;&gt; </span><span class="n">manager</span> <span class="o">=</span> <span class="n">MLManager</span><span class="p">(</span><span class="s2">&quot;local&quot;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">manager</span><span class="o">.</span><span class="n">get_documents_client</span><span class="p">(</span><span class="s2">&quot;app-services&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">docs_client</span><span class="p">:</span>
@@ -406,7 +406,7 @@ For example, some of the high-level clients are:</p>
 </div>
 <p><strong>Put multiple documents</strong></p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mlclient</span><span class="w"> </span><span class="kn">import</span> <span class="n">MLManager</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mlclient.model</span><span class="w"> </span><span class="kn">import</span> <span class="n">DocumentFactory</span><span class="p">,</span> <span class="n">DocumentType</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mlclient.structures</span><span class="w"> </span><span class="kn">import</span> <span class="n">DocumentFactory</span><span class="p">,</span> <span class="n">DocumentType</span>
 
 <span class="gp">&gt;&gt;&gt; </span><span class="n">uri_1</span> <span class="o">=</span> <span class="s2">&quot;/doc-1.xml&quot;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">content_1</span> <span class="o">=</span> <span class="sa">b</span><span class="s2">&quot;&lt;root&gt;&lt;child&gt;data&lt;/child&gt;&lt;/root&gt;&quot;</span>
@@ -430,7 +430,7 @@ For example, some of the high-level clients are:</p>
 </div>
 <p><strong>Put documents with default metadata</strong></p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mlclient</span><span class="w"> </span><span class="kn">import</span> <span class="n">MLManager</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mlclient.model</span><span class="w"> </span><span class="kn">import</span> <span class="n">DocumentFactory</span><span class="p">,</span> <span class="n">DocumentType</span><span class="p">,</span> <span class="n">Metadata</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mlclient.structures</span><span class="w"> </span><span class="kn">import</span> <span class="n">DocumentFactory</span><span class="p">,</span> <span class="n">DocumentType</span><span class="p">,</span> <span class="n">Metadata</span>
 
 <span class="gp">&gt;&gt;&gt; </span><span class="n">default_metadata</span> <span class="o">=</span> <span class="n">Metadata</span><span class="p">(</span><span class="n">collections</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;some-collection&quot;</span><span class="p">])</span>
 
@@ -805,6 +805,17 @@ Moreover, you can customize low-level clients to implement python api for your o
 conservative: transport-level retries are enabled for idempotent methods only.
 If you need a different policy, pass a custom <code class="docutils literal notranslate"><span class="pre">retry</span></code> strategy when initializing
 the client.</p>
+<p>MLClient also exposes the standard MarkLogic endpoint ports as public constants:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">MARKLOGIC_REST_API_PORT</span></code> = <code class="docutils literal notranslate"><span class="pre">8000</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">MARKLOGIC_ADMIN_API_PORT</span></code> = <code class="docutils literal notranslate"><span class="pre">8001</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">MARKLOGIC_MANAGE_API_PORT</span></code> = <code class="docutils literal notranslate"><span class="pre">8002</span></code></p></li>
+</ul>
+<p>Two retry presets are also exported:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">DEFAULT_RETRY_STRATEGY</span></code> for normal requests</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">RESTART_RETRY_STRATEGY</span></code> for Admin timestamp polling during restart windows</p></li>
+</ul>
 <section id="connection">
 <h5>Connection<a class="headerlink" href="#connection" title="Link to this heading"></a></h5>
 <p>The easiest way to start a connection is to initialize <code class="xref py py-class docutils literal notranslate"><span class="pre">MLClient</span></code> as a context manager:</p>
@@ -906,6 +917,48 @@ the client.</p>
 <span class="gp">... </span>    <span class="p">)</span>
 </pre></div>
 </div>
+</section>
+<section id="restart-readiness">
+<h5>Restart readiness<a class="headerlink" href="#restart-readiness" title="Link to this heading"></a></h5>
+<p>Some Management and Admin API operations return <code class="docutils literal notranslate"><span class="pre">202</span> <span class="pre">Accepted</span></code> together with
+<code class="docutils literal notranslate"><span class="pre">Location:</span> <span class="pre">/admin/v1/timestamp</span></code> and a <code class="docutils literal notranslate"><span class="pre">restart</span></code> payload body. That payload
+contains one or more <code class="docutils literal notranslate"><span class="pre">last-startup</span></code> entries keyed by <code class="docutils literal notranslate"><span class="pre">host-id</span></code>. This
+indicates that MarkLogic accepted the request and that callers should verify
+readiness through the Admin timestamp endpoint on port <code class="docutils literal notranslate"><span class="pre">8001</span></code> before issuing
+follow-up administrative requests.</p>
+<p>The timestamp endpoint is host-specific, not cluster-wide. MarkLogic
+documentation explicitly notes that if an operation restarts multiple hosts,
+the caller must iterate through the returned <code class="docutils literal notranslate"><span class="pre">host-id</span></code> and timestamp pairs
+and check each host separately. <code class="docutils literal notranslate"><span class="pre">MLClient.wait_for_restart_completion()</span></code>
+does that internally: for multi-host restart responses it resolves host ids
+through <code class="docutils literal notranslate"><span class="pre">GET</span> <span class="pre">/manage/v2/hosts</span></code> and waits for all affected hosts in parallel.
+The current client host is probed immediately while the host mapping request is
+in flight, and the remaining host probes are started as soon as the mapping is
+available. If the current client host is one of the affected hosts, the method
+still waits for a timestamp newer than that host’s own <code class="docutils literal notranslate"><span class="pre">last-startup</span></code> value
+before it returns.</p>
+<p>Use <code class="xref py py-meth docutils literal notranslate"><span class="pre">wait_for_restart_completion()</span></code> for this check:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mlclient</span><span class="w"> </span><span class="kn">import</span> <span class="n">MLClient</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">MLClient</span><span class="p">()</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">resp</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">delete_</span><span class="p">(</span>
+<span class="gp">... </span>        <span class="s2">&quot;/manage/v2/servers/TestServer&quot;</span><span class="p">,</span>
+<span class="gp">... </span>        <span class="n">params</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;group-id&quot;</span><span class="p">:</span> <span class="s2">&quot;Default&quot;</span><span class="p">},</span>
+<span class="gp">... </span>    <span class="p">)</span>
+<span class="gp">... </span>    <span class="n">client</span><span class="o">.</span><span class="n">wait_for_restart_completion</span><span class="p">(</span><span class="n">resp</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>If you call <code class="xref py py-meth docutils literal notranslate"><span class="pre">wait_for_restart_completion()</span></code> without a
+response, it performs a single readiness probe using a retry policy tuned for
+restart windows:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mlclient</span><span class="w"> </span><span class="kn">import</span> <span class="n">MLClient</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">MLClient</span><span class="p">()</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">client</span><span class="o">.</span><span class="n">wait_for_restart_completion</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>For multi-host restart responses, the method waits for all affected hosts
+before it returns.</p>
 </section>
 </section>
 <section id="mlresourceclient">

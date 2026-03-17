@@ -1,0 +1,10 @@
+{
+  "host-default-list": {
+    "list-items": {
+      "list-item": {
+        "nameref": "node-a",
+        "idref": "host-a"
+      }
+    }
+  }
+}

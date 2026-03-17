@@ -31,13 +31,27 @@ Examples
 >>> from mlclient.clients import MLResourceClient
 """
 
-from .ml_client import MLClient, MLResourceClient, MLResourcesClient
+from .ml_client import (
+    DEFAULT_RETRY_STRATEGY,
+    MARKLOGIC_ADMIN_API_PORT,
+    MARKLOGIC_MANAGE_API_PORT,
+    MARKLOGIC_REST_API_PORT,
+    RESTART_RETRY_STRATEGY,
+    MLClient,
+    MLResourceClient,
+    MLResourcesClient,
+)
 from .documents_client import DocumentsClient
 from .eval_client import EvalClient, LOCAL_NS
 from .logs_client import LogsClient, LogType
 
 __all__ = [
+    "DEFAULT_RETRY_STRATEGY",
     "LOCAL_NS",
+    "MARKLOGIC_ADMIN_API_PORT",
+    "MARKLOGIC_MANAGE_API_PORT",
+    "MARKLOGIC_REST_API_PORT",
+    "RESTART_RETRY_STRATEGY",
     "DocumentsClient",
     "EvalClient",
     "LogType",

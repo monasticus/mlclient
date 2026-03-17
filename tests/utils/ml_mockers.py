@@ -3,16 +3,16 @@ from __future__ import annotations
 import json
 from abc import ABCMeta, abstractmethod
 from contextlib import contextmanager
-from typing import Any, Callable, Iterable, Iterator, List, Optional, Union
+from dataclasses import dataclass, field
+from typing import Any, Callable, Iterable, Iterator, List, Sequence
 
 import httpx
 import respx
 import urllib3
 from httpx import Headers, Request, Response
-from pydantic import BaseModel, ConfigDict, Field
 from requests_toolbelt import MultipartDecoder
 from requests_toolbelt.multipart.decoder import BodyPart
-from respx import MockRouter
+from respx import MockRouter, Route
 from urllib3.fields import RequestField
 
 from mlclient.constants import HEADER_X_WWW_FORM_URLENCODED
@@ -140,33 +140,60 @@ class MLMocker(metaclass=ABCMeta):
         return logs_body
 
 
-class RespXRequest(BaseModel):
-    model_config = ConfigDict(arbitrary_types_allowed=True)
-
-    name: Optional[str] = None
+@dataclass
+class RespXRequest:
+    name: str | None = None
     url: str = ""
     method: str = ""
-    params: Optional[List[tuple]] = None
-    headers: Optional[Headers] = None
-    content: Optional[Union[bytes, str]] = None
-    data: Optional[dict] = None
-    json_: Optional[dict] = Field(alias="json", default=None)
+    params: List[tuple] | None = None
+    headers: Headers | None = None
+    content: bytes | str | None = None
+    data: dict | None = None
+    json_: dict | None = None
+
+    def as_kwargs(self) -> dict[str, Any]:
+        kwargs = {
+            "name": self.name,
+            "url": self.url,
+            "method": self.method,
+            "params": self.params,
+            "headers": self.headers,
+            "content": self.content,
+            "data": self.data,
+            "json": self.json_,
+        }
+        return {key: value for key, value in kwargs.items() if value is not None}
 
 
-class RespXResponse(BaseModel):
-    model_config = ConfigDict(arbitrary_types_allowed=True)
-
+@dataclass
+class RespXResponse:
     status_code: int = -1
-    headers: Optional[Headers] = None
-    content: Optional[Union[bytes, str]] = None
-    json_: Optional[dict] = Field(alias="json", default=None)
-    body_parts: Optional[list[RequestField]] = None
+    headers: Headers | None = None
+    content: bytes | str | None = None
+    json_: dict | None = None
+    body_parts: list[RequestField] | None = None
+
+    def as_kwargs(self) -> dict[str, Any]:
+        kwargs = {
+            "status_code": self.status_code,
+            "headers": self.headers,
+            "content": self.content,
+            "json": self.json_,
+        }
+        return {key: value for key, value in kwargs.items() if value is not None}
 
 
-class RespXMock(BaseModel):
-    request: RespXRequest = RespXRequest()
-    response: RespXResponse = RespXResponse()
-    side_effect: Optional[Callable] = None
+@dataclass
+class RespXMock:
+    request: RespXRequest = field(default_factory=RespXRequest)
+    response: RespXResponse = field(default_factory=RespXResponse)
+    side_effect: (
+        Callable
+        | Exception
+        | type[Exception]
+        | Sequence[Response | Exception | type[Exception]]
+        | None
+    ) = None
 
 
 class MLRespXMocker(MLMocker):
@@ -288,44 +315,45 @@ class MLRespXMocker(MLMocker):
 
     def with_get_side_effect(
         self,
-        side_effect: Callable,
-    ):
+        side_effect: (
+            Callable
+            | Exception
+            | type[Exception]
+            | Sequence[Response | Exception | type[Exception]]
+        ),
+    ) -> Route:
         self._resp_mock.side_effect = side_effect
-        self.mock_get()
+        return self.mock_get()
 
     def with_post_side_effect(
         self,
-        side_effect: Callable,
-    ):
+        side_effect: (
+            Callable
+            | Exception
+            | type[Exception]
+            | Sequence[Response | Exception | type[Exception]]
+        ),
+    ) -> Route:
         self._resp_mock.side_effect = side_effect
-        self.mock_post()
+        return self.mock_post()
 
     def mock_response(
         self,
-    ):
+    ) -> Route:
         if self._resp_mock.side_effect:
-            self._mock.request(
-                **self._resp_mock.request.model_dump(
-                    exclude_none=True,
-                    by_alias=True,
-                ),
-            ).mock(side_effect=self._resp_mock.side_effect)
+            route = self._mock.request(
+                **self._resp_mock.request.as_kwargs(),
+            )
+            route.mock(side_effect=self._resp_mock.side_effect)
         else:
             self._validate()
             self._setup_response_body()
-            self._mock.request(
-                **self._resp_mock.request.model_dump(
-                    exclude_none=True,
-                    by_alias=True,
-                ),
-            ).respond(
-                **self._resp_mock.response.model_dump(
-                    exclude={"body_parts"},
-                    exclude_none=True,
-                    by_alias=True,
-                ),
+            route = self._mock.request(
+                **self._resp_mock.request.as_kwargs(),
             )
+            route.respond(**self._resp_mock.response.as_kwargs())
         self._resp_mock = RespXMock()
+        return route
 
     def _validate(self):
         bodies = [

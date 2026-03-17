@@ -53,7 +53,7 @@ READ
     ...    doc = docs_client.read("/doc-1.xml")
 
     >>> doc
-    <mlclient.model.data.XMLDocument object at 0x7f9200980070>
+    <mlclient.structures.documents.XMLDocument object at 0x7f9200980070>
 
     >>> doc.doc_type
     <DocumentType.XML: 'xml'>
@@ -82,7 +82,7 @@ READ
     ...     doc = docs_client.read("/doc-1.xml", output_type=str)
 
     >>> doc
-    <mlclient.model.data.RawStringDocument object at 0x7f9200980400>
+    <mlclient.structures.documents.RawStringDocument object at 0x7f9200980400>
 
     >>> doc.doc_type
     <DocumentType.XML: 'xml'>
@@ -105,7 +105,7 @@ READ
     ...     doc = docs_client.read("/doc-1.xml", output_type=bytes)
 
     >>> doc
-    <mlclient.model.data.RawDocument object at 0x7f9200980490>
+    <mlclient.structures.documents.RawDocument object at 0x7f9200980490>
 
     >>> doc.doc_type
     <DocumentType.XML: 'xml'>
@@ -128,7 +128,7 @@ READ
     ...     doc = docs_client.read("/doc-1.xml", category=["content", "metadata"])
 
     >>> doc.metadata
-    <mlclient.model.data.Metadata object at 0x7f9200980eb0>
+    <mlclient.structures.documents.Metadata object at 0x7f9200980eb0>
 
     >>> doc.metadata.to_json()
     {'collections': [], 'permissions': [], 'properties': {}, 'quality': 0, 'metadataValues': {}}
@@ -166,19 +166,19 @@ READ
 
     >>> xml_doc = next(doc for doc in docs if doc.uri == "/doc-1.xml")
     >>> xml_doc
-    <mlclient.model.data.XMLDocument object at 0x7f9200920a00>
+    <mlclient.structures.documents.XMLDocument object at 0x7f9200920a00>
 
     >>> json_doc = next(doc for doc in docs if doc.uri == "/doc-2.json")
     >>> json_doc
-    <mlclient.model.data.JSONDocument object at 0x7f9200920430>
+    <mlclient.structures.documents.JSONDocument object at 0x7f9200920430>
 
     >>> text_doc = next(doc for doc in docs if doc.uri == "/doc-3.xqy")
     >>> text_doc
-    <mlclient.model.data.TextDocument object at 0x7f9200920e20>
+    <mlclient.structures.documents.TextDocument object at 0x7f9200920e20>
 
     >>> bin_doc = next(doc for doc in docs if doc.uri == "/doc-4.zip")
     >>> bin_doc
-    <mlclient.model.data.BinaryDocument object at 0x7f9200920970>
+    <mlclient.structures.documents.BinaryDocument object at 0x7f9200920970>
 
 **Read documents from a custom database**
 
@@ -191,7 +191,7 @@ READ
     ...     doc = docs_client.read("/doc-1.xml", database="App-Services")
 
     >>> doc
-    <mlclient.model.data.XMLDocument object at 0x7f92009b4700>
+    <mlclient.structures.documents.XMLDocument object at 0x7f92009b4700>
 
 
 CREATE / UPDATE
@@ -202,13 +202,13 @@ CREATE / UPDATE
 .. code-block:: python
 
     >>> from mlclient import MLManager
-    >>> from mlclient.model import DocumentFactory
+    >>> from mlclient.structures import DocumentFactory
 
     >>> uri = "/doc-2.json"
     >>> content = {"root": {"child": "data"}}
     >>> doc = DocumentFactory.build_document(uri=uri, content=content)
     >>> doc
-    <mlclient.model.data.JSONDocument object at 0x7f9200920f70>
+    <mlclient.structures.documents.JSONDocument object at 0x7f9200920f70>
 
     >>> manager = MLManager("local")
     >>> with manager.get_documents_client("app-services") as docs_client:
@@ -222,7 +222,7 @@ CREATE / UPDATE
 .. code-block:: python
 
     >>> from mlclient import MLManager
-    >>> from mlclient.model import DocumentFactory, Metadata
+    >>> from mlclient.structures import DocumentFactory, Metadata
 
     >>> uri = "/doc-2.json"
     >>> content = {"root": {"child": "data"}}
@@ -241,7 +241,7 @@ CREATE / UPDATE
 .. code-block:: python
 
     >>> from mlclient import MLManager
-    >>> from mlclient.model import DocumentFactory, DocumentType
+    >>> from mlclient.structures import DocumentFactory, DocumentType
 
     >>> uri = "/doc-1.xml"
     >>> content = b"<root><child>data</child></root>"
@@ -251,7 +251,7 @@ CREATE / UPDATE
     ...     doc_type=DocumentType.XML,
     ... )
     >>> doc
-    <mlclient.model.data.RawDocument object at 0x7f9200929430>
+    <mlclient.structures.documents.RawDocument object at 0x7f9200929430>
 
     >>> manager = MLManager("local")
     >>> with manager.get_documents_client("app-services") as docs_client:
@@ -265,7 +265,7 @@ CREATE / UPDATE
 .. code-block:: python
 
     >>> from mlclient import MLManager
-    >>> from mlclient.model import DocumentFactory, DocumentType
+    >>> from mlclient.structures import DocumentFactory, DocumentType
 
     >>> uri = "/doc-1.xml"
     >>> content = b"<root><child>data</child></root>"
@@ -288,13 +288,13 @@ CREATE / UPDATE
 .. code-block:: python
 
     >>> from mlclient import MLManager
-    >>> from mlclient.model import DocumentFactory
+    >>> from mlclient.structures import DocumentFactory
 
     >>> uri = "/doc-2.json"
     >>> content = {"root": {"child": "data"}}
     >>> doc = DocumentFactory.build_document(uri=uri, content=content)
     >>> doc
-    <mlclient.model.data.JSONDocument object at 0x7f9200920f70>
+    <mlclient.structures.documents.JSONDocument object at 0x7f9200920f70>
 
     >>> manager = MLManager("local")
     >>> with manager.get_documents_client("app-services") as docs_client:
@@ -307,13 +307,13 @@ CREATE / UPDATE
 .. code-block:: python
 
     >>> from mlclient import MLManager
-    >>> from mlclient.model import Metadata, MetadataDocument
+    >>> from mlclient.structures import Metadata, MetadataDocument
 
     >>> uri = "/doc-2.json"
     >>> metadata = Metadata(collections=["some-collection"])
     >>> doc = MetadataDocument(uri, metadata)
     >>> doc
-    <mlclient.model.data.MetadataDocument object at 0x7f9200929e20>
+    <mlclient.structures.documents.MetadataDocument object at 0x7f9200929e20>
 
     >>> manager = MLManager("local")
     >>> with manager.get_documents_client("app-services") as docs_client:
@@ -327,7 +327,7 @@ CREATE / UPDATE
 .. code-block:: python
 
     >>> from mlclient import MLManager
-    >>> from mlclient.model import DocumentFactory, DocumentType
+    >>> from mlclient.structures import DocumentFactory, DocumentType
     
     >>> uri_1 = "/doc-1.xml"
     >>> content_1 = b"<root><child>data</child></root>"
@@ -354,7 +354,7 @@ CREATE / UPDATE
 .. code-block:: python
 
     >>> from mlclient import MLManager
-    >>> from mlclient.model import DocumentFactory, DocumentType, Metadata
+    >>> from mlclient.structures import DocumentFactory, DocumentType, Metadata
     
     >>> default_metadata = Metadata(collections=["some-collection"])
     
@@ -805,6 +805,17 @@ conservative: transport-level retries are enabled for idempotent methods only.
 If you need a different policy, pass a custom ``retry`` strategy when initializing
 the client.
 
+MLClient also exposes the standard MarkLogic endpoint ports as public constants:
+
+- ``MARKLOGIC_REST_API_PORT`` = ``8000``
+- ``MARKLOGIC_ADMIN_API_PORT`` = ``8001``
+- ``MARKLOGIC_MANAGE_API_PORT`` = ``8002``
+
+Two retry presets are also exported:
+
+- ``DEFAULT_RETRY_STRATEGY`` for normal requests
+- ``RESTART_RETRY_STRATEGY`` for Admin timestamp polling during restart windows
+
 Connection
 """"""""""
 
@@ -930,6 +941,56 @@ DELETE request
     ...         "/manage/v2/databases/CustomDatabase",
     ...         params={"forest-delete": "configuration"}
     ...     )
+
+
+Restart readiness
+"""""""""""""""""
+
+Some Management and Admin API operations return ``202 Accepted`` together with
+``Location: /admin/v1/timestamp`` and a ``restart`` payload body. That payload
+contains one or more ``last-startup`` entries keyed by ``host-id``. This
+indicates that MarkLogic accepted the request and that callers should verify
+readiness through the Admin timestamp endpoint on port ``8001`` before issuing
+follow-up administrative requests.
+
+The timestamp endpoint is host-specific, not cluster-wide. MarkLogic
+documentation explicitly notes that if an operation restarts multiple hosts,
+the caller must iterate through the returned ``host-id`` and timestamp pairs
+and check each host separately. ``MLClient.wait_for_restart_completion()``
+does that internally: for multi-host restart responses it resolves host ids
+through ``GET /manage/v2/hosts`` and waits for all affected hosts in parallel.
+The current client host is probed immediately while the host mapping request is
+in flight, and the remaining host probes are started as soon as the mapping is
+available. If the current client host is one of the affected hosts, the method
+still waits for a timestamp newer than that host's own ``last-startup`` value
+before it returns.
+
+Use :meth:`~mlclient.MLClient.wait_for_restart_completion` for this check:
+
+.. code-block:: python
+
+    >>> from mlclient import MLClient
+
+    >>> with MLClient() as client:
+    ...     resp = client.delete_(
+    ...         "/manage/v2/servers/TestServer",
+    ...         params={"group-id": "Default"},
+    ...     )
+    ...     client.wait_for_restart_completion(resp)
+
+If you call :meth:`~mlclient.MLClient.wait_for_restart_completion` without a
+response, it performs a single readiness probe using a retry policy tuned for
+restart windows:
+
+.. code-block:: python
+
+    >>> from mlclient import MLClient
+
+    >>> with MLClient() as client:
+    ...     client.wait_for_restart_completion()
+
+For multi-host restart responses, the method waits for all affected hosts
+before it returns.
 
 
 MLResourceClient

@@ -7,8 +7,9 @@ import operator
 import os
 import urllib.parse
 import zlib
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Any, Iterable
+from typing import Any
 
 import responses
 import urllib3

@@ -104,6 +104,7 @@ def main() -> int:
                 return 0
         except Exception as exc:
             stable_rounds = 0
+            last_timestamp = None
             logger.info("Waiting for MarkLogic: %s", exc)
 
         time.sleep(args.poll_interval)

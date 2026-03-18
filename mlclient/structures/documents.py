@@ -41,7 +41,7 @@ import xml.etree.ElementTree as ElemTree
 from abc import ABCMeta, abstractmethod
 from enum import Enum
 from pathlib import Path
-from typing import Any, ClassVar, List, TextIO
+from typing import Any, ClassVar, TextIO
 from xml.dom import minidom
 
 import xmltodict
@@ -1626,5 +1626,5 @@ class Mimetype(BaseModel):
     """A class representing a mime type."""
 
     mime_type: str = Field(alias="mime-type")
-    extensions: List[str]
+    extensions: list[str]
     document_type: DocumentType = Field(alias="doc-type")

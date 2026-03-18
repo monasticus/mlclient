@@ -29,12 +29,12 @@ import queue
 import uuid
 import xml.etree.ElementTree as ElemTree
 from abc import ABCMeta, abstractmethod
+from collections.abc import Generator, Iterable
 from concurrent.futures import ThreadPoolExecutor
 from copy import copy
 from enum import Enum
 from pathlib import Path
 from threading import Thread
-from typing import Generator, Iterable
 
 import aiofiles
 from pydantic import BaseModel

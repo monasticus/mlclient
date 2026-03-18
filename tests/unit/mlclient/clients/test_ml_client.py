@@ -4,9 +4,7 @@ import httpx
 import respx
 from pytest_mock import MockerFixture
 
-from mlclient import (
-    MLClient,
-)
+from mlclient import MLClient
 from mlclient.clients import ml_client as ml_client_module
 from tests.utils import resources as resources_utils
 from tests.utils.ml_mockers import MLRespXMocker

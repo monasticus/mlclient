@@ -7,7 +7,8 @@ It exports high-level class to perform CRUD operations in a MarkLogic server:
 
 from __future__ import annotations
 
-from typing import Any, Iterator
+from collections.abc import Iterator
+from typing import Any
 
 from httpx import Response
 

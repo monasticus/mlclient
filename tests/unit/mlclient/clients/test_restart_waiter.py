@@ -6,6 +6,7 @@ import json
 import httpx
 import pytest
 import respx
+from httpx_retries import Retry
 from pytest_mock import MockerFixture
 
 from mlclient import (
@@ -16,7 +17,6 @@ from mlclient import (
 from mlclient.clients.restart_waiter import RestartWaiter
 from tests.utils import resources as resources_utils
 from tests.utils.ml_mockers import MLRespXMocker
-from httpx_retries import Retry
 
 RESOURCES = resources_utils.get_test_resources(__file__)
 TEXT_PLAIN = "text/plain; charset=UTF-8"
@@ -114,16 +114,18 @@ def json_restart_response_factory():
                 "Location": location,
                 "Content-Type": content_type,
             },
-            content=json.dumps({
-                "restart": {
-                    "last-startup": last_startup,
-                    "link": {
-                        "kindref": "timestamp",
-                        "uriref": location,
+            content=json.dumps(
+                {
+                    "restart": {
+                        "last-startup": last_startup,
+                        "link": {
+                            "kindref": "timestamp",
+                            "uriref": location,
+                        },
+                        "message": "Check for new timestamp to verify host restart.",
                     },
-                    "message": "Check for new timestamp to verify host restart.",
                 },
-            }).encode(),
+            ).encode(),
         )
 
     return build
@@ -640,7 +642,7 @@ def test_is_restart_response(response, expected_is_restart_response):
     ],
 )
 @respx.mock
-def test_wait_for_restart_completion_treats_invalid_restart_payloads_as_single_host_probe(
+def test_wait_for_restart_treats_invalid_payloads_as_single_host_probe(
     waiter: RestartWaiter,
     ml_mocker: MLRespXMocker,
     response,
@@ -714,6 +716,7 @@ def test_wait_for_restart_completion_parses_valid_xml_restart_payload(
     assert node_a_route.call_count == 2
     assert node_b_route.call_count == 2
     assert sleep.await_count >= 2
+
 
 @respx.mock
 def test_wait_for_host_ready_returns_before_next_request_when_baseline_resolves(

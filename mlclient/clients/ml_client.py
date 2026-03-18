@@ -12,12 +12,12 @@ It exports 3 classes:
 from __future__ import annotations
 
 import logging
+import ssl
 from collections.abc import Mapping
 from types import TracebackType
-import ssl
 
 import httpx
-from httpx import Auth, BasicAuth, Client, DigestAuth, Response, HTTPTransport
+from httpx import Auth, BasicAuth, Client, DigestAuth, HTTPTransport, Response
 from httpx_retries import Retry, RetryTransport
 
 from mlclient import constants as const
@@ -65,6 +65,7 @@ from mlclient.calls import (
 from mlclient.mimetypes import Mimetypes
 from mlclient.structures import DocumentType
 from mlclient.structures.calls import DocumentsBodyPart
+
 from .restart_waiter import RestartWaiter
 
 logger = logging.getLogger(__name__)
@@ -226,7 +227,10 @@ class MLClient:
         """Start an HTTP session."""
         logger.debug("Initiating a connection with %s", self.base_url)
         transport = HTTPTransport(verify=_SHARED_SSL_CONTEXT)
-        self._client = Client(transport=RetryTransport(transport=transport, retry=self._retry))
+        self._client = Client(
+            transport=RetryTransport(transport=transport, retry=self._retry),
+            follow_redirects=True,
+        )
 
     def disconnect(
         self,
@@ -453,7 +457,7 @@ class MLClient:
             "auth": self._auth,
         }
         if body is not None:
-            content_type = headers.get(const.HEADER_NAME_CONTENT_TYPE)
+            content_type = (headers or {}).get(const.HEADER_NAME_CONTENT_TYPE)
             doc_type = Mimetypes.get_doc_type(content_type) if content_type else None
             if doc_type == DocumentType.JSON:
                 request["json"] = body
@@ -490,7 +494,11 @@ class MLClient:
                 method.upper(),
                 endpoint,
             )
-            with Client(transport=RetryTransport(retry=self._retry)) as client:
+            transport = httpx.HTTPTransport(verify=_SHARED_SSL_CONTEXT)
+            with Client(
+                transport=RetryTransport(transport=transport, retry=self._retry),
+                follow_redirects=True,
+            ) as client:
                 resp = client.request(method, url, **request)
 
         return resp
@@ -526,10 +534,7 @@ class MLClient:
         """Format an HTTP response in a protocol-like representation."""
         reason_phrase = httpx.codes.get_reason_phrase(response.status_code)
         start_line = f"HTTP/1.1 {response.status_code} {reason_phrase}"
-        headers = "\n".join(
-            f"{name}: {val}"
-            for name, val in response.headers.items()
-        )
+        headers = "\n".join(f"{name}: {val}" for name, val in response.headers.items())
         if response.text:
             return f"{start_line}\n{headers}\n\n{response.text}"
         return f"{start_line}\n{headers}"

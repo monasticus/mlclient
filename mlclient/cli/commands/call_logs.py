@@ -7,8 +7,8 @@ It exports an implementation for 'call logs' command:
 
 from __future__ import annotations
 
+from collections.abc import Generator, Iterator
 from functools import lru_cache
-from typing import Generator, Iterator
 
 from cleo.commands.command import Command
 from cleo.helpers import option

@@ -10,8 +10,8 @@ It exports high-level classes to easily read MarkLogic logs:
 from __future__ import annotations
 
 import re
+from collections.abc import Iterator
 from enum import Enum
-from typing import Iterator
 
 from mlclient.calls import LogsCall
 from mlclient.clients import MLResourceClient

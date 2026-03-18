@@ -137,7 +137,7 @@ exclude = [
     "docs",
     "scripts"
 ]
-target-version = "py38"
+target-version = "py39"
 
 [tool.ruff.lint.pydocstyle]
 convention = "numpy"
@@ -147,7 +147,6 @@ max-complexity = 10
 
 [tool.ruff.lint.per-file-ignores]
 "mlclient/ml_config.py" = [
-    "UP006", # allow using List instead of list for pydantic
     "PLR6301" # allow for a non-static method as it is defined by the Pydantic lib
 ]
 "mlclient/calls/*" = [
@@ -171,9 +170,9 @@ max-complexity = 10
     "PLR0904"  # allow many public methods as MLResourcesClient is a fascade for all ML resources
 ]
 "mlclient/structures/*" = [
-    "UP006", # allow using List instead of list for pydantic
-    "UP007", # allow using Union instead of X | Y for pydantic
-    "UP045", # allow using Optional instead of X | None for pydantic
+    "UP006", # pydantic evaluates field annotations at runtime; list[] needs 3.10+
+    "UP007", # pydantic evaluates field annotations at runtime; X | Y needs 3.10+
+    "UP045", # pydantic evaluates field annotations at runtime; Optional needs 3.10+
 ]
 "mlclient/structures/documents.py" = [
     "PLR0913" # allow many arguments as they depend on ML structure
@@ -197,7 +196,4 @@ max-complexity = 10
 ]
 "tests/utils/ml_mockers.py" = [
     "T201", # allow printing by MLMocker
-    "UP006", # allow using List instead of list for pydantic
-    "UP007", # allow using Union instead of X | Y for pydantic
-    "UP045", # allow using Optional instead of X | None for pydantic
 ]

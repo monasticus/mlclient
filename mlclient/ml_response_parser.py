@@ -57,9 +57,9 @@ class MLResponseParser:
 
     _PLAIN_TEXT_PARSERS: ClassVar[dict] = {
         const.HEADER_PRIMITIVE_STRING: lambda data: data,
-        const.HEADER_PRIMITIVE_INTEGER: lambda data: int(data),
-        const.HEADER_PRIMITIVE_DECIMAL: lambda data: float(data),
-        const.HEADER_PRIMITIVE_BOOLEAN: lambda data: bool(data),
+        const.HEADER_PRIMITIVE_INTEGER: int,
+        const.HEADER_PRIMITIVE_DECIMAL: float,
+        const.HEADER_PRIMITIVE_BOOLEAN: bool,
         const.HEADER_PRIMITIVE_DATE: lambda data: datetime.strptime(
             data,
             "%Y-%m-%d%z",
@@ -104,7 +104,7 @@ class MLResponseParser:
             A parsed response body
         """
         logger.debug("Attempt to parse a response")
-        if response.is_success and int(response.headers.get("Content-Length")) == 0:
+        if response.is_success and int(response.headers.get("Content-Length", -1)) == 0:
             logger.fine("No content to parse")
             return []
 
@@ -136,7 +136,7 @@ class MLResponseParser:
             A parsed response body with headers
         """
         logger.debug("Attempt to parse a response")
-        if response.is_success and int(response.headers.get("Content-Length")) == 0:
+        if response.is_success and int(response.headers.get("Content-Length", -1)) == 0:
             logger.fine("No content to parse")
             return response.headers, []
 

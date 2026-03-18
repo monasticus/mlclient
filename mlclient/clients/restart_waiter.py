@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import json
 import ssl
 import time
@@ -10,8 +11,9 @@ from typing import NoReturn, Union
 from xml.etree import ElementTree
 
 import httpx
-from httpx import AsyncClient, Auth, Response, AsyncHTTPTransport
+from httpx import AsyncClient, AsyncHTTPTransport, Auth, Response
 from httpx_retries import Retry, RetryTransport
+
 from mlclient import constants as const
 
 # See ml_client._SHARED_SSL_CONTEXT for rationale (avoid repeated CA bundle loading).
@@ -160,10 +162,7 @@ class RestartWaiter:
             return {}
 
         link = restart.get("link")
-        if (
-            not isinstance(link, dict)
-            or link.get("uriref") != _RESTART_TIMESTAMP_PATH
-        ):
+        if not isinstance(link, dict) or link.get("uriref") != _RESTART_TIMESTAMP_PATH:
             return {}
 
         last_startup = restart.get("last-startup")
@@ -171,11 +170,7 @@ class RestartWaiter:
         return {
             item["host-id"]: item["value"]
             for item in items
-            if (
-                isinstance(item, dict)
-                and item.get("host-id")
-                and item.get("value")
-            )
+            if (isinstance(item, dict) and item.get("host-id") and item.get("value"))
         }
 
     @staticmethod
@@ -332,10 +327,13 @@ class RestartWaiter:
                 host_names_by_id,
             )
             current_host_baseline.set_result(restart_hosts_by_name.get(self._host))
-            return restart_hosts_by_name
         except Exception:
             current_host_task.cancel()
+            with contextlib.suppress(asyncio.CancelledError, Exception):
+                await current_host_task
             raise
+        else:
+            return restart_hosts_by_name
 
     @staticmethod
     def _get_restart_hosts_by_name(
@@ -344,9 +342,7 @@ class RestartWaiter:
     ) -> dict[str, str]:
         """Return restart baseline timestamps keyed by host name."""
         missing_host_ids = sorted(
-            host_id
-            for host_id in restart_timestamps
-            if host_id not in host_names_by_id
+            host_id for host_id in restart_timestamps if host_id not in host_names_by_id
         )
         if missing_host_ids:
             RestartWaiter._raise_missing_restart_hosts(missing_host_ids)
@@ -359,7 +355,7 @@ class RestartWaiter:
     async def _get_host_names_by_id(self) -> dict[str, str]:
         """Return MarkLogic host names keyed by host id."""
         async with AsyncClient(
-            transport=RetryTransport(                                                                                                                                                                                   
+            transport=RetryTransport(
                 transport=AsyncHTTPTransport(verify=_SHARED_SSL_CONTEXT),
                 retry=self._default_retry,
             ),
@@ -392,6 +388,7 @@ class RestartWaiter:
     ) -> None:
         """Wait for a single host to report readiness via the timestamp endpoint."""
         async with AsyncClient(
+            transport=AsyncHTTPTransport(verify=_SHARED_SSL_CONTEXT),
             headers={"Connection": "close"},
             timeout=5,
         ) as client:
@@ -447,7 +444,7 @@ class RestartWaiter:
             )
         except Exception as exc:
             if not retry.is_retryable_exception(exc):
-                raise exc
+                raise
             self._raise_wait_timeout_if_needed(
                 host,
                 baseline_timestamp,
@@ -563,7 +560,7 @@ class RestartWaiter:
     @staticmethod
     def _raise_missing_restart_hosts(
         missing_host_ids: list[str],
-    ) -> None:
+    ) -> NoReturn:
         """Raise an error describing unresolved host ids from a restart payload."""
         msg = (
             "Could not resolve all restart host ids through /manage/v2/hosts. "

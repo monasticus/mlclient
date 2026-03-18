@@ -2,9 +2,10 @@ from __future__ import annotations
 
 import json
 from abc import ABCMeta, abstractmethod
+from collections.abc import Iterable, Iterator, Sequence
 from contextlib import contextmanager
 from dataclasses import dataclass, field
-from typing import Any, Callable, Iterable, Iterator, List, Sequence
+from typing import Any, Callable
 
 import httpx
 import respx
@@ -145,7 +146,7 @@ class RespXRequest:
     name: str | None = None
     url: str = ""
     method: str = ""
-    params: List[tuple] | None = None
+    params: list[tuple] | None = None
     headers: Headers | None = None
     content: bytes | str | None = None
     data: dict | None = None
@@ -233,7 +234,8 @@ class MLRespXMocker(MLMocker):
 
     def with_request_body(self, body: bytes | str | dict):
         if (
-            self._resp_mock.request.headers.get("content-type")
+            self._resp_mock.request.headers
+            and self._resp_mock.request.headers.get("content-type")
             == HEADER_X_WWW_FORM_URLENCODED
         ):
             self._resp_mock.request.data = body

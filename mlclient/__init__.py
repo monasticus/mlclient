@@ -43,7 +43,17 @@ import yaml
 from haggis.logs import add_logging_level
 
 from . import utils
-from .clients import LOCAL_NS, MLClient, MLResourceClient, MLResourcesClient
+from .clients import (
+    DEFAULT_RETRY_STRATEGY,
+    LOCAL_NS,
+    MARKLOGIC_ADMIN_API_PORT,
+    MARKLOGIC_MANAGE_API_PORT,
+    MARKLOGIC_REST_API_PORT,
+    RESTART_RETRY_STRATEGY,
+    MLClient,
+    MLResourceClient,
+    MLResourcesClient,
+)
 from .ml_config import MLConfiguration
 from .ml_manager import MLManager
 from .ml_response_parser import MLResponseParser
@@ -58,14 +68,19 @@ def setup_logger():
 
 __version__ = "0.4.1"
 __all__ = [
-    "__version__",
+    "DEFAULT_RETRY_STRATEGY",
     "LOCAL_NS",
+    "MARKLOGIC_ADMIN_API_PORT",
+    "MARKLOGIC_MANAGE_API_PORT",
+    "MARKLOGIC_REST_API_PORT",
+    "RESTART_RETRY_STRATEGY",
     "MLClient",
+    "MLConfiguration",
+    "MLManager",
     "MLResourceClient",
     "MLResourcesClient",
     "MLResponseParser",
-    "MLConfiguration",
-    "MLManager",
+    "__version__",
     "setup_logger",
 ]
 

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mlclient.calls.forest_call &mdash; MLClient 0.4.0 documentation</title>
+  <title>mlclient.calls.forest_call &mdash; MLClient 0.4.1 documentation</title>
       <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/autodoc_pydantic.css" type="text/css" />
@@ -13,9 +13,9 @@
   
         <script src="../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=4e78f113"></script>
-        <script src="../../../_static/doctools.js?v=888ff710"></script>
-        <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
+        <script src="../../../_static/documentation_options.js?v=c87aa342"></script>
+        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
@@ -66,6 +66,7 @@
   <ul class="wy-breadcrumbs">
       <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+          <li class="breadcrumb-item"><a href="../../mlclient.html">mlclient</a></li>
       <li class="breadcrumb-item active">mlclient.calls.forest_call</li>
       <li class="wy-breadcrumbs-aside">
       </li>
@@ -86,15 +87,18 @@
 <span class="sd">    * ForestDeleteCall</span>
 <span class="sd">        A DELETE request to remove a forest.</span>
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
 
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">ClassVar</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
-<span class="kn">from</span> <span class="nn">mlclient</span> <span class="kn">import</span> <span class="n">constants</span><span class="p">,</span> <span class="n">exceptions</span><span class="p">,</span> <span class="n">utils</span>
-<span class="kn">from</span> <span class="nn">mlclient.calls</span> <span class="kn">import</span> <span class="n">ResourceCall</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">ClassVar</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">mlclient</span><span class="w"> </span><span class="kn">import</span> <span class="n">constants</span><span class="p">,</span> <span class="n">exceptions</span><span class="p">,</span> <span class="n">utils</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mlclient.calls</span><span class="w"> </span><span class="kn">import</span> <span class="n">ResourceCall</span>
 
 
-<div class="viewcode-block" id="ForestGetCall"><a class="viewcode-back" href="../../../api/mlclient/calls/mlclient.calls.html#mlclient.calls.ForestGetCall">[docs]</a><span class="k">class</span> <span class="nc">ForestGetCall</span><span class="p">(</span><span class="n">ResourceCall</span><span class="p">):</span>
+<div class="viewcode-block" id="ForestGetCall">
+<a class="viewcode-back" href="../../../api/mlclient/calls/mlclient.calls.html#mlclient.calls.ForestGetCall">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">ForestGetCall</span><span class="p">(</span><span class="n">ResourceCall</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;A GET request to get a forest details.</span>
 
 <span class="sd">    A ResourceCall implementation representing a single GET request</span>
@@ -123,7 +127,7 @@
         <span class="s2">&quot;properties-schema&quot;</span><span class="p">,</span>
     <span class="p">]</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">forest</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">data_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;xml&quot;</span><span class="p">,</span>
@@ -155,7 +159,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">add_param</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_VIEW_PARAM</span><span class="p">,</span> <span class="n">view</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">endpoint</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">endpoint</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;An endpoint for the Forest call.</span>
@@ -168,7 +172,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ENDPOINT_TEMPLATE</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_forest</span><span class="p">)</span>
 
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">_validate_params</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_validate_params</span><span class="p">(</span>
         <span class="bp">cls</span><span class="p">,</span>
         <span class="n">data_format</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">view</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -183,7 +187,10 @@
             <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">WrongParametersError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="ForestPostCall"><a class="viewcode-back" href="../../../api/mlclient/calls/mlclient.calls.html#mlclient.calls.ForestPostCall">[docs]</a><span class="k">class</span> <span class="nc">ForestPostCall</span><span class="p">(</span><span class="n">ResourceCall</span><span class="p">):</span>
+
+<div class="viewcode-block" id="ForestPostCall">
+<a class="viewcode-back" href="../../../api/mlclient/calls/mlclient.calls.html#mlclient.calls.ForestPostCall">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">ForestPostCall</span><span class="p">(</span><span class="n">ResourceCall</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;A POST request to change a forest&#39;s state.</span>
 
 <span class="sd">    A ResourceCall implementation representing a single POST request</span>
@@ -207,7 +214,7 @@
         <span class="s2">&quot;employ&quot;</span><span class="p">,</span>
     <span class="p">]</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">forest</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">body</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
@@ -232,7 +239,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_forest</span> <span class="o">=</span> <span class="n">forest</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">endpoint</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">endpoint</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;An endpoint for the Forests call.</span>
@@ -245,7 +252,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ENDPOINT_TEMPLATE</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_forest</span><span class="p">)</span>
 
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">_validate_params</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_validate_params</span><span class="p">(</span>
         <span class="bp">cls</span><span class="p">,</span>
         <span class="n">state</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="p">):</span>
@@ -258,7 +265,10 @@
             <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">WrongParametersError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="ForestDeleteCall"><a class="viewcode-back" href="../../../api/mlclient/calls/mlclient.calls.html#mlclient.calls.ForestDeleteCall">[docs]</a><span class="k">class</span> <span class="nc">ForestDeleteCall</span><span class="p">(</span><span class="n">ResourceCall</span><span class="p">):</span>
+
+<div class="viewcode-block" id="ForestDeleteCall">
+<a class="viewcode-back" href="../../../api/mlclient/calls/mlclient.calls.html#mlclient.calls.ForestDeleteCall">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">ForestDeleteCall</span><span class="p">(</span><span class="n">ResourceCall</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;A DELETE request to remove a forest.</span>
 
 <span class="sd">    A ResourceCall implementation representing a single DELETE request</span>
@@ -276,7 +286,7 @@
     <span class="n">_SUPPORTED_LEVELS</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;full&quot;</span><span class="p">,</span> <span class="s2">&quot;config-only&quot;</span><span class="p">]</span>
     <span class="n">_SUPPORTED_REPLICAS_OPTS</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;detach&quot;</span><span class="p">,</span> <span class="s2">&quot;delete&quot;</span><span class="p">]</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">forest</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">level</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -305,7 +315,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_forest</span> <span class="o">=</span> <span class="n">forest</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">endpoint</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">endpoint</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;An endpoint for the Forest call.</span>
@@ -318,7 +328,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ENDPOINT_TEMPLATE</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_forest</span><span class="p">)</span>
 
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">_validate_params</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_validate_params</span><span class="p">(</span>
         <span class="bp">cls</span><span class="p">,</span>
         <span class="n">level</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">replicas</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -331,6 +341,7 @@
             <span class="n">joined_supported_opts</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">_SUPPORTED_REPLICAS_OPTS</span><span class="p">)</span>
             <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;The supported replicas options are: </span><span class="si">{</span><span class="n">joined_supported_opts</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">WrongParametersError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
 </pre></div>
 
            </div>

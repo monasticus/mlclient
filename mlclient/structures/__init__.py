@@ -60,18 +60,18 @@ from .documents import (
 )
 
 __all__ = [
-    "MetadataFactory",
-    "DocumentFactory",
+    "BinaryDocument",
     "Document",
+    "DocumentFactory",
+    "DocumentType",
+    "JSONDocument",
+    "Metadata",
+    "MetadataDocument",
+    "MetadataFactory",
+    "Mimetype",
+    "Permission",
     "RawDocument",
     "RawStringDocument",
-    "MetadataDocument",
-    "XMLDocument",
-    "JSONDocument",
     "TextDocument",
-    "BinaryDocument",
-    "DocumentType",
-    "Mimetype",
-    "Metadata",
-    "Permission",
+    "XMLDocument",
 ]

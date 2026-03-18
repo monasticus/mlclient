@@ -12,11 +12,13 @@ It exports 3 classes:
 from __future__ import annotations
 
 import logging
+import ssl
+from collections.abc import Mapping
 from types import TracebackType
 
-from requests import Response, Session
-from requests.adapters import HTTPAdapter, Retry
-from requests.auth import AuthBase, HTTPBasicAuth, HTTPDigestAuth
+import httpx
+from httpx import Auth, BasicAuth, Client, DigestAuth, HTTPTransport, Response
+from httpx_retries import Retry, RetryTransport
 
 from mlclient import constants as const
 from mlclient.calls import (
@@ -64,7 +66,36 @@ from mlclient.mimetypes import Mimetypes
 from mlclient.structures import DocumentType
 from mlclient.structures.calls import DocumentsBodyPart
 
+from .restart_waiter import RestartWaiter
+
 logger = logging.getLogger(__name__)
+
+MARKLOGIC_REST_API_PORT = 8000
+MARKLOGIC_ADMIN_API_PORT = 8001
+MARKLOGIC_MANAGE_API_PORT = 8002
+# Reuse a single SSL context across all clients. Without this, every
+# HTTPTransport() call invokes ssl.SSLContext.load_verify_locations which
+# re-reads the system CA bundle from disk (~60-120 ms each).
+_SHARED_SSL_CONTEXT = ssl.create_default_context()
+DEFAULT_RETRY_STRATEGY = Retry(
+    total=5,
+    backoff_factor=0.5,
+)
+RESTART_RETRY_STRATEGY = Retry(
+    total=12,
+    allowed_methods=["GET"],
+    status_forcelist=[
+        httpx.codes.BAD_GATEWAY,
+        httpx.codes.SERVICE_UNAVAILABLE,
+        httpx.codes.GATEWAY_TIMEOUT,
+    ],
+    retry_on_exceptions=[
+        httpx.TimeoutException,
+        httpx.NetworkError,
+        httpx.RemoteProtocolError,
+    ],
+    backoff_factor=1.0,
+)
 
 
 class MLClient:
@@ -113,21 +144,15 @@ class MLClient:
     --6a5df7d535c71968--
     """
 
-    _DEFAULT_RETRY_STRATEGY = Retry(
-        connect=5,
-        allowed_methods=None,  # any
-        backoff_factor=0.5,
-    )
-
     def __init__(
         self,
         protocol: str = "http",
         host: str = "localhost",
-        port: int = 8002,
+        port: int = MARKLOGIC_MANAGE_API_PORT,
         auth_method: str = "basic",
         username: str = "admin",
         password: str = "admin",
-        retry: Retry = _DEFAULT_RETRY_STRATEGY,
+        retry: Retry | None = None,
     ):
         """Initialize MLClient instance.
 
@@ -145,7 +170,7 @@ class MLClient:
             A username
         password : str, default "admin"
             A password
-        retry : Retry, default Retry(connect=5,allowed_methods=None,backoff_factor=0.5)
+        retry : Retry, default Retry(total=5,backoff_factor=0.5)
             A retry strategy
         """
         self.protocol: str = protocol
@@ -155,10 +180,10 @@ class MLClient:
         self.username: str = username
         self.password: str = password
         self.base_url: str = f"{protocol}://{host}:{port}"
-        self._retry: Retry = retry
-        self._sess: Session | None = None
-        auth_impl = HTTPBasicAuth if auth_method == "basic" else HTTPDigestAuth
-        self._auth: AuthBase = auth_impl(username, password)
+        self._retry: Retry = retry or DEFAULT_RETRY_STRATEGY
+        self._client: Client | None = None
+        auth_impl = BasicAuth if auth_method == "basic" else DigestAuth
+        self._auth: Auth = auth_impl(username, password)
 
     def __enter__(
         self,
@@ -201,17 +226,20 @@ class MLClient:
     ):
         """Start an HTTP session."""
         logger.debug("Initiating a connection with %s", self.base_url)
-        self._sess = Session()
-        self._sess.mount(self.base_url, HTTPAdapter(max_retries=self._retry))
+        transport = HTTPTransport(verify=_SHARED_SSL_CONTEXT)
+        self._client = Client(
+            transport=RetryTransport(transport=transport, retry=self._retry),
+            follow_redirects=True,
+        )
 
     def disconnect(
         self,
     ):
         """Close an HTTP session."""
-        if self._sess:
+        if self._client:
             logger.debug("Closing a connection")
-            self._sess.close()
-            self._sess = None
+            self._client.close()
+            self._client = None
 
     def is_connected(
         self,
@@ -223,7 +251,7 @@ class MLClient:
         bool
             True if the client has started a connection; otherwise False
         """
-        return self._sess is not None
+        return self._client is not None
 
     def get(
         self,
@@ -303,7 +331,7 @@ class MLClient:
         """
         return self.request("PUT", endpoint, params, headers, body)
 
-    def delete_(
+    def delete(
         self,
         endpoint: str,
         params: dict | None = None,
@@ -357,9 +385,64 @@ class MLClient:
         """
         request = self._prepare_request(params, headers, body)
         resp = self._send_request(method, endpoint, request)
-        logger.debug("Response retrieved")
-        logger.fine("Response body: %s", resp.text)
+        self._log_response(method, endpoint, resp)
         return resp
+
+    def wait_for_restart_completion(
+        self,
+        response: Response | None = None,
+        timeout: float = 30.0,
+        poll_interval: float = 0.25,
+        retry: Retry | None = None,
+    ) -> None:
+        """Wait for MarkLogic readiness after a restart-signaling response.
+
+        Use this after operations that may return MarkLogic restart metadata.
+        If ``response`` is a recognized restart response, the method waits until
+        all affected hosts report readiness through ``/admin/v1/timestamp``.
+        Otherwise, it performs a single readiness probe for the current host.
+
+        Parameters
+        ----------
+        response : Response | None
+            Optional response returned by an operation that may have initiated a
+            restart.
+        timeout : float
+            Maximum number of seconds to wait for readiness.
+        poll_interval : float
+            Delay between readiness probes while waiting for a host to recover.
+        retry : Retry | None
+            Retry strategy used for readiness probes. If omitted, restart-aware
+            retry settings are used.
+
+        Raises
+        ------
+        ValueError
+            If a multi-host restart response cannot be resolved to MarkLogic
+            host names.
+        TimeoutError
+            If MarkLogic does not report readiness before ``timeout`` expires.
+        AssertionError
+            If the readiness probe returns a non-retryable non-``200`` status.
+        RuntimeError
+            If called from a running event loop.
+        """
+        admin_retry = retry or RESTART_RETRY_STRATEGY
+        self._get_restart_waiter().wait_for_restart_completion(
+            response,
+            timeout,
+            poll_interval,
+            admin_retry,
+        )
+
+    def _get_restart_waiter(self) -> RestartWaiter:
+        """Return a helper handling restart payload parsing and readiness waits."""
+        return RestartWaiter(
+            protocol=self.protocol,
+            host=self.host,
+            auth=self._auth,
+            default_retry=self._retry,
+        )
 
     def _prepare_request(
         self,
@@ -373,13 +456,15 @@ class MLClient:
             "headers": headers or {},
             "auth": self._auth,
         }
-        if body:
-            content_type = headers.get(const.HEADER_NAME_CONTENT_TYPE)
+        if body is not None:
+            content_type = (headers or {}).get(const.HEADER_NAME_CONTENT_TYPE)
             doc_type = Mimetypes.get_doc_type(content_type) if content_type else None
             if doc_type == DocumentType.JSON:
                 request["json"] = body
-            else:
+            elif isinstance(body, Mapping):
                 request["data"] = body
+            else:
+                request["content"] = body
 
         logger.fine(
             "Request details: %s",
@@ -401,7 +486,7 @@ class MLClient:
 
         url = self.base_url + endpoint
         if self.is_connected():
-            resp = self._sess.request(method, url, **request)
+            resp = self._client.request(method, url, **request)
         else:
             logger.warning(
                 "MLClient is not connected -- "
@@ -409,11 +494,50 @@ class MLClient:
                 method.upper(),
                 endpoint,
             )
-            with Session() as sess:
-                sess.mount(self.base_url, HTTPAdapter(max_retries=self._retry))
-                resp = sess.request(method, url, **request)
+            transport = httpx.HTTPTransport(verify=_SHARED_SSL_CONTEXT)
+            with Client(
+                transport=RetryTransport(transport=transport, retry=self._retry),
+                follow_redirects=True,
+            ) as client:
+                resp = client.request(method, url, **request)
 
         return resp
+
+    def _log_response(
+        self,
+        method: str,
+        endpoint: str,
+        response: Response,
+    ):
+        """Log response details and restart warning, if applicable."""
+        logger.debug("Response retrieved")
+        if logger.isEnabledFor(logging.FINE):
+            logger.fine(
+                "Response:\n%s",
+                self._format_http_response(response),
+            )
+
+        if RestartWaiter.is_restart_response(response):
+            logger.warning(
+                "MarkLogic accepted %s %s and initiated a restart; "
+                "Location [%s]. Wait for restart completion before "
+                "sending follow-up requests",
+                method,
+                endpoint,
+                response.headers.get("Location"),
+            )
+
+    @staticmethod
+    def _format_http_response(
+        response: Response,
+    ) -> str:
+        """Format an HTTP response in a protocol-like representation."""
+        reason_phrase = httpx.codes.get_reason_phrase(response.status_code)
+        start_line = f"HTTP/1.1 {response.status_code} {reason_phrase}"
+        headers = "\n".join(f"{name}: {val}" for name, val in response.headers.items())
+        if response.text:
+            return f"{start_line}\n{headers}\n\n{response.text}"
+        return f"{start_line}\n{headers}"
 
 
 class MLResourceClient(MLClient):

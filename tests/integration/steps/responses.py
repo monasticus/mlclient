@@ -1,7 +1,8 @@
 from __future__ import annotations
 
+import httpx
+from httpx import Response
 from pytest_bdd import parsers, then
-from requests import Response
 
 from mlclient import MLResponseParser
 
@@ -12,8 +13,7 @@ from .common import parse_step_input
 def verify_response(
     response: Response,
 ):
-    assert response.status_code == 200
-    assert response.reason == "OK"
+    assert response.status_code == httpx.codes.OK
 
 
 @then(parsers.parse("I get a successful multipart response\n{expected_parts}"))
@@ -24,7 +24,7 @@ def verify_multipart_response(
     expected_parts = parse_step_input(expected_parts)
 
     parsed_resp = MLResponseParser.parse(response, str)
-    assert response.status_code == 200
+    assert response.status_code == httpx.codes.OK
     if len(expected_parts) == 1:
         assert parsed_resp == expected_parts[0]["text"]
     else:
@@ -54,7 +54,7 @@ def verify_requests_producing_logs(
     eval_logs = [
         log
         for log in logs
-        if '"POST /v1/eval HTTP/1.1"' in log and "python-requests" in log
+        if '"POST /v1/eval HTTP/1.1"' in log and "python-httpx" in log
     ]
     assert len(eval_logs) >= test_logs_count
 

@@ -39,11 +39,11 @@ from .documents import (
 )
 
 __all__ = [
+    "Category",
+    "ContentDispositionSerializer",
     "DocumentsBodyPart",
     "DocumentsBodyPartType",
     "DocumentsContentDisposition",
-    "Category",
     "Extract",
     "Repair",
-    "ContentDispositionSerializer",
 ]

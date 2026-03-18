@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import datetime
 
+from httpx import Response
 from pytest_bdd import given, parsers, then, when
-from requests import Response
 
 from mlclient import MLResourceClient, MLResourcesClient
 from mlclient.calls import EvalCall
@@ -19,9 +19,13 @@ def init_client(
     client_type: str,
 ) -> MLResourceClient:
     if client_type == "MLResourceClient":
-        client = MLResourceClient(auth_method="digest")
+        client = MLResourceClient(
+            auth_method="digest",
+        )
     elif client_type == "MLResourcesClient":
-        client = MLResourcesClient(auth_method="digest")
+        client = MLResourcesClient(
+            auth_method="digest",
+        )
     else:
         msg = (
             f"Incorrect client type! "

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-import os
+from collections.abc import Generator
 from pathlib import Path
 
 _SCRIPT_DIR = Path(__file__).resolve()
@@ -11,11 +11,30 @@ TESTS_PATH = Path(_SCRIPT_DIR).parent.parent
 RESOURCES_PATH = next(TESTS_PATH.glob(_RESOURCES_DIR))
 
 
+def get_test_resources(
+    test_path: str,
+) -> dict:
+    resources = {}
+    for resource in list_resources(test_path):
+        abs_path = get_test_resource_path(test_path, resource)
+        resources[resource] = {
+            "abs_path": abs_path,
+            "bytes": Path(abs_path).read_bytes(),
+            "str": Path(abs_path).read_text(),
+        }
+        if abs_path.endswith(".json"):
+            resources[resource]["json"] = get_test_resource_json(test_path, resource)
+    return resources
+
+
 def list_resources(
     test_path: str,
-) -> list[str]:
+) -> Generator[str]:
     test_resources_path = get_test_resources_path(test_path)
-    return os.listdir(test_resources_path)
+    return (
+        str(p.relative_to(test_resources_path))
+        for p in Path(test_resources_path).iterdir()
+    )
 
 
 def get_test_resource_json(

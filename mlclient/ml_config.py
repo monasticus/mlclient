@@ -16,7 +16,6 @@ from __future__ import annotations
 import logging
 from enum import Enum
 from pathlib import Path
-from typing import List
 
 import yaml
 from pydantic import BaseModel, Field, field_serializer
@@ -74,7 +73,7 @@ class MLConfiguration(BaseModel):
     host: str = Field(description="A hostname", default="localhost")
     username: str = Field(description="An username", default="admin")
     password: str = Field(description="A password", default="admin")
-    app_servers: List[MLAppServerConfiguration] = Field(
+    app_servers: list[MLAppServerConfiguration] = Field(
         alias="app-servers",
         description="App Servers configurations' list",
         default=[MLAppServerConfiguration(id="manage", port=8002, rest=True)],

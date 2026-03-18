@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mlclient.clients.documents_client &mdash; MLClient 0.4.0 documentation</title>
+  <title>mlclient.clients.documents_client &mdash; MLClient 0.4.1 documentation</title>
       <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/autodoc_pydantic.css" type="text/css" />
@@ -13,9 +13,9 @@
   
         <script src="../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=4e78f113"></script>
-        <script src="../../../_static/doctools.js?v=888ff710"></script>
-        <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
+        <script src="../../../_static/documentation_options.js?v=c87aa342"></script>
+        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
@@ -66,6 +66,7 @@
   <ul class="wy-breadcrumbs">
       <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+          <li class="breadcrumb-item"><a href="../../mlclient.html">mlclient</a></li>
       <li class="breadcrumb-item active">mlclient.clients.documents_client</li>
       <li class="wy-breadcrumbs-aside">
       </li>
@@ -82,25 +83,20 @@
 <span class="sd">    * DocumentsClient</span>
 <span class="sd">        An MLResourceClient calling /v1/documents endpoint.</span>
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
 
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Iterator</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
-<span class="kn">from</span> <span class="nn">requests</span> <span class="kn">import</span> <span class="n">Response</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Iterator</span>
 
-<span class="kn">from</span> <span class="nn">mlclient</span> <span class="kn">import</span> <span class="n">constants</span>
-<span class="kn">from</span> <span class="nn">mlclient.calls</span> <span class="kn">import</span> <span class="n">DocumentsDeleteCall</span><span class="p">,</span> <span class="n">DocumentsGetCall</span><span class="p">,</span> <span class="n">DocumentsPostCall</span>
-<span class="kn">from</span> <span class="nn">mlclient.calls.model</span> <span class="kn">import</span> <span class="p">(</span>
-    <span class="n">Category</span><span class="p">,</span>
-    <span class="n">ContentDispositionSerializer</span><span class="p">,</span>
-    <span class="n">DocumentsBodyPart</span><span class="p">,</span>
-    <span class="n">DocumentsContentDisposition</span><span class="p">,</span>
-<span class="p">)</span>
-<span class="kn">from</span> <span class="nn">mlclient.clients</span> <span class="kn">import</span> <span class="n">MLResourceClient</span>
-<span class="kn">from</span> <span class="nn">mlclient.exceptions</span> <span class="kn">import</span> <span class="n">MarkLogicError</span>
-<span class="kn">from</span> <span class="nn">mlclient.mimetypes</span> <span class="kn">import</span> <span class="n">Mimetypes</span>
-<span class="kn">from</span> <span class="nn">mlclient.ml_response_parser</span> <span class="kn">import</span> <span class="n">MLResponseParser</span>
-<span class="kn">from</span> <span class="nn">mlclient.model</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">httpx</span><span class="w"> </span><span class="kn">import</span> <span class="n">Response</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">mlclient</span><span class="w"> </span><span class="kn">import</span> <span class="n">constants</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mlclient.calls</span><span class="w"> </span><span class="kn">import</span> <span class="n">DocumentsDeleteCall</span><span class="p">,</span> <span class="n">DocumentsGetCall</span><span class="p">,</span> <span class="n">DocumentsPostCall</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mlclient.clients</span><span class="w"> </span><span class="kn">import</span> <span class="n">MLResourceClient</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mlclient.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">MarkLogicError</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mlclient.mimetypes</span><span class="w"> </span><span class="kn">import</span> <span class="n">Mimetypes</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mlclient.ml_response_parser</span><span class="w"> </span><span class="kn">import</span> <span class="n">MLResponseParser</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mlclient.structures</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">Document</span><span class="p">,</span>
     <span class="n">DocumentFactory</span><span class="p">,</span>
     <span class="n">Metadata</span><span class="p">,</span>
@@ -108,15 +104,25 @@
     <span class="n">RawDocument</span><span class="p">,</span>
     <span class="n">RawStringDocument</span><span class="p">,</span>
 <span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mlclient.structures.calls</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">Category</span><span class="p">,</span>
+    <span class="n">ContentDispositionSerializer</span><span class="p">,</span>
+    <span class="n">DocumentsBodyPart</span><span class="p">,</span>
+    <span class="n">DocumentsContentDisposition</span><span class="p">,</span>
+<span class="p">)</span>
 
 
-<div class="viewcode-block" id="DocumentsClient"><a class="viewcode-back" href="../../../api/mlclient/clients/mlclient.clients.html#mlclient.clients.DocumentsClient">[docs]</a><span class="k">class</span> <span class="nc">DocumentsClient</span><span class="p">(</span><span class="n">MLResourceClient</span><span class="p">):</span>
+<div class="viewcode-block" id="DocumentsClient">
+<a class="viewcode-back" href="../../../api/mlclient/clients/mlclient.clients.html#mlclient.clients.DocumentsClient">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">DocumentsClient</span><span class="p">(</span><span class="n">MLResourceClient</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;An MLResourceClient calling /v1/documents endpoint.</span>
 
 <span class="sd">    It is a high-level class performing CRUD operations in a MarkLogic server.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="DocumentsClient.create"><a class="viewcode-back" href="../../../api/mlclient/clients/mlclient.clients.html#mlclient.clients.DocumentsClient.create">[docs]</a>    <span class="k">def</span> <span class="nf">create</span><span class="p">(</span>
+<div class="viewcode-block" id="DocumentsClient.create">
+<a class="viewcode-back" href="../../../api/mlclient/clients/mlclient.clients.html#mlclient.clients.DocumentsClient.create">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">create</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">data</span><span class="p">:</span> <span class="n">Document</span> <span class="o">|</span> <span class="n">Metadata</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">Document</span> <span class="o">|</span> <span class="n">Metadata</span><span class="p">],</span>
         <span class="n">database</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -152,12 +158,15 @@
             <span class="n">temporal_collection</span><span class="o">=</span><span class="n">temporal_collection</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">resp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">call</span><span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">resp</span><span class="o">.</span><span class="n">ok</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">resp</span><span class="o">.</span><span class="n">is_success</span><span class="p">:</span>
             <span class="n">resp_body</span> <span class="o">=</span> <span class="n">MLResponseParser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">resp</span><span class="p">)</span>
             <span class="k">raise</span> <span class="n">MarkLogicError</span><span class="p">(</span><span class="n">resp_body</span><span class="p">[</span><span class="s2">&quot;errorResponse&quot;</span><span class="p">])</span>
         <span class="k">return</span> <span class="n">MLResponseParser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">resp</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="DocumentsClient.read"><a class="viewcode-back" href="../../../api/mlclient/clients/mlclient.clients.html#mlclient.clients.DocumentsClient.read">[docs]</a>    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span>
+
+<div class="viewcode-block" id="DocumentsClient.read">
+<a class="viewcode-back" href="../../../api/mlclient/clients/mlclient.clients.html#mlclient.clients.DocumentsClient.read">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">read</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">uris</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
         <span class="n">category</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -197,12 +206,15 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">call</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_call</span><span class="p">(</span><span class="n">uris</span><span class="o">=</span><span class="n">uris</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="n">category</span><span class="p">,</span> <span class="n">database</span><span class="o">=</span><span class="n">database</span><span class="p">)</span>
         <span class="n">resp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">call</span><span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">resp</span><span class="o">.</span><span class="n">ok</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">resp</span><span class="o">.</span><span class="n">is_success</span><span class="p">:</span>
             <span class="n">resp_body</span> <span class="o">=</span> <span class="n">MLResponseParser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">resp</span><span class="p">)</span>
             <span class="k">raise</span> <span class="n">MarkLogicError</span><span class="p">(</span><span class="n">resp_body</span><span class="p">[</span><span class="s2">&quot;errorResponse&quot;</span><span class="p">])</span>
         <span class="k">return</span> <span class="n">DocumentsReader</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">resp</span><span class="p">,</span> <span class="n">uris</span><span class="p">,</span> <span class="n">category</span><span class="p">,</span> <span class="n">output_type</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="DocumentsClient.delete"><a class="viewcode-back" href="../../../api/mlclient/clients/mlclient.clients.html#mlclient.clients.DocumentsClient.delete">[docs]</a>    <span class="k">def</span> <span class="nf">delete</span><span class="p">(</span>
+
+<div class="viewcode-block" id="DocumentsClient.delete">
+<a class="viewcode-back" href="../../../api/mlclient/clients/mlclient.clients.html#mlclient.clients.DocumentsClient.delete">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">delete</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">uris</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
         <span class="n">category</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -248,12 +260,13 @@
             <span class="n">wipe_temporal</span><span class="o">=</span><span class="n">wipe_temporal</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">resp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">call</span><span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">resp</span><span class="o">.</span><span class="n">ok</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">resp</span><span class="o">.</span><span class="n">is_success</span><span class="p">:</span>
             <span class="n">resp_body</span> <span class="o">=</span> <span class="n">MLResponseParser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">resp</span><span class="p">)</span>
             <span class="k">raise</span> <span class="n">MarkLogicError</span><span class="p">(</span><span class="n">resp_body</span><span class="p">[</span><span class="s2">&quot;errorResponse&quot;</span><span class="p">])</span></div>
 
+
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">_post_call</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_post_call</span><span class="p">(</span>
         <span class="bp">cls</span><span class="p">,</span>
         <span class="n">body_parts</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">DocumentsBodyPart</span><span class="p">],</span>
         <span class="n">database</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
@@ -286,7 +299,7 @@
         <span class="p">)</span>
 
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">_get_call</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_call</span><span class="p">(</span>
         <span class="bp">cls</span><span class="p">,</span>
         <span class="n">uris</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
         <span class="n">category</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
@@ -326,7 +339,7 @@
         <span class="k">return</span> <span class="n">DocumentsGetCall</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
 
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">_delete_call</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_delete_call</span><span class="p">(</span>
         <span class="bp">cls</span><span class="p">,</span>
         <span class="n">uris</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
         <span class="n">category</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
@@ -372,11 +385,12 @@
         <span class="p">)</span></div>
 
 
-<span class="k">class</span> <span class="nc">DocumentsSender</span><span class="p">:</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">DocumentsSender</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;A class parsing Document or Metadata instance(s) to DocumentsBodyPart&#39;s list.&quot;&quot;&quot;</span>
 
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">parse</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">parse</span><span class="p">(</span>
         <span class="bp">cls</span><span class="p">,</span>
         <span class="n">data</span><span class="p">:</span> <span class="n">Document</span> <span class="o">|</span> <span class="n">Metadata</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">Document</span> <span class="o">|</span> <span class="n">Metadata</span><span class="p">],</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">DocumentsBodyPart</span><span class="p">]:</span>
@@ -412,7 +426,7 @@
         <span class="k">return</span> <span class="n">body_parts</span>
 
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">_get_doc_content_body_part</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_doc_content_body_part</span><span class="p">(</span>
         <span class="bp">cls</span><span class="p">,</span>
         <span class="n">document</span><span class="p">:</span> <span class="n">Document</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DocumentsBodyPart</span><span class="p">:</span>
@@ -441,7 +455,7 @@
         <span class="p">)</span>
 
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">_get_doc_metadata_body_part</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_doc_metadata_body_part</span><span class="p">(</span>
         <span class="bp">cls</span><span class="p">,</span>
         <span class="n">document</span><span class="p">:</span> <span class="n">Document</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DocumentsBodyPart</span><span class="p">:</span>
@@ -473,7 +487,7 @@
         <span class="p">)</span>
 
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">_get_default_metadata_body_part</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_default_metadata_body_part</span><span class="p">(</span>
         <span class="bp">cls</span><span class="p">,</span>
         <span class="n">metadata</span><span class="p">:</span> <span class="n">Metadata</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DocumentsBodyPart</span><span class="p">:</span>
@@ -502,11 +516,11 @@
         <span class="p">)</span>
 
 
-<span class="k">class</span> <span class="nc">DocumentsReader</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">DocumentsReader</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;A class parsing raw MarkLogic response to Document instance(s).&quot;&quot;&quot;</span>
 
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">parse</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">parse</span><span class="p">(</span>
         <span class="bp">cls</span><span class="p">,</span>
         <span class="n">resp</span><span class="p">:</span> <span class="n">Response</span><span class="p">,</span>
         <span class="n">uris</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
@@ -545,7 +559,7 @@
         <span class="k">return</span> <span class="n">docs</span>
 
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">_parse_response</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_parse_response</span><span class="p">(</span>
         <span class="bp">cls</span><span class="p">,</span>
         <span class="n">resp</span><span class="p">:</span> <span class="n">Response</span><span class="p">,</span>
         <span class="n">output_type</span><span class="p">:</span> <span class="nb">type</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
@@ -573,7 +587,7 @@
         <span class="k">return</span> <span class="n">parsed_resp</span>
 
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">_pre_format_data</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_pre_format_data</span><span class="p">(</span>
         <span class="bp">cls</span><span class="p">,</span>
         <span class="n">parsed_resp</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">],</span>
         <span class="n">is_multipart</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
@@ -607,7 +621,7 @@
         <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_pre_format_document</span><span class="p">(</span><span class="n">parsed_resp</span><span class="p">,</span> <span class="n">uris</span><span class="p">,</span> <span class="n">category</span><span class="p">)</span>
 
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">_pre_format_documents</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_pre_format_documents</span><span class="p">(</span>
         <span class="bp">cls</span><span class="p">,</span>
         <span class="n">parsed_resp</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">],</span>
         <span class="n">origin_category</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
@@ -637,17 +651,15 @@
                 <span class="k">yield</span> <span class="n">partial_data</span>
             <span class="k">elif</span> <span class="n">content_disp</span><span class="o">.</span><span class="n">filename</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">pre_formatted_data</span><span class="p">:</span>
                 <span class="n">pre_formatted_data</span><span class="p">[</span><span class="n">content_disp</span><span class="o">.</span><span class="n">filename</span><span class="p">]</span> <span class="o">=</span> <span class="n">partial_data</span>
+            <span class="k">elif</span> <span class="n">content_disp</span><span class="o">.</span><span class="n">category</span> <span class="o">==</span> <span class="n">Category</span><span class="o">.</span><span class="n">CONTENT</span><span class="p">:</span>
+                <span class="n">pre_formatted_data</span><span class="p">[</span><span class="n">content_disp</span><span class="o">.</span><span class="n">filename</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">partial_data</span><span class="p">)</span>
+                <span class="k">yield</span> <span class="n">pre_formatted_data</span><span class="p">[</span><span class="n">content_disp</span><span class="o">.</span><span class="n">filename</span><span class="p">]</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">data</span> <span class="o">=</span> <span class="n">pre_formatted_data</span><span class="p">[</span><span class="n">content_disp</span><span class="o">.</span><span class="n">filename</span><span class="p">]</span>
-                <span class="k">if</span> <span class="n">content_disp</span><span class="o">.</span><span class="n">category</span> <span class="o">==</span> <span class="n">Category</span><span class="o">.</span><span class="n">CONTENT</span><span class="p">:</span>
-                    <span class="n">data</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">partial_data</span><span class="p">)</span>
-                    <span class="k">yield</span> <span class="n">data</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">partial_data</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
-                    <span class="k">yield</span> <span class="n">partial_data</span>
+                <span class="n">partial_data</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">pre_formatted_data</span><span class="p">[</span><span class="n">content_disp</span><span class="o">.</span><span class="n">filename</span><span class="p">])</span>
+                <span class="k">yield</span> <span class="n">partial_data</span>
 
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">_pre_format_document</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_pre_format_document</span><span class="p">(</span>
         <span class="bp">cls</span><span class="p">,</span>
         <span class="n">parsed_resp</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">],</span>
         <span class="n">origin_uris</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
@@ -685,7 +697,7 @@
             <span class="p">}</span>
 
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">_pre_format_metadata</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_pre_format_metadata</span><span class="p">(</span>
         <span class="bp">cls</span><span class="p">,</span>
         <span class="n">raw_metadata</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="nb">bytes</span> <span class="o">|</span> <span class="nb">str</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span> <span class="o">|</span> <span class="nb">bytes</span> <span class="o">|</span> <span class="nb">str</span><span class="p">:</span>
@@ -710,7 +722,7 @@
         <span class="k">return</span> <span class="n">raw_metadata</span>
 
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">_expect_categories</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_expect_categories</span><span class="p">(</span>
         <span class="bp">cls</span><span class="p">,</span>
         <span class="n">origin_category</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]:</span>
@@ -736,7 +748,7 @@
         <span class="k">return</span> <span class="n">expect_content</span><span class="p">,</span> <span class="n">expect_metadata</span>
 
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">_get_partial_data</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_partial_data</span><span class="p">(</span>
         <span class="bp">cls</span><span class="p">,</span>
         <span class="n">content_disp</span><span class="p">:</span> <span class="n">DocumentsContentDisposition</span><span class="p">,</span>
         <span class="n">parsed_resp_body</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
@@ -767,7 +779,7 @@
         <span class="p">}</span>
 
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">_parse_to_documents</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_parse_to_documents</span><span class="p">(</span>
         <span class="bp">cls</span><span class="p">,</span>
         <span class="n">documents_data</span><span class="p">:</span> <span class="n">Iterator</span><span class="p">[</span><span class="nb">dict</span><span class="p">],</span>
         <span class="n">output_type</span><span class="p">:</span> <span class="nb">type</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
@@ -792,7 +804,7 @@
         <span class="p">]</span>
 
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">_parse_to_document</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_parse_to_document</span><span class="p">(</span>
         <span class="bp">cls</span><span class="p">,</span>
         <span class="n">document_data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
         <span class="n">output_type</span><span class="p">:</span> <span class="nb">type</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>

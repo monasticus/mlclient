@@ -1,14 +1,14 @@
 from __future__ import annotations
 
 import pytest
-import responses
+import respx
 from cleo.testers.command_tester import CommandTester
 
 from mlclient import MLConfiguration
 from mlclient.cli import MLCLIentApplication
 from mlclient.exceptions import WrongParametersError
-from tests.utils import MLResponseBuilder
 from tests.utils import resources as resources_utils
+from tests.utils.ml_mockers import MLRespXMocker
 
 
 @pytest.fixture(autouse=True)
@@ -43,16 +43,17 @@ def _setup(mocker, ml_config):
     mocker.patch(target, return_value=ml_config)
 
 
-@responses.activate
+@respx.mock
 def test_command_call_eval_basic():
     code = 'xquery version "1.0"; ""'
 
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/eval")
-    builder.with_request_body({"xquery": code})
-    builder.with_response_body_multipart_mixed()
-    builder.with_response_body_part("string", "")
-    builder.build_post()
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/v1/eval")
+    ml_mocker.with_request_content_type("application/x-www-form-urlencoded")
+    ml_mocker.with_request_body({"xquery": code})
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body_part("string", "")
+    ml_mocker.mock_post()
 
     file_path = resources_utils.get_test_resource_path(__file__, "xquery-code.xqy")
     tester = _get_tester("call eval")
@@ -68,16 +69,17 @@ def test_command_call_eval_basic():
     assert tester.command.option("txid") is None
 
 
-@responses.activate
+@respx.mock
 def test_command_call_eval_custom_rest_server():
     code = 'xquery version "1.0"; ""'
 
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/eval")
-    builder.with_request_body({"xquery": code})
-    builder.with_response_body_multipart_mixed()
-    builder.with_response_body_part("string", "")
-    builder.build_post()
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/v1/eval")
+    ml_mocker.with_request_content_type("application/x-www-form-urlencoded")
+    ml_mocker.with_request_body({"xquery": code})
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body_part("string", "")
+    ml_mocker.mock_post()
 
     file_path = resources_utils.get_test_resource_path(__file__, "xquery-code.xqy")
     tester = _get_tester("call eval")
@@ -93,22 +95,22 @@ def test_command_call_eval_custom_rest_server():
     assert tester.command.option("txid") is None
 
 
-@responses.activate
+@respx.mock
 def test_command_call_eval_with_vars():
     code = 'xquery version "1.0"; ""'
 
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/eval")
-    builder.with_request_content_type("application/x-www-form-urlencoded")
-    builder.with_request_body(
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/v1/eval")
+    ml_mocker.with_request_content_type("application/x-www-form-urlencoded")
+    ml_mocker.with_request_body(
         {
             "xquery": code,
             "vars": '{"VARIABLE_1": "X", "VARIABLE_2": "Y"}',
         },
     )
-    builder.with_response_body_multipart_mixed()
-    builder.with_response_body_part("string", "")
-    builder.build_post()
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body_part("string", "")
+    ml_mocker.mock_post()
 
     file_path = resources_utils.get_test_resource_path(__file__, "xquery-code.xqy")
     tester = _get_tester("call eval")
@@ -124,16 +126,17 @@ def test_command_call_eval_with_vars():
     assert tester.command.option("txid") is None
 
 
-@responses.activate
+@respx.mock
 def test_command_call_eval_xquery_flag():
     code = 'xquery version "1.0"; ""'
 
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/eval")
-    builder.with_request_body({"xquery": code})
-    builder.with_response_body_multipart_mixed()
-    builder.with_response_body_part("string", "")
-    builder.build_post()
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/v1/eval")
+    ml_mocker.with_request_content_type("application/x-www-form-urlencoded")
+    ml_mocker.with_request_body({"xquery": code})
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body_part("string", "")
+    ml_mocker.mock_post()
 
     tester = _get_tester("call eval")
     tester.execute(f"-e test -x '{code}'")
@@ -148,16 +151,17 @@ def test_command_call_eval_xquery_flag():
     assert tester.command.option("txid") is None
 
 
-@responses.activate
+@respx.mock
 def test_command_call_eval_javascript_flag():
     code = '"use strict"; ""'
 
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/eval")
-    builder.with_request_body({"javascript": code})
-    builder.with_response_body_multipart_mixed()
-    builder.with_response_body_part("string", "")
-    builder.build_post()
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/v1/eval")
+    ml_mocker.with_request_content_type("application/x-www-form-urlencoded")
+    ml_mocker.with_request_body({"javascript": code})
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body_part("string", "")
+    ml_mocker.mock_post()
 
     tester = _get_tester("call eval")
     tester.execute(f"-e test -j '{code}'")
@@ -183,17 +187,18 @@ def test_command_call_eval_mixed_xquery_and_javascript():
     assert err.value.args[0] == expected_msg
 
 
-@responses.activate
+@respx.mock
 def test_command_call_eval_custom_database():
     code = 'xquery version "1.0"; ""'
 
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/eval")
-    builder.with_request_param("database", "custom-db")
-    builder.with_request_body({"xquery": code})
-    builder.with_response_body_multipart_mixed()
-    builder.with_response_body_part("string", "")
-    builder.build_post()
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/v1/eval")
+    ml_mocker.with_request_param("database", "custom-db")
+    ml_mocker.with_request_content_type("application/x-www-form-urlencoded")
+    ml_mocker.with_request_body({"xquery": code})
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body_part("string", "")
+    ml_mocker.mock_post()
 
     file_path = resources_utils.get_test_resource_path(__file__, "xquery-code.xqy")
     tester = _get_tester("call eval")
@@ -209,17 +214,18 @@ def test_command_call_eval_custom_database():
     assert tester.command.option("txid") is None
 
 
-@responses.activate
+@respx.mock
 def test_command_call_eval_custom_txid():
     code = 'xquery version "1.0"; ""'
 
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/eval")
-    builder.with_request_param("txid", "transaction-id")
-    builder.with_request_body({"xquery": code})
-    builder.with_response_body_multipart_mixed()
-    builder.with_response_body_part("string", "")
-    builder.build_post()
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/v1/eval")
+    ml_mocker.with_request_param("txid", "transaction-id")
+    ml_mocker.with_request_content_type("application/x-www-form-urlencoded")
+    ml_mocker.with_request_body({"xquery": code})
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body_part("string", "")
+    ml_mocker.mock_post()
 
     file_path = resources_utils.get_test_resource_path(__file__, "xquery-code.xqy")
     tester = _get_tester("call eval")
@@ -235,7 +241,7 @@ def test_command_call_eval_custom_txid():
     assert tester.command.option("txid") == "transaction-id"
 
 
-@responses.activate
+@respx.mock
 def test_command_call_eval_output():
     code = (
         'xquery version "1.0"; '
@@ -248,16 +254,17 @@ def test_command_call_eval_output():
         ")"
     )
 
-    builder = MLResponseBuilder()
-    builder.with_base_url("http://localhost:8002/v1/eval")
-    builder.with_request_body({"xquery": code})
-    builder.with_response_body_multipart_mixed()
-    builder.with_response_body_part("dateTime", "2023-08-09T01:01:01.001Z")
-    builder.with_response_body_part("integer", "1")
-    builder.with_response_body_part("string", "string-value")
-    builder.with_response_body_part("element", "<root/>")
-    builder.with_response_body_part("map", '{"key": "value"}')
-    builder.build_post()
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/v1/eval")
+    ml_mocker.with_request_content_type("application/x-www-form-urlencoded")
+    ml_mocker.with_request_body({"xquery": code})
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body_part("dateTime", "2023-08-09T01:01:01.001Z")
+    ml_mocker.with_response_body_part("integer", "1")
+    ml_mocker.with_response_body_part("string", "string-value")
+    ml_mocker.with_response_body_part("element", "<root/>")
+    ml_mocker.with_response_body_part("map", '{"key": "value"}')
+    ml_mocker.mock_post()
 
     tester = _get_tester("call eval")
     tester.execute(f"-e test -x '{code}'")

@@ -10,8 +10,8 @@ It exports high-level classes to easily read MarkLogic logs:
 from __future__ import annotations
 
 import re
+from collections.abc import Iterator
 from enum import Enum
-from typing import Iterator
 
 from mlclient.calls import LogsCall
 from mlclient.clients import MLResourceClient
@@ -129,7 +129,7 @@ class LogsClient(MLResourceClient):
 
         resp = self.call(call)
         resp_body = resp.json()
-        if not resp.ok:
+        if not resp.is_success:
             raise MarkLogicError(resp_body["errorResponse"])
 
         return self._parse_logs(log_type, resp_body)

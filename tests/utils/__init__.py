@@ -7,8 +7,9 @@ import operator
 import os
 import urllib.parse
 import zlib
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Any, Iterable
+from typing import Any
 
 import responses
 import urllib3
@@ -30,6 +31,7 @@ from mlclient.structures.calls import ContentDispositionSerializer, DocumentsBod
 from tests.utils import resources as resources_utils
 
 
+# Support httpx Responses
 class MLResponseBuilder:
     def __init__(
         self,

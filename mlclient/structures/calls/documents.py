@@ -22,7 +22,7 @@ It exports the following classes:
 from __future__ import annotations
 
 from enum import Enum
-from typing import List, Optional, Union
+from typing import Optional, Union
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -70,7 +70,7 @@ class DocumentsContentDisposition(BaseModel):
     body_part_type: DocumentsBodyPartType = Field(
         description="The content type indication (inline or attachment).",
     )
-    category: Optional[Union[Category, List[Category]]] = Field(
+    category: Optional[Union[Category, list[Category]]] = Field(
         description="The category of data.",
         default=None,
     )

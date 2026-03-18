@@ -31,7 +31,7 @@ def _setup_and_teardown():
     # Teardown
     for file_name in resources_utils.list_resources(__file__):
         Path(f"{constants.ML_CLIENT_DIR}/{file_name}").unlink()
-    if ml_client_dir.exists() and not os.listdir(constants.ML_CLIENT_DIR):
+    if ml_client_dir.exists() and not list(Path(constants.ML_CLIENT_DIR).iterdir()):
         ml_client_dir.rmdir()
 
 

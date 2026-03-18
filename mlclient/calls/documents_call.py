@@ -164,11 +164,8 @@ class DocumentsGetCall(ResourceCall):
         category: str | list,
         data_format: str,
     ):
-        if (
-            not isinstance(uri, str)
-            and len(uri) > 1
-            or isinstance(category, list)
-            and len(category) > 1
+        if (not isinstance(uri, str) and len(uri) > 1) or (
+            isinstance(category, list) and len(category) > 1
         ):
             return constants.HEADER_MULTIPART_MIXED
         if data_format and category and category != "content":

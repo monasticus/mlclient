@@ -7,9 +7,10 @@ It exports high-level class to perform CRUD operations in a MarkLogic server:
 
 from __future__ import annotations
 
-from typing import Any, Iterator
+from collections.abc import Iterator
+from typing import Any
 
-from requests import Response
+from httpx import Response
 
 from mlclient import constants
 from mlclient.calls import DocumentsDeleteCall, DocumentsGetCall, DocumentsPostCall
@@ -75,7 +76,7 @@ class DocumentsClient(MLResourceClient):
             temporal_collection=temporal_collection,
         )
         resp = self.call(call)
-        if not resp.ok:
+        if not resp.is_success:
             resp_body = MLResponseParser.parse(resp)
             raise MarkLogicError(resp_body["errorResponse"])
         return MLResponseParser.parse(resp)
@@ -120,7 +121,7 @@ class DocumentsClient(MLResourceClient):
         """
         call = self._get_call(uris=uris, category=category, database=database)
         resp = self.call(call)
-        if not resp.ok:
+        if not resp.is_success:
             resp_body = MLResponseParser.parse(resp)
             raise MarkLogicError(resp_body["errorResponse"])
         return DocumentsReader.parse(resp, uris, category, output_type)
@@ -171,7 +172,7 @@ class DocumentsClient(MLResourceClient):
             wipe_temporal=wipe_temporal,
         )
         resp = self.call(call)
-        if not resp.ok:
+        if not resp.is_success:
             resp_body = MLResponseParser.parse(resp)
             raise MarkLogicError(resp_body["errorResponse"])
 
@@ -560,14 +561,12 @@ class DocumentsReader:
                 yield partial_data
             elif content_disp.filename not in pre_formatted_data:
                 pre_formatted_data[content_disp.filename] = partial_data
+            elif content_disp.category == Category.CONTENT:
+                pre_formatted_data[content_disp.filename].update(partial_data)
+                yield pre_formatted_data[content_disp.filename]
             else:
-                data = pre_formatted_data[content_disp.filename]
-                if content_disp.category == Category.CONTENT:
-                    data.update(partial_data)
-                    yield data
-                else:
-                    partial_data.update(data)
-                    yield partial_data
+                partial_data.update(pre_formatted_data[content_disp.filename])
+                yield partial_data
 
     @classmethod
     def _pre_format_document(

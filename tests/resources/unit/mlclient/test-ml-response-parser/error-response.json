@@ -1,0 +1,8 @@
+{
+    "errorResponse": {
+        "statusCode": 404,
+        "status": "Not Found",
+        "messageCode": "RESTAPI-NODOCUMENT",
+        "message": "RESTAPI-NODOCUMENT: (err:FOER0000) Resource or document does not exist:  category: content message: /some/dir/doc.xml"
+    }
+}

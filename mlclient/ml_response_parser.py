@@ -13,8 +13,7 @@ import xml.etree.ElementTree as ElemTree
 from datetime import datetime
 from typing import ClassVar
 
-from requests import Response
-from requests.structures import CaseInsensitiveDict
+from httpx import Headers, Response
 from requests_toolbelt import MultipartDecoder
 from requests_toolbelt.multipart.decoder import BodyPart
 
@@ -58,9 +57,9 @@ class MLResponseParser:
 
     _PLAIN_TEXT_PARSERS: ClassVar[dict] = {
         const.HEADER_PRIMITIVE_STRING: lambda data: data,
-        const.HEADER_PRIMITIVE_INTEGER: lambda data: int(data),
-        const.HEADER_PRIMITIVE_DECIMAL: lambda data: float(data),
-        const.HEADER_PRIMITIVE_BOOLEAN: lambda data: bool(data),
+        const.HEADER_PRIMITIVE_INTEGER: int,
+        const.HEADER_PRIMITIVE_DECIMAL: float,
+        const.HEADER_PRIMITIVE_BOOLEAN: bool,
         const.HEADER_PRIMITIVE_DATE: lambda data: datetime.strptime(
             data,
             "%Y-%m-%d%z",
@@ -105,7 +104,7 @@ class MLResponseParser:
             A parsed response body
         """
         logger.debug("Attempt to parse a response")
-        if response.ok and int(response.headers.get("Content-Length")) == 0:
+        if response.is_success and int(response.headers.get("Content-Length", -1)) == 0:
             logger.fine("No content to parse")
             return []
 
@@ -137,7 +136,7 @@ class MLResponseParser:
             A parsed response body with headers
         """
         logger.debug("Attempt to parse a response")
-        if response.ok and int(response.headers.get("Content-Length")) == 0:
+        if response.is_success and int(response.headers.get("Content-Length", -1)) == 0:
             logger.fine("No content to parse")
             return response.headers, []
 
@@ -180,7 +179,7 @@ class MLResponseParser:
             A parsed response body
         """
         content_type = response.headers.get(const.HEADER_NAME_CONTENT_TYPE)
-        if not response.ok:
+        if not response.is_success:
             if content_type.startswith(const.HEADER_JSON):
                 error = response.json()
             elif content_type.startswith(const.HEADER_XML):
@@ -223,7 +222,7 @@ class MLResponseParser:
             A parsed response body in string format
         """
         content_type = response.headers.get(const.HEADER_NAME_CONTENT_TYPE)
-        if not response.ok:
+        if not response.is_success:
             if content_type.startswith(const.HEADER_JSON):
                 json_error = response.json()
                 error = json.dumps(json_error)
@@ -268,7 +267,7 @@ class MLResponseParser:
             A parsed response body in bytes format
         """
         content_type = response.headers.get(const.HEADER_NAME_CONTENT_TYPE)
-        if not response.ok:
+        if not response.is_success:
             if content_type.startswith(const.HEADER_JSON):
                 json_error = response.json()
                 error = json.dumps(json_error).encode("utf-8")
@@ -409,7 +408,7 @@ class MLResponseParser:
     def _parse_type_specific(
         cls,
         body_part: BodyPart | Response,
-        headers: CaseInsensitiveDict,
+        headers: Headers,
     ) -> (
         bytes
         | str
@@ -428,7 +427,7 @@ class MLResponseParser:
         ----------
         body_part : BodyPart | Response
             An HTTP response body or body part taken from MarkLogic instance
-        headers : CaseInsensitiveDict
+        headers : Headers
             HTTP headers
 
         Returns
@@ -456,7 +455,7 @@ class MLResponseParser:
     def _decode_headers(
         headers: dict,
         encoding: str,
-    ) -> CaseInsensitiveDict:
+    ) -> Headers:
         """Decode HTTP headers from bytes format.
 
         Parameters
@@ -468,11 +467,11 @@ class MLResponseParser:
 
         Returns
         -------
-        CaseInsensitiveDict
+        Headers
             Decoded HTTP headers
         """
         headers_dict = {
             name.decode(encoding): value.decode(encoding)
             for name, value in headers.items()
         }
-        return CaseInsensitiveDict(**headers_dict)
+        return Headers(headers_dict)

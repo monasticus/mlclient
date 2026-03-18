@@ -135,7 +135,7 @@ class UserPropertiesPutCall(ResourceCall):
         cls,
         body: str | dict,
     ):
-        if body is None or isinstance(body, str) and re.search("^\\s*$", body):
+        if body is None or (isinstance(body, str) and re.search("^\\s*$", body)):
             msg = (
                 "No request body provided for "
                 "PUT /manage/v2/users/{id|name}/properties!"

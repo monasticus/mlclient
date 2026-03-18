@@ -164,7 +164,7 @@ class DatabasePostCall(ResourceCall):
         cls,
         body: str | dict,
     ):
-        if body is None or isinstance(body, str) and re.search("^\\s*$", body):
+        if body is None or (isinstance(body, str) and re.search("^\\s*$", body)):
             msg = "No request body provided for POST /manage/v2/databases/{id|name}!"
             raise exceptions.WrongParametersError(msg)
 

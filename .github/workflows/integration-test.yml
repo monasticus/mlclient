@@ -21,10 +21,6 @@ jobs:
           MARKLOGIC_ADMIN_PASSWORD: admin
 
     steps:
-      - name: Sleep for 45 seconds
-        run: sleep 45s
-        shell: bash
-
       - uses: actions/checkout@v3
 
       - name: Set up Python 3.11
@@ -34,7 +30,11 @@ jobs:
 
       - name: Install MLClient with poetry
         run: |
-          make install
+          pip install poetry
+          poetry install
+
+      - name: Wait for MarkLogic readiness
+        run: poetry run python dev/scripts/wait-for-marklogic/wait_for_marklogic.py
 
       - name: Test code with pytest
         run: poetry run pytest tests/integration/

@@ -18,9 +18,12 @@ def assert_document_does_not_exist(
         "Resource or document does not exist:  "
         f"category: content message: {uri}"
     )
-    with DocumentsClient(auth_method="digest") as docs_client, pytest.raises(
-        MarkLogicError,
-    ) as err:
+    with (
+        DocumentsClient(auth_method="digest") as docs_client,
+        pytest.raises(
+            MarkLogicError,
+        ) as err,
+    ):
         docs_client.read(uri)
     assert err.value.args[0] == expected_msg
 

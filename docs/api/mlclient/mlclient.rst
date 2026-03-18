@@ -5,7 +5,8 @@ mlclient package
    :members:
    :undoc-members:
    :show-inheritance:
-   :exclude-members: MLConfiguration
+   :exclude-members: MLClient, MLConfiguration, MLResourceClient, MLResourcesClient
+   :no-index:
 
 .. toctree::
    :maxdepth: 1
@@ -13,7 +14,7 @@ mlclient package
    calls/mlclient.calls
    clients/mlclient.clients
    jobs/mlclient.jobs
-   model/mlclient.model
+   structures/mlclient.structures
 
 mlclient.ml_config module
 -------------------------

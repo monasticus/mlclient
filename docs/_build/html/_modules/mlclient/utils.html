@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mlclient.utils &mdash; MLClient 0.4.0 documentation</title>
+  <title>mlclient.utils &mdash; MLClient 0.4.1 documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/autodoc_pydantic.css" type="text/css" />
@@ -13,9 +13,9 @@
   
         <script src="../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=4e78f113"></script>
-        <script src="../../_static/doctools.js?v=888ff710"></script>
-        <script src="../../_static/sphinx_highlight.js?v=4825356b"></script>
+        <script src="../../_static/documentation_options.js?v=c87aa342"></script>
+        <script src="../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
@@ -66,6 +66,7 @@
   <ul class="wy-breadcrumbs">
       <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+          <li class="breadcrumb-item"><a href="../mlclient.html">mlclient</a></li>
       <li class="breadcrumb-item active">mlclient.utils</li>
       <li class="wy-breadcrumbs-aside">
       </li>
@@ -93,18 +94,21 @@
 <span class="sd">    * BiDict</span>
 <span class="sd">        A bidirectional dictionary.</span>
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
 
-<span class="kn">import</span> <span class="nn">importlib.resources</span> <span class="k">as</span> <span class="nn">pkg_resources</span>
-<span class="kn">import</span> <span class="nn">json</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">TextIO</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
-<span class="kn">from</span> <span class="nn">mlclient</span> <span class="kn">import</span> <span class="n">constants</span><span class="p">,</span> <span class="n">exceptions</span>
-<span class="kn">from</span> <span class="nn">mlclient</span> <span class="kn">import</span> <span class="n">resources</span> <span class="k">as</span> <span class="n">data</span>
-<span class="kn">from</span> <span class="nn">mlclient.exceptions</span> <span class="kn">import</span> <span class="n">ResourceNotFoundError</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">importlib.resources</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pkg_resources</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">TextIO</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">mlclient</span><span class="w"> </span><span class="kn">import</span> <span class="n">constants</span><span class="p">,</span> <span class="n">exceptions</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mlclient</span><span class="w"> </span><span class="kn">import</span> <span class="n">resources</span> <span class="k">as</span> <span class="n">data</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mlclient.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">ResourceNotFoundError</span>
 
 
-<div class="viewcode-block" id="get_accept_header_for_format"><a class="viewcode-back" href="../../api/mlclient/mlclient.html#mlclient.utils.get_accept_header_for_format">[docs]</a><span class="k">def</span> <span class="nf">get_accept_header_for_format</span><span class="p">(</span>
+<div class="viewcode-block" id="get_accept_header_for_format">
+<a class="viewcode-back" href="../../api/mlclient/mlclient.html#mlclient.utils.get_accept_header_for_format">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_accept_header_for_format</span><span class="p">(</span>
     <span class="n">data_format</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return an Accept header for data format.</span>
@@ -137,7 +141,10 @@
     <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">UnsupportedFormatError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="get_content_type_header_for_data"><a class="viewcode-back" href="../../api/mlclient/mlclient.html#mlclient.utils.get_content_type_header_for_data">[docs]</a><span class="k">def</span> <span class="nf">get_content_type_header_for_data</span><span class="p">(</span>
+
+<div class="viewcode-block" id="get_content_type_header_for_data">
+<a class="viewcode-back" href="../../api/mlclient/mlclient.html#mlclient.utils.get_content_type_header_for_data">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_content_type_header_for_data</span><span class="p">(</span>
     <span class="n">content</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return a Content-Type header for data provided.</span>
@@ -162,7 +169,10 @@
         <span class="k">return</span> <span class="n">constants</span><span class="o">.</span><span class="n">HEADER_JSON</span></div>
 
 
-<div class="viewcode-block" id="get_resource"><a class="viewcode-back" href="../../api/mlclient/mlclient.html#mlclient.utils.get_resource">[docs]</a><span class="k">def</span> <span class="nf">get_resource</span><span class="p">(</span>
+
+<div class="viewcode-block" id="get_resource">
+<a class="viewcode-back" href="../../api/mlclient/mlclient.html#mlclient.utils.get_resource">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_resource</span><span class="p">(</span>
     <span class="n">resource_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TextIO</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return an MLClient resource.</span>
@@ -188,16 +198,19 @@
     <span class="k">try</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">pkg_resources</span><span class="o">.</span><span class="n">open_text</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">resource_name</span><span class="p">)</span>
     <span class="k">except</span> <span class="ne">FileNotFoundError</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">ResourceNotFoundError</span><span class="p">(</span><span class="n">resource_name</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">FileNotFoundError</span></div>
+        <span class="k">raise</span> <span class="n">ResourceNotFoundError</span><span class="p">(</span><span class="n">resource_name</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">FileNotFoundError</span></div>
 
 
-<div class="viewcode-block" id="BiDict"><a class="viewcode-back" href="../../api/mlclient/mlclient.html#mlclient.utils.BiDict">[docs]</a><span class="k">class</span> <span class="nc">BiDict</span><span class="p">:</span>
+
+<div class="viewcode-block" id="BiDict">
+<a class="viewcode-back" href="../../api/mlclient/mlclient.html#mlclient.utils.BiDict">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">BiDict</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;A bidirectional dictionary.</span>
 
 <span class="sd">    This dict allows you to find a corresponding value by key in two directions.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">input_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
     <span class="p">):</span>
@@ -211,7 +224,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_origin</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">input_dict</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_inverse</span> <span class="o">=</span> <span class="p">{</span><span class="n">value</span><span class="p">:</span> <span class="n">key</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">input_dict</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
 
-<div class="viewcode-block" id="BiDict.get"><a class="viewcode-back" href="../../api/mlclient/mlclient.html#mlclient.utils.BiDict.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span>
+<div class="viewcode-block" id="BiDict.get">
+<a class="viewcode-back" href="../../api/mlclient/mlclient.html#mlclient.utils.BiDict.get">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">key</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
         <span class="n">default</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -230,7 +245,9 @@
 <span class="sd">        Any</span>
 <span class="sd">            A corresponding value from the dictionary</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_origin</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_inverse</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">default</span><span class="p">))</span></div></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_origin</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_inverse</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">default</span><span class="p">))</span></div>
+</div>
+
 </pre></div>
 
            </div>

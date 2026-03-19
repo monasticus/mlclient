@@ -1,30 +1,20 @@
 """The REST Client module.
 
 It exports the RestClient class for calling MarkLogic REST endpoints
-via RestCall objects and organized API groups.
+via RestCall objects.
 """
 
 from __future__ import annotations
 
-from functools import cached_property
-
 from httpx import Response
 
-from mlclient.api.databases import DatabasesApi
-from mlclient.api.documents import DocumentsApi
-from mlclient.api.eval import EvalApi
-from mlclient.api.forests import ForestsApi
-from mlclient.api.logs import LogsApi
-from mlclient.api.roles import RolesApi
-from mlclient.api.servers import ServersApi
-from mlclient.api.users import UsersApi
 from mlclient.calls import RestCall
 
 from .http_client import HttpClient
 
 
 class RestClient:
-    """Mid-level client providing call() and endpoint-grouped API access.
+    """Mid-level client providing call() for RestCall objects.
 
     Attributes
     ----------
@@ -60,43 +50,3 @@ class RestClient:
             headers=call_.headers,
             body=call_.body,
         )
-
-    @cached_property
-    def databases(self) -> DatabasesApi:
-        """Return the databases API group."""
-        return DatabasesApi(self)
-
-    @cached_property
-    def documents(self) -> DocumentsApi:
-        """Return the documents API group."""
-        return DocumentsApi(self)
-
-    @cached_property
-    def eval(self) -> EvalApi:
-        """Return the eval API group."""
-        return EvalApi(self)
-
-    @cached_property
-    def forests(self) -> ForestsApi:
-        """Return the forests API group."""
-        return ForestsApi(self)
-
-    @cached_property
-    def logs(self) -> LogsApi:
-        """Return the logs API group."""
-        return LogsApi(self)
-
-    @cached_property
-    def roles(self) -> RolesApi:
-        """Return the roles API group."""
-        return RolesApi(self)
-
-    @cached_property
-    def servers(self) -> ServersApi:
-        """Return the servers API group."""
-        return ServersApi(self)
-
-    @cached_property
-    def users(self) -> UsersApi:
-        """Return the users API group."""
-        return UsersApi(self)

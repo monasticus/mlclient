@@ -49,7 +49,7 @@ Low-level (raw HTTP)::
    --6a5df7d535c71968--
 
 
-Mid-level (REST API groups)::
+Mid-level REST API (/v1/*)::
 
    >>> from mlclient import MLClient
    >>> config = {
@@ -70,6 +70,38 @@ Mid-level (REST API groups)::
 
    App-Services
    --6a5df7d535c71968--
+
+
+Response parsing::
+
+   >>> from mlclient import MLClient, MLResponseParser
+   >>> config = {
+   ...     "host": "localhost",
+   ...     "port": 8002,
+   ...     "username": "admin",
+   ...     "password": "admin",
+   ... }
+   >>> with MLClient(**config) as ml:
+   ...     resp = ml.rest.eval.post(
+   ...         xquery="xdmp:database() => xdmp:database-name()",
+   ...     )
+   ...     parsed = MLResponseParser.parse(resp)
+   ...     print(parsed)
+   ...
+   App-Services
+
+
+Mid-level Management API (/manage/v2/*)::
+
+   >>> from mlclient import MLClient
+   >>> config = {
+   ...     "host": "localhost",
+   ...     "port": 8002,
+   ...     "username": "admin",
+   ...     "password": "admin",
+   ... }
+   >>> with MLClient(**config) as ml:
+   ...     resp = ml.manage.databases.get_list()
 
 
 High-level (services)::

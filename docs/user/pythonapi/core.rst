@@ -790,15 +790,15 @@ or to handle the responses yourself.
 ====================================  =======================================================================================================================================================
 Layer                                 Description
 ====================================  =======================================================================================================================================================
-:class:`~mlclient.MLClient`           Main entry point with layered access (``.http``, ``.rest``, ``.documents``, ``.eval``, ``.logs``)
+:class:`~mlclient.MLClient`           Main entry point with layered access (``.http``, ``.rest``, ``.manage``, ``.documents``, ``.eval``, ``.logs``)
 :class:`~mlclient.HttpClient`         Low-level HTTP client that accepts ML configuration and sends raw HTTP requests
-:class:`~mlclient.RestClient`         Mid-level client providing :meth:`~mlclient.RestClient.call` for :class:`~mlclient.calls.RestCall` objects and endpoint-grouped API access
+:class:`~mlclient.RestClient`         Mid-level client providing :meth:`~mlclient.RestClient.call` for :class:`~mlclient.calls.RestCall` objects
 ====================================  =======================================================================================================================================================
 
 MLClient
 ^^^^^^^^
 
-The main entry point that provides layered access to MarkLogic through ``.http``, ``.rest``, and service properties.
+The main entry point that provides layered access to MarkLogic through ``.http``, ``.rest``, ``.manage``, and service properties.
 
 Internally, the underlying ``HttpClient`` uses ``httpx``. Its default retry strategy is intentionally
 conservative: transport-level retries are enabled for idempotent methods only.

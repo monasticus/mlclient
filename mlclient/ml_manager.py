@@ -11,7 +11,7 @@ from __future__ import annotations
 import logging
 
 from mlclient import MLClient, MLConfiguration
-from mlclient.clients import HttpClient
+from mlclient.clients import HttpClient, MARKLOGIC_MANAGE_API_PORT
 from mlclient.exceptions import NoRestServerConfiguredError, NotARestServerError
 
 logger = logging.getLogger(__name__)
@@ -98,7 +98,7 @@ class MLManager:
         if app_server_id is None:
             app_server_id = self._get_rest_server_id(app_server_id)
         app_server_config = self.config.provide_config(app_server_id)
-        return MLClient(**app_server_config)
+        return MLClient(**app_server_config, manage_port=MARKLOGIC_MANAGE_API_PORT)
 
     def get_http_client(
         self,

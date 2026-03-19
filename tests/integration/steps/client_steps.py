@@ -78,7 +78,7 @@ def get_logs(
             )
     params["filename"] = (f"{client.port}_{logs_type.capitalize()}Log.txt",)
     params["data_format"] = "json"
-    return client.rest.logs.get(**params)
+    return client.manage.logs.get(**params)
 
 
 @then("I close the connection")

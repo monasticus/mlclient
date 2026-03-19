@@ -140,7 +140,7 @@ class TestDatabasesManagement:
         cls,
         client: MLClient,
     ) -> Response:
-        resp = client.rest.databases.get_list(data_format="json")
+        resp = client.manage.databases.get_list(data_format="json")
         assert resp.status_code == httpx.codes.OK
 
         return resp
@@ -152,7 +152,7 @@ class TestDatabasesManagement:
         database: str,
         view: str,
     ) -> Response:
-        resp = client.rest.databases.get(
+        resp = client.manage.databases.get(
             database=database, data_format="json", view=view,
         )
         assert resp.status_code == httpx.codes.OK
@@ -165,7 +165,7 @@ class TestDatabasesManagement:
         client: MLClient,
         database: str,
     ) -> Response:
-        resp = client.rest.databases.get_properties(
+        resp = client.manage.databases.get_properties(
             database=database, data_format="json",
         )
         assert resp.status_code == httpx.codes.OK
@@ -179,7 +179,7 @@ class TestDatabasesManagement:
         database: str,
         body: dict,
     ) -> Response:
-        resp = client.rest.databases.put_properties(
+        resp = client.manage.databases.put_properties(
             database=database,
             body=body,
         )
@@ -192,7 +192,7 @@ class TestDatabasesManagement:
         cls,
         client: MLClient,
     ):
-        resp = client.rest.databases.create(cls.TEST_DATABASE_CONFIG)
+        resp = client.manage.databases.create(cls.TEST_DATABASE_CONFIG)
         assert resp.status_code == httpx.codes.CREATED
 
     @classmethod
@@ -200,7 +200,7 @@ class TestDatabasesManagement:
         cls,
         client: MLClient,
     ):
-        resp = client.rest.databases.delete(cls.TEST_DATABASE_CONFIG["database-name"])
+        resp = client.manage.databases.delete(cls.TEST_DATABASE_CONFIG["database-name"])
         assert resp.status_code == httpx.codes.NO_CONTENT
 
     @classmethod
@@ -208,7 +208,7 @@ class TestDatabasesManagement:
         cls,
         client: MLClient,
     ):
-        resp = client.rest.databases.post(
+        resp = client.manage.databases.post(
             database=cls.TEST_DATABASE_CONFIG["database-name"],
             body={"operation": "clear-database"},
         )
@@ -331,7 +331,7 @@ class TestServersManagement:
         cls,
         client: MLClient,
     ) -> Response:
-        resp = client.rest.servers.get_list(data_format="json")
+        resp = client.manage.servers.get_list(data_format="json")
         assert resp.status_code == httpx.codes.OK
 
         return resp
@@ -343,7 +343,7 @@ class TestServersManagement:
         server: str,
         view: str,
     ) -> Response:
-        resp = client.rest.servers.get(
+        resp = client.manage.servers.get(
             server=server,
             group_id="Default",
             data_format="json",
@@ -359,7 +359,7 @@ class TestServersManagement:
         client: MLClient,
         server: str,
     ) -> Response:
-        resp = client.rest.servers.get_properties(
+        resp = client.manage.servers.get_properties(
             server=server,
             group_id="Default",
             data_format="json",
@@ -375,7 +375,7 @@ class TestServersManagement:
         server: str,
         body: dict,
     ) -> Response:
-        resp = client.rest.servers.put_properties(
+        resp = client.manage.servers.put_properties(
             server=server,
             group_id="Default",
             body=body,
@@ -389,7 +389,7 @@ class TestServersManagement:
         cls,
         client: MLClient,
     ):
-        resp = client.rest.servers.create(
+        resp = client.manage.servers.create(
             group_id="Default",
             server_type="http",
             body=cls.TEST_SERVER_CONFIG,
@@ -401,7 +401,7 @@ class TestServersManagement:
         cls,
         client: MLClient,
     ):
-        resp = client.rest.servers.delete(
+        resp = client.manage.servers.delete(
             server=cls.TEST_SERVER_CONFIG["server-name"],
             group_id="Default",
         )
@@ -523,7 +523,7 @@ class TestForestsManagement:
         cls,
         client: MLClient,
     ) -> Response:
-        resp = client.rest.forests.get_list(data_format="json")
+        resp = client.manage.forests.get_list(data_format="json")
         assert resp.status_code == httpx.codes.OK
 
         return resp
@@ -535,7 +535,7 @@ class TestForestsManagement:
         forest: str,
         view: str,
     ) -> Response:
-        resp = client.rest.forests.get(forest=forest, data_format="json", view=view)
+        resp = client.manage.forests.get(forest=forest, data_format="json", view=view)
         assert resp.status_code == httpx.codes.OK
 
         return resp
@@ -546,7 +546,7 @@ class TestForestsManagement:
         client: MLClient,
         forest: str,
     ) -> Response:
-        resp = client.rest.forests.get_properties(forest=forest, data_format="json")
+        resp = client.manage.forests.get_properties(forest=forest, data_format="json")
         assert resp.status_code == httpx.codes.OK
 
         return resp
@@ -558,7 +558,7 @@ class TestForestsManagement:
         forest: str,
         body: dict,
     ) -> Response:
-        resp = client.rest.forests.put_properties(
+        resp = client.manage.forests.put_properties(
             forest=forest,
             body=body,
         )
@@ -571,7 +571,7 @@ class TestForestsManagement:
         cls,
         client: MLClient,
     ):
-        resp = client.rest.forests.create(cls.TEST_FOREST_CONFIG)
+        resp = client.manage.forests.create(cls.TEST_FOREST_CONFIG)
         assert resp.status_code == httpx.codes.CREATED
 
     @classmethod
@@ -579,7 +579,7 @@ class TestForestsManagement:
         cls,
         client: MLClient,
     ):
-        resp = client.rest.forests.delete(
+        resp = client.manage.forests.delete(
             cls.TEST_FOREST_CONFIG["forest-name"],
             level="full",
         )
@@ -590,7 +590,7 @@ class TestForestsManagement:
         cls,
         client: MLClient,
     ):
-        resp = client.rest.forests.post(
+        resp = client.manage.forests.post(
             forest=cls.TEST_FOREST_CONFIG["forest-name"],
             body={"state": "clear"},
         )
@@ -601,7 +601,7 @@ class TestForestsManagement:
         cls,
         client: MLClient,
     ):
-        resp = client.rest.forests.put(
+        resp = client.manage.forests.put(
             body={
                 "operation": "forest-migrate",
             },
@@ -727,7 +727,7 @@ class TestRolesManagement:
         cls,
         client: MLClient,
     ) -> Response:
-        resp = client.rest.roles.get_list(data_format="json")
+        resp = client.manage.roles.get_list(data_format="json")
         assert resp.status_code == httpx.codes.OK
 
         return resp
@@ -738,7 +738,7 @@ class TestRolesManagement:
         client: MLClient,
         role: str,
     ) -> Response:
-        resp = client.rest.roles.get(
+        resp = client.manage.roles.get(
             role=role,
             data_format="json",
         )
@@ -752,7 +752,7 @@ class TestRolesManagement:
         client: MLClient,
         role: str,
     ) -> Response:
-        resp = client.rest.roles.get_properties(
+        resp = client.manage.roles.get_properties(
             role=role,
             data_format="json",
         )
@@ -767,7 +767,7 @@ class TestRolesManagement:
         role: str,
         body: dict,
     ) -> Response:
-        resp = client.rest.roles.put_properties(
+        resp = client.manage.roles.put_properties(
             role=role,
             body=body,
         )
@@ -780,7 +780,7 @@ class TestRolesManagement:
         cls,
         client: MLClient,
     ):
-        resp = client.rest.roles.create(
+        resp = client.manage.roles.create(
             body=cls.TEST_ROLE_CONFIG,
         )
         assert resp.status_code == httpx.codes.CREATED
@@ -790,7 +790,7 @@ class TestRolesManagement:
         cls,
         client: MLClient,
     ):
-        resp = client.rest.roles.delete(
+        resp = client.manage.roles.delete(
             role=cls.TEST_ROLE_CONFIG["role-name"],
         )
         assert resp.status_code == httpx.codes.NO_CONTENT
@@ -907,7 +907,7 @@ class TestUsersManagement:
         cls,
         client: MLClient,
     ) -> Response:
-        resp = client.rest.users.get_list(data_format="json")
+        resp = client.manage.users.get_list(data_format="json")
         assert resp.status_code == httpx.codes.OK
 
         return resp
@@ -918,7 +918,7 @@ class TestUsersManagement:
         client: MLClient,
         user: str,
     ) -> Response:
-        resp = client.rest.users.get(
+        resp = client.manage.users.get(
             user=user,
             data_format="json",
         )
@@ -932,7 +932,7 @@ class TestUsersManagement:
         client: MLClient,
         user: str,
     ) -> Response:
-        resp = client.rest.users.get_properties(
+        resp = client.manage.users.get_properties(
             user=user,
             data_format="json",
         )
@@ -947,7 +947,7 @@ class TestUsersManagement:
         user: str,
         body: dict,
     ) -> Response:
-        resp = client.rest.users.put_properties(
+        resp = client.manage.users.put_properties(
             user=user,
             body=body,
         )
@@ -960,7 +960,7 @@ class TestUsersManagement:
         cls,
         client: MLClient,
     ):
-        resp = client.rest.users.create(
+        resp = client.manage.users.create(
             body=cls.TEST_USER_CONFIG,
         )
         assert resp.status_code == httpx.codes.CREATED
@@ -970,7 +970,7 @@ class TestUsersManagement:
         cls,
         client: MLClient,
     ):
-        resp = client.rest.users.delete(
+        resp = client.manage.users.delete(
             user=cls.TEST_USER_CONFIG["user-name"],
         )
         assert resp.status_code == httpx.codes.NO_CONTENT

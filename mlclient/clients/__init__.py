@@ -5,13 +5,13 @@ This package contains the client hierarchy for MarkLogic interaction.
 Exports:
     * MLClient - main entry point (composition with .http, .rest, etc.)
     * HttpClient - raw HTTP client
-    * RestClient - mid-level REST client with endpoint groups
+    * RestClient - mid-level REST client with call()
 
 Examples
 --------
 >>> from mlclient.clients import MLClient
 >>> with MLClient() as ml:
-...     resp = ml.rest.databases.get_list()
+...     resp = ml.manage.databases.get_list()
 """
 
 from .http_client import (

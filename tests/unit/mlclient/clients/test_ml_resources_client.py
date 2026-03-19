@@ -63,7 +63,7 @@ def test_get_logs():
     ml_mocker.mock_get()
 
     with MLClient() as client:
-        resp = client.rest.logs.get(filename="ErrorLog.txt", data_format="json")
+        resp = client.manage.logs.get(filename="ErrorLog.txt", data_format="json")
 
     assert resp.status_code == httpx.codes.OK
     assert "logfile" in resp.json()
@@ -85,7 +85,7 @@ def test_get_databases():
     ml_mocker.mock_get()
 
     with MLClient() as client:
-        resp = client.rest.databases.get_list(data_format="json")
+        resp = client.manage.databases.get_list(data_format="json")
 
     expected_uri = "/manage/v2/databases?view=default"
     assert resp.status_code == httpx.codes.OK
@@ -108,7 +108,7 @@ def test_post_databases():
     ml_mocker.mock_post()
 
     with MLClient() as client:
-        resp = client.rest.databases.create(body=body)
+        resp = client.manage.databases.create(body=body)
 
     assert resp.status_code == httpx.codes.BAD_REQUEST
     assert (
@@ -133,7 +133,7 @@ def test_get_database():
     ml_mocker.mock_get()
 
     with MLClient() as client:
-        resp = client.rest.databases.get(database="Documents", data_format="json")
+        resp = client.manage.databases.get(database="Documents", data_format="json")
 
     expected_uri = "/manage/v2/databases/Documents?view=default"
     assert resp.status_code == httpx.codes.OK
@@ -156,7 +156,7 @@ def test_post_database():
     ml_mocker.mock_post()
 
     with MLClient() as client:
-        resp = client.rest.databases.post(
+        resp = client.manage.databases.post(
             database="Documents",
             body={"operation": "clear-database"},
         )
@@ -174,7 +174,7 @@ def test_delete_database():
     ml_mocker.mock_delete()
 
     with MLClient() as client:
-        resp = client.rest.databases.delete(database="custom-db")
+        resp = client.manage.databases.delete(database="custom-db")
 
     assert resp.status_code == httpx.codes.NO_CONTENT
     assert not resp.text
@@ -197,7 +197,7 @@ def test_get_database_properties():
     ml_mocker.mock_get()
 
     with MLClient() as client:
-        resp = client.rest.databases.get_properties(
+        resp = client.manage.databases.get_properties(
             database="Documents", data_format="json",
         )
 
@@ -223,7 +223,7 @@ def test_put_database_properties():
     ml_mocker.mock_put()
 
     with MLClient() as client:
-        resp = client.rest.databases.put_properties(
+        resp = client.manage.databases.put_properties(
             database="non-existing-db",
             body={"database-name": "custom-db"},
         )
@@ -248,7 +248,7 @@ def test_get_servers():
     ml_mocker.mock_get()
 
     with MLClient() as client:
-        resp = client.rest.servers.get_list(data_format="json")
+        resp = client.manage.servers.get_list(data_format="json")
 
     expected_uri = "/manage/v2/servers?view=default"
     assert resp.status_code == httpx.codes.OK
@@ -271,7 +271,7 @@ def test_post_servers():
     ml_mocker.mock_post()
 
     with MLClient() as client:
-        resp = client.rest.servers.create(
+        resp = client.manage.servers.create(
             group_id="Default",
             server_type="http",
             body='<http-server-properties xmlns="http://marklogic.com/manage" />',
@@ -300,7 +300,7 @@ def test_get_server():
     ml_mocker.mock_get()
 
     with MLClient() as client:
-        resp = client.rest.servers.get(
+        resp = client.manage.servers.get(
             server="App-Services",
             group_id="Default",
             data_format="json",
@@ -326,7 +326,7 @@ def test_delete_server():
     ml_mocker.mock_delete()
 
     with MLClient() as client:
-        resp = client.rest.servers.delete(
+        resp = client.manage.servers.delete(
             server="Non-existing-server",
             group_id="Non-existing-group",
         )
@@ -353,7 +353,7 @@ def test_get_server_properties():
     ml_mocker.mock_get()
 
     with MLClient() as client:
-        resp = client.rest.servers.get_properties(
+        resp = client.manage.servers.get_properties(
             server="App-Services",
             group_id="Default",
             data_format="json",
@@ -382,7 +382,7 @@ def test_put_server_properties():
     ml_mocker.mock_put()
 
     with MLClient() as client:
-        resp = client.rest.servers.put_properties(
+        resp = client.manage.servers.put_properties(
             server="non-existing-server",
             group_id="non-existing-group",
             body={"server-name": "non-existing-server"},
@@ -409,7 +409,7 @@ def test_get_forests():
     ml_mocker.mock_get()
 
     with MLClient() as client:
-        resp = client.rest.forests.get_list(data_format="json", database="Documents")
+        resp = client.manage.forests.get_list(data_format="json", database="Documents")
 
     expected_uri = "/manage/v2/forests?view=default&database-id=Documents"
     assert resp.status_code == httpx.codes.OK
@@ -432,7 +432,7 @@ def test_post_forests():
     ml_mocker.mock_post()
 
     with MLClient() as client:
-        resp = client.rest.forests.create(body=body)
+        resp = client.manage.forests.create(body=body)
 
     assert resp.status_code == httpx.codes.INTERNAL_SERVER_ERROR
 
@@ -453,7 +453,7 @@ def test_put_forests():
     ml_mocker.mock_put()
 
     with MLClient() as client:
-        resp = client.rest.forests.put(body=body)
+        resp = client.manage.forests.put(body=body)
 
     assert resp.status_code == httpx.codes.BAD_REQUEST
     assert (
@@ -479,7 +479,7 @@ def test_get_forest():
     ml_mocker.mock_get()
 
     with MLClient() as client:
-        resp = client.rest.forests.get(forest="Documents", data_format="json")
+        resp = client.manage.forests.get(forest="Documents", data_format="json")
 
     expected_uri = "/manage/v2/forests/Documents?view=default"
     assert resp.status_code == httpx.codes.OK
@@ -503,7 +503,7 @@ def test_post_forest():
     ml_mocker.mock_post()
 
     with MLClient() as client:
-        resp = client.rest.forests.post(forest="aaa", body={"state": "clear"})
+        resp = client.manage.forests.post(forest="aaa", body={"state": "clear"})
 
     assert resp.status_code == httpx.codes.NOT_FOUND
     assert "XDMP-NOSUCHFOREST" in resp.text
@@ -519,7 +519,7 @@ def test_delete_forest():
     ml_mocker.mock_delete()
 
     with MLClient() as client:
-        resp = client.rest.forests.delete(forest="aaa", level="full")
+        resp = client.manage.forests.delete(forest="aaa", level="full")
 
     assert resp.status_code == httpx.codes.NO_CONTENT
     assert not resp.text
@@ -542,7 +542,7 @@ def test_get_forest_properties():
     ml_mocker.mock_get()
 
     with MLClient() as client:
-        resp = client.rest.forests.get_properties(
+        resp = client.manage.forests.get_properties(
             forest="Documents", data_format="json",
         )
 
@@ -568,7 +568,7 @@ def test_put_forest_properties():
     ml_mocker.mock_put()
 
     with MLClient() as client:
-        resp = client.rest.forests.put_properties(
+        resp = client.manage.forests.put_properties(
             forest="non-existing-forest",
             body={"forest-name": "custom-forest"},
         )
@@ -593,7 +593,7 @@ def test_get_roles():
     ml_mocker.mock_get()
 
     with MLClient() as client:
-        resp = client.rest.roles.get_list(data_format="json")
+        resp = client.manage.roles.get_list(data_format="json")
 
     expected_uri = "/manage/v2/roles?view=default"
     assert resp.status_code == httpx.codes.OK
@@ -616,7 +616,7 @@ def test_post_roles():
     ml_mocker.mock_post()
 
     with MLClient() as client:
-        resp = client.rest.roles.create(body=body)
+        resp = client.manage.roles.create(body=body)
 
     assert resp.status_code == httpx.codes.BAD_REQUEST
     assert "Payload has errors in structure, content-type or values." in resp.text
@@ -638,7 +638,7 @@ def test_get_role():
     ml_mocker.mock_get()
 
     with MLClient() as client:
-        resp = client.rest.roles.get(role="admin", data_format="json")
+        resp = client.manage.roles.get(role="admin", data_format="json")
 
     expected_uri = "/manage/v2/roles/admin?view=default"
     assert resp.status_code == httpx.codes.OK
@@ -654,7 +654,7 @@ def test_delete_role():
     ml_mocker.mock_delete()
 
     with MLClient() as client:
-        resp = client.rest.roles.delete(role="custom-role")
+        resp = client.manage.roles.delete(role="custom-role")
 
     assert resp.status_code == httpx.codes.NO_CONTENT
     assert not resp.text
@@ -675,7 +675,7 @@ def test_get_role_properties():
     ml_mocker.mock_get()
 
     with MLClient() as client:
-        resp = client.rest.roles.get_properties(role="admin", data_format="json")
+        resp = client.manage.roles.get_properties(role="admin", data_format="json")
 
     assert resp.status_code == httpx.codes.OK
     assert resp.json()["role-name"] == "admin"
@@ -699,7 +699,7 @@ def test_put_role_properties():
     ml_mocker.mock_put()
 
     with MLClient() as client:
-        resp = client.rest.roles.put_properties(
+        resp = client.manage.roles.put_properties(
             role="non-existing-role",
             body={"role-name": "custom-db"},
         )
@@ -727,7 +727,7 @@ def test_get_users():
     ml_mocker.mock_get()
 
     with MLClient() as client:
-        resp = client.rest.users.get_list(data_format="json")
+        resp = client.manage.users.get_list(data_format="json")
 
     expected_uri = "/manage/v2/users?view=default"
     assert resp.status_code == httpx.codes.OK
@@ -750,7 +750,7 @@ def test_post_users():
     ml_mocker.mock_post()
 
     with MLClient() as client:
-        resp = client.rest.users.create(body=body)
+        resp = client.manage.users.create(body=body)
 
     assert resp.status_code == httpx.codes.BAD_REQUEST
     assert "Payload has errors in structure, content-type or values." in resp.text
@@ -772,7 +772,7 @@ def test_get_user():
     ml_mocker.mock_get()
 
     with MLClient() as client:
-        resp = client.rest.users.get(user="admin", data_format="json")
+        resp = client.manage.users.get(user="admin", data_format="json")
 
     expected_uri = "/manage/v2/users/admin?view=default"
     assert resp.status_code == httpx.codes.OK
@@ -793,7 +793,7 @@ def test_delete_user():
     ml_mocker.mock_delete()
 
     with MLClient() as client:
-        resp = client.rest.users.delete(user="custom-user")
+        resp = client.manage.users.delete(user="custom-user")
 
     assert resp.status_code == httpx.codes.NOT_FOUND
     assert "User does not exist: custom-user" in resp.text
@@ -814,7 +814,7 @@ def test_get_user_properties():
     ml_mocker.mock_get()
 
     with MLClient() as client:
-        resp = client.rest.users.get_properties(user="admin", data_format="json")
+        resp = client.manage.users.get_properties(user="admin", data_format="json")
 
     assert resp.status_code == httpx.codes.OK
     assert resp.json()["user-name"] == "admin"
@@ -838,7 +838,7 @@ def test_put_user_properties():
     ml_mocker.mock_put()
 
     with MLClient() as client:
-        resp = client.rest.users.put_properties(
+        resp = client.manage.users.put_properties(
             user="non-existing-user",
             body={"user-name": "custom-db"},
         )

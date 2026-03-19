@@ -8,7 +8,7 @@ This package exports the following classes:
     * HttpClient
         A low-level class used to send HTTP requests to a MarkLogic instance.
     * RestClient
-        A mid-level client providing call() and endpoint-grouped API access.
+        A mid-level client providing call() for RestCall objects.
     * MLConfiguration
         A class representing MarkLogic configuration.
     * MLManager
@@ -20,7 +20,7 @@ Examples
 --------
 >>> from mlclient import MLClient
 >>> with MLClient() as ml:
-...     resp = ml.rest.databases.get_list()
+...     resp = ml.manage.databases.get_list()
 """
 
 import logging.config

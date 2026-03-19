@@ -168,7 +168,7 @@ class ForestsPostCall(RestCall):
         Parameters
         ----------
         body : str | dict
-            A database properties in XML or JSON format.
+            A forest properties in XML or JSON format.
         wait_for_forest_to_mount : bool
             Whether to wait for the new forest to mount before sending a response
             to this request. Allowed values: true (default) or false.
@@ -227,7 +227,7 @@ class ForestsPutCall(RestCall):
         Parameters
         ----------
         body : str | dict
-            A database properties in XML or JSON format.
+            A forest properties in XML or JSON format.
         """
         self._validate_params(body)
         content_type = utils.get_content_type_header_for_data(body)

@@ -94,7 +94,7 @@ class DocumentsGetCall(RestCall):
             Names a content transformation previously installed via
             the /config/transforms service. The service applies the transformation
             to all documents prior to constructing the response.
-        transform_params : str
+        transform_params : dict
             A transform parameter names and values. For example, { "myparam": 1 }.
             Transform parameters are passed to the transform named in the transform
             parameter.
@@ -216,7 +216,7 @@ class DocumentsPostCall(RestCall):
             Names a content transformation previously installed via
             the /config/transforms service. The service applies the transformation
             to all documents prior to constructing the response.
-        transform_params : str
+        transform_params : dict
             A transform parameter names and values. For example, { "myparam": 1 }.
             Transform parameters are passed to the transform named in the transform
             parameter.

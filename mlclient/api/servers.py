@@ -77,7 +77,7 @@ class ServersApi:
         Parameters
         ----------
         body : str | dict
-            A database properties in XML or JSON format.
+            A server properties in XML or JSON format.
         group_id : str
             The id or name of the group to which the App Server belongs.
             The group must be specified by this parameter or by the group-name property
@@ -224,7 +224,7 @@ class ServersApi:
             The id or name of the group to which the App Server belongs.
             This parameter is required.
         body : str | dict
-            A database properties in XML or JSON format.
+            A server properties in XML or JSON format.
 
         Returns
         -------

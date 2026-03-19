@@ -40,13 +40,13 @@ class EvalApi:
             The query to evaluate, expressed using server-side JavaScript.
             You must include either this parameter or the xquery parameter,
             but not both.
-        variables
+        variables : dict
             External variables to pass to the query during evaluation
-        database
+        database : str
             Perform this operation on the named content database
             instead of the default content database associated with the REST API
             instance. The database can be identified by name or by database id.
-        txid
+        txid : str
             The transaction identifier of the multi-statement transaction
             in which to service this request.
 

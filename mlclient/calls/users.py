@@ -79,7 +79,7 @@ class UsersGetCall(RestCall):
         Returns
         -------
         str
-            An Users call endpoint
+            A Users call endpoint
         """
         return self._ENDPOINT
 
@@ -137,7 +137,7 @@ class UsersPostCall(RestCall):
         Returns
         -------
         str
-            An Users call endpoint
+            A Users call endpoint
         """
         return self._ENDPOINT
 

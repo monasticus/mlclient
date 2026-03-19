@@ -305,7 +305,7 @@ def test_parse_with_headers_error_response_json(client):
     assert parsed_resp == RESOURCES["error-response.json"]["json"]
     assert headers == {
         "Content-Type": "application/json; charset=UTF-8",
-        "Content-Length": "230",
+        "Content-Length": "222",
     }
 
 
@@ -330,7 +330,7 @@ def test_parse_text_with_headers_error_response_json(client):
     )
     assert headers == {
         "Content-Type": "application/json; charset=UTF-8",
-        "Content-Length": "230",
+        "Content-Length": "222",
     }
 
 
@@ -355,7 +355,7 @@ def test_parse_bytes_with_headers_error_response_json(client):
     )
     assert headers == {
         "Content-Type": "application/json; charset=UTF-8",
-        "Content-Length": "230",
+        "Content-Length": "222",
     }
 
 

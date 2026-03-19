@@ -36,12 +36,11 @@ This code will work in every subdirectory of the ``migration-app`` project as it
 
 ``MLConfiguration`` class allows you to get a specific app service config::
 
-   >>> from mlclient import MLConfiguration, MLResourcesClient, MLResponseParser
+   >>> from mlclient import MLClient, MLConfiguration
    >>> ml_config = MLConfiguration.from_environment("local")
    >>> app_config = ml_config.provide_config("content")
-   >>> with MLResourcesClient(**app_config) as client:
-   ...     resp = client.eval(xquery="xdmp:database() => xdmp:database-name()")
-   ...     parsed_resp = MLResponseParser.parse(resp)
+   >>> with MLClient(**app_config) as ml:
+   ...     result = ml.eval.xquery("xdmp:database() => xdmp:database-name()")
    ...
 
 
@@ -61,11 +60,11 @@ MLManager class
 To make it easier, ``mlclient`` lib provides you a ``MLManager`` class with the highest-level API.
 The same logic as in the above example we will achieve in fewer steps::
 
-   >>> from mlclient import MLManager, MLResponseParser
+   >>> from mlclient import MLManager
    >>> ml_manager = MLManager("local")
-   >>> with ml_manager.get_resources_client("content") as client:
-   ...     resp = client.eval(xquery="xdmp:database() => xdmp:database-name()")
-   ...     parsed_resp = MLResponseParser.parse(resp)
+   >>> with ml_manager.get_client("content") as ml:
+   ...     resp = ml.rest.eval.post(xquery="xdmp:database() => xdmp:database-name()")
+   ...     parsed_resp = ml.parser.parse(resp)
    ...
 
 .. note::

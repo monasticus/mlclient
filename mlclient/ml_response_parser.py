@@ -33,7 +33,7 @@ class MLResponseParser:
 
     Examples
     --------
-    >>> from mlclient import MLClient, MLResponseParser
+    >>> from mlclient import MLClient
     >>> config = {
     ...     "host": "localhost",
     ...     "port": 8002,
@@ -44,7 +44,7 @@ class MLResponseParser:
     >>> with MLClient(**config) as ml:
     ...     resp = ml.rest.eval.post(xquery="xdmp:database() => xdmp:database-name()")
     ...     print("Raw:", resp.text)
-    ...     print("Parsed:", MLResponseParser.parse(resp))
+    ...     print("Parsed:", ml.parser.parse(resp))
     ...
     Raw:
     --6a5df7d535c71968

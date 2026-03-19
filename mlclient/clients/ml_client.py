@@ -15,6 +15,7 @@ from types import TracebackType
 from httpx import Response
 from httpx_retries import Retry
 
+from mlclient.ml_response_parser import MLResponseParser
 from mlclient.services.documents import DocumentsService
 from mlclient.services.eval import EvalService
 from mlclient.services.logs import LogsService
@@ -33,6 +34,7 @@ class MLClient:
     - ml.http.get("/endpoint")           # raw HTTP
     - ml.rest.databases.get_list()       # mid-level, returns Response
     - ml.rest.call(SomeRestCall())   # advanced: custom Call objects
+    - ml.parser.parse(resp)              # manual parsing of raw responses
     - ml.documents.read("/doc.json")     # high-level, parsed results
     - ml.eval.xquery("1+1")              # high-level, parsed results
     - ml.logs.get(log_type=...)          # high-level, parsed results
@@ -172,6 +174,11 @@ class MLClient:
     def rest(self) -> RestClient:
         """Mid-level REST API access."""
         return self._rest
+
+    @property
+    def parser(self) -> type[MLResponseParser]:
+        """Response parser for manual parsing of raw responses."""
+        return MLResponseParser
 
     @cached_property
     def documents(self) -> DocumentsService:

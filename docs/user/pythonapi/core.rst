@@ -13,31 +13,31 @@ Clients
 Overview
 --------
 
-MLClient offers two types of clients to access a MarkLogic Server: high-level and low-level.
-High-level clients are designed for specific endpoints, such as ``/v1/documents``.
+MLClient offers a layered architecture to access a MarkLogic Server: high-level services, a mid-level REST client, and a low-level HTTP client.
+High-level services are designed for specific endpoints, such as ``/v1/documents``.
 They provide a simple and intuitive API that covers all the functionality of each endpoint.
-Low-level clients are the foundation of MLClient. They use :class:`~mlclient.calls.RestCall` objects to represent the parameters of any endpoint.
-You can use low-level clients to send raw requests to the server.
-You can learn more about high-level and low-level clients in the following sections.
+The mid-level :class:`~mlclient.RestClient` uses :class:`~mlclient.calls.RestCall` objects to represent the parameters of any endpoint.
+The low-level :class:`~mlclient.HttpClient` lets you send raw HTTP requests to the server.
+You can learn more about services and clients in the following sections.
 
-High-level clients
-------------------
+High-level services
+-------------------
 
-High-level clients are designed for specific endpoints of MarkLogic Server and database.
+High-level services are designed for specific endpoints of MarkLogic Server and database.
 They allow you to manage configuration or documents in MarkLogic with ease.
-Each client ensures that you can perform all the operations in the corresponding area.
-For example, some of the high-level clients are:
+Each service ensures that you can perform all the operations in the corresponding area.
+For example, some of the high-level services are:
 
 ==========================================  ===================
-Client                                      Endpoint
+Service                                     Endpoint
 ==========================================  ===================
-:class:`~mlclient.clients.DocumentsClient`  ``/v1/documents``
-:class:`~mlclient.clients.EvalClient`       ``/v1/eval``
-:class:`~mlclient.clients.LogsClient`       ``/manage/v2/logs``
+``ml.documents``                            ``/v1/documents``
+``ml.eval``                                 ``/v1/eval``
+``ml.logs``                                 ``/manage/v2/logs``
 ==========================================  ===================
 
-DocumentsClient
-^^^^^^^^^^^^^^^
+DocumentsService
+^^^^^^^^^^^^^^^^^
 
 READ
 """"
@@ -47,10 +47,10 @@ READ
 .. code-block:: python
 
     >>> from mlclient import MLManager
-    
+
     >>> manager = MLManager("local")
-    >>> with manager.get_documents_client("app-services") as docs_client:
-    ...    doc = docs_client.read("/doc-1.xml")
+    >>> with manager.get_client("app-services") as ml:
+    ...    doc = ml.documents.read("/doc-1.xml")
 
     >>> doc
     <mlclient.structures.documents.XMLDocument object at 0x7f9200980070>
@@ -78,8 +78,8 @@ READ
     >>> from mlclient import MLManager
 
     >>> manager = MLManager("local")
-    >>> with manager.get_documents_client("app-services") as docs_client:
-    ...     doc = docs_client.read("/doc-1.xml", output_type=str)
+    >>> with manager.get_client("app-services") as ml:
+    ...     doc = ml.documents.read("/doc-1.xml", output_type=str)
 
     >>> doc
     <mlclient.structures.documents.RawStringDocument object at 0x7f9200980400>
@@ -101,8 +101,8 @@ READ
     >>> from mlclient import MLManager
 
     >>> manager = MLManager("local")
-    >>> with manager.get_documents_client("app-services") as docs_client:
-    ...     doc = docs_client.read("/doc-1.xml", output_type=bytes)
+    >>> with manager.get_client("app-services") as ml:
+    ...     doc = ml.documents.read("/doc-1.xml", output_type=bytes)
 
     >>> doc
     <mlclient.structures.documents.RawDocument object at 0x7f9200980490>
@@ -124,8 +124,8 @@ READ
     >>> from mlclient import MLManager
 
     >>> manager = MLManager("local")
-    >>> with manager.get_documents_client("app-services") as docs_client:
-    ...     doc = docs_client.read("/doc-1.xml", category=["content", "metadata"])
+    >>> with manager.get_client("app-services") as ml:
+    ...     doc = ml.documents.read("/doc-1.xml", category=["content", "metadata"])
 
     >>> doc.metadata
     <mlclient.structures.documents.Metadata object at 0x7f9200980eb0>
@@ -158,8 +158,8 @@ READ
     ...     "/doc-4.zip",
     ... ]
     >>> manager = MLManager("local")
-    >>> with manager.get_documents_client("app-services") as docs_client:
-    ...     docs = docs_client.read(uris)
+    >>> with manager.get_client("app-services") as ml:
+    ...     docs = ml.documents.read(uris)
 
     >>> len(docs)
     4
@@ -187,8 +187,8 @@ READ
     >>> from mlclient import MLManager
 
     >>> manager = MLManager("local")
-    >>> with manager.get_documents_client("app-services") as docs_client:
-    ...     doc = docs_client.read("/doc-1.xml", database="App-Services")
+    >>> with manager.get_client("app-services") as ml:
+    ...     doc = ml.documents.read("/doc-1.xml", database="App-Services")
 
     >>> doc
     <mlclient.structures.documents.XMLDocument object at 0x7f92009b4700>
@@ -211,8 +211,8 @@ CREATE / UPDATE
     <mlclient.structures.documents.JSONDocument object at 0x7f9200920f70>
 
     >>> manager = MLManager("local")
-    >>> with manager.get_documents_client("app-services") as docs_client:
-    ...     resp = docs_client.create(doc)
+    >>> with manager.get_client("app-services") as ml:
+    ...     resp = ml.documents.create(doc)
     >>> resp
     {'documents': [{'uri': '/doc-2.json', 'mime-type': 'application/json', 'category': ['metadata', 'content']}]}
 
@@ -230,8 +230,8 @@ CREATE / UPDATE
     >>> doc = DocumentFactory.build_document(uri=uri, content=content, metadata=metadata)
 
     >>> manager = MLManager("local")
-    >>> with manager.get_documents_client("app-services") as docs_client:
-    ...     resp = docs_client.create(doc)
+    >>> with manager.get_client("app-services") as ml:
+    ...     resp = ml.documents.create(doc)
     >>> resp
     {'documents': [{'uri': '/doc-2.json', 'mime-type': 'application/json', 'category': ['metadata', 'content']}]}
 
@@ -254,8 +254,8 @@ CREATE / UPDATE
     <mlclient.structures.documents.RawDocument object at 0x7f9200929430>
 
     >>> manager = MLManager("local")
-    >>> with manager.get_documents_client("app-services") as docs_client:
-    ...     resp = docs_client.create(doc)
+    >>> with manager.get_client("app-services") as ml:
+    ...     resp = ml.documents.create(doc)
     >>> resp
     {'documents': [{'uri': '/doc-1.xml', 'mime-type': 'application/xml', 'category': ['metadata', 'content']}]}
 
@@ -278,8 +278,8 @@ CREATE / UPDATE
     ... )
 
     >>> manager = MLManager("local")
-    >>> with manager.get_documents_client("app-services") as docs_client:
-    ...     resp = docs_client.create(doc)
+    >>> with manager.get_client("app-services") as ml:
+    ...     resp = ml.documents.create(doc)
     >>> resp
     {'documents': [{'uri': '/doc-1.xml', 'mime-type': 'application/xml', 'category': ['metadata', 'content']}]}
 
@@ -297,8 +297,8 @@ CREATE / UPDATE
     <mlclient.structures.documents.JSONDocument object at 0x7f9200920f70>
 
     >>> manager = MLManager("local")
-    >>> with manager.get_documents_client("app-services") as docs_client:
-    ...     resp = docs_client.create(doc, database="Documents")
+    >>> with manager.get_client("app-services") as ml:
+    ...     resp = ml.documents.create(doc, database="Documents")
     >>> resp
     {'documents': [{'uri': '/doc-2.json', 'mime-type': 'application/json', 'category': ['metadata', 'content']}]}
 
@@ -316,8 +316,8 @@ CREATE / UPDATE
     <mlclient.structures.documents.MetadataDocument object at 0x7f9200929e20>
 
     >>> manager = MLManager("local")
-    >>> with manager.get_documents_client("app-services") as docs_client:
-    ...     resp = docs_client.create(doc)
+    >>> with manager.get_client("app-services") as ml:
+    ...     resp = ml.documents.create(doc)
     >>> resp
     {'documents': [{'uri': '/doc-2.json', 'mime-type': '', 'category': ['metadata']}]}
 
@@ -328,7 +328,7 @@ CREATE / UPDATE
 
     >>> from mlclient import MLManager
     >>> from mlclient.structures import DocumentFactory, DocumentType
-    
+
     >>> uri_1 = "/doc-1.xml"
     >>> content_1 = b"<root><child>data</child></root>"
     >>> doc_1 = DocumentFactory.build_raw_document(
@@ -340,11 +340,11 @@ CREATE / UPDATE
     >>> uri_2 = "/doc-2.json"
     >>> content_2 = {"root": {"child": "data"}}
     >>> doc_2 = DocumentFactory.build_document(uri=uri_2, content=content_2)
-    
+
 
     >>> manager = MLManager("local")
-    >>> with manager.get_documents_client("app-services") as docs_client:
-    ...     resp = docs_client.create([doc_1, doc_2])
+    >>> with manager.get_client("app-services") as ml:
+    ...     resp = ml.documents.create([doc_1, doc_2])
     >>> resp
     {'documents': [{'uri': '/doc-1.xml', 'mime-type': 'application/xml', 'category': ['metadata', 'content']}, {'uri': '/doc-2.json', 'mime-type': 'application/json', 'category': ['metadata', 'content']}]}
 
@@ -355,9 +355,9 @@ CREATE / UPDATE
 
     >>> from mlclient import MLManager
     >>> from mlclient.structures import DocumentFactory, DocumentType, Metadata
-    
+
     >>> default_metadata = Metadata(collections=["some-collection"])
-    
+
     >>> uri_1 = "/doc-1.xml"
     >>> content_1 = b"<root><child>data</child></root>"
     >>> doc_1 = DocumentFactory.build_raw_document(
@@ -369,11 +369,11 @@ CREATE / UPDATE
     >>> uri_2 = "/doc-2.json"
     >>> content_2 = {"root": {"child": "data"}}
     >>> doc_2 = DocumentFactory.build_document(uri=uri_2, content=content_2)
-    
+
 
     >>> manager = MLManager("local")
-    >>> with manager.get_documents_client("app-services") as docs_client:
-    ...     resp = docs_client.create([default_metadata, doc_1, doc_2])
+    >>> with manager.get_client("app-services") as ml:
+    ...     resp = ml.documents.create([default_metadata, doc_1, doc_2])
     >>> resp
     {'documents': [{'uri': '/doc-1.xml', 'mime-type': 'application/xml', 'category': ['metadata', 'content']}, {'uri': '/doc-2.json', 'mime-type': 'application/json', 'category': ['metadata', 'content']}]}
 
@@ -386,10 +386,10 @@ DELETE
 .. code-block:: python
 
     >>> from mlclient import MLManager
-    
+
     >>> manager = MLManager("local")
-    >>> with manager.get_documents_client("app-services") as docs_client:
-    ...     docs_client.delete("/doc-1.xml")
+    >>> with manager.get_client("app-services") as ml:
+    ...     ml.documents.delete("/doc-1.xml")
 
 
 **Delete multiple documents**
@@ -397,7 +397,7 @@ DELETE
 .. code-block:: python
 
     >>> from mlclient import MLManager
-    
+
     >>> uris = [
     ...     "/doc-1.xml",
     ...     "/doc-2.json",
@@ -405,8 +405,8 @@ DELETE
     ...     "/doc-4.zip",
     ... ]
     >>> manager = MLManager("local")
-    >>> with manager.get_documents_client("app-services") as docs_client:
-    ...     docs_client.delete(uris)
+    >>> with manager.get_client("app-services") as ml:
+    ...     ml.documents.delete(uris)
 
 
 **Delete a document from a custom database**
@@ -416,8 +416,8 @@ DELETE
     >>> from mlclient import MLManager
 
     >>> manager = MLManager("local")
-    >>> with manager.get_documents_client("app-services") as docs_client:
-    ...     docs_client.delete("/doc-1.xml", database="Documents")
+    >>> with manager.get_client("app-services") as ml:
+    ...     ml.documents.delete("/doc-1.xml", database="Documents")
 
 
 **Delete document's metadata**
@@ -425,10 +425,10 @@ DELETE
 .. code-block:: python
 
     >>> from mlclient import MLManager
-    
+
     >>> manager = MLManager("local")
-    >>> with manager.get_documents_client("app-services") as docs_client:
-    ...     docs_client.delete("/doc-1.xml", category=["properties", "collections"])
+    >>> with manager.get_client("app-services") as ml:
+    ...     ml.documents.delete("/doc-1.xml", category=["properties", "collections"])
 
 
 **Delete a temporal document**
@@ -436,10 +436,10 @@ DELETE
 .. code-block:: python
 
     >>> from mlclient import MLManager
-    
+
     >>> manager = MLManager("local")
-    >>> with manager.get_documents_client("app-services") as docs_client:
-    ...     docs_client.delete("/doc-1.xml", temporal_collection="temporal-collection")
+    >>> with manager.get_client("app-services") as ml:
+    ...     ml.documents.delete("/doc-1.xml", temporal_collection="temporal-collection")
 
 
 **Wipe a temporal document**
@@ -447,18 +447,18 @@ DELETE
 .. code-block:: python
 
     >>> from mlclient import MLManager
-    
+
     >>> manager = MLManager("local")
-    >>> with manager.get_documents_client("app-services") as docs_client:
-    ...     docs_client.delete(
+    >>> with manager.get_client("app-services") as ml:
+    ...     ml.documents.delete(
     ...        "/doc-1.xml",
     ...        temporal_collection="temporal-collection",
     ...        wipe_temporal=True,
     ... )
 
 
-EvalClient
-^^^^^^^^^^
+EvalService
+^^^^^^^^^^^
 
 **Evaluate code from a file**
 
@@ -467,9 +467,9 @@ EvalClient
     >>> from mlclient import MLManager
 
     >>> manager = MLManager("local")
-    >>> with manager.get_eval_client() as client:
-    ...     result = client.eval("./xqy-code-to-eval.xqy)
-    ...     result = client.eval("./js-code-to-eval.js)
+    >>> with manager.get_client() as ml:
+    ...     result = ml.eval.file("./xqy-code-to-eval.xqy")
+    ...     result = ml.eval.file("./js-code-to-eval.js")
 
 
 **Evaluate raw xquery code**
@@ -478,8 +478,8 @@ EvalClient
 
     >>> from mlclient import MLManager
 
-    >>> with MLManager("local").get_eval_client() as client:
-    ...     result = client.eval(xq="fn:current-dateTime()")
+    >>> with MLManager("local").get_client() as ml:
+    ...     result = ml.eval.xquery("fn:current-dateTime()")
     >>> result
     datetime.datetime(2024, 2, 22, 11, 38, 32, 709484, tzinfo=datetime.timezone.utc)
 
@@ -490,8 +490,8 @@ EvalClient
 
     >>> from mlclient import MLManager
 
-    >>> with MLManager("local").get_eval_client() as client:
-    ...     result = client.eval(js="fn.currentDateTime()")
+    >>> with MLManager("local").get_client() as ml:
+    ...     result = ml.eval.javascript("fn.currentDateTime()")
     >>> result
     datetime.datetime(2024, 2, 22, 11, 39, 22, 264102, tzinfo=datetime.timezone.utc)
 
@@ -507,9 +507,9 @@ EvalClient
     ...
     ... fn:current-dateTime() - xs:dayTimeDuration("P" || $DAYS || "D")'''
 
-    >>> with MLManager("local").get_eval_client() as client:
-    ...     result = client.eval(
-    ...         xq=xq,
+    >>> with MLManager("local").get_client() as ml:
+    ...     result = ml.eval.xquery(
+    ...         xq,
     ...         variables={"DAYS": 5},
     ...     )
     >>> result
@@ -525,9 +525,9 @@ EvalClient
     ...
     ... fn:current-dateTime() - xs:dayTimeDuration("P" || $DAYS || "D")'''
 
-    >>> with MLManager("local").get_eval_client() as client:
-    ...     result = client.eval(
-    ...         xq=xq,
+    >>> with MLManager("local").get_client() as ml:
+    ...     result = ml.eval.xquery(
+    ...         xq,
     ...         DAYS=5,
     ...     )
     >>> result
@@ -545,9 +545,9 @@ EvalClient
     ...
     ... fn:current-dateTime() - xs:dayTimeDuration("P" || $local:DAYS || "D")'''
 
-    >>> with MLManager("local").get_eval_client() as client:
-    ...     result = client.eval(
-    ...         xq=xq,
+    >>> with MLManager("local").get_client() as ml:
+    ...     result = ml.eval.xquery(
+    ...         xq,
     ...         variables={
     ...             "{http://www.w3.org/2005/xquery-local-functions}DAYS": 5,
     ...         },
@@ -562,9 +562,9 @@ EvalClient
 
     >>> from mlclient import MLManager
 
-    >>> with MLManager("local").get_eval_client() as client:
-    ...     result = client.eval(
-    ...         xq="xdmp:database() => xdmp:database-name()",
+    >>> with MLManager("local").get_client() as ml:
+    ...     result = ml.eval.xquery(
+    ...         "xdmp:database() => xdmp:database-name()",
     ...         database="Documents",
     ...     )
     >>> result
@@ -577,8 +577,8 @@ EvalClient
 
     >>> from mlclient import MLManager
 
-    >>> with MLManager("local").get_eval_client() as client:
-    ...     result = client.eval(xq="fn:current-dateTime()", output_type=str)
+    >>> with MLManager("local").get_client() as ml:
+    ...     result = ml.eval.xquery("fn:current-dateTime()", output_type=str)
     >>> result
     '2024-02-22T12:24:40.362014Z'
 
@@ -587,14 +587,14 @@ EvalClient
 
     >>> from mlclient import MLManager
 
-    >>> with MLManager("local").get_eval_client() as client:
-    ...     result = client.eval(xq="fn:current-dateTime()", output_type=bytes)
+    >>> with MLManager("local").get_client() as ml:
+    ...     result = ml.eval.xquery("fn:current-dateTime()", output_type=bytes)
     >>> result
     b'2024-02-22T12:24:53.677793Z'
 
 
-LogsClient
-^^^^^^^^^^
+LogsService
+^^^^^^^^^^^
 
 Get all logs
 """"""""""""
@@ -605,8 +605,8 @@ Get all logs
 
     >>> from mlclient import MLManager
 
-    >>> with MLManager("local").get_logs_client() as client:
-    ...     logs = client.get_logs(app_server=8002)
+    >>> with MLManager("local").get_client() as ml:
+    ...     logs = ml.logs.get(app_server=8002)
     >>> list(logs)[0]
     {'timestamp': '2024-01-09T13:30:51.187Z', 'level': 'error', 'message': 'Test Log 1'}
 
@@ -614,10 +614,10 @@ Get all logs
 .. code-block:: python
 
     >>> from mlclient import MLManager
-    >>> from mlclient.clients import LogType
+    >>> from mlclient.services import LogType
 
-    >>> with MLManager("local").get_logs_client() as client:
-    ...     logs = client.get_logs(app_server=8002, log_type=LogType.ERROR)
+    >>> with MLManager("local").get_client() as ml:
+    ...     logs = ml.logs.get(app_server=8002, log_type=LogType.ERROR)
     >>> list(logs)[0]
     {'timestamp': '2024-01-09T13:30:51.187Z', 'level': 'error', 'message': 'Test Log 1'}
 
@@ -627,10 +627,10 @@ Get all logs
 .. code-block:: python
 
     >>> from mlclient import MLManager
-    >>> from mlclient.clients import LogType
+    >>> from mlclient.services import LogType
 
-    >>> with MLManager("local").get_logs_client() as client:
-    ...     logs = client.get_logs(app_server=8002, log_type=LogType.ACCESS)
+    >>> with MLManager("local").get_client() as ml:
+    ...     logs = ml.logs.get(app_server=8002, log_type=LogType.ACCESS)
     >>> list(logs)[0]
     {'message': '172.17.0.1 - - [22/Feb/2024:12:13:18 +0000] "POST /v1/eval HTTP/1.1" 401 209 - "python-httpx/0.27.0"'}
 
@@ -641,10 +641,10 @@ Get all logs
 .. code-block:: python
 
     >>> from mlclient import MLManager
-    >>> from mlclient.clients import LogType
+    >>> from mlclient.services import LogType
 
-    >>> with MLManager("local").get_logs_client() as client:
-    ...     logs = client.get_logs(app_server=8002, log_type=LogType.REQUEST)
+    >>> with MLManager("local").get_client() as ml:
+    ...     logs = ml.logs.get(app_server=8002, log_type=LogType.REQUEST)
     >>> list(logs)[0]
     {'message': '{"time":"2024-02-22T12:38:27Z", "url":"/manage/v2/logs?format=json", "user":"admin", "elapsedTime":1.801654, "requests":1, "valueCacheHits":5743, "valueCacheMisses":349701, "regexpCacheHits":5278, "regexpCacheMisses":10, "fsProgramCacheMisses":1, "fsMainModuleSequenceCacheMisses":1, "fsLibraryModuleCacheMisses":226, "compileTime":0.757087, "runTime":1.043248}'}
 
@@ -655,8 +655,8 @@ Get all logs
 
     >>> from mlclient import MLManager
 
-    >>> with MLManager("local").get_logs_client() as client:
-    ...     logs = client.get_logs()
+    >>> with MLManager("local").get_client() as ml:
+    ...     logs = ml.logs.get()
 
 
 *TaskServer_ErrorLog.txt*
@@ -665,16 +665,16 @@ Get all logs
 
     >>> from mlclient import MLManager
 
-    >>> with MLManager("local").get_logs_client() as client:
-    ...     logs = client.get_logs(app_server="TaskServer")
+    >>> with MLManager("local").get_client() as ml:
+    ...     logs = ml.logs.get(app_server="TaskServer")
 
 
 .. code-block:: python
 
     >>> from mlclient import MLManager
 
-    >>> with MLManager("local").get_logs_client() as client:
-    ...     logs = client.get_logs(app_server=0)
+    >>> with MLManager("local").get_client() as ml:
+    ...     logs = ml.logs.get(app_server=0)
 
 
 Get limited logs
@@ -691,24 +691,24 @@ Get limited logs
 
     >>> from mlclient import MLManager
 
-    >>> with MLManager("local").get_logs_client() as client:
-    ...     logs = client.get_logs(app_server=8002, start_time="10:00")
+    >>> with MLManager("local").get_client() as ml:
+    ...     logs = ml.logs.get(app_server=8002, start_time="10:00")
 
 
 .. code-block:: python
 
     >>> from mlclient import MLManager
 
-    >>> with MLManager("local").get_logs_client() as client:
-    ...     logs = client.get_logs(app_server=8002, end_time="12:00")
+    >>> with MLManager("local").get_client() as ml:
+    ...     logs = ml.logs.get(app_server=8002, end_time="12:00")
 
 
 .. code-block:: python
 
     >>> from mlclient import MLManager
 
-    >>> with MLManager("local").get_logs_client() as client:
-    ...     logs = client.get_logs(
+    >>> with MLManager("local").get_client() as ml:
+    ...     logs = ml.logs.get(
     ...         app_server=8002,
     ...         start_time="10:00",
     ...         end_time="12:00",
@@ -719,8 +719,8 @@ Get limited logs
 
     >>> from mlclient import MLManager
 
-    >>> with MLManager("local").get_logs_client() as client:
-    ...     logs = client.get_logs(
+    >>> with MLManager("local").get_client() as ml:
+    ...     logs = ml.logs.get(
     ...         app_server=8002,
     ...         start_time="2024-02-01",
     ...         end_time="2024-02-03",
@@ -731,8 +731,8 @@ Get limited logs
 
     >>> from mlclient import MLManager
 
-    >>> with MLManager("local").get_logs_client() as client:
-    ...     logs = client.get_logs(
+    >>> with MLManager("local").get_client() as ml:
+    ...     logs = ml.logs.get(
     ...         app_server=8002,
     ...         start_time="2024-02-01 10:00",
     ...         end_time="2024-02-03",
@@ -745,32 +745,32 @@ Get limited logs
 
     >>> from mlclient import MLManager
 
-    >>> with MLManager("local").get_logs_client() as client:
-    ...     logs = client.get_logs(app_server=8002, regex="Forest Meters")
+    >>> with MLManager("local").get_client() as ml:
+    ...     logs = ml.logs.get(app_server=8002, regex="Forest Meters")
 
 
 .. code-block:: python
 
     >>> from mlclient import MLManager
 
-    >>> with MLManager("local").get_logs_client() as client:
-    ...     logs = client.get_logs(app_server=8002, regex="Forest M.*")
+    >>> with MLManager("local").get_client() as ml:
+    ...     logs = ml.logs.get(app_server=8002, regex="Forest M.*")
 
 
 .. code-block:: python
 
     >>> from mlclient import MLManager
 
-    >>> with MLManager("local").get_logs_client() as client:
-    ...     logs = client.get_logs(app_server=8002, regex="Memory [^1]{1,2}%")
+    >>> with MLManager("local").get_client() as ml:
+    ...     logs = ml.logs.get(app_server=8002, regex="Memory [^1]{1,2}%")
 
 
 .. code-block:: python
 
     >>> from mlclient import MLManager
 
-    >>> with MLManager("local").get_logs_client() as client:
-    ...     logs = client.get_logs(
+    >>> with MLManager("local").get_client() as ml:
+    ...     logs = ml.logs.get(
     ...         app_server=8002,
     ...         start_time="2024-02-01",
     ...         end_time="2024-02-03",
@@ -781,31 +781,31 @@ Get limited logs
 Low-level clients
 -----------------
 
-Low-level clients offer a basic HTTP client functionality that is compatible with MarkLogic Server configuration.
-They also work with :class:`~mlclient.calls.RestCall` objects, which are python representations of MarkLogic resources’ calls.
-You can use low-level clients to send customized requests that are not supported by the high-level client API,
+Low-level clients offer basic HTTP and REST functionality compatible with MarkLogic Server configuration.
+:class:`~mlclient.RestClient` works with :class:`~mlclient.calls.RestCall` objects, which are python representations of MarkLogic resources' calls.
+:class:`~mlclient.HttpClient` lets you send raw HTTP requests.
+You can use these clients to send customized requests that are not supported by the high-level service API,
 or to handle the responses yourself.
-Moreover, you can customize low-level clients to implement python api for your own resources.
 
 ====================================  =======================================================================================================================================================
-Client                                Description
+Layer                                 Description
 ====================================  =======================================================================================================================================================
-:class:`~mlclient.MLClient`           The lowest level client that accepts ML configuration and sends HTTP requests
-:class:`~mlclient.MLResourceClient`   A client that provides an additional :meth:`~mlclient.MLResourceClient.call` method that works with :class:`~mlclient.calls.RestCall` objects
-:class:`~mlclient.MLResourcesClient`  A facade client that offers methods for all :class:`~mlclient.RestCall` implementations (and thus all ML Resources endpoints)
+:class:`~mlclient.MLClient`           Main entry point with layered access (``.http``, ``.rest``, ``.documents``, ``.eval``, ``.logs``)
+:class:`~mlclient.HttpClient`         Low-level HTTP client that accepts ML configuration and sends raw HTTP requests
+:class:`~mlclient.RestClient`         Mid-level client providing :meth:`~mlclient.RestClient.call` for :class:`~mlclient.calls.RestCall` objects and endpoint-grouped API access
 ====================================  =======================================================================================================================================================
 
 MLClient
 ^^^^^^^^
 
-The lowest level client that accepts ML configuration and sends HTTP requests.
+The main entry point that provides layered access to MarkLogic through ``.http``, ``.rest``, and service properties.
 
-Internally, ``MLClient`` uses ``httpx``. Its default retry strategy is intentionally
+Internally, the underlying ``HttpClient`` uses ``httpx``. Its default retry strategy is intentionally
 conservative: transport-level retries are enabled for idempotent methods only.
 If you need a different policy, pass a custom ``retry`` strategy when initializing
 the client.
 
-MLClient also exposes the standard MarkLogic endpoint ports as public constants:
+``HttpClient`` also exposes the standard MarkLogic endpoint ports as public constants:
 
 - ``MARKLOGIC_REST_API_PORT`` = ``8000``
 - ``MARKLOGIC_ADMIN_API_PORT`` = ``8001``
@@ -825,8 +825,8 @@ The easiest way to start a connection is to initialize :class:`~mlclient.MLClien
 
     >>> from mlclient import MLClient
 
-    >>> with MLClient() as client:
-    ...     resp = client.get("/manage/v2/servers")
+    >>> with MLClient() as ml:
+    ...     resp = ml.http.get("/manage/v2/servers")
 
 
 If you would like to explicitly connect and disconnect a client, however, you can do it as below:
@@ -835,10 +835,10 @@ If you would like to explicitly connect and disconnect a client, however, you ca
 
     >>> from mlclient import MLClient
 
-    >>> client = MLClient()
-    >>> client.connect()
-    >>> resp = client.get("/manage/v2/servers")
-    >>> client.disconnect()
+    >>> ml = MLClient()
+    >>> ml.connect()
+    >>> resp = ml.http.get("/manage/v2/servers")
+    >>> ml.disconnect()
 
 
 To check if a client is connected you can use :meth:`~mlclient.MLClient.is_connected` method:
@@ -847,12 +847,12 @@ To check if a client is connected you can use :meth:`~mlclient.MLClient.is_conne
 
     >>> from mlclient import MLClient
 
-    >>> client = MLClient()
-    >>> client.connect()
-    >>> client.is_connected()
+    >>> ml = MLClient()
+    >>> ml.connect()
+    >>> ml.is_connected()
     True
-    >>> client.disconnect()
-    >>> client.is_connected()
+    >>> ml.disconnect()
+    >>> ml.is_connected()
     False
 
 
@@ -865,8 +865,8 @@ GET request
 
     >>> from mlclient import MLClient
 
-    >>> with MLClient() as client:
-    ...     resp = client.get("/manage/v2/servers")
+    >>> with MLClient() as ml:
+    ...     resp = ml.http.get("/manage/v2/servers")
 
 
 *Custom parameters and headers*
@@ -875,8 +875,8 @@ GET request
 
     >>> from mlclient import MLClient
 
-    >>> with MLClient() as client:
-    ...     resp = client.get(
+    >>> with MLClient() as ml:
+    ...     resp = ml.http.get(
     ...         "/manage/v2/servers",
     ...         params={"format": "json"},
     ...         headers={"custom-header": "custom-value"},
@@ -892,8 +892,8 @@ POST request
 
     >>> from mlclient import MLClient
 
-    >>> with MLClient() as client:
-    ...     resp = client.post(
+    >>> with MLClient() as ml:
+    ...     resp = ml.http.post(
     ...         "/manage/v2/databases",
     ...         body={"database-name": "CustomDatabase"},
     ...     )
@@ -905,8 +905,8 @@ POST request
 
     >>> from mlclient import MLClient
 
-    >>> with MLClient() as client:
-    ...     resp = client.post(
+    >>> with MLClient() as ml:
+    ...     resp = ml.http.post(
     ...         "/v1/eval",
     ...         body={"xquery": "fn:current-dateTime()"},
     ...         params={"database": "Documents"},
@@ -921,8 +921,8 @@ PUT request
 
     >>> from mlclient import MLClient
 
-    >>> with MLClient() as client:
-    ...     resp = client.put(
+    >>> with MLClient() as ml:
+    ...     resp = ml.http.put(
     ...         "/manage/v2/databases/CustomDatabase/properties",
     ...         body={"enabled": False},
     ...         headers={"Content-Type": "application/json"}
@@ -936,8 +936,8 @@ DELETE request
 
     >>> from mlclient import MLClient
 
-    >>> with MLClient() as client:
-    ...     resp = client.delete(
+    >>> with MLClient() as ml:
+    ...     resp = ml.http.delete(
     ...         "/manage/v2/databases/CustomDatabase",
     ...         params={"forest-delete": "configuration"}
     ...     )
@@ -956,7 +956,7 @@ follow-up administrative requests.
 The timestamp endpoint is host-specific, not cluster-wide. MarkLogic
 documentation explicitly notes that if an operation restarts multiple hosts,
 the caller must iterate through the returned ``host-id`` and timestamp pairs
-and check each host separately. ``MLClient.wait_for_restart_completion()``
+and check each host separately. ``MLClient.wait_for_restart()``
 does that internally: for multi-host restart responses it resolves host ids
 through ``GET /manage/v2/hosts`` and waits for all affected hosts in parallel.
 The current client host is probed immediately while the host mapping request is
@@ -965,20 +965,20 @@ available. If the current client host is one of the affected hosts, the method
 still waits for a timestamp newer than that host's own ``last-startup`` value
 before it returns.
 
-Use :meth:`~mlclient.MLClient.wait_for_restart_completion` for this check:
+Use :meth:`~mlclient.MLClient.wait_for_restart` for this check:
 
 .. code-block:: python
 
     >>> from mlclient import MLClient
 
-    >>> with MLClient() as client:
-    ...     resp = client.delete_(
+    >>> with MLClient() as ml:
+    ...     resp = ml.http.delete(
     ...         "/manage/v2/servers/TestServer",
     ...         params={"group-id": "Default"},
     ...     )
-    ...     client.wait_for_restart_completion(resp)
+    ...     ml.wait_for_restart(resp)
 
-If you call :meth:`~mlclient.MLClient.wait_for_restart_completion` without a
+If you call :meth:`~mlclient.MLClient.wait_for_restart` without a
 response, it performs a single readiness probe using a retry policy tuned for
 restart windows:
 
@@ -986,16 +986,8 @@ restart windows:
 
     >>> from mlclient import MLClient
 
-    >>> with MLClient() as client:
-    ...     client.wait_for_restart_completion()
+    >>> with MLClient() as ml:
+    ...     ml.wait_for_restart()
 
 For multi-host restart responses, the method waits for all affected hosts
 before it returns.
-
-
-MLResourceClient
-^^^^^^^^^^^^^^^^
-
-
-MLResourcesClient
-^^^^^^^^^^^^^^^^^

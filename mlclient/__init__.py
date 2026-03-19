@@ -11,7 +11,7 @@ This package exports the following classes:
         A mid-level client providing call() for RestCall objects.
     * MLConfiguration
         A class representing MarkLogic configuration.
-    * MLManager
+    * MLEnvironment
         A high-level class managing a MarkLogic instance.
     * MLResponseParser
         A MarkLogic HTTP response parser.
@@ -40,7 +40,7 @@ from .clients import (
     RestClient,
 )
 from .ml_config import MLConfiguration
-from .ml_manager import MLManager
+from .ml_environment import MLEnvironment
 from .ml_response_parser import MLResponseParser
 
 
@@ -61,7 +61,7 @@ __all__ = [
     "HttpClient",
     "MLClient",
     "MLConfiguration",
-    "MLManager",
+    "MLEnvironment",
     "MLResponseParser",
     "RestClient",
     "__version__",

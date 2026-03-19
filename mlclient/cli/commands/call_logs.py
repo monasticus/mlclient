@@ -15,7 +15,7 @@ from cleo.helpers import option
 from cleo.io.inputs.option import Option
 from cleo.io.outputs.output import Type
 
-from mlclient import MLManager
+from mlclient import MLEnvironment
 from mlclient.services import LogType
 
 
@@ -282,7 +282,7 @@ class CallLogsCommand(Command):
         """Identify app port to be used."""
         environment = self.option("environment")
         app_port = self.option("app-server")
-        manager = MLManager(environment)
+        manager = MLEnvironment(environment)
         if app_port == "0":
             app_port = "TaskServer"
         elif app_port is not None and not app_port.isnumeric():
@@ -313,5 +313,5 @@ def _get_cached_client(
     rest_server: str,
 ):
     """Get cached MLClient instance."""
-    manager = MLManager(environment)
+    manager = MLEnvironment(environment)
     return manager.get_client(rest_server)

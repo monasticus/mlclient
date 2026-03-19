@@ -8,44 +8,24 @@ of HTTP requests. Additionally, it exports the following package:
 
 This package exports the following modules:
 
-    * rest_call
+    * rest
         An abstract class representing a single request to a MarkLogic REST Resource.
-    * database_call
+    * databases
         The ML Database Resource Calls module.
-    * database_properties_call
-        The ML Database Properties Resource Calls module.
-    * databases_call
-        The ML Databases Resource Calls module.
-    * documents_call
+    * documents
         The ML Documents Resource Calls module.
-    * eval_call
+    * eval
         The ML Eval Resource Call module.
-    * forest_call
+    * forests
         The ML Forest Resource Calls module.
-    * forest_properties_call
-        The ML Forest Properties Resource Calls module.
-    * forests_call
-        The ML Forests Resource Calls module.
-    * logs_call
+    * logs
         The ML Logs Resource Call module.
-    * role_call
+    * roles
         The ML Role Resource Calls module.
-    * role_properties_call
-        The ML Role Properties Resource Calls module.
-    * roles_call
-        The ML Roles Resource Calls module.
-    * server_call
+    * servers
         The ML Server Resource Calls module.
-    * server_properties_call
-        The ML Server Properties Resource Calls module.
-    * servers_call
-        The ML Servers Resource Calls module.
-    * user_call
+    * users
         The ML User Resource Calls module.
-    * user_properties_call
-        The ML User Properties Resource Calls module.
-    * users_call
-        The ML Users Resource Calls module.
 
 This package exports the following classes:
     * RestCall
@@ -132,28 +112,53 @@ Examples
 >>> from mlclient.calls import DatabaseGetCall, EvalCall
 """
 
-from .rest_call import RestCall
-from .database_call import DatabaseDeleteCall, DatabaseGetCall, DatabasePostCall
-from .database_properties_call import (
+from .rest import RestCall
+from .databases import (
+    DatabaseDeleteCall,
+    DatabaseGetCall,
+    DatabasePostCall,
     DatabasePropertiesGetCall,
     DatabasePropertiesPutCall,
+    DatabasesGetCall,
+    DatabasesPostCall,
 )
-from .databases_call import DatabasesGetCall, DatabasesPostCall
-from .documents_call import DocumentsGetCall, DocumentsDeleteCall, DocumentsPostCall
-from .eval_call import EvalCall
-from .forest_call import ForestDeleteCall, ForestGetCall, ForestPostCall
-from .forest_properties_call import ForestPropertiesGetCall, ForestPropertiesPutCall
-from .forests_call import ForestsGetCall, ForestsPostCall, ForestsPutCall
-from .logs_call import LogsCall
-from .role_call import RoleDeleteCall, RoleGetCall
-from .role_properties_call import RolePropertiesGetCall, RolePropertiesPutCall
-from .roles_call import RolesGetCall, RolesPostCall
-from .user_call import UserDeleteCall, UserGetCall
-from .user_properties_call import UserPropertiesGetCall, UserPropertiesPutCall
-from .users_call import UsersGetCall, UsersPostCall
-from .server_call import ServerDeleteCall, ServerGetCall
-from .server_properties_call import ServerPropertiesGetCall, ServerPropertiesPutCall
-from .servers_call import ServersGetCall, ServersPostCall
+from .documents import DocumentsDeleteCall, DocumentsGetCall, DocumentsPostCall
+from .eval import EvalCall
+from .forests import (
+    ForestDeleteCall,
+    ForestGetCall,
+    ForestPostCall,
+    ForestPropertiesGetCall,
+    ForestPropertiesPutCall,
+    ForestsGetCall,
+    ForestsPostCall,
+    ForestsPutCall,
+)
+from .logs import LogsCall
+from .roles import (
+    RoleDeleteCall,
+    RoleGetCall,
+    RolePropertiesGetCall,
+    RolePropertiesPutCall,
+    RolesGetCall,
+    RolesPostCall,
+)
+from .servers import (
+    ServerDeleteCall,
+    ServerGetCall,
+    ServerPropertiesGetCall,
+    ServerPropertiesPutCall,
+    ServersGetCall,
+    ServersPostCall,
+)
+from .users import (
+    UserDeleteCall,
+    UserGetCall,
+    UserPropertiesGetCall,
+    UserPropertiesPutCall,
+    UsersGetCall,
+    UsersPostCall,
+)
 
 __all__ = [
     "DatabaseDeleteCall",

@@ -13,7 +13,7 @@ from cleo.io.inputs.argument import Argument
 from cleo.io.inputs.option import Option
 from cleo.io.outputs.output import Type
 
-from mlclient import MLManager
+from mlclient import MLEnvironment
 
 
 class CallEvalCommand(Command):
@@ -142,7 +142,7 @@ class CallEvalCommand(Command):
         environment = self.option("environment")
         rest_server = self.option("rest-server")
 
-        manager = MLManager(environment)
+        manager = MLEnvironment(environment)
         with manager.get_client(rest_server) as client:
             self.info(f"Evaluating code using REST App-Server {client.base_url}")
             return client.eval.eval(**eval_params)

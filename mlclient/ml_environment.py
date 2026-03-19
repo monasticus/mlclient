@@ -1,8 +1,8 @@
-"""The ML Manager module.
+"""The ML Environment module.
 
 This module contains a high-level API for MarkLogic management.
 It exports the following class:
-    * MLManager
+    * MLEnvironment
         A high-level class managing a MarkLogic instance.
 """
 
@@ -17,7 +17,7 @@ from mlclient.exceptions import NoRestServerConfiguredError, NotARestServerError
 logger = logging.getLogger(__name__)
 
 
-class MLManager:
+class MLEnvironment:
     """A high-level class managing a MarkLogic instance.
 
     It combines MLConfiguration and MLClient components to simplify every action
@@ -28,7 +28,7 @@ class MLManager:
         self,
         environment_name: str,
     ):
-        """Initialize MLManager instance.
+        """Initialize MLEnvironment instance.
 
         Parameters
         ----------
@@ -69,7 +69,7 @@ class MLManager:
 
     def get_client(
         self,
-        app_server_id: str | None = None,
+        rest_server_id: str | None = None,
     ) -> MLClient:
         """Initialize an MLClient instance for a specific App Server.
 
@@ -78,8 +78,8 @@ class MLManager:
 
         Parameters
         ----------
-        app_server_id : str | None, default None
-            An App Server identifier
+        rest_server_id : str | None, default None
+            A REST App Server identifier
 
         Returns
         -------
@@ -90,14 +90,14 @@ class MLManager:
         ------
         NotARestServerError
             If the App-Server identifier does not point to a REST server
-            (only when app_server_id is not None and is not a REST server)
+            (only when rest_server_id is not None and is not a REST server)
         NoRestServerConfiguredError
             If an identifier has not been provided and there's no REST servers
             configured for the environment
         """
-        if app_server_id is None:
-            app_server_id = self._get_rest_server_id(app_server_id)
-        app_server_config = self.config.provide_config(app_server_id)
+        if rest_server_id is None:
+            rest_server_id = self._get_rest_server_id(rest_server_id)
+        app_server_config = self.config.provide_config(rest_server_id)
         return MLClient(**app_server_config, manage_port=MARKLOGIC_MANAGE_API_PORT)
 
     def get_http_client(
@@ -121,14 +121,14 @@ class MLManager:
 
     def _get_rest_server_id(
         self,
-        app_server_id: str | None = None,
+        rest_server_id: str | None = None,
     ) -> str:
         """Return verified REST Server identifier.
 
         Parameters
         ----------
-        app_server_id : str | None, default None
-            An App Server identifier
+        rest_server_id : str | None, default None
+            A REST App Server identifier
 
         Returns
         -------
@@ -143,21 +143,21 @@ class MLManager:
             If an identifier has not been provided and there's no REST servers
             configured for the environment
         """
-        logger.debug("Verifying the app server id [%s]", app_server_id or "")
-        if app_server_id is None:
+        logger.debug("Verifying the app server id [%s]", rest_server_id or "")
+        if rest_server_id is None:
             logger.debug("No id provided - trying to identify any REST app server")
             if len(self.config.rest_servers) == 0:
                 env = self.environment_name
                 msg = f"No REST server is configured for the [{env}] environment."
                 raise NoRestServerConfiguredError(msg)
-            app_server_id = self.config.rest_servers[0]
-            logger.debug("Identified REST app server id: [%s]", app_server_id)
-            return app_server_id
-        if app_server_id not in self.config.rest_servers:
-            msg = f"[{app_server_id}] App-Server is not configured as a REST one."
+            rest_server_id = self.config.rest_servers[0]
+            logger.debug("Identified REST app server id: [%s]", rest_server_id)
+            return rest_server_id
+        if rest_server_id not in self.config.rest_servers:
+            msg = f"[{rest_server_id}] App-Server is not configured as a REST one."
             raise NotARestServerError(msg)
         logger.debug(
             "The [%s] app server has been verified as a REST one.",
-            app_server_id,
+            rest_server_id,
         )
-        return app_server_id
+        return rest_server_id

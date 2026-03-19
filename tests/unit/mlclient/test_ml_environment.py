@@ -1,6 +1,6 @@
 import pytest
 
-from mlclient import MLClient, MLConfiguration, MLManager
+from mlclient import MLClient, MLConfiguration, MLEnvironment
 from mlclient.exceptions import NoRestServerConfiguredError
 
 
@@ -102,18 +102,18 @@ def _setup(mocker, ml_config, ml_config_no_rest):
 
 
 def test_properties():
-    ml_manager = MLManager("test")
+    ml_env = MLEnvironment("test")
 
-    assert ml_manager.environment_name == "test"
+    assert ml_env.environment_name == "test"
 
     expected_config = MLConfiguration.from_environment("test")
-    assert ml_manager.config.model_dump() == expected_config.model_dump()
+    assert ml_env.config.model_dump() == expected_config.model_dump()
 
 
 def test_get_client_with_app_server_id():
     # uses tests/resources/test-ml-manager/mlclient-test.yaml copy
-    ml_manager = MLManager("test")
-    with ml_manager.get_client("content") as client:
+    ml_env = MLEnvironment("test")
+    with ml_env.get_client("content") as client:
         assert isinstance(client, MLClient)
         assert client.protocol == "https"
         assert client.host == "localhost"
@@ -127,8 +127,8 @@ def test_get_client_with_app_server_id():
 
 def test_get_client_default():
     # uses tests/resources/test-ml-manager/mlclient-test.yaml copy
-    ml_manager = MLManager("test")
-    with ml_manager.get_client() as client:
+    ml_env = MLEnvironment("test")
+    with ml_env.get_client() as client:
         assert isinstance(client, MLClient)
         assert client.protocol == "https"
         assert client.host == "localhost"
@@ -143,7 +143,7 @@ def test_get_client_default():
 def test_get_client_default_no_rest_servers_configured():
     # uses tests/resources/test-ml-manager/mlclient-test-no-rest.yaml copy
     with pytest.raises(NoRestServerConfiguredError) as err:
-        MLManager("test-no-rest").get_client()
+        MLEnvironment("test-no-rest").get_client()
     assert err.value.args[0] == (
         "No REST server is configured for the [test-no-rest] environment."
     )
@@ -151,7 +151,7 @@ def test_get_client_default_no_rest_servers_configured():
 
 def test_get_client_any_server():
     # get_client() with explicit ID works for any server, not just REST
-    ml_manager = MLManager("test")
-    with ml_manager.get_client("schemas") as client:
+    ml_env = MLEnvironment("test")
+    with ml_env.get_client("schemas") as client:
         assert isinstance(client, MLClient)
         assert client.port == 8102

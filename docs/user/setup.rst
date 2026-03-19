@@ -54,18 +54,18 @@ This code will work in every subdirectory of the ``migration-app`` project as it
        MLConfiguration(app_name='migration-app', protocol='http', host='localhost', username='admin', password='admin', app_servers=[MLAppServerConfiguration(identifier='manage', port=8002, auth=<AuthMethod.BASIC: 'basic'>), MLAppServerConfiguration(identifier='content', port=8100, auth=<AuthMethod.BASIC: 'basic'>), MLAppServerConfiguration(identifier='modules', port=8101, auth=<AuthMethod.BASIC: 'basic'>), MLAppServerConfiguration(identifier='schemas', port=8102, auth=<AuthMethod.BASIC: 'basic'>), MLAppServerConfiguration(identifier='test', port=8103, auth=<AuthMethod.BASIC: 'basic'>)])
 
 
-MLManager class
----------------
+MLEnvironment class
+-------------------
 
-To make it easier, ``mlclient`` lib provides you a ``MLManager`` class with the highest-level API.
+To make it easier, ``mlclient`` lib provides you a ``MLEnvironment`` class with the highest-level API.
 The same logic as in the above example we will achieve in fewer steps::
 
-   >>> from mlclient import MLManager
-   >>> ml_manager = MLManager("local")
-   >>> with ml_manager.get_client("content") as ml:
+   >>> from mlclient import MLEnvironment
+   >>> ml_env = MLEnvironment("local")
+   >>> with ml_env.get_client("content") as ml:
    ...     resp = ml.rest.eval.post(xquery="xdmp:database() => xdmp:database-name()")
    ...     parsed_resp = ml.parser.parse(resp)
    ...
 
 .. note::
-   ``MLManager`` is accessible only using ML Client Environments.
+   ``MLEnvironment`` is accessible only using ML Client Environments.

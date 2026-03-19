@@ -41,8 +41,8 @@ class MLResponseParser:
     ...     "password": "admin",
     ...     "auth_method": "digest",
     ... }
-    >>> with MLClient(**config) as client:
-    ...     resp = client.eval(xquery="xdmp:database() => xdmp:database-name()")
+    >>> with MLClient(**config) as ml:
+    ...     resp = ml.rest.eval.post(xquery="xdmp:database() => xdmp:database-name()")
     ...     print("Raw:", resp.text)
     ...     print("Parsed:", MLResponseParser.parse(resp))
     ...

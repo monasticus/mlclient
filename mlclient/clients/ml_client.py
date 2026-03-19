@@ -56,6 +56,8 @@ class MLClient:
 
     Examples
     --------
+    Low-level (raw HTTP) - returns raw multipart response:
+
     >>> from mlclient import MLClient
     >>> config = {
     ...     "host": "localhost",
@@ -63,10 +65,32 @@ class MLClient:
     ...     "username": "admin",
     ...     "password": "admin",
     ... }
-    >>> with MLClient(**config) as client:
-    ...     xq = "xdmp:database() => xdmp:database-name()"
-    ...     resp = client.rest.eval.post(xquery=xq)
-    ...     print(resp.text)
+    >>> with MLClient(**config) as ml:
+    ...     resp = ml.http.post(
+    ...         "/v1/eval",
+    ...         headers={"Content-Type": "..."},
+    ...         body="xquery=xdmp:database()",
+    ...     )
+    ...     resp.status_code
+    200
+
+    Mid-level (REST API groups) - returns httpx.Response:
+
+    >>> with MLClient(**config) as ml:
+    ...     resp = ml.rest.eval.post(
+    ...         xquery="xdmp:database() => xdmp:database-name()",
+    ...     )
+    ...     resp.status_code
+    200
+
+    High-level (services) - returns parsed Python objects:
+
+    >>> with MLClient(**config) as ml:
+    ...     result = ml.eval.xquery(
+    ...         "xdmp:database() => xdmp:database-name()",
+    ...     )
+    ...     print(result)
+    App-Services
     """
 
     def __init__(

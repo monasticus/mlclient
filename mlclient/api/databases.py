@@ -16,6 +16,7 @@ from mlclient.calls import (
     DatabasesPostCall,
 )
 
+# Avoid circular import: RestClient -> api classes -> RestClient
 if TYPE_CHECKING:
     from mlclient.clients.rest_client import RestClient
 

@@ -1,7 +1,6 @@
 """High-level Logs service.
 
 Provides parsed log retrieval from MarkLogic.
-Logic migrated from clients/logs_client.py.
 """
 
 from __future__ import annotations

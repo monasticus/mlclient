@@ -1,7 +1,6 @@
 """High-level Eval service.
 
 Provides parsed code evaluation on MarkLogic.
-Logic migrated from clients/eval_client.py.
 """
 
 from __future__ import annotations

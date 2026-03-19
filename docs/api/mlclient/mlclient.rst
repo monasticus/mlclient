@@ -41,7 +41,7 @@ mlclient.exceptions module
    :show-inheritance:
 
 mlclient.utils module
--------------------------
+---------------------
 
 .. automodule:: mlclient.utils
    :members:

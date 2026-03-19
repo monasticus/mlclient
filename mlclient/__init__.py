@@ -51,7 +51,7 @@ def setup_logger():
         logging.config.dictConfig(config)
 
 
-__version__ = "0.5.0"
+__version__ = "0.4.1"
 __all__ = [
     "DEFAULT_RETRY_STRATEGY",
     "MARKLOGIC_ADMIN_API_PORT",

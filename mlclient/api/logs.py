@@ -8,6 +8,7 @@ from httpx import Response
 
 from mlclient.calls import LogsCall
 
+# Avoid circular import: RestClient -> api classes -> RestClient
 if TYPE_CHECKING:
     from mlclient.clients.rest_client import RestClient
 

@@ -9,6 +9,7 @@ from httpx import Response
 from mlclient.calls import DocumentsDeleteCall, DocumentsGetCall, DocumentsPostCall
 from mlclient.structures.calls import DocumentsBodyPart
 
+# Avoid circular import: RestClient -> api classes -> RestClient
 if TYPE_CHECKING:
     from mlclient.clients.rest_client import RestClient
 

@@ -15,6 +15,7 @@ from mlclient.calls import (
     RolesPostCall,
 )
 
+# Avoid circular import: RestClient -> api classes -> RestClient
 if TYPE_CHECKING:
     from mlclient.clients.rest_client import RestClient
 

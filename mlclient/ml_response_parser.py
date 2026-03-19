@@ -44,7 +44,7 @@ class MLResponseParser:
     >>> with MLClient(**config) as ml:
     ...     resp = ml.rest.eval.post(xquery="xdmp:database() => xdmp:database-name()")
     ...     print("Raw:", resp.text)
-    ...     print("Parsed:", ml.parser.parse(resp))
+    ...     print("Parsed:", MLResponseParser.parse(resp))
     ...
     Raw:
     --6a5df7d535c71968

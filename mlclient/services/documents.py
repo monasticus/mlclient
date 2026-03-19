@@ -1,7 +1,6 @@
 """High-level Documents service.
 
 Provides parsed document operations on MarkLogic.
-Logic migrated from clients/documents_client.py.
 """
 
 from __future__ import annotations

@@ -5,7 +5,8 @@ from pathlib import Path
 import pytest
 import respx
 
-from mlclient.clients import LogsClient, LogType
+from mlclient import MLClient
+from mlclient.services.logs import LogType
 from mlclient.exceptions import MarkLogicError
 from tests.utils import resources as resources_utils
 from tests.utils.ml_mockers import MLRespXMocker
@@ -14,8 +15,8 @@ ENDPOINT = "/manage/v2/logs"
 
 
 @pytest.fixture(autouse=True)
-def logs_client() -> LogsClient:
-    return LogsClient(auth_method="digest")
+def logs_client() -> MLClient:
+    return MLClient(auth_method="digest")
 
 
 @pytest.fixture(autouse=True)
@@ -50,7 +51,7 @@ def test_get_logs_no_such_host(logs_client):
     ml_mocker.mock_get()
 
     with pytest.raises(MarkLogicError) as err:
-        logs_client.get_logs(8002, host="non-existing-host")
+        logs_client.logs.get(8002, host="non-existing-host")
 
     expected_error = (
         "[404 Not Found] (XDMP-NOSUCHHOST) "
@@ -80,7 +81,7 @@ def test_get_logs_unauthorized(logs_client):
     ml_mocker.mock_get()
 
     with pytest.raises(MarkLogicError) as err:
-        logs_client.get_logs()
+        logs_client.logs.get()
 
     expected_error = "[401 Unauthorized] 401 Unauthorized"
     assert err.value.args[0] == expected_error
@@ -97,7 +98,7 @@ def test_get_logs_empty(logs_client):
     ml_mocker.with_response_body(ml_mocker.error_logs_body([]))
     ml_mocker.mock_get()
 
-    logs = logs_client.get_logs(8002)
+    logs = logs_client.logs.get(8002)
 
     assert next(logs, None) is None
 
@@ -121,7 +122,7 @@ def test_get_logs_without_port(logs_client):
     )
     ml_mocker.mock_get()
 
-    logs = logs_client.get_logs()
+    logs = logs_client.logs.get()
     logs = list(logs)
 
     assert len(logs) == 3
@@ -161,7 +162,7 @@ def test_get_logs_using_string_port(logs_client):
     )
     ml_mocker.mock_get()
 
-    logs = logs_client.get_logs("8002")
+    logs = logs_client.logs.get("8002")
     logs = list(logs)
 
     assert len(logs) == 3
@@ -201,7 +202,7 @@ def test_get_task_server_logs(logs_client):
     )
     ml_mocker.mock_get()
 
-    logs = logs_client.get_logs("TaskServer")
+    logs = logs_client.logs.get("TaskServer")
     logs = list(logs)
 
     assert len(logs) == 3
@@ -241,7 +242,7 @@ def test_get_task_server_logs_using_int_port(logs_client):
     )
     ml_mocker.mock_get()
 
-    logs = logs_client.get_logs(0)
+    logs = logs_client.logs.get(0)
     logs = list(logs)
 
     assert len(logs) == 3
@@ -281,7 +282,7 @@ def test_get_error_logs(logs_client):
     )
     ml_mocker.mock_get()
 
-    logs = logs_client.get_logs(8002)
+    logs = logs_client.logs.get(8002)
     logs = list(logs)
 
     assert len(logs) == 3
@@ -324,7 +325,7 @@ def test_get_error_logs_with_search_params(logs_client):
     )
     ml_mocker.mock_get()
 
-    logs = logs_client.get_logs(
+    logs = logs_client.logs.get(
         8002,
         start_time="2023-09-01 00:00",
         end_time="2023-09-01 23:59",
@@ -373,7 +374,7 @@ def test_get_error_logs_fully_customized(logs_client):
     )
     ml_mocker.mock_get()
 
-    logs = logs_client.get_logs(
+    logs = logs_client.logs.get(
         8002,
         start_time="2023-09-01 00:00",
         end_time="2023-09-01 23:59",
@@ -411,7 +412,7 @@ def test_get_error_logs_empty(logs_client):
     ml_mocker.with_response_body(ml_mocker.error_logs_body([]))
     ml_mocker.mock_get()
 
-    logs = logs_client.get_logs(8002)
+    logs = logs_client.logs.get(8002)
     logs = list(logs)
 
     assert len(logs) == 0
@@ -440,7 +441,7 @@ def test_get_access_logs(logs_client):
     ml_mocker.with_response_body(ml_mocker.non_error_logs_body(raw_logs))
     ml_mocker.mock_get()
 
-    logs = logs_client.get_logs(8002, log_type=LogType.ACCESS)
+    logs = logs_client.logs.get(8002, log_type=LogType.ACCESS)
     logs = list(logs)
 
     assert len(logs) == 2
@@ -475,7 +476,7 @@ def test_get_access_logs_with_search_params(logs_client):
     ml_mocker.with_response_body(ml_mocker.non_error_logs_body(raw_logs))
     ml_mocker.mock_get()
 
-    logs = logs_client.get_logs(
+    logs = logs_client.logs.get(
         8002,
         log_type=LogType.ACCESS,
         start_time="00:00",
@@ -504,7 +505,7 @@ def test_get_access_logs_empty(logs_client):
     ml_mocker.with_response_body(ml_mocker.non_error_logs_body([]))
     ml_mocker.mock_get()
 
-    logs = logs_client.get_logs(8002, log_type=LogType.ACCESS)
+    logs = logs_client.logs.get(8002, log_type=LogType.ACCESS)
     logs = list(logs)
 
     assert len(logs) == 0
@@ -566,7 +567,7 @@ def test_get_request_logs(logs_client):
     ml_mocker.with_response_body(ml_mocker.non_error_logs_body(raw_logs))
     ml_mocker.mock_get()
 
-    logs = logs_client.get_logs(8002, log_type=LogType.REQUEST)
+    logs = logs_client.logs.get(8002, log_type=LogType.REQUEST)
     logs = list(logs)
 
     assert len(logs) == 2
@@ -634,7 +635,7 @@ def test_get_request_logs_with_search_params(logs_client):
     ml_mocker.with_response_body(ml_mocker.non_error_logs_body(raw_logs))
     ml_mocker.mock_get()
 
-    logs = logs_client.get_logs(
+    logs = logs_client.logs.get(
         8002,
         log_type=LogType.REQUEST,
         start_time="00:00",
@@ -663,7 +664,7 @@ def test_get_request_logs_empty(logs_client):
     ml_mocker.with_response_body(ml_mocker.non_error_logs_body([]))
     ml_mocker.mock_get()
 
-    logs = logs_client.get_logs(8002, log_type=LogType.REQUEST)
+    logs = logs_client.logs.get(8002, log_type=LogType.REQUEST)
     logs = list(logs)
 
     assert len(logs) == 0
@@ -691,7 +692,7 @@ def test_get_audit_logs(logs_client):
     ml_mocker.with_response_body(ml_mocker.non_error_logs_body(raw_logs))
     ml_mocker.mock_get()
 
-    logs = logs_client.get_logs(log_type=LogType.AUDIT)
+    logs = logs_client.logs.get(log_type=LogType.AUDIT)
     logs = list(logs)
 
     assert len(logs) == 3
@@ -728,7 +729,7 @@ def test_get_audit_logs_with_search_params(logs_client):
     ml_mocker.with_response_body(ml_mocker.non_error_logs_body(raw_logs))
     ml_mocker.mock_get()
 
-    logs = logs_client.get_logs(
+    logs = logs_client.logs.get(
         log_type=LogType.AUDIT,
         start_time="00:00",
         end_time="23:59:59",
@@ -759,7 +760,7 @@ def test_get_audit_logs_empty(logs_client):
     ml_mocker.with_response_body(ml_mocker.non_error_logs_body([]))
     ml_mocker.mock_get()
 
-    logs = logs_client.get_logs(log_type=LogType.AUDIT)
+    logs = logs_client.logs.get(log_type=LogType.AUDIT)
     logs = list(logs)
 
     assert len(logs) == 0
@@ -785,7 +786,7 @@ def test_get_logs_list_unauthorized(logs_client):
     ml_mocker.mock_get()
 
     with pytest.raises(MarkLogicError) as err:
-        logs_client.get_logs_list()
+        logs_client.logs.list()
 
     expected_error = "[401 Unauthorized] 401 Unauthorized"
     assert err.value.args[0] == expected_error
@@ -807,7 +808,7 @@ def test_get_logs_list_no_such_host(logs_client):
     ml_mocker.with_response_body(Path(response_body_path).read_bytes())
     ml_mocker.mock_get()
     with pytest.raises(MarkLogicError) as err:
-        logs_client.get_logs_list(host="non-existing-host")
+        logs_client.logs.list(host="non-existing-host")
 
     expected_error = (
         "[404 Not Found] (XDMP-NOSUCHHOST) XDMP-NOSUCHHOST: "
@@ -830,7 +831,7 @@ def test_get_logs_list_empty(logs_client):
     ml_mocker.with_response_body(response_body_json)
     ml_mocker.mock_get()
 
-    logs_list = logs_client.get_logs_list()
+    logs_list = logs_client.logs.list()
 
     assert logs_list == {
         "source": [],
@@ -855,7 +856,7 @@ def test_get_logs_list_from_single_node_cluster(logs_client):
     ml_mocker.with_response_body(response_body_json)
     ml_mocker.mock_get()
 
-    logs_list = logs_client.get_logs_list()
+    logs_list = logs_client.logs.list()
     assert isinstance(logs_list, dict)
 
     source = logs_list["source"]
@@ -1095,7 +1096,7 @@ def test_get_logs_list_from_multiple_nodes_cluster(logs_client):
     ml_mocker.with_response_body(response_body_json)
     ml_mocker.mock_get()
 
-    logs_list = logs_client.get_logs_list()
+    logs_list = logs_client.logs.list()
     assert isinstance(logs_list, dict)
 
     source = logs_list["source"]
@@ -1352,7 +1353,7 @@ def test_get_logs_list_from_multiple_nodes_cluster_for_single_host(logs_client):
     ml_mocker.with_response_body(response_body_json)
     ml_mocker.mock_get()
 
-    logs_list = logs_client.get_logs_list(host="ml_cluster_node3")
+    logs_list = logs_client.logs.list(host="ml_cluster_node3")
     assert isinstance(logs_list, dict)
 
     source = logs_list["source"]

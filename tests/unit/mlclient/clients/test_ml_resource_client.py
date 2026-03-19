@@ -2,7 +2,7 @@ import httpx
 import pytest
 import respx
 
-from mlclient import MLResourceClient
+from mlclient import MLClient
 from mlclient.calls import EvalCall
 from tests.utils.ml_mockers import MLRespXMocker
 
@@ -38,8 +38,8 @@ def test_call(xquery):
         xquery=xquery,
         variables={"element": "<parent><child/></parent>"},
     )
-    with MLResourceClient() as client:
-        resp = client.call(eval_call)
+    with MLClient() as client:
+        resp = client.rest.call(eval_call)
 
     assert resp.status_code == httpx.codes.OK
     assert "<new-parent><child/></new-parent>" in resp.text

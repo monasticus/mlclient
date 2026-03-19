@@ -33,7 +33,7 @@ class MLResponseParser:
 
     Examples
     --------
-    >>> from mlclient import MLResourcesClient, MLResponseParser
+    >>> from mlclient import MLClient, MLResponseParser
     >>> config = {
     ...     "host": "localhost",
     ...     "port": 8002,
@@ -41,7 +41,7 @@ class MLResponseParser:
     ...     "password": "admin",
     ...     "auth_method": "digest",
     ... }
-    >>> with MLResourcesClient(**config) as client:
+    >>> with MLClient(**config) as client:
     ...     resp = client.eval(xquery="xdmp:database() => xdmp:database-name()")
     ...     print("Raw:", resp.text)
     ...     print("Parsed:", MLResponseParser.parse(resp))

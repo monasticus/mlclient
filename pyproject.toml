@@ -159,15 +159,14 @@ max-complexity = 10
     "A002",  # allow for shadowing input builtin as it is superclass method definition
     "PLR6301"  # allow for a non-static method as it is defined in a superclass
 ]
-"mlclient/clients/*" = [
+"mlclient/api/*" = [
     "PLR0913" # allow many arguments as they depend on ML REST resource
 ]
-"mlclient/clients/eval_client.py" = [
-    "A003", # allow shadowing eval builtin for consistency
+"mlclient/clients/*" = [
+    "PLR0913", # allow many arguments as they depend on ML REST resource
 ]
-"mlclient/clients/ml_client.py" = [
-    "A003", # allow shadowing eval builtin for consistency
-    "PLR0904"  # allow many public methods as MLResourcesClient is a fascade for all ML resources
+"mlclient/services/*" = [
+    "PLR0913" # allow many arguments as they mirror ML REST resource params
 ]
 "mlclient/structures/*" = [
     "UP006", # pydantic evaluates field annotations at runtime; list[] needs 3.10+

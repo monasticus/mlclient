@@ -107,7 +107,7 @@ class CallEvalCommand(Command):
         return 0
 
     def _get_eval_params(self):
-        """Prepare parameters for an EvalClient."""
+        """Prepare parameters for an Eval service."""
         code = self.argument("code")
         variables = self.option("var")
         xq_flag = self.option("xquery")
@@ -143,6 +143,6 @@ class CallEvalCommand(Command):
         rest_server = self.option("rest-server")
 
         manager = MLManager(environment)
-        with manager.get_eval_client(rest_server) as client:
+        with manager.get_client(rest_server) as client:
             self.info(f"Evaluating code using REST App-Server {client.base_url}")
-            return client.eval(**eval_params)
+            return client.eval.eval(**eval_params)

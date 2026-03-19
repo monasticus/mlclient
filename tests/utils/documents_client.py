@@ -3,7 +3,7 @@ from __future__ import annotations
 import pytest
 from mimeo import MimeoConfig, MimeoConfigFactory, Mimeograph
 
-from mlclient.clients import DocumentsClient
+from mlclient import MLClient
 from mlclient.exceptions import MarkLogicError
 from mlclient.mimetypes import Mimetypes
 from mlclient.structures import Document, DocumentType, Metadata, RawDocument
@@ -19,27 +19,27 @@ def assert_document_does_not_exist(
         f"category: content message: {uri}"
     )
     with (
-        DocumentsClient(auth_method="digest") as docs_client,
+        MLClient(auth_method="digest") as docs_client,
         pytest.raises(
             MarkLogicError,
         ) as err,
     ):
-        docs_client.read(uri)
+        docs_client.documents.read(uri)
     assert err.value.args[0] == expected_msg
 
 
 def assert_documents_exist(
     uris: list,
 ):
-    with DocumentsClient(auth_method="digest") as docs_client:
-        assert docs_client.read(uris, output_type=bytes) != []
+    with MLClient(auth_method="digest") as docs_client:
+        assert docs_client.documents.read(uris, output_type=bytes) != []
 
 
 def assert_documents_do_not_exist(
     uris: list,
 ):
-    with DocumentsClient(auth_method="digest") as docs_client:
-        assert docs_client.read(uris, output_type=bytes) == []
+    with MLClient(auth_method="digest") as docs_client:
+        assert docs_client.documents.read(uris, output_type=bytes) == []
 
 
 def assert_documents_exist_and_confirm_content_with_metadata(
@@ -58,8 +58,8 @@ def assert_documents_exist_and_confirm_data(
     category: str | list[str] = "content",
     output_type: type | None = None,
 ):
-    with DocumentsClient(auth_method="digest") as docs_client:
-        actual_docs = docs_client.read(
+    with MLClient(auth_method="digest") as docs_client:
+        actual_docs = docs_client.documents.read(
             list(expected.keys()),
             category,
             output_type=output_type,
@@ -85,8 +85,8 @@ def assert_documents_exist_and_confirm_data(
 def write_documents(
     docs: Document | Metadata | list[Document | Metadata],
 ):
-    with DocumentsClient(auth_method="digest") as docs_client:
-        resp = docs_client.create(docs)
+    with MLClient(auth_method="digest") as docs_client:
+        resp = docs_client.documents.create(docs)
         documents = resp["documents"]
         if not isinstance(docs, list):
             docs = [docs]
@@ -106,8 +106,8 @@ def delete_documents(
     uri: str | list[str],
 ):
     try:
-        with DocumentsClient(auth_method="digest") as docs_client:
-            docs_client.delete(uri)
+        with MLClient(auth_method="digest") as docs_client:
+            docs_client.documents.delete(uri)
     except MarkLogicError as err:
         pytest.fail(str(err))
 

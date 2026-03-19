@@ -39,7 +39,7 @@ from threading import Thread
 import aiofiles
 from pydantic import BaseModel
 
-from mlclient.clients import DocumentsClient
+from mlclient.clients import MLClient
 from mlclient.mimetypes import Mimetypes
 from mlclient.structures import (
     Document,
@@ -89,12 +89,12 @@ class DocumentsJob(metaclass=ABCMeta):
         self,
         **config,
     ):
-        """Set DocumentsClient configuration.
+        """Set MLClient configuration.
 
         Parameters
         ----------
         config
-            Keyword arguments to be passed for a DocumentsClient instance.
+            Keyword arguments to be passed for an MLClient instance.
         """
         self._config = config
 
@@ -204,11 +204,11 @@ class DocumentsJob(metaclass=ABCMeta):
     ):
         """Perform documents job in batches until queue is empty.
 
-        Once DocumentsClient is initialized, it populates batches and sends requests
+        Once MLClient is initialized, it populates batches and sends requests
         against a MarkLogic server. When a batch size is lower than configured,
         the infinitive loop is stopped.
         """
-        with DocumentsClient(**self._config) as client:
+        with MLClient(**self._config) as client:
             while True:
                 batch = self._populate_batch()
                 if len(batch) > 0:
@@ -244,7 +244,7 @@ class DocumentsJob(metaclass=ABCMeta):
     def _send_batch(
         self,
         batch: list[str],
-        client: DocumentsClient,
+        client: MLClient,
     ):
         """Send a batch to /v1/documents endpoint."""
         raise NotImplementedError
@@ -358,7 +358,7 @@ class ReadDocumentsJob(DocumentsJob):
     def _send_batch(
         self,
         batch: list[str],
-        client: DocumentsClient,
+        client: MLClient,
     ):
         """Send a URIs' batch to /v1/documents endpoint.
 
@@ -366,8 +366,8 @@ class ReadDocumentsJob(DocumentsJob):
         ----------
         batch : list[str]
             A batch with documents
-        client : DocumentsClient
-            A DocumentsClient instance to call documents endpoint.
+        client : MLClient
+            An MLClient instance to call documents endpoint.
 
         Raises
         ------
@@ -383,7 +383,7 @@ class ReadDocumentsJob(DocumentsJob):
                 kwargs["category"] = list(dict.fromkeys(self._categories))
             if self._fs_output_path is not None:
                 kwargs["output_type"] = bytes
-            for doc in client.read(**kwargs):
+            for doc in client.documents.read(**kwargs):
                 self._report.add_successful_doc(doc.uri)
                 self._output_queue.put(doc)
         except Exception as err:
@@ -468,7 +468,7 @@ class WriteDocumentsJob(DocumentsJob):
     def _send_batch(
         self,
         batch: list[Document],
-        client: DocumentsClient,
+        client: MLClient,
     ):
         """Send a documents' batch to /v1/documents endpoint.
 
@@ -476,8 +476,8 @@ class WriteDocumentsJob(DocumentsJob):
         ----------
         batch : list[Document]
             A batch with documents
-        client : DocumentsClient
-            A DocumentsClient instance to call documents endpoint.
+        client : MLClient
+            An MLClient instance to call documents endpoint.
 
         Raises
         ------
@@ -486,7 +486,7 @@ class WriteDocumentsJob(DocumentsJob):
         """
         batch_uris = [doc.uri for doc in batch]
         try:
-            client.create(data=batch, database=self._database)
+            client.documents.create(data=batch, database=self._database)
             self._report.add_successful_docs(batch_uris)
         except Exception as err:
             self._report.add_failed_docs(batch_uris, err)

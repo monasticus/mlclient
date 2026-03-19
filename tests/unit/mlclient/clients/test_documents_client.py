@@ -7,7 +7,7 @@ from pathlib import Path
 import pytest
 import respx
 
-from mlclient.clients import DocumentsClient
+from mlclient import MLClient
 from mlclient.exceptions import MarkLogicError
 from mlclient.structures import (
     BinaryDocument,
@@ -41,8 +41,8 @@ ml_mocker.with_post_side_effect(side_effect=ml_doc_mocker.post_documents_side_ef
 
 
 @pytest.fixture(autouse=True)
-def docs_client() -> DocumentsClient:
-    return DocumentsClient(port=8002, auth_method="digest")
+def docs_client() -> MLClient:
+    return MLClient(port=8002, auth_method="digest")
 
 
 @pytest.fixture(autouse=True)
@@ -59,7 +59,7 @@ def test_read_non_existing_doc(docs_client):
     uri = "/some/dir/doc5.xml"
 
     with pytest.raises(MarkLogicError) as err:
-        docs_client.read(uri)
+        docs_client.documents.read(uri)
 
     expected_error = (
         "[500 Internal Server Error] (RESTAPI-NODOCUMENT) "
@@ -74,7 +74,7 @@ def test_read_non_existing_doc(docs_client):
 def test_read_xml_doc(docs_client):
     uri = "/some/dir/doc1.xml"
 
-    document = docs_client.read(uri)
+    document = docs_client.documents.read(uri)
 
     assert isinstance(document, XMLDocument)
     assert document.uri == uri
@@ -91,7 +91,7 @@ def test_read_xml_doc(docs_client):
 def test_read_xml_doc_using_uri_list(docs_client):
     uri = "/some/dir/doc1.xml"
 
-    docs = docs_client.read([uri])
+    docs = docs_client.documents.read([uri])
     assert isinstance(docs, list)
     assert len(docs) == 1
 
@@ -111,7 +111,7 @@ def test_read_xml_doc_using_uri_list(docs_client):
 def test_read_json_doc(docs_client):
     uri = "/some/dir/doc2.json"
 
-    document = docs_client.read(uri)
+    document = docs_client.documents.read(uri)
 
     assert isinstance(document, JSONDocument)
     assert document.uri == uri
@@ -126,7 +126,7 @@ def test_read_json_doc(docs_client):
 def test_read_json_doc_using_uri_list(docs_client):
     uri = "/some/dir/doc2.json"
 
-    docs = docs_client.read([uri])
+    docs = docs_client.documents.read([uri])
     assert isinstance(docs, list)
     assert len(docs) == 1
 
@@ -144,7 +144,7 @@ def test_read_json_doc_using_uri_list(docs_client):
 def test_read_text_doc(docs_client):
     uri = "/some/dir/doc3.xqy"
 
-    document = docs_client.read(uri)
+    document = docs_client.documents.read(uri)
 
     assert isinstance(document, TextDocument)
     assert document.uri == uri
@@ -159,7 +159,7 @@ def test_read_text_doc(docs_client):
 def test_read_text_doc_using_uri_list(docs_client):
     uri = "/some/dir/doc3.xqy"
 
-    docs = docs_client.read([uri])
+    docs = docs_client.documents.read([uri])
     assert isinstance(docs, list)
     assert len(docs) == 1
 
@@ -178,7 +178,7 @@ def test_read_binary_doc(docs_client):
     uri = "/some/dir/doc4.zip"
     content = zlib.compress(b'xquery version "1.0-ml";\n\nfn:current-date()')
 
-    document = docs_client.read(uri)
+    document = docs_client.documents.read(uri)
 
     assert isinstance(document, BinaryDocument)
     assert document.uri == uri
@@ -194,7 +194,7 @@ def test_read_binary_doc_using_uri_list(docs_client):
     uri = "/some/dir/doc4.zip"
     content = zlib.compress(b'xquery version "1.0-ml";\n\nfn:current-date()')
 
-    docs = docs_client.read([uri])
+    docs = docs_client.documents.read([uri])
     assert isinstance(docs, list)
     assert len(docs) == 1
 
@@ -212,7 +212,7 @@ def test_read_binary_doc_using_uri_list(docs_client):
 def test_read_doc_as_string(docs_client):
     uri = "/some/dir/doc1.xml"
 
-    document = docs_client.read(uri, output_type=str)
+    document = docs_client.documents.read(uri, output_type=str)
 
     assert isinstance(document, RawStringDocument)
     assert document.uri == uri
@@ -227,7 +227,7 @@ def test_read_doc_as_string(docs_client):
 def test_read_doc_as_string_using_uri_list(docs_client):
     uri = "/some/dir/doc1.xml"
 
-    docs = docs_client.read([uri], output_type=str)
+    docs = docs_client.documents.read([uri], output_type=str)
     assert isinstance(docs, list)
     assert len(docs) == 1
 
@@ -245,7 +245,7 @@ def test_read_doc_as_string_using_uri_list(docs_client):
 def test_read_doc_as_bytes(docs_client):
     uri = "/some/dir/doc2.json"
 
-    document = docs_client.read(uri, output_type=bytes)
+    document = docs_client.documents.read(uri, output_type=bytes)
 
     assert isinstance(document, RawDocument)
     assert document.uri == uri
@@ -260,7 +260,7 @@ def test_read_doc_as_bytes(docs_client):
 def test_read_doc_as_bytes_using_uri_list(docs_client):
     uri = "/some/dir/doc2.json"
 
-    docs = docs_client.read([uri], output_type=bytes)
+    docs = docs_client.documents.read([uri], output_type=bytes)
     assert isinstance(docs, list)
     assert len(docs) == 1
 
@@ -281,7 +281,7 @@ def test_read_existing_and_non_existing_doc(docs_client):
         "/some/dir/doc5.xml",
     ]
 
-    docs = docs_client.read(uris)
+    docs = docs_client.documents.read(uris)
     assert isinstance(docs, list)
     assert len(docs) == 1
 
@@ -306,7 +306,7 @@ def test_read_multiple_docs(docs_client):
         "/some/dir/doc4.zip",
     ]
 
-    docs = docs_client.read(uris)
+    docs = docs_client.documents.read(uris)
 
     assert isinstance(docs, list)
     assert len(docs) == 4
@@ -368,7 +368,7 @@ def test_read_multiple_docs_as_string(docs_client):
         "/some/dir/doc4.zip",
     ]
 
-    docs = docs_client.read(uris, output_type=str)
+    docs = docs_client.documents.read(uris, output_type=str)
 
     assert isinstance(docs, list)
     assert len(docs) == 4
@@ -428,7 +428,7 @@ def test_read_multiple_docs_as_bytes(docs_client):
         "/some/dir/doc4.zip",
     ]
 
-    docs = docs_client.read(uris, output_type=bytes)
+    docs = docs_client.documents.read(uris, output_type=bytes)
 
     assert isinstance(docs, list)
     assert len(docs) == 4
@@ -486,7 +486,7 @@ def test_read_multiple_non_existing_docs(docs_client):
         "/some/dir/doc6.xml",
     ]
 
-    docs = docs_client.read(uris)
+    docs = docs_client.documents.read(uris)
 
     assert docs == []
 
@@ -500,7 +500,7 @@ def test_read_multiple_existing_and_non_existing_docs(docs_client):
         "/some/dir/doc6.json",
     ]
 
-    docs = docs_client.read(uris)
+    docs = docs_client.documents.read(uris)
 
     assert isinstance(docs, list)
     assert len(docs) == 2
@@ -542,7 +542,7 @@ def test_read_doc_with_full_metadata(docs_client):
         )
         uri = "/some/dir/doc1.xml"
 
-        document = docs_client.read(uri, category=["content", "metadata"])
+        document = docs_client.documents.read(uri, category=["content", "metadata"])
 
     assert isinstance(document, XMLDocument)
     assert document.uri == uri
@@ -571,7 +571,7 @@ def test_read_doc_with_single_metadata_category(docs_client):
         )
         uri = "/some/dir/doc1.xml"
 
-        document = docs_client.read(uri, category=["content", "collections"])
+        document = docs_client.documents.read(uri, category=["content", "collections"])
 
     assert isinstance(document, XMLDocument)
     assert document.uri == uri
@@ -600,7 +600,9 @@ def test_read_doc_with_two_metadata_categories(docs_client):
         )
         uri = "/some/dir/doc1.xml"
 
-        document = docs_client.read(uri, category=["content", "collections", "quality"])
+        document = docs_client.documents.read(
+            uri, category=["content", "collections", "quality"],
+        )
 
     assert isinstance(document, XMLDocument)
     assert document.uri == uri
@@ -629,7 +631,7 @@ def test_read_doc_with_all_metadata_categories(docs_client):
         )
         uri = "/some/dir/doc1.xml"
 
-        document = docs_client.read(
+        document = docs_client.documents.read(
             uri,
             category=[
                 "content",
@@ -672,7 +674,7 @@ def test_read_doc_with_full_metadata_when_content_follows_metadata_in_response(
         )
         uri = "/some/dir/doc1.xml"
 
-        document = docs_client.read(uri, category=["content", "metadata"])
+        document = docs_client.documents.read(uri, category=["content", "metadata"])
 
     assert isinstance(document, XMLDocument)
     assert document.uri == uri
@@ -702,7 +704,7 @@ def test_read_full_metadata_without_content(docs_client):
         )
         uri = "/some/dir/doc1.xml"
 
-        document = docs_client.read(uri, category=["metadata"])
+        document = docs_client.documents.read(uri, category=["metadata"])
 
     assert isinstance(document, MetadataDocument)
     assert document.uri == uri
@@ -728,7 +730,7 @@ def test_read_single_metadata_category_without_content(docs_client):
         )
         uri = "/some/dir/doc1.xml"
 
-        document = docs_client.read(uri, category=["collections"])
+        document = docs_client.documents.read(uri, category=["collections"])
 
     assert isinstance(document, MetadataDocument)
     assert document.uri == uri
@@ -754,7 +756,7 @@ def test_read_two_metadata_categories_without_content(docs_client):
         )
         uri = "/some/dir/doc1.xml"
 
-        document = docs_client.read(uri, category=["collections", "quality"])
+        document = docs_client.documents.read(uri, category=["collections", "quality"])
 
     assert isinstance(document, MetadataDocument)
     assert document.uri == uri
@@ -780,7 +782,7 @@ def test_read_all_metadata_categories_without_content(docs_client):
         )
         uri = "/some/dir/doc1.xml"
 
-        document = docs_client.read(
+        document = docs_client.documents.read(
             uri,
             category=[
                 "metadata-values",
@@ -824,7 +826,7 @@ def test_read_multiple_docs_with_full_metadata(docs_client):
             "/some/dir/doc2.json",
         ]
 
-        docs = docs_client.read(uris, category=["content", "metadata"])
+        docs = docs_client.documents.read(uris, category=["content", "metadata"])
 
     assert isinstance(docs, list)
     assert len(docs) == 2
@@ -882,7 +884,7 @@ def test_read_multiple_docs_with_single_metadata_category(docs_client):
             "/some/dir/doc2.json",
         ]
 
-        docs = docs_client.read(uris, category=["content", "collections"])
+        docs = docs_client.documents.read(uris, category=["content", "collections"])
 
     assert isinstance(docs, list)
     assert len(docs) == 2
@@ -940,7 +942,9 @@ def test_read_multiple_docs_with_two_metadata_categories(docs_client):
             "/some/dir/doc2.json",
         ]
 
-        docs = docs_client.read(uris, category=["content", "collections", "quality"])
+        docs = docs_client.documents.read(
+            uris, category=["content", "collections", "quality"],
+        )
 
     assert isinstance(docs, list)
     assert len(docs) == 2
@@ -998,7 +1002,7 @@ def test_read_multiple_docs_with_all_metadata_categories(docs_client):
             "/some/dir/doc2.json",
         ]
 
-        docs = docs_client.read(
+        docs = docs_client.documents.read(
             uris,
             category=[
                 "content",
@@ -1068,7 +1072,7 @@ def test_read_multiple_docs_full_metadata_without_content(docs_client):
             "/some/dir/doc2.json",
         ]
 
-        docs = docs_client.read(uris, category=["metadata"])
+        docs = docs_client.documents.read(uris, category=["metadata"])
 
     assert isinstance(docs, list)
     assert len(docs) == 2
@@ -1122,7 +1126,7 @@ def test_read_multiple_docs_single_metadata_category_without_content(docs_client
             "/some/dir/doc2.json",
         ]
 
-        docs = docs_client.read(uris, category=["collections"])
+        docs = docs_client.documents.read(uris, category=["collections"])
 
     assert isinstance(docs, list)
     assert len(docs) == 2
@@ -1176,7 +1180,7 @@ def test_read_multiple_docs_two_metadata_categories_without_content(docs_client)
             "/some/dir/doc2.json",
         ]
 
-        docs = docs_client.read(uris, category=["collections", "quality"])
+        docs = docs_client.documents.read(uris, category=["collections", "quality"])
 
     assert isinstance(docs, list)
     assert len(docs) == 2
@@ -1230,7 +1234,7 @@ def test_read_multiple_docs_all_metadata_categories_without_content(docs_client)
             "/some/dir/doc2.json",
         ]
 
-        docs = docs_client.read(
+        docs = docs_client.documents.read(
             uris,
             category=[
                 "metadata-values",
@@ -1279,7 +1283,7 @@ def test_read_multiple_docs_all_metadata_categories_without_content(docs_client)
 def test_read_single_doc_using_custom_database(docs_client):
     uri = "/some/dir/doc1.xml"
 
-    document = docs_client.read(uri, database="Documents")
+    document = docs_client.documents.read(uri, database="Documents")
 
     assert isinstance(document, XMLDocument)
     assert document.uri == uri
@@ -1301,7 +1305,7 @@ def test_read_multiple_docs_using_custom_database(docs_client):
         "/some/dir/doc4.zip",
     ]
 
-    docs = docs_client.read(uris, database="Documents")
+    docs = docs_client.documents.read(uris, database="Documents")
 
     assert isinstance(docs, list)
     assert len(docs) == 4
@@ -1360,7 +1364,7 @@ def test_create_raw_document(docs_client):
     content = b"<root><child>data</child></root>"
     doc = RawDocument(content, uri, DocumentType.XML)
 
-    resp = docs_client.create(doc)
+    resp = docs_client.documents.create(doc)
 
     documents = resp["documents"]
     assert len(documents) == 1
@@ -1375,7 +1379,7 @@ def test_create_raw_string_document(docs_client):
     content = '{"root":{"child":"data"}}'
     doc = RawStringDocument(content, uri, DocumentType.JSON)
 
-    resp = docs_client.create(doc)
+    resp = docs_client.documents.create(doc)
 
     documents = resp["documents"]
     assert len(documents) == 1
@@ -1391,7 +1395,7 @@ def test_create_xml_document(docs_client):
     content = ElemTree.ElementTree(ElemTree.fromstring(content_str))
     doc = XMLDocument(content, uri)
 
-    resp = docs_client.create(doc)
+    resp = docs_client.documents.create(doc)
 
     documents = resp["documents"]
     assert len(documents) == 1
@@ -1406,7 +1410,7 @@ def test_create_json_document(docs_client):
     content = {"root": {"child": "data"}}
     doc = JSONDocument(content, uri)
 
-    resp = docs_client.create(doc)
+    resp = docs_client.documents.create(doc)
 
     documents = resp["documents"]
     assert len(documents) == 1
@@ -1421,7 +1425,7 @@ def test_create_text_document(docs_client):
     content = 'xquery version "1.0-ml";\n\nfn:current-date()'
     doc = TextDocument(content, uri)
 
-    resp = docs_client.create(doc)
+    resp = docs_client.documents.create(doc)
 
     documents = resp["documents"]
     assert len(documents) == 1
@@ -1436,7 +1440,7 @@ def test_create_binary_document(docs_client):
     content = zlib.compress(b'xquery version "1.0-ml";\n\nfn:current-date()')
     doc = BinaryDocument(content, uri)
 
-    resp = docs_client.create(doc)
+    resp = docs_client.documents.create(doc)
 
     documents = resp["documents"]
     assert len(documents) == 1
@@ -1451,7 +1455,7 @@ def test_create_metadata_document_when_doc_exists(docs_client):
     metadata = Metadata(collections=["test-collection"])
     doc = MetadataDocument(uri, metadata)
 
-    resp = docs_client.create(doc)
+    resp = docs_client.documents.create(doc)
 
     documents = resp["documents"]
     assert len(documents) == 1
@@ -1468,7 +1472,7 @@ def test_create_metadata_document_when_doc_does_not_exists(docs_client):
     doc = MetadataDocument(uri, metadata)
 
     with pytest.raises(MarkLogicError) as err:
-        docs_client.create(doc)
+        docs_client.documents.create(doc)
 
     expected_error = (
         "[500 Internal Server Error] (XDMP-DOCNOTFOUND) XDMP-DOCNOTFOUND: "
@@ -1497,7 +1501,7 @@ def test_create_multiple_documents(docs_client):
     doc_4_content = zlib.compress(b'xquery version "1.0-ml";\n\nfn:current-date()')
     doc_4 = BinaryDocument(doc_4_content, doc_4_uri)
 
-    resp = docs_client.create([doc_1, doc_2, doc_3, doc_4])
+    resp = docs_client.documents.create([doc_1, doc_2, doc_3, doc_4])
 
     documents = resp["documents"]
     assert len(documents) == 4
@@ -1538,7 +1542,7 @@ def test_create_raw_document_with_metadata(docs_client):
     metadata = b'{"collections": ["test-collection"]}'
     doc = RawDocument(content, uri, DocumentType.XML, metadata)
 
-    resp = docs_client.create(doc)
+    resp = docs_client.documents.create(doc)
 
     documents = resp["documents"]
     assert len(documents) == 1
@@ -1554,7 +1558,7 @@ def test_create_raw_string_document_with_metadata(docs_client):
     metadata = '{"collections": ["test-collection"]}'
     doc = RawStringDocument(content, uri, DocumentType.XML, metadata)
 
-    resp = docs_client.create(doc)
+    resp = docs_client.documents.create(doc)
 
     documents = resp["documents"]
     assert len(documents) == 1
@@ -1571,7 +1575,7 @@ def test_create_xml_document_with_metadata(docs_client):
     metadata = Metadata(collections=["test-collection"])
     doc = XMLDocument(content, uri, metadata)
 
-    resp = docs_client.create(doc)
+    resp = docs_client.documents.create(doc)
 
     documents = resp["documents"]
     assert len(documents) == 1
@@ -1587,7 +1591,7 @@ def test_create_json_document_with_metadata(docs_client):
     metadata = Metadata(collections=["test-collection"])
     doc = JSONDocument(content, uri, metadata)
 
-    resp = docs_client.create(doc)
+    resp = docs_client.documents.create(doc)
 
     documents = resp["documents"]
     assert len(documents) == 1
@@ -1603,7 +1607,7 @@ def test_create_text_document_with_metadata(docs_client):
     metadata = Metadata(collections=["test-collection"])
     doc = TextDocument(content, uri, metadata)
 
-    resp = docs_client.create(doc)
+    resp = docs_client.documents.create(doc)
 
     documents = resp["documents"]
     assert len(documents) == 1
@@ -1619,7 +1623,7 @@ def test_create_binary_document_with_metadata(docs_client):
     metadata = Metadata(collections=["test-collection"])
     doc = BinaryDocument(content, uri, metadata)
 
-    resp = docs_client.create(doc)
+    resp = docs_client.documents.create(doc)
 
     documents = resp["documents"]
     assert len(documents) == 1
@@ -1649,7 +1653,7 @@ def test_create_multiple_documents_with_metadata(docs_client):
     doc_4_content = zlib.compress(b'xquery version "1.0-ml";\n\nfn:current-date()')
     doc_4 = BinaryDocument(doc_4_content, doc_4_uri, metadata)
 
-    resp = docs_client.create([doc_1, doc_2, doc_3, doc_4])
+    resp = docs_client.documents.create([doc_1, doc_2, doc_3, doc_4])
 
     documents = resp["documents"]
     assert len(documents) == 4
@@ -1691,7 +1695,7 @@ def test_create_single_document_with_default_metadata(docs_client):
     content = b"<root><child>data</child></root>"
     doc = RawDocument(content, uri, DocumentType.XML)
 
-    resp = docs_client.create([default_metadata, doc])
+    resp = docs_client.documents.create([default_metadata, doc])
 
     documents = resp["documents"]
     assert len(documents) == 1
@@ -1721,7 +1725,7 @@ def test_create_multiple_documents_with_default_metadata(docs_client):
     doc_4_content = zlib.compress(b'xquery version "1.0-ml";\n\nfn:current-date()')
     doc_4 = BinaryDocument(doc_4_content, doc_4_uri)
 
-    resp = docs_client.create([default_metadata, doc_1, doc_2, doc_3, doc_4])
+    resp = docs_client.documents.create([default_metadata, doc_1, doc_2, doc_3, doc_4])
 
     documents = resp["documents"]
     assert len(documents) == 4
@@ -1759,7 +1763,7 @@ def test_create_multiple_documents_with_default_metadata(docs_client):
 def test_create_only_default_metadata(docs_client):
     default_metadata = Metadata(collections=["test-collection"])
 
-    resp = docs_client.create(default_metadata)
+    resp = docs_client.documents.create(default_metadata)
 
     documents = resp["documents"]
     assert len(documents) == 0
@@ -1771,7 +1775,7 @@ def test_create_single_document_using_custom_database(docs_client):
     content = b"<root><child>data</child></root>"
     doc = RawDocument(content, uri, DocumentType.XML)
 
-    resp = docs_client.create(doc, database="Documents")
+    resp = docs_client.documents.create(doc, database="Documents")
 
     documents = resp["documents"]
     assert len(documents) == 1
@@ -1799,7 +1803,9 @@ def test_create_multiple_documents_using_custom_database(docs_client):
     doc_4_content = zlib.compress(b'xquery version "1.0-ml";\n\nfn:current-date()')
     doc_4 = BinaryDocument(doc_4_content, doc_4_uri)
 
-    resp = docs_client.create([doc_1, doc_2, doc_3, doc_4], database="Documents")
+    resp = docs_client.documents.create(
+        [doc_1, doc_2, doc_3, doc_4], database="Documents",
+    )
 
     documents = resp["documents"]
     assert len(documents) == 4
@@ -1839,7 +1845,7 @@ def test_create_document_with_temporal_collection(docs_client):
     content = "<root><child>data</child><systemStart/><systemEnd/></root>"
     doc = RawStringDocument(content, uri, DocumentType.XML)
 
-    resp = docs_client.create(doc, temporal_collection="temporal-collection")
+    resp = docs_client.documents.create(doc, temporal_collection="temporal-collection")
 
     documents = resp["documents"]
     assert len(documents) == 1
@@ -1860,7 +1866,7 @@ def test_delete_single_document(docs_client):
     mocker.mock_delete()
 
     try:
-        docs_client.delete(uri)
+        docs_client.documents.delete(uri)
     except MarkLogicError as err:
         pytest.fail(str(err))
 
@@ -1883,7 +1889,7 @@ def test_delete_multiple_documents(docs_client):
     mocker.mock_delete()
 
     try:
-        docs_client.delete(uris)
+        docs_client.documents.delete(uris)
     except MarkLogicError as err:
         pytest.fail(str(err))
 
@@ -1901,7 +1907,7 @@ def test_delete_document_with_single_category(docs_client):
     mocker.mock_delete()
 
     try:
-        docs_client.delete(uri, category="collections")
+        docs_client.documents.delete(uri, category="collections")
     except MarkLogicError as err:
         pytest.fail(str(err))
 
@@ -1920,7 +1926,7 @@ def test_delete_document_with_multiple_categories(docs_client):
     mocker.mock_delete()
 
     try:
-        docs_client.delete(uri, category=["properties", "collections"])
+        docs_client.documents.delete(uri, category=["properties", "collections"])
     except MarkLogicError as err:
         pytest.fail(str(err))
 
@@ -1938,7 +1944,7 @@ def test_delete_document_with_custom_database(docs_client):
     mocker.mock_delete()
 
     try:
-        docs_client.delete(uri, database="Documents")
+        docs_client.documents.delete(uri, database="Documents")
     except MarkLogicError as err:
         pytest.fail(str(err))
 
@@ -1962,7 +1968,7 @@ def test_delete_document_with_non_existing_database(docs_client):
     mocker.mock_delete()
 
     with pytest.raises(MarkLogicError) as err:
-        docs_client.delete(uri, database="Document")
+        docs_client.documents.delete(uri, database="Document")
 
     expected_error = (
         "[404 Not Found] (XDMP-NOSUCHDB) XDMP-NOSUCHDB: No such database Document"
@@ -1987,7 +1993,7 @@ def test_delete_document_with_temporal_collection(docs_client):
     mocker.mock_delete()
 
     try:
-        docs_client.delete(uri, temporal_collection="temporal-collection")
+        docs_client.documents.delete(uri, temporal_collection="temporal-collection")
     except MarkLogicError as err:
         pytest.fail(str(err))
 
@@ -2010,7 +2016,7 @@ def test_delete_document_with_wipe_temporal(docs_client):
     mocker.mock_delete()
 
     try:
-        docs_client.delete(
+        docs_client.documents.delete(
             uri,
             temporal_collection="temporal-collection",
             wipe_temporal=True,

@@ -1,10 +1,7 @@
-"""The ML Logs Client module.
+"""High-level Logs service.
 
-It exports high-level classes to easily read MarkLogic logs:
-    * LogsClient
-        An MLResourceClient calling /manage/v2/logs endpoint.
-    * LogType
-        An enumeration class representing MarkLogic log types.
+Provides parsed log retrieval from MarkLogic.
+Logic migrated from clients/logs_client.py.
 """
 
 from __future__ import annotations
@@ -12,9 +9,8 @@ from __future__ import annotations
 import re
 from collections.abc import Iterator
 from enum import Enum
-
 from mlclient.calls import LogsCall
-from mlclient.clients import MLResourceClient
+from mlclient.clients.rest_client import RestClient
 from mlclient.exceptions import InvalidLogTypeError, MarkLogicError
 
 
@@ -30,18 +26,7 @@ class LogType(Enum):
     def get(
         logs_type: str,
     ) -> LogType:
-        """Get a specific LogType enum for a string value.
-
-        Parameters
-        ----------
-        logs_type : str,
-            A log type
-
-        Returns
-        -------
-        LogType
-            A LogType enum
-        """
+        """Get a specific LogType enum for a string value."""
         if logs_type.lower() == "error":
             return LogType.ERROR
         if logs_type.lower() == "access":
@@ -57,32 +42,20 @@ class LogType(Enum):
         self,
         other: LogType,
     ):
-        """Compare LogTypes with LT operator.
-
-        Parameters
-        ----------
-        other : LogType
-            An other LogType instance
-
-        Returns
-        -------
-        bool
-            A comparison result.
-        """
+        """Compare LogTypes with LT operator."""
         return self.value < other.value
 
 
-class LogsClient(MLResourceClient):
-    """An MLResourceClient calling /manage/v2/logs endpoint.
-
-    It is a high-level class parsing MarkLogic response and extracting logs from
-    the server.
-    """
+class LogsService:
+    """High-level service for /manage/v2/logs endpoint."""
 
     _LOG_TYPES_RE = "|".join(t.value[:-3] for t in LogType)
     _FILENAME_RE = re.compile(rf"((.+)_)?({_LOG_TYPES_RE})Log(_([1-6]))?\.txt")
 
-    def get_logs(
+    def __init__(self, rest: RestClient):
+        self._rest = rest
+
+    def get(
         self,
         app_server: int | str | None = None,
         log_type: LogType = LogType.ERROR,
@@ -116,7 +89,7 @@ class LogsClient(MLResourceClient):
         Raises
         ------
         MarkLogicError
-            If MarkLogic returns an error (most likely XDMP-NOSUCHHOST)
+            If MarkLogic returns an error
         """
         call = self._get_call(
             app_server=app_server,
@@ -127,26 +100,18 @@ class LogsClient(MLResourceClient):
             host=host,
         )
 
-        resp = self.call(call)
+        resp = self._rest.call(call)
         resp_body = resp.json()
         if not resp.is_success:
             raise MarkLogicError(resp_body["errorResponse"])
 
         return self._parse_logs(log_type, resp_body)
 
-    def get_logs_list(
+    def list(
         self,
         host: str | None = None,
     ) -> dict:
         """Return a logs list from a MarkLogic server.
-
-        Result of this method is a parsed dict of log files with 3 keys:
-
-        * source: points to origin log list items
-        * parsed: points to parsed log list items
-          includes a filename, server, log type and a number of days
-        * grouped: points to a dictionary
-          { <host>: { <server>: { <log-type>: { <num-of-days>: <file-name> } } } }
 
         Parameters
         ----------
@@ -165,7 +130,7 @@ class LogsClient(MLResourceClient):
         """
         call = self._get_call(host=host)
 
-        resp = self.call(call)
+        resp = self._rest.call(call)
         resp_body = resp.json()
         if "errorResponse" in resp_body:
             raise MarkLogicError(resp_body["errorResponse"])
@@ -181,31 +146,7 @@ class LogsClient(MLResourceClient):
         regex: str | None = None,
         host: str | None = None,
     ) -> LogsCall:
-        """Prepare a LogsCall instance.
-
-        It initializes a LogsCall instance with adjusted parameters. When log type
-        is not ERROR, search params are ignored: start_time, end_time and regex.
-
-        Parameters
-        ----------
-        app_server : int | str | None, default None
-            An app server (port) with logs to retrieve
-        log_type : LogType | None, default None
-            A log type
-        start_time : str | None, default None
-            A start time to search error logs
-        end_time : str | None, default None
-            An end time to search error logs
-        regex : str | None, default None
-            A regex to search error logs
-        host : str | None, default None
-            The host from which to return the log data.
-
-        Returns
-        -------
-        LogsCall
-            A prepared LogsCall instance
-        """
+        """Prepare a LogsCall instance."""
         if app_server in [0, "0"]:
             app_server = "TaskServer"
         if log_type is None:
@@ -235,20 +176,7 @@ class LogsClient(MLResourceClient):
         log_type: LogType,
         resp_body: dict,
     ) -> Iterator[dict]:
-        """Parse MarkLogic logs depending on their type.
-
-        Parameters
-        ----------
-        log_type : LogType
-            A log type
-        resp_body : dict
-            A JSON response body from an MarkLogic server
-
-        Returns
-        -------
-        Iterator[dict]
-            A log details generator.
-        """
+        """Parse MarkLogic logs depending on their type."""
         logfile = resp_body["logfile"]
         if log_type == LogType.ERROR:
             logs = logfile.get("log", ())
@@ -262,18 +190,7 @@ class LogsClient(MLResourceClient):
         cls,
         resp_body: dict,
     ) -> dict:
-        """Parse MarkLogic logs list.
-
-        Parameters
-        ----------
-        resp_body : dict
-            A JSON response body from an MarkLogic server
-
-        Returns
-        -------
-        dict
-            A compiled information about ML log files
-        """
+        """Parse MarkLogic logs list."""
         count = resp_body["log-default-list"]["list-items"]["list-count"]["value"]
         if count > 0:
             source_items = resp_body["log-default-list"]["list-items"]["list-item"]
@@ -295,18 +212,7 @@ class LogsClient(MLResourceClient):
         cls,
         source_log_item: dict,
     ) -> dict:
-        """Parse MarkLogic logs list item.
-
-        Parameters
-        ----------
-        source_log_item : dict
-            A source item of log list received from an ML server.
-
-        Returns
-        -------
-        dict
-            A parsed log item
-        """
+        """Parse MarkLogic logs list item."""
         file_name = source_log_item["nameref"]
         host = source_log_item["roleref"]
         match = cls._FILENAME_RE.match(file_name)
@@ -325,18 +231,7 @@ class LogsClient(MLResourceClient):
     def _group_log_files(
         parsed_log_items: list[dict],
     ) -> dict:
-        """Group parsed logs items.
-
-        Parameters
-        ----------
-        parsed_log_items : list[dict]
-            Parsed log items
-
-        Returns
-        -------
-        dict
-            Log items grouped by server, log type and number of days
-        """
+        """Group parsed logs items."""
         grouped = {}
         for item in parsed_log_items:
             host = item["host"]

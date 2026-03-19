@@ -1,6 +1,6 @@
 import pytest
 
-from mlclient.clients import LogType
+from mlclient.services.logs import LogType
 from mlclient.exceptions import InvalidLogTypeError
 
 

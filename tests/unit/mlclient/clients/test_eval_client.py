@@ -5,7 +5,8 @@ from pathlib import Path
 import pytest
 import respx
 
-from mlclient.clients import LOCAL_NS, EvalClient
+from mlclient import MLClient
+from mlclient.services.eval import LOCAL_NS
 from mlclient.exceptions import (
     MarkLogicError,
     UnsupportedFileExtensionError,
@@ -16,8 +17,8 @@ from tests.utils.ml_mockers import MLRespXMocker
 
 
 @pytest.fixture(autouse=True)
-def eval_client() -> EvalClient:
-    return EvalClient()
+def eval_client() -> MLClient:
+    return MLClient()
 
 
 @pytest.fixture(autouse=True)
@@ -41,7 +42,7 @@ def test_eval_raw_xquery_empty(eval_client):
     ml_mocker.with_empty_response_body()
     ml_mocker.mock_post()
 
-    resp = eval_client.eval(xq=code)
+    resp = eval_client.eval.eval(xq=code)
 
     assert resp == []
 
@@ -58,7 +59,7 @@ def test_eval_raw_xquery_single_item(eval_client):
     ml_mocker.with_response_body_part("string", "")
     ml_mocker.mock_post()
 
-    resp = eval_client.eval(xq=code)
+    resp = eval_client.eval.eval(xq=code)
 
     assert resp == ""
 
@@ -76,7 +77,7 @@ def test_eval_raw_xquery_multiple_items(eval_client):
     ml_mocker.with_response_body_part("integer", "1")
     ml_mocker.mock_post()
 
-    resp = eval_client.eval(xq=code)
+    resp = eval_client.eval.eval(xq=code)
 
     assert resp == ["", 1]
 
@@ -93,7 +94,7 @@ def test_eval_raw_javascript_empty(eval_client):
     ml_mocker.with_empty_response_body()
     ml_mocker.mock_post()
 
-    resp = eval_client.eval(js=code)
+    resp = eval_client.eval.eval(js=code)
 
     assert resp == []
 
@@ -110,7 +111,7 @@ def test_eval_raw_javascript_single_item(eval_client):
     ml_mocker.with_response_body_part("string", "")
     ml_mocker.mock_post()
 
-    resp = eval_client.eval(js=code)
+    resp = eval_client.eval.eval(js=code)
 
     assert resp == ""
 
@@ -128,7 +129,7 @@ def test_eval_raw_javascript_multiple_items(eval_client):
     ml_mocker.with_response_body_part("integer", "1")
     ml_mocker.mock_post()
 
-    resp = eval_client.eval(js=code)
+    resp = eval_client.eval.eval(js=code)
 
     assert resp == ["", 1]
 
@@ -150,7 +151,7 @@ def test_eval_variables_explicit(eval_client):
     ml_mocker.with_response_body_part("string", "X")
     ml_mocker.mock_post()
 
-    resp = eval_client.eval(xq=code, variables={"VARIABLE": "X"})
+    resp = eval_client.eval.eval(xq=code, variables={"VARIABLE": "X"})
 
     assert resp == "X"
 
@@ -172,7 +173,7 @@ def test_eval_variables_using_kwargs(eval_client):
     ml_mocker.with_response_body_part("string", "X")
     ml_mocker.mock_post()
 
-    resp = eval_client.eval(xq=code, VARIABLE="X")
+    resp = eval_client.eval.eval(xq=code, VARIABLE="X")
 
     assert resp == "X"
 
@@ -198,7 +199,7 @@ def test_eval_variables_explicit_with_kwargs(eval_client):
     ml_mocker.with_response_body_part("integer", "3")
     ml_mocker.mock_post()
 
-    resp = eval_client.eval(xq=code, variables={"INTEGER1": 1}, INTEGER2=2)
+    resp = eval_client.eval.eval(xq=code, variables={"INTEGER1": 1}, INTEGER2=2)
 
     assert resp == 3
 
@@ -220,7 +221,7 @@ def test_eval_variables_using_namespace(eval_client):
     ml_mocker.with_response_body_part("string", "X")
     ml_mocker.mock_post()
 
-    resp = eval_client.eval(xq=code, variables={f"{{{LOCAL_NS}}}VARIABLE": "X"})
+    resp = eval_client.eval.eval(xq=code, variables={f"{{{LOCAL_NS}}}VARIABLE": "X"})
 
     assert resp == "X"
 
@@ -238,7 +239,7 @@ def test_eval_using_database_param(eval_client):
     ml_mocker.with_empty_response_body()
     ml_mocker.mock_post()
 
-    resp = eval_client.eval(xq=code, database="Documents")
+    resp = eval_client.eval.eval(xq=code, database="Documents")
 
     assert resp == []
 
@@ -256,7 +257,7 @@ def test_eval_using_txid_param(eval_client):
     ml_mocker.with_empty_response_body()
     ml_mocker.mock_post()
 
-    resp = eval_client.eval(xq=code, txid="transaction-id")
+    resp = eval_client.eval.eval(xq=code, txid="transaction-id")
 
     assert resp == []
 
@@ -278,7 +279,7 @@ def test_eval_file_xquery(eval_client):
             __file__,
             f"xquery-code.{ext}",
         )
-        resp = eval_client.eval(file=file_path)
+        resp = eval_client.eval.eval(file=file_path)
 
         assert resp == []
 
@@ -300,7 +301,7 @@ def test_eval_file_javascript(eval_client):
             __file__,
             f"javascript-code.{ext}",
         )
-        resp = eval_client.eval(file=file_path)
+        resp = eval_client.eval.eval(file=file_path)
 
         assert resp == []
 
@@ -323,7 +324,7 @@ def test_eval_with_marklogic_error(eval_client):
     ml_mocker.mock_post()
 
     with pytest.raises(MarkLogicError) as err:
-        eval_client.eval(xq=code)
+        eval_client.eval.eval(xq=code)
 
     expected_msg = (
         "XDMP-EXTVAR: (err:XPDY0002) "
@@ -336,7 +337,7 @@ def test_eval_with_marklogic_error(eval_client):
 
 def test_eval_file_unknown_extension(eval_client):
     with pytest.raises(UnsupportedFileExtensionError) as err:
-        eval_client.eval(file="unknown-extension.txt")
+        eval_client.eval.eval(file="unknown-extension.txt")
 
     assert err.value.args[0] == (
         "Unknown file extension! "
@@ -348,7 +349,7 @@ def test_eval_file_unknown_extension(eval_client):
 def test_eval_mixed_file_and_raw_xquery(eval_client):
     file_path = resources_utils.get_test_resource_path(__file__, "xquery-code.xq")
     with pytest.raises(WrongParametersError) as err:
-        eval_client.eval(file=file_path, xq="()")
+        eval_client.eval.eval(file=file_path, xq="()")
 
     expected_msg = "You cannot include both the file and the xquery parameter!"
     assert err.value.args[0] == expected_msg
@@ -357,7 +358,7 @@ def test_eval_mixed_file_and_raw_xquery(eval_client):
 def test_eval_mixed_file_and_raw_javascript(eval_client):
     file_path = resources_utils.get_test_resource_path(__file__, "javascript-code.js")
     with pytest.raises(WrongParametersError) as err:
-        eval_client.eval(file=file_path, js="Sequence.from([]);")
+        eval_client.eval.eval(file=file_path, js="Sequence.from([]);")
 
     expected_msg = "You cannot include both the file and the javascript parameter!"
     assert err.value.args[0] == expected_msg
@@ -365,7 +366,7 @@ def test_eval_mixed_file_and_raw_javascript(eval_client):
 
 def test_eval_mixed_raw_xquery_and_raw_javascript(eval_client):
     with pytest.raises(WrongParametersError) as err:
-        eval_client.eval(xq="()", js="Sequence.from([]);")
+        eval_client.eval.eval(xq="()", js="Sequence.from([]);")
 
     expected_msg = "You cannot include both the xquery and the javascript parameter!"
     assert err.value.args[0] == expected_msg
@@ -373,7 +374,7 @@ def test_eval_mixed_raw_xquery_and_raw_javascript(eval_client):
 
 def test_eval_no_code_params(eval_client):
     with pytest.raises(WrongParametersError) as err:
-        eval_client.eval()
+        eval_client.eval.eval()
 
     expected_msg = "You must include either the xquery or the javascript parameter!"
     assert err.value.args[0] == expected_msg
@@ -391,7 +392,7 @@ def test_eval_with_str_output_type(eval_client):
     ml_mocker.with_response_body_part("element", "<root/>")
     ml_mocker.mock_post()
 
-    resp = eval_client.eval(xq=code, output_type=str)
+    resp = eval_client.eval.eval(xq=code, output_type=str)
 
     assert isinstance(resp, str)
     assert resp == "<root/>"
@@ -409,7 +410,7 @@ def test_eval_with_bytes_output_type(eval_client):
     ml_mocker.with_response_body_part("element", "<root/>")
     ml_mocker.mock_post()
 
-    resp = eval_client.eval(xq=code, output_type=bytes)
+    resp = eval_client.eval.eval(xq=code, output_type=bytes)
 
     assert isinstance(resp, bytes)
     assert resp == b"<root/>"

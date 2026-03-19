@@ -5,7 +5,7 @@ import respx
 from pytest_mock import MockerFixture
 
 from mlclient import MLClient
-from mlclient.clients import ml_client as ml_client_module
+from mlclient.clients import http_client as http_client_module
 from tests.utils import resources as resources_utils
 from tests.utils.ml_mockers import MLRespXMocker
 
@@ -42,7 +42,7 @@ def test_request_when_disconnected():
     client = MLClient()
 
     assert not client.is_connected()
-    resp = client.get("/manage/v2/servers")
+    resp = client.http.get("/manage/v2/servers")
     assert not client.is_connected()
     assert resp.status_code == httpx.codes.OK
     assert resp.content == RESOURCES["test-get-response.xml"]["bytes"]
@@ -59,7 +59,7 @@ def test_get():
     ml_mocker.mock_get()
 
     with MLClient() as client:
-        resp = client.get("/manage/v2/servers")
+        resp = client.http.get("/manage/v2/servers")
     assert resp.status_code == httpx.codes.OK
     assert resp.content == RESOURCES["test-get-response.xml"]["bytes"]
     assert resp.headers.get("Content-Type") == "application/xml; charset=UTF-8"
@@ -80,7 +80,7 @@ def test_get_with_customized_params_and_headers():
     ml_mocker.mock_get()
 
     with MLClient() as client:
-        resp = client.get(
+        resp = client.http.get(
             "/manage/v2/servers",
             params={"format": "json"},
             headers={"custom-header": "custom-value"},
@@ -100,7 +100,7 @@ def test_post():
     ml_mocker.mock_post()
 
     with MLClient() as client:
-        resp = client.post("/manage/v2/databases/Documents")
+        resp = client.http.post("/manage/v2/databases/Documents")
     assert resp.status_code == httpx.codes.BAD_REQUEST
     assert resp.content == RESOURCES["test-post-response.xml"]["bytes"]
     assert resp.headers.get("Content-Type") == "application/xml; charset=UTF-8"
@@ -118,7 +118,7 @@ def test_post_with_customized_params_and_headers_and_body_different_than_json():
     ml_mocker.mock_post()
 
     with MLClient() as client:
-        resp = client.post(
+        resp = client.http.post(
             "/v1/eval",
             body={"xquery": "()"},
             params={"database": "Documents"},
@@ -141,7 +141,7 @@ def test_post_with_customized_params_and_headers_and_json_body():
     ml_mocker.mock_post()
 
     with MLClient() as client:
-        resp = client.post(
+        resp = client.http.post(
             "/manage/v2/databases/Documents",
             body={"operation": "clear-database"},
             params={"format": "json"},
@@ -162,7 +162,7 @@ def test_put():
     ml_mocker.mock_put()
 
     with MLClient() as client:
-        resp = client.put("/v1/documents")
+        resp = client.http.put("/v1/documents")
     assert resp.status_code == httpx.codes.BAD_REQUEST
     assert resp.content == RESOURCES["test-put-response.xml"]["bytes"]
     assert resp.headers.get("Content-Type") == "application/xml; charset=UTF-8"
@@ -181,7 +181,7 @@ def test_put_with_customized_params_and_headers_and_body_different_than_json():
     ml_mocker.mock_put()
 
     with MLClient() as client:
-        resp = client.put(
+        resp = client.http.put(
             "/v1/documents",
             body="<document/>",
             params={"database": "Documents", "uri": "/doc.xml"},
@@ -204,7 +204,7 @@ def test_put_with_customized_params_and_headers_and_json_body():
     ml_mocker.mock_put()
 
     with MLClient() as client:
-        resp = client.put(
+        resp = client.http.put(
             "/v1/documents",
             body={"document": {}},
             params={"database": "Documents", "uri": "/doc.json"},
@@ -223,7 +223,7 @@ def test_delete():
     ml_mocker.mock_delete()
 
     with MLClient() as client:
-        resp = client.delete("/manage/v2/databases/custom-db")
+        resp = client.http.delete("/manage/v2/databases/custom-db")
     assert resp.status_code == httpx.codes.NO_CONTENT
     assert resp.content == b""
 
@@ -239,7 +239,7 @@ def test_delete_with_customized_params_and_headers():
     ml_mocker.mock_delete()
 
     with MLClient() as client:
-        resp = client.delete(
+        resp = client.http.delete(
             "/manage/v2/databases/custom-db",
             params={"format": "json"},
             headers={"custom-header": "custom-value"},
@@ -263,10 +263,10 @@ def test_request_logs_warning_for_restart_location(mocker: MockerFixture):
     ml_mocker.with_response_header("Location", "/admin/v1/timestamp")
     ml_mocker.with_response_body(RESOURCES["restart-response.json"]["json"])
     ml_mocker.mock_put()
-    logger_warning = mocker.patch.object(ml_client_module.logger, "warning")
+    logger_warning = mocker.patch.object(http_client_module.logger, "warning")
 
     with MLClient() as client:
-        resp = client.put(
+        resp = client.http.put(
             "/manage/v2/servers/TestServer/properties",
             body={"port": 8111},
             params={"group-id": "Default", "format": "json"},
@@ -300,10 +300,10 @@ def test_request_does_not_log_warning_for_non_restart_202(
         RESOURCES["non-restart-accepted-response.json"]["json"],
     )
     ml_mocker.mock_put()
-    logger_warning = mocker.patch.object(ml_client_module.logger, "warning")
+    logger_warning = mocker.patch.object(http_client_module.logger, "warning")
 
     with MLClient() as client:
-        resp = client.put(
+        resp = client.http.put(
             "/manage/v2/forests",
             body={"operation": "attach"},
             params={"format": "json"},
@@ -315,52 +315,45 @@ def test_request_does_not_log_warning_for_non_restart_202(
 
 
 @respx.mock
-def test_request_logs_fine_formatted_response_with_body(mocker: MockerFixture):
+def test_request_logs_debug_response_retrieved(mocker: MockerFixture):
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url("http://localhost:8002/manage/v2/servers")
     ml_mocker.with_response_code(200)
     ml_mocker.with_response_content_type("text/plain")
     ml_mocker.with_response_body("ok")
     ml_mocker.mock_get()
-    logger_fine = mocker.patch.object(ml_client_module.logger, "fine")
-    mocker.patch.object(ml_client_module.logger, "isEnabledFor", return_value=True)
+    logger_debug = mocker.patch.object(http_client_module.logger, "debug")
 
     with MLClient() as client:
-        client.get("/manage/v2/servers")
+        client.http.get("/manage/v2/servers")
 
-    assert logger_fine.call_count == 2
-    response_log = logger_fine.call_args_list[-1].args[1]
-    assert "HTTP/1.1 200 OK" in response_log
-    assert "content-type: text/plain" in response_log
-    assert response_log.endswith("\n\nok")
+    debug_messages = [call.args[0] for call in logger_debug.call_args_list]
+    assert "Response retrieved" in debug_messages
 
 
 @respx.mock
-def test_request_logs_fine_formatted_response_without_body(mocker: MockerFixture):
+def test_request_logs_debug_response_retrieved_no_body(mocker: MockerFixture):
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url("http://localhost:8002/manage/v2/databases/custom-db")
     ml_mocker.with_response_code(204)
     ml_mocker.with_response_header("X-Test", "1")
     ml_mocker.with_empty_response_body()
     ml_mocker.mock_delete()
-    logger_fine = mocker.patch.object(ml_client_module.logger, "fine")
-    mocker.patch.object(ml_client_module.logger, "isEnabledFor", return_value=True)
+    logger_debug = mocker.patch.object(http_client_module.logger, "debug")
 
     with MLClient() as client:
-        client.delete("/manage/v2/databases/custom-db")
+        client.http.delete("/manage/v2/databases/custom-db")
 
-    assert logger_fine.call_count == 2
-    response_log = logger_fine.call_args_list[-1].args[1]
-    assert "HTTP/1.1 204 No Content" in response_log
-    assert "x-test: 1" in response_log
+    debug_messages = [call.args[0] for call in logger_debug.call_args_list]
+    assert "Response retrieved" in debug_messages
 
 
-def test_wait_for_restart_completion_builds_restart_waiter_and_uses_default_retry(
+def test_wait_for_restart_builds_restart_waiter_and_uses_default_retry(
     mocker: MockerFixture,
 ):
     waiter = mocker.MagicMock()
     restart_waiter_cls = mocker.patch.object(
-        ml_client_module,
+        http_client_module,
         "RestartWaiter",
         autospec=True,
         return_value=waiter,
@@ -374,7 +367,7 @@ def test_wait_for_restart_completion_builds_restart_waiter_and_uses_default_retr
         password="pass",
     ) as client:
         response = httpx.Response(202)
-        client.wait_for_restart_completion(
+        client.wait_for_restart(
             response=response,
             timeout=12.0,
             poll_interval=0.5,
@@ -388,16 +381,16 @@ def test_wait_for_restart_completion_builds_restart_waiter_and_uses_default_retr
         response,
         12.0,
         0.5,
-        ml_client_module.RESTART_RETRY_STRATEGY,
+        http_client_module.RESTART_RETRY_STRATEGY,
     )
 
 
-def test_wait_for_restart_completion_uses_custom_retry(
+def test_wait_for_restart_uses_custom_retry(
     mocker: MockerFixture,
 ):
     waiter = mocker.MagicMock()
     restart_waiter_cls = mocker.patch.object(
-        ml_client_module,
+        http_client_module,
         "RestartWaiter",
         autospec=True,
         return_value=waiter,
@@ -405,7 +398,7 @@ def test_wait_for_restart_completion_uses_custom_retry(
     custom_retry = object()
 
     with MLClient() as client:
-        client.wait_for_restart_completion(
+        client.wait_for_restart(
             response=None,
             timeout=12.0,
             poll_interval=0.5,

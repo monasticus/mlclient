@@ -40,12 +40,12 @@ class RestClient:
         """Return the underlying HTTP client."""
         return self._http
 
-    def call(self, resource_call: RestCall) -> Response:
+    def call(self, call_: RestCall) -> Response:
         """Send a request using a RestCall object.
 
         Parameters
         ----------
-        resource_call : RestCall
+        call_ : RestCall
             A specific endpoint call implementation
 
         Returns
@@ -54,11 +54,11 @@ class RestClient:
             An HTTP response
         """
         return self._http.request(
-            method=resource_call.method,
-            endpoint=resource_call.endpoint,
-            params=resource_call.params,
-            headers=resource_call.headers,
-            body=resource_call.body,
+            method=call_.method,
+            endpoint=call_.endpoint,
+            params=call_.params,
+            headers=call_.headers,
+            body=call_.body,
         )
 
     @cached_property

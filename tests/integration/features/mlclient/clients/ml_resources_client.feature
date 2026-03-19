@@ -2,7 +2,7 @@ Feature: Test MLClient
 
   Scenario: Test /v1/eval endpoint
 
-    Given I initialized an MLClient's connection
+    Given I connected to MarkLogic
     And I prepared the following xquery code to eval
       """
       xquery version '1.0-ml';
@@ -25,7 +25,7 @@ Feature: Test MLClient
 
   Scenario: Test /manage/v2/logs endpoint (ErrorLog.txt)
 
-    Given I initialized an MLClient's connection
+    Given I connected to MarkLogic
     And I produce 10 test logs
       """
       Test Log <i>
@@ -44,7 +44,7 @@ Feature: Test MLClient
 
   Scenario: Test /manage/v2/logs endpoint (AccessLog.txt)
 
-    Given I initialized an MLClient's connection
+    Given I connected to MarkLogic
     And I produce 10 test logs
       """
       Test Log <i>
@@ -63,7 +63,7 @@ Feature: Test MLClient
 
   Scenario: Test /manage/v2/logs endpoint (RequestLog.txt)
 
-    Given I initialized an MLClient's connection
+    Given I connected to MarkLogic
 
     When I get request logs
       | data_format |

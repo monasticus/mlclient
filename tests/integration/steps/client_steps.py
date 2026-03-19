@@ -11,23 +11,9 @@ from mlclient.calls import EvalCall
 from .common import parse_step_input
 
 
-@given(
-    parsers.parse("I initialized an {client_type}'s connection"),
-    target_fixture="client",
-)
-def init_client(
-    client_type: str,
-) -> MLClient:
-    if client_type == "MLClient":
-        client = MLClient(
-            auth_method="digest",
-        )
-    else:
-        msg = (
-            f"Incorrect client type! "
-            f"Expected: [MLClient], got: [{client_type}]"
-        )
-        raise ValueError(msg)
+@given("I connected to MarkLogic", target_fixture="client")
+def init_client() -> MLClient:
+    client = MLClient(auth_method="digest")
     client.connect()
     return client
 

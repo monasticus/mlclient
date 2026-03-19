@@ -25,7 +25,7 @@ Below you can find a few examples of basic usage. Read more in the deep document
 
 -------------------
 
-Low-level MLClient::
+Low-level (raw HTTP)::
 
    >>> from mlclient import MLClient
    >>> config = {
@@ -34,9 +34,11 @@ Low-level MLClient::
    ...     "username": "admin",
    ...     "password": "admin",
    ... }
-   >>> with MLClient(**config) as client:
-   ...     resp = client.post(endpoint="/v1/eval",
-   ...                        body={"xquery": "xdmp:database() => xdmp:database-name()"})
+   >>> with MLClient(**config) as ml:
+   ...     resp = ml.http.post(
+   ...         "/v1/eval",
+   ...         body={"xquery": "xdmp:database() => xdmp:database-name()"},
+   ...     )
    ...     print(resp.text)
    ...
    --6a5df7d535c71968
@@ -47,17 +49,19 @@ Low-level MLClient::
    --6a5df7d535c71968--
 
 
-Medium-level MLResourceClient::
+Mid-level (REST API groups)::
 
-   >>> from mlclient import MLResourceClient
+   >>> from mlclient import MLClient
    >>> config = {
    ...     "host": "localhost",
    ...     "port": 8002,
    ...     "username": "admin",
    ...     "password": "admin",
    ... }
-   >>> with MLResourceClient(**config) as client:
-   ...     resp = client.eval(xquery="xdmp:database() => xdmp:database-name()")
+   >>> with MLClient(**config) as ml:
+   ...     resp = ml.rest.eval.post(
+   ...         xquery="xdmp:database() => xdmp:database-name()",
+   ...     )
    ...     print(resp.text)
    ...
    --6a5df7d535c71968
@@ -68,19 +72,20 @@ Medium-level MLResourceClient::
    --6a5df7d535c71968--
 
 
-Parsing response::
+High-level (services)::
 
-   >>> from mlclient import MLResourceClient, MLResponseParser
+   >>> from mlclient import MLClient
    >>> config = {
    ...     "host": "localhost",
    ...     "port": 8002,
    ...     "username": "admin",
    ...     "password": "admin",
    ... }
-   >>> with MLResourceClient(**config) as client:
-   ...     resp = client.eval(xquery="xdmp:database() => xdmp:database-name()")
-   ...     parsed_resp = MLResponseParser.parse(resp)
-   ...     print(parsed_resp)
+   >>> with MLClient(**config) as ml:
+   ...     result = ml.eval.xquery(
+   ...         "xdmp:database() => xdmp:database-name()",
+   ...     )
+   ...     print(result)
    ...
    App-Services
 

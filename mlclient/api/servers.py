@@ -28,6 +28,7 @@ class ServersApi:
 
     def get_list(
         self,
+        *,
         data_format: str | None = None,
         group_id: str | None = None,
         view: str | None = None,
@@ -67,6 +68,7 @@ class ServersApi:
     def create(
         self,
         body: str | dict,
+        *,
         group_id: str | None = None,
         server_type: str | None = None,
     ) -> Response:
@@ -99,6 +101,7 @@ class ServersApi:
         self,
         server: str,
         group_id: str,
+        *,
         data_format: str | None = None,
         view: str | None = None,
         host_id: str | None = None,
@@ -177,6 +180,7 @@ class ServersApi:
         self,
         server: str,
         group_id: str,
+        *,
         data_format: str | None = None,
     ) -> Response:
         """Send a GET to /manage/v2/servers/{id|name}/properties.

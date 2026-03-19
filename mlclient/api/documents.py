@@ -23,6 +23,7 @@ class DocumentsApi:
     def get(
         self,
         uri: str | list,
+        *,
         database: str | None = None,
         category: str | list | None = None,
         data_format: str | None = None,
@@ -91,6 +92,7 @@ class DocumentsApi:
     def post(
         self,
         body_parts: list[DocumentsBodyPart],
+        *,
         database: str | None = None,
         transform: str | None = None,
         transform_params: dict | None = None,
@@ -147,6 +149,7 @@ class DocumentsApi:
     def delete(
         self,
         uri: str | list,
+        *,
         database: str | None = None,
         category: str | list | None = None,
         txid: str | None = None,

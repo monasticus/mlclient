@@ -30,6 +30,7 @@ class ForestsApi:
 
     def get_list(
         self,
+        *,
         data_format: str | None = None,
         view: str | None = None,
         database: str | None = None,
@@ -79,6 +80,7 @@ class ForestsApi:
     def create(
         self,
         body: str | dict,
+        *,
         wait_for_forest_to_mount: bool | None = None,
     ) -> Response:
         """Send a POST request to the /manage/v2/forests endpoint.
@@ -124,6 +126,7 @@ class ForestsApi:
     def get(
         self,
         forest: str,
+        *,
         data_format: str | None = None,
         view: str | None = None,
     ) -> Response:
@@ -176,6 +179,7 @@ class ForestsApi:
         self,
         forest: str,
         level: str,
+        *,
         replicas: str | None = None,
     ) -> Response:
         """Send a DELETE request to the /manage/v2/forests/{id|name} endpoint.
@@ -205,6 +209,7 @@ class ForestsApi:
     def get_properties(
         self,
         forest: str,
+        *,
         data_format: str | None = None,
     ) -> Response:
         """Send a GET to /manage/v2/forests/{id|name}/properties.

@@ -19,10 +19,6 @@ It exports 5 classes:
         A Document implementation representing a single MarkLogic document.
     * MetadataDocument
         A Document implementation representing a single MarkLogic document's metadata.
-    * DocumentFactory
-        A factory class instantiating a Document implementation classes.
-    * MetadataFactory
-        A factory class instantiating a Metadata class from a file.
     * Metadata
         A class representing MarkLogic's document metadata.
     * Permission:
@@ -111,6 +107,102 @@ class Document(metaclass=ABCMeta):
             and not callable(subclass.content_bytes)
             and "content_string" in subclass.__dict__
             and not callable(subclass.content_string)
+        )
+
+    @classmethod
+    def create(
+        cls,
+        content: ElemTree.Element | dict | str | bytes | None = None,
+        doc_type: DocumentType | str | None = None,
+        uri: str | None = None,
+        metadata: Metadata | None = None,
+        temporal_collection: str | None = None,
+    ) -> Document:
+        """Instantiate Document based on the document or content type.
+
+        Parameters
+        ----------
+        content : ElemTree.Element | dict | str | bytes | None, default None
+            A document content
+        doc_type : DocumentType | str | None, default None
+            A document type
+        uri : str | None, default None
+            A document URI
+        metadata : Metadata | None, default None
+            A document metadata
+        temporal_collection : str | None, default None
+            The temporal collection
+
+        Returns
+        -------
+        Document
+            A Document implementation instance
+        """
+        if isinstance(doc_type, str):
+            doc_type = DocumentType(doc_type)
+
+        if content is None and doc_type is None:
+            return MetadataDocument(uri=uri, metadata=metadata)
+
+        impl = _get_document_impl(content, doc_type)
+        return impl(
+            content=content,
+            uri=uri,
+            metadata=metadata,
+            temporal_collection=temporal_collection,
+        )
+
+    @classmethod
+    def create_raw(
+        cls,
+        content: bytes | str,
+        doc_type: DocumentType | str,
+        uri: str | None = None,
+        metadata: bytes | str | None = None,
+        temporal_collection: str | None = None,
+    ) -> Document:
+        """Instantiate Document based on the document type.
+
+        Parameters
+        ----------
+        content : bytes | str
+            A document content
+        doc_type : DocumentType | str
+            A document type
+        uri : str | None, default None
+            A document URI
+        metadata : bytes | str | None, default None
+            A document metadata
+        temporal_collection : str | None, default None
+            The temporal collection
+
+        Returns
+        -------
+        Document
+            A raw Document implementation instance
+
+        Raises
+        ------
+        NotImplementedError
+            If content type is neither bytes nor str
+        """
+        if isinstance(doc_type, str):
+            doc_type = DocumentType(doc_type)
+
+        if isinstance(content, bytes):
+            impl = RawDocument
+        elif isinstance(content, str):
+            impl = RawStringDocument
+        else:
+            msg = "Raw document can store content only in [bytes] or [str] format!"
+            raise NotImplementedError(msg)
+
+        return impl(
+            content=content,
+            doc_type=doc_type,
+            uri=uri,
+            metadata=metadata,
+            temporal_collection=temporal_collection,
         )
 
     @property
@@ -680,154 +772,77 @@ class MetadataDocument(Document):
         return
 
 
-class DocumentFactory:
-    """A factory class instantiating a Document implementation classes."""
+def _get_document_impl(
+    content: ElemTree.Element | dict | str | bytes | None,
+    doc_type: DocumentType | None,
+):
+    """Return Document's implementation based on document type or content.
 
-    @classmethod
-    def build_document(
-        cls,
-        content: ElemTree.Element | dict | str | bytes | None = None,
-        doc_type: DocumentType | str | None = None,
-        uri: str | None = None,
-        metadata: Metadata | None = None,
-        temporal_collection: str | None = None,
-    ) -> Document:
-        """Instantiate Document based on the document or content type.
+    Parameters
+    ----------
+    content : ElemTree.Element | dict | str | bytes | None
+        A document content
+    doc_type : DocumentType | None
+        A document type
 
-        Parameters
-        ----------
-        content : ElemTree.Element | dict | str | bytes | None, default None
-            A document content
-        doc_type : DocumentType | str | None, default None
-            A document type
-        uri : str | None, default None
-            A document URI
-        metadata : Metadata | None, default None
-            A document metadata
-        temporal_collection : str | None, default None
-            The temporal collection
-
-        Returns
-        -------
-        Document
-            A Document implementation instance
-        """
-        if isinstance(doc_type, str):
-            doc_type = DocumentType(doc_type)
-
-        if content is None and doc_type is None:
-            return MetadataDocument(uri=uri, metadata=metadata)
-
-        impl = cls._get_impl(content, doc_type)
-        return impl(
-            content=content,
-            uri=uri,
-            metadata=metadata,
-            temporal_collection=temporal_collection,
+    Returns
+    -------
+    Document
+        A Document's subclass reference
+    """
+    if doc_type == DocumentType.XML:
+        impl = XMLDocument
+    elif doc_type == DocumentType.JSON:
+        impl = JSONDocument
+    elif doc_type == DocumentType.TEXT:
+        impl = TextDocument
+    elif doc_type == DocumentType.BINARY:
+        impl = BinaryDocument
+    elif isinstance(content, ElemTree.Element):
+        impl = XMLDocument
+    elif isinstance(content, dict):
+        impl = JSONDocument
+    elif isinstance(content, str):
+        impl = TextDocument
+    elif isinstance(content, bytes):
+        impl = BinaryDocument
+    else:
+        msg = (
+            "Unsupported document type! "
+            "Document types are: XML, JSON, TEXT, BINARY!"
         )
-
-    @classmethod
-    def build_raw_document(
-        cls,
-        content: bytes | str,
-        doc_type: DocumentType | str,
-        uri: str | None = None,
-        metadata: bytes | str | None = None,
-        temporal_collection: str | None = None,
-    ) -> Document:
-        """Instantiate Document based on the document type.
-
-        Parameters
-        ----------
-        content : bytes | str
-            A document content
-        doc_type : DocumentType | str
-            A document type
-        uri : str | None, default None
-            A document URI
-        metadata : bytes | str | None, default None
-            A document metadata
-        temporal_collection : str | None, default None
-            The temporal collection
-
-        Returns
-        -------
-        Document
-            A raw Document implementation instance
-
-        Raises
-        ------
-        NotImplementedError
-            If content type is neither bytes nor str
-        """
-        if isinstance(doc_type, str):
-            doc_type = DocumentType(doc_type)
-
-        if isinstance(content, bytes):
-            impl = RawDocument
-        elif isinstance(content, str):
-            impl = RawStringDocument
-        else:
-            msg = "Raw document can store content only in [bytes] or [str] format!"
-            raise NotImplementedError(msg)
-
-        return impl(
-            content=content,
-            doc_type=doc_type,
-            uri=uri,
-            metadata=metadata,
-            temporal_collection=temporal_collection,
-        )
-
-    @classmethod
-    def _get_impl(
-        cls,
-        content: ElemTree.Element | dict | str | bytes | None,
-        doc_type: DocumentType | None,
-    ):
-        """Return Document's implementation based on document type or content.
-
-        Parameters
-        ----------
-        content : ElemTree.Element | dict | str | bytes | None
-            A document content
-        doc_type : DocumentType | None
-            A document type
-
-        Returns
-        -------
-        Document
-            A Document's subclass reference
-        """
-        if doc_type == DocumentType.XML:
-            impl = XMLDocument
-        elif doc_type == DocumentType.JSON:
-            impl = JSONDocument
-        elif doc_type == DocumentType.TEXT:
-            impl = TextDocument
-        elif doc_type == DocumentType.BINARY:
-            impl = BinaryDocument
-        elif isinstance(content, ElemTree.Element):
-            impl = XMLDocument
-        elif isinstance(content, dict):
-            impl = JSONDocument
-        elif isinstance(content, str):
-            impl = TextDocument
-        elif isinstance(content, bytes):
-            impl = BinaryDocument
-        else:
-            msg = (
-                "Unsupported document type! "
-                "Document types are: XML, JSON, TEXT, BINARY!"
-            )
-            raise NotImplementedError(msg)
-        return impl
+        raise NotImplementedError(msg)
+    return impl
 
 
-class MetadataFactory:
-    """A factory class instantiating a Metadata class from a file."""
+class Metadata:
+    """A class representing MarkLogic's document metadata."""
 
-    _XML_MAPPINGS: ClassVar[dict] = {
+    _COLLECTIONS_KEY: str = "collections"
+    _PERMISSIONS_KEY: str = "permissions"
+    _PROPERTIES_KEY: str = "properties"
+    _QUALITY_KEY: str = "quality"
+    _METADATA_VALUES_KEY: str = "metadataValues"
+
+    _METADATA_TAG: str = "rapi:metadata"
+    _COLLECTIONS_TAG: str = "rapi:collections"
+    _COLLECTION_TAG: str = "rapi:collection"
+    _PERMISSIONS_TAG: str = "rapi:permissions"
+    _PERMISSION_TAG: str = "rapi:permission"
+    _ROLE_NAME_TAG: str = "rapi:role-name"
+    _CAPABILITY_TAG: str = "rapi:capability"
+    _PROPERTIES_TAG: str = "prop:properties"
+    _QUALITY_TAG: str = "rapi:quality"
+    _METADATA_VALUES_TAG: str = "rapi:metadata-values"
+    _METADATA_VALUE_TAG: str = "rapi:metadata-value"
+    _KEY_ATTR: str = "key"
+
+    _RAPI_NS_PREFIX: str = "xmlns:rapi"
+    _PROP_NS_PREFIX: str = "xmlns:prop"
+    _RAPI_NS_URI: str = "http://marklogic.com/rest-api"
+    _PROP_NS_URI: str = "http://marklogic.com/xdmp/property"
+
+    _XML_FILE_MAPPINGS: ClassVar[dict] = {
         "collections": "collection",
         "permissions": "permission",
         "metadata-values": "metadata-value",
@@ -889,7 +904,7 @@ class MetadataFactory:
                 "http://marklogic.com/xdmp/property": None,
             },
         ).get("metadata")
-        for items, item in cls._XML_MAPPINGS.items():
+        for items, item in cls._XML_FILE_MAPPINGS.items():
             if items in raw_metadata:
                 values = raw_metadata[items][item]
                 if not isinstance(values, list):
@@ -920,34 +935,6 @@ class MetadataFactory:
         if "quality" in raw_metadata:
             raw_metadata["quality"] = int(raw_metadata["quality"])
         return Metadata(**raw_metadata)
-
-
-class Metadata:
-    """A class representing MarkLogic's document metadata."""
-
-    _COLLECTIONS_KEY: str = "collections"
-    _PERMISSIONS_KEY: str = "permissions"
-    _PROPERTIES_KEY: str = "properties"
-    _QUALITY_KEY: str = "quality"
-    _METADATA_VALUES_KEY: str = "metadataValues"
-
-    _METADATA_TAG: str = "rapi:metadata"
-    _COLLECTIONS_TAG: str = "rapi:collections"
-    _COLLECTION_TAG: str = "rapi:collection"
-    _PERMISSIONS_TAG: str = "rapi:permissions"
-    _PERMISSION_TAG: str = "rapi:permission"
-    _ROLE_NAME_TAG: str = "rapi:role-name"
-    _CAPABILITY_TAG: str = "rapi:capability"
-    _PROPERTIES_TAG: str = "prop:properties"
-    _QUALITY_TAG: str = "rapi:quality"
-    _METADATA_VALUES_TAG: str = "rapi:metadata-values"
-    _METADATA_VALUE_TAG: str = "rapi:metadata-value"
-    _KEY_ATTR: str = "key"
-
-    _RAPI_NS_PREFIX: str = "xmlns:rapi"
-    _PROP_NS_PREFIX: str = "xmlns:prop"
-    _RAPI_NS_URI: str = "http://marklogic.com/rest-api"
-    _PROP_NS_URI: str = "http://marklogic.com/xdmp/property"
 
     def __init__(
         self,

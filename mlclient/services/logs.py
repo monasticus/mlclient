@@ -58,6 +58,7 @@ class LogsService:
         self,
         app_server: int | str | None = None,
         log_type: LogType = LogType.ERROR,
+        *,
         start_time: str | None = None,
         end_time: str | None = None,
         regex: str | None = None,

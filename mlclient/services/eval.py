@@ -36,6 +36,7 @@ class EvalService:
     def xquery(
         self,
         code: str,
+        *,
         variables: dict | None = None,
         database: str | None = None,
         txid: str | None = None,
@@ -79,6 +80,7 @@ class EvalService:
     def javascript(
         self,
         code: str,
+        *,
         variables: dict | None = None,
         database: str | None = None,
         txid: str | None = None,
@@ -119,9 +121,58 @@ class EvalService:
         return self._eval(js=code, variables=variables, database=database,
                           txid=txid, output_type=output_type, **kwargs)
 
+    def xqy(
+        self,
+        code: str,
+        *,
+        variables: dict | None = None,
+        database: str | None = None,
+        txid: str | None = None,
+        output_type: type | None = None,
+        **kwargs,
+    ) -> (
+        bytes
+        | str
+        | int
+        | float
+        | bool
+        | dict
+        | ElemTree.ElementTree
+        | ElemTree.Element
+        | list
+    ):
+        """Evaluate XQuery code. Alias for :meth:`xquery`."""
+        return self.xquery(code, variables=variables, database=database,
+                           txid=txid, output_type=output_type, **kwargs)
+
+    def js(
+        self,
+        code: str,
+        *,
+        variables: dict | None = None,
+        database: str | None = None,
+        txid: str | None = None,
+        output_type: type | None = None,
+        **kwargs,
+    ) -> (
+        bytes
+        | str
+        | int
+        | float
+        | bool
+        | dict
+        | ElemTree.ElementTree
+        | ElemTree.Element
+        | list
+    ):
+        """Evaluate JavaScript code. Alias for :meth:`javascript`."""
+        return self.javascript(code, variables=variables, database=database,
+                               txid=txid, output_type=output_type, **kwargs)
+
     def file(
         self,
         path: str,
+        *,
         variables: dict | None = None,
         database: str | None = None,
         txid: str | None = None,
@@ -164,6 +215,7 @@ class EvalService:
 
     def eval(
         self,
+        *,
         file: str | None = None,
         xq: str | None = None,
         js: str | None = None,

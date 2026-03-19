@@ -29,6 +29,7 @@ class DatabasesApi:
 
     def get_list(
         self,
+        *,
         data_format: str | None = None,
         view: str | None = None,
     ) -> Response:
@@ -72,6 +73,7 @@ class DatabasesApi:
     def get(
         self,
         database: str,
+        *,
         data_format: str | None = None,
         view: str | None = None,
     ) -> Response:
@@ -122,6 +124,7 @@ class DatabasesApi:
     def delete(
         self,
         database: str,
+        *,
         forest_delete: str | None = None,
     ) -> Response:
         """Send a DELETE request to the /manage/v2/databases/{id|name} endpoint.
@@ -148,6 +151,7 @@ class DatabasesApi:
     def get_properties(
         self,
         database: str,
+        *,
         data_format: str | None = None,
     ) -> Response:
         """Send a GET to /manage/v2/databases/{id|name}/properties.

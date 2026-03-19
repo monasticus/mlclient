@@ -43,10 +43,8 @@ from mlclient.clients import MLClient
 from mlclient.mimetypes import Mimetypes
 from mlclient.structures import (
     Document,
-    DocumentFactory,
     DocumentType,
     Metadata,
-    MetadataFactory,
 )
 
 logger = logging.getLogger(__name__)
@@ -582,9 +580,9 @@ class DocumentsLoader:
         metadata = cls._load_metadata(path, raw)
 
         if raw:
-            factory_function = DocumentFactory.build_raw_document
+            factory_function = Document.create_raw
         else:
-            factory_function = DocumentFactory.build_document
+            factory_function = Document.create
 
         return factory_function(
             content=content,
@@ -669,7 +667,7 @@ class DocumentsLoader:
         if raw:
             with Path(metadata_file_path).open("rb") as metadata_file:
                 return metadata_file.read()
-        return MetadataFactory.from_file(metadata_file_path)
+        return Metadata.from_file(metadata_file_path)
 
 
 class DocumentJobReport:

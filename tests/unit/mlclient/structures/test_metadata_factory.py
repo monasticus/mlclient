@@ -1,6 +1,6 @@
 from deepdiff import DeepDiff
 
-from mlclient.structures import MetadataFactory
+from mlclient.structures import Metadata
 from tests.utils import resources as resources_utils
 
 
@@ -10,7 +10,7 @@ def test_from_json_file():
         "metadata.json",
     )
 
-    actual_metadata = MetadataFactory.from_file(metadata_file_path)
+    actual_metadata = Metadata.from_file(metadata_file_path)
 
     expected_metadata_json = {
         "collections": ["collection-1"],
@@ -39,7 +39,7 @@ def test_from_xml_file():
         "metadata.xml",
     )
 
-    actual_metadata = MetadataFactory.from_file(metadata_file_path)
+    actual_metadata = Metadata.from_file(metadata_file_path)
 
     expected_metadata_json = {
         "collections": ["collection-1"],

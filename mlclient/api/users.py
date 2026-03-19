@@ -28,6 +28,7 @@ class UsersApi:
 
     def get_list(
         self,
+        *,
         data_format: str | None = None,
         view: str | None = None,
     ) -> Response:
@@ -70,6 +71,7 @@ class UsersApi:
     def get(
         self,
         user: str,
+        *,
         data_format: str | None = None,
         view: str | None = None,
     ) -> Response:
@@ -115,6 +117,7 @@ class UsersApi:
     def get_properties(
         self,
         user: str,
+        *,
         data_format: str | None = None,
     ) -> Response:
         """Send a GET to /manage/v2/users/{id|name}/properties.

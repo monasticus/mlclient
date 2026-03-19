@@ -21,6 +21,7 @@ class EvalApi:
 
     def post(
         self,
+        *,
         xquery: str | None = None,
         javascript: str | None = None,
         variables: dict | None = None,

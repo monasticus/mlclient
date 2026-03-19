@@ -202,11 +202,11 @@ CREATE / UPDATE
 .. code-block:: python
 
     >>> from mlclient import MLManager
-    >>> from mlclient.structures import DocumentFactory
+    >>> from mlclient.structures import Document
 
     >>> uri = "/doc-2.json"
     >>> content = {"root": {"child": "data"}}
-    >>> doc = DocumentFactory.build_document(uri=uri, content=content)
+    >>> doc = Document.create(uri=uri, content=content)
     >>> doc
     <mlclient.structures.documents.JSONDocument object at 0x7f9200920f70>
 
@@ -222,12 +222,12 @@ CREATE / UPDATE
 .. code-block:: python
 
     >>> from mlclient import MLManager
-    >>> from mlclient.structures import DocumentFactory, Metadata
+    >>> from mlclient.structures import Document, Metadata
 
     >>> uri = "/doc-2.json"
     >>> content = {"root": {"child": "data"}}
     >>> metadata = Metadata(collections=["some-collection"])
-    >>> doc = DocumentFactory.build_document(uri=uri, content=content, metadata=metadata)
+    >>> doc = Document.create(uri=uri, content=content, metadata=metadata)
 
     >>> manager = MLManager("local")
     >>> with manager.get_client("app-services") as ml:
@@ -241,11 +241,11 @@ CREATE / UPDATE
 .. code-block:: python
 
     >>> from mlclient import MLManager
-    >>> from mlclient.structures import DocumentFactory, DocumentType
+    >>> from mlclient.structures import Document, DocumentType
 
     >>> uri = "/doc-1.xml"
     >>> content = b"<root><child>data</child></root>"
-    >>> doc = DocumentFactory.build_raw_document(
+    >>> doc = Document.create_raw(
     ...     uri=uri,
     ...     content=content,
     ...     doc_type=DocumentType.XML,
@@ -265,12 +265,12 @@ CREATE / UPDATE
 .. code-block:: python
 
     >>> from mlclient import MLManager
-    >>> from mlclient.structures import DocumentFactory, DocumentType
+    >>> from mlclient.structures import Document, DocumentType
 
     >>> uri = "/doc-1.xml"
     >>> content = b"<root><child>data</child></root>"
     >>> metadata = b'{"collections": ["some-collection"]}'
-    >>> doc = DocumentFactory.build_raw_document(
+    >>> doc = Document.create_raw(
     ...     uri=uri,
     ...     content=content,
     ...     doc_type=DocumentType.XML,
@@ -288,11 +288,11 @@ CREATE / UPDATE
 .. code-block:: python
 
     >>> from mlclient import MLManager
-    >>> from mlclient.structures import DocumentFactory
+    >>> from mlclient.structures import Document
 
     >>> uri = "/doc-2.json"
     >>> content = {"root": {"child": "data"}}
-    >>> doc = DocumentFactory.build_document(uri=uri, content=content)
+    >>> doc = Document.create(uri=uri, content=content)
     >>> doc
     <mlclient.structures.documents.JSONDocument object at 0x7f9200920f70>
 
@@ -327,11 +327,11 @@ CREATE / UPDATE
 .. code-block:: python
 
     >>> from mlclient import MLManager
-    >>> from mlclient.structures import DocumentFactory, DocumentType
+    >>> from mlclient.structures import Document, DocumentType
 
     >>> uri_1 = "/doc-1.xml"
     >>> content_1 = b"<root><child>data</child></root>"
-    >>> doc_1 = DocumentFactory.build_raw_document(
+    >>> doc_1 = Document.create_raw(
     ...     uri=uri_1,
     ...     content=content_1,
     ...     doc_type=DocumentType.XML,
@@ -339,7 +339,7 @@ CREATE / UPDATE
 
     >>> uri_2 = "/doc-2.json"
     >>> content_2 = {"root": {"child": "data"}}
-    >>> doc_2 = DocumentFactory.build_document(uri=uri_2, content=content_2)
+    >>> doc_2 = Document.create(uri=uri_2, content=content_2)
 
 
     >>> manager = MLManager("local")
@@ -354,13 +354,13 @@ CREATE / UPDATE
 .. code-block:: python
 
     >>> from mlclient import MLManager
-    >>> from mlclient.structures import DocumentFactory, DocumentType, Metadata
+    >>> from mlclient.structures import Document, DocumentType, Metadata
 
     >>> default_metadata = Metadata(collections=["some-collection"])
 
     >>> uri_1 = "/doc-1.xml"
     >>> content_1 = b"<root><child>data</child></root>"
-    >>> doc_1 = DocumentFactory.build_raw_document(
+    >>> doc_1 = Document.create_raw(
     ...     uri=uri_1,
     ...     content=content_1,
     ...     doc_type=DocumentType.XML,
@@ -368,7 +368,7 @@ CREATE / UPDATE
 
     >>> uri_2 = "/doc-2.json"
     >>> content_2 = {"root": {"child": "data"}}
-    >>> doc_2 = DocumentFactory.build_document(uri=uri_2, content=content_2)
+    >>> doc_2 = Document.create(uri=uri_2, content=content_2)
 
 
     >>> manager = MLManager("local")

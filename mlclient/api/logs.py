@@ -22,6 +22,7 @@ class LogsApi:
     def get(
         self,
         filename: str,
+        *,
         data_format: str | None = None,
         host: str | None = None,
         start_time: str | None = None,

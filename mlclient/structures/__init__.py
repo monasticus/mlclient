@@ -26,10 +26,6 @@ This package exports the following classes:
         A Document implementation representing a single MarkLogic document.
     * MetadataDocument
         A Document implementation representing a single MarkLogic document's metadata.
-    * DocumentFactory
-        A factory class instantiating a Document implementation classes.
-    * MetadataFactory
-        A factory class instantiating a Metadata class from a file.
     * Metadata
         A class representing MarkLogic's document metadata.
     * Permission:
@@ -45,12 +41,10 @@ Examples
 from .documents import (
     BinaryDocument,
     Document,
-    DocumentFactory,
     DocumentType,
     JSONDocument,
     Metadata,
     MetadataDocument,
-    MetadataFactory,
     Mimetype,
     Permission,
     RawDocument,
@@ -62,12 +56,10 @@ from .documents import (
 __all__ = [
     "BinaryDocument",
     "Document",
-    "DocumentFactory",
     "DocumentType",
     "JSONDocument",
     "Metadata",
     "MetadataDocument",
-    "MetadataFactory",
     "Mimetype",
     "Permission",
     "RawDocument",

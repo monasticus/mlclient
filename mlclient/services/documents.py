@@ -17,7 +17,6 @@ from mlclient.mimetypes import Mimetypes
 from mlclient.ml_response_parser import MLResponseParser
 from mlclient.structures import (
     Document,
-    DocumentFactory,
     Metadata,
     MetadataDocument,
     RawDocument,
@@ -42,6 +41,7 @@ class DocumentsService:
     def create(
         self,
         data: Document | Metadata | list[Document | Metadata],
+        *,
         database: str | None = None,
         temporal_collection: str | None = None,
     ) -> dict:
@@ -81,6 +81,7 @@ class DocumentsService:
     def read(
         self,
         uris: str | list[str] | tuple[str] | set[str],
+        *,
         category: str | list | None = None,
         database: str | None = None,
         output_type: type | None = None,
@@ -126,6 +127,7 @@ class DocumentsService:
     def delete(
         self,
         uris: str | list[str] | tuple[str] | set[str],
+        *,
         category: str | list | None = None,
         database: str | None = None,
         temporal_collection: str | None = None,
@@ -415,10 +417,10 @@ class DocumentsReader:
         metadata = document_data.get("metadata")
 
         if output_type in (bytes, str):
-            factory_function = DocumentFactory.build_raw_document
+            factory_function = Document.create_raw
         else:
             metadata = Metadata(**metadata) if metadata else metadata
-            factory_function = DocumentFactory.build_document
+            factory_function = Document.create
 
         return factory_function(
             content=content,

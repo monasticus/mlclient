@@ -4,7 +4,7 @@ import pytest
 
 from mlclient.structures import (
     BinaryDocument,
-    DocumentFactory,
+    Document,
     DocumentType,
     JSONDocument,
     Metadata,
@@ -17,7 +17,7 @@ from mlclient.structures import (
 
 
 def test_build_metadata_document():
-    document = DocumentFactory.build_document(uri="/a.xml", metadata=Metadata())
+    document = Document.create(uri="/a.xml", metadata=Metadata())
 
     assert isinstance(document, MetadataDocument)
     assert document.uri == "/a.xml"
@@ -26,7 +26,7 @@ def test_build_metadata_document():
 
 def test_build_document_by_document_type_xml():
     content = Element("root")
-    document = DocumentFactory.build_document(content, DocumentType.XML)
+    document = Document.create(content, DocumentType.XML)
 
     assert isinstance(document, XMLDocument)
     assert document.content == content
@@ -35,7 +35,7 @@ def test_build_document_by_document_type_xml():
 
 def test_build_document_by_str_document_type_xml():
     content = Element("root")
-    document = DocumentFactory.build_document(content, "xml")
+    document = Document.create(content, "xml")
 
     assert isinstance(document, XMLDocument)
     assert document.content == content
@@ -44,7 +44,7 @@ def test_build_document_by_str_document_type_xml():
 
 def test_build_document_by_content_type_xml():
     content = Element("root")
-    document = DocumentFactory.build_document(content)
+    document = Document.create(content)
 
     assert isinstance(document, XMLDocument)
     assert document.content == content
@@ -53,7 +53,7 @@ def test_build_document_by_content_type_xml():
 
 def test_build_document_by_document_type_json():
     content = {"root": "data"}
-    document = DocumentFactory.build_document(content, DocumentType.JSON)
+    document = Document.create(content, DocumentType.JSON)
 
     assert isinstance(document, JSONDocument)
     assert document.content == content
@@ -62,7 +62,7 @@ def test_build_document_by_document_type_json():
 
 def test_build_document_by_str_document_type_json():
     content = {"root": "data"}
-    document = DocumentFactory.build_document(content, "json")
+    document = Document.create(content, "json")
 
     assert isinstance(document, JSONDocument)
     assert document.content == content
@@ -71,7 +71,7 @@ def test_build_document_by_str_document_type_json():
 
 def test_build_document_by_content_type_json():
     content = {"root": "data"}
-    document = DocumentFactory.build_document(content)
+    document = Document.create(content)
 
     assert isinstance(document, JSONDocument)
     assert document.content == content
@@ -80,7 +80,7 @@ def test_build_document_by_content_type_json():
 
 def test_build_document_by_document_type_text():
     content = 'xquery version "1.0-ml";\nfn:current-dateTime()'
-    document = DocumentFactory.build_document(content, DocumentType.TEXT)
+    document = Document.create(content, DocumentType.TEXT)
 
     assert isinstance(document, TextDocument)
     assert document.content == content
@@ -89,7 +89,7 @@ def test_build_document_by_document_type_text():
 
 def test_build_document_by_str_document_type_text():
     content = 'xquery version "1.0-ml";\nfn:current-dateTime()'
-    document = DocumentFactory.build_document(content, "text")
+    document = Document.create(content, "text")
 
     assert isinstance(document, TextDocument)
     assert document.content == content
@@ -98,7 +98,7 @@ def test_build_document_by_str_document_type_text():
 
 def test_build_document_by_content_type_text():
     content = 'xquery version "1.0-ml";\nfn:current-dateTime()'
-    document = DocumentFactory.build_document(content)
+    document = Document.create(content)
 
     assert isinstance(document, TextDocument)
     assert document.content == content
@@ -107,7 +107,7 @@ def test_build_document_by_content_type_text():
 
 def test_build_document_by_document_type_binary():
     content = b'{"root": "data"}'
-    document = DocumentFactory.build_document(content, DocumentType.BINARY)
+    document = Document.create(content, DocumentType.BINARY)
 
     assert isinstance(document, BinaryDocument)
     assert document.content == content
@@ -116,7 +116,7 @@ def test_build_document_by_document_type_binary():
 
 def test_build_document_by_str_document_type_binary():
     content = b'{"root": "data"}'
-    document = DocumentFactory.build_document(content, "binary")
+    document = Document.create(content, "binary")
 
     assert isinstance(document, BinaryDocument)
     assert document.content == content
@@ -125,7 +125,7 @@ def test_build_document_by_str_document_type_binary():
 
 def test_build_document_by_content_type_binary():
     content = b'{"root": "data"}'
-    document = DocumentFactory.build_document(content)
+    document = Document.create(content)
 
     assert isinstance(document, BinaryDocument)
     assert document.content == content
@@ -134,7 +134,7 @@ def test_build_document_by_content_type_binary():
 
 def test_build_document_unsupported_content_type():
     with pytest.raises(NotImplementedError) as err:
-        DocumentFactory.build_document(1)
+        Document.create(1)
 
     expected_msg = (
         "Unsupported document type! Document types are: XML, JSON, TEXT, BINARY!"
@@ -144,7 +144,7 @@ def test_build_document_unsupported_content_type():
 
 def test_build_raw_document_bytes_with_document_type():
     content = b'{"root": "data"}'
-    document = DocumentFactory.build_raw_document(content, DocumentType.JSON)
+    document = Document.create_raw(content, DocumentType.JSON)
 
     assert isinstance(document, RawDocument)
     assert document.content == content
@@ -153,7 +153,7 @@ def test_build_raw_document_bytes_with_document_type():
 
 def test_build_raw_document_bytes_with_str_document_type():
     content = b'{"root": "data"}'
-    document = DocumentFactory.build_raw_document(content, "json")
+    document = Document.create_raw(content, "json")
 
     assert isinstance(document, RawDocument)
     assert document.content == content
@@ -162,7 +162,7 @@ def test_build_raw_document_bytes_with_str_document_type():
 
 def test_build_raw_document_str_with_document_type():
     content = "<root></root>"
-    document = DocumentFactory.build_raw_document(content, DocumentType.XML)
+    document = Document.create_raw(content, DocumentType.XML)
 
     assert isinstance(document, RawStringDocument)
     assert document.content == content
@@ -171,7 +171,7 @@ def test_build_raw_document_str_with_document_type():
 
 def test_build_raw_document_str_with_str_document_type():
     content = "<root></root>"
-    document = DocumentFactory.build_raw_document(content, "xml")
+    document = Document.create_raw(content, "xml")
 
     assert isinstance(document, RawStringDocument)
     assert document.content == content
@@ -180,7 +180,7 @@ def test_build_raw_document_str_with_str_document_type():
 
 def test_build_raw_document_unsupported_content_type():
     with pytest.raises(NotImplementedError) as err:
-        DocumentFactory.build_raw_document({}, DocumentType.JSON)
+        Document.create_raw({}, DocumentType.JSON)
 
     expected_msg = "Raw document can store content only in [bytes] or [str] format!"
     assert err.value.args[0] == expected_msg

@@ -14,13 +14,13 @@ import re
 from typing import ClassVar
 
 from mlclient import constants, exceptions, utils
-from mlclient.calls import ResourceCall
+from mlclient.calls import RestCall
 
 
-class ForestPropertiesGetCall(ResourceCall):
+class ForestPropertiesGetCall(RestCall):
     """A GET request to get forest properties.
 
-    A ResourceCall implementation representing a single GET request
+    A RestCall implementation representing a single GET request
     to the /manage/v2/forests/{id|name}/properties REST Resource.
 
     Retrieve the current state of modifiable properties of the forest identified
@@ -84,10 +84,10 @@ class ForestPropertiesGetCall(ResourceCall):
             raise exceptions.WrongParametersError(msg)
 
 
-class ForestPropertiesPutCall(ResourceCall):
+class ForestPropertiesPutCall(RestCall):
     """A PUT request to modify forest properties.
 
-    A ResourceCall implementation representing a single PUT request
+    A RestCall implementation representing a single PUT request
     to the /manage/v2/forests/{id|name}/properties REST Resource.
 
     Modify the configuration of the forest identified by {id|name}.

@@ -16,7 +16,7 @@ Overview
 MLClient offers two types of clients to access a MarkLogic Server: high-level and low-level.
 High-level clients are designed for specific endpoints, such as ``/v1/documents``.
 They provide a simple and intuitive API that covers all the functionality of each endpoint.
-Low-level clients are the foundation of MLClient. They use :class:`~mlclient.calls.ResourceCall` objects to represent the parameters of any endpoint.
+Low-level clients are the foundation of MLClient. They use :class:`~mlclient.calls.RestCall` objects to represent the parameters of any endpoint.
 You can use low-level clients to send raw requests to the server.
 You can learn more about high-level and low-level clients in the following sections.
 
@@ -782,7 +782,7 @@ Low-level clients
 -----------------
 
 Low-level clients offer a basic HTTP client functionality that is compatible with MarkLogic Server configuration.
-They also work with :class:`~mlclient.calls.ResourceCall` objects, which are python representations of MarkLogic resources’ calls.
+They also work with :class:`~mlclient.calls.RestCall` objects, which are python representations of MarkLogic resources’ calls.
 You can use low-level clients to send customized requests that are not supported by the high-level client API,
 or to handle the responses yourself.
 Moreover, you can customize low-level clients to implement python api for your own resources.
@@ -791,8 +791,8 @@ Moreover, you can customize low-level clients to implement python api for your o
 Client                                Description
 ====================================  =======================================================================================================================================================
 :class:`~mlclient.MLClient`           The lowest level client that accepts ML configuration and sends HTTP requests
-:class:`~mlclient.MLResourceClient`   A client that provides an additional :meth:`~mlclient.MLResourceClient.call` method that works with :class:`~mlclient.calls.ResourceCall` objects
-:class:`~mlclient.MLResourcesClient`  A facade client that offers methods for all :class:`~mlclient.ResourceCall` implementations (and thus all ML Resources endpoints)
+:class:`~mlclient.MLResourceClient`   A client that provides an additional :meth:`~mlclient.MLResourceClient.call` method that works with :class:`~mlclient.calls.RestCall` objects
+:class:`~mlclient.MLResourcesClient`  A facade client that offers methods for all :class:`~mlclient.RestCall` implementations (and thus all ML Resources endpoints)
 ====================================  =======================================================================================================================================================
 
 MLClient

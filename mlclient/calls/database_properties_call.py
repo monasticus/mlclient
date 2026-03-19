@@ -14,13 +14,13 @@ import re
 from typing import ClassVar
 
 from mlclient import constants, exceptions, utils
-from mlclient.calls import ResourceCall
+from mlclient.calls import RestCall
 
 
-class DatabasePropertiesGetCall(ResourceCall):
+class DatabasePropertiesGetCall(RestCall):
     """A GET request to get a database properties.
 
-    A ResourceCall implementation representing a single GET request
+    A RestCall implementation representing a single GET request
     to the /manage/v2/databases/{id|name}/properties REST Resource.
 
     This resource address returns the modifiable properties of the named database.
@@ -84,10 +84,10 @@ class DatabasePropertiesGetCall(ResourceCall):
             raise exceptions.WrongParametersError(msg)
 
 
-class DatabasePropertiesPutCall(ResourceCall):
+class DatabasePropertiesPutCall(RestCall):
     """A PUT request to modify database properties.
 
-    A ResourceCall implementation representing a single PUT request
+    A RestCall implementation representing a single PUT request
     to the /manage/v2/databases/{id|name}/properties REST Resource.
 
     This resource address modifies the properties of the named database.

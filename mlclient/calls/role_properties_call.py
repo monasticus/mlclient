@@ -14,13 +14,13 @@ import re
 from typing import ClassVar
 
 from mlclient import constants, exceptions, utils
-from mlclient.calls import ResourceCall
+from mlclient.calls import RestCall
 
 
-class RolePropertiesGetCall(ResourceCall):
+class RolePropertiesGetCall(RestCall):
     """A GET request to get role properties.
 
-    A ResourceCall implementation representing a single GET request
+    A RestCall implementation representing a single GET request
     to the /manage/v2/roles/{id|name}/properties REST Resource.
 
     This resource address returns the properties of the specified role.
@@ -83,10 +83,10 @@ class RolePropertiesGetCall(ResourceCall):
             raise exceptions.WrongParametersError(msg)
 
 
-class RolePropertiesPutCall(ResourceCall):
+class RolePropertiesPutCall(RestCall):
     """A PUT request to modify role properties.
 
-    A ResourceCall implementation representing a single PUT request
+    A RestCall implementation representing a single PUT request
     to the /manage/v2/roles/{id|name}/properties REST Resource.
 
     This resource address can be used to update the properties for the specified role.

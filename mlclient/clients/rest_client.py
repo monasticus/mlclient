@@ -18,7 +18,7 @@ from mlclient.api.logs import LogsApi
 from mlclient.api.roles import RolesApi
 from mlclient.api.servers import ServersApi
 from mlclient.api.users import UsersApi
-from mlclient.calls import ResourceCall
+from mlclient.calls import RestCall
 
 from .http_client import HttpClient
 
@@ -40,12 +40,12 @@ class RestClient:
         """Return the underlying HTTP client."""
         return self._http
 
-    def call(self, resource_call: ResourceCall) -> Response:
-        """Send a request using a ResourceCall object.
+    def call(self, resource_call: RestCall) -> Response:
+        """Send a request using a RestCall object.
 
         Parameters
         ----------
-        resource_call : ResourceCall
+        resource_call : RestCall
             A specific endpoint call implementation
 
         Returns

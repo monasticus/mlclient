@@ -12,13 +12,13 @@ from __future__ import annotations
 from typing import ClassVar
 
 from mlclient import constants, exceptions, utils
-from mlclient.calls import ResourceCall
+from mlclient.calls import RestCall
 
 
-class RoleGetCall(ResourceCall):
+class RoleGetCall(RestCall):
     """A GET request to get a role details.
 
-    A ResourceCall implementation representing a single GET request
+    A RestCall implementation representing a single GET request
     to the /manage/v2/roles/{id|name} REST Resource.
 
     This resource address returns the configuration for the specified role.
@@ -92,10 +92,10 @@ class RoleGetCall(ResourceCall):
             raise exceptions.WrongParametersError(msg)
 
 
-class RoleDeleteCall(ResourceCall):
+class RoleDeleteCall(RestCall):
     """A DELETE request to remove a role.
 
-    A ResourceCall implementation representing a single DELETE request
+    A RestCall implementation representing a single DELETE request
     to the /manage/v2/roles/{id|name} REST Resource.
 
     This resource address deletes the named role from the named security database.

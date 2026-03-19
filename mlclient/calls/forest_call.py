@@ -14,13 +14,13 @@ from __future__ import annotations
 from typing import ClassVar
 
 from mlclient import constants, exceptions, utils
-from mlclient.calls import ResourceCall
+from mlclient.calls import RestCall
 
 
-class ForestGetCall(ResourceCall):
+class ForestGetCall(RestCall):
     """A GET request to get a forest details.
 
-    A ResourceCall implementation representing a single GET request
+    A RestCall implementation representing a single GET request
     to the /manage/v2/forests/{id|name} REST Resource.
 
     Retrieve information about a forest. The forest can be identified either by id
@@ -106,10 +106,10 @@ class ForestGetCall(ResourceCall):
             raise exceptions.WrongParametersError(msg)
 
 
-class ForestPostCall(ResourceCall):
+class ForestPostCall(RestCall):
     """A POST request to change a forest's state.
 
-    A ResourceCall implementation representing a single POST request
+    A RestCall implementation representing a single POST request
     to the /manage/v2/forests/{id|name} REST Resource.
 
     Initiate a state change on a forest, such as a merge, restart, or attach.
@@ -181,10 +181,10 @@ class ForestPostCall(ResourceCall):
             raise exceptions.WrongParametersError(msg)
 
 
-class ForestDeleteCall(ResourceCall):
+class ForestDeleteCall(RestCall):
     """A DELETE request to remove a forest.
 
-    A ResourceCall implementation representing a single DELETE request
+    A RestCall implementation representing a single DELETE request
     to the /manage/v2/forests/{id|name} REST Resource.
 
     Delete a forest.

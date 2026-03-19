@@ -14,13 +14,13 @@ import re
 from typing import ClassVar
 
 from mlclient import constants, exceptions, utils
-from mlclient.calls import ResourceCall
+from mlclient.calls import RestCall
 
 
-class DatabasesGetCall(ResourceCall):
+class DatabasesGetCall(RestCall):
     """A GET request to get databases summary.
 
-    A ResourceCall implementation representing a single GET request
+    A RestCall implementation representing a single GET request
     to the /manage/v2/databases REST Resource.
 
     This resource address returns a summary of the databases in the cluster.
@@ -97,10 +97,10 @@ class DatabasesGetCall(ResourceCall):
             raise exceptions.WrongParametersError(msg)
 
 
-class DatabasesPostCall(ResourceCall):
+class DatabasesPostCall(RestCall):
     """A POST request to create a new database.
 
-    A ResourceCall implementation representing a single POST request
+    A RestCall implementation representing a single POST request
     to the /manage/v2/databases REST Resource.
 
     This resource address creates a new database in the cluster.

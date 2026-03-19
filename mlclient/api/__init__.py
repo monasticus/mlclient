@@ -1,7 +1,7 @@
 """The ML API package.
 
 REST endpoint groups providing mid-level access to MarkLogic resources.
-Each API class wraps ResourceCall objects and returns raw Response objects.
+Each API class wraps RestCall objects and returns raw Response objects.
 """
 
 from .databases import DatabasesApi

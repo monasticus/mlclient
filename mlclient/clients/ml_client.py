@@ -32,7 +32,7 @@ class MLClient:
     Provides layered access:
     - ml.http.get("/endpoint")           # raw HTTP
     - ml.rest.databases.get_list()       # mid-level, returns Response
-    - ml.rest.call(SomeResourceCall())   # advanced: custom Call objects
+    - ml.rest.call(SomeRestCall())   # advanced: custom Call objects
     - ml.documents.read("/doc.json")     # high-level, parsed results
     - ml.eval.xquery("1+1")              # high-level, parsed results
     - ml.logs.get(log_type=...)          # high-level, parsed results

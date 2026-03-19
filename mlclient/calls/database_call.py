@@ -16,13 +16,13 @@ import re
 from typing import ClassVar
 
 from mlclient import constants, exceptions, utils
-from mlclient.calls import ResourceCall
+from mlclient.calls import RestCall
 
 
-class DatabaseGetCall(ResourceCall):
+class DatabaseGetCall(RestCall):
     """A GET request to get database details.
 
-    A ResourceCall implementation representing a single GET request
+    A RestCall implementation representing a single GET request
     to the /manage/v2/databases/{id|name} REST Resource.
 
     This resource address returns information on the specified database.
@@ -110,10 +110,10 @@ class DatabaseGetCall(ResourceCall):
             raise exceptions.WrongParametersError(msg)
 
 
-class DatabasePostCall(ResourceCall):
+class DatabasePostCall(RestCall):
     """A POST request to manage a database.
 
-    A ResourceCall implementation representing a single POST request
+    A RestCall implementation representing a single POST request
     to the /manage/v2/databases/{id|name} REST Resource.
 
     This resource address can be used to clear the contents of the named database
@@ -169,10 +169,10 @@ class DatabasePostCall(ResourceCall):
             raise exceptions.WrongParametersError(msg)
 
 
-class DatabaseDeleteCall(ResourceCall):
+class DatabaseDeleteCall(RestCall):
     """A DELETE request to remove a database from a cluster.
 
-    A ResourceCall implementation representing a single DELETE request
+    A RestCall implementation representing a single DELETE request
     to the /manage/v2/databases/{id|name} REST Resource.
 
     This resource address deletes the named database from the cluster.

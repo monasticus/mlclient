@@ -14,13 +14,13 @@ import re
 from typing import ClassVar
 
 from mlclient import constants, exceptions, utils
-from mlclient.calls import ResourceCall
+from mlclient.calls import RestCall
 
 
-class RolesGetCall(ResourceCall):
+class RolesGetCall(RestCall):
     """A GET request to get roles summary.
 
-    A ResourceCall implementation representing a single GET request
+    A RestCall implementation representing a single GET request
     to the /manage/v2/roles REST Resource.
 
     This resource address returns a summary of the roles in the security database.
@@ -89,10 +89,10 @@ class RolesGetCall(ResourceCall):
             raise exceptions.WrongParametersError(msg)
 
 
-class RolesPostCall(ResourceCall):
+class RolesPostCall(RestCall):
     """A POST request to create a new role.
 
-    A ResourceCall implementation representing a single POST request
+    A RestCall implementation representing a single POST request
     to the /manage/v2/roles REST Resource.
 
     This resource address creates a new role in the security database.

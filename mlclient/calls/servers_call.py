@@ -14,13 +14,13 @@ import re
 from typing import ClassVar
 
 from mlclient import constants, exceptions, utils
-from mlclient.calls import ResourceCall
+from mlclient.calls import RestCall
 
 
-class ServersGetCall(ResourceCall):
+class ServersGetCall(RestCall):
     """A GET request to get app servers summary.
 
-    A ResourceCall implementation representing a single GET request
+    A RestCall implementation representing a single GET request
     to the /manage/v2/servers REST Resource.
 
     This resource address returns data about the App Servers in the cluster.
@@ -116,10 +116,10 @@ class ServersGetCall(ResourceCall):
             raise exceptions.WrongParametersError(msg)
 
 
-class ServersPostCall(ResourceCall):
+class ServersPostCall(RestCall):
     """A POST request to create a new app server.
 
-    A ResourceCall implementation representing a single POST request
+    A RestCall implementation representing a single POST request
     to the /manage/v2/servers REST Resource.
 
     This resource address is used to create a new App Server in the specified group.

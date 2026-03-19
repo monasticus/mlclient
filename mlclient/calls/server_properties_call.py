@@ -14,13 +14,13 @@ import re
 from typing import ClassVar
 
 from mlclient import constants, exceptions, utils
-from mlclient.calls import ResourceCall
+from mlclient.calls import RestCall
 
 
-class ServerPropertiesGetCall(ResourceCall):
+class ServerPropertiesGetCall(RestCall):
     """A GET request to get app server properties.
 
-    A ResourceCall implementation representing a single GET request
+    A RestCall implementation representing a single GET request
     to the /manage/v2/servers/{id|name}/properties REST Resource.
 
     This resource address returns the current state of modifiable properties
@@ -90,10 +90,10 @@ class ServerPropertiesGetCall(ResourceCall):
             raise exceptions.WrongParametersError(msg)
 
 
-class ServerPropertiesPutCall(ResourceCall):
+class ServerPropertiesPutCall(RestCall):
     """A PUT request to modify app server properties.
 
-    A ResourceCall implementation representing a single PUT request
+    A RestCall implementation representing a single PUT request
     to the /manage/v2/servers/{id|name}/properties REST Resource.
 
     Initiate a properties change on the specified App Server.

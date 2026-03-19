@@ -14,13 +14,13 @@ import re
 from typing import ClassVar
 
 from mlclient import constants, exceptions, utils
-from mlclient.calls import ResourceCall
+from mlclient.calls import RestCall
 
 
-class UsersGetCall(ResourceCall):
+class UsersGetCall(RestCall):
     """A GET request to get users summary.
 
-    A ResourceCall implementation representing a single GET request
+    A RestCall implementation representing a single GET request
     to the /manage/v2/users REST Resource.
 
     This resource address returns a summary of the users in the cluster.
@@ -89,10 +89,10 @@ class UsersGetCall(ResourceCall):
             raise exceptions.WrongParametersError(msg)
 
 
-class UsersPostCall(ResourceCall):
+class UsersPostCall(RestCall):
     """A POST request to create a new user.
 
-    A ResourceCall implementation representing a single POST request
+    A RestCall implementation representing a single POST request
     to the /manage/v2/users REST Resource.
 
     This resource address creates a new user in the security database.

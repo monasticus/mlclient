@@ -10,13 +10,13 @@ from __future__ import annotations
 from dateutil import parser
 
 from mlclient import exceptions, utils
-from mlclient.calls import ResourceCall
+from mlclient.calls import RestCall
 
 
-class LogsCall(ResourceCall):
+class LogsCall(RestCall):
     """A GET request to retrieve logs.
 
-    A ResourceCall implementation representing a single GET request
+    A RestCall implementation representing a single GET request
     to the /manage/v2/logs REST Resource.
 
     Returns the content of server log files.

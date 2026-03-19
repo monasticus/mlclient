@@ -14,13 +14,13 @@ import re
 from typing import ClassVar
 
 from mlclient import constants, exceptions, utils
-from mlclient.calls import ResourceCall
+from mlclient.calls import RestCall
 
 
-class UserPropertiesGetCall(ResourceCall):
+class UserPropertiesGetCall(RestCall):
     """A GET request to get user properties.
 
-    A ResourceCall implementation representing a single GET request
+    A RestCall implementation representing a single GET request
     to the /manage/v2/users/{id|name}/properties REST Resource.
 
     This resource address returns the properties of the specified user.
@@ -83,10 +83,10 @@ class UserPropertiesGetCall(ResourceCall):
             raise exceptions.WrongParametersError(msg)
 
 
-class UserPropertiesPutCall(ResourceCall):
+class UserPropertiesPutCall(RestCall):
     """A PUT request to modify user properties.
 
-    A ResourceCall implementation representing a single PUT request
+    A RestCall implementation representing a single PUT request
     to the /manage/v2/users/{id|name}/properties REST Resource.
 
     This resource address can be used to update the properties for the specified user.

@@ -1,7 +1,7 @@
-"""The ML Resource Call module.
+"""The ML REST Call module.
 
 It exports 1 class:
-    * ResourceCall
+    * RestCall
         An abstract class representing a single request to a MarkLogic REST Resource.
 """
 
@@ -13,7 +13,7 @@ from typing import Any
 from mlclient import constants
 
 
-class ResourceCall(metaclass=ABCMeta):
+class RestCall(metaclass=ABCMeta):
     """An abstract class representing a single request to a MarkLogic REST Resource."""
 
     def __init__(
@@ -25,7 +25,7 @@ class ResourceCall(metaclass=ABCMeta):
         accept: str | None = None,
         content_type: str | None = None,
     ):
-        """Initialize ResourceCall implementation instance.
+        """Initialize RestCall implementation instance.
 
         Parameters
         ----------
@@ -54,14 +54,14 @@ class ResourceCall(metaclass=ABCMeta):
     @classmethod
     def __subclasshook__(
         cls,
-        subclass: ResourceCall,
+        subclass: RestCall,
     ):
         """Verify if a subclass implements all abstract methods.
 
         Parameters
         ----------
-        subclass : ResourceCall
-            A ResourceCall subclass
+        subclass : RestCall
+            A RestCall subclass
 
         Returns
         -------
@@ -75,7 +75,7 @@ class ResourceCall(metaclass=ABCMeta):
     def endpoint(
         self,
     ) -> str:
-        """An endpoint of the ResourceCall.
+        """An endpoint of the RestCall.
 
         Returns
         -------

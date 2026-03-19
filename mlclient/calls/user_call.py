@@ -12,13 +12,13 @@ from __future__ import annotations
 from typing import ClassVar
 
 from mlclient import constants, exceptions, utils
-from mlclient.calls import ResourceCall
+from mlclient.calls import RestCall
 
 
-class UserGetCall(ResourceCall):
+class UserGetCall(RestCall):
     """A GET request to get user details.
 
-    A ResourceCall implementation representing a single GET request
+    A RestCall implementation representing a single GET request
     to the /manage/v2/users/{id|name} REST Resource.
 
     This resource address returns the configuration for the specified user.
@@ -92,10 +92,10 @@ class UserGetCall(ResourceCall):
             raise exceptions.WrongParametersError(msg)
 
 
-class UserDeleteCall(ResourceCall):
+class UserDeleteCall(RestCall):
     """A DELETE request to remove a user.
 
-    A ResourceCall implementation representing a single DELETE request
+    A RestCall implementation representing a single DELETE request
     to the /manage/v2/users/{id|name} REST Resource.
 
     This resource address deletes the named user from the named security database.

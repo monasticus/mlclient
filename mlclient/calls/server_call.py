@@ -12,13 +12,13 @@ from __future__ import annotations
 from typing import ClassVar
 
 from mlclient import constants, exceptions, utils
-from mlclient.calls import ResourceCall
+from mlclient.calls import RestCall
 
 
-class ServerGetCall(ResourceCall):
+class ServerGetCall(RestCall):
     """A GET request to get app server details.
 
-    A ResourceCall implementation representing a single GET request
+    A RestCall implementation representing a single GET request
     to the /manage/v2/servers/{id|name} REST Resource.
 
     This resource address returns data about a specific App Server.
@@ -137,10 +137,10 @@ class ServerGetCall(ResourceCall):
             raise exceptions.WrongParametersError(msg)
 
 
-class ServerDeleteCall(ResourceCall):
+class ServerDeleteCall(RestCall):
     """A DELETE request to remove an app server.
 
-    A ResourceCall implementation representing a single DELETE request
+    A RestCall implementation representing a single DELETE request
     to the /manage/v2/servers/{id|name} REST Resource.
 
     This resource address deletes the specified App Server from the specified group.

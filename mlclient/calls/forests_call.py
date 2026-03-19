@@ -16,13 +16,13 @@ import re
 from typing import ClassVar
 
 from mlclient import constants, exceptions, utils
-from mlclient.calls import ResourceCall
+from mlclient.calls import RestCall
 
 
-class ForestsGetCall(ResourceCall):
+class ForestsGetCall(RestCall):
     """A GET request to get forests summary.
 
-    A ResourceCall implementation representing a single GET request
+    A RestCall implementation representing a single GET request
     to the /manage/v2/forests REST Resource.
 
     This resource address returns data about the forests in the cluster.
@@ -131,10 +131,10 @@ class ForestsGetCall(ResourceCall):
             raise exceptions.WrongParametersError(msg)
 
 
-class ForestsPostCall(ResourceCall):
+class ForestsPostCall(RestCall):
     """A POST request to create a new forest.
 
-    A ResourceCall implementation representing a single POST request
+    A RestCall implementation representing a single POST request
     to the /manage/v2/forests REST Resource.
 
     Create a new forest, including replicas if specified.
@@ -193,10 +193,10 @@ class ForestsPostCall(ResourceCall):
             raise exceptions.WrongParametersError(msg)
 
 
-class ForestsPutCall(ResourceCall):
+class ForestsPutCall(RestCall):
     """A PUT request to perform an operation on forests.
 
-    A ResourceCall implementation representing a single PUT request
+    A RestCall implementation representing a single PUT request
     to the /manage/v2/forests REST Resource.
 
     Perform an operation on one or more forests, such as combining multiple forests

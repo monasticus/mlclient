@@ -8,7 +8,7 @@ of HTTP requests. Additionally, it exports the following package:
 
 This package exports the following modules:
 
-    * resource_call
+    * rest_call
         An abstract class representing a single request to a MarkLogic REST Resource.
     * database_call
         The ML Database Resource Calls module.
@@ -48,7 +48,7 @@ This package exports the following modules:
         The ML Users Resource Calls module.
 
 This package exports the following classes:
-    * ResourceCall
+    * RestCall
         An abstract class representing a single request to a MarkLogic REST Resource.
     * DatabaseGetCall
         A GET request to get database details.
@@ -132,7 +132,7 @@ Examples
 >>> from mlclient.calls import DatabaseGetCall, EvalCall
 """
 
-from .resource_call import ResourceCall
+from .rest_call import RestCall
 from .database_call import DatabaseDeleteCall, DatabaseGetCall, DatabasePostCall
 from .database_properties_call import (
     DatabasePropertiesGetCall,
@@ -176,7 +176,7 @@ __all__ = [
     "ForestsPostCall",
     "ForestsPutCall",
     "LogsCall",
-    "ResourceCall",
+    "RestCall",
     "RoleDeleteCall",
     "RoleGetCall",
     "RolePropertiesGetCall",

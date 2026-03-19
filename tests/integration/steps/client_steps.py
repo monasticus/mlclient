@@ -5,7 +5,7 @@ import datetime
 from httpx import Response
 from pytest_bdd import given, parsers, then, when
 
-from mlclient import MLResourceClient, MLResourcesClient
+from mlclient import MLClient
 from mlclient.calls import EvalCall
 
 from .common import parse_step_input
@@ -17,19 +17,15 @@ from .common import parse_step_input
 )
 def init_client(
     client_type: str,
-) -> MLResourceClient:
-    if client_type == "MLResourceClient":
-        client = MLResourceClient(
-            auth_method="digest",
-        )
-    elif client_type == "MLResourcesClient":
-        client = MLResourcesClient(
+) -> MLClient:
+    if client_type == "MLClient":
+        client = MLClient(
             auth_method="digest",
         )
     else:
         msg = (
             f"Incorrect client type! "
-            f"Expected: [MLResourceClient, MLResourcesClient], got: [{client_type}]"
+            f"Expected: [MLClient], got: [{client_type}]"
         )
         raise ValueError(msg)
     client.connect()
@@ -63,19 +59,19 @@ def set_variables(
 
 @when("I call the EvalCall", target_fixture="response")
 def call_eval(
-    client: MLResourceClient,
+    client: MLClient,
     call_config: dict,
 ) -> Response:
     call = EvalCall(**call_config)
-    return client.call(call)
+    return client.rest.call(call)
 
 
 @when("I evaluate the code", target_fixture="response")
 def eval_(
-    client: MLResourcesClient,
+    client: MLClient,
     call_config: dict,
 ) -> Response:
-    return client.eval(**call_config)
+    return client.rest.eval.post(**call_config)
 
 
 @when(
@@ -83,7 +79,7 @@ def eval_(
     target_fixture="response",
 )
 def get_logs(
-    client: MLResourcesClient,
+    client: MLClient,
     logs_type: str,
     params: str,
 ) -> Response:
@@ -96,12 +92,12 @@ def get_logs(
             )
     params["filename"] = (f"{client.port}_{logs_type.capitalize()}Log.txt",)
     params["data_format"] = "json"
-    return client.get_logs(**params)
+    return client.rest.logs.get(**params)
 
 
 @then("I close the connection")
 def close_client(
-    client: MLResourceClient,
+    client: MLClient,
 ):
     client.disconnect()
     assert not client.is_connected()

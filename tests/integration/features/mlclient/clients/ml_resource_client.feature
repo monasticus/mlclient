@@ -1,8 +1,8 @@
-Feature: Test MLResourceClient
+Feature: Test MLClient
 
   Scenario: Test a simple call
 
-    Given I initialized an MLResourceClient's connection
+    Given I initialized an MLClient's connection
     And I prepared the following xquery code to eval
       """
       xquery version '1.0-ml';

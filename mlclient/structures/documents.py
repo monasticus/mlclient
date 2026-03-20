@@ -807,10 +807,7 @@ def _get_document_impl(
     elif isinstance(content, bytes):
         impl = BinaryDocument
     else:
-        msg = (
-            "Unsupported document type! "
-            "Document types are: XML, JSON, TEXT, BINARY!"
-        )
+        msg = "Unsupported document type! Document types are: XML, JSON, TEXT, BINARY!"
         raise NotImplementedError(msg)
     return impl
 

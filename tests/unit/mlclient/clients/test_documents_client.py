@@ -601,7 +601,8 @@ def test_read_doc_with_two_metadata_categories(docs_client):
         uri = "/some/dir/doc1.xml"
 
         document = docs_client.documents.read(
-            uri, category=["content", "collections", "quality"],
+            uri,
+            category=["content", "collections", "quality"],
         )
 
     assert isinstance(document, XMLDocument)
@@ -943,7 +944,8 @@ def test_read_multiple_docs_with_two_metadata_categories(docs_client):
         ]
 
         docs = docs_client.documents.read(
-            uris, category=["content", "collections", "quality"],
+            uris,
+            category=["content", "collections", "quality"],
         )
 
     assert isinstance(docs, list)
@@ -1804,7 +1806,8 @@ def test_create_multiple_documents_using_custom_database(docs_client):
     doc_4 = BinaryDocument(doc_4_content, doc_4_uri)
 
     resp = docs_client.documents.create(
-        [doc_1, doc_2, doc_3, doc_4], database="Documents",
+        [doc_1, doc_2, doc_3, doc_4],
+        database="Documents",
     )
 
     documents = resp["documents"]

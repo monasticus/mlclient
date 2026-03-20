@@ -153,7 +153,9 @@ class TestDatabasesManagement:
         view: str,
     ) -> Response:
         resp = client.manage.databases.get(
-            database=database, data_format="json", view=view,
+            database=database,
+            data_format="json",
+            view=view,
         )
         assert resp.status_code == httpx.codes.OK
 
@@ -166,7 +168,8 @@ class TestDatabasesManagement:
         database: str,
     ) -> Response:
         resp = client.manage.databases.get_properties(
-            database=database, data_format="json",
+            database=database,
+            data_format="json",
         )
         assert resp.status_code == httpx.codes.OK
 

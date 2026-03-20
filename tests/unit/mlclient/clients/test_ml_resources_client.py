@@ -198,7 +198,8 @@ def test_get_database_properties():
 
     with MLClient() as client:
         resp = client.manage.databases.get_properties(
-            database="Documents", data_format="json",
+            database="Documents",
+            data_format="json",
         )
 
     assert resp.status_code == httpx.codes.OK
@@ -543,7 +544,8 @@ def test_get_forest_properties():
 
     with MLClient() as client:
         resp = client.manage.forests.get_properties(
-            forest="Documents", data_format="json",
+            forest="Documents",
+            data_format="json",
         )
 
     assert resp.status_code == httpx.codes.OK

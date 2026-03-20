@@ -6,12 +6,12 @@ import pytest
 import respx
 
 from mlclient import MLClient
-from mlclient.services.eval import LOCAL_NS
 from mlclient.exceptions import (
     MarkLogicError,
     UnsupportedFileExtensionError,
     WrongParametersError,
 )
+from mlclient.services.eval import LOCAL_NS
 from tests.utils import resources as resources_utils
 from tests.utils.ml_mockers import MLRespXMocker
 

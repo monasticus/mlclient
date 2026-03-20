@@ -291,9 +291,7 @@ class HttpClient:
         """Format an HTTP response in a protocol-like representation."""
         reason_phrase = httpx.codes.get_reason_phrase(response.status_code)
         start_line = f"HTTP/1.1 {response.status_code} {reason_phrase}"
-        headers = "\n".join(
-            f"{name}: {val}" for name, val in response.headers.items()
-        )
+        headers = "\n".join(f"{name}: {val}" for name, val in response.headers.items())
         if response.text:
             return f"{start_line}\n{headers}\n\n{response.text}"
         return f"{start_line}\n{headers}"

@@ -24,13 +24,13 @@ import re
 from typing import ClassVar
 
 from mlclient import constants, exceptions, utils
-from mlclient.calls import RestCall
+from mlclient.calls.api_call import ApiCall
 
 
-class ServersGetCall(RestCall):
+class ServersGetCall(ApiCall):
     """A GET request to get app servers summary.
 
-    A RestCall implementation representing a single GET request
+    A ApiCall implementation representing a single GET request
     to the /manage/v2/servers REST Resource.
 
     This resource address returns data about the App Servers in the cluster.
@@ -126,10 +126,10 @@ class ServersGetCall(RestCall):
             raise exceptions.WrongParametersError(msg)
 
 
-class ServersPostCall(RestCall):
+class ServersPostCall(ApiCall):
     """A POST request to create a new app server.
 
-    A RestCall implementation representing a single POST request
+    A ApiCall implementation representing a single POST request
     to the /manage/v2/servers REST Resource.
 
     This resource address is used to create a new App Server in the specified group.
@@ -202,10 +202,10 @@ class ServersPostCall(RestCall):
             raise exceptions.WrongParametersError(msg)
 
 
-class ServerGetCall(RestCall):
+class ServerGetCall(ApiCall):
     """A GET request to get app server details.
 
-    A RestCall implementation representing a single GET request
+    A ApiCall implementation representing a single GET request
     to the /manage/v2/servers/{id|name} REST Resource.
 
     This resource address returns data about a specific App Server.
@@ -324,10 +324,10 @@ class ServerGetCall(RestCall):
             raise exceptions.WrongParametersError(msg)
 
 
-class ServerDeleteCall(RestCall):
+class ServerDeleteCall(ApiCall):
     """A DELETE request to remove an app server.
 
-    A RestCall implementation representing a single DELETE request
+    A ApiCall implementation representing a single DELETE request
     to the /manage/v2/servers/{id|name} REST Resource.
 
     This resource address deletes the specified App Server from the specified group.
@@ -371,10 +371,10 @@ class ServerDeleteCall(RestCall):
         return self._ENDPOINT_TEMPLATE.format(self._server)
 
 
-class ServerPropertiesGetCall(RestCall):
+class ServerPropertiesGetCall(ApiCall):
     """A GET request to get app server properties.
 
-    A RestCall implementation representing a single GET request
+    A ApiCall implementation representing a single GET request
     to the /manage/v2/servers/{id|name}/properties REST Resource.
 
     This resource address returns the current state of modifiable properties
@@ -444,10 +444,10 @@ class ServerPropertiesGetCall(RestCall):
             raise exceptions.WrongParametersError(msg)
 
 
-class ServerPropertiesPutCall(RestCall):
+class ServerPropertiesPutCall(ApiCall):
     """A PUT request to modify app server properties.
 
-    A RestCall implementation representing a single PUT request
+    A ApiCall implementation representing a single PUT request
     to the /manage/v2/servers/{id|name}/properties REST Resource.
 
     Initiate a properties change on the specified App Server.

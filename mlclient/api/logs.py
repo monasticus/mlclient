@@ -8,15 +8,15 @@ from httpx import Response
 
 from mlclient.calls import LogsCall
 
-# Avoid circular import: RestClient -> api classes -> RestClient
+# Avoid circular import: ApiClient -> api classes -> ApiClient
 if TYPE_CHECKING:
-    from mlclient.clients.rest_client import RestClient
+    from mlclient.clients.api_client import ApiClient
 
 
 class LogsApi:
     """Mid-level API for /manage/v2/logs endpoint."""
 
-    def __init__(self, rest: RestClient):
+    def __init__(self, rest: ApiClient):
         self._rest = rest
 
     def get(

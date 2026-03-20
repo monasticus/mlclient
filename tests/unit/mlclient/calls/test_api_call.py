@@ -1,43 +1,43 @@
-from mlclient.calls import RestCall
+from mlclient.calls import ApiCall
 
 
-class RestCallTestImpl(RestCall):
-    """A RestCall implementation for testing purposes"""
+class ApiCallTestImpl(ApiCall):
+    """An ApiCall implementation for testing purposes"""
 
     @property
     def endpoint(self):
         return "/impl-endpoint"
 
 
-class RestCallTestInvalidImpl(RestCall):
-    """A RestCall invalid implementation for testing purposes"""
+class ApiCallTestInvalidImpl(ApiCall):
+    """An ApiCall invalid implementation for testing purposes"""
 
 
 def test_issubclass_true():
-    assert issubclass(RestCallTestImpl, RestCall)
+    assert issubclass(ApiCallTestImpl, ApiCall)
 
 
 def test_issubclass_false():
-    assert not issubclass(RestCallTestInvalidImpl, RestCall)
+    assert not issubclass(ApiCallTestInvalidImpl, ApiCall)
 
 
 # endpoint
 def test_endpoint():
-    assert RestCallTestImpl().endpoint == "/impl-endpoint"
+    assert ApiCallTestImpl().endpoint == "/impl-endpoint"
 
 
 # method
 def test_default_method():
-    assert RestCallTestImpl().method == "GET"
+    assert ApiCallTestImpl().method == "GET"
 
 
 def test_custom_method():
-    assert RestCallTestImpl(method="POST").method == "POST"
+    assert ApiCallTestImpl(method="POST").method == "POST"
 
 
 # set_method
 def test_set_method():
-    call = RestCallTestImpl()
+    call = ApiCallTestImpl()
     assert call.method == "GET"
 
     call.method = "POST"
@@ -46,18 +46,18 @@ def test_set_method():
 
 # params
 def test_default_params():
-    assert RestCallTestImpl().params == {}
+    assert ApiCallTestImpl().params == {}
 
 
 def test_custom_params():
-    call_with_custom_param = RestCallTestImpl(
+    call_with_custom_param = ApiCallTestImpl(
         params={"custom-param": "custom-value"},
     )
     assert call_with_custom_param.params == {"custom-param": "custom-value"}
 
 
 def test_params_encapsulation():
-    call = RestCallTestImpl()
+    call = ApiCallTestImpl()
     params = call.params
     assert params == {}
 
@@ -69,7 +69,7 @@ def test_params_encapsulation():
 
 # set_params
 def test_set_params():
-    call = RestCallTestImpl()
+    call = ApiCallTestImpl()
     params = call.params
     assert params == {}
 
@@ -82,7 +82,7 @@ def test_set_params():
 
 
 def test_set_params_with_none_value():
-    call = RestCallTestImpl(params={"custom-param-1": "custom-value"})
+    call = ApiCallTestImpl(params={"custom-param-1": "custom-value"})
     params = call.params
     assert params == {"custom-param-1": "custom-value"}
 
@@ -91,7 +91,7 @@ def test_set_params_with_none_value():
 
 
 def test_set_params_with_none_param():
-    call = RestCallTestImpl()
+    call = ApiCallTestImpl()
     params = call.params
     assert params == {}
 
@@ -106,33 +106,33 @@ def test_set_params_with_none_param():
 
 # headers
 def test_default_headers():
-    assert RestCallTestImpl().headers == {}
+    assert ApiCallTestImpl().headers == {}
 
 
 def test_custom_headers():
-    call_with_custom_header = RestCallTestImpl(
+    call_with_custom_header = ApiCallTestImpl(
         headers={"custom-header": "custom-value"},
     )
     assert call_with_custom_header.headers == {"custom-header": "custom-value"}
 
 
 def test_custom_headers_with_none_value():
-    call_with_custom_header = RestCallTestImpl(headers={"custom-header": None})
+    call_with_custom_header = ApiCallTestImpl(headers={"custom-header": None})
     assert call_with_custom_header.headers == {}
 
 
 def test_headers_with_accept():
-    call_with_accept = RestCallTestImpl(accept="application/xml")
+    call_with_accept = ApiCallTestImpl(accept="application/xml")
     assert call_with_accept.headers == {"Accept": "application/xml"}
 
 
 def test_headers_with_content_type():
-    call_with_content_type = RestCallTestImpl(content_type="application/xml")
+    call_with_content_type = ApiCallTestImpl(content_type="application/xml")
     assert call_with_content_type.headers == {"Content-Type": "application/xml"}
 
 
 def test_mixed_headers():
-    call_with_mixed_headers = RestCallTestImpl(
+    call_with_mixed_headers = ApiCallTestImpl(
         headers={"custom-header": "custom-value"},
         accept="application/xml",
         content_type="application/xml",
@@ -145,7 +145,7 @@ def test_mixed_headers():
 
 
 def test_headers_when_accept_exists_and_is_provided():
-    call_with_custom_header = RestCallTestImpl(
+    call_with_custom_header = ApiCallTestImpl(
         headers={"Accept": "application/xml"},
         accept="application/json",
     )
@@ -153,7 +153,7 @@ def test_headers_when_accept_exists_and_is_provided():
 
 
 def test_headers_when_content_type_exists_and_is_provided():
-    call_with_custom_header = RestCallTestImpl(
+    call_with_custom_header = ApiCallTestImpl(
         headers={"Content-Type": "application/xml"},
         content_type="application/json",
     )
@@ -161,7 +161,7 @@ def test_headers_when_content_type_exists_and_is_provided():
 
 
 def test_headers_encapsulation():
-    call = RestCallTestImpl()
+    call = ApiCallTestImpl()
     headers = call.headers
     assert headers == {}
 
@@ -173,7 +173,7 @@ def test_headers_encapsulation():
 
 # set_headers
 def test_set_headers():
-    call = RestCallTestImpl()
+    call = ApiCallTestImpl()
     headers = call.headers
     assert headers == {}
 
@@ -186,7 +186,7 @@ def test_set_headers():
 
 
 def test_set_headers_with_none_value():
-    call = RestCallTestImpl(headers={"custom-header-1": "custom-value"})
+    call = ApiCallTestImpl(headers={"custom-header-1": "custom-value"})
     headers = call.headers
     assert headers == {"custom-header-1": "custom-value"}
 
@@ -195,7 +195,7 @@ def test_set_headers_with_none_value():
 
 
 def test_set_headers_with_none_header():
-    call = RestCallTestImpl()
+    call = ApiCallTestImpl()
     headers = call.headers
     assert headers == {}
 
@@ -210,23 +210,23 @@ def test_set_headers_with_none_header():
 
 # body
 def test_default_body():
-    assert not RestCallTestImpl().body
+    assert not ApiCallTestImpl().body
 
 
 def test_custom_string_body():
-    assert RestCallTestImpl(body="").body == ""
+    assert ApiCallTestImpl(body="").body == ""
 
 
 def test_custom_json_body():
-    assert RestCallTestImpl(body={}).body == {}
+    assert ApiCallTestImpl(body={}).body == {}
 
 
 def test_custom_bytes_body():
-    assert RestCallTestImpl(body=b"").body == b""
+    assert ApiCallTestImpl(body=b"").body == b""
 
 
 def test_string_body_encapsulation():
-    call = RestCallTestImpl(body="")
+    call = ApiCallTestImpl(body="")
     body = call.body
     assert body == ""
 
@@ -237,7 +237,7 @@ def test_string_body_encapsulation():
 
 
 def test_dict_body_encapsulation():
-    call = RestCallTestImpl(body={})
+    call = ApiCallTestImpl(body={})
     body = call.body
     assert body == {}
 
@@ -248,7 +248,7 @@ def test_dict_body_encapsulation():
 
 
 def test_bytes_body_encapsulation():
-    call = RestCallTestImpl(body=b"")
+    call = ApiCallTestImpl(body=b"")
     body = call.body
     assert body == b""
 
@@ -260,7 +260,7 @@ def test_bytes_body_encapsulation():
 
 # set_body
 def test_set_body():
-    call = RestCallTestImpl()
+    call = ApiCallTestImpl()
     assert call.body is None
 
     call.body = "custom-body"
@@ -268,7 +268,7 @@ def test_set_body():
 
 
 def test_set_body_when_exists():
-    call = RestCallTestImpl(body="custom-body-1")
+    call = ApiCallTestImpl(body="custom-body-1")
     assert call.body == "custom-body-1"
 
     call.body = "custom-body-2"
@@ -277,7 +277,7 @@ def test_set_body_when_exists():
 
 # add_param
 def test_add_param():
-    call = RestCallTestImpl()
+    call = ApiCallTestImpl()
     assert call.params == {}
 
     call.add_param("custom-param", "custom-value")
@@ -285,7 +285,7 @@ def test_add_param():
 
 
 def test_add_param_when_exists():
-    call = RestCallTestImpl(params={"custom-param": "custom-value-1"})
+    call = ApiCallTestImpl(params={"custom-param": "custom-value-1"})
     assert call.params == {"custom-param": "custom-value-1"}
 
     call.add_param("custom-param", "custom-value-2")
@@ -294,7 +294,7 @@ def test_add_param_when_exists():
 
 # add_header
 def test_add_header():
-    call = RestCallTestImpl()
+    call = ApiCallTestImpl()
     assert call.headers == {}
 
     call.add_header("custom-header", "custom-value")
@@ -302,7 +302,7 @@ def test_add_header():
 
 
 def test_add_header_when_exists():
-    call = RestCallTestImpl(headers={"custom-header": "custom-value-1"})
+    call = ApiCallTestImpl(headers={"custom-header": "custom-value-1"})
     assert call.headers == {"custom-header": "custom-value-1"}
 
     call.add_header("custom-header", "custom-value-2")

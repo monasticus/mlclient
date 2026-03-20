@@ -12,6 +12,7 @@ from httpx import Response
 
 from mlclient import constants
 from mlclient.calls import DocumentsDeleteCall, DocumentsGetCall, DocumentsPostCall
+from mlclient.clients.api_client import ApiClient
 from mlclient.exceptions import MarkLogicError
 from mlclient.mimetypes import Mimetypes
 from mlclient.ml_response_parser import MLResponseParser
@@ -29,13 +30,11 @@ from mlclient.structures.calls import (
     DocumentsContentDisposition,
 )
 
-from mlclient.clients.rest_client import RestClient
-
 
 class DocumentsService:
     """High-level service for /v1/documents CRUD operations."""
 
-    def __init__(self, rest: RestClient):
+    def __init__(self, rest: ApiClient):
         self._rest = rest
 
     def create(

@@ -16,7 +16,7 @@ Overview
 MLClient offers a layered architecture to access a MarkLogic Server: high-level services, a mid-level REST client, and a low-level HTTP client.
 High-level services are designed for specific endpoints, such as ``/v1/documents``.
 They provide a simple and intuitive API that covers all the functionality of each endpoint.
-The mid-level :class:`~mlclient.RestClient` uses :class:`~mlclient.calls.RestCall` objects to represent the parameters of any endpoint.
+The mid-level :class:`~mlclient.ApiClient` uses :class:`~mlclient.calls.ApiCall` objects to represent the parameters of any endpoint.
 The low-level :class:`~mlclient.HttpClient` lets you send raw HTTP requests to the server.
 You can learn more about services and clients in the following sections.
 
@@ -782,7 +782,7 @@ Low-level clients
 -----------------
 
 Low-level clients offer basic HTTP and REST functionality compatible with MarkLogic Server configuration.
-:class:`~mlclient.RestClient` works with :class:`~mlclient.calls.RestCall` objects, which are python representations of MarkLogic resources' calls.
+:class:`~mlclient.ApiClient` works with :class:`~mlclient.calls.ApiCall` objects, which are python representations of MarkLogic resources' calls.
 :class:`~mlclient.HttpClient` lets you send raw HTTP requests.
 You can use these clients to send customized requests that are not supported by the high-level service API,
 or to handle the responses yourself.
@@ -790,9 +790,9 @@ or to handle the responses yourself.
 ====================================  =======================================================================================================================================================
 Layer                                 Description
 ====================================  =======================================================================================================================================================
-:class:`~mlclient.MLClient`           Main entry point with layered access (``.http``, ``.rest``, ``.manage``, ``.documents``, ``.eval``, ``.logs``)
+:class:`~mlclient.MLClient`           Main entry point with layered access (``.http``, ``.rest``, ``.manage``, ``.admin``, ``.documents``, ``.eval``, ``.logs``)
 :class:`~mlclient.HttpClient`         Low-level HTTP client that accepts ML configuration and sends raw HTTP requests
-:class:`~mlclient.RestClient`         Mid-level client providing :meth:`~mlclient.RestClient.call` for :class:`~mlclient.calls.RestCall` objects
+:class:`~mlclient.ApiClient`          Mid-level client providing :meth:`~mlclient.ApiClient.call` for :class:`~mlclient.calls.ApiCall` objects
 ====================================  =======================================================================================================================================================
 
 MLClient
@@ -815,6 +815,59 @@ Two retry presets are also exported:
 
 - ``DEFAULT_RETRY_STRATEGY`` for normal requests
 - ``RESTART_RETRY_STRATEGY`` for Admin timestamp polling during restart windows
+
+API tiers and port routing
+""""""""""""""""""""""""""
+
+MarkLogic exposes three separate HTTP API tiers, each bound to a fixed port:
+
+========================  ==========  ===========================
+Tier                      Port        Endpoints
+========================  ==========  ===========================
+Client (REST) API         8000/custom ``/v1/*``
+Admin API                 8001        ``/admin/v1/*``
+Management API            8002        ``/manage/v2/*``
+========================  ==========  ===========================
+
+Port 8000 is the default App-Services REST server. Custom REST app servers
+(created via the Management API) also serve ``/v1/*`` on their configured port.
+Neither custom HTTP nor custom REST app servers serve ``/manage/v2/*`` or
+``/admin/v1/*`` endpoints - those are only available on the fixed ports shown above.
+Port 8000 appears to accept ``/manage/v2/*`` requests, but it silently redirects
+them to port 8002.
+
+``MLClient`` reflects this topology through three API properties:
+
+.. code-block:: text
+
+    MLClient (main entry point)
+      +- .http       -> HttpClient   (raw HTTP on the main port)
+      +- .rest       -> RestApi      (/v1/* on the main port)
+      +- .manage     -> ManageApi    (/manage/v2/* on port 8002)
+      +- .admin      -> AdminApi     (/admin/v1/* on port 8001)
+      +- .parser     -> MLResponseParser
+      +- .documents, .eval, .logs -> high-level services
+
+Port routing is automatic. When the main ``port`` is already 8002 (the default),
+``.manage`` reuses the same HTTP connection. Otherwise, a separate connection to
+port 8002 is lazily created on first access. The same logic applies to
+``.admin`` and port 8001. All secondary connections share the same ``protocol``,
+``host``, ``auth_method``, ``username``, and ``password`` as the main client.
+They are also managed by the ``connect()`` / ``disconnect()`` lifecycle.
+
+.. code-block:: python
+
+    >>> from mlclient import MLClient
+
+    # Default port is 8002 - .manage reuses the connection, .admin creates one to 8001
+    >>> with MLClient() as ml:
+    ...     resp = ml.manage.databases.get_list()
+    ...     ts = ml.admin.get_timestamp()
+
+    # Custom REST server on port 8040 - .rest uses 8040, .manage/admin use 8002/8001
+    >>> with MLClient(port=8040) as ml:
+    ...     resp = ml.rest.eval.post(xquery="1")
+    ...     dbs = ml.manage.databases.get_list()
 
 Connection
 """"""""""

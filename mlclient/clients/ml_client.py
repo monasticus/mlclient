@@ -2,21 +2,24 @@
 
 It exports the MLClient class - the main entry point for MarkLogic interaction
 using a layered composition architecture:
-    - .http     -> HttpClient (raw HTTP)
-    - .rest     -> RestApi (/v1/* endpoints)
-    - .manage   -> ManageApi (/manage/v2/* endpoints)
+    - .http     -> HttpClient (raw HTTP on main port)
+    - .rest     -> RestApi (/v1/* on main port)
+    - .manage   -> ManageApi (/manage/v2/* on port 8002)
+    - .admin    -> AdminApi (/admin/v1/* on port 8001)
     - .parser   -> MLResponseParser
     - .documents, .eval, .logs -> high-level services
 """
 
 from __future__ import annotations
 
+import logging
 from functools import cached_property
 from types import TracebackType
 
 from httpx import Response
 from httpx_retries import Retry
 
+from mlclient.api.admin_api import AdminApi
 from mlclient.api.manage_api import ManageApi
 from mlclient.api.rest_api import RestApi
 from mlclient.ml_response_parser import MLResponseParser
@@ -24,11 +27,10 @@ from mlclient.services.documents import DocumentsService
 from mlclient.services.eval import EvalService
 from mlclient.services.logs import LogsService
 
-from .http_client import (
-    MARKLOGIC_MANAGE_API_PORT,
-    HttpClient,
-)
-from .rest_client import RestClient
+from .api_client import ApiClient
+from .http_client import MARKLOGIC_ADMIN_API_PORT, MARKLOGIC_MANAGE_API_PORT, HttpClient
+
+logger = logging.getLogger(__name__)
 
 
 class MLClient:
@@ -38,7 +40,8 @@ class MLClient:
     - ml.http.get("/endpoint")              # raw HTTP
     - ml.rest.eval.post(xquery="...")       # mid-level REST API (/v1/*)
     - ml.manage.databases.get_list()        # mid-level Management API (/manage/v2/*)
-    - ml.rest.call(SomeRestCall())          # advanced: custom Call objects
+    - ml.admin.get_timestamp()              # mid-level Admin API (/admin/v1/*)
+    - ml.rest.call(SomeApiCall())           # advanced: custom Call objects
     - ml.parser.parse(resp)                 # manual parsing of raw responses
     - ml.documents.read("/doc.json")        # high-level, parsed results
     - ml.eval.xquery("1+1")                # high-level, parsed results
@@ -97,6 +100,13 @@ class MLClient:
     ...     resp.status_code
     200
 
+    Mid-level Admin API (/admin/v1/*) - returns httpx.Response:
+
+    >>> with MLClient(**config) as ml:
+    ...     resp = ml.admin.get_timestamp()
+    ...     resp.status_code
+    200
+
     Response parsing:
 
     >>> from mlclient import MLClient, MLResponseParser
@@ -127,7 +137,6 @@ class MLClient:
         username: str = "admin",
         password: str = "admin",
         retry: Retry | None = None,
-        manage_port: int | None = None,
     ):
         self._http = HttpClient(
             protocol=protocol,
@@ -138,10 +147,11 @@ class MLClient:
             password=password,
             retry=retry,
         )
-        self._rest_client = RestClient(self._http)
-        self._manage_port = manage_port
+        self._api_client = ApiClient(self._http)
         self._manage_http = None
-        self._manage_rest_client = None
+        self._manage_api_client = None
+        self._admin_http = None
+        self._admin_api_client = None
 
     def __enter__(self):
         """Connect and return self for use as a context manager."""
@@ -200,12 +210,17 @@ class MLClient:
     @cached_property
     def rest(self) -> RestApi:
         """REST API (/v1/*) - requires REST app server."""
-        return RestApi(self._rest_client)
+        return RestApi(self._api_client)
 
     @cached_property
     def manage(self) -> ManageApi:
         """Management API (/manage/v2/*) - requires Manage server."""
         return ManageApi(self._get_manage_client())
+
+    @cached_property
+    def admin(self) -> AdminApi:
+        """Admin API (/admin/v1/*) - requires Admin server (port 8001)."""
+        return AdminApi(self._get_admin_client())
 
     @property
     def parser(self) -> type[MLResponseParser]:
@@ -215,12 +230,12 @@ class MLClient:
     @cached_property
     def documents(self) -> DocumentsService:
         """High-level documents service."""
-        return DocumentsService(self._rest_client)
+        return DocumentsService(self._api_client)
 
     @cached_property
     def eval(self) -> EvalService:
         """High-level eval service."""
-        return EvalService(self._rest_client)
+        return EvalService(self._api_client)
 
     @cached_property
     def logs(self) -> LogsService:
@@ -232,12 +247,16 @@ class MLClient:
         self._http.connect()
         if self._manage_http is not None:
             self._manage_http.connect()
+        if self._admin_http is not None:
+            self._admin_http.connect()
 
     def disconnect(self):
         """Close an HTTP session."""
         self._http.disconnect()
         if self._manage_http is not None:
             self._manage_http.disconnect()
+        if self._admin_http is not None:
+            self._admin_http.disconnect()
 
     def is_connected(self) -> bool:
         """Return a connection status."""
@@ -265,20 +284,46 @@ class MLClient:
         """
         self._http.wait_for_restart_completion(response, timeout, poll_interval, retry)
 
-    def _get_manage_client(self) -> RestClient:
-        """Return RestClient for manage API (lazy init if separate port)."""
-        if self._manage_port is None or self._manage_port == self._http.port:
-            return self._rest_client
-        if self._manage_rest_client is None:
-            self._manage_http = HttpClient(
-                protocol=self._http.protocol,
-                host=self._http.host,
-                port=self._manage_port,
-                auth_method=self._http.auth_method,
-                username=self._http.username,
-                password=self._http.password,
+    def _get_manage_client(self) -> ApiClient:
+        """Return ApiClient for manage API (always port 8002).
+
+        The Management API is only available on the fixed Manage server
+        port (8002). If the main client already uses port 8002, it is reused.
+        Otherwise, a separate HttpClient is lazily created.
+        """
+        if self._http.port == MARKLOGIC_MANAGE_API_PORT:
+            return self._api_client
+        if self._manage_api_client is None:
+            self._manage_http = self._create_secondary_http(
+                MARKLOGIC_MANAGE_API_PORT,
             )
-            if self.is_connected():
-                self._manage_http.connect()
-            self._manage_rest_client = RestClient(self._manage_http)
-        return self._manage_rest_client
+            self._manage_api_client = ApiClient(self._manage_http)
+        return self._manage_api_client
+
+    def _get_admin_client(self) -> ApiClient:
+        """Return ApiClient for admin API (always port 8001).
+
+        The Admin API is only available on the fixed Admin server port (8001).
+        If the main client already uses port 8001, it is reused. Otherwise,
+        a separate HttpClient is lazily created.
+        """
+        if self._http.port == MARKLOGIC_ADMIN_API_PORT:
+            return self._api_client
+        if self._admin_api_client is None:
+            self._admin_http = self._create_secondary_http(MARKLOGIC_ADMIN_API_PORT)
+            self._admin_api_client = ApiClient(self._admin_http)
+        return self._admin_api_client
+
+    def _create_secondary_http(self, port: int) -> HttpClient:
+        """Create and optionally connect a secondary HttpClient."""
+        http = HttpClient(
+            protocol=self._http.protocol,
+            host=self._http.host,
+            port=port,
+            auth_method=self._http.auth_method,
+            username=self._http.username,
+            password=self._http.password,
+        )
+        if self.is_connected():
+            http.connect()
+        return http

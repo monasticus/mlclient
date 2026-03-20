@@ -8,8 +8,9 @@ from __future__ import annotations
 import re
 from collections.abc import Iterator
 from enum import Enum
+
 from mlclient.calls import LogsCall
-from mlclient.clients.rest_client import RestClient
+from mlclient.clients.api_client import ApiClient
 from mlclient.exceptions import InvalidLogTypeError, MarkLogicError
 
 
@@ -51,7 +52,7 @@ class LogsService:
     _LOG_TYPES_RE = "|".join(t.value[:-3] for t in LogType)
     _FILENAME_RE = re.compile(rf"((.+)_)?({_LOG_TYPES_RE})Log(_([1-6]))?\.txt")
 
-    def __init__(self, rest: RestClient):
+    def __init__(self, rest: ApiClient):
         self._rest = rest
 
     def get(

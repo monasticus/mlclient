@@ -9,15 +9,15 @@ from httpx import Response
 from mlclient.calls import DocumentsDeleteCall, DocumentsGetCall, DocumentsPostCall
 from mlclient.structures.calls import DocumentsBodyPart
 
-# Avoid circular import: RestClient -> api classes -> RestClient
+# Avoid circular import: ApiClient -> api classes -> ApiClient
 if TYPE_CHECKING:
-    from mlclient.clients.rest_client import RestClient
+    from mlclient.clients.api_client import ApiClient
 
 
 class DocumentsApi:
     """Mid-level API for /v1/documents endpoints."""
 
-    def __init__(self, rest: RestClient):
+    def __init__(self, rest: ApiClient):
         self._rest = rest
 
     def get(

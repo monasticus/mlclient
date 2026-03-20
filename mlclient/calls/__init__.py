@@ -1,6 +1,6 @@
 """The ML Calls package.
 
-It contains modules dealing with MarkLogic REST Resources at the lowest level
+It contains modules dealing with MarkLogic API endpoints at the lowest level
 of HTTP requests. Additionally, it exports the following package:
 
     * model
@@ -8,8 +8,10 @@ of HTTP requests. Additionally, it exports the following package:
 
 This package exports the following modules:
 
-    * rest
-        An abstract class representing a single request to a MarkLogic REST Resource.
+    * api_call
+        An abstract class representing a single request to a MarkLogic API endpoint.
+    * admin
+        The ML Admin API Calls module.
     * databases
         The ML Database Resource Calls module.
     * documents
@@ -28,8 +30,12 @@ This package exports the following modules:
         The ML User Resource Calls module.
 
 This package exports the following classes:
-    * RestCall
-        An abstract class representing a single request to a MarkLogic REST Resource.
+    * ApiCall
+        An abstract class representing a single request to a MarkLogic API endpoint.
+    * TimestampGetCall
+        A GET request to get the Admin server timestamp.
+    * ServerConfigGetCall
+        A GET request to get the Admin server configuration.
     * DatabaseGetCall
         A GET request to get database details.
     * DatabasePostCall
@@ -112,7 +118,8 @@ Examples
 >>> from mlclient.calls import DatabaseGetCall, EvalCall
 """
 
-from .rest import RestCall
+from .admin import ServerConfigGetCall, TimestampGetCall
+from .api_call import ApiCall
 from .databases import (
     DatabaseDeleteCall,
     DatabaseGetCall,
@@ -161,6 +168,7 @@ from .users import (
 )
 
 __all__ = [
+    "ApiCall",
     "DatabaseDeleteCall",
     "DatabaseGetCall",
     "DatabasePostCall",
@@ -181,19 +189,20 @@ __all__ = [
     "ForestsPostCall",
     "ForestsPutCall",
     "LogsCall",
-    "RestCall",
     "RoleDeleteCall",
     "RoleGetCall",
     "RolePropertiesGetCall",
     "RolePropertiesPutCall",
     "RolesGetCall",
     "RolesPostCall",
+    "ServerConfigGetCall",
     "ServerDeleteCall",
     "ServerGetCall",
     "ServerPropertiesGetCall",
     "ServerPropertiesPutCall",
     "ServersGetCall",
     "ServersPostCall",
+    "TimestampGetCall",
     "UserDeleteCall",
     "UserGetCall",
     "UserPropertiesGetCall",

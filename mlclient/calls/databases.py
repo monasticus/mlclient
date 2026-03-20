@@ -26,13 +26,13 @@ import re
 from typing import ClassVar
 
 from mlclient import constants, exceptions, utils
-from mlclient.calls import RestCall
+from mlclient.calls.api_call import ApiCall
 
 
-class DatabasesGetCall(RestCall):
+class DatabasesGetCall(ApiCall):
     """A GET request to get databases summary.
 
-    A RestCall implementation representing a single GET request
+    A ApiCall implementation representing a single GET request
     to the /manage/v2/databases REST Resource.
 
     This resource address returns a summary of the databases in the cluster.
@@ -109,10 +109,10 @@ class DatabasesGetCall(RestCall):
             raise exceptions.WrongParametersError(msg)
 
 
-class DatabasesPostCall(RestCall):
+class DatabasesPostCall(ApiCall):
     """A POST request to create a new database.
 
-    A RestCall implementation representing a single POST request
+    A ApiCall implementation representing a single POST request
     to the /manage/v2/databases REST Resource.
 
     This resource address creates a new database in the cluster.
@@ -161,10 +161,10 @@ class DatabasesPostCall(RestCall):
             raise exceptions.WrongParametersError(msg)
 
 
-class DatabaseGetCall(RestCall):
+class DatabaseGetCall(ApiCall):
     """A GET request to get database details.
 
-    A RestCall implementation representing a single GET request
+    A ApiCall implementation representing a single GET request
     to the /manage/v2/databases/{id|name} REST Resource.
 
     This resource address returns information on the specified database.
@@ -252,10 +252,10 @@ class DatabaseGetCall(RestCall):
             raise exceptions.WrongParametersError(msg)
 
 
-class DatabasePostCall(RestCall):
+class DatabasePostCall(ApiCall):
     """A POST request to manage a database.
 
-    A RestCall implementation representing a single POST request
+    A ApiCall implementation representing a single POST request
     to the /manage/v2/databases/{id|name} REST Resource.
 
     This resource address can be used to clear the contents of the named database
@@ -311,10 +311,10 @@ class DatabasePostCall(RestCall):
             raise exceptions.WrongParametersError(msg)
 
 
-class DatabaseDeleteCall(RestCall):
+class DatabaseDeleteCall(ApiCall):
     """A DELETE request to remove a database from a cluster.
 
-    A RestCall implementation representing a single DELETE request
+    A ApiCall implementation representing a single DELETE request
     to the /manage/v2/databases/{id|name} REST Resource.
 
     This resource address deletes the named database from the cluster.
@@ -375,10 +375,10 @@ class DatabaseDeleteCall(RestCall):
             raise exceptions.WrongParametersError(msg)
 
 
-class DatabasePropertiesGetCall(RestCall):
+class DatabasePropertiesGetCall(ApiCall):
     """A GET request to get a database properties.
 
-    A RestCall implementation representing a single GET request
+    A ApiCall implementation representing a single GET request
     to the /manage/v2/databases/{id|name}/properties REST Resource.
 
     This resource address returns the modifiable properties of the named database.
@@ -442,10 +442,10 @@ class DatabasePropertiesGetCall(RestCall):
             raise exceptions.WrongParametersError(msg)
 
 
-class DatabasePropertiesPutCall(RestCall):
+class DatabasePropertiesPutCall(ApiCall):
     """A PUT request to modify database properties.
 
-    A RestCall implementation representing a single PUT request
+    A ApiCall implementation representing a single PUT request
     to the /manage/v2/databases/{id|name}/properties REST Resource.
 
     This resource address modifies the properties of the named database.

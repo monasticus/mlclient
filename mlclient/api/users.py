@@ -15,15 +15,15 @@ from mlclient.calls import (
     UsersPostCall,
 )
 
-# Avoid circular import: RestClient -> api classes -> RestClient
+# Avoid circular import: ApiClient -> api classes -> ApiClient
 if TYPE_CHECKING:
-    from mlclient.clients.rest_client import RestClient
+    from mlclient.clients.api_client import ApiClient
 
 
 class UsersApi:
     """Mid-level API for /manage/v2/users endpoints."""
 
-    def __init__(self, rest: RestClient):
+    def __init__(self, rest: ApiClient):
         self._rest = rest
 
     def get_list(

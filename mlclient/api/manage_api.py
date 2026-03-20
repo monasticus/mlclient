@@ -10,11 +10,11 @@ from typing import TYPE_CHECKING
 
 from httpx import Response
 
-from mlclient.calls import RestCall
+from mlclient.calls import ApiCall
 
-# Avoid circular import: RestClient -> api classes -> RestClient
+# Avoid circular import: ApiClient -> api classes -> ApiClient
 if TYPE_CHECKING:
-    from mlclient.clients.rest_client import RestClient
+    from mlclient.clients.api_client import ApiClient
 
 from .databases import DatabasesApi
 from .forests import ForestsApi
@@ -30,15 +30,15 @@ class ManageApi:
     Requires the Manage server (port 8002 by default).
     """
 
-    def __init__(self, client: RestClient):
+    def __init__(self, client: ApiClient):
         self._client = client
 
-    def call(self, call_: RestCall) -> Response:
-        """Send a custom RestCall.
+    def call(self, call_: ApiCall) -> Response:
+        """Send a custom ApiCall.
 
         Parameters
         ----------
-        call_ : RestCall
+        call_ : ApiCall
             A specific endpoint call implementation
 
         Returns

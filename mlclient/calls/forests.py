@@ -28,13 +28,13 @@ import re
 from typing import ClassVar
 
 from mlclient import constants, exceptions, utils
-from mlclient.calls import RestCall
+from mlclient.calls.api_call import ApiCall
 
 
-class ForestsGetCall(RestCall):
+class ForestsGetCall(ApiCall):
     """A GET request to get forests summary.
 
-    A RestCall implementation representing a single GET request
+    A ApiCall implementation representing a single GET request
     to the /manage/v2/forests REST Resource.
 
     This resource address returns data about the forests in the cluster.
@@ -143,10 +143,10 @@ class ForestsGetCall(RestCall):
             raise exceptions.WrongParametersError(msg)
 
 
-class ForestsPostCall(RestCall):
+class ForestsPostCall(ApiCall):
     """A POST request to create a new forest.
 
-    A RestCall implementation representing a single POST request
+    A ApiCall implementation representing a single POST request
     to the /manage/v2/forests REST Resource.
 
     Create a new forest, including replicas if specified.
@@ -205,10 +205,10 @@ class ForestsPostCall(RestCall):
             raise exceptions.WrongParametersError(msg)
 
 
-class ForestsPutCall(RestCall):
+class ForestsPutCall(ApiCall):
     """A PUT request to perform an operation on forests.
 
-    A RestCall implementation representing a single PUT request
+    A ApiCall implementation representing a single PUT request
     to the /manage/v2/forests REST Resource.
 
     Perform an operation on one or more forests, such as combining multiple forests
@@ -258,10 +258,10 @@ class ForestsPutCall(RestCall):
             raise exceptions.WrongParametersError(msg)
 
 
-class ForestGetCall(RestCall):
+class ForestGetCall(ApiCall):
     """A GET request to get a forest details.
 
-    A RestCall implementation representing a single GET request
+    A ApiCall implementation representing a single GET request
     to the /manage/v2/forests/{id|name} REST Resource.
 
     Retrieve information about a forest. The forest can be identified either by id
@@ -347,10 +347,10 @@ class ForestGetCall(RestCall):
             raise exceptions.WrongParametersError(msg)
 
 
-class ForestPostCall(RestCall):
+class ForestPostCall(ApiCall):
     """A POST request to change a forest's state.
 
-    A RestCall implementation representing a single POST request
+    A ApiCall implementation representing a single POST request
     to the /manage/v2/forests/{id|name} REST Resource.
 
     Initiate a state change on a forest, such as a merge, restart, or attach.
@@ -422,10 +422,10 @@ class ForestPostCall(RestCall):
             raise exceptions.WrongParametersError(msg)
 
 
-class ForestDeleteCall(RestCall):
+class ForestDeleteCall(ApiCall):
     """A DELETE request to remove a forest.
 
-    A RestCall implementation representing a single DELETE request
+    A ApiCall implementation representing a single DELETE request
     to the /manage/v2/forests/{id|name} REST Resource.
 
     Delete a forest.
@@ -497,10 +497,10 @@ class ForestDeleteCall(RestCall):
             raise exceptions.WrongParametersError(msg)
 
 
-class ForestPropertiesGetCall(RestCall):
+class ForestPropertiesGetCall(ApiCall):
     """A GET request to get forest properties.
 
-    A RestCall implementation representing a single GET request
+    A ApiCall implementation representing a single GET request
     to the /manage/v2/forests/{id|name}/properties REST Resource.
 
     Retrieve the current state of modifiable properties of the forest identified
@@ -564,10 +564,10 @@ class ForestPropertiesGetCall(RestCall):
             raise exceptions.WrongParametersError(msg)
 
 
-class ForestPropertiesPutCall(RestCall):
+class ForestPropertiesPutCall(ApiCall):
     """A PUT request to modify forest properties.
 
-    A RestCall implementation representing a single PUT request
+    A ApiCall implementation representing a single PUT request
     to the /manage/v2/forests/{id|name}/properties REST Resource.
 
     Modify the configuration of the forest identified by {id|name}.

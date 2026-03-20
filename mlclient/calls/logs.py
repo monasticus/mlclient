@@ -10,13 +10,13 @@ from __future__ import annotations
 from dateutil import parser
 
 from mlclient import exceptions, utils
-from mlclient.calls import RestCall
+from mlclient.calls.api_call import ApiCall
 
 
-class LogsCall(RestCall):
+class LogsCall(ApiCall):
     """A GET request to retrieve logs.
 
-    A RestCall implementation representing a single GET request
+    A ApiCall implementation representing a single GET request
     to the /manage/v2/logs REST Resource.
 
     Returns the content of server log files.

@@ -24,13 +24,13 @@ import re
 from typing import ClassVar
 
 from mlclient import constants, exceptions, utils
-from mlclient.calls import RestCall
+from mlclient.calls.api_call import ApiCall
 
 
-class RolesGetCall(RestCall):
+class RolesGetCall(ApiCall):
     """A GET request to get roles summary.
 
-    A RestCall implementation representing a single GET request
+    A ApiCall implementation representing a single GET request
     to the /manage/v2/roles REST Resource.
 
     This resource address returns a summary of the roles in the security database.
@@ -99,10 +99,10 @@ class RolesGetCall(RestCall):
             raise exceptions.WrongParametersError(msg)
 
 
-class RolesPostCall(RestCall):
+class RolesPostCall(ApiCall):
     """A POST request to create a new role.
 
-    A RestCall implementation representing a single POST request
+    A ApiCall implementation representing a single POST request
     to the /manage/v2/roles REST Resource.
 
     This resource address creates a new role in the security database.
@@ -151,10 +151,10 @@ class RolesPostCall(RestCall):
             raise exceptions.WrongParametersError(msg)
 
 
-class RoleGetCall(RestCall):
+class RoleGetCall(ApiCall):
     """A GET request to get a role details.
 
-    A RestCall implementation representing a single GET request
+    A ApiCall implementation representing a single GET request
     to the /manage/v2/roles/{id|name} REST Resource.
 
     This resource address returns the configuration for the specified role.
@@ -228,10 +228,10 @@ class RoleGetCall(RestCall):
             raise exceptions.WrongParametersError(msg)
 
 
-class RoleDeleteCall(RestCall):
+class RoleDeleteCall(ApiCall):
     """A DELETE request to remove a role.
 
-    A RestCall implementation representing a single DELETE request
+    A ApiCall implementation representing a single DELETE request
     to the /manage/v2/roles/{id|name} REST Resource.
 
     This resource address deletes the named role from the named security database.
@@ -268,10 +268,10 @@ class RoleDeleteCall(RestCall):
         return self._ENDPOINT_TEMPLATE.format(self._role)
 
 
-class RolePropertiesGetCall(RestCall):
+class RolePropertiesGetCall(ApiCall):
     """A GET request to get role properties.
 
-    A RestCall implementation representing a single GET request
+    A ApiCall implementation representing a single GET request
     to the /manage/v2/roles/{id|name}/properties REST Resource.
 
     This resource address returns the properties of the specified role.
@@ -334,10 +334,10 @@ class RolePropertiesGetCall(RestCall):
             raise exceptions.WrongParametersError(msg)
 
 
-class RolePropertiesPutCall(RestCall):
+class RolePropertiesPutCall(ApiCall):
     """A PUT request to modify role properties.
 
-    A RestCall implementation representing a single PUT request
+    A ApiCall implementation representing a single PUT request
     to the /manage/v2/roles/{id|name}/properties REST Resource.
 
     This resource address can be used to update the properties for the specified role.

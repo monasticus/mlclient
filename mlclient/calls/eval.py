@@ -11,13 +11,13 @@ import re
 from json import dumps
 
 from mlclient import constants, exceptions
-from mlclient.calls import RestCall
+from mlclient.calls.api_call import ApiCall
 
 
-class EvalCall(RestCall):
+class EvalCall(ApiCall):
     """A POST request to evaluate an ad-hoc query.
 
-    A RestCall implementation representing a single request
+    A ApiCall implementation representing a single request
     to the /v1/eval REST Resource.
 
     Evaluate an ad-hoc query expressed using XQuery or server-side JavaScript.

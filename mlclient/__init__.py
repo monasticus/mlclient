@@ -7,8 +7,8 @@ This package exports the following classes:
         Main entry point for MarkLogic interaction with layered access.
     * HttpClient
         A low-level class used to send HTTP requests to a MarkLogic instance.
-    * RestClient
-        A mid-level client providing call() for RestCall objects.
+    * ApiClient
+        A mid-level client providing call() for ApiCall objects.
     * MLConfiguration
         A class representing MarkLogic configuration.
     * MLEnvironment
@@ -35,9 +35,9 @@ from .clients import (
     MARKLOGIC_MANAGE_API_PORT,
     MARKLOGIC_REST_API_PORT,
     RESTART_RETRY_STRATEGY,
+    ApiClient,
     HttpClient,
     MLClient,
-    RestClient,
 )
 from .ml_config import MLConfiguration
 from .ml_environment import MLEnvironment
@@ -58,12 +58,12 @@ __all__ = [
     "MARKLOGIC_MANAGE_API_PORT",
     "MARKLOGIC_REST_API_PORT",
     "RESTART_RETRY_STRATEGY",
+    "ApiClient",
     "HttpClient",
     "MLClient",
     "MLConfiguration",
     "MLEnvironment",
     "MLResponseParser",
-    "RestClient",
     "__version__",
     "setup_logger",
 ]

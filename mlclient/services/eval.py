@@ -7,8 +7,9 @@ from __future__ import annotations
 
 import xml.etree.ElementTree as ElemTree
 from pathlib import Path
+
 from mlclient.calls import EvalCall
-from mlclient.clients.rest_client import RestClient
+from mlclient.clients.api_client import ApiClient
 from mlclient.exceptions import (
     MarkLogicError,
     UnsupportedFileExtensionError,
@@ -30,7 +31,7 @@ _SUPPORTED_FILE_EXT = tuple(
 class EvalService:
     """High-level service for /v1/eval endpoint."""
 
-    def __init__(self, rest: RestClient):
+    def __init__(self, rest: ApiClient):
         self._rest = rest
 
     def xquery(
@@ -74,8 +75,14 @@ class EvalService:
         -------
         Parsed evaluation result
         """
-        return self._eval(xq=code, variables=variables, database=database,
-                          txid=txid, output_type=output_type, **kwargs)
+        return self._eval(
+            xq=code,
+            variables=variables,
+            database=database,
+            txid=txid,
+            output_type=output_type,
+            **kwargs,
+        )
 
     def javascript(
         self,
@@ -118,8 +125,14 @@ class EvalService:
         -------
         Parsed evaluation result
         """
-        return self._eval(js=code, variables=variables, database=database,
-                          txid=txid, output_type=output_type, **kwargs)
+        return self._eval(
+            js=code,
+            variables=variables,
+            database=database,
+            txid=txid,
+            output_type=output_type,
+            **kwargs,
+        )
 
     def xqy(
         self,
@@ -142,8 +155,14 @@ class EvalService:
         | list
     ):
         """Evaluate XQuery code. Alias for :meth:`xquery`."""
-        return self.xquery(code, variables=variables, database=database,
-                           txid=txid, output_type=output_type, **kwargs)
+        return self.xquery(
+            code,
+            variables=variables,
+            database=database,
+            txid=txid,
+            output_type=output_type,
+            **kwargs,
+        )
 
     def js(
         self,
@@ -166,8 +185,14 @@ class EvalService:
         | list
     ):
         """Evaluate JavaScript code. Alias for :meth:`javascript`."""
-        return self.javascript(code, variables=variables, database=database,
-                               txid=txid, output_type=output_type, **kwargs)
+        return self.javascript(
+            code,
+            variables=variables,
+            database=database,
+            txid=txid,
+            output_type=output_type,
+            **kwargs,
+        )
 
     def file(
         self,
@@ -210,8 +235,14 @@ class EvalService:
         -------
         Parsed evaluation result
         """
-        return self._eval(file=path, variables=variables, database=database,
-                          txid=txid, output_type=output_type, **kwargs)
+        return self._eval(
+            file=path,
+            variables=variables,
+            database=database,
+            txid=txid,
+            output_type=output_type,
+            **kwargs,
+        )
 
     def eval(
         self,
@@ -269,8 +300,14 @@ class EvalService:
             If MarkLogic returns an error
         """
         return self._eval(
-            file=file, xq=xq, js=js, variables=variables,
-            database=database, txid=txid, output_type=output_type, **kwargs,
+            file=file,
+            xq=xq,
+            js=js,
+            variables=variables,
+            database=database,
+            txid=txid,
+            output_type=output_type,
+            **kwargs,
         )
 
     def _eval(
@@ -287,8 +324,13 @@ class EvalService:
         """Execute eval and return parsed result."""
         _validate_params(file, xq, js)
         call = _get_call(
-            file=file, xq=xq, js=js, variables=variables,
-            database=database, txid=txid, **kwargs,
+            file=file,
+            xq=xq,
+            js=js,
+            variables=variables,
+            database=database,
+            txid=txid,
+            **kwargs,
         )
         resp = self._rest.call(call)
         parsed_resp = MLResponseParser.parse(resp, output_type=output_type)

@@ -1,8 +1,8 @@
-"""The ML REST Call module.
+"""The ML API Call module.
 
 It exports 1 class:
-    * RestCall
-        An abstract class representing a single request to a MarkLogic REST Resource.
+    * ApiCall
+        An abstract class representing a single request to a MarkLogic API endpoint.
 """
 
 from __future__ import annotations
@@ -13,8 +13,8 @@ from typing import Any
 from mlclient import constants
 
 
-class RestCall(metaclass=ABCMeta):
-    """An abstract class representing a single request to a MarkLogic REST Resource."""
+class ApiCall(metaclass=ABCMeta):
+    """An abstract class representing a single request to a MarkLogic API endpoint."""
 
     def __init__(
         self,
@@ -25,7 +25,7 @@ class RestCall(metaclass=ABCMeta):
         accept: str | None = None,
         content_type: str | None = None,
     ):
-        """Initialize RestCall implementation instance.
+        """Initialize ApiCall implementation instance.
 
         Parameters
         ----------
@@ -54,14 +54,14 @@ class RestCall(metaclass=ABCMeta):
     @classmethod
     def __subclasshook__(
         cls,
-        subclass: RestCall,
+        subclass: ApiCall,
     ):
         """Verify if a subclass implements all abstract methods.
 
         Parameters
         ----------
-        subclass : RestCall
-            A RestCall subclass
+        subclass : ApiCall
+            An ApiCall subclass
 
         Returns
         -------
@@ -75,7 +75,7 @@ class RestCall(metaclass=ABCMeta):
     def endpoint(
         self,
     ) -> str:
-        """An endpoint of the RestCall.
+        """An endpoint of the ApiCall.
 
         Returns
         -------

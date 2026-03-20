@@ -1,20 +1,20 @@
-"""The REST Client module.
+"""The API Client module.
 
-It exports the RestClient class for calling MarkLogic REST endpoints
-via RestCall objects.
+It exports the ApiClient class for calling MarkLogic API endpoints
+via ApiCall objects.
 """
 
 from __future__ import annotations
 
 from httpx import Response
 
-from mlclient.calls import RestCall
+from mlclient.calls import ApiCall
 
 from .http_client import HttpClient
 
 
-class RestClient:
-    """Mid-level client providing call() for RestCall objects.
+class ApiClient:
+    """Mid-level client providing call() for ApiCall objects.
 
     Attributes
     ----------
@@ -30,12 +30,12 @@ class RestClient:
         """Return the underlying HTTP client."""
         return self._http
 
-    def call(self, call_: RestCall) -> Response:
-        """Send a request using a RestCall object.
+    def call(self, call_: ApiCall) -> Response:
+        """Send a request using an ApiCall object.
 
         Parameters
         ----------
-        call_ : RestCall
+        call_ : ApiCall
             A specific endpoint call implementation
 
         Returns

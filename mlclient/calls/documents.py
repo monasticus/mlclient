@@ -18,7 +18,7 @@ import urllib3
 from urllib3.fields import RequestField
 
 from mlclient import constants, exceptions, utils
-from mlclient.calls import RestCall
+from mlclient.calls.api_call import ApiCall
 from mlclient.constants import HEADER_JSON
 from mlclient.structures.calls import (
     Category,
@@ -27,10 +27,10 @@ from mlclient.structures.calls import (
 )
 
 
-class DocumentsGetCall(RestCall):
+class DocumentsGetCall(ApiCall):
     """A GET request to retrieve documents' content or metadata.
 
-    A RestCall implementation representing a single GET request
+    A ApiCall implementation representing a single GET request
     to the /v1/documents REST Resource.
 
     Retrieve document content and/or metadata from the database.
@@ -173,10 +173,10 @@ class DocumentsGetCall(RestCall):
         return None
 
 
-class DocumentsPostCall(RestCall):
+class DocumentsPostCall(ApiCall):
     """A POST request to insert or update documents' content or metadata.
 
-    A RestCall implementation representing a single POST request
+    A ApiCall implementation representing a single POST request
     to the /v1/documents REST Resource.
 
     Insert or update content and/or metadata for multiple documents in a single request.
@@ -300,10 +300,10 @@ class DocumentsPostCall(RestCall):
         )
 
 
-class DocumentsDeleteCall(RestCall):
+class DocumentsDeleteCall(ApiCall):
     """A DELETE request to remove documents, or reset document metadata.
 
-    A RestCall implementation representing a single DELETE request
+    A ApiCall implementation representing a single DELETE request
     to the /v1/documents REST Resource.
 
     Retrieve document content and/or metadata from the database.

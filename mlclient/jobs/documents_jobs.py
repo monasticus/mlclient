@@ -575,10 +575,7 @@ class DocumentsLoader:
         content = cls._load_content(path, raw, doc_type)
         metadata = cls._load_metadata(path, raw)
 
-        if raw:
-            factory_function = Document.create_raw
-        else:
-            factory_function = Document.create
+        factory_function = Document.create_raw if raw else Document.create
 
         return factory_function(
             content=content,

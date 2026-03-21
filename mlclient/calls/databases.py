@@ -39,7 +39,9 @@ class DatabasesGetCall(ApiCall):
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/GET/manage/v2/databases
     """
 
-    _ENDPOINT: str = "/manage/v2/databases"
+    _API_VERSION: int = 2
+
+    _ENDPOINT: str = "/manage/v{}/databases"
 
     _FORMAT_PARAM: str = "format"
     _VIEW_PARAM: str = "view"
@@ -91,7 +93,7 @@ class DatabasesGetCall(ApiCall):
         str
             A Databases call endpoint
         """
-        return self._ENDPOINT
+        return self._ENDPOINT.format(self._API_VERSION)
 
     @classmethod
     def _validate_params(
@@ -119,7 +121,9 @@ class DatabasesPostCall(ApiCall):
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/POST/manage/v2/databases
     """
 
-    _ENDPOINT: str = "/manage/v2/databases"
+    _API_VERSION: int = 2
+
+    _ENDPOINT: str = "/manage/v{}/databases"
 
     def __init__(
         self,
@@ -149,7 +153,7 @@ class DatabasesPostCall(ApiCall):
         str
             A Databases call endpoint
         """
-        return self._ENDPOINT
+        return self._ENDPOINT.format(self._API_VERSION)
 
     @classmethod
     def _validate_params(
@@ -173,7 +177,9 @@ class DatabaseGetCall(ApiCall):
     https://docs.marklogic.com/REST/GET/manage/v2/databases/[id-or-name]
     """
 
-    _ENDPOINT_TEMPLATE: str = "/manage/v2/databases/{}"
+    _API_VERSION: int = 2
+
+    _ENDPOINT_TEMPLATE: str = "/manage/v{}/databases/{}"
 
     _FORMAT_PARAM: str = "format"
     _VIEW_PARAM: str = "view"
@@ -234,7 +240,7 @@ class DatabaseGetCall(ApiCall):
         str
             A Database call endpoint
         """
-        return self._ENDPOINT_TEMPLATE.format(self.__database)
+        return self._ENDPOINT_TEMPLATE.format(self._API_VERSION, self.__database)
 
     @classmethod
     def _validate_params(
@@ -265,7 +271,9 @@ class DatabasePostCall(ApiCall):
     https://docs.marklogic.com/REST/POST/manage/v2/databases/[id-or-name]
     """
 
-    _ENDPOINT_TEMPLATE: str = "/manage/v2/databases/{}"
+    _API_VERSION: int = 2
+
+    _ENDPOINT_TEMPLATE: str = "/manage/v{}/databases/{}"
 
     def __init__(
         self,
@@ -299,7 +307,7 @@ class DatabasePostCall(ApiCall):
         str
             A Database call endpoint
         """
-        return self._ENDPOINT_TEMPLATE.format(self.__database)
+        return self._ENDPOINT_TEMPLATE.format(self._API_VERSION, self.__database)
 
     @classmethod
     def _validate_params(
@@ -322,7 +330,9 @@ class DatabaseDeleteCall(ApiCall):
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/DELETE/manage/v2/databases/[id-or-name]
     """
 
-    _ENDPOINT_TEMPLATE: str = "/manage/v2/databases/{}"
+    _API_VERSION: int = 2
+
+    _ENDPOINT_TEMPLATE: str = "/manage/v{}/databases/{}"
 
     _FOREST_DELETE_PARAM: str = "forest-delete"
 
@@ -362,7 +372,7 @@ class DatabaseDeleteCall(ApiCall):
         str
             A Database call endpoint
         """
-        return self._ENDPOINT_TEMPLATE.format(self._database)
+        return self._ENDPOINT_TEMPLATE.format(self._API_VERSION, self._database)
 
     @classmethod
     def _validate_params(
@@ -387,7 +397,9 @@ class DatabasePropertiesGetCall(ApiCall):
     https://docs.marklogic.com/REST/GET/manage/v2/databases/[id-or-name]/properties
     """
 
-    _ENDPOINT_TEMPLATE: str = "/manage/v2/databases/{}/properties"
+    _API_VERSION: int = 2
+
+    _ENDPOINT_TEMPLATE: str = "/manage/v{}/databases/{}/properties"
 
     _FORMAT_PARAM: str = "format"
 
@@ -429,7 +441,7 @@ class DatabasePropertiesGetCall(ApiCall):
         str
             A Database Properties call endpoint
         """
-        return self._ENDPOINT_TEMPLATE.format(self._database)
+        return self._ENDPOINT_TEMPLATE.format(self._API_VERSION, self._database)
 
     @classmethod
     def _validate_params(
@@ -455,7 +467,9 @@ class DatabasePropertiesPutCall(ApiCall):
     https://docs.marklogic.com/REST/PUT/manage/v2/databases/[id-or-name]/properties
     """
 
-    _ENDPOINT_TEMPLATE: str = "/manage/v2/databases/{}/properties"
+    _API_VERSION: int = 2
+
+    _ENDPOINT_TEMPLATE: str = "/manage/v{}/databases/{}/properties"
 
     def __init__(
         self,
@@ -489,7 +503,7 @@ class DatabasePropertiesPutCall(ApiCall):
         str
             A Database Properties call endpoint
         """
-        return self._ENDPOINT_TEMPLATE.format(self._database)
+        return self._ENDPOINT_TEMPLATE.format(self._API_VERSION, self._database)
 
     @classmethod
     def __validate_params(

@@ -44,7 +44,9 @@ class ForestsGetCall(ApiCall):
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/GET/manage/v2/forests
     """
 
-    _ENDPOINT: str = "/manage/v2/forests"
+    _API_VERSION: int = 2
+
+    _ENDPOINT: str = "/manage/v{}/forests"
 
     _FORMAT_PARAM: str = "format"
     _VIEW_PARAM: str = "view"
@@ -125,7 +127,7 @@ class ForestsGetCall(ApiCall):
         str
             A Forests call endpoint
         """
-        return self._ENDPOINT
+        return self._ENDPOINT.format(self._API_VERSION)
 
     @classmethod
     def _validate_params(
@@ -154,7 +156,9 @@ class ForestsPostCall(ApiCall):
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/POST/manage/v2/forests
     """
 
-    _ENDPOINT: str = "/manage/v2/forests"
+    _API_VERSION: int = 2
+
+    _ENDPOINT: str = "/manage/v{}/forests"
 
     _WAIT_FOR_FOREST_TO_MOUNT_PARAM: str = "wait-for-forest-to-mount"
 
@@ -193,7 +197,7 @@ class ForestsPostCall(ApiCall):
         str
             A Forests call endpoint
         """
-        return self._ENDPOINT
+        return self._ENDPOINT.format(self._API_VERSION)
 
     @classmethod
     def _validate_params(
@@ -216,7 +220,9 @@ class ForestsPutCall(ApiCall):
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/PUT/manage/v2/forests
     """
 
-    _ENDPOINT: str = "/manage/v2/forests"
+    _API_VERSION: int = 2
+
+    _ENDPOINT: str = "/manage/v{}/forests"
 
     def __init__(
         self,
@@ -246,7 +252,7 @@ class ForestsPutCall(ApiCall):
         str
             A Forests call endpoint
         """
-        return self._ENDPOINT
+        return self._ENDPOINT.format(self._API_VERSION)
 
     @classmethod
     def _validate_params(
@@ -269,7 +275,9 @@ class ForestGetCall(ApiCall):
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/GET/manage/v2/forests/[id-or-name]
     """
 
-    _ENDPOINT_TEMPLATE: str = "/manage/v2/forests/{}"
+    _API_VERSION: int = 2
+
+    _ENDPOINT_TEMPLATE: str = "/manage/v{}/forests/{}"
 
     _FORMAT_PARAM: str = "format"
     _VIEW_PARAM: str = "view"
@@ -329,7 +337,7 @@ class ForestGetCall(ApiCall):
         str
             A Forest call endpoint
         """
-        return self._ENDPOINT_TEMPLATE.format(self._forest)
+        return self._ENDPOINT_TEMPLATE.format(self._API_VERSION, self._forest)
 
     @classmethod
     def _validate_params(
@@ -357,7 +365,9 @@ class ForestPostCall(ApiCall):
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/POST/manage/v2/forests/[id-or-name]
     """
 
-    _ENDPOINT_TEMPLATE: str = "/manage/v2/forests/{}"
+    _API_VERSION: int = 2
+
+    _ENDPOINT_TEMPLATE: str = "/manage/v{}/forests/{}"
 
     _STATE_PARAM: str = "state"
 
@@ -406,7 +416,7 @@ class ForestPostCall(ApiCall):
         str
             A Forests call endpoint
         """
-        return self._ENDPOINT_TEMPLATE.format(self._forest)
+        return self._ENDPOINT_TEMPLATE.format(self._API_VERSION, self._forest)
 
     @classmethod
     def _validate_params(
@@ -432,7 +442,9 @@ class ForestDeleteCall(ApiCall):
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/DELETE/manage/v2/forests/[id-or-name]
     """
 
-    _ENDPOINT_TEMPLATE: str = "/manage/v2/forests/{}"
+    _API_VERSION: int = 2
+
+    _ENDPOINT_TEMPLATE: str = "/manage/v{}/forests/{}"
 
     _LEVEL_PARAM: str = "level"
     _REPLICAS_PARAM: str = "replicas"
@@ -479,7 +491,7 @@ class ForestDeleteCall(ApiCall):
         str
             A Forest call endpoint
         """
-        return self._ENDPOINT_TEMPLATE.format(self._forest)
+        return self._ENDPOINT_TEMPLATE.format(self._API_VERSION, self._forest)
 
     @classmethod
     def _validate_params(
@@ -509,7 +521,9 @@ class ForestPropertiesGetCall(ApiCall):
     https://docs.marklogic.com/REST/GET/manage/v2/forests/[id-or-name]/properties
     """
 
-    _ENDPOINT_TEMPLATE: str = "/manage/v2/forests/{}/properties"
+    _API_VERSION: int = 2
+
+    _ENDPOINT_TEMPLATE: str = "/manage/v{}/forests/{}/properties"
 
     _FORMAT_PARAM: str = "format"
 
@@ -551,7 +565,7 @@ class ForestPropertiesGetCall(ApiCall):
         str
             A Forest Properties call endpoint
         """
-        return self._ENDPOINT_TEMPLATE.format(self._forest)
+        return self._ENDPOINT_TEMPLATE.format(self._API_VERSION, self._forest)
 
     @classmethod
     def _validate_params(
@@ -575,7 +589,9 @@ class ForestPropertiesPutCall(ApiCall):
     https://docs.marklogic.com/REST/PUT/manage/v2/forests/[id-or-name]/properties
     """
 
-    _ENDPOINT_TEMPLATE: str = "/manage/v2/forests/{}/properties"
+    _API_VERSION: int = 2
+
+    _ENDPOINT_TEMPLATE: str = "/manage/v{}/forests/{}/properties"
 
     def __init__(
         self,
@@ -609,7 +625,7 @@ class ForestPropertiesPutCall(ApiCall):
         str
             A Forest Properties call endpoint
         """
-        return self._ENDPOINT_TEMPLATE.format(self._forest)
+        return self._ENDPOINT_TEMPLATE.format(self._API_VERSION, self._forest)
 
     @classmethod
     def _validate_params(

@@ -37,7 +37,9 @@ class RolesGetCall(ApiCall):
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/GET/manage/v2/roles
     """
 
-    _ENDPOINT: str = "/manage/v2/roles"
+    _API_VERSION: int = 2
+
+    _ENDPOINT: str = "/manage/v{}/roles"
 
     _FORMAT_PARAM: str = "format"
     _VIEW_PARAM: str = "view"
@@ -81,7 +83,7 @@ class RolesGetCall(ApiCall):
         str
             A Roles call endpoint
         """
-        return self._ENDPOINT
+        return self._ENDPOINT.format(self._API_VERSION)
 
     @classmethod
     def _validate_params(
@@ -109,7 +111,9 @@ class RolesPostCall(ApiCall):
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/POST/manage/v2/roles
     """
 
-    _ENDPOINT: str = "/manage/v2/roles"
+    _API_VERSION: int = 2
+
+    _ENDPOINT: str = "/manage/v{}/roles"
 
     def __init__(
         self,
@@ -139,7 +143,7 @@ class RolesPostCall(ApiCall):
         str
             A Roles call endpoint
         """
-        return self._ENDPOINT
+        return self._ENDPOINT.format(self._API_VERSION)
 
     @classmethod
     def _validate_params(
@@ -161,7 +165,9 @@ class RoleGetCall(ApiCall):
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/GET/manage/v2/roles/[id-or-name]
     """
 
-    _ENDPOINT_TEMPLATE: str = "/manage/v2/roles/{}"
+    _API_VERSION: int = 2
+
+    _ENDPOINT_TEMPLATE: str = "/manage/v{}/roles/{}"
 
     _FORMAT_PARAM: str = "format"
     _VIEW_PARAM: str = "view"
@@ -210,7 +216,7 @@ class RoleGetCall(ApiCall):
         str
             A Role call endpoint
         """
-        return self._ENDPOINT_TEMPLATE.format(self._role)
+        return self._ENDPOINT_TEMPLATE.format(self._API_VERSION, self._role)
 
     @classmethod
     def _validate_params(
@@ -238,7 +244,9 @@ class RoleDeleteCall(ApiCall):
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/DELETE/manage/v2/roles/[id-or-name]
     """
 
-    _ENDPOINT_TEMPLATE: str = "/manage/v2/roles/{}"
+    _API_VERSION: int = 2
+
+    _ENDPOINT_TEMPLATE: str = "/manage/v{}/roles/{}"
 
     def __init__(
         self,
@@ -265,7 +273,7 @@ class RoleDeleteCall(ApiCall):
         str
             A Role call endpoint
         """
-        return self._ENDPOINT_TEMPLATE.format(self._role)
+        return self._ENDPOINT_TEMPLATE.format(self._API_VERSION, self._role)
 
 
 class RolePropertiesGetCall(ApiCall):
@@ -279,7 +287,9 @@ class RolePropertiesGetCall(ApiCall):
     https://docs.marklogic.com/REST/GET/manage/v2/roles/[id-or-name]/properties
     """
 
-    _ENDPOINT_TEMPLATE: str = "/manage/v2/roles/{}/properties"
+    _API_VERSION: int = 2
+
+    _ENDPOINT_TEMPLATE: str = "/manage/v{}/roles/{}/properties"
 
     _FORMAT_PARAM: str = "format"
 
@@ -321,7 +331,7 @@ class RolePropertiesGetCall(ApiCall):
         str
             A Role Properties call endpoint
         """
-        return self._ENDPOINT_TEMPLATE.format(self._role)
+        return self._ENDPOINT_TEMPLATE.format(self._API_VERSION, self._role)
 
     @classmethod
     def _validate_params(
@@ -345,7 +355,9 @@ class RolePropertiesPutCall(ApiCall):
     https://docs.marklogic.com/REST/PUT/manage/v2/roles/[id-or-name]/properties
     """
 
-    _ENDPOINT_TEMPLATE: str = "/manage/v2/roles/{}/properties"
+    _API_VERSION: int = 2
+
+    _ENDPOINT_TEMPLATE: str = "/manage/v{}/roles/{}/properties"
 
     def __init__(
         self,
@@ -379,7 +391,7 @@ class RolePropertiesPutCall(ApiCall):
         str
             A Role Properties call endpoint
         """
-        return self._ENDPOINT_TEMPLATE.format(self._role)
+        return self._ENDPOINT_TEMPLATE.format(self._API_VERSION, self._role)
 
     @classmethod
     def _validate_params(

@@ -24,7 +24,9 @@ class EvalCall(ApiCall):
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/POST/v1/eval
     """
 
-    _ENDPOINT: str = "/v1/eval"
+    _API_VERSION: int = 1
+
+    _ENDPOINT: str = "/v{}/eval"
 
     _XQ_PARAM: str = "xquery"
     _JS_PARAM: str = "javascript"
@@ -84,7 +86,7 @@ class EvalCall(ApiCall):
         str
             An Eval call endpoint
         """
-        return self._ENDPOINT
+        return self._ENDPOINT.format(self._API_VERSION)
 
     @classmethod
     def _validate_params(

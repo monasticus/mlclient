@@ -19,10 +19,13 @@ class TimestampGetCall(ApiCall):
     to the /admin/v1/timestamp endpoint.
     """
 
+    _API_VERSION: int = 1
+    _ENDPOINT: str = "/admin/v{}/timestamp"
+
     @property
     def endpoint(self) -> str:
         """Return the endpoint."""
-        return "/admin/v1/timestamp"
+        return self._ENDPOINT.format(self._API_VERSION)
 
 
 class ServerConfigGetCall(ApiCall):
@@ -32,7 +35,10 @@ class ServerConfigGetCall(ApiCall):
     to the /admin/v1/server-config endpoint.
     """
 
+    _API_VERSION: int = 1
+    _ENDPOINT: str = "/admin/v{}/server-config"
+
     @property
     def endpoint(self) -> str:
         """Return the endpoint."""
-        return "/admin/v1/server-config"
+        return self._ENDPOINT.format(self._API_VERSION)

@@ -37,7 +37,9 @@ class UsersGetCall(ApiCall):
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/GET/manage/v2/users
     """
 
-    _ENDPOINT: str = "/manage/v2/users"
+    _API_VERSION: int = 2
+
+    _ENDPOINT: str = "/manage/v{}/users"
 
     _FORMAT_PARAM: str = "format"
     _VIEW_PARAM: str = "view"
@@ -81,7 +83,7 @@ class UsersGetCall(ApiCall):
         str
             A Users call endpoint
         """
-        return self._ENDPOINT
+        return self._ENDPOINT.format(self._API_VERSION)
 
     @classmethod
     def _validate_params(
@@ -109,7 +111,9 @@ class UsersPostCall(ApiCall):
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/POST/manage/v2/users
     """
 
-    _ENDPOINT: str = "/manage/v2/users"
+    _API_VERSION: int = 2
+
+    _ENDPOINT: str = "/manage/v{}/users"
 
     def __init__(
         self,
@@ -139,7 +143,7 @@ class UsersPostCall(ApiCall):
         str
             A Users call endpoint
         """
-        return self._ENDPOINT
+        return self._ENDPOINT.format(self._API_VERSION)
 
     @classmethod
     def _validate_params(
@@ -161,7 +165,9 @@ class UserGetCall(ApiCall):
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/GET/manage/v2/users/[id-or-name]
     """
 
-    _ENDPOINT_TEMPLATE: str = "/manage/v2/users/{}"
+    _API_VERSION: int = 2
+
+    _ENDPOINT_TEMPLATE: str = "/manage/v{}/users/{}"
 
     _FORMAT_PARAM: str = "format"
     _VIEW_PARAM: str = "view"
@@ -210,7 +216,7 @@ class UserGetCall(ApiCall):
         str
             An User call endpoint
         """
-        return self._ENDPOINT_TEMPLATE.format(self._user)
+        return self._ENDPOINT_TEMPLATE.format(self._API_VERSION, self._user)
 
     @classmethod
     def _validate_params(
@@ -238,7 +244,9 @@ class UserDeleteCall(ApiCall):
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/DELETE/manage/v2/users/[id-or-name]
     """
 
-    _ENDPOINT_TEMPLATE: str = "/manage/v2/users/{}"
+    _API_VERSION: int = 2
+
+    _ENDPOINT_TEMPLATE: str = "/manage/v{}/users/{}"
 
     def __init__(
         self,
@@ -265,7 +273,7 @@ class UserDeleteCall(ApiCall):
         str
             An User call endpoint
         """
-        return self._ENDPOINT_TEMPLATE.format(self._user)
+        return self._ENDPOINT_TEMPLATE.format(self._API_VERSION, self._user)
 
 
 class UserPropertiesGetCall(ApiCall):
@@ -279,7 +287,9 @@ class UserPropertiesGetCall(ApiCall):
     https://docs.marklogic.com/REST/GET/manage/v2/users/[id-or-name]/properties
     """
 
-    _ENDPOINT_TEMPLATE: str = "/manage/v2/users/{}/properties"
+    _API_VERSION: int = 2
+
+    _ENDPOINT_TEMPLATE: str = "/manage/v{}/users/{}/properties"
 
     _FORMAT_PARAM: str = "format"
 
@@ -321,7 +331,7 @@ class UserPropertiesGetCall(ApiCall):
         str
             An User Properties call endpoint
         """
-        return self._ENDPOINT_TEMPLATE.format(self._user)
+        return self._ENDPOINT_TEMPLATE.format(self._API_VERSION, self._user)
 
     @classmethod
     def _validate_params(
@@ -345,7 +355,9 @@ class UserPropertiesPutCall(ApiCall):
     https://docs.marklogic.com/REST/PUT/manage/v2/users/[id-or-name]/properties
     """
 
-    _ENDPOINT_TEMPLATE: str = "/manage/v2/users/{}/properties"
+    _API_VERSION: int = 2
+
+    _ENDPOINT_TEMPLATE: str = "/manage/v{}/users/{}/properties"
 
     def __init__(
         self,
@@ -379,7 +391,7 @@ class UserPropertiesPutCall(ApiCall):
         str
             An User Properties call endpoint
         """
-        return self._ENDPOINT_TEMPLATE.format(self._user)
+        return self._ENDPOINT_TEMPLATE.format(self._API_VERSION, self._user)
 
     @classmethod
     def _validate_params(

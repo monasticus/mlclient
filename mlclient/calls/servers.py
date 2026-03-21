@@ -39,7 +39,9 @@ class ServersGetCall(ApiCall):
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/GET/manage/v2/servers
     """
 
-    _ENDPOINT: str = "/manage/v2/servers"
+    _API_VERSION: int = 2
+
+    _ENDPOINT: str = "/manage/v{}/servers"
 
     _FORMAT_PARAM: str = "format"
     _GROUP_ID_PARAM: str = "group-id"
@@ -108,7 +110,7 @@ class ServersGetCall(ApiCall):
         str
             A Servers call endpoint
         """
-        return self._ENDPOINT
+        return self._ENDPOINT.format(self._API_VERSION)
 
     @classmethod
     def _validate_params(
@@ -136,7 +138,9 @@ class ServersPostCall(ApiCall):
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/POST/manage/v2/servers
     """
 
-    _ENDPOINT: str = "/manage/v2/servers"
+    _API_VERSION: int = 2
+
+    _ENDPOINT: str = "/manage/v{}/servers"
 
     _GROUP_ID_PARAM: str = "group-id"
     _SERVER_TYPE_PARAM: str = "server-type"
@@ -185,7 +189,7 @@ class ServersPostCall(ApiCall):
         str
             A Servers call endpoint
         """
-        return self._ENDPOINT
+        return self._ENDPOINT.format(self._API_VERSION)
 
     @classmethod
     def _validate_params(
@@ -215,7 +219,9 @@ class ServerGetCall(ApiCall):
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/GET/manage/v2/servers/[id-or-name]
     """
 
-    _ENDPOINT_TEMPLATE: str = "/manage/v2/servers/{}"
+    _API_VERSION: int = 2
+
+    _ENDPOINT_TEMPLATE: str = "/manage/v{}/servers/{}"
 
     _GROUP_ID_PARAM: str = "group-id"
     _FORMAT_PARAM: str = "format"
@@ -306,7 +312,7 @@ class ServerGetCall(ApiCall):
         str
             A Server call endpoint
         """
-        return self._ENDPOINT_TEMPLATE.format(self._server)
+        return self._ENDPOINT_TEMPLATE.format(self._API_VERSION, self._server)
 
     @classmethod
     def _validate_params(
@@ -334,7 +340,9 @@ class ServerDeleteCall(ApiCall):
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/DELETE/manage/v2/servers/[id-or-name]
     """
 
-    _ENDPOINT_TEMPLATE: str = "/manage/v2/servers/{}"
+    _API_VERSION: int = 2
+
+    _ENDPOINT_TEMPLATE: str = "/manage/v{}/servers/{}"
 
     _GROUP_ID_PARAM: str = "group-id"
 
@@ -368,7 +376,7 @@ class ServerDeleteCall(ApiCall):
         str
             A Server call endpoint
         """
-        return self._ENDPOINT_TEMPLATE.format(self._server)
+        return self._ENDPOINT_TEMPLATE.format(self._API_VERSION, self._server)
 
 
 class ServerPropertiesGetCall(ApiCall):
@@ -383,7 +391,9 @@ class ServerPropertiesGetCall(ApiCall):
     https://docs.marklogic.com/REST/GET/manage/v2/servers/[id-or-name]/properties
     """
 
-    _ENDPOINT_TEMPLATE: str = "/manage/v2/servers/{}/properties"
+    _API_VERSION: int = 2
+
+    _ENDPOINT_TEMPLATE: str = "/manage/v{}/servers/{}/properties"
 
     _GROUP_ID_PARAM: str = "group-id"
     _FORMAT_PARAM: str = "format"
@@ -431,7 +441,7 @@ class ServerPropertiesGetCall(ApiCall):
         str
             A Server Properties call endpoint
         """
-        return self._ENDPOINT_TEMPLATE.format(self._server)
+        return self._ENDPOINT_TEMPLATE.format(self._API_VERSION, self._server)
 
     @classmethod
     def _validate_params(
@@ -455,7 +465,9 @@ class ServerPropertiesPutCall(ApiCall):
     https://docs.marklogic.com/REST/PUT/manage/v2/servers/[id-or-name]/properties
     """
 
-    _ENDPOINT_TEMPLATE: str = "/manage/v2/servers/{}/properties"
+    _API_VERSION: int = 2
+
+    _ENDPOINT_TEMPLATE: str = "/manage/v{}/servers/{}/properties"
 
     _GROUP_ID_PARAM: str = "group-id"
 
@@ -496,7 +508,7 @@ class ServerPropertiesPutCall(ApiCall):
         str
             A Server Properties call endpoint
         """
-        return self._ENDPOINT_TEMPLATE.format(self._server)
+        return self._ENDPOINT_TEMPLATE.format(self._API_VERSION, self._server)
 
     @classmethod
     def _validate_params(

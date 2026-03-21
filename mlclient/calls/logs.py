@@ -23,7 +23,9 @@ class LogsCall(ApiCall):
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/GET/manage/v2/logs
     """
 
-    _ENDPOINT: str = "/manage/v2/logs"
+    _API_VERSION: int = 2
+
+    _ENDPOINT: str = "/manage/v{}/logs"
 
     _FORMAT_PARAM: str = "format"
     _FILENAME_PARAM: str = "filename"
@@ -81,7 +83,7 @@ class LogsCall(ApiCall):
         str
             A Logs call endpoint
         """
-        return self._ENDPOINT
+        return self._ENDPOINT.format(self._API_VERSION)
 
     @classmethod
     def _validate_params(

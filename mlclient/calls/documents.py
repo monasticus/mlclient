@@ -37,7 +37,9 @@ class DocumentsGetCall(ApiCall):
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/GET/v1/documents
     """
 
-    _ENDPOINT: str = "/v1/documents"
+    _API_VERSION: int = 1
+
+    _ENDPOINT: str = "/v{}/documents"
 
     _URI_PARAM: str = "uri"
     _DATABASE_PARAM: str = "database"
@@ -131,7 +133,7 @@ class DocumentsGetCall(ApiCall):
         str
             A Documents call endpoint
         """
-        return self._ENDPOINT
+        return self._ENDPOINT.format(self._API_VERSION)
 
     @classmethod
     def _validate_params(
@@ -183,7 +185,9 @@ class DocumentsPostCall(ApiCall):
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/POST/v1/documents
     """
 
-    _ENDPOINT: str = "/v1/documents"
+    _API_VERSION: int = 1
+
+    _ENDPOINT: str = "/v{}/documents"
 
     _DATABASE_PARAM: str = "database"
     _TRANSFORM_PARAM: str = "transform"
@@ -260,7 +264,7 @@ class DocumentsPostCall(ApiCall):
         str
             A Documents call endpoint
         """
-        return self._ENDPOINT
+        return self._ENDPOINT.format(self._API_VERSION)
 
     @classmethod
     def _validate_params(
@@ -310,7 +314,9 @@ class DocumentsDeleteCall(ApiCall):
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/DELETE/v1/documents
     """
 
-    _ENDPOINT: str = "/v1/documents"
+    _API_VERSION: int = 1
+
+    _ENDPOINT: str = "/v{}/documents"
 
     _URI_PARAM: str = "uri"
     _DATABASE_PARAM: str = "database"
@@ -390,7 +396,7 @@ class DocumentsDeleteCall(ApiCall):
         str
             A Documents call endpoint
         """
-        return self._ENDPOINT
+        return self._ENDPOINT.format(self._API_VERSION)
 
     @classmethod
     def _validate_params(

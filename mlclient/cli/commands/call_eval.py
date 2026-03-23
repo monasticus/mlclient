@@ -2,7 +2,7 @@
 
 It exports an implementation for 'call eval' command:
     * CallEvalCommand
-        Sends a GET request to the /v1/eval endpoint.
+        Sends a POST request to the /v1/eval endpoint.
 """
 
 from __future__ import annotations
@@ -18,7 +18,7 @@ from mlclient.exceptions import WrongParametersError
 
 
 class CallEvalCommand(Command):
-    """Sends a GET request to the /v1/eval endpoint.
+    """Sends a POST request to the /v1/eval endpoint.
 
     Usage:
       call eval [options] [--] <code>
@@ -45,7 +45,7 @@ class CallEvalCommand(Command):
     """
 
     name: str = "call eval"
-    description: str = "Sends a GET request to the /v1/eval endpoint"
+    description: str = "Sends a POST request to the /v1/eval endpoint"
     arguments: list[Argument] = [
         argument(
             "code",

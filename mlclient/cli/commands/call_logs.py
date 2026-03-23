@@ -35,7 +35,7 @@ class CallLogsCommand(Command):
       -f, --from=FROM
             A start time to search error logs
       -t, --to=TO
-            n end time to search error logs
+            An end time to search error logs
       -r, --regex=REGEX
             A regex to search error logs
       -H, --host=HOST
@@ -124,7 +124,7 @@ class CallLogsCommand(Command):
     def _get_logs_list(
         self,
     ) -> dict:
-        """Retrieve logs list using MLClient."""
+        """Retrieve logs list using the Logs service."""
         host = self.option("host")
         with self._get_client() as client:
             self.info(f"Getting logs list using REST App-Server {client.base_url}")
@@ -228,7 +228,7 @@ class CallLogsCommand(Command):
     def _get_logs(
         self,
     ) -> Iterator[dict]:
-        """Retrieve logs using MLClient."""
+        """Retrieve logs using the Logs service."""
         app_port = self._get_app_port()
         log_type = LogType.get(self.option("log-type"))
         start_time = self.option("from")
@@ -293,7 +293,7 @@ class CallLogsCommand(Command):
     def _get_client(
         self,
     ):
-        """Get MLClient instance."""
+        """Get an MLClient instance."""
         profile = self.option("profile")
         return _get_cached_client(profile)
 

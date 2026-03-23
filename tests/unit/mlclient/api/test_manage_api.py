@@ -69,7 +69,7 @@ def test_post_databases():
     ml_mocker.mock_post()
 
     with MLClient() as ml:
-        resp = ml.manage.databases.create(body=body)
+        resp = ml.manage.databases.create(body)
 
     assert resp.status_code == httpx.codes.BAD_REQUEST
     assert (
@@ -117,10 +117,7 @@ def test_post_database():
     ml_mocker.mock_post()
 
     with MLClient() as ml:
-        resp = ml.manage.databases.post(
-            database="Documents",
-            body={"operation": "clear-database"},
-        )
+        resp = ml.manage.databases.post("Documents", {"operation": "clear-database"})
 
     assert resp.status_code == httpx.codes.OK
     assert not resp.text
@@ -186,8 +183,7 @@ def test_put_database_properties():
 
     with MLClient() as ml:
         resp = ml.manage.databases.put_properties(
-            database="non-existing-db",
-            body={"database-name": "custom-db"},
+            "non-existing-db", {"database-name": "custom-db"},
         )
 
     assert resp.status_code == httpx.codes.NOT_FOUND
@@ -234,9 +230,9 @@ def test_post_servers():
 
     with MLClient() as ml:
         resp = ml.manage.servers.create(
+            '<http-server-properties xmlns="http://marklogic.com/manage" />',
             group_id="Default",
             server_type="http",
-            body='<http-server-properties xmlns="http://marklogic.com/manage" />',
         )
 
     assert resp.status_code == httpx.codes.BAD_REQUEST
@@ -345,9 +341,9 @@ def test_put_server_properties():
 
     with MLClient() as ml:
         resp = ml.manage.servers.put_properties(
-            server="non-existing-server",
-            group_id="non-existing-group",
-            body={"server-name": "non-existing-server"},
+            "non-existing-server",
+            "non-existing-group",
+            {"server-name": "non-existing-server"},
         )
 
     assert resp.status_code == httpx.codes.NOT_FOUND
@@ -394,7 +390,7 @@ def test_post_forests():
     ml_mocker.mock_post()
 
     with MLClient() as ml:
-        resp = ml.manage.forests.create(body=body)
+        resp = ml.manage.forests.create(body)
 
     assert resp.status_code == httpx.codes.INTERNAL_SERVER_ERROR
 
@@ -532,8 +528,7 @@ def test_put_forest_properties():
 
     with MLClient() as ml:
         resp = ml.manage.forests.put_properties(
-            forest="non-existing-forest",
-            body={"forest-name": "custom-forest"},
+            "non-existing-forest", {"forest-name": "custom-forest"},
         )
 
     assert resp.status_code == httpx.codes.NOT_FOUND
@@ -579,7 +574,7 @@ def test_post_roles():
     ml_mocker.mock_post()
 
     with MLClient() as ml:
-        resp = ml.manage.roles.create(body=body)
+        resp = ml.manage.roles.create(body)
 
     assert resp.status_code == httpx.codes.BAD_REQUEST
     assert "Payload has errors in structure, content-type or values." in resp.text
@@ -663,8 +658,7 @@ def test_put_role_properties():
 
     with MLClient() as ml:
         resp = ml.manage.roles.put_properties(
-            role="non-existing-role",
-            body={"role-name": "custom-db"},
+            "non-existing-role", {"role-name": "custom-db"},
         )
 
     assert resp.status_code == httpx.codes.BAD_REQUEST
@@ -713,7 +707,7 @@ def test_post_users():
     ml_mocker.mock_post()
 
     with MLClient() as ml:
-        resp = ml.manage.users.create(body=body)
+        resp = ml.manage.users.create(body)
 
     assert resp.status_code == httpx.codes.BAD_REQUEST
     assert "Payload has errors in structure, content-type or values." in resp.text
@@ -802,8 +796,7 @@ def test_put_user_properties():
 
     with MLClient() as ml:
         resp = ml.manage.users.put_properties(
-            user="non-existing-user",
-            body={"user-name": "custom-db"},
+            "non-existing-user", {"user-name": "custom-db"},
         )
 
     assert resp.status_code == httpx.codes.NOT_FOUND

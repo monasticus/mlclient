@@ -14,12 +14,12 @@ from mlclient import MLClient
 def produce_logs(
     count: str,
     pattern: str,
-    client: MLClient,
+    ml: MLClient,
 ) -> int:
     count = int(count)
     for i in range(1, count + 1):
         log = pattern.replace("<i>", str(i))
-        client.rest.eval.post(xquery=f'xdmp:log("{log}", "error")')
+        ml.rest.eval.post(xquery=f'xdmp:log("{log}", "error")')
     return count
 
 

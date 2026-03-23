@@ -11,11 +11,11 @@ from mlclient.calls import EvalCall
 from .common import parse_step_input
 
 
-@given("I connected to MarkLogic", target_fixture="client")
-def init_client() -> MLClient:
-    client = MLClient(auth_method="digest")
-    client.connect()
-    return client
+@given("I connected to MarkLogic", target_fixture="ml")
+def init_ml() -> MLClient:
+    ml = MLClient(auth_method="digest")
+    ml.connect()
+    return ml
 
 
 @given(
@@ -45,19 +45,19 @@ def set_variables(
 
 @when("I call the EvalCall", target_fixture="response")
 def call_eval(
-    client: MLClient,
+    ml: MLClient,
     call_config: dict,
 ) -> Response:
     call = EvalCall(**call_config)
-    return client.rest.call(call)
+    return ml.rest.call(call)
 
 
 @when("I evaluate the code", target_fixture="response")
 def eval_(
-    client: MLClient,
+    ml: MLClient,
     call_config: dict,
 ) -> Response:
-    return client.rest.eval.post(**call_config)
+    return ml.rest.eval.post(**call_config)
 
 
 @when(
@@ -65,7 +65,7 @@ def eval_(
     target_fixture="response",
 )
 def get_logs(
-    client: MLClient,
+    ml: MLClient,
     logs_type: str,
     params: str,
 ) -> Response:
@@ -76,14 +76,14 @@ def get_logs(
                 "<today>",
                 str(datetime.date.today()),
             )
-    params["filename"] = (f"{client.port}_{logs_type.capitalize()}Log.txt",)
+    params["filename"] = (f"{ml.port}_{logs_type.capitalize()}Log.txt",)
     params["data_format"] = "json"
-    return client.manage.logs.get(**params)
+    return ml.manage.logs.get(**params)
 
 
 @then("I close the connection")
-def close_client(
-    client: MLClient,
+def close_ml(
+    ml: MLClient,
 ):
-    client.disconnect()
-    assert not client.is_connected()
+    ml.disconnect()
+    assert not ml.is_connected()

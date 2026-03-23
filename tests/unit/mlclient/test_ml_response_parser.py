@@ -247,7 +247,7 @@ ml_mocker.with_url("/v1/documents")
 ml_mocker.with_request_param("uri", "/some/dir/doc.xml")
 ml_mocker.with_response_code(404)
 ml_mocker.with_response_content_type("application/json; charset=UTF-8")
-ml_mocker.with_response_body(RESOURCES["error-response.json"]["json"])
+ml_mocker.with_response_body(RESOURCES["error-response.json"]["bytes"])
 ml_mocker.mock_get()
 
 
@@ -303,10 +303,10 @@ def test_parse_with_headers_error_response_json(client):
 
     assert isinstance(parsed_resp, dict)
     assert parsed_resp == RESOURCES["error-response.json"]["json"]
-    assert headers == {
-        "Content-Type": "application/json; charset=UTF-8",
-        "Content-Length": "222",
-    }
+    assert headers["content-type"] == "application/json; charset=UTF-8"
+    assert headers["content-length"] == str(
+        len(RESOURCES["error-response.json"]["bytes"]),
+    )
 
 
 @ml_mock
@@ -323,15 +323,15 @@ def test_parse_text_with_headers_error_response_json(client):
         '"status": "Not Found", '
         '"messageCode": "RESTAPI-NODOCUMENT", '
         '"message": "RESTAPI-NODOCUMENT: (err:FOER0000) '
-        "Resource or document does not exist: "
-        ' category: content message: /some/dir/doc.xml"'
+        "Resource or document does not exist:  "
+        'category: content message: /some/dir/doc.xml"'
         "}"
         "}"
     )
-    assert headers == {
-        "Content-Type": "application/json; charset=UTF-8",
-        "Content-Length": "222",
-    }
+    assert headers["content-type"] == "application/json; charset=UTF-8"
+    assert headers["content-length"] == str(
+        len(RESOURCES["error-response.json"]["bytes"]),
+    )
 
 
 @ml_mock
@@ -348,15 +348,15 @@ def test_parse_bytes_with_headers_error_response_json(client):
         b'"status": "Not Found", '
         b'"messageCode": "RESTAPI-NODOCUMENT", '
         b'"message": "RESTAPI-NODOCUMENT: (err:FOER0000) '
-        b"Resource or document does not exist: "
-        b' category: content message: /some/dir/doc.xml"'
+        b"Resource or document does not exist:  "
+        b'category: content message: /some/dir/doc.xml"'
         b"}"
         b"}"
     )
-    assert headers == {
-        "Content-Type": "application/json; charset=UTF-8",
-        "Content-Length": "222",
-    }
+    assert headers["content-type"] == "application/json; charset=UTF-8"
+    assert headers["content-length"] == str(
+        len(RESOURCES["error-response.json"]["bytes"]),
+    )
 
 
 ml_mocker.with_name("non-multipart-mixed-xml")

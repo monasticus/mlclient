@@ -272,16 +272,16 @@ READ
     4
 
     >>> docs["/doc-1.xml"]
-    <mlclient.structures.documents.XMLDocument object at 0x7f9200920a00>
+    <mlclient.models.documents.XMLDocument object at 0x7f9200920a00>
 
     >>> docs["/doc-2.json"]
-    <mlclient.structures.documents.JSONDocument object at 0x7f9200920430>
+    <mlclient.models.documents.JSONDocument object at 0x7f9200920430>
 
     >>> docs["/doc-3.xqy"]
-    <mlclient.structures.documents.TextDocument object at 0x7f9200920e20>
+    <mlclient.models.documents.TextDocument object at 0x7f9200920e20>
 
     >>> docs["/doc-4.zip"]
-    <mlclient.structures.documents.BinaryDocument object at 0x7f9200920970>
+    <mlclient.models.documents.BinaryDocument object at 0x7f9200920970>
 
 **Read documents from a custom database**
 
@@ -302,7 +302,7 @@ WRITE (create / update)
 .. code-block:: python
 
     >>> from mlclient import MLClientManager
-    >>> from mlclient.structures import Document
+    >>> from mlclient.models import Document
 
     >>> doc = Document.create("/doc-2.json", {"root": {"child": "data"}})
     >>> mgr = MLClientManager("local")
@@ -315,7 +315,7 @@ WRITE (create / update)
 .. code-block:: python
 
     >>> from mlclient import MLClientManager
-    >>> from mlclient.structures import Document, Metadata
+    >>> from mlclient.models import Document, Metadata
 
     >>> metadata = Metadata(collections=["some-collection"])
     >>> doc = Document.create(
@@ -334,7 +334,7 @@ WRITE (create / update)
 .. code-block:: python
 
     >>> from mlclient import MLClientManager
-    >>> from mlclient.structures import Document, DocumentType
+    >>> from mlclient.models import Document, DocumentType
 
     >>> doc = Document.create_raw(
     ...     "/doc-1.xml",
@@ -342,7 +342,7 @@ WRITE (create / update)
     ...     doc_type=DocumentType.XML,
     ... )
     >>> doc
-    <mlclient.structures.documents.RawDocument object at 0x7f9200929430>
+    <mlclient.models.documents.RawDocument object at 0x7f9200929430>
 
     >>> mgr = MLClientManager("local")
     >>> with mgr.get_client("app-services") as ml:
@@ -354,7 +354,7 @@ WRITE (create / update)
 .. code-block:: python
 
     >>> from mlclient import MLClientManager
-    >>> from mlclient.structures import Document, DocumentType
+    >>> from mlclient.models import Document, DocumentType
 
     >>> doc = Document.create_raw(
     ...     "/doc-1.xml",
@@ -373,11 +373,11 @@ WRITE (create / update)
 .. code-block:: python
 
     >>> from mlclient import MLClientManager
-    >>> from mlclient.structures import Document
+    >>> from mlclient.models import Document
 
     >>> doc = Document.create("/doc-2.json", {"root": {"child": "data"}})
     >>> doc
-    <mlclient.structures.documents.JSONDocument object at 0x7f9200920f70>
+    <mlclient.models.documents.JSONDocument object at 0x7f9200920f70>
 
     >>> mgr = MLClientManager("local")
     >>> with mgr.get_client("app-services") as ml:
@@ -389,12 +389,12 @@ WRITE (create / update)
 .. code-block:: python
 
     >>> from mlclient import MLClientManager
-    >>> from mlclient.structures import Metadata, MetadataDocument
+    >>> from mlclient.models import Metadata, MetadataDocument
 
     >>> metadata = Metadata(collections=["some-collection"])
     >>> doc = MetadataDocument("/doc-2.json", metadata)
     >>> doc
-    <mlclient.structures.documents.MetadataDocument object at 0x7f9200929e20>
+    <mlclient.models.documents.MetadataDocument object at 0x7f9200929e20>
 
     >>> mgr = MLClientManager("local")
     >>> with mgr.get_client("app-services") as ml:
@@ -406,7 +406,7 @@ WRITE (create / update)
 .. code-block:: python
 
     >>> from mlclient import MLClientManager
-    >>> from mlclient.structures import Document, DocumentType
+    >>> from mlclient.models import Document, DocumentType
 
     >>> doc_1 = Document.create_raw(
     ...     "/doc-1.xml",
@@ -425,7 +425,7 @@ WRITE (create / update)
 .. code-block:: python
 
     >>> from mlclient import MLClientManager
-    >>> from mlclient.structures import Document, DocumentType, Metadata
+    >>> from mlclient.models import Document, DocumentType, Metadata
 
     >>> default_metadata = Metadata(collections=["some-collection"])
     >>> doc_1 = Document.create_raw(

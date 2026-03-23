@@ -5,7 +5,7 @@ import copy
 import pytest
 from deepdiff import DeepDiff
 
-from mlclient.structures import Metadata, Permission
+from mlclient.models import Metadata, Permission
 
 
 def __assert_permissions_are_equal(

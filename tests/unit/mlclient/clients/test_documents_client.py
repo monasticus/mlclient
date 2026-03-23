@@ -9,7 +9,7 @@ import respx
 
 from mlclient import MLClient
 from mlclient.exceptions import MarkLogicError
-from mlclient.structures import (
+from mlclient.models import (
     BinaryDocument,
     DocumentType,
     JSONDocument,

@@ -1,7 +1,7 @@
-"""The ML Structures package.
+"""The ML Models package.
 
 It contains modules with a corresponding Python representation of MarkLogic-related
-data structures:
+data models:
 
     * documents
         The ML Documents module.
@@ -35,7 +35,7 @@ This package exports the following classes:
 
 Examples
 --------
->>> from mlclient.structures import Document, DocumentType, Metadata
+>>> from mlclient.models import Document, DocumentType, Metadata
 """
 
 from .documents import (

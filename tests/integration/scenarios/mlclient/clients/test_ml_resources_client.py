@@ -8,7 +8,7 @@ from httpx import Response
 from pytest_bdd import scenarios
 
 from mlclient import MLClient, MLResponseParser
-from mlclient.structures.calls import DocumentsBodyPart
+from mlclient.models.calls import DocumentsBodyPart
 
 scenarios("../../../features/mlclient/clients/ml_resources_client.feature")
 

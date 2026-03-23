@@ -5,7 +5,7 @@ import pytest
 import respx
 
 from mlclient import MLClient
-from mlclient.structures.calls import DocumentsBodyPart
+from mlclient.models.calls import DocumentsBodyPart
 from tests.utils import resources as resources_utils
 from tests.utils.ml_mockers import MLRespXMocker
 

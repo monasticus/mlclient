@@ -16,7 +16,7 @@ from httpx_retries import Retry, RetryTransport
 
 from mlclient import constants as const
 from mlclient.mimetypes import Mimetypes
-from mlclient.structures import DocumentType
+from mlclient.models import DocumentType
 
 from .restart_waiter import RestartWaiter
 

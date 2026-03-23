@@ -19,7 +19,7 @@ from requests_toolbelt.multipart.decoder import BodyPart
 
 from mlclient import constants as const
 from mlclient.mimetypes import Mimetypes
-from mlclient.structures import DocumentType
+from mlclient.models import DocumentType
 
 logger = logging.getLogger(__name__)
 

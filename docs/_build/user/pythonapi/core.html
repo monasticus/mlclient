@@ -396,16 +396,16 @@ For example, some of the high-level services are:</p>
 <span class="go">4</span>
 
 <span class="gp">&gt;&gt;&gt; </span><span class="n">docs</span><span class="p">[</span><span class="s2">&quot;/doc-1.xml&quot;</span><span class="p">]</span>
-<span class="go">&lt;mlclient.structures.documents.XMLDocument object at 0x7f9200920a00&gt;</span>
+<span class="go">&lt;mlclient.models.documents.XMLDocument object at 0x7f9200920a00&gt;</span>
 
 <span class="gp">&gt;&gt;&gt; </span><span class="n">docs</span><span class="p">[</span><span class="s2">&quot;/doc-2.json&quot;</span><span class="p">]</span>
-<span class="go">&lt;mlclient.structures.documents.JSONDocument object at 0x7f9200920430&gt;</span>
+<span class="go">&lt;mlclient.models.documents.JSONDocument object at 0x7f9200920430&gt;</span>
 
 <span class="gp">&gt;&gt;&gt; </span><span class="n">docs</span><span class="p">[</span><span class="s2">&quot;/doc-3.xqy&quot;</span><span class="p">]</span>
-<span class="go">&lt;mlclient.structures.documents.TextDocument object at 0x7f9200920e20&gt;</span>
+<span class="go">&lt;mlclient.models.documents.TextDocument object at 0x7f9200920e20&gt;</span>
 
 <span class="gp">&gt;&gt;&gt; </span><span class="n">docs</span><span class="p">[</span><span class="s2">&quot;/doc-4.zip&quot;</span><span class="p">]</span>
-<span class="go">&lt;mlclient.structures.documents.BinaryDocument object at 0x7f9200920970&gt;</span>
+<span class="go">&lt;mlclient.models.documents.BinaryDocument object at 0x7f9200920970&gt;</span>
 </pre></div>
 </div>
 <p><strong>Read documents from a custom database</strong></p>
@@ -421,7 +421,7 @@ For example, some of the high-level services are:</p>
 <h5>WRITE (create / update)<a class="headerlink" href="#write-create-update" title="Link to this heading"></a></h5>
 <p><strong>Put a document</strong></p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mlclient</span><span class="w"> </span><span class="kn">import</span> <span class="n">MLClientManager</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mlclient.structures</span><span class="w"> </span><span class="kn">import</span> <span class="n">Document</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mlclient.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">Document</span>
 
 <span class="gp">&gt;&gt;&gt; </span><span class="n">doc</span> <span class="o">=</span> <span class="n">Document</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="s2">&quot;/doc-2.json&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;root&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;child&quot;</span><span class="p">:</span> <span class="s2">&quot;data&quot;</span><span class="p">}})</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">mgr</span> <span class="o">=</span> <span class="n">MLClientManager</span><span class="p">(</span><span class="s2">&quot;local&quot;</span><span class="p">)</span>
@@ -431,7 +431,7 @@ For example, some of the high-level services are:</p>
 </div>
 <p><strong>Put a document with metadata</strong></p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mlclient</span><span class="w"> </span><span class="kn">import</span> <span class="n">MLClientManager</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mlclient.structures</span><span class="w"> </span><span class="kn">import</span> <span class="n">Document</span><span class="p">,</span> <span class="n">Metadata</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mlclient.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">Document</span><span class="p">,</span> <span class="n">Metadata</span>
 
 <span class="gp">&gt;&gt;&gt; </span><span class="n">metadata</span> <span class="o">=</span> <span class="n">Metadata</span><span class="p">(</span><span class="n">collections</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;some-collection&quot;</span><span class="p">])</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">doc</span> <span class="o">=</span> <span class="n">Document</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
@@ -447,7 +447,7 @@ For example, some of the high-level services are:</p>
 </div>
 <p><strong>Put a raw document</strong></p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mlclient</span><span class="w"> </span><span class="kn">import</span> <span class="n">MLClientManager</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mlclient.structures</span><span class="w"> </span><span class="kn">import</span> <span class="n">Document</span><span class="p">,</span> <span class="n">DocumentType</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mlclient.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">Document</span><span class="p">,</span> <span class="n">DocumentType</span>
 
 <span class="gp">&gt;&gt;&gt; </span><span class="n">doc</span> <span class="o">=</span> <span class="n">Document</span><span class="o">.</span><span class="n">create_raw</span><span class="p">(</span>
 <span class="gp">... </span>    <span class="s2">&quot;/doc-1.xml&quot;</span><span class="p">,</span>
@@ -455,7 +455,7 @@ For example, some of the high-level services are:</p>
 <span class="gp">... </span>    <span class="n">doc_type</span><span class="o">=</span><span class="n">DocumentType</span><span class="o">.</span><span class="n">XML</span><span class="p">,</span>
 <span class="gp">... </span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">doc</span>
-<span class="go">&lt;mlclient.structures.documents.RawDocument object at 0x7f9200929430&gt;</span>
+<span class="go">&lt;mlclient.models.documents.RawDocument object at 0x7f9200929430&gt;</span>
 
 <span class="gp">&gt;&gt;&gt; </span><span class="n">mgr</span> <span class="o">=</span> <span class="n">MLClientManager</span><span class="p">(</span><span class="s2">&quot;local&quot;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">mgr</span><span class="o">.</span><span class="n">get_client</span><span class="p">(</span><span class="s2">&quot;app-services&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">ml</span><span class="p">:</span>
@@ -464,7 +464,7 @@ For example, some of the high-level services are:</p>
 </div>
 <p><strong>Put a raw document with metadata</strong></p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mlclient</span><span class="w"> </span><span class="kn">import</span> <span class="n">MLClientManager</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mlclient.structures</span><span class="w"> </span><span class="kn">import</span> <span class="n">Document</span><span class="p">,</span> <span class="n">DocumentType</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mlclient.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">Document</span><span class="p">,</span> <span class="n">DocumentType</span>
 
 <span class="gp">&gt;&gt;&gt; </span><span class="n">doc</span> <span class="o">=</span> <span class="n">Document</span><span class="o">.</span><span class="n">create_raw</span><span class="p">(</span>
 <span class="gp">... </span>    <span class="s2">&quot;/doc-1.xml&quot;</span><span class="p">,</span>
@@ -480,11 +480,11 @@ For example, some of the high-level services are:</p>
 </div>
 <p><strong>Put a document to a custom database</strong></p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mlclient</span><span class="w"> </span><span class="kn">import</span> <span class="n">MLClientManager</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mlclient.structures</span><span class="w"> </span><span class="kn">import</span> <span class="n">Document</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mlclient.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">Document</span>
 
 <span class="gp">&gt;&gt;&gt; </span><span class="n">doc</span> <span class="o">=</span> <span class="n">Document</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="s2">&quot;/doc-2.json&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;root&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;child&quot;</span><span class="p">:</span> <span class="s2">&quot;data&quot;</span><span class="p">}})</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">doc</span>
-<span class="go">&lt;mlclient.structures.documents.JSONDocument object at 0x7f9200920f70&gt;</span>
+<span class="go">&lt;mlclient.models.documents.JSONDocument object at 0x7f9200920f70&gt;</span>
 
 <span class="gp">&gt;&gt;&gt; </span><span class="n">mgr</span> <span class="o">=</span> <span class="n">MLClientManager</span><span class="p">(</span><span class="s2">&quot;local&quot;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">mgr</span><span class="o">.</span><span class="n">get_client</span><span class="p">(</span><span class="s2">&quot;app-services&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">ml</span><span class="p">:</span>
@@ -493,12 +493,12 @@ For example, some of the high-level services are:</p>
 </div>
 <p><strong>Update document’s metadata</strong></p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mlclient</span><span class="w"> </span><span class="kn">import</span> <span class="n">MLClientManager</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mlclient.structures</span><span class="w"> </span><span class="kn">import</span> <span class="n">Metadata</span><span class="p">,</span> <span class="n">MetadataDocument</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mlclient.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">Metadata</span><span class="p">,</span> <span class="n">MetadataDocument</span>
 
 <span class="gp">&gt;&gt;&gt; </span><span class="n">metadata</span> <span class="o">=</span> <span class="n">Metadata</span><span class="p">(</span><span class="n">collections</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;some-collection&quot;</span><span class="p">])</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">doc</span> <span class="o">=</span> <span class="n">MetadataDocument</span><span class="p">(</span><span class="s2">&quot;/doc-2.json&quot;</span><span class="p">,</span> <span class="n">metadata</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">doc</span>
-<span class="go">&lt;mlclient.structures.documents.MetadataDocument object at 0x7f9200929e20&gt;</span>
+<span class="go">&lt;mlclient.models.documents.MetadataDocument object at 0x7f9200929e20&gt;</span>
 
 <span class="gp">&gt;&gt;&gt; </span><span class="n">mgr</span> <span class="o">=</span> <span class="n">MLClientManager</span><span class="p">(</span><span class="s2">&quot;local&quot;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">mgr</span><span class="o">.</span><span class="n">get_client</span><span class="p">(</span><span class="s2">&quot;app-services&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">ml</span><span class="p">:</span>
@@ -507,7 +507,7 @@ For example, some of the high-level services are:</p>
 </div>
 <p><strong>Put multiple documents</strong></p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mlclient</span><span class="w"> </span><span class="kn">import</span> <span class="n">MLClientManager</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mlclient.structures</span><span class="w"> </span><span class="kn">import</span> <span class="n">Document</span><span class="p">,</span> <span class="n">DocumentType</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mlclient.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">Document</span><span class="p">,</span> <span class="n">DocumentType</span>
 
 <span class="gp">&gt;&gt;&gt; </span><span class="n">doc_1</span> <span class="o">=</span> <span class="n">Document</span><span class="o">.</span><span class="n">create_raw</span><span class="p">(</span>
 <span class="gp">... </span>    <span class="s2">&quot;/doc-1.xml&quot;</span><span class="p">,</span>
@@ -523,7 +523,7 @@ For example, some of the high-level services are:</p>
 </div>
 <p><strong>Put documents with default metadata</strong></p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mlclient</span><span class="w"> </span><span class="kn">import</span> <span class="n">MLClientManager</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mlclient.structures</span><span class="w"> </span><span class="kn">import</span> <span class="n">Document</span><span class="p">,</span> <span class="n">DocumentType</span><span class="p">,</span> <span class="n">Metadata</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mlclient.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">Document</span><span class="p">,</span> <span class="n">DocumentType</span><span class="p">,</span> <span class="n">Metadata</span>
 
 <span class="gp">&gt;&gt;&gt; </span><span class="n">default_metadata</span> <span class="o">=</span> <span class="n">Metadata</span><span class="p">(</span><span class="n">collections</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;some-collection&quot;</span><span class="p">])</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">doc_1</span> <span class="o">=</span> <span class="n">Document</span><span class="o">.</span><span class="n">create_raw</span><span class="p">(</span>

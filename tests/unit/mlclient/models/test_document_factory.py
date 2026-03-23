@@ -2,7 +2,7 @@ from xml.etree.ElementTree import Element
 
 import pytest
 
-from mlclient.structures import (
+from mlclient.models import (
     BinaryDocument,
     Document,
     DocumentType,

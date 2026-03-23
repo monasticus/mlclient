@@ -1,5 +1,5 @@
 from mlclient.mimetypes import Mimetypes
-from mlclient.structures import DocumentType
+from mlclient.models import DocumentType
 
 
 def test_xml_mimetypes():

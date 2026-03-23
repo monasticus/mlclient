@@ -1,6 +1,6 @@
 from deepdiff import DeepDiff
 
-from mlclient.structures import Metadata
+from mlclient.models import Metadata
 from tests.utils import resources as resources_utils
 
 

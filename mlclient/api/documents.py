@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 from httpx import Response
 
 from mlclient.calls import DocumentsDeleteCall, DocumentsGetCall, DocumentsPostCall
-from mlclient.structures.calls import DocumentsBodyPart
+from mlclient.models.calls import DocumentsBodyPart
 
 # Avoid circular import: ApiClient -> api classes -> ApiClient
 if TYPE_CHECKING:

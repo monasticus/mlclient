@@ -1,4 +1,4 @@
-from mlclient.structures import Document, DocumentType, RawDocument
+from mlclient.models import Document, DocumentType, RawDocument
 
 
 def test_is_document_subclass():

@@ -41,7 +41,7 @@ from pydantic import BaseModel
 
 from mlclient.clients import MLClient
 from mlclient.mimetypes import Mimetypes
-from mlclient.structures import Document, DocumentType, Metadata
+from mlclient.models import Document, DocumentType, Metadata
 
 logger = logging.getLogger(__name__)
 

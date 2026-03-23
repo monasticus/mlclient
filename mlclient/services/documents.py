@@ -17,14 +17,14 @@ from mlclient.clients.api_client import ApiClient
 from mlclient.exceptions import MarkLogicError
 from mlclient.mimetypes import Mimetypes
 from mlclient.ml_response_parser import MLResponseParser
-from mlclient.structures import (
+from mlclient.models import (
     Document,
     Metadata,
     MetadataDocument,
     RawDocument,
     RawStringDocument,
 )
-from mlclient.structures.calls import (
+from mlclient.models.calls import (
     Category,
     ContentDispositionSerializer,
     DocumentsBodyPart,

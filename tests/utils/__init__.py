@@ -27,7 +27,7 @@ from mlclient.constants import (
     HEADER_NAME_PRIMITIVE,
     HEADER_X_WWW_FORM_URLENCODED,
 )
-from mlclient.structures.calls import ContentDispositionSerializer, DocumentsBodyPart
+from mlclient.models.calls import ContentDispositionSerializer, DocumentsBodyPart
 from tests.utils import resources as resources_utils
 
 

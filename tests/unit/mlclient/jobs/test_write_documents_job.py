@@ -2,7 +2,7 @@ import respx
 
 from mlclient.exceptions import MarkLogicError
 from mlclient.jobs import WriteDocumentsJob
-from mlclient.structures import DocumentType, RawDocument
+from mlclient.models import DocumentType, RawDocument
 from tests.utils import resources as resources_utils
 from tests.utils.ml_mockers import MLDocumentsMocker, MLRespXMocker
 

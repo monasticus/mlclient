@@ -27,7 +27,7 @@ from typing import Optional, Union
 from pydantic import BaseModel, Field, field_validator
 
 from mlclient.constants import HEADER_JSON
-from mlclient.structures import DocumentType
+from mlclient.models import DocumentType
 from mlclient.utils import BiDict
 
 

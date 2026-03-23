@@ -2,7 +2,7 @@ import pytest
 
 from mlclient import exceptions
 from mlclient.calls import DocumentsPostCall
-from mlclient.structures.calls import DocumentsBodyPart
+from mlclient.models.calls import DocumentsBodyPart
 
 
 @pytest.fixture

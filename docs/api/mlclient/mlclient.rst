@@ -14,7 +14,7 @@ mlclient package
    calls/mlclient.calls
    clients/mlclient.clients
    jobs/mlclient.jobs
-   structures/mlclient.structures
+   models/mlclient.models
 
 mlclient.ml_profile module
 --------------------------

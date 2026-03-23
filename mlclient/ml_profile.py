@@ -23,7 +23,7 @@ from pydantic import BaseModel, Field, field_serializer
 from mlclient import constants
 from mlclient.exceptions import (
     MLClientDirectoryNotFoundError,
-    MLClientEnvironmentNotFoundError,
+    MLClientProfileNotFoundError,
     NoSuchAppServerError,
 )
 
@@ -143,15 +143,15 @@ class MLProfile(BaseModel):
         ------
         MLClientDirectoryNotFoundError
             If .mlclient directory has not been found
-        MLClientEnvironmentNotFoundError
+        MLClientProfileNotFoundError
             If there's no .mlclient/mlclient-<profile_name>.yaml file
         """
         logger.debug(
             "Loading MLClient configuration for the profile: [%s]",
             profile_name,
         )
-        env_file_path = cls._find_mlclient_environment(profile_name)
-        return cls.load_file(env_file_path)
+        pro_file_path = cls._find_mlclient_profile(profile_name)
+        return cls.load_file(pro_file_path)
 
     @classmethod
     def load_file(
@@ -175,40 +175,40 @@ class MLProfile(BaseModel):
         return MLProfile(**source_config)
 
     @classmethod
-    def _find_mlclient_environment(
+    def _find_mlclient_profile(
         cls,
-        environment_name: str,
+        profile_name: str,
     ) -> str:
-        """Return MLClient environment configuration path.
+        """Return MLClient profile configuration path.
 
         Parameters
         ----------
-        environment_name : str
-            An MLClient environment name
+        profile_name : str
+            An MLClient profile name
 
         Returns
         -------
         str
-            An MLClient environment configuration path
+            An MLClient profile configuration path
 
         Raises
         ------
         MLClientDirectoryNotFoundError
             If .mlclient directory has not been found
-        MLClientEnvironmentNotFoundError
-            If there's no .mlclient/mlclient-<environment_name>.yaml file
+        MLClientProfileNotFoundError
+            If there's no .mlclient/mlclient-<profile_name>.yaml file
         """
         ml_client_dir = cls._find_mlclient_directory(Path.cwd())
-        env_file_name = f"mlclient-{environment_name}.yaml"
-        env_file_path = next(Path(ml_client_dir).glob(env_file_name), None)
-        if not env_file_path:
+        pro_file_name = f"mlclient-{profile_name}.yaml"
+        pro_file_path = next(Path(ml_client_dir).glob(pro_file_name), None)
+        if not pro_file_path:
             msg = (
-                f"MLClient's configuration has not been found for the environment "
-                f"[{environment_name}]!"
+                f"MLClient's profile configuration has not been found for "
+                f"[{profile_name}]!"
             )
-            raise MLClientEnvironmentNotFoundError(msg)
-        logger.debug("MLClient configuration file found: [%s]", env_file_name)
-        return env_file_path.as_posix()
+            raise MLClientProfileNotFoundError(msg)
+        logger.debug("MLClient configuration file found: [%s]", pro_file_name)
+        return pro_file_path.as_posix()
 
     @classmethod
     def _find_mlclient_directory(

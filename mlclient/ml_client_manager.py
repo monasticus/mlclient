@@ -39,7 +39,7 @@ class MLClientManager:
         ------
         MLClientDirectoryNotFoundError
             If .mlclient directory has not been found
-        MLClientEnvironmentNotFoundError
+        MLClientProfileNotFoundError
             If there's no .mlclient/mlclient-<profile_name>.yaml file
         """
         self._profile_name = profile_name

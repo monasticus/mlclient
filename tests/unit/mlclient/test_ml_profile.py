@@ -7,7 +7,7 @@ import pytest
 from mlclient import MLProfile, constants
 from mlclient.exceptions import (
     MLClientDirectoryNotFoundError,
-    MLClientEnvironmentNotFoundError,
+    MLClientProfileNotFoundError,
     NoSuchAppServerError,
 )
 from mlclient.ml_profile import MLServerConfig
@@ -113,7 +113,7 @@ def test_load_file_default_values():
 
 
 def test_load():
-    # Note: the test environment configuration is copied from the test resources
+    # Note: the test profile configuration is copied from the test resources
     # to .mlclient directory in a setup step
     config = MLProfile.load("test")
     assert config.model_dump() == {
@@ -163,7 +163,7 @@ def test_load():
 
 
 def test_load_default():
-    # Note: the test-default environment configuration is copied from the test resources
+    # Note: the test-default profile configuration is copied from the test resources
     # to .mlclient directory in a setup step
     config = MLProfile.load("test-default")
     assert config.model_dump() == {
@@ -189,10 +189,10 @@ def test_load_default():
 
 
 def test_load_non_existing():
-    with pytest.raises(MLClientEnvironmentNotFoundError) as err:
+    with pytest.raises(MLClientProfileNotFoundError) as err:
         MLProfile.load("non-existing")
     expected_msg = (
-        "MLClient's configuration has not been found for the environment "
+        "MLClient's profile configuration has not been found for "
         "[non-existing]!"
     )
     actual_msg = err.value.args[0]
@@ -200,7 +200,7 @@ def test_load_non_existing():
 
 
 def test_load_in_child_directory():
-    # Note: the test-default environment configuration is copied from the test resources
+    # Note: the test-default profile configuration is copied from the test resources
     # to .mlclient directory in a setup step
     curr_dir = Path.cwd()
     os.chdir(_SCRIPT_DIR)
@@ -231,7 +231,7 @@ def test_load_in_child_directory():
 
 
 def test_load_in_parent_directory():
-    # Note: the test-default environment configuration is copied from the test resources
+    # Note: the test-default profile configuration is copied from the test resources
     # to .mlclient directory in a setup step
     curr_dir = Path.cwd()
     os.chdir(Path(_SCRIPT_DIR).parent.parent.parent.parent)

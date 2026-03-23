@@ -26,12 +26,10 @@ class CallLogsCommand(Command):
       call logs [options]
 
     Options:
-      -e, --environment=ENVIRONMENT
-            The ML Client environment name [default: "local"]
-      -a, --app-server=APP-PORT
+      -p, --profile=PROFILE
+            The ML Client profile name [default: "local"]
+      -s, --app-server=APP-PORT
             The App-Server (port) to get logs of
-      -s, --rest-server=REST-SERVER
-            The ML REST Server environmental id (to get logs from)
       -l, --log-type=LOG-TYPE
             MarkLogic log type (error, access or request) [default: "error"]
       -f, --from=FROM
@@ -50,22 +48,16 @@ class CallLogsCommand(Command):
     description: str = "Sends a GET request to the /manage/v2/logs endpoint"
     options: list[Option] = [
         option(
-            "environment",
-            "e",
-            description="The ML Client environment name",
+            "profile",
+            "p",
+            description="The ML Client profile name",
             flag=False,
             default="local",
         ),
         option(
             "app-server",
-            "a",
-            description="The App-Server (port) to get logs of",
-            flag=False,
-        ),
-        option(
-            "rest-server",
             "s",
-            description="The ML REST Server environmental id (to get logs from)",
+            description="The App-Server (port) to get logs of",
             flag=False,
         ),
         option(
@@ -280,9 +272,9 @@ class CallLogsCommand(Command):
         self,
     ) -> int | str:
         """Identify app port to be used."""
-        environment = self.option("environment")
+        profile = self.option("profile")
         app_port = self.option("app-server")
-        mgr = MLClientManager(environment)
+        mgr = MLClientManager(profile)
         if app_port == "0":
             app_port = "TaskServer"
         elif app_port is not None and not app_port.isnumeric():
@@ -302,17 +294,14 @@ class CallLogsCommand(Command):
         self,
     ):
         """Get MLClient instance."""
-        environment = self.option("environment")
-        rest_server = self.option("rest-server")
-        return _get_cached_client(environment, rest_server)
+        profile = self.option("profile")
+        return _get_cached_client(profile)
 
 
 @lru_cache
 def _get_cached_client(
-    environment: str,
-    rest_server: str,
+    profile: str,
 ):
     # Cached to avoid re-reading config and re-creating the client on every
     # call -- _get_client() is invoked multiple times (e.g. in --list loops).
-    mgr = MLClientManager(environment)
-    return mgr.get_client(rest_server)
+    return MLClientManager(profile).get_client()

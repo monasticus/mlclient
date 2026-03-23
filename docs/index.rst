@@ -72,6 +72,40 @@ Mid-level REST API (/v1/*)::
    --6a5df7d535c71968--
 
 
+Mid-level Management API (/manage/v2/*, port 8002)::
+
+   >>> from mlclient import MLClient
+   >>> config = {
+   ...     "host": "localhost",
+   ...     "port": 8002,
+   ...     "username": "admin",
+   ...     "password": "admin",
+   ... }
+   >>> with MLClient(**config) as ml:
+   ...     resp = ml.manage.databases.get_properties(
+   ...         "Documents", data_format="json",
+   ...     )
+   ...     print(resp.json()["database-name"])
+   ...
+   Documents
+
+
+Mid-level Admin API (/admin/v1/*, port 8001)::
+
+   >>> from mlclient import MLClient
+   >>> config = {
+   ...     "host": "localhost",
+   ...     "port": 8002,
+   ...     "username": "admin",
+   ...     "password": "admin",
+   ... }
+   >>> with MLClient(**config) as ml:
+   ...     resp = ml.admin.get_timestamp()
+   ...     print(resp.text)
+   ...
+   2024-06-21T14:08:32.130813Z
+
+
 Response parsing::
 
    >>> from mlclient import MLClient
@@ -89,19 +123,6 @@ Response parsing::
    ...     print(parsed)
    ...
    App-Services
-
-
-Mid-level Management API (/manage/v2/*)::
-
-   >>> from mlclient import MLClient
-   >>> config = {
-   ...     "host": "localhost",
-   ...     "port": 8002,
-   ...     "username": "admin",
-   ...     "password": "admin",
-   ... }
-   >>> with MLClient(**config) as ml:
-   ...     resp = ml.manage.databases.get_list()
 
 
 High-level (services)::

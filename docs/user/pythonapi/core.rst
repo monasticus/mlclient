@@ -13,12 +13,138 @@ Clients
 Overview
 --------
 
-MLClient offers a layered architecture to access a MarkLogic Server: high-level services, a mid-level REST client, and a low-level HTTP client.
+MLClient offers a layered architecture to access a MarkLogic Server: high-level services, mid-level API clients, and a low-level HTTP client.
 High-level services are designed for specific endpoints, such as ``/v1/documents``.
 They provide a simple and intuitive API that covers all the functionality of each endpoint.
-The mid-level :class:`~mlclient.ApiClient` uses :class:`~mlclient.calls.ApiCall` objects to represent the parameters of any endpoint.
+The mid-level layer provides three API clients that mirror MarkLogic's API tiers:
+:class:`~mlclient.api.RestApi` for ``/v1/*`` endpoints, :class:`~mlclient.api.ManageApi` for ``/manage/v2/*`` (port 8002), and :class:`~mlclient.api.AdminApi` for ``/admin/v1/*`` (port 8001).
+Each uses :class:`~mlclient.calls.ApiCall` objects to represent the parameters of any endpoint.
 The low-level :class:`~mlclient.HttpClient` lets you send raw HTTP requests to the server.
 You can learn more about services and clients in the following sections.
+
+MLClient
+--------
+
+:class:`~mlclient.MLClient` is the main entry point that provides layered access to MarkLogic
+through ``.http``, ``.rest``, ``.manage``, ``.admin``, and service properties.
+
+====================================  =======================================================================================================================================================
+Layer                                 Description
+====================================  =======================================================================================================================================================
+:class:`~mlclient.MLClient`           Main entry point with layered access (``.http``, ``.rest``, ``.manage``, ``.admin``, ``.documents``, ``.eval``, ``.logs``)
+:class:`~mlclient.HttpClient`         Low-level HTTP client that accepts ML configuration and sends raw HTTP requests
+:class:`~mlclient.ApiClient`          Mid-level client providing :meth:`~mlclient.ApiClient.call` for :class:`~mlclient.calls.ApiCall` objects
+====================================  =======================================================================================================================================================
+
+Internally, the underlying ``HttpClient`` uses ``httpx``. Its default retry strategy is intentionally
+conservative: transport-level retries are enabled for idempotent methods only.
+If you need a different policy, pass a custom ``retry`` strategy when initializing
+the client.
+
+``HttpClient`` also exposes the standard MarkLogic endpoint ports as public constants:
+
+- ``MARKLOGIC_REST_API_PORT`` = ``8000``
+- ``MARKLOGIC_ADMIN_API_PORT`` = ``8001``
+- ``MARKLOGIC_MANAGE_API_PORT`` = ``8002``
+
+Two retry presets are also exported:
+
+- ``DEFAULT_RETRY_STRATEGY`` for normal requests
+- ``RESTART_RETRY_STRATEGY`` for Admin timestamp polling during restart windows
+
+Connection
+^^^^^^^^^^
+
+The easiest way to start a connection is to initialize :class:`~mlclient.MLClient` as a context manager:
+
+.. code-block:: python
+
+    >>> from mlclient import MLClient
+
+    >>> with MLClient() as ml:
+    ...     resp = ml.http.get("/manage/v2/servers")
+
+
+If you would like to explicitly connect and disconnect a client, however, you can do it as below:
+
+.. code-block:: python
+
+    >>> from mlclient import MLClient
+
+    >>> ml = MLClient()
+    >>> ml.connect()
+    >>> resp = ml.http.get("/manage/v2/servers")
+    >>> ml.disconnect()
+
+
+To check if a client is connected you can use :meth:`~mlclient.MLClient.is_connected` method:
+
+.. code-block:: python
+
+    >>> from mlclient import MLClient
+
+    >>> ml = MLClient()
+    >>> ml.connect()
+    >>> ml.is_connected()
+    True
+    >>> ml.disconnect()
+    >>> ml.is_connected()
+    False
+
+
+API tiers and port routing
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+MarkLogic exposes three separate HTTP API tiers, each bound to a fixed port:
+
+========================  ==========  ===========================
+Tier                      Port        Endpoints
+========================  ==========  ===========================
+Client (REST) API         8000/custom ``/v1/*``
+Admin API                 8001        ``/admin/v1/*``
+Management API            8002        ``/manage/v2/*``
+========================  ==========  ===========================
+
+Port 8000 is the default App-Services REST server. Custom REST app servers
+(created via the Management API) also serve ``/v1/*`` on their configured port.
+Neither custom HTTP nor custom REST app servers serve ``/manage/v2/*`` or
+``/admin/v1/*`` endpoints - those are only available on the fixed ports shown above.
+Port 8000 appears to accept ``/manage/v2/*`` requests, but it silently redirects
+them to port 8002.
+
+``MLClient`` reflects this topology through three API properties:
+
+.. code-block:: text
+
+    MLClient (main entry point)
+      +- .http       -> HttpClient   (raw HTTP on the main port)
+      +- .rest       -> RestApi      (/v1/* on the main port)
+      +- .manage     -> ManageApi    (/manage/v2/* on port 8002)
+      +- .admin      -> AdminApi     (/admin/v1/* on port 8001)
+      +- .parser     -> MLResponseParser
+      +- .documents, .eval, .logs -> high-level services
+
+Port routing is automatic. When the main ``port`` is already 8002 (the default),
+``.manage`` reuses the same HTTP connection. Otherwise, a separate connection to
+port 8002 is lazily created on first access. The same logic applies to
+``.admin`` and port 8001. All secondary connections share the same ``protocol``,
+``host``, ``auth_method``, ``username``, and ``password`` as the main client.
+They are also managed by the ``connect()`` / ``disconnect()`` lifecycle.
+
+.. code-block:: python
+
+    >>> from mlclient import MLClient
+
+    # Default port is 8002 - .manage reuses the connection, .admin creates one to 8001
+    >>> with MLClient() as ml:
+    ...     resp = ml.manage.databases.get_list()
+    ...     ts = ml.admin.get_timestamp()
+
+    # Custom REST server on port 8040 - .rest uses 8040, .manage/admin use 8002/8001
+    >>> with MLClient(port=8040) as ml:
+    ...     resp = ml.rest.eval.post(xquery="1")
+    ...     dbs = ml.manage.databases.get_list()
+
 
 High-level services
 -------------------
@@ -52,17 +178,11 @@ READ
     >>> with mgr.get_client("app-services") as ml:
     ...    doc = ml.documents.read("/doc-1.xml")
 
-    >>> doc
-    <mlclient.structures.documents.XMLDocument object at 0x7f9200980070>
-
-    >>> doc.doc_type
-    <DocumentType.XML: 'xml'>
-
     >>> doc.uri
     '/doc-1.xml'
 
-    >>> doc.content
-    <xml.etree.ElementTree.ElementTree object at 0x7f920095be20>
+    >>> doc.doc_type
+    <DocumentType.XML: 'xml'>
 
     >>> doc.content_string
     '''<?xml version="1.0" encoding="UTF-8"?>
@@ -80,9 +200,6 @@ READ
     >>> mgr = MLClientManager("local")
     >>> with mgr.get_client("app-services") as ml:
     ...     doc = ml.documents.read("/doc-1.xml", output_type=str)
-
-    >>> doc
-    <mlclient.structures.documents.RawStringDocument object at 0x7f9200980400>
 
     >>> doc.doc_type
     <DocumentType.XML: 'xml'>
@@ -104,9 +221,6 @@ READ
     >>> with mgr.get_client("app-services") as ml:
     ...     doc = ml.documents.read("/doc-1.xml", output_type=bytes)
 
-    >>> doc
-    <mlclient.structures.documents.RawDocument object at 0x7f9200980490>
-
     >>> doc.doc_type
     <DocumentType.XML: 'xml'>
 
@@ -126,9 +240,6 @@ READ
     >>> mgr = MLClientManager("local")
     >>> with mgr.get_client("app-services") as ml:
     ...     doc = ml.documents.read("/doc-1.xml", category=["content", "metadata"])
-
-    >>> doc.metadata
-    <mlclient.structures.documents.Metadata object at 0x7f9200980eb0>
 
     >>> doc.metadata.to_json()
     {'collections': [], 'permissions': [], 'properties': {}, 'quality': 0, 'metadataValues': {}}
@@ -151,15 +262,11 @@ READ
 
     >>> from mlclient import MLClientManager
 
-    >>> uris = [
-    ...     "/doc-1.xml",
-    ...     "/doc-2.json",
-    ...     "/doc-3.xqy",
-    ...     "/doc-4.zip",
-    ... ]
     >>> mgr = MLClientManager("local")
     >>> with mgr.get_client("app-services") as ml:
-    ...     docs = ml.documents.read(uris)
+    ...     docs = ml.documents.read(
+    ...         ["/doc-1.xml", "/doc-2.json", "/doc-3.xqy", "/doc-4.zip"]
+    ...     )
 
     >>> len(docs)
     4
@@ -190,9 +297,6 @@ READ
     >>> with mgr.get_client("app-services") as ml:
     ...     doc = ml.documents.read("/doc-1.xml", database="App-Services")
 
-    >>> doc
-    <mlclient.structures.documents.XMLDocument object at 0x7f92009b4700>
-
 
 WRITE (create / update)
 """""""""""""""""""""""
@@ -205,14 +309,9 @@ WRITE (create / update)
     >>> from mlclient.structures import Document
 
     >>> doc = Document.create("/doc-2.json", {"root": {"child": "data"}})
-    >>> doc
-    <mlclient.structures.documents.JSONDocument object at 0x7f9200920f70>
-
     >>> mgr = MLClientManager("local")
     >>> with mgr.get_client("app-services") as ml:
-    ...     resp = ml.documents.write(doc)
-    >>> resp
-    {'documents': [{'uri': '/doc-2.json', 'mime-type': 'application/json', 'category': ['metadata', 'content']}]}
+    ...     ml.documents.write(doc)
 
 
 **Put a document with metadata**
@@ -231,9 +330,7 @@ WRITE (create / update)
 
     >>> mgr = MLClientManager("local")
     >>> with mgr.get_client("app-services") as ml:
-    ...     resp = ml.documents.write(doc)
-    >>> resp
-    {'documents': [{'uri': '/doc-2.json', 'mime-type': 'application/json', 'category': ['metadata', 'content']}]}
+    ...     ml.documents.write(doc)
 
 
 **Put a raw document**
@@ -253,9 +350,7 @@ WRITE (create / update)
 
     >>> mgr = MLClientManager("local")
     >>> with mgr.get_client("app-services") as ml:
-    ...     resp = ml.documents.write(doc)
-    >>> resp
-    {'documents': [{'uri': '/doc-1.xml', 'mime-type': 'application/xml', 'category': ['metadata', 'content']}]}
+    ...     ml.documents.write(doc)
 
 
 **Put a raw document with metadata**
@@ -274,9 +369,8 @@ WRITE (create / update)
 
     >>> mgr = MLClientManager("local")
     >>> with mgr.get_client("app-services") as ml:
-    ...     resp = ml.documents.write(doc)
-    >>> resp
-    {'documents': [{'uri': '/doc-1.xml', 'mime-type': 'application/xml', 'category': ['metadata', 'content']}]}
+    ...     ml.documents.write(doc)
+
 
 **Put a document to a custom database**
 
@@ -291,9 +385,8 @@ WRITE (create / update)
 
     >>> mgr = MLClientManager("local")
     >>> with mgr.get_client("app-services") as ml:
-    ...     resp = ml.documents.write(doc, database="Documents")
-    >>> resp
-    {'documents': [{'uri': '/doc-2.json', 'mime-type': 'application/json', 'category': ['metadata', 'content']}]}
+    ...     ml.documents.write(doc, database="Documents")
+
 
 **Update document's metadata**
 
@@ -309,9 +402,7 @@ WRITE (create / update)
 
     >>> mgr = MLClientManager("local")
     >>> with mgr.get_client("app-services") as ml:
-    ...     resp = ml.documents.write(doc)
-    >>> resp
-    {'documents': [{'uri': '/doc-2.json', 'mime-type': '', 'category': ['metadata']}]}
+    ...     ml.documents.write(doc)
 
 
 **Put multiple documents**
@@ -330,9 +421,7 @@ WRITE (create / update)
 
     >>> mgr = MLClientManager("local")
     >>> with mgr.get_client("app-services") as ml:
-    ...     resp = ml.documents.write([doc_1, doc_2])
-    >>> resp
-    {'documents': [{'uri': '/doc-1.xml', 'mime-type': 'application/xml', 'category': ['metadata', 'content']}, {'uri': '/doc-2.json', 'mime-type': 'application/json', 'category': ['metadata', 'content']}]}
+    ...     ml.documents.write([doc_1, doc_2])
 
 
 **Put documents with default metadata**
@@ -353,9 +442,7 @@ WRITE (create / update)
 
     >>> mgr = MLClientManager("local")
     >>> with mgr.get_client("app-services") as ml:
-    ...     resp = ml.documents.write([default_metadata, doc_1, doc_2])
-    >>> resp
-    {'documents': [{'uri': '/doc-1.xml', 'mime-type': 'application/xml', 'category': ['metadata', 'content']}, {'uri': '/doc-2.json', 'mime-type': 'application/json', 'category': ['metadata', 'content']}]}
+    ...     ml.documents.write([default_metadata, doc_1, doc_2])
 
 
 DELETE
@@ -378,15 +465,11 @@ DELETE
 
     >>> from mlclient import MLClientManager
 
-    >>> uris = [
-    ...     "/doc-1.xml",
-    ...     "/doc-2.json",
-    ...     "/doc-3.xqy",
-    ...     "/doc-4.zip",
-    ... ]
     >>> mgr = MLClientManager("local")
     >>> with mgr.get_client("app-services") as ml:
-    ...     ml.documents.delete(uris)
+    ...     ml.documents.delete(
+    ...         ["/doc-1.xml", "/doc-2.json", "/doc-3.xqy", "/doc-4.zip"]
+    ...     )
 
 
 **Delete a document from a custom database**
@@ -448,8 +531,8 @@ EvalService
 
     >>> mgr = MLClientManager("local")
     >>> with mgr.get_client() as ml:
-    ...     result = ml.eval.file("./xqy-code-to-eval.xqy")
-    ...     result = ml.eval.file("./js-code-to-eval.js")
+    ...     result1 = ml.eval.file("./xqy-code-to-eval.xqy")
+    ...     result2 = ml.eval.file("./js-code-to-eval.js")
 
 
 **Evaluate raw xquery code**
@@ -602,6 +685,17 @@ Get all logs
     {'timestamp': '2024-01-09T13:30:51.187Z', 'level': 'error', 'message': 'Test Log 1'}
 
 
+.. code-block:: python
+
+    >>> from mlclient import MLClientManager
+    >>> from mlclient.services import LogType
+
+    >>> with MLClientManager("local").get_client() as ml:
+    ...     logs = ml.logs.get(8002, "error")
+    >>> list(logs)[0]
+    {'timestamp': '2024-01-09T13:30:51.187Z', 'level': 'error', 'message': 'Test Log 1'}
+
+
 *8002_AccessLog.txt*
 
 .. code-block:: python
@@ -615,6 +709,16 @@ Get all logs
     {'message': '172.17.0.1 - - [22/Feb/2024:12:13:18 +0000] "POST /v1/eval HTTP/1.1" 401 209 - "python-httpx/0.27.0"'}
 
 
+.. code-block:: python
+
+    >>> from mlclient import MLClientManager
+    >>> from mlclient.services import LogType
+
+    >>> with MLClientManager("local").get_client() as ml:
+    ...     logs = ml.logs.get(8002, "access")
+    >>> list(logs)[0]
+    {'message': '172.17.0.1 - - [22/Feb/2024:12:13:18 +0000] "POST /v1/eval HTTP/1.1" 401 209 - "python-httpx/0.27.0"'}
+
 
 *8002_RequestLog.txt*
 
@@ -625,6 +729,17 @@ Get all logs
 
     >>> with MLClientManager("local").get_client() as ml:
     ...     logs = ml.logs.get(8002, LogType.REQUEST)
+    >>> list(logs)[0]
+    {'message': '{"time":"2024-02-22T12:38:27Z", "url":"/manage/v2/logs?format=json", "user":"admin", "elapsedTime":1.801654, "requests":1, "valueCacheHits":5743, "valueCacheMisses":349701, "regexpCacheHits":5278, "regexpCacheMisses":10, "fsProgramCacheMisses":1, "fsMainModuleSequenceCacheMisses":1, "fsLibraryModuleCacheMisses":226, "compileTime":0.757087, "runTime":1.043248}'}
+
+
+.. code-block:: python
+
+    >>> from mlclient import MLClientManager
+    >>> from mlclient.services import LogType
+
+    >>> with MLClientManager("local").get_client() as ml:
+    ...     logs = ml.logs.get(8002, "request")
     >>> list(logs)[0]
     {'message': '{"time":"2024-02-22T12:38:27Z", "url":"/manage/v2/logs?format=json", "user":"admin", "elapsedTime":1.801654, "requests":1, "valueCacheHits":5743, "valueCacheMisses":349701, "regexpCacheHits":5278, "regexpCacheMisses":10, "fsProgramCacheMisses":1, "fsMainModuleSequenceCacheMisses":1, "fsLibraryModuleCacheMisses":226, "compileTime":0.757087, "runTime":1.043248}'}
 
@@ -758,139 +873,73 @@ Get limited logs
     ...     )
 
 
-Low-level clients
------------------
+Mid-level API clients
+---------------------
 
-Low-level clients offer basic HTTP and REST functionality compatible with MarkLogic Server configuration.
-:class:`~mlclient.ApiClient` works with :class:`~mlclient.calls.ApiCall` objects, which are python representations of MarkLogic resources' calls.
-:class:`~mlclient.HttpClient` lets you send raw HTTP requests.
-You can use these clients to send customized requests that are not supported by the high-level service API,
-or to handle the responses yourself.
+Below the high-level services, MLClient exposes three mid-level API clients that correspond
+to MarkLogic's API tiers. They work with :class:`~mlclient.calls.ApiCall` objects, which are
+python representations of MarkLogic endpoint calls. You can use these clients to send
+customized requests that are not supported by the high-level service API, or to handle the
+responses yourself.
 
-====================================  =======================================================================================================================================================
-Layer                                 Description
-====================================  =======================================================================================================================================================
-:class:`~mlclient.MLClient`           Main entry point with layered access (``.http``, ``.rest``, ``.manage``, ``.admin``, ``.documents``, ``.eval``, ``.logs``)
-:class:`~mlclient.HttpClient`         Low-level HTTP client that accepts ML configuration and sends raw HTTP requests
-:class:`~mlclient.ApiClient`          Mid-level client providing :meth:`~mlclient.ApiClient.call` for :class:`~mlclient.calls.ApiCall` objects
-====================================  =======================================================================================================================================================
+RestApi
+^^^^^^^
 
-MLClient
+:class:`~mlclient.api.RestApi` provides access to ``/v1/*`` endpoints on the main port.
+
+.. code-block:: python
+
+    >>> from mlclient import MLClient
+
+    >>> with MLClient() as ml:
+    ...     resp = ml.rest.eval.post(
+    ...         xquery="xdmp:database() => xdmp:database-name()",
+    ...     )
+    ...     parsed = ml.parser.parse(resp)
+    ...     print(parsed)
+    ...
+    App-Services
+
+ManageApi
+^^^^^^^^^
+:class:`~mlclient.api.ManageApi` provides access to ``/manage/v2/*`` endpoints on port 8002.
+
+.. code-block:: python
+
+    >>> from mlclient import MLClient
+
+    >>> with MLClient() as ml:
+    ...     resp = ml.manage.databases.get_properties(
+    ...         "Documents", data_format="json",
+    ...     )
+    ...     print(resp.json()["database-name"])
+    ...
+    Documents
+
+AdminApi
 ^^^^^^^^
 
-The main entry point that provides layered access to MarkLogic through ``.http``, ``.rest``, ``.manage``, and service properties.
-
-Internally, the underlying ``HttpClient`` uses ``httpx``. Its default retry strategy is intentionally
-conservative: transport-level retries are enabled for idempotent methods only.
-If you need a different policy, pass a custom ``retry`` strategy when initializing
-the client.
-
-``HttpClient`` also exposes the standard MarkLogic endpoint ports as public constants:
-
-- ``MARKLOGIC_REST_API_PORT`` = ``8000``
-- ``MARKLOGIC_ADMIN_API_PORT`` = ``8001``
-- ``MARKLOGIC_MANAGE_API_PORT`` = ``8002``
-
-Two retry presets are also exported:
-
-- ``DEFAULT_RETRY_STRATEGY`` for normal requests
-- ``RESTART_RETRY_STRATEGY`` for Admin timestamp polling during restart windows
-
-API tiers and port routing
-""""""""""""""""""""""""""
-
-MarkLogic exposes three separate HTTP API tiers, each bound to a fixed port:
-
-========================  ==========  ===========================
-Tier                      Port        Endpoints
-========================  ==========  ===========================
-Client (REST) API         8000/custom ``/v1/*``
-Admin API                 8001        ``/admin/v1/*``
-Management API            8002        ``/manage/v2/*``
-========================  ==========  ===========================
-
-Port 8000 is the default App-Services REST server. Custom REST app servers
-(created via the Management API) also serve ``/v1/*`` on their configured port.
-Neither custom HTTP nor custom REST app servers serve ``/manage/v2/*`` or
-``/admin/v1/*`` endpoints - those are only available on the fixed ports shown above.
-Port 8000 appears to accept ``/manage/v2/*`` requests, but it silently redirects
-them to port 8002.
-
-``MLClient`` reflects this topology through three API properties:
-
-.. code-block:: text
-
-    MLClient (main entry point)
-      +- .http       -> HttpClient   (raw HTTP on the main port)
-      +- .rest       -> RestApi      (/v1/* on the main port)
-      +- .manage     -> ManageApi    (/manage/v2/* on port 8002)
-      +- .admin      -> AdminApi     (/admin/v1/* on port 8001)
-      +- .parser     -> MLResponseParser
-      +- .documents, .eval, .logs -> high-level services
-
-Port routing is automatic. When the main ``port`` is already 8002 (the default),
-``.manage`` reuses the same HTTP connection. Otherwise, a separate connection to
-port 8002 is lazily created on first access. The same logic applies to
-``.admin`` and port 8001. All secondary connections share the same ``protocol``,
-``host``, ``auth_method``, ``username``, and ``password`` as the main client.
-They are also managed by the ``connect()`` / ``disconnect()`` lifecycle.
-
-.. code-block:: python
-
-    >>> from mlclient import MLClient
-
-    # Default port is 8002 - .manage reuses the connection, .admin creates one to 8001
-    >>> with MLClient() as ml:
-    ...     resp = ml.manage.databases.get_list()
-    ...     ts = ml.admin.get_timestamp()
-
-    # Custom REST server on port 8040 - .rest uses 8040, .manage/admin use 8002/8001
-    >>> with MLClient(port=8040) as ml:
-    ...     resp = ml.rest.eval.post(xquery="1")
-    ...     dbs = ml.manage.databases.get_list()
-
-Connection
-""""""""""
-
-The easiest way to start a connection is to initialize :class:`~mlclient.MLClient` as a context manager:
+:class:`~mlclient.api.AdminApi` provides access to ``/admin/v1/*`` endpoints on port 8001.
 
 .. code-block:: python
 
     >>> from mlclient import MLClient
 
     >>> with MLClient() as ml:
-    ...     resp = ml.http.get("/manage/v2/servers")
+    ...     resp = ml.admin.get_timestamp()
+    ...     print(resp.text)
+    ...
+    2024-06-21T14:08:32.130813Z
 
 
-If you would like to explicitly connect and disconnect a client, however, you can do it as below:
+Low-level HTTP
+--------------
 
-.. code-block:: python
-
-    >>> from mlclient import MLClient
-
-    >>> ml = MLClient()
-    >>> ml.connect()
-    >>> resp = ml.http.get("/manage/v2/servers")
-    >>> ml.disconnect()
-
-
-To check if a client is connected you can use :meth:`~mlclient.MLClient.is_connected` method:
-
-.. code-block:: python
-
-    >>> from mlclient import MLClient
-
-    >>> ml = MLClient()
-    >>> ml.connect()
-    >>> ml.is_connected()
-    True
-    >>> ml.disconnect()
-    >>> ml.is_connected()
-    False
-
+The low-level :class:`~mlclient.HttpClient` lets you send raw HTTP requests.
+It is accessible via ``ml.http``.
 
 GET request
-"""""""""""
+^^^^^^^^^^^
 
 *A simple GET request*
 
@@ -917,7 +966,7 @@ GET request
 
 
 POST request
-""""""""""""
+^^^^^^^^^^^^
 
 *A simple POST request*
 
@@ -928,7 +977,7 @@ POST request
     >>> with MLClient() as ml:
     ...     resp = ml.http.post(
     ...         "/manage/v2/databases",
-    ...         body={"database-name": "CustomDatabase"},
+    ...         {"database-name": "CustomDatabase"},
     ...     )
 
 
@@ -941,14 +990,14 @@ POST request
     >>> with MLClient() as ml:
     ...     resp = ml.http.post(
     ...         "/v1/eval",
-    ...         body={"xquery": "fn:current-dateTime()"},
+    ...         {"xquery": "fn:current-dateTime()"},
     ...         params={"database": "Documents"},
     ...         headers={"Content-Type": "application/x-www-form-urlencoded"},
     ...     )
 
 
 PUT request
-"""""""""""
+^^^^^^^^^^^
 
 .. code-block:: python
 
@@ -957,13 +1006,13 @@ PUT request
     >>> with MLClient() as ml:
     ...     resp = ml.http.put(
     ...         "/manage/v2/databases/CustomDatabase/properties",
-    ...         body={"enabled": False},
+    ...         {"enabled": False},
     ...         headers={"Content-Type": "application/json"}
     ...     )
 
 
 DELETE request
-""""""""""""""
+^^^^^^^^^^^^^^
 
 .. code-block:: python
 
@@ -977,7 +1026,7 @@ DELETE request
 
 
 Restart readiness
-"""""""""""""""""
+-----------------
 
 Some Management and Admin API operations return ``202 Accepted`` together with
 ``Location: /admin/v1/timestamp`` and a ``restart`` payload body. That payload

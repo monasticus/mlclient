@@ -57,10 +57,10 @@ def test_command_call_eval_basic():
 
     file_path = resources_utils.get_test_resource_path(__file__, "xquery-code.xqy")
     tester = _get_tester("call eval")
-    tester.execute(f"-e test {file_path}")
+    tester.execute(f"-p test {file_path}")
 
     assert tester.command.argument("code") == file_path
-    assert tester.command.option("environment") == "test"
+    assert tester.command.option("profile") == "test"
     assert tester.command.option("rest-server") is None
     assert tester.command.option("var") == []
     assert tester.command.option("xquery") is False
@@ -83,10 +83,10 @@ def test_command_call_eval_custom_rest_server():
 
     file_path = resources_utils.get_test_resource_path(__file__, "xquery-code.xqy")
     tester = _get_tester("call eval")
-    tester.execute(f"-e test -s manage {file_path}")
+    tester.execute(f"-p test -s manage {file_path}")
 
     assert tester.command.argument("code") == file_path
-    assert tester.command.option("environment") == "test"
+    assert tester.command.option("profile") == "test"
     assert tester.command.option("rest-server") == "manage"
     assert tester.command.option("var") == []
     assert tester.command.option("xquery") is False
@@ -114,10 +114,10 @@ def test_command_call_eval_with_vars():
 
     file_path = resources_utils.get_test_resource_path(__file__, "xquery-code.xqy")
     tester = _get_tester("call eval")
-    tester.execute(f"-e test {file_path} --var VARIABLE_1=X --var VARIABLE_2=Y")
+    tester.execute(f"-p test {file_path} --var VARIABLE_1=X --var VARIABLE_2=Y")
 
     assert tester.command.argument("code") == file_path
-    assert tester.command.option("environment") == "test"
+    assert tester.command.option("profile") == "test"
     assert tester.command.option("rest-server") is None
     assert tester.command.option("var") == ["VARIABLE_1=X", "VARIABLE_2=Y"]
     assert tester.command.option("xquery") is False
@@ -139,10 +139,10 @@ def test_command_call_eval_xquery_flag():
     ml_mocker.mock_post()
 
     tester = _get_tester("call eval")
-    tester.execute(f"-e test -x '{code}'")
+    tester.execute(f"-p test -x '{code}'")
 
     assert tester.command.argument("code") == code
-    assert tester.command.option("environment") == "test"
+    assert tester.command.option("profile") == "test"
     assert tester.command.option("rest-server") is None
     assert tester.command.option("var") == []
     assert tester.command.option("xquery") is True
@@ -164,10 +164,10 @@ def test_command_call_eval_javascript_flag():
     ml_mocker.mock_post()
 
     tester = _get_tester("call eval")
-    tester.execute(f"-e test -j '{code}'")
+    tester.execute(f"-p test -j '{code}'")
 
     assert tester.command.argument("code") == code
-    assert tester.command.option("environment") == "test"
+    assert tester.command.option("profile") == "test"
     assert tester.command.option("rest-server") is None
     assert tester.command.option("var") == []
     assert tester.command.option("xquery") is False
@@ -181,7 +181,7 @@ def test_command_call_eval_mixed_xquery_and_javascript():
 
     tester = _get_tester("call eval")
     with pytest.raises(WrongParametersError) as err:
-        tester.execute(f"-e test -x -j '{code}'")
+        tester.execute(f"-p test -x -j '{code}'")
 
     expected_msg = "You cannot include both the --xquery and the --javascript flag!"
     assert err.value.args[0] == expected_msg
@@ -202,10 +202,10 @@ def test_command_call_eval_custom_database():
 
     file_path = resources_utils.get_test_resource_path(__file__, "xquery-code.xqy")
     tester = _get_tester("call eval")
-    tester.execute(f"-e test -d custom-db {file_path}")
+    tester.execute(f"-p test -d custom-db {file_path}")
 
     assert tester.command.argument("code") == file_path
-    assert tester.command.option("environment") == "test"
+    assert tester.command.option("profile") == "test"
     assert tester.command.option("rest-server") is None
     assert tester.command.option("var") == []
     assert tester.command.option("xquery") is False
@@ -229,10 +229,10 @@ def test_command_call_eval_custom_txid():
 
     file_path = resources_utils.get_test_resource_path(__file__, "xquery-code.xqy")
     tester = _get_tester("call eval")
-    tester.execute(f"-e test -t transaction-id {file_path}")
+    tester.execute(f"-p test -t transaction-id {file_path}")
 
     assert tester.command.argument("code") == file_path
-    assert tester.command.option("environment") == "test"
+    assert tester.command.option("profile") == "test"
     assert tester.command.option("rest-server") is None
     assert tester.command.option("var") == []
     assert tester.command.option("xquery") is False
@@ -267,11 +267,11 @@ def test_command_call_eval_output():
     ml_mocker.mock_post()
 
     tester = _get_tester("call eval")
-    tester.execute(f"-e test -x '{code}'")
+    tester.execute(f"-p test -x '{code}'")
     command_output = tester.io.fetch_output()
 
     assert tester.command.argument("code") == code
-    assert tester.command.option("environment") == "test"
+    assert tester.command.option("profile") == "test"
     assert tester.command.option("xquery") is True
 
     expected_output_lines = [

@@ -1,4 +1,4 @@
-"""The ML Role Resource Calls module.
+"""The ML Role Api Calls module.
 
 This module provides call classes for role-related REST resources.
 
@@ -31,7 +31,7 @@ class RolesGetCall(ApiCall):
     """A GET request to get roles summary.
 
     A ApiCall implementation representing a single GET request
-    to the /manage/v2/roles REST Resource.
+    to the /manage/v2/roles endpoint.
 
     This resource address returns a summary of the roles in the security database.
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/GET/manage/v2/roles
@@ -105,7 +105,7 @@ class RolesPostCall(ApiCall):
     """A POST request to create a new role.
 
     A ApiCall implementation representing a single POST request
-    to the /manage/v2/roles REST Resource.
+    to the /manage/v2/roles endpoint.
 
     This resource address creates a new role in the security database.
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/POST/manage/v2/roles
@@ -159,7 +159,7 @@ class RoleGetCall(ApiCall):
     """A GET request to get a role details.
 
     A ApiCall implementation representing a single GET request
-    to the /manage/v2/roles/{id|name} REST Resource.
+    to the /manage/v2/roles/{id|name} endpoint.
 
     This resource address returns the configuration for the specified role.
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/GET/manage/v2/roles/[id-or-name]
@@ -238,7 +238,7 @@ class RoleDeleteCall(ApiCall):
     """A DELETE request to remove a role.
 
     A ApiCall implementation representing a single DELETE request
-    to the /manage/v2/roles/{id|name} REST Resource.
+    to the /manage/v2/roles/{id|name} endpoint.
 
     This resource address deletes the named role from the named security database.
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/DELETE/manage/v2/roles/[id-or-name]
@@ -280,7 +280,7 @@ class RolePropertiesGetCall(ApiCall):
     """A GET request to get role properties.
 
     A ApiCall implementation representing a single GET request
-    to the /manage/v2/roles/{id|name}/properties REST Resource.
+    to the /manage/v2/roles/{id|name}/properties endpoint.
 
     This resource address returns the properties of the specified role.
     Documentation of the REST Resource API:
@@ -348,7 +348,7 @@ class RolePropertiesPutCall(ApiCall):
     """A PUT request to modify role properties.
 
     A ApiCall implementation representing a single PUT request
-    to the /manage/v2/roles/{id|name}/properties REST Resource.
+    to the /manage/v2/roles/{id|name}/properties endpoint.
 
     This resource address can be used to update the properties for the specified role.
     Documentation of the REST Resource API:

@@ -480,7 +480,7 @@ class WriteDocumentsJob(DocumentsJob):
         """
         batch_uris = [doc.uri for doc in batch]
         try:
-            client.documents.create(data=batch, database=self._database)
+            client.documents.write(data=batch, database=self._database)
             self._report.add_successful_docs(batch_uris)
         except Exception as err:
             self._report.add_failed_docs(batch_uris, err)

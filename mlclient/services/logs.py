@@ -58,7 +58,7 @@ class LogsService:
     def get(
         self,
         app_server: int | str | None = None,
-        log_type: LogType = LogType.ERROR,
+        log_type: LogType | str = LogType.ERROR,
         *,
         start_time: str | None = None,
         end_time: str | None = None,
@@ -71,8 +71,8 @@ class LogsService:
         ----------
         app_server : int | str | None, default None
             An app server (port) with logs to retrieve
-        log_type : LogType, default LogType.ERROR
-            A log type
+        log_type : LogType | str, default LogType.ERROR
+            A log type (enum or string: "error", "access", "request", "audit")
         start_time : str | None, default None
             A start time to search error logs
         end_time : str | None, default None
@@ -92,6 +92,8 @@ class LogsService:
         MarkLogicError
             If MarkLogic returns an error
         """
+        if isinstance(log_type, str):
+            log_type = LogType.get(log_type)
         call = self._get_call(
             app_server=app_server,
             log_type=log_type,

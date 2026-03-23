@@ -43,21 +43,21 @@ class UnsupportedFormatError(Exception):
 class MLClientDirectoryNotFoundError(Exception):
     """A custom Exception class for a non-existing MLClient configuration directory.
 
-    Raised when initializing an MLConfiguration from an environment.
+    Raised when loading an MLProfile.
     """
 
 
 class MLClientEnvironmentNotFoundError(Exception):
     """A custom Exception class for a non-existing MLClient environment.
 
-    Raised when initializing an MLConfiguration from an environment.
+    Raised when loading an MLProfile.
     """
 
 
 class NoSuchAppServerError(Exception):
     """A custom Exception class for a non-existing app server configuration.
 
-    Raised when getting an app server config from an MLConfiguration instance.
+    Raised when getting an app server config from an MLProfile instance.
     """
 
 

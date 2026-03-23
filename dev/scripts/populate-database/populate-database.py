@@ -6,7 +6,7 @@ from pathlib import Path
 
 from mimeo import MimeoConfigFactory, Mimeograph
 
-from mlclient import MLConfiguration, setup_logger
+from mlclient import MLProfile, setup_logger
 from mlclient.jobs import WriteDocumentsJob
 
 _SCRIPT_DIR = Path(__file__).resolve().parent
@@ -53,7 +53,7 @@ def populate_database(
     database: str | None,
     mimeo_output_root: str,
 ):
-    ml_config = MLConfiguration.from_environment(env)
+    ml_config = MLProfile.load(env)
     client_config = ml_config.provide_config(rest_server_id)
     job = WriteDocumentsJob(batch_size=250)
     job.with_client_config(**client_config)

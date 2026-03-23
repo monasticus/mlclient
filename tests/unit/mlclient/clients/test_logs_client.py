@@ -441,7 +441,7 @@ def test_get_access_logs(logs_client):
     ml_mocker.with_response_body(ml_mocker.non_error_logs_body(raw_logs))
     ml_mocker.mock_get()
 
-    logs = logs_client.logs.get(8002, log_type=LogType.ACCESS)
+    logs = logs_client.logs.get(8002, LogType.ACCESS)
     logs = list(logs)
 
     assert len(logs) == 2
@@ -450,6 +450,33 @@ def test_get_access_logs(logs_client):
     }
     assert logs[1] == {
         "message": raw_logs[1],
+    }
+
+
+@respx.mock
+def test_get_access_logs_with_str_log_type(logs_client):
+    raw_logs = [
+        (
+            "172.17.0.1 - admin [01/Sep/2023:03:54:16 +0000] "
+            '"GET /manage/v2/logs?format=json&filename=8002_AccessLog.txt HTTP/1.1" '
+            '200 454 - "python-requests/2.31.0"'
+        ),
+    ]
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(f"http://localhost:8002{ENDPOINT}")
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_param("filename", "8002_AccessLog.txt")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_response_body(ml_mocker.non_error_logs_body(raw_logs))
+    ml_mocker.mock_get()
+
+    logs = logs_client.logs.get(8002, "access")
+    logs = list(logs)
+
+    assert len(logs) == 1
+    assert logs[0] == {
+        "message": raw_logs[0],
     }
 
 
@@ -478,7 +505,7 @@ def test_get_access_logs_with_search_params(logs_client):
 
     logs = logs_client.logs.get(
         8002,
-        log_type=LogType.ACCESS,
+        LogType.ACCESS,
         start_time="00:00",
         end_time="23:59:59",
         regex="Test request",
@@ -505,7 +532,7 @@ def test_get_access_logs_empty(logs_client):
     ml_mocker.with_response_body(ml_mocker.non_error_logs_body([]))
     ml_mocker.mock_get()
 
-    logs = logs_client.logs.get(8002, log_type=LogType.ACCESS)
+    logs = logs_client.logs.get(8002, LogType.ACCESS)
     logs = list(logs)
 
     assert len(logs) == 0
@@ -567,7 +594,7 @@ def test_get_request_logs(logs_client):
     ml_mocker.with_response_body(ml_mocker.non_error_logs_body(raw_logs))
     ml_mocker.mock_get()
 
-    logs = logs_client.logs.get(8002, log_type=LogType.REQUEST)
+    logs = logs_client.logs.get(8002, LogType.REQUEST)
     logs = list(logs)
 
     assert len(logs) == 2
@@ -637,7 +664,7 @@ def test_get_request_logs_with_search_params(logs_client):
 
     logs = logs_client.logs.get(
         8002,
-        log_type=LogType.REQUEST,
+        LogType.REQUEST,
         start_time="00:00",
         end_time="23:59:59",
         regex="Test request",
@@ -664,7 +691,7 @@ def test_get_request_logs_empty(logs_client):
     ml_mocker.with_response_body(ml_mocker.non_error_logs_body([]))
     ml_mocker.mock_get()
 
-    logs = logs_client.logs.get(8002, log_type=LogType.REQUEST)
+    logs = logs_client.logs.get(8002, LogType.REQUEST)
     logs = list(logs)
 
     assert len(logs) == 0

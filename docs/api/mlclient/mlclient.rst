@@ -5,7 +5,7 @@ mlclient package
    :members:
    :undoc-members:
    :show-inheritance:
-   :exclude-members: MLClient, MLConfiguration
+   :exclude-members: MLClient, MLProfile
    :no-index:
 
 .. toctree::
@@ -16,10 +16,10 @@ mlclient package
    jobs/mlclient.jobs
    structures/mlclient.structures
 
-mlclient.ml_config module
--------------------------
+mlclient.ml_profile module
+--------------------------
 
-.. automodule:: mlclient.ml_config
+.. automodule:: mlclient.ml_profile
    :members:
    :undoc-members:
    :show-inheritance:

@@ -1,6 +1,6 @@
-"""The ML Documents Resource Calls module.
+"""The ML Documents Api Calls module.
 
-It exports 1 class:
+It exports 3 classes:
     * DocumentsGetCall
         A GET request to retrieve documents' content or metadata.
     * DocumentsPostCall
@@ -31,7 +31,7 @@ class DocumentsGetCall(ApiCall):
     """A GET request to retrieve documents' content or metadata.
 
     A ApiCall implementation representing a single GET request
-    to the /v1/documents REST Resource.
+    to the /v1/documents endpoint.
 
     Retrieve document content and/or metadata from the database.
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/GET/v1/documents
@@ -179,7 +179,7 @@ class DocumentsPostCall(ApiCall):
     """A POST request to insert or update documents' content or metadata.
 
     A ApiCall implementation representing a single POST request
-    to the /v1/documents REST Resource.
+    to the /v1/documents endpoint.
 
     Insert or update content and/or metadata for multiple documents in a single request.
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/POST/v1/documents
@@ -308,7 +308,7 @@ class DocumentsDeleteCall(ApiCall):
     """A DELETE request to remove documents, or reset document metadata.
 
     A ApiCall implementation representing a single DELETE request
-    to the /v1/documents REST Resource.
+    to the /v1/documents endpoint.
 
     Retrieve document content and/or metadata from the database.
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/DELETE/v1/documents

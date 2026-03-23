@@ -1,4 +1,4 @@
-"""The ML User Resource Calls module.
+"""The ML User Api Calls module.
 
 This module provides call classes for user-related REST resources.
 
@@ -31,7 +31,7 @@ class UsersGetCall(ApiCall):
     """A GET request to get users summary.
 
     A ApiCall implementation representing a single GET request
-    to the /manage/v2/users REST Resource.
+    to the /manage/v2/users endpoint.
 
     This resource address returns a summary of the users in the cluster.
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/GET/manage/v2/users
@@ -105,7 +105,7 @@ class UsersPostCall(ApiCall):
     """A POST request to create a new user.
 
     A ApiCall implementation representing a single POST request
-    to the /manage/v2/users REST Resource.
+    to the /manage/v2/users endpoint.
 
     This resource address creates a new user in the security database.
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/POST/manage/v2/users
@@ -159,7 +159,7 @@ class UserGetCall(ApiCall):
     """A GET request to get user details.
 
     A ApiCall implementation representing a single GET request
-    to the /manage/v2/users/{id|name} REST Resource.
+    to the /manage/v2/users/{id|name} endpoint.
 
     This resource address returns the configuration for the specified user.
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/GET/manage/v2/users/[id-or-name]
@@ -238,7 +238,7 @@ class UserDeleteCall(ApiCall):
     """A DELETE request to remove a user.
 
     A ApiCall implementation representing a single DELETE request
-    to the /manage/v2/users/{id|name} REST Resource.
+    to the /manage/v2/users/{id|name} endpoint.
 
     This resource address deletes the named user from the named security database.
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/DELETE/manage/v2/users/[id-or-name]
@@ -280,7 +280,7 @@ class UserPropertiesGetCall(ApiCall):
     """A GET request to get user properties.
 
     A ApiCall implementation representing a single GET request
-    to the /manage/v2/users/{id|name}/properties REST Resource.
+    to the /manage/v2/users/{id|name}/properties endpoint.
 
     This resource address returns the properties of the specified user.
     Documentation of the REST Resource API:
@@ -348,7 +348,7 @@ class UserPropertiesPutCall(ApiCall):
     """A PUT request to modify user properties.
 
     A ApiCall implementation representing a single PUT request
-    to the /manage/v2/users/{id|name}/properties REST Resource.
+    to the /manage/v2/users/{id|name}/properties endpoint.
 
     This resource address can be used to update the properties for the specified user.
     Documentation of the REST Resource API:

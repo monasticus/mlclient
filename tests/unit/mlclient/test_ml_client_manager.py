@@ -1,11 +1,12 @@
 import pytest
 
-from mlclient import MLClient, MLConfiguration, MLEnvironment
-from mlclient.exceptions import NoRestServerConfiguredError
+from mlclient import MLClient, MLClientManager, MLProfile
+from mlclient.clients import HttpClient
+from mlclient.exceptions import NoRestServerConfiguredError, NotARestServerError
 
 
 @pytest.fixture(autouse=True)
-def ml_config() -> MLConfiguration:
+def ml_config() -> MLProfile:
     config = {
         "app-name": "my-marklogic-app",
         "host": "localhost",
@@ -43,11 +44,11 @@ def ml_config() -> MLConfiguration:
             },
         ],
     }
-    return MLConfiguration(**config)
+    return MLProfile(**config)
 
 
 @pytest.fixture(autouse=True)
-def ml_config_no_rest() -> MLConfiguration:
+def ml_config_no_rest() -> MLProfile:
     config = {
         "app-name": "my-marklogic-app",
         "host": "localhost",
@@ -82,38 +83,37 @@ def ml_config_no_rest() -> MLConfiguration:
             },
         ],
     }
-    return MLConfiguration(**config)
+    return MLProfile(**config)
 
 
 @pytest.fixture(autouse=True)
 def _setup(mocker, ml_config, ml_config_no_rest):
     # Setup
-    original_method = MLConfiguration.from_environment
+    original_method = MLProfile.load
 
-    def config_from_environment(environment_name: str):
-        if environment_name == "test":
+    def load_profile(profile_name: str):
+        if profile_name == "test":
             return ml_config
-        if environment_name == "test-no-rest":
+        if profile_name == "test-no-rest":
             return ml_config_no_rest
-        return original_method(environment_name)
+        return original_method(profile_name)
 
-    target = "mlclient.ml_config.MLConfiguration.from_environment"
-    mocker.patch(target, side_effect=config_from_environment)
+    target = "mlclient.ml_profile.MLProfile.load"
+    mocker.patch(target, side_effect=load_profile)
 
 
 def test_properties():
-    ml_env = MLEnvironment("test")
+    mgr = MLClientManager("test")
 
-    assert ml_env.environment_name == "test"
+    assert mgr.profile_name == "test"
 
-    expected_config = MLConfiguration.from_environment("test")
-    assert ml_env.config.model_dump() == expected_config.model_dump()
+    expected_config = MLProfile.load("test")
+    assert mgr.config.model_dump() == expected_config.model_dump()
 
 
 def test_get_client_with_app_server_id():
-    # uses tests/resources/test-ml-manager/mlclient-test.yaml copy
-    ml_env = MLEnvironment("test")
-    with ml_env.get_client("content") as client:
+    mgr = MLClientManager("test")
+    with mgr.get_client("content") as client:
         assert isinstance(client, MLClient)
         assert client.protocol == "https"
         assert client.host == "localhost"
@@ -126,9 +126,8 @@ def test_get_client_with_app_server_id():
 
 
 def test_get_client_default():
-    # uses tests/resources/test-ml-manager/mlclient-test.yaml copy
-    ml_env = MLEnvironment("test")
-    with ml_env.get_client() as client:
+    mgr = MLClientManager("test")
+    with mgr.get_client() as client:
         assert isinstance(client, MLClient)
         assert client.protocol == "https"
         assert client.host == "localhost"
@@ -141,17 +140,29 @@ def test_get_client_default():
 
 
 def test_get_client_default_no_rest_servers_configured():
-    # uses tests/resources/test-ml-manager/mlclient-test-no-rest.yaml copy
     with pytest.raises(NoRestServerConfiguredError) as err:
-        MLEnvironment("test-no-rest").get_client()
+        MLClientManager("test-no-rest").get_client()
     assert err.value.args[0] == (
-        "No REST server is configured for the [test-no-rest] environment."
+        "No REST server is configured for the [test-no-rest] profile."
     )
 
 
-def test_get_client_any_server():
-    # get_client() with explicit ID works for any server, not just REST
-    ml_env = MLEnvironment("test")
-    with ml_env.get_client("schemas") as client:
-        assert isinstance(client, MLClient)
-        assert client.port == 8102
+def test_get_client_not_a_rest_server():
+    mgr = MLClientManager("test")
+    with pytest.raises(NotARestServerError) as err:
+        mgr.get_client("modules")
+    assert err.value.args[0] == (
+        "[modules] App-Server is not configured as a REST one."
+    )
+
+
+def test_get_http_client():
+    mgr = MLClientManager("test")
+    with mgr.get_http_client("content") as client:
+        assert isinstance(client, HttpClient)
+        assert client.protocol == "https"
+        assert client.host == "localhost"
+        assert client.port == 8100
+        assert client.username == "my-marklogic-app-user"
+        assert client.password == "my-marklogic-app-password"
+        assert client.auth_method == "basic"

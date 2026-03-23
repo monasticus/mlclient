@@ -4,13 +4,13 @@ from pathlib import Path
 
 import pytest
 
-from mlclient import MLConfiguration, constants
+from mlclient import MLProfile, constants
 from mlclient.exceptions import (
     MLClientDirectoryNotFoundError,
     MLClientEnvironmentNotFoundError,
     NoSuchAppServerError,
 )
-from mlclient.ml_config import MLAppServerConfiguration
+from mlclient.ml_profile import MLServerConfig
 from tests.utils import resources as resources_utils
 
 _SCRIPT_DIR = Path(__file__).resolve().parent
@@ -35,9 +35,9 @@ def _setup_and_teardown():
         ml_client_dir.rmdir()
 
 
-def test_from_file():
+def test_load_file():
     path = resources_utils.get_test_resource_path(__file__, "mlclient-test.yaml")
-    config = MLConfiguration.from_file(path)
+    config = MLProfile.load_file(path)
     assert config.model_dump() == {
         "app_name": "my-marklogic-app",
         "host": "localhost",
@@ -77,19 +77,19 @@ def test_from_file():
             },
         ],
     }
-    assert isinstance(config, MLConfiguration)
+    assert isinstance(config, MLProfile)
     assert all(
-        isinstance(app_server_config, MLAppServerConfiguration)
+        isinstance(app_server_config, MLServerConfig)
         for app_server_config in config.app_servers
     )
 
 
-def test_from_file_default_values():
+def test_load_file_default_values():
     path = resources_utils.get_test_resource_path(
         __file__,
         "mlclient-test-default.yaml",
     )
-    config = MLConfiguration.from_file(path)
+    config = MLProfile.load_file(path)
     assert config.model_dump() == {
         "app_name": "my-default-app",
         "host": "localhost",
@@ -105,17 +105,17 @@ def test_from_file_default_values():
             },
         ],
     }
-    assert isinstance(config, MLConfiguration)
+    assert isinstance(config, MLProfile)
     assert all(
-        isinstance(app_server_config, MLAppServerConfiguration)
+        isinstance(app_server_config, MLServerConfig)
         for app_server_config in config.app_servers
     )
 
 
-def test_from_environment():
+def test_load():
     # Note: the test environment configuration is copied from the test resources
     # to .mlclient directory in a setup step
-    config = MLConfiguration.from_environment("test")
+    config = MLProfile.load("test")
     assert config.model_dump() == {
         "app_name": "my-marklogic-app",
         "host": "localhost",
@@ -155,17 +155,17 @@ def test_from_environment():
             },
         ],
     }
-    assert isinstance(config, MLConfiguration)
+    assert isinstance(config, MLProfile)
     assert all(
-        isinstance(app_server_config, MLAppServerConfiguration)
+        isinstance(app_server_config, MLServerConfig)
         for app_server_config in config.app_servers
     )
 
 
-def test_from_environment_default():
+def test_load_default():
     # Note: the test-default environment configuration is copied from the test resources
     # to .mlclient directory in a setup step
-    config = MLConfiguration.from_environment("test-default")
+    config = MLProfile.load("test-default")
     assert config.model_dump() == {
         "app_name": "my-default-app",
         "host": "localhost",
@@ -181,16 +181,16 @@ def test_from_environment_default():
             },
         ],
     }
-    assert isinstance(config, MLConfiguration)
+    assert isinstance(config, MLProfile)
     assert all(
-        isinstance(app_server_config, MLAppServerConfiguration)
+        isinstance(app_server_config, MLServerConfig)
         for app_server_config in config.app_servers
     )
 
 
-def test_from_environment_non_existing():
+def test_load_non_existing():
     with pytest.raises(MLClientEnvironmentNotFoundError) as err:
-        MLConfiguration.from_environment("non-existing")
+        MLProfile.load("non-existing")
     expected_msg = (
         "MLClient's configuration has not been found for the environment "
         "[non-existing]!"
@@ -199,13 +199,13 @@ def test_from_environment_non_existing():
     assert actual_msg == expected_msg
 
 
-def test_from_environment_in_child_directory():
+def test_load_in_child_directory():
     # Note: the test-default environment configuration is copied from the test resources
     # to .mlclient directory in a setup step
     curr_dir = Path.cwd()
     os.chdir(_SCRIPT_DIR)
 
-    config = MLConfiguration.from_environment("test-default")
+    config = MLProfile.load("test-default")
     assert config.model_dump() == {
         "app_name": "my-default-app",
         "host": "localhost",
@@ -221,23 +221,23 @@ def test_from_environment_in_child_directory():
             },
         ],
     }
-    assert isinstance(config, MLConfiguration)
+    assert isinstance(config, MLProfile)
     assert all(
-        isinstance(app_server_config, MLAppServerConfiguration)
+        isinstance(app_server_config, MLServerConfig)
         for app_server_config in config.app_servers
     )
 
     os.chdir(curr_dir)
 
 
-def test_from_environment_in_parent_directory():
+def test_load_in_parent_directory():
     # Note: the test-default environment configuration is copied from the test resources
     # to .mlclient directory in a setup step
     curr_dir = Path.cwd()
     os.chdir(Path(_SCRIPT_DIR).parent.parent.parent.parent)
 
     with pytest.raises(MLClientDirectoryNotFoundError) as err:
-        MLConfiguration.from_environment("test-default")
+        MLProfile.load("test-default")
     expected_msg = (
         ".mlclient directory has not been found in any of parent directories!"
     )
@@ -248,14 +248,14 @@ def test_from_environment_in_parent_directory():
 
 
 def test_rest_servers():
-    test_config = MLConfiguration.from_environment("test")
-    default_config = MLConfiguration.from_environment("test-default")
+    test_config = MLProfile.load("test")
+    default_config = MLProfile.load("test-default")
     assert test_config.rest_servers == ["manage", "content", "test"]
     assert default_config.rest_servers == ["manage"]
 
 
 def test_provide_config():
-    config = MLConfiguration.from_environment("test")
+    config = MLProfile.load("test")
     assert config.provide_config("manage") == {
         "protocol": "http",
         "host": "localhost",
@@ -267,7 +267,7 @@ def test_provide_config():
 
 
 def test_provide_config_non_existing_server():
-    config = MLConfiguration.from_environment("test")
+    config = MLProfile.load("test")
     with pytest.raises(NoSuchAppServerError) as err:
         config.provide_config("non-existing")
     expected_msg = "There's no [non-existing] app server configuration!"

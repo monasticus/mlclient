@@ -5,6 +5,7 @@ Provides parsed document operations on MarkLogic.
 
 from __future__ import annotations
 
+
 from collections.abc import Iterator
 from typing import Any
 
@@ -37,14 +38,14 @@ class DocumentsService:
     def __init__(self, rest: ApiClient):
         self._rest = rest
 
-    def create(
+    def write(
         self,
         data: Document | Metadata | list[Document | Metadata],
         *,
         database: str | None = None,
         temporal_collection: str | None = None,
     ) -> dict:
-        """Create or update document(s) content or metadata.
+        """Write (create or update) document(s) content or metadata.
 
         Parameters
         ----------

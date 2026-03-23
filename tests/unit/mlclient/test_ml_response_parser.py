@@ -136,7 +136,7 @@ ml_mocker.mock_delete()
 
 @ml_mock
 def test_parse_error_response_xml(client):
-    resp = client.rest.documents.delete(uri="/some/dir/doc1.xml", database="Document")
+    resp = client.rest.documents.delete("/some/dir/doc1.xml", database="Document")
     parsed_resp = MLResponseParser.parse(resp)
 
     assert isinstance(parsed_resp, dict)
@@ -152,7 +152,7 @@ def test_parse_error_response_xml(client):
 
 @ml_mock
 def test_parse_text_error_response_xml(client):
-    resp = client.rest.documents.delete(uri="/some/dir/doc1.xml", database="Document")
+    resp = client.rest.documents.delete("/some/dir/doc1.xml", database="Document")
     parsed_resp = MLResponseParser.parse(resp, output_type=str)
 
     assert isinstance(parsed_resp, str)
@@ -168,7 +168,7 @@ def test_parse_text_error_response_xml(client):
 
 @ml_mock
 def test_parse_bytes_error_response_xml(client):
-    resp = client.rest.documents.delete(uri="/some/dir/doc1.xml", database="Document")
+    resp = client.rest.documents.delete("/some/dir/doc1.xml", database="Document")
     parsed_resp = MLResponseParser.parse(resp, output_type=bytes)
 
     assert isinstance(parsed_resp, bytes)
@@ -184,7 +184,7 @@ def test_parse_bytes_error_response_xml(client):
 
 @ml_mock
 def test_parse_with_headers_error_response_xml(client):
-    resp = client.rest.documents.delete(uri="/some/dir/doc1.xml", database="Document")
+    resp = client.rest.documents.delete("/some/dir/doc1.xml", database="Document")
     headers, parsed_resp = MLResponseParser.parse_with_headers(resp)
 
     assert isinstance(parsed_resp, dict)
@@ -204,7 +204,7 @@ def test_parse_with_headers_error_response_xml(client):
 
 @ml_mock
 def test_parse_text_with_headers_error_response_xml(client):
-    resp = client.rest.documents.delete(uri="/some/dir/doc1.xml", database="Document")
+    resp = client.rest.documents.delete("/some/dir/doc1.xml", database="Document")
     headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=str)
 
     assert isinstance(parsed_resp, str)
@@ -224,7 +224,7 @@ def test_parse_text_with_headers_error_response_xml(client):
 
 @ml_mock
 def test_parse_bytes_with_headers_error_response_xml(client):
-    resp = client.rest.documents.delete(uri="/some/dir/doc1.xml", database="Document")
+    resp = client.rest.documents.delete("/some/dir/doc1.xml", database="Document")
     headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=bytes)
 
     assert isinstance(parsed_resp, bytes)
@@ -253,7 +253,7 @@ ml_mocker.mock_get()
 
 @ml_mock
 def test_parse_error_response_json(client):
-    resp = client.rest.documents.get(uri="/some/dir/doc.xml")
+    resp = client.rest.documents.get("/some/dir/doc.xml")
     parsed_resp = MLResponseParser.parse(resp)
 
     assert isinstance(parsed_resp, dict)
@@ -262,7 +262,7 @@ def test_parse_error_response_json(client):
 
 @ml_mock
 def test_parse_text_error_response_json(client):
-    resp = client.rest.documents.get(uri="/some/dir/doc.xml")
+    resp = client.rest.documents.get("/some/dir/doc.xml")
     parsed_resp = MLResponseParser.parse(resp, output_type=str)
 
     assert isinstance(parsed_resp, str)
@@ -280,7 +280,7 @@ def test_parse_text_error_response_json(client):
 
 @ml_mock
 def test_parse_bytes_error_response_json(client):
-    resp = client.rest.documents.get(uri="/some/dir/doc.xml")
+    resp = client.rest.documents.get("/some/dir/doc.xml")
     parsed_resp = MLResponseParser.parse(resp, output_type=bytes)
 
     assert isinstance(parsed_resp, bytes)
@@ -298,7 +298,7 @@ def test_parse_bytes_error_response_json(client):
 
 @ml_mock
 def test_parse_with_headers_error_response_json(client):
-    resp = client.rest.documents.get(uri="/some/dir/doc.xml")
+    resp = client.rest.documents.get("/some/dir/doc.xml")
     headers, parsed_resp = MLResponseParser.parse_with_headers(resp)
 
     assert isinstance(parsed_resp, dict)
@@ -311,7 +311,7 @@ def test_parse_with_headers_error_response_json(client):
 
 @ml_mock
 def test_parse_text_with_headers_error_response_json(client):
-    resp = client.rest.documents.get(uri="/some/dir/doc.xml")
+    resp = client.rest.documents.get("/some/dir/doc.xml")
     headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=str)
 
     assert isinstance(parsed_resp, str)
@@ -336,7 +336,7 @@ def test_parse_text_with_headers_error_response_json(client):
 
 @ml_mock
 def test_parse_bytes_with_headers_error_response_json(client):
-    resp = client.rest.documents.get(uri="/some/dir/doc.xml")
+    resp = client.rest.documents.get("/some/dir/doc.xml")
     headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=bytes)
 
     assert isinstance(parsed_resp, bytes)
@@ -371,7 +371,7 @@ ml_mocker.mock_get()
 
 @ml_mock
 def test_parse_non_multipart_mixed_response_xml(client):
-    resp = client.rest.documents.get(uri="/some/dir/doc1.xml")
+    resp = client.rest.documents.get("/some/dir/doc1.xml")
     parsed_resp = MLResponseParser.parse(resp)
 
     assert isinstance(parsed_resp, ElemTree.ElementTree)
@@ -382,7 +382,7 @@ def test_parse_non_multipart_mixed_response_xml(client):
 
 @ml_mock
 def test_parse_text_non_multipart_mixed_response_xml(client):
-    resp = client.rest.documents.get(uri="/some/dir/doc1.xml")
+    resp = client.rest.documents.get("/some/dir/doc1.xml")
     parsed_resp = MLResponseParser.parse(resp, output_type=str)
 
     assert isinstance(parsed_resp, str)
@@ -391,7 +391,7 @@ def test_parse_text_non_multipart_mixed_response_xml(client):
 
 @ml_mock
 def test_parse_bytes_non_multipart_mixed_response_xml(client):
-    resp = client.rest.documents.get(uri="/some/dir/doc1.xml")
+    resp = client.rest.documents.get("/some/dir/doc1.xml")
     parsed_resp = MLResponseParser.parse(resp, output_type=bytes)
 
     assert isinstance(parsed_resp, bytes)
@@ -400,7 +400,7 @@ def test_parse_bytes_non_multipart_mixed_response_xml(client):
 
 @ml_mock
 def test_parse_with_headers_non_multipart_mixed_response_xml(client):
-    resp = client.rest.documents.get(uri="/some/dir/doc1.xml")
+    resp = client.rest.documents.get("/some/dir/doc1.xml")
     headers, parsed_resp = MLResponseParser.parse_with_headers(resp)
 
     assert isinstance(parsed_resp, ElemTree.ElementTree)
@@ -416,7 +416,7 @@ def test_parse_with_headers_non_multipart_mixed_response_xml(client):
 
 @ml_mock
 def test_parse_text_with_headers_non_multipart_mixed_response_xml(client):
-    resp = client.rest.documents.get(uri="/some/dir/doc1.xml")
+    resp = client.rest.documents.get("/some/dir/doc1.xml")
     headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=str)
 
     assert isinstance(parsed_resp, str)
@@ -430,7 +430,7 @@ def test_parse_text_with_headers_non_multipart_mixed_response_xml(client):
 
 @ml_mock
 def test_parse_bytes_with_headers_non_multipart_mixed_response_xml(client):
-    resp = client.rest.documents.get(uri="/some/dir/doc1.xml")
+    resp = client.rest.documents.get("/some/dir/doc1.xml")
     headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=bytes)
 
     assert isinstance(parsed_resp, bytes)
@@ -454,7 +454,7 @@ ml_mocker.mock_get()
 
 @ml_mock
 def test_parse_non_multipart_mixed_response_json(client):
-    resp = client.rest.documents.get(uri="/some/dir/doc2.json")
+    resp = client.rest.documents.get("/some/dir/doc2.json")
     parsed_resp = MLResponseParser.parse(resp)
 
     assert isinstance(parsed_resp, dict)
@@ -463,7 +463,7 @@ def test_parse_non_multipart_mixed_response_json(client):
 
 @ml_mock
 def test_parse_text_non_multipart_mixed_response_json(client):
-    resp = client.rest.documents.get(uri="/some/dir/doc2.json")
+    resp = client.rest.documents.get("/some/dir/doc2.json")
     parsed_resp = MLResponseParser.parse(resp, output_type=str)
 
     assert isinstance(parsed_resp, str)
@@ -472,7 +472,7 @@ def test_parse_text_non_multipart_mixed_response_json(client):
 
 @ml_mock
 def test_parse_bytes_non_multipart_mixed_response_json(client):
-    resp = client.rest.documents.get(uri="/some/dir/doc2.json")
+    resp = client.rest.documents.get("/some/dir/doc2.json")
     parsed_resp = MLResponseParser.parse(resp, output_type=bytes)
 
     assert isinstance(parsed_resp, bytes)
@@ -481,7 +481,7 @@ def test_parse_bytes_non_multipart_mixed_response_json(client):
 
 @ml_mock
 def test_parse_with_headers_non_multipart_mixed_response_json(client):
-    resp = client.rest.documents.get(uri="/some/dir/doc2.json")
+    resp = client.rest.documents.get("/some/dir/doc2.json")
     headers, parsed_resp = MLResponseParser.parse_with_headers(resp)
 
     assert isinstance(parsed_resp, dict)
@@ -495,7 +495,7 @@ def test_parse_with_headers_non_multipart_mixed_response_json(client):
 
 @ml_mock
 def test_parse_text_with_headers_non_multipart_mixed_response_json(client):
-    resp = client.rest.documents.get(uri="/some/dir/doc2.json")
+    resp = client.rest.documents.get("/some/dir/doc2.json")
     headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=str)
 
     assert isinstance(parsed_resp, str)
@@ -509,7 +509,7 @@ def test_parse_text_with_headers_non_multipart_mixed_response_json(client):
 
 @ml_mock
 def test_parse_bytes_with_headers_non_multipart_mixed_response_json(client):
-    resp = client.rest.documents.get(uri="/some/dir/doc2.json")
+    resp = client.rest.documents.get("/some/dir/doc2.json")
     headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=bytes)
 
     assert isinstance(parsed_resp, bytes)
@@ -533,7 +533,7 @@ ml_mocker.mock_get()
 
 @ml_mock
 def test_parse_non_multipart_mixed_response_text(client):
-    resp = client.rest.documents.get(uri="/some/dir/doc3.xqy")
+    resp = client.rest.documents.get("/some/dir/doc3.xqy")
     parsed_resp = MLResponseParser.parse(resp)
 
     assert isinstance(parsed_resp, str)
@@ -542,7 +542,7 @@ def test_parse_non_multipart_mixed_response_text(client):
 
 @ml_mock
 def test_parse_text_non_multipart_mixed_response_text(client):
-    resp = client.rest.documents.get(uri="/some/dir/doc3.xqy")
+    resp = client.rest.documents.get("/some/dir/doc3.xqy")
     parsed_resp = MLResponseParser.parse(resp, output_type=str)
 
     assert isinstance(parsed_resp, str)
@@ -551,7 +551,7 @@ def test_parse_text_non_multipart_mixed_response_text(client):
 
 @ml_mock
 def test_parse_bytes_non_multipart_mixed_response_text(client):
-    resp = client.rest.documents.get(uri="/some/dir/doc3.xqy")
+    resp = client.rest.documents.get("/some/dir/doc3.xqy")
     parsed_resp = MLResponseParser.parse(resp, output_type=bytes)
 
     assert isinstance(parsed_resp, bytes)
@@ -560,7 +560,7 @@ def test_parse_bytes_non_multipart_mixed_response_text(client):
 
 @ml_mock
 def test_parse_with_headers_non_multipart_mixed_response_text(client):
-    resp = client.rest.documents.get(uri="/some/dir/doc3.xqy")
+    resp = client.rest.documents.get("/some/dir/doc3.xqy")
     headers, parsed_resp = MLResponseParser.parse_with_headers(resp)
 
     assert isinstance(parsed_resp, str)
@@ -574,7 +574,7 @@ def test_parse_with_headers_non_multipart_mixed_response_text(client):
 
 @ml_mock
 def test_parse_text_with_headers_non_multipart_mixed_response_text(client):
-    resp = client.rest.documents.get(uri="/some/dir/doc3.xqy")
+    resp = client.rest.documents.get("/some/dir/doc3.xqy")
     headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=str)
 
     assert isinstance(parsed_resp, str)
@@ -588,7 +588,7 @@ def test_parse_text_with_headers_non_multipart_mixed_response_text(client):
 
 @ml_mock
 def test_parse_bytes_with_headers_non_multipart_mixed_response_text(client):
-    resp = client.rest.documents.get(uri="/some/dir/doc3.xqy")
+    resp = client.rest.documents.get("/some/dir/doc3.xqy")
     headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=bytes)
 
     assert isinstance(parsed_resp, bytes)
@@ -614,7 +614,7 @@ ml_mocker.mock_get()
 
 @ml_mock
 def test_parse_non_multipart_mixed_response_binary(client):
-    resp = client.rest.documents.get(uri="/some/dir/doc4.zip")
+    resp = client.rest.documents.get("/some/dir/doc4.zip")
     parsed_resp = MLResponseParser.parse(resp)
 
     assert isinstance(parsed_resp, bytes)
@@ -625,7 +625,7 @@ def test_parse_non_multipart_mixed_response_binary(client):
 
 @ml_mock
 def test_parse_text_non_multipart_mixed_response_binary(client):
-    resp = client.rest.documents.get(uri="/some/dir/doc4.zip")
+    resp = client.rest.documents.get("/some/dir/doc4.zip")
     parsed_resp = MLResponseParser.parse(resp, output_type=str)
 
     assert isinstance(parsed_resp, bytes)
@@ -636,7 +636,7 @@ def test_parse_text_non_multipart_mixed_response_binary(client):
 
 @ml_mock
 def test_parse_bytes_non_multipart_mixed_response_binary(client):
-    resp = client.rest.documents.get(uri="/some/dir/doc4.zip")
+    resp = client.rest.documents.get("/some/dir/doc4.zip")
     parsed_resp = MLResponseParser.parse(resp, output_type=bytes)
 
     assert isinstance(parsed_resp, bytes)
@@ -647,7 +647,7 @@ def test_parse_bytes_non_multipart_mixed_response_binary(client):
 
 @ml_mock
 def test_parse_with_headers_non_multipart_mixed_response_binary(client):
-    resp = client.rest.documents.get(uri="/some/dir/doc4.zip")
+    resp = client.rest.documents.get("/some/dir/doc4.zip")
     headers, parsed_resp = MLResponseParser.parse_with_headers(resp)
 
     assert isinstance(parsed_resp, bytes)
@@ -663,7 +663,7 @@ def test_parse_with_headers_non_multipart_mixed_response_binary(client):
 
 @ml_mock
 def test_parse_text_with_headers_non_multipart_mixed_response_binary(client):
-    resp = client.rest.documents.get(uri="/some/dir/doc4.zip")
+    resp = client.rest.documents.get("/some/dir/doc4.zip")
     headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=str)
 
     assert isinstance(parsed_resp, bytes)
@@ -679,7 +679,7 @@ def test_parse_text_with_headers_non_multipart_mixed_response_binary(client):
 
 @ml_mock
 def test_parse_bytes_with_headers_non_multipart_mixed_response_binary(client):
-    resp = client.rest.documents.get(uri="/some/dir/doc4.zip")
+    resp = client.rest.documents.get("/some/dir/doc4.zip")
     headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=bytes)
 
     assert isinstance(parsed_resp, bytes)
@@ -761,7 +761,7 @@ def test_parse_multipart_mixed_response(client):
         "/some/dir/doc4.zip",
     ]
 
-    resp = client.rest.documents.get(uri=uris)
+    resp = client.rest.documents.get(uris)
     parsed_resp = MLResponseParser.parse(resp)
 
     assert isinstance(parsed_resp, list)
@@ -792,7 +792,7 @@ def test_parse_text_multipart_mixed_response(client):
         "/some/dir/doc4.zip",
     ]
 
-    resp = client.rest.documents.get(uri=uris)
+    resp = client.rest.documents.get(uris)
     parsed_resp = MLResponseParser.parse(resp, output_type=str)
 
     assert isinstance(parsed_resp, list)
@@ -823,7 +823,7 @@ def test_parse_bytes_multipart_mixed_response(client):
         "/some/dir/doc4.zip",
     ]
 
-    resp = client.rest.documents.get(uri=uris)
+    resp = client.rest.documents.get(uris)
     parsed_resp = MLResponseParser.parse(resp, output_type=bytes)
 
     assert isinstance(parsed_resp, list)
@@ -854,7 +854,7 @@ def test_parse_with_headers_multipart_mixed_response(client):
         "/some/dir/doc4.zip",
     ]
 
-    resp = client.rest.documents.get(uri=uris)
+    resp = client.rest.documents.get(uris)
     parsed_resp_list = MLResponseParser.parse_with_headers(resp)
 
     assert isinstance(parsed_resp_list, list)
@@ -910,7 +910,7 @@ def test_parse_with_headers_text_multipart_mixed_response(client):
         "/some/dir/doc4.zip",
     ]
 
-    resp = client.rest.documents.get(uri=uris)
+    resp = client.rest.documents.get(uris)
     parsed_resp_list = MLResponseParser.parse_with_headers(resp, output_type=str)
 
     assert isinstance(parsed_resp_list, list)
@@ -966,7 +966,7 @@ def test_parse_with_headers_bytes_multipart_mixed_response(client):
         "/some/dir/doc4.zip",
     ]
 
-    resp = client.rest.documents.get(uri=uris)
+    resp = client.rest.documents.get(uris)
     parsed_resp_list = MLResponseParser.parse_with_headers(resp, output_type=bytes)
 
     assert isinstance(parsed_resp_list, list)

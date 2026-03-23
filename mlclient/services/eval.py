@@ -244,7 +244,7 @@ class EvalService:
             **kwargs,
         )
 
-    def eval(
+    def execute(
         self,
         *,
         file: str | None = None,
@@ -255,21 +255,11 @@ class EvalService:
         txid: str | None = None,
         output_type: type | None = None,
         **kwargs,
-    ) -> (
-        bytes
-        | str
-        | int
-        | float
-        | bool
-        | dict
-        | ElemTree.ElementTree
-        | ElemTree.Element
-        | list
     ):
-        """Evaluate code in a MarkLogic server and get results.
+        """Evaluate code in a MarkLogic server (general-purpose).
 
-        This is the general-purpose method. For better IDE hints, prefer
-        xquery(), javascript(), or file().
+        Dynamically resolves the code type from the provided parameters.
+        For explicit, typed calls prefer xquery(), javascript(), or file().
 
         Parameters
         ----------

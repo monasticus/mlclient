@@ -23,49 +23,48 @@ YAML file:
    .. literalinclude:: setup/mlclient-local.yaml
       :language: YAML
 
-MLConfiguration class
----------------------
-Having the configuration file, you can instantiate ``MLConfiguration`` class using your environment::
+MLProfile class
+---------------
+Having the configuration file, you can instantiate ``MLProfile`` class using your profile::
 
-   >>> from mlclient import MLConfiguration
-   >>> ml_config = MLConfiguration.from_environment("local")
-   >>> ml_config
-   MLConfiguration(app_name='migration-app', protocol='http', host='localhost', username='admin', password='admin', app_servers=[MLAppServerConfiguration(identifier='manage', port=8002, auth=<AuthMethod.BASIC: 'basic'>), MLAppServerConfiguration(identifier='content', port=8100, auth=<AuthMethod.BASIC: 'basic'>), MLAppServerConfiguration(identifier='modules', port=8101, auth=<AuthMethod.BASIC: 'basic'>), MLAppServerConfiguration(identifier='schemas', port=8102, auth=<AuthMethod.BASIC: 'basic'>), MLAppServerConfiguration(identifier='test', port=8103, auth=<AuthMethod.BASIC: 'basic'>)])
+   >>> from mlclient import MLProfile
+   >>> profile = MLProfile.load("local")
+   >>> profile
+   MLProfile(app_name='migration-app', protocol='http', host='localhost', username='admin', password='admin', app_servers=[MLServerConfig(identifier='manage', port=8002, auth=<AuthMethod.BASIC: 'basic'>), MLServerConfig(identifier='content', port=8100, auth=<AuthMethod.BASIC: 'basic'>), MLServerConfig(identifier='modules', port=8101, auth=<AuthMethod.BASIC: 'basic'>), MLServerConfig(identifier='schemas', port=8102, auth=<AuthMethod.BASIC: 'basic'>), MLServerConfig(identifier='test', port=8103, auth=<AuthMethod.BASIC: 'basic'>)])
 
 This code will work in every subdirectory of the ``migration-app`` project as it looks for ``.mlclient`` recursively.
 
-``MLConfiguration`` class allows you to get a specific app service config::
+``MLProfile`` class allows you to get a specific app service config::
 
-   >>> from mlclient import MLClient, MLConfiguration
-   >>> ml_config = MLConfiguration.from_environment("local")
-   >>> app_config = ml_config.provide_config("content")
+   >>> from mlclient import MLClient, MLProfile
+   >>> profile = MLProfile.load("local")
+   >>> app_config = profile.provide_config("content")
    >>> with MLClient(**app_config) as ml:
    ...     result = ml.eval.xquery("xdmp:database() => xdmp:database-name()")
    ...
 
 
 .. note::
-   If you would like to use MLConfiguration class without setting up an environment,
-   you can use ``MLConfiguration.from_file()`` method::
+   If you would like to use MLProfile class without setting up a profile,
+   you can use ``MLProfile.load_file()`` method::
 
-       >>> from mlclient import MLConfiguration
-       >>> ml_config = MLConfiguration.from_file("mlclient.yaml")
-       >>> ml_config
-       MLConfiguration(app_name='migration-app', protocol='http', host='localhost', username='admin', password='admin', app_servers=[MLAppServerConfiguration(identifier='manage', port=8002, auth=<AuthMethod.BASIC: 'basic'>), MLAppServerConfiguration(identifier='content', port=8100, auth=<AuthMethod.BASIC: 'basic'>), MLAppServerConfiguration(identifier='modules', port=8101, auth=<AuthMethod.BASIC: 'basic'>), MLAppServerConfiguration(identifier='schemas', port=8102, auth=<AuthMethod.BASIC: 'basic'>), MLAppServerConfiguration(identifier='test', port=8103, auth=<AuthMethod.BASIC: 'basic'>)])
+       >>> from mlclient import MLProfile
+       >>> profile = MLProfile.load_file("mlclient.yaml")
+       >>> profile
+       MLProfile(app_name='migration-app', protocol='http', host='localhost', username='admin', password='admin', app_servers=[MLServerConfig(identifier='manage', port=8002, auth=<AuthMethod.BASIC: 'basic'>), MLServerConfig(identifier='content', port=8100, auth=<AuthMethod.BASIC: 'basic'>), MLServerConfig(identifier='modules', port=8101, auth=<AuthMethod.BASIC: 'basic'>), MLServerConfig(identifier='schemas', port=8102, auth=<AuthMethod.BASIC: 'basic'>), MLServerConfig(identifier='test', port=8103, auth=<AuthMethod.BASIC: 'basic'>)])
 
 
-MLEnvironment class
--------------------
+MLClientManager class
+---------------------
 
-To make it easier, ``mlclient`` lib provides you a ``MLEnvironment`` class with the highest-level API.
+To make it easier, ``mlclient`` lib provides you a ``MLClientManager`` class with the highest-level API.
 The same logic as in the above example we will achieve in fewer steps::
 
-   >>> from mlclient import MLEnvironment
-   >>> ml_env = MLEnvironment("local")
-   >>> with ml_env.get_client("content") as ml:
-   ...     resp = ml.rest.eval.post(xquery="xdmp:database() => xdmp:database-name()")
-   ...     parsed_resp = ml.parser.parse(resp)
+   >>> from mlclient import MLClientManager
+   >>> mgr = MLClientManager("local")
+   >>> with mgr.get_client("content") as ml:
+   ...     result = ml.eval.xquery("xdmp:database() => xdmp:database-name()")
    ...
 
 .. note::
-   ``MLEnvironment`` is accessible only using ML Client Environments.
+   ``MLClientManager`` is accessible only using ML Client Profiles.

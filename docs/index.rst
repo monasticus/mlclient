@@ -74,7 +74,7 @@ Mid-level REST API (/v1/*)::
 
 Response parsing::
 
-   >>> from mlclient import MLClient, MLResponseParser
+   >>> from mlclient import MLClient
    >>> config = {
    ...     "host": "localhost",
    ...     "port": 8002,
@@ -85,7 +85,7 @@ Response parsing::
    ...     resp = ml.rest.eval.post(
    ...         xquery="xdmp:database() => xdmp:database-name()",
    ...     )
-   ...     parsed = MLResponseParser.parse(resp)
+   ...     parsed = ml.parser.parse(resp)
    ...     print(parsed)
    ...
    App-Services

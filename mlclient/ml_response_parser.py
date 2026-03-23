@@ -33,7 +33,7 @@ class MLResponseParser:
 
     Examples
     --------
-    >>> from mlclient import MLClient
+    >>> from mlclient import MLClient, MLResponseParser
     >>> config = {
     ...     "host": "localhost",
     ...     "port": 8002,

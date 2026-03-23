@@ -7,7 +7,7 @@ import pytest
 import respx
 from cleo.testers.command_tester import CommandTester
 
-from mlclient import MLConfiguration
+from mlclient import MLProfile
 from mlclient.cli import MLCLIentApplication
 from mlclient.exceptions import InvalidLogTypeError
 from tests.utils import resources as resources_utils
@@ -17,7 +17,7 @@ ENDPOINT = "/manage/v2/logs"
 
 
 @pytest.fixture(autouse=True)
-def ml_config_single_node() -> MLConfiguration:
+def ml_config_single_node() -> MLProfile:
     config = {
         "app-name": "my-marklogic-app",
         "host": "localhost",
@@ -38,11 +38,11 @@ def ml_config_single_node() -> MLConfiguration:
             },
         ],
     }
-    return MLConfiguration(**config)
+    return MLProfile(**config)
 
 
 @pytest.fixture(autouse=True)
-def ml_config_cluster() -> MLConfiguration:
+def ml_config_cluster() -> MLProfile:
     config = {
         "app-name": "my-marklogic-app",
         "host": "ml_cluster_node1",
@@ -63,7 +63,7 @@ def ml_config_cluster() -> MLConfiguration:
             },
         ],
     }
-    return MLConfiguration(**config)
+    return MLProfile(**config)
 
 
 @pytest.fixture(autouse=True)
@@ -77,17 +77,17 @@ def logs_list_response() -> dict:
 @pytest.fixture(autouse=True)
 def _setup(mocker, ml_config_single_node, ml_config_cluster):
     # Setup
-    original_method = MLConfiguration.from_environment
+    original_method = MLProfile.load
 
-    def config_from_environment(environment_name: str):
-        if environment_name == "test":
+    def load_profile(profile_name: str):
+        if profile_name == "test":
             return ml_config_single_node
-        if environment_name == "test-cluster":
+        if profile_name == "test-cluster":
             return ml_config_cluster
-        return original_method(environment_name)
+        return original_method(profile_name)
 
-    target = "mlclient.ml_config.MLConfiguration.from_environment"
-    mocker.patch(target, side_effect=config_from_environment)
+    target = "mlclient.ml_profile.MLProfile.load"
+    mocker.patch(target, side_effect=load_profile)
 
 
 @respx.mock

@@ -112,9 +112,10 @@ class Document(metaclass=ABCMeta):
     @classmethod
     def create(
         cls,
-        content: ElemTree.Element | dict | str | bytes | None = None,
-        doc_type: DocumentType | str | None = None,
         uri: str | None = None,
+        content: ElemTree.Element | dict | str | bytes | None = None,
+        *,
+        doc_type: DocumentType | str | None = None,
         metadata: Metadata | None = None,
         temporal_collection: str | None = None,
     ) -> Document:
@@ -122,12 +123,12 @@ class Document(metaclass=ABCMeta):
 
         Parameters
         ----------
+        uri : str | None, default None
+            A document URI
         content : ElemTree.Element | dict | str | bytes | None, default None
             A document content
         doc_type : DocumentType | str | None, default None
             A document type
-        uri : str | None, default None
-            A document URI
         metadata : Metadata | None, default None
             A document metadata
         temporal_collection : str | None, default None
@@ -155,9 +156,10 @@ class Document(metaclass=ABCMeta):
     @classmethod
     def create_raw(
         cls,
+        uri: str,
         content: bytes | str,
+        *,
         doc_type: DocumentType | str,
-        uri: str | None = None,
         metadata: bytes | str | None = None,
         temporal_collection: str | None = None,
     ) -> Document:
@@ -165,12 +167,12 @@ class Document(metaclass=ABCMeta):
 
         Parameters
         ----------
+        uri : str
+            A document URI
         content : bytes | str
             A document content
         doc_type : DocumentType | str
             A document type
-        uri : str | None, default None
-            A document URI
         metadata : bytes | str | None, default None
             A document metadata
         temporal_collection : str | None, default None

@@ -178,8 +178,8 @@ class ForestsApi:
     def delete(
         self,
         forest: str,
-        level: str,
         *,
+        level: str,
         replicas: str | None = None,
     ) -> Response:
         """Send a DELETE request to the /manage/v2/forests/{id|name} endpoint.

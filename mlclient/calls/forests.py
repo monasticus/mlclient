@@ -1,4 +1,4 @@
-"""The ML Forest Resource Calls module.
+"""The ML Forest Api Calls module.
 
 This module provides call classes for forest-related REST resources.
 
@@ -35,7 +35,7 @@ class ForestsGetCall(ApiCall):
     """A GET request to get forests summary.
 
     A ApiCall implementation representing a single GET request
-    to the /manage/v2/forests REST Resource.
+    to the /manage/v2/forests endpoint.
 
     This resource address returns data about the forests in the cluster.
     The data returned depends on the view.
@@ -149,7 +149,7 @@ class ForestsPostCall(ApiCall):
     """A POST request to create a new forest.
 
     A ApiCall implementation representing a single POST request
-    to the /manage/v2/forests REST Resource.
+    to the /manage/v2/forests endpoint.
 
     Create a new forest, including replicas if specified.
     If a database id or database is included, attach the new forest(s) to the database.
@@ -213,7 +213,7 @@ class ForestsPutCall(ApiCall):
     """A PUT request to perform an operation on forests.
 
     A ApiCall implementation representing a single PUT request
-    to the /manage/v2/forests REST Resource.
+    to the /manage/v2/forests endpoint.
 
     Perform an operation on one or more forests, such as combining multiple forests
     into a single new one, or migrating the data in the forests to a new data directory.
@@ -268,7 +268,7 @@ class ForestGetCall(ApiCall):
     """A GET request to get a forest details.
 
     A ApiCall implementation representing a single GET request
-    to the /manage/v2/forests/{id|name} REST Resource.
+    to the /manage/v2/forests/{id|name} endpoint.
 
     Retrieve information about a forest. The forest can be identified either by id
     or name.
@@ -359,7 +359,7 @@ class ForestPostCall(ApiCall):
     """A POST request to change a forest's state.
 
     A ApiCall implementation representing a single POST request
-    to the /manage/v2/forests/{id|name} REST Resource.
+    to the /manage/v2/forests/{id|name} endpoint.
 
     Initiate a state change on a forest, such as a merge, restart, or attach.
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/POST/manage/v2/forests/[id-or-name]
@@ -436,7 +436,7 @@ class ForestDeleteCall(ApiCall):
     """A DELETE request to remove a forest.
 
     A ApiCall implementation representing a single DELETE request
-    to the /manage/v2/forests/{id|name} REST Resource.
+    to the /manage/v2/forests/{id|name} endpoint.
 
     Delete a forest.
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/DELETE/manage/v2/forests/[id-or-name]
@@ -513,7 +513,7 @@ class ForestPropertiesGetCall(ApiCall):
     """A GET request to get forest properties.
 
     A ApiCall implementation representing a single GET request
-    to the /manage/v2/forests/{id|name}/properties REST Resource.
+    to the /manage/v2/forests/{id|name}/properties endpoint.
 
     Retrieve the current state of modifiable properties of the forest identified
     by {id|name}.
@@ -582,7 +582,7 @@ class ForestPropertiesPutCall(ApiCall):
     """A PUT request to modify forest properties.
 
     A ApiCall implementation representing a single PUT request
-    to the /manage/v2/forests/{id|name}/properties REST Resource.
+    to the /manage/v2/forests/{id|name}/properties endpoint.
 
     Modify the configuration of the forest identified by {id|name}.
     Documentation of the REST Resource API:

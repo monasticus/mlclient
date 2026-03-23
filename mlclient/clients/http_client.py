@@ -83,6 +83,25 @@ class HttpClient:
         password: str = "admin",
         retry: Retry | None = None,
     ):
+        """Initialize HttpClient instance.
+
+        Parameters
+        ----------
+        protocol : str, default "http"
+            A protocol used for HTTP requests (http / https)
+        host : str, default "localhost"
+            A host name
+        port : int, default 8002
+            An App Service port
+        auth_method : str, default "basic"
+            An authorization method (basic / digest)
+        username : str, default "admin"
+            A username
+        password : str, default "admin"
+            A password
+        retry : Retry | None, default Retry(total=5, backoff_factor=0.5)
+            A retry strategy
+        """
         self.protocol: str = protocol
         self.host: str = host
         self.port: int = port
@@ -126,85 +145,154 @@ class HttpClient:
             self._client = None
 
     def is_connected(self) -> bool:
-        """Return a connection status."""
+        """Return a connection status.
+
+        Returns
+        -------
+        bool
+            True if the client has started a connection; otherwise False
+        """
         return self._client is not None
 
     def get(
         self,
         endpoint: str,
+        *,
         params: dict | None = None,
         headers: dict | None = None,
     ) -> Response:
-        """Send a GET request."""
-        return self.request("GET", endpoint, params, headers)
+        """Send a GET request.
+
+        Parameters
+        ----------
+        endpoint : str
+            A REST endpoint to call
+        params : dict | None
+            Request parameters
+        headers : dict | None
+            Request headers
+
+        Returns
+        -------
+        Response
+            An HTTP response
+        """
+        return self.request("GET", endpoint, params=params, headers=headers)
 
     def post(
         self,
         endpoint: str,
+        body: str | dict | None = None,
+        *,
         params: dict | None = None,
         headers: dict | None = None,
-        body: str | dict | None = None,
     ) -> Response:
-        """Send a POST request."""
-        return self.request("POST", endpoint, params, headers, body)
+        """Send a POST request.
+
+        Parameters
+        ----------
+        endpoint : str
+            A REST endpoint to call
+        body : str | dict | None
+            A request body
+        params : dict | None
+            Request parameters
+        headers : dict | None
+            Request headers
+
+        Returns
+        -------
+        Response
+            An HTTP response
+        """
+        return self.request("POST", endpoint, body, params=params, headers=headers)
 
     def put(
         self,
         endpoint: str,
+        body: str | dict | None = None,
+        *,
         params: dict | None = None,
         headers: dict | None = None,
-        body: str | dict | None = None,
     ) -> Response:
-        """Send a PUT request."""
-        return self.request("PUT", endpoint, params, headers, body)
+        """Send a PUT request.
+
+        Parameters
+        ----------
+        endpoint : str
+            A REST endpoint to call
+        body : str | dict | None
+            A request body
+        params : dict | None
+            Request parameters
+        headers : dict | None
+            Request headers
+
+        Returns
+        -------
+        Response
+            An HTTP response
+        """
+        return self.request("PUT", endpoint, body, params=params, headers=headers)
 
     def delete(
         self,
         endpoint: str,
+        *,
         params: dict | None = None,
         headers: dict | None = None,
     ) -> Response:
-        """Send a DELETE request."""
-        return self.request("DELETE", endpoint, params, headers)
+        """Send a DELETE request.
+
+        Parameters
+        ----------
+        endpoint : str
+            A REST endpoint to call
+        params : dict | None
+            Request parameters
+        headers : dict | None
+            Request headers
+
+        Returns
+        -------
+        Response
+            An HTTP response
+        """
+        return self.request("DELETE", endpoint, params=params, headers=headers)
 
     def request(
         self,
         method: str,
         endpoint: str,
+        body: str | dict | None = None,
+        *,
         params: dict | None = None,
         headers: dict | None = None,
-        body: str | dict | None = None,
     ) -> Response:
-        """Send an HTTP request."""
+        """Send an HTTP request.
+
+        Parameters
+        ----------
+        method : str
+            An HTTP request method
+        endpoint : str
+            A REST endpoint to call
+        body : str | dict | None
+            A request body
+        params : dict | None
+            Request parameters
+        headers : dict | None
+            Request headers
+
+        Returns
+        -------
+        Response
+            An HTTP response
+        """
         request = self._prepare_request(params, headers, body)
         resp = self._send_request(method, endpoint, request)
         self._log_response(method, endpoint, resp)
         return resp
-
-    def wait_for_restart_completion(
-        self,
-        response: Response | None = None,
-        timeout: float = 30.0,
-        poll_interval: float = 0.25,
-        retry: Retry | None = None,
-    ) -> None:
-        """Wait for MarkLogic readiness after a restart-signaling response."""
-        admin_retry = retry or RESTART_RETRY_STRATEGY
-        self._get_restart_waiter().wait_for_restart_completion(
-            response,
-            timeout,
-            poll_interval,
-            admin_retry,
-        )
-
-    def _get_restart_waiter(self) -> RestartWaiter:
-        """Return a helper handling restart payload parsing and readiness waits."""
-        return RestartWaiter(
-            protocol=self.protocol,
-            host=self.host,
-            auth=self._auth,
-            default_retry=self._retry,
-        )
 
     def _prepare_request(
         self,
@@ -248,22 +336,20 @@ class HttpClient:
 
         url = self.base_url + endpoint
         if self.is_connected():
-            resp = self._client.request(method, url, **request)
-        else:
-            logger.warning(
-                "HttpClient is not connected -- "
-                "A request will be sent in an ad-hoc initialized session (%s %s)",
-                method.upper(),
-                endpoint,
-            )
-            transport = httpx.HTTPTransport(verify=_SHARED_SSL_CONTEXT)
-            with Client(
-                transport=RetryTransport(transport=transport, retry=self._retry),
-                follow_redirects=True,
-            ) as client:
-                resp = client.request(method, url, **request)
+            return self._client.request(method, url, **request)
 
-        return resp
+        logger.warning(
+            "HttpClient is not connected -- "
+            "A request will be sent in an ad-hoc initialized session (%s %s)",
+            method.upper(),
+            endpoint,
+        )
+        transport = httpx.HTTPTransport(verify=_SHARED_SSL_CONTEXT)
+        with Client(
+            transport=RetryTransport(transport=transport, retry=self._retry),
+            follow_redirects=True,
+        ) as client:
+            return client.request(method, url, **request)
 
     @staticmethod
     def _log_response(
@@ -273,6 +359,7 @@ class HttpClient:
     ):
         """Log response details and restart warning, if applicable."""
         logger.debug("Response retrieved")
+        logger.fine(HttpClient._format_http_response(response))
 
         if RestartWaiter.is_restart_response(response):
             logger.warning(

@@ -16,7 +16,7 @@ import logging
 from functools import cached_property
 from types import TracebackType
 
-from httpx import Response
+from httpx import BasicAuth, DigestAuth, Response
 from httpx_retries import Retry
 
 from mlclient.api.admin_api import AdminApi
@@ -28,7 +28,14 @@ from mlclient.services.eval import EvalService
 from mlclient.services.logs import LogsService
 
 from .api_client import ApiClient
-from .http_client import MARKLOGIC_ADMIN_API_PORT, MARKLOGIC_MANAGE_API_PORT, HttpClient
+from .http_client import (
+    MARKLOGIC_ADMIN_API_PORT,
+    MARKLOGIC_MANAGE_API_PORT,
+    DEFAULT_RETRY_STRATEGY,
+    RESTART_RETRY_STRATEGY,
+    HttpClient,
+)
+from .restart_waiter import RestartWaiter
 
 logger = logging.getLogger(__name__)
 
@@ -78,8 +85,8 @@ class MLClient:
     >>> with MLClient(**config) as ml:
     ...     resp = ml.http.post(
     ...         "/v1/eval",
-    ...         headers={"Content-Type": "..."},
-    ...         body="xquery=xdmp:database()",
+    ...         "xquery=xdmp:database()",
+    ...         headers={"Content-Type": "application/x-www-form-urlencoded"},
     ...     )
     ...     resp.status_code
     200
@@ -109,12 +116,12 @@ class MLClient:
 
     Response parsing:
 
-    >>> from mlclient import MLClient, MLResponseParser
+    >>> from mlclient import MLClient
     >>> with MLClient(**config) as ml:
     ...     resp = ml.rest.eval.post(
     ...         xquery="xdmp:database() => xdmp:database-name()",
     ...     )
-    ...     parsed = MLResponseParser.parse(resp)
+    ...     parsed = ml.parser.parse(resp)
     ...     print(parsed)
     App-Services
 
@@ -138,6 +145,25 @@ class MLClient:
         password: str = "admin",
         retry: Retry | None = None,
     ):
+        """Initialize MLClient instance.
+
+        Parameters
+        ----------
+        protocol : str, default "http"
+            A protocol used for HTTP requests (http / https)
+        host : str, default "localhost"
+            A host name
+        port : int, default 8002
+            An App Service port
+        auth_method : str, default "basic"
+            An authorization method (basic / digest)
+        username : str, default "admin"
+            A username
+        password : str, default "admin"
+            A password
+        retry : Retry | None, default Retry(total=5, backoff_factor=0.5)
+            A retry strategy
+        """
         self._http = HttpClient(
             protocol=protocol,
             host=host,
@@ -259,12 +285,19 @@ class MLClient:
             self._admin_http.disconnect()
 
     def is_connected(self) -> bool:
-        """Return a connection status."""
+        """Return a connection status.
+
+        Returns
+        -------
+        bool
+            True if the client has started a connection; otherwise False
+        """
         return self._http.is_connected()
 
     def wait_for_restart(
         self,
         response: Response | None = None,
+        *,
         timeout: float = 30.0,
         poll_interval: float = 0.25,
         retry: Retry | None = None,
@@ -282,7 +315,23 @@ class MLClient:
         retry : Retry | None
             Retry strategy for readiness probes.
         """
-        self._http.wait_for_restart_completion(response, timeout, poll_interval, retry)
+        waiter = self._get_restart_waiter()
+        waiter.wait_for_restart_completion(
+            response,
+            timeout=timeout,
+            poll_interval=poll_interval,
+            retry=retry or RESTART_RETRY_STRATEGY,
+        )
+
+    def _get_restart_waiter(self) -> RestartWaiter:
+        auth_impl = BasicAuth if self._http.auth_method == "basic" else DigestAuth
+        auth = auth_impl(self._http.username, self._http.password)
+        return RestartWaiter(
+            protocol=self._http.protocol,
+            host=self._http.host,
+            auth=auth,
+            default_retry=DEFAULT_RETRY_STRATEGY,
+        )
 
     def _get_manage_client(self) -> ApiClient:
         """Return ApiClient for manage API (always port 8002).

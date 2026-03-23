@@ -46,10 +46,10 @@ READ
 
 .. code-block:: python
 
-    >>> from mlclient import MLEnvironment
+    >>> from mlclient import MLClientManager
 
-    >>> manager = MLEnvironment("local")
-    >>> with manager.get_client("app-services") as ml:
+    >>> mgr = MLClientManager("local")
+    >>> with mgr.get_client("app-services") as ml:
     ...    doc = ml.documents.read("/doc-1.xml")
 
     >>> doc
@@ -75,10 +75,10 @@ READ
 
 .. code-block:: python
 
-    >>> from mlclient import MLEnvironment
+    >>> from mlclient import MLClientManager
 
-    >>> manager = MLEnvironment("local")
-    >>> with manager.get_client("app-services") as ml:
+    >>> mgr = MLClientManager("local")
+    >>> with mgr.get_client("app-services") as ml:
     ...     doc = ml.documents.read("/doc-1.xml", output_type=str)
 
     >>> doc
@@ -98,10 +98,10 @@ READ
 
 .. code-block:: python
 
-    >>> from mlclient import MLEnvironment
+    >>> from mlclient import MLClientManager
 
-    >>> manager = MLEnvironment("local")
-    >>> with manager.get_client("app-services") as ml:
+    >>> mgr = MLClientManager("local")
+    >>> with mgr.get_client("app-services") as ml:
     ...     doc = ml.documents.read("/doc-1.xml", output_type=bytes)
 
     >>> doc
@@ -121,10 +121,10 @@ READ
 
 .. code-block:: python
 
-    >>> from mlclient import MLEnvironment
+    >>> from mlclient import MLClientManager
 
-    >>> manager = MLEnvironment("local")
-    >>> with manager.get_client("app-services") as ml:
+    >>> mgr = MLClientManager("local")
+    >>> with mgr.get_client("app-services") as ml:
     ...     doc = ml.documents.read("/doc-1.xml", category=["content", "metadata"])
 
     >>> doc.metadata
@@ -149,7 +149,7 @@ READ
 
 .. code-block:: python
 
-    >>> from mlclient import MLEnvironment
+    >>> from mlclient import MLClientManager
 
     >>> uris = [
     ...     "/doc-1.xml",
@@ -157,8 +157,8 @@ READ
     ...     "/doc-3.xqy",
     ...     "/doc-4.zip",
     ... ]
-    >>> manager = MLEnvironment("local")
-    >>> with manager.get_client("app-services") as ml:
+    >>> mgr = MLClientManager("local")
+    >>> with mgr.get_client("app-services") as ml:
     ...     docs = ml.documents.read(uris)
 
     >>> len(docs)
@@ -184,35 +184,33 @@ READ
 
 .. code-block:: python
 
-    >>> from mlclient import MLEnvironment
+    >>> from mlclient import MLClientManager
 
-    >>> manager = MLEnvironment("local")
-    >>> with manager.get_client("app-services") as ml:
+    >>> mgr = MLClientManager("local")
+    >>> with mgr.get_client("app-services") as ml:
     ...     doc = ml.documents.read("/doc-1.xml", database="App-Services")
 
     >>> doc
     <mlclient.structures.documents.XMLDocument object at 0x7f92009b4700>
 
 
-CREATE / UPDATE
-"""""""""""""""
+WRITE (create / update)
+"""""""""""""""""""""""
 
 **Put a document**
 
 .. code-block:: python
 
-    >>> from mlclient import MLEnvironment
+    >>> from mlclient import MLClientManager
     >>> from mlclient.structures import Document
 
-    >>> uri = "/doc-2.json"
-    >>> content = {"root": {"child": "data"}}
-    >>> doc = Document.create(uri=uri, content=content)
+    >>> doc = Document.create("/doc-2.json", {"root": {"child": "data"}})
     >>> doc
     <mlclient.structures.documents.JSONDocument object at 0x7f9200920f70>
 
-    >>> manager = MLEnvironment("local")
-    >>> with manager.get_client("app-services") as ml:
-    ...     resp = ml.documents.create(doc)
+    >>> mgr = MLClientManager("local")
+    >>> with mgr.get_client("app-services") as ml:
+    ...     resp = ml.documents.write(doc)
     >>> resp
     {'documents': [{'uri': '/doc-2.json', 'mime-type': 'application/json', 'category': ['metadata', 'content']}]}
 
@@ -221,17 +219,19 @@ CREATE / UPDATE
 
 .. code-block:: python
 
-    >>> from mlclient import MLEnvironment
+    >>> from mlclient import MLClientManager
     >>> from mlclient.structures import Document, Metadata
 
-    >>> uri = "/doc-2.json"
-    >>> content = {"root": {"child": "data"}}
     >>> metadata = Metadata(collections=["some-collection"])
-    >>> doc = Document.create(uri=uri, content=content, metadata=metadata)
+    >>> doc = Document.create(
+    ...     "/doc-2.json",
+    ...     {"root": {"child": "data"}},
+    ...     metadata=metadata,
+    ... )
 
-    >>> manager = MLEnvironment("local")
-    >>> with manager.get_client("app-services") as ml:
-    ...     resp = ml.documents.create(doc)
+    >>> mgr = MLClientManager("local")
+    >>> with mgr.get_client("app-services") as ml:
+    ...     resp = ml.documents.write(doc)
     >>> resp
     {'documents': [{'uri': '/doc-2.json', 'mime-type': 'application/json', 'category': ['metadata', 'content']}]}
 
@@ -240,22 +240,20 @@ CREATE / UPDATE
 
 .. code-block:: python
 
-    >>> from mlclient import MLEnvironment
+    >>> from mlclient import MLClientManager
     >>> from mlclient.structures import Document, DocumentType
 
-    >>> uri = "/doc-1.xml"
-    >>> content = b"<root><child>data</child></root>"
     >>> doc = Document.create_raw(
-    ...     uri=uri,
-    ...     content=content,
+    ...     "/doc-1.xml",
+    ...     b"<root><child>data</child></root>",
     ...     doc_type=DocumentType.XML,
     ... )
     >>> doc
     <mlclient.structures.documents.RawDocument object at 0x7f9200929430>
 
-    >>> manager = MLEnvironment("local")
-    >>> with manager.get_client("app-services") as ml:
-    ...     resp = ml.documents.create(doc)
+    >>> mgr = MLClientManager("local")
+    >>> with mgr.get_client("app-services") as ml:
+    ...     resp = ml.documents.write(doc)
     >>> resp
     {'documents': [{'uri': '/doc-1.xml', 'mime-type': 'application/xml', 'category': ['metadata', 'content']}]}
 
@@ -264,22 +262,19 @@ CREATE / UPDATE
 
 .. code-block:: python
 
-    >>> from mlclient import MLEnvironment
+    >>> from mlclient import MLClientManager
     >>> from mlclient.structures import Document, DocumentType
 
-    >>> uri = "/doc-1.xml"
-    >>> content = b"<root><child>data</child></root>"
-    >>> metadata = b'{"collections": ["some-collection"]}'
     >>> doc = Document.create_raw(
-    ...     uri=uri,
-    ...     content=content,
+    ...     "/doc-1.xml",
+    ...     b"<root><child>data</child></root>",
     ...     doc_type=DocumentType.XML,
-    ...     metadata=metadata,
+    ...     metadata=b'{"collections": ["some-collection"]}',
     ... )
 
-    >>> manager = MLEnvironment("local")
-    >>> with manager.get_client("app-services") as ml:
-    ...     resp = ml.documents.create(doc)
+    >>> mgr = MLClientManager("local")
+    >>> with mgr.get_client("app-services") as ml:
+    ...     resp = ml.documents.write(doc)
     >>> resp
     {'documents': [{'uri': '/doc-1.xml', 'mime-type': 'application/xml', 'category': ['metadata', 'content']}]}
 
@@ -287,18 +282,16 @@ CREATE / UPDATE
 
 .. code-block:: python
 
-    >>> from mlclient import MLEnvironment
+    >>> from mlclient import MLClientManager
     >>> from mlclient.structures import Document
 
-    >>> uri = "/doc-2.json"
-    >>> content = {"root": {"child": "data"}}
-    >>> doc = Document.create(uri=uri, content=content)
+    >>> doc = Document.create("/doc-2.json", {"root": {"child": "data"}})
     >>> doc
     <mlclient.structures.documents.JSONDocument object at 0x7f9200920f70>
 
-    >>> manager = MLEnvironment("local")
-    >>> with manager.get_client("app-services") as ml:
-    ...     resp = ml.documents.create(doc, database="Documents")
+    >>> mgr = MLClientManager("local")
+    >>> with mgr.get_client("app-services") as ml:
+    ...     resp = ml.documents.write(doc, database="Documents")
     >>> resp
     {'documents': [{'uri': '/doc-2.json', 'mime-type': 'application/json', 'category': ['metadata', 'content']}]}
 
@@ -306,18 +299,17 @@ CREATE / UPDATE
 
 .. code-block:: python
 
-    >>> from mlclient import MLEnvironment
+    >>> from mlclient import MLClientManager
     >>> from mlclient.structures import Metadata, MetadataDocument
 
-    >>> uri = "/doc-2.json"
     >>> metadata = Metadata(collections=["some-collection"])
-    >>> doc = MetadataDocument(uri, metadata)
+    >>> doc = MetadataDocument("/doc-2.json", metadata)
     >>> doc
     <mlclient.structures.documents.MetadataDocument object at 0x7f9200929e20>
 
-    >>> manager = MLEnvironment("local")
-    >>> with manager.get_client("app-services") as ml:
-    ...     resp = ml.documents.create(doc)
+    >>> mgr = MLClientManager("local")
+    >>> with mgr.get_client("app-services") as ml:
+    ...     resp = ml.documents.write(doc)
     >>> resp
     {'documents': [{'uri': '/doc-2.json', 'mime-type': '', 'category': ['metadata']}]}
 
@@ -326,25 +318,19 @@ CREATE / UPDATE
 
 .. code-block:: python
 
-    >>> from mlclient import MLEnvironment
+    >>> from mlclient import MLClientManager
     >>> from mlclient.structures import Document, DocumentType
 
-    >>> uri_1 = "/doc-1.xml"
-    >>> content_1 = b"<root><child>data</child></root>"
     >>> doc_1 = Document.create_raw(
-    ...     uri=uri_1,
-    ...     content=content_1,
+    ...     "/doc-1.xml",
+    ...     b"<root><child>data</child></root>",
     ...     doc_type=DocumentType.XML,
     ... )
+    >>> doc_2 = Document.create("/doc-2.json", {"root": {"child": "data"}})
 
-    >>> uri_2 = "/doc-2.json"
-    >>> content_2 = {"root": {"child": "data"}}
-    >>> doc_2 = Document.create(uri=uri_2, content=content_2)
-
-
-    >>> manager = MLEnvironment("local")
-    >>> with manager.get_client("app-services") as ml:
-    ...     resp = ml.documents.create([doc_1, doc_2])
+    >>> mgr = MLClientManager("local")
+    >>> with mgr.get_client("app-services") as ml:
+    ...     resp = ml.documents.write([doc_1, doc_2])
     >>> resp
     {'documents': [{'uri': '/doc-1.xml', 'mime-type': 'application/xml', 'category': ['metadata', 'content']}, {'uri': '/doc-2.json', 'mime-type': 'application/json', 'category': ['metadata', 'content']}]}
 
@@ -353,27 +339,21 @@ CREATE / UPDATE
 
 .. code-block:: python
 
-    >>> from mlclient import MLEnvironment
+    >>> from mlclient import MLClientManager
     >>> from mlclient.structures import Document, DocumentType, Metadata
 
     >>> default_metadata = Metadata(collections=["some-collection"])
-
-    >>> uri_1 = "/doc-1.xml"
-    >>> content_1 = b"<root><child>data</child></root>"
     >>> doc_1 = Document.create_raw(
-    ...     uri=uri_1,
-    ...     content=content_1,
+    ...     "/doc-1.xml",
+    ...     b"<root><child>data</child></root>",
     ...     doc_type=DocumentType.XML,
     ... )
-
-    >>> uri_2 = "/doc-2.json"
-    >>> content_2 = {"root": {"child": "data"}}
-    >>> doc_2 = Document.create(uri=uri_2, content=content_2)
+    >>> doc_2 = Document.create("/doc-2.json", {"root": {"child": "data"}})
 
 
-    >>> manager = MLEnvironment("local")
-    >>> with manager.get_client("app-services") as ml:
-    ...     resp = ml.documents.create([default_metadata, doc_1, doc_2])
+    >>> mgr = MLClientManager("local")
+    >>> with mgr.get_client("app-services") as ml:
+    ...     resp = ml.documents.write([default_metadata, doc_1, doc_2])
     >>> resp
     {'documents': [{'uri': '/doc-1.xml', 'mime-type': 'application/xml', 'category': ['metadata', 'content']}, {'uri': '/doc-2.json', 'mime-type': 'application/json', 'category': ['metadata', 'content']}]}
 
@@ -385,10 +365,10 @@ DELETE
 
 .. code-block:: python
 
-    >>> from mlclient import MLEnvironment
+    >>> from mlclient import MLClientManager
 
-    >>> manager = MLEnvironment("local")
-    >>> with manager.get_client("app-services") as ml:
+    >>> mgr = MLClientManager("local")
+    >>> with mgr.get_client("app-services") as ml:
     ...     ml.documents.delete("/doc-1.xml")
 
 
@@ -396,7 +376,7 @@ DELETE
 
 .. code-block:: python
 
-    >>> from mlclient import MLEnvironment
+    >>> from mlclient import MLClientManager
 
     >>> uris = [
     ...     "/doc-1.xml",
@@ -404,8 +384,8 @@ DELETE
     ...     "/doc-3.xqy",
     ...     "/doc-4.zip",
     ... ]
-    >>> manager = MLEnvironment("local")
-    >>> with manager.get_client("app-services") as ml:
+    >>> mgr = MLClientManager("local")
+    >>> with mgr.get_client("app-services") as ml:
     ...     ml.documents.delete(uris)
 
 
@@ -413,10 +393,10 @@ DELETE
 
 .. code-block:: python
 
-    >>> from mlclient import MLEnvironment
+    >>> from mlclient import MLClientManager
 
-    >>> manager = MLEnvironment("local")
-    >>> with manager.get_client("app-services") as ml:
+    >>> mgr = MLClientManager("local")
+    >>> with mgr.get_client("app-services") as ml:
     ...     ml.documents.delete("/doc-1.xml", database="Documents")
 
 
@@ -424,10 +404,10 @@ DELETE
 
 .. code-block:: python
 
-    >>> from mlclient import MLEnvironment
+    >>> from mlclient import MLClientManager
 
-    >>> manager = MLEnvironment("local")
-    >>> with manager.get_client("app-services") as ml:
+    >>> mgr = MLClientManager("local")
+    >>> with mgr.get_client("app-services") as ml:
     ...     ml.documents.delete("/doc-1.xml", category=["properties", "collections"])
 
 
@@ -435,10 +415,10 @@ DELETE
 
 .. code-block:: python
 
-    >>> from mlclient import MLEnvironment
+    >>> from mlclient import MLClientManager
 
-    >>> manager = MLEnvironment("local")
-    >>> with manager.get_client("app-services") as ml:
+    >>> mgr = MLClientManager("local")
+    >>> with mgr.get_client("app-services") as ml:
     ...     ml.documents.delete("/doc-1.xml", temporal_collection="temporal-collection")
 
 
@@ -446,10 +426,10 @@ DELETE
 
 .. code-block:: python
 
-    >>> from mlclient import MLEnvironment
+    >>> from mlclient import MLClientManager
 
-    >>> manager = MLEnvironment("local")
-    >>> with manager.get_client("app-services") as ml:
+    >>> mgr = MLClientManager("local")
+    >>> with mgr.get_client("app-services") as ml:
     ...     ml.documents.delete(
     ...        "/doc-1.xml",
     ...        temporal_collection="temporal-collection",
@@ -464,10 +444,10 @@ EvalService
 
 .. code-block:: python
 
-    >>> from mlclient import MLEnvironment
+    >>> from mlclient import MLClientManager
 
-    >>> manager = MLEnvironment("local")
-    >>> with manager.get_client() as ml:
+    >>> mgr = MLClientManager("local")
+    >>> with mgr.get_client() as ml:
     ...     result = ml.eval.file("./xqy-code-to-eval.xqy")
     ...     result = ml.eval.file("./js-code-to-eval.js")
 
@@ -476,9 +456,9 @@ EvalService
 
 .. code-block:: python
 
-    >>> from mlclient import MLEnvironment
+    >>> from mlclient import MLClientManager
 
-    >>> with MLEnvironment("local").get_client() as ml:
+    >>> with MLClientManager("local").get_client() as ml:
     ...     result = ml.eval.xquery("fn:current-dateTime()")
     >>> result
     datetime.datetime(2024, 2, 22, 11, 38, 32, 709484, tzinfo=datetime.timezone.utc)
@@ -488,9 +468,9 @@ EvalService
 
 .. code-block:: python
 
-    >>> from mlclient import MLEnvironment
+    >>> from mlclient import MLClientManager
 
-    >>> with MLEnvironment("local").get_client() as ml:
+    >>> with MLClientManager("local").get_client() as ml:
     ...     result = ml.eval.javascript("fn.currentDateTime()")
     >>> result
     datetime.datetime(2024, 2, 22, 11, 39, 22, 264102, tzinfo=datetime.timezone.utc)
@@ -500,14 +480,14 @@ EvalService
 
 .. code-block:: python
 
-    >>> from mlclient import MLEnvironment
+    >>> from mlclient import MLClientManager
 
     >>> xq = '''
     ... declare variable $DAYS external;
     ...
     ... fn:current-dateTime() - xs:dayTimeDuration("P" || $DAYS || "D")'''
 
-    >>> with MLEnvironment("local").get_client() as ml:
+    >>> with MLClientManager("local").get_client() as ml:
     ...     result = ml.eval.xquery(
     ...         xq,
     ...         variables={"DAYS": 5},
@@ -518,14 +498,14 @@ EvalService
 
 .. code-block:: python
 
-    >>> from mlclient import MLEnvironment
+    >>> from mlclient import MLClientManager
 
     >>> xq = '''
     ... declare variable $DAYS external;
     ...
     ... fn:current-dateTime() - xs:dayTimeDuration("P" || $DAYS || "D")'''
 
-    >>> with MLEnvironment("local").get_client() as ml:
+    >>> with MLClientManager("local").get_client() as ml:
     ...     result = ml.eval.xquery(
     ...         xq,
     ...         DAYS=5,
@@ -538,14 +518,14 @@ EvalService
 
 .. code-block:: python
 
-    >>> from mlclient import MLEnvironment
+    >>> from mlclient import MLClientManager
 
     >>> xq = '''
     ... declare variable $local:DAYS external;
     ...
     ... fn:current-dateTime() - xs:dayTimeDuration("P" || $local:DAYS || "D")'''
 
-    >>> with MLEnvironment("local").get_client() as ml:
+    >>> with MLClientManager("local").get_client() as ml:
     ...     result = ml.eval.xquery(
     ...         xq,
     ...         variables={
@@ -560,9 +540,9 @@ EvalService
 
 .. code-block:: python
 
-    >>> from mlclient import MLEnvironment
+    >>> from mlclient import MLClientManager
 
-    >>> with MLEnvironment("local").get_client() as ml:
+    >>> with MLClientManager("local").get_client() as ml:
     ...     result = ml.eval.xquery(
     ...         "xdmp:database() => xdmp:database-name()",
     ...         database="Documents",
@@ -575,9 +555,9 @@ EvalService
 
 .. code-block:: python
 
-    >>> from mlclient import MLEnvironment
+    >>> from mlclient import MLClientManager
 
-    >>> with MLEnvironment("local").get_client() as ml:
+    >>> with MLClientManager("local").get_client() as ml:
     ...     result = ml.eval.xquery("fn:current-dateTime()", output_type=str)
     >>> result
     '2024-02-22T12:24:40.362014Z'
@@ -585,9 +565,9 @@ EvalService
 
 .. code-block:: python
 
-    >>> from mlclient import MLEnvironment
+    >>> from mlclient import MLClientManager
 
-    >>> with MLEnvironment("local").get_client() as ml:
+    >>> with MLClientManager("local").get_client() as ml:
     ...     result = ml.eval.xquery("fn:current-dateTime()", output_type=bytes)
     >>> result
     b'2024-02-22T12:24:53.677793Z'
@@ -603,21 +583,21 @@ Get all logs
 
 .. code-block:: python
 
-    >>> from mlclient import MLEnvironment
+    >>> from mlclient import MLClientManager
 
-    >>> with MLEnvironment("local").get_client() as ml:
-    ...     logs = ml.logs.get(app_server=8002)
+    >>> with MLClientManager("local").get_client() as ml:
+    ...     logs = ml.logs.get(8002)
     >>> list(logs)[0]
     {'timestamp': '2024-01-09T13:30:51.187Z', 'level': 'error', 'message': 'Test Log 1'}
 
 
 .. code-block:: python
 
-    >>> from mlclient import MLEnvironment
+    >>> from mlclient import MLClientManager
     >>> from mlclient.services import LogType
 
-    >>> with MLEnvironment("local").get_client() as ml:
-    ...     logs = ml.logs.get(app_server=8002, log_type=LogType.ERROR)
+    >>> with MLClientManager("local").get_client() as ml:
+    ...     logs = ml.logs.get(8002, LogType.ERROR)
     >>> list(logs)[0]
     {'timestamp': '2024-01-09T13:30:51.187Z', 'level': 'error', 'message': 'Test Log 1'}
 
@@ -626,11 +606,11 @@ Get all logs
 
 .. code-block:: python
 
-    >>> from mlclient import MLEnvironment
+    >>> from mlclient import MLClientManager
     >>> from mlclient.services import LogType
 
-    >>> with MLEnvironment("local").get_client() as ml:
-    ...     logs = ml.logs.get(app_server=8002, log_type=LogType.ACCESS)
+    >>> with MLClientManager("local").get_client() as ml:
+    ...     logs = ml.logs.get(8002, LogType.ACCESS)
     >>> list(logs)[0]
     {'message': '172.17.0.1 - - [22/Feb/2024:12:13:18 +0000] "POST /v1/eval HTTP/1.1" 401 209 - "python-httpx/0.27.0"'}
 
@@ -640,11 +620,11 @@ Get all logs
 
 .. code-block:: python
 
-    >>> from mlclient import MLEnvironment
+    >>> from mlclient import MLClientManager
     >>> from mlclient.services import LogType
 
-    >>> with MLEnvironment("local").get_client() as ml:
-    ...     logs = ml.logs.get(app_server=8002, log_type=LogType.REQUEST)
+    >>> with MLClientManager("local").get_client() as ml:
+    ...     logs = ml.logs.get(8002, LogType.REQUEST)
     >>> list(logs)[0]
     {'message': '{"time":"2024-02-22T12:38:27Z", "url":"/manage/v2/logs?format=json", "user":"admin", "elapsedTime":1.801654, "requests":1, "valueCacheHits":5743, "valueCacheMisses":349701, "regexpCacheHits":5278, "regexpCacheMisses":10, "fsProgramCacheMisses":1, "fsMainModuleSequenceCacheMisses":1, "fsLibraryModuleCacheMisses":226, "compileTime":0.757087, "runTime":1.043248}'}
 
@@ -653,9 +633,9 @@ Get all logs
 
 .. code-block:: python
 
-    >>> from mlclient import MLEnvironment
+    >>> from mlclient import MLClientManager
 
-    >>> with MLEnvironment("local").get_client() as ml:
+    >>> with MLClientManager("local").get_client() as ml:
     ...     logs = ml.logs.get()
 
 
@@ -663,18 +643,18 @@ Get all logs
 
 .. code-block:: python
 
-    >>> from mlclient import MLEnvironment
+    >>> from mlclient import MLClientManager
 
-    >>> with MLEnvironment("local").get_client() as ml:
-    ...     logs = ml.logs.get(app_server="TaskServer")
+    >>> with MLClientManager("local").get_client() as ml:
+    ...     logs = ml.logs.get("TaskServer")
 
 
 .. code-block:: python
 
-    >>> from mlclient import MLEnvironment
+    >>> from mlclient import MLClientManager
 
-    >>> with MLEnvironment("local").get_client() as ml:
-    ...     logs = ml.logs.get(app_server=0)
+    >>> with MLClientManager("local").get_client() as ml:
+    ...     logs = ml.logs.get(0)
 
 
 Get limited logs
@@ -689,27 +669,27 @@ Get limited logs
 
 .. code-block:: python
 
-    >>> from mlclient import MLEnvironment
+    >>> from mlclient import MLClientManager
 
-    >>> with MLEnvironment("local").get_client() as ml:
-    ...     logs = ml.logs.get(app_server=8002, start_time="10:00")
-
-
-.. code-block:: python
-
-    >>> from mlclient import MLEnvironment
-
-    >>> with MLEnvironment("local").get_client() as ml:
-    ...     logs = ml.logs.get(app_server=8002, end_time="12:00")
+    >>> with MLClientManager("local").get_client() as ml:
+    ...     logs = ml.logs.get(8002, start_time="10:00")
 
 
 .. code-block:: python
 
-    >>> from mlclient import MLEnvironment
+    >>> from mlclient import MLClientManager
 
-    >>> with MLEnvironment("local").get_client() as ml:
+    >>> with MLClientManager("local").get_client() as ml:
+    ...     logs = ml.logs.get(8002, end_time="12:00")
+
+
+.. code-block:: python
+
+    >>> from mlclient import MLClientManager
+
+    >>> with MLClientManager("local").get_client() as ml:
     ...     logs = ml.logs.get(
-    ...         app_server=8002,
+    ...         8002,
     ...         start_time="10:00",
     ...         end_time="12:00",
     ...     )
@@ -717,11 +697,11 @@ Get limited logs
 
 .. code-block:: python
 
-    >>> from mlclient import MLEnvironment
+    >>> from mlclient import MLClientManager
 
-    >>> with MLEnvironment("local").get_client() as ml:
+    >>> with MLClientManager("local").get_client() as ml:
     ...     logs = ml.logs.get(
-    ...         app_server=8002,
+    ...         8002,
     ...         start_time="2024-02-01",
     ...         end_time="2024-02-03",
     ...     )
@@ -729,11 +709,11 @@ Get limited logs
 
 .. code-block:: python
 
-    >>> from mlclient import MLEnvironment
+    >>> from mlclient import MLClientManager
 
-    >>> with MLEnvironment("local").get_client() as ml:
+    >>> with MLClientManager("local").get_client() as ml:
     ...     logs = ml.logs.get(
-    ...         app_server=8002,
+    ...         8002,
     ...         start_time="2024-02-01 10:00",
     ...         end_time="2024-02-03",
     ...     )
@@ -743,35 +723,35 @@ Get limited logs
 
 .. code-block:: python
 
-    >>> from mlclient import MLEnvironment
+    >>> from mlclient import MLClientManager
 
-    >>> with MLEnvironment("local").get_client() as ml:
-    ...     logs = ml.logs.get(app_server=8002, regex="Forest Meters")
-
-
-.. code-block:: python
-
-    >>> from mlclient import MLEnvironment
-
-    >>> with MLEnvironment("local").get_client() as ml:
-    ...     logs = ml.logs.get(app_server=8002, regex="Forest M.*")
+    >>> with MLClientManager("local").get_client() as ml:
+    ...     logs = ml.logs.get(8002, regex="Forest Meters")
 
 
 .. code-block:: python
 
-    >>> from mlclient import MLEnvironment
+    >>> from mlclient import MLClientManager
 
-    >>> with MLEnvironment("local").get_client() as ml:
-    ...     logs = ml.logs.get(app_server=8002, regex="Memory [^1]{1,2}%")
+    >>> with MLClientManager("local").get_client() as ml:
+    ...     logs = ml.logs.get(8002, regex="Forest M.*")
 
 
 .. code-block:: python
 
-    >>> from mlclient import MLEnvironment
+    >>> from mlclient import MLClientManager
 
-    >>> with MLEnvironment("local").get_client() as ml:
+    >>> with MLClientManager("local").get_client() as ml:
+    ...     logs = ml.logs.get(8002, regex="Memory [^1]{1,2}%")
+
+
+.. code-block:: python
+
+    >>> from mlclient import MLClientManager
+
+    >>> with MLClientManager("local").get_client() as ml:
     ...     logs = ml.logs.get(
-    ...         app_server=8002,
+    ...         8002,
     ...         start_time="2024-02-01",
     ...         end_time="2024-02-03",
     ...         regex="Memory [^1]{1,2}%",

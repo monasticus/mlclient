@@ -1,11 +1,11 @@
-"""The ML Configuration module.
+"""The ML Profile module.
 
-This module contains an API for MarkLogic configuration.
+This module contains an API for MarkLogic profile configuration.
 It exports the following classes:
 
-    * MLConfiguration
-        A class representing MarkLogic configuration.
-    * MLAppServerConfiguration
+    * MLProfile
+        A class representing a MarkLogic configuration profile.
+    * MLServerConfig
         A class representing MarkLogic App Server configuration.
     * AuthMethod
         An enumeration class representing authorization methods.
@@ -37,7 +37,7 @@ class AuthMethod(Enum):
     DIGEST = "digest"
 
 
-class MLAppServerConfiguration(BaseModel):
+class MLServerConfig(BaseModel):
     """A class representing MarkLogic App Server configuration."""
 
     identifier: str = Field(
@@ -65,18 +65,18 @@ class MLAppServerConfiguration(BaseModel):
         return auth_method.value
 
 
-class MLConfiguration(BaseModel):
-    """A class representing MarkLogic configuration."""
+class MLProfile(BaseModel):
+    """A class representing a MarkLogic configuration profile."""
 
     app_name: str = Field(alias="app-name", description="An application name")
     protocol: str = Field(description="An HTTP protocol", default="http")
     host: str = Field(description="A hostname", default="localhost")
     username: str = Field(description="An username", default="admin")
     password: str = Field(description="A password", default="admin")
-    app_servers: list[MLAppServerConfiguration] = Field(
+    app_servers: list[MLServerConfig] = Field(
         alias="app-servers",
         description="App Servers configurations' list",
-        default=[MLAppServerConfiguration(id="manage", port=8002, rest=True)],
+        default=[MLServerConfig(id="manage", port=8002, rest=True)],
     )
 
     @property
@@ -119,46 +119,46 @@ class MLConfiguration(BaseModel):
         return {**ml_config, **app_server_config}
 
     @classmethod
-    def from_environment(
+    def load(
         cls,
-        environment_name: str,
-    ) -> MLConfiguration:
-        """Instantiate MLConfiguration from an environment.
+        profile_name: str,
+    ) -> MLProfile:
+        """Instantiate MLProfile from a named profile.
 
         This method looks for a configuration file in the .mlclient directory.
-        An environment configuration needs to match a file name pattern
-        to be recognized: mlclient-<environment-name>.yaml.
+        A profile configuration needs to match a file name pattern
+        to be recognized: mlclient-<profile-name>.yaml.
 
         Parameters
         ----------
-        environment_name : str
-            An MLClient environment name
+        profile_name : str
+            A profile name
 
         Returns
         -------
-        MLConfiguration
-            An MLConfiguration instance
+        MLProfile
+            An MLProfile instance
 
         Raises
         ------
         MLClientDirectoryNotFoundError
             If .mlclient directory has not been found
         MLClientEnvironmentNotFoundError
-            If there's no .mlclient/mlclient-<environment_name>.yaml file
+            If there's no .mlclient/mlclient-<profile_name>.yaml file
         """
         logger.debug(
-            "Loading MLClient configuration for the environment: [%s]",
-            environment_name,
+            "Loading MLClient configuration for the profile: [%s]",
+            profile_name,
         )
-        env_file_path = cls._find_mlclient_environment(environment_name)
-        return cls.from_file(env_file_path)
+        env_file_path = cls._find_mlclient_environment(profile_name)
+        return cls.load_file(env_file_path)
 
     @classmethod
-    def from_file(
+    def load_file(
         cls,
         file_path: str,
-    ) -> MLConfiguration:
-        """Instantiate MLConfiguration from a file.
+    ) -> MLProfile:
+        """Instantiate MLProfile from a file.
 
         Parameters
         ----------
@@ -167,12 +167,12 @@ class MLConfiguration(BaseModel):
 
         Returns
         -------
-        MLConfiguration
-            An MLConfiguration instance
+        MLProfile
+            An MLProfile instance
         """
         logger.info("Loading MLClient configuration from the file: [%s]", file_path)
         source_config = cls._get_source_config(file_path)
-        return MLConfiguration(**source_config)
+        return MLProfile(**source_config)
 
     @classmethod
     def _find_mlclient_environment(

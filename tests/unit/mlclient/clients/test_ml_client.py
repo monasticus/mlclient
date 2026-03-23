@@ -5,7 +5,13 @@ import respx
 from pytest_mock import MockerFixture
 
 from mlclient import MLClient
+from mlclient.api.rest_api import RestApi
+from mlclient.calls import DatabasesGetCall
 from mlclient.clients import http_client as http_client_module
+from mlclient.clients import ml_client as ml_client_module
+from mlclient.ml_response_parser import MLResponseParser
+from mlclient.services.documents import DocumentsService
+from mlclient.services.eval import EvalService
 from tests.utils import resources as resources_utils
 from tests.utils.ml_mockers import MLRespXMocker
 
@@ -348,12 +354,155 @@ def test_request_logs_debug_response_retrieved_no_body(mocker: MockerFixture):
     assert "Response retrieved" in debug_messages
 
 
+def test_properties_delegate_to_http_client():
+    client = MLClient(
+        protocol="https",
+        host="ml.example.com",
+        port=8123,
+        auth_method="digest",
+        username="user",
+        password="pass",
+    )
+    assert client.protocol == "https"
+    assert client.host == "ml.example.com"
+    assert client.port == 8123
+    assert client.auth_method == "digest"
+    assert client.username == "user"
+    assert client.password == "pass"
+    assert client.base_url == "https://ml.example.com:8123"
+
+
+def test_rest_property():
+    client = MLClient()
+    assert isinstance(client.rest, RestApi)
+
+
+def test_documents_property():
+    client = MLClient()
+    assert isinstance(client.documents, DocumentsService)
+
+
+def test_eval_property():
+    client = MLClient()
+    assert isinstance(client.eval, EvalService)
+
+
+def test_parser_returns_ml_response_parser():
+    client = MLClient()
+    assert client.parser is MLResponseParser
+
+
+@respx.mock
+def test_manage_custom_call():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/manage/v2/databases")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("application/json")
+    ml_mocker.with_response_body({"database-default-list": {}})
+    ml_mocker.mock_get()
+
+    with MLClient() as client:
+        resp = client.manage.call(DatabasesGetCall())
+
+    assert resp.status_code == 200
+
+
+@respx.mock
+def test_admin_uses_main_port_when_already_8001():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8001/admin/v1/timestamp")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("text/plain")
+    ml_mocker.with_response_body("2026-03-23T00:00:00")
+    ml_mocker.mock_get()
+
+    with MLClient(port=8001) as client:
+        resp = client.admin.get_timestamp()
+
+    assert resp.status_code == 200
+
+
+@respx.mock
+def test_admin_uses_port_8001_when_main_port_differs():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8001/admin/v1/timestamp")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("text/plain")
+    ml_mocker.with_response_body("2026-03-23T00:00:00")
+    ml_mocker.mock_get()
+
+    with MLClient(port=8000) as client:
+        resp = client.admin.get_timestamp()
+
+    assert resp.status_code == 200
+
+
+@respx.mock
+def test_manage_uses_main_port_when_already_8002():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/manage/v2/databases")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("application/json")
+    ml_mocker.with_response_body({"database-default-list": {}})
+    ml_mocker.mock_get()
+
+    with MLClient(port=8002) as client:
+        resp = client.manage.databases.get_list()
+
+    assert resp.status_code == 200
+
+
+@respx.mock
+def test_manage_uses_port_8002_when_main_port_differs():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/manage/v2/databases")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("application/json")
+    ml_mocker.with_response_body({"database-default-list": {}})
+    ml_mocker.mock_get()
+
+    with MLClient(port=8000) as client:
+        resp = client.manage.databases.get_list()
+
+    assert resp.status_code == 200
+
+
+@respx.mock
+def test_secondary_clients_connect_and_disconnect_with_main():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/manage/v2/databases")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("application/json")
+    ml_mocker.with_response_body({"database-default-list": {}})
+    ml_mocker.mock_get()
+
+    ml_mocker.with_url("http://localhost:8001/admin/v1/timestamp")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("text/plain")
+    ml_mocker.with_response_body("2026-03-23T00:00:00")
+    ml_mocker.mock_get()
+
+    client = MLClient(port=8000)
+    # Force creation of secondary clients before connecting
+    _ = client.manage
+    _ = client.admin
+
+    client.connect()
+    resp_manage = client.manage.databases.get_list()
+    resp_admin = client.admin.get_timestamp()
+    assert resp_manage.status_code == 200
+    assert resp_admin.status_code == 200
+
+    client.disconnect()
+    assert not client.is_connected()
+
+
 def test_wait_for_restart_builds_restart_waiter_and_uses_default_retry(
     mocker: MockerFixture,
 ):
     waiter = mocker.MagicMock()
     restart_waiter_cls = mocker.patch.object(
-        http_client_module,
+        ml_client_module,
         "RestartWaiter",
         autospec=True,
         return_value=waiter,
@@ -368,7 +517,7 @@ def test_wait_for_restart_builds_restart_waiter_and_uses_default_retry(
     ) as client:
         response = httpx.Response(202)
         client.wait_for_restart(
-            response=response,
+            response,
             timeout=12.0,
             poll_interval=0.5,
         )
@@ -379,9 +528,9 @@ def test_wait_for_restart_builds_restart_waiter_and_uses_default_retry(
     assert isinstance(kwargs["auth"], httpx.BasicAuth)
     waiter.wait_for_restart_completion.assert_called_once_with(
         response,
-        12.0,
-        0.5,
-        http_client_module.RESTART_RETRY_STRATEGY,
+        timeout=12.0,
+        poll_interval=0.5,
+        retry=ml_client_module.RESTART_RETRY_STRATEGY,
     )
 
 
@@ -390,7 +539,7 @@ def test_wait_for_restart_uses_custom_retry(
 ):
     waiter = mocker.MagicMock()
     restart_waiter_cls = mocker.patch.object(
-        http_client_module,
+        ml_client_module,
         "RestartWaiter",
         autospec=True,
         return_value=waiter,
@@ -408,7 +557,7 @@ def test_wait_for_restart_uses_custom_retry(
     assert restart_waiter_cls.called
     waiter.wait_for_restart_completion.assert_called_once_with(
         None,
-        12.0,
-        0.5,
-        custom_retry,
+        timeout=12.0,
+        poll_interval=0.5,
+        retry=custom_retry,
     )

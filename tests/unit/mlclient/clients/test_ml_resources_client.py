@@ -63,7 +63,7 @@ def test_get_logs():
     ml_mocker.mock_get()
 
     with MLClient() as client:
-        resp = client.manage.logs.get(filename="ErrorLog.txt", data_format="json")
+        resp = client.manage.logs.get("ErrorLog.txt", data_format="json")
 
     assert resp.status_code == httpx.codes.OK
     assert "logfile" in resp.json()
@@ -133,7 +133,7 @@ def test_get_database():
     ml_mocker.mock_get()
 
     with MLClient() as client:
-        resp = client.manage.databases.get(database="Documents", data_format="json")
+        resp = client.manage.databases.get("Documents", data_format="json")
 
     expected_uri = "/manage/v2/databases/Documents?view=default"
     assert resp.status_code == httpx.codes.OK
@@ -174,7 +174,7 @@ def test_delete_database():
     ml_mocker.mock_delete()
 
     with MLClient() as client:
-        resp = client.manage.databases.delete(database="custom-db")
+        resp = client.manage.databases.delete("custom-db")
 
     assert resp.status_code == httpx.codes.NO_CONTENT
     assert not resp.text
@@ -454,7 +454,7 @@ def test_put_forests():
     ml_mocker.mock_put()
 
     with MLClient() as client:
-        resp = client.manage.forests.put(body=body)
+        resp = client.manage.forests.put(body)
 
     assert resp.status_code == httpx.codes.BAD_REQUEST
     assert (
@@ -480,7 +480,7 @@ def test_get_forest():
     ml_mocker.mock_get()
 
     with MLClient() as client:
-        resp = client.manage.forests.get(forest="Documents", data_format="json")
+        resp = client.manage.forests.get("Documents", data_format="json")
 
     expected_uri = "/manage/v2/forests/Documents?view=default"
     assert resp.status_code == httpx.codes.OK
@@ -495,7 +495,7 @@ def test_post_forest():
     )
 
     ml_mocker = MLRespXMocker(use_router=False)
-    ml_mocker.with_url("http://localhost:8002/manage/v2/forests/aaa")
+    ml_mocker.with_url("http://localhost:8002/manage/v2/forests/forest-01")
     ml_mocker.with_request_content_type("application/x-www-form-urlencoded")
     ml_mocker.with_request_body({"state": "clear"})
     ml_mocker.with_response_content_type("application/xml; charset=UTF-8")
@@ -504,7 +504,7 @@ def test_post_forest():
     ml_mocker.mock_post()
 
     with MLClient() as client:
-        resp = client.manage.forests.post(forest="aaa", body={"state": "clear"})
+        resp = client.manage.forests.post("forest-01", {"state": "clear"})
 
     assert resp.status_code == httpx.codes.NOT_FOUND
     assert "XDMP-NOSUCHFOREST" in resp.text
@@ -513,14 +513,14 @@ def test_post_forest():
 @respx.mock
 def test_delete_forest():
     ml_mocker = MLRespXMocker(use_router=False)
-    ml_mocker.with_url("http://localhost:8002/manage/v2/forests/aaa")
+    ml_mocker.with_url("http://localhost:8002/manage/v2/forests/forest-01")
     ml_mocker.with_request_param("level", "full")
     ml_mocker.with_response_code(204)
     ml_mocker.with_empty_response_body()
     ml_mocker.mock_delete()
 
     with MLClient() as client:
-        resp = client.manage.forests.delete(forest="aaa", level="full")
+        resp = client.manage.forests.delete("forest-01", level="full")
 
     assert resp.status_code == httpx.codes.NO_CONTENT
     assert not resp.text
@@ -640,7 +640,7 @@ def test_get_role():
     ml_mocker.mock_get()
 
     with MLClient() as client:
-        resp = client.manage.roles.get(role="admin", data_format="json")
+        resp = client.manage.roles.get("admin", data_format="json")
 
     expected_uri = "/manage/v2/roles/admin?view=default"
     assert resp.status_code == httpx.codes.OK
@@ -656,7 +656,7 @@ def test_delete_role():
     ml_mocker.mock_delete()
 
     with MLClient() as client:
-        resp = client.manage.roles.delete(role="custom-role")
+        resp = client.manage.roles.delete("custom-role")
 
     assert resp.status_code == httpx.codes.NO_CONTENT
     assert not resp.text
@@ -774,7 +774,7 @@ def test_get_user():
     ml_mocker.mock_get()
 
     with MLClient() as client:
-        resp = client.manage.users.get(user="admin", data_format="json")
+        resp = client.manage.users.get("admin", data_format="json")
 
     expected_uri = "/manage/v2/users/admin?view=default"
     assert resp.status_code == httpx.codes.OK
@@ -795,7 +795,7 @@ def test_delete_user():
     ml_mocker.mock_delete()
 
     with MLClient() as client:
-        resp = client.manage.users.delete(user="custom-user")
+        resp = client.manage.users.delete("custom-user")
 
     assert resp.status_code == httpx.codes.NOT_FOUND
     assert "User does not exist: custom-user" in resp.text
@@ -894,7 +894,7 @@ def test_post_documents():
     ml_mocker.mock_post()
 
     with MLClient() as client:
-        resp = client.rest.documents.post(body_parts=[DocumentsBodyPart(**body_part)])
+        resp = client.rest.documents.post([DocumentsBodyPart(**body_part)])
 
     assert resp.status_code == httpx.codes.INTERNAL_SERVER_ERROR
     assert resp.json() == {

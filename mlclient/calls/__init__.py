@@ -13,21 +13,21 @@ This package exports the following modules:
     * admin
         The ML Admin API Calls module.
     * databases
-        The ML Database Resource Calls module.
+        The ML Database Api Calls module.
     * documents
-        The ML Documents Resource Calls module.
+        The ML Documents Api Calls module.
     * eval
-        The ML Eval Resource Call module.
+        The ML Eval Api Call module.
     * forests
-        The ML Forest Resource Calls module.
+        The ML Forest Api Calls module.
     * logs
-        The ML Logs Resource Call module.
+        The ML Logs Api Call module.
     * roles
-        The ML Role Resource Calls module.
+        The ML Role Api Calls module.
     * servers
-        The ML Server Resource Calls module.
+        The ML Server Api Calls module.
     * users
-        The ML User Resource Calls module.
+        The ML User Api Calls module.
 
 This package exports the following classes:
     * ApiCall

@@ -1,4 +1,4 @@
-"""The ML Eval Resource Call module.
+"""The ML Eval Api Call module.
 
 It exports 1 class:
     * EvalCall
@@ -18,7 +18,7 @@ class EvalCall(ApiCall):
     """A POST request to evaluate an ad-hoc query.
 
     A ApiCall implementation representing a single request
-    to the /v1/eval REST Resource.
+    to the /v1/eval endpoint.
 
     Evaluate an ad-hoc query expressed using XQuery or server-side JavaScript.
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/POST/v1/eval

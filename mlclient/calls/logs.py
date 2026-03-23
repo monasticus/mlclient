@@ -1,4 +1,4 @@
-"""The ML Logs Resource Call module.
+"""The ML Logs Api Call module.
 
 It exports 1 class:
     * LogsCall
@@ -16,8 +16,8 @@ from mlclient.calls.api_call import ApiCall
 class LogsCall(ApiCall):
     """A GET request to retrieve logs.
 
-    A ApiCall implementation representing a single GET request
-    to the /manage/v2/logs REST Resource.
+    An ApiCall implementation representing a single GET request
+    to the /manage/v2/logs endpoint.
 
     Returns the content of server log files.
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/GET/manage/v2/logs

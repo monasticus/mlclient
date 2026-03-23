@@ -13,7 +13,8 @@ from cleo.io.inputs.argument import Argument
 from cleo.io.inputs.option import Option
 from cleo.io.outputs.output import Type
 
-from mlclient import MLEnvironment
+from mlclient import MLClientManager
+from mlclient.exceptions import WrongParametersError
 
 
 class CallEvalCommand(Command):
@@ -115,6 +116,10 @@ class CallEvalCommand(Command):
         database = self.option("database")
         txid = self.option("txid")
 
+        if xq_flag and js_flag:
+            msg = "You cannot include both the --xquery and the --javascript flag!"
+            raise WrongParametersError(msg)
+
         params = {
             "output_type": str,
             "database": database,
@@ -142,7 +147,7 @@ class CallEvalCommand(Command):
         environment = self.option("environment")
         rest_server = self.option("rest-server")
 
-        manager = MLEnvironment(environment)
-        with manager.get_client(rest_server) as client:
+        mgr = MLClientManager(environment)
+        with mgr.get_client(rest_server) as client:
             self.info(f"Evaluating code using REST App-Server {client.base_url}")
-            return client.eval.eval(**eval_params)
+            return client.eval.execute(**eval_params)

@@ -1,4 +1,4 @@
-"""The ML Server Resource Calls module.
+"""The ML Server Api Calls module.
 
 This module provides call classes for server-related REST resources.
 
@@ -31,7 +31,7 @@ class ServersGetCall(ApiCall):
     """A GET request to get app servers summary.
 
     A ApiCall implementation representing a single GET request
-    to the /manage/v2/servers REST Resource.
+    to the /manage/v2/servers endpoint.
 
     This resource address returns data about the App Servers in the cluster.
     The data returned depends on the setting of the view request parameter.
@@ -132,7 +132,7 @@ class ServersPostCall(ApiCall):
     """A POST request to create a new app server.
 
     A ApiCall implementation representing a single POST request
-    to the /manage/v2/servers REST Resource.
+    to the /manage/v2/servers endpoint.
 
     This resource address is used to create a new App Server in the specified group.
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/POST/manage/v2/servers
@@ -210,7 +210,7 @@ class ServerGetCall(ApiCall):
     """A GET request to get app server details.
 
     A ApiCall implementation representing a single GET request
-    to the /manage/v2/servers/{id|name} REST Resource.
+    to the /manage/v2/servers/{id|name} endpoint.
 
     This resource address returns data about a specific App Server.
     The server can be identified either by id or name.
@@ -334,7 +334,7 @@ class ServerDeleteCall(ApiCall):
     """A DELETE request to remove an app server.
 
     A ApiCall implementation representing a single DELETE request
-    to the /manage/v2/servers/{id|name} REST Resource.
+    to the /manage/v2/servers/{id|name} endpoint.
 
     This resource address deletes the specified App Server from the specified group.
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/DELETE/manage/v2/servers/[id-or-name]
@@ -383,7 +383,7 @@ class ServerPropertiesGetCall(ApiCall):
     """A GET request to get app server properties.
 
     A ApiCall implementation representing a single GET request
-    to the /manage/v2/servers/{id|name}/properties REST Resource.
+    to the /manage/v2/servers/{id|name}/properties endpoint.
 
     This resource address returns the current state of modifiable properties
     of the specified App Server.
@@ -458,7 +458,7 @@ class ServerPropertiesPutCall(ApiCall):
     """A PUT request to modify app server properties.
 
     A ApiCall implementation representing a single PUT request
-    to the /manage/v2/servers/{id|name}/properties REST Resource.
+    to the /manage/v2/servers/{id|name}/properties endpoint.
 
     Initiate a properties change on the specified App Server.
     Documentation of the REST Resource API:

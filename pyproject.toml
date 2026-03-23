@@ -104,7 +104,9 @@ exclude_lines = [
     # Don't complain if non-runnable code isn't run:
     "if __name__ == .__main__.:",
     # Don't complain about abstract methods, they aren't run:
-    "raise NotImplementedError$"
+    "raise NotImplementedError$",
+    # Type-checking imports are never executed at runtime:
+    "if TYPE_CHECKING:",
 ]
 
 [tool.isort]
@@ -146,7 +148,7 @@ convention = "numpy"
 max-complexity = 10
 
 [tool.ruff.lint.per-file-ignores]
-"mlclient/ml_config.py" = [
+"mlclient/ml_profile.py" = [
     "PLR6301" # allow for a non-static method as it is defined by the Pydantic lib
 ]
 "mlclient/calls/*" = [

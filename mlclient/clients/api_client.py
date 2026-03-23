@@ -14,21 +14,10 @@ from .http_client import HttpClient
 
 
 class ApiClient:
-    """Mid-level client providing call() for ApiCall objects.
-
-    Attributes
-    ----------
-    http : HttpClient
-        The underlying HTTP client used for requests.
-    """
+    """Mid-level client providing call() for ApiCall objects."""
 
     def __init__(self, http: HttpClient):
         self._http = http
-
-    @property
-    def http(self) -> HttpClient:
-        """Return the underlying HTTP client."""
-        return self._http
 
     def call(self, call_: ApiCall) -> Response:
         """Send a request using an ApiCall object.

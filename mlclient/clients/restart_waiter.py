@@ -36,6 +36,19 @@ class RestartWaiter:
         auth: Auth,
         default_retry: Retry,
     ):
+        """Initialize RestartWaiter instance.
+
+        Parameters
+        ----------
+        protocol : str
+            A protocol used for HTTP requests (http / https)
+        host : str
+            A host name
+        auth : Auth
+            An httpx authentication handler (BasicAuth or DigestAuth)
+        default_retry : Retry
+            A default retry strategy for readiness probes
+        """
         self._protocol = protocol
         self._host = host
         self._auth = auth
@@ -44,6 +57,7 @@ class RestartWaiter:
     def wait_for_restart_completion(
         self,
         response: Response | None,
+        *,
         timeout: float,
         poll_interval: float,
         retry: Retry | None = None,

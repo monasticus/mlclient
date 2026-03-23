@@ -86,7 +86,7 @@ def write_documents(
     docs: Document | Metadata | list[Document | Metadata],
 ):
     with MLClient(auth_method="digest") as docs_client:
-        resp = docs_client.documents.create(docs)
+        resp = docs_client.documents.write(docs)
         documents = resp["documents"]
         if not isinstance(docs, list):
             docs = [docs]

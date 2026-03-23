@@ -1366,7 +1366,7 @@ def test_create_raw_document(docs_client):
     content = b"<root><child>data</child></root>"
     doc = RawDocument(content, uri, DocumentType.XML)
 
-    resp = docs_client.documents.create(doc)
+    resp = docs_client.documents.write(doc)
 
     documents = resp["documents"]
     assert len(documents) == 1
@@ -1381,7 +1381,7 @@ def test_create_raw_string_document(docs_client):
     content = '{"root":{"child":"data"}}'
     doc = RawStringDocument(content, uri, DocumentType.JSON)
 
-    resp = docs_client.documents.create(doc)
+    resp = docs_client.documents.write(doc)
 
     documents = resp["documents"]
     assert len(documents) == 1
@@ -1397,7 +1397,7 @@ def test_create_xml_document(docs_client):
     content = ElemTree.ElementTree(ElemTree.fromstring(content_str))
     doc = XMLDocument(content, uri)
 
-    resp = docs_client.documents.create(doc)
+    resp = docs_client.documents.write(doc)
 
     documents = resp["documents"]
     assert len(documents) == 1
@@ -1412,7 +1412,7 @@ def test_create_json_document(docs_client):
     content = {"root": {"child": "data"}}
     doc = JSONDocument(content, uri)
 
-    resp = docs_client.documents.create(doc)
+    resp = docs_client.documents.write(doc)
 
     documents = resp["documents"]
     assert len(documents) == 1
@@ -1427,7 +1427,7 @@ def test_create_text_document(docs_client):
     content = 'xquery version "1.0-ml";\n\nfn:current-date()'
     doc = TextDocument(content, uri)
 
-    resp = docs_client.documents.create(doc)
+    resp = docs_client.documents.write(doc)
 
     documents = resp["documents"]
     assert len(documents) == 1
@@ -1442,7 +1442,7 @@ def test_create_binary_document(docs_client):
     content = zlib.compress(b'xquery version "1.0-ml";\n\nfn:current-date()')
     doc = BinaryDocument(content, uri)
 
-    resp = docs_client.documents.create(doc)
+    resp = docs_client.documents.write(doc)
 
     documents = resp["documents"]
     assert len(documents) == 1
@@ -1457,7 +1457,7 @@ def test_create_metadata_document_when_doc_exists(docs_client):
     metadata = Metadata(collections=["test-collection"])
     doc = MetadataDocument(uri, metadata)
 
-    resp = docs_client.documents.create(doc)
+    resp = docs_client.documents.write(doc)
 
     documents = resp["documents"]
     assert len(documents) == 1
@@ -1474,7 +1474,7 @@ def test_create_metadata_document_when_doc_does_not_exists(docs_client):
     doc = MetadataDocument(uri, metadata)
 
     with pytest.raises(MarkLogicError) as err:
-        docs_client.documents.create(doc)
+        docs_client.documents.write(doc)
 
     expected_error = (
         "[500 Internal Server Error] (XDMP-DOCNOTFOUND) XDMP-DOCNOTFOUND: "
@@ -1503,7 +1503,7 @@ def test_create_multiple_documents(docs_client):
     doc_4_content = zlib.compress(b'xquery version "1.0-ml";\n\nfn:current-date()')
     doc_4 = BinaryDocument(doc_4_content, doc_4_uri)
 
-    resp = docs_client.documents.create([doc_1, doc_2, doc_3, doc_4])
+    resp = docs_client.documents.write([doc_1, doc_2, doc_3, doc_4])
 
     documents = resp["documents"]
     assert len(documents) == 4
@@ -1544,7 +1544,7 @@ def test_create_raw_document_with_metadata(docs_client):
     metadata = b'{"collections": ["test-collection"]}'
     doc = RawDocument(content, uri, DocumentType.XML, metadata)
 
-    resp = docs_client.documents.create(doc)
+    resp = docs_client.documents.write(doc)
 
     documents = resp["documents"]
     assert len(documents) == 1
@@ -1560,7 +1560,7 @@ def test_create_raw_string_document_with_metadata(docs_client):
     metadata = '{"collections": ["test-collection"]}'
     doc = RawStringDocument(content, uri, DocumentType.XML, metadata)
 
-    resp = docs_client.documents.create(doc)
+    resp = docs_client.documents.write(doc)
 
     documents = resp["documents"]
     assert len(documents) == 1
@@ -1577,7 +1577,7 @@ def test_create_xml_document_with_metadata(docs_client):
     metadata = Metadata(collections=["test-collection"])
     doc = XMLDocument(content, uri, metadata)
 
-    resp = docs_client.documents.create(doc)
+    resp = docs_client.documents.write(doc)
 
     documents = resp["documents"]
     assert len(documents) == 1
@@ -1593,7 +1593,7 @@ def test_create_json_document_with_metadata(docs_client):
     metadata = Metadata(collections=["test-collection"])
     doc = JSONDocument(content, uri, metadata)
 
-    resp = docs_client.documents.create(doc)
+    resp = docs_client.documents.write(doc)
 
     documents = resp["documents"]
     assert len(documents) == 1
@@ -1609,7 +1609,7 @@ def test_create_text_document_with_metadata(docs_client):
     metadata = Metadata(collections=["test-collection"])
     doc = TextDocument(content, uri, metadata)
 
-    resp = docs_client.documents.create(doc)
+    resp = docs_client.documents.write(doc)
 
     documents = resp["documents"]
     assert len(documents) == 1
@@ -1625,7 +1625,7 @@ def test_create_binary_document_with_metadata(docs_client):
     metadata = Metadata(collections=["test-collection"])
     doc = BinaryDocument(content, uri, metadata)
 
-    resp = docs_client.documents.create(doc)
+    resp = docs_client.documents.write(doc)
 
     documents = resp["documents"]
     assert len(documents) == 1
@@ -1655,7 +1655,7 @@ def test_create_multiple_documents_with_metadata(docs_client):
     doc_4_content = zlib.compress(b'xquery version "1.0-ml";\n\nfn:current-date()')
     doc_4 = BinaryDocument(doc_4_content, doc_4_uri, metadata)
 
-    resp = docs_client.documents.create([doc_1, doc_2, doc_3, doc_4])
+    resp = docs_client.documents.write([doc_1, doc_2, doc_3, doc_4])
 
     documents = resp["documents"]
     assert len(documents) == 4
@@ -1697,7 +1697,7 @@ def test_create_single_document_with_default_metadata(docs_client):
     content = b"<root><child>data</child></root>"
     doc = RawDocument(content, uri, DocumentType.XML)
 
-    resp = docs_client.documents.create([default_metadata, doc])
+    resp = docs_client.documents.write([default_metadata, doc])
 
     documents = resp["documents"]
     assert len(documents) == 1
@@ -1727,7 +1727,7 @@ def test_create_multiple_documents_with_default_metadata(docs_client):
     doc_4_content = zlib.compress(b'xquery version "1.0-ml";\n\nfn:current-date()')
     doc_4 = BinaryDocument(doc_4_content, doc_4_uri)
 
-    resp = docs_client.documents.create([default_metadata, doc_1, doc_2, doc_3, doc_4])
+    resp = docs_client.documents.write([default_metadata, doc_1, doc_2, doc_3, doc_4])
 
     documents = resp["documents"]
     assert len(documents) == 4
@@ -1765,7 +1765,7 @@ def test_create_multiple_documents_with_default_metadata(docs_client):
 def test_create_only_default_metadata(docs_client):
     default_metadata = Metadata(collections=["test-collection"])
 
-    resp = docs_client.documents.create(default_metadata)
+    resp = docs_client.documents.write(default_metadata)
 
     documents = resp["documents"]
     assert len(documents) == 0
@@ -1777,7 +1777,7 @@ def test_create_single_document_using_custom_database(docs_client):
     content = b"<root><child>data</child></root>"
     doc = RawDocument(content, uri, DocumentType.XML)
 
-    resp = docs_client.documents.create(doc, database="Documents")
+    resp = docs_client.documents.write(doc, database="Documents")
 
     documents = resp["documents"]
     assert len(documents) == 1
@@ -1805,7 +1805,7 @@ def test_create_multiple_documents_using_custom_database(docs_client):
     doc_4_content = zlib.compress(b'xquery version "1.0-ml";\n\nfn:current-date()')
     doc_4 = BinaryDocument(doc_4_content, doc_4_uri)
 
-    resp = docs_client.documents.create(
+    resp = docs_client.documents.write(
         [doc_1, doc_2, doc_3, doc_4],
         database="Documents",
     )
@@ -1848,7 +1848,7 @@ def test_create_document_with_temporal_collection(docs_client):
     content = "<root><child>data</child><systemStart/><systemEnd/></root>"
     doc = RawStringDocument(content, uri, DocumentType.XML)
 
-    resp = docs_client.documents.create(doc, temporal_collection="temporal-collection")
+    resp = docs_client.documents.write(doc, temporal_collection="temporal-collection")
 
     documents = resp["documents"]
     assert len(documents) == 1

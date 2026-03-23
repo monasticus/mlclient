@@ -13,8 +13,8 @@ call eval
       code                           The code to evaluate (a file path or raw xqy/js code)
 
     Options:
-      -e, --environment=ENVIRONMENT  The ML Client environment name [default: "local"]
-      -s, --rest-server=REST-SERVER  The ML REST Server environmental id
+      -p, --profile=PROFILE          The ML Client profile name [default: "local"]
+      -s, --rest-server=REST-SERVER  The ML REST Server profile id
           --var=VAR                  A variable to be used in the code (multiple values allowed)
       -x, --xquery                   If set, the code will be treated as raw xquery
       -j, --javascript               If set, the code will be treated as raw javascript

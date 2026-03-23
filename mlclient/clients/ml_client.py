@@ -44,32 +44,16 @@ class MLClient:
     """Main entry point for MarkLogic interaction.
 
     Provides layered access:
-    - ml.http.get("/endpoint")              # raw HTTP
-    - ml.rest.eval.post(xquery="...")       # mid-level REST API (/v1/*)
-    - ml.manage.databases.get_list()        # mid-level Management API (/manage/v2/*)
-    - ml.admin.get_timestamp()              # mid-level Admin API (/admin/v1/*)
-    - ml.rest.call(SomeApiCall())           # advanced: custom Call objects
-    - ml.parser.parse(resp)                 # manual parsing of raw responses
-    - ml.documents.read("/doc.json")        # high-level, parsed results
-    - ml.eval.xquery("1+1")                # high-level, parsed results
-    - ml.logs.get(log_type=...)             # high-level, parsed results
 
-    Attributes
-    ----------
-    protocol : str
-        a protocol used for HTTP requests (http / https)
-    host : str
-        a host name
-    port : int
-        an App Service port
-    auth_method : str
-        an authorization method (basic / digest)
-    username : str
-        a username
-    password : str
-        a password
-    base_url : str
-        a base url built based on the protocol, the host name and the port
+    - ``ml.http.get("/endpoint")`` -- raw HTTP
+    - ``ml.rest.eval.post(xquery="...")`` -- mid-level REST API (``/v1/*``)
+    - ``ml.manage.databases.get_list()`` -- mid-level Management API (``/manage/v2/*``)
+    - ``ml.admin.get_timestamp()`` -- mid-level Admin API (``/admin/v1/*``)
+    - ``ml.rest.call(SomeApiCall())`` -- advanced: custom Call objects
+    - ``ml.parser.parse(resp)`` -- manual parsing of raw responses
+    - ``ml.documents.read("/doc.json")`` -- high-level, parsed results
+    - ``ml.eval.xquery("1+1")`` -- high-level, parsed results
+    - ``ml.logs.get(log_type=...)`` -- high-level, parsed results
 
     Examples
     --------
@@ -91,7 +75,7 @@ class MLClient:
     ...     resp.status_code
     200
 
-    Mid-level REST API (/v1/*) - returns httpx.Response:
+    Mid-level REST API (``/v1/*``) - returns httpx.Response:
 
     >>> with MLClient(**config) as ml:
     ...     resp = ml.rest.eval.post(
@@ -100,14 +84,14 @@ class MLClient:
     ...     resp.status_code
     200
 
-    Mid-level Management API (/manage/v2/*) - returns httpx.Response:
+    Mid-level Management API (``/manage/v2/*``) - returns httpx.Response:
 
     >>> with MLClient(**config) as ml:
     ...     resp = ml.manage.databases.get_list()
     ...     resp.status_code
     200
 
-    Mid-level Admin API (/admin/v1/*) - returns httpx.Response:
+    Mid-level Admin API (``/admin/v1/*``) - returns httpx.Response:
 
     >>> with MLClient(**config) as ml:
     ...     resp = ml.admin.get_timestamp()
@@ -235,17 +219,17 @@ class MLClient:
 
     @cached_property
     def rest(self) -> RestApi:
-        """REST API (/v1/*) - requires REST app server."""
+        """REST API (``/v1/*``) - requires REST app server."""
         return RestApi(self._api_client)
 
     @cached_property
     def manage(self) -> ManageApi:
-        """Management API (/manage/v2/*) - requires Manage server."""
+        """Management API (``/manage/v2/*``) - requires Manage server."""
         return ManageApi(self._get_manage_client())
 
     @cached_property
     def admin(self) -> AdminApi:
-        """Admin API (/admin/v1/*) - requires Admin server (port 8001)."""
+        """Admin API (``/admin/v1/*``) - requires Admin server (port 8001)."""
         return AdminApi(self._get_admin_client())
 
     @property

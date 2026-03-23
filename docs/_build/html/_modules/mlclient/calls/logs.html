@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mlclient.calls.logs_call &mdash; MLClient 0.4.1 documentation</title>
+  <title>mlclient.calls.logs &mdash; MLClient 0.4.1 documentation</title>
       <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/autodoc_pydantic.css" type="text/css" />
@@ -67,7 +67,7 @@
       <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
           <li class="breadcrumb-item"><a href="../../mlclient.html">mlclient</a></li>
-      <li class="breadcrumb-item active">mlclient.calls.logs_call</li>
+      <li class="breadcrumb-item active">mlclient.calls.logs</li>
       <li class="wy-breadcrumbs-aside">
       </li>
   </ul>
@@ -76,8 +76,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <h1>Source code for mlclient.calls.logs_call</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;The ML Logs Resource Call module.</span>
+  <h1>Source code for mlclient.calls.logs</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;The ML Logs Api Call module.</span>
 
 <span class="sd">It exports 1 class:</span>
 <span class="sd">    * LogsCall</span>
@@ -89,22 +89,24 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">dateutil</span><span class="w"> </span><span class="kn">import</span> <span class="n">parser</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">mlclient</span><span class="w"> </span><span class="kn">import</span> <span class="n">exceptions</span><span class="p">,</span> <span class="n">utils</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">mlclient.calls</span><span class="w"> </span><span class="kn">import</span> <span class="n">ResourceCall</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mlclient.calls.api_call</span><span class="w"> </span><span class="kn">import</span> <span class="n">ApiCall</span>
 
 
 <div class="viewcode-block" id="LogsCall">
 <a class="viewcode-back" href="../../../api/mlclient/calls/mlclient.calls.html#mlclient.calls.LogsCall">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">LogsCall</span><span class="p">(</span><span class="n">ResourceCall</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">LogsCall</span><span class="p">(</span><span class="n">ApiCall</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;A GET request to retrieve logs.</span>
 
-<span class="sd">    A ResourceCall implementation representing a single GET request</span>
-<span class="sd">    to the /manage/v2/logs REST Resource.</span>
+<span class="sd">    An ApiCall implementation representing a single GET request</span>
+<span class="sd">    to the /manage/v2/logs endpoint.</span>
 
 <span class="sd">    Returns the content of server log files.</span>
 <span class="sd">    Documentation of the REST Resource API: https://docs.marklogic.com/REST/GET/manage/v2/logs</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">_ENDPOINT</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;/manage/v2/logs&quot;</span>
+    <span class="n">_API_VERSION</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span>
+
+    <span class="n">_ENDPOINT</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;/manage/v</span><span class="si">{}</span><span class="s2">/logs&quot;</span>
 
     <span class="n">_FORMAT_PARAM</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;format&quot;</span>
     <span class="n">_FILENAME_PARAM</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;filename&quot;</span>
@@ -162,7 +164,7 @@
 <span class="sd">        str</span>
 <span class="sd">            A Logs call endpoint</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ENDPOINT</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ENDPOINT</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_API_VERSION</span><span class="p">)</span>
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_validate_params</span><span class="p">(</span>

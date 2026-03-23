@@ -78,41 +78,27 @@
   <h1>Source code for mlclient</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;The ML Client package.</span>
 
-<span class="sd">The root package of Python API to manage MarkLogic instance. It contains the most</span>
-<span class="sd">generic modules:</span>
-
-<span class="sd">    * ml_config</span>
-<span class="sd">        The ML Configuration module.</span>
-<span class="sd">    * ml_manager</span>
-<span class="sd">        The ML Manager module.</span>
-<span class="sd">    * ml_response_parser</span>
-<span class="sd">        The ML Response Parser module.</span>
-<span class="sd">    * constants</span>
-<span class="sd">        The ML Client Constants module.</span>
-<span class="sd">    * mimetypes</span>
-<span class="sd">        The ML Client Mimetypes module.</span>
-<span class="sd">    * exceptions</span>
-<span class="sd">        The ML Client Exceptions module.</span>
-<span class="sd">    * utils</span>
-<span class="sd">        The ML Client Utils module.</span>
+<span class="sd">The root package of Python API to manage MarkLogic instance.</span>
 
 <span class="sd">This package exports the following classes:</span>
 <span class="sd">    * MLClient</span>
-<span class="sd">        A low-level class used to send simple HTTP requests to a MarkLogic instance.</span>
-<span class="sd">    * MLResourceClient</span>
-<span class="sd">        A MLClient subclass calling ResourceCall implementation classes.</span>
-<span class="sd">    * MLResourcesClient</span>
-<span class="sd">        A MLResourceClient subclass supporting REST Resources of the MarkLogic server.</span>
-<span class="sd">    * MLConfiguration</span>
-<span class="sd">        A class representing MarkLogic configuration.</span>
-<span class="sd">    * MLManager</span>
-<span class="sd">        A high-level class managing a MarkLogic instance.</span>
+<span class="sd">        Main entry point for MarkLogic interaction with layered access.</span>
+<span class="sd">    * HttpClient</span>
+<span class="sd">        A low-level class used to send HTTP requests to a MarkLogic instance.</span>
+<span class="sd">    * ApiClient</span>
+<span class="sd">        A mid-level client providing call() for ApiCall objects.</span>
+<span class="sd">    * MLProfile</span>
+<span class="sd">        A class representing a MarkLogic configuration profile.</span>
+<span class="sd">    * MLClientManager</span>
+<span class="sd">        A high-level class managing MarkLogic clients for a given profile.</span>
 <span class="sd">    * MLResponseParser</span>
 <span class="sd">        A MarkLogic HTTP response parser.</span>
 
 <span class="sd">Examples</span>
 <span class="sd">--------</span>
-<span class="sd">&gt;&gt;&gt; from mlclient import MLResourcesClient</span>
+<span class="sd">&gt;&gt;&gt; from mlclient import MLClient</span>
+<span class="sd">&gt;&gt;&gt; with MLClient() as ml:</span>
+<span class="sd">...     resp = ml.manage.databases.get_list()</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">logging.config</span>
@@ -123,17 +109,16 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">utils</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.clients</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">DEFAULT_RETRY_STRATEGY</span><span class="p">,</span>
-    <span class="n">LOCAL_NS</span><span class="p">,</span>
     <span class="n">MARKLOGIC_ADMIN_API_PORT</span><span class="p">,</span>
     <span class="n">MARKLOGIC_MANAGE_API_PORT</span><span class="p">,</span>
     <span class="n">MARKLOGIC_REST_API_PORT</span><span class="p">,</span>
     <span class="n">RESTART_RETRY_STRATEGY</span><span class="p">,</span>
+    <span class="n">ApiClient</span><span class="p">,</span>
+    <span class="n">HttpClient</span><span class="p">,</span>
     <span class="n">MLClient</span><span class="p">,</span>
-    <span class="n">MLResourceClient</span><span class="p">,</span>
-    <span class="n">MLResourcesClient</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.ml_config</span><span class="w"> </span><span class="kn">import</span> <span class="n">MLConfiguration</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.ml_manager</span><span class="w"> </span><span class="kn">import</span> <span class="n">MLManager</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.ml_client_manager</span><span class="w"> </span><span class="kn">import</span> <span class="n">MLClientManager</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.ml_profile</span><span class="w"> </span><span class="kn">import</span> <span class="n">MLProfile</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.ml_response_parser</span><span class="w"> </span><span class="kn">import</span> <span class="n">MLResponseParser</span>
 
 
@@ -150,16 +135,15 @@
 <span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;0.4.1&quot;</span>
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
     <span class="s2">&quot;DEFAULT_RETRY_STRATEGY&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;LOCAL_NS&quot;</span><span class="p">,</span>
     <span class="s2">&quot;MARKLOGIC_ADMIN_API_PORT&quot;</span><span class="p">,</span>
     <span class="s2">&quot;MARKLOGIC_MANAGE_API_PORT&quot;</span><span class="p">,</span>
     <span class="s2">&quot;MARKLOGIC_REST_API_PORT&quot;</span><span class="p">,</span>
     <span class="s2">&quot;RESTART_RETRY_STRATEGY&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ApiClient&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;HttpClient&quot;</span><span class="p">,</span>
     <span class="s2">&quot;MLClient&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;MLConfiguration&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;MLManager&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;MLResourceClient&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;MLResourcesClient&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;MLClientManager&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;MLProfile&quot;</span><span class="p">,</span>
     <span class="s2">&quot;MLResponseParser&quot;</span><span class="p">,</span>
     <span class="s2">&quot;__version__&quot;</span><span class="p">,</span>
     <span class="s2">&quot;setup_logger&quot;</span><span class="p">,</span>

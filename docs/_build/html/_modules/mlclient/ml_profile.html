@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mlclient.ml_config &mdash; MLClient 0.4.1 documentation</title>
+  <title>mlclient.ml_profile &mdash; MLClient 0.4.1 documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/autodoc_pydantic.css" type="text/css" />
@@ -67,7 +67,7 @@
       <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
           <li class="breadcrumb-item"><a href="../mlclient.html">mlclient</a></li>
-      <li class="breadcrumb-item active">mlclient.ml_config</li>
+      <li class="breadcrumb-item active">mlclient.ml_profile</li>
       <li class="wy-breadcrumbs-aside">
       </li>
   </ul>
@@ -76,15 +76,15 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <h1>Source code for mlclient.ml_config</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;The ML Configuration module.</span>
+  <h1>Source code for mlclient.ml_profile</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;The ML Profile module.</span>
 
-<span class="sd">This module contains an API for MarkLogic configuration.</span>
+<span class="sd">This module contains an API for MarkLogic profile configuration.</span>
 <span class="sd">It exports the following classes:</span>
 
-<span class="sd">    * MLConfiguration</span>
-<span class="sd">        A class representing MarkLogic configuration.</span>
-<span class="sd">    * MLAppServerConfiguration</span>
+<span class="sd">    * MLProfile</span>
+<span class="sd">        A class representing a MarkLogic configuration profile.</span>
+<span class="sd">    * MLServerConfig</span>
 <span class="sd">        A class representing MarkLogic App Server configuration.</span>
 <span class="sd">    * AuthMethod</span>
 <span class="sd">        An enumeration class representing authorization methods.</span>
@@ -95,7 +95,6 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">Enum</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">yaml</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pydantic</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseModel</span><span class="p">,</span> <span class="n">Field</span><span class="p">,</span> <span class="n">field_serializer</span>
@@ -103,7 +102,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">mlclient</span><span class="w"> </span><span class="kn">import</span> <span class="n">constants</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mlclient.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">MLClientDirectoryNotFoundError</span><span class="p">,</span>
-    <span class="n">MLClientEnvironmentNotFoundError</span><span class="p">,</span>
+    <span class="n">MLClientProfileNotFoundError</span><span class="p">,</span>
     <span class="n">NoSuchAppServerError</span><span class="p">,</span>
 <span class="p">)</span>
 
@@ -111,7 +110,7 @@
 
 
 <div class="viewcode-block" id="AuthMethod">
-<a class="viewcode-back" href="../../api/mlclient/mlclient.html#mlclient.ml_config.AuthMethod">[docs]</a>
+<a class="viewcode-back" href="../../api/mlclient/mlclient.html#mlclient.ml_profile.AuthMethod">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">AuthMethod</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;An enumeration class representing authorization methods.&quot;&quot;&quot;</span>
 
@@ -120,9 +119,9 @@
 
 
 
-<div class="viewcode-block" id="MLAppServerConfiguration">
-<a class="viewcode-back" href="../../api/mlclient/mlclient.html#mlclient.ml_config.MLAppServerConfiguration">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">MLAppServerConfiguration</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+<div class="viewcode-block" id="MLServerConfig">
+<a class="viewcode-back" href="../../api/mlclient/mlclient.html#mlclient.ml_profile.MLServerConfig">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">MLServerConfig</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;A class representing MarkLogic App Server configuration.&quot;&quot;&quot;</span>
 
     <span class="n">identifier</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
@@ -140,8 +139,8 @@
         <span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="p">)</span>
 
-<div class="viewcode-block" id="MLAppServerConfiguration.serialize_auth">
-<a class="viewcode-back" href="../../api/mlclient/mlclient.html#mlclient.ml_config.MLAppServerConfiguration.serialize_auth">[docs]</a>
+<div class="viewcode-block" id="MLServerConfig.serialize_auth">
+<a class="viewcode-back" href="../../api/mlclient/mlclient.html#mlclient.ml_profile.MLServerConfig.serialize_auth">[docs]</a>
     <span class="nd">@field_serializer</span><span class="p">(</span><span class="s2">&quot;auth_method&quot;</span><span class="p">)</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">serialize_auth</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -154,20 +153,20 @@
 
 
 
-<div class="viewcode-block" id="MLConfiguration">
-<a class="viewcode-back" href="../../api/mlclient/mlclient.html#mlclient.ml_config.MLConfiguration">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">MLConfiguration</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;A class representing MarkLogic configuration.&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="MLProfile">
+<a class="viewcode-back" href="../../api/mlclient/mlclient.html#mlclient.ml_profile.MLProfile">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">MLProfile</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A class representing a MarkLogic configuration profile.&quot;&quot;&quot;</span>
 
     <span class="n">app_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">alias</span><span class="o">=</span><span class="s2">&quot;app-name&quot;</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;An application name&quot;</span><span class="p">)</span>
     <span class="n">protocol</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">&quot;An HTTP protocol&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s2">&quot;http&quot;</span><span class="p">)</span>
     <span class="n">host</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">&quot;A hostname&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s2">&quot;localhost&quot;</span><span class="p">)</span>
     <span class="n">username</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">&quot;An username&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s2">&quot;admin&quot;</span><span class="p">)</span>
     <span class="n">password</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">&quot;A password&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s2">&quot;admin&quot;</span><span class="p">)</span>
-    <span class="n">app_servers</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">MLAppServerConfiguration</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+    <span class="n">app_servers</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">MLServerConfig</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
         <span class="n">alias</span><span class="o">=</span><span class="s2">&quot;app-servers&quot;</span><span class="p">,</span>
         <span class="n">description</span><span class="o">=</span><span class="s2">&quot;App Servers configurations&#39; list&quot;</span><span class="p">,</span>
-        <span class="n">default</span><span class="o">=</span><span class="p">[</span><span class="n">MLAppServerConfiguration</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">&quot;manage&quot;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">8002</span><span class="p">,</span> <span class="n">rest</span><span class="o">=</span><span class="kc">True</span><span class="p">)],</span>
+        <span class="n">default</span><span class="o">=</span><span class="p">[</span><span class="n">MLServerConfig</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">&quot;manage&quot;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">8002</span><span class="p">,</span> <span class="n">rest</span><span class="o">=</span><span class="kc">True</span><span class="p">)],</span>
     <span class="p">)</span>
 
     <span class="nd">@property</span>
@@ -179,8 +178,8 @@
             <span class="n">app_server</span><span class="o">.</span><span class="n">identifier</span> <span class="k">for</span> <span class="n">app_server</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">app_servers</span> <span class="k">if</span> <span class="n">app_server</span><span class="o">.</span><span class="n">rest</span>
         <span class="p">]</span>
 
-<div class="viewcode-block" id="MLConfiguration.provide_config">
-<a class="viewcode-back" href="../../api/mlclient/mlclient.html#mlclient.ml_config.MLConfiguration.provide_config">[docs]</a>
+<div class="viewcode-block" id="MLProfile.provide_config">
+<a class="viewcode-back" href="../../api/mlclient/mlclient.html#mlclient.ml_profile.MLProfile.provide_config">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">provide_config</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">app_server_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -212,52 +211,52 @@
         <span class="k">return</span> <span class="p">{</span><span class="o">**</span><span class="n">ml_config</span><span class="p">,</span> <span class="o">**</span><span class="n">app_server_config</span><span class="p">}</span></div>
 
 
-<div class="viewcode-block" id="MLConfiguration.from_environment">
-<a class="viewcode-back" href="../../api/mlclient/mlclient.html#mlclient.ml_config.MLConfiguration.from_environment">[docs]</a>
+<div class="viewcode-block" id="MLProfile.load">
+<a class="viewcode-back" href="../../api/mlclient/mlclient.html#mlclient.ml_profile.MLProfile.load">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">from_environment</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load</span><span class="p">(</span>
         <span class="bp">cls</span><span class="p">,</span>
-        <span class="n">environment_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MLConfiguration</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Instantiate MLConfiguration from an environment.</span>
+        <span class="n">profile_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MLProfile</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Instantiate MLProfile from a named profile.</span>
 
 <span class="sd">        This method looks for a configuration file in the .mlclient directory.</span>
-<span class="sd">        An environment configuration needs to match a file name pattern</span>
-<span class="sd">        to be recognized: mlclient-&lt;environment-name&gt;.yaml.</span>
+<span class="sd">        A profile configuration needs to match a file name pattern</span>
+<span class="sd">        to be recognized: mlclient-&lt;profile-name&gt;.yaml.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        environment_name : str</span>
-<span class="sd">            An MLClient environment name</span>
+<span class="sd">        profile_name : str</span>
+<span class="sd">            A profile name</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        MLConfiguration</span>
-<span class="sd">            An MLConfiguration instance</span>
+<span class="sd">        MLProfile</span>
+<span class="sd">            An MLProfile instance</span>
 
 <span class="sd">        Raises</span>
 <span class="sd">        ------</span>
 <span class="sd">        MLClientDirectoryNotFoundError</span>
 <span class="sd">            If .mlclient directory has not been found</span>
-<span class="sd">        MLClientEnvironmentNotFoundError</span>
-<span class="sd">            If there&#39;s no .mlclient/mlclient-&lt;environment_name&gt;.yaml file</span>
+<span class="sd">        MLClientProfileNotFoundError</span>
+<span class="sd">            If there&#39;s no .mlclient/mlclient-&lt;profile_name&gt;.yaml file</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
-            <span class="s2">&quot;Loading MLClient configuration for the environment: [</span><span class="si">%s</span><span class="s2">]&quot;</span><span class="p">,</span>
-            <span class="n">environment_name</span><span class="p">,</span>
+            <span class="s2">&quot;Loading MLClient configuration for the profile: [</span><span class="si">%s</span><span class="s2">]&quot;</span><span class="p">,</span>
+            <span class="n">profile_name</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="n">env_file_path</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_find_mlclient_environment</span><span class="p">(</span><span class="n">environment_name</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">env_file_path</span><span class="p">)</span></div>
+        <span class="n">pro_file_path</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_find_mlclient_profile</span><span class="p">(</span><span class="n">profile_name</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">load_file</span><span class="p">(</span><span class="n">pro_file_path</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="MLConfiguration.from_file">
-<a class="viewcode-back" href="../../api/mlclient/mlclient.html#mlclient.ml_config.MLConfiguration.from_file">[docs]</a>
+<div class="viewcode-block" id="MLProfile.load_file">
+<a class="viewcode-back" href="../../api/mlclient/mlclient.html#mlclient.ml_profile.MLProfile.load_file">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">from_file</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load_file</span><span class="p">(</span>
         <span class="bp">cls</span><span class="p">,</span>
         <span class="n">file_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MLConfiguration</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Instantiate MLConfiguration from a file.</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MLProfile</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Instantiate MLProfile from a file.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -266,49 +265,49 @@
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        MLConfiguration</span>
-<span class="sd">            An MLConfiguration instance</span>
+<span class="sd">        MLProfile</span>
+<span class="sd">            An MLProfile instance</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Loading MLClient configuration from the file: [</span><span class="si">%s</span><span class="s2">]&quot;</span><span class="p">,</span> <span class="n">file_path</span><span class="p">)</span>
         <span class="n">source_config</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_get_source_config</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">MLConfiguration</span><span class="p">(</span><span class="o">**</span><span class="n">source_config</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">MLProfile</span><span class="p">(</span><span class="o">**</span><span class="n">source_config</span><span class="p">)</span></div>
 
 
     <span class="nd">@classmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_find_mlclient_environment</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_find_mlclient_profile</span><span class="p">(</span>
         <span class="bp">cls</span><span class="p">,</span>
-        <span class="n">environment_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">profile_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return MLClient environment configuration path.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return MLClient profile configuration path.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        environment_name : str</span>
-<span class="sd">            An MLClient environment name</span>
+<span class="sd">        profile_name : str</span>
+<span class="sd">            An MLClient profile name</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        str</span>
-<span class="sd">            An MLClient environment configuration path</span>
+<span class="sd">            An MLClient profile configuration path</span>
 
 <span class="sd">        Raises</span>
 <span class="sd">        ------</span>
 <span class="sd">        MLClientDirectoryNotFoundError</span>
 <span class="sd">            If .mlclient directory has not been found</span>
-<span class="sd">        MLClientEnvironmentNotFoundError</span>
-<span class="sd">            If there&#39;s no .mlclient/mlclient-&lt;environment_name&gt;.yaml file</span>
+<span class="sd">        MLClientProfileNotFoundError</span>
+<span class="sd">            If there&#39;s no .mlclient/mlclient-&lt;profile_name&gt;.yaml file</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">ml_client_dir</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_find_mlclient_directory</span><span class="p">(</span><span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">())</span>
-        <span class="n">env_file_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;mlclient-</span><span class="si">{</span><span class="n">environment_name</span><span class="si">}</span><span class="s2">.yaml&quot;</span>
-        <span class="n">env_file_path</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">ml_client_dir</span><span class="p">)</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">env_file_name</span><span class="p">),</span> <span class="kc">None</span><span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">env_file_path</span><span class="p">:</span>
+        <span class="n">pro_file_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;mlclient-</span><span class="si">{</span><span class="n">profile_name</span><span class="si">}</span><span class="s2">.yaml&quot;</span>
+        <span class="n">pro_file_path</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">ml_client_dir</span><span class="p">)</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">pro_file_name</span><span class="p">),</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">pro_file_path</span><span class="p">:</span>
             <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;MLClient&#39;s configuration has not been found for the environment &quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;[</span><span class="si">{</span><span class="n">environment_name</span><span class="si">}</span><span class="s2">]!&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;MLClient&#39;s profile configuration has not been found for &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;[</span><span class="si">{</span><span class="n">profile_name</span><span class="si">}</span><span class="s2">]!&quot;</span>
             <span class="p">)</span>
-            <span class="k">raise</span> <span class="n">MLClientEnvironmentNotFoundError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;MLClient configuration file found: [</span><span class="si">%s</span><span class="s2">]&quot;</span><span class="p">,</span> <span class="n">env_file_name</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">env_file_path</span><span class="o">.</span><span class="n">as_posix</span><span class="p">()</span>
+            <span class="k">raise</span> <span class="n">MLClientProfileNotFoundError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;MLClient configuration file found: [</span><span class="si">%s</span><span class="s2">]&quot;</span><span class="p">,</span> <span class="n">pro_file_name</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">pro_file_path</span><span class="o">.</span><span class="n">as_posix</span><span class="p">()</span>
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_find_mlclient_directory</span><span class="p">(</span>

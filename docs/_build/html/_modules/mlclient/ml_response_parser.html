@@ -114,7 +114,7 @@
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
-<span class="sd">    &gt;&gt;&gt; from mlclient import MLResourcesClient, MLResponseParser</span>
+<span class="sd">    &gt;&gt;&gt; from mlclient import MLClient, MLResponseParser</span>
 <span class="sd">    &gt;&gt;&gt; config = {</span>
 <span class="sd">    ...     &quot;host&quot;: &quot;localhost&quot;,</span>
 <span class="sd">    ...     &quot;port&quot;: 8002,</span>
@@ -122,8 +122,8 @@
 <span class="sd">    ...     &quot;password&quot;: &quot;admin&quot;,</span>
 <span class="sd">    ...     &quot;auth_method&quot;: &quot;digest&quot;,</span>
 <span class="sd">    ... }</span>
-<span class="sd">    &gt;&gt;&gt; with MLResourcesClient(**config) as client:</span>
-<span class="sd">    ...     resp = client.eval(xquery=&quot;xdmp:database() =&gt; xdmp:database-name()&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; with MLClient(**config) as ml:</span>
+<span class="sd">    ...     resp = ml.rest.eval.post(xquery=&quot;xdmp:database() =&gt; xdmp:database-name()&quot;)</span>
 <span class="sd">    ...     print(&quot;Raw:&quot;, resp.text)</span>
 <span class="sd">    ...     print(&quot;Parsed:&quot;, MLResponseParser.parse(resp))</span>
 <span class="sd">    ...</span>
@@ -138,9 +138,9 @@
 
     <span class="n">_PLAIN_TEXT_PARSERS</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
         <span class="n">const</span><span class="o">.</span><span class="n">HEADER_PRIMITIVE_STRING</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">data</span><span class="p">:</span> <span class="n">data</span><span class="p">,</span>
-        <span class="n">const</span><span class="o">.</span><span class="n">HEADER_PRIMITIVE_INTEGER</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">data</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">data</span><span class="p">),</span>
-        <span class="n">const</span><span class="o">.</span><span class="n">HEADER_PRIMITIVE_DECIMAL</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">data</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">data</span><span class="p">),</span>
-        <span class="n">const</span><span class="o">.</span><span class="n">HEADER_PRIMITIVE_BOOLEAN</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">data</span><span class="p">:</span> <span class="nb">bool</span><span class="p">(</span><span class="n">data</span><span class="p">),</span>
+        <span class="n">const</span><span class="o">.</span><span class="n">HEADER_PRIMITIVE_INTEGER</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">const</span><span class="o">.</span><span class="n">HEADER_PRIMITIVE_DECIMAL</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+        <span class="n">const</span><span class="o">.</span><span class="n">HEADER_PRIMITIVE_BOOLEAN</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
         <span class="n">const</span><span class="o">.</span><span class="n">HEADER_PRIMITIVE_DATE</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">data</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span>
             <span class="n">data</span><span class="p">,</span>
             <span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2">%z&quot;</span><span class="p">,</span>
@@ -187,7 +187,7 @@
 <span class="sd">            A parsed response body</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Attempt to parse a response&quot;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">is_success</span> <span class="ow">and</span> <span class="nb">int</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;Content-Length&quot;</span><span class="p">))</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">is_success</span> <span class="ow">and</span> <span class="nb">int</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;Content-Length&quot;</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">fine</span><span class="p">(</span><span class="s2">&quot;No content to parse&quot;</span><span class="p">)</span>
             <span class="k">return</span> <span class="p">[]</span>
 
@@ -222,7 +222,7 @@
 <span class="sd">            A parsed response body with headers</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Attempt to parse a response&quot;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">is_success</span> <span class="ow">and</span> <span class="nb">int</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;Content-Length&quot;</span><span class="p">))</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">is_success</span> <span class="ow">and</span> <span class="nb">int</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;Content-Length&quot;</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">fine</span><span class="p">(</span><span class="s2">&quot;No content to parse&quot;</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">response</span><span class="o">.</span><span class="n">headers</span><span class="p">,</span> <span class="p">[]</span>
 

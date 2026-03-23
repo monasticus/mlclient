@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mlclient.calls.eval_call &mdash; MLClient 0.4.1 documentation</title>
+  <title>mlclient.calls.eval &mdash; MLClient 0.4.1 documentation</title>
       <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/autodoc_pydantic.css" type="text/css" />
@@ -67,7 +67,7 @@
       <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
           <li class="breadcrumb-item"><a href="../../mlclient.html">mlclient</a></li>
-      <li class="breadcrumb-item active">mlclient.calls.eval_call</li>
+      <li class="breadcrumb-item active">mlclient.calls.eval</li>
       <li class="wy-breadcrumbs-aside">
       </li>
   </ul>
@@ -76,8 +76,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <h1>Source code for mlclient.calls.eval_call</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;The ML Eval Resource Call module.</span>
+  <h1>Source code for mlclient.calls.eval</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;The ML Eval Api Call module.</span>
 
 <span class="sd">It exports 1 class:</span>
 <span class="sd">    * EvalCall</span>
@@ -90,22 +90,24 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">json</span><span class="w"> </span><span class="kn">import</span> <span class="n">dumps</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">mlclient</span><span class="w"> </span><span class="kn">import</span> <span class="n">constants</span><span class="p">,</span> <span class="n">exceptions</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">mlclient.calls</span><span class="w"> </span><span class="kn">import</span> <span class="n">ResourceCall</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mlclient.calls.api_call</span><span class="w"> </span><span class="kn">import</span> <span class="n">ApiCall</span>
 
 
 <div class="viewcode-block" id="EvalCall">
 <a class="viewcode-back" href="../../../api/mlclient/calls/mlclient.calls.html#mlclient.calls.EvalCall">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">EvalCall</span><span class="p">(</span><span class="n">ResourceCall</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">EvalCall</span><span class="p">(</span><span class="n">ApiCall</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;A POST request to evaluate an ad-hoc query.</span>
 
-<span class="sd">    A ResourceCall implementation representing a single request</span>
-<span class="sd">    to the /v1/eval REST Resource.</span>
+<span class="sd">    A ApiCall implementation representing a single request</span>
+<span class="sd">    to the /v1/eval endpoint.</span>
 
 <span class="sd">    Evaluate an ad-hoc query expressed using XQuery or server-side JavaScript.</span>
 <span class="sd">    Documentation of the REST Resource API: https://docs.marklogic.com/REST/POST/v1/eval</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">_ENDPOINT</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;/v1/eval&quot;</span>
+    <span class="n">_API_VERSION</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="n">_ENDPOINT</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;/v</span><span class="si">{}</span><span class="s2">/eval&quot;</span>
 
     <span class="n">_XQ_PARAM</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;xquery&quot;</span>
     <span class="n">_JS_PARAM</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;javascript&quot;</span>
@@ -165,7 +167,7 @@
 <span class="sd">        str</span>
 <span class="sd">            An Eval call endpoint</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ENDPOINT</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ENDPOINT</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_API_VERSION</span><span class="p">)</span>
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_validate_params</span><span class="p">(</span>
@@ -188,7 +190,7 @@
         <span class="n">variables</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="n">code_lang</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_XQ_PARAM</span> <span class="k">if</span> <span class="n">xquery</span> <span class="k">else</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_JS_PARAM</span>
-        <span class="n">code_to_eval</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_normalize_code</span><span class="p">(</span><span class="n">xquery</span> <span class="k">if</span> <span class="n">xquery</span> <span class="k">else</span> <span class="n">javascript</span><span class="p">)</span>
+        <span class="n">code_to_eval</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_normalize_code</span><span class="p">(</span><span class="n">xquery</span> <span class="ow">or</span> <span class="n">javascript</span><span class="p">)</span>
         <span class="n">body</span> <span class="o">=</span> <span class="p">{</span><span class="n">code_lang</span><span class="p">:</span> <span class="n">code_to_eval</span><span class="p">}</span>
         <span class="k">if</span> <span class="n">variables</span><span class="p">:</span>
             <span class="n">body</span><span class="p">[</span><span class="bp">cls</span><span class="o">.</span><span class="n">_VARS_PARAM</span><span class="p">]</span> <span class="o">=</span> <span class="n">dumps</span><span class="p">(</span><span class="n">variables</span><span class="p">)</span>

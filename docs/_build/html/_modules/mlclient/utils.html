@@ -128,13 +128,13 @@
 <span class="sd">    UnsupportedFormatError</span>
 <span class="sd">        If the format provided is not being supported</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">data_format</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;xml&quot;</span><span class="p">]:</span>
+    <span class="k">if</span> <span class="n">data_format</span> <span class="o">==</span> <span class="s2">&quot;xml&quot;</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">constants</span><span class="o">.</span><span class="n">HEADER_XML</span>
-    <span class="k">if</span> <span class="n">data_format</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;json&quot;</span><span class="p">]:</span>
+    <span class="k">if</span> <span class="n">data_format</span> <span class="o">==</span> <span class="s2">&quot;json&quot;</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">constants</span><span class="o">.</span><span class="n">HEADER_JSON</span>
-    <span class="k">if</span> <span class="n">data_format</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;html&quot;</span><span class="p">]:</span>
+    <span class="k">if</span> <span class="n">data_format</span> <span class="o">==</span> <span class="s2">&quot;html&quot;</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">constants</span><span class="o">.</span><span class="n">HEADER_HTML</span>
-    <span class="k">if</span> <span class="n">data_format</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;text&quot;</span><span class="p">]:</span>
+    <span class="k">if</span> <span class="n">data_format</span> <span class="o">==</span> <span class="s2">&quot;text&quot;</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">constants</span><span class="o">.</span><span class="n">HEADER_PLAIN_TEXT</span>
 
     <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Provided format [</span><span class="si">{</span><span class="n">data_format</span><span class="si">}</span><span class="s2">] is not supported.&quot;</span>

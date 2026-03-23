@@ -21,7 +21,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Command Line Interface" href="cli.html" />
-    <link rel="prev" title="mlclient.model package" href="../api/mlclient/model/mlclient.model.html" /> 
+    <link rel="prev" title="mlclient.structures package" href="../api/mlclient/structures/mlclient.structures.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -50,9 +50,9 @@
 <p class="caption" role="heading"><span class="caption-text">User Guide:</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Setup</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#yaml-configuration-file">YAML Configuration file</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#mlconfiguration-class">MLConfiguration class</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#mlmanager-class">MLManager class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#yaml-profile-file">YAML Profile file</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#mlprofile-class">MLProfile class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#mlclientmanager-class">MLClientManager class</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="cli.html">Command Line Interface</a></li>
@@ -85,11 +85,11 @@
              
   <section id="setup">
 <h1>Setup<a class="headerlink" href="#setup" title="Link to this heading"></a></h1>
-<p>When using <strong>ML Client</strong> in your application it can be helpful to setup <strong>ML Client</strong>’s configuration.
+<p>When using <strong>ML Client</strong> in your application it can be helpful to setup <strong>ML Client</strong>’s profile.
 It will make it easier to use <code class="docutils literal notranslate"><span class="pre">mlclient</span></code> lib without explicit use of ML configuration parameters.
 Using a YAML file, you’re able to easily get a configuration for a MLClient instance.</p>
-<section id="yaml-configuration-file">
-<h2>YAML Configuration file<a class="headerlink" href="#yaml-configuration-file" title="Link to this heading"></a></h2>
+<section id="yaml-profile-file">
+<h2>YAML Profile file<a class="headerlink" href="#yaml-profile-file" title="Link to this heading"></a></h2>
 <p>Assume you want to manage your ML application called <em>migration-app</em>.
 First create a <code class="docutils literal notranslate"><span class="pre">.mlclient</span></code> directory in root of your project and a YAML file within:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>migration-app
@@ -132,53 +132,50 @@ First create a <code class="docutils literal notranslate"><span class="pre">.mlc
 </div>
 </div></blockquote>
 </section>
-<section id="mlconfiguration-class">
-<h2>MLConfiguration class<a class="headerlink" href="#mlconfiguration-class" title="Link to this heading"></a></h2>
-<p>Having the configuration file, you can instantiate <code class="docutils literal notranslate"><span class="pre">MLConfiguration</span></code> class using your environment:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mlclient</span><span class="w"> </span><span class="kn">import</span> <span class="n">MLConfiguration</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ml_config</span> <span class="o">=</span> <span class="n">MLConfiguration</span><span class="o">.</span><span class="n">from_environment</span><span class="p">(</span><span class="s2">&quot;local&quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ml_config</span>
-<span class="go">MLConfiguration(app_name=&#39;migration-app&#39;, protocol=&#39;http&#39;, host=&#39;localhost&#39;, username=&#39;admin&#39;, password=&#39;admin&#39;, app_servers=[MLAppServerConfiguration(identifier=&#39;manage&#39;, port=8002, auth=&lt;AuthMethod.BASIC: &#39;basic&#39;&gt;), MLAppServerConfiguration(identifier=&#39;content&#39;, port=8100, auth=&lt;AuthMethod.BASIC: &#39;basic&#39;&gt;), MLAppServerConfiguration(identifier=&#39;modules&#39;, port=8101, auth=&lt;AuthMethod.BASIC: &#39;basic&#39;&gt;), MLAppServerConfiguration(identifier=&#39;schemas&#39;, port=8102, auth=&lt;AuthMethod.BASIC: &#39;basic&#39;&gt;), MLAppServerConfiguration(identifier=&#39;test&#39;, port=8103, auth=&lt;AuthMethod.BASIC: &#39;basic&#39;&gt;)])</span>
+<section id="mlprofile-class">
+<h2>MLProfile class<a class="headerlink" href="#mlprofile-class" title="Link to this heading"></a></h2>
+<p>Having the profile file, you can instantiate <code class="docutils literal notranslate"><span class="pre">MLProfile</span></code> class using your profile:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mlclient</span><span class="w"> </span><span class="kn">import</span> <span class="n">MLProfile</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">profile</span> <span class="o">=</span> <span class="n">MLProfile</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;local&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">profile</span>
+<span class="go">MLProfile(app_name=&#39;migration-app&#39;, protocol=&#39;http&#39;, host=&#39;localhost&#39;, username=&#39;admin&#39;, password=&#39;admin&#39;, app_servers=[MLServerConfig(identifier=&#39;manage&#39;, port=8002, auth=&lt;AuthMethod.BASIC: &#39;basic&#39;&gt;), MLServerConfig(identifier=&#39;content&#39;, port=8100, auth=&lt;AuthMethod.BASIC: &#39;basic&#39;&gt;), MLServerConfig(identifier=&#39;modules&#39;, port=8101, auth=&lt;AuthMethod.BASIC: &#39;basic&#39;&gt;), MLServerConfig(identifier=&#39;schemas&#39;, port=8102, auth=&lt;AuthMethod.BASIC: &#39;basic&#39;&gt;), MLServerConfig(identifier=&#39;test&#39;, port=8103, auth=&lt;AuthMethod.BASIC: &#39;basic&#39;&gt;)])</span>
 </pre></div>
 </div>
 <p>This code will work in every subdirectory of the <code class="docutils literal notranslate"><span class="pre">migration-app</span></code> project as it looks for <code class="docutils literal notranslate"><span class="pre">.mlclient</span></code> recursively.</p>
-<p><code class="docutils literal notranslate"><span class="pre">MLConfiguration</span></code> class allows you to get a specific app service config:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mlclient</span><span class="w"> </span><span class="kn">import</span> <span class="n">MLConfiguration</span><span class="p">,</span> <span class="n">MLResourcesClient</span><span class="p">,</span> <span class="n">MLResponseParser</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ml_config</span> <span class="o">=</span> <span class="n">MLConfiguration</span><span class="o">.</span><span class="n">from_environment</span><span class="p">(</span><span class="s2">&quot;local&quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">app_config</span> <span class="o">=</span> <span class="n">ml_config</span><span class="o">.</span><span class="n">provide_config</span><span class="p">(</span><span class="s2">&quot;content&quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">MLResourcesClient</span><span class="p">(</span><span class="o">**</span><span class="n">app_config</span><span class="p">)</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
-<span class="gp">... </span>    <span class="n">resp</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="n">xquery</span><span class="o">=</span><span class="s2">&quot;xdmp:database() =&gt; xdmp:database-name()&quot;</span><span class="p">)</span>
-<span class="gp">... </span>    <span class="n">parsed_resp</span> <span class="o">=</span> <span class="n">MLResponseParser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">resp</span><span class="p">)</span>
+<p><code class="docutils literal notranslate"><span class="pre">MLProfile</span></code> class allows you to get a specific app service config:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mlclient</span><span class="w"> </span><span class="kn">import</span> <span class="n">MLClient</span><span class="p">,</span> <span class="n">MLProfile</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">profile</span> <span class="o">=</span> <span class="n">MLProfile</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;local&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">MLClient</span><span class="p">(</span><span class="o">**</span><span class="n">profile</span><span class="o">.</span><span class="n">provide_config</span><span class="p">(</span><span class="s2">&quot;content&quot;</span><span class="p">))</span> <span class="k">as</span> <span class="n">ml</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">result</span> <span class="o">=</span> <span class="n">ml</span><span class="o">.</span><span class="n">eval</span><span class="o">.</span><span class="n">xquery</span><span class="p">(</span><span class="s2">&quot;xdmp:database() =&gt; xdmp:database-name()&quot;</span><span class="p">)</span>
 <span class="gp">...</span>
 </pre></div>
 </div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>If you would like to use MLConfiguration class without setting up an environment,
-you can use <code class="docutils literal notranslate"><span class="pre">MLConfiguration.from_file()</span></code> method:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mlclient</span><span class="w"> </span><span class="kn">import</span> <span class="n">MLConfiguration</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ml_config</span> <span class="o">=</span> <span class="n">MLConfiguration</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="s2">&quot;mlclient.yaml&quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ml_config</span>
-<span class="go">MLConfiguration(app_name=&#39;migration-app&#39;, protocol=&#39;http&#39;, host=&#39;localhost&#39;, username=&#39;admin&#39;, password=&#39;admin&#39;, app_servers=[MLAppServerConfiguration(identifier=&#39;manage&#39;, port=8002, auth=&lt;AuthMethod.BASIC: &#39;basic&#39;&gt;), MLAppServerConfiguration(identifier=&#39;content&#39;, port=8100, auth=&lt;AuthMethod.BASIC: &#39;basic&#39;&gt;), MLAppServerConfiguration(identifier=&#39;modules&#39;, port=8101, auth=&lt;AuthMethod.BASIC: &#39;basic&#39;&gt;), MLAppServerConfiguration(identifier=&#39;schemas&#39;, port=8102, auth=&lt;AuthMethod.BASIC: &#39;basic&#39;&gt;), MLAppServerConfiguration(identifier=&#39;test&#39;, port=8103, auth=&lt;AuthMethod.BASIC: &#39;basic&#39;&gt;)])</span>
+<p>If you want to load a profile from a specific file path instead of relying on
+the <code class="docutils literal notranslate"><span class="pre">.mlclient</span></code> directory lookup, you can use <code class="docutils literal notranslate"><span class="pre">MLProfile.load_file()</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mlclient</span><span class="w"> </span><span class="kn">import</span> <span class="n">MLProfile</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">profile</span> <span class="o">=</span> <span class="n">MLProfile</span><span class="o">.</span><span class="n">load_file</span><span class="p">(</span><span class="s2">&quot;path/to/mlclient-local.yaml&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">profile</span>
+<span class="go">MLProfile(app_name=&#39;migration-app&#39;, protocol=&#39;http&#39;, host=&#39;localhost&#39;, username=&#39;admin&#39;, password=&#39;admin&#39;, app_servers=[MLServerConfig(identifier=&#39;manage&#39;, port=8002, auth=&lt;AuthMethod.BASIC: &#39;basic&#39;&gt;), MLServerConfig(identifier=&#39;content&#39;, port=8100, auth=&lt;AuthMethod.BASIC: &#39;basic&#39;&gt;), MLServerConfig(identifier=&#39;modules&#39;, port=8101, auth=&lt;AuthMethod.BASIC: &#39;basic&#39;&gt;), MLServerConfig(identifier=&#39;schemas&#39;, port=8102, auth=&lt;AuthMethod.BASIC: &#39;basic&#39;&gt;), MLServerConfig(identifier=&#39;test&#39;, port=8103, auth=&lt;AuthMethod.BASIC: &#39;basic&#39;&gt;)])</span>
 </pre></div>
 </div>
 </div>
 </section>
-<section id="mlmanager-class">
-<h2>MLManager class<a class="headerlink" href="#mlmanager-class" title="Link to this heading"></a></h2>
-<p>To make it easier, <code class="docutils literal notranslate"><span class="pre">mlclient</span></code> lib provides you a <code class="docutils literal notranslate"><span class="pre">MLManager</span></code> class with the highest-level API.
+<section id="mlclientmanager-class">
+<h2>MLClientManager class<a class="headerlink" href="#mlclientmanager-class" title="Link to this heading"></a></h2>
+<p>To make it easier, <code class="docutils literal notranslate"><span class="pre">mlclient</span></code> lib provides you a <code class="docutils literal notranslate"><span class="pre">MLClientManager</span></code> class with the highest-level API.
 The same logic as in the above example we will achieve in fewer steps:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mlclient</span><span class="w"> </span><span class="kn">import</span> <span class="n">MLManager</span><span class="p">,</span> <span class="n">MLResponseParser</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ml_manager</span> <span class="o">=</span> <span class="n">MLManager</span><span class="p">(</span><span class="s2">&quot;local&quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">ml_manager</span><span class="o">.</span><span class="n">get_resources_client</span><span class="p">(</span><span class="s2">&quot;content&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
-<span class="gp">... </span>    <span class="n">resp</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="n">xquery</span><span class="o">=</span><span class="s2">&quot;xdmp:database() =&gt; xdmp:database-name()&quot;</span><span class="p">)</span>
-<span class="gp">... </span>    <span class="n">parsed_resp</span> <span class="o">=</span> <span class="n">MLResponseParser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">resp</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mlclient</span><span class="w"> </span><span class="kn">import</span> <span class="n">MLClientManager</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mgr</span> <span class="o">=</span> <span class="n">MLClientManager</span><span class="p">(</span><span class="s2">&quot;local&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">mgr</span><span class="o">.</span><span class="n">get_client</span><span class="p">(</span><span class="s2">&quot;content&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">ml</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">result</span> <span class="o">=</span> <span class="n">ml</span><span class="o">.</span><span class="n">eval</span><span class="o">.</span><span class="n">xquery</span><span class="p">(</span><span class="s2">&quot;xdmp:database() =&gt; xdmp:database-name()&quot;</span><span class="p">)</span>
 <span class="gp">...</span>
 </pre></div>
 </div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p><code class="docutils literal notranslate"><span class="pre">MLManager</span></code> is accessible only using ML Client Environments.</p>
+<p><code class="docutils literal notranslate"><span class="pre">MLClientManager</span></code> is accessible only using ML Client Profiles.</p>
 </div>
 </section>
 </section>
@@ -187,7 +184,7 @@ The same logic as in the above example we will achieve in fewer steps:</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="../api/mlclient/model/mlclient.model.html" class="btn btn-neutral float-left" title="mlclient.model package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../api/mlclient/structures/mlclient.structures.html" class="btn btn-neutral float-left" title="mlclient.structures package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="cli.html" class="btn btn-neutral float-right" title="Command Line Interface" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

@@ -10,9 +10,8 @@ call logs
       call logs [options]
 
     Options:
-      -e, --environment=ENVIRONMENT  The ML Client environment name [default: "local"]
-      -a, --app-server=APP-SERVER    The App-Server (port) to get logs of
-      -s, --rest-server=REST-SERVER  The ML REST Server environmental id (to get logs from)
+      -p, --profile=PROFILE          The ML Client profile name [default: "local"]
+      -s, --app-server=APP-SERVER    The App-Server (port) to get logs of
       -l, --log-type=LOG-TYPE        MarkLogic log type (error, access or request) [default: "error"]
       -f, --from=FROM                A start time to search error logs
       -t, --to=TO                    n end time to search error logs
@@ -44,25 +43,25 @@ Get all logs
 
 .. code-block:: bash
 
-    ml call logs -a 8002
+    ml call logs -s 8002
 
 *8002_ErrorLog.txt*
 
 .. code-block:: bash
 
-    ml call logs -a 8002 -l error
+    ml call logs -s 8002 -l error
 
 *8002_AccessLog.txt*
 
 .. code-block:: bash
 
-    ml call logs -a 8002 -l access
+    ml call logs -s 8002 -l access
 
 *8002_RequestLog.txt*
 
 .. code-block:: bash
 
-    ml call logs -a 8002 -l request
+    ml call logs -s 8002 -l request
 
 *ErrorLog.txt*
 
@@ -74,13 +73,13 @@ Get all logs
 
 .. code-block:: bash
 
-    ml call logs -a TaskServer
+    ml call logs -s TaskServer
 
 *TaskServer_ErrorLog.txt*
 
 .. code-block:: bash
 
-    ml call logs -a 0
+    ml call logs -s 0
 
 
 Get limited logs
@@ -95,23 +94,23 @@ Time frames
 
 .. code-block:: bash
 
-    ml call logs -a 8002 -f 10:00
+    ml call logs -s 8002 -f 10:00
 
 .. code-block:: bash
 
-    ml call logs -a 8002 -t 12:00
+    ml call logs -s 8002 -t 12:00
 
 .. code-block:: bash
 
-    ml call logs -a 8002 -f 10:00 -t 12:00
+    ml call logs -s 8002 -f 10:00 -t 12:00
 
 .. code-block:: bash
 
-    ml call logs -a 8002 -f 2024-02-01 -t 2024-02-03
+    ml call logs -s 8002 -f 2024-02-01 -t 2024-02-03
 
 .. code-block:: bash
 
-    ml call logs -a 8002 -f '2024-02-01 10:00' -t 2024-02-03
+    ml call logs -s 8002 -f '2024-02-01 10:00' -t 2024-02-03
 
 
 RegEx
@@ -119,16 +118,16 @@ RegEx
 
 .. code-block:: bash
 
-    ml call logs -a 8002 -r 'Forest Meters'
+    ml call logs -s 8002 -r 'Forest Meters'
 
 .. code-block:: bash
 
-    ml call logs -a 8002 -r 'Forest M.*'
+    ml call logs -s 8002 -r 'Forest M.*'
 
 .. code-block:: bash
 
-    ml call logs -a 8002 -r 'Memory [^1]{1,2}%'
+    ml call logs -s 8002 -r 'Memory [^1]{1,2}%'
 
 .. code-block:: bash
 
-    ml call logs -a 8002 -f 2024-02-01 -t 2024-02-03 -r 'Memory [^1]{1,2}%'
+    ml call logs -s 8002 -f 2024-02-01 -t 2024-02-03 -r 'Memory [^1]{1,2}%'

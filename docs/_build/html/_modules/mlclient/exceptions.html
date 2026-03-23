@@ -86,8 +86,8 @@
 <span class="sd">        A custom Exception class for an unsupported format.</span>
 <span class="sd">    * MLClientDirectoryNotFoundError</span>
 <span class="sd">        A custom Exception class for a non-existing MLClient configuration directory.</span>
-<span class="sd">    * MLClientEnvironmentNotFoundError</span>
-<span class="sd">        A custom Exception class for a non-existing MLClient environment.</span>
+<span class="sd">    * MLClientProfileNotFoundError</span>
+<span class="sd">        A custom Exception class for a non-existing MLClient profile.</span>
 <span class="sd">    * NoSuchAppServerError</span>
 <span class="sd">        A custom Exception class for a non-existing app server configuration.</span>
 <span class="sd">    * NotARestServerError</span>
@@ -130,17 +130,17 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">MLClientDirectoryNotFoundError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;A custom Exception class for a non-existing MLClient configuration directory.</span>
 
-<span class="sd">    Raised when initializing an MLConfiguration from an environment.</span>
+<span class="sd">    Raised when loading an MLProfile.</span>
 <span class="sd">    &quot;&quot;&quot;</span></div>
 
 
 
-<div class="viewcode-block" id="MLClientEnvironmentNotFoundError">
-<a class="viewcode-back" href="../../api/mlclient/mlclient.html#mlclient.exceptions.MLClientEnvironmentNotFoundError">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">MLClientEnvironmentNotFoundError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;A custom Exception class for a non-existing MLClient environment.</span>
+<div class="viewcode-block" id="MLClientProfileNotFoundError">
+<a class="viewcode-back" href="../../api/mlclient/mlclient.html#mlclient.exceptions.MLClientProfileNotFoundError">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">MLClientProfileNotFoundError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A custom Exception class for a non-existing MLClient profile.</span>
 
-<span class="sd">    Raised when initializing an MLConfiguration from an environment.</span>
+<span class="sd">    Raised when loading an MLProfile.</span>
 <span class="sd">    &quot;&quot;&quot;</span></div>
 
 
@@ -150,7 +150,7 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">NoSuchAppServerError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;A custom Exception class for a non-existing app server configuration.</span>
 
-<span class="sd">    Raised when getting an app server config from an MLConfiguration instance.</span>
+<span class="sd">    Raised when getting an app server config from an MLProfile instance.</span>
 <span class="sd">    &quot;&quot;&quot;</span></div>
 
 
@@ -235,7 +235,7 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">ResourceNotFoundError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;A custom Exception class for a not found resource.</span>
 
-<span class="sd">    Raised while attempting to get a resource that does exist.</span>
+<span class="sd">    Raised while attempting to get a resource that does not exist.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>

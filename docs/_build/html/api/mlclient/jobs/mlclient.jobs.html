@@ -20,7 +20,7 @@
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
-    <link rel="next" title="mlclient.model package" href="../model/mlclient.model.html" />
+    <link rel="next" title="mlclient.structures package" href="../structures/mlclient.structures.html" />
     <link rel="prev" title="mlclient.clients package" href="../clients/mlclient.clients.html" /> 
 </head>
 
@@ -46,9 +46,6 @@
               <p class="caption" role="heading"><span class="caption-text">Python API:</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="reference internal" href="../mlclient.html">mlclient package</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="../mlclient.html#mlclient.MLManager"><code class="docutils literal notranslate"><span class="pre">MLManager</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="../mlclient.html#mlclient.MLResponseParser"><code class="docutils literal notranslate"><span class="pre">MLResponseParser</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="../mlclient.html#mlclient.setup_logger"><code class="docutils literal notranslate"><span class="pre">setup_logger()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="../calls/mlclient.calls.html">mlclient.calls package</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../clients/mlclient.clients.html">mlclient.clients package</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">mlclient.jobs package</a><ul>
@@ -92,8 +89,8 @@
 </li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="../model/mlclient.model.html">mlclient.model package</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../mlclient.html#module-mlclient.ml_config">mlclient.ml_config module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../structures/mlclient.structures.html">mlclient.structures package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../mlclient.html#module-mlclient.ml_profile">mlclient.ml_profile module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../mlclient.html#module-mlclient.constants">mlclient.constants module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../mlclient.html#module-mlclient.exceptions">mlclient.exceptions module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../mlclient.html#module-mlclient.utils">mlclient.utils module</a></li>
@@ -285,7 +282,7 @@ It contains the following modules</p>
 <p>A class parsing files into Documents.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="mlclient.jobs.DocumentsLoader.load">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uri_prefix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raw</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Generator</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../model/mlclient.model.html#mlclient.model.Document" title="mlclient.model.Document"><span class="pre">Document</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/mlclient/jobs/documents_jobs.html#DocumentsLoader.load"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.jobs.DocumentsLoader.load" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uri_prefix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raw</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Generator</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../structures/mlclient.structures.html#mlclient.structures.Document" title="mlclient.structures.documents.Document"><span class="pre">Document</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/mlclient/jobs/documents_jobs.html#DocumentsLoader.load"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.jobs.DocumentsLoader.load" title="Link to this definition"></a></dt>
 <dd><p>Load documents from files under a path.</p>
 <p>When the path points to a file - yields a single Document with URI set to
 the file name. Otherwise, yields documents with URIs without the input path
@@ -306,14 +303,14 @@ Metadata is identified for a file at the same level with .metadata.json or
 <dd class="field-even"><p>A generator of Document instances</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Generator[<a class="reference internal" href="../model/mlclient.model.html#mlclient.model.Document" title="mlclient.model.Document">Document</a>]</p>
+<dd class="field-odd"><p>Generator[<a class="reference internal" href="../structures/mlclient.structures.html#mlclient.structures.Document" title="mlclient.structures.Document">Document</a>]</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mlclient.jobs.DocumentsLoader.load_document">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load_document</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uri</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raw</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="../model/mlclient.model.html#mlclient.model.Document" title="mlclient.model.Document"><span class="pre">Document</span></a></span></span><a class="reference internal" href="../../../_modules/mlclient/jobs/documents_jobs.html#DocumentsLoader.load_document"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.jobs.DocumentsLoader.load_document" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load_document</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uri</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raw</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="../structures/mlclient.structures.html#mlclient.structures.Document" title="mlclient.structures.documents.Document"><span class="pre">Document</span></a></span></span><a class="reference internal" href="../../../_modules/mlclient/jobs/documents_jobs.html#DocumentsLoader.load_document"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.jobs.DocumentsLoader.load_document" title="Link to this definition"></a></dt>
 <dd><p>Load a document from a file.</p>
 <p>By default, returns a Document without URI. It can be customized with
 the uri parameter.
@@ -333,7 +330,7 @@ Metadata is identified for a file at the same level with .metadata.json or
 <dd class="field-even"><p>A Document instance</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="../model/mlclient.model.html#mlclient.model.Document" title="mlclient.model.Document">Document</a></p>
+<dd class="field-odd"><p><a class="reference internal" href="../structures/mlclient.structures.html#mlclient.structures.Document" title="mlclient.structures.Document">Document</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -353,7 +350,7 @@ Metadata is identified for a file at the same level with .metadata.json or
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mlclient.jobs.ReadDocumentsJob.get_documents">
-<span class="sig-name descname"><span class="pre">get_documents</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../model/mlclient.model.html#mlclient.model.Document" title="mlclient.structures.documents.Document"><span class="pre">Document</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/mlclient/jobs/documents_jobs.html#ReadDocumentsJob.get_documents"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.jobs.ReadDocumentsJob.get_documents" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_documents</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../structures/mlclient.structures.html#mlclient.structures.Document" title="mlclient.structures.documents.Document"><span class="pre">Document</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/mlclient/jobs/documents_jobs.html#ReadDocumentsJob.get_documents"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.jobs.ReadDocumentsJob.get_documents" title="Link to this definition"></a></dt>
 <dd><p>Return all read documents from the job.</p>
 </dd></dl>
 
@@ -406,11 +403,11 @@ Metadata is identified for a file at the same level with .metadata.json or
 <p>A multi-thread job writing documents into a MarkLogic database.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="mlclient.jobs.WriteDocumentsJob.with_documents_input">
-<span class="sig-name descname"><span class="pre">with_documents_input</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">documents</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../model/mlclient.model.html#mlclient.model.Document" title="mlclient.structures.documents.Document"><span class="pre">Document</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/mlclient/jobs/documents_jobs.html#WriteDocumentsJob.with_documents_input"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.jobs.WriteDocumentsJob.with_documents_input" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">with_documents_input</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">documents</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../structures/mlclient.structures.html#mlclient.structures.Document" title="mlclient.structures.documents.Document"><span class="pre">Document</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/mlclient/jobs/documents_jobs.html#WriteDocumentsJob.with_documents_input"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlclient.jobs.WriteDocumentsJob.with_documents_input" title="Link to this definition"></a></dt>
 <dd><p>Add Documents to the job’s input.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>documents</strong> (<em>Iterable</em><em>[</em><a class="reference internal" href="../model/mlclient.model.html#mlclient.model.Document" title="mlclient.model.Document"><em>Document</em></a><em>]</em>) – Documents to be written into a MarkLogic database</p>
+<dd class="field-odd"><p><strong>documents</strong> (<em>Iterable</em><em>[</em><a class="reference internal" href="../structures/mlclient.structures.html#mlclient.structures.Document" title="mlclient.structures.Document"><em>Document</em></a><em>]</em>) – Documents to be written into a MarkLogic database</p>
 </dd>
 </dl>
 </dd></dl>
@@ -438,7 +435,7 @@ Metadata is identified for a file at the same level with .metadata.json or
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="../clients/mlclient.clients.html" class="btn btn-neutral float-left" title="mlclient.clients package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="../model/mlclient.model.html" class="btn btn-neutral float-right" title="mlclient.model package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="../structures/mlclient.structures.html" class="btn btn-neutral float-right" title="mlclient.structures package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

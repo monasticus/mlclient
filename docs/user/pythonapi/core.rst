@@ -97,13 +97,13 @@ API tiers and port routing
 
 MarkLogic exposes three separate HTTP API tiers, each bound to a fixed port:
 
-========================  ==========  ===========================
-Tier                      Port        Endpoints
-========================  ==========  ===========================
-Client (REST) API         8000/custom ``/v1/*``
-Admin API                 8001        ``/admin/v1/*``
-Management API            8002        ``/manage/v2/*``
-========================  ==========  ===========================
+========================  ===========  ===========================
+Tier                      Port         Endpoints
+========================  ===========  ===========================
+Client (REST) API         8000/custom  ``/v1/*``
+Admin API                 8001         ``/admin/v1/*``
+Management API            8002         ``/manage/v2/*``
+========================  ===========  ===========================
 
 Port 8000 is the default App-Services REST server. Custom REST app servers
 (created via the Management API) also serve ``/v1/*`` on their configured port.

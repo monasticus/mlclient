@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mlclient.calls.documents_call &mdash; MLClient 0.4.1 documentation</title>
+  <title>mlclient.calls.documents &mdash; MLClient 0.4.1 documentation</title>
       <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/autodoc_pydantic.css" type="text/css" />
@@ -67,7 +67,7 @@
       <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
           <li class="breadcrumb-item"><a href="../../mlclient.html">mlclient</a></li>
-      <li class="breadcrumb-item active">mlclient.calls.documents_call</li>
+      <li class="breadcrumb-item active">mlclient.calls.documents</li>
       <li class="wy-breadcrumbs-aside">
       </li>
   </ul>
@@ -76,10 +76,10 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <h1>Source code for mlclient.calls.documents_call</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;The ML Documents Resource Calls module.</span>
+  <h1>Source code for mlclient.calls.documents</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;The ML Documents Api Calls module.</span>
 
-<span class="sd">It exports 1 class:</span>
+<span class="sd">It exports 3 classes:</span>
 <span class="sd">    * DocumentsGetCall</span>
 <span class="sd">        A GET request to retrieve documents&#39; content or metadata.</span>
 <span class="sd">    * DocumentsPostCall</span>
@@ -97,7 +97,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">urllib3.fields</span><span class="w"> </span><span class="kn">import</span> <span class="n">RequestField</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">mlclient</span><span class="w"> </span><span class="kn">import</span> <span class="n">constants</span><span class="p">,</span> <span class="n">exceptions</span><span class="p">,</span> <span class="n">utils</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">mlclient.calls</span><span class="w"> </span><span class="kn">import</span> <span class="n">ResourceCall</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mlclient.calls.api_call</span><span class="w"> </span><span class="kn">import</span> <span class="n">ApiCall</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mlclient.constants</span><span class="w"> </span><span class="kn">import</span> <span class="n">HEADER_JSON</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">mlclient.structures.calls</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">Category</span><span class="p">,</span>
@@ -108,17 +108,19 @@
 
 <div class="viewcode-block" id="DocumentsGetCall">
 <a class="viewcode-back" href="../../../api/mlclient/calls/mlclient.calls.html#mlclient.calls.DocumentsGetCall">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">DocumentsGetCall</span><span class="p">(</span><span class="n">ResourceCall</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">DocumentsGetCall</span><span class="p">(</span><span class="n">ApiCall</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;A GET request to retrieve documents&#39; content or metadata.</span>
 
-<span class="sd">    A ResourceCall implementation representing a single GET request</span>
-<span class="sd">    to the /v1/documents REST Resource.</span>
+<span class="sd">    A ApiCall implementation representing a single GET request</span>
+<span class="sd">    to the /v1/documents endpoint.</span>
 
 <span class="sd">    Retrieve document content and/or metadata from the database.</span>
 <span class="sd">    Documentation of the REST Resource API: https://docs.marklogic.com/REST/GET/v1/documents</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">_ENDPOINT</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;/v1/documents&quot;</span>
+    <span class="n">_API_VERSION</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="n">_ENDPOINT</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;/v</span><span class="si">{}</span><span class="s2">/documents&quot;</span>
 
     <span class="n">_URI_PARAM</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;uri&quot;</span>
     <span class="n">_DATABASE_PARAM</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;database&quot;</span>
@@ -175,7 +177,7 @@
 <span class="sd">            Names a content transformation previously installed via</span>
 <span class="sd">            the /config/transforms service. The service applies the transformation</span>
 <span class="sd">            to all documents prior to constructing the response.</span>
-<span class="sd">        transform_params : str</span>
+<span class="sd">        transform_params : dict</span>
 <span class="sd">            A transform parameter names and values. For example, { &quot;myparam&quot;: 1 }.</span>
 <span class="sd">            Transform parameters are passed to the transform named in the transform</span>
 <span class="sd">            parameter.</span>
@@ -212,7 +214,7 @@
 <span class="sd">        str</span>
 <span class="sd">            A Documents call endpoint</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ENDPOINT</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ENDPOINT</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_API_VERSION</span><span class="p">)</span>
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_validate_params</span><span class="p">(</span>
@@ -257,17 +259,19 @@
 
 <div class="viewcode-block" id="DocumentsPostCall">
 <a class="viewcode-back" href="../../../api/mlclient/calls/mlclient.calls.html#mlclient.calls.DocumentsPostCall">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">DocumentsPostCall</span><span class="p">(</span><span class="n">ResourceCall</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">DocumentsPostCall</span><span class="p">(</span><span class="n">ApiCall</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;A POST request to insert or update documents&#39; content or metadata.</span>
 
-<span class="sd">    A ResourceCall implementation representing a single POST request</span>
-<span class="sd">    to the /v1/documents REST Resource.</span>
+<span class="sd">    A ApiCall implementation representing a single POST request</span>
+<span class="sd">    to the /v1/documents endpoint.</span>
 
 <span class="sd">    Insert or update content and/or metadata for multiple documents in a single request.</span>
 <span class="sd">    Documentation of the REST Resource API: https://docs.marklogic.com/REST/POST/v1/documents</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">_ENDPOINT</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;/v1/documents&quot;</span>
+    <span class="n">_API_VERSION</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="n">_ENDPOINT</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;/v</span><span class="si">{}</span><span class="s2">/documents&quot;</span>
 
     <span class="n">_DATABASE_PARAM</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;database&quot;</span>
     <span class="n">_TRANSFORM_PARAM</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;transform&quot;</span>
@@ -300,7 +304,7 @@
 <span class="sd">            Names a content transformation previously installed via</span>
 <span class="sd">            the /config/transforms service. The service applies the transformation</span>
 <span class="sd">            to all documents prior to constructing the response.</span>
-<span class="sd">        transform_params : str</span>
+<span class="sd">        transform_params : dict</span>
 <span class="sd">            A transform parameter names and values. For example, { &quot;myparam&quot;: 1 }.</span>
 <span class="sd">            Transform parameters are passed to the transform named in the transform</span>
 <span class="sd">            parameter.</span>
@@ -344,7 +348,7 @@
 <span class="sd">        str</span>
 <span class="sd">            A Documents call endpoint</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ENDPOINT</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ENDPOINT</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_API_VERSION</span><span class="p">)</span>
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_validate_params</span><span class="p">(</span>
@@ -387,17 +391,19 @@
 
 <div class="viewcode-block" id="DocumentsDeleteCall">
 <a class="viewcode-back" href="../../../api/mlclient/calls/mlclient.calls.html#mlclient.calls.DocumentsDeleteCall">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">DocumentsDeleteCall</span><span class="p">(</span><span class="n">ResourceCall</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">DocumentsDeleteCall</span><span class="p">(</span><span class="n">ApiCall</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;A DELETE request to remove documents, or reset document metadata.</span>
 
-<span class="sd">    A ResourceCall implementation representing a single DELETE request</span>
-<span class="sd">    to the /v1/documents REST Resource.</span>
+<span class="sd">    A ApiCall implementation representing a single DELETE request</span>
+<span class="sd">    to the /v1/documents endpoint.</span>
 
 <span class="sd">    Retrieve document content and/or metadata from the database.</span>
 <span class="sd">    Documentation of the REST Resource API: https://docs.marklogic.com/REST/DELETE/v1/documents</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">_ENDPOINT</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;/v1/documents&quot;</span>
+    <span class="n">_API_VERSION</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="n">_ENDPOINT</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;/v</span><span class="si">{}</span><span class="s2">/documents&quot;</span>
 
     <span class="n">_URI_PARAM</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;uri&quot;</span>
     <span class="n">_DATABASE_PARAM</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;database&quot;</span>
@@ -477,7 +483,7 @@
 <span class="sd">        str</span>
 <span class="sd">            A Documents call endpoint</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ENDPOINT</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ENDPOINT</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_API_VERSION</span><span class="p">)</span>
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_validate_params</span><span class="p">(</span>

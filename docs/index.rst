@@ -49,7 +49,7 @@ Low-level (raw HTTP)::
    --6a5df7d535c71968--
 
 
-Mid-level REST API (/v1/*)::
+Mid-level REST API (``/v1/*``)::
 
    >>> from mlclient import MLClient
    >>> config = {
@@ -72,7 +72,7 @@ Mid-level REST API (/v1/*)::
    --6a5df7d535c71968--
 
 
-Mid-level Management API (/manage/v2/*, port 8002)::
+Mid-level Management API (``/manage/v2/*``, port 8002)::
 
    >>> from mlclient import MLClient
    >>> config = {
@@ -90,7 +90,7 @@ Mid-level Management API (/manage/v2/*, port 8002)::
    Documents
 
 
-Mid-level Admin API (/admin/v1/*, port 8001)::
+Mid-level Admin API (``/admin/v1/*``, port 8001)::
 
    >>> from mlclient import MLClient
    >>> config = {

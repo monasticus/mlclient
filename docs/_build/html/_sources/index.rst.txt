@@ -25,7 +25,7 @@ Below you can find a few examples of basic usage. Read more in the deep document
 
 -------------------
 
-Low-level MLClient::
+Low-level (raw HTTP)::
 
    >>> from mlclient import MLClient
    >>> config = {
@@ -34,9 +34,11 @@ Low-level MLClient::
    ...     "username": "admin",
    ...     "password": "admin",
    ... }
-   >>> with MLClient(**config) as client:
-   ...     resp = client.post(endpoint="/v1/eval",
-   ...                        body={"xquery": "xdmp:database() => xdmp:database-name()"})
+   >>> with MLClient(**config) as ml:
+   ...     resp = ml.http.post(
+   ...         "/v1/eval",
+   ...         body={"xquery": "xdmp:database() => xdmp:database-name()"},
+   ...     )
    ...     print(resp.text)
    ...
    --6a5df7d535c71968
@@ -47,17 +49,19 @@ Low-level MLClient::
    --6a5df7d535c71968--
 
 
-Medium-level MLResourceClient::
+Mid-level REST API (``/v1/*``)::
 
-   >>> from mlclient import MLResourceClient
+   >>> from mlclient import MLClient
    >>> config = {
    ...     "host": "localhost",
    ...     "port": 8002,
    ...     "username": "admin",
    ...     "password": "admin",
    ... }
-   >>> with MLResourceClient(**config) as client:
-   ...     resp = client.eval(xquery="xdmp:database() => xdmp:database-name()")
+   >>> with MLClient(**config) as ml:
+   ...     resp = ml.rest.eval.post(
+   ...         xquery="xdmp:database() => xdmp:database-name()",
+   ...     )
    ...     print(resp.text)
    ...
    --6a5df7d535c71968
@@ -68,19 +72,73 @@ Medium-level MLResourceClient::
    --6a5df7d535c71968--
 
 
-Parsing response::
+Mid-level Management API (``/manage/v2/*``, port 8002)::
 
-   >>> from mlclient import MLResourceClient, MLResponseParser
+   >>> from mlclient import MLClient
    >>> config = {
    ...     "host": "localhost",
    ...     "port": 8002,
    ...     "username": "admin",
    ...     "password": "admin",
    ... }
-   >>> with MLResourceClient(**config) as client:
-   ...     resp = client.eval(xquery="xdmp:database() => xdmp:database-name()")
-   ...     parsed_resp = MLResponseParser.parse(resp)
-   ...     print(parsed_resp)
+   >>> with MLClient(**config) as ml:
+   ...     resp = ml.manage.databases.get_properties(
+   ...         "Documents", data_format="json",
+   ...     )
+   ...     print(resp.json()["database-name"])
+   ...
+   Documents
+
+
+Mid-level Admin API (``/admin/v1/*``, port 8001)::
+
+   >>> from mlclient import MLClient
+   >>> config = {
+   ...     "host": "localhost",
+   ...     "port": 8002,
+   ...     "username": "admin",
+   ...     "password": "admin",
+   ... }
+   >>> with MLClient(**config) as ml:
+   ...     resp = ml.admin.get_timestamp()
+   ...     print(resp.text)
+   ...
+   2024-06-21T14:08:32.130813Z
+
+
+Response parsing::
+
+   >>> from mlclient import MLClient
+   >>> config = {
+   ...     "host": "localhost",
+   ...     "port": 8002,
+   ...     "username": "admin",
+   ...     "password": "admin",
+   ... }
+   >>> with MLClient(**config) as ml:
+   ...     resp = ml.rest.eval.post(
+   ...         xquery="xdmp:database() => xdmp:database-name()",
+   ...     )
+   ...     parsed = ml.parser.parse(resp)
+   ...     print(parsed)
+   ...
+   App-Services
+
+
+High-level (services)::
+
+   >>> from mlclient import MLClient
+   >>> config = {
+   ...     "host": "localhost",
+   ...     "port": 8002,
+   ...     "username": "admin",
+   ...     "password": "admin",
+   ... }
+   >>> with MLClient(**config) as ml:
+   ...     result = ml.eval.xquery(
+   ...         "xdmp:database() => xdmp:database-name()",
+   ...     )
+   ...     print(result)
    ...
    App-Services
 

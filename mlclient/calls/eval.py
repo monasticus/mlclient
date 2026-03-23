@@ -17,7 +17,7 @@ from mlclient.calls.api_call import ApiCall
 class EvalCall(ApiCall):
     """A POST request to evaluate an ad-hoc query.
 
-    A ApiCall implementation representing a single request
+    An ApiCall implementation representing a single request
     to the /v1/eval endpoint.
 
     Evaluate an ad-hoc query expressed using XQuery or server-side JavaScript.

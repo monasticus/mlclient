@@ -34,7 +34,7 @@ from mlclient.calls.api_call import ApiCall
 class ForestsGetCall(ApiCall):
     """A GET request to get forests summary.
 
-    A ApiCall implementation representing a single GET request
+    An ApiCall implementation representing a single GET request
     to the /manage/v2/forests endpoint.
 
     This resource address returns data about the forests in the cluster.
@@ -148,7 +148,7 @@ class ForestsGetCall(ApiCall):
 class ForestsPostCall(ApiCall):
     """A POST request to create a new forest.
 
-    A ApiCall implementation representing a single POST request
+    An ApiCall implementation representing a single POST request
     to the /manage/v2/forests endpoint.
 
     Create a new forest, including replicas if specified.
@@ -212,7 +212,7 @@ class ForestsPostCall(ApiCall):
 class ForestsPutCall(ApiCall):
     """A PUT request to perform an operation on forests.
 
-    A ApiCall implementation representing a single PUT request
+    An ApiCall implementation representing a single PUT request
     to the /manage/v2/forests endpoint.
 
     Perform an operation on one or more forests, such as combining multiple forests
@@ -267,7 +267,7 @@ class ForestsPutCall(ApiCall):
 class ForestGetCall(ApiCall):
     """A GET request to get a forest details.
 
-    A ApiCall implementation representing a single GET request
+    An ApiCall implementation representing a single GET request
     to the /manage/v2/forests/{id|name} endpoint.
 
     Retrieve information about a forest. The forest can be identified either by id
@@ -358,7 +358,7 @@ class ForestGetCall(ApiCall):
 class ForestPostCall(ApiCall):
     """A POST request to change a forest's state.
 
-    A ApiCall implementation representing a single POST request
+    An ApiCall implementation representing a single POST request
     to the /manage/v2/forests/{id|name} endpoint.
 
     Initiate a state change on a forest, such as a merge, restart, or attach.
@@ -435,7 +435,7 @@ class ForestPostCall(ApiCall):
 class ForestDeleteCall(ApiCall):
     """A DELETE request to remove a forest.
 
-    A ApiCall implementation representing a single DELETE request
+    An ApiCall implementation representing a single DELETE request
     to the /manage/v2/forests/{id|name} endpoint.
 
     Delete a forest.
@@ -512,7 +512,7 @@ class ForestDeleteCall(ApiCall):
 class ForestPropertiesGetCall(ApiCall):
     """A GET request to get forest properties.
 
-    A ApiCall implementation representing a single GET request
+    An ApiCall implementation representing a single GET request
     to the /manage/v2/forests/{id|name}/properties endpoint.
 
     Retrieve the current state of modifiable properties of the forest identified
@@ -581,7 +581,7 @@ class ForestPropertiesGetCall(ApiCall):
 class ForestPropertiesPutCall(ApiCall):
     """A PUT request to modify forest properties.
 
-    A ApiCall implementation representing a single PUT request
+    An ApiCall implementation representing a single PUT request
     to the /manage/v2/forests/{id|name}/properties endpoint.
 
     Modify the configuration of the forest identified by {id|name}.

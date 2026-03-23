@@ -15,7 +15,10 @@ if TYPE_CHECKING:
 
 
 class DocumentsApi:
-    """Mid-level API for /v1/documents endpoints."""
+    """Mid-level API for ``/v1/documents`` endpoints.
+
+    Create, read, update, and delete document content and metadata.
+    """
 
     def __init__(self, rest: ApiClient):
         self._rest = rest
@@ -32,7 +35,9 @@ class DocumentsApi:
         transform_params: dict | None = None,
         txid: str | None = None,
     ) -> Response:
-        """Send a GET request to the /v1/documents endpoint.
+        """Retrieve document content and/or metadata from the database.
+
+        Documentation: https://docs.marklogic.com/REST/GET/v1/documents
 
         Parameters
         ----------
@@ -75,7 +80,7 @@ class DocumentsApi:
         Returns
         -------
         Response
-            An HTTP response
+            An HTTP response with document content and/or metadata
         """
         call = DocumentsGetCall(
             uri=uri,
@@ -100,7 +105,9 @@ class DocumentsApi:
         temporal_collection: str | None = None,
         system_time: str | None = None,
     ) -> Response:
-        """Send a POST request to the /v1/documents endpoint.
+        """Insert or update content and/or metadata for multiple documents.
+
+        Documentation: https://docs.marklogic.com/REST/POST/v1/documents
 
         Parameters
         ----------
@@ -133,7 +140,8 @@ class DocumentsApi:
         Returns
         -------
         Response
-            An HTTP response
+            An HTTP response with ``application/json`` body containing
+            the write results
         """
         call = DocumentsPostCall(
             body_parts=body_parts,
@@ -157,7 +165,9 @@ class DocumentsApi:
         system_time: str | None = None,
         wipe_temporal: bool | None = None,
     ) -> Response:
-        """Send a DELETE request to the /v1/documents endpoint.
+        """Remove documents, or reset document metadata.
+
+        Documentation: https://docs.marklogic.com/REST/DELETE/v1/documents
 
         Parameters
         ----------

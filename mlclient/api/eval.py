@@ -14,7 +14,10 @@ if TYPE_CHECKING:
 
 
 class EvalApi:
-    """Mid-level API for /v1/eval endpoint."""
+    """Mid-level API for ``/v1/eval`` endpoint.
+
+    Evaluate ad-hoc XQuery or server-side JavaScript queries.
+    """
 
     def __init__(self, rest: ApiClient):
         self._rest = rest
@@ -28,7 +31,9 @@ class EvalApi:
         database: str | None = None,
         txid: str | None = None,
     ) -> Response:
-        """Send a POST request to the /v1/eval endpoint.
+        """Evaluate an ad-hoc query expressed using XQuery or server-side JavaScript.
+
+        Documentation: https://docs.marklogic.com/REST/POST/v1/eval
 
         Parameters
         ----------
@@ -53,7 +58,8 @@ class EvalApi:
         Returns
         -------
         Response
-            An HTTP response
+            An HTTP response with ``multipart/mixed`` body containing
+            the evaluation results
         """
         call = EvalCall(
             xquery=xquery,

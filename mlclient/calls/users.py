@@ -30,7 +30,7 @@ from mlclient.calls.api_call import ApiCall
 class UsersGetCall(ApiCall):
     """A GET request to get users summary.
 
-    A ApiCall implementation representing a single GET request
+    An ApiCall implementation representing a single GET request
     to the /manage/v2/users endpoint.
 
     This resource address returns a summary of the users in the cluster.
@@ -104,7 +104,7 @@ class UsersGetCall(ApiCall):
 class UsersPostCall(ApiCall):
     """A POST request to create a new user.
 
-    A ApiCall implementation representing a single POST request
+    An ApiCall implementation representing a single POST request
     to the /manage/v2/users endpoint.
 
     This resource address creates a new user in the security database.
@@ -158,7 +158,7 @@ class UsersPostCall(ApiCall):
 class UserGetCall(ApiCall):
     """A GET request to get user details.
 
-    A ApiCall implementation representing a single GET request
+    An ApiCall implementation representing a single GET request
     to the /manage/v2/users/{id|name} endpoint.
 
     This resource address returns the configuration for the specified user.
@@ -214,7 +214,7 @@ class UserGetCall(ApiCall):
         Returns
         -------
         str
-            An User call endpoint
+            A User call endpoint
         """
         return self._ENDPOINT_TEMPLATE.format(self._API_VERSION, self._user)
 
@@ -237,7 +237,7 @@ class UserGetCall(ApiCall):
 class UserDeleteCall(ApiCall):
     """A DELETE request to remove a user.
 
-    A ApiCall implementation representing a single DELETE request
+    An ApiCall implementation representing a single DELETE request
     to the /manage/v2/users/{id|name} endpoint.
 
     This resource address deletes the named user from the named security database.
@@ -271,7 +271,7 @@ class UserDeleteCall(ApiCall):
         Returns
         -------
         str
-            An User call endpoint
+            A User call endpoint
         """
         return self._ENDPOINT_TEMPLATE.format(self._API_VERSION, self._user)
 
@@ -279,7 +279,7 @@ class UserDeleteCall(ApiCall):
 class UserPropertiesGetCall(ApiCall):
     """A GET request to get user properties.
 
-    A ApiCall implementation representing a single GET request
+    An ApiCall implementation representing a single GET request
     to the /manage/v2/users/{id|name}/properties endpoint.
 
     This resource address returns the properties of the specified user.
@@ -329,7 +329,7 @@ class UserPropertiesGetCall(ApiCall):
         Returns
         -------
         str
-            An User Properties call endpoint
+            A User Properties call endpoint
         """
         return self._ENDPOINT_TEMPLATE.format(self._API_VERSION, self._user)
 
@@ -347,7 +347,7 @@ class UserPropertiesGetCall(ApiCall):
 class UserPropertiesPutCall(ApiCall):
     """A PUT request to modify user properties.
 
-    A ApiCall implementation representing a single PUT request
+    An ApiCall implementation representing a single PUT request
     to the /manage/v2/users/{id|name}/properties endpoint.
 
     This resource address can be used to update the properties for the specified user.
@@ -389,7 +389,7 @@ class UserPropertiesPutCall(ApiCall):
         Returns
         -------
         str
-            An User Properties call endpoint
+            A User Properties call endpoint
         """
         return self._ENDPOINT_TEMPLATE.format(self._API_VERSION, self._user)
 

@@ -30,7 +30,7 @@ from mlclient.calls.api_call import ApiCall
 class ServersGetCall(ApiCall):
     """A GET request to get app servers summary.
 
-    A ApiCall implementation representing a single GET request
+    An ApiCall implementation representing a single GET request
     to the /manage/v2/servers endpoint.
 
     This resource address returns data about the App Servers in the cluster.
@@ -131,7 +131,7 @@ class ServersGetCall(ApiCall):
 class ServersPostCall(ApiCall):
     """A POST request to create a new app server.
 
-    A ApiCall implementation representing a single POST request
+    An ApiCall implementation representing a single POST request
     to the /manage/v2/servers endpoint.
 
     This resource address is used to create a new App Server in the specified group.
@@ -209,7 +209,7 @@ class ServersPostCall(ApiCall):
 class ServerGetCall(ApiCall):
     """A GET request to get app server details.
 
-    A ApiCall implementation representing a single GET request
+    An ApiCall implementation representing a single GET request
     to the /manage/v2/servers/{id|name} endpoint.
 
     This resource address returns data about a specific App Server.
@@ -333,7 +333,7 @@ class ServerGetCall(ApiCall):
 class ServerDeleteCall(ApiCall):
     """A DELETE request to remove an app server.
 
-    A ApiCall implementation representing a single DELETE request
+    An ApiCall implementation representing a single DELETE request
     to the /manage/v2/servers/{id|name} endpoint.
 
     This resource address deletes the specified App Server from the specified group.
@@ -382,7 +382,7 @@ class ServerDeleteCall(ApiCall):
 class ServerPropertiesGetCall(ApiCall):
     """A GET request to get app server properties.
 
-    A ApiCall implementation representing a single GET request
+    An ApiCall implementation representing a single GET request
     to the /manage/v2/servers/{id|name}/properties endpoint.
 
     This resource address returns the current state of modifiable properties
@@ -457,7 +457,7 @@ class ServerPropertiesGetCall(ApiCall):
 class ServerPropertiesPutCall(ApiCall):
     """A PUT request to modify app server properties.
 
-    A ApiCall implementation representing a single PUT request
+    An ApiCall implementation representing a single PUT request
     to the /manage/v2/servers/{id|name}/properties endpoint.
 
     Initiate a properties change on the specified App Server.

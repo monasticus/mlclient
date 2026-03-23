@@ -21,7 +21,12 @@ if TYPE_CHECKING:
 
 
 class UsersApi:
-    """Mid-level API for /manage/v2/users endpoints."""
+    """Mid-level API for ``/manage/v2/users`` endpoints.
+
+    Create, read, update, and delete users in the security database.
+
+    Requires the Manage server (port 8002 by default).
+    """
 
     def __init__(self, rest: ApiClient):
         self._rest = rest
@@ -32,7 +37,9 @@ class UsersApi:
         data_format: str | None = None,
         view: str | None = None,
     ) -> Response:
-        """Send a GET request to the /manage/v2/users endpoint.
+        """Retrieve a summary of the users in the cluster.
+
+        Documentation: https://docs.marklogic.com/REST/GET/manage/v2/users
 
         Parameters
         ----------
@@ -44,7 +51,7 @@ class UsersApi:
         Returns
         -------
         Response
-            An HTTP response
+            An HTTP response with the users summary
         """
         call = UsersGetCall(data_format=data_format, view=view)
         return self._rest.call(call)
@@ -53,7 +60,9 @@ class UsersApi:
         self,
         body: str | dict,
     ) -> Response:
-        """Send a POST request to the /manage/v2/users endpoint.
+        """Create a new user in the security database.
+
+        Documentation: https://docs.marklogic.com/REST/POST/manage/v2/users
 
         Parameters
         ----------
@@ -75,7 +84,9 @@ class UsersApi:
         data_format: str | None = None,
         view: str | None = None,
     ) -> Response:
-        """Send a GET request to the /manage/v2/users/{id|name} endpoint.
+        """Retrieve the configuration for the specified user.
+
+        Documentation: https://docs.marklogic.com/REST/GET/manage/v2/users/[id-or-name]
 
         Parameters
         ----------
@@ -90,7 +101,7 @@ class UsersApi:
         Returns
         -------
         Response
-            An HTTP response
+            An HTTP response with the user details
         """
         call = UserGetCall(user=user, data_format=data_format, view=view)
         return self._rest.call(call)
@@ -99,7 +110,9 @@ class UsersApi:
         self,
         user: str,
     ) -> Response:
-        """Send a DELETE request to the /manage/v2/users/{id|name} endpoint.
+        """Delete the specified user from the security database.
+
+        Documentation: https://docs.marklogic.com/REST/DELETE/manage/v2/users/[id-or-name]
 
         Parameters
         ----------
@@ -120,7 +133,9 @@ class UsersApi:
         *,
         data_format: str | None = None,
     ) -> Response:
-        """Send a GET to /manage/v2/users/{id|name}/properties.
+        """Retrieve the properties of the specified user.
+
+        Documentation: https://docs.marklogic.com/REST/GET/manage/v2/users/[id-or-name]/properties
 
         Parameters
         ----------
@@ -133,7 +148,7 @@ class UsersApi:
         Returns
         -------
         Response
-            An HTTP response
+            An HTTP response with the user properties
         """
         call = UserPropertiesGetCall(user=user, data_format=data_format)
         return self._rest.call(call)
@@ -143,7 +158,9 @@ class UsersApi:
         user: str,
         body: str | dict,
     ) -> Response:
-        """Send a PUT to /manage/v2/users/{id|name}/properties.
+        """Update the properties for the specified user.
+
+        Documentation: https://docs.marklogic.com/REST/PUT/manage/v2/users/[id-or-name]/properties
 
         Parameters
         ----------

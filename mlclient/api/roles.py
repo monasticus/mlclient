@@ -21,7 +21,12 @@ if TYPE_CHECKING:
 
 
 class RolesApi:
-    """Mid-level API for /manage/v2/roles endpoints."""
+    """Mid-level API for ``/manage/v2/roles`` endpoints.
+
+    Create, read, update, and delete roles in the security database.
+
+    Requires the Manage server (port 8002 by default).
+    """
 
     def __init__(self, rest: ApiClient):
         self._rest = rest
@@ -32,7 +37,9 @@ class RolesApi:
         data_format: str | None = None,
         view: str | None = None,
     ) -> Response:
-        """Send a GET request to the /manage/v2/roles endpoint.
+        """Retrieve a summary of the roles in the security database.
+
+        Documentation: https://docs.marklogic.com/REST/GET/manage/v2/roles
 
         Parameters
         ----------
@@ -44,7 +51,7 @@ class RolesApi:
         Returns
         -------
         Response
-            An HTTP response
+            An HTTP response with the roles summary
         """
         call = RolesGetCall(data_format=data_format, view=view)
         return self._rest.call(call)
@@ -53,7 +60,9 @@ class RolesApi:
         self,
         body: str | dict,
     ) -> Response:
-        """Send a POST request to the /manage/v2/roles endpoint.
+        """Create a new role in the security database.
+
+        Documentation: https://docs.marklogic.com/REST/POST/manage/v2/roles
 
         Parameters
         ----------
@@ -75,7 +84,9 @@ class RolesApi:
         data_format: str | None = None,
         view: str | None = None,
     ) -> Response:
-        """Send a GET request to the /manage/v2/roles/{id|name} endpoint.
+        """Retrieve the configuration for the specified role.
+
+        Documentation: https://docs.marklogic.com/REST/GET/manage/v2/roles/[id-or-name]
 
         Parameters
         ----------
@@ -90,7 +101,7 @@ class RolesApi:
         Returns
         -------
         Response
-            An HTTP response
+            An HTTP response with the role details
         """
         call = RoleGetCall(role=role, data_format=data_format, view=view)
         return self._rest.call(call)
@@ -99,7 +110,9 @@ class RolesApi:
         self,
         role: str,
     ) -> Response:
-        """Send a DELETE request to the /manage/v2/roles/{id|name} endpoint.
+        """Delete the specified role from the security database.
+
+        Documentation: https://docs.marklogic.com/REST/DELETE/manage/v2/roles/[id-or-name]
 
         Parameters
         ----------
@@ -120,7 +133,9 @@ class RolesApi:
         *,
         data_format: str | None = None,
     ) -> Response:
-        """Send a GET to /manage/v2/roles/{id|name}/properties.
+        """Retrieve the properties of the specified role.
+
+        Documentation: https://docs.marklogic.com/REST/GET/manage/v2/roles/[id-or-name]/properties
 
         Parameters
         ----------
@@ -133,7 +148,7 @@ class RolesApi:
         Returns
         -------
         Response
-            An HTTP response
+            An HTTP response with the role properties
         """
         call = RolePropertiesGetCall(role=role, data_format=data_format)
         return self._rest.call(call)
@@ -143,7 +158,9 @@ class RolesApi:
         role: str,
         body: str | dict,
     ) -> Response:
-        """Send a PUT to /manage/v2/roles/{id|name}/properties.
+        """Update the properties for the specified role.
+
+        Documentation: https://docs.marklogic.com/REST/PUT/manage/v2/roles/[id-or-name]/properties
 
         Parameters
         ----------

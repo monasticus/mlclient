@@ -32,7 +32,7 @@ from mlclient.calls.api_call import ApiCall
 class DatabasesGetCall(ApiCall):
     """A GET request to get databases summary.
 
-    A ApiCall implementation representing a single GET request
+    An ApiCall implementation representing a single GET request
     to the /manage/v2/databases endpoint.
 
     This resource address returns a summary of the databases in the cluster.
@@ -114,7 +114,7 @@ class DatabasesGetCall(ApiCall):
 class DatabasesPostCall(ApiCall):
     """A POST request to create a new database.
 
-    A ApiCall implementation representing a single POST request
+    An ApiCall implementation representing a single POST request
     to the /manage/v2/databases endpoint.
 
     This resource address creates a new database in the cluster.
@@ -168,7 +168,7 @@ class DatabasesPostCall(ApiCall):
 class DatabaseGetCall(ApiCall):
     """A GET request to get database details.
 
-    A ApiCall implementation representing a single GET request
+    An ApiCall implementation representing a single GET request
     to the /manage/v2/databases/{id|name} endpoint.
 
     This resource address returns information on the specified database.
@@ -261,7 +261,7 @@ class DatabaseGetCall(ApiCall):
 class DatabasePostCall(ApiCall):
     """A POST request to manage a database.
 
-    A ApiCall implementation representing a single POST request
+    An ApiCall implementation representing a single POST request
     to the /manage/v2/databases/{id|name} endpoint.
 
     This resource address can be used to clear the contents of the named database
@@ -322,7 +322,7 @@ class DatabasePostCall(ApiCall):
 class DatabaseDeleteCall(ApiCall):
     """A DELETE request to remove a database from a cluster.
 
-    A ApiCall implementation representing a single DELETE request
+    An ApiCall implementation representing a single DELETE request
     to the /manage/v2/databases/{id|name} endpoint.
 
     This resource address deletes the named database from the cluster.
@@ -388,7 +388,7 @@ class DatabaseDeleteCall(ApiCall):
 class DatabasePropertiesGetCall(ApiCall):
     """A GET request to get a database properties.
 
-    A ApiCall implementation representing a single GET request
+    An ApiCall implementation representing a single GET request
     to the /manage/v2/databases/{id|name}/properties endpoint.
 
     This resource address returns the modifiable properties of the named database.
@@ -457,7 +457,7 @@ class DatabasePropertiesGetCall(ApiCall):
 class DatabasePropertiesPutCall(ApiCall):
     """A PUT request to modify database properties.
 
-    A ApiCall implementation representing a single PUT request
+    An ApiCall implementation representing a single PUT request
     to the /manage/v2/databases/{id|name}/properties endpoint.
 
     This resource address modifies the properties of the named database.

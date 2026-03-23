@@ -14,7 +14,12 @@ if TYPE_CHECKING:
 
 
 class LogsApi:
-    """Mid-level API for /manage/v2/logs endpoint."""
+    """Mid-level API for ``/manage/v2/logs`` endpoint.
+
+    Retrieve log file contents from MarkLogic Server.
+
+    Requires the Manage server (port 8002 by default).
+    """
 
     def __init__(self, rest: ApiClient):
         self._rest = rest
@@ -29,7 +34,9 @@ class LogsApi:
         end_time: str | None = None,
         regex: str | None = None,
     ) -> Response:
-        """Send a GET request to the /manage/v2/logs endpoint.
+        """Retrieve the contents of a log file.
+
+        Documentation: https://docs.marklogic.com/REST/GET/manage/v2/logs
 
         Parameters
         ----------
@@ -50,7 +57,7 @@ class LogsApi:
         Returns
         -------
         Response
-            An HTTP response
+            An HTTP response containing the log data
         """
         call = LogsCall(
             filename=filename,

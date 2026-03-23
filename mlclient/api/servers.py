@@ -21,7 +21,12 @@ if TYPE_CHECKING:
 
 
 class ServersApi:
-    """Mid-level API for /manage/v2/servers endpoints."""
+    """Mid-level API for ``/manage/v2/servers`` endpoints.
+
+    Create, read, update, and delete App Servers in the cluster.
+
+    Requires the Manage server (port 8002 by default).
+    """
 
     def __init__(self, rest: ApiClient):
         self._rest = rest
@@ -34,7 +39,12 @@ class ServersApi:
         view: str | None = None,
         full_refs: bool | None = None,
     ) -> Response:
-        """Send a GET request to the /manage/v2/servers endpoint.
+        """Retrieve data about the App Servers in the cluster.
+
+        The data returned depends on the setting of the view request parameter.
+        The default view provides a summary of the servers.
+
+        Documentation: https://docs.marklogic.com/REST/GET/manage/v2/servers
 
         Parameters
         ----------
@@ -55,7 +65,7 @@ class ServersApi:
         Returns
         -------
         Response
-            An HTTP response
+            An HTTP response with the servers summary
         """
         call = ServersGetCall(
             data_format=data_format,
@@ -72,7 +82,9 @@ class ServersApi:
         group_id: str | None = None,
         server_type: str | None = None,
     ) -> Response:
-        """Send a POST request to the /manage/v2/servers endpoint.
+        """Create a new App Server in the specified group.
+
+        Documentation: https://docs.marklogic.com/REST/POST/manage/v2/servers
 
         Parameters
         ----------
@@ -108,7 +120,13 @@ class ServersApi:
         full_refs: bool | None = None,
         modules: bool | None = None,
     ) -> Response:
-        """Send a GET request to the /manage/v2/servers/{id|name} endpoint.
+        """Retrieve data about a specific App Server.
+
+        The server can be identified either by ID or name. The data returned
+        depends on the value of the view request parameter. The default view
+        is a summary with links to additional data.
+
+        Documentation: https://docs.marklogic.com/REST/GET/manage/v2/servers/[id-or-name]
 
         Parameters
         ----------
@@ -140,7 +158,7 @@ class ServersApi:
         Returns
         -------
         Response
-            An HTTP response
+            An HTTP response with the server details
         """
         call = ServerGetCall(
             server=server,
@@ -158,7 +176,9 @@ class ServersApi:
         server: str,
         group_id: str,
     ) -> Response:
-        """Send a DELETE request to the /manage/v2/servers/{id|name} endpoint.
+        """Delete the specified App Server from the specified group.
+
+        Documentation: https://docs.marklogic.com/REST/DELETE/manage/v2/servers/[id-or-name]
 
         Parameters
         ----------
@@ -183,7 +203,9 @@ class ServersApi:
         *,
         data_format: str | None = None,
     ) -> Response:
-        """Send a GET to /manage/v2/servers/{id|name}/properties.
+        """Retrieve the modifiable properties of the specified App Server.
+
+        Documentation: https://docs.marklogic.com/REST/GET/manage/v2/servers/[id-or-name]/properties
 
         Parameters
         ----------
@@ -199,7 +221,7 @@ class ServersApi:
         Returns
         -------
         Response
-            An HTTP response
+            An HTTP response with the server properties
         """
         call = ServerPropertiesGetCall(
             server=server,
@@ -214,7 +236,9 @@ class ServersApi:
         group_id: str,
         body: str | dict,
     ) -> Response:
-        """Send a PUT to /manage/v2/servers/{id|name}/properties.
+        """Modify the properties of the specified App Server.
+
+        Documentation: https://docs.marklogic.com/REST/PUT/manage/v2/servers/[id-or-name]/properties
 
         Parameters
         ----------

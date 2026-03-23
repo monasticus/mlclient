@@ -30,7 +30,7 @@ from mlclient.structures.calls import (
 class DocumentsGetCall(ApiCall):
     """A GET request to retrieve documents' content or metadata.
 
-    A ApiCall implementation representing a single GET request
+    An ApiCall implementation representing a single GET request
     to the /v1/documents endpoint.
 
     Retrieve document content and/or metadata from the database.
@@ -178,7 +178,7 @@ class DocumentsGetCall(ApiCall):
 class DocumentsPostCall(ApiCall):
     """A POST request to insert or update documents' content or metadata.
 
-    A ApiCall implementation representing a single POST request
+    An ApiCall implementation representing a single POST request
     to the /v1/documents endpoint.
 
     Insert or update content and/or metadata for multiple documents in a single request.
@@ -307,10 +307,10 @@ class DocumentsPostCall(ApiCall):
 class DocumentsDeleteCall(ApiCall):
     """A DELETE request to remove documents, or reset document metadata.
 
-    A ApiCall implementation representing a single DELETE request
+    An ApiCall implementation representing a single DELETE request
     to the /v1/documents endpoint.
 
-    Retrieve document content and/or metadata from the database.
+    Remove documents, or reset document metadata.
     Documentation of the REST Resource API: https://docs.marklogic.com/REST/DELETE/v1/documents
     """
 

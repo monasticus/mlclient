@@ -30,7 +30,7 @@ from mlclient.calls.api_call import ApiCall
 class RolesGetCall(ApiCall):
     """A GET request to get roles summary.
 
-    A ApiCall implementation representing a single GET request
+    An ApiCall implementation representing a single GET request
     to the /manage/v2/roles endpoint.
 
     This resource address returns a summary of the roles in the security database.
@@ -104,7 +104,7 @@ class RolesGetCall(ApiCall):
 class RolesPostCall(ApiCall):
     """A POST request to create a new role.
 
-    A ApiCall implementation representing a single POST request
+    An ApiCall implementation representing a single POST request
     to the /manage/v2/roles endpoint.
 
     This resource address creates a new role in the security database.
@@ -158,7 +158,7 @@ class RolesPostCall(ApiCall):
 class RoleGetCall(ApiCall):
     """A GET request to get a role details.
 
-    A ApiCall implementation representing a single GET request
+    An ApiCall implementation representing a single GET request
     to the /manage/v2/roles/{id|name} endpoint.
 
     This resource address returns the configuration for the specified role.
@@ -237,7 +237,7 @@ class RoleGetCall(ApiCall):
 class RoleDeleteCall(ApiCall):
     """A DELETE request to remove a role.
 
-    A ApiCall implementation representing a single DELETE request
+    An ApiCall implementation representing a single DELETE request
     to the /manage/v2/roles/{id|name} endpoint.
 
     This resource address deletes the named role from the named security database.
@@ -279,7 +279,7 @@ class RoleDeleteCall(ApiCall):
 class RolePropertiesGetCall(ApiCall):
     """A GET request to get role properties.
 
-    A ApiCall implementation representing a single GET request
+    An ApiCall implementation representing a single GET request
     to the /manage/v2/roles/{id|name}/properties endpoint.
 
     This resource address returns the properties of the specified role.
@@ -347,7 +347,7 @@ class RolePropertiesGetCall(ApiCall):
 class RolePropertiesPutCall(ApiCall):
     """A PUT request to modify role properties.
 
-    A ApiCall implementation representing a single PUT request
+    An ApiCall implementation representing a single PUT request
     to the /manage/v2/roles/{id|name}/properties endpoint.
 
     This resource address can be used to update the properties for the specified role.

@@ -41,21 +41,33 @@ class AdminApi:
         return self._client.call(call_)
 
     def get_timestamp(self) -> Response:
-        """Get the Admin server timestamp.
+        """Verify that MarkLogic Server is up and accepting requests.
+
+        Returns a plain text timestamp of the last restart. Can be used to
+        detect when a restart triggered by an administrative operation has
+        completed.
+
+        Documentation: https://docs.marklogic.com/REST/GET/admin/v1/timestamp
 
         Returns
         -------
         Response
-            An HTTP response
+            An HTTP response with ``text/plain`` body containing the timestamp
         """
         return self._client.call(TimestampGetCall())
 
     def get_server_config(self) -> Response:
-        """Get the Admin server configuration.
+        """Retrieve server configuration information for cluster join.
+
+        Returns the host configuration as XML, suitable for use as input to
+        ``POST /admin/v1/cluster-config`` when adding this host to a cluster.
+
+        Documentation: https://docs.marklogic.com/REST/GET/admin/v1/server-config
 
         Returns
         -------
         Response
-            An HTTP response
+            An HTTP response with ``application/xml`` body containing
+            the server configuration
         """
         return self._client.call(ServerConfigGetCall())

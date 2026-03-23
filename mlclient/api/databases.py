@@ -22,7 +22,12 @@ if TYPE_CHECKING:
 
 
 class DatabasesApi:
-    """Mid-level API for /manage/v2/databases endpoints."""
+    """Mid-level API for ``/manage/v2/databases`` endpoints.
+
+    Create, read, update, and delete databases in the cluster.
+
+    Requires the Manage server (port 8002 by default).
+    """
 
     def __init__(self, rest: ApiClient):
         self._rest = rest
@@ -33,7 +38,9 @@ class DatabasesApi:
         data_format: str | None = None,
         view: str | None = None,
     ) -> Response:
-        """Send a GET request to the /manage/v2/databases endpoint.
+        """Retrieve a summary of the databases in the cluster.
+
+        Documentation: https://docs.marklogic.com/REST/GET/manage/v2/databases
 
         Parameters
         ----------
@@ -46,7 +53,7 @@ class DatabasesApi:
         Returns
         -------
         Response
-            An HTTP response
+            An HTTP response with the databases summary
         """
         call = DatabasesGetCall(data_format=data_format, view=view)
         return self._rest.call(call)
@@ -55,7 +62,9 @@ class DatabasesApi:
         self,
         body: str | dict,
     ) -> Response:
-        """Send a POST request to the /manage/v2/databases endpoint.
+        """Create a new database in the cluster.
+
+        Documentation: https://docs.marklogic.com/REST/POST/manage/v2/databases
 
         Parameters
         ----------
@@ -77,7 +86,11 @@ class DatabasesApi:
         data_format: str | None = None,
         view: str | None = None,
     ) -> Response:
-        """Send a GET request to the /manage/v2/databases/{id|name} endpoint.
+        """Retrieve information on the specified database.
+
+        The database can be identified either by ID or name.
+
+        Documentation: https://docs.marklogic.com/REST/GET/manage/v2/databases/[id-or-name]
 
         Parameters
         ----------
@@ -94,7 +107,7 @@ class DatabasesApi:
         Returns
         -------
         Response
-            An HTTP response
+            An HTTP response with the database details
         """
         call = DatabaseGetCall(database=database, data_format=data_format, view=view)
         return self._rest.call(call)
@@ -104,7 +117,12 @@ class DatabasesApi:
         database: str,
         body: str | dict,
     ) -> Response:
-        """Send a POST request to the /manage/v2/databases/{id|name} endpoint.
+        """Clear or configure the specified database.
+
+        Can be used to clear the contents of the named database and to perform
+        various configuration operations on the database.
+
+        Documentation: https://docs.marklogic.com/REST/POST/manage/v2/databases/[id-or-name]
 
         Parameters
         ----------
@@ -127,7 +145,9 @@ class DatabasesApi:
         *,
         forest_delete: str | None = None,
     ) -> Response:
-        """Send a DELETE request to the /manage/v2/databases/{id|name} endpoint.
+        """Delete the specified database from the cluster.
+
+        Documentation: https://docs.marklogic.com/REST/DELETE/manage/v2/databases/[id-or-name]
 
         Parameters
         ----------
@@ -154,7 +174,9 @@ class DatabasesApi:
         *,
         data_format: str | None = None,
     ) -> Response:
-        """Send a GET to /manage/v2/databases/{id|name}/properties.
+        """Retrieve the modifiable properties of the specified database.
+
+        Documentation: https://docs.marklogic.com/REST/GET/manage/v2/databases/[id-or-name]/properties
 
         Parameters
         ----------
@@ -167,7 +189,7 @@ class DatabasesApi:
         Returns
         -------
         Response
-            An HTTP response
+            An HTTP response with the database properties
         """
         call = DatabasePropertiesGetCall(database=database, data_format=data_format)
         return self._rest.call(call)
@@ -177,7 +199,9 @@ class DatabasesApi:
         database: str,
         body: str | dict,
     ) -> Response:
-        """Send a PUT to /manage/v2/databases/{id|name}/properties.
+        """Modify the properties of the specified database.
+
+        Documentation: https://docs.marklogic.com/REST/PUT/manage/v2/databases/[id-or-name]/properties
 
         Parameters
         ----------

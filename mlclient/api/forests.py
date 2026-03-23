@@ -23,7 +23,12 @@ if TYPE_CHECKING:
 
 
 class ForestsApi:
-    """Mid-level API for /manage/v2/forests endpoints."""
+    """Mid-level API for ``/manage/v2/forests`` endpoints.
+
+    Create, read, update, and delete forests in the cluster.
+
+    Requires the Manage server (port 8002 by default).
+    """
 
     def __init__(self, rest: ApiClient):
         self._rest = rest
@@ -38,7 +43,12 @@ class ForestsApi:
         host: str | None = None,
         full_refs: bool | None = None,
     ) -> Response:
-        """Send a GET request to the /manage/v2/forests endpoint.
+        """Retrieve data about the forests in the cluster.
+
+        The data returned depends on the view. If no view is specified, this
+        request returns a summary of the forests in the cluster.
+
+        Documentation: https://docs.marklogic.com/REST/GET/manage/v2/forests
 
         Parameters
         ----------
@@ -65,7 +75,7 @@ class ForestsApi:
         Returns
         -------
         Response
-            An HTTP response
+            An HTTP response with the forests summary
         """
         call = ForestsGetCall(
             data_format=data_format,
@@ -83,7 +93,12 @@ class ForestsApi:
         *,
         wait_for_forest_to_mount: bool | None = None,
     ) -> Response:
-        """Send a POST request to the /manage/v2/forests endpoint.
+        """Create a new forest, including replicas if specified.
+
+        If a database id or database is included, attach the new forest(s)
+        to the database.
+
+        Documentation: https://docs.marklogic.com/REST/POST/manage/v2/forests
 
         Parameters
         ----------
@@ -108,7 +123,12 @@ class ForestsApi:
         self,
         body: str | dict,
     ) -> Response:
-        """Send a PUT request to the /manage/v2/forests endpoint.
+        """Perform an operation on one or more forests.
+
+        Such as combining multiple forests into a single new one, or migrating
+        the data in the forests to a new data directory.
+
+        Documentation: https://docs.marklogic.com/REST/PUT/manage/v2/forests
 
         Parameters
         ----------
@@ -130,7 +150,11 @@ class ForestsApi:
         data_format: str | None = None,
         view: str | None = None,
     ) -> Response:
-        """Send a GET request to the /manage/v2/forests/{id|name} endpoint.
+        """Retrieve information about a forest.
+
+        The forest can be identified either by ID or name.
+
+        Documentation: https://docs.marklogic.com/REST/GET/manage/v2/forests/[id-or-name]
 
         Parameters
         ----------
@@ -146,7 +170,7 @@ class ForestsApi:
         Returns
         -------
         Response
-            An HTTP response
+            An HTTP response with the forest details
         """
         call = ForestGetCall(forest=forest, data_format=data_format, view=view)
         return self._rest.call(call)
@@ -156,7 +180,9 @@ class ForestsApi:
         forest: str,
         body: str | dict,
     ) -> Response:
-        """Send a POST request to the /manage/v2/forests/{id|name} endpoint.
+        """Initiate a state change on a forest, such as a merge, restart, or attach.
+
+        Documentation: https://docs.marklogic.com/REST/POST/manage/v2/forests/[id-or-name]
 
         Parameters
         ----------
@@ -182,7 +208,9 @@ class ForestsApi:
         level: str,
         replicas: str | None = None,
     ) -> Response:
-        """Send a DELETE request to the /manage/v2/forests/{id|name} endpoint.
+        """Delete a forest.
+
+        Documentation: https://docs.marklogic.com/REST/DELETE/manage/v2/forests/[id-or-name]
 
         Parameters
         ----------
@@ -212,7 +240,9 @@ class ForestsApi:
         *,
         data_format: str | None = None,
     ) -> Response:
-        """Send a GET to /manage/v2/forests/{id|name}/properties.
+        """Retrieve the modifiable properties of a forest.
+
+        Documentation: https://docs.marklogic.com/REST/GET/manage/v2/forests/[id-or-name]/properties
 
         Parameters
         ----------
@@ -225,7 +255,7 @@ class ForestsApi:
         Returns
         -------
         Response
-            An HTTP response
+            An HTTP response with the forest properties
         """
         call = ForestPropertiesGetCall(forest=forest, data_format=data_format)
         return self._rest.call(call)
@@ -235,7 +265,9 @@ class ForestsApi:
         forest: str,
         body: str | dict,
     ) -> Response:
-        """Send a PUT to /manage/v2/forests/{id|name}/properties.
+        """Modify the configuration of a forest.
+
+        Documentation: https://docs.marklogic.com/REST/PUT/manage/v2/forests/[id-or-name]/properties
 
         Parameters
         ----------

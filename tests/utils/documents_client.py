@@ -32,14 +32,14 @@ def assert_documents_exist(
     uris: list,
 ):
     with MLClient(auth_method="digest") as docs_client:
-        assert docs_client.documents.read(uris, output_type=bytes) != []
+        assert docs_client.documents.read(uris, output_type=bytes) != {}
 
 
 def assert_documents_do_not_exist(
     uris: list,
 ):
     with MLClient(auth_method="digest") as docs_client:
-        assert docs_client.documents.read(uris, output_type=bytes) == []
+        assert docs_client.documents.read(uris, output_type=bytes) == {}
 
 
 def assert_documents_exist_and_confirm_content_with_metadata(
@@ -61,14 +61,11 @@ def assert_documents_exist_and_confirm_data(
     with MLClient(auth_method="digest") as docs_client:
         actual_docs = docs_client.documents.read(
             list(expected.keys()),
-            category,
+            category=category,
             output_type=output_type,
         )
-        for actual_doc in actual_docs:
-            expected_doc = next(
-                (doc for uri, doc in expected.items() if uri == actual_doc.uri),
-                None,
-            )
+        for uri, actual_doc in actual_docs.items():
+            expected_doc = expected.get(uri)
             assert expected_doc is not None
             assert actual_doc.uri == expected_doc.uri
             assert actual_doc.doc_type == expected_doc.doc_type

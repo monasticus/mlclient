@@ -377,7 +377,7 @@ class ReadDocumentsJob(DocumentsJob):
                 kwargs["category"] = list(dict.fromkeys(self._categories))
             if self._fs_output_path is not None:
                 kwargs["output_type"] = bytes
-            for doc in client.documents.read(**kwargs):
+            for doc in client.documents.read_stream(**kwargs):
                 self._report.add_successful_doc(doc.uri)
                 self._output_queue.put(doc)
         except Exception as err:

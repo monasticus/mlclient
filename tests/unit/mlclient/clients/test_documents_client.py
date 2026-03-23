@@ -41,25 +41,25 @@ ml_mocker.with_post_side_effect(side_effect=ml_doc_mocker.post_documents_side_ef
 
 
 @pytest.fixture(autouse=True)
-def docs_client() -> MLClient:
+def ml() -> MLClient:
     return MLClient(port=8002, auth_method="digest")
 
 
 @pytest.fixture(autouse=True)
-def _setup_and_teardown(docs_client):
-    docs_client.connect()
+def _setup_and_teardown(ml):
+    ml.connect()
 
     yield
 
-    docs_client.disconnect()
+    ml.disconnect()
 
 
 @ml_mocker.router
-def test_read_non_existing_doc(docs_client):
+def test_read_non_existing_doc(ml):
     uri = "/some/dir/doc5.xml"
 
     with pytest.raises(MarkLogicError) as err:
-        docs_client.documents.read(uri)
+        ml.documents.read(uri)
 
     expected_error = (
         "[500 Internal Server Error] (RESTAPI-NODOCUMENT) "
@@ -71,10 +71,10 @@ def test_read_non_existing_doc(docs_client):
 
 
 @ml_mocker.router
-def test_read_xml_doc(docs_client):
+def test_read_xml_doc(ml):
     uri = "/some/dir/doc1.xml"
 
-    document = docs_client.documents.read(uri)
+    document = ml.documents.read(uri)
 
     assert isinstance(document, XMLDocument)
     assert document.uri == uri
@@ -88,14 +88,14 @@ def test_read_xml_doc(docs_client):
 
 
 @ml_mocker.router
-def test_read_xml_doc_using_uri_list(docs_client):
+def test_read_xml_doc_using_uri_list(ml):
     uri = "/some/dir/doc1.xml"
 
-    docs = docs_client.documents.read([uri])
-    assert isinstance(docs, list)
+    docs = ml.documents.read([uri])
+    assert isinstance(docs, dict)
     assert len(docs) == 1
 
-    document = docs[0]
+    document = docs[uri]
     assert isinstance(document, XMLDocument)
     assert document.uri == uri
     assert document.doc_type == DocumentType.XML
@@ -108,10 +108,10 @@ def test_read_xml_doc_using_uri_list(docs_client):
 
 
 @ml_mocker.router
-def test_read_json_doc(docs_client):
+def test_read_json_doc(ml):
     uri = "/some/dir/doc2.json"
 
-    document = docs_client.documents.read(uri)
+    document = ml.documents.read(uri)
 
     assert isinstance(document, JSONDocument)
     assert document.uri == uri
@@ -123,14 +123,14 @@ def test_read_json_doc(docs_client):
 
 
 @ml_mocker.router
-def test_read_json_doc_using_uri_list(docs_client):
+def test_read_json_doc_using_uri_list(ml):
     uri = "/some/dir/doc2.json"
 
-    docs = docs_client.documents.read([uri])
-    assert isinstance(docs, list)
+    docs = ml.documents.read([uri])
+    assert isinstance(docs, dict)
     assert len(docs) == 1
 
-    document = docs[0]
+    document = docs[uri]
     assert isinstance(document, JSONDocument)
     assert document.uri == uri
     assert document.doc_type == DocumentType.JSON
@@ -141,10 +141,10 @@ def test_read_json_doc_using_uri_list(docs_client):
 
 
 @ml_mocker.router
-def test_read_text_doc(docs_client):
+def test_read_text_doc(ml):
     uri = "/some/dir/doc3.xqy"
 
-    document = docs_client.documents.read(uri)
+    document = ml.documents.read(uri)
 
     assert isinstance(document, TextDocument)
     assert document.uri == uri
@@ -156,14 +156,14 @@ def test_read_text_doc(docs_client):
 
 
 @ml_mocker.router
-def test_read_text_doc_using_uri_list(docs_client):
+def test_read_text_doc_using_uri_list(ml):
     uri = "/some/dir/doc3.xqy"
 
-    docs = docs_client.documents.read([uri])
-    assert isinstance(docs, list)
+    docs = ml.documents.read([uri])
+    assert isinstance(docs, dict)
     assert len(docs) == 1
 
-    document = docs[0]
+    document = docs[uri]
     assert isinstance(document, TextDocument)
     assert document.uri == uri
     assert document.doc_type == DocumentType.TEXT
@@ -174,11 +174,11 @@ def test_read_text_doc_using_uri_list(docs_client):
 
 
 @ml_mocker.router
-def test_read_binary_doc(docs_client):
+def test_read_binary_doc(ml):
     uri = "/some/dir/doc4.zip"
     content = zlib.compress(b'xquery version "1.0-ml";\n\nfn:current-date()')
 
-    document = docs_client.documents.read(uri)
+    document = ml.documents.read(uri)
 
     assert isinstance(document, BinaryDocument)
     assert document.uri == uri
@@ -190,15 +190,15 @@ def test_read_binary_doc(docs_client):
 
 
 @ml_mocker.router
-def test_read_binary_doc_using_uri_list(docs_client):
+def test_read_binary_doc_using_uri_list(ml):
     uri = "/some/dir/doc4.zip"
     content = zlib.compress(b'xquery version "1.0-ml";\n\nfn:current-date()')
 
-    docs = docs_client.documents.read([uri])
-    assert isinstance(docs, list)
+    docs = ml.documents.read([uri])
+    assert isinstance(docs, dict)
     assert len(docs) == 1
 
-    document = docs[0]
+    document = docs[uri]
     assert isinstance(document, BinaryDocument)
     assert document.uri == uri
     assert document.doc_type == DocumentType.BINARY
@@ -209,10 +209,10 @@ def test_read_binary_doc_using_uri_list(docs_client):
 
 
 @ml_mocker.router
-def test_read_doc_as_string(docs_client):
+def test_read_doc_as_string(ml):
     uri = "/some/dir/doc1.xml"
 
-    document = docs_client.documents.read(uri, output_type=str)
+    document = ml.documents.read(uri, output_type=str)
 
     assert isinstance(document, RawStringDocument)
     assert document.uri == uri
@@ -224,14 +224,14 @@ def test_read_doc_as_string(docs_client):
 
 
 @ml_mocker.router
-def test_read_doc_as_string_using_uri_list(docs_client):
+def test_read_doc_as_string_using_uri_list(ml):
     uri = "/some/dir/doc1.xml"
 
-    docs = docs_client.documents.read([uri], output_type=str)
-    assert isinstance(docs, list)
+    docs = ml.documents.read([uri], output_type=str)
+    assert isinstance(docs, dict)
     assert len(docs) == 1
 
-    document = docs[0]
+    document = docs[uri]
     assert isinstance(document, RawStringDocument)
     assert document.uri == uri
     assert document.doc_type == DocumentType.XML
@@ -242,10 +242,10 @@ def test_read_doc_as_string_using_uri_list(docs_client):
 
 
 @ml_mocker.router
-def test_read_doc_as_bytes(docs_client):
+def test_read_doc_as_bytes(ml):
     uri = "/some/dir/doc2.json"
 
-    document = docs_client.documents.read(uri, output_type=bytes)
+    document = ml.documents.read(uri, output_type=bytes)
 
     assert isinstance(document, RawDocument)
     assert document.uri == uri
@@ -257,14 +257,14 @@ def test_read_doc_as_bytes(docs_client):
 
 
 @ml_mocker.router
-def test_read_doc_as_bytes_using_uri_list(docs_client):
+def test_read_doc_as_bytes_using_uri_list(ml):
     uri = "/some/dir/doc2.json"
 
-    docs = docs_client.documents.read([uri], output_type=bytes)
-    assert isinstance(docs, list)
+    docs = ml.documents.read([uri], output_type=bytes)
+    assert isinstance(docs, dict)
     assert len(docs) == 1
 
-    document = docs[0]
+    document = docs[uri]
     assert isinstance(document, RawDocument)
     assert document.uri == uri
     assert document.doc_type == DocumentType.JSON
@@ -275,17 +275,17 @@ def test_read_doc_as_bytes_using_uri_list(docs_client):
 
 
 @ml_mocker.router
-def test_read_existing_and_non_existing_doc(docs_client):
+def test_read_existing_and_non_existing_doc(ml):
     uris = [
         "/some/dir/doc1.xml",
         "/some/dir/doc5.xml",
     ]
 
-    docs = docs_client.documents.read(uris)
-    assert isinstance(docs, list)
+    docs = ml.documents.read(uris)
+    assert isinstance(docs, dict)
     assert len(docs) == 1
 
-    document = docs[0]
+    document = docs["/some/dir/doc1.xml"]
     assert isinstance(document, XMLDocument)
     assert document.uri == "/some/dir/doc1.xml"
     assert document.doc_type == DocumentType.XML
@@ -298,7 +298,7 @@ def test_read_existing_and_non_existing_doc(docs_client):
 
 
 @ml_mocker.router
-def test_read_multiple_docs(docs_client):
+def test_read_multiple_docs(ml):
     uris = [
         "/some/dir/doc1.xml",
         "/some/dir/doc2.json",
@@ -306,14 +306,12 @@ def test_read_multiple_docs(docs_client):
         "/some/dir/doc4.zip",
     ]
 
-    docs = docs_client.documents.read(uris)
+    docs = ml.documents.read(uris)
 
-    assert isinstance(docs, list)
+    assert isinstance(docs, dict)
     assert len(docs) == 4
 
-    xml_docs = [doc for doc in docs if doc.uri.endswith(".xml")]
-    assert len(xml_docs) == 1
-    xml_doc = xml_docs[0]
+    xml_doc = docs["/some/dir/doc1.xml"]
     assert isinstance(xml_doc, XMLDocument)
     assert xml_doc.uri == "/some/dir/doc1.xml"
     assert xml_doc.doc_type == DocumentType.XML
@@ -324,9 +322,7 @@ def test_read_multiple_docs(docs_client):
     assert xml_doc.metadata is None
     assert xml_doc.temporal_collection is None
 
-    json_docs = list(filter(lambda d: d.uri.endswith(".json"), docs))
-    assert len(json_docs) == 1
-    json_doc = json_docs[0]
+    json_doc = docs["/some/dir/doc2.json"]
     assert isinstance(json_doc, JSONDocument)
     assert json_doc.uri == "/some/dir/doc2.json"
     assert json_doc.doc_type == DocumentType.JSON
@@ -335,9 +331,7 @@ def test_read_multiple_docs(docs_client):
     assert json_doc.metadata is None
     assert json_doc.temporal_collection is None
 
-    xqy_docs = list(filter(lambda d: d.uri.endswith(".xqy"), docs))
-    assert len(xqy_docs) == 1
-    xqy_doc = xqy_docs[0]
+    xqy_doc = docs["/some/dir/doc3.xqy"]
     assert isinstance(xqy_doc, TextDocument)
     assert xqy_doc.uri == "/some/dir/doc3.xqy"
     assert xqy_doc.doc_type == DocumentType.TEXT
@@ -347,9 +341,7 @@ def test_read_multiple_docs(docs_client):
     assert xqy_doc.temporal_collection is None
 
     zip_content = zlib.compress(b'xquery version "1.0-ml";\n\nfn:current-date()')
-    zip_docs = list(filter(lambda d: d.uri.endswith(".zip"), docs))
-    assert len(zip_docs) == 1
-    zip_doc = zip_docs[0]
+    zip_doc = docs["/some/dir/doc4.zip"]
     assert isinstance(zip_doc, BinaryDocument)
     assert zip_doc.uri == "/some/dir/doc4.zip"
     assert zip_doc.doc_type == DocumentType.BINARY
@@ -360,7 +352,7 @@ def test_read_multiple_docs(docs_client):
 
 
 @ml_mocker.router
-def test_read_multiple_docs_as_string(docs_client):
+def test_read_multiple_docs_as_string(ml):
     uris = [
         "/some/dir/doc1.xml",
         "/some/dir/doc2.json",
@@ -368,14 +360,12 @@ def test_read_multiple_docs_as_string(docs_client):
         "/some/dir/doc4.zip",
     ]
 
-    docs = docs_client.documents.read(uris, output_type=str)
+    docs = ml.documents.read(uris, output_type=str)
 
-    assert isinstance(docs, list)
+    assert isinstance(docs, dict)
     assert len(docs) == 4
 
-    xml_docs = [doc for doc in docs if doc.uri.endswith(".xml")]
-    assert len(xml_docs) == 1
-    xml_doc = xml_docs[0]
+    xml_doc = docs["/some/dir/doc1.xml"]
     assert isinstance(xml_doc, RawStringDocument)
     assert xml_doc.uri == "/some/dir/doc1.xml"
     assert xml_doc.doc_type == DocumentType.XML
@@ -384,9 +374,7 @@ def test_read_multiple_docs_as_string(docs_client):
     assert xml_doc.metadata is None
     assert xml_doc.temporal_collection is None
 
-    json_docs = list(filter(lambda d: d.uri.endswith(".json"), docs))
-    assert len(json_docs) == 1
-    json_doc = json_docs[0]
+    json_doc = docs["/some/dir/doc2.json"]
     assert isinstance(json_doc, RawStringDocument)
     assert json_doc.uri == "/some/dir/doc2.json"
     assert json_doc.doc_type == DocumentType.JSON
@@ -395,9 +383,7 @@ def test_read_multiple_docs_as_string(docs_client):
     assert json_doc.metadata is None
     assert json_doc.temporal_collection is None
 
-    xqy_docs = list(filter(lambda d: d.uri.endswith(".xqy"), docs))
-    assert len(xqy_docs) == 1
-    xqy_doc = xqy_docs[0]
+    xqy_doc = docs["/some/dir/doc3.xqy"]
     assert isinstance(xqy_doc, RawStringDocument)
     assert xqy_doc.uri == "/some/dir/doc3.xqy"
     assert xqy_doc.doc_type == DocumentType.TEXT
@@ -407,9 +393,7 @@ def test_read_multiple_docs_as_string(docs_client):
     assert xqy_doc.temporal_collection is None
 
     zip_content = zlib.compress(b'xquery version "1.0-ml";\n\nfn:current-date()')
-    zip_docs = list(filter(lambda d: d.uri.endswith(".zip"), docs))
-    assert len(zip_docs) == 1
-    zip_doc = zip_docs[0]
+    zip_doc = docs["/some/dir/doc4.zip"]
     assert isinstance(zip_doc, RawDocument)
     assert zip_doc.uri == "/some/dir/doc4.zip"
     assert zip_doc.doc_type == DocumentType.BINARY
@@ -420,7 +404,7 @@ def test_read_multiple_docs_as_string(docs_client):
 
 
 @ml_mocker.router
-def test_read_multiple_docs_as_bytes(docs_client):
+def test_read_multiple_docs_as_bytes(ml):
     uris = [
         "/some/dir/doc1.xml",
         "/some/dir/doc2.json",
@@ -428,14 +412,12 @@ def test_read_multiple_docs_as_bytes(docs_client):
         "/some/dir/doc4.zip",
     ]
 
-    docs = docs_client.documents.read(uris, output_type=bytes)
+    docs = ml.documents.read(uris, output_type=bytes)
 
-    assert isinstance(docs, list)
+    assert isinstance(docs, dict)
     assert len(docs) == 4
 
-    xml_docs = [doc for doc in docs if doc.uri.endswith(".xml")]
-    assert len(xml_docs) == 1
-    xml_doc = xml_docs[0]
+    xml_doc = docs["/some/dir/doc1.xml"]
     assert isinstance(xml_doc, RawDocument)
     assert xml_doc.uri == "/some/dir/doc1.xml"
     assert xml_doc.doc_type == DocumentType.XML
@@ -444,9 +426,7 @@ def test_read_multiple_docs_as_bytes(docs_client):
     assert xml_doc.metadata is None
     assert xml_doc.temporal_collection is None
 
-    json_docs = list(filter(lambda d: d.uri.endswith(".json"), docs))
-    assert len(json_docs) == 1
-    json_doc = json_docs[0]
+    json_doc = docs["/some/dir/doc2.json"]
     assert isinstance(json_doc, RawDocument)
     assert json_doc.uri == "/some/dir/doc2.json"
     assert json_doc.doc_type == DocumentType.JSON
@@ -455,9 +435,7 @@ def test_read_multiple_docs_as_bytes(docs_client):
     assert json_doc.metadata is None
     assert json_doc.temporal_collection is None
 
-    xqy_docs = list(filter(lambda d: d.uri.endswith(".xqy"), docs))
-    assert len(xqy_docs) == 1
-    xqy_doc = xqy_docs[0]
+    xqy_doc = docs["/some/dir/doc3.xqy"]
     assert isinstance(xqy_doc, RawDocument)
     assert xqy_doc.uri == "/some/dir/doc3.xqy"
     assert xqy_doc.doc_type == DocumentType.TEXT
@@ -467,9 +445,7 @@ def test_read_multiple_docs_as_bytes(docs_client):
     assert xqy_doc.temporal_collection is None
 
     zip_content = zlib.compress(b'xquery version "1.0-ml";\n\nfn:current-date()')
-    zip_docs = list(filter(lambda d: d.uri.endswith(".zip"), docs))
-    assert len(zip_docs) == 1
-    zip_doc = zip_docs[0]
+    zip_doc = docs["/some/dir/doc4.zip"]
     assert isinstance(zip_doc, RawDocument)
     assert zip_doc.uri == "/some/dir/doc4.zip"
     assert zip_doc.doc_type == DocumentType.BINARY
@@ -480,19 +456,19 @@ def test_read_multiple_docs_as_bytes(docs_client):
 
 
 @ml_mocker.router
-def test_read_multiple_non_existing_docs(docs_client):
+def test_read_multiple_non_existing_docs(ml):
     uris = [
         "/some/dir/doc5.xml",
         "/some/dir/doc6.xml",
     ]
 
-    docs = docs_client.documents.read(uris)
+    docs = ml.documents.read(uris)
 
-    assert docs == []
+    assert docs == {}
 
 
 @ml_mocker.router
-def test_read_multiple_existing_and_non_existing_docs(docs_client):
+def test_read_multiple_existing_and_non_existing_docs(ml):
     uris = [
         "/some/dir/doc1.xml",
         "/some/dir/doc2.json",
@@ -500,14 +476,12 @@ def test_read_multiple_existing_and_non_existing_docs(docs_client):
         "/some/dir/doc6.json",
     ]
 
-    docs = docs_client.documents.read(uris)
+    docs = ml.documents.read(uris)
 
-    assert isinstance(docs, list)
+    assert isinstance(docs, dict)
     assert len(docs) == 2
 
-    xml_docs = [doc for doc in docs if doc.uri.endswith(".xml")]
-    assert len(xml_docs) == 1
-    xml_doc = xml_docs[0]
+    xml_doc = docs["/some/dir/doc1.xml"]
     assert isinstance(xml_doc, XMLDocument)
     assert xml_doc.uri == "/some/dir/doc1.xml"
     assert xml_doc.doc_type == DocumentType.XML
@@ -518,9 +492,7 @@ def test_read_multiple_existing_and_non_existing_docs(docs_client):
     assert xml_doc.metadata is None
     assert xml_doc.temporal_collection is None
 
-    json_docs = list(filter(lambda d: d.uri.endswith(".json"), docs))
-    assert len(json_docs) == 1
-    json_doc = json_docs[0]
+    json_doc = docs["/some/dir/doc2.json"]
     assert isinstance(json_doc, JSONDocument)
     assert json_doc.uri == "/some/dir/doc2.json"
     assert json_doc.doc_type == DocumentType.JSON
@@ -531,7 +503,7 @@ def test_read_multiple_existing_and_non_existing_docs(docs_client):
 
 
 @ml_mocker.router
-def test_read_doc_with_full_metadata(docs_client):
+def test_read_doc_with_full_metadata(ml):
     with ml_doc_mocker.scoped(fresh=False):
         ml_doc_mocker.mock_document(
             test_data.doc_full_metadata_body_part(
@@ -542,7 +514,7 @@ def test_read_doc_with_full_metadata(docs_client):
         )
         uri = "/some/dir/doc1.xml"
 
-        document = docs_client.documents.read(uri, category=["content", "metadata"])
+        document = ml.documents.read(uri, category=["content", "metadata"])
 
     assert isinstance(document, XMLDocument)
     assert document.uri == uri
@@ -561,7 +533,7 @@ def test_read_doc_with_full_metadata(docs_client):
 
 
 @ml_mocker.router
-def test_read_doc_with_single_metadata_category(docs_client):
+def test_read_doc_with_single_metadata_category(ml):
     with ml_doc_mocker.scoped(fresh=False):
         ml_doc_mocker.mock_document(
             test_data.doc_metadata_body_part(
@@ -571,7 +543,7 @@ def test_read_doc_with_single_metadata_category(docs_client):
         )
         uri = "/some/dir/doc1.xml"
 
-        document = docs_client.documents.read(uri, category=["content", "collections"])
+        document = ml.documents.read(uri, category=["content", "collections"])
 
     assert isinstance(document, XMLDocument)
     assert document.uri == uri
@@ -590,7 +562,7 @@ def test_read_doc_with_single_metadata_category(docs_client):
 
 
 @ml_mocker.router
-def test_read_doc_with_two_metadata_categories(docs_client):
+def test_read_doc_with_two_metadata_categories(ml):
     with ml_doc_mocker.scoped(fresh=False):
         ml_doc_mocker.mock_document(
             test_data.doc_metadata_body_part(
@@ -600,7 +572,7 @@ def test_read_doc_with_two_metadata_categories(docs_client):
         )
         uri = "/some/dir/doc1.xml"
 
-        document = docs_client.documents.read(
+        document = ml.documents.read(
             uri,
             category=["content", "collections", "quality"],
         )
@@ -622,7 +594,7 @@ def test_read_doc_with_two_metadata_categories(docs_client):
 
 
 @ml_mocker.router
-def test_read_doc_with_all_metadata_categories(docs_client):
+def test_read_doc_with_all_metadata_categories(ml):
     with ml_doc_mocker.scoped(fresh=False):
         ml_doc_mocker.mock_document(
             test_data.doc_full_metadata_body_part(
@@ -632,7 +604,7 @@ def test_read_doc_with_all_metadata_categories(docs_client):
         )
         uri = "/some/dir/doc1.xml"
 
-        document = docs_client.documents.read(
+        document = ml.documents.read(
             uri,
             category=[
                 "content",
@@ -662,7 +634,7 @@ def test_read_doc_with_all_metadata_categories(docs_client):
 
 @ml_mocker.router
 def test_read_doc_with_full_metadata_when_content_follows_metadata_in_response(
-    docs_client,
+    ml,
 ):
     with ml_doc_mocker.scoped():
         ml_doc_mocker.mock_document(
@@ -675,7 +647,7 @@ def test_read_doc_with_full_metadata_when_content_follows_metadata_in_response(
         )
         uri = "/some/dir/doc1.xml"
 
-        document = docs_client.documents.read(uri, category=["content", "metadata"])
+        document = ml.documents.read(uri, category=["content", "metadata"])
 
     assert isinstance(document, XMLDocument)
     assert document.uri == uri
@@ -694,7 +666,7 @@ def test_read_doc_with_full_metadata_when_content_follows_metadata_in_response(
 
 
 @ml_mocker.router
-def test_read_full_metadata_without_content(docs_client):
+def test_read_full_metadata_without_content(ml):
     with ml_doc_mocker.scoped(fresh=False):
         ml_doc_mocker.mock_document(
             test_data.doc_full_metadata_body_part(
@@ -705,7 +677,7 @@ def test_read_full_metadata_without_content(docs_client):
         )
         uri = "/some/dir/doc1.xml"
 
-        document = docs_client.documents.read(uri, category=["metadata"])
+        document = ml.documents.read(uri, category=["metadata"])
 
     assert isinstance(document, MetadataDocument)
     assert document.uri == uri
@@ -721,7 +693,7 @@ def test_read_full_metadata_without_content(docs_client):
 
 
 @ml_mocker.router
-def test_read_single_metadata_category_without_content(docs_client):
+def test_read_single_metadata_category_without_content(ml):
     with ml_doc_mocker.scoped(fresh=False):
         ml_doc_mocker.mock_document(
             test_data.doc_metadata_body_part(
@@ -731,7 +703,7 @@ def test_read_single_metadata_category_without_content(docs_client):
         )
         uri = "/some/dir/doc1.xml"
 
-        document = docs_client.documents.read(uri, category=["collections"])
+        document = ml.documents.read(uri, category=["collections"])
 
     assert isinstance(document, MetadataDocument)
     assert document.uri == uri
@@ -747,7 +719,7 @@ def test_read_single_metadata_category_without_content(docs_client):
 
 
 @ml_mocker.router
-def test_read_two_metadata_categories_without_content(docs_client):
+def test_read_two_metadata_categories_without_content(ml):
     with ml_doc_mocker.scoped(fresh=False):
         ml_doc_mocker.mock_document(
             test_data.doc_metadata_body_part(
@@ -757,7 +729,7 @@ def test_read_two_metadata_categories_without_content(docs_client):
         )
         uri = "/some/dir/doc1.xml"
 
-        document = docs_client.documents.read(uri, category=["collections", "quality"])
+        document = ml.documents.read(uri, category=["collections", "quality"])
 
     assert isinstance(document, MetadataDocument)
     assert document.uri == uri
@@ -773,7 +745,7 @@ def test_read_two_metadata_categories_without_content(docs_client):
 
 
 @ml_mocker.router
-def test_read_all_metadata_categories_without_content(docs_client):
+def test_read_all_metadata_categories_without_content(ml):
     with ml_doc_mocker.scoped(fresh=False):
         ml_doc_mocker.mock_document(
             test_data.doc_full_metadata_body_part(
@@ -783,7 +755,7 @@ def test_read_all_metadata_categories_without_content(docs_client):
         )
         uri = "/some/dir/doc1.xml"
 
-        document = docs_client.documents.read(
+        document = ml.documents.read(
             uri,
             category=[
                 "metadata-values",
@@ -808,7 +780,7 @@ def test_read_all_metadata_categories_without_content(docs_client):
 
 
 @ml_mocker.router
-def test_read_multiple_docs_with_full_metadata(docs_client):
+def test_read_multiple_docs_with_full_metadata(ml):
     with ml_doc_mocker.scoped(fresh=False):
         ml_doc_mocker.mock_document(
             test_data.doc_full_metadata_body_part(
@@ -827,14 +799,12 @@ def test_read_multiple_docs_with_full_metadata(docs_client):
             "/some/dir/doc2.json",
         ]
 
-        docs = docs_client.documents.read(uris, category=["content", "metadata"])
+        docs = ml.documents.read(uris, category=["content", "metadata"])
 
-    assert isinstance(docs, list)
+    assert isinstance(docs, dict)
     assert len(docs) == 2
 
-    xml_docs = [doc for doc in docs if doc.uri.endswith(".xml")]
-    assert len(xml_docs) == 1
-    xml_doc = xml_docs[0]
+    xml_doc = docs["/some/dir/doc1.xml"]
     assert isinstance(xml_doc, XMLDocument)
     assert xml_doc.uri == "/some/dir/doc1.xml"
     assert xml_doc.doc_type == DocumentType.XML
@@ -850,9 +820,7 @@ def test_read_multiple_docs_with_full_metadata(docs_client):
     assert xml_doc.metadata.quality() == 0
     assert xml_doc.temporal_collection is None
 
-    json_docs = list(filter(lambda d: d.uri.endswith(".json"), docs))
-    assert len(json_docs) == 1
-    json_doc = json_docs[0]
+    json_doc = docs["/some/dir/doc2.json"]
     assert isinstance(json_doc, JSONDocument)
     assert json_doc.uri == "/some/dir/doc2.json"
     assert json_doc.doc_type == DocumentType.JSON
@@ -868,7 +836,7 @@ def test_read_multiple_docs_with_full_metadata(docs_client):
 
 
 @ml_mocker.router
-def test_read_multiple_docs_with_single_metadata_category(docs_client):
+def test_read_multiple_docs_with_single_metadata_category(ml):
     with ml_doc_mocker.scoped(fresh=False):
         ml_doc_mocker.mock_document(
             test_data.doc_metadata_body_part(
@@ -885,14 +853,12 @@ def test_read_multiple_docs_with_single_metadata_category(docs_client):
             "/some/dir/doc2.json",
         ]
 
-        docs = docs_client.documents.read(uris, category=["content", "collections"])
+        docs = ml.documents.read(uris, category=["content", "collections"])
 
-    assert isinstance(docs, list)
+    assert isinstance(docs, dict)
     assert len(docs) == 2
 
-    xml_docs = [doc for doc in docs if doc.uri.endswith(".xml")]
-    assert len(xml_docs) == 1
-    xml_doc = xml_docs[0]
+    xml_doc = docs["/some/dir/doc1.xml"]
     assert isinstance(xml_doc, XMLDocument)
     assert xml_doc.uri == "/some/dir/doc1.xml"
     assert xml_doc.doc_type == DocumentType.XML
@@ -908,9 +874,7 @@ def test_read_multiple_docs_with_single_metadata_category(docs_client):
     assert xml_doc.metadata.quality() == 0
     assert xml_doc.temporal_collection is None
 
-    json_docs = list(filter(lambda d: d.uri.endswith(".json"), docs))
-    assert len(json_docs) == 1
-    json_doc = json_docs[0]
+    json_doc = docs["/some/dir/doc2.json"]
     assert isinstance(json_doc, JSONDocument)
     assert json_doc.uri == "/some/dir/doc2.json"
     assert json_doc.doc_type == DocumentType.JSON
@@ -926,7 +890,7 @@ def test_read_multiple_docs_with_single_metadata_category(docs_client):
 
 
 @ml_mocker.router
-def test_read_multiple_docs_with_two_metadata_categories(docs_client):
+def test_read_multiple_docs_with_two_metadata_categories(ml):
     with ml_doc_mocker.scoped(fresh=False):
         ml_doc_mocker.mock_document(
             test_data.doc_metadata_body_part(
@@ -943,17 +907,15 @@ def test_read_multiple_docs_with_two_metadata_categories(docs_client):
             "/some/dir/doc2.json",
         ]
 
-        docs = docs_client.documents.read(
+        docs = ml.documents.read(
             uris,
             category=["content", "collections", "quality"],
         )
 
-    assert isinstance(docs, list)
+    assert isinstance(docs, dict)
     assert len(docs) == 2
 
-    xml_docs = [doc for doc in docs if doc.uri.endswith(".xml")]
-    assert len(xml_docs) == 1
-    xml_doc = xml_docs[0]
+    xml_doc = docs["/some/dir/doc1.xml"]
     assert isinstance(xml_doc, XMLDocument)
     assert xml_doc.uri == "/some/dir/doc1.xml"
     assert xml_doc.doc_type == DocumentType.XML
@@ -969,9 +931,7 @@ def test_read_multiple_docs_with_two_metadata_categories(docs_client):
     assert xml_doc.metadata.quality() == 0
     assert xml_doc.temporal_collection is None
 
-    json_docs = list(filter(lambda d: d.uri.endswith(".json"), docs))
-    assert len(json_docs) == 1
-    json_doc = json_docs[0]
+    json_doc = docs["/some/dir/doc2.json"]
     assert isinstance(json_doc, JSONDocument)
     assert json_doc.uri == "/some/dir/doc2.json"
     assert json_doc.doc_type == DocumentType.JSON
@@ -987,7 +947,7 @@ def test_read_multiple_docs_with_two_metadata_categories(docs_client):
 
 
 @ml_mocker.router
-def test_read_multiple_docs_with_all_metadata_categories(docs_client):
+def test_read_multiple_docs_with_all_metadata_categories(ml):
     with ml_doc_mocker.scoped(fresh=False):
         ml_doc_mocker.mock_document(
             test_data.doc_full_metadata_body_part(
@@ -1004,7 +964,7 @@ def test_read_multiple_docs_with_all_metadata_categories(docs_client):
             "/some/dir/doc2.json",
         ]
 
-        docs = docs_client.documents.read(
+        docs = ml.documents.read(
             uris,
             category=[
                 "content",
@@ -1016,12 +976,10 @@ def test_read_multiple_docs_with_all_metadata_categories(docs_client):
             ],
         )
 
-    assert isinstance(docs, list)
+    assert isinstance(docs, dict)
     assert len(docs) == 2
 
-    xml_docs = [doc for doc in docs if doc.uri.endswith(".xml")]
-    assert len(xml_docs) == 1
-    xml_doc = xml_docs[0]
+    xml_doc = docs["/some/dir/doc1.xml"]
     assert isinstance(xml_doc, XMLDocument)
     assert xml_doc.uri == "/some/dir/doc1.xml"
     assert xml_doc.doc_type == DocumentType.XML
@@ -1037,9 +995,7 @@ def test_read_multiple_docs_with_all_metadata_categories(docs_client):
     assert xml_doc.metadata.quality() == 0
     assert xml_doc.temporal_collection is None
 
-    json_docs = list(filter(lambda d: d.uri.endswith(".json"), docs))
-    assert len(json_docs) == 1
-    json_doc = json_docs[0]
+    json_doc = docs["/some/dir/doc2.json"]
     assert isinstance(json_doc, JSONDocument)
     assert json_doc.uri == "/some/dir/doc2.json"
     assert json_doc.doc_type == DocumentType.JSON
@@ -1055,7 +1011,7 @@ def test_read_multiple_docs_with_all_metadata_categories(docs_client):
 
 
 @ml_mocker.router
-def test_read_multiple_docs_full_metadata_without_content(docs_client):
+def test_read_multiple_docs_full_metadata_without_content(ml):
     with ml_doc_mocker.scoped(fresh=False):
         ml_doc_mocker.mock_document(
             test_data.doc_full_metadata_body_part(
@@ -1074,14 +1030,12 @@ def test_read_multiple_docs_full_metadata_without_content(docs_client):
             "/some/dir/doc2.json",
         ]
 
-        docs = docs_client.documents.read(uris, category=["metadata"])
+        docs = ml.documents.read(uris, category=["metadata"])
 
-    assert isinstance(docs, list)
+    assert isinstance(docs, dict)
     assert len(docs) == 2
 
-    xml_docs = [doc for doc in docs if doc.uri.endswith(".xml")]
-    assert len(xml_docs) == 1
-    xml_doc = xml_docs[0]
+    xml_doc = docs["/some/dir/doc1.xml"]
     assert isinstance(xml_doc, MetadataDocument)
     assert xml_doc.uri == "/some/dir/doc1.xml"
     assert xml_doc.doc_type is None
@@ -1094,9 +1048,7 @@ def test_read_multiple_docs_full_metadata_without_content(docs_client):
     assert xml_doc.metadata.quality() == 0
     assert xml_doc.temporal_collection is None
 
-    json_docs = list(filter(lambda d: d.uri.endswith(".json"), docs))
-    assert len(json_docs) == 1
-    json_doc = json_docs[0]
+    json_doc = docs["/some/dir/doc2.json"]
     assert isinstance(json_doc, MetadataDocument)
     assert json_doc.uri == "/some/dir/doc2.json"
     assert json_doc.doc_type is None
@@ -1111,7 +1063,7 @@ def test_read_multiple_docs_full_metadata_without_content(docs_client):
 
 
 @ml_mocker.router
-def test_read_multiple_docs_single_metadata_category_without_content(docs_client):
+def test_read_multiple_docs_single_metadata_category_without_content(ml):
     with ml_doc_mocker.scoped(fresh=False):
         ml_doc_mocker.mock_document(
             test_data.doc_metadata_body_part(
@@ -1128,14 +1080,12 @@ def test_read_multiple_docs_single_metadata_category_without_content(docs_client
             "/some/dir/doc2.json",
         ]
 
-        docs = docs_client.documents.read(uris, category=["collections"])
+        docs = ml.documents.read(uris, category=["collections"])
 
-    assert isinstance(docs, list)
+    assert isinstance(docs, dict)
     assert len(docs) == 2
 
-    xml_docs = [doc for doc in docs if doc.uri.endswith(".xml")]
-    assert len(xml_docs) == 1
-    xml_doc = xml_docs[0]
+    xml_doc = docs["/some/dir/doc1.xml"]
     assert isinstance(xml_doc, MetadataDocument)
     assert xml_doc.uri == "/some/dir/doc1.xml"
     assert xml_doc.doc_type is None
@@ -1148,9 +1098,7 @@ def test_read_multiple_docs_single_metadata_category_without_content(docs_client
     assert xml_doc.metadata.quality() == 0
     assert xml_doc.temporal_collection is None
 
-    json_docs = list(filter(lambda d: d.uri.endswith(".json"), docs))
-    assert len(json_docs) == 1
-    json_doc = json_docs[0]
+    json_doc = docs["/some/dir/doc2.json"]
     assert isinstance(json_doc, MetadataDocument)
     assert json_doc.uri == "/some/dir/doc2.json"
     assert json_doc.doc_type is None
@@ -1165,7 +1113,7 @@ def test_read_multiple_docs_single_metadata_category_without_content(docs_client
 
 
 @ml_mocker.router
-def test_read_multiple_docs_two_metadata_categories_without_content(docs_client):
+def test_read_multiple_docs_two_metadata_categories_without_content(ml):
     with ml_doc_mocker.scoped(fresh=False):
         ml_doc_mocker.mock_document(
             test_data.doc_metadata_body_part(
@@ -1182,14 +1130,12 @@ def test_read_multiple_docs_two_metadata_categories_without_content(docs_client)
             "/some/dir/doc2.json",
         ]
 
-        docs = docs_client.documents.read(uris, category=["collections", "quality"])
+        docs = ml.documents.read(uris, category=["collections", "quality"])
 
-    assert isinstance(docs, list)
+    assert isinstance(docs, dict)
     assert len(docs) == 2
 
-    xml_docs = [doc for doc in docs if doc.uri.endswith(".xml")]
-    assert len(xml_docs) == 1
-    xml_doc = xml_docs[0]
+    xml_doc = docs["/some/dir/doc1.xml"]
     assert isinstance(xml_doc, MetadataDocument)
     assert xml_doc.uri == "/some/dir/doc1.xml"
     assert xml_doc.doc_type is None
@@ -1202,9 +1148,7 @@ def test_read_multiple_docs_two_metadata_categories_without_content(docs_client)
     assert xml_doc.metadata.quality() == 0
     assert xml_doc.temporal_collection is None
 
-    json_docs = list(filter(lambda d: d.uri.endswith(".json"), docs))
-    assert len(json_docs) == 1
-    json_doc = json_docs[0]
+    json_doc = docs["/some/dir/doc2.json"]
     assert isinstance(json_doc, MetadataDocument)
     assert json_doc.uri == "/some/dir/doc2.json"
     assert json_doc.doc_type is None
@@ -1219,7 +1163,7 @@ def test_read_multiple_docs_two_metadata_categories_without_content(docs_client)
 
 
 @ml_mocker.router
-def test_read_multiple_docs_all_metadata_categories_without_content(docs_client):
+def test_read_multiple_docs_all_metadata_categories_without_content(ml):
     with ml_doc_mocker.scoped(fresh=False):
         ml_doc_mocker.mock_document(
             test_data.doc_full_metadata_body_part(
@@ -1236,7 +1180,7 @@ def test_read_multiple_docs_all_metadata_categories_without_content(docs_client)
             "/some/dir/doc2.json",
         ]
 
-        docs = docs_client.documents.read(
+        docs = ml.documents.read(
             uris,
             category=[
                 "metadata-values",
@@ -1247,12 +1191,10 @@ def test_read_multiple_docs_all_metadata_categories_without_content(docs_client)
             ],
         )
 
-    assert isinstance(docs, list)
+    assert isinstance(docs, dict)
     assert len(docs) == 2
 
-    xml_docs = [doc for doc in docs if doc.uri.endswith(".xml")]
-    assert len(xml_docs) == 1
-    xml_doc = xml_docs[0]
+    xml_doc = docs["/some/dir/doc1.xml"]
     assert isinstance(xml_doc, MetadataDocument)
     assert xml_doc.uri == "/some/dir/doc1.xml"
     assert xml_doc.doc_type is None
@@ -1265,9 +1207,7 @@ def test_read_multiple_docs_all_metadata_categories_without_content(docs_client)
     assert xml_doc.metadata.quality() == 0
     assert xml_doc.temporal_collection is None
 
-    json_docs = list(filter(lambda d: d.uri.endswith(".json"), docs))
-    assert len(json_docs) == 1
-    json_doc = json_docs[0]
+    json_doc = docs["/some/dir/doc2.json"]
     assert isinstance(json_doc, MetadataDocument)
     assert json_doc.uri == "/some/dir/doc2.json"
     assert json_doc.doc_type is None
@@ -1282,10 +1222,10 @@ def test_read_multiple_docs_all_metadata_categories_without_content(docs_client)
 
 
 @ml_mocker.router
-def test_read_single_doc_using_custom_database(docs_client):
+def test_read_single_doc_using_custom_database(ml):
     uri = "/some/dir/doc1.xml"
 
-    document = docs_client.documents.read(uri, database="Documents")
+    document = ml.documents.read(uri, database="Documents")
 
     assert isinstance(document, XMLDocument)
     assert document.uri == uri
@@ -1299,7 +1239,7 @@ def test_read_single_doc_using_custom_database(docs_client):
 
 
 @ml_mocker.router
-def test_read_multiple_docs_using_custom_database(docs_client):
+def test_read_multiple_docs_using_custom_database(ml):
     uris = [
         "/some/dir/doc1.xml",
         "/some/dir/doc2.json",
@@ -1307,14 +1247,12 @@ def test_read_multiple_docs_using_custom_database(docs_client):
         "/some/dir/doc4.zip",
     ]
 
-    docs = docs_client.documents.read(uris, database="Documents")
+    docs = ml.documents.read(uris, database="Documents")
 
-    assert isinstance(docs, list)
+    assert isinstance(docs, dict)
     assert len(docs) == 4
 
-    xml_docs = [doc for doc in docs if doc.uri.endswith(".xml")]
-    assert len(xml_docs) == 1
-    xml_doc = xml_docs[0]
+    xml_doc = docs["/some/dir/doc1.xml"]
     assert isinstance(xml_doc, XMLDocument)
     assert xml_doc.uri == "/some/dir/doc1.xml"
     assert xml_doc.doc_type == DocumentType.XML
@@ -1325,9 +1263,7 @@ def test_read_multiple_docs_using_custom_database(docs_client):
     assert xml_doc.metadata is None
     assert xml_doc.temporal_collection is None
 
-    json_docs = list(filter(lambda d: d.uri.endswith(".json"), docs))
-    assert len(json_docs) == 1
-    json_doc = json_docs[0]
+    json_doc = docs["/some/dir/doc2.json"]
     assert isinstance(json_doc, JSONDocument)
     assert json_doc.uri == "/some/dir/doc2.json"
     assert json_doc.doc_type == DocumentType.JSON
@@ -1336,9 +1272,7 @@ def test_read_multiple_docs_using_custom_database(docs_client):
     assert json_doc.metadata is None
     assert json_doc.temporal_collection is None
 
-    xqy_docs = list(filter(lambda d: d.uri.endswith(".xqy"), docs))
-    assert len(xqy_docs) == 1
-    xqy_doc = xqy_docs[0]
+    xqy_doc = docs["/some/dir/doc3.xqy"]
     assert isinstance(xqy_doc, TextDocument)
     assert xqy_doc.uri == "/some/dir/doc3.xqy"
     assert xqy_doc.doc_type == DocumentType.TEXT
@@ -1348,9 +1282,7 @@ def test_read_multiple_docs_using_custom_database(docs_client):
     assert xqy_doc.temporal_collection is None
 
     zip_content = zlib.compress(b'xquery version "1.0-ml";\n\nfn:current-date()')
-    zip_docs = list(filter(lambda d: d.uri.endswith(".zip"), docs))
-    assert len(zip_docs) == 1
-    zip_doc = zip_docs[0]
+    zip_doc = docs["/some/dir/doc4.zip"]
     assert isinstance(zip_doc, BinaryDocument)
     assert zip_doc.uri == "/some/dir/doc4.zip"
     assert zip_doc.doc_type == DocumentType.BINARY
@@ -1361,12 +1293,12 @@ def test_read_multiple_docs_using_custom_database(docs_client):
 
 
 @ml_mocker.router
-def test_create_raw_document(docs_client):
+def test_create_raw_document(ml):
     uri = "/some/dir/doc1.xml"
     content = b"<root><child>data</child></root>"
     doc = RawDocument(content, uri, DocumentType.XML)
 
-    resp = docs_client.documents.write(doc)
+    resp = ml.documents.write(doc)
 
     documents = resp["documents"]
     assert len(documents) == 1
@@ -1376,12 +1308,12 @@ def test_create_raw_document(docs_client):
 
 
 @ml_mocker.router
-def test_create_raw_string_document(docs_client):
+def test_create_raw_string_document(ml):
     uri = "/some/dir/doc2.json"
     content = '{"root":{"child":"data"}}'
     doc = RawStringDocument(content, uri, DocumentType.JSON)
 
-    resp = docs_client.documents.write(doc)
+    resp = ml.documents.write(doc)
 
     documents = resp["documents"]
     assert len(documents) == 1
@@ -1391,13 +1323,13 @@ def test_create_raw_string_document(docs_client):
 
 
 @ml_mocker.router
-def test_create_xml_document(docs_client):
+def test_create_xml_document(ml):
     uri = "/some/dir/doc1.xml"
     content_str = "<root><child>data</child></root>"
     content = ElemTree.ElementTree(ElemTree.fromstring(content_str))
     doc = XMLDocument(content, uri)
 
-    resp = docs_client.documents.write(doc)
+    resp = ml.documents.write(doc)
 
     documents = resp["documents"]
     assert len(documents) == 1
@@ -1407,12 +1339,12 @@ def test_create_xml_document(docs_client):
 
 
 @ml_mocker.router
-def test_create_json_document(docs_client):
+def test_create_json_document(ml):
     uri = "/some/dir/doc2.json"
     content = {"root": {"child": "data"}}
     doc = JSONDocument(content, uri)
 
-    resp = docs_client.documents.write(doc)
+    resp = ml.documents.write(doc)
 
     documents = resp["documents"]
     assert len(documents) == 1
@@ -1422,12 +1354,12 @@ def test_create_json_document(docs_client):
 
 
 @ml_mocker.router
-def test_create_text_document(docs_client):
+def test_create_text_document(ml):
     uri = "/some/dir/doc3.xqy"
     content = 'xquery version "1.0-ml";\n\nfn:current-date()'
     doc = TextDocument(content, uri)
 
-    resp = docs_client.documents.write(doc)
+    resp = ml.documents.write(doc)
 
     documents = resp["documents"]
     assert len(documents) == 1
@@ -1437,12 +1369,12 @@ def test_create_text_document(docs_client):
 
 
 @ml_mocker.router
-def test_create_binary_document(docs_client):
+def test_create_binary_document(ml):
     uri = "/some/dir/doc4.zip"
     content = zlib.compress(b'xquery version "1.0-ml";\n\nfn:current-date()')
     doc = BinaryDocument(content, uri)
 
-    resp = docs_client.documents.write(doc)
+    resp = ml.documents.write(doc)
 
     documents = resp["documents"]
     assert len(documents) == 1
@@ -1452,12 +1384,12 @@ def test_create_binary_document(docs_client):
 
 
 @ml_mocker.router
-def test_create_metadata_document_when_doc_exists(docs_client):
+def test_create_metadata_document_when_doc_exists(ml):
     uri = "/some/dir/doc1.xml"
     metadata = Metadata(collections=["test-collection"])
     doc = MetadataDocument(uri, metadata)
 
-    resp = docs_client.documents.write(doc)
+    resp = ml.documents.write(doc)
 
     documents = resp["documents"]
     assert len(documents) == 1
@@ -1467,14 +1399,14 @@ def test_create_metadata_document_when_doc_exists(docs_client):
 
 
 @ml_mocker.router
-def test_create_metadata_document_when_doc_does_not_exists(docs_client):
+def test_create_metadata_document_when_doc_does_not_exists(ml):
     # NON_EXISTING part makes it simulating an error
     uri = f"/some/dir/{MLDocumentsMocker.NON_EXISTING_TAG}-doc.xml"
     metadata = Metadata(collections=["test-collection"])
     doc = MetadataDocument(uri, metadata)
 
     with pytest.raises(MarkLogicError) as err:
-        docs_client.documents.write(doc)
+        ml.documents.write(doc)
 
     expected_error = (
         "[500 Internal Server Error] (XDMP-DOCNOTFOUND) XDMP-DOCNOTFOUND: "
@@ -1485,7 +1417,7 @@ def test_create_metadata_document_when_doc_does_not_exists(docs_client):
 
 
 @ml_mocker.router
-def test_create_multiple_documents(docs_client):
+def test_create_multiple_documents(ml):
     doc_1_uri = "/some/dir/doc1.xml"
     doc_1_content_str = "<root><child>data</child></root>"
     doc_1_content = ElemTree.ElementTree(ElemTree.fromstring(doc_1_content_str))
@@ -1503,7 +1435,7 @@ def test_create_multiple_documents(docs_client):
     doc_4_content = zlib.compress(b'xquery version "1.0-ml";\n\nfn:current-date()')
     doc_4 = BinaryDocument(doc_4_content, doc_4_uri)
 
-    resp = docs_client.documents.write([doc_1, doc_2, doc_3, doc_4])
+    resp = ml.documents.write([doc_1, doc_2, doc_3, doc_4])
 
     documents = resp["documents"]
     assert len(documents) == 4
@@ -1538,13 +1470,13 @@ def test_create_multiple_documents(docs_client):
 
 
 @ml_mocker.router
-def test_create_raw_document_with_metadata(docs_client):
+def test_create_raw_document_with_metadata(ml):
     uri = "/some/dir/doc1.xml"
     content = b"<root><child>data</child></root>"
     metadata = b'{"collections": ["test-collection"]}'
     doc = RawDocument(content, uri, DocumentType.XML, metadata)
 
-    resp = docs_client.documents.write(doc)
+    resp = ml.documents.write(doc)
 
     documents = resp["documents"]
     assert len(documents) == 1
@@ -1554,13 +1486,13 @@ def test_create_raw_document_with_metadata(docs_client):
 
 
 @ml_mocker.router
-def test_create_raw_string_document_with_metadata(docs_client):
+def test_create_raw_string_document_with_metadata(ml):
     uri = "/some/dir/doc1.xml"
     content = "<root><child>data</child></root>"
     metadata = '{"collections": ["test-collection"]}'
     doc = RawStringDocument(content, uri, DocumentType.XML, metadata)
 
-    resp = docs_client.documents.write(doc)
+    resp = ml.documents.write(doc)
 
     documents = resp["documents"]
     assert len(documents) == 1
@@ -1570,14 +1502,14 @@ def test_create_raw_string_document_with_metadata(docs_client):
 
 
 @ml_mocker.router
-def test_create_xml_document_with_metadata(docs_client):
+def test_create_xml_document_with_metadata(ml):
     uri = "/some/dir/doc1.xml"
     content_str = "<root><child>data</child></root>"
     content = ElemTree.ElementTree(ElemTree.fromstring(content_str))
     metadata = Metadata(collections=["test-collection"])
     doc = XMLDocument(content, uri, metadata)
 
-    resp = docs_client.documents.write(doc)
+    resp = ml.documents.write(doc)
 
     documents = resp["documents"]
     assert len(documents) == 1
@@ -1587,13 +1519,13 @@ def test_create_xml_document_with_metadata(docs_client):
 
 
 @ml_mocker.router
-def test_create_json_document_with_metadata(docs_client):
+def test_create_json_document_with_metadata(ml):
     uri = "/some/dir/doc2.json"
     content = {"root": {"child": "data"}}
     metadata = Metadata(collections=["test-collection"])
     doc = JSONDocument(content, uri, metadata)
 
-    resp = docs_client.documents.write(doc)
+    resp = ml.documents.write(doc)
 
     documents = resp["documents"]
     assert len(documents) == 1
@@ -1603,13 +1535,13 @@ def test_create_json_document_with_metadata(docs_client):
 
 
 @ml_mocker.router
-def test_create_text_document_with_metadata(docs_client):
+def test_create_text_document_with_metadata(ml):
     uri = "/some/dir/doc3.xqy"
     content = 'xquery version "1.0-ml";\n\nfn:current-date()'
     metadata = Metadata(collections=["test-collection"])
     doc = TextDocument(content, uri, metadata)
 
-    resp = docs_client.documents.write(doc)
+    resp = ml.documents.write(doc)
 
     documents = resp["documents"]
     assert len(documents) == 1
@@ -1619,13 +1551,13 @@ def test_create_text_document_with_metadata(docs_client):
 
 
 @ml_mocker.router
-def test_create_binary_document_with_metadata(docs_client):
+def test_create_binary_document_with_metadata(ml):
     uri = "/some/dir/doc4.zip"
     content = zlib.compress(b'xquery version "1.0-ml";\n\nfn:current-date()')
     metadata = Metadata(collections=["test-collection"])
     doc = BinaryDocument(content, uri, metadata)
 
-    resp = docs_client.documents.write(doc)
+    resp = ml.documents.write(doc)
 
     documents = resp["documents"]
     assert len(documents) == 1
@@ -1635,7 +1567,7 @@ def test_create_binary_document_with_metadata(docs_client):
 
 
 @ml_mocker.router
-def test_create_multiple_documents_with_metadata(docs_client):
+def test_create_multiple_documents_with_metadata(ml):
     metadata = Metadata(collections=["test-collection"])
 
     doc_1_uri = "/some/dir/doc1.xml"
@@ -1655,7 +1587,7 @@ def test_create_multiple_documents_with_metadata(docs_client):
     doc_4_content = zlib.compress(b'xquery version "1.0-ml";\n\nfn:current-date()')
     doc_4 = BinaryDocument(doc_4_content, doc_4_uri, metadata)
 
-    resp = docs_client.documents.write([doc_1, doc_2, doc_3, doc_4])
+    resp = ml.documents.write([doc_1, doc_2, doc_3, doc_4])
 
     documents = resp["documents"]
     assert len(documents) == 4
@@ -1690,14 +1622,14 @@ def test_create_multiple_documents_with_metadata(docs_client):
 
 
 @ml_mocker.router
-def test_create_single_document_with_default_metadata(docs_client):
+def test_create_single_document_with_default_metadata(ml):
     default_metadata = Metadata(collections=["test-collection"])
 
     uri = "/some/dir/doc1.xml"
     content = b"<root><child>data</child></root>"
     doc = RawDocument(content, uri, DocumentType.XML)
 
-    resp = docs_client.documents.write([default_metadata, doc])
+    resp = ml.documents.write([default_metadata, doc])
 
     documents = resp["documents"]
     assert len(documents) == 1
@@ -1707,7 +1639,7 @@ def test_create_single_document_with_default_metadata(docs_client):
 
 
 @ml_mocker.router
-def test_create_multiple_documents_with_default_metadata(docs_client):
+def test_create_multiple_documents_with_default_metadata(ml):
     default_metadata = Metadata(collections=["test-collection"])
 
     doc_1_uri = "/some/dir/doc1.xml"
@@ -1727,7 +1659,7 @@ def test_create_multiple_documents_with_default_metadata(docs_client):
     doc_4_content = zlib.compress(b'xquery version "1.0-ml";\n\nfn:current-date()')
     doc_4 = BinaryDocument(doc_4_content, doc_4_uri)
 
-    resp = docs_client.documents.write([default_metadata, doc_1, doc_2, doc_3, doc_4])
+    resp = ml.documents.write([default_metadata, doc_1, doc_2, doc_3, doc_4])
 
     documents = resp["documents"]
     assert len(documents) == 4
@@ -1762,22 +1694,22 @@ def test_create_multiple_documents_with_default_metadata(docs_client):
 
 
 @ml_mocker.router
-def test_create_only_default_metadata(docs_client):
+def test_create_only_default_metadata(ml):
     default_metadata = Metadata(collections=["test-collection"])
 
-    resp = docs_client.documents.write(default_metadata)
+    resp = ml.documents.write(default_metadata)
 
     documents = resp["documents"]
     assert len(documents) == 0
 
 
 @ml_mocker.router
-def test_create_single_document_using_custom_database(docs_client):
+def test_create_single_document_using_custom_database(ml):
     uri = "/some/dir/doc1.xml"
     content = b"<root><child>data</child></root>"
     doc = RawDocument(content, uri, DocumentType.XML)
 
-    resp = docs_client.documents.write(doc, database="Documents")
+    resp = ml.documents.write(doc, database="Documents")
 
     documents = resp["documents"]
     assert len(documents) == 1
@@ -1787,7 +1719,7 @@ def test_create_single_document_using_custom_database(docs_client):
 
 
 @ml_mocker.router
-def test_create_multiple_documents_using_custom_database(docs_client):
+def test_create_multiple_documents_using_custom_database(ml):
     doc_1_uri = "/some/dir/doc1.xml"
     doc_1_content_str = "<root><child>data</child></root>"
     doc_1_content = ElemTree.ElementTree(ElemTree.fromstring(doc_1_content_str))
@@ -1805,7 +1737,7 @@ def test_create_multiple_documents_using_custom_database(docs_client):
     doc_4_content = zlib.compress(b'xquery version "1.0-ml";\n\nfn:current-date()')
     doc_4 = BinaryDocument(doc_4_content, doc_4_uri)
 
-    resp = docs_client.documents.write(
+    resp = ml.documents.write(
         [doc_1, doc_2, doc_3, doc_4],
         database="Documents",
     )
@@ -1843,12 +1775,12 @@ def test_create_multiple_documents_using_custom_database(docs_client):
 
 
 @ml_mocker.router
-def test_create_document_with_temporal_collection(docs_client):
+def test_create_document_with_temporal_collection(ml):
     uri = "/some/dir/doc1.xml"
     content = "<root><child>data</child><systemStart/><systemEnd/></root>"
     doc = RawStringDocument(content, uri, DocumentType.XML)
 
-    resp = docs_client.documents.write(doc, temporal_collection="temporal-collection")
+    resp = ml.documents.write(doc, temporal_collection="temporal-collection")
 
     documents = resp["documents"]
     assert len(documents) == 1
@@ -1858,7 +1790,7 @@ def test_create_document_with_temporal_collection(docs_client):
 
 
 @respx.mock
-def test_delete_single_document(docs_client):
+def test_delete_single_document(ml):
     uri = "/some/dir/doc1.xml"
 
     mocker = MLRespXMocker(use_router=False)
@@ -1869,13 +1801,13 @@ def test_delete_single_document(docs_client):
     mocker.mock_delete()
 
     try:
-        docs_client.documents.delete(uri)
+        ml.documents.delete(uri)
     except MarkLogicError as err:
         pytest.fail(str(err))
 
 
 @respx.mock
-def test_delete_multiple_documents(docs_client):
+def test_delete_multiple_documents(ml):
     uris = [
         "/some/dir/doc1.xml",
         "/some/dir/doc2.json",
@@ -1892,13 +1824,13 @@ def test_delete_multiple_documents(docs_client):
     mocker.mock_delete()
 
     try:
-        docs_client.documents.delete(uris)
+        ml.documents.delete(uris)
     except MarkLogicError as err:
         pytest.fail(str(err))
 
 
 @respx.mock
-def test_delete_document_with_single_category(docs_client):
+def test_delete_document_with_single_category(ml):
     uri = "/some/dir/doc1.xml"
 
     mocker = MLRespXMocker(use_router=False)
@@ -1910,13 +1842,13 @@ def test_delete_document_with_single_category(docs_client):
     mocker.mock_delete()
 
     try:
-        docs_client.documents.delete(uri, category="collections")
+        ml.documents.delete(uri, category="collections")
     except MarkLogicError as err:
         pytest.fail(str(err))
 
 
 @respx.mock
-def test_delete_document_with_multiple_categories(docs_client):
+def test_delete_document_with_multiple_categories(ml):
     uri = "/some/dir/doc1.xml"
 
     mocker = MLRespXMocker(use_router=False)
@@ -1929,13 +1861,13 @@ def test_delete_document_with_multiple_categories(docs_client):
     mocker.mock_delete()
 
     try:
-        docs_client.documents.delete(uri, category=["properties", "collections"])
+        ml.documents.delete(uri, category=["properties", "collections"])
     except MarkLogicError as err:
         pytest.fail(str(err))
 
 
 @respx.mock
-def test_delete_document_with_custom_database(docs_client):
+def test_delete_document_with_custom_database(ml):
     uri = "/some/dir/doc1.xml"
 
     mocker = MLRespXMocker(use_router=False)
@@ -1947,13 +1879,13 @@ def test_delete_document_with_custom_database(docs_client):
     mocker.mock_delete()
 
     try:
-        docs_client.documents.delete(uri, database="Documents")
+        ml.documents.delete(uri, database="Documents")
     except MarkLogicError as err:
         pytest.fail(str(err))
 
 
 @respx.mock
-def test_delete_document_with_non_existing_database(docs_client):
+def test_delete_document_with_non_existing_database(ml):
     uri = "/some/dir/doc1.xml"
 
     response_body_path = resources_utils.get_test_resource_path(
@@ -1971,7 +1903,7 @@ def test_delete_document_with_non_existing_database(docs_client):
     mocker.mock_delete()
 
     with pytest.raises(MarkLogicError) as err:
-        docs_client.documents.delete(uri, database="Document")
+        ml.documents.delete(uri, database="Document")
 
     expected_error = (
         "[404 Not Found] (XDMP-NOSUCHDB) XDMP-NOSUCHDB: No such database Document"
@@ -1980,7 +1912,7 @@ def test_delete_document_with_non_existing_database(docs_client):
 
 
 @respx.mock
-def test_delete_document_with_temporal_collection(docs_client):
+def test_delete_document_with_temporal_collection(ml):
     uri = "/some/dir/doc1.xml"
 
     mocker = MLRespXMocker(use_router=False)
@@ -1996,13 +1928,13 @@ def test_delete_document_with_temporal_collection(docs_client):
     mocker.mock_delete()
 
     try:
-        docs_client.documents.delete(uri, temporal_collection="temporal-collection")
+        ml.documents.delete(uri, temporal_collection="temporal-collection")
     except MarkLogicError as err:
         pytest.fail(str(err))
 
 
 @respx.mock
-def test_delete_document_with_wipe_temporal(docs_client):
+def test_delete_document_with_wipe_temporal(ml):
     uri = "/some/dir/doc1.xml"
 
     mocker = MLRespXMocker(use_router=False)
@@ -2019,10 +1951,46 @@ def test_delete_document_with_wipe_temporal(docs_client):
     mocker.mock_delete()
 
     try:
-        docs_client.documents.delete(
+        ml.documents.delete(
             uri,
             temporal_collection="temporal-collection",
             wipe_temporal=True,
         )
     except MarkLogicError as err:
         pytest.fail(str(err))
+
+
+@ml_mocker.router
+def test_read_stream_single_uri(ml):
+    uri = "/some/dir/doc1.xml"
+
+    docs = list(ml.documents.read_stream([uri]))
+
+    assert len(docs) == 1
+
+    document = docs[0]
+    assert isinstance(document, XMLDocument)
+    assert document.uri == uri
+    assert document.doc_type == DocumentType.XML
+    assert isinstance(document.content, ElemTree.ElementTree)
+    assert document.content.getroot().tag == "root"
+    assert document.metadata is None
+    assert document.temporal_collection is None
+
+
+@ml_mocker.router
+def test_read_stream_multiple_uris(ml):
+    uris = [
+        "/some/dir/doc1.xml",
+        "/some/dir/doc2.json",
+        "/some/dir/doc3.xqy",
+        "/some/dir/doc4.zip",
+    ]
+
+    docs = list(ml.documents.read_stream(uris))
+
+    assert len(docs) == 4
+    assert any(isinstance(doc, XMLDocument) for doc in docs)
+    assert any(isinstance(doc, JSONDocument) for doc in docs)
+    assert any(isinstance(doc, TextDocument) for doc in docs)
+    assert any(isinstance(doc, BinaryDocument) for doc in docs)

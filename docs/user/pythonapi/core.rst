@@ -271,20 +271,16 @@ READ
     >>> len(docs)
     4
 
-    >>> xml_doc = next(doc for doc in docs if doc.uri == "/doc-1.xml")
-    >>> xml_doc
+    >>> docs["/doc-1.xml"]
     <mlclient.structures.documents.XMLDocument object at 0x7f9200920a00>
 
-    >>> json_doc = next(doc for doc in docs if doc.uri == "/doc-2.json")
-    >>> json_doc
+    >>> docs["/doc-2.json"]
     <mlclient.structures.documents.JSONDocument object at 0x7f9200920430>
 
-    >>> text_doc = next(doc for doc in docs if doc.uri == "/doc-3.xqy")
-    >>> text_doc
+    >>> docs["/doc-3.xqy"]
     <mlclient.structures.documents.TextDocument object at 0x7f9200920e20>
 
-    >>> bin_doc = next(doc for doc in docs if doc.uri == "/doc-4.zip")
-    >>> bin_doc
+    >>> docs["/doc-4.zip"]
     <mlclient.structures.documents.BinaryDocument object at 0x7f9200920970>
 
 **Read documents from a custom database**

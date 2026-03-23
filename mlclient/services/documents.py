@@ -85,11 +85,11 @@ class DocumentsService:
         category: str | list | None = None,
         database: str | None = None,
         output_type: type | None = None,
-    ) -> Document | list[Document]:
+    ) -> Document | dict[str, Document]:
         """Return document(s) content or metadata from a MarkLogic database.
 
         When uris is a string it returns a single Document instance. Otherwise,
-        result is a list.
+        result is a dict mapping URI to Document.
 
         Parameters
         ----------
@@ -104,8 +104,46 @@ class DocumentsService:
 
         Returns
         -------
-        Document | list[Document]
-            One or more documents from the database.
+        Document | dict[str, Document]
+            A single document when uris is a string, otherwise a dict keyed by URI.
+
+        Raises
+        ------
+        MarkLogicError
+            If MarkLogic returns an error
+        """
+        docs = self.read_stream(
+            uris, category=category, database=database, output_type=output_type,
+        )
+        return next(docs) if isinstance(uris, str) else {doc.uri: doc for doc in docs}
+
+    def read_stream(
+        self,
+        uris: str | list[str] | tuple[str] | set[str],
+        *,
+        category: str | list | None = None,
+        database: str | None = None,
+        output_type: type | None = None,
+    ) -> Iterator[Document]:
+        """Return document(s) as an iterator, suitable for batch processing.
+
+        Unlike read(), does not materialize results into a dict.
+
+        Parameters
+        ----------
+        uris : str | list[str] | tuple[str] | set[str]
+            One or more URIs for documents in the database.
+        category : str | list | None, default None
+            The category of data to fetch about the requested document.
+        database : str | None, default None
+            Perform this operation on the named content database.
+        output_type : type | None, default None
+            A raw output type (supported: str, bytes)
+
+        Returns
+        -------
+        Iterator[Document]
+            Documents from the database.
 
         Raises
         ------
@@ -262,16 +300,13 @@ class DocumentsReader:
         uris: str | list[str] | tuple[str] | set[str],
         category: str | list | None,
         output_type: type | None = None,
-    ) -> Document | list[Document]:
+    ) -> Iterator[Document]:
         """Parse a MarkLogic response to Documents."""
         parsed_resp = cls._parse_response(resp, output_type)
         content_type = resp.headers.get(constants.HEADER_NAME_CONTENT_TYPE)
         is_multipart = content_type.startswith(constants.HEADER_MULTIPART_MIXED)
         documents_data = cls._pre_format_data(parsed_resp, is_multipart, uris, category)
-        docs = cls._parse_to_documents(documents_data, output_type)
-        if isinstance(uris, str):
-            return docs[0]
-        return docs
+        return cls._parse_to_documents(documents_data, output_type)
 
     @classmethod
     def _parse_response(
@@ -397,12 +432,10 @@ class DocumentsReader:
         cls,
         documents_data: Iterator[dict],
         output_type: type | None,
-    ) -> list[Document]:
-        """Parse pre-formatted data to a list of Document instances."""
-        return [
-            cls._parse_to_document(document_data, output_type)
-            for document_data in documents_data
-        ]
+    ) -> Iterator[Document]:
+        """Parse pre-formatted data to Document instances."""
+        for document_data in documents_data:
+            yield cls._parse_to_document(document_data, output_type)
 
     @classmethod
     def _parse_to_document(

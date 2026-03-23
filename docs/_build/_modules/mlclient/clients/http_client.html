@@ -456,15 +456,16 @@
         <span class="p">)</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">client</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="o">**</span><span class="n">request</span><span class="p">)</span>
 
-    <span class="nd">@staticmethod</span>
+    <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_log_response</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span>
         <span class="n">method</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">endpoint</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">response</span><span class="p">:</span> <span class="n">Response</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Log response details and restart warning, if applicable.&quot;&quot;&quot;</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Response retrieved&quot;</span><span class="p">)</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">fine</span><span class="p">(</span><span class="n">HttpClient</span><span class="o">.</span><span class="n">_format_http_response</span><span class="p">(</span><span class="n">response</span><span class="p">))</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">fine</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">_format_http_response</span><span class="p">(</span><span class="n">response</span><span class="p">))</span>
 
         <span class="k">if</span> <span class="n">RestartWaiter</span><span class="o">.</span><span class="n">is_restart_response</span><span class="p">(</span><span class="n">response</span><span class="p">):</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>

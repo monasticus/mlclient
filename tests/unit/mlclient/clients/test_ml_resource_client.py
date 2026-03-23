@@ -38,8 +38,8 @@ def test_call(xquery):
         xquery=xquery,
         variables={"element": "<parent><child/></parent>"},
     )
-    with MLClient() as client:
-        resp = client.rest.call(eval_call)
+    with MLClient() as ml:
+        resp = ml.rest.call(eval_call)
 
     assert resp.status_code == httpx.codes.OK
     assert "<new-parent><child/></new-parent>" in resp.text

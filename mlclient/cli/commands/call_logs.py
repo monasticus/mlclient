@@ -126,9 +126,9 @@ class CallLogsCommand(Command):
     ) -> dict:
         """Retrieve logs list using the Logs service."""
         host = self.option("host")
-        with self._get_client() as client:
-            self.info(f"Getting logs list using REST App-Server {client.base_url}")
-            return client.logs.list(host)
+        with self._get_client() as ml:
+            self.info(f"Getting logs list using REST App-Server {ml.base_url}")
+            return ml.logs.list(host)
 
     def _get_log_files_rows(
         self,
@@ -236,15 +236,15 @@ class CallLogsCommand(Command):
         regex = self.option("regex")
         host = self.option("host")
 
-        with self._get_client() as client:
+        with self._get_client() as ml:
             if app_port is None:
                 file_name = f"{log_type.value}.txt"
             else:
                 file_name = f"{app_port}_{log_type.value}.txt"
             self.info(
-                f"Getting {file_name} logs using REST App-Server {client.base_url}",
+                f"Getting {file_name} logs using REST App-Server {ml.base_url}",
             )
-            return client.logs.get(
+            return ml.logs.get(
                 app_server=app_port,
                 log_type=log_type,
                 start_time=start_time,

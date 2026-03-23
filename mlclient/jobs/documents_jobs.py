@@ -202,11 +202,11 @@ class DocumentsJob(metaclass=ABCMeta):
         against a MarkLogic server. When a batch size is lower than configured,
         the infinitive loop is stopped.
         """
-        with MLClient(**self._config) as client:
+        with MLClient(**self._config) as ml:
             while True:
                 batch = self._populate_batch()
                 if len(batch) > 0:
-                    self._send_batch(batch, client)
+                    self._send_batch(batch, ml)
                 if len(batch) < self._batch_size:
                     logger.debug("No more data in the queue. Closing a worker...")
                     break
@@ -352,7 +352,7 @@ class ReadDocumentsJob(DocumentsJob):
     def _send_batch(
         self,
         batch: list[str],
-        client: MLClient,
+        ml: MLClient,
     ):
         """Send a URIs' batch to /v1/documents endpoint.
 
@@ -360,7 +360,7 @@ class ReadDocumentsJob(DocumentsJob):
         ----------
         batch : list[str]
             A batch with documents
-        client : MLClient
+        ml : MLClient
             An MLClient instance to call documents endpoint.
 
         Raises
@@ -377,7 +377,7 @@ class ReadDocumentsJob(DocumentsJob):
                 kwargs["category"] = list(dict.fromkeys(self._categories))
             if self._fs_output_path is not None:
                 kwargs["output_type"] = bytes
-            for doc in client.documents.read_stream(**kwargs):
+            for doc in ml.documents.read_stream(**kwargs):
                 self._report.add_successful_doc(doc.uri)
                 self._output_queue.put(doc)
         except Exception as err:
@@ -462,7 +462,7 @@ class WriteDocumentsJob(DocumentsJob):
     def _send_batch(
         self,
         batch: list[Document],
-        client: MLClient,
+        ml: MLClient,
     ):
         """Send a documents' batch to /v1/documents endpoint.
 
@@ -470,7 +470,7 @@ class WriteDocumentsJob(DocumentsJob):
         ----------
         batch : list[Document]
             A batch with documents
-        client : MLClient
+        ml : MLClient
             An MLClient instance to call documents endpoint.
 
         Raises
@@ -480,7 +480,7 @@ class WriteDocumentsJob(DocumentsJob):
         """
         batch_uris = [doc.uri for doc in batch]
         try:
-            client.documents.write(data=batch, database=self._database)
+            ml.documents.write(data=batch, database=self._database)
             self._report.add_successful_docs(batch_uris)
         except Exception as err:
             self._report.add_failed_docs(batch_uris, err)

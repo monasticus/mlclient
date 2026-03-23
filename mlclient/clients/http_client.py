@@ -351,15 +351,16 @@ class HttpClient:
         ) as client:
             return client.request(method, url, **request)
 
-    @staticmethod
+    @classmethod
     def _log_response(
+        cls,
         method: str,
         endpoint: str,
         response: Response,
     ):
         """Log response details and restart warning, if applicable."""
         logger.debug("Response retrieved")
-        logger.fine(HttpClient._format_http_response(response))
+        logger.fine(cls._format_http_response(response))
 
         if RestartWaiter.is_restart_response(response):
             logger.warning(

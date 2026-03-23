@@ -10,7 +10,7 @@ from pytest_bdd import scenarios
 from mlclient import MLClient, MLResponseParser
 from mlclient.models.calls import DocumentsBodyPart
 
-scenarios("../../../features/mlclient/clients/ml_resources_client.feature")
+scenarios("../../../features/mlclient/clients/api_wrappers.feature")
 
 pytest_plugins = [
     "tests.integration.steps.client_steps",

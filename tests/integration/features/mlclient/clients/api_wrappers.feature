@@ -1,4 +1,4 @@
-Feature: Test MLClient
+Feature: Test API Wrappers
 
   Scenario: Test /v1/eval endpoint
 

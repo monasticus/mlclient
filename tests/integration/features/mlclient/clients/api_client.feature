@@ -1,4 +1,4 @@
-Feature: Test MLClient
+Feature: Test ApiClient
 
   Scenario: Test a simple call
 

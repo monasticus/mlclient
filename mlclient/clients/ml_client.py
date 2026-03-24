@@ -178,41 +178,6 @@ class MLClient:
         self.disconnect()
 
     @property
-    def protocol(self) -> str:
-        """Return the protocol (http/https)."""
-        return self._http.protocol
-
-    @property
-    def host(self) -> str:
-        """Return the host name."""
-        return self._http.host
-
-    @property
-    def port(self) -> int:
-        """Return the port number."""
-        return self._http.port
-
-    @property
-    def auth_method(self) -> str:
-        """Return the auth method."""
-        return self._http.auth_method
-
-    @property
-    def username(self) -> str:
-        """Return the username."""
-        return self._http.username
-
-    @property
-    def password(self) -> str:
-        """Return the password."""
-        return self._http.password
-
-    @property
-    def base_url(self) -> str:
-        """Return the base URL."""
-        return self._http.base_url
-
-    @property
     def http(self) -> HttpClient:
         """Raw HTTP access."""
         return self._http

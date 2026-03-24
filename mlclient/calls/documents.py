@@ -20,7 +20,7 @@ from urllib3.fields import RequestField
 from mlclient import constants, exceptions, utils
 from mlclient.calls.api_call import ApiCall
 from mlclient.constants import HEADER_JSON
-from mlclient.models.calls import (
+from mlclient.models.http import (
     Category,
     ContentDispositionSerializer,
     DocumentsBodyPart,

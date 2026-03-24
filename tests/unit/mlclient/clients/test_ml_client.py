@@ -363,13 +363,13 @@ def test_properties_delegate_to_http_client():
         username="user",
         password="pass",
     )
-    assert ml.protocol == "https"
-    assert ml.host == "ml.example.com"
-    assert ml.port == 8123
-    assert ml.auth_method == "digest"
-    assert ml.username == "user"
-    assert ml.password == "pass"
-    assert ml.base_url == "https://ml.example.com:8123"
+    assert ml.http.protocol == "https"
+    assert ml.http.host == "ml.example.com"
+    assert ml.http.port == 8123
+    assert ml.http.auth_method == "digest"
+    assert ml.http.username == "user"
+    assert ml.http.password == "pass"
+    assert ml.http.base_url == "https://ml.example.com:8123"
 
 
 def test_rest_property():

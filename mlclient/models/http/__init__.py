@@ -1,10 +1,10 @@
-"""The ML Calls Models package.
+"""The ML HTTP Models package.
 
 It contains modules with a corresponding Python representation of
-ML calls-specific data models:
+HTTP-specific data models:
 
     * documents
-        The Documents Call Models module.
+        The Documents HTTP Models module.
 
 This package exports the following classes:
 
@@ -25,7 +25,7 @@ This package exports the following classes:
 
 Examples
 --------
->>> from mlclient.models.calls import DocumentsBodyPart
+>>> from mlclient.models.http import DocumentsBodyPart
 """
 
 from .documents import (

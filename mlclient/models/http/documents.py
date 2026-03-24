@@ -1,6 +1,6 @@
-"""The Documents Call Structures module.
+"""The Documents HTTP Models module.
 
-This module contains an API for /v1/documents call body.
+This module contains models for /v1/documents HTTP body.
 It exports the following classes:
 
     * DocumentsBodyPart

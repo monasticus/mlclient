@@ -17,7 +17,7 @@ from respx import MockRouter, Route
 from urllib3.fields import RequestField
 
 from mlclient.constants import HEADER_X_WWW_FORM_URLENCODED
-from mlclient.models.calls import (
+from mlclient.models.http import (
     Category,
     ContentDispositionSerializer,
     DocumentsBodyPart,

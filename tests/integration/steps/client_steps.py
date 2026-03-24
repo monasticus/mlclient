@@ -76,7 +76,7 @@ def get_logs(
                 "<today>",
                 str(datetime.date.today()),
             )
-    params["filename"] = (f"{ml.port}_{logs_type.capitalize()}Log.txt",)
+    params["filename"] = (f"{ml.http.port}_{logs_type.capitalize()}Log.txt",)
     params["data_format"] = "json"
     return ml.manage.logs.get(**params)
 

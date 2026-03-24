@@ -5,7 +5,7 @@ from datetime import date, datetime
 import pytest
 
 from mlclient import MLClient, MLResponseParser
-from mlclient.models.calls import DocumentsBodyPart
+from mlclient.models.http import DocumentsBodyPart
 from tests.utils import resources as resources_utils
 from tests.utils.ml_mockers import MLRespXMocker
 

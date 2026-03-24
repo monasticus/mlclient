@@ -113,30 +113,30 @@ def test_properties():
 
 def test_get_client_with_app_server_id():
     mgr = MLClientManager("test")
-    with mgr.get_client("content") as client:
-        assert isinstance(client, MLClient)
-        assert client.protocol == "https"
-        assert client.host == "localhost"
-        assert client.port == 8100
-        assert client.username == "my-marklogic-app-user"
-        assert client.password == "my-marklogic-app-password"
-        assert client.auth_method == "basic"
-        assert client.is_connected()
-    assert not client.is_connected()
+    with mgr.get_client("content") as ml:
+        assert isinstance(ml, MLClient)
+        assert ml.http.protocol == "https"
+        assert ml.http.host == "localhost"
+        assert ml.http.port == 8100
+        assert ml.http.username == "my-marklogic-app-user"
+        assert ml.http.password == "my-marklogic-app-password"
+        assert ml.http.auth_method == "basic"
+        assert ml.is_connected()
+    assert not ml.is_connected()
 
 
 def test_get_client_default():
     mgr = MLClientManager("test")
-    with mgr.get_client() as client:
-        assert isinstance(client, MLClient)
-        assert client.protocol == "https"
-        assert client.host == "localhost"
-        assert client.port == 8002
-        assert client.username == "my-marklogic-app-user"
-        assert client.password == "my-marklogic-app-password"
-        assert client.auth_method == "basic"
-        assert client.is_connected()
-    assert not client.is_connected()
+    with mgr.get_client() as ml:
+        assert isinstance(ml, MLClient)
+        assert ml.http.protocol == "https"
+        assert ml.http.host == "localhost"
+        assert ml.http.port == 8002
+        assert ml.http.username == "my-marklogic-app-user"
+        assert ml.http.password == "my-marklogic-app-password"
+        assert ml.http.auth_method == "basic"
+        assert ml.is_connected()
+    assert not ml.is_connected()
 
 
 def test_get_client_default_no_rest_servers_configured():

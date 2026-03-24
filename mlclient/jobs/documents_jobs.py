@@ -370,14 +370,13 @@ class ReadDocumentsJob(DocumentsJob):
         """
         try:
             kwargs = {
-                "uris": batch,
                 "database": self._database,
             }
             if self._categories != ["content"]:
                 kwargs["category"] = list(dict.fromkeys(self._categories))
             if self._fs_output_path is not None:
                 kwargs["output_type"] = bytes
-            for doc in ml.documents.read_stream(**kwargs):
+            for doc in ml.documents.read_stream(batch, **kwargs):
                 self._report.add_successful_doc(doc.uri)
                 self._output_queue.put(doc)
         except Exception as err:
@@ -480,7 +479,7 @@ class WriteDocumentsJob(DocumentsJob):
         """
         batch_uris = [doc.uri for doc in batch]
         try:
-            ml.documents.write(data=batch, database=self._database)
+            ml.documents.write(batch, database=self._database)
             self._report.add_successful_docs(batch_uris)
         except Exception as err:
             self._report.add_failed_docs(batch_uris, err)

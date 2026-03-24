@@ -149,5 +149,5 @@ class CallEvalCommand(Command):
 
         mgr = MLClientManager(env)
         with mgr.get_client(rest_server) as ml:
-            self.info(f"Evaluating code using REST App-Server {ml.base_url}")
+            self.info(f"Evaluating code using REST App-Server {ml.http.base_url}")
             return ml.eval.execute(**eval_params)

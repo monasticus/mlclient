@@ -286,8 +286,8 @@ def test_delete_server():
 
     with MLClient() as ml:
         resp = ml.manage.servers.delete(
-            server="Non-existing-server",
-            group_id="Non-existing-group",
+            "Non-existing-server",
+            "Non-existing-group",
         )
 
     assert resp.status_code == httpx.codes.NOT_FOUND

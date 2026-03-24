@@ -8,7 +8,7 @@ from httpx import Response
 from pytest_bdd import scenarios
 
 from mlclient import MLClient, MLResponseParser
-from mlclient.models.calls import DocumentsBodyPart
+from mlclient.models.http import DocumentsBodyPart
 
 scenarios("../../../features/mlclient/clients/api_wrappers.feature")
 
@@ -153,7 +153,7 @@ class TestDatabasesManagement:
         view: str,
     ) -> Response:
         resp = ml.manage.databases.get(
-            database=database,
+            database,
             data_format="json",
             view=view,
         )
@@ -168,7 +168,7 @@ class TestDatabasesManagement:
         database: str,
     ) -> Response:
         resp = ml.manage.databases.get_properties(
-            database=database,
+            database,
             data_format="json",
         )
         assert resp.status_code == httpx.codes.OK
@@ -183,8 +183,8 @@ class TestDatabasesManagement:
         body: dict,
     ) -> Response:
         resp = ml.manage.databases.put_properties(
-            database=database,
-            body=body,
+            database,
+            body,
         )
         assert resp.status_code == httpx.codes.NO_CONTENT
 
@@ -212,8 +212,8 @@ class TestDatabasesManagement:
         ml: MLClient,
     ):
         resp = ml.manage.databases.post(
-            database=cls.TEST_DATABASE_CONFIG["database-name"],
-            body={"operation": "clear-database"},
+            cls.TEST_DATABASE_CONFIG["database-name"],
+            {"operation": "clear-database"},
         )
         assert resp.status_code == httpx.codes.OK
 
@@ -347,8 +347,8 @@ class TestServersManagement:
         view: str,
     ) -> Response:
         resp = ml.manage.servers.get(
-            server=server,
-            group_id="Default",
+            server,
+            "Default",
             data_format="json",
             view=view,
         )
@@ -363,8 +363,8 @@ class TestServersManagement:
         server: str,
     ) -> Response:
         resp = ml.manage.servers.get_properties(
-            server=server,
-            group_id="Default",
+            server,
+            "Default",
             data_format="json",
         )
         assert resp.status_code == httpx.codes.OK
@@ -379,9 +379,9 @@ class TestServersManagement:
         body: dict,
     ) -> Response:
         resp = ml.manage.servers.put_properties(
-            server=server,
-            group_id="Default",
-            body=body,
+            server,
+            "Default",
+            body,
         )
         assert resp.status_code == httpx.codes.NO_CONTENT
 
@@ -393,9 +393,9 @@ class TestServersManagement:
         ml: MLClient,
     ):
         resp = ml.manage.servers.create(
+            cls.TEST_SERVER_CONFIG,
             group_id="Default",
             server_type="http",
-            body=cls.TEST_SERVER_CONFIG,
         )
         assert resp.status_code == httpx.codes.CREATED
 
@@ -405,8 +405,8 @@ class TestServersManagement:
         ml: MLClient,
     ):
         resp = ml.manage.servers.delete(
-            server=cls.TEST_SERVER_CONFIG["server-name"],
-            group_id="Default",
+            cls.TEST_SERVER_CONFIG["server-name"],
+            "Default",
         )
         assert resp.status_code == httpx.codes.ACCEPTED
         ml.wait_for_restart(resp)
@@ -538,7 +538,7 @@ class TestForestsManagement:
         forest: str,
         view: str,
     ) -> Response:
-        resp = ml.manage.forests.get(forest=forest, data_format="json", view=view)
+        resp = ml.manage.forests.get(forest, data_format="json", view=view)
         assert resp.status_code == httpx.codes.OK
 
         return resp
@@ -549,7 +549,7 @@ class TestForestsManagement:
         ml: MLClient,
         forest: str,
     ) -> Response:
-        resp = ml.manage.forests.get_properties(forest=forest, data_format="json")
+        resp = ml.manage.forests.get_properties(forest, data_format="json")
         assert resp.status_code == httpx.codes.OK
 
         return resp
@@ -562,8 +562,8 @@ class TestForestsManagement:
         body: dict,
     ) -> Response:
         resp = ml.manage.forests.put_properties(
-            forest=forest,
-            body=body,
+            forest,
+            body,
         )
         assert resp.status_code == httpx.codes.NO_CONTENT
 
@@ -594,8 +594,8 @@ class TestForestsManagement:
         ml: MLClient,
     ):
         resp = ml.manage.forests.post(
-            forest=cls.TEST_FOREST_CONFIG["forest-name"],
-            body={"state": "clear"},
+            cls.TEST_FOREST_CONFIG["forest-name"],
+            {"state": "clear"},
         )
         assert resp.status_code == httpx.codes.OK
 
@@ -742,7 +742,7 @@ class TestRolesManagement:
         role: str,
     ) -> Response:
         resp = ml.manage.roles.get(
-            role=role,
+            role,
             data_format="json",
         )
         assert resp.status_code == httpx.codes.OK
@@ -756,7 +756,7 @@ class TestRolesManagement:
         role: str,
     ) -> Response:
         resp = ml.manage.roles.get_properties(
-            role=role,
+            role,
             data_format="json",
         )
         assert resp.status_code == httpx.codes.OK
@@ -771,8 +771,8 @@ class TestRolesManagement:
         body: dict,
     ) -> Response:
         resp = ml.manage.roles.put_properties(
-            role=role,
-            body=body,
+            role,
+            body,
         )
         assert resp.status_code == httpx.codes.NO_CONTENT
 
@@ -783,9 +783,7 @@ class TestRolesManagement:
         cls,
         ml: MLClient,
     ):
-        resp = ml.manage.roles.create(
-            body=cls.TEST_ROLE_CONFIG,
-        )
+        resp = ml.manage.roles.create(cls.TEST_ROLE_CONFIG)
         assert resp.status_code == httpx.codes.CREATED
 
     @classmethod
@@ -793,9 +791,7 @@ class TestRolesManagement:
         cls,
         ml: MLClient,
     ):
-        resp = ml.manage.roles.delete(
-            role=cls.TEST_ROLE_CONFIG["role-name"],
-        )
+        resp = ml.manage.roles.delete(cls.TEST_ROLE_CONFIG["role-name"])
         assert resp.status_code == httpx.codes.NO_CONTENT
 
 
@@ -922,7 +918,7 @@ class TestUsersManagement:
         user: str,
     ) -> Response:
         resp = ml.manage.users.get(
-            user=user,
+            user,
             data_format="json",
         )
         assert resp.status_code == httpx.codes.OK
@@ -936,7 +932,7 @@ class TestUsersManagement:
         user: str,
     ) -> Response:
         resp = ml.manage.users.get_properties(
-            user=user,
+            user,
             data_format="json",
         )
         assert resp.status_code == httpx.codes.OK
@@ -951,8 +947,8 @@ class TestUsersManagement:
         body: dict,
     ) -> Response:
         resp = ml.manage.users.put_properties(
-            user=user,
-            body=body,
+            user,
+            body,
         )
         assert resp.status_code == httpx.codes.NO_CONTENT
 
@@ -963,9 +959,7 @@ class TestUsersManagement:
         cls,
         ml: MLClient,
     ):
-        resp = ml.manage.users.create(
-            body=cls.TEST_USER_CONFIG,
-        )
+        resp = ml.manage.users.create(cls.TEST_USER_CONFIG)
         assert resp.status_code == httpx.codes.CREATED
 
     @classmethod
@@ -973,9 +967,7 @@ class TestUsersManagement:
         cls,
         ml: MLClient,
     ):
-        resp = ml.manage.users.delete(
-            user=cls.TEST_USER_CONFIG["user-name"],
-        )
+        resp = ml.manage.users.delete(cls.TEST_USER_CONFIG["user-name"])
         assert resp.status_code == httpx.codes.NO_CONTENT
 
 
@@ -1062,7 +1054,7 @@ class TestDocumentsManagement:
         cls,
         ml: MLClient,
     ):
-        resp = ml.rest.documents.post(body_parts=[cls.DOCUMENT_BODY_PART_1])
+        resp = ml.rest.documents.post([cls.DOCUMENT_BODY_PART_1])
         assert resp.status_code == httpx.codes.OK
 
     @classmethod
@@ -1070,7 +1062,7 @@ class TestDocumentsManagement:
         cls,
         ml: MLClient,
     ):
-        resp = ml.rest.documents.post(body_parts=[cls.DOCUMENT_BODY_PART_2])
+        resp = ml.rest.documents.post([cls.DOCUMENT_BODY_PART_2])
         assert resp.status_code == httpx.codes.OK
 
     @classmethod
@@ -1079,6 +1071,6 @@ class TestDocumentsManagement:
         ml: MLClient,
     ):
         resp = ml.rest.documents.delete(
-            uri=cls.DOCUMENT_BODY_PART_1.content_disposition.filename,
+            cls.DOCUMENT_BODY_PART_1.content_disposition.filename,
         )
         assert resp.status_code == httpx.codes.NO_CONTENT

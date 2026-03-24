@@ -5,7 +5,7 @@ import zlib
 from dataclasses import dataclass
 from typing import Any
 
-from mlclient.models.calls import DocumentsBodyPart
+from mlclient.models.http import DocumentsBodyPart
 
 
 @dataclass(frozen=True)

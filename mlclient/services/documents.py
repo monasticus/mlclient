@@ -24,7 +24,7 @@ from mlclient.models import (
     RawDocument,
     RawStringDocument,
 )
-from mlclient.models.calls import (
+from mlclient.models.http import (
     Category,
     ContentDispositionSerializer,
     DocumentsBodyPart,

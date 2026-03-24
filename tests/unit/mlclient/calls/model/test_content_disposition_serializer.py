@@ -1,5 +1,5 @@
 from mlclient.models import DocumentType
-from mlclient.models.calls import (
+from mlclient.models.http import (
     ContentDispositionSerializer,
     DocumentsBodyPartType,
     DocumentsContentDisposition,

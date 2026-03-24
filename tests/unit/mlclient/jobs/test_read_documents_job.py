@@ -12,7 +12,7 @@ import respx
 from mlclient.exceptions import MarkLogicError
 from mlclient.jobs import ReadDocumentsJob
 from mlclient.models import Document, DocumentType, XMLDocument
-from mlclient.models.calls import DocumentsBodyPart
+from mlclient.models.http import DocumentsBodyPart
 from tests.utils import filesystem as fs_utils
 from tests.utils.ml_mockers import MLDocumentsMocker, MLRespXMocker
 

@@ -126,8 +126,8 @@ class CallLogsCommand(Command):
     ) -> dict:
         """Retrieve logs list using the Logs service."""
         host = self.option("host")
-        with self._get_client() as ml:
-            self.info(f"Getting logs list using REST App-Server {ml.base_url}")
+        with _get_cached_client(self.option("environment")) as ml:
+            self.info(f"Getting logs list using REST App-Server {ml.http.base_url}")
             return ml.logs.list(host)
 
     def _get_log_files_rows(
@@ -184,7 +184,7 @@ class CallLogsCommand(Command):
         source_logs = logs_list["source"]
         grouped_logs = logs_list["grouped"]
 
-        ml_url = self._get_client().base_url
+        ml_url = _get_cached_client(self.option("environment")).http.base_url
 
         server_logs = grouped_logs[host][server]
         type_logs = server_logs[log_type]
@@ -236,17 +236,17 @@ class CallLogsCommand(Command):
         regex = self.option("regex")
         host = self.option("host")
 
-        with self._get_client() as ml:
+        with _get_cached_client(self.option("environment")) as ml:
             if app_port is None:
                 file_name = f"{log_type.value}.txt"
             else:
                 file_name = f"{app_port}_{log_type.value}.txt"
             self.info(
-                f"Getting {file_name} logs using REST App-Server {ml.base_url}",
+                f"Getting {file_name} logs using REST App-Server {ml.http.base_url}",
             )
             return ml.logs.get(
-                app_server=app_port,
-                log_type=log_type,
+                app_port,
+                log_type,
                 start_time=start_time,
                 end_time=end_time,
                 regex=regex,
@@ -289,13 +289,6 @@ class CallLogsCommand(Command):
             if named_app_port is not None:
                 app_port = named_app_port
         return app_port
-
-    def _get_client(
-        self,
-    ):
-        """Get an MLClient instance."""
-        env = self.option("environment")
-        return _get_cached_client(env)
 
 
 @lru_cache

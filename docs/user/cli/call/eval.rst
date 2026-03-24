@@ -14,7 +14,7 @@ call eval
 
     Options:
       -e, --environment=ENVIRONMENT  The ML Client environment name [default: "local"]
-      -s, --rest-server=REST-SERVER  The ML REST Server environment id
+      -s, --rest-server=REST-SERVER  The ML REST Server environmental id
           --var=VAR                  A variable to be used in the code (multiple values allowed)
       -x, --xquery                   If set, the code will be treated as raw xquery
       -j, --javascript               If set, the code will be treated as raw javascript

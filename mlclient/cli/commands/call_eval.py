@@ -31,7 +31,7 @@ class CallEvalCommand(Command):
       -e, --environment=ENVIRONMENT
             The ML Client environment name [default: "local"]
       -s, --rest-server=REST-SERVER
-            The ML REST Server environment id
+            The ML REST Server environmental id
           --var=VAR
             A variable to be used in the code (multiple values allowed)
       -x, --xquery
@@ -63,7 +63,7 @@ class CallEvalCommand(Command):
         option(
             "rest-server",
             "s",
-            description="The ML REST Server environment id",
+            description="The ML REST Server environmental id",
             flag=False,
         ),
         option(

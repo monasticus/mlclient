@@ -48,13 +48,13 @@ def generate_docs(
 
 
 def populate_database(
-    env: str,
+    env_name: str,
     rest_server_id: str,
     database: str | None,
     mimeo_output_root: str,
 ):
-    ml_config = MLEnvironment.load(env)
-    client_config = ml_config.provide_config(rest_server_id)
+    env = MLEnvironment.load(env_name)
+    client_config = env.provide_config(rest_server_id)
     job = WriteDocumentsJob(batch_size=250)
     job.with_client_config(**client_config)
     job.with_database(database)
@@ -71,7 +71,7 @@ generate_docs(
     custom_count=MIMEO_CUSTOM_COUNT,
 )
 populate_database(
-    env=ENV,
+    env_name=ENV,
     rest_server_id=REST_SERVER,
     database=DATABASE,
     mimeo_output_root=MIMEO_OUTPUT_ROOT,

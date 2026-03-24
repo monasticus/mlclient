@@ -10,7 +10,7 @@ call logs
       call logs [options]
 
     Options:
-      -p, --profile=PROFILE          The ML Client profile name [default: "local"]
+      -e, --environment=ENVIRONMENT  The ML Client environment name [default: "local"]
       -s, --app-server=APP-SERVER    The App-Server (port) to get logs of
       -l, --log-type=LOG-TYPE        MarkLogic log type (error, access or request) [default: "error"]
       -f, --from=FROM                A start time to search error logs

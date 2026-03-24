@@ -26,8 +26,8 @@ class CallLogsCommand(Command):
       call logs [options]
 
     Options:
-      -p, --profile=PROFILE
-            The ML Client profile name [default: "local"]
+      -e, --environment=ENVIRONMENT
+            The ML Client environment name [default: "local"]
       -s, --app-server=APP-PORT
             The App-Server (port) to get logs of
       -l, --log-type=LOG-TYPE
@@ -48,9 +48,9 @@ class CallLogsCommand(Command):
     description: str = "Sends a GET request to the /manage/v2/logs endpoint"
     options: list[Option] = [
         option(
-            "profile",
-            "p",
-            description="The ML Client profile name",
+            "environment",
+            "e",
+            description="The ML Client environment name",
             flag=False,
             default="local",
         ),
@@ -272,9 +272,9 @@ class CallLogsCommand(Command):
         self,
     ) -> int | str:
         """Identify app port to be used."""
-        profile = self.option("profile")
+        env = self.option("environment")
         app_port = self.option("app-server")
-        mgr = MLClientManager(profile)
+        mgr = MLClientManager(env)
         if app_port == "0":
             app_port = "TaskServer"
         elif app_port is not None and not app_port.isnumeric():
@@ -294,14 +294,14 @@ class CallLogsCommand(Command):
         self,
     ):
         """Get an MLClient instance."""
-        profile = self.option("profile")
-        return _get_cached_client(profile)
+        env = self.option("environment")
+        return _get_cached_client(env)
 
 
 @lru_cache
 def _get_cached_client(
-    profile: str,
+    env_name: str,
 ):
     # Cached to avoid re-reading config and re-creating the client on every
     # call -- _get_client() is invoked multiple times (e.g. in --list loops).
-    return MLClientManager(profile).get_client()
+    return MLClientManager(env_name).get_client()

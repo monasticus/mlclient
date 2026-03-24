@@ -7,8 +7,8 @@ It contains all custom exceptions related to ML Client:
         A custom Exception class for an unsupported format.
     * MLClientDirectoryNotFoundError
         A custom Exception class for a non-existing MLClient configuration directory.
-    * MLClientProfileNotFoundError
-        A custom Exception class for a non-existing MLClient profile.
+    * MLClientEnvironmentNotFoundError
+        A custom Exception class for a non-existing MLClient environment.
     * NoSuchAppServerError
         A custom Exception class for a non-existing app server configuration.
     * NotARestServerError
@@ -43,21 +43,21 @@ class UnsupportedFormatError(Exception):
 class MLClientDirectoryNotFoundError(Exception):
     """A custom Exception class for a non-existing MLClient configuration directory.
 
-    Raised when loading an MLProfile.
+    Raised when loading an MLEnvironment.
     """
 
 
-class MLClientProfileNotFoundError(Exception):
-    """A custom Exception class for a non-existing MLClient profile.
+class MLClientEnvironmentNotFoundError(Exception):
+    """A custom Exception class for a non-existing MLClient environment.
 
-    Raised when loading an MLProfile.
+    Raised when loading an MLEnvironment.
     """
 
 
 class NoSuchAppServerError(Exception):
     """A custom Exception class for a non-existing app server configuration.
 
-    Raised when getting an app server config from an MLProfile instance.
+    Raised when getting an app server config from an MLEnvironment instance.
     """
 
 

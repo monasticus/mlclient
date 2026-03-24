@@ -28,10 +28,10 @@ class CallEvalCommand(Command):
             The code to evaluate (a file path or raw xqy/js code)
 
     Options:
-      -p, --profile=PROFILE
-            The ML Client profile name [default: "local"]
+      -e, --environment=ENVIRONMENT
+            The ML Client environment name [default: "local"]
       -s, --rest-server=REST-SERVER
-            The ML REST Server profile id
+            The ML REST Server environment id
           --var=VAR
             A variable to be used in the code (multiple values allowed)
       -x, --xquery
@@ -54,16 +54,16 @@ class CallEvalCommand(Command):
     ]
     options: list[Option] = [
         option(
-            "profile",
-            "p",
-            description="The ML Client profile name",
+            "environment",
+            "e",
+            description="The ML Client environment name",
             flag=False,
             default="local",
         ),
         option(
             "rest-server",
             "s",
-            description="The ML REST Server profile id",
+            description="The ML REST Server environment id",
             flag=False,
         ),
         option(
@@ -144,10 +144,10 @@ class CallEvalCommand(Command):
         eval_params: dict,
     ):
         """Evaluate the code and get results."""
-        profile = self.option("profile")
+        env = self.option("environment")
         rest_server = self.option("rest-server")
 
-        mgr = MLClientManager(profile)
+        mgr = MLClientManager(env)
         with mgr.get_client(rest_server) as ml:
             self.info(f"Evaluating code using REST App-Server {ml.base_url}")
             return ml.eval.execute(**eval_params)

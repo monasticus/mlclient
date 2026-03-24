@@ -9,8 +9,8 @@ This package exports the following classes:
         A low-level class used to send HTTP requests to a MarkLogic instance.
     * ApiClient
         A mid-level client providing call() for ApiCall objects.
-    * MLProfile
-        A class representing a MarkLogic configuration profile.
+    * MLEnvironment
+        A class representing a MarkLogic configuration environment.
     * MLClientManager
         A high-level class managing MarkLogic clients for a given profile.
     * MLResponseParser
@@ -40,7 +40,7 @@ from .clients import (
     MLClient,
 )
 from .ml_client_manager import MLClientManager
-from .ml_profile import MLProfile
+from .ml_environment import MLEnvironment
 from .ml_response_parser import MLResponseParser
 
 
@@ -62,7 +62,7 @@ __all__ = [
     "HttpClient",
     "MLClient",
     "MLClientManager",
-    "MLProfile",
+    "MLEnvironment",
     "MLResponseParser",
     "__version__",
     "setup_logger",

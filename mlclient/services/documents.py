@@ -113,7 +113,10 @@ class DocumentsService:
             If MarkLogic returns an error
         """
         docs = self.read_stream(
-            uris, category=category, database=database, output_type=output_type,
+            uris,
+            category=category,
+            database=database,
+            output_type=output_type,
         )
         return next(docs) if isinstance(uris, str) else {doc.uri: doc for doc in docs}
 

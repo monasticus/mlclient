@@ -3,7 +3,7 @@
 This module contains a high-level API for MarkLogic management.
 It exports the following class:
     * MLClientManager
-        A high-level class managing MarkLogic clients for a given profile.
+        A high-level class managing MarkLogic clients for a given environment.
 """
 
 from __future__ import annotations
@@ -12,59 +12,59 @@ import logging
 
 from mlclient.clients import HttpClient, MLClient
 from mlclient.exceptions import NoRestServerConfiguredError, NotARestServerError
-from mlclient.ml_profile import MLProfile
+from mlclient.ml_environment import MLEnvironment
 
 logger = logging.getLogger(__name__)
 
 
 class MLClientManager:
-    """A high-level class managing MarkLogic clients for a given profile.
+    """A high-level class managing MarkLogic clients for a given environment.
 
-    It combines MLProfile and MLClient components to simplify every action
+    It combines MLEnvironment and MLClient components to simplify every action
     to perform on your instance.
     """
 
     def __init__(
         self,
-        profile_name: str,
+        env_name: str,
     ):
         """Initialize MLClientManager instance.
 
         Parameters
         ----------
-        profile_name :  str
-            A profile name.
+        env_name :  str
+            An environment name.
 
         Raises
         ------
         MLClientDirectoryNotFoundError
             If .mlclient directory has not been found
-        MLClientProfileNotFoundError
-            If there's no .mlclient/mlclient-<profile_name>.yaml file
+        MLClientEnvironmentNotFoundError
+            If there's no .mlclient/mlclient-<env_name>.yaml file
         """
-        self._profile_name = profile_name
-        self.config = MLProfile.load(profile_name)
+        self._env_name = env_name
+        self.config = MLEnvironment.load(env_name)
 
     @property
-    def profile_name(
+    def env_name(
         self,
     ) -> str:
-        """A profile name."""
-        return self._profile_name
+        """An environment name."""
+        return self._env_name
 
     @property
     def config(
         self,
-    ) -> MLProfile:
-        """A MarkLogic configuration profile."""
+    ) -> MLEnvironment:
+        """A MarkLogic configuration environment."""
         return self._config.model_copy(deep=True)
 
     @config.setter
     def config(
         self,
-        ml_configuration: MLProfile,
+        ml_configuration: MLEnvironment,
     ):
-        """Set a MarkLogic configuration profile."""
+        """Set a MarkLogic configuration environment."""
         self._config = ml_configuration
 
     def get_client(
@@ -74,7 +74,7 @@ class MLClientManager:
         """Initialize an MLClient instance for a specific App Server.
 
         If no identifier is provided, returns a client for the first configured
-        REST server within the profile.
+        REST server within the environment.
 
         Parameters
         ----------
@@ -93,7 +93,7 @@ class MLClientManager:
             (only when rest_server_id is not None and is not a REST server)
         NoRestServerConfiguredError
             If an identifier has not been provided and there's no REST servers
-            configured for the profile
+            configured for the environment
         """
         rest_server_id = self._get_rest_server_id(rest_server_id)
         app_server_config = self.config.provide_config(rest_server_id)
@@ -140,14 +140,14 @@ class MLClientManager:
             If the App-Server identifier does not point to a REST server
         NoRestServerConfiguredError
             If an identifier has not been provided and there's no REST servers
-            configured for the profile
+            configured for the environment
         """
         logger.debug("Verifying the app server id [%s]", rest_server_id or "")
         if rest_server_id is None:
             logger.debug("No id provided - trying to identify any REST app server")
             if len(self.config.rest_servers) == 0:
-                profile = self.profile_name
-                msg = f"No REST server is configured for the [{profile}] profile."
+                env = self.env_name
+                msg = f"No REST server is configured for the [{env}] environment."
                 raise NoRestServerConfiguredError(msg)
             rest_server_id = self.config.rest_servers[0]
             logger.debug("Identified REST app server id: [%s]", rest_server_id)

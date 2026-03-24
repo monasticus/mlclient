@@ -183,7 +183,8 @@ def test_put_database_properties():
 
     with MLClient() as ml:
         resp = ml.manage.databases.put_properties(
-            "non-existing-db", {"database-name": "custom-db"},
+            "non-existing-db",
+            {"database-name": "custom-db"},
         )
 
     assert resp.status_code == httpx.codes.NOT_FOUND
@@ -528,7 +529,8 @@ def test_put_forest_properties():
 
     with MLClient() as ml:
         resp = ml.manage.forests.put_properties(
-            "non-existing-forest", {"forest-name": "custom-forest"},
+            "non-existing-forest",
+            {"forest-name": "custom-forest"},
         )
 
     assert resp.status_code == httpx.codes.NOT_FOUND
@@ -658,7 +660,8 @@ def test_put_role_properties():
 
     with MLClient() as ml:
         resp = ml.manage.roles.put_properties(
-            "non-existing-role", {"role-name": "custom-db"},
+            "non-existing-role",
+            {"role-name": "custom-db"},
         )
 
     assert resp.status_code == httpx.codes.BAD_REQUEST
@@ -796,7 +799,8 @@ def test_put_user_properties():
 
     with MLClient() as ml:
         resp = ml.manage.users.put_properties(
-            "non-existing-user", {"user-name": "custom-db"},
+            "non-existing-user",
+            {"user-name": "custom-db"},
         )
 
     assert resp.status_code == httpx.codes.NOT_FOUND

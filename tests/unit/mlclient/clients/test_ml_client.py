@@ -6,7 +6,7 @@ from pytest_mock import MockerFixture
 
 from mlclient import MLClient
 from mlclient.api.rest_api import RestApi
-from mlclient.calls import DatabasesGetCall
+from mlclient.calls import DatabasesGetCall, TimestampGetCall
 from mlclient.clients import http_client as http_client_module
 from mlclient.clients import ml_client as ml_client_module
 from mlclient.ml_response_parser import MLResponseParser
@@ -403,6 +403,21 @@ def test_manage_custom_call():
 
     with MLClient() as ml:
         resp = ml.manage.call(DatabasesGetCall())
+
+    assert resp.status_code == 200
+
+
+@respx.mock
+def test_admin_custom_call():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8001/admin/v1/timestamp")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("text/plain")
+    ml_mocker.with_response_body("2026-03-23T00:00:00")
+    ml_mocker.mock_get()
+
+    with MLClient() as ml:
+        resp = ml.admin.call(TimestampGetCall())
 
     assert resp.status_code == 200
 

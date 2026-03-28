@@ -14,9 +14,6 @@ from __future__ import annotations
 import json
 from typing import ClassVar
 
-import urllib3
-from urllib3.fields import RequestField
-
 from mlclient import constants, exceptions, utils
 from mlclient.calls.api_call import ApiCall
 from mlclient.constants import HEADER_JSON
@@ -25,6 +22,7 @@ from mlclient.models.http import (
     ContentDispositionSerializer,
     DocumentsBodyPart,
 )
+from mlclient.multipart import MultipartPart, encode_multipart_mixed
 
 
 class DocumentsGetCall(ApiCall):
@@ -280,27 +278,27 @@ class DocumentsPostCall(ApiCall):
         cls,
         body_parts: list[DocumentsBodyPart],
     ) -> tuple[bytes, str]:
-        fields = [cls._get_request_field(body_part) for body_part in body_parts]
-        body, content_type = urllib3.encode_multipart_formdata(fields)
-        return body, content_type.replace("multipart/form-data", "multipart/mixed")
+        parts = [cls._build_multipart_part(body_part) for body_part in body_parts]
+        return encode_multipart_mixed(parts)
 
     @staticmethod
-    def _get_request_field(
+    def _build_multipart_part(
         body_part: DocumentsBodyPart,
-    ) -> RequestField:
+    ) -> MultipartPart:
         data = body_part.content
         if isinstance(data, dict):
             data = json.dumps(data)
+        if isinstance(data, str):
+            data = data.encode("utf-8")
         content_disp = ContentDispositionSerializer.deserialize(
             body_part.content_disposition,
         )
-        return RequestField(
-            name="--ignore--",
-            data=data,
+        return MultipartPart(
             headers={
                 "Content-Disposition": content_disp,
                 "Content-Type": body_part.content_type,
             },
+            content=data,
         )
 
 

@@ -14,10 +14,9 @@ from datetime import datetime
 from typing import ClassVar
 
 from httpx import Headers, Response
-from requests_toolbelt import MultipartDecoder
-from requests_toolbelt.multipart.decoder import BodyPart
 
 from mlclient import constants as const
+from mlclient.multipart import MultipartPart, decode_multipart_mixed
 from mlclient.mimetypes import Mimetypes
 from mlclient.models import DocumentType
 
@@ -192,7 +191,10 @@ class MLResponseParser:
             return error
 
         if content_type.startswith(const.HEADER_MULTIPART_MIXED):
-            body_parts = MultipartDecoder.from_response(response).parts
+            body_parts = decode_multipart_mixed(
+                response.content,
+                response.headers.get(const.HEADER_NAME_CONTENT_TYPE),
+            )
         else:
             body_parts = [response]
 
@@ -237,7 +239,10 @@ class MLResponseParser:
             return error
 
         if content_type.startswith(const.HEADER_MULTIPART_MIXED):
-            body_parts = MultipartDecoder.from_response(response).parts
+            body_parts = decode_multipart_mixed(
+                response.content,
+                response.headers.get(const.HEADER_NAME_CONTENT_TYPE),
+            )
         else:
             body_parts = [response]
 
@@ -282,7 +287,10 @@ class MLResponseParser:
             return error
 
         if content_type.startswith(const.HEADER_MULTIPART_MIXED):
-            body_parts = MultipartDecoder.from_response(response).parts
+            body_parts = decode_multipart_mixed(
+                response.content,
+                response.headers.get(const.HEADER_NAME_CONTENT_TYPE),
+            )
         else:
             body_parts = [response]
 
@@ -353,7 +361,7 @@ class MLResponseParser:
     @classmethod
     def _parse_part(
         cls,
-        body_part: BodyPart | Response,
+        body_part: MultipartPart | Response,
         output_type: type | None = None,
         with_headers: bool = False,
     ) -> (
@@ -372,7 +380,7 @@ class MLResponseParser:
 
         Parameters
         ----------
-        body_part : BodyPart | Response
+        body_part : MultipartPart | Response
             An HTTP response body or body part taken from MarkLogic instance
         output_type : type | None , default None
             An output type (supported: str, bytes)
@@ -385,8 +393,8 @@ class MLResponseParser:
             A parsed response body or body part
         """
         headers = body_part.headers
-        if isinstance(body_part, BodyPart):
-            headers = cls._decode_headers(headers, body_part.encoding)
+        if isinstance(body_part, MultipartPart):
+            headers = Headers(body_part.headers)
         content_type = headers.get(const.HEADER_NAME_CONTENT_TYPE)
         doc_type = Mimetypes.get_doc_type(content_type)
 
@@ -407,7 +415,7 @@ class MLResponseParser:
     @classmethod
     def _parse_type_specific(
         cls,
-        body_part: BodyPart | Response,
+        body_part: MultipartPart | Response,
         headers: Headers,
     ) -> (
         bytes
@@ -425,7 +433,7 @@ class MLResponseParser:
 
         Parameters
         ----------
-        body_part : BodyPart | Response
+        body_part : MultipartPart | Response
             An HTTP response body or body part taken from MarkLogic instance
         headers : Headers
             HTTP headers
@@ -451,27 +459,3 @@ class MLResponseParser:
             return element
         return body_part.content
 
-    @staticmethod
-    def _decode_headers(
-        headers: dict,
-        encoding: str,
-    ) -> Headers:
-        """Decode HTTP headers from bytes format.
-
-        Parameters
-        ----------
-        headers : dict
-            Encoded HTTP headers
-        encoding : str
-            An encoding type
-
-        Returns
-        -------
-        Headers
-            Decoded HTTP headers
-        """
-        headers_dict = {
-            name.decode(encoding): value.decode(encoding)
-            for name, value in headers.items()
-        }
-        return Headers(headers_dict)

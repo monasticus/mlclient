@@ -12,7 +12,7 @@ This package exports the following classes:
     * MLEnvironment
         A class representing a MarkLogic configuration environment.
     * MLClientManager
-        A high-level class managing MarkLogic clients for a given profile.
+        A high-level class managing MarkLogic clients for a given environment.
     * MLResponseParser
         A MarkLogic HTTP response parser.
 

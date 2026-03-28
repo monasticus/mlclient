@@ -12,12 +12,14 @@ from pathlib import Path
 from typing import Any
 
 import responses
-import urllib3
 from requests import PreparedRequest, Response
-from requests_toolbelt import MultipartDecoder
-from requests_toolbelt.multipart.decoder import BodyPart
 from responses import matchers
-from urllib3.fields import RequestField
+
+from mlclient.multipart import (
+    MultipartPart,
+    decode_multipart_mixed,
+    encode_multipart_mixed,
+)
 
 from mlclient.constants import (
     HEADER_JSON,
@@ -134,12 +136,10 @@ class MLResponseBuilder:
         if x_primitive is not None:
             headers["X-Primitive"] = x_primitive
 
-        req_field = RequestField(
-            name="--ignore--",
-            data=body_part_content,
-            headers=headers,
-        )
-        self._response_body_fields.append(req_field)
+        if isinstance(body_part_content, str):
+            body_part_content = body_part_content.encode("utf-8")
+        part = MultipartPart(headers=headers, content=body_part_content)
+        self._response_body_fields.append(part)
 
     def with_response_documents_body_part(
         self,
@@ -156,18 +156,19 @@ class MLResponseBuilder:
         data = body_part.content
         if isinstance(data, dict):
             data = json.dumps(data)
+        if isinstance(data, str):
+            data = data.encode("utf-8")
         content_disp = ContentDispositionSerializer.deserialize(
             body_part.content_disposition,
         )
-        req_field = RequestField(
-            name="--ignore--",
-            data=data,
+        part = MultipartPart(
             headers={
                 "Content-Disposition": content_disp,
                 "Content-Type": body_part.content_type,
             },
+            content=data,
         )
-        self._response_body_fields.append(req_field)
+        self._response_body_fields.append(part)
 
     def with_response_status(
         self,
@@ -239,7 +240,7 @@ class MLResponseBuilder:
         def _for_multiple_uris(
             uris: list,
         ) -> tuple[dict, bytes]:
-            response_body_fields = []
+            parts = []
             for uri in uris:
                 body_part = _find_body_part(uri)
                 if body_part is None:
@@ -247,25 +248,19 @@ class MLResponseBuilder:
                 data = body_part.content
                 if isinstance(data, dict):
                     data = json.dumps(data)
+                if isinstance(data, str):
+                    data = data.encode("utf-8")
                 content_disp = ContentDispositionSerializer.deserialize(
                     body_part.content_disposition,
                 )
-                req_field = RequestField(
-                    name="--ignore--",
-                    data=data,
+                parts.append(MultipartPart(
                     headers={
                         "Content-Disposition": content_disp,
                         "Content-Type": body_part.content_type,
                     },
-                )
-                response_body_fields.append(req_field)
-            body, content_type = urllib3.encode_multipart_formdata(
-                response_body_fields,
-            )
-            content_type = content_type.replace(
-                "multipart/form-data",
-                "multipart/mixed",
-            )
+                    content=data,
+                ))
+            body, content_type = encode_multipart_mixed(parts)
             headers = {
                 "Content-Type": content_type,
             }
@@ -351,15 +346,11 @@ class MLResponseBuilder:
                 del self._response_headers["Content-Type"]
             responses_params["headers"] = self._response_headers
         else:
-            body, content_type = urllib3.encode_multipart_formdata(
+            body, content_type = encode_multipart_mixed(
                 self._response_body_fields or [],
             )
             if self._response_body == b"":
                 body = self._response_body
-            content_type = content_type.replace(
-                "multipart/form-data",
-                "multipart/mixed",
-            )
             self.with_response_header("Content-Length", len(body))
 
             responses_params["body"] = body
@@ -643,11 +634,14 @@ class MLResponseBuilder:
             return [f"builder.with_response_body('{body}')"]
 
         response_body_lines = []
-        raw_parts = MultipartDecoder.from_response(response).parts
+        raw_parts = decode_multipart_mixed(
+            response.content,
+            response.headers.get("Content-Type"),
+        )
         for part in raw_parts:
-            x_primitive = cls._decode_header(part, HEADER_NAME_PRIMITIVE)
-            content_type = cls._decode_header(part, HEADER_NAME_CONTENT_TYPE)
-            content_disp = cls._decode_header(part, HEADER_NAME_CONTENT_DISP)
+            x_primitive = part.headers.get(HEADER_NAME_PRIMITIVE)
+            content_type = part.headers.get(HEADER_NAME_CONTENT_TYPE)
+            content_disp = part.headers.get(HEADER_NAME_CONTENT_DISP)
 
             if content_type != "application/zip":
                 body_part_content = part.text.replace("'", "\\'")
@@ -688,18 +682,6 @@ class MLResponseBuilder:
     ) -> str:
         method = response.request.method.lower()
         return f"builder.build_{method}()"
-
-    @classmethod
-    def _decode_header(
-        cls,
-        body_part: BodyPart,
-        header_name: str,
-    ) -> str | None:
-        name_enc = header_name.encode(body_part.encoding)
-        value_enc = body_part.headers.get(name_enc)
-        if value_enc is None:
-            return None
-        return value_enc.decode(body_part.encoding)
 
     @classmethod
     def _generate_response_body_file_lines(

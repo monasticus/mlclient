@@ -9,12 +9,14 @@ from typing import Any, Callable
 
 import httpx
 import respx
-import urllib3
 from httpx import Headers, Request, Response
-from requests_toolbelt import MultipartDecoder
-from requests_toolbelt.multipart.decoder import BodyPart
 from respx import MockRouter, Route
-from urllib3.fields import RequestField
+
+from mlclient.multipart import (
+    MultipartPart,
+    decode_multipart_mixed,
+    encode_multipart_mixed,
+)
 
 from mlclient.constants import HEADER_X_WWW_FORM_URLENCODED
 from mlclient.models.http import (
@@ -172,7 +174,7 @@ class RespXResponse:
     headers: Headers | None = None
     content: bytes | str | None = None
     json_: dict | None = None
-    body_parts: list[RequestField] | None = None
+    body_parts: list[MultipartPart] | None = None
 
     def as_kwargs(self) -> dict[str, Any]:
         kwargs = {
@@ -285,12 +287,10 @@ class MLRespXMocker(MLMocker):
         if x_primitive is not None:
             headers["X-Primitive"] = x_primitive
 
-        req_field = RequestField(
-            name="--ignore--",
-            data=body_part_content,
-            headers=headers,
-        )
-        self._resp_mock.response.body_parts.append(req_field)
+        if isinstance(body_part_content, str):
+            body_part_content = body_part_content.encode("utf-8")
+        part = MultipartPart(headers=headers, content=body_part_content)
+        self._resp_mock.response.body_parts.append(part)
 
     def with_response_documents_body_part(
         self,
@@ -302,18 +302,19 @@ class MLRespXMocker(MLMocker):
         data = body_part.content
         if isinstance(data, dict):
             data = json.dumps(data)
+        if isinstance(data, str):
+            data = data.encode("utf-8")
         content_disp = ContentDispositionSerializer.deserialize(
             body_part.content_disposition,
         )
-        req_field = RequestField(
-            name="--ignore--",
-            data=data,
+        part = MultipartPart(
             headers={
                 "Content-Disposition": content_disp,
                 "Content-Type": body_part.content_type,
             },
+            content=data,
         )
-        self._resp_mock.response.body_parts.append(req_field)
+        self._resp_mock.response.body_parts.append(part)
 
     def with_get_side_effect(
         self,
@@ -373,12 +374,8 @@ class MLRespXMocker(MLMocker):
 
     def _setup_response_body(self):
         if self._resp_mock.response.body_parts is not None:
-            body, content_type = urllib3.encode_multipart_formdata(
+            body, content_type = encode_multipart_mixed(
                 self._resp_mock.response.body_parts,
-            )
-            content_type = content_type.replace(
-                "multipart/form-data",
-                "multipart/mixed",
             )
             self.with_response_content_type(content_type)
             self._resp_mock.response.body_parts = None
@@ -437,7 +434,10 @@ class MLDocumentsMocker:
         self,
         request: Request,
     ) -> Response:
-        body_parts = MultipartDecoder.from_response(request).parts
+        body_parts = decode_multipart_mixed(
+            request.content,
+            request.headers.get("Content-Type"),
+        )
         if len(body_parts) == 1:
             body_part = body_parts[0]
             uri = self._get_content_disposition(body_part).filename
@@ -462,38 +462,39 @@ class MLDocumentsMocker:
         uris: list[str],
         category: list[str],
     ) -> Response:
-        form_data_fields = self._build_form_data_fields(uris, category)
-        return self._build_successful_multipart_get_response(form_data_fields)
+        parts = self._build_multipart_parts(uris, category)
+        return self._build_successful_multipart_get_response(parts)
 
-    def _build_form_data_fields(
+    def _build_multipart_parts(
         self,
         uris: list[str],
         category: list[str],
-    ) -> list[RequestField]:
+    ) -> list[MultipartPart]:
         return [
-            self._build_form_data_field(body_part)
+            self._build_multipart_part(body_part)
             for uri in uris
             for body_part in self._find_body_parts(uri, category)
             if body_part is not None
         ]
 
     @staticmethod
-    def _build_form_data_field(
+    def _build_multipart_part(
         body_part: DocumentsBodyPart,
-    ) -> RequestField:
+    ) -> MultipartPart:
         data = body_part.content
         if isinstance(data, dict):
             data = json.dumps(data)
+        if isinstance(data, str):
+            data = data.encode("utf-8")
         content_disp = ContentDispositionSerializer.deserialize(
             body_part.content_disposition,
         )
-        return RequestField(
-            name="--ignore--",
-            data=data,
+        return MultipartPart(
             headers={
                 "Content-Disposition": content_disp,
                 "Content-Type": body_part.content_type,
             },
+            content=data,
         )
 
     def _find_body_parts(
@@ -569,7 +570,7 @@ class MLDocumentsMocker:
     @classmethod
     def _build_doc_objects(
         cls,
-        body_parts: tuple[BodyPart],
+        body_parts: list[MultipartPart],
     ) -> list[dict]:
         doc_objects = []
         for body_part in body_parts:
@@ -583,14 +584,14 @@ class MLDocumentsMocker:
     def _build_doc_object(
         cls,
         doc_objects: list[dict],
-        body_part: BodyPart,
+        body_part: MultipartPart,
     ) -> dict:
         content_disp = cls._get_content_disposition(body_part)
         uri = content_disp.filename
         existing_doc_object = cls._pop_object_with_uri(doc_objects, uri)
 
         if content_disp.category in [None, Category.CONTENT]:
-            mime_type = cls._get_header_str(body_part, b"Content-Type")
+            mime_type = body_part.headers.get("Content-Type")
             category = ["metadata", "content"]
         elif existing_doc_object:
             mime_type = existing_doc_object.get("mime-type")
@@ -604,21 +605,13 @@ class MLDocumentsMocker:
             "category": category,
         }
 
-    @classmethod
+    @staticmethod
     def _get_content_disposition(
-        cls,
-        body_part: BodyPart,
+        body_part: MultipartPart,
     ) -> DocumentsContentDisposition:
         return ContentDispositionSerializer.serialize(
-            cls._get_header_str(body_part, b"Content-Disposition"),
+            body_part.headers.get("Content-Disposition"),
         )
-
-    @staticmethod
-    def _get_header_str(
-        body_part: BodyPart,
-        header: bytes,
-    ) -> str:
-        return body_part.headers.get(header).decode("utf-8")
 
     @staticmethod
     def _pop_object_with_uri(
@@ -652,7 +645,7 @@ class MLDocumentsMocker:
     def _build_doc_not_found_error_post_response(
         cls,
         uri: str,
-        body_part: BodyPart,
+        body_part: MultipartPart,
     ) -> Response:
         code = httpx.codes.INTERNAL_SERVER_ERROR
         operation = cls._get_post_erroneous_operation(uri, body_part)
@@ -685,19 +678,13 @@ class MLDocumentsMocker:
 
     @staticmethod
     def _build_successful_multipart_get_response(
-        form_data_fields: list[RequestField],
+        parts: list[MultipartPart],
     ) -> Response:
-        content, content_type = urllib3.encode_multipart_formdata(
-            form_data_fields,
-        )
-        content_type = content_type.replace(
-            "multipart/form-data",
-            "multipart/mixed",
-        )
+        content, content_type = encode_multipart_mixed(parts)
         headers = {
             "Content-Type": content_type,
         }
-        if len(form_data_fields) == 0:
+        if len(parts) == 0:
             content = b""
             headers["Content-Length"] = "0"
         return Response(status_code=httpx.codes.OK, headers=headers, content=content)
@@ -716,9 +703,9 @@ class MLDocumentsMocker:
     @staticmethod
     def _get_post_erroneous_operation(
         uri: str,
-        body_part: BodyPart,
+        body_part: MultipartPart,
     ) -> str:
-        metadata = json.loads(body_part.content.decode("utf-8"))
+        metadata = json.loads(body_part.text)
         if metadata.get("collections") and len(metadata.get("collections")) > 0:
             collections = metadata.get("collections")
             if len(collections) == 1:

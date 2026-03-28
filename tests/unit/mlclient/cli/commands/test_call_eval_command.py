@@ -4,7 +4,7 @@ import pytest
 import respx
 from cleo.testers.command_tester import CommandTester
 
-from mlclient import MLConfiguration
+from mlclient import MLEnvironment
 from mlclient.cli import MLCLIentApplication
 from mlclient.exceptions import WrongParametersError
 from tests.utils import resources as resources_utils
@@ -12,7 +12,7 @@ from tests.utils.ml_mockers import MLRespXMocker
 
 
 @pytest.fixture(autouse=True)
-def ml_config() -> MLConfiguration:
+def ml_config() -> MLEnvironment:
     config = {
         "app-name": "my-marklogic-app",
         "host": "localhost",
@@ -33,13 +33,13 @@ def ml_config() -> MLConfiguration:
             },
         ],
     }
-    return MLConfiguration(**config)
+    return MLEnvironment(**config)
 
 
 @pytest.fixture(autouse=True)
 def _setup(mocker, ml_config):
     # Setup
-    target = "mlclient.ml_config.MLConfiguration.from_environment"
+    target = "mlclient.ml_environment.MLEnvironment.load"
     mocker.patch(target, return_value=ml_config)
 
 
@@ -183,7 +183,7 @@ def test_command_call_eval_mixed_xquery_and_javascript():
     with pytest.raises(WrongParametersError) as err:
         tester.execute(f"-e test -x -j '{code}'")
 
-    expected_msg = "You cannot include both the xquery and the javascript parameter!"
+    expected_msg = "You cannot include both the --xquery and the --javascript flag!"
     assert err.value.args[0] == expected_msg
 
 

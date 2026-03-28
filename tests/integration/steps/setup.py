@@ -4,7 +4,7 @@ from time import sleep
 
 from pytest_bdd import given, parsers
 
-from mlclient import MLResourcesClient
+from mlclient import MLClient
 
 
 @given(
@@ -14,12 +14,12 @@ from mlclient import MLResourcesClient
 def produce_logs(
     count: str,
     pattern: str,
-    client: MLResourcesClient,
+    ml: MLClient,
 ) -> int:
     count = int(count)
     for i in range(1, count + 1):
         log = pattern.replace("<i>", str(i))
-        client.eval(xquery=f'xdmp:log("{log}", "error")')
+        ml.rest.eval.post(xquery=f'xdmp:log("{log}", "error")')
     return count
 
 

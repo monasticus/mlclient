@@ -15,8 +15,8 @@ from cleo.helpers import option
 from cleo.io.inputs.option import Option
 from cleo.io.outputs.output import Type
 
-from mlclient import MLManager
-from mlclient.clients import LogType
+from mlclient import MLClientManager
+from mlclient.services import LogType
 
 
 class CallLogsCommand(Command):
@@ -28,16 +28,14 @@ class CallLogsCommand(Command):
     Options:
       -e, --environment=ENVIRONMENT
             The ML Client environment name [default: "local"]
-      -a, --app-server=APP-PORT
+      -s, --app-server=APP-PORT
             The App-Server (port) to get logs of
-      -s, --rest-server=REST-SERVER
-            The ML REST Server environmental id (to get logs from)
       -l, --log-type=LOG-TYPE
             MarkLogic log type (error, access or request) [default: "error"]
       -f, --from=FROM
             A start time to search error logs
       -t, --to=TO
-            n end time to search error logs
+            An end time to search error logs
       -r, --regex=REGEX
             A regex to search error logs
       -H, --host=HOST
@@ -58,14 +56,8 @@ class CallLogsCommand(Command):
         ),
         option(
             "app-server",
-            "a",
-            description="The App-Server (port) to get logs of",
-            flag=False,
-        ),
-        option(
-            "rest-server",
             "s",
-            description="The ML REST Server environmental id (to get logs from)",
+            description="The App-Server (port) to get logs of",
             flag=False,
         ),
         option(
@@ -132,11 +124,11 @@ class CallLogsCommand(Command):
     def _get_logs_list(
         self,
     ) -> dict:
-        """Retrieve logs list using LogsClient."""
+        """Retrieve logs list using the Logs service."""
         host = self.option("host")
-        with self._get_logs_client() as client:
-            self.info(f"Getting logs list using REST App-Server {client.base_url}")
-            return client.get_logs_list(host)
+        with _get_cached_client(self.option("environment")) as ml:
+            self.info(f"Getting logs list using REST App-Server {ml.http.base_url}")
+            return ml.logs.list(host)
 
     def _get_log_files_rows(
         self,
@@ -192,7 +184,7 @@ class CallLogsCommand(Command):
         source_logs = logs_list["source"]
         grouped_logs = logs_list["grouped"]
 
-        ml_url = self._get_logs_client().base_url
+        ml_url = _get_cached_client(self.option("environment")).http.base_url
 
         server_logs = grouped_logs[host][server]
         type_logs = server_logs[log_type]
@@ -236,7 +228,7 @@ class CallLogsCommand(Command):
     def _get_logs(
         self,
     ) -> Iterator[dict]:
-        """Retrieve logs using LogsClient."""
+        """Retrieve logs using the Logs service."""
         app_port = self._get_app_port()
         log_type = LogType.get(self.option("log-type"))
         start_time = self.option("from")
@@ -244,17 +236,17 @@ class CallLogsCommand(Command):
         regex = self.option("regex")
         host = self.option("host")
 
-        with self._get_logs_client() as client:
+        with _get_cached_client(self.option("environment")) as ml:
             if app_port is None:
                 file_name = f"{log_type.value}.txt"
             else:
                 file_name = f"{app_port}_{log_type.value}.txt"
             self.info(
-                f"Getting {file_name} logs using REST App-Server {client.base_url}",
+                f"Getting {file_name} logs using REST App-Server {ml.http.base_url}",
             )
-            return client.get_logs(
-                app_server=app_port,
-                log_type=log_type,
+            return ml.logs.get(
+                app_port,
+                log_type,
                 start_time=start_time,
                 end_time=end_time,
                 regex=regex,
@@ -280,16 +272,16 @@ class CallLogsCommand(Command):
         self,
     ) -> int | str:
         """Identify app port to be used."""
-        environment = self.option("environment")
+        env = self.option("environment")
         app_port = self.option("app-server")
-        manager = MLManager(environment)
+        mgr = MLClientManager(env)
         if app_port == "0":
             app_port = "TaskServer"
         elif app_port is not None and not app_port.isnumeric():
             named_app_port = next(
                 (
                     app_server.port
-                    for app_server in manager.config.app_servers
+                    for app_server in mgr.config.app_servers
                     if app_server.identifier == app_port
                 ),
                 None,
@@ -298,20 +290,11 @@ class CallLogsCommand(Command):
                 app_port = named_app_port
         return app_port
 
-    def _get_logs_client(
-        self,
-    ):
-        """Get LogsClient instance."""
-        environment = self.option("environment")
-        rest_server = self.option("rest-server")
-        return _get_cached_logs_client(environment, rest_server)
-
 
 @lru_cache
-def _get_cached_logs_client(
-    environment: str,
-    rest_server: str,
+def _get_cached_client(
+    env_name: str,
 ):
-    """Get cached LogsClient instance."""
-    manager = MLManager(environment)
-    return manager.get_logs_client(rest_server)
+    # Cached to avoid re-reading config and re-creating the client on every
+    # call -- _get_client() is invoked multiple times (e.g. in --list loops).
+    return MLClientManager(env_name).get_client()

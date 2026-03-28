@@ -2,7 +2,7 @@
 
 It exports an implementation for 'call eval' command:
     * CallEvalCommand
-        Sends a GET request to the /v1/eval endpoint.
+        Sends a POST request to the /v1/eval endpoint.
 """
 
 from __future__ import annotations
@@ -13,11 +13,12 @@ from cleo.io.inputs.argument import Argument
 from cleo.io.inputs.option import Option
 from cleo.io.outputs.output import Type
 
-from mlclient import MLManager
+from mlclient import MLClientManager
+from mlclient.exceptions import WrongParametersError
 
 
 class CallEvalCommand(Command):
-    """Sends a GET request to the /v1/eval endpoint.
+    """Sends a POST request to the /v1/eval endpoint.
 
     Usage:
       call eval [options] [--] <code>
@@ -30,7 +31,7 @@ class CallEvalCommand(Command):
       -e, --environment=ENVIRONMENT
             The ML Client environment name [default: "local"]
       -s, --rest-server=REST-SERVER
-            The ML REST Server environmental id (to get logs from)
+            The ML REST Server environmental id
           --var=VAR
             A variable to be used in the code (multiple values allowed)
       -x, --xquery
@@ -44,7 +45,7 @@ class CallEvalCommand(Command):
     """
 
     name: str = "call eval"
-    description: str = "Sends a GET request to the /v1/eval endpoint"
+    description: str = "Sends a POST request to the /v1/eval endpoint"
     arguments: list[Argument] = [
         argument(
             "code",
@@ -107,13 +108,17 @@ class CallEvalCommand(Command):
         return 0
 
     def _get_eval_params(self):
-        """Prepare parameters for an EvalClient."""
+        """Prepare parameters for an Eval service."""
         code = self.argument("code")
         variables = self.option("var")
         xq_flag = self.option("xquery")
         js_flag = self.option("javascript")
         database = self.option("database")
         txid = self.option("txid")
+
+        if xq_flag and js_flag:
+            msg = "You cannot include both the --xquery and the --javascript flag!"
+            raise WrongParametersError(msg)
 
         params = {
             "output_type": str,
@@ -139,10 +144,10 @@ class CallEvalCommand(Command):
         eval_params: dict,
     ):
         """Evaluate the code and get results."""
-        environment = self.option("environment")
+        env = self.option("environment")
         rest_server = self.option("rest-server")
 
-        manager = MLManager(environment)
-        with manager.get_eval_client(rest_server) as client:
-            self.info(f"Evaluating code using REST App-Server {client.base_url}")
-            return client.eval(**eval_params)
+        mgr = MLClientManager(env)
+        with mgr.get_client(rest_server) as ml:
+            self.info(f"Evaluating code using REST App-Server {ml.http.base_url}")
+            return ml.eval.execute(**eval_params)

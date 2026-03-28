@@ -11,8 +11,8 @@ import respx
 
 from mlclient.exceptions import MarkLogicError
 from mlclient.jobs import ReadDocumentsJob
-from mlclient.structures import Document, DocumentType, XMLDocument
-from mlclient.structures.calls import DocumentsBodyPart
+from mlclient.models import Document, DocumentType, XMLDocument
+from mlclient.models.http import DocumentsBodyPart as BodyPart
 from tests.utils import filesystem as fs_utils
 from tests.utils.ml_mockers import MLDocumentsMocker, MLRespXMocker
 
@@ -391,7 +391,7 @@ def _get_test_document_body_parts(
     *,
     start: int = 1,
     metadata: list[str] | None = None,
-) -> Iterable[DocumentsBodyPart]:
+) -> Iterable[BodyPart]:
     range_start = start - 1
     range_end = start + count
     for i in range(range_start, range_end):
@@ -401,8 +401,8 @@ def _get_test_document_body_parts(
 def _get_test_document_body_part(
     num: int,
     metadata: list[str] | None = None,
-) -> Iterable[DocumentsBodyPart]:
-    yield DocumentsBodyPart(
+) -> Iterable[BodyPart]:
+    yield BodyPart(
         **{
             "content-type": "application/xml",
             "content-disposition": "attachment; "
@@ -426,7 +426,7 @@ def _get_test_document_body_part(
             content["properties"] = {}
         if "metadata" in metadata or "metadataValues" in metadata:
             content["metadataValues"] = {}
-        yield DocumentsBodyPart(
+        yield BodyPart(
             **{
                 "content-type": "application/json",
                 "content-disposition": "attachment; "

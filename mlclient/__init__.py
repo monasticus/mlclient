@@ -1,40 +1,26 @@
 """The ML Client package.
 
-The root package of Python API to manage MarkLogic instance. It contains the most
-generic modules:
-
-    * ml_config
-        The ML Configuration module.
-    * ml_manager
-        The ML Manager module.
-    * ml_response_parser
-        The ML Response Parser module.
-    * constants
-        The ML Client Constants module.
-    * mimetypes
-        The ML Client Mimetypes module.
-    * exceptions
-        The ML Client Exceptions module.
-    * utils
-        The ML Client Utils module.
+The root package of Python API to manage MarkLogic instance.
 
 This package exports the following classes:
     * MLClient
-        A low-level class used to send simple HTTP requests to a MarkLogic instance.
-    * MLResourceClient
-        A MLClient subclass calling ResourceCall implementation classes.
-    * MLResourcesClient
-        A MLResourceClient subclass supporting REST Resources of the MarkLogic server.
-    * MLConfiguration
-        A class representing MarkLogic configuration.
-    * MLManager
-        A high-level class managing a MarkLogic instance.
+        Main entry point for MarkLogic interaction with layered access.
+    * HttpClient
+        A low-level class used to send HTTP requests to a MarkLogic instance.
+    * ApiClient
+        A mid-level client providing call() for ApiCall objects.
+    * MLEnvironment
+        A class representing a MarkLogic configuration environment.
+    * MLClientManager
+        A high-level class managing MarkLogic clients for a given environment.
     * MLResponseParser
         A MarkLogic HTTP response parser.
 
 Examples
 --------
->>> from mlclient import MLResourcesClient
+>>> from mlclient import MLClient
+>>> with MLClient() as ml:
+...     resp = ml.manage.databases.get_list()
 """
 
 import logging.config
@@ -45,17 +31,16 @@ from haggis.logs import add_logging_level
 from . import utils
 from .clients import (
     DEFAULT_RETRY_STRATEGY,
-    LOCAL_NS,
     MARKLOGIC_ADMIN_API_PORT,
     MARKLOGIC_MANAGE_API_PORT,
     MARKLOGIC_REST_API_PORT,
     RESTART_RETRY_STRATEGY,
+    ApiClient,
+    HttpClient,
     MLClient,
-    MLResourceClient,
-    MLResourcesClient,
 )
-from .ml_config import MLConfiguration
-from .ml_manager import MLManager
+from .ml_client_manager import MLClientManager
+from .ml_environment import MLEnvironment
 from .ml_response_parser import MLResponseParser
 
 
@@ -69,16 +54,15 @@ def setup_logger():
 __version__ = "0.4.1"
 __all__ = [
     "DEFAULT_RETRY_STRATEGY",
-    "LOCAL_NS",
     "MARKLOGIC_ADMIN_API_PORT",
     "MARKLOGIC_MANAGE_API_PORT",
     "MARKLOGIC_REST_API_PORT",
     "RESTART_RETRY_STRATEGY",
+    "ApiClient",
+    "HttpClient",
     "MLClient",
-    "MLConfiguration",
-    "MLManager",
-    "MLResourceClient",
-    "MLResourcesClient",
+    "MLClientManager",
+    "MLEnvironment",
     "MLResponseParser",
     "__version__",
     "setup_logger",

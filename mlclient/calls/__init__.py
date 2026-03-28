@@ -1,6 +1,6 @@
 """The ML Calls package.
 
-It contains modules dealing with MarkLogic REST Resources at the lowest level
+It contains modules dealing with MarkLogic API endpoints at the lowest level
 of HTTP requests. Additionally, it exports the following package:
 
     * model
@@ -8,48 +8,34 @@ of HTTP requests. Additionally, it exports the following package:
 
 This package exports the following modules:
 
-    * resource_call
-        An abstract class representing a single request to a MarkLogic REST Resource.
-    * database_call
-        The ML Database Resource Calls module.
-    * database_properties_call
-        The ML Database Properties Resource Calls module.
-    * databases_call
-        The ML Databases Resource Calls module.
-    * documents_call
-        The ML Documents Resource Calls module.
-    * eval_call
-        The ML Eval Resource Call module.
-    * forest_call
-        The ML Forest Resource Calls module.
-    * forest_properties_call
-        The ML Forest Properties Resource Calls module.
-    * forests_call
-        The ML Forests Resource Calls module.
-    * logs_call
-        The ML Logs Resource Call module.
-    * role_call
-        The ML Role Resource Calls module.
-    * role_properties_call
-        The ML Role Properties Resource Calls module.
-    * roles_call
-        The ML Roles Resource Calls module.
-    * server_call
-        The ML Server Resource Calls module.
-    * server_properties_call
-        The ML Server Properties Resource Calls module.
-    * servers_call
-        The ML Servers Resource Calls module.
-    * user_call
-        The ML User Resource Calls module.
-    * user_properties_call
-        The ML User Properties Resource Calls module.
-    * users_call
-        The ML Users Resource Calls module.
+    * api_call
+        An abstract class representing a single request to a MarkLogic API endpoint.
+    * admin
+        The ML Admin API Calls module.
+    * databases
+        The ML Database Api Calls module.
+    * documents
+        The ML Documents Api Calls module.
+    * eval
+        The ML Eval Api Call module.
+    * forests
+        The ML Forest Api Calls module.
+    * logs
+        The ML Logs Api Call module.
+    * roles
+        The ML Role Api Calls module.
+    * servers
+        The ML Server Api Calls module.
+    * users
+        The ML User Api Calls module.
 
 This package exports the following classes:
-    * ResourceCall
-        An abstract class representing a single request to a MarkLogic REST Resource.
+    * ApiCall
+        An abstract class representing a single request to a MarkLogic API endpoint.
+    * TimestampGetCall
+        A GET request to get the Admin server timestamp.
+    * ServerConfigGetCall
+        A GET request to get the Admin server configuration.
     * DatabaseGetCall
         A GET request to get database details.
     * DatabasePostCall
@@ -132,30 +118,57 @@ Examples
 >>> from mlclient.calls import DatabaseGetCall, EvalCall
 """
 
-from .resource_call import ResourceCall
-from .database_call import DatabaseDeleteCall, DatabaseGetCall, DatabasePostCall
-from .database_properties_call import (
+from .admin import ServerConfigGetCall, TimestampGetCall
+from .api_call import ApiCall
+from .databases import (
+    DatabaseDeleteCall,
+    DatabaseGetCall,
+    DatabasePostCall,
     DatabasePropertiesGetCall,
     DatabasePropertiesPutCall,
+    DatabasesGetCall,
+    DatabasesPostCall,
 )
-from .databases_call import DatabasesGetCall, DatabasesPostCall
-from .documents_call import DocumentsGetCall, DocumentsDeleteCall, DocumentsPostCall
-from .eval_call import EvalCall
-from .forest_call import ForestDeleteCall, ForestGetCall, ForestPostCall
-from .forest_properties_call import ForestPropertiesGetCall, ForestPropertiesPutCall
-from .forests_call import ForestsGetCall, ForestsPostCall, ForestsPutCall
-from .logs_call import LogsCall
-from .role_call import RoleDeleteCall, RoleGetCall
-from .role_properties_call import RolePropertiesGetCall, RolePropertiesPutCall
-from .roles_call import RolesGetCall, RolesPostCall
-from .user_call import UserDeleteCall, UserGetCall
-from .user_properties_call import UserPropertiesGetCall, UserPropertiesPutCall
-from .users_call import UsersGetCall, UsersPostCall
-from .server_call import ServerDeleteCall, ServerGetCall
-from .server_properties_call import ServerPropertiesGetCall, ServerPropertiesPutCall
-from .servers_call import ServersGetCall, ServersPostCall
+from .documents import DocumentsDeleteCall, DocumentsGetCall, DocumentsPostCall
+from .eval import EvalCall
+from .forests import (
+    ForestDeleteCall,
+    ForestGetCall,
+    ForestPostCall,
+    ForestPropertiesGetCall,
+    ForestPropertiesPutCall,
+    ForestsGetCall,
+    ForestsPostCall,
+    ForestsPutCall,
+)
+from .logs import LogsCall
+from .roles import (
+    RoleDeleteCall,
+    RoleGetCall,
+    RolePropertiesGetCall,
+    RolePropertiesPutCall,
+    RolesGetCall,
+    RolesPostCall,
+)
+from .servers import (
+    ServerDeleteCall,
+    ServerGetCall,
+    ServerPropertiesGetCall,
+    ServerPropertiesPutCall,
+    ServersGetCall,
+    ServersPostCall,
+)
+from .users import (
+    UserDeleteCall,
+    UserGetCall,
+    UserPropertiesGetCall,
+    UserPropertiesPutCall,
+    UsersGetCall,
+    UsersPostCall,
+)
 
 __all__ = [
+    "ApiCall",
     "DatabaseDeleteCall",
     "DatabaseGetCall",
     "DatabasePostCall",
@@ -176,19 +189,20 @@ __all__ = [
     "ForestsPostCall",
     "ForestsPutCall",
     "LogsCall",
-    "ResourceCall",
     "RoleDeleteCall",
     "RoleGetCall",
     "RolePropertiesGetCall",
     "RolePropertiesPutCall",
     "RolesGetCall",
     "RolesPostCall",
+    "ServerConfigGetCall",
     "ServerDeleteCall",
     "ServerGetCall",
     "ServerPropertiesGetCall",
     "ServerPropertiesPutCall",
     "ServersGetCall",
     "ServersPostCall",
+    "TimestampGetCall",
     "UserDeleteCall",
     "UserGetCall",
     "UserPropertiesGetCall",

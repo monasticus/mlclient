@@ -4,8 +4,8 @@ from datetime import date, datetime
 
 import pytest
 
-from mlclient import MLResourcesClient, MLResponseParser
-from mlclient.structures.calls import DocumentsBodyPart
+from mlclient import MLClient, MLResponseParser
+from mlclient.models.http import DocumentsBodyPart as BodyPart
 from tests.utils import resources as resources_utils
 from tests.utils.ml_mockers import MLRespXMocker
 
@@ -15,19 +15,19 @@ ml_mock = ml_mocker.router
 
 
 @pytest.fixture(scope="module")
-def client():
-    return MLResourcesClient()
+def ml():
+    return MLClient()
 
 
 @pytest.fixture(scope="module", autouse=True)
-def _setup_and_teardown(client):
+def _setup_and_teardown(ml):
     # Setup
-    client.connect()
+    ml.connect()
 
     yield
 
     # Teardown
-    client.disconnect()
+    ml.disconnect()
 
 
 ml_mocker.with_name("html-error")
@@ -41,8 +41,8 @@ ml_mocker.mock_post()
 
 
 @ml_mock
-def test_parse_error_response_html(client):
-    resp = client.eval(xquery="'missing-quote")
+def test_parse_error_response_html(ml):
+    resp = ml.rest.eval.post(xquery="'missing-quote")
     parsed_resp = MLResponseParser.parse(resp)
 
     assert isinstance(parsed_resp, str)
@@ -53,8 +53,8 @@ def test_parse_error_response_html(client):
 
 
 @ml_mock
-def test_parse_text_error_response_html(client):
-    resp = client.eval(xquery="'missing-quote")
+def test_parse_text_error_response_html(ml):
+    resp = ml.rest.eval.post(xquery="'missing-quote")
     parsed_resp = MLResponseParser.parse(resp, output_type=str)
 
     assert isinstance(parsed_resp, str)
@@ -65,8 +65,8 @@ def test_parse_text_error_response_html(client):
 
 
 @ml_mock
-def test_parse_bytes_error_response_html(client):
-    resp = client.eval(xquery="'missing-quote")
+def test_parse_bytes_error_response_html(ml):
+    resp = ml.rest.eval.post(xquery="'missing-quote")
     parsed_resp = MLResponseParser.parse(resp, output_type=bytes)
 
     assert isinstance(parsed_resp, bytes)
@@ -77,8 +77,8 @@ def test_parse_bytes_error_response_html(client):
 
 
 @ml_mock
-def test_parse_with_headers_error_response_html(client):
-    resp = client.eval(xquery="'missing-quote")
+def test_parse_with_headers_error_response_html(ml):
+    resp = ml.rest.eval.post(xquery="'missing-quote")
     headers, parsed_resp = MLResponseParser.parse_with_headers(resp)
 
     assert isinstance(parsed_resp, str)
@@ -93,8 +93,8 @@ def test_parse_with_headers_error_response_html(client):
 
 
 @ml_mock
-def test_parse_text_with_headers_error_response_html(client):
-    resp = client.eval(xquery="'missing-quote")
+def test_parse_text_with_headers_error_response_html(ml):
+    resp = ml.rest.eval.post(xquery="'missing-quote")
     headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=str)
 
     assert isinstance(parsed_resp, str)
@@ -109,8 +109,8 @@ def test_parse_text_with_headers_error_response_html(client):
 
 
 @ml_mock
-def test_parse_bytes_with_headers_error_response_html(client):
-    resp = client.eval(xquery="'missing-quote")
+def test_parse_bytes_with_headers_error_response_html(ml):
+    resp = ml.rest.eval.post(xquery="'missing-quote")
     headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=bytes)
 
     assert isinstance(parsed_resp, bytes)
@@ -135,8 +135,8 @@ ml_mocker.mock_delete()
 
 
 @ml_mock
-def test_parse_error_response_xml(client):
-    resp = client.delete_documents(uri="/some/dir/doc1.xml", database="Document")
+def test_parse_error_response_xml(ml):
+    resp = ml.rest.documents.delete("/some/dir/doc1.xml", database="Document")
     parsed_resp = MLResponseParser.parse(resp)
 
     assert isinstance(parsed_resp, dict)
@@ -151,8 +151,8 @@ def test_parse_error_response_xml(client):
 
 
 @ml_mock
-def test_parse_text_error_response_xml(client):
-    resp = client.delete_documents(uri="/some/dir/doc1.xml", database="Document")
+def test_parse_text_error_response_xml(ml):
+    resp = ml.rest.documents.delete("/some/dir/doc1.xml", database="Document")
     parsed_resp = MLResponseParser.parse(resp, output_type=str)
 
     assert isinstance(parsed_resp, str)
@@ -167,8 +167,8 @@ def test_parse_text_error_response_xml(client):
 
 
 @ml_mock
-def test_parse_bytes_error_response_xml(client):
-    resp = client.delete_documents(uri="/some/dir/doc1.xml", database="Document")
+def test_parse_bytes_error_response_xml(ml):
+    resp = ml.rest.documents.delete("/some/dir/doc1.xml", database="Document")
     parsed_resp = MLResponseParser.parse(resp, output_type=bytes)
 
     assert isinstance(parsed_resp, bytes)
@@ -183,8 +183,8 @@ def test_parse_bytes_error_response_xml(client):
 
 
 @ml_mock
-def test_parse_with_headers_error_response_xml(client):
-    resp = client.delete_documents(uri="/some/dir/doc1.xml", database="Document")
+def test_parse_with_headers_error_response_xml(ml):
+    resp = ml.rest.documents.delete("/some/dir/doc1.xml", database="Document")
     headers, parsed_resp = MLResponseParser.parse_with_headers(resp)
 
     assert isinstance(parsed_resp, dict)
@@ -203,8 +203,8 @@ def test_parse_with_headers_error_response_xml(client):
 
 
 @ml_mock
-def test_parse_text_with_headers_error_response_xml(client):
-    resp = client.delete_documents(uri="/some/dir/doc1.xml", database="Document")
+def test_parse_text_with_headers_error_response_xml(ml):
+    resp = ml.rest.documents.delete("/some/dir/doc1.xml", database="Document")
     headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=str)
 
     assert isinstance(parsed_resp, str)
@@ -223,8 +223,8 @@ def test_parse_text_with_headers_error_response_xml(client):
 
 
 @ml_mock
-def test_parse_bytes_with_headers_error_response_xml(client):
-    resp = client.delete_documents(uri="/some/dir/doc1.xml", database="Document")
+def test_parse_bytes_with_headers_error_response_xml(ml):
+    resp = ml.rest.documents.delete("/some/dir/doc1.xml", database="Document")
     headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=bytes)
 
     assert isinstance(parsed_resp, bytes)
@@ -247,13 +247,13 @@ ml_mocker.with_url("/v1/documents")
 ml_mocker.with_request_param("uri", "/some/dir/doc.xml")
 ml_mocker.with_response_code(404)
 ml_mocker.with_response_content_type("application/json; charset=UTF-8")
-ml_mocker.with_response_body(RESOURCES["error-response.json"]["json"])
+ml_mocker.with_response_body(RESOURCES["error-response.json"]["bytes"])
 ml_mocker.mock_get()
 
 
 @ml_mock
-def test_parse_error_response_json(client):
-    resp = client.get_documents(uri="/some/dir/doc.xml")
+def test_parse_error_response_json(ml):
+    resp = ml.rest.documents.get("/some/dir/doc.xml")
     parsed_resp = MLResponseParser.parse(resp)
 
     assert isinstance(parsed_resp, dict)
@@ -261,8 +261,8 @@ def test_parse_error_response_json(client):
 
 
 @ml_mock
-def test_parse_text_error_response_json(client):
-    resp = client.get_documents(uri="/some/dir/doc.xml")
+def test_parse_text_error_response_json(ml):
+    resp = ml.rest.documents.get("/some/dir/doc.xml")
     parsed_resp = MLResponseParser.parse(resp, output_type=str)
 
     assert isinstance(parsed_resp, str)
@@ -279,8 +279,8 @@ def test_parse_text_error_response_json(client):
 
 
 @ml_mock
-def test_parse_bytes_error_response_json(client):
-    resp = client.get_documents(uri="/some/dir/doc.xml")
+def test_parse_bytes_error_response_json(ml):
+    resp = ml.rest.documents.get("/some/dir/doc.xml")
     parsed_resp = MLResponseParser.parse(resp, output_type=bytes)
 
     assert isinstance(parsed_resp, bytes)
@@ -297,21 +297,21 @@ def test_parse_bytes_error_response_json(client):
 
 
 @ml_mock
-def test_parse_with_headers_error_response_json(client):
-    resp = client.get_documents(uri="/some/dir/doc.xml")
+def test_parse_with_headers_error_response_json(ml):
+    resp = ml.rest.documents.get("/some/dir/doc.xml")
     headers, parsed_resp = MLResponseParser.parse_with_headers(resp)
 
     assert isinstance(parsed_resp, dict)
     assert parsed_resp == RESOURCES["error-response.json"]["json"]
-    assert headers == {
-        "Content-Type": "application/json; charset=UTF-8",
-        "Content-Length": "230",
-    }
+    assert headers["content-type"] == "application/json; charset=UTF-8"
+    assert headers["content-length"] == str(
+        len(RESOURCES["error-response.json"]["bytes"]),
+    )
 
 
 @ml_mock
-def test_parse_text_with_headers_error_response_json(client):
-    resp = client.get_documents(uri="/some/dir/doc.xml")
+def test_parse_text_with_headers_error_response_json(ml):
+    resp = ml.rest.documents.get("/some/dir/doc.xml")
     headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=str)
 
     assert isinstance(parsed_resp, str)
@@ -323,20 +323,20 @@ def test_parse_text_with_headers_error_response_json(client):
         '"status": "Not Found", '
         '"messageCode": "RESTAPI-NODOCUMENT", '
         '"message": "RESTAPI-NODOCUMENT: (err:FOER0000) '
-        "Resource or document does not exist: "
-        ' category: content message: /some/dir/doc.xml"'
+        "Resource or document does not exist:  "
+        'category: content message: /some/dir/doc.xml"'
         "}"
         "}"
     )
-    assert headers == {
-        "Content-Type": "application/json; charset=UTF-8",
-        "Content-Length": "230",
-    }
+    assert headers["content-type"] == "application/json; charset=UTF-8"
+    assert headers["content-length"] == str(
+        len(RESOURCES["error-response.json"]["bytes"]),
+    )
 
 
 @ml_mock
-def test_parse_bytes_with_headers_error_response_json(client):
-    resp = client.get_documents(uri="/some/dir/doc.xml")
+def test_parse_bytes_with_headers_error_response_json(ml):
+    resp = ml.rest.documents.get("/some/dir/doc.xml")
     headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=bytes)
 
     assert isinstance(parsed_resp, bytes)
@@ -348,15 +348,15 @@ def test_parse_bytes_with_headers_error_response_json(client):
         b'"status": "Not Found", '
         b'"messageCode": "RESTAPI-NODOCUMENT", '
         b'"message": "RESTAPI-NODOCUMENT: (err:FOER0000) '
-        b"Resource or document does not exist: "
-        b' category: content message: /some/dir/doc.xml"'
+        b"Resource or document does not exist:  "
+        b'category: content message: /some/dir/doc.xml"'
         b"}"
         b"}"
     )
-    assert headers == {
-        "Content-Type": "application/json; charset=UTF-8",
-        "Content-Length": "230",
-    }
+    assert headers["content-type"] == "application/json; charset=UTF-8"
+    assert headers["content-length"] == str(
+        len(RESOURCES["error-response.json"]["bytes"]),
+    )
 
 
 ml_mocker.with_name("non-multipart-mixed-xml")
@@ -370,8 +370,8 @@ ml_mocker.mock_get()
 
 
 @ml_mock
-def test_parse_non_multipart_mixed_response_xml(client):
-    resp = client.get_documents(uri="/some/dir/doc1.xml")
+def test_parse_non_multipart_mixed_response_xml(ml):
+    resp = ml.rest.documents.get("/some/dir/doc1.xml")
     parsed_resp = MLResponseParser.parse(resp)
 
     assert isinstance(parsed_resp, ElemTree.ElementTree)
@@ -381,8 +381,8 @@ def test_parse_non_multipart_mixed_response_xml(client):
 
 
 @ml_mock
-def test_parse_text_non_multipart_mixed_response_xml(client):
-    resp = client.get_documents(uri="/some/dir/doc1.xml")
+def test_parse_text_non_multipart_mixed_response_xml(ml):
+    resp = ml.rest.documents.get("/some/dir/doc1.xml")
     parsed_resp = MLResponseParser.parse(resp, output_type=str)
 
     assert isinstance(parsed_resp, str)
@@ -390,8 +390,8 @@ def test_parse_text_non_multipart_mixed_response_xml(client):
 
 
 @ml_mock
-def test_parse_bytes_non_multipart_mixed_response_xml(client):
-    resp = client.get_documents(uri="/some/dir/doc1.xml")
+def test_parse_bytes_non_multipart_mixed_response_xml(ml):
+    resp = ml.rest.documents.get("/some/dir/doc1.xml")
     parsed_resp = MLResponseParser.parse(resp, output_type=bytes)
 
     assert isinstance(parsed_resp, bytes)
@@ -399,8 +399,8 @@ def test_parse_bytes_non_multipart_mixed_response_xml(client):
 
 
 @ml_mock
-def test_parse_with_headers_non_multipart_mixed_response_xml(client):
-    resp = client.get_documents(uri="/some/dir/doc1.xml")
+def test_parse_with_headers_non_multipart_mixed_response_xml(ml):
+    resp = ml.rest.documents.get("/some/dir/doc1.xml")
     headers, parsed_resp = MLResponseParser.parse_with_headers(resp)
 
     assert isinstance(parsed_resp, ElemTree.ElementTree)
@@ -415,8 +415,8 @@ def test_parse_with_headers_non_multipart_mixed_response_xml(client):
 
 
 @ml_mock
-def test_parse_text_with_headers_non_multipart_mixed_response_xml(client):
-    resp = client.get_documents(uri="/some/dir/doc1.xml")
+def test_parse_text_with_headers_non_multipart_mixed_response_xml(ml):
+    resp = ml.rest.documents.get("/some/dir/doc1.xml")
     headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=str)
 
     assert isinstance(parsed_resp, str)
@@ -429,8 +429,8 @@ def test_parse_text_with_headers_non_multipart_mixed_response_xml(client):
 
 
 @ml_mock
-def test_parse_bytes_with_headers_non_multipart_mixed_response_xml(client):
-    resp = client.get_documents(uri="/some/dir/doc1.xml")
+def test_parse_bytes_with_headers_non_multipart_mixed_response_xml(ml):
+    resp = ml.rest.documents.get("/some/dir/doc1.xml")
     headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=bytes)
 
     assert isinstance(parsed_resp, bytes)
@@ -453,8 +453,8 @@ ml_mocker.mock_get()
 
 
 @ml_mock
-def test_parse_non_multipart_mixed_response_json(client):
-    resp = client.get_documents(uri="/some/dir/doc2.json")
+def test_parse_non_multipart_mixed_response_json(ml):
+    resp = ml.rest.documents.get("/some/dir/doc2.json")
     parsed_resp = MLResponseParser.parse(resp)
 
     assert isinstance(parsed_resp, dict)
@@ -462,8 +462,8 @@ def test_parse_non_multipart_mixed_response_json(client):
 
 
 @ml_mock
-def test_parse_text_non_multipart_mixed_response_json(client):
-    resp = client.get_documents(uri="/some/dir/doc2.json")
+def test_parse_text_non_multipart_mixed_response_json(ml):
+    resp = ml.rest.documents.get("/some/dir/doc2.json")
     parsed_resp = MLResponseParser.parse(resp, output_type=str)
 
     assert isinstance(parsed_resp, str)
@@ -471,8 +471,8 @@ def test_parse_text_non_multipart_mixed_response_json(client):
 
 
 @ml_mock
-def test_parse_bytes_non_multipart_mixed_response_json(client):
-    resp = client.get_documents(uri="/some/dir/doc2.json")
+def test_parse_bytes_non_multipart_mixed_response_json(ml):
+    resp = ml.rest.documents.get("/some/dir/doc2.json")
     parsed_resp = MLResponseParser.parse(resp, output_type=bytes)
 
     assert isinstance(parsed_resp, bytes)
@@ -480,8 +480,8 @@ def test_parse_bytes_non_multipart_mixed_response_json(client):
 
 
 @ml_mock
-def test_parse_with_headers_non_multipart_mixed_response_json(client):
-    resp = client.get_documents(uri="/some/dir/doc2.json")
+def test_parse_with_headers_non_multipart_mixed_response_json(ml):
+    resp = ml.rest.documents.get("/some/dir/doc2.json")
     headers, parsed_resp = MLResponseParser.parse_with_headers(resp)
 
     assert isinstance(parsed_resp, dict)
@@ -494,8 +494,8 @@ def test_parse_with_headers_non_multipart_mixed_response_json(client):
 
 
 @ml_mock
-def test_parse_text_with_headers_non_multipart_mixed_response_json(client):
-    resp = client.get_documents(uri="/some/dir/doc2.json")
+def test_parse_text_with_headers_non_multipart_mixed_response_json(ml):
+    resp = ml.rest.documents.get("/some/dir/doc2.json")
     headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=str)
 
     assert isinstance(parsed_resp, str)
@@ -508,8 +508,8 @@ def test_parse_text_with_headers_non_multipart_mixed_response_json(client):
 
 
 @ml_mock
-def test_parse_bytes_with_headers_non_multipart_mixed_response_json(client):
-    resp = client.get_documents(uri="/some/dir/doc2.json")
+def test_parse_bytes_with_headers_non_multipart_mixed_response_json(ml):
+    resp = ml.rest.documents.get("/some/dir/doc2.json")
     headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=bytes)
 
     assert isinstance(parsed_resp, bytes)
@@ -532,8 +532,8 @@ ml_mocker.mock_get()
 
 
 @ml_mock
-def test_parse_non_multipart_mixed_response_text(client):
-    resp = client.get_documents(uri="/some/dir/doc3.xqy")
+def test_parse_non_multipart_mixed_response_text(ml):
+    resp = ml.rest.documents.get("/some/dir/doc3.xqy")
     parsed_resp = MLResponseParser.parse(resp)
 
     assert isinstance(parsed_resp, str)
@@ -541,8 +541,8 @@ def test_parse_non_multipart_mixed_response_text(client):
 
 
 @ml_mock
-def test_parse_text_non_multipart_mixed_response_text(client):
-    resp = client.get_documents(uri="/some/dir/doc3.xqy")
+def test_parse_text_non_multipart_mixed_response_text(ml):
+    resp = ml.rest.documents.get("/some/dir/doc3.xqy")
     parsed_resp = MLResponseParser.parse(resp, output_type=str)
 
     assert isinstance(parsed_resp, str)
@@ -550,8 +550,8 @@ def test_parse_text_non_multipart_mixed_response_text(client):
 
 
 @ml_mock
-def test_parse_bytes_non_multipart_mixed_response_text(client):
-    resp = client.get_documents(uri="/some/dir/doc3.xqy")
+def test_parse_bytes_non_multipart_mixed_response_text(ml):
+    resp = ml.rest.documents.get("/some/dir/doc3.xqy")
     parsed_resp = MLResponseParser.parse(resp, output_type=bytes)
 
     assert isinstance(parsed_resp, bytes)
@@ -559,8 +559,8 @@ def test_parse_bytes_non_multipart_mixed_response_text(client):
 
 
 @ml_mock
-def test_parse_with_headers_non_multipart_mixed_response_text(client):
-    resp = client.get_documents(uri="/some/dir/doc3.xqy")
+def test_parse_with_headers_non_multipart_mixed_response_text(ml):
+    resp = ml.rest.documents.get("/some/dir/doc3.xqy")
     headers, parsed_resp = MLResponseParser.parse_with_headers(resp)
 
     assert isinstance(parsed_resp, str)
@@ -573,8 +573,8 @@ def test_parse_with_headers_non_multipart_mixed_response_text(client):
 
 
 @ml_mock
-def test_parse_text_with_headers_non_multipart_mixed_response_text(client):
-    resp = client.get_documents(uri="/some/dir/doc3.xqy")
+def test_parse_text_with_headers_non_multipart_mixed_response_text(ml):
+    resp = ml.rest.documents.get("/some/dir/doc3.xqy")
     headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=str)
 
     assert isinstance(parsed_resp, str)
@@ -587,8 +587,8 @@ def test_parse_text_with_headers_non_multipart_mixed_response_text(client):
 
 
 @ml_mock
-def test_parse_bytes_with_headers_non_multipart_mixed_response_text(client):
-    resp = client.get_documents(uri="/some/dir/doc3.xqy")
+def test_parse_bytes_with_headers_non_multipart_mixed_response_text(ml):
+    resp = ml.rest.documents.get("/some/dir/doc3.xqy")
     headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=bytes)
 
     assert isinstance(parsed_resp, bytes)
@@ -613,8 +613,8 @@ ml_mocker.mock_get()
 
 
 @ml_mock
-def test_parse_non_multipart_mixed_response_binary(client):
-    resp = client.get_documents(uri="/some/dir/doc4.zip")
+def test_parse_non_multipart_mixed_response_binary(ml):
+    resp = ml.rest.documents.get("/some/dir/doc4.zip")
     parsed_resp = MLResponseParser.parse(resp)
 
     assert isinstance(parsed_resp, bytes)
@@ -624,8 +624,8 @@ def test_parse_non_multipart_mixed_response_binary(client):
 
 
 @ml_mock
-def test_parse_text_non_multipart_mixed_response_binary(client):
-    resp = client.get_documents(uri="/some/dir/doc4.zip")
+def test_parse_text_non_multipart_mixed_response_binary(ml):
+    resp = ml.rest.documents.get("/some/dir/doc4.zip")
     parsed_resp = MLResponseParser.parse(resp, output_type=str)
 
     assert isinstance(parsed_resp, bytes)
@@ -635,8 +635,8 @@ def test_parse_text_non_multipart_mixed_response_binary(client):
 
 
 @ml_mock
-def test_parse_bytes_non_multipart_mixed_response_binary(client):
-    resp = client.get_documents(uri="/some/dir/doc4.zip")
+def test_parse_bytes_non_multipart_mixed_response_binary(ml):
+    resp = ml.rest.documents.get("/some/dir/doc4.zip")
     parsed_resp = MLResponseParser.parse(resp, output_type=bytes)
 
     assert isinstance(parsed_resp, bytes)
@@ -646,8 +646,8 @@ def test_parse_bytes_non_multipart_mixed_response_binary(client):
 
 
 @ml_mock
-def test_parse_with_headers_non_multipart_mixed_response_binary(client):
-    resp = client.get_documents(uri="/some/dir/doc4.zip")
+def test_parse_with_headers_non_multipart_mixed_response_binary(ml):
+    resp = ml.rest.documents.get("/some/dir/doc4.zip")
     headers, parsed_resp = MLResponseParser.parse_with_headers(resp)
 
     assert isinstance(parsed_resp, bytes)
@@ -662,8 +662,8 @@ def test_parse_with_headers_non_multipart_mixed_response_binary(client):
 
 
 @ml_mock
-def test_parse_text_with_headers_non_multipart_mixed_response_binary(client):
-    resp = client.get_documents(uri="/some/dir/doc4.zip")
+def test_parse_text_with_headers_non_multipart_mixed_response_binary(ml):
+    resp = ml.rest.documents.get("/some/dir/doc4.zip")
     headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=str)
 
     assert isinstance(parsed_resp, bytes)
@@ -678,8 +678,8 @@ def test_parse_text_with_headers_non_multipart_mixed_response_binary(client):
 
 
 @ml_mock
-def test_parse_bytes_with_headers_non_multipart_mixed_response_binary(client):
-    resp = client.get_documents(uri="/some/dir/doc4.zip")
+def test_parse_bytes_with_headers_non_multipart_mixed_response_binary(ml):
+    resp = ml.rest.documents.get("/some/dir/doc4.zip")
     headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=bytes)
 
     assert isinstance(parsed_resp, bytes)
@@ -701,7 +701,7 @@ ml_mocker.with_request_param("uri", "/some/dir/doc3.xqy")
 ml_mocker.with_request_param("uri", "/some/dir/doc4.zip")
 ml_mocker.with_response_code(200)
 ml_mocker.with_response_documents_body_part(
-    DocumentsBodyPart(
+    BodyPart(
         **{
             "content-type": "application/zip",
             "content-disposition": "attachment; "
@@ -713,7 +713,7 @@ ml_mocker.with_response_documents_body_part(
     ),
 )
 ml_mocker.with_response_documents_body_part(
-    DocumentsBodyPart(
+    BodyPart(
         **{
             "content-type": "application/xml",
             "content-disposition": "attachment; "
@@ -726,7 +726,7 @@ ml_mocker.with_response_documents_body_part(
     ),
 )
 ml_mocker.with_response_documents_body_part(
-    DocumentsBodyPart(
+    BodyPart(
         **{
             "content-type": "application/vnd.marklogic-xdmp",
             "content-disposition": "attachment; "
@@ -738,7 +738,7 @@ ml_mocker.with_response_documents_body_part(
     ),
 )
 ml_mocker.with_response_documents_body_part(
-    DocumentsBodyPart(
+    BodyPart(
         **{
             "content-type": "application/json",
             "content-disposition": "attachment; "
@@ -753,7 +753,7 @@ ml_mocker.mock_get()
 
 
 @ml_mock
-def test_parse_multipart_mixed_response(client):
+def test_parse_multipart_mixed_response(ml):
     uris = [
         "/some/dir/doc1.xml",
         "/some/dir/doc2.json",
@@ -761,7 +761,7 @@ def test_parse_multipart_mixed_response(client):
         "/some/dir/doc4.zip",
     ]
 
-    resp = client.get_documents(uri=uris)
+    resp = ml.rest.documents.get(uris)
     parsed_resp = MLResponseParser.parse(resp)
 
     assert isinstance(parsed_resp, list)
@@ -784,7 +784,7 @@ def test_parse_multipart_mixed_response(client):
 
 
 @ml_mock
-def test_parse_text_multipart_mixed_response(client):
+def test_parse_text_multipart_mixed_response(ml):
     uris = [
         "/some/dir/doc1.xml",
         "/some/dir/doc2.json",
@@ -792,7 +792,7 @@ def test_parse_text_multipart_mixed_response(client):
         "/some/dir/doc4.zip",
     ]
 
-    resp = client.get_documents(uri=uris)
+    resp = ml.rest.documents.get(uris)
     parsed_resp = MLResponseParser.parse(resp, output_type=str)
 
     assert isinstance(parsed_resp, list)
@@ -815,7 +815,7 @@ def test_parse_text_multipart_mixed_response(client):
 
 
 @ml_mock
-def test_parse_bytes_multipart_mixed_response(client):
+def test_parse_bytes_multipart_mixed_response(ml):
     uris = [
         "/some/dir/doc1.xml",
         "/some/dir/doc2.json",
@@ -823,7 +823,7 @@ def test_parse_bytes_multipart_mixed_response(client):
         "/some/dir/doc4.zip",
     ]
 
-    resp = client.get_documents(uri=uris)
+    resp = ml.rest.documents.get(uris)
     parsed_resp = MLResponseParser.parse(resp, output_type=bytes)
 
     assert isinstance(parsed_resp, list)
@@ -846,7 +846,7 @@ def test_parse_bytes_multipart_mixed_response(client):
 
 
 @ml_mock
-def test_parse_with_headers_multipart_mixed_response(client):
+def test_parse_with_headers_multipart_mixed_response(ml):
     uris = [
         "/some/dir/doc1.xml",
         "/some/dir/doc2.json",
@@ -854,7 +854,7 @@ def test_parse_with_headers_multipart_mixed_response(client):
         "/some/dir/doc4.zip",
     ]
 
-    resp = client.get_documents(uri=uris)
+    resp = ml.rest.documents.get(uris)
     parsed_resp_list = MLResponseParser.parse_with_headers(resp)
 
     assert isinstance(parsed_resp_list, list)
@@ -902,7 +902,7 @@ def test_parse_with_headers_multipart_mixed_response(client):
 
 
 @ml_mock
-def test_parse_with_headers_text_multipart_mixed_response(client):
+def test_parse_with_headers_text_multipart_mixed_response(ml):
     uris = [
         "/some/dir/doc1.xml",
         "/some/dir/doc2.json",
@@ -910,7 +910,7 @@ def test_parse_with_headers_text_multipart_mixed_response(client):
         "/some/dir/doc4.zip",
     ]
 
-    resp = client.get_documents(uri=uris)
+    resp = ml.rest.documents.get(uris)
     parsed_resp_list = MLResponseParser.parse_with_headers(resp, output_type=str)
 
     assert isinstance(parsed_resp_list, list)
@@ -958,7 +958,7 @@ def test_parse_with_headers_text_multipart_mixed_response(client):
 
 
 @ml_mock
-def test_parse_with_headers_bytes_multipart_mixed_response(client):
+def test_parse_with_headers_bytes_multipart_mixed_response(ml):
     uris = [
         "/some/dir/doc1.xml",
         "/some/dir/doc2.json",
@@ -966,7 +966,7 @@ def test_parse_with_headers_bytes_multipart_mixed_response(client):
         "/some/dir/doc4.zip",
     ]
 
-    resp = client.get_documents(uri=uris)
+    resp = ml.rest.documents.get(uris)
     parsed_resp_list = MLResponseParser.parse_with_headers(resp, output_type=bytes)
 
     assert isinstance(parsed_resp_list, list)
@@ -1026,8 +1026,8 @@ ml_mocker.mock_post()
 
 
 @ml_mock
-def test_parse_single_unsupported_response(client):
-    resp = client.eval(xquery='cts:directory-query("/root/", "infinity")')
+def test_parse_single_unsupported_response(ml):
+    resp = ml.rest.eval.post(xquery='cts:directory-query("/root/", "infinity")')
     parsed_resp = MLResponseParser.parse(resp)
 
     assert isinstance(parsed_resp, bytes)
@@ -1035,8 +1035,8 @@ def test_parse_single_unsupported_response(client):
 
 
 @ml_mock
-def test_parse_text_single_unsupported_response(client):
-    resp = client.eval(xquery='cts:directory-query("/root/", "infinity")')
+def test_parse_text_single_unsupported_response(ml):
+    resp = ml.rest.eval.post(xquery='cts:directory-query("/root/", "infinity")')
     parsed_resp = MLResponseParser.parse(resp, output_type=str)
 
     assert isinstance(parsed_resp, str)
@@ -1044,8 +1044,8 @@ def test_parse_text_single_unsupported_response(client):
 
 
 @ml_mock
-def test_parse_bytes_single_unsupported_response(client):
-    resp = client.eval(xquery='cts:directory-query("/root/", "infinity")')
+def test_parse_bytes_single_unsupported_response(ml):
+    resp = ml.rest.eval.post(xquery='cts:directory-query("/root/", "infinity")')
     parsed_resp = MLResponseParser.parse(resp, output_type=bytes)
 
     assert isinstance(parsed_resp, bytes)
@@ -1053,8 +1053,8 @@ def test_parse_bytes_single_unsupported_response(client):
 
 
 @ml_mock
-def test_parse_with_headers_single_unsupported_response(client):
-    resp = client.eval(xquery='cts:directory-query("/root/", "infinity")')
+def test_parse_with_headers_single_unsupported_response(ml):
+    resp = ml.rest.eval.post(xquery='cts:directory-query("/root/", "infinity")')
     headers, parsed_resp = MLResponseParser.parse_with_headers(resp)
 
     assert isinstance(parsed_resp, bytes)
@@ -1066,8 +1066,8 @@ def test_parse_with_headers_single_unsupported_response(client):
 
 
 @ml_mock
-def test_parse_text_with_headers_single_unsupported_response(client):
-    resp = client.eval(xquery='cts:directory-query("/root/", "infinity")')
+def test_parse_text_with_headers_single_unsupported_response(ml):
+    resp = ml.rest.eval.post(xquery='cts:directory-query("/root/", "infinity")')
     headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=str)
 
     assert isinstance(parsed_resp, str)
@@ -1079,8 +1079,8 @@ def test_parse_text_with_headers_single_unsupported_response(client):
 
 
 @ml_mock
-def test_parse_bytes_with_headers_single_unsupported_response(client):
-    resp = client.eval(xquery='cts:directory-query("/root/", "infinity")')
+def test_parse_bytes_with_headers_single_unsupported_response(ml):
+    resp = ml.rest.eval.post(xquery='cts:directory-query("/root/", "infinity")')
     headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=bytes)
 
     assert isinstance(parsed_resp, bytes)
@@ -1101,8 +1101,8 @@ ml_mocker.mock_post()
 
 
 @ml_mock
-def test_parse_single_empty_response(client):
-    resp = client.eval(xquery="()")
+def test_parse_single_empty_response(ml):
+    resp = ml.rest.eval.post(xquery="()")
     parsed_resp = MLResponseParser.parse(resp)
 
     assert isinstance(parsed_resp, list)
@@ -1110,8 +1110,8 @@ def test_parse_single_empty_response(client):
 
 
 @ml_mock
-def test_parse_text_single_empty_response(client):
-    resp = client.eval(xquery="()")
+def test_parse_text_single_empty_response(ml):
+    resp = ml.rest.eval.post(xquery="()")
     parsed_resp = MLResponseParser.parse(resp, output_type=str)
 
     assert isinstance(parsed_resp, list)
@@ -1119,8 +1119,8 @@ def test_parse_text_single_empty_response(client):
 
 
 @ml_mock
-def test_parse_bytes_single_empty_response(client):
-    resp = client.eval(xquery="()")
+def test_parse_bytes_single_empty_response(ml):
+    resp = ml.rest.eval.post(xquery="()")
     parsed_resp = MLResponseParser.parse(resp, output_type=bytes)
 
     assert isinstance(parsed_resp, list)
@@ -1128,8 +1128,8 @@ def test_parse_bytes_single_empty_response(client):
 
 
 @ml_mock
-def test_parse_with_headers_single_empty_response(client):
-    resp = client.eval(xquery="()")
+def test_parse_with_headers_single_empty_response(ml):
+    resp = ml.rest.eval.post(xquery="()")
     headers, parsed_resp = MLResponseParser.parse_with_headers(resp)
 
     assert isinstance(parsed_resp, list)
@@ -1140,8 +1140,8 @@ def test_parse_with_headers_single_empty_response(client):
 
 
 @ml_mock
-def test_parse_text_with_headers_single_empty_response(client):
-    resp = client.eval(xquery="()")
+def test_parse_text_with_headers_single_empty_response(ml):
+    resp = ml.rest.eval.post(xquery="()")
     headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=str)
 
     assert isinstance(parsed_resp, list)
@@ -1152,8 +1152,8 @@ def test_parse_text_with_headers_single_empty_response(client):
 
 
 @ml_mock
-def test_parse_bytes_with_headers_single_empty_response(client):
-    resp = client.eval(xquery="()")
+def test_parse_bytes_with_headers_single_empty_response(ml):
+    resp = ml.rest.eval.post(xquery="()")
     headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=bytes)
 
     assert isinstance(parsed_resp, list)
@@ -1173,8 +1173,8 @@ ml_mocker.mock_post()
 
 
 @ml_mock
-def test_parse_single_plain_text_str_response(client):
-    resp = client.eval(xquery="'plain text'")
+def test_parse_single_plain_text_str_response(ml):
+    resp = ml.rest.eval.post(xquery="'plain text'")
     parsed_resp = MLResponseParser.parse(resp)
 
     assert isinstance(parsed_resp, str)
@@ -1182,8 +1182,8 @@ def test_parse_single_plain_text_str_response(client):
 
 
 @ml_mock
-def test_parse_text_single_plain_text_str_response(client):
-    resp = client.eval(xquery="'plain text'")
+def test_parse_text_single_plain_text_str_response(ml):
+    resp = ml.rest.eval.post(xquery="'plain text'")
     parsed_resp = MLResponseParser.parse(resp, output_type=str)
 
     assert isinstance(parsed_resp, str)
@@ -1191,8 +1191,8 @@ def test_parse_text_single_plain_text_str_response(client):
 
 
 @ml_mock
-def test_parse_bytes_single_plain_text_str_response(client):
-    resp = client.eval(xquery="'plain text'")
+def test_parse_bytes_single_plain_text_str_response(ml):
+    resp = ml.rest.eval.post(xquery="'plain text'")
     parsed_resp = MLResponseParser.parse(resp, output_type=bytes)
 
     assert isinstance(parsed_resp, bytes)
@@ -1200,8 +1200,8 @@ def test_parse_bytes_single_plain_text_str_response(client):
 
 
 @ml_mock
-def test_parse_with_headers_single_plain_text_str_response(client):
-    resp = client.eval(xquery="'plain text'")
+def test_parse_with_headers_single_plain_text_str_response(ml):
+    resp = ml.rest.eval.post(xquery="'plain text'")
     headers, parsed_resp = MLResponseParser.parse_with_headers(resp)
 
     assert isinstance(parsed_resp, str)
@@ -1213,8 +1213,8 @@ def test_parse_with_headers_single_plain_text_str_response(client):
 
 
 @ml_mock
-def test_parse_text_with_headers_single_plain_text_str_response(client):
-    resp = client.eval(xquery="'plain text'")
+def test_parse_text_with_headers_single_plain_text_str_response(ml):
+    resp = ml.rest.eval.post(xquery="'plain text'")
     headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=str)
 
     assert isinstance(parsed_resp, str)
@@ -1226,8 +1226,8 @@ def test_parse_text_with_headers_single_plain_text_str_response(client):
 
 
 @ml_mock
-def test_parse_bytes_with_headers_single_plain_text_str_response(client):
-    resp = client.eval(xquery="'plain text'")
+def test_parse_bytes_with_headers_single_plain_text_str_response(ml):
+    resp = ml.rest.eval.post(xquery="'plain text'")
     headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=bytes)
 
     assert isinstance(parsed_resp, bytes)
@@ -1248,8 +1248,8 @@ ml_mocker.mock_post()
 
 
 @ml_mock
-def test_parse_single_plain_text_int_response(client):
-    resp = client.eval(xquery="1")
+def test_parse_single_plain_text_int_response(ml):
+    resp = ml.rest.eval.post(xquery="1")
     parsed_resp = MLResponseParser.parse(resp)
 
     assert isinstance(parsed_resp, int)
@@ -1257,8 +1257,8 @@ def test_parse_single_plain_text_int_response(client):
 
 
 @ml_mock
-def test_parse_text_single_plain_text_int_response(client):
-    resp = client.eval(xquery="1")
+def test_parse_text_single_plain_text_int_response(ml):
+    resp = ml.rest.eval.post(xquery="1")
     parsed_resp = MLResponseParser.parse(resp, output_type=str)
 
     assert isinstance(parsed_resp, str)
@@ -1266,8 +1266,8 @@ def test_parse_text_single_plain_text_int_response(client):
 
 
 @ml_mock
-def test_parse_bytes_single_plain_text_int_response(client):
-    resp = client.eval(xquery="1")
+def test_parse_bytes_single_plain_text_int_response(ml):
+    resp = ml.rest.eval.post(xquery="1")
     parsed_resp = MLResponseParser.parse(resp, output_type=bytes)
 
     assert isinstance(parsed_resp, bytes)
@@ -1275,8 +1275,8 @@ def test_parse_bytes_single_plain_text_int_response(client):
 
 
 @ml_mock
-def test_parse_with_headers_single_plain_text_int_response(client):
-    resp = client.eval(xquery="1")
+def test_parse_with_headers_single_plain_text_int_response(ml):
+    resp = ml.rest.eval.post(xquery="1")
     headers, parsed_resp = MLResponseParser.parse_with_headers(resp)
 
     assert isinstance(parsed_resp, int)
@@ -1288,8 +1288,8 @@ def test_parse_with_headers_single_plain_text_int_response(client):
 
 
 @ml_mock
-def test_parse_text_with_headers_single_plain_text_int_response(client):
-    resp = client.eval(xquery="1")
+def test_parse_text_with_headers_single_plain_text_int_response(ml):
+    resp = ml.rest.eval.post(xquery="1")
     headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=str)
 
     assert isinstance(parsed_resp, str)
@@ -1301,8 +1301,8 @@ def test_parse_text_with_headers_single_plain_text_int_response(client):
 
 
 @ml_mock
-def test_parse_bytes_with_headers_single_plain_text_int_response(client):
-    resp = client.eval(xquery="1")
+def test_parse_bytes_with_headers_single_plain_text_int_response(ml):
+    resp = ml.rest.eval.post(xquery="1")
     headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=bytes)
 
     assert isinstance(parsed_resp, bytes)
@@ -1323,8 +1323,8 @@ ml_mocker.mock_post()
 
 
 @ml_mock
-def test_parse_single_plain_text_decimal_response(client):
-    resp = client.eval(xquery="1.1")
+def test_parse_single_plain_text_decimal_response(ml):
+    resp = ml.rest.eval.post(xquery="1.1")
     parsed_resp = MLResponseParser.parse(resp)
 
     assert isinstance(parsed_resp, float)
@@ -1332,8 +1332,8 @@ def test_parse_single_plain_text_decimal_response(client):
 
 
 @ml_mock
-def test_parse_text_single_plain_text_decimal_response(client):
-    resp = client.eval(xquery="1.1")
+def test_parse_text_single_plain_text_decimal_response(ml):
+    resp = ml.rest.eval.post(xquery="1.1")
     parsed_resp = MLResponseParser.parse(resp, output_type=str)
 
     assert isinstance(parsed_resp, str)
@@ -1341,8 +1341,8 @@ def test_parse_text_single_plain_text_decimal_response(client):
 
 
 @ml_mock
-def test_parse_bytes_single_plain_text_decimal_response(client):
-    resp = client.eval(xquery="1.1")
+def test_parse_bytes_single_plain_text_decimal_response(ml):
+    resp = ml.rest.eval.post(xquery="1.1")
     parsed_resp = MLResponseParser.parse(resp, output_type=bytes)
 
     assert isinstance(parsed_resp, bytes)
@@ -1350,8 +1350,8 @@ def test_parse_bytes_single_plain_text_decimal_response(client):
 
 
 @ml_mock
-def test_parse_with_headers_single_plain_text_decimal_response(client):
-    resp = client.eval(xquery="1.1")
+def test_parse_with_headers_single_plain_text_decimal_response(ml):
+    resp = ml.rest.eval.post(xquery="1.1")
     headers, parsed_resp = MLResponseParser.parse_with_headers(resp)
 
     assert isinstance(parsed_resp, float)
@@ -1363,8 +1363,8 @@ def test_parse_with_headers_single_plain_text_decimal_response(client):
 
 
 @ml_mock
-def test_parse_text_with_headers_single_plain_text_decimal_response(client):
-    resp = client.eval(xquery="1.1")
+def test_parse_text_with_headers_single_plain_text_decimal_response(ml):
+    resp = ml.rest.eval.post(xquery="1.1")
     headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=str)
 
     assert isinstance(parsed_resp, str)
@@ -1376,8 +1376,8 @@ def test_parse_text_with_headers_single_plain_text_decimal_response(client):
 
 
 @ml_mock
-def test_parse_bytes_with_headers_single_plain_text_decimal_response(client):
-    resp = client.eval(xquery="1.1")
+def test_parse_bytes_with_headers_single_plain_text_decimal_response(ml):
+    resp = ml.rest.eval.post(xquery="1.1")
     headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=bytes)
 
     assert isinstance(parsed_resp, bytes)
@@ -1398,8 +1398,8 @@ ml_mocker.mock_post()
 
 
 @ml_mock
-def test_parse_single_plain_text_boolean_response(client):
-    resp = client.eval(xquery="fn:true()")
+def test_parse_single_plain_text_boolean_response(ml):
+    resp = ml.rest.eval.post(xquery="fn:true()")
     parsed_resp = MLResponseParser.parse(resp)
 
     assert isinstance(parsed_resp, bool)
@@ -1407,8 +1407,8 @@ def test_parse_single_plain_text_boolean_response(client):
 
 
 @ml_mock
-def test_parse_text_single_plain_text_boolean_response(client):
-    resp = client.eval(xquery="fn:true()")
+def test_parse_text_single_plain_text_boolean_response(ml):
+    resp = ml.rest.eval.post(xquery="fn:true()")
     parsed_resp = MLResponseParser.parse(resp, output_type=str)
 
     assert isinstance(parsed_resp, str)
@@ -1416,8 +1416,8 @@ def test_parse_text_single_plain_text_boolean_response(client):
 
 
 @ml_mock
-def test_parse_bytes_single_plain_text_boolean_response(client):
-    resp = client.eval(xquery="fn:true()")
+def test_parse_bytes_single_plain_text_boolean_response(ml):
+    resp = ml.rest.eval.post(xquery="fn:true()")
     parsed_resp = MLResponseParser.parse(resp, output_type=bytes)
 
     assert isinstance(parsed_resp, bytes)
@@ -1425,8 +1425,8 @@ def test_parse_bytes_single_plain_text_boolean_response(client):
 
 
 @ml_mock
-def test_parse_with_headers_single_plain_text_boolean_response(client):
-    resp = client.eval(xquery="fn:true()")
+def test_parse_with_headers_single_plain_text_boolean_response(ml):
+    resp = ml.rest.eval.post(xquery="fn:true()")
     headers, parsed_resp = MLResponseParser.parse_with_headers(resp)
 
     assert isinstance(parsed_resp, bool)
@@ -1438,8 +1438,8 @@ def test_parse_with_headers_single_plain_text_boolean_response(client):
 
 
 @ml_mock
-def test_parse_text_with_headers_single_plain_text_boolean_response(client):
-    resp = client.eval(xquery="fn:true()")
+def test_parse_text_with_headers_single_plain_text_boolean_response(ml):
+    resp = ml.rest.eval.post(xquery="fn:true()")
     headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=str)
 
     assert isinstance(parsed_resp, str)
@@ -1451,8 +1451,8 @@ def test_parse_text_with_headers_single_plain_text_boolean_response(client):
 
 
 @ml_mock
-def test_parse_bytes_with_headers_single_plain_text_boolean_response(client):
-    resp = client.eval(xquery="fn:true()")
+def test_parse_bytes_with_headers_single_plain_text_boolean_response(ml):
+    resp = ml.rest.eval.post(xquery="fn:true()")
     headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=bytes)
 
     assert isinstance(parsed_resp, bytes)
@@ -1473,8 +1473,8 @@ ml_mocker.mock_post()
 
 
 @ml_mock
-def test_parse_single_plain_text_date_response(client):
-    resp = client.eval(xquery="fn:current-date()")
+def test_parse_single_plain_text_date_response(ml):
+    resp = ml.rest.eval.post(xquery="fn:current-date()")
     parsed_resp = MLResponseParser.parse(resp)
 
     assert isinstance(parsed_resp, date)
@@ -1482,8 +1482,8 @@ def test_parse_single_plain_text_date_response(client):
 
 
 @ml_mock
-def test_parse_text_single_plain_text_date_response(client):
-    resp = client.eval(xquery="fn:current-date()")
+def test_parse_text_single_plain_text_date_response(ml):
+    resp = ml.rest.eval.post(xquery="fn:current-date()")
     parsed_resp = MLResponseParser.parse(resp, output_type=str)
 
     assert isinstance(parsed_resp, str)
@@ -1491,8 +1491,8 @@ def test_parse_text_single_plain_text_date_response(client):
 
 
 @ml_mock
-def test_parse_bytes_single_plain_text_date_response(client):
-    resp = client.eval(xquery="fn:current-date()")
+def test_parse_bytes_single_plain_text_date_response(ml):
+    resp = ml.rest.eval.post(xquery="fn:current-date()")
     parsed_resp = MLResponseParser.parse(resp, output_type=bytes)
 
     assert isinstance(parsed_resp, bytes)
@@ -1500,8 +1500,8 @@ def test_parse_bytes_single_plain_text_date_response(client):
 
 
 @ml_mock
-def test_parse_with_headers_single_plain_text_date_response(client):
-    resp = client.eval(xquery="fn:current-date()")
+def test_parse_with_headers_single_plain_text_date_response(ml):
+    resp = ml.rest.eval.post(xquery="fn:current-date()")
     headers, parsed_resp = MLResponseParser.parse_with_headers(resp)
 
     assert isinstance(parsed_resp, date)
@@ -1513,8 +1513,8 @@ def test_parse_with_headers_single_plain_text_date_response(client):
 
 
 @ml_mock
-def test_parse_text_with_headers_single_plain_text_date_response(client):
-    resp = client.eval(xquery="fn:current-date()")
+def test_parse_text_with_headers_single_plain_text_date_response(ml):
+    resp = ml.rest.eval.post(xquery="fn:current-date()")
     headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=str)
 
     assert isinstance(parsed_resp, str)
@@ -1526,8 +1526,8 @@ def test_parse_text_with_headers_single_plain_text_date_response(client):
 
 
 @ml_mock
-def test_parse_bytes_with_headers_single_plain_text_date_response(client):
-    resp = client.eval(xquery="fn:current-date()")
+def test_parse_bytes_with_headers_single_plain_text_date_response(ml):
+    resp = ml.rest.eval.post(xquery="fn:current-date()")
     headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=bytes)
 
     assert isinstance(parsed_resp, bytes)
@@ -1548,8 +1548,8 @@ ml_mocker.mock_post()
 
 
 @ml_mock
-def test_parse_single_plain_text_date_time_response(client):
-    resp = client.eval(xquery="fn:current-dateTime()")
+def test_parse_single_plain_text_date_time_response(ml):
+    resp = ml.rest.eval.post(xquery="fn:current-dateTime()")
     parsed_resp = MLResponseParser.parse(resp)
 
     assert isinstance(parsed_resp, datetime)
@@ -1560,8 +1560,8 @@ def test_parse_single_plain_text_date_time_response(client):
 
 
 @ml_mock
-def test_parse_text_single_plain_text_date_time_response(client):
-    resp = client.eval(xquery="fn:current-dateTime()")
+def test_parse_text_single_plain_text_date_time_response(ml):
+    resp = ml.rest.eval.post(xquery="fn:current-dateTime()")
     parsed_resp = MLResponseParser.parse(resp, output_type=str)
 
     assert isinstance(parsed_resp, str)
@@ -1569,8 +1569,8 @@ def test_parse_text_single_plain_text_date_time_response(client):
 
 
 @ml_mock
-def test_parse_bytes_single_plain_text_date_time_response(client):
-    resp = client.eval(xquery="fn:current-dateTime()")
+def test_parse_bytes_single_plain_text_date_time_response(ml):
+    resp = ml.rest.eval.post(xquery="fn:current-dateTime()")
     parsed_resp = MLResponseParser.parse(resp, output_type=bytes)
 
     assert isinstance(parsed_resp, bytes)
@@ -1578,8 +1578,8 @@ def test_parse_bytes_single_plain_text_date_time_response(client):
 
 
 @ml_mock
-def test_parse_with_headers_single_plain_text_date_time_response(client):
-    resp = client.eval(xquery="fn:current-dateTime()")
+def test_parse_with_headers_single_plain_text_date_time_response(ml):
+    resp = ml.rest.eval.post(xquery="fn:current-dateTime()")
     headers, parsed_resp = MLResponseParser.parse_with_headers(resp)
 
     assert isinstance(parsed_resp, datetime)
@@ -1594,8 +1594,8 @@ def test_parse_with_headers_single_plain_text_date_time_response(client):
 
 
 @ml_mock
-def test_parse_text_with_headers_single_plain_text_date_time_response(client):
-    resp = client.eval(xquery="fn:current-dateTime()")
+def test_parse_text_with_headers_single_plain_text_date_time_response(ml):
+    resp = ml.rest.eval.post(xquery="fn:current-dateTime()")
     headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=str)
 
     assert isinstance(parsed_resp, str)
@@ -1607,8 +1607,8 @@ def test_parse_text_with_headers_single_plain_text_date_time_response(client):
 
 
 @ml_mock
-def test_parse_bytes_with_headers_single_plain_text_date_time_response(client):
-    resp = client.eval(xquery="fn:current-dateTime()")
+def test_parse_bytes_with_headers_single_plain_text_date_time_response(ml):
+    resp = ml.rest.eval.post(xquery="fn:current-dateTime()")
     headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=bytes)
 
     assert isinstance(parsed_resp, bytes)
@@ -1641,7 +1641,7 @@ ml_mocker.mock_post()
 
 
 @ml_mock
-def test_parse_single_map_response(client):
+def test_parse_single_map_response(ml):
     xqy = (
         "map:map() "
         '=> map:with("str", "value") '
@@ -1650,7 +1650,7 @@ def test_parse_single_map_response(client):
         '=> map:with("float", 1.1) '
         '=> map:with("bool", fn:true())'
     )
-    resp = client.eval(xquery=xqy)
+    resp = ml.rest.eval.post(xquery=xqy)
     parsed_resp = MLResponseParser.parse(resp)
 
     assert isinstance(parsed_resp, dict)
@@ -1664,7 +1664,7 @@ def test_parse_single_map_response(client):
 
 
 @ml_mock
-def test_parse_text_single_map_response(client):
+def test_parse_text_single_map_response(ml):
     xqy = (
         "map:map() "
         '=> map:with("str", "value") '
@@ -1673,7 +1673,7 @@ def test_parse_text_single_map_response(client):
         '=> map:with("float", 1.1) '
         '=> map:with("bool", fn:true())'
     )
-    resp = client.eval(xquery=xqy)
+    resp = ml.rest.eval.post(xquery=xqy)
     parsed_resp = MLResponseParser.parse(resp, output_type=str)
 
     serialized_map = '{"float":1.1, "int":1, "bool":true, "str":"value", "int_str":"1"}'
@@ -1682,7 +1682,7 @@ def test_parse_text_single_map_response(client):
 
 
 @ml_mock
-def test_parse_bytes_single_map_response(client):
+def test_parse_bytes_single_map_response(ml):
     xqy = (
         "map:map() "
         '=> map:with("str", "value") '
@@ -1691,7 +1691,7 @@ def test_parse_bytes_single_map_response(client):
         '=> map:with("float", 1.1) '
         '=> map:with("bool", fn:true())'
     )
-    resp = client.eval(xquery=xqy)
+    resp = ml.rest.eval.post(xquery=xqy)
     parsed_resp = MLResponseParser.parse(resp, output_type=bytes)
 
     serialized_map = '{"float":1.1, "int":1, "bool":true, "str":"value", "int_str":"1"}'
@@ -1700,7 +1700,7 @@ def test_parse_bytes_single_map_response(client):
 
 
 @ml_mock
-def test_parse_with_headers_single_map_response(client):
+def test_parse_with_headers_single_map_response(ml):
     xqy = (
         "map:map() "
         '=> map:with("str", "value") '
@@ -1709,7 +1709,7 @@ def test_parse_with_headers_single_map_response(client):
         '=> map:with("float", 1.1) '
         '=> map:with("bool", fn:true())'
     )
-    resp = client.eval(xquery=xqy)
+    resp = ml.rest.eval.post(xquery=xqy)
     headers, parsed_resp = MLResponseParser.parse_with_headers(resp)
 
     assert isinstance(parsed_resp, dict)
@@ -1727,7 +1727,7 @@ def test_parse_with_headers_single_map_response(client):
 
 
 @ml_mock
-def test_parse_text_with_headers_single_map_response(client):
+def test_parse_text_with_headers_single_map_response(ml):
     xqy = (
         "map:map() "
         '=> map:with("str", "value") '
@@ -1736,7 +1736,7 @@ def test_parse_text_with_headers_single_map_response(client):
         '=> map:with("float", 1.1) '
         '=> map:with("bool", fn:true())'
     )
-    resp = client.eval(xquery=xqy)
+    resp = ml.rest.eval.post(xquery=xqy)
     headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=str)
 
     serialized_map = '{"float":1.1, "int":1, "bool":true, "str":"value", "int_str":"1"}'
@@ -1749,7 +1749,7 @@ def test_parse_text_with_headers_single_map_response(client):
 
 
 @ml_mock
-def test_parse_bytes_with_headers_single_map_response(client):
+def test_parse_bytes_with_headers_single_map_response(ml):
     xqy = (
         "map:map() "
         '=> map:with("str", "value") '
@@ -1758,7 +1758,7 @@ def test_parse_bytes_with_headers_single_map_response(client):
         '=> map:with("float", 1.1) '
         '=> map:with("bool", fn:true())'
     )
-    resp = client.eval(xquery=xqy)
+    resp = ml.rest.eval.post(xquery=xqy)
     headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=bytes)
 
     serialized_map = '{"float":1.1, "int":1, "bool":true, "str":"value", "int_str":"1"}'
@@ -1792,7 +1792,7 @@ ml_mocker.mock_post()
 
 
 @ml_mock
-def test_parse_single_json_response(client):
+def test_parse_single_json_response(ml):
     xqy = (
         "json:object() "
         '=> map:with("str", "value") '
@@ -1801,7 +1801,7 @@ def test_parse_single_json_response(client):
         '=> map:with("float", 1.1) '
         '=> map:with("bool", fn:true())'
     )
-    resp = client.eval(xquery=xqy)
+    resp = ml.rest.eval.post(xquery=xqy)
     parsed_resp = MLResponseParser.parse(resp)
 
     assert isinstance(parsed_resp, dict)
@@ -1815,7 +1815,7 @@ def test_parse_single_json_response(client):
 
 
 @ml_mock
-def test_parse_text_single_json_response(client):
+def test_parse_text_single_json_response(ml):
     xqy = (
         "json:object() "
         '=> map:with("str", "value") '
@@ -1824,7 +1824,7 @@ def test_parse_text_single_json_response(client):
         '=> map:with("float", 1.1) '
         '=> map:with("bool", fn:true())'
     )
-    resp = client.eval(xquery=xqy)
+    resp = ml.rest.eval.post(xquery=xqy)
     parsed_resp = MLResponseParser.parse(resp, output_type=str)
 
     serialized_map = '{"float":1.1, "int":1, "bool":true, "str":"value", "int_str":"1"}'
@@ -1833,7 +1833,7 @@ def test_parse_text_single_json_response(client):
 
 
 @ml_mock
-def test_parse_bytes_single_json_response(client):
+def test_parse_bytes_single_json_response(ml):
     xqy = (
         "json:object() "
         '=> map:with("str", "value") '
@@ -1842,7 +1842,7 @@ def test_parse_bytes_single_json_response(client):
         '=> map:with("float", 1.1) '
         '=> map:with("bool", fn:true())'
     )
-    resp = client.eval(xquery=xqy)
+    resp = ml.rest.eval.post(xquery=xqy)
     parsed_resp = MLResponseParser.parse(resp, output_type=bytes)
 
     serialized_map = '{"float":1.1, "int":1, "bool":true, "str":"value", "int_str":"1"}'
@@ -1851,7 +1851,7 @@ def test_parse_bytes_single_json_response(client):
 
 
 @ml_mock
-def test_parse_with_headers_single_json_response(client):
+def test_parse_with_headers_single_json_response(ml):
     xqy = (
         "json:object() "
         '=> map:with("str", "value") '
@@ -1860,7 +1860,7 @@ def test_parse_with_headers_single_json_response(client):
         '=> map:with("float", 1.1) '
         '=> map:with("bool", fn:true())'
     )
-    resp = client.eval(xquery=xqy)
+    resp = ml.rest.eval.post(xquery=xqy)
     headers, parsed_resp = MLResponseParser.parse_with_headers(resp)
 
     assert isinstance(parsed_resp, dict)
@@ -1878,7 +1878,7 @@ def test_parse_with_headers_single_json_response(client):
 
 
 @ml_mock
-def test_parse_text_with_headers_single_json_response(client):
+def test_parse_text_with_headers_single_json_response(ml):
     xqy = (
         "json:object() "
         '=> map:with("str", "value") '
@@ -1887,7 +1887,7 @@ def test_parse_text_with_headers_single_json_response(client):
         '=> map:with("float", 1.1) '
         '=> map:with("bool", fn:true())'
     )
-    resp = client.eval(xquery=xqy)
+    resp = ml.rest.eval.post(xquery=xqy)
     headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=str)
 
     serialized_map = '{"float":1.1, "int":1, "bool":true, "str":"value", "int_str":"1"}'
@@ -1900,7 +1900,7 @@ def test_parse_text_with_headers_single_json_response(client):
 
 
 @ml_mock
-def test_parse_bytes_with_headers_single_json_response(client):
+def test_parse_bytes_with_headers_single_json_response(ml):
     xqy = (
         "json:object() "
         '=> map:with("str", "value") '
@@ -1909,7 +1909,7 @@ def test_parse_bytes_with_headers_single_json_response(client):
         '=> map:with("float", 1.1) '
         '=> map:with("bool", fn:true())'
     )
-    resp = client.eval(xquery=xqy)
+    resp = ml.rest.eval.post(xquery=xqy)
     headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=bytes)
 
     serialized_map = '{"float":1.1, "int":1, "bool":true, "str":"value", "int_str":"1"}'
@@ -1933,8 +1933,9 @@ ml_mocker.mock_post()
 
 
 @ml_mock
-def test_parse_single_json_array_response(client):
-    resp = client.eval(xquery='("value", "1", 1, 1.1, fn:true()) => json:to-array()')
+def test_parse_single_json_array_response(ml):
+    xq = '("value", "1", 1, 1.1, fn:true()) => json:to-array()'
+    resp = ml.rest.eval.post(xquery=xq)
     parsed_resp = MLResponseParser.parse(resp)
 
     assert isinstance(parsed_resp, list)
@@ -1942,8 +1943,9 @@ def test_parse_single_json_array_response(client):
 
 
 @ml_mock
-def test_parse_text_single_json_array_response(client):
-    resp = client.eval(xquery='("value", "1", 1, 1.1, fn:true()) => json:to-array()')
+def test_parse_text_single_json_array_response(ml):
+    xq = '("value", "1", 1, 1.1, fn:true()) => json:to-array()'
+    resp = ml.rest.eval.post(xquery=xq)
     parsed_resp = MLResponseParser.parse(resp, output_type=str)
 
     assert isinstance(parsed_resp, str)
@@ -1951,8 +1953,9 @@ def test_parse_text_single_json_array_response(client):
 
 
 @ml_mock
-def test_parse_bytes_single_json_array_response(client):
-    resp = client.eval(xquery='("value", "1", 1, 1.1, fn:true()) => json:to-array()')
+def test_parse_bytes_single_json_array_response(ml):
+    xq = '("value", "1", 1, 1.1, fn:true()) => json:to-array()'
+    resp = ml.rest.eval.post(xquery=xq)
     parsed_resp = MLResponseParser.parse(resp, output_type=bytes)
 
     assert isinstance(parsed_resp, bytes)
@@ -1960,8 +1963,9 @@ def test_parse_bytes_single_json_array_response(client):
 
 
 @ml_mock
-def test_parse_with_headers_single_json_array_response(client):
-    resp = client.eval(xquery='("value", "1", 1, 1.1, fn:true()) => json:to-array()')
+def test_parse_with_headers_single_json_array_response(ml):
+    xq = '("value", "1", 1, 1.1, fn:true()) => json:to-array()'
+    resp = ml.rest.eval.post(xquery=xq)
     headers, parsed_resp = MLResponseParser.parse_with_headers(resp)
 
     assert isinstance(parsed_resp, list)
@@ -1973,8 +1977,9 @@ def test_parse_with_headers_single_json_array_response(client):
 
 
 @ml_mock
-def test_parse_text_with_headers_single_json_array_response(client):
-    resp = client.eval(xquery='("value", "1", 1, 1.1, fn:true()) => json:to-array()')
+def test_parse_text_with_headers_single_json_array_response(ml):
+    xq = '("value", "1", 1, 1.1, fn:true()) => json:to-array()'
+    resp = ml.rest.eval.post(xquery=xq)
     headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=str)
 
     assert isinstance(parsed_resp, str)
@@ -1986,8 +1991,9 @@ def test_parse_text_with_headers_single_json_array_response(client):
 
 
 @ml_mock
-def test_parse_bytes_with_headers_single_json_array_response(client):
-    resp = client.eval(xquery='("value", "1", 1, 1.1, fn:true()) => json:to-array()')
+def test_parse_bytes_with_headers_single_json_array_response(ml):
+    xq = '("value", "1", 1, 1.1, fn:true()) => json:to-array()'
+    resp = ml.rest.eval.post(xquery=xq)
     headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=bytes)
 
     assert isinstance(parsed_resp, bytes)
@@ -2011,8 +2017,8 @@ ml_mocker.mock_post()
 
 
 @ml_mock
-def test_parse_single_xml_document_node_response(client):
-    resp = client.eval(xquery="document { element root {} }")
+def test_parse_single_xml_document_node_response(ml):
+    resp = ml.rest.eval.post(xquery="document { element root {} }")
     parsed_resp = MLResponseParser.parse(resp)
 
     assert isinstance(parsed_resp, ElemTree.ElementTree)
@@ -2022,8 +2028,8 @@ def test_parse_single_xml_document_node_response(client):
 
 
 @ml_mock
-def test_parse_text_single_xml_document_node_response(client):
-    resp = client.eval(xquery="document { element root {} }")
+def test_parse_text_single_xml_document_node_response(ml):
+    resp = ml.rest.eval.post(xquery="document { element root {} }")
     parsed_resp = MLResponseParser.parse(resp, output_type=str)
 
     assert isinstance(parsed_resp, str)
@@ -2031,8 +2037,8 @@ def test_parse_text_single_xml_document_node_response(client):
 
 
 @ml_mock
-def test_parse_bytes_single_xml_document_node_response(client):
-    resp = client.eval(xquery="document { element root {} }")
+def test_parse_bytes_single_xml_document_node_response(ml):
+    resp = ml.rest.eval.post(xquery="document { element root {} }")
     parsed_resp = MLResponseParser.parse(resp, output_type=bytes)
 
     assert isinstance(parsed_resp, bytes)
@@ -2040,8 +2046,8 @@ def test_parse_bytes_single_xml_document_node_response(client):
 
 
 @ml_mock
-def test_parse_with_headers_single_xml_document_node_response(client):
-    resp = client.eval(xquery="document { element root {} }")
+def test_parse_with_headers_single_xml_document_node_response(ml):
+    resp = ml.rest.eval.post(xquery="document { element root {} }")
     headers, parsed_resp = MLResponseParser.parse_with_headers(resp)
 
     assert isinstance(parsed_resp, ElemTree.ElementTree)
@@ -2055,8 +2061,8 @@ def test_parse_with_headers_single_xml_document_node_response(client):
 
 
 @ml_mock
-def test_parse_text_with_headers_single_xml_document_node_response(client):
-    resp = client.eval(xquery="document { element root {} }")
+def test_parse_text_with_headers_single_xml_document_node_response(ml):
+    resp = ml.rest.eval.post(xquery="document { element root {} }")
     headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=str)
 
     assert isinstance(parsed_resp, str)
@@ -2068,8 +2074,8 @@ def test_parse_text_with_headers_single_xml_document_node_response(client):
 
 
 @ml_mock
-def test_parse_bytes_with_headers_single_xml_document_node_response(client):
-    resp = client.eval(xquery="document { element root {} }")
+def test_parse_bytes_with_headers_single_xml_document_node_response(ml):
+    resp = ml.rest.eval.post(xquery="document { element root {} }")
     headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=bytes)
 
     assert isinstance(parsed_resp, bytes)
@@ -2090,8 +2096,8 @@ ml_mocker.mock_post()
 
 
 @ml_mock
-def test_parse_single_xml_element_response(client):
-    resp = client.eval(xquery="element root {}")
+def test_parse_single_xml_element_response(ml):
+    resp = ml.rest.eval.post(xquery="element root {}")
     parsed_resp = MLResponseParser.parse(resp)
 
     assert isinstance(parsed_resp, ElemTree.Element)
@@ -2101,8 +2107,8 @@ def test_parse_single_xml_element_response(client):
 
 
 @ml_mock
-def test_parse_text_single_xml_element_response(client):
-    resp = client.eval(xquery="element root {}")
+def test_parse_text_single_xml_element_response(ml):
+    resp = ml.rest.eval.post(xquery="element root {}")
     parsed_resp = MLResponseParser.parse(resp, output_type=str)
 
     assert isinstance(parsed_resp, str)
@@ -2110,8 +2116,8 @@ def test_parse_text_single_xml_element_response(client):
 
 
 @ml_mock
-def test_parse_bytes_single_xml_element_response(client):
-    resp = client.eval(xquery="element root {}")
+def test_parse_bytes_single_xml_element_response(ml):
+    resp = ml.rest.eval.post(xquery="element root {}")
     parsed_resp = MLResponseParser.parse(resp, output_type=bytes)
 
     assert isinstance(parsed_resp, bytes)
@@ -2119,8 +2125,8 @@ def test_parse_bytes_single_xml_element_response(client):
 
 
 @ml_mock
-def test_parse_with_headers_single_xml_element_response(client):
-    resp = client.eval(xquery="element root {}")
+def test_parse_with_headers_single_xml_element_response(ml):
+    resp = ml.rest.eval.post(xquery="element root {}")
     headers, parsed_resp = MLResponseParser.parse_with_headers(resp)
 
     assert isinstance(parsed_resp, ElemTree.Element)
@@ -2134,8 +2140,8 @@ def test_parse_with_headers_single_xml_element_response(client):
 
 
 @ml_mock
-def test_parse_text_with_headers_single_xml_element_response(client):
-    resp = client.eval(xquery="element root {}")
+def test_parse_text_with_headers_single_xml_element_response(ml):
+    resp = ml.rest.eval.post(xquery="element root {}")
     headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=str)
 
     assert isinstance(parsed_resp, str)
@@ -2147,8 +2153,8 @@ def test_parse_text_with_headers_single_xml_element_response(client):
 
 
 @ml_mock
-def test_parse_bytes_with_headers_single_xml_element_response(client):
-    resp = client.eval(xquery="element root {}")
+def test_parse_bytes_with_headers_single_xml_element_response(ml):
+    resp = ml.rest.eval.post(xquery="element root {}")
     headers, parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=bytes)
 
     assert isinstance(parsed_resp, bytes)
@@ -2175,9 +2181,9 @@ ml_mocker.mock_post()
 
 
 @ml_mock
-def test_parse_multiple_responses(client):
+def test_parse_multiple_responses(ml):
     xqy = '(cts:directory-query("/root/", "infinity"), (), "plain text")'
-    resp = client.eval(xquery=xqy)
+    resp = ml.rest.eval.post(xquery=xqy)
     parsed_resp = MLResponseParser.parse(resp)
 
     assert isinstance(parsed_resp, list)
@@ -2188,9 +2194,9 @@ def test_parse_multiple_responses(client):
 
 
 @ml_mock
-def test_parse_text_multiple_responses(client):
+def test_parse_text_multiple_responses(ml):
     xqy = '(cts:directory-query("/root/", "infinity"), (), "plain text")'
-    resp = client.eval(xquery=xqy)
+    resp = ml.rest.eval.post(xquery=xqy)
     parsed_resp = MLResponseParser.parse(resp, output_type=str)
 
     assert isinstance(parsed_resp, list)
@@ -2201,9 +2207,9 @@ def test_parse_text_multiple_responses(client):
 
 
 @ml_mock
-def test_parse_bytes_multiple_responses(client):
+def test_parse_bytes_multiple_responses(ml):
     xqy = '(cts:directory-query("/root/", "infinity"), (), "plain text")'
-    resp = client.eval(xquery=xqy)
+    resp = ml.rest.eval.post(xquery=xqy)
     parsed_resp = MLResponseParser.parse(resp, output_type=bytes)
 
     assert isinstance(parsed_resp, list)
@@ -2214,9 +2220,9 @@ def test_parse_bytes_multiple_responses(client):
 
 
 @ml_mock
-def test_parse_with_headers_multiple_responses(client):
+def test_parse_with_headers_multiple_responses(ml):
     xqy = '(cts:directory-query("/root/", "infinity"), (), "plain text")'
-    resp = client.eval(xquery=xqy)
+    resp = ml.rest.eval.post(xquery=xqy)
     parsed_resp_with_headers = MLResponseParser.parse_with_headers(resp)
 
     assert isinstance(parsed_resp_with_headers, list)
@@ -2239,9 +2245,9 @@ def test_parse_with_headers_multiple_responses(client):
 
 
 @ml_mock
-def test_parse_text_with_headers_multiple_responses(client):
+def test_parse_text_with_headers_multiple_responses(ml):
     xqy = '(cts:directory-query("/root/", "infinity"), (), "plain text")'
-    resp = client.eval(xquery=xqy)
+    resp = ml.rest.eval.post(xquery=xqy)
     parsed_resp_with_headers = MLResponseParser.parse_with_headers(
         resp,
         output_type=str,
@@ -2267,9 +2273,9 @@ def test_parse_text_with_headers_multiple_responses(client):
 
 
 @ml_mock
-def test_parse_bytes_with_headers_multiple_responses(client):
+def test_parse_bytes_with_headers_multiple_responses(ml):
     xqy = '(cts:directory-query("/root/", "infinity"), (), "plain text")'
-    resp = client.eval(xquery=xqy)
+    resp = ml.rest.eval.post(xquery=xqy)
     parsed_resp_with_headers = MLResponseParser.parse_with_headers(
         resp,
         output_type=bytes,

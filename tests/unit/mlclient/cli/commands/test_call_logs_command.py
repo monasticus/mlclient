@@ -7,7 +7,7 @@ import pytest
 import respx
 from cleo.testers.command_tester import CommandTester
 
-from mlclient import MLConfiguration
+from mlclient import MLEnvironment
 from mlclient.cli import MLCLIentApplication
 from mlclient.exceptions import InvalidLogTypeError
 from tests.utils import resources as resources_utils
@@ -17,7 +17,7 @@ ENDPOINT = "/manage/v2/logs"
 
 
 @pytest.fixture(autouse=True)
-def ml_config_single_node() -> MLConfiguration:
+def ml_config_single_node() -> MLEnvironment:
     config = {
         "app-name": "my-marklogic-app",
         "host": "localhost",
@@ -38,11 +38,11 @@ def ml_config_single_node() -> MLConfiguration:
             },
         ],
     }
-    return MLConfiguration(**config)
+    return MLEnvironment(**config)
 
 
 @pytest.fixture(autouse=True)
-def ml_config_cluster() -> MLConfiguration:
+def ml_config_cluster() -> MLEnvironment:
     config = {
         "app-name": "my-marklogic-app",
         "host": "ml_cluster_node1",
@@ -63,7 +63,7 @@ def ml_config_cluster() -> MLConfiguration:
             },
         ],
     }
-    return MLConfiguration(**config)
+    return MLEnvironment(**config)
 
 
 @pytest.fixture(autouse=True)
@@ -77,17 +77,17 @@ def logs_list_response() -> dict:
 @pytest.fixture(autouse=True)
 def _setup(mocker, ml_config_single_node, ml_config_cluster):
     # Setup
-    original_method = MLConfiguration.from_environment
+    original_method = MLEnvironment.load
 
-    def config_from_environment(environment_name: str):
-        if environment_name == "test":
+    def load_env(env_name: str):
+        if env_name == "test":
             return ml_config_single_node
-        if environment_name == "test-cluster":
+        if env_name == "test-cluster":
             return ml_config_cluster
-        return original_method(environment_name)
+        return original_method(env_name)
 
-    target = "mlclient.ml_config.MLConfiguration.from_environment"
-    mocker.patch(target, side_effect=config_from_environment)
+    target = "mlclient.ml_environment.MLEnvironment.load"
+    mocker.patch(target, side_effect=load_env)
 
 
 @respx.mock
@@ -102,10 +102,9 @@ def test_command_call_logs_basic():
     ml_mocker.mock_get()
 
     tester = _get_tester("call logs")
-    tester.execute("-e test -a 8002")
+    tester.execute("-e test -s 8002")
 
     assert tester.command.option("environment") == "test"
-    assert tester.command.option("rest-server") is None
     assert tester.command.option("app-server") == "8002"
     assert tester.command.option("log-type") == "error"
     assert tester.command.option("from") is None
@@ -130,7 +129,6 @@ def test_command_call_logs_basic_without_app_server():
     tester.execute("-e test")
 
     assert tester.command.option("environment") == "test"
-    assert tester.command.option("rest-server") is None
     assert tester.command.option("app-server") is None
     assert tester.command.option("log-type") == "error"
     assert tester.command.option("from") is None
@@ -152,36 +150,10 @@ def test_command_call_logs_basic_using_named_app_server():
     ml_mocker.mock_get()
 
     tester = _get_tester("call logs")
-    tester.execute("-e test -a content")
+    tester.execute("-e test -s content")
 
     assert tester.command.option("environment") == "test"
-    assert tester.command.option("rest-server") is None
     assert tester.command.option("app-server") == "content"
-    assert tester.command.option("log-type") == "error"
-    assert tester.command.option("from") is None
-    assert tester.command.option("to") is None
-    assert tester.command.option("regex") is None
-    assert tester.command.option("host") is None
-    assert tester.command.option("list") is False
-
-
-@respx.mock
-def test_command_call_logs_custom_rest_server():
-    ml_mocker = MLRespXMocker(use_router=False)
-    ml_mocker.with_url(f"http://localhost:8002{ENDPOINT}")
-    ml_mocker.with_request_param("format", "json")
-    ml_mocker.with_request_param("filename", "8002_ErrorLog.txt")
-    ml_mocker.with_response_code(200)
-    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
-    ml_mocker.with_response_body(ml_mocker.error_logs_body([]))
-    ml_mocker.mock_get()
-
-    tester = _get_tester("call logs")
-    tester.execute("-e test -a 8002 -s manage")
-
-    assert tester.command.option("environment") == "test"
-    assert tester.command.option("rest-server") == "manage"
-    assert tester.command.option("app-server") == "8002"
     assert tester.command.option("log-type") == "error"
     assert tester.command.option("from") is None
     assert tester.command.option("to") is None
@@ -202,10 +174,9 @@ def test_command_call_logs_custom_log_type_error():
     ml_mocker.mock_get()
 
     tester = _get_tester("call logs")
-    tester.execute("-e test -a 8002 -l error")
+    tester.execute("-e test -s 8002 -l error")
 
     assert tester.command.option("environment") == "test"
-    assert tester.command.option("rest-server") is None
     assert tester.command.option("app-server") == "8002"
     assert tester.command.option("log-type") == "error"
     assert tester.command.option("from") is None
@@ -227,10 +198,9 @@ def test_command_call_logs_custom_log_type_access():
     ml_mocker.mock_get()
 
     tester = _get_tester("call logs")
-    tester.execute("-e test -a 8002 -l access")
+    tester.execute("-e test -s 8002 -l access")
 
     assert tester.command.option("environment") == "test"
-    assert tester.command.option("rest-server") is None
     assert tester.command.option("app-server") == "8002"
     assert tester.command.option("log-type") == "access"
     assert tester.command.option("from") is None
@@ -252,10 +222,9 @@ def test_command_call_logs_custom_log_type_request():
     ml_mocker.mock_get()
 
     tester = _get_tester("call logs")
-    tester.execute("-e test -a 8002 -l request")
+    tester.execute("-e test -s 8002 -l request")
 
     assert tester.command.option("environment") == "test"
-    assert tester.command.option("rest-server") is None
     assert tester.command.option("app-server") == "8002"
     assert tester.command.option("log-type") == "request"
     assert tester.command.option("from") is None
@@ -268,7 +237,7 @@ def test_command_call_logs_custom_log_type_request():
 def test_command_call_logs_custom_log_type_invalid():
     tester = _get_tester("call logs")
     with pytest.raises(InvalidLogTypeError) as err:
-        tester.execute("-e test -a 8002 -l invalid")
+        tester.execute("-e test -s 8002 -l invalid")
 
     expected_msg = "Invalid log type! Allowed values are: error, access, request."
     assert err.value.args[0] == expected_msg
@@ -287,10 +256,9 @@ def test_command_call_logs_from():
     ml_mocker.mock_get()
 
     tester = _get_tester("call logs")
-    tester.execute("-e test -a 8002 -f 1970-01-01")
+    tester.execute("-e test -s 8002 -f 1970-01-01")
 
     assert tester.command.option("environment") == "test"
-    assert tester.command.option("rest-server") is None
     assert tester.command.option("app-server") == "8002"
     assert tester.command.option("log-type") == "error"
     assert tester.command.option("from") == "1970-01-01"
@@ -313,10 +281,9 @@ def test_command_call_logs_to():
     ml_mocker.mock_get()
 
     tester = _get_tester("call logs")
-    tester.execute("-e test -a 8002 -t 1984-01-01")
+    tester.execute("-e test -s 8002 -t 1984-01-01")
 
     assert tester.command.option("environment") == "test"
-    assert tester.command.option("rest-server") is None
     assert tester.command.option("app-server") == "8002"
     assert tester.command.option("log-type") == "error"
     assert tester.command.option("from") is None
@@ -339,10 +306,9 @@ def test_command_call_logs_regex():
     ml_mocker.mock_get()
 
     tester = _get_tester("call logs")
-    tester.execute("-e test -a 8002 -r you-will-not-find-it")
+    tester.execute("-e test -s 8002 -r you-will-not-find-it")
 
     assert tester.command.option("environment") == "test"
-    assert tester.command.option("rest-server") is None
     assert tester.command.option("app-server") == "8002"
     assert tester.command.option("log-type") == "error"
     assert tester.command.option("from") is None
@@ -365,10 +331,9 @@ def test_command_call_logs_host():
     ml_mocker.mock_get()
 
     tester = _get_tester("call logs")
-    tester.execute("-e test -a 8002 -H some-host")
+    tester.execute("-e test -s 8002 -H some-host")
 
     assert tester.command.option("environment") == "test"
-    assert tester.command.option("rest-server") is None
     assert tester.command.option("app-server") == "8002"
     assert tester.command.option("log-type") == "error"
     assert tester.command.option("from") is None
@@ -396,7 +361,6 @@ def test_command_call_logs_list():
     tester.execute("-e test --list")
 
     assert tester.command.option("environment") == "test"
-    assert tester.command.option("rest-server") is None
     assert tester.command.option("app-server") is None
     assert tester.command.option("log-type") == "error"
     assert tester.command.option("from") is None
@@ -426,7 +390,7 @@ def test_command_call_logs_output_for_error_logs():
     ml_mocker.mock_get()
 
     tester = _get_tester("call logs")
-    tester.execute("-e test -a 8002")
+    tester.execute("-e test -s 8002")
     command_output = tester.io.fetch_output()
 
     assert tester.command.option("environment") == "test"
@@ -466,7 +430,7 @@ def test_command_call_logs_output_for_access_logs():
     ml_mocker.mock_get()
 
     tester = _get_tester("call logs")
-    tester.execute("-e test -a 8002 -l access")
+    tester.execute("-e test -s 8002 -l access")
     command_output = tester.io.fetch_output()
 
     assert tester.command.option("environment") == "test"
@@ -537,7 +501,7 @@ def test_command_call_logs_output_for_request_logs():
     ml_mocker.mock_get()
 
     tester = _get_tester("call logs")
-    tester.execute("-e test -a 8002 -l request")
+    tester.execute("-e test -s 8002 -l request")
     command_output = tester.io.fetch_output()
 
     assert tester.command.option("environment") == "test"
@@ -689,7 +653,7 @@ def test_command_call_logs_output_for_xml_logs():
     ml_mocker.mock_get()
 
     tester = _get_tester("call logs")
-    tester.execute("-e test -a 8002")
+    tester.execute("-e test -s 8002")
     command_output = tester.io.fetch_output()
 
     assert tester.command.option("environment") == "test"
@@ -714,7 +678,7 @@ def test_command_call_logs_output_for_xml_logs():
             "output-single-node-full.txt",
         ),
         (  # single node - logs list for a specific app server
-            "-e test -a manage --list",
+            "-e test -s manage --list",
             "localhost",
             "logs-list-response-single-node.json",
             "output-single-node-server.txt",
@@ -726,7 +690,7 @@ def test_command_call_logs_output_for_xml_logs():
             "output-single-node-full.txt",
         ),
         (  # single node - logs list for a host and a specific app server
-            "-e test -H localhost -a manage --list",
+            "-e test -H localhost -s manage --list",
             "localhost",
             "logs-list-response-single-node.json",
             "output-single-node-server.txt",
@@ -738,7 +702,7 @@ def test_command_call_logs_output_for_xml_logs():
             "output-cluster-full.txt",
         ),
         (  # cluster - logs list for a specific app server
-            "-e test-cluster -a manage --list",
+            "-e test-cluster -s manage --list",
             "ml_cluster_node1",
             "logs-list-response-cluster.json",
             "output-cluster-server.txt",
@@ -750,13 +714,13 @@ def test_command_call_logs_output_for_xml_logs():
             "output-cluster-host.txt",
         ),
         (  # cluster - logs list for a host and a specific app server
-            "-e test-cluster -H ml_cluster_node2 -a manage --list",
+            "-e test-cluster -H ml_cluster_node2 -s manage --list",
             "ml_cluster_node1",
             "logs-list-response-cluster-logs-from-single-node.json",
             "output-cluster-host-and-server.txt",
         ),
         (  # task server log files
-            "-e test -a 0 --list",
+            "-e test -s 0 --list",
             "localhost",
             "logs-list-response-single-node.json",
             "output-single-node-task.txt",
@@ -768,7 +732,7 @@ def test_command_call_logs_output_for_xml_logs():
             "output-single-node-empty.txt",
         ),
         (  # no corresponding log files
-            "-e test -a 9999 --list",
+            "-e test -s 9999 --list",
             "localhost",
             "logs-list-response-single-node.json",
             "output-single-node-empty.txt",

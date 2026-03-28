@@ -64,7 +64,7 @@ poetry-bumpversion = "^0.3.3"
 respx = "^0.21.1"
 requests = "^2.32.3"
 responses = "^0.23.3"
-deepdiff = "^6.7.1"
+deepdiff = "^8.6.2"
 mimeograph = "^1.1.0"
 
 [tool.poetry.group.docs]
@@ -76,7 +76,7 @@ sphinx-rtd-theme = "^1.3.0"
 autodoc-pydantic = "^2.0.1"
 
 [tool.poetry.group.sub.dependencies]
-cryptography = "^42.0.8"
+cryptography = "^43.0.3"
 pandas = "^2.1.2"
 aiohttp = "^3.10.2"
 

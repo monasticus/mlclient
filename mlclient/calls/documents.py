@@ -19,8 +19,7 @@ from mlclient.calls.api_call import ApiCall
 from mlclient.constants import HEADER_JSON
 from mlclient.models.http import (
     Category,
-    ContentDispositionSerializer,
-    DocumentsBodyPart,
+    DocumentsBodyPart as BodyPart,
 )
 from mlclient.multipart import MultipartPart, encode_multipart_mixed
 
@@ -196,7 +195,7 @@ class DocumentsPostCall(ApiCall):
 
     def __init__(
         self,
-        body_parts: list[DocumentsBodyPart],
+        body_parts: list[BodyPart],
         database: str | None = None,
         transform: str | None = None,
         transform_params: dict | None = None,
@@ -208,7 +207,7 @@ class DocumentsPostCall(ApiCall):
 
         Parameters
         ----------
-        body_parts : list[DocumentsBodyPart]
+        body_parts : list[BodyPart]
             A list of multipart request body parts
         database : str
             Perform this operation on the named content database instead
@@ -267,7 +266,7 @@ class DocumentsPostCall(ApiCall):
     @classmethod
     def _validate_params(
         cls,
-        body: list[DocumentsBodyPart] | None,
+        body: list[BodyPart] | None,
     ):
         if body is None or len(body) == 0:
             msg = "No request body provided for POST /v1/documents!"
@@ -276,23 +275,21 @@ class DocumentsPostCall(ApiCall):
     @classmethod
     def _build_body(
         cls,
-        body_parts: list[DocumentsBodyPart],
+        body_parts: list[BodyPart],
     ) -> tuple[bytes, str]:
         parts = [cls._build_multipart_part(body_part) for body_part in body_parts]
         return encode_multipart_mixed(parts)
 
     @staticmethod
     def _build_multipart_part(
-        body_part: DocumentsBodyPart,
+        body_part: BodyPart,
     ) -> MultipartPart:
         data = body_part.content
         if isinstance(data, dict):
             data = json.dumps(data)
         if isinstance(data, str):
             data = data.encode("utf-8")
-        content_disp = ContentDispositionSerializer.deserialize(
-            body_part.content_disposition,
-        )
+        content_disp = body_part.disposition.to_header()
         return MultipartPart(
             headers={
                 "Content-Disposition": content_disp,

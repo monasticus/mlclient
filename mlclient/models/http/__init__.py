@@ -10,7 +10,7 @@ This package exports the following classes:
 
     * DocumentsBodyPart
         A class representing /v1/documents body part.
-    * DocumentsContentDisposition
+    * DocumentsDisposition
         A class representing /v1/documents body part Content-Disposition header.
     * DocumentsBodyPartType
         An enumeration class representing /v1/documents body part types.
@@ -20,30 +20,24 @@ This package exports the following classes:
         An enumeration class representing metadata extract types.
     * Category
         An enumeration class representing data categories.
-    * ContentDispositionSerializer
-        A Content-Disposition header serializer.
 
 Examples
 --------
 >>> from mlclient.models.http import DocumentsBodyPart
+>>> from mlclient.models.http.documents import BodyPart  # unprefixed
 """
 
-from .documents import (
-    Category,
-    ContentDispositionSerializer,
-    DocumentsBodyPart,
-    DocumentsBodyPartType,
-    DocumentsContentDisposition,
-    Extract,
-    Repair,
-)
+from .documents import BodyPart as DocumentsBodyPart
+from .documents import BodyPartType as DocumentsBodyPartType
+from .documents import Category
+from .documents import Disposition as DocumentsDisposition
+from .documents import Extract, Repair
 
 __all__ = [
     "Category",
-    "ContentDispositionSerializer",
     "DocumentsBodyPart",
     "DocumentsBodyPartType",
-    "DocumentsContentDisposition",
+    "DocumentsDisposition",
     "Extract",
     "Repair",
 ]

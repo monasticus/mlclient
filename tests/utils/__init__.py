@@ -29,7 +29,10 @@ from mlclient.constants import (
     HEADER_NAME_PRIMITIVE,
     HEADER_X_WWW_FORM_URLENCODED,
 )
-from mlclient.models.http import ContentDispositionSerializer, DocumentsBodyPart
+from mlclient.models.http import (
+    DocumentsBodyPart as BodyPart,
+    DocumentsDisposition as Disposition,
+)
 from tests.utils import resources as resources_utils
 
 
@@ -143,7 +146,7 @@ class MLResponseBuilder:
 
     def with_response_documents_body_part(
         self,
-        body_part: DocumentsBodyPart,
+        body_part: BodyPart,
     ):
         if not self._multipart_mixed_response:
             func = "MLResponseBuilder.with_response_body_multipart_mixed()"
@@ -158,9 +161,7 @@ class MLResponseBuilder:
             data = json.dumps(data)
         if isinstance(data, str):
             data = data.encode("utf-8")
-        content_disp = ContentDispositionSerializer.deserialize(
-            body_part.content_disposition,
-        )
+        content_disp = body_part.disposition.to_header()
         part = MultipartPart(
             headers={
                 "Content-Disposition": content_disp,
@@ -224,7 +225,7 @@ class MLResponseBuilder:
 
     def build_with_docs_callback(
         self,
-        docs_body_parts: Iterable[DocumentsBodyPart],
+        docs_body_parts: Iterable[BodyPart],
     ):
         def request_callback(
             request: PreparedRequest,
@@ -250,9 +251,7 @@ class MLResponseBuilder:
                     data = json.dumps(data)
                 if isinstance(data, str):
                     data = data.encode("utf-8")
-                content_disp = ContentDispositionSerializer.deserialize(
-                    body_part.content_disposition,
-                )
+                content_disp = body_part.disposition.to_header()
                 parts.append(MultipartPart(
                     headers={
                         "Content-Disposition": content_disp,
@@ -275,7 +274,7 @@ class MLResponseBuilder:
                 body = json.dumps(body_part.content)
             else:
                 body = body_part.content
-            doc_format = body_part.content_disposition.format_.value
+            doc_format = body_part.disposition.format_.value
             headers = {
                 "Content-Type": content_type,
                 "vnd.marklogic.document-format": doc_format,
@@ -284,12 +283,12 @@ class MLResponseBuilder:
 
         def _find_body_part(
             uri: str,
-        ) -> DocumentsBodyPart | None:
+        ) -> BodyPart | None:
             return next(
                 (
                     part
                     for part in docs_body_parts
-                    if part.content_disposition.filename == uri
+                    if part.disposition.filename == uri
                 ),
                 None,
             )
@@ -657,7 +656,7 @@ class MLResponseBuilder:
                 }
                 response_body_line = (
                     "builder.with_response_documents_body_part("
-                    f"DocumentsBodyPart(**{doc_body_part}"
+                    f"BodyPart(**{doc_body_part}"
                     "))"
                 )
             else:

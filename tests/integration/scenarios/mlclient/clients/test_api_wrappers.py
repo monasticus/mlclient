@@ -8,7 +8,7 @@ from httpx import Response
 from pytest_bdd import scenarios
 
 from mlclient import MLClient, MLResponseParser
-from mlclient.models.http import DocumentsBodyPart
+from mlclient.models.http import DocumentsBodyPart as BodyPart
 
 scenarios("../../../features/mlclient/clients/api_wrappers.feature")
 
@@ -972,21 +972,21 @@ class TestUsersManagement:
 
 
 class TestDocumentsManagement:
-    DOCUMENT_BODY_PART_1 = DocumentsBodyPart(
+    DOCUMENT_BODY_PART_1 = BodyPart(
         **{
             "content-type": "application/json",
             "content-disposition": {
-                "body_part_type": "attachment",
+                "type": "attachment",
                 "filename": "/some/dir/doc1.json",
             },
             "content": b'{"root": {"child": "data"}}',
         },
     )
-    DOCUMENT_BODY_PART_2 = DocumentsBodyPart(
+    DOCUMENT_BODY_PART_2 = BodyPart(
         **{
             "content-type": "application/json",
             "content-disposition": {
-                "body_part_type": "attachment",
+                "type": "attachment",
                 "filename": "/some/dir/doc1.json",
             },
             "content": b'{"root2": {"child2": "data2"}}',
@@ -1015,7 +1015,7 @@ class TestDocumentsManagement:
         ml: MLClient,
     ):
         resp = ml.rest.documents.get(
-            uri=cls.DOCUMENT_BODY_PART_1.content_disposition.filename,
+            uri=cls.DOCUMENT_BODY_PART_1.disposition.filename,
             data_format="json",
         )
         assert resp.status_code == httpx.codes.INTERNAL_SERVER_ERROR
@@ -1027,7 +1027,7 @@ class TestDocumentsManagement:
         ml: MLClient,
     ):
         resp = ml.rest.documents.get(
-            uri=cls.DOCUMENT_BODY_PART_1.content_disposition.filename,
+            uri=cls.DOCUMENT_BODY_PART_1.disposition.filename,
             data_format="json",
         )
         assert resp.status_code == httpx.codes.OK
@@ -1041,7 +1041,7 @@ class TestDocumentsManagement:
         ml: MLClient,
     ):
         resp = ml.rest.documents.get(
-            uri=cls.DOCUMENT_BODY_PART_1.content_disposition.filename,
+            uri=cls.DOCUMENT_BODY_PART_1.disposition.filename,
             data_format="json",
         )
         assert resp.status_code == httpx.codes.OK
@@ -1071,6 +1071,6 @@ class TestDocumentsManagement:
         ml: MLClient,
     ):
         resp = ml.rest.documents.delete(
-            cls.DOCUMENT_BODY_PART_1.content_disposition.filename,
+            cls.DOCUMENT_BODY_PART_1.disposition.filename,
         )
         assert resp.status_code == httpx.codes.NO_CONTENT

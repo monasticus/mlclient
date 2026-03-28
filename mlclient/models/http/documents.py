@@ -3,11 +3,11 @@
 This module contains models for /v1/documents HTTP body.
 It exports the following classes:
 
-    * DocumentsBodyPart
+    * BodyPart
         A class representing /v1/documents body part.
-    * DocumentsContentDisposition
+    * Disposition
         A class representing /v1/documents body part Content-Disposition header.
-    * DocumentsBodyPartType
+    * BodyPartType
         An enumeration class representing /v1/documents body part types.
     * Repair
         An enumeration class representing repair levels.
@@ -15,8 +15,6 @@ It exports the following classes:
         An enumeration class representing metadata extract types.
     * Category
         An enumeration class representing data categories.
-    * ContentDispositionSerializer
-        A Content-Disposition header serializer.
 """
 
 from __future__ import annotations
@@ -31,7 +29,7 @@ from mlclient.models import DocumentType
 from mlclient.utils import BiDict
 
 
-class DocumentsBodyPartType(Enum):
+class BodyPartType(Enum):
     """An enumeration class representing /v1/documents body part types."""
 
     INLINE = "inline"
@@ -64,11 +62,14 @@ class Category(Enum):
     QUALITY = "quality"
 
 
-class DocumentsContentDisposition(BaseModel):
+class Disposition(BaseModel):
     """A class representing /v1/documents body part Content-Disposition header."""
 
-    body_part_type: DocumentsBodyPartType = Field(
+    model_config = {"populate_by_name": True}
+
+    type_: BodyPartType = Field(
         description="The content type indication (inline or attachment).",
+        alias="type",
     )
     category: Optional[Union[Category, list[Category]]] = Field(
         description="The category of data.",
@@ -86,6 +87,7 @@ class DocumentsContentDisposition(BaseModel):
         description="Specifies an explicit document URI. "
         "Use extension to have MarkLogic Server generate a URI instead. "
         "For a given part, filename and extension are mutually exclusive.",
+        alias="uri",
         default=None,
     )
     extension: Optional[str] = Field(
@@ -135,34 +137,120 @@ class DocumentsContentDisposition(BaseModel):
         default=None,
     )
 
+    @property
+    def is_attachment(self) -> bool:
+        """Whether this disposition is an attachment (document-specific part)."""
+        return self.type_ == BodyPartType.ATTACHMENT
 
-class DocumentsBodyPart(BaseModel):
+    @property
+    def is_inline(self) -> bool:
+        """Whether this disposition is inline (default metadata part)."""
+        return self.type_ == BodyPartType.INLINE
+
+    @classmethod
+    def from_header(cls, header: str) -> Disposition:
+        """Parse a raw Content-Disposition header string.
+
+        Parameters
+        ----------
+        header : str
+            A raw Content-Disposition header value
+
+        Returns
+        -------
+        Disposition
+            A parsed Disposition instance
+        """
+        m = _DispositionMapping
+        disp_dict = {}
+        for disp in header.split(m._DISP_SEP):
+            key, value = cls._parse_header_part(disp)
+            curr_value = disp_dict.get(key)
+            if curr_value is None:
+                disp_dict[key] = value
+            elif not isinstance(curr_value, list):
+                disp_dict[key] = [curr_value, value]
+            else:
+                curr_value.append(value)
+        return cls(**disp_dict)
+
+    def to_header(self) -> str:
+        """Serialize this instance to a raw Content-Disposition header string.
+
+        Returns
+        -------
+        str
+            A raw Content-Disposition header value
+        """
+        m = _DispositionMapping
+        parts = [self._serialize_field(key) for key in m._FIELD_ORDER]
+        return m._DISP_SEP.join([p for p in parts if p is not None])
+
+    @staticmethod
+    def _parse_header_part(disp: str) -> tuple[str, str]:
+        m = _DispositionMapping
+        key_value_pair = disp.split(m._KEY_VALUE_SEP)
+        if len(key_value_pair) == 1:
+            key = None
+            value = key_value_pair[0]
+        else:
+            key, value = key_value_pair
+        key = m._DISPOSITIONS.get(key)
+        if key == m._CLASS_KEY_FORMAT:
+            key = m._CLASS_KEY_FORMAT_ALIAS
+        value = value[1:-1] if key == m._DISP_KEY_FILENAME else value
+        return key, value
+
+    def _serialize_field(self, class_key: str) -> str | None:
+        m = _DispositionMapping
+        disp_value = self.model_dump().get(class_key)
+        if disp_value is None:
+            return None
+        disp = m._DISPOSITIONS.get(class_key)
+
+        if not isinstance(disp_value, list):
+            disp_value = [disp_value]
+
+        dispositions = []
+        for value in disp_value:
+            if isinstance(value, Enum):
+                final_value = value.value
+            elif disp == m._DISP_KEY_FILENAME:
+                final_value = f'"{value}"'
+            else:
+                final_value = value
+            disposition = final_value if disp is None else f"{disp}={final_value}"
+            dispositions.append(disposition)
+        return "; ".join(dispositions)
+
+
+class BodyPart(BaseModel):
     """A class representing /v1/documents body part."""
 
     content_type: str = Field(alias="content-type", default=HEADER_JSON)
-    content_disposition: DocumentsContentDisposition = Field(
+    disposition: Disposition = Field(
         alias="content-disposition",
     )
     content: Union[str, bytes, dict]
 
-    @field_validator("content_disposition", mode="before")
+    @field_validator("disposition", mode="before")
     @classmethod
-    def parse_content_disposition(
+    def parse_disposition(
         cls,
         value: str | dict,
-    ) -> DocumentsContentDisposition:
+    ) -> Disposition:
         """Parse a Content-Disposition header."""
         if isinstance(value, dict):
-            return DocumentsContentDisposition(**value)
-        return ContentDispositionSerializer.serialize(value)
+            return Disposition(**value)
+        return Disposition.from_header(value)
 
 
-class ContentDispositionSerializer:
-    """A Content-Disposition header serializer."""
+class _DispositionMapping:
+    """Internal mapping between Disposition fields and HTTP header params."""
 
     _DISP_SEP = "; "
     _KEY_VALUE_SEP = "="
-    _CLASS_KEY_BODY_PART_TYPE = "body_part_type"
+    _CLASS_KEY_TYPE = "type_"
     _CLASS_KEY_CATEGORY = "category"
     _CLASS_KEY_REPAIR = "repair"
     _CLASS_KEY_FILENAME = "filename"
@@ -173,7 +261,7 @@ class ContentDispositionSerializer:
     _CLASS_KEY_TEMPORAL_DOC = "temporal_document"
     _CLASS_KEY_FORMAT = "format_"
     _CLASS_KEY_FORMAT_ALIAS = "format"
-    _DISP_KEY_BODY_PART_TYPE = None
+    _DISP_KEY_TYPE = None
     _DISP_KEY_CATEGORY = _CLASS_KEY_CATEGORY
     _DISP_KEY_REPAIR = _CLASS_KEY_REPAIR
     _DISP_KEY_FILENAME = _CLASS_KEY_FILENAME
@@ -185,7 +273,7 @@ class ContentDispositionSerializer:
     _DISP_KEY_FORMAT = _CLASS_KEY_FORMAT_ALIAS
     _DISPOSITIONS = BiDict(
         {
-            _CLASS_KEY_BODY_PART_TYPE: _DISP_KEY_BODY_PART_TYPE,
+            _CLASS_KEY_TYPE: _DISP_KEY_TYPE,
             _CLASS_KEY_CATEGORY: _DISP_KEY_CATEGORY,
             _CLASS_KEY_REPAIR: _DISP_KEY_REPAIR,
             _CLASS_KEY_FILENAME: _DISP_KEY_FILENAME,
@@ -197,159 +285,16 @@ class ContentDispositionSerializer:
             _CLASS_KEY_FORMAT: _DISP_KEY_FORMAT,
         },
     )
-
-    @classmethod
-    def serialize(
-        cls,
-        content_disposition: str,
-    ) -> DocumentsContentDisposition:
-        """Serialize a raw Content-Disposition header.
-
-        Creates and initializes a DocumentsContentDisposition instance.
-
-        Parameters
-        ----------
-        content_disposition : str
-            A raw Content-Disposition header value
-
-        Returns
-        -------
-        DocumentsContentDisposition
-            A serialized DocumentsContentDisposition instance
-        """
-        disp_dict = {}
-        for disp in content_disposition.split(cls._DISP_SEP):
-            key, value = cls._get_disp_key_and_value(disp)
-            curr_value = disp_dict.get(key)
-            if curr_value is None:
-                disp_dict[key] = value
-            elif not isinstance(curr_value, list):
-                disp_dict[key] = [curr_value, value]
-            else:
-                curr_value.append(value)
-        return DocumentsContentDisposition(**disp_dict)
-
-    @classmethod
-    def _get_disp_key_and_value(
-        cls,
-        disp: str,
-    ) -> tuple[str, str]:
-        """Return a single DocumentsContentDisposition-like disposition key and value.
-
-        Parameters
-        ----------
-        disp : str
-            A single disposition
-
-        Returns
-        -------
-        tuple[str, str]
-            A single DocumentsContentDisposition-like disposition key and value
-        """
-        key_value_pair = disp.split(cls._KEY_VALUE_SEP)
-        if len(key_value_pair) == 1:
-            key = None
-            value = key_value_pair[0]
-        else:
-            key, value = key_value_pair
-        return cls._parse_disp_key_and_value(key, value)
-
-    @classmethod
-    def _parse_disp_key_and_value(
-        cls,
-        key: str,
-        value: str,
-    ) -> tuple[str, str]:
-        """Parse a single raw Content-Disposition key and value.
-
-        Parameters
-        ----------
-        key : str
-            A single disposition key
-        value : str
-            A single disposition value
-
-        Returns
-        -------
-        tuple[str, str]
-            A single DocumentsContentDisposition-like disposition key and value
-        """
-        key = cls._DISPOSITIONS.get(key)
-        if key == cls._CLASS_KEY_FORMAT:
-            key = cls._CLASS_KEY_FORMAT_ALIAS
-        value = value[1:-1] if key == cls._DISP_KEY_FILENAME else value
-        return key, value
-
-    @classmethod
-    def deserialize(
-        cls,
-        content_disposition: DocumentsContentDisposition,
-    ) -> str:
-        """Deserialize a DocumentsContentDisposition instance.
-
-        Parses a DocumentsContentDisposition instance to a string representation
-
-        Parameters
-        ----------
-        content_disposition : DocumentsContentDisposition
-            A DocumentsContentDisposition instance
-
-        Returns
-        -------
-        str
-            A raw Content-Disposition header value
-        """
-        disposition = [
-            cls._get_disposition(content_disposition, cls._CLASS_KEY_BODY_PART_TYPE),
-            cls._get_disposition(content_disposition, cls._CLASS_KEY_FILENAME),
-            cls._get_disposition(content_disposition, cls._CLASS_KEY_CATEGORY),
-            cls._get_disposition(content_disposition, cls._CLASS_KEY_EXTENSION),
-            cls._get_disposition(content_disposition, cls._CLASS_KEY_DIRECTORY),
-            cls._get_disposition(content_disposition, cls._CLASS_KEY_REPAIR),
-            cls._get_disposition(content_disposition, cls._CLASS_KEY_EXTRACT),
-            cls._get_disposition(content_disposition, cls._CLASS_KEY_VERSION_ID),
-            cls._get_disposition(content_disposition, cls._CLASS_KEY_TEMPORAL_DOC),
-            cls._get_disposition(content_disposition, cls._CLASS_KEY_FORMAT),
-        ]
-
-        return cls._DISP_SEP.join([disp for disp in disposition if disp is not None])
-
-    @classmethod
-    def _get_disposition(
-        cls,
-        content_disposition: DocumentsContentDisposition,
-        class_key: str,
-    ) -> str | None:
-        """Parse a single DocumentsContentDisposition attribute to a string.
-
-        Parameters
-        ----------
-        content_disposition : DocumentsContentDisposition
-            A DocumentsContentDisposition instance
-        class_key : str
-            A DocumentsContentDisposition class attribute key
-
-        Returns
-        -------
-        str | None
-            A single raw disposition key-value pair
-        """
-        disp_value = content_disposition.model_dump().get(class_key)
-        if disp_value is None:
-            return None
-        disp = cls._DISPOSITIONS.get(class_key)
-
-        if not isinstance(disp_value, list):
-            disp_value = [disp_value]
-
-        dispositions = []
-        for value in disp_value:
-            if isinstance(value, Enum):
-                final_value = value.value
-            elif disp == cls._DISP_KEY_FILENAME:
-                final_value = f'"{value}"'
-            else:
-                final_value = value
-            disposition = final_value if disp is None else f"{disp}={final_value}"
-            dispositions.append(disposition)
-        return "; ".join(dispositions)
+    # Order of fields in the serialized header
+    _FIELD_ORDER = [
+        _CLASS_KEY_TYPE,
+        _CLASS_KEY_FILENAME,
+        _CLASS_KEY_CATEGORY,
+        _CLASS_KEY_EXTENSION,
+        _CLASS_KEY_DIRECTORY,
+        _CLASS_KEY_REPAIR,
+        _CLASS_KEY_EXTRACT,
+        _CLASS_KEY_VERSION_ID,
+        _CLASS_KEY_TEMPORAL_DOC,
+        _CLASS_KEY_FORMAT,
+    ]

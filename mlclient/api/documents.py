@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 from httpx import Response
 
 from mlclient.calls import DocumentsDeleteCall, DocumentsGetCall, DocumentsPostCall
-from mlclient.models.http import DocumentsBodyPart
+from mlclient.models.http import DocumentsBodyPart as BodyPart
 
 # Avoid circular import: ApiClient -> api classes -> ApiClient
 if TYPE_CHECKING:
@@ -96,7 +96,7 @@ class DocumentsApi:
 
     def post(
         self,
-        body_parts: list[DocumentsBodyPart],
+        body_parts: list[BodyPart],
         *,
         database: str | None = None,
         transform: str | None = None,
@@ -111,7 +111,7 @@ class DocumentsApi:
 
         Parameters
         ----------
-        body_parts : list[DocumentsBodyPart]
+        body_parts : list[BodyPart]
             A list of multipart request body parts
         database : str
             Perform this operation on the named content database instead

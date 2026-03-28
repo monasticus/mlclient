@@ -26,9 +26,8 @@ from mlclient.models import (
 )
 from mlclient.models.http import (
     Category,
-    ContentDispositionSerializer,
-    DocumentsBodyPart,
-    DocumentsContentDisposition,
+    DocumentsBodyPart as BodyPart,
+    DocumentsDisposition as Disposition,
 )
 
 
@@ -208,14 +207,14 @@ class DocumentsService:
 
 
 class DocumentsSender:
-    """A class parsing Document or Metadata instance(s) to DocumentsBodyPart's list."""
+    """A class parsing Document or Metadata instance(s) to BodyPart's list."""
 
     @classmethod
     def parse(
         cls,
         data: Document | Metadata | list[Document | Metadata],
-    ) -> list[DocumentsBodyPart]:
-        """Parse Document or Metadata instance(s) to DocumentsBodyPart's list."""
+    ) -> list[BodyPart]:
+        """Parse Document or Metadata instance(s) to BodyPart's list."""
         if not isinstance(data, list):
             data = [data]
         body_parts = []
@@ -239,13 +238,13 @@ class DocumentsSender:
     def _get_doc_content_body_part(
         cls,
         document: Document,
-    ) -> DocumentsBodyPart:
-        """Instantiate DocumentsBodyPart with Document's content."""
-        return DocumentsBodyPart(
+    ) -> BodyPart:
+        """Instantiate BodyPart with Document's content."""
+        return BodyPart(
             **{
                 "content-type": Mimetypes.get_mimetype(document.uri),
                 "content-disposition": {
-                    "body_part_type": "attachment",
+                    "type": "attachment",
                     "filename": document.uri,
                     "format": document.doc_type,
                 },
@@ -257,16 +256,16 @@ class DocumentsSender:
     def _get_doc_metadata_body_part(
         cls,
         document: Document,
-    ) -> DocumentsBodyPart:
-        """Instantiate DocumentsBodyPart with Document's metadata."""
+    ) -> BodyPart:
+        """Instantiate BodyPart with Document's metadata."""
         metadata = document.metadata
         if type(document) not in (RawDocument, RawStringDocument):
             metadata = metadata.to_json_string()
-        return DocumentsBodyPart(
+        return BodyPart(
             **{
                 "content-type": constants.HEADER_JSON,
                 "content-disposition": {
-                    "body_part_type": "attachment",
+                    "type": "attachment",
                     "filename": document.uri,
                     "category": "metadata",
                 },
@@ -278,14 +277,14 @@ class DocumentsSender:
     def _get_default_metadata_body_part(
         cls,
         metadata: Metadata,
-    ) -> DocumentsBodyPart:
-        """Instantiate DocumentsBodyPart with default metadata."""
+    ) -> BodyPart:
+        """Instantiate BodyPart with default metadata."""
         metadata = metadata.to_json_string()
-        return DocumentsBodyPart(
+        return BodyPart(
             **{
                 "content-type": constants.HEADER_JSON,
                 "content-disposition": {
-                    "body_part_type": "inline",
+                    "type": "inline",
                     "category": "metadata",
                 },
                 "content": metadata,
@@ -350,7 +349,7 @@ class DocumentsReader:
         pre_formatted_data = {}
         for headers, parse_resp_body in parsed_resp:
             raw_content_disp = headers.get(constants.HEADER_NAME_CONTENT_DISP)
-            content_disp = ContentDispositionSerializer.serialize(raw_content_disp)
+            content_disp = Disposition.from_header(raw_content_disp)
             partial_data = cls._get_partial_data(content_disp, parse_resp_body)
 
             if not (expect_content and expect_metadata):
@@ -415,7 +414,7 @@ class DocumentsReader:
     @classmethod
     def _get_partial_data(
         cls,
-        content_disp: DocumentsContentDisposition,
+        content_disp: Disposition,
         parsed_resp_body: Any,
     ) -> dict:
         """Return pre-formatted partial data."""

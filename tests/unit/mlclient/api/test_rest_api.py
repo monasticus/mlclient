@@ -5,7 +5,7 @@ import pytest
 import respx
 
 from mlclient import MLClient
-from mlclient.models.http import DocumentsBodyPart
+from mlclient.models.http import DocumentsBodyPart as BodyPart
 from tests.utils import resources as resources_utils
 from tests.utils.ml_mockers import MLRespXMocker
 
@@ -92,7 +92,7 @@ def test_post_documents():
     ml_mocker.mock_post()
 
     with MLClient() as ml:
-        resp = ml.rest.documents.post([DocumentsBodyPart(**body_part)])
+        resp = ml.rest.documents.post([BodyPart(**body_part)])
 
     assert resp.status_code == httpx.codes.INTERNAL_SERVER_ERROR
     assert resp.json() == {

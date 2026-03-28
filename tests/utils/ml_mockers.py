@@ -21,10 +21,8 @@ from mlclient.multipart import (
 from mlclient.constants import HEADER_X_WWW_FORM_URLENCODED
 from mlclient.models.http import (
     Category,
-    ContentDispositionSerializer,
-    DocumentsBodyPart,
-    DocumentsBodyPartType,
-    DocumentsContentDisposition,
+    DocumentsBodyPart as BodyPart,
+    DocumentsDisposition as Disposition,
 )
 
 
@@ -83,7 +81,7 @@ class MLMocker(metaclass=ABCMeta):
     @abstractmethod
     def with_response_documents_body_part(
         self,
-        body_part: DocumentsBodyPart,
+        body_part: BodyPart,
     ):
         raise NotImplementedError
 
@@ -294,7 +292,7 @@ class MLRespXMocker(MLMocker):
 
     def with_response_documents_body_part(
         self,
-        body_part: DocumentsBodyPart,
+        body_part: BodyPart,
     ):
         if not self._resp_mock.response.body_parts:
             self._resp_mock.response.body_parts = []
@@ -304,9 +302,7 @@ class MLRespXMocker(MLMocker):
             data = json.dumps(data)
         if isinstance(data, str):
             data = data.encode("utf-8")
-        content_disp = ContentDispositionSerializer.deserialize(
-            body_part.content_disposition,
-        )
+        content_disp = body_part.disposition.to_header()
         part = MultipartPart(
             headers={
                 "Content-Disposition": content_disp,
@@ -387,7 +383,7 @@ class MLDocumentsMocker:
 
     def __init__(
         self,
-        docs: Iterable[DocumentsBodyPart] | None = None,
+        docs: Iterable[BodyPart] | None = None,
     ):
         self._doc_body_parts = [] if docs is None else list(docs)
 
@@ -407,13 +403,13 @@ class MLDocumentsMocker:
 
     def mock_documents(
         self,
-        docs: Iterable[DocumentsBodyPart],
+        docs: Iterable[BodyPart],
     ):
         self.mock_document(*docs)
 
     def mock_document(
         self,
-        *docs: DocumentsBodyPart,
+        *docs: BodyPart,
     ):
         self._doc_body_parts.extend(docs)
 
@@ -440,7 +436,7 @@ class MLDocumentsMocker:
         )
         if len(body_parts) == 1:
             body_part = body_parts[0]
-            uri = self._get_content_disposition(body_part).filename
+            uri = self._get_disposition(body_part).filename
             if uri and self.NON_EXISTING_TAG in uri:
                 return self._build_doc_not_found_error_post_response(uri, body_part)
 
@@ -479,16 +475,14 @@ class MLDocumentsMocker:
 
     @staticmethod
     def _build_multipart_part(
-        body_part: DocumentsBodyPart,
+        body_part: BodyPart,
     ) -> MultipartPart:
         data = body_part.content
         if isinstance(data, dict):
             data = json.dumps(data)
         if isinstance(data, str):
             data = data.encode("utf-8")
-        content_disp = ContentDispositionSerializer.deserialize(
-            body_part.content_disposition,
-        )
+        content_disp = body_part.disposition.to_header()
         return MultipartPart(
             headers={
                 "Content-Disposition": content_disp,
@@ -501,7 +495,7 @@ class MLDocumentsMocker:
         self,
         uri: str,
         category: list[str],
-    ) -> Iterable[DocumentsBodyPart]:
+    ) -> Iterable[BodyPart]:
         return (
             part
             for part in self._doc_body_parts
@@ -513,7 +507,7 @@ class MLDocumentsMocker:
         cls,
         uri: str,
         category: list[str],
-        body_part: DocumentsBodyPart,
+        body_part: BodyPart,
     ) -> bool:
         if not cls._filename_matches_uri(body_part, uri):
             return False
@@ -528,16 +522,16 @@ class MLDocumentsMocker:
 
     @staticmethod
     def _filename_matches_uri(
-        body_part: DocumentsBodyPart,
+        body_part: BodyPart,
         uri: str,
     ) -> bool:
-        return body_part.content_disposition.filename == uri
+        return body_part.disposition.filename == uri
 
     @staticmethod
     def _get_body_part_category(
-        body_part: DocumentsBodyPart,
+        body_part: BodyPart,
     ) -> list[str]:
-        body_part_category = body_part.content_disposition.category or Category.CONTENT
+        body_part_category = body_part.disposition.category or Category.CONTENT
         if isinstance(body_part_category, Category):
             body_part_category = [body_part_category]
         return [c.value for c in body_part_category]
@@ -574,8 +568,8 @@ class MLDocumentsMocker:
     ) -> list[dict]:
         doc_objects = []
         for body_part in body_parts:
-            content_disp = cls._get_content_disposition(body_part)
-            if content_disp.body_part_type == DocumentsBodyPartType.ATTACHMENT:
+            content_disp = cls._get_disposition(body_part)
+            if content_disp.is_attachment:
                 doc_object = cls._build_doc_object(doc_objects, body_part)
                 doc_objects.append(doc_object)
         return doc_objects
@@ -586,7 +580,7 @@ class MLDocumentsMocker:
         doc_objects: list[dict],
         body_part: MultipartPart,
     ) -> dict:
-        content_disp = cls._get_content_disposition(body_part)
+        content_disp = cls._get_disposition(body_part)
         uri = content_disp.filename
         existing_doc_object = cls._pop_object_with_uri(doc_objects, uri)
 
@@ -606,10 +600,10 @@ class MLDocumentsMocker:
         }
 
     @staticmethod
-    def _get_content_disposition(
+    def _get_disposition(
         body_part: MultipartPart,
-    ) -> DocumentsContentDisposition:
-        return ContentDispositionSerializer.serialize(
+    ) -> Disposition:
+        return Disposition.from_header(
             body_part.headers.get("Content-Disposition"),
         )
 
@@ -662,10 +656,10 @@ class MLDocumentsMocker:
 
     @staticmethod
     def _build_successful_single_part_get_response(
-        body_part: DocumentsBodyPart,
+        body_part: BodyPart,
     ) -> Response:
         content_type = f"{body_part.content_type}; charset=utf-8"
-        doc_format = body_part.content_disposition.format_.value
+        doc_format = body_part.disposition.format_.value
         headers = {
             "Content-Type": content_type,
             "vnd.marklogic.document-format": doc_format,

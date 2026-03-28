@@ -5,7 +5,7 @@ from datetime import date, datetime
 import pytest
 
 from mlclient import MLClient, MLResponseParser
-from mlclient.models.http import DocumentsBodyPart
+from mlclient.models.http import DocumentsBodyPart as BodyPart
 from tests.utils import resources as resources_utils
 from tests.utils.ml_mockers import MLRespXMocker
 
@@ -701,7 +701,7 @@ ml_mocker.with_request_param("uri", "/some/dir/doc3.xqy")
 ml_mocker.with_request_param("uri", "/some/dir/doc4.zip")
 ml_mocker.with_response_code(200)
 ml_mocker.with_response_documents_body_part(
-    DocumentsBodyPart(
+    BodyPart(
         **{
             "content-type": "application/zip",
             "content-disposition": "attachment; "
@@ -713,7 +713,7 @@ ml_mocker.with_response_documents_body_part(
     ),
 )
 ml_mocker.with_response_documents_body_part(
-    DocumentsBodyPart(
+    BodyPart(
         **{
             "content-type": "application/xml",
             "content-disposition": "attachment; "
@@ -726,7 +726,7 @@ ml_mocker.with_response_documents_body_part(
     ),
 )
 ml_mocker.with_response_documents_body_part(
-    DocumentsBodyPart(
+    BodyPart(
         **{
             "content-type": "application/vnd.marklogic-xdmp",
             "content-disposition": "attachment; "
@@ -738,7 +738,7 @@ ml_mocker.with_response_documents_body_part(
     ),
 )
 ml_mocker.with_response_documents_body_part(
-    DocumentsBodyPart(
+    BodyPart(
         **{
             "content-type": "application/json",
             "content-disposition": "attachment; "

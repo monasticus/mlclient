@@ -22,8 +22,8 @@ class AdminApi:
     Requires the Admin server (port 8001 by default).
     """
 
-    def __init__(self, client: ApiClient):
-        self._client = client
+    def __init__(self, api: ApiClient):
+        self._api = api
 
     def call(self, call_: ApiCall) -> Response:
         """Send a custom ApiCall.
@@ -38,7 +38,7 @@ class AdminApi:
         Response
             An HTTP response
         """
-        return self._client.call(call_)
+        return self._api.call(call_)
 
     def get_timestamp(self) -> Response:
         """Verify that MarkLogic Server is up and accepting requests.
@@ -54,7 +54,7 @@ class AdminApi:
         Response
             An HTTP response with ``text/plain`` body containing the timestamp
         """
-        return self._client.call(TimestampGetCall())
+        return self._api.call(TimestampGetCall())
 
     def get_server_config(self) -> Response:
         """Retrieve server configuration information for cluster join.
@@ -70,4 +70,4 @@ class AdminApi:
             An HTTP response with ``application/xml`` body containing
             the server configuration
         """
-        return self._client.call(ServerConfigGetCall())
+        return self._api.call(ServerConfigGetCall())

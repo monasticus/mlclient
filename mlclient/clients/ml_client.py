@@ -157,11 +157,8 @@ class MLClient:
             password=password,
             retry=retry,
         )
-        self._client = ApiClient(self._http)
         self._manage_http = None
-        self._manage_client = None
         self._admin_http = None
-        self._admin_client = None
 
     def __enter__(self):
         """Connect and return self for use as a context manager."""
@@ -185,17 +182,17 @@ class MLClient:
     @cached_property
     def rest(self) -> RestApi:
         """REST API (``/v1/*``) - requires REST app server."""
-        return RestApi(self._client)
+        return RestApi(ApiClient(self._http))
 
     @cached_property
     def manage(self) -> ManageApi:
         """Management API (``/manage/v2/*``) - requires Manage server."""
-        return ManageApi(self._get_manage_client())
+        return ManageApi(ApiClient(self._get_manage_http()))
 
     @cached_property
     def admin(self) -> AdminApi:
         """Admin API (``/admin/v1/*``) - requires Admin server (port 8001)."""
-        return AdminApi(self._get_admin_client())
+        return AdminApi(ApiClient(self._get_admin_http()))
 
     @property
     def parser(self) -> type[MLResponseParser]:
@@ -205,17 +202,17 @@ class MLClient:
     @cached_property
     def documents(self) -> DocumentsService:
         """High-level documents service."""
-        return DocumentsService(self._client)
+        return DocumentsService(ApiClient(self._http))
 
     @cached_property
     def eval(self) -> EvalService:
         """High-level eval service."""
-        return EvalService(self._client)
+        return EvalService(ApiClient(self._http))
 
     @cached_property
     def logs(self) -> LogsService:
         """High-level logs service."""
-        return LogsService(self._get_manage_client())
+        return LogsService(ApiClient(self._get_manage_http()))
 
     def connect(self):
         """Start an HTTP session."""
@@ -282,35 +279,33 @@ class MLClient:
             default_retry=DEFAULT_RETRY_STRATEGY,
         )
 
-    def _get_manage_client(self) -> ApiClient:
-        """Return ApiClient for manage API (always port 8002).
+    def _get_manage_http(self) -> HttpClient:
+        """Return HttpClient for manage API (always port 8002).
 
         The Management API is only available on the fixed Manage server
         port (8002). If the main client already uses port 8002, it is reused.
         Otherwise, a separate HttpClient is lazily created.
         """
         if self._http.port == MARKLOGIC_MANAGE_API_PORT:
-            return self._client
-        if self._manage_client is None:
+            return self._http
+        if self._manage_http is None:
             self._manage_http = self._create_secondary_http(
                 MARKLOGIC_MANAGE_API_PORT,
             )
-            self._manage_client = ApiClient(self._manage_http)
-        return self._manage_client
+        return self._manage_http
 
-    def _get_admin_client(self) -> ApiClient:
-        """Return ApiClient for admin API (always port 8001).
+    def _get_admin_http(self) -> HttpClient:
+        """Return HttpClient for admin API (always port 8001).
 
         The Admin API is only available on the fixed Admin server port (8001).
         If the main client already uses port 8001, it is reused. Otherwise,
         a separate HttpClient is lazily created.
         """
         if self._http.port == MARKLOGIC_ADMIN_API_PORT:
-            return self._client
-        if self._admin_client is None:
+            return self._http
+        if self._admin_http is None:
             self._admin_http = self._create_secondary_http(MARKLOGIC_ADMIN_API_PORT)
-            self._admin_client = ApiClient(self._admin_http)
-        return self._admin_client
+        return self._admin_http
 
     def _create_secondary_http(self, port: int) -> HttpClient:
         """Create and optionally connect a secondary HttpClient."""

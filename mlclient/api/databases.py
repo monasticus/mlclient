@@ -29,8 +29,8 @@ class DatabasesApi:
     Requires the Manage server (port 8002 by default).
     """
 
-    def __init__(self, client: ApiClient):
-        self._client = client
+    def __init__(self, api: ApiClient):
+        self._api = api
 
     def get_list(
         self,
@@ -56,7 +56,7 @@ class DatabasesApi:
             An HTTP response with the databases summary
         """
         call = DatabasesGetCall(data_format=data_format, view=view)
-        return self._client.call(call)
+        return self._api.call(call)
 
     def create(
         self,
@@ -77,7 +77,7 @@ class DatabasesApi:
             An HTTP response
         """
         call = DatabasesPostCall(body=body)
-        return self._client.call(call)
+        return self._api.call(call)
 
     def get(
         self,
@@ -110,7 +110,7 @@ class DatabasesApi:
             An HTTP response with the database details
         """
         call = DatabaseGetCall(database=database, data_format=data_format, view=view)
-        return self._client.call(call)
+        return self._api.call(call)
 
     def post(
         self,
@@ -137,7 +137,7 @@ class DatabasesApi:
             An HTTP response
         """
         call = DatabasePostCall(database=database, body=body)
-        return self._client.call(call)
+        return self._api.call(call)
 
     def delete(
         self,
@@ -166,7 +166,7 @@ class DatabasesApi:
             An HTTP response
         """
         call = DatabaseDeleteCall(database=database, forest_delete=forest_delete)
-        return self._client.call(call)
+        return self._api.call(call)
 
     def get_properties(
         self,
@@ -192,7 +192,7 @@ class DatabasesApi:
             An HTTP response with the database properties
         """
         call = DatabasePropertiesGetCall(database=database, data_format=data_format)
-        return self._client.call(call)
+        return self._api.call(call)
 
     def put_properties(
         self,
@@ -216,4 +216,4 @@ class DatabasesApi:
             An HTTP response
         """
         call = DatabasePropertiesPutCall(database=database, body=body)
-        return self._client.call(call)
+        return self._api.call(call)

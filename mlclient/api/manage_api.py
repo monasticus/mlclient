@@ -30,8 +30,8 @@ class ManageApi:
     Requires the Manage server (port 8002 by default).
     """
 
-    def __init__(self, client: ApiClient):
-        self._client = client
+    def __init__(self, api: ApiClient):
+        self._api = api
 
     def call(self, call_: ApiCall) -> Response:
         """Send a custom ApiCall.
@@ -46,34 +46,34 @@ class ManageApi:
         Response
             An HTTP response
         """
-        return self._client.call(call_)
+        return self._api.call(call_)
 
     @cached_property
     def databases(self) -> DatabasesApi:
         """Return the databases API group."""
-        return DatabasesApi(self._client)
+        return DatabasesApi(self._api)
 
     @cached_property
     def forests(self) -> ForestsApi:
         """Return the forests API group."""
-        return ForestsApi(self._client)
+        return ForestsApi(self._api)
 
     @cached_property
     def logs(self) -> LogsApi:
         """Return the logs API group."""
-        return LogsApi(self._client)
+        return LogsApi(self._api)
 
     @cached_property
     def roles(self) -> RolesApi:
         """Return the roles API group."""
-        return RolesApi(self._client)
+        return RolesApi(self._api)
 
     @cached_property
     def servers(self) -> ServersApi:
         """Return the servers API group."""
-        return ServersApi(self._client)
+        return ServersApi(self._api)
 
     @cached_property
     def users(self) -> UsersApi:
         """Return the users API group."""
-        return UsersApi(self._client)
+        return UsersApi(self._api)

@@ -20,8 +20,8 @@ class DocumentsApi:
     Create, read, update, and delete document content and metadata.
     """
 
-    def __init__(self, client: ApiClient):
-        self._client = client
+    def __init__(self, api: ApiClient):
+        self._api = api
 
     def get(
         self,
@@ -92,7 +92,7 @@ class DocumentsApi:
             transform_params=transform_params,
             txid=txid,
         )
-        return self._client.call(call)
+        return self._api.call(call)
 
     def post(
         self,
@@ -152,7 +152,7 @@ class DocumentsApi:
             temporal_collection=temporal_collection,
             system_time=system_time,
         )
-        return self._client.call(call)
+        return self._api.call(call)
 
     def delete(
         self,
@@ -216,4 +216,4 @@ class DocumentsApi:
             system_time=system_time,
             wipe_temporal=wipe_temporal,
         )
-        return self._client.call(call)
+        return self._api.call(call)

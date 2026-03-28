@@ -30,8 +30,8 @@ class ForestsApi:
     Requires the Manage server (port 8002 by default).
     """
 
-    def __init__(self, client: ApiClient):
-        self._client = client
+    def __init__(self, api: ApiClient):
+        self._api = api
 
     def get_list(
         self,
@@ -85,7 +85,7 @@ class ForestsApi:
             host=host,
             full_refs=full_refs,
         )
-        return self._client.call(call)
+        return self._api.call(call)
 
     def create(
         self,
@@ -117,7 +117,7 @@ class ForestsApi:
             body=body,
             wait_for_forest_to_mount=wait_for_forest_to_mount,
         )
-        return self._client.call(call)
+        return self._api.call(call)
 
     def put(
         self,
@@ -141,7 +141,7 @@ class ForestsApi:
             An HTTP response
         """
         call = ForestsPutCall(body=body)
-        return self._client.call(call)
+        return self._api.call(call)
 
     def get(
         self,
@@ -173,7 +173,7 @@ class ForestsApi:
             An HTTP response with the forest details
         """
         call = ForestGetCall(forest=forest, data_format=data_format, view=view)
-        return self._client.call(call)
+        return self._api.call(call)
 
     def post(
         self,
@@ -199,7 +199,7 @@ class ForestsApi:
             An HTTP response
         """
         call = ForestPostCall(forest=forest, body=body)
-        return self._client.call(call)
+        return self._api.call(call)
 
     def delete(
         self,
@@ -232,7 +232,7 @@ class ForestsApi:
             An HTTP response
         """
         call = ForestDeleteCall(forest=forest, level=level, replicas=replicas)
-        return self._client.call(call)
+        return self._api.call(call)
 
     def get_properties(
         self,
@@ -258,7 +258,7 @@ class ForestsApi:
             An HTTP response with the forest properties
         """
         call = ForestPropertiesGetCall(forest=forest, data_format=data_format)
-        return self._client.call(call)
+        return self._api.call(call)
 
     def put_properties(
         self,
@@ -282,4 +282,4 @@ class ForestsApi:
             An HTTP response
         """
         call = ForestPropertiesPutCall(forest=forest, body=body)
-        return self._client.call(call)
+        return self._api.call(call)

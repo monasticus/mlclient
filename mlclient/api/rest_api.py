@@ -26,8 +26,8 @@ class RestApi:
     Requires a REST app server.
     """
 
-    def __init__(self, client: ApiClient):
-        self._client = client
+    def __init__(self, api: ApiClient):
+        self._api = api
 
     def call(self, call_: ApiCall) -> Response:
         """Send a custom ApiCall.
@@ -42,14 +42,14 @@ class RestApi:
         Response
             An HTTP response
         """
-        return self._client.call(call_)
+        return self._api.call(call_)
 
     @cached_property
     def eval(self) -> EvalApi:
         """Return the eval API group."""
-        return EvalApi(self._client)
+        return EvalApi(self._api)
 
     @cached_property
     def documents(self) -> DocumentsApi:
         """Return the documents API group."""
-        return DocumentsApi(self._client)
+        return DocumentsApi(self._api)

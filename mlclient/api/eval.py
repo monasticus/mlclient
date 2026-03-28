@@ -19,8 +19,8 @@ class EvalApi:
     Evaluate ad-hoc XQuery or server-side JavaScript queries.
     """
 
-    def __init__(self, client: ApiClient):
-        self._client = client
+    def __init__(self, api: ApiClient):
+        self._api = api
 
     def post(
         self,
@@ -68,4 +68,4 @@ class EvalApi:
             database=database,
             txid=txid,
         )
-        return self._client.call(call)
+        return self._api.call(call)

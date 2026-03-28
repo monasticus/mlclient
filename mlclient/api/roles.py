@@ -28,8 +28,8 @@ class RolesApi:
     Requires the Manage server (port 8002 by default).
     """
 
-    def __init__(self, client: ApiClient):
-        self._client = client
+    def __init__(self, api: ApiClient):
+        self._api = api
 
     def get_list(
         self,
@@ -54,7 +54,7 @@ class RolesApi:
             An HTTP response with the roles summary
         """
         call = RolesGetCall(data_format=data_format, view=view)
-        return self._client.call(call)
+        return self._api.call(call)
 
     def create(
         self,
@@ -75,7 +75,7 @@ class RolesApi:
             An HTTP response
         """
         call = RolesPostCall(body=body)
-        return self._client.call(call)
+        return self._api.call(call)
 
     def get(
         self,
@@ -104,7 +104,7 @@ class RolesApi:
             An HTTP response with the role details
         """
         call = RoleGetCall(role=role, data_format=data_format, view=view)
-        return self._client.call(call)
+        return self._api.call(call)
 
     def delete(
         self,
@@ -125,7 +125,7 @@ class RolesApi:
             An HTTP response
         """
         call = RoleDeleteCall(role=role)
-        return self._client.call(call)
+        return self._api.call(call)
 
     def get_properties(
         self,
@@ -151,7 +151,7 @@ class RolesApi:
             An HTTP response with the role properties
         """
         call = RolePropertiesGetCall(role=role, data_format=data_format)
-        return self._client.call(call)
+        return self._api.call(call)
 
     def put_properties(
         self,
@@ -175,4 +175,4 @@ class RolesApi:
             An HTTP response
         """
         call = RolePropertiesPutCall(role=role, body=body)
-        return self._client.call(call)
+        return self._api.call(call)

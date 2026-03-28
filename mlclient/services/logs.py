@@ -52,8 +52,8 @@ class LogsService:
     _LOG_TYPES_RE = "|".join(t.value[:-3] for t in LogType)
     _FILENAME_RE = re.compile(rf"((.+)_)?({_LOG_TYPES_RE})Log(_([1-6]))?\.txt")
 
-    def __init__(self, client: ApiClient):
-        self._client = client
+    def __init__(self, api: ApiClient):
+        self._api = api
 
     def get(
         self,
@@ -103,7 +103,7 @@ class LogsService:
             host=host,
         )
 
-        resp = self._client.call(call)
+        resp = self._api.call(call)
         resp_body = resp.json()
         if not resp.is_success:
             raise MarkLogicError(resp_body["errorResponse"])
@@ -133,7 +133,7 @@ class LogsService:
         """
         call = self._get_call(host=host)
 
-        resp = self._client.call(call)
+        resp = self._api.call(call)
         resp_body = resp.json()
         if "errorResponse" in resp_body:
             raise MarkLogicError(resp_body["errorResponse"])

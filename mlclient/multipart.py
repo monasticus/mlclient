@@ -28,8 +28,8 @@ class MultipartPart:
         """Decode content to string using the charset from Content-Type."""
         charset = "utf-8"
         content_type = self.headers.get("Content-Type", "")
-        for param in content_type.split(";"):
-            param = param.strip()
+        for raw in content_type.split(";"):
+            param = raw.strip()
             if param.lower().startswith("charset="):
                 charset = param.split("=", 1)[1].strip().strip('"')
         return self.content.decode(charset)
@@ -98,10 +98,9 @@ def decode_multipart_mixed(
     # Last piece is "--\r\n" (closing marker)
     pieces.pop()
     parts = []
-    for piece in pieces:
-        if piece.startswith(b"\r\n"):
-            piece = piece[2:]
-        header_block, _, body = piece.partition(b"\r\n\r\n")
+    for raw in pieces:
+        chunk = raw[2:] if raw.startswith(b"\r\n") else raw
+        header_block, _, body = chunk.partition(b"\r\n\r\n")
         headers = {}
         for line in header_block.split(b"\r\n"):
             name, _, value = line.partition(b": ")
@@ -111,8 +110,8 @@ def decode_multipart_mixed(
 
 
 def _extract_boundary(content_type: str) -> str:
-    for param in content_type.split(";"):
-        param = param.strip()
+    for raw in content_type.split(";"):
+        param = raw.strip()
         if param.startswith("boundary="):
             return param.split("=", 1)[1].strip().strip('"')
     msg = f"No boundary found in Content-Type: {content_type}"

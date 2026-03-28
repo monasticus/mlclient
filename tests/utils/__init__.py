@@ -29,10 +29,7 @@ from mlclient.constants import (
     HEADER_NAME_PRIMITIVE,
     HEADER_X_WWW_FORM_URLENCODED,
 )
-from mlclient.models.http import (
-    DocumentsBodyPart as BodyPart,
-    DocumentsDisposition as Disposition,
-)
+from mlclient.models.http.documents import BodyPart
 from tests.utils import resources as resources_utils
 
 

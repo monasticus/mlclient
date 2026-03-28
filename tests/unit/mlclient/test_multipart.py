@@ -160,14 +160,14 @@ class TestMultipartPart:
     def test_text_default_charset(self):
         part = MultipartPart(
             headers={"Content-Type": "text/plain"},
-            content="hello".encode(),
+            content=b"hello",
         )
         assert part.text == "hello"
 
     def test_text_explicit_charset(self):
         part = MultipartPart(
             headers={"Content-Type": "text/plain; charset=utf-8"},
-            content="hello".encode(),
+            content=b"hello",
         )
         assert part.text == "hello"
 

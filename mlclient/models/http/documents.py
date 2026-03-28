@@ -20,7 +20,7 @@ It exports the following classes:
 from __future__ import annotations
 
 from enum import Enum
-from typing import Optional, Union
+from typing import ClassVar, Optional, Union
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -163,7 +163,7 @@ class Disposition(BaseModel):
         """
         m = _DispositionMapping
         disp_dict = {}
-        for disp in header.split(m._DISP_SEP):
+        for disp in header.split(m.DISP_SEP):
             key, value = cls._parse_header_part(disp)
             curr_value = disp_dict.get(key)
             if curr_value is None:
@@ -183,22 +183,22 @@ class Disposition(BaseModel):
             A raw Content-Disposition header value
         """
         m = _DispositionMapping
-        parts = [self._serialize_field(key) for key in m._FIELD_ORDER]
-        return m._DISP_SEP.join([p for p in parts if p is not None])
+        parts = [self._serialize_field(key) for key in m.FIELD_ORDER]
+        return m.DISP_SEP.join([p for p in parts if p is not None])
 
     @staticmethod
     def _parse_header_part(disp: str) -> tuple[str, str]:
         m = _DispositionMapping
-        key_value_pair = disp.split(m._KEY_VALUE_SEP)
+        key_value_pair = disp.split(m.KEY_VALUE_SEP)
         if len(key_value_pair) == 1:
             key = None
             value = key_value_pair[0]
         else:
             key, value = key_value_pair
-        key = m._DISPOSITIONS.get(key)
-        if key == m._CLASS_KEY_FORMAT:
-            key = m._CLASS_KEY_FORMAT_ALIAS
-        value = value[1:-1] if key == m._DISP_KEY_FILENAME else value
+        key = m.DISPOSITIONS.get(key)
+        if key == m.CLASS_KEY_FORMAT:
+            key = m.CLASS_KEY_FORMAT_ALIAS
+        value = value[1:-1] if key == m.DISP_KEY_FILENAME else value
         return key, value
 
     def _serialize_field(self, class_key: str) -> str | None:
@@ -206,7 +206,7 @@ class Disposition(BaseModel):
         disp_value = self.model_dump().get(class_key)
         if disp_value is None:
             return None
-        disp = m._DISPOSITIONS.get(class_key)
+        disp = m.DISPOSITIONS.get(class_key)
 
         if not isinstance(disp_value, list):
             disp_value = [disp_value]
@@ -215,7 +215,7 @@ class Disposition(BaseModel):
         for value in disp_value:
             if isinstance(value, Enum):
                 final_value = value.value
-            elif disp == m._DISP_KEY_FILENAME:
+            elif disp == m.DISP_KEY_FILENAME:
                 final_value = f'"{value}"'
             else:
                 final_value = value
@@ -248,53 +248,52 @@ class BodyPart(BaseModel):
 class _DispositionMapping:
     """Internal mapping between Disposition fields and HTTP header params."""
 
-    _DISP_SEP = "; "
-    _KEY_VALUE_SEP = "="
-    _CLASS_KEY_TYPE = "type_"
-    _CLASS_KEY_CATEGORY = "category"
-    _CLASS_KEY_REPAIR = "repair"
-    _CLASS_KEY_FILENAME = "filename"
-    _CLASS_KEY_EXTENSION = "extension"
-    _CLASS_KEY_DIRECTORY = "directory"
-    _CLASS_KEY_EXTRACT = "extract"
-    _CLASS_KEY_VERSION_ID = "version_id"
-    _CLASS_KEY_TEMPORAL_DOC = "temporal_document"
-    _CLASS_KEY_FORMAT = "format_"
-    _CLASS_KEY_FORMAT_ALIAS = "format"
-    _DISP_KEY_TYPE = None
-    _DISP_KEY_CATEGORY = _CLASS_KEY_CATEGORY
-    _DISP_KEY_REPAIR = _CLASS_KEY_REPAIR
-    _DISP_KEY_FILENAME = _CLASS_KEY_FILENAME
-    _DISP_KEY_EXTENSION = _CLASS_KEY_EXTENSION
-    _DISP_KEY_DIRECTORY = _CLASS_KEY_DIRECTORY
-    _DISP_KEY_EXTRACT = _CLASS_KEY_EXTRACT
-    _DISP_KEY_VERSION_ID = "versionId"
-    _DISP_KEY_TEMPORAL_DOC = "temporal-document"
-    _DISP_KEY_FORMAT = _CLASS_KEY_FORMAT_ALIAS
-    _DISPOSITIONS = BiDict(
+    DISP_SEP = "; "
+    KEY_VALUE_SEP = "="
+    CLASS_KEY_TYPE = "type_"
+    CLASS_KEY_CATEGORY = "category"
+    CLASS_KEY_REPAIR = "repair"
+    CLASS_KEY_FILENAME = "filename"
+    CLASS_KEY_EXTENSION = "extension"
+    CLASS_KEY_DIRECTORY = "directory"
+    CLASS_KEY_EXTRACT = "extract"
+    CLASS_KEY_VERSION_ID = "version_id"
+    CLASS_KEY_TEMPORAL_DOC = "temporal_document"
+    CLASS_KEY_FORMAT = "format_"
+    CLASS_KEY_FORMAT_ALIAS = "format"
+    DISP_KEY_TYPE = None
+    DISP_KEY_CATEGORY = CLASS_KEY_CATEGORY
+    DISP_KEY_REPAIR = CLASS_KEY_REPAIR
+    DISP_KEY_FILENAME = CLASS_KEY_FILENAME
+    DISP_KEY_EXTENSION = CLASS_KEY_EXTENSION
+    DISP_KEY_DIRECTORY = CLASS_KEY_DIRECTORY
+    DISP_KEY_EXTRACT = CLASS_KEY_EXTRACT
+    DISP_KEY_VERSION_ID = "versionId"
+    DISP_KEY_TEMPORAL_DOC = "temporal-document"
+    DISP_KEY_FORMAT = CLASS_KEY_FORMAT_ALIAS
+    DISPOSITIONS = BiDict(
         {
-            _CLASS_KEY_TYPE: _DISP_KEY_TYPE,
-            _CLASS_KEY_CATEGORY: _DISP_KEY_CATEGORY,
-            _CLASS_KEY_REPAIR: _DISP_KEY_REPAIR,
-            _CLASS_KEY_FILENAME: _DISP_KEY_FILENAME,
-            _CLASS_KEY_EXTENSION: _DISP_KEY_EXTENSION,
-            _CLASS_KEY_DIRECTORY: _DISP_KEY_DIRECTORY,
-            _CLASS_KEY_EXTRACT: _DISP_KEY_EXTRACT,
-            _CLASS_KEY_VERSION_ID: _DISP_KEY_VERSION_ID,
-            _CLASS_KEY_TEMPORAL_DOC: _DISP_KEY_TEMPORAL_DOC,
-            _CLASS_KEY_FORMAT: _DISP_KEY_FORMAT,
+            CLASS_KEY_TYPE: DISP_KEY_TYPE,
+            CLASS_KEY_CATEGORY: DISP_KEY_CATEGORY,
+            CLASS_KEY_REPAIR: DISP_KEY_REPAIR,
+            CLASS_KEY_FILENAME: DISP_KEY_FILENAME,
+            CLASS_KEY_EXTENSION: DISP_KEY_EXTENSION,
+            CLASS_KEY_DIRECTORY: DISP_KEY_DIRECTORY,
+            CLASS_KEY_EXTRACT: DISP_KEY_EXTRACT,
+            CLASS_KEY_VERSION_ID: DISP_KEY_VERSION_ID,
+            CLASS_KEY_TEMPORAL_DOC: DISP_KEY_TEMPORAL_DOC,
+            CLASS_KEY_FORMAT: DISP_KEY_FORMAT,
         },
     )
-    # Order of fields in the serialized header
-    _FIELD_ORDER = [
-        _CLASS_KEY_TYPE,
-        _CLASS_KEY_FILENAME,
-        _CLASS_KEY_CATEGORY,
-        _CLASS_KEY_EXTENSION,
-        _CLASS_KEY_DIRECTORY,
-        _CLASS_KEY_REPAIR,
-        _CLASS_KEY_EXTRACT,
-        _CLASS_KEY_VERSION_ID,
-        _CLASS_KEY_TEMPORAL_DOC,
-        _CLASS_KEY_FORMAT,
+    FIELD_ORDER: ClassVar[list] = [
+        CLASS_KEY_TYPE,
+        CLASS_KEY_FILENAME,
+        CLASS_KEY_CATEGORY,
+        CLASS_KEY_EXTENSION,
+        CLASS_KEY_DIRECTORY,
+        CLASS_KEY_REPAIR,
+        CLASS_KEY_EXTRACT,
+        CLASS_KEY_VERSION_ID,
+        CLASS_KEY_TEMPORAL_DOC,
+        CLASS_KEY_FORMAT,
     ]

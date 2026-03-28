@@ -157,11 +157,11 @@ class MLClient:
             password=password,
             retry=retry,
         )
-        self._api_client = ApiClient(self._http)
+        self._client = ApiClient(self._http)
         self._manage_http = None
-        self._manage_api_client = None
+        self._manage_client = None
         self._admin_http = None
-        self._admin_api_client = None
+        self._admin_client = None
 
     def __enter__(self):
         """Connect and return self for use as a context manager."""
@@ -185,7 +185,7 @@ class MLClient:
     @cached_property
     def rest(self) -> RestApi:
         """REST API (``/v1/*``) - requires REST app server."""
-        return RestApi(self._api_client)
+        return RestApi(self._client)
 
     @cached_property
     def manage(self) -> ManageApi:
@@ -205,12 +205,12 @@ class MLClient:
     @cached_property
     def documents(self) -> DocumentsService:
         """High-level documents service."""
-        return DocumentsService(self._api_client)
+        return DocumentsService(self._client)
 
     @cached_property
     def eval(self) -> EvalService:
         """High-level eval service."""
-        return EvalService(self._api_client)
+        return EvalService(self._client)
 
     @cached_property
     def logs(self) -> LogsService:
@@ -290,13 +290,13 @@ class MLClient:
         Otherwise, a separate HttpClient is lazily created.
         """
         if self._http.port == MARKLOGIC_MANAGE_API_PORT:
-            return self._api_client
-        if self._manage_api_client is None:
+            return self._client
+        if self._manage_client is None:
             self._manage_http = self._create_secondary_http(
                 MARKLOGIC_MANAGE_API_PORT,
             )
-            self._manage_api_client = ApiClient(self._manage_http)
-        return self._manage_api_client
+            self._manage_client = ApiClient(self._manage_http)
+        return self._manage_client
 
     def _get_admin_client(self) -> ApiClient:
         """Return ApiClient for admin API (always port 8001).
@@ -306,11 +306,11 @@ class MLClient:
         a separate HttpClient is lazily created.
         """
         if self._http.port == MARKLOGIC_ADMIN_API_PORT:
-            return self._api_client
-        if self._admin_api_client is None:
+            return self._client
+        if self._admin_client is None:
             self._admin_http = self._create_secondary_http(MARKLOGIC_ADMIN_API_PORT)
-            self._admin_api_client = ApiClient(self._admin_http)
-        return self._admin_api_client
+            self._admin_client = ApiClient(self._admin_http)
+        return self._admin_client
 
     def _create_secondary_http(self, port: int) -> HttpClient:
         """Create and optionally connect a secondary HttpClient."""

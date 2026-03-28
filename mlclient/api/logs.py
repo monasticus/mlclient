@@ -21,8 +21,8 @@ class LogsApi:
     Requires the Manage server (port 8002 by default).
     """
 
-    def __init__(self, rest: ApiClient):
-        self._rest = rest
+    def __init__(self, client: ApiClient):
+        self._client = client
 
     def get(
         self,
@@ -67,4 +67,4 @@ class LogsApi:
             end_time=end_time,
             regex=regex,
         )
-        return self._rest.call(call)
+        return self._client.call(call)

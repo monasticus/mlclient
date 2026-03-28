@@ -34,8 +34,8 @@ from mlclient.models.http import (
 class DocumentsService:
     """High-level service for /v1/documents CRUD operations."""
 
-    def __init__(self, rest: ApiClient):
-        self._rest = rest
+    def __init__(self, client: ApiClient):
+        self._client = client
 
     def write(
         self,
@@ -71,7 +71,7 @@ class DocumentsService:
             database=database,
             temporal_collection=temporal_collection,
         )
-        resp = self._rest.call(call)
+        resp = self._client.call(call)
         if not resp.is_success:
             resp_body = MLResponseParser.parse(resp)
             raise MarkLogicError(resp_body["errorResponse"])
@@ -158,7 +158,7 @@ class DocumentsService:
             database=database,
             data_format="json",
         )
-        resp = self._rest.call(call)
+        resp = self._client.call(call)
         if not resp.is_success:
             resp_body = MLResponseParser.parse(resp)
             raise MarkLogicError(resp_body["errorResponse"])
@@ -200,7 +200,7 @@ class DocumentsService:
             temporal_collection=temporal_collection,
             wipe_temporal=wipe_temporal,
         )
-        resp = self._rest.call(call)
+        resp = self._client.call(call)
         if not resp.is_success:
             resp_body = MLResponseParser.parse(resp)
             raise MarkLogicError(resp_body["errorResponse"])

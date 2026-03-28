@@ -16,7 +16,6 @@ from typing import ClassVar
 
 from mlclient import constants, exceptions, utils
 from mlclient.calls.api_call import ApiCall
-from mlclient.constants import HEADER_JSON
 from mlclient.models.http import (
     Category,
     DocumentsBodyPart as BodyPart,
@@ -236,7 +235,7 @@ class DocumentsPostCall(ApiCall):
         self._validate_params(body_parts)
 
         super().__init__(method="POST")
-        self.add_header(constants.HEADER_NAME_ACCEPT, HEADER_JSON)
+        self.add_header(constants.HEADER_NAME_ACCEPT, constants.HEADER_JSON)
         self.add_param(self._DATABASE_PARAM, database)
         self.add_param(self._TRANSFORM_PARAM, transform)
         self.add_param(self._TXID_PARAM, txid)

@@ -28,8 +28,8 @@ class UsersApi:
     Requires the Manage server (port 8002 by default).
     """
 
-    def __init__(self, rest: ApiClient):
-        self._rest = rest
+    def __init__(self, client: ApiClient):
+        self._client = client
 
     def get_list(
         self,
@@ -54,7 +54,7 @@ class UsersApi:
             An HTTP response with the users summary
         """
         call = UsersGetCall(data_format=data_format, view=view)
-        return self._rest.call(call)
+        return self._client.call(call)
 
     def create(
         self,
@@ -75,7 +75,7 @@ class UsersApi:
             An HTTP response
         """
         call = UsersPostCall(body=body)
-        return self._rest.call(call)
+        return self._client.call(call)
 
     def get(
         self,
@@ -104,7 +104,7 @@ class UsersApi:
             An HTTP response with the user details
         """
         call = UserGetCall(user=user, data_format=data_format, view=view)
-        return self._rest.call(call)
+        return self._client.call(call)
 
     def delete(
         self,
@@ -125,7 +125,7 @@ class UsersApi:
             An HTTP response
         """
         call = UserDeleteCall(user=user)
-        return self._rest.call(call)
+        return self._client.call(call)
 
     def get_properties(
         self,
@@ -151,7 +151,7 @@ class UsersApi:
             An HTTP response with the user properties
         """
         call = UserPropertiesGetCall(user=user, data_format=data_format)
-        return self._rest.call(call)
+        return self._client.call(call)
 
     def put_properties(
         self,
@@ -175,4 +175,4 @@ class UsersApi:
             An HTTP response
         """
         call = UserPropertiesPutCall(user=user, body=body)
-        return self._rest.call(call)
+        return self._client.call(call)

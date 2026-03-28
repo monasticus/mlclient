@@ -225,7 +225,7 @@ class DatabaseGetCall(ApiCall):
             method="GET",
             accept=utils.get_accept_header_for_format(data_format),
         )
-        self.__database = database
+        self._database = database
         self.add_param(self._FORMAT_PARAM, data_format)
         self.add_param(self._VIEW_PARAM, view)
 
@@ -240,7 +240,7 @@ class DatabaseGetCall(ApiCall):
         str
             A Database call endpoint
         """
-        return self._ENDPOINT_TEMPLATE.format(self._API_VERSION, self.__database)
+        return self._ENDPOINT_TEMPLATE.format(self._API_VERSION, self._database)
 
     @classmethod
     def _validate_params(
@@ -294,7 +294,7 @@ class DatabasePostCall(ApiCall):
         if content_type == constants.HEADER_JSON and isinstance(body, str):
             body = json.loads(body)
         super().__init__(method="POST", content_type=content_type, body=body)
-        self.__database = database
+        self._database = database
 
     @property
     def endpoint(
@@ -307,7 +307,7 @@ class DatabasePostCall(ApiCall):
         str
             A Database call endpoint
         """
-        return self._ENDPOINT_TEMPLATE.format(self._API_VERSION, self.__database)
+        return self._ENDPOINT_TEMPLATE.format(self._API_VERSION, self._database)
 
     @classmethod
     def _validate_params(
@@ -485,7 +485,7 @@ class DatabasePropertiesPutCall(ApiCall):
         body : str | dict
             A database properties in XML or JSON format.
         """
-        self.__validate_params(body)
+        self._validate_params(body)
         content_type = utils.get_content_type_header_for_data(body)
         if content_type == constants.HEADER_JSON and isinstance(body, str):
             body = json.loads(body)
@@ -506,7 +506,7 @@ class DatabasePropertiesPutCall(ApiCall):
         return self._ENDPOINT_TEMPLATE.format(self._API_VERSION, self._database)
 
     @classmethod
-    def __validate_params(
+    def _validate_params(
         cls,
         body: str | dict,
     ):

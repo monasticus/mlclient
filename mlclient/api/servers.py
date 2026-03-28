@@ -28,8 +28,8 @@ class ServersApi:
     Requires the Manage server (port 8002 by default).
     """
 
-    def __init__(self, rest: ApiClient):
-        self._rest = rest
+    def __init__(self, client: ApiClient):
+        self._client = client
 
     def get_list(
         self,
@@ -73,7 +73,7 @@ class ServersApi:
             view=view,
             full_refs=full_refs,
         )
-        return self._rest.call(call)
+        return self._client.call(call)
 
     def create(
         self,
@@ -107,7 +107,7 @@ class ServersApi:
             An HTTP response
         """
         call = ServersPostCall(body=body, group_id=group_id, server_type=server_type)
-        return self._rest.call(call)
+        return self._client.call(call)
 
     def get(
         self,
@@ -169,7 +169,7 @@ class ServersApi:
             full_refs=full_refs,
             modules=modules,
         )
-        return self._rest.call(call)
+        return self._client.call(call)
 
     def delete(
         self,
@@ -194,7 +194,7 @@ class ServersApi:
             An HTTP response
         """
         call = ServerDeleteCall(server=server, group_id=group_id)
-        return self._rest.call(call)
+        return self._client.call(call)
 
     def get_properties(
         self,
@@ -228,7 +228,7 @@ class ServersApi:
             group_id=group_id,
             data_format=data_format,
         )
-        return self._rest.call(call)
+        return self._client.call(call)
 
     def put_properties(
         self,
@@ -256,4 +256,4 @@ class ServersApi:
             An HTTP response
         """
         call = ServerPropertiesPutCall(server=server, group_id=group_id, body=body)
-        return self._rest.call(call)
+        return self._client.call(call)

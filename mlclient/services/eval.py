@@ -31,8 +31,8 @@ _SUPPORTED_FILE_EXT = tuple(
 class EvalService:
     """High-level service for /v1/eval endpoint."""
 
-    def __init__(self, rest: ApiClient):
-        self._rest = rest
+    def __init__(self, client: ApiClient):
+        self._client = client
 
     def xquery(
         self,
@@ -322,7 +322,7 @@ class EvalService:
             txid=txid,
             **kwargs,
         )
-        resp = self._rest.call(call)
+        resp = self._client.call(call)
         parsed_resp = MLResponseParser.parse(resp, output_type=output_type)
         if not resp.is_success:
             raise MarkLogicError(parsed_resp)

@@ -15,12 +15,6 @@ import responses
 from requests import PreparedRequest, Response
 from responses import matchers
 
-from mlclient.multipart import (
-    MultipartPart,
-    decode_multipart_mixed,
-    encode_multipart_mixed,
-)
-
 from mlclient.constants import (
     HEADER_JSON,
     HEADER_MULTIPART_MIXED,
@@ -30,6 +24,11 @@ from mlclient.constants import (
     HEADER_X_WWW_FORM_URLENCODED,
 )
 from mlclient.models.http.documents import BodyPart
+from mlclient.multipart import (
+    MultipartPart,
+    decode_multipart_mixed,
+    encode_multipart_mixed,
+)
 from tests.utils import resources as resources_utils
 
 
@@ -249,13 +248,15 @@ class MLResponseBuilder:
                 if isinstance(data, str):
                     data = data.encode("utf-8")
                 content_disp = body_part.disposition.to_header()
-                parts.append(MultipartPart(
-                    headers={
-                        "Content-Disposition": content_disp,
-                        "Content-Type": body_part.content_type,
-                    },
-                    content=data,
-                ))
+                parts.append(
+                    MultipartPart(
+                        headers={
+                            "Content-Disposition": content_disp,
+                            "Content-Type": body_part.content_type,
+                        },
+                        content=data,
+                    ),
+                )
             body, content_type = encode_multipart_mixed(parts)
             headers = {
                 "Content-Type": content_type,
@@ -282,11 +283,7 @@ class MLResponseBuilder:
             uri: str,
         ) -> BodyPart | None:
             return next(
-                (
-                    part
-                    for part in docs_body_parts
-                    if part.disposition.filename == uri
-                ),
+                (part for part in docs_body_parts if part.disposition.filename == uri),
                 None,
             )
 

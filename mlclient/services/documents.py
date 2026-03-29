@@ -5,7 +5,6 @@ Provides parsed document operations on MarkLogic.
 
 from __future__ import annotations
 
-
 from collections.abc import Iterator
 from typing import Any
 
@@ -24,11 +23,9 @@ from mlclient.models import (
     RawDocument,
     RawStringDocument,
 )
-from mlclient.models.http import (
-    Category,
-    DocumentsBodyPart as BodyPart,
-    DocumentsDisposition as Disposition,
-)
+from mlclient.models.http import Category
+from mlclient.models.http import DocumentsBodyPart as BodyPart
+from mlclient.models.http import DocumentsDisposition as Disposition
 
 
 class DocumentsService:

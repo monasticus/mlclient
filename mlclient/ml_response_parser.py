@@ -16,9 +16,9 @@ from typing import ClassVar
 from httpx import Headers, Response
 
 from mlclient import constants as const
-from mlclient.multipart import MultipartPart, decode_multipart_mixed
 from mlclient.mimetypes import Mimetypes
 from mlclient.models import DocumentType
+from mlclient.multipart import MultipartPart, decode_multipart_mixed
 
 logger = logging.getLogger(__name__)
 
@@ -458,4 +458,3 @@ class MLResponseParser:
                 return ElemTree.ElementTree(element)
             return element
         return body_part.content
-

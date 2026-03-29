@@ -16,10 +16,8 @@ from typing import ClassVar
 
 from mlclient import constants, exceptions, utils
 from mlclient.calls.api_call import ApiCall
-from mlclient.models.http import (
-    Category,
-    DocumentsBodyPart as BodyPart,
-)
+from mlclient.models.http import Category
+from mlclient.models.http import DocumentsBodyPart as BodyPart
 from mlclient.multipart import MultipartPart, encode_multipart_mixed
 
 

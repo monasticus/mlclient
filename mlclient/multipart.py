@@ -92,7 +92,7 @@ def decode_multipart_mixed(
     pieces = content.split(delimiter)
     first = f"--{boundary}\r\n".encode()
     if pieces[0].startswith(first):
-        pieces[0] = pieces[0][len(first):]
+        pieces[0] = pieces[0][len(first) :]
     else:
         pieces.pop(0)
     # Last piece is "--\r\n" (closing marker)

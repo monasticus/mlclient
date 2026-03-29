@@ -81,13 +81,7 @@ class TestEncodeMultipartMixed:
 
 class TestDecodeMultipartMixed:
     def test_decode_single_part(self):
-        raw = (
-            b"--boundary\r\n"
-            b"Content-Type: text/plain\r\n"
-            b"\r\n"
-            b"hello\r\n"
-            b"--boundary--\r\n"
-        )
+        raw = b"--boundary\r\nContent-Type: text/plain\r\n\r\nhello\r\n--boundary--\r\n"
         parts = decode_multipart_mixed(raw, "multipart/mixed; boundary=boundary")
         assert len(parts) == 1
         assert parts[0].headers == {"Content-Type": "text/plain"}
@@ -115,9 +109,7 @@ class TestDecodeMultipartMixed:
         raw = (
             b"--boundary\r\n"
             b"Content-Type: application/octet-stream\r\n"
-            b"\r\n"
-            + binary
-            + b"\r\n"
+            b"\r\n" + binary + b"\r\n"
             b"--boundary--\r\n"
         )
         parts = decode_multipart_mixed(raw, "multipart/mixed; boundary=boundary")

@@ -12,17 +12,14 @@ import respx
 from httpx import Headers, Request, Response
 from respx import MockRouter, Route
 
+from mlclient.constants import HEADER_X_WWW_FORM_URLENCODED
+from mlclient.models.http import Category
+from mlclient.models.http import DocumentsBodyPart as BodyPart
+from mlclient.models.http import DocumentsDisposition as Disposition
 from mlclient.multipart import (
     MultipartPart,
     decode_multipart_mixed,
     encode_multipart_mixed,
-)
-
-from mlclient.constants import HEADER_X_WWW_FORM_URLENCODED
-from mlclient.models.http import (
-    Category,
-    DocumentsBodyPart as BodyPart,
-    DocumentsDisposition as Disposition,
 )
 
 

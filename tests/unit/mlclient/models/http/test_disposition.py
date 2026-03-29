@@ -170,5 +170,7 @@ def test_serialize_field_uses_enum_values_and_quotes_filename():
     )
 
     assert disposition._serialize_field("filename") == 'filename="/doc.xml"'
-    assert disposition._serialize_field("category") == "category=collections; category=quality"
+    assert disposition._serialize_field("category") == (
+        "category=collections; category=quality"
+    )
     assert disposition._serialize_field("extract") == "extract=properties"

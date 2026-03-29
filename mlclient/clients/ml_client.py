@@ -29,9 +29,9 @@ from mlclient.services.logs import LogsService
 
 from .api_client import ApiClient
 from .http_client import (
+    DEFAULT_RETRY_STRATEGY,
     MARKLOGIC_ADMIN_API_PORT,
     MARKLOGIC_MANAGE_API_PORT,
-    DEFAULT_RETRY_STRATEGY,
     RESTART_RETRY_STRATEGY,
     HttpClient,
 )

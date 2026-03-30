@@ -9,6 +9,8 @@ import xml.etree.ElementTree as ElemTree
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+import aiofiles
+
 from mlclient.calls import EvalCall
 from mlclient.clients.api_client import ApiClient
 
@@ -381,6 +383,40 @@ def _get_call(
     return EvalCall(**params)
 
 
+async def _async_get_call(
+    file: str | None,
+    xq: str | None,
+    js: str | None,
+    variables: dict | None,
+    database: str | None,
+    txid: str | None,
+    **kwargs,
+) -> EvalCall:
+    """Prepare an EvalCall instance, reading files asynchronously."""
+    params = {
+        "xquery": xq,
+        "javascript": js,
+        "variables": _get_variables(variables, kwargs),
+        "database": database,
+        "txid": txid,
+    }
+
+    if file:
+        if file.endswith(_XQUERY_FILE_EXT):
+            lang = "xquery"
+        elif file.endswith(_JAVASCRIPT_FILE_EXT):
+            lang = "javascript"
+        else:
+            extensions = ", ".join(_SUPPORTED_FILE_EXT)
+            msg = f"Unknown file extension! Supported extensions are: {extensions}"
+            raise UnsupportedFileExtensionError(msg)
+
+        async with aiofiles.open(file) as f:
+            params[lang] = await f.read()
+
+    return EvalCall(**params)
+
+
 def _get_variables(
     variables: dict | None,
     kwargs: dict,
@@ -585,7 +621,7 @@ class AsyncEvalService:
     ):
         """Execute eval and return parsed result."""
         _validate_params(file, xq, js)
-        call = _get_call(
+        call = await _async_get_call(
             file=file,
             xq=xq,
             js=js,

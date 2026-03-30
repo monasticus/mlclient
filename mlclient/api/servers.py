@@ -1,4 +1,4 @@
-"""ServersApi - mid-level access to MarkLogic server endpoints."""
+"""ServersApi / AsyncServersApi - mid-level access to MarkLogic server endpoints."""
 
 from __future__ import annotations
 
@@ -17,7 +17,7 @@ from mlclient.calls import (
 
 # Avoid circular import: ApiClient -> api classes -> ApiClient
 if TYPE_CHECKING:
-    from mlclient.clients.api_client import ApiClient
+    from mlclient.clients.api_client import ApiClient, AsyncApiClient
 
 
 class ServersApi:
@@ -257,3 +257,95 @@ class ServersApi:
         """
         call = ServerPropertiesPutCall(server=server, group_id=group_id, body=body)
         return self._api.call(call)
+
+
+class AsyncServersApi:
+    """Async mid-level API for ``/manage/v2/servers`` endpoints."""
+
+    def __init__(self, api: AsyncApiClient):
+        self._api = api
+
+    async def get_list(
+        self,
+        *,
+        data_format: str | None = None,
+        group_id: str | None = None,
+        view: str | None = None,
+        full_refs: bool | None = None,
+    ) -> Response:
+        """Retrieve data about the App Servers in the cluster."""
+        call = ServersGetCall(
+            data_format=data_format,
+            group_id=group_id,
+            view=view,
+            full_refs=full_refs,
+        )
+        return await self._api.call(call)
+
+    async def create(
+        self,
+        body: str | dict,
+        *,
+        group_id: str | None = None,
+        server_type: str | None = None,
+    ) -> Response:
+        """Create a new App Server in the specified group."""
+        call = ServersPostCall(body=body, group_id=group_id, server_type=server_type)
+        return await self._api.call(call)
+
+    async def get(
+        self,
+        server: str,
+        group_id: str,
+        *,
+        data_format: str | None = None,
+        view: str | None = None,
+        host_id: str | None = None,
+        full_refs: bool | None = None,
+        modules: bool | None = None,
+    ) -> Response:
+        """Retrieve data about a specific App Server."""
+        call = ServerGetCall(
+            server=server,
+            group_id=group_id,
+            data_format=data_format,
+            view=view,
+            host_id=host_id,
+            full_refs=full_refs,
+            modules=modules,
+        )
+        return await self._api.call(call)
+
+    async def delete(
+        self,
+        server: str,
+        group_id: str,
+    ) -> Response:
+        """Delete the specified App Server from the specified group."""
+        call = ServerDeleteCall(server=server, group_id=group_id)
+        return await self._api.call(call)
+
+    async def get_properties(
+        self,
+        server: str,
+        group_id: str,
+        *,
+        data_format: str | None = None,
+    ) -> Response:
+        """Retrieve the modifiable properties of the specified App Server."""
+        call = ServerPropertiesGetCall(
+            server=server,
+            group_id=group_id,
+            data_format=data_format,
+        )
+        return await self._api.call(call)
+
+    async def put_properties(
+        self,
+        server: str,
+        group_id: str,
+        body: str | dict,
+    ) -> Response:
+        """Modify the properties of the specified App Server."""
+        call = ServerPropertiesPutCall(server=server, group_id=group_id, body=body)
+        return await self._api.call(call)

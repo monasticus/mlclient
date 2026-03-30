@@ -1,4 +1,4 @@
-"""High-level Eval service.
+"""High-level Eval service (EvalService / AsyncEvalService).
 
 Provides parsed code evaluation on MarkLogic.
 """
@@ -7,9 +7,14 @@ from __future__ import annotations
 
 import xml.etree.ElementTree as ElemTree
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from mlclient.calls import EvalCall
 from mlclient.clients.api_client import ApiClient
+
+if TYPE_CHECKING:
+    from mlclient.clients.api_client import AsyncApiClient
+
 from mlclient.exceptions import (
     MarkLogicError,
     UnsupportedFileExtensionError,
@@ -385,3 +390,212 @@ def _get_variables(
         variables.update(kwargs)
         return variables
     return kwargs
+
+
+class AsyncEvalService:
+    """Async high-level service for /v1/eval endpoint."""
+
+    def __init__(self, api: AsyncApiClient):
+        self._api = api
+
+    async def xquery(
+        self,
+        code: str,
+        *,
+        variables: dict | None = None,
+        database: str | None = None,
+        txid: str | None = None,
+        output_type: type | None = None,
+        **kwargs,
+    ) -> (
+        bytes
+        | str
+        | int
+        | float
+        | bool
+        | dict
+        | ElemTree.ElementTree
+        | ElemTree.Element
+        | list
+    ):
+        """Evaluate XQuery code in MarkLogic."""
+        return await self._eval(
+            xq=code,
+            variables=variables,
+            database=database,
+            txid=txid,
+            output_type=output_type,
+            **kwargs,
+        )
+
+    async def javascript(
+        self,
+        code: str,
+        *,
+        variables: dict | None = None,
+        database: str | None = None,
+        txid: str | None = None,
+        output_type: type | None = None,
+        **kwargs,
+    ) -> (
+        bytes
+        | str
+        | int
+        | float
+        | bool
+        | dict
+        | ElemTree.ElementTree
+        | ElemTree.Element
+        | list
+    ):
+        """Evaluate JavaScript code in MarkLogic."""
+        return await self._eval(
+            js=code,
+            variables=variables,
+            database=database,
+            txid=txid,
+            output_type=output_type,
+            **kwargs,
+        )
+
+    async def xqy(
+        self,
+        code: str,
+        *,
+        variables: dict | None = None,
+        database: str | None = None,
+        txid: str | None = None,
+        output_type: type | None = None,
+        **kwargs,
+    ) -> (
+        bytes
+        | str
+        | int
+        | float
+        | bool
+        | dict
+        | ElemTree.ElementTree
+        | ElemTree.Element
+        | list
+    ):
+        """Evaluate XQuery code. Alias for :meth:`xquery`."""
+        return await self.xquery(
+            code,
+            variables=variables,
+            database=database,
+            txid=txid,
+            output_type=output_type,
+            **kwargs,
+        )
+
+    async def js(
+        self,
+        code: str,
+        *,
+        variables: dict | None = None,
+        database: str | None = None,
+        txid: str | None = None,
+        output_type: type | None = None,
+        **kwargs,
+    ) -> (
+        bytes
+        | str
+        | int
+        | float
+        | bool
+        | dict
+        | ElemTree.ElementTree
+        | ElemTree.Element
+        | list
+    ):
+        """Evaluate JavaScript code. Alias for :meth:`javascript`."""
+        return await self.javascript(
+            code,
+            variables=variables,
+            database=database,
+            txid=txid,
+            output_type=output_type,
+            **kwargs,
+        )
+
+    async def file(
+        self,
+        path: str,
+        *,
+        variables: dict | None = None,
+        database: str | None = None,
+        txid: str | None = None,
+        output_type: type | None = None,
+        **kwargs,
+    ) -> (
+        bytes
+        | str
+        | int
+        | float
+        | bool
+        | dict
+        | ElemTree.ElementTree
+        | ElemTree.Element
+        | list
+    ):
+        """Evaluate code from a file in MarkLogic (auto-detect language)."""
+        return await self._eval(
+            file=path,
+            variables=variables,
+            database=database,
+            txid=txid,
+            output_type=output_type,
+            **kwargs,
+        )
+
+    async def execute(
+        self,
+        *,
+        file: str | None = None,
+        xq: str | None = None,
+        js: str | None = None,
+        variables: dict | None = None,
+        database: str | None = None,
+        txid: str | None = None,
+        output_type: type | None = None,
+        **kwargs,
+    ):
+        """Evaluate code in a MarkLogic server (general-purpose)."""
+        return await self._eval(
+            file=file,
+            xq=xq,
+            js=js,
+            variables=variables,
+            database=database,
+            txid=txid,
+            output_type=output_type,
+            **kwargs,
+        )
+
+    async def _eval(
+        self,
+        file: str | None = None,
+        xq: str | None = None,
+        js: str | None = None,
+        variables: dict | None = None,
+        database: str | None = None,
+        txid: str | None = None,
+        output_type: type | None = None,
+        **kwargs,
+    ):
+        """Execute eval and return parsed result."""
+        _validate_params(file, xq, js)
+        call = _get_call(
+            file=file,
+            xq=xq,
+            js=js,
+            variables=variables,
+            database=database,
+            txid=txid,
+            **kwargs,
+        )
+        resp = await self._api.call(call)
+        parsed_resp = MLResponseParser.parse(resp, output_type=output_type)
+        if not resp.is_success:
+            raise MarkLogicError(parsed_resp)
+        return parsed_resp

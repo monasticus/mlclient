@@ -3,12 +3,15 @@
 High-level services providing parsed results from MarkLogic operations.
 """
 
-from .documents import DocumentsService
-from .eval import LOCAL_NS, EvalService
-from .logs import LogsService, LogType
+from .documents import AsyncDocumentsService, DocumentsService
+from .eval import LOCAL_NS, AsyncEvalService, EvalService
+from .logs import AsyncLogsService, LogsService, LogType
 
 __all__ = [
     "LOCAL_NS",
+    "AsyncDocumentsService",
+    "AsyncEvalService",
+    "AsyncLogsService",
     "DocumentsService",
     "EvalService",
     "LogType",

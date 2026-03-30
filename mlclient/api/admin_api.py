@@ -1,4 +1,4 @@
-"""Admin API group for /admin/v1/* endpoints.
+"""Admin API group for /admin/v1/* endpoints (AdminApi / AsyncAdminApi).
 
 Requires the Admin server (port 8001 by default).
 """
@@ -13,7 +13,7 @@ from mlclient.calls import ApiCall
 from mlclient.calls.admin import ServerConfigGetCall, TimestampGetCall
 
 if TYPE_CHECKING:
-    from mlclient.clients.api_client import ApiClient
+    from mlclient.clients.api_client import ApiClient, AsyncApiClient
 
 
 class AdminApi:
@@ -71,3 +71,22 @@ class AdminApi:
             the server configuration
         """
         return self._api.call(ServerConfigGetCall())
+
+
+class AsyncAdminApi:
+    """Async Admin API group for /admin/v1/* endpoints."""
+
+    def __init__(self, api: AsyncApiClient):
+        self._api = api
+
+    async def call(self, call_: ApiCall) -> Response:
+        """Send a custom ApiCall."""
+        return await self._api.call(call_)
+
+    async def get_timestamp(self) -> Response:
+        """Verify that MarkLogic Server is up and accepting requests."""
+        return await self._api.call(TimestampGetCall())
+
+    async def get_server_config(self) -> Response:
+        """Retrieve server configuration information for cluster join."""
+        return await self._api.call(ServerConfigGetCall())

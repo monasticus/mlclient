@@ -5,10 +5,16 @@ The root package of Python API to manage MarkLogic instance.
 This package exports the following classes:
     * MLClient
         Main entry point for MarkLogic interaction with layered access.
+    * AsyncMLClient
+        Async variant of MLClient.
     * HttpClient
         A low-level class used to send HTTP requests to a MarkLogic instance.
+    * AsyncHttpClient
+        Async variant of HttpClient.
     * ApiClient
         A mid-level client providing call() for ApiCall objects.
+    * AsyncApiClient
+        Async variant of ApiClient.
     * MLEnvironment
         A class representing a MarkLogic configuration environment.
     * MLClientManager
@@ -36,6 +42,9 @@ from .clients import (
     MARKLOGIC_REST_API_PORT,
     RESTART_RETRY_STRATEGY,
     ApiClient,
+    AsyncApiClient,
+    AsyncHttpClient,
+    AsyncMLClient,
     HttpClient,
     MLClient,
 )
@@ -59,6 +68,9 @@ __all__ = [
     "MARKLOGIC_REST_API_PORT",
     "RESTART_RETRY_STRATEGY",
     "ApiClient",
+    "AsyncApiClient",
+    "AsyncHttpClient",
+    "AsyncMLClient",
     "HttpClient",
     "MLClient",
     "MLClientManager",

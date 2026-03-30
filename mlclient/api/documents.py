@@ -1,4 +1,4 @@
-"""DocumentsApi - mid-level access to MarkLogic documents endpoints."""
+"""DocumentsApi / AsyncDocumentsApi - MarkLogic documents endpoints."""
 
 from __future__ import annotations
 
@@ -11,7 +11,7 @@ from mlclient.models.http import DocumentsBodyPart as BodyPart
 
 # Avoid circular import: ApiClient -> api classes -> ApiClient
 if TYPE_CHECKING:
-    from mlclient.clients.api_client import ApiClient
+    from mlclient.clients.api_client import ApiClient, AsyncApiClient
 
 
 class DocumentsApi:
@@ -217,3 +217,81 @@ class DocumentsApi:
             wipe_temporal=wipe_temporal,
         )
         return self._api.call(call)
+
+
+class AsyncDocumentsApi:
+    """Async mid-level API for ``/v1/documents`` endpoints."""
+
+    def __init__(self, api: AsyncApiClient):
+        self._api = api
+
+    async def get(
+        self,
+        uri: str | list,
+        *,
+        database: str | None = None,
+        category: str | list | None = None,
+        data_format: str | None = None,
+        timestamp: str | None = None,
+        transform: str | None = None,
+        transform_params: dict | None = None,
+        txid: str | None = None,
+    ) -> Response:
+        """Retrieve document content and/or metadata from the database."""
+        call = DocumentsGetCall(
+            uri=uri,
+            database=database,
+            category=category,
+            data_format=data_format,
+            timestamp=timestamp,
+            transform=transform,
+            transform_params=transform_params,
+            txid=txid,
+        )
+        return await self._api.call(call)
+
+    async def post(
+        self,
+        body_parts: list[BodyPart],
+        *,
+        database: str | None = None,
+        transform: str | None = None,
+        transform_params: dict | None = None,
+        txid: str | None = None,
+        temporal_collection: str | None = None,
+        system_time: str | None = None,
+    ) -> Response:
+        """Insert or update content and/or metadata for multiple documents."""
+        call = DocumentsPostCall(
+            body_parts=body_parts,
+            database=database,
+            transform=transform,
+            transform_params=transform_params,
+            txid=txid,
+            temporal_collection=temporal_collection,
+            system_time=system_time,
+        )
+        return await self._api.call(call)
+
+    async def delete(
+        self,
+        uri: str | list,
+        *,
+        database: str | None = None,
+        category: str | list | None = None,
+        txid: str | None = None,
+        temporal_collection: str | None = None,
+        system_time: str | None = None,
+        wipe_temporal: bool | None = None,
+    ) -> Response:
+        """Remove documents, or reset document metadata."""
+        call = DocumentsDeleteCall(
+            uri=uri,
+            database=database,
+            category=category,
+            txid=txid,
+            temporal_collection=temporal_collection,
+            system_time=system_time,
+            wipe_temporal=wipe_temporal,
+        )
+        return await self._api.call(call)

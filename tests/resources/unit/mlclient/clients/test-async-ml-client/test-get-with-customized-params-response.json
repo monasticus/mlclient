@@ -1,0 +1,127 @@
+{
+  "server-default-list": {
+    "meta": {
+      "uri": "/manage/v2/servers",
+      "current-time": "2023-11-06T10:08:20.497006Z",
+      "elapsed-time": {
+        "units": "sec",
+        "value": 0.008514
+      }
+    },
+    "relations": {
+      "relation-group": [
+        {
+          "typeref": "groups",
+          "relation-count": {
+            "units": "quantity",
+            "value": 1
+          },
+          "relation": [
+            {
+              "uriref": "/manage/v2/groups/Default",
+              "idref": "11633792252511439866",
+              "nameref": "Default"
+            }
+          ]
+        }
+      ]
+    },
+    "list-items": {
+      "list-count": {
+        "units": "quantity",
+        "value": 4
+      },
+      "list-item": [
+        {
+          "relation-id": [
+            "11633792252511439866"
+          ],
+          "groupnameref": "Default",
+          "uriref": "/manage/v2/servers/Admin?group-id=Default",
+          "kindref": "http",
+          "content-db": "Security",
+          "idref": "6578640693744866160",
+          "nameref": "Admin"
+        },
+        {
+          "relation-id": [
+            "11633792252511439866"
+          ],
+          "groupnameref": "Default",
+          "uriref": "/manage/v2/servers/App-Services?group-id=Default",
+          "kindref": "http",
+          "content-db": "Documents",
+          "modules-db": "Modules",
+          "idref": "882594824993807443",
+          "nameref": "App-Services"
+        },
+        {
+          "relation-id": [
+            "11633792252511439866"
+          ],
+          "groupnameref": "Default",
+          "uriref": "/manage/v2/servers/HealthCheck?group-id=Default",
+          "kindref": "http",
+          "content-db": "App-Services",
+          "idref": "5400984594824545371",
+          "nameref": "HealthCheck"
+        },
+        {
+          "relation-id": [
+            "11633792252511439866"
+          ],
+          "groupnameref": "Default",
+          "uriref": "/manage/v2/servers/Manage?group-id=Default",
+          "kindref": "http",
+          "content-db": "App-Services",
+          "idref": "891382231445569816",
+          "nameref": "Manage"
+        }
+      ]
+    },
+    "related-views": {
+      "related-view": [
+        {
+          "view-type": "root",
+          "view-name": "default",
+          "view-uri": "/manage/v2"
+        },
+        {
+          "view-type": "list",
+          "view-name": "metrics",
+          "view-uri": "/manage/v2/servers?view=metrics"
+        },
+        {
+          "view-type": "list",
+          "view-name": "package",
+          "view-uri": "/manage/v2/servers?view=package"
+        },
+        {
+          "view-type": "list",
+          "view-name": "properties-schema",
+          "view-uri": "/manage/v2/servers?view=properties-schema"
+        },
+        {
+          "view-type": "list",
+          "view-name": "schema",
+          "view-uri": "/manage/v2/servers?view=schema"
+        },
+        {
+          "view-type": "list",
+          "view-name": "status",
+          "view-uri": "/manage/v2/servers?view=status"
+        },
+        {
+          "view-type": "list",
+          "view-name": "health",
+          "view-uri": "/manage/v2?view=health&health-resource=server"
+        },
+        {
+          "view-type": "list",
+          "view-name": "docs",
+          "view-uri": "http://docs.marklogic.com/REST/management/app-servers"
+        }
+      ]
+    }
+  }
+}

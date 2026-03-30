@@ -1,4 +1,4 @@
-"""EvalApi - mid-level access to MarkLogic eval endpoint."""
+"""EvalApi / AsyncEvalApi - mid-level access to MarkLogic eval endpoint."""
 
 from __future__ import annotations
 
@@ -10,7 +10,7 @@ from mlclient.calls import EvalCall
 
 # Avoid circular import: ApiClient -> api classes -> ApiClient
 if TYPE_CHECKING:
-    from mlclient.clients.api_client import ApiClient
+    from mlclient.clients.api_client import ApiClient, AsyncApiClient
 
 
 class EvalApi:
@@ -69,3 +69,29 @@ class EvalApi:
             txid=txid,
         )
         return self._api.call(call)
+
+
+class AsyncEvalApi:
+    """Async mid-level API for ``/v1/eval`` endpoint."""
+
+    def __init__(self, api: AsyncApiClient):
+        self._api = api
+
+    async def post(
+        self,
+        *,
+        xquery: str | None = None,
+        javascript: str | None = None,
+        variables: dict | None = None,
+        database: str | None = None,
+        txid: str | None = None,
+    ) -> Response:
+        """Evaluate an ad-hoc query expressed using XQuery or server-side JavaScript."""
+        call = EvalCall(
+            xquery=xquery,
+            javascript=javascript,
+            variables=variables,
+            database=database,
+            txid=txid,
+        )
+        return await self._api.call(call)

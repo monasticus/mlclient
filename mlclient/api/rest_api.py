@@ -1,4 +1,4 @@
-"""REST API group for /v1/* endpoints.
+"""REST API group for /v1/* endpoints (RestApi / AsyncRestApi).
 
 Requires a REST app server.
 """
@@ -14,10 +14,10 @@ from mlclient.calls import ApiCall
 
 # Avoid circular import: ApiClient -> api classes -> ApiClient
 if TYPE_CHECKING:
-    from mlclient.clients.api_client import ApiClient
+    from mlclient.clients.api_client import ApiClient, AsyncApiClient
 
-from .documents import DocumentsApi
-from .eval import EvalApi
+from .documents import AsyncDocumentsApi, DocumentsApi
+from .eval import AsyncEvalApi, EvalApi
 
 
 class RestApi:
@@ -53,3 +53,24 @@ class RestApi:
     def documents(self) -> DocumentsApi:
         """Return the documents API group."""
         return DocumentsApi(self._api)
+
+
+class AsyncRestApi:
+    """Async REST API group for /v1/* endpoints (eval, documents)."""
+
+    def __init__(self, api: AsyncApiClient):
+        self._api = api
+
+    async def call(self, call_: ApiCall) -> Response:
+        """Send a custom ApiCall."""
+        return await self._api.call(call_)
+
+    @cached_property
+    def eval(self) -> AsyncEvalApi:
+        """Return the eval API group."""
+        return AsyncEvalApi(self._api)
+
+    @cached_property
+    def documents(self) -> AsyncDocumentsApi:
+        """Return the documents API group."""
+        return AsyncDocumentsApi(self._api)

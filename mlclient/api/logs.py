@@ -1,4 +1,4 @@
-"""LogsApi - mid-level access to MarkLogic logs endpoint."""
+"""LogsApi / AsyncLogsApi - mid-level access to MarkLogic logs endpoint."""
 
 from __future__ import annotations
 
@@ -10,7 +10,7 @@ from mlclient.calls import LogsCall
 
 # Avoid circular import: ApiClient -> api classes -> ApiClient
 if TYPE_CHECKING:
-    from mlclient.clients.api_client import ApiClient
+    from mlclient.clients.api_client import ApiClient, AsyncApiClient
 
 
 class LogsApi:
@@ -68,3 +68,31 @@ class LogsApi:
             regex=regex,
         )
         return self._api.call(call)
+
+
+class AsyncLogsApi:
+    """Async mid-level API for ``/manage/v2/logs`` endpoint."""
+
+    def __init__(self, api: AsyncApiClient):
+        self._api = api
+
+    async def get(
+        self,
+        filename: str,
+        *,
+        data_format: str | None = None,
+        host: str | None = None,
+        start_time: str | None = None,
+        end_time: str | None = None,
+        regex: str | None = None,
+    ) -> Response:
+        """Retrieve the contents of a log file."""
+        call = LogsCall(
+            filename=filename,
+            data_format=data_format,
+            host=host,
+            start_time=start_time,
+            end_time=end_time,
+            regex=regex,
+        )
+        return await self._api.call(call)

@@ -1,0 +1,57 @@
+{
+  "logfile": {
+    "host": "e22004ef58bb.home",
+    "filename": "ErrorLog.txt",
+    "start": "",
+    "end": "",
+    "regex": "",
+    "regex-flags": "",
+    "log": [
+      {
+        "timestamp": "2023-10-31T09:03:06.383Z",
+        "level": "notice",
+        "message": "Starting MarkLogic Server 10.0-10.2 x86_64 in /opt/MarkLogic with data in /var/opt/MarkLogic"
+      },
+      {
+        "timestamp": "2023-10-31T09:03:06.383Z",
+        "level": "info",
+        "message": "MarkLogic Converters not installed"
+      },
+      {
+        "timestamp": "2023-10-31T09:03:06.450Z",
+        "level": "info",
+        "message": "MarkLogic Server is running in docker environment\nSwap space= 2097148KB and Huge pages=0"
+      },
+      {
+        "timestamp": "2023-10-31T09:03:06.450Z",
+        "level": "warning",
+        "message": "Linux swap is underprovisioned; need=31GB have=2GB"
+      },
+      {
+        "timestamp": "2023-10-31T09:03:06.631Z",
+        "level": "info",
+        "message": "License key languages: en"
+      },
+      {
+        "timestamp": "2023-10-31T09:03:06.700Z",
+        "level": "info",
+        "message": "Using icu tokenization: ta ro tr da fi hu"
+      },
+      {
+        "timestamp": "2023-10-31T09:03:06.700Z",
+        "level": "info",
+        "message": "Using bitext stemming: en en-uc"
+      },
+      {
+        "timestamp": "2023-10-31T09:03:06.700Z",
+        "level": "info",
+        "message": "Using snowball stemming: ta ro tr da fi hu"
+      },
+      {
+        "timestamp": "2023-10-31T09:03:07.290Z",
+        "level": "info",
+        "message": "Loaded schemas, rule sets, and templates"
+      }
+    ]
+  }
+}

@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import logging
 
-from mlclient.clients import HttpClient, MLClient
+from mlclient.clients import AsyncHttpClient, AsyncMLClient, HttpClient, MLClient
 from mlclient.exceptions import NoRestServerConfiguredError, NotARestServerError
 from mlclient.ml_environment import MLEnvironment
 
@@ -98,6 +98,57 @@ class MLClientManager:
         rest_server_id = self._get_rest_server_id(rest_server_id)
         app_server_config = self.config.provide_config(rest_server_id)
         return MLClient(**app_server_config)
+
+    def get_async_client(
+        self,
+        rest_server_id: str | None = None,
+    ) -> AsyncMLClient:
+        """Initialize an AsyncMLClient instance for a specific App Server.
+
+        If no identifier is provided, returns a client for the first configured
+        REST server within the environment.
+
+        Parameters
+        ----------
+        rest_server_id : str | None, default None
+            A REST App Server identifier
+
+        Returns
+        -------
+        AsyncMLClient
+            An AsyncMLClient instance
+
+        Raises
+        ------
+        NotARestServerError
+            If the App-Server identifier does not point to a REST server
+            (only when rest_server_id is not None and is not a REST server)
+        NoRestServerConfiguredError
+            If an identifier has not been provided and there's no REST servers
+            configured for the environment
+        """
+        rest_server_id = self._get_rest_server_id(rest_server_id)
+        app_server_config = self.config.provide_config(rest_server_id)
+        return AsyncMLClient(**app_server_config)
+
+    def get_async_http_client(
+        self,
+        app_server_id: str,
+    ) -> AsyncHttpClient:
+        """Initialize an AsyncHttpClient instance for a specific App Server.
+
+        Parameters
+        ----------
+        app_server_id : str
+            An App Server identifier
+
+        Returns
+        -------
+        AsyncHttpClient
+            An AsyncHttpClient instance
+        """
+        app_server_config = self.config.provide_config(app_server_id)
+        return AsyncHttpClient(**app_server_config)
 
     def get_http_client(
         self,

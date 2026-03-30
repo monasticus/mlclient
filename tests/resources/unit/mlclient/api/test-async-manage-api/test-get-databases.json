@@ -1,0 +1,109 @@
+{
+  "database-default-list": {
+    "meta": {
+      "uri": "/manage/v2/databases?view=default",
+      "current-time": "2023-11-06T13:01:22.599357Z",
+      "elapsed-time": {
+        "units": "sec",
+        "value": 0.010371
+      }
+    },
+    "list-items": {
+      "list-count": {
+        "units": "quantity",
+        "value": 10
+      },
+      "list-item": [
+        {
+          "uriref": "/manage/v2/databases/App-Services",
+          "idref": "17052451265718992663",
+          "nameref": "App-Services"
+        },
+        {
+          "uriref": "/manage/v2/databases/Documents",
+          "idref": "16888443514805545800",
+          "nameref": "Documents"
+        },
+        {
+          "uriref": "/manage/v2/databases/Extensions",
+          "idref": "902459493867671897",
+          "nameref": "Extensions"
+        },
+        {
+          "uriref": "/manage/v2/databases/Fab",
+          "idref": "12447752034658669525",
+          "nameref": "Fab"
+        },
+        {
+          "uriref": "/manage/v2/databases/Last-Login",
+          "idref": "12015871717477311545",
+          "nameref": "Last-Login"
+        },
+        {
+          "uriref": "/manage/v2/databases/Meters",
+          "idref": "14325726833195620506",
+          "nameref": "Meters"
+        },
+        {
+          "uriref": "/manage/v2/databases/Modules",
+          "idref": "1434845581500363296",
+          "nameref": "Modules"
+        },
+        {
+          "uriref": "/manage/v2/databases/Schemas",
+          "idref": "4404838638654954154",
+          "nameref": "Schemas"
+        },
+        {
+          "uriref": "/manage/v2/databases/Security",
+          "idref": "174303095332374528",
+          "nameref": "Security"
+        },
+        {
+          "uriref": "/manage/v2/databases/Triggers",
+          "idref": "17541154225211168808",
+          "nameref": "Triggers"
+        }
+      ]
+    },
+    "related-views": {
+      "related-view": [
+        {
+          "view-type": "root",
+          "view-name": "default",
+          "view-uri": "/manage/v2"
+        },
+        {
+          "view-type": "list",
+          "view-name": "metrics",
+          "view-uri": "/manage/v2/databases?view=metrics"
+        },
+        {
+          "view-type": "list",
+          "view-name": "package",
+          "view-uri": "/manage/v2/databases?view=package"
+        },
+        {
+          "view-type": "list",
+          "view-name": "properties-schema",
+          "view-uri": "/manage/v2/databases?view=properties-schema"
+        },
+        {
+          "view-type": "list",
+          "view-name": "schema",
+          "view-uri": "/manage/v2/databases?view=schema"
+        },
+        {
+          "view-type": "list",
+          "view-name": "health",
+          "view-uri": "/manage/v2?view=health&health-resource=database"
+        },
+        {
+          "view-type": "list",
+          "view-name": "docs",
+          "view-uri": "http://docs.marklogic.com/REST/management/databases"
+        }
+      ]
+    }
+  }
+}

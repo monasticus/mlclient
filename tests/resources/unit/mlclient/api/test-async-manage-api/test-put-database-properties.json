@@ -1,0 +1,1 @@
+{"errorResponse":{"statusCode":"404", "status":"Not Found", "messageCode":"XDMP-NOSUCHDB", "message":"XDMP-NOSUCHDB: (err:FOER0000) No such database non-existing-db"}}

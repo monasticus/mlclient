@@ -59,8 +59,7 @@ def populate_database(
     job.with_client_config(**client_config)
     job.with_database(database)
     job.with_filesystem_input(mimeo_output_root)
-    job.start()
-    job.await_completion()
+    job.run_sync()
 
 
 setup_logger()

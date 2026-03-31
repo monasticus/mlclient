@@ -16,13 +16,11 @@ ml_mocker.with_post_side_effect(side_effect=ml_doc_mocker.post_documents_side_ef
 def test_basic_job_with_documents_input():
     docs = _get_test_docs(5)
 
-    job = WriteDocumentsJob(thread_count=1, batch_size=5)
-    assert job.thread_count == 1
-    assert job.batch_size == 5
+    job = WriteDocumentsJob(batch_size=5)
+
     job.with_client_config(auth_method="digest")
     job.with_documents_input(docs)
-    job.start()
-    job.await_completion()
+    job.run_sync()
 
     assert ml_mocker.router.calls.call_count == 1
     assert ml_mocker.router.calls.last.request.url.params.get("database") is None
@@ -34,13 +32,11 @@ def test_basic_job_with_documents_input():
 @ml_mocker.router
 def test_basic_job_with_filesystem_input():
     input_path = resources_utils.get_test_resources_path(__file__)
-    job = WriteDocumentsJob(thread_count=1, batch_size=5)
-    assert job.thread_count == 1
-    assert job.batch_size == 5
+    job = WriteDocumentsJob(batch_size=5)
+
     job.with_client_config(auth_method="digest")
     job.with_filesystem_input(input_path, "/root/dir")
-    job.start()
-    job.await_completion()
+    job.run_sync()
 
     assert ml_mocker.router.calls.call_count == 1
     assert ml_mocker.router.calls.last.request.url.params.get("database") is None
@@ -53,14 +49,12 @@ def test_basic_job_with_filesystem_input():
 def test_basic_job_with_multiple_inputs():
     docs = list(_get_test_docs(5000))
 
-    job = WriteDocumentsJob(thread_count=1, batch_size=50)
-    assert job.thread_count == 1
-    assert job.batch_size == 50
+    job = WriteDocumentsJob(batch_size=50)
+
     job.with_client_config(auth_method="digest")
     job.with_documents_input(docs[:2500])
     job.with_documents_input(docs[2500:])
-    job.start()
-    job.await_completion()
+    job.run_sync()
 
     assert ml_mocker.router.calls.call_count == 100
     assert ml_mocker.router.calls.last.request.url.params.get("database") is None
@@ -73,38 +67,17 @@ def test_basic_job_with_multiple_inputs():
 def test_job_with_custom_database():
     docs = _get_test_docs(5)
 
-    job = WriteDocumentsJob(thread_count=1, batch_size=5)
-    assert job.thread_count == 1
-    assert job.batch_size == 5
+    job = WriteDocumentsJob(batch_size=5)
+
     job.with_client_config(auth_method="digest")
     job.with_documents_input(docs)
     job.with_database("Documents")
-    job.start()
-    job.await_completion()
+    job.run_sync()
 
     assert ml_mocker.router.calls.call_count == 1
     assert ml_mocker.router.calls.last.request.url.params.get("database") == "Documents"
     assert job.report.completed == 5
     assert job.report.successful == 5
-    assert job.report.failed == 0
-
-
-@ml_mocker.router
-def test_multi_thread_job():
-    docs = _get_test_docs(150)
-
-    job = WriteDocumentsJob(batch_size=5)
-    assert job.thread_count > 1
-    assert job.batch_size == 5
-    job.with_client_config(auth_method="digest")
-    job.with_documents_input(docs)
-    job.start()
-    job.await_completion()
-
-    assert ml_mocker.router.calls.call_count >= 30
-    assert ml_mocker.router.calls.last.request.url.params.get("database") is None
-    assert job.report.completed == 150
-    assert job.report.successful == 150
     assert job.report.failed == 0
 
 
@@ -127,13 +100,11 @@ def test_failing_job():
     )
     mocker.mock_post()
 
-    job = WriteDocumentsJob(thread_count=1, batch_size=5)
-    assert job.thread_count == 1
-    assert job.batch_size == 5
+    job = WriteDocumentsJob(batch_size=5)
+
     job.with_client_config()
     job.with_documents_input(docs)
-    job.start()
-    job.await_completion()
+    job.run_sync()
 
     assert respx.calls.call_count == 1
     assert job.report.completed == 5

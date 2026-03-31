@@ -17,8 +17,7 @@ def test_write_job_with_documents_input():
         job = WriteDocumentsJob()
         job.with_client_config(auth_method="digest")
         job.with_documents_input(docs)
-        job.start()
-        job.await_completion()
+        job.run_sync()
         assert job.report.completed == len(uris)
         assert job.report.successful == len(uris)
         assert job.report.failed == 0
@@ -33,6 +32,7 @@ def test_write_job_with_documents_input():
 
 
 def test_read_job_with_documents_output():
+
     written_docs = list(docs_client_utils.generate_docs())
     uris = [doc.uri for doc in written_docs]
 
@@ -41,15 +41,14 @@ def test_read_job_with_documents_output():
         job = WriteDocumentsJob()
         job.with_client_config(auth_method="digest")
         job.with_documents_input(written_docs)
-        job.start()
-        job.await_completion()
+        job.run_sync()
         docs_client_utils.assert_documents_exist(uris)
 
         job = ReadDocumentsJob()
         job.with_client_config(auth_method="digest")
         job.with_uris_input(uris)
-        job.start()
-        read_docs = job.get_documents()
+        job.run_sync()
+        read_docs = job.documents
         for actual_doc in read_docs:
             expected_doc = next(
                 doc for doc in written_docs if actual_doc.uri == doc.uri
@@ -64,6 +63,7 @@ def test_read_job_with_documents_output():
 
 
 def test_read_job_with_filesystem_output():
+
     written_docs = list(docs_client_utils.generate_docs())
     uris = [doc.uri for doc in written_docs]
 
@@ -74,16 +74,14 @@ def test_read_job_with_filesystem_output():
         job = WriteDocumentsJob()
         job.with_client_config(auth_method="digest")
         job.with_documents_input(written_docs)
-        job.start()
-        job.await_completion()
+        job.run_sync()
         docs_client_utils.assert_documents_exist(uris)
 
         job = ReadDocumentsJob()
         job.with_client_config(auth_method="digest")
         job.with_uris_input(uris)
         job.with_filesystem_output(output_dir)
-        job.start()
-        job.await_completion()
+        job.run_sync()
         assert Path(output_dir).exists()
         assert len([p for p in Path(output_dir).rglob("*") if p.is_file()]) == len(uris)
         for uri in uris:

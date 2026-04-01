@@ -16,7 +16,7 @@ from tests.utils.ml_mockers import MLRespXMocker
 @respx.mock
 async def test_custom_call():
     ml_mocker = MLRespXMocker(use_router=False)
-    ml_mocker.with_url("http://localhost:8002/manage/v2/databases")
+    ml_mocker.with_url("http://localhost:8000/manage/v2/databases")
     ml_mocker.with_response_code(200)
     ml_mocker.with_response_content_type("application/json")
     ml_mocker.with_response_body({"database-default-list": {}})
@@ -37,7 +37,7 @@ async def test_get_logs():
         "test-get-logs.json",
     )
     ml_mocker = MLRespXMocker(use_router=False)
-    ml_mocker.with_url("http://localhost:8002/manage/v2/logs")
+    ml_mocker.with_url("http://localhost:8000/manage/v2/logs")
     ml_mocker.with_request_param("format", "json")
     ml_mocker.with_request_param("filename", "ErrorLog.txt")
     ml_mocker.with_response_content_type("application/json; charset=UTF-8")
@@ -61,7 +61,7 @@ async def test_get_databases():
         "test-get-databases.json",
     )
     ml_mocker = MLRespXMocker(use_router=False)
-    ml_mocker.with_url("http://localhost:8002/manage/v2/databases")
+    ml_mocker.with_url("http://localhost:8000/manage/v2/databases")
     ml_mocker.with_request_param("format", "json")
     ml_mocker.with_request_param("view", "default")
     ml_mocker.with_response_content_type("application/json; charset=UTF-8")
@@ -88,7 +88,7 @@ async def test_post_databases():
         "test-post-databases.xml",
     )
     ml_mocker = MLRespXMocker(use_router=False)
-    ml_mocker.with_url("http://localhost:8002/manage/v2/databases")
+    ml_mocker.with_url("http://localhost:8000/manage/v2/databases")
     ml_mocker.with_response_content_type("application/xml; charset=UTF-8")
     ml_mocker.with_response_code(400)
     ml_mocker.with_response_body(Path(response_body_path).read_bytes())
@@ -113,7 +113,7 @@ async def test_get_database():
         "test-get-database.json",
     )
     ml_mocker = MLRespXMocker(use_router=False)
-    ml_mocker.with_url("http://localhost:8002/manage/v2/databases/Documents")
+    ml_mocker.with_url("http://localhost:8000/manage/v2/databases/Documents")
     ml_mocker.with_request_param("format", "json")
     ml_mocker.with_request_param("view", "default")
     ml_mocker.with_response_content_type("application/json; charset=UTF-8")
@@ -138,7 +138,7 @@ async def test_post_database():
         "test-post-database.xml",
     )
     ml_mocker = MLRespXMocker(use_router=False)
-    ml_mocker.with_url("http://localhost:8002/manage/v2/databases/Documents")
+    ml_mocker.with_url("http://localhost:8000/manage/v2/databases/Documents")
     ml_mocker.with_request_content_type("application/json")
     ml_mocker.with_request_body({"operation": "clear-database"})
     ml_mocker.with_response_content_type("application/xml; charset=UTF-8")
@@ -158,7 +158,7 @@ async def test_post_database():
 @respx.mock
 async def test_delete_database():
     ml_mocker = MLRespXMocker(use_router=False)
-    ml_mocker.with_url("http://localhost:8002/manage/v2/databases/custom-db")
+    ml_mocker.with_url("http://localhost:8000/manage/v2/databases/custom-db")
     ml_mocker.with_response_code(204)
     ml_mocker.with_empty_response_body()
     ml_mocker.mock_delete()
@@ -180,7 +180,7 @@ async def test_get_database_properties():
     )
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url(
-        "http://localhost:8002/manage/v2/databases/Documents/properties",
+        "http://localhost:8000/manage/v2/databases/Documents/properties",
     )
     ml_mocker.with_request_param("format", "json")
     ml_mocker.with_response_content_type("application/json; charset=UTF-8")
@@ -208,7 +208,7 @@ async def test_put_database_properties():
     )
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url(
-        "http://localhost:8002/manage/v2/databases/non-existing-db/properties",
+        "http://localhost:8000/manage/v2/databases/non-existing-db/properties",
     )
     ml_mocker.with_request_content_type("application/json")
     ml_mocker.with_request_body({"database-name": "custom-db"})
@@ -236,7 +236,7 @@ async def test_get_servers():
         "test-get-servers.json",
     )
     ml_mocker = MLRespXMocker(use_router=False)
-    ml_mocker.with_url("http://localhost:8002/manage/v2/servers")
+    ml_mocker.with_url("http://localhost:8000/manage/v2/servers")
     ml_mocker.with_request_param("format", "json")
     ml_mocker.with_request_param("view", "default")
     ml_mocker.with_response_content_type("application/json; charset=UTF-8")
@@ -261,7 +261,7 @@ async def test_post_servers():
         "test-post-servers.xml",
     )
     ml_mocker = MLRespXMocker(use_router=False)
-    ml_mocker.with_url("http://localhost:8002/manage/v2/servers")
+    ml_mocker.with_url("http://localhost:8000/manage/v2/servers")
     ml_mocker.with_request_param("group-id", "Default")
     ml_mocker.with_request_param("server-type", "http")
     ml_mocker.with_response_content_type("application/xml; charset=UTF-8")
@@ -291,7 +291,7 @@ async def test_get_server():
         "test-get-server.json",
     )
     ml_mocker = MLRespXMocker(use_router=False)
-    ml_mocker.with_url("http://localhost:8002/manage/v2/servers/App-Services")
+    ml_mocker.with_url("http://localhost:8000/manage/v2/servers/App-Services")
     ml_mocker.with_request_param("group-id", "Default")
     ml_mocker.with_request_param("format", "json")
     ml_mocker.with_request_param("view", "default")
@@ -321,7 +321,7 @@ async def test_delete_server():
         "test-delete-server.xml",
     )
     ml_mocker = MLRespXMocker(use_router=False)
-    ml_mocker.with_url("http://localhost:8002/manage/v2/servers/Non-existing-server")
+    ml_mocker.with_url("http://localhost:8000/manage/v2/servers/Non-existing-server")
     ml_mocker.with_request_param("group-id", "Non-existing-group")
     ml_mocker.with_response_content_type("application/xml; charset=UTF-8")
     ml_mocker.with_response_code(404)
@@ -348,7 +348,7 @@ async def test_get_server_properties():
     )
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url(
-        "http://localhost:8002/manage/v2/servers/App-Services/properties",
+        "http://localhost:8000/manage/v2/servers/App-Services/properties",
     )
     ml_mocker.with_request_param("group-id", "Default")
     ml_mocker.with_request_param("format", "json")
@@ -378,7 +378,7 @@ async def test_put_server_properties():
     )
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url(
-        "http://localhost:8002/manage/v2/servers/non-existing-server/properties",
+        "http://localhost:8000/manage/v2/servers/non-existing-server/properties",
     )
     ml_mocker.with_request_content_type("application/json")
     ml_mocker.with_request_param("group-id", "non-existing-group")
@@ -408,7 +408,7 @@ async def test_get_forests():
         "test-get-forests.json",
     )
     ml_mocker = MLRespXMocker(use_router=False)
-    ml_mocker.with_url("http://localhost:8002/manage/v2/forests")
+    ml_mocker.with_url("http://localhost:8000/manage/v2/forests")
     ml_mocker.with_request_param("format", "json")
     ml_mocker.with_request_param("view", "default")
     ml_mocker.with_request_param("database-id", "Documents")
@@ -436,7 +436,7 @@ async def test_post_forests():
         "test-post-forests.xml",
     )
     ml_mocker = MLRespXMocker(use_router=False)
-    ml_mocker.with_url("http://localhost:8002/manage/v2/forests")
+    ml_mocker.with_url("http://localhost:8000/manage/v2/forests")
     ml_mocker.with_response_content_type("application/xml; charset=UTF-8")
     ml_mocker.with_response_code(500)
     ml_mocker.with_response_body(Path(response_body_path).read_bytes())
@@ -459,7 +459,7 @@ async def test_put_forests():
         "test-put-forests.xml",
     )
     ml_mocker = MLRespXMocker(use_router=False)
-    ml_mocker.with_url("http://localhost:8002/manage/v2/forests")
+    ml_mocker.with_url("http://localhost:8000/manage/v2/forests")
     ml_mocker.with_response_content_type("application/xml; charset=UTF-8")
     ml_mocker.with_response_code(400)
     ml_mocker.with_response_body(Path(response_body_path).read_bytes())
@@ -485,7 +485,7 @@ async def test_get_forest():
     )
 
     ml_mocker = MLRespXMocker(use_router=False)
-    ml_mocker.with_url("http://localhost:8002/manage/v2/forests/Documents")
+    ml_mocker.with_url("http://localhost:8000/manage/v2/forests/Documents")
     ml_mocker.with_request_param("format", "json")
     ml_mocker.with_request_param("view", "default")
     ml_mocker.with_response_content_type("application/json; charset=UTF-8")
@@ -511,7 +511,7 @@ async def test_post_forest():
     )
 
     ml_mocker = MLRespXMocker(use_router=False)
-    ml_mocker.with_url("http://localhost:8002/manage/v2/forests/forest-01")
+    ml_mocker.with_url("http://localhost:8000/manage/v2/forests/forest-01")
     ml_mocker.with_request_content_type("application/x-www-form-urlencoded")
     ml_mocker.with_request_body({"state": "clear"})
     ml_mocker.with_response_content_type("application/xml; charset=UTF-8")
@@ -531,7 +531,7 @@ async def test_post_forest():
 @respx.mock
 async def test_delete_forest():
     ml_mocker = MLRespXMocker(use_router=False)
-    ml_mocker.with_url("http://localhost:8002/manage/v2/forests/forest-01")
+    ml_mocker.with_url("http://localhost:8000/manage/v2/forests/forest-01")
     ml_mocker.with_request_param("level", "full")
     ml_mocker.with_response_code(204)
     ml_mocker.with_empty_response_body()
@@ -554,7 +554,7 @@ async def test_get_forest_properties():
     )
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url(
-        "http://localhost:8002/manage/v2/forests/Documents/properties",
+        "http://localhost:8000/manage/v2/forests/Documents/properties",
     )
     ml_mocker.with_request_param("format", "json")
     ml_mocker.with_response_content_type("application/json; charset=UTF-8")
@@ -582,7 +582,7 @@ async def test_put_forest_properties():
     )
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url(
-        "http://localhost:8002/manage/v2/forests/non-existing-forest/properties",
+        "http://localhost:8000/manage/v2/forests/non-existing-forest/properties",
     )
     ml_mocker.with_request_content_type("application/json")
     ml_mocker.with_request_body({"forest-name": "custom-forest"})
@@ -610,7 +610,7 @@ async def test_get_roles():
         "test-get-roles.json",
     )
     ml_mocker = MLRespXMocker(use_router=False)
-    ml_mocker.with_url("http://localhost:8002/manage/v2/roles")
+    ml_mocker.with_url("http://localhost:8000/manage/v2/roles")
     ml_mocker.with_request_param("format", "json")
     ml_mocker.with_request_param("view", "default")
     ml_mocker.with_response_content_type("application/json; charset=UTF-8")
@@ -637,7 +637,7 @@ async def test_post_roles():
         "test-post-roles.xml",
     )
     ml_mocker = MLRespXMocker(use_router=False)
-    ml_mocker.with_url("http://localhost:8002/manage/v2/roles")
+    ml_mocker.with_url("http://localhost:8000/manage/v2/roles")
     ml_mocker.with_response_content_type("application/xml; charset=UTF-8")
     ml_mocker.with_response_code(400)
     ml_mocker.with_response_body(Path(response_body_path).read_bytes())
@@ -659,7 +659,7 @@ async def test_get_role():
         "test-get-role.json",
     )
     ml_mocker = MLRespXMocker(use_router=False)
-    ml_mocker.with_url("http://localhost:8002/manage/v2/roles/admin")
+    ml_mocker.with_url("http://localhost:8000/manage/v2/roles/admin")
     ml_mocker.with_request_param("format", "json")
     ml_mocker.with_request_param("view", "default")
     ml_mocker.with_response_content_type("application/json; charset=UTF-8")
@@ -680,7 +680,7 @@ async def test_get_role():
 @respx.mock
 async def test_delete_role():
     ml_mocker = MLRespXMocker(use_router=False)
-    ml_mocker.with_url("http://localhost:8002/manage/v2/roles/custom-role")
+    ml_mocker.with_url("http://localhost:8000/manage/v2/roles/custom-role")
     ml_mocker.with_response_code(204)
     ml_mocker.with_empty_response_body()
     ml_mocker.mock_delete()
@@ -701,7 +701,7 @@ async def test_get_role_properties():
         "test-get-role-properties.json",
     )
     ml_mocker = MLRespXMocker(use_router=False)
-    ml_mocker.with_url("http://localhost:8002/manage/v2/roles/admin/properties")
+    ml_mocker.with_url("http://localhost:8000/manage/v2/roles/admin/properties")
     ml_mocker.with_request_param("format", "json")
     ml_mocker.with_response_content_type("application/json; charset=UTF-8")
     ml_mocker.with_response_code(200)
@@ -725,7 +725,7 @@ async def test_put_role_properties():
     )
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url(
-        "http://localhost:8002/manage/v2/roles/non-existing-role/properties",
+        "http://localhost:8000/manage/v2/roles/non-existing-role/properties",
     )
     ml_mocker.with_request_content_type("application/json")
     ml_mocker.with_request_body({"role-name": "custom-db"})
@@ -756,7 +756,7 @@ async def test_get_users():
         "test-get-users.json",
     )
     ml_mocker = MLRespXMocker(use_router=False)
-    ml_mocker.with_url("http://localhost:8002/manage/v2/users")
+    ml_mocker.with_url("http://localhost:8000/manage/v2/users")
     ml_mocker.with_request_param("format", "json")
     ml_mocker.with_request_param("view", "default")
     ml_mocker.with_response_content_type("application/json; charset=UTF-8")
@@ -783,7 +783,7 @@ async def test_post_users():
         "test-post-users.xml",
     )
     ml_mocker = MLRespXMocker(use_router=False)
-    ml_mocker.with_url("http://localhost:8002/manage/v2/users")
+    ml_mocker.with_url("http://localhost:8000/manage/v2/users")
     ml_mocker.with_response_content_type("application/xml; charset=UTF-8")
     ml_mocker.with_response_code(400)
     ml_mocker.with_response_body(Path(response_body_path).read_bytes())
@@ -805,7 +805,7 @@ async def test_get_user():
         "test-get-user.json",
     )
     ml_mocker = MLRespXMocker(use_router=False)
-    ml_mocker.with_url("http://localhost:8002/manage/v2/users/admin")
+    ml_mocker.with_url("http://localhost:8000/manage/v2/users/admin")
     ml_mocker.with_request_param("format", "json")
     ml_mocker.with_request_param("view", "default")
     ml_mocker.with_response_content_type("application/json; charset=UTF-8")
@@ -830,7 +830,7 @@ async def test_delete_user():
         "test-delete-user.xml",
     )
     ml_mocker = MLRespXMocker(use_router=False)
-    ml_mocker.with_url("http://localhost:8002/manage/v2/users/custom-user")
+    ml_mocker.with_url("http://localhost:8000/manage/v2/users/custom-user")
     ml_mocker.with_response_content_type("application/xml; charset=UTF-8")
     ml_mocker.with_response_code(404)
     ml_mocker.with_response_body(Path(response_body_path).read_bytes())
@@ -852,7 +852,7 @@ async def test_get_user_properties():
         "test-get-user-properties.json",
     )
     ml_mocker = MLRespXMocker(use_router=False)
-    ml_mocker.with_url("http://localhost:8002/manage/v2/users/admin/properties")
+    ml_mocker.with_url("http://localhost:8000/manage/v2/users/admin/properties")
     ml_mocker.with_request_param("format", "json")
     ml_mocker.with_response_content_type("application/json; charset=UTF-8")
     ml_mocker.with_response_code(200)
@@ -876,7 +876,7 @@ async def test_put_user_properties():
     )
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url(
-        "http://localhost:8002/manage/v2/users/non-existing-user/properties",
+        "http://localhost:8000/manage/v2/users/non-existing-user/properties",
     )
     ml_mocker.with_request_content_type("application/json")
     ml_mocker.with_request_body({"user-name": "custom-db"})

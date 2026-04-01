@@ -44,7 +44,7 @@ async def test_context_mng():
 @respx.mock
 async def test_request_when_disconnected():
     ml_mocker = MLRespXMocker(use_router=False)
-    ml_mocker.with_url("http://localhost:8002/manage/v2/servers")
+    ml_mocker.with_url("http://localhost:8000/manage/v2/servers")
     ml_mocker.with_response_code(200)
     ml_mocker.with_response_body(RESOURCES["test-get-response.xml"]["bytes"])
     ml_mocker.with_response_content_type("application/xml; charset=UTF-8")
@@ -64,7 +64,7 @@ async def test_request_when_disconnected():
 @respx.mock
 async def test_get():
     ml_mocker = MLRespXMocker(use_router=False)
-    ml_mocker.with_url("http://localhost:8002/manage/v2/servers")
+    ml_mocker.with_url("http://localhost:8000/manage/v2/servers")
     ml_mocker.with_response_code(200)
     ml_mocker.with_response_body(RESOURCES["test-get-response.xml"]["bytes"])
     ml_mocker.with_response_content_type("application/xml; charset=UTF-8")
@@ -84,7 +84,7 @@ async def test_get_with_customized_params_and_headers():
         "json"
     ]
     ml_mocker = MLRespXMocker(use_router=False)
-    ml_mocker.with_url("http://localhost:8002/manage/v2/servers")
+    ml_mocker.with_url("http://localhost:8000/manage/v2/servers")
     ml_mocker.with_request_param("format", "json")
     ml_mocker.with_request_header("custom-header", "custom-value")
     ml_mocker.with_response_code(200)
@@ -107,7 +107,7 @@ async def test_get_with_customized_params_and_headers():
 @respx.mock
 async def test_post():
     ml_mocker = MLRespXMocker(use_router=False)
-    ml_mocker.with_url("http://localhost:8002/manage/v2/databases/Documents")
+    ml_mocker.with_url("http://localhost:8000/manage/v2/databases/Documents")
     ml_mocker.with_response_code(400)
     ml_mocker.with_response_body(RESOURCES["test-post-response.xml"]["bytes"])
     ml_mocker.with_response_content_type("application/xml; charset=UTF-8")
@@ -124,7 +124,7 @@ async def test_post():
 @respx.mock
 async def test_post_with_customized_params_and_headers_and_body_different_than_json():
     ml_mocker = MLRespXMocker(use_router=False)
-    ml_mocker.with_url("http://localhost:8002/v1/eval")
+    ml_mocker.with_url("http://localhost:8000/v1/eval")
     ml_mocker.with_request_param("database", "Documents")
     ml_mocker.with_request_content_type("application/x-www-form-urlencoded")
     ml_mocker.with_request_body({"xquery": "()"})
@@ -147,7 +147,7 @@ async def test_post_with_customized_params_and_headers_and_body_different_than_j
 @respx.mock
 async def test_post_with_customized_params_and_headers_and_json_body():
     ml_mocker = MLRespXMocker(use_router=False)
-    ml_mocker.with_url("http://localhost:8002/manage/v2/databases/Documents")
+    ml_mocker.with_url("http://localhost:8000/manage/v2/databases/Documents")
     ml_mocker.with_request_param("format", "json")
     ml_mocker.with_request_content_type("application/json")
     ml_mocker.with_request_body({"operation": "clear-database"})
@@ -172,7 +172,7 @@ async def test_post_with_customized_params_and_headers_and_json_body():
 @respx.mock
 async def test_put():
     ml_mocker = MLRespXMocker(use_router=False)
-    ml_mocker.with_url("http://localhost:8002/v1/documents")
+    ml_mocker.with_url("http://localhost:8000/v1/documents")
     ml_mocker.with_response_code(400)
     ml_mocker.with_response_body(RESOURCES["test-put-response.xml"]["bytes"])
     ml_mocker.with_response_content_type("application/xml; charset=UTF-8")
@@ -189,7 +189,7 @@ async def test_put():
 @respx.mock
 async def test_put_with_customized_params_and_headers_and_body_different_than_json():
     ml_mocker = MLRespXMocker(use_router=False)
-    ml_mocker.with_url("http://localhost:8002/v1/documents")
+    ml_mocker.with_url("http://localhost:8000/v1/documents")
     ml_mocker.with_request_param("database", "Documents")
     ml_mocker.with_request_param("uri", "/doc.xml")
     ml_mocker.with_request_content_type("application/xml")
@@ -213,7 +213,7 @@ async def test_put_with_customized_params_and_headers_and_body_different_than_js
 @respx.mock
 async def test_put_with_customized_params_and_headers_and_json_body():
     ml_mocker = MLRespXMocker(use_router=False)
-    ml_mocker.with_url("http://localhost:8002/v1/documents")
+    ml_mocker.with_url("http://localhost:8000/v1/documents")
     ml_mocker.with_request_param("database", "Documents")
     ml_mocker.with_request_param("uri", "/doc.json")
     ml_mocker.with_request_content_type("application/json")
@@ -237,7 +237,7 @@ async def test_put_with_customized_params_and_headers_and_json_body():
 @respx.mock
 async def test_delete():
     ml_mocker = MLRespXMocker(use_router=False)
-    ml_mocker.with_url("http://localhost:8002/manage/v2/databases/custom-db")
+    ml_mocker.with_url("http://localhost:8000/manage/v2/databases/custom-db")
     ml_mocker.with_response_code(204)
     ml_mocker.with_empty_response_body()
     ml_mocker.mock_delete()
@@ -252,7 +252,7 @@ async def test_delete():
 @respx.mock
 async def test_delete_with_customized_params_and_headers():
     ml_mocker = MLRespXMocker(use_router=False)
-    ml_mocker.with_url("http://localhost:8002/manage/v2/databases/custom-db")
+    ml_mocker.with_url("http://localhost:8000/manage/v2/databases/custom-db")
     ml_mocker.with_request_param("format", "json")
     ml_mocker.with_request_header("custom-header", "custom-value")
     ml_mocker.with_response_code(204)
@@ -274,7 +274,7 @@ async def test_delete_with_customized_params_and_headers():
 async def test_request_logs_warning_for_restart_location(mocker: MockerFixture):
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url(
-        "http://localhost:8002/manage/v2/servers/TestServer/properties",
+        "http://localhost:8000/manage/v2/servers/TestServer/properties",
     )
     ml_mocker.with_request_param("group-id", "Default")
     ml_mocker.with_request_param("format", "json")
@@ -312,7 +312,7 @@ async def test_request_does_not_log_warning_for_non_restart_202(
     mocker: MockerFixture,
 ):
     ml_mocker = MLRespXMocker(use_router=False)
-    ml_mocker.with_url("http://localhost:8002/manage/v2/forests")
+    ml_mocker.with_url("http://localhost:8000/manage/v2/forests")
     ml_mocker.with_request_param("format", "json")
     ml_mocker.with_request_content_type("application/json")
     ml_mocker.with_request_body({"operation": "attach"})
@@ -341,7 +341,7 @@ async def test_request_does_not_log_warning_for_non_restart_202(
 @respx.mock
 async def test_request_logs_debug_response_retrieved(mocker: MockerFixture):
     ml_mocker = MLRespXMocker(use_router=False)
-    ml_mocker.with_url("http://localhost:8002/manage/v2/servers")
+    ml_mocker.with_url("http://localhost:8000/manage/v2/servers")
     ml_mocker.with_response_code(200)
     ml_mocker.with_response_content_type("text/plain")
     ml_mocker.with_response_body("ok")
@@ -359,7 +359,7 @@ async def test_request_logs_debug_response_retrieved(mocker: MockerFixture):
 @respx.mock
 async def test_request_logs_debug_response_retrieved_no_body(mocker: MockerFixture):
     ml_mocker = MLRespXMocker(use_router=False)
-    ml_mocker.with_url("http://localhost:8002/manage/v2/databases/custom-db")
+    ml_mocker.with_url("http://localhost:8000/manage/v2/databases/custom-db")
     ml_mocker.with_response_code(204)
     ml_mocker.with_response_header("X-Test", "1")
     ml_mocker.with_empty_response_body()

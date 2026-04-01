@@ -26,7 +26,7 @@ async def svc():
 @respx.mock
 async def test_get_logs_no_such_host(svc):
     ml_mocker = MLRespXMocker(use_router=False)
-    ml_mocker.with_url(f"http://localhost:8002{ENDPOINT}")
+    ml_mocker.with_url(f"http://localhost:8000{ENDPOINT}")
     ml_mocker.with_request_param("format", "json")
     ml_mocker.with_request_param("filename", "8002_ErrorLog.txt")
     ml_mocker.with_request_param("host", "non-existing-host")
@@ -60,7 +60,7 @@ async def test_get_logs_no_such_host(svc):
 @respx.mock
 async def test_get_logs_unauthorized(svc):
     ml_mocker = MLRespXMocker(use_router=False)
-    ml_mocker.with_url(f"http://localhost:8002{ENDPOINT}")
+    ml_mocker.with_url(f"http://localhost:8000{ENDPOINT}")
     ml_mocker.with_request_param("format", "json")
     ml_mocker.with_request_param("filename", "ErrorLog.txt")
     ml_mocker.with_response_code(401)
@@ -87,7 +87,7 @@ async def test_get_logs_unauthorized(svc):
 @respx.mock
 async def test_get_logs_empty(svc):
     ml_mocker = MLRespXMocker(use_router=False)
-    ml_mocker.with_url(f"http://localhost:8002{ENDPOINT}")
+    ml_mocker.with_url(f"http://localhost:8000{ENDPOINT}")
     ml_mocker.with_request_param("format", "json")
     ml_mocker.with_request_param("filename", "8002_ErrorLog.txt")
     ml_mocker.with_response_code(200)
@@ -104,7 +104,7 @@ async def test_get_logs_empty(svc):
 @respx.mock
 async def test_get_logs_without_port(svc):
     ml_mocker = MLRespXMocker(use_router=False)
-    ml_mocker.with_url(f"http://localhost:8002{ENDPOINT}")
+    ml_mocker.with_url(f"http://localhost:8000{ENDPOINT}")
     ml_mocker.with_request_param("format", "json")
     ml_mocker.with_request_param("filename", "ErrorLog.txt")
     ml_mocker.with_response_code(200)
@@ -145,7 +145,7 @@ async def test_get_logs_without_port(svc):
 @respx.mock
 async def test_get_task_server_logs(svc):
     ml_mocker = MLRespXMocker(use_router=False)
-    ml_mocker.with_url(f"http://localhost:8002{ENDPOINT}")
+    ml_mocker.with_url(f"http://localhost:8000{ENDPOINT}")
     ml_mocker.with_request_param("format", "json")
     ml_mocker.with_request_param("filename", "TaskServer_ErrorLog.txt")
     ml_mocker.with_response_code(200)
@@ -174,7 +174,7 @@ async def test_get_task_server_logs(svc):
 @respx.mock
 async def test_get_task_server_logs_using_int_port(svc):
     ml_mocker = MLRespXMocker(use_router=False)
-    ml_mocker.with_url(f"http://localhost:8002{ENDPOINT}")
+    ml_mocker.with_url(f"http://localhost:8000{ENDPOINT}")
     ml_mocker.with_request_param("format", "json")
     ml_mocker.with_request_param("filename", "TaskServer_ErrorLog.txt")
     ml_mocker.with_response_code(200)
@@ -198,7 +198,7 @@ async def test_get_task_server_logs_using_int_port(svc):
 @respx.mock
 async def test_get_error_logs_with_search_params(svc):
     ml_mocker = MLRespXMocker(use_router=False)
-    ml_mocker.with_url(f"http://localhost:8002{ENDPOINT}")
+    ml_mocker.with_url(f"http://localhost:8000{ENDPOINT}")
     ml_mocker.with_request_param("format", "json")
     ml_mocker.with_request_param("filename", "8002_ErrorLog.txt")
     ml_mocker.with_request_param("start", "2023-09-01T00:00:00")
@@ -242,7 +242,7 @@ async def test_get_access_logs(svc):
         ),
     ]
     ml_mocker = MLRespXMocker(use_router=False)
-    ml_mocker.with_url(f"http://localhost:8002{ENDPOINT}")
+    ml_mocker.with_url(f"http://localhost:8000{ENDPOINT}")
     ml_mocker.with_request_param("format", "json")
     ml_mocker.with_request_param("filename", "8002_AccessLog.txt")
     ml_mocker.with_response_code(200)
@@ -269,7 +269,7 @@ async def test_get_access_logs_with_str_log_type(svc):
         ),
     ]
     ml_mocker = MLRespXMocker(use_router=False)
-    ml_mocker.with_url(f"http://localhost:8002{ENDPOINT}")
+    ml_mocker.with_url(f"http://localhost:8000{ENDPOINT}")
     ml_mocker.with_request_param("format", "json")
     ml_mocker.with_request_param("filename", "8002_AccessLog.txt")
     ml_mocker.with_response_code(200)
@@ -288,7 +288,7 @@ async def test_get_access_logs_with_str_log_type(svc):
 @respx.mock
 async def test_get_access_logs_empty(svc):
     ml_mocker = MLRespXMocker(use_router=False)
-    ml_mocker.with_url(f"http://localhost:8002{ENDPOINT}")
+    ml_mocker.with_url(f"http://localhost:8000{ENDPOINT}")
     ml_mocker.with_request_param("format", "json")
     ml_mocker.with_request_param("filename", "8002_AccessLog.txt")
     ml_mocker.with_response_code(200)
@@ -307,7 +307,7 @@ async def test_get_access_logs_empty(svc):
 async def test_get_request_logs(svc):
     raw_logs = ['{"time":"2023-09-04T03:53:40Z", "url":"/manage/v2/logs"}']
     ml_mocker = MLRespXMocker(use_router=False)
-    ml_mocker.with_url(f"http://localhost:8002{ENDPOINT}")
+    ml_mocker.with_url(f"http://localhost:8000{ENDPOINT}")
     ml_mocker.with_request_param("format", "json")
     ml_mocker.with_request_param("filename", "8002_RequestLog.txt")
     ml_mocker.with_response_code(200)
@@ -329,7 +329,7 @@ async def test_get_audit_logs(svc):
         "2023-09-04 01:01:01.111 event=server-restart; success=true;",
     ]
     ml_mocker = MLRespXMocker(use_router=False)
-    ml_mocker.with_url(f"http://localhost:8002{ENDPOINT}")
+    ml_mocker.with_url(f"http://localhost:8000{ENDPOINT}")
     ml_mocker.with_request_param("format", "json")
     ml_mocker.with_request_param("filename", "AuditLog.txt")
     ml_mocker.with_response_code(200)
@@ -348,7 +348,7 @@ async def test_get_audit_logs(svc):
 @respx.mock
 async def test_get_logs_list_unauthorized(svc):
     ml_mocker = MLRespXMocker(use_router=False)
-    ml_mocker.with_url(f"http://localhost:8002{ENDPOINT}")
+    ml_mocker.with_url(f"http://localhost:8000{ENDPOINT}")
     ml_mocker.with_request_param("format", "json")
     ml_mocker.with_response_content_type("application/json; charset=UTF-8")
     ml_mocker.with_response_code(401)
@@ -379,7 +379,7 @@ async def test_get_logs_list_no_such_host(svc):
         "no-such-host.json",
     )
     ml_mocker = MLRespXMocker(use_router=False)
-    ml_mocker.with_url("http://localhost:8002/manage/v2/logs")
+    ml_mocker.with_url("http://localhost:8000/manage/v2/logs")
     ml_mocker.with_request_param("format", "json")
     ml_mocker.with_request_param("host", "non-existing-host")
     ml_mocker.with_response_content_type("application/json; charset=UTF-8")
@@ -406,7 +406,7 @@ async def test_get_logs_list_empty(svc):
         "logs-list-response-no-logs.json",
     )
     ml_mocker = MLRespXMocker(use_router=False)
-    ml_mocker.with_url(f"http://localhost:8002{ENDPOINT}")
+    ml_mocker.with_url(f"http://localhost:8000{ENDPOINT}")
     ml_mocker.with_request_param("format", "json")
     ml_mocker.with_response_code(200)
     ml_mocker.with_response_content_type("application/json; charset=UTF-8")
@@ -431,7 +431,7 @@ async def test_get_logs_list_from_single_node_cluster(svc):
     )
 
     ml_mocker = MLRespXMocker(use_router=False)
-    ml_mocker.with_url(f"http://localhost:8002{ENDPOINT}")
+    ml_mocker.with_url(f"http://localhost:8000{ENDPOINT}")
     ml_mocker.with_request_param("format", "json")
     ml_mocker.with_response_content_type("application/json; charset=UTF-8")
     ml_mocker.with_response_code(200)

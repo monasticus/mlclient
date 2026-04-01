@@ -86,7 +86,7 @@ class HttpClientBase:
         self,
         protocol: str = "http",
         host: str = "localhost",
-        port: int = MARKLOGIC_MANAGE_API_PORT,
+        port: int = MARKLOGIC_REST_API_PORT,
         auth_method: str = "basic",
         username: str = "admin",
         password: str = "admin",
@@ -100,7 +100,7 @@ class HttpClientBase:
             A protocol used for HTTP requests (http / https)
         host : str, default "localhost"
             A host name
-        port : int, default 8002
+        port : int, default 8000
             An App Service port
         auth_method : str, default "basic"
             An authorization method (basic / digest)
@@ -217,7 +217,7 @@ class HttpClient(HttpClientBase):
             A protocol used for HTTP requests (http / https)
         host : str, default "localhost"
             A host name
-        port : int, default 8002
+        port : int, default 8000
             An App Service port
         auth_method : str, default "basic"
             An authorization method (basic / digest)
@@ -468,7 +468,7 @@ class AsyncHttpClient(HttpClientBase):
             A protocol used for HTTP requests (http / https)
         host : str, default "localhost"
             A host name
-        port : int, default 8002
+        port : int, default 8000
             An App Service port
         auth_method : str, default "basic"
             An authorization method (basic / digest)

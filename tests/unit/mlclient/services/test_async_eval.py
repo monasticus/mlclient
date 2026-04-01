@@ -30,7 +30,7 @@ async def test_eval_raw_xquery_empty(svc):
     code = "()"
 
     ml_mocker = MLRespXMocker(use_router=False)
-    ml_mocker.with_url("http://localhost:8002/v1/eval")
+    ml_mocker.with_url("http://localhost:8000/v1/eval")
     ml_mocker.with_request_content_type("application/x-www-form-urlencoded")
     ml_mocker.with_request_body({"xquery": code})
     ml_mocker.with_response_code(200)
@@ -48,7 +48,7 @@ async def test_eval_raw_xquery_single_item(svc):
     code = "''"
 
     ml_mocker = MLRespXMocker(use_router=False)
-    ml_mocker.with_url("http://localhost:8002/v1/eval")
+    ml_mocker.with_url("http://localhost:8000/v1/eval")
     ml_mocker.with_request_content_type("application/x-www-form-urlencoded")
     ml_mocker.with_request_body({"xquery": code})
     ml_mocker.with_response_code(200)
@@ -66,7 +66,7 @@ async def test_eval_raw_xquery_multiple_items(svc):
     code = "('',1)"
 
     ml_mocker = MLRespXMocker(use_router=False)
-    ml_mocker.with_url("http://localhost:8002/v1/eval")
+    ml_mocker.with_url("http://localhost:8000/v1/eval")
     ml_mocker.with_request_content_type("application/x-www-form-urlencoded")
     ml_mocker.with_request_body({"xquery": code})
     ml_mocker.with_response_code(200)
@@ -85,7 +85,7 @@ async def test_eval_xqy_alias(svc):
     code = "()"
 
     ml_mocker = MLRespXMocker(use_router=False)
-    ml_mocker.with_url("http://localhost:8002/v1/eval")
+    ml_mocker.with_url("http://localhost:8000/v1/eval")
     ml_mocker.with_request_content_type("application/x-www-form-urlencoded")
     ml_mocker.with_request_body({"xquery": code})
     ml_mocker.with_response_code(200)
@@ -103,7 +103,7 @@ async def test_eval_raw_javascript_empty(svc):
     code = "Sequence.from([]);"
 
     ml_mocker = MLRespXMocker(use_router=False)
-    ml_mocker.with_url("http://localhost:8002/v1/eval")
+    ml_mocker.with_url("http://localhost:8000/v1/eval")
     ml_mocker.with_request_content_type("application/x-www-form-urlencoded")
     ml_mocker.with_request_body({"javascript": code})
     ml_mocker.with_response_code(200)
@@ -121,7 +121,7 @@ async def test_eval_raw_javascript_single_item(svc):
     code = "''"
 
     ml_mocker = MLRespXMocker(use_router=False)
-    ml_mocker.with_url("http://localhost:8002/v1/eval")
+    ml_mocker.with_url("http://localhost:8000/v1/eval")
     ml_mocker.with_request_content_type("application/x-www-form-urlencoded")
     ml_mocker.with_request_body({"javascript": code})
     ml_mocker.with_response_code(200)
@@ -139,7 +139,7 @@ async def test_eval_raw_javascript_multiple_items(svc):
     code = "Sequence.from(['', 1]);"
 
     ml_mocker = MLRespXMocker(use_router=False)
-    ml_mocker.with_url("http://localhost:8002/v1/eval")
+    ml_mocker.with_url("http://localhost:8000/v1/eval")
     ml_mocker.with_request_content_type("application/x-www-form-urlencoded")
     ml_mocker.with_request_body({"javascript": code})
     ml_mocker.with_response_code(200)
@@ -158,7 +158,7 @@ async def test_eval_js_alias(svc):
     code = "Sequence.from([]);"
 
     ml_mocker = MLRespXMocker(use_router=False)
-    ml_mocker.with_url("http://localhost:8002/v1/eval")
+    ml_mocker.with_url("http://localhost:8000/v1/eval")
     ml_mocker.with_request_content_type("application/x-www-form-urlencoded")
     ml_mocker.with_request_body({"javascript": code})
     ml_mocker.with_response_code(200)
@@ -176,7 +176,7 @@ async def test_eval_variables_explicit(svc):
     code = "declare variable $VARIABLE as xs:string external; $VARIABLE"
 
     ml_mocker = MLRespXMocker(use_router=False)
-    ml_mocker.with_url("http://localhost:8002/v1/eval")
+    ml_mocker.with_url("http://localhost:8000/v1/eval")
     ml_mocker.with_request_content_type("application/x-www-form-urlencoded")
     ml_mocker.with_request_body(
         {
@@ -199,7 +199,7 @@ async def test_eval_variables_using_kwargs(svc):
     code = "declare variable $VARIABLE as xs:string external; $VARIABLE"
 
     ml_mocker = MLRespXMocker(use_router=False)
-    ml_mocker.with_url("http://localhost:8002/v1/eval")
+    ml_mocker.with_url("http://localhost:8000/v1/eval")
     ml_mocker.with_request_content_type("application/x-www-form-urlencoded")
     ml_mocker.with_request_body(
         {
@@ -226,7 +226,7 @@ async def test_eval_variables_explicit_with_kwargs(svc):
     )
 
     ml_mocker = MLRespXMocker(use_router=False)
-    ml_mocker.with_url("http://localhost:8002/v1/eval")
+    ml_mocker.with_url("http://localhost:8000/v1/eval")
     ml_mocker.with_request_content_type("application/x-www-form-urlencoded")
     ml_mocker.with_request_body(
         {
@@ -249,7 +249,7 @@ async def test_eval_variables_using_namespace(svc):
     code = "declare variable $local:VARIABLE as xs:string external; $local:VARIABLE"
 
     ml_mocker = MLRespXMocker(use_router=False)
-    ml_mocker.with_url("http://localhost:8002/v1/eval")
+    ml_mocker.with_url("http://localhost:8000/v1/eval")
     ml_mocker.with_request_content_type("application/x-www-form-urlencoded")
     ml_mocker.with_request_body(
         {
@@ -272,7 +272,7 @@ async def test_eval_using_database_param(svc):
     code = "()"
 
     ml_mocker = MLRespXMocker(use_router=False)
-    ml_mocker.with_url("http://localhost:8002/v1/eval")
+    ml_mocker.with_url("http://localhost:8000/v1/eval")
     ml_mocker.with_request_param("database", "Documents")
     ml_mocker.with_request_content_type("application/x-www-form-urlencoded")
     ml_mocker.with_request_body({"xquery": code})
@@ -291,7 +291,7 @@ async def test_eval_using_txid_param(svc):
     code = "()"
 
     ml_mocker = MLRespXMocker(use_router=False)
-    ml_mocker.with_url("http://localhost:8002/v1/eval")
+    ml_mocker.with_url("http://localhost:8000/v1/eval")
     ml_mocker.with_request_param("txid", "transaction-id")
     ml_mocker.with_request_content_type("application/x-www-form-urlencoded")
     ml_mocker.with_request_body({"xquery": code})
@@ -311,7 +311,7 @@ async def test_eval_file_xquery(svc):
 
     ml_mocker = MLRespXMocker(use_router=False)
     for ext in ["xq", "xql", "xqm", "xqu", "xquery", "xqy"]:
-        ml_mocker.with_url("http://localhost:8002/v1/eval")
+        ml_mocker.with_url("http://localhost:8000/v1/eval")
         ml_mocker.with_request_content_type("application/x-www-form-urlencoded")
         ml_mocker.with_request_body({"xquery": code})
         ml_mocker.with_response_code(200)
@@ -334,7 +334,7 @@ async def test_eval_file_javascript(svc):
 
     ml_mocker = MLRespXMocker(use_router=False)
     for ext in ["js", "sjs"]:
-        ml_mocker.with_url("http://localhost:8002/v1/eval")
+        ml_mocker.with_url("http://localhost:8000/v1/eval")
         ml_mocker.with_request_content_type("application/x-www-form-urlencoded")
         ml_mocker.with_request_body({"javascript": code})
         ml_mocker.with_response_code(200)
@@ -360,7 +360,7 @@ async def test_eval_with_marklogic_error(svc):
     code = "declare variable $local:VARIABLE external; $local:VARIABLE"
 
     ml_mocker = MLRespXMocker(use_router=False)
-    ml_mocker.with_url("http://localhost:8002/v1/eval")
+    ml_mocker.with_url("http://localhost:8000/v1/eval")
     ml_mocker.with_request_content_type("application/x-www-form-urlencoded")
     ml_mocker.with_request_body({"xquery": code})
     ml_mocker.with_response_code(400)
@@ -416,7 +416,7 @@ async def test_eval_with_str_output_type(svc):
     code = "element root {}"
 
     ml_mocker = MLRespXMocker(use_router=False)
-    ml_mocker.with_url("http://localhost:8002/v1/eval")
+    ml_mocker.with_url("http://localhost:8000/v1/eval")
     ml_mocker.with_request_content_type("application/x-www-form-urlencoded")
     ml_mocker.with_request_body({"xquery": code})
     ml_mocker.with_response_code(200)
@@ -435,7 +435,7 @@ async def test_eval_with_bytes_output_type(svc):
     code = "element root {}"
 
     ml_mocker = MLRespXMocker(use_router=False)
-    ml_mocker.with_url("http://localhost:8002/v1/eval")
+    ml_mocker.with_url("http://localhost:8000/v1/eval")
     ml_mocker.with_request_content_type("application/x-www-form-urlencoded")
     ml_mocker.with_request_body({"xquery": code})
     ml_mocker.with_response_code(200)

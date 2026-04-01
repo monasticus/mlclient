@@ -8,7 +8,7 @@ from tests.utils.ml_mockers import MLDocumentsMocker, MLRespXMocker
 
 ml_doc_mocker = MLDocumentsMocker()
 
-ml_mocker = MLRespXMocker(router_base_url="http://localhost:8002/v1/documents")
+ml_mocker = MLRespXMocker(router_base_url="http://localhost:8000/v1/documents")
 ml_mocker.with_post_side_effect(side_effect=ml_doc_mocker.post_documents_side_effect)
 
 
@@ -86,7 +86,7 @@ def test_failing_job():
     docs = _get_test_docs(5)
 
     mocker = MLRespXMocker(use_router=False)
-    mocker.with_url("http://localhost:8002/v1/documents")
+    mocker.with_url("http://localhost:8000/v1/documents")
     mocker.with_response_content_type("application/json; charset=utf-8")
     mocker.with_response_code(401)
     mocker.with_response_body(

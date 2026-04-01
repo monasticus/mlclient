@@ -1,8 +1,3 @@
-.. MLClient documentation master file, created by
-   sphinx-quickstart on Mon Aug  7 10:42:08 2023.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
 MLClient - MarkLogic instance in your hands
 ===========================================
 
@@ -18,129 +13,144 @@ MLClient - MarkLogic instance in your hands
     :target: https://www.python.org/
     :alt: Python Version Support Badge
 
-ML Client is a python library providing a python API to manage a MarkLogic instance.
-Furthermore, it includes a Command Line Interface.
+A Python client for MarkLogic Server. Three API layers, async out of the box, CLI included.
 
-Below you can find a few examples of basic usage. Read more in the deep documentation.
+.. code-block:: sh
+
+    pip install mlclient
+
+By default MLClient connects to ``localhost:8000`` with basic auth (``admin``/``admin``).
+Pass ``host``, ``port``, ``username``, ``password``, or ``auth_method`` to override:
+
+.. code-block:: python
+
+    config = {
+        "host": "ml.example.com",
+        "port": 8040,
+        "username": "my-user",
+        "password": "my-password",
+        "auth_method": "digest",
+    }
+    ml = MLClient(**config)
 
 -------------------
 
-Low-level (raw HTTP)::
+Quickstart
+----------
 
-   >>> from mlclient import MLClient
-   >>> config = {
-   ...     "host": "localhost",
-   ...     "port": 8002,
-   ...     "username": "admin",
-   ...     "password": "admin",
-   ... }
-   >>> with MLClient(**config) as ml:
-   ...     resp = ml.http.post(
-   ...         "/v1/eval",
-   ...         body={"xquery": "xdmp:database() => xdmp:database-name()"},
-   ...     )
-   ...     print(resp.text)
-   ...
-   --6a5df7d535c71968
-   Content-Type: text/plain
-   X-Primitive: string
+Evaluate XQuery and get a parsed Python object back - not raw multipart HTTP, not strings:
 
-   App-Services
-   --6a5df7d535c71968--
+.. code-block:: python
 
+    from mlclient import MLClient
 
-Mid-level REST API (``/v1/*``)::
+    with MLClient() as ml:
+        db_name = ml.eval.xquery("xdmp:database() => xdmp:database-name()")
+        print(db_name)          # "Documents"
+        print(type(db_name))    # <class 'str'>
 
-   >>> from mlclient import MLClient
-   >>> config = {
-   ...     "host": "localhost",
-   ...     "port": 8002,
-   ...     "username": "admin",
-   ...     "password": "admin",
-   ... }
-   >>> with MLClient(**config) as ml:
-   ...     resp = ml.rest.eval.post(
-   ...         xquery="xdmp:database() => xdmp:database-name()",
-   ...     )
-   ...     print(resp.text)
-   ...
-   --6a5df7d535c71968
-   Content-Type: text/plain
-   X-Primitive: string
+        timestamp = ml.eval.xquery("fn:current-dateTime()")
+        print(timestamp)        # 2024-06-21 14:08:32.130813+00:00
+        print(type(timestamp))  # <class 'datetime.datetime'>
 
-   App-Services
-   --6a5df7d535c71968--
+Read and write documents:
+
+.. code-block:: python
+
+    from mlclient import MLClient
+    from mlclient.models import Document
+
+    with MLClient() as ml:
+        doc = ml.documents.read("/patient/record-1.json")
+        print(doc.uri)       # /patient/record-1.json
+        print(doc.content)   # {"name": "Smith", "id": "001"}
+
+        new_doc = Document.create("/patient/record-2.json", {"name": "Jones", "id": "002"})
+        ml.documents.write(new_doc)
+
+Available high-level services:
+
+==================  =====================  =======================================
+Service             Endpoint               Description
+==================  =====================  =======================================
+``ml.documents``    ``/v1/documents``       Read, write, delete documents
+``ml.eval``         ``/v1/eval``            Evaluate XQuery and JavaScript
+``ml.logs``         ``/manage/v2/logs``     Retrieve and filter server logs
+==================  =====================  =======================================
 
 
-Mid-level Management API (``/manage/v2/*``, port 8002)::
+More control
+------------
 
-   >>> from mlclient import MLClient
-   >>> config = {
-   ...     "host": "localhost",
-   ...     "port": 8002,
-   ...     "username": "admin",
-   ...     "password": "admin",
-   ... }
-   >>> with MLClient(**config) as ml:
-   ...     resp = ml.manage.databases.get_properties(
-   ...         "Documents", data_format="json",
-   ...     )
-   ...     print(resp.json()["database-name"])
-   ...
-   Documents
+Need the raw ``httpx.Response``? Drop down to the mid-level API clients.
+Use the built-in response parser when you want parsed results:
 
+.. code-block:: python
 
-Mid-level Admin API (``/admin/v1/*``, port 8001)::
+    with MLClient() as ml:
+        resp = ml.rest.eval.post(xquery="xdmp:database() => xdmp:database-name()")
+        print(resp.status_code)         # 200
+        parsed = ml.parser.parse(resp)  # "Documents"
 
-   >>> from mlclient import MLClient
-   >>> config = {
-   ...     "host": "localhost",
-   ...     "port": 8002,
-   ...     "username": "admin",
-   ...     "password": "admin",
-   ... }
-   >>> with MLClient(**config) as ml:
-   ...     resp = ml.admin.get_timestamp()
-   ...     print(resp.text)
-   ...
-   2024-06-21T14:08:32.130813Z
+Three mid-level API clients cover all of MarkLogic's API tiers:
+
+- ``ml.rest`` -- REST Client API (``/v1/*``)
+- ``ml.manage`` -- Management API (``/manage/v2/*``, port 8002)
+- ``ml.admin`` -- Admin API (``/admin/v1/*``, port 8001)
+
+.. code-block:: python
+
+    with MLClient() as ml:
+        resp = ml.manage.databases.get_properties("Documents", data_format="json")
+        print(resp.json()["database-name"])  # Documents
+
+        resp = ml.admin.get_timestamp()
+        print(resp.text)  # 2024-06-21T14:08:32.130813Z
+
+Port routing is automatic. Manage and Admin requests go to ports 8002 and 8001
+regardless of the main client port.
 
 
-Response parsing::
+Full control
+------------
 
-   >>> from mlclient import MLClient
-   >>> config = {
-   ...     "host": "localhost",
-   ...     "port": 8002,
-   ...     "username": "admin",
-   ...     "password": "admin",
-   ... }
-   >>> with MLClient(**config) as ml:
-   ...     resp = ml.rest.eval.post(
-   ...         xquery="xdmp:database() => xdmp:database-name()",
-   ...     )
-   ...     parsed = ml.parser.parse(resp)
-   ...     print(parsed)
-   ...
-   App-Services
+Send any HTTP request directly:
+
+.. code-block:: python
+
+    with MLClient() as ml:
+        resp = ml.http.post(
+            "/v1/eval",
+            body={"xquery": "xdmp:database() => xdmp:database-name()"},
+        )
+        print(resp.text)  # raw multipart/mixed response
 
 
-High-level (services)::
+Async
+-----
 
-   >>> from mlclient import MLClient
-   >>> config = {
-   ...     "host": "localhost",
-   ...     "port": 8002,
-   ...     "username": "admin",
-   ...     "password": "admin",
-   ... }
-   >>> with MLClient(**config) as ml:
-   ...     result = ml.eval.xquery(
-   ...         "xdmp:database() => xdmp:database-name()",
-   ...     )
-   ...     print(result)
-   ...
-   App-Services
+``AsyncMLClient`` mirrors ``MLClient`` 1:1 - every method is a coroutine:
+
+.. code-block:: python
+
+    from mlclient import AsyncMLClient
+
+    async with AsyncMLClient() as ml:
+        db_name = await ml.eval.xquery("xdmp:database() => xdmp:database-name()")
+        doc = await ml.documents.read("/patient/record-1.xml")
+        resp = await ml.http.get("/manage/v2/servers")
+
+
+CLI
+---
+
+.. code-block:: sh
+
+    ml call eval -e local -x "xdmp:database() => xdmp:database-name()"
+    ml call logs -e local -a 8002 --regex "XDMP-.*"
+
+See :doc:`user/cli` for the full CLI reference.
+
 
 .. toctree::
    :maxdepth: 1

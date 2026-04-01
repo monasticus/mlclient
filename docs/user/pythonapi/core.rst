@@ -22,6 +22,13 @@ Each uses :class:`~mlclient.calls.ApiCall` objects to represent the parameters o
 The low-level :class:`~mlclient.HttpClient` lets you send raw HTTP requests to the server.
 You can learn more about services and clients in the following sections.
 
+Every layer is also available asynchronously through :class:`~mlclient.AsyncMLClient`,
+which mirrors :class:`~mlclient.MLClient` 1:1. All methods become coroutines -
+just use ``async with AsyncMLClient() as ml:`` and ``await`` on each call.
+The same applies to the mid-level clients: :class:`~mlclient.api.AsyncRestApi`,
+:class:`~mlclient.api.AsyncManageApi`, :class:`~mlclient.api.AsyncAdminApi`,
+and to the low-level :class:`~mlclient.AsyncHttpClient`.
+
 MLClient
 --------
 
@@ -32,8 +39,11 @@ through ``.http``, ``.rest``, ``.manage``, ``.admin``, and service properties.
 Layer                                 Description
 ====================================  =======================================================================================================================================================
 :class:`~mlclient.MLClient`           Main entry point with layered access (``.http``, ``.rest``, ``.manage``, ``.admin``, ``.documents``, ``.eval``, ``.logs``)
+:class:`~mlclient.AsyncMLClient`      Async variant of ``MLClient`` - same API, all methods are coroutines
 :class:`~mlclient.HttpClient`         Low-level HTTP client that accepts ML configuration and sends raw HTTP requests
+:class:`~mlclient.AsyncHttpClient`    Async variant of ``HttpClient``
 :class:`~mlclient.ApiClient`          Mid-level client providing :meth:`~mlclient.ApiClient.call` for :class:`~mlclient.calls.ApiCall` objects
+:class:`~mlclient.AsyncApiClient`     Async variant of ``ApiClient``
 ====================================  =======================================================================================================================================================
 
 Internally, the underlying ``HttpClient`` uses ``httpx``. Its default retry strategy is intentionally
@@ -75,6 +85,19 @@ If you would like to explicitly connect and disconnect a client, however, you ca
     >>> ml.connect()
     >>> resp = ml.http.get("/manage/v2/servers")
     >>> ml.disconnect()
+
+
+Async connection
+""""""""""""""""
+
+:class:`~mlclient.AsyncMLClient` follows the same pattern with ``async with``:
+
+.. code-block:: python
+
+    >>> from mlclient import AsyncMLClient
+
+    >>> async with AsyncMLClient() as ml:
+    ...     resp = await ml.http.get("/manage/v2/servers")
 
 
 To check if a client is connected you can use :meth:`~mlclient.MLClient.is_connected` method:
@@ -668,7 +691,6 @@ Get all logs
     ...     logs = ml.logs.get(8002)
     >>> list(logs)[0]
     {'timestamp': '2024-01-09T13:30:51.187Z', 'level': 'error', 'message': 'Test Log 1'}
-
 
 .. code-block:: python
 

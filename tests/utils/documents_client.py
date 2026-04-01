@@ -74,6 +74,7 @@ def assert_documents_exist_and_confirm_data(
             category=category,
             output_type=output_type,
         )
+        assert len(actual_docs) == len(expected)
         for uri, actual_doc in actual_docs.items():
             expected_doc = expected.get(uri)
             assert expected_doc is not None

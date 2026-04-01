@@ -1,0 +1,6 @@
+<error xmlns="http://marklogic.com/xdmp/error">
+  <status-code>404</status-code>
+  <status>Not Found</status>
+  <message-code>XDMP-NOSUCHGROUP</message-code>
+  <message>XDMP-NOSUCHGROUP: xdmp:group("Non-existing-group") -- No such group Non-existing-group</message>
+</error>

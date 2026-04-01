@@ -1,3 +1,6 @@
+> **Superseded**: These results reflect the old sync (ThreadPoolExecutor) implementation,
+> replaced by async. See [AsyncConsolidation.md](AsyncConsolidation.md) for current benchmarks and design decisions.
+
 ```text
 ===================================================================================================== test session starts =====================================================================================================
 platform linux -- Python 3.8.10, pytest-7.4.3, pluggy-1.3.0

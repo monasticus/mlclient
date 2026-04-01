@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 from pathlib import Path
 
 import pytest
@@ -15,7 +16,7 @@ NUMBER_OF_DOCS = 10000
 @pytest.fixture(scope="module", autouse=True)
 def _setup_and_teardown():
     # Setup
-    uri_prefix = "/performance-tests/read-documents-job"
+    uri_prefix = "/perf-tests/read-job"
     uri_template = f"{uri_prefix}/doc-{{}}.xml"
     uris = [uri_template.format(i + 1) for i in range(NUMBER_OF_DOCS)]
 
@@ -37,476 +38,476 @@ def test_reading_docs_with_default_settings(
     _perform_parametrized_test(benchmark, docs_count=NUMBER_OF_DOCS)
 
 
-def test_reading_docs_with_default_threads_batch_100(
+def test_reading_docs_with_default_concurrency_batch_100(
     benchmark,
 ):
     _perform_parametrized_test(benchmark, docs_count=NUMBER_OF_DOCS, batch_size=100)
 
 
-def test_reading_docs_with_default_threads_batch_200(
+def test_reading_docs_with_default_concurrency_batch_200(
     benchmark,
 ):
     _perform_parametrized_test(benchmark, docs_count=NUMBER_OF_DOCS, batch_size=200)
 
 
-def test_reading_docs_with_default_threads_batch_300(
+def test_reading_docs_with_default_concurrency_batch_300(
     benchmark,
 ):
     _perform_parametrized_test(benchmark, docs_count=NUMBER_OF_DOCS, batch_size=300)
 
 
-def test_reading_docs_with_default_threads_batch_500(
+def test_reading_docs_with_default_concurrency_batch_500(
     benchmark,
 ):
     _perform_parametrized_test(benchmark, docs_count=NUMBER_OF_DOCS, batch_size=500)
 
 
-def test_reading_docs_with_default_threads_batch_600(
+def test_reading_docs_with_default_concurrency_batch_600(
     benchmark,
 ):
     _perform_parametrized_test(benchmark, docs_count=NUMBER_OF_DOCS, batch_size=600)
 
 
-def test_reading_docs_with_default_threads_batch_700(
+def test_reading_docs_with_default_concurrency_batch_700(
     benchmark,
 ):
     _perform_parametrized_test(benchmark, docs_count=NUMBER_OF_DOCS, batch_size=700)
 
 
-def test_reading_docs_with_default_threads_batch_800(
+def test_reading_docs_with_default_concurrency_batch_800(
     benchmark,
 ):
     _perform_parametrized_test(benchmark, docs_count=NUMBER_OF_DOCS, batch_size=800)
 
 
-def test_reading_docs_with_default_threads_batch_900(
+def test_reading_docs_with_default_concurrency_batch_900(
     benchmark,
 ):
     _perform_parametrized_test(benchmark, docs_count=NUMBER_OF_DOCS, batch_size=900)
 
 
-def test_reading_docs_with_default_threads_batch_1000(
+def test_reading_docs_with_default_concurrency_batch_1000(
     benchmark,
 ):
     _perform_parametrized_test(benchmark, docs_count=NUMBER_OF_DOCS, batch_size=1000)
 
 
-def test_reading_docs_with_4_threads_default_batch(
+def test_reading_docs_with_4_concurrency_default_batch(
     benchmark,
 ):
-    _perform_parametrized_test(benchmark, docs_count=NUMBER_OF_DOCS, thread_count=4)
+    _perform_parametrized_test(benchmark, docs_count=NUMBER_OF_DOCS, concurrency=4)
 
 
-def test_reading_docs_with_8_threads_default_batch(
+def test_reading_docs_with_8_concurrency_default_batch(
     benchmark,
 ):
-    _perform_parametrized_test(benchmark, docs_count=NUMBER_OF_DOCS, thread_count=8)
+    _perform_parametrized_test(benchmark, docs_count=NUMBER_OF_DOCS, concurrency=8)
 
 
-def test_reading_docs_with_12_threads_default_batch(
+def test_reading_docs_with_12_concurrency_default_batch(
     benchmark,
 ):
-    _perform_parametrized_test(benchmark, docs_count=NUMBER_OF_DOCS, thread_count=12)
+    _perform_parametrized_test(benchmark, docs_count=NUMBER_OF_DOCS, concurrency=12)
 
 
-def test_reading_docs_with_24_threads_default_batch(
+def test_reading_docs_with_24_concurrency_default_batch(
     benchmark,
 ):
-    _perform_parametrized_test(benchmark, docs_count=NUMBER_OF_DOCS, thread_count=24)
+    _perform_parametrized_test(benchmark, docs_count=NUMBER_OF_DOCS, concurrency=24)
 
 
-def test_reading_docs_with_4_threads_batch_100(
+def test_reading_docs_with_4_concurrency_batch_100(
     benchmark,
 ):
     _perform_parametrized_test(
         benchmark,
         docs_count=NUMBER_OF_DOCS,
-        thread_count=4,
+        concurrency=4,
         batch_size=100,
     )
 
 
-def test_reading_docs_with_8_threads_batch_100(
+def test_reading_docs_with_8_concurrency_batch_100(
     benchmark,
 ):
     _perform_parametrized_test(
         benchmark,
         docs_count=NUMBER_OF_DOCS,
-        thread_count=8,
+        concurrency=8,
         batch_size=100,
     )
 
 
-def test_reading_docs_with_12_threads_batch_100(
+def test_reading_docs_with_12_concurrency_batch_100(
     benchmark,
 ):
     _perform_parametrized_test(
         benchmark,
         docs_count=NUMBER_OF_DOCS,
-        thread_count=12,
+        concurrency=12,
         batch_size=100,
     )
 
 
-def test_reading_docs_with_24_threads_batch_100(
+def test_reading_docs_with_24_concurrency_batch_100(
     benchmark,
 ):
     _perform_parametrized_test(
         benchmark,
         docs_count=NUMBER_OF_DOCS,
-        thread_count=24,
+        concurrency=24,
         batch_size=100,
     )
 
 
-def test_reading_docs_with_4_threads_batch_200(
+def test_reading_docs_with_4_concurrency_batch_200(
     benchmark,
 ):
     _perform_parametrized_test(
         benchmark,
         docs_count=NUMBER_OF_DOCS,
-        thread_count=4,
+        concurrency=4,
         batch_size=200,
     )
 
 
-def test_reading_docs_with_8_threads_batch_200(
+def test_reading_docs_with_8_concurrency_batch_200(
     benchmark,
 ):
     _perform_parametrized_test(
         benchmark,
         docs_count=NUMBER_OF_DOCS,
-        thread_count=8,
+        concurrency=8,
         batch_size=200,
     )
 
 
-def test_reading_docs_with_12_threads_batch_200(
+def test_reading_docs_with_12_concurrency_batch_200(
     benchmark,
 ):
     _perform_parametrized_test(
         benchmark,
         docs_count=NUMBER_OF_DOCS,
-        thread_count=12,
+        concurrency=12,
         batch_size=200,
     )
 
 
-def test_reading_docs_with_24_threads_batch_200(
+def test_reading_docs_with_24_concurrency_batch_200(
     benchmark,
 ):
     _perform_parametrized_test(
         benchmark,
         docs_count=NUMBER_OF_DOCS,
-        thread_count=24,
+        concurrency=24,
         batch_size=200,
     )
 
 
-def test_reading_docs_with_4_threads_batch_300(
+def test_reading_docs_with_4_concurrency_batch_300(
     benchmark,
 ):
     _perform_parametrized_test(
         benchmark,
         docs_count=NUMBER_OF_DOCS,
-        thread_count=4,
+        concurrency=4,
         batch_size=300,
     )
 
 
-def test_reading_docs_with_8_threads_batch_300(
+def test_reading_docs_with_8_concurrency_batch_300(
     benchmark,
 ):
     _perform_parametrized_test(
         benchmark,
         docs_count=NUMBER_OF_DOCS,
-        thread_count=8,
+        concurrency=8,
         batch_size=300,
     )
 
 
-def test_reading_docs_with_12_threads_batch_300(
+def test_reading_docs_with_12_concurrency_batch_300(
     benchmark,
 ):
     _perform_parametrized_test(
         benchmark,
         docs_count=NUMBER_OF_DOCS,
-        thread_count=12,
+        concurrency=12,
         batch_size=300,
     )
 
 
-def test_reading_docs_with_24_threads_batch_300(
+def test_reading_docs_with_24_concurrency_batch_300(
     benchmark,
 ):
     _perform_parametrized_test(
         benchmark,
         docs_count=NUMBER_OF_DOCS,
-        thread_count=24,
+        concurrency=24,
         batch_size=300,
     )
 
 
-def test_reading_docs_with_4_threads_batch_500(
+def test_reading_docs_with_4_concurrency_batch_500(
     benchmark,
 ):
     _perform_parametrized_test(
         benchmark,
         docs_count=NUMBER_OF_DOCS,
-        thread_count=4,
+        concurrency=4,
         batch_size=500,
     )
 
 
-def test_reading_docs_with_8_threads_batch_500(
+def test_reading_docs_with_8_concurrency_batch_500(
     benchmark,
 ):
     _perform_parametrized_test(
         benchmark,
         docs_count=NUMBER_OF_DOCS,
-        thread_count=8,
+        concurrency=8,
         batch_size=500,
     )
 
 
-def test_reading_docs_with_12_threads_batch_500(
+def test_reading_docs_with_12_concurrency_batch_500(
     benchmark,
 ):
     _perform_parametrized_test(
         benchmark,
         docs_count=NUMBER_OF_DOCS,
-        thread_count=12,
+        concurrency=12,
         batch_size=500,
     )
 
 
-def test_reading_docs_with_24_threads_batch_500(
+def test_reading_docs_with_24_concurrency_batch_500(
     benchmark,
 ):
     _perform_parametrized_test(
         benchmark,
         docs_count=NUMBER_OF_DOCS,
-        thread_count=24,
+        concurrency=24,
         batch_size=500,
     )
 
 
-def test_reading_docs_with_4_threads_batch_600(
+def test_reading_docs_with_4_concurrency_batch_600(
     benchmark,
 ):
     _perform_parametrized_test(
         benchmark,
         docs_count=NUMBER_OF_DOCS,
-        thread_count=4,
+        concurrency=4,
         batch_size=600,
     )
 
 
-def test_reading_docs_with_8_threads_batch_600(
+def test_reading_docs_with_8_concurrency_batch_600(
     benchmark,
 ):
     _perform_parametrized_test(
         benchmark,
         docs_count=NUMBER_OF_DOCS,
-        thread_count=8,
+        concurrency=8,
         batch_size=600,
     )
 
 
-def test_reading_docs_with_12_threads_batch_600(
+def test_reading_docs_with_12_concurrency_batch_600(
     benchmark,
 ):
     _perform_parametrized_test(
         benchmark,
         docs_count=NUMBER_OF_DOCS,
-        thread_count=12,
+        concurrency=12,
         batch_size=600,
     )
 
 
-def test_reading_docs_with_24_threads_batch_600(
+def test_reading_docs_with_24_concurrency_batch_600(
     benchmark,
 ):
     _perform_parametrized_test(
         benchmark,
         docs_count=NUMBER_OF_DOCS,
-        thread_count=24,
+        concurrency=24,
         batch_size=600,
     )
 
 
-def test_reading_docs_with_4_threads_batch_700(
+def test_reading_docs_with_4_concurrency_batch_700(
     benchmark,
 ):
     _perform_parametrized_test(
         benchmark,
         docs_count=NUMBER_OF_DOCS,
-        thread_count=4,
+        concurrency=4,
         batch_size=700,
     )
 
 
-def test_reading_docs_with_8_threads_batch_700(
+def test_reading_docs_with_8_concurrency_batch_700(
     benchmark,
 ):
     _perform_parametrized_test(
         benchmark,
         docs_count=NUMBER_OF_DOCS,
-        thread_count=8,
+        concurrency=8,
         batch_size=700,
     )
 
 
-def test_reading_docs_with_12_threads_batch_700(
+def test_reading_docs_with_12_concurrency_batch_700(
     benchmark,
 ):
     _perform_parametrized_test(
         benchmark,
         docs_count=NUMBER_OF_DOCS,
-        thread_count=12,
+        concurrency=12,
         batch_size=700,
     )
 
 
-def test_reading_docs_with_24_threads_batch_700(
+def test_reading_docs_with_24_concurrency_batch_700(
     benchmark,
 ):
     _perform_parametrized_test(
         benchmark,
         docs_count=NUMBER_OF_DOCS,
-        thread_count=24,
+        concurrency=24,
         batch_size=700,
     )
 
 
-def test_reading_docs_with_4_threads_batch_800(
+def test_reading_docs_with_4_concurrency_batch_800(
     benchmark,
 ):
     _perform_parametrized_test(
         benchmark,
         docs_count=NUMBER_OF_DOCS,
-        thread_count=4,
+        concurrency=4,
         batch_size=800,
     )
 
 
-def test_reading_docs_with_8_threads_batch_800(
+def test_reading_docs_with_8_concurrency_batch_800(
     benchmark,
 ):
     _perform_parametrized_test(
         benchmark,
         docs_count=NUMBER_OF_DOCS,
-        thread_count=8,
+        concurrency=8,
         batch_size=800,
     )
 
 
-def test_reading_docs_with_12_threads_batch_800(
+def test_reading_docs_with_12_concurrency_batch_800(
     benchmark,
 ):
     _perform_parametrized_test(
         benchmark,
         docs_count=NUMBER_OF_DOCS,
-        thread_count=12,
+        concurrency=12,
         batch_size=800,
     )
 
 
-def test_reading_docs_with_24_threads_batch_800(
+def test_reading_docs_with_24_concurrency_batch_800(
     benchmark,
 ):
     _perform_parametrized_test(
         benchmark,
         docs_count=NUMBER_OF_DOCS,
-        thread_count=24,
+        concurrency=24,
         batch_size=800,
     )
 
 
-def test_reading_docs_with_4_threads_batch_900(
+def test_reading_docs_with_4_concurrency_batch_900(
     benchmark,
 ):
     _perform_parametrized_test(
         benchmark,
         docs_count=NUMBER_OF_DOCS,
-        thread_count=4,
+        concurrency=4,
         batch_size=900,
     )
 
 
-def test_reading_docs_with_8_threads_batch_900(
+def test_reading_docs_with_8_concurrency_batch_900(
     benchmark,
 ):
     _perform_parametrized_test(
         benchmark,
         docs_count=NUMBER_OF_DOCS,
-        thread_count=8,
+        concurrency=8,
         batch_size=900,
     )
 
 
-def test_reading_docs_with_12_threads_batch_900(
+def test_reading_docs_with_12_concurrency_batch_900(
     benchmark,
 ):
     _perform_parametrized_test(
         benchmark,
         docs_count=NUMBER_OF_DOCS,
-        thread_count=12,
+        concurrency=12,
         batch_size=900,
     )
 
 
-def test_reading_docs_with_24_threads_batch_900(
+def test_reading_docs_with_24_concurrency_batch_900(
     benchmark,
 ):
     _perform_parametrized_test(
         benchmark,
         docs_count=NUMBER_OF_DOCS,
-        thread_count=24,
+        concurrency=24,
         batch_size=900,
     )
 
 
-def test_reading_docs_with_4_threads_batch_1000(
+def test_reading_docs_with_4_concurrency_batch_1000(
     benchmark,
 ):
     _perform_parametrized_test(
         benchmark,
         docs_count=NUMBER_OF_DOCS,
-        thread_count=4,
+        concurrency=4,
         batch_size=1000,
     )
 
 
-def test_reading_docs_with_8_threads_batch_1000(
+def test_reading_docs_with_8_concurrency_batch_1000(
     benchmark,
 ):
     _perform_parametrized_test(
         benchmark,
         docs_count=NUMBER_OF_DOCS,
-        thread_count=8,
+        concurrency=8,
         batch_size=1000,
     )
 
 
-def test_reading_docs_with_12_threads_batch_1000(
+def test_reading_docs_with_12_concurrency_batch_1000(
     benchmark,
 ):
     _perform_parametrized_test(
         benchmark,
         docs_count=NUMBER_OF_DOCS,
-        thread_count=12,
+        concurrency=12,
         batch_size=1000,
     )
 
 
-def test_reading_docs_with_24_threads_batch_1000(
+def test_reading_docs_with_24_concurrency_batch_1000(
     benchmark,
 ):
     _perform_parametrized_test(
         benchmark,
         docs_count=NUMBER_OF_DOCS,
-        thread_count=24,
+        concurrency=24,
         batch_size=1000,
     )
 
@@ -521,17 +522,14 @@ def test_reading_docs_with_filesystem_output_and_default_settings(
     )
 
 
-# def t
-
-
 def _perform_parametrized_test(
     benchmark,
     docs_count: int,
-    thread_count: int | None = None,
+    concurrency: int | None = None,
     batch_size: int = 400,
     output_path: str | None = None,
 ):
-    uri_prefix = "/performance-tests/read-documents-job"
+    uri_prefix = "/perf-tests/read-job"
     uri_template = f"{uri_prefix}/doc-{{}}.xml"
     uris = [uri_template.format(i + 1) for i in range(docs_count)]
 
@@ -539,7 +537,7 @@ def _perform_parametrized_test(
         job = benchmark(
             _read_job_with_filesystem_output,
             uris,
-            thread_count,
+            concurrency,
             batch_size,
             output_path,
         )
@@ -548,7 +546,7 @@ def _perform_parametrized_test(
         job = benchmark(
             _read_job_with_documents_output,
             uris,
-            thread_count,
+            concurrency,
             batch_size,
         )
 
@@ -563,37 +561,38 @@ def _write_job_with_documents_input(
 ):
     docs = docs_client_utils.generate_docs(docs_count, uri_template=uri_template)
     job = WriteDocumentsJob()
-    job.with_client_config(auth_method="digest")
+    job.with_client_config(port=8000, auth_method="digest")
     job.with_documents_input(docs)
-    job.start()
-    job.await_completion()
+    job.run_sync()
 
 
 def _read_job_with_documents_output(
     uris: list[str],
-    thread_count: int | None,
+    concurrency: int | None,
     batch_size: int,
 ):
-    job = ReadDocumentsJob(thread_count=thread_count, batch_size=batch_size)
-    job.with_client_config(auth_method="digest")
-    job.with_uris_input(uris)
-    job.start()
-    job.await_completion()
+    async def _run():
+        job = ReadDocumentsJob(concurrency=concurrency, batch_size=batch_size)
+        job.with_client_config(port=8000, auth_method="digest")
+        job.with_uris_input(uris)
+        await job.run()
+        return job
 
-    return job
+    return asyncio.run(_run())
 
 
 def _read_job_with_filesystem_output(
     uris: list[str],
-    thread_count: int | None,
+    concurrency: int | None,
     batch_size: int,
     output_path: str,
 ):
-    job = ReadDocumentsJob(thread_count=thread_count, batch_size=batch_size)
-    job.with_client_config(auth_method="digest")
-    job.with_uris_input(uris)
-    job.with_filesystem_output(output_path)
-    job.start()
-    job.await_completion()
+    async def _run():
+        job = ReadDocumentsJob(concurrency=concurrency, batch_size=batch_size)
+        job.with_client_config(port=8000, auth_method="digest")
+        job.with_uris_input(uris)
+        job.with_filesystem_output(output_path)
+        await job.run()
+        return job
 
-    return job
+    return asyncio.run(_run())

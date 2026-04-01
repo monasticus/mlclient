@@ -1,0 +1,6 @@
+<server-config xmlns="http://marklogic.com/xdmp">
+  <config-version>11.0-9</config-version>
+  <host-id>12345678901234567890</host-id>
+  <host-name>localhost</host-name>
+  <timestamp>2024-01-15T10:30:00.000Z</timestamp>
+</server-config>

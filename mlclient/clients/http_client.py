@@ -1,6 +1,6 @@
-"""The HTTP Client module.
+"""The HTTP Client module (HttpClient / AsyncHttpClient).
 
-It exports the HttpClient class for raw HTTP communication with MarkLogic.
+Exports sync and async HTTP clients for raw communication with MarkLogic.
 """
 
 from __future__ import annotations
@@ -11,7 +11,16 @@ from collections.abc import Mapping
 from types import TracebackType
 
 import httpx
-from httpx import Auth, BasicAuth, Client, DigestAuth, HTTPTransport, Response
+from httpx import (
+    AsyncClient,
+    AsyncHTTPTransport,
+    Auth,
+    BasicAuth,
+    Client,
+    DigestAuth,
+    HTTPTransport,
+    Response,
+)
 from httpx_retries import Retry, RetryTransport
 
 from mlclient import constants as const
@@ -52,8 +61,8 @@ RESTART_RETRY_STRATEGY = Retry(
 )
 
 
-class HttpClient:
-    """A low-level class used to send HTTP requests to a MarkLogic instance.
+class HttpClientBase:
+    """Shared base for sync and async HTTP clients.
 
     Attributes
     ----------
@@ -83,7 +92,7 @@ class HttpClient:
         password: str = "admin",
         retry: Retry | None = None,
     ):
-        """Initialize HttpClient instance.
+        """Initialize HttpClientBase instance.
 
         Parameters
         ----------
@@ -110,9 +119,117 @@ class HttpClient:
         self.password: str = password
         self.base_url: str = f"{protocol}://{host}:{port}"
         self._retry: Retry = retry or DEFAULT_RETRY_STRATEGY
-        self._client: Client | None = None
         auth_impl = BasicAuth if auth_method == "basic" else DigestAuth
         self._auth: Auth = auth_impl(username, password)
+
+    def _prepare_request(
+        self,
+        params: dict | None = None,
+        headers: dict | None = None,
+        body: str | dict | None = None,
+    ) -> dict:
+        """Prepare request details."""
+        request = {
+            "params": params or {},
+            "headers": headers or {},
+            "auth": self._auth,
+        }
+        if body is not None:
+            content_type = (headers or {}).get(const.HEADER_NAME_CONTENT_TYPE)
+            doc_type = Mimetypes.get_doc_type(content_type) if content_type else None
+            if doc_type == DocumentType.JSON:
+                request["json"] = body
+            elif isinstance(body, Mapping):
+                request["data"] = body
+            else:
+                request["content"] = body
+
+        logger.debug(
+            "Request details: %s",
+            " ".join(
+                f"{k} [{v if k != 'auth' else v.__class__.__name__}]"
+                for k, v in request.items()
+            ),
+        )
+        return request
+
+    @classmethod
+    def _log_response(
+        cls,
+        method: str,
+        endpoint: str,
+        response: Response,
+    ):
+        """Log response details and restart warning, if applicable."""
+        logger.debug("Response retrieved")
+        logger.fine(cls._format_http_response(response))
+
+        if RestartWaiter.is_restart_response(response):
+            logger.warning(
+                "MarkLogic accepted %s %s and initiated a restart; "
+                "Location [%s]. Wait for restart completion before "
+                "sending follow-up requests",
+                method,
+                endpoint,
+                response.headers.get("Location"),
+            )
+
+    @staticmethod
+    def _format_http_response(
+        response: Response,
+    ) -> str:
+        """Format an HTTP response in a protocol-like representation."""
+        reason_phrase = httpx.codes.get_reason_phrase(response.status_code)
+        start_line = f"HTTP/1.1 {response.status_code} {reason_phrase}"
+        headers = "\n".join(f"{name}: {val}" for name, val in response.headers.items())
+        if response.text:
+            return f"{start_line}\n{headers}\n\n{response.text}"
+        return f"{start_line}\n{headers}"
+
+
+class HttpClient(HttpClientBase):
+    """A low-level class used to send HTTP requests to a MarkLogic instance.
+
+    Attributes
+    ----------
+    protocol : str
+        a protocol used for HTTP requests (http / https)
+    host : str
+        a host name
+    port : int
+        an App Service port
+    auth_method : str
+        an authorization method (basic / digest)
+    username : str
+        a username
+    password : str
+        a password
+    base_url : str
+        a base url built based on the protocol, the host name and the port
+    """
+
+    def __init__(self, **kwargs):
+        """Initialize HttpClient instance.
+
+        Parameters
+        ----------
+        protocol : str, default "http"
+            A protocol used for HTTP requests (http / https)
+        host : str, default "localhost"
+            A host name
+        port : int, default 8002
+            An App Service port
+        auth_method : str, default "basic"
+            An authorization method (basic / digest)
+        username : str, default "admin"
+            A username
+        password : str, default "admin"
+            A password
+        retry : Retry | None, default Retry(total=5, backoff_factor=0.5)
+            A retry strategy
+        """
+        super().__init__(**kwargs)
+        self._client: Client | None = None
 
     def __enter__(self):
         """Connect and return self for use as a context manager."""
@@ -294,37 +411,6 @@ class HttpClient:
         self._log_response(method, endpoint, resp)
         return resp
 
-    def _prepare_request(
-        self,
-        params: dict | None = None,
-        headers: dict | None = None,
-        body: str | dict | None = None,
-    ) -> dict:
-        """Prepare a request details."""
-        request = {
-            "params": params or {},
-            "headers": headers or {},
-            "auth": self._auth,
-        }
-        if body is not None:
-            content_type = (headers or {}).get(const.HEADER_NAME_CONTENT_TYPE)
-            doc_type = Mimetypes.get_doc_type(content_type) if content_type else None
-            if doc_type == DocumentType.JSON:
-                request["json"] = body
-            elif isinstance(body, Mapping):
-                request["data"] = body
-            else:
-                request["content"] = body
-
-        logger.debug(
-            "Request details: %s",
-            " ".join(
-                f"{k} [{v if k != 'auth' else v.__class__.__name__}]"
-                for k, v in request.items()
-            ),
-        )
-        return request
-
     def _send_request(
         self,
         method: str,
@@ -344,42 +430,272 @@ class HttpClient:
             method.upper(),
             endpoint,
         )
-        transport = httpx.HTTPTransport(verify=_SHARED_SSL_CONTEXT)
+        transport = HTTPTransport(verify=_SHARED_SSL_CONTEXT)
         with Client(
             transport=RetryTransport(transport=transport, retry=self._retry),
             follow_redirects=True,
         ) as client:
             return client.request(method, url, **request)
 
-    @classmethod
-    def _log_response(
-        cls,
+
+class AsyncHttpClient(HttpClientBase):
+    """An async low-level class used to send HTTP requests to a MarkLogic instance.
+
+    Attributes
+    ----------
+    protocol : str
+        a protocol used for HTTP requests (http / https)
+    host : str
+        a host name
+    port : int
+        an App Service port
+    auth_method : str
+        an authorization method (basic / digest)
+    username : str
+        a username
+    password : str
+        a password
+    base_url : str
+        a base url built based on the protocol, the host name and the port
+    """
+
+    def __init__(self, **kwargs):
+        """Initialize AsyncHttpClient instance.
+
+        Parameters
+        ----------
+        protocol : str, default "http"
+            A protocol used for HTTP requests (http / https)
+        host : str, default "localhost"
+            A host name
+        port : int, default 8002
+            An App Service port
+        auth_method : str, default "basic"
+            An authorization method (basic / digest)
+        username : str, default "admin"
+            A username
+        password : str, default "admin"
+            A password
+        retry : Retry | None, default Retry(total=5, backoff_factor=0.5)
+            A retry strategy
+        """
+        super().__init__(**kwargs)
+        self._client: AsyncClient | None = None
+
+    async def __aenter__(self):
+        """Connect and return self for use as an async context manager."""
+        await self.connect()
+        return self
+
+    async def __aexit__(
+        self,
+        exc_type: type,
+        exc_val: BaseException,
+        exc_tb: TracebackType,
+    ):
+        """Disconnect on async context manager exit."""
+        await self.disconnect()
+
+    async def connect(self):
+        """Start an async HTTP session."""
+        logger.debug("Initiating a connection with %s", self.base_url)
+        transport = AsyncHTTPTransport(verify=_SHARED_SSL_CONTEXT)
+        self._client = AsyncClient(
+            transport=RetryTransport(transport=transport, retry=self._retry),
+            follow_redirects=True,
+        )
+
+    async def disconnect(self):
+        """Close an async HTTP session."""
+        if self._client:
+            logger.debug("Closing a connection")
+            await self._client.aclose()
+            self._client = None
+
+    def is_connected(self) -> bool:
+        """Return a connection status.
+
+        Returns
+        -------
+        bool
+            True if the client has started a connection; otherwise False
+        """
+        return self._client is not None
+
+    async def get(
+        self,
+        endpoint: str,
+        *,
+        params: dict | None = None,
+        headers: dict | None = None,
+    ) -> Response:
+        """Send an async GET request.
+
+        Parameters
+        ----------
+        endpoint : str
+            A REST endpoint to call
+        params : dict | None
+            Request parameters
+        headers : dict | None
+            Request headers
+
+        Returns
+        -------
+        Response
+            An HTTP response
+        """
+        return await self.request("GET", endpoint, params=params, headers=headers)
+
+    async def post(
+        self,
+        endpoint: str,
+        body: str | dict | None = None,
+        *,
+        params: dict | None = None,
+        headers: dict | None = None,
+    ) -> Response:
+        """Send an async POST request.
+
+        Parameters
+        ----------
+        endpoint : str
+            A REST endpoint to call
+        body : str | dict | None
+            A request body
+        params : dict | None
+            Request parameters
+        headers : dict | None
+            Request headers
+
+        Returns
+        -------
+        Response
+            An HTTP response
+        """
+        return await self.request(
+            "POST",
+            endpoint,
+            body,
+            params=params,
+            headers=headers,
+        )
+
+    async def put(
+        self,
+        endpoint: str,
+        body: str | dict | None = None,
+        *,
+        params: dict | None = None,
+        headers: dict | None = None,
+    ) -> Response:
+        """Send an async PUT request.
+
+        Parameters
+        ----------
+        endpoint : str
+            A REST endpoint to call
+        body : str | dict | None
+            A request body
+        params : dict | None
+            Request parameters
+        headers : dict | None
+            Request headers
+
+        Returns
+        -------
+        Response
+            An HTTP response
+        """
+        return await self.request(
+            "PUT",
+            endpoint,
+            body,
+            params=params,
+            headers=headers,
+        )
+
+    async def delete(
+        self,
+        endpoint: str,
+        *,
+        params: dict | None = None,
+        headers: dict | None = None,
+    ) -> Response:
+        """Send an async DELETE request.
+
+        Parameters
+        ----------
+        endpoint : str
+            A REST endpoint to call
+        params : dict | None
+            Request parameters
+        headers : dict | None
+            Request headers
+
+        Returns
+        -------
+        Response
+            An HTTP response
+        """
+        return await self.request("DELETE", endpoint, params=params, headers=headers)
+
+    async def request(
+        self,
         method: str,
         endpoint: str,
-        response: Response,
-    ):
-        """Log response details and restart warning, if applicable."""
-        logger.debug("Response retrieved")
-        logger.fine(cls._format_http_response(response))
+        body: str | dict | None = None,
+        *,
+        params: dict | None = None,
+        headers: dict | None = None,
+    ) -> Response:
+        """Send an async HTTP request.
 
-        if RestartWaiter.is_restart_response(response):
-            logger.warning(
-                "MarkLogic accepted %s %s and initiated a restart; "
-                "Location [%s]. Wait for restart completion before "
-                "sending follow-up requests",
-                method,
-                endpoint,
-                response.headers.get("Location"),
-            )
+        Parameters
+        ----------
+        method : str
+            An HTTP request method
+        endpoint : str
+            A REST endpoint to call
+        body : str | dict | None
+            A request body
+        params : dict | None
+            Request parameters
+        headers : dict | None
+            Request headers
 
-    @staticmethod
-    def _format_http_response(
-        response: Response,
-    ) -> str:
-        """Format an HTTP response in a protocol-like representation."""
-        reason_phrase = httpx.codes.get_reason_phrase(response.status_code)
-        start_line = f"HTTP/1.1 {response.status_code} {reason_phrase}"
-        headers = "\n".join(f"{name}: {val}" for name, val in response.headers.items())
-        if response.text:
-            return f"{start_line}\n{headers}\n\n{response.text}"
-        return f"{start_line}\n{headers}"
+        Returns
+        -------
+        Response
+            An HTTP response
+        """
+        request = self._prepare_request(params, headers, body)
+        resp = await self._send_request(method, endpoint, request)
+        self._log_response(method, endpoint, resp)
+        return resp
+
+    async def _send_request(
+        self,
+        method: str,
+        endpoint: str,
+        request: dict,
+    ) -> Response:
+        """Send a request asynchronously."""
+        logger.info("Sending a request... %s %s", method.upper(), endpoint)
+
+        url = self.base_url + endpoint
+        if self.is_connected():
+            return await self._client.request(method, url, **request)
+
+        logger.warning(
+            "AsyncHttpClient is not connected -- "
+            "A request will be sent in an ad-hoc initialized session (%s %s)",
+            method.upper(),
+            endpoint,
+        )
+        transport = AsyncHTTPTransport(verify=_SHARED_SSL_CONTEXT)
+        async with AsyncClient(
+            transport=RetryTransport(transport=transport, retry=self._retry),
+            follow_redirects=True,
+        ) as client:
+            return await client.request(method, url, **request)

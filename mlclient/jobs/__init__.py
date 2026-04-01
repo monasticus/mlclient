@@ -8,9 +8,9 @@ It contains the following modules
 
 This package exports the following classes:
     * WriteDocumentsJob
-        A multi-thread job writing documents into a MarkLogic database.
+        An async job writing documents into a MarkLogic database.
     * ReadDocumentsJob
-        A multi-thread job reading documents from a MarkLogic database.
+        An async job reading documents from a MarkLogic database.
     * DocumentJobReport
         A class representing a documents job report.
     * DocumentsLoader

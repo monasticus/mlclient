@@ -130,6 +130,27 @@ class RestartWaiter:
             ),
         )
 
+    async def async_wait_for_restart_completion(
+        self,
+        response: Response | None,
+        *,
+        timeout: float,
+        poll_interval: float,
+        retry: Retry | None = None,
+    ) -> None:
+        """Async variant of :meth:`wait_for_restart_completion`.
+
+        Use this from an async context instead of the sync version, which
+        cannot run inside an already-running event loop.
+        """
+        restart_timestamps = self._get_last_startup_by_host(response)
+        await self._wait_for_restart_readiness(
+            restart_timestamps,
+            timeout,
+            poll_interval,
+            retry or self._default_retry,
+        )
+
     @staticmethod
     def is_restart_response(
         response: Response | None,

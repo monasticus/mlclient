@@ -1,4 +1,4 @@
-"""ForestsApi - mid-level access to MarkLogic forest endpoints."""
+"""ForestsApi / AsyncForestsApi - mid-level access to MarkLogic forest endpoints."""
 
 from __future__ import annotations
 
@@ -19,7 +19,7 @@ from mlclient.calls import (
 
 # Avoid circular import: ApiClient -> api classes -> ApiClient
 if TYPE_CHECKING:
-    from mlclient.clients.api_client import ApiClient
+    from mlclient.clients.api_client import ApiClient, AsyncApiClient
 
 
 class ForestsApi:
@@ -283,3 +283,102 @@ class ForestsApi:
         """
         call = ForestPropertiesPutCall(forest=forest, body=body)
         return self._api.call(call)
+
+
+class AsyncForestsApi:
+    """Async mid-level API for ``/manage/v2/forests`` endpoints."""
+
+    def __init__(self, api: AsyncApiClient):
+        self._api = api
+
+    async def get_list(
+        self,
+        *,
+        data_format: str | None = None,
+        view: str | None = None,
+        database: str | None = None,
+        group: str | None = None,
+        host: str | None = None,
+        full_refs: bool | None = None,
+    ) -> Response:
+        """Retrieve data about the forests in the cluster."""
+        call = ForestsGetCall(
+            data_format=data_format,
+            view=view,
+            database=database,
+            group=group,
+            host=host,
+            full_refs=full_refs,
+        )
+        return await self._api.call(call)
+
+    async def create(
+        self,
+        body: str | dict,
+        *,
+        wait_for_forest_to_mount: bool | None = None,
+    ) -> Response:
+        """Create a new forest, including replicas if specified."""
+        call = ForestsPostCall(
+            body=body,
+            wait_for_forest_to_mount=wait_for_forest_to_mount,
+        )
+        return await self._api.call(call)
+
+    async def put(
+        self,
+        body: str | dict,
+    ) -> Response:
+        """Perform an operation on one or more forests."""
+        call = ForestsPutCall(body=body)
+        return await self._api.call(call)
+
+    async def get(
+        self,
+        forest: str,
+        *,
+        data_format: str | None = None,
+        view: str | None = None,
+    ) -> Response:
+        """Retrieve information about a forest."""
+        call = ForestGetCall(forest=forest, data_format=data_format, view=view)
+        return await self._api.call(call)
+
+    async def post(
+        self,
+        forest: str,
+        body: str | dict,
+    ) -> Response:
+        """Initiate a state change on a forest, such as a merge, restart, or attach."""
+        call = ForestPostCall(forest=forest, body=body)
+        return await self._api.call(call)
+
+    async def delete(
+        self,
+        forest: str,
+        *,
+        level: str,
+        replicas: str | None = None,
+    ) -> Response:
+        """Delete a forest."""
+        call = ForestDeleteCall(forest=forest, level=level, replicas=replicas)
+        return await self._api.call(call)
+
+    async def get_properties(
+        self,
+        forest: str,
+        *,
+        data_format: str | None = None,
+    ) -> Response:
+        """Retrieve the modifiable properties of a forest."""
+        call = ForestPropertiesGetCall(forest=forest, data_format=data_format)
+        return await self._api.call(call)
+
+    async def put_properties(
+        self,
+        forest: str,
+        body: str | dict,
+    ) -> Response:
+        """Modify the configuration of a forest."""
+        call = ForestPropertiesPutCall(forest=forest, body=body)
+        return await self._api.call(call)

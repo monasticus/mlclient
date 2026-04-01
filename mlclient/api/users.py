@@ -1,4 +1,4 @@
-"""UsersApi - mid-level access to MarkLogic user endpoints."""
+"""UsersApi / AsyncUsersApi - mid-level access to MarkLogic user endpoints."""
 
 from __future__ import annotations
 
@@ -17,7 +17,7 @@ from mlclient.calls import (
 
 # Avoid circular import: ApiClient -> api classes -> ApiClient
 if TYPE_CHECKING:
-    from mlclient.clients.api_client import ApiClient
+    from mlclient.clients.api_client import ApiClient, AsyncApiClient
 
 
 class UsersApi:
@@ -176,3 +176,66 @@ class UsersApi:
         """
         call = UserPropertiesPutCall(user=user, body=body)
         return self._api.call(call)
+
+
+class AsyncUsersApi:
+    """Async mid-level API for ``/manage/v2/users`` endpoints."""
+
+    def __init__(self, api: AsyncApiClient):
+        self._api = api
+
+    async def get_list(
+        self,
+        *,
+        data_format: str | None = None,
+        view: str | None = None,
+    ) -> Response:
+        """Retrieve a summary of the users in the cluster."""
+        call = UsersGetCall(data_format=data_format, view=view)
+        return await self._api.call(call)
+
+    async def create(
+        self,
+        body: str | dict,
+    ) -> Response:
+        """Create a new user in the security database."""
+        call = UsersPostCall(body=body)
+        return await self._api.call(call)
+
+    async def get(
+        self,
+        user: str,
+        *,
+        data_format: str | None = None,
+        view: str | None = None,
+    ) -> Response:
+        """Retrieve the configuration for the specified user."""
+        call = UserGetCall(user=user, data_format=data_format, view=view)
+        return await self._api.call(call)
+
+    async def delete(
+        self,
+        user: str,
+    ) -> Response:
+        """Delete the specified user from the security database."""
+        call = UserDeleteCall(user=user)
+        return await self._api.call(call)
+
+    async def get_properties(
+        self,
+        user: str,
+        *,
+        data_format: str | None = None,
+    ) -> Response:
+        """Retrieve the properties of the specified user."""
+        call = UserPropertiesGetCall(user=user, data_format=data_format)
+        return await self._api.call(call)
+
+    async def put_properties(
+        self,
+        user: str,
+        body: str | dict,
+    ) -> Response:
+        """Update the properties for the specified user."""
+        call = UserPropertiesPutCall(user=user, body=body)
+        return await self._api.call(call)

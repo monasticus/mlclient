@@ -1,4 +1,4 @@
-"""High-level Documents service.
+"""High-level Documents service (DocumentsService / AsyncDocumentsService).
 
 Provides parsed document operations on MarkLogic.
 """
@@ -6,7 +6,7 @@ Provides parsed document operations on MarkLogic.
 from __future__ import annotations
 
 from collections.abc import Iterator
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from httpx import Response
 
@@ -14,6 +14,10 @@ from mlclient import constants
 from mlclient.calls import DocumentsDeleteCall, DocumentsGetCall, DocumentsPostCall
 from mlclient.clients.api_client import ApiClient
 from mlclient.exceptions import MarkLogicError
+
+if TYPE_CHECKING:
+    from mlclient.clients.api_client import AsyncApiClient
+
 from mlclient.mimetypes import Mimetypes
 from mlclient.ml_response_parser import MLResponseParser
 from mlclient.models import (
@@ -460,3 +464,90 @@ class DocumentsReader:
             uri=uri,
             metadata=metadata,
         )
+
+
+class AsyncDocumentsService:
+    """Async high-level service for /v1/documents CRUD operations."""
+
+    def __init__(self, api: AsyncApiClient):
+        self._api = api
+
+    async def write(
+        self,
+        data: Document | Metadata | list[Document | Metadata],
+        *,
+        database: str | None = None,
+        temporal_collection: str | None = None,
+    ) -> dict:
+        """Write documents to MarkLogic."""
+        body_parts = DocumentsSender.parse(data)
+        call = DocumentsPostCall(
+            body_parts=body_parts,
+            database=database,
+            temporal_collection=temporal_collection,
+        )
+        resp = await self._api.call(call)
+        if not resp.is_success:
+            resp_body = MLResponseParser.parse(resp)
+            raise MarkLogicError(resp_body["errorResponse"])
+        return MLResponseParser.parse(resp)
+
+    async def read(
+        self,
+        uris: str | list[str] | tuple[str] | set[str],
+        *,
+        category: str | list | None = None,
+        database: str | None = None,
+        output_type: type | None = None,
+    ) -> Document | dict[str, Document]:
+        """Read documents from MarkLogic."""
+        docs = await self.read_stream(
+            uris,
+            category=category,
+            database=database,
+            output_type=output_type,
+        )
+        return next(docs) if isinstance(uris, str) else {doc.uri: doc for doc in docs}
+
+    async def read_stream(
+        self,
+        uris: str | list[str] | tuple[str] | set[str],
+        *,
+        category: str | list | None = None,
+        database: str | None = None,
+        output_type: type | None = None,
+    ) -> Iterator[Document]:
+        """Read documents from MarkLogic as a stream."""
+        call = DocumentsGetCall(
+            uri=uris,
+            category=category,
+            database=database,
+            data_format="json",
+        )
+        resp = await self._api.call(call)
+        if not resp.is_success:
+            resp_body = MLResponseParser.parse(resp)
+            raise MarkLogicError(resp_body["errorResponse"])
+        return DocumentsReader.parse(resp, uris, category, output_type)
+
+    async def delete(
+        self,
+        uris: str | list[str] | tuple[str] | set[str],
+        *,
+        category: str | list | None = None,
+        database: str | None = None,
+        temporal_collection: str | None = None,
+        wipe_temporal: bool | None = None,
+    ):
+        """Delete documents from MarkLogic."""
+        call = DocumentsDeleteCall(
+            uri=uris,
+            category=category,
+            database=database,
+            temporal_collection=temporal_collection,
+            wipe_temporal=wipe_temporal,
+        )
+        resp = await self._api.call(call)
+        if not resp.is_success:
+            resp_body = MLResponseParser.parse(resp)
+            raise MarkLogicError(resp_body["errorResponse"])

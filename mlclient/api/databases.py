@@ -1,4 +1,4 @@
-"""DatabasesApi - mid-level access to MarkLogic database endpoints."""
+"""DatabasesApi / AsyncDatabasesApi - MarkLogic database endpoints."""
 
 from __future__ import annotations
 
@@ -18,7 +18,7 @@ from mlclient.calls import (
 
 # Avoid circular import: ApiClient -> api classes -> ApiClient
 if TYPE_CHECKING:
-    from mlclient.clients.api_client import ApiClient
+    from mlclient.clients.api_client import ApiClient, AsyncApiClient
 
 
 class DatabasesApi:
@@ -217,3 +217,77 @@ class DatabasesApi:
         """
         call = DatabasePropertiesPutCall(database=database, body=body)
         return self._api.call(call)
+
+
+class AsyncDatabasesApi:
+    """Async mid-level API for ``/manage/v2/databases`` endpoints."""
+
+    def __init__(self, api: AsyncApiClient):
+        self._api = api
+
+    async def get_list(
+        self,
+        *,
+        data_format: str | None = None,
+        view: str | None = None,
+    ) -> Response:
+        """Retrieve a summary of the databases in the cluster."""
+        call = DatabasesGetCall(data_format=data_format, view=view)
+        return await self._api.call(call)
+
+    async def create(
+        self,
+        body: str | dict,
+    ) -> Response:
+        """Create a new database in the cluster."""
+        call = DatabasesPostCall(body=body)
+        return await self._api.call(call)
+
+    async def get(
+        self,
+        database: str,
+        *,
+        data_format: str | None = None,
+        view: str | None = None,
+    ) -> Response:
+        """Retrieve information on the specified database."""
+        call = DatabaseGetCall(database=database, data_format=data_format, view=view)
+        return await self._api.call(call)
+
+    async def post(
+        self,
+        database: str,
+        body: str | dict,
+    ) -> Response:
+        """Clear or configure the specified database."""
+        call = DatabasePostCall(database=database, body=body)
+        return await self._api.call(call)
+
+    async def delete(
+        self,
+        database: str,
+        *,
+        forest_delete: str | None = None,
+    ) -> Response:
+        """Delete the specified database from the cluster."""
+        call = DatabaseDeleteCall(database=database, forest_delete=forest_delete)
+        return await self._api.call(call)
+
+    async def get_properties(
+        self,
+        database: str,
+        *,
+        data_format: str | None = None,
+    ) -> Response:
+        """Retrieve the modifiable properties of the specified database."""
+        call = DatabasePropertiesGetCall(database=database, data_format=data_format)
+        return await self._api.call(call)
+
+    async def put_properties(
+        self,
+        database: str,
+        body: str | dict,
+    ) -> Response:
+        """Modify the properties of the specified database."""
+        call = DatabasePropertiesPutCall(database=database, body=body)
+        return await self._api.call(call)

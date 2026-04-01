@@ -1,4 +1,4 @@
-"""High-level Logs service.
+"""High-level Logs service (LogsService / AsyncLogsService).
 
 Provides parsed log retrieval from MarkLogic.
 """
@@ -8,10 +8,14 @@ from __future__ import annotations
 import re
 from collections.abc import Iterator
 from enum import Enum
+from typing import TYPE_CHECKING
 
 from mlclient.calls import LogsCall
 from mlclient.clients.api_client import ApiClient
 from mlclient.exceptions import InvalidLogTypeError, MarkLogicError
+
+if TYPE_CHECKING:
+    from mlclient.clients.api_client import AsyncApiClient
 
 
 class LogType(Enum):
@@ -252,3 +256,53 @@ class LogsService:
             grouped[host][server][log_type][days_ago] = file_name
 
         return grouped
+
+
+class AsyncLogsService(LogsService):
+    """Async high-level service for /manage/v2/logs endpoint."""
+
+    def __init__(self, api: AsyncApiClient):
+        self._api = api
+
+    async def get(  # type: ignore[override]
+        self,
+        app_server: int | str | None = None,
+        log_type: LogType | str = LogType.ERROR,
+        *,
+        start_time: str | None = None,
+        end_time: str | None = None,
+        regex: str | None = None,
+        host: str | None = None,
+    ) -> Iterator[dict]:
+        """Return logs from a MarkLogic server."""
+        if isinstance(log_type, str):
+            log_type = LogType.get(log_type)
+        call = self._get_call(
+            app_server=app_server,
+            log_type=log_type,
+            start_time=start_time,
+            end_time=end_time,
+            regex=regex,
+            host=host,
+        )
+
+        resp = await self._api.call(call)
+        resp_body = resp.json()
+        if not resp.is_success:
+            raise MarkLogicError(resp_body["errorResponse"])
+
+        return self._parse_logs(log_type, resp_body)
+
+    async def list(  # type: ignore[override]
+        self,
+        host: str | None = None,
+    ) -> dict:
+        """Return a logs list from a MarkLogic server."""
+        call = self._get_call(host=host)
+
+        resp = await self._api.call(call)
+        resp_body = resp.json()
+        if "errorResponse" in resp_body:
+            raise MarkLogicError(resp_body["errorResponse"])
+
+        return self._parse_logs_list(resp_body)

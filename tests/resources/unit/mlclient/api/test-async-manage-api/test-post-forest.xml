@@ -1,0 +1,6 @@
+<error xmlns="http://marklogic.com/xdmp/error">
+  <status-code>404</status-code>
+  <status>Not Found</status>
+  <message-code>XDMP-NOSUCHFOREST</message-code>
+  <message>XDMP-NOSUCHFOREST: xdmp:forest("aaa") -- No such forest aaa</message>
+</error>

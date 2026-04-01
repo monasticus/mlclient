@@ -1,0 +1,6 @@
+<error xmlns="http://marklogic.com/xdmp/error">
+  <status-code>400</status-code>
+  <status>Bad Request</status>
+  <message-code>REST-REQUIREDPARAM</message-code>
+  <message>REST-REQUIREDPARAM: (err:FOER0000) Required parameter: uri</message>
+</error>

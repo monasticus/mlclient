@@ -1,7 +1,7 @@
 import pytest
 
-from mlclient import MLClient, MLClientManager, MLEnvironment
-from mlclient.clients import HttpClient
+from mlclient import AsyncMLClient, MLClient, MLClientManager, MLEnvironment
+from mlclient.clients import AsyncHttpClient, HttpClient
 from mlclient.exceptions import NoRestServerConfiguredError, NotARestServerError
 
 
@@ -166,3 +166,62 @@ def test_get_http_client():
         assert client.username == "my-marklogic-app-user"
         assert client.password == "my-marklogic-app-password"
         assert client.auth_method == "basic"
+
+
+@pytest.mark.asyncio
+async def test_get_async_client_with_app_server_id():
+    mgr = MLClientManager("test")
+    async with mgr.get_async_client("content") as ml:
+        assert isinstance(ml, AsyncMLClient)
+        assert ml.http.protocol == "https"
+        assert ml.http.host == "localhost"
+        assert ml.http.port == 8100
+        assert ml.http.username == "my-marklogic-app-user"
+        assert ml.http.password == "my-marklogic-app-password"
+        assert ml.http.auth_method == "basic"
+        assert ml.is_connected()
+    assert not ml.is_connected()
+
+
+@pytest.mark.asyncio
+async def test_get_async_client_default():
+    mgr = MLClientManager("test")
+    async with mgr.get_async_client() as ml:
+        assert isinstance(ml, AsyncMLClient)
+        assert ml.http.protocol == "https"
+        assert ml.http.host == "localhost"
+        assert ml.http.port == 8002
+        assert ml.http.username == "my-marklogic-app-user"
+        assert ml.http.password == "my-marklogic-app-password"
+        assert ml.http.auth_method == "basic"
+        assert ml.is_connected()
+    assert not ml.is_connected()
+
+
+def test_get_async_client_default_no_rest_servers_configured():
+    with pytest.raises(NoRestServerConfiguredError) as err:
+        MLClientManager("test-no-rest").get_async_client()
+    assert err.value.args[0] == (
+        "No REST server is configured for the [test-no-rest] environment."
+    )
+
+
+def test_get_async_client_not_a_rest_server():
+    mgr = MLClientManager("test")
+    with pytest.raises(NotARestServerError) as err:
+        mgr.get_async_client("modules")
+    assert err.value.args[0] == (
+        "[modules] App-Server is not configured as a REST one."
+    )
+
+
+def test_get_async_http_client():
+    mgr = MLClientManager("test")
+    ml = mgr.get_async_http_client("content")
+    assert isinstance(ml, AsyncHttpClient)
+    assert ml.protocol == "https"
+    assert ml.host == "localhost"
+    assert ml.port == 8100
+    assert ml.username == "my-marklogic-app-user"
+    assert ml.password == "my-marklogic-app-password"
+    assert ml.auth_method == "basic"

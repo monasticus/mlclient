@@ -6,7 +6,6 @@ import xml.etree.ElementTree as ElemTree
 from collections.abc import Iterable
 from pathlib import Path
 
-import pytest
 import respx
 
 from mlclient.exceptions import MarkLogicError
@@ -29,13 +28,12 @@ def test_basic_job_with_documents_output():
         uris = [f"/some/dir/doc{i + 1}.xml" for i in range(uris_count)]
         ml_doc_mocker.mock_document(*_get_test_document_body_parts(uris_count))
 
-        job = ReadDocumentsJob(thread_count=1, batch_size=5)
-        assert job.thread_count == 1
-        assert job.batch_size == 5
+        job = ReadDocumentsJob(batch_size=5)
+
         job.with_client_config(auth_method="digest")
         job.with_uris_input(uris)
-        job.start()
-        docs = job.get_documents()
+        job.run_sync()
+        docs = job.documents
 
     assert ml_mocker.router.calls.call_count == 1
     assert ml_mocker.router.calls.last.request.url.params.get("database") is None
@@ -56,14 +54,11 @@ def test_basic_job_with_filesystem_output():
         output_dir = str(Path(__file__).resolve().parent / "output")
         assert not Path(output_dir).exists()
         try:
-            job = ReadDocumentsJob(thread_count=1, batch_size=5)
-            assert job.thread_count == 1
-            assert job.batch_size == 5
+            job = ReadDocumentsJob(batch_size=5)
             job.with_client_config(auth_method="digest")
             job.with_uris_input(uris)
             job.with_filesystem_output(output_dir)
-            job.start()
-            job.await_completion()
+            job.run_sync()
 
             assert ml_mocker.router.calls.call_count == 1
             assert (
@@ -88,14 +83,13 @@ def test_basic_job_with_multiple_inputs():
         uris = [f"/some/dir/doc{i + 1}.xml" for i in range(uris_count)]
         ml_doc_mocker.mock_document(*_get_test_document_body_parts(uris_count))
 
-        job = ReadDocumentsJob(thread_count=1, batch_size=500)
-        assert job.thread_count == 1
-        assert job.batch_size == 500
+        job = ReadDocumentsJob(batch_size=500)
+
         job.with_client_config(auth_method="digest")
         job.with_uris_input(uris[:250])
         job.with_uris_input(uris[250:])
-        job.start()
-        docs = job.get_documents()
+        job.run_sync()
+        docs = job.documents
 
         assert ml_mocker.router.calls.call_count == 1
         assert ml_mocker.router.calls.last.request.url.params.get("database") is None
@@ -115,14 +109,13 @@ def test_job_with_documents_output_and_full_metadata():
             *_get_test_document_body_parts(uris_count, metadata=["metadata"]),
         )
 
-        job = ReadDocumentsJob(thread_count=1, batch_size=5)
-        assert job.thread_count == 1
-        assert job.batch_size == 5
+        job = ReadDocumentsJob(batch_size=5)
+
         job.with_client_config(auth_method="digest")
         job.with_uris_input(uris)
         job.with_metadata()
-        job.start()
-        docs = job.get_documents()
+        job.run_sync()
+        docs = job.documents
 
         assert ml_mocker.router.calls.call_count == 1
         assert ml_mocker.router.calls.last.request.url.params.get("database") is None
@@ -145,14 +138,13 @@ def test_job_with_documents_output_and_some_metadata_categories():
             *_get_test_document_body_parts(uris_count, metadata=["quality"]),
         )
 
-        job = ReadDocumentsJob(thread_count=1, batch_size=5)
-        assert job.thread_count == 1
-        assert job.batch_size == 5
+        job = ReadDocumentsJob(batch_size=5)
+
         job.with_client_config(auth_method="digest")
         job.with_uris_input(uris)
         job.with_metadata("quality")
-        job.start()
-        docs = job.get_documents()
+        job.run_sync()
+        docs = job.documents
 
         assert ml_mocker.router.calls.call_count == 1
         assert ml_mocker.router.calls.last.request.url.params.get("database") is None
@@ -178,15 +170,12 @@ def test_basic_job_with_filesystem_output_and_full_metadata():
         output_dir = str(Path(__file__).resolve().parent / "output")
         assert not Path(output_dir).exists()
         try:
-            job = ReadDocumentsJob(thread_count=1, batch_size=5)
-            assert job.thread_count == 1
-            assert job.batch_size == 5
+            job = ReadDocumentsJob(batch_size=5)
             job.with_client_config(auth_method="digest")
             job.with_uris_input(uris)
             job.with_metadata()
             job.with_filesystem_output(output_dir)
-            job.start()
-            job.await_completion()
+            job.run_sync()
 
             assert ml_mocker.router.calls.call_count == 1
             assert (
@@ -216,15 +205,12 @@ def test_basic_job_with_filesystem_output_and_some_metadata_categories():
         output_dir = str(Path(__file__).resolve().parent / "output")
         assert not Path(output_dir).exists()
         try:
-            job = ReadDocumentsJob(thread_count=1, batch_size=5)
-            assert job.thread_count == 1
-            assert job.batch_size == 5
+            job = ReadDocumentsJob(batch_size=5)
             job.with_client_config(auth_method="digest")
             job.with_uris_input(uris)
             job.with_metadata("quality")
             job.with_filesystem_output(output_dir)
-            job.start()
-            job.await_completion()
+            job.run_sync()
 
             assert ml_mocker.router.calls.call_count == 1
             assert (
@@ -249,14 +235,13 @@ def test_job_with_custom_database():
         uris = [f"/some/dir/doc{i + 1}.xml" for i in range(uris_count)]
         ml_doc_mocker.mock_document(*_get_test_document_body_parts(uris_count))
 
-        job = ReadDocumentsJob(thread_count=1, batch_size=5)
-        assert job.thread_count == 1
-        assert job.batch_size == 5
+        job = ReadDocumentsJob(batch_size=5)
+
         job.with_client_config(auth_method="digest")
         job.with_database("Documents")
         job.with_uris_input(uris)
-        job.start()
-        docs = job.get_documents()
+        job.run_sync()
+        docs = job.documents
 
         assert ml_mocker.router.calls.call_count == 1
         assert (
@@ -270,42 +255,31 @@ def test_job_with_custom_database():
         _confirm_documents_data(uris, docs)
 
 
-@pytest.mark.asyncio
-async def test_multi_thread_job():
-    @ml_mocker.router
-    async def run():
-        with ml_doc_mocker.scoped():
-            uris_count = 150
-            uris = [f"/some/dir/doc{i + 1}.xml" for i in range(uris_count)]
-            ml_doc_mocker.mock_document(*_get_test_document_body_parts(uris_count))
+@ml_mocker.router
+def test_job_with_multiple_batches():
+    with ml_doc_mocker.scoped():
+        uris_count = 150
+        uris = [f"/some/dir/doc{i + 1}.xml" for i in range(uris_count)]
+        ml_doc_mocker.mock_document(*_get_test_document_body_parts(uris_count))
 
-            job = ReadDocumentsJob(batch_size=5)
-            assert job.thread_count > 1
-            assert job.batch_size == 5
-            job.with_client_config(auth_method="digest")
-            job.with_uris_input(uris)
-            job.start()
-            docs = job.get_documents()
+        job = ReadDocumentsJob(batch_size=5)
 
-            if len(docs) != uris_count:
-                return False
+        job.with_client_config(auth_method="digest")
+        job.with_uris_input(uris)
+        job.run_sync()
+        docs = job.documents
 
-            assert ml_mocker.router.calls.call_count >= 30
-            assert (
-                ml_mocker.router.calls.last.request.url.params.get("database") is None
-            )
-            assert (
-                ml_mocker.router.calls.last.request.url.params.get("category") is None
-            )
-            assert job.report.completed == uris_count
-            assert job.report.successful == uris_count
-            assert job.report.failed == 0
-            _confirm_documents_data(uris, docs)
-            return True
-
-    all_docs_processed = False
-    while not all_docs_processed:
-        all_docs_processed = await run()
+        assert ml_mocker.router.calls.call_count == 30
+        assert (
+            ml_mocker.router.calls.last.request.url.params.get("database") is None
+        )
+        assert (
+            ml_mocker.router.calls.last.request.url.params.get("category") is None
+        )
+        assert job.report.completed == uris_count
+        assert job.report.successful == uris_count
+        assert job.report.failed == 0
+        _confirm_documents_data(uris, docs)
 
 
 @respx.mock
@@ -331,13 +305,11 @@ def test_failing_job():
     )
     mocker.mock_get()
 
-    job = ReadDocumentsJob(thread_count=1, batch_size=5)
-    assert job.thread_count == 1
-    assert job.batch_size == 5
+    job = ReadDocumentsJob(batch_size=5)
     job.with_client_config(auth_method="digest")
     job.with_uris_input(uris)
-    job.start()
-    docs = job.get_documents()
+    job.run_sync()
+    docs = job.documents
 
     assert respx.calls.call_count == 1
     assert job.report.completed == uris_count
@@ -360,14 +332,11 @@ def test_failing_filesystem_write_step():
         output_dir_path = Path(__file__).resolve()
         assert output_dir_path.exists()
         try:
-            job = ReadDocumentsJob(thread_count=1, batch_size=5)
-            assert job.thread_count == 1
-            assert job.batch_size == 5
+            job = ReadDocumentsJob(batch_size=5)
             job.with_client_config(auth_method="digest")
             job.with_uris_input(uris)
             job.with_filesystem_output(str(output_dir_path))
-            job.start()
-            job.await_completion()
+            job.run_sync()
 
             assert ml_mocker.router.calls.call_count == 1
             assert job.report.completed == uris_count

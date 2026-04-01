@@ -1,4 +1,4 @@
-"""RolesApi - mid-level access to MarkLogic role endpoints."""
+"""RolesApi / AsyncRolesApi - mid-level access to MarkLogic role endpoints."""
 
 from __future__ import annotations
 
@@ -17,7 +17,7 @@ from mlclient.calls import (
 
 # Avoid circular import: ApiClient -> api classes -> ApiClient
 if TYPE_CHECKING:
-    from mlclient.clients.api_client import ApiClient
+    from mlclient.clients.api_client import ApiClient, AsyncApiClient
 
 
 class RolesApi:
@@ -176,3 +176,66 @@ class RolesApi:
         """
         call = RolePropertiesPutCall(role=role, body=body)
         return self._api.call(call)
+
+
+class AsyncRolesApi:
+    """Async mid-level API for ``/manage/v2/roles`` endpoints."""
+
+    def __init__(self, api: AsyncApiClient):
+        self._api = api
+
+    async def get_list(
+        self,
+        *,
+        data_format: str | None = None,
+        view: str | None = None,
+    ) -> Response:
+        """Retrieve a summary of the roles in the security database."""
+        call = RolesGetCall(data_format=data_format, view=view)
+        return await self._api.call(call)
+
+    async def create(
+        self,
+        body: str | dict,
+    ) -> Response:
+        """Create a new role in the security database."""
+        call = RolesPostCall(body=body)
+        return await self._api.call(call)
+
+    async def get(
+        self,
+        role: str,
+        *,
+        data_format: str | None = None,
+        view: str | None = None,
+    ) -> Response:
+        """Retrieve the configuration for the specified role."""
+        call = RoleGetCall(role=role, data_format=data_format, view=view)
+        return await self._api.call(call)
+
+    async def delete(
+        self,
+        role: str,
+    ) -> Response:
+        """Delete the specified role from the security database."""
+        call = RoleDeleteCall(role=role)
+        return await self._api.call(call)
+
+    async def get_properties(
+        self,
+        role: str,
+        *,
+        data_format: str | None = None,
+    ) -> Response:
+        """Retrieve the properties of the specified role."""
+        call = RolePropertiesGetCall(role=role, data_format=data_format)
+        return await self._api.call(call)
+
+    async def put_properties(
+        self,
+        role: str,
+        body: str | dict,
+    ) -> Response:
+        """Update the properties for the specified role."""
+        call = RolePropertiesPutCall(role=role, body=body)
+        return await self._api.call(call)

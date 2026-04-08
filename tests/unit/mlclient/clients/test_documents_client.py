@@ -35,14 +35,14 @@ DOC_BODY_PARTS = [
 
 ml_doc_mocker = MLDocumentsMocker(DOC_BODY_PARTS)
 
-ml_mocker = MLRespXMocker(router_base_url="http://localhost:8002/v1/documents")
+ml_mocker = MLRespXMocker(router_base_url="http://localhost:8000/v1/documents")
 ml_mocker.with_get_side_effect(side_effect=ml_doc_mocker.get_documents_side_effect)
 ml_mocker.with_post_side_effect(side_effect=ml_doc_mocker.post_documents_side_effect)
 
 
 @pytest.fixture(autouse=True)
 def ml() -> MLClient:
-    return MLClient(port=8002, auth_method="digest")
+    return MLClient(auth_method="digest")
 
 
 @pytest.fixture(autouse=True)
@@ -1794,7 +1794,7 @@ def test_delete_single_document(ml):
     uri = "/some/dir/doc1.xml"
 
     mocker = MLRespXMocker(use_router=False)
-    mocker.with_url("http://localhost:8002/v1/documents")
+    mocker.with_url("http://localhost:8000/v1/documents")
     mocker.with_request_param("uri", uri)
     mocker.with_response_code(204)
     mocker.with_empty_response_body()
@@ -1816,7 +1816,7 @@ def test_delete_multiple_documents(ml):
     ]
 
     mocker = MLRespXMocker(use_router=False)
-    mocker.with_url("http://localhost:8002/v1/documents")
+    mocker.with_url("http://localhost:8000/v1/documents")
     for uri in uris:
         mocker.with_request_param("uri", uri)
     mocker.with_response_code(204)
@@ -1834,7 +1834,7 @@ def test_delete_document_with_single_category(ml):
     uri = "/some/dir/doc1.xml"
 
     mocker = MLRespXMocker(use_router=False)
-    mocker.with_url("http://localhost:8002/v1/documents")
+    mocker.with_url("http://localhost:8000/v1/documents")
     mocker.with_request_param("uri", uri)
     mocker.with_request_param("category", "collections")
     mocker.with_response_code(204)
@@ -1852,7 +1852,7 @@ def test_delete_document_with_multiple_categories(ml):
     uri = "/some/dir/doc1.xml"
 
     mocker = MLRespXMocker(use_router=False)
-    mocker.with_url("http://localhost:8002/v1/documents")
+    mocker.with_url("http://localhost:8000/v1/documents")
     mocker.with_request_param("uri", uri)
     mocker.with_request_param("category", "properties")
     mocker.with_request_param("category", "collections")
@@ -1871,7 +1871,7 @@ def test_delete_document_with_custom_database(ml):
     uri = "/some/dir/doc1.xml"
 
     mocker = MLRespXMocker(use_router=False)
-    mocker.with_url("http://localhost:8002/v1/documents")
+    mocker.with_url("http://localhost:8000/v1/documents")
     mocker.with_request_param("uri", uri)
     mocker.with_request_param("database", "Documents")
     mocker.with_response_code(204)
@@ -1894,7 +1894,7 @@ def test_delete_document_with_non_existing_database(ml):
     )
 
     mocker = MLRespXMocker(use_router=False)
-    mocker.with_url("http://localhost:8002/v1/documents")
+    mocker.with_url("http://localhost:8000/v1/documents")
     mocker.with_request_param("uri", uri)
     mocker.with_request_param("database", "Document")
     mocker.with_response_content_type("application/xml; charset=UTF-8")
@@ -1916,7 +1916,7 @@ def test_delete_document_with_temporal_collection(ml):
     uri = "/some/dir/doc1.xml"
 
     mocker = MLRespXMocker(use_router=False)
-    mocker.with_url("http://localhost:8002/v1/documents")
+    mocker.with_url("http://localhost:8000/v1/documents")
     mocker.with_request_param("uri", uri)
     mocker.with_request_param("temporal-collection", "temporal-collection")
     mocker.with_response_header(
@@ -1938,7 +1938,7 @@ def test_delete_document_with_wipe_temporal(ml):
     uri = "/some/dir/doc1.xml"
 
     mocker = MLRespXMocker(use_router=False)
-    mocker.with_url("http://localhost:8002/v1/documents")
+    mocker.with_url("http://localhost:8000/v1/documents")
     mocker.with_request_param("uri", uri)
     mocker.with_request_param("temporal-collection", "temporal-collection")
     mocker.with_request_param("result", "wiped")

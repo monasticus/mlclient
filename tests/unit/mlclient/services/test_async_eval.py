@@ -6,22 +6,21 @@ import pytest
 import pytest_asyncio
 import respx
 
-from mlclient.clients.api_client import AsyncApiClient
-from mlclient.clients.http_client import AsyncHttpClient
+from mlclient import AsyncMLClient
 from mlclient.exceptions import (
     MarkLogicError,
     UnsupportedFileExtensionError,
     WrongParametersError,
 )
-from mlclient.services.eval import LOCAL_NS, AsyncEvalService
+from mlclient.services.eval import LOCAL_NS
 from tests.utils import resources as resources_utils
 from tests.utils.ml_mockers import MLRespXMocker
 
 
 @pytest_asyncio.fixture
 async def svc():
-    async with AsyncHttpClient() as http:
-        yield AsyncEvalService(AsyncApiClient(http))
+    async with AsyncMLClient() as ml:
+        yield ml.eval
 
 
 @pytest.mark.asyncio

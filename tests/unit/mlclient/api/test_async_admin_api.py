@@ -4,10 +4,8 @@ import httpx
 import pytest
 import respx
 
-from mlclient.api.admin_api import AsyncAdminApi
+from mlclient import AsyncMLClient
 from mlclient.calls import TimestampGetCall
-from mlclient.clients.api_client import AsyncApiClient
-from mlclient.clients.http_client import AsyncHttpClient
 from tests.utils import resources as resources_utils
 from tests.utils.ml_mockers import MLRespXMocker
 
@@ -22,9 +20,8 @@ async def test_custom_call():
     ml_mocker.with_response_body("2026-03-23T00:00:00")
     ml_mocker.mock_get()
 
-    async with AsyncHttpClient(port=8001) as http:
-        admin = AsyncAdminApi(AsyncApiClient(http))
-        resp = await admin.call(TimestampGetCall())
+    async with AsyncMLClient() as ml:
+        resp = await ml.admin.call(TimestampGetCall())
 
     assert resp.status_code == 200
 
@@ -43,9 +40,8 @@ async def test_get_timestamp():
     ml_mocker.with_response_body(Path(response_body_path).read_bytes())
     ml_mocker.mock_get()
 
-    async with AsyncHttpClient(port=8001) as http:
-        admin = AsyncAdminApi(AsyncApiClient(http))
-        resp = await admin.get_timestamp()
+    async with AsyncMLClient() as ml:
+        resp = await ml.admin.get_timestamp()
 
     assert resp.status_code == httpx.codes.OK
     assert "2024-01-15T10:30:00.000Z" in resp.text
@@ -65,9 +61,8 @@ async def test_get_server_config():
     ml_mocker.with_response_body(Path(response_body_path).read_bytes())
     ml_mocker.mock_get()
 
-    async with AsyncHttpClient(port=8001) as http:
-        admin = AsyncAdminApi(AsyncApiClient(http))
-        resp = await admin.get_server_config()
+    async with AsyncMLClient() as ml:
+        resp = await ml.admin.get_server_config()
 
     assert resp.status_code == httpx.codes.OK
     assert "server-config" in resp.text

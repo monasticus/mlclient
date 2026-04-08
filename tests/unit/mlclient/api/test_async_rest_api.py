@@ -4,10 +4,8 @@ import httpx
 import pytest
 import respx
 
-from mlclient.api.rest_api import AsyncRestApi
+from mlclient import AsyncMLClient
 from mlclient.calls import EvalCall
-from mlclient.clients.api_client import AsyncApiClient
-from mlclient.clients.http_client import AsyncHttpClient
 from mlclient.models.http import DocumentsBodyPart as BodyPart
 from tests.utils import resources as resources_utils
 from tests.utils.ml_mockers import MLRespXMocker
@@ -24,9 +22,8 @@ async def test_custom_call():
     ml_mocker.with_response_body_part("xs:integer", "2")
     ml_mocker.mock_post()
 
-    async with AsyncHttpClient() as http:
-        rest = AsyncRestApi(AsyncApiClient(http))
-        resp = await rest.call(EvalCall(xquery="1+1"))
+    async with AsyncMLClient() as ml:
+        resp = await ml.rest.call(EvalCall(xquery="1+1"))
 
     assert resp.status_code == httpx.codes.OK
 
@@ -59,9 +56,8 @@ async def test_eval(xquery):
     ml_mocker.with_response_body_part("element()", "<new-parent><child/></new-parent>")
     ml_mocker.mock_post()
 
-    async with AsyncHttpClient() as http:
-        rest = AsyncRestApi(AsyncApiClient(http))
-        resp = await rest.eval.post(
+    async with AsyncMLClient() as ml:
+        resp = await ml.rest.eval.post(
             xquery=xquery,
             variables={"element": "<parent><child/></parent>"},
         )
@@ -86,9 +82,8 @@ async def test_get_documents():
     ml_mocker.with_response_body(Path(response_body_path).read_bytes())
     ml_mocker.mock_get()
 
-    async with AsyncHttpClient() as http:
-        rest = AsyncRestApi(AsyncApiClient(http))
-        resp = await rest.documents.get(
+    async with AsyncMLClient() as ml:
+        resp = await ml.rest.documents.get(
             uri="/path/to/non-existing/document.xml",
             data_format="json",
         )
@@ -117,9 +112,8 @@ async def test_post_documents():
     ml_mocker.with_response_body(Path(response_body_path).read_bytes())
     ml_mocker.mock_post()
 
-    async with AsyncHttpClient() as http:
-        rest = AsyncRestApi(AsyncApiClient(http))
-        resp = await rest.documents.post([BodyPart(**body_part)])
+    async with AsyncMLClient() as ml:
+        resp = await ml.rest.documents.post([BodyPart(**body_part)])
 
     assert resp.status_code == httpx.codes.INTERNAL_SERVER_ERROR
     assert resp.json() == {
@@ -149,9 +143,8 @@ async def test_delete_documents():
     ml_mocker.with_response_body(Path(response_body_path).read_bytes())
     ml_mocker.mock_delete()
 
-    async with AsyncHttpClient() as http:
-        rest = AsyncRestApi(AsyncApiClient(http))
-        resp = await rest.documents.delete(
+    async with AsyncMLClient() as ml:
+        resp = await ml.rest.documents.delete(
             uri="/path/to/non-existing/document.xml",
             wipe_temporal=True,
         )

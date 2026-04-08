@@ -21,6 +21,7 @@ from mlclient.models import (
     TextDocument,
     XMLDocument,
 )
+from mlclient.models.http import Category
 from tests.utils import data as test_data
 from tests.utils import resources as resources_utils
 from tests.utils.data import MetadataSpec
@@ -232,6 +233,52 @@ async def test_read_full_metadata_without_content(svc):
 
 @pytest.mark.asyncio
 @ml_mocker.router
+async def test_read_doc_with_full_metadata_using_category_enum(svc):
+    with ml_doc_mocker.scoped(fresh=False):
+        ml_doc_mocker.mock_document(
+            test_data.doc_full_metadata_body_part(
+                "/some/dir/doc1.xml",
+                MetadataSpec(collections=["xml"]),
+                metadata_category=True,
+            ),
+        )
+        uri = "/some/dir/doc1.xml"
+
+        document = await svc.read(
+            uri,
+            category=[Category.CONTENT, Category.METADATA],
+        )
+
+    assert isinstance(document, XMLDocument)
+    assert document.uri == uri
+    assert document.metadata is not None
+    assert document.metadata.collections() == ["xml"]
+
+
+@pytest.mark.asyncio
+@ml_mocker.router
+async def test_read_full_metadata_without_content_using_category_enum(svc):
+    with ml_doc_mocker.scoped(fresh=False):
+        ml_doc_mocker.mock_document(
+            test_data.doc_full_metadata_body_part(
+                "/some/dir/doc1.xml",
+                MetadataSpec(collections=["xml"]),
+                metadata_category=True,
+            ),
+        )
+        uri = "/some/dir/doc1.xml"
+
+        document = await svc.read(uri, category=[Category.METADATA])
+
+    assert isinstance(document, MetadataDocument)
+    assert document.uri == uri
+    assert document.content is None
+    assert document.metadata is not None
+    assert document.metadata.collections() == ["xml"]
+
+
+@pytest.mark.asyncio
+@ml_mocker.router
 async def test_read_single_doc_using_custom_database(svc):
     uri = "/some/dir/doc1.xml"
 
@@ -430,6 +477,25 @@ async def test_delete_document_with_category(svc):
 
     try:
         await svc.delete(uri, category="collections")
+    except MarkLogicError as err:
+        pytest.fail(str(err))
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_delete_document_with_category_enum(svc):
+    uri = "/some/dir/doc1.xml"
+
+    mocker = MLRespXMocker(use_router=False)
+    mocker.with_url("http://localhost:8000/v1/documents")
+    mocker.with_request_param("uri", uri)
+    mocker.with_request_param("category", "collections")
+    mocker.with_response_code(204)
+    mocker.with_empty_response_body()
+    mocker.mock_delete()
+
+    try:
+        await svc.delete(uri, category=Category.COLLECTIONS)
     except MarkLogicError as err:
         pytest.fail(str(err))
 

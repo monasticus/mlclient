@@ -32,7 +32,6 @@ def test_write_job_with_documents_input():
 
 
 def test_read_job_with_documents_output():
-
     written_docs = list(docs_client_utils.generate_docs())
     uris = [doc.uri for doc in written_docs]
 
@@ -63,7 +62,6 @@ def test_read_job_with_documents_output():
 
 
 def test_read_job_with_filesystem_output():
-
     written_docs = list(docs_client_utils.generate_docs())
     uris = [doc.uri for doc in written_docs]
 

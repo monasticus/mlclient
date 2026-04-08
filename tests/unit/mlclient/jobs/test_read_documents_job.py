@@ -270,12 +270,8 @@ def test_job_with_multiple_batches():
         docs = job.documents
 
         assert ml_mocker.router.calls.call_count == 30
-        assert (
-            ml_mocker.router.calls.last.request.url.params.get("database") is None
-        )
-        assert (
-            ml_mocker.router.calls.last.request.url.params.get("category") is None
-        )
+        assert ml_mocker.router.calls.last.request.url.params.get("database") is None
+        assert ml_mocker.router.calls.last.request.url.params.get("category") is None
         assert job.report.completed == uris_count
         assert job.report.successful == uris_count
         assert job.report.failed == 0

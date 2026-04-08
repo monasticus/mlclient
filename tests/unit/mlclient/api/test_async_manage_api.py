@@ -140,7 +140,9 @@ async def test_post_database():
     ml_mocker.mock_post()
 
     async with AsyncMLClient() as ml:
-        resp = await ml.manage.databases.post("Documents", {"operation": "clear-database"})
+        resp = await ml.manage.databases.post(
+            "Documents", {"operation": "clear-database"},
+        )
 
     assert resp.status_code == httpx.codes.OK
     assert not resp.text
@@ -401,7 +403,9 @@ async def test_get_forests():
     ml_mocker.mock_get()
 
     async with AsyncMLClient() as ml:
-        resp = await ml.manage.forests.get_list(data_format="json", database="Documents")
+        resp = await ml.manage.forests.get_list(
+            data_format="json", database="Documents",
+        )
 
     expected_uri = "/manage/v2/forests?view=default&database-id=Documents"
     assert resp.status_code == httpx.codes.OK

@@ -17,7 +17,7 @@ from tests.utils.ml_mockers import MLDocumentsMocker, MLRespXMocker
 
 ml_doc_mocker = MLDocumentsMocker()
 
-ml_mocker = MLRespXMocker(router_base_url="http://localhost:8002/v1/documents")
+ml_mocker = MLRespXMocker(router_base_url="http://localhost:8000/v1/documents")
 ml_mocker.with_get_side_effect(side_effect=ml_doc_mocker.get_documents_side_effect)
 
 
@@ -270,12 +270,8 @@ def test_job_with_multiple_batches():
         docs = job.documents
 
         assert ml_mocker.router.calls.call_count == 30
-        assert (
-            ml_mocker.router.calls.last.request.url.params.get("database") is None
-        )
-        assert (
-            ml_mocker.router.calls.last.request.url.params.get("category") is None
-        )
+        assert ml_mocker.router.calls.last.request.url.params.get("database") is None
+        assert ml_mocker.router.calls.last.request.url.params.get("category") is None
         assert job.report.completed == uris_count
         assert job.report.successful == uris_count
         assert job.report.failed == 0
@@ -288,7 +284,7 @@ def test_failing_job():
     uris = [f"/some/dir/doc{i + 1}.xml" for i in range(uris_count)]
 
     mocker = MLRespXMocker(use_router=False)
-    mocker.with_url("http://localhost:8002/v1/documents")
+    mocker.with_url("http://localhost:8000/v1/documents")
     for uri in uris:
         mocker.with_request_param("uri", uri)
     mocker.with_request_param("format", "json")

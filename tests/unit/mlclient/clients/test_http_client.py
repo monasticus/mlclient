@@ -1,41 +1,37 @@
 from __future__ import annotations
 
 import httpx
-import pytest
 import respx
 from pytest_mock import MockerFixture
 
 from mlclient.clients import http_client as http_client_module
-from mlclient.clients.http_client import AsyncHttpClient
+from mlclient.clients.http_client import HttpClient
 from tests.utils import resources as resources_utils
 from tests.utils.ml_mockers import MLRespXMocker
 
 RESOURCES = resources_utils.get_test_resources(__file__)
 
 
-@pytest.mark.asyncio
-async def test_connection():
-    client = AsyncHttpClient()
+def test_connection():
+    client = HttpClient()
     assert not client.is_connected()
 
-    await client.connect()
+    client.connect()
     assert client.is_connected()
 
-    await client.disconnect()
+    client.disconnect()
     assert not client.is_connected()
 
 
-@pytest.mark.asyncio
-async def test_context_mng():
-    async with AsyncHttpClient() as client:
+def test_context_mng():
+    with HttpClient() as client:
         assert client.is_connected()
 
     assert not client.is_connected()
 
 
-@pytest.mark.asyncio
 @respx.mock
-async def test_request_when_disconnected():
+def test_request_when_disconnected():
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url("http://localhost:8002/manage/v2/servers")
     ml_mocker.with_response_code(200)
@@ -43,19 +39,18 @@ async def test_request_when_disconnected():
     ml_mocker.with_response_content_type("application/xml; charset=UTF-8")
     ml_mocker.mock_get()
 
-    client = AsyncHttpClient(port=8002)
+    client = HttpClient(port=8002)
 
     assert not client.is_connected()
-    resp = await client.get("/manage/v2/servers")
+    resp = client.get("/manage/v2/servers")
     assert not client.is_connected()
     assert resp.status_code == httpx.codes.OK
     assert resp.content == RESOURCES["test-get-response.xml"]["bytes"]
     assert resp.headers.get("Content-Type") == "application/xml; charset=UTF-8"
 
 
-@pytest.mark.asyncio
 @respx.mock
-async def test_get():
+def test_get():
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url("http://localhost:8002/manage/v2/servers")
     ml_mocker.with_response_code(200)
@@ -63,16 +58,15 @@ async def test_get():
     ml_mocker.with_response_content_type("application/xml; charset=UTF-8")
     ml_mocker.mock_get()
 
-    async with AsyncHttpClient(port=8002) as client:
-        resp = await client.get("/manage/v2/servers")
+    with HttpClient(port=8002) as client:
+        resp = client.get("/manage/v2/servers")
     assert resp.status_code == httpx.codes.OK
     assert resp.content == RESOURCES["test-get-response.xml"]["bytes"]
     assert resp.headers.get("Content-Type") == "application/xml; charset=UTF-8"
 
 
-@pytest.mark.asyncio
 @respx.mock
-async def test_get_with_customized_params_and_headers():
+def test_get_with_customized_params_and_headers():
     response_body_json = RESOURCES["test-get-with-customized-params-response.json"][
         "json"
     ]
@@ -85,8 +79,8 @@ async def test_get_with_customized_params_and_headers():
     ml_mocker.with_response_content_type("application/json; charset=UTF-8")
     ml_mocker.mock_get()
 
-    async with AsyncHttpClient(port=8002) as client:
-        resp = await client.get(
+    with HttpClient(port=8002) as client:
+        resp = client.get(
             "/manage/v2/servers",
             params={"format": "json"},
             headers={"custom-header": "custom-value"},
@@ -96,9 +90,8 @@ async def test_get_with_customized_params_and_headers():
     assert resp.headers.get("Content-Type") == "application/json; charset=UTF-8"
 
 
-@pytest.mark.asyncio
 @respx.mock
-async def test_post():
+def test_post():
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url("http://localhost:8002/manage/v2/databases/Documents")
     ml_mocker.with_response_code(400)
@@ -106,16 +99,15 @@ async def test_post():
     ml_mocker.with_response_content_type("application/xml; charset=UTF-8")
     ml_mocker.mock_post()
 
-    async with AsyncHttpClient(port=8002) as client:
-        resp = await client.post("/manage/v2/databases/Documents")
+    with HttpClient(port=8002) as client:
+        resp = client.post("/manage/v2/databases/Documents")
     assert resp.status_code == httpx.codes.BAD_REQUEST
     assert resp.content == RESOURCES["test-post-response.xml"]["bytes"]
     assert resp.headers.get("Content-Type") == "application/xml; charset=UTF-8"
 
 
-@pytest.mark.asyncio
 @respx.mock
-async def test_post_with_customized_params_and_headers_and_body_different_than_json():
+def test_post_with_customized_params_and_headers_and_body_different_than_json():
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url("http://localhost:8000/v1/eval")
     ml_mocker.with_request_param("database", "Documents")
@@ -125,8 +117,8 @@ async def test_post_with_customized_params_and_headers_and_body_different_than_j
     ml_mocker.with_empty_response_body()
     ml_mocker.mock_post()
 
-    async with AsyncHttpClient() as client:
-        resp = await client.post(
+    with HttpClient() as client:
+        resp = client.post(
             "/v1/eval",
             body={"xquery": "()"},
             params={"database": "Documents"},
@@ -136,9 +128,8 @@ async def test_post_with_customized_params_and_headers_and_body_different_than_j
     assert resp.content == b""
 
 
-@pytest.mark.asyncio
 @respx.mock
-async def test_post_with_customized_params_and_headers_and_json_body():
+def test_post_with_customized_params_and_headers_and_json_body():
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url("http://localhost:8002/manage/v2/databases/Documents")
     ml_mocker.with_request_param("format", "json")
@@ -149,8 +140,8 @@ async def test_post_with_customized_params_and_headers_and_json_body():
     ml_mocker.with_response_content_type("application/json; charset=UTF-8")
     ml_mocker.mock_post()
 
-    async with AsyncHttpClient(port=8002) as client:
-        resp = await client.post(
+    with HttpClient(port=8002) as client:
+        resp = client.post(
             "/manage/v2/databases/Documents",
             body={"operation": "clear-database"},
             params={"format": "json"},
@@ -161,9 +152,8 @@ async def test_post_with_customized_params_and_headers_and_json_body():
     assert resp.headers.get("Content-Type") == "application/json; charset=UTF-8"
 
 
-@pytest.mark.asyncio
 @respx.mock
-async def test_put():
+def test_put():
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url("http://localhost:8000/v1/documents")
     ml_mocker.with_response_code(400)
@@ -171,16 +161,15 @@ async def test_put():
     ml_mocker.with_response_content_type("application/xml; charset=UTF-8")
     ml_mocker.mock_put()
 
-    async with AsyncHttpClient() as client:
-        resp = await client.put("/v1/documents")
+    with HttpClient() as client:
+        resp = client.put("/v1/documents")
     assert resp.status_code == httpx.codes.BAD_REQUEST
     assert resp.content == RESOURCES["test-put-response.xml"]["bytes"]
     assert resp.headers.get("Content-Type") == "application/xml; charset=UTF-8"
 
 
-@pytest.mark.asyncio
 @respx.mock
-async def test_put_with_customized_params_and_headers_and_body_different_than_json():
+def test_put_with_customized_params_and_headers_and_body_different_than_json():
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url("http://localhost:8000/v1/documents")
     ml_mocker.with_request_param("database", "Documents")
@@ -191,8 +180,8 @@ async def test_put_with_customized_params_and_headers_and_body_different_than_js
     ml_mocker.with_empty_response_body()
     ml_mocker.mock_put()
 
-    async with AsyncHttpClient() as client:
-        resp = await client.put(
+    with HttpClient() as client:
+        resp = client.put(
             "/v1/documents",
             body="<document/>",
             params={"database": "Documents", "uri": "/doc.xml"},
@@ -202,9 +191,8 @@ async def test_put_with_customized_params_and_headers_and_body_different_than_js
     assert resp.content == b""
 
 
-@pytest.mark.asyncio
 @respx.mock
-async def test_put_with_customized_params_and_headers_and_json_body():
+def test_put_with_customized_params_and_headers_and_json_body():
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url("http://localhost:8000/v1/documents")
     ml_mocker.with_request_param("database", "Documents")
@@ -215,8 +203,8 @@ async def test_put_with_customized_params_and_headers_and_json_body():
     ml_mocker.with_empty_response_body()
     ml_mocker.mock_put()
 
-    async with AsyncHttpClient() as client:
-        resp = await client.put(
+    with HttpClient() as client:
+        resp = client.put(
             "/v1/documents",
             body={"document": {}},
             params={"database": "Documents", "uri": "/doc.json"},
@@ -226,24 +214,22 @@ async def test_put_with_customized_params_and_headers_and_json_body():
     assert resp.content == b""
 
 
-@pytest.mark.asyncio
 @respx.mock
-async def test_delete():
+def test_delete():
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url("http://localhost:8002/manage/v2/databases/custom-db")
     ml_mocker.with_response_code(204)
     ml_mocker.with_empty_response_body()
     ml_mocker.mock_delete()
 
-    async with AsyncHttpClient(port=8002) as client:
-        resp = await client.delete("/manage/v2/databases/custom-db")
+    with HttpClient(port=8002) as client:
+        resp = client.delete("/manage/v2/databases/custom-db")
     assert resp.status_code == httpx.codes.NO_CONTENT
     assert resp.content == b""
 
 
-@pytest.mark.asyncio
 @respx.mock
-async def test_delete_with_customized_params_and_headers():
+def test_delete_with_customized_params_and_headers():
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url("http://localhost:8002/manage/v2/databases/custom-db")
     ml_mocker.with_request_param("format", "json")
@@ -252,8 +238,8 @@ async def test_delete_with_customized_params_and_headers():
     ml_mocker.with_empty_response_body()
     ml_mocker.mock_delete()
 
-    async with AsyncHttpClient(port=8002) as client:
-        resp = await client.delete(
+    with HttpClient(port=8002) as client:
+        resp = client.delete(
             "/manage/v2/databases/custom-db",
             params={"format": "json"},
             headers={"custom-header": "custom-value"},
@@ -262,9 +248,8 @@ async def test_delete_with_customized_params_and_headers():
     assert resp.content == b""
 
 
-@pytest.mark.asyncio
 @respx.mock
-async def test_request_logs_warning_for_restart_location(mocker: MockerFixture):
+def test_request_logs_warning_for_restart_location(mocker: MockerFixture):
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url(
         "http://localhost:8002/manage/v2/servers/TestServer/properties",
@@ -280,8 +265,8 @@ async def test_request_logs_warning_for_restart_location(mocker: MockerFixture):
     ml_mocker.mock_put()
     logger_warning = mocker.patch.object(http_client_module.logger, "warning")
 
-    async with AsyncHttpClient(port=8002) as client:
-        resp = await client.put(
+    with HttpClient(port=8002) as client:
+        resp = client.put(
             "/manage/v2/servers/TestServer/properties",
             body={"port": 8111},
             params={"group-id": "Default", "format": "json"},
@@ -299,9 +284,8 @@ async def test_request_logs_warning_for_restart_location(mocker: MockerFixture):
     )
 
 
-@pytest.mark.asyncio
 @respx.mock
-async def test_request_does_not_log_warning_for_non_restart_202(
+def test_request_does_not_log_warning_for_non_restart_202(
     mocker: MockerFixture,
 ):
     ml_mocker = MLRespXMocker(use_router=False)
@@ -318,8 +302,8 @@ async def test_request_does_not_log_warning_for_non_restart_202(
     ml_mocker.mock_put()
     logger_warning = mocker.patch.object(http_client_module.logger, "warning")
 
-    async with AsyncHttpClient(port=8002) as client:
-        resp = await client.put(
+    with HttpClient(port=8002) as client:
+        resp = client.put(
             "/manage/v2/forests",
             body={"operation": "attach"},
             params={"format": "json"},
@@ -330,9 +314,8 @@ async def test_request_does_not_log_warning_for_non_restart_202(
     logger_warning.assert_not_called()
 
 
-@pytest.mark.asyncio
 @respx.mock
-async def test_request_logs_debug_response_retrieved(mocker: MockerFixture):
+def test_request_logs_debug_response_retrieved(mocker: MockerFixture):
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url("http://localhost:8002/manage/v2/servers")
     ml_mocker.with_response_code(200)
@@ -341,16 +324,15 @@ async def test_request_logs_debug_response_retrieved(mocker: MockerFixture):
     ml_mocker.mock_get()
     logger_debug = mocker.patch.object(http_client_module.logger, "debug")
 
-    async with AsyncHttpClient(port=8002) as client:
-        await client.get("/manage/v2/servers")
+    with HttpClient(port=8002) as client:
+        client.get("/manage/v2/servers")
 
     debug_messages = [call.args[0] for call in logger_debug.call_args_list]
     assert "Response retrieved" in debug_messages
 
 
-@pytest.mark.asyncio
 @respx.mock
-async def test_request_logs_debug_response_retrieved_no_body(mocker: MockerFixture):
+def test_request_logs_debug_response_retrieved_no_body(mocker: MockerFixture):
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url("http://localhost:8002/manage/v2/databases/custom-db")
     ml_mocker.with_response_code(204)
@@ -359,15 +341,15 @@ async def test_request_logs_debug_response_retrieved_no_body(mocker: MockerFixtu
     ml_mocker.mock_delete()
     logger_debug = mocker.patch.object(http_client_module.logger, "debug")
 
-    async with AsyncHttpClient(port=8002) as client:
-        await client.delete("/manage/v2/databases/custom-db")
+    with HttpClient(port=8002) as client:
+        client.delete("/manage/v2/databases/custom-db")
 
     debug_messages = [call.args[0] for call in logger_debug.call_args_list]
     assert "Response retrieved" in debug_messages
 
 
 def test_properties():
-    client = AsyncHttpClient(
+    client = HttpClient(
         protocol="https",
         host="ml.example.com",
         port=8123,

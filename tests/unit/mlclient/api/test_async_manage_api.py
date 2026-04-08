@@ -4,10 +4,8 @@ import httpx
 import pytest
 import respx
 
-from mlclient.api.manage_api import AsyncManageApi
+from mlclient import AsyncMLClient
 from mlclient.calls import DatabasesGetCall
-from mlclient.clients.api_client import AsyncApiClient
-from mlclient.clients.http_client import AsyncHttpClient
 from tests.utils import resources as resources_utils
 from tests.utils.ml_mockers import MLRespXMocker
 
@@ -22,9 +20,8 @@ async def test_custom_call():
     ml_mocker.with_response_body({"database-default-list": {}})
     ml_mocker.mock_get()
 
-    async with AsyncHttpClient() as http:
-        manage = AsyncManageApi(AsyncApiClient(http))
-        resp = await manage.call(DatabasesGetCall())
+    async with AsyncMLClient() as ml:
+        resp = await ml.manage.call(DatabasesGetCall())
 
     assert resp.status_code == 200
 
@@ -45,9 +42,8 @@ async def test_get_logs():
     ml_mocker.with_response_body(Path(response_body_path).read_bytes())
     ml_mocker.mock_get()
 
-    async with AsyncHttpClient() as http:
-        manage = AsyncManageApi(AsyncApiClient(http))
-        resp = await manage.logs.get("ErrorLog.txt", data_format="json")
+    async with AsyncMLClient() as ml:
+        resp = await ml.manage.logs.get("ErrorLog.txt", data_format="json")
 
     assert resp.status_code == httpx.codes.OK
     assert "logfile" in resp.json()
@@ -69,9 +65,8 @@ async def test_get_databases():
     ml_mocker.with_response_body(Path(response_body_path).read_bytes())
     ml_mocker.mock_get()
 
-    async with AsyncHttpClient() as http:
-        manage = AsyncManageApi(AsyncApiClient(http))
-        resp = await manage.databases.get_list(data_format="json")
+    async with AsyncMLClient() as ml:
+        resp = await ml.manage.databases.get_list(data_format="json")
 
     expected_uri = "/manage/v2/databases?view=default"
     assert resp.status_code == httpx.codes.OK
@@ -94,9 +89,8 @@ async def test_post_databases():
     ml_mocker.with_response_body(Path(response_body_path).read_bytes())
     ml_mocker.mock_post()
 
-    async with AsyncHttpClient() as http:
-        manage = AsyncManageApi(AsyncApiClient(http))
-        resp = await manage.databases.create(body)
+    async with AsyncMLClient() as ml:
+        resp = await ml.manage.databases.create(body)
 
     assert resp.status_code == httpx.codes.BAD_REQUEST
     assert (
@@ -121,9 +115,8 @@ async def test_get_database():
     ml_mocker.with_response_body(Path(response_body_path).read_bytes())
     ml_mocker.mock_get()
 
-    async with AsyncHttpClient() as http:
-        manage = AsyncManageApi(AsyncApiClient(http))
-        resp = await manage.databases.get("Documents", data_format="json")
+    async with AsyncMLClient() as ml:
+        resp = await ml.manage.databases.get("Documents", data_format="json")
 
     expected_uri = "/manage/v2/databases/Documents?view=default"
     assert resp.status_code == httpx.codes.OK
@@ -146,9 +139,10 @@ async def test_post_database():
     ml_mocker.with_response_body(Path(response_body_path).read_bytes())
     ml_mocker.mock_post()
 
-    async with AsyncHttpClient() as http:
-        manage = AsyncManageApi(AsyncApiClient(http))
-        resp = await manage.databases.post("Documents", {"operation": "clear-database"})
+    async with AsyncMLClient() as ml:
+        resp = await ml.manage.databases.post(
+            "Documents", {"operation": "clear-database"},
+        )
 
     assert resp.status_code == httpx.codes.OK
     assert not resp.text
@@ -163,9 +157,8 @@ async def test_delete_database():
     ml_mocker.with_empty_response_body()
     ml_mocker.mock_delete()
 
-    async with AsyncHttpClient() as http:
-        manage = AsyncManageApi(AsyncApiClient(http))
-        resp = await manage.databases.delete("custom-db")
+    async with AsyncMLClient() as ml:
+        resp = await ml.manage.databases.delete("custom-db")
 
     assert resp.status_code == httpx.codes.NO_CONTENT
     assert not resp.text
@@ -188,9 +181,8 @@ async def test_get_database_properties():
     ml_mocker.with_response_body(Path(response_body_path).read_bytes())
     ml_mocker.mock_get()
 
-    async with AsyncHttpClient() as http:
-        manage = AsyncManageApi(AsyncApiClient(http))
-        resp = await manage.databases.get_properties(
+    async with AsyncMLClient() as ml:
+        resp = await ml.manage.databases.get_properties(
             database="Documents",
             data_format="json",
         )
@@ -217,9 +209,8 @@ async def test_put_database_properties():
     ml_mocker.with_response_body(Path(response_body_path).read_bytes())
     ml_mocker.mock_put()
 
-    async with AsyncHttpClient() as http:
-        manage = AsyncManageApi(AsyncApiClient(http))
-        resp = await manage.databases.put_properties(
+    async with AsyncMLClient() as ml:
+        resp = await ml.manage.databases.put_properties(
             "non-existing-db",
             {"database-name": "custom-db"},
         )
@@ -244,9 +235,8 @@ async def test_get_servers():
     ml_mocker.with_response_body(Path(response_body_path).read_bytes())
     ml_mocker.mock_get()
 
-    async with AsyncHttpClient() as http:
-        manage = AsyncManageApi(AsyncApiClient(http))
-        resp = await manage.servers.get_list(data_format="json")
+    async with AsyncMLClient() as ml:
+        resp = await ml.manage.servers.get_list(data_format="json")
 
     expected_uri = "/manage/v2/servers?view=default"
     assert resp.status_code == httpx.codes.OK
@@ -269,9 +259,8 @@ async def test_post_servers():
     ml_mocker.with_response_body(Path(response_body_path).read_bytes())
     ml_mocker.mock_post()
 
-    async with AsyncHttpClient() as http:
-        manage = AsyncManageApi(AsyncApiClient(http))
-        resp = await manage.servers.create(
+    async with AsyncMLClient() as ml:
+        resp = await ml.manage.servers.create(
             '<http-server-properties xmlns="http://marklogic.com/manage" />',
             group_id="Default",
             server_type="http",
@@ -300,9 +289,8 @@ async def test_get_server():
     ml_mocker.with_response_body(Path(response_body_path).read_bytes())
     ml_mocker.mock_get()
 
-    async with AsyncHttpClient() as http:
-        manage = AsyncManageApi(AsyncApiClient(http))
-        resp = await manage.servers.get(
+    async with AsyncMLClient() as ml:
+        resp = await ml.manage.servers.get(
             server="App-Services",
             group_id="Default",
             data_format="json",
@@ -328,9 +316,8 @@ async def test_delete_server():
     ml_mocker.with_response_body(Path(response_body_path).read_bytes())
     ml_mocker.mock_delete()
 
-    async with AsyncHttpClient() as http:
-        manage = AsyncManageApi(AsyncApiClient(http))
-        resp = await manage.servers.delete(
+    async with AsyncMLClient() as ml:
+        resp = await ml.manage.servers.delete(
             "Non-existing-server",
             "Non-existing-group",
         )
@@ -357,9 +344,8 @@ async def test_get_server_properties():
     ml_mocker.with_response_body(Path(response_body_path).read_bytes())
     ml_mocker.mock_get()
 
-    async with AsyncHttpClient() as http:
-        manage = AsyncManageApi(AsyncApiClient(http))
-        resp = await manage.servers.get_properties(
+    async with AsyncMLClient() as ml:
+        resp = await ml.manage.servers.get_properties(
             server="App-Services",
             group_id="Default",
             data_format="json",
@@ -388,9 +374,8 @@ async def test_put_server_properties():
     ml_mocker.with_response_body(Path(response_body_path).read_bytes())
     ml_mocker.mock_put()
 
-    async with AsyncHttpClient() as http:
-        manage = AsyncManageApi(AsyncApiClient(http))
-        resp = await manage.servers.put_properties(
+    async with AsyncMLClient() as ml:
+        resp = await ml.manage.servers.put_properties(
             "non-existing-server",
             "non-existing-group",
             {"server-name": "non-existing-server"},
@@ -417,9 +402,10 @@ async def test_get_forests():
     ml_mocker.with_response_body(Path(response_body_path).read_bytes())
     ml_mocker.mock_get()
 
-    async with AsyncHttpClient() as http:
-        manage = AsyncManageApi(AsyncApiClient(http))
-        resp = await manage.forests.get_list(data_format="json", database="Documents")
+    async with AsyncMLClient() as ml:
+        resp = await ml.manage.forests.get_list(
+            data_format="json", database="Documents",
+        )
 
     expected_uri = "/manage/v2/forests?view=default&database-id=Documents"
     assert resp.status_code == httpx.codes.OK
@@ -442,9 +428,8 @@ async def test_post_forests():
     ml_mocker.with_response_body(Path(response_body_path).read_bytes())
     ml_mocker.mock_post()
 
-    async with AsyncHttpClient() as http:
-        manage = AsyncManageApi(AsyncApiClient(http))
-        resp = await manage.forests.create(body)
+    async with AsyncMLClient() as ml:
+        resp = await ml.manage.forests.create(body)
 
     assert resp.status_code == httpx.codes.INTERNAL_SERVER_ERROR
 
@@ -465,9 +450,8 @@ async def test_put_forests():
     ml_mocker.with_response_body(Path(response_body_path).read_bytes())
     ml_mocker.mock_put()
 
-    async with AsyncHttpClient() as http:
-        manage = AsyncManageApi(AsyncApiClient(http))
-        resp = await manage.forests.put(body)
+    async with AsyncMLClient() as ml:
+        resp = await ml.manage.forests.put(body)
 
     assert resp.status_code == httpx.codes.BAD_REQUEST
     assert (
@@ -493,9 +477,8 @@ async def test_get_forest():
     ml_mocker.with_response_body(Path(response_body_path).read_bytes())
     ml_mocker.mock_get()
 
-    async with AsyncHttpClient() as http:
-        manage = AsyncManageApi(AsyncApiClient(http))
-        resp = await manage.forests.get("Documents", data_format="json")
+    async with AsyncMLClient() as ml:
+        resp = await ml.manage.forests.get("Documents", data_format="json")
 
     expected_uri = "/manage/v2/forests/Documents?view=default"
     assert resp.status_code == httpx.codes.OK
@@ -519,9 +502,8 @@ async def test_post_forest():
     ml_mocker.with_response_body(Path(response_body_path).read_bytes())
     ml_mocker.mock_post()
 
-    async with AsyncHttpClient() as http:
-        manage = AsyncManageApi(AsyncApiClient(http))
-        resp = await manage.forests.post("forest-01", {"state": "clear"})
+    async with AsyncMLClient() as ml:
+        resp = await ml.manage.forests.post("forest-01", {"state": "clear"})
 
     assert resp.status_code == httpx.codes.NOT_FOUND
     assert "XDMP-NOSUCHFOREST" in resp.text
@@ -537,9 +519,8 @@ async def test_delete_forest():
     ml_mocker.with_empty_response_body()
     ml_mocker.mock_delete()
 
-    async with AsyncHttpClient() as http:
-        manage = AsyncManageApi(AsyncApiClient(http))
-        resp = await manage.forests.delete("forest-01", level="full")
+    async with AsyncMLClient() as ml:
+        resp = await ml.manage.forests.delete("forest-01", level="full")
 
     assert resp.status_code == httpx.codes.NO_CONTENT
     assert not resp.text
@@ -562,9 +543,8 @@ async def test_get_forest_properties():
     ml_mocker.with_response_body(Path(response_body_path).read_bytes())
     ml_mocker.mock_get()
 
-    async with AsyncHttpClient() as http:
-        manage = AsyncManageApi(AsyncApiClient(http))
-        resp = await manage.forests.get_properties(
+    async with AsyncMLClient() as ml:
+        resp = await ml.manage.forests.get_properties(
             forest="Documents",
             data_format="json",
         )
@@ -591,9 +571,8 @@ async def test_put_forest_properties():
     ml_mocker.with_response_body(Path(response_body_path).read_bytes())
     ml_mocker.mock_put()
 
-    async with AsyncHttpClient() as http:
-        manage = AsyncManageApi(AsyncApiClient(http))
-        resp = await manage.forests.put_properties(
+    async with AsyncMLClient() as ml:
+        resp = await ml.manage.forests.put_properties(
             "non-existing-forest",
             {"forest-name": "custom-forest"},
         )
@@ -618,9 +597,8 @@ async def test_get_roles():
     ml_mocker.with_response_body(Path(response_body_path).read_bytes())
     ml_mocker.mock_get()
 
-    async with AsyncHttpClient() as http:
-        manage = AsyncManageApi(AsyncApiClient(http))
-        resp = await manage.roles.get_list(data_format="json")
+    async with AsyncMLClient() as ml:
+        resp = await ml.manage.roles.get_list(data_format="json")
 
     expected_uri = "/manage/v2/roles?view=default"
     assert resp.status_code == httpx.codes.OK
@@ -643,9 +621,8 @@ async def test_post_roles():
     ml_mocker.with_response_body(Path(response_body_path).read_bytes())
     ml_mocker.mock_post()
 
-    async with AsyncHttpClient() as http:
-        manage = AsyncManageApi(AsyncApiClient(http))
-        resp = await manage.roles.create(body)
+    async with AsyncMLClient() as ml:
+        resp = await ml.manage.roles.create(body)
 
     assert resp.status_code == httpx.codes.BAD_REQUEST
     assert "Payload has errors in structure, content-type or values." in resp.text
@@ -667,9 +644,8 @@ async def test_get_role():
     ml_mocker.with_response_body(Path(response_body_path).read_bytes())
     ml_mocker.mock_get()
 
-    async with AsyncHttpClient() as http:
-        manage = AsyncManageApi(AsyncApiClient(http))
-        resp = await manage.roles.get("admin", data_format="json")
+    async with AsyncMLClient() as ml:
+        resp = await ml.manage.roles.get("admin", data_format="json")
 
     expected_uri = "/manage/v2/roles/admin?view=default"
     assert resp.status_code == httpx.codes.OK
@@ -685,9 +661,8 @@ async def test_delete_role():
     ml_mocker.with_empty_response_body()
     ml_mocker.mock_delete()
 
-    async with AsyncHttpClient() as http:
-        manage = AsyncManageApi(AsyncApiClient(http))
-        resp = await manage.roles.delete("custom-role")
+    async with AsyncMLClient() as ml:
+        resp = await ml.manage.roles.delete("custom-role")
 
     assert resp.status_code == httpx.codes.NO_CONTENT
     assert not resp.text
@@ -708,9 +683,8 @@ async def test_get_role_properties():
     ml_mocker.with_response_body(Path(response_body_path).read_bytes())
     ml_mocker.mock_get()
 
-    async with AsyncHttpClient() as http:
-        manage = AsyncManageApi(AsyncApiClient(http))
-        resp = await manage.roles.get_properties(role="admin", data_format="json")
+    async with AsyncMLClient() as ml:
+        resp = await ml.manage.roles.get_properties(role="admin", data_format="json")
 
     assert resp.status_code == httpx.codes.OK
     assert resp.json()["role-name"] == "admin"
@@ -734,9 +708,8 @@ async def test_put_role_properties():
     ml_mocker.with_response_body(Path(response_body_path).read_bytes())
     ml_mocker.mock_put()
 
-    async with AsyncHttpClient() as http:
-        manage = AsyncManageApi(AsyncApiClient(http))
-        resp = await manage.roles.put_properties(
+    async with AsyncMLClient() as ml:
+        resp = await ml.manage.roles.put_properties(
             "non-existing-role",
             {"role-name": "custom-db"},
         )
@@ -764,9 +737,8 @@ async def test_get_users():
     ml_mocker.with_response_body(Path(response_body_path).read_bytes())
     ml_mocker.mock_get()
 
-    async with AsyncHttpClient() as http:
-        manage = AsyncManageApi(AsyncApiClient(http))
-        resp = await manage.users.get_list(data_format="json")
+    async with AsyncMLClient() as ml:
+        resp = await ml.manage.users.get_list(data_format="json")
 
     expected_uri = "/manage/v2/users?view=default"
     assert resp.status_code == httpx.codes.OK
@@ -789,9 +761,8 @@ async def test_post_users():
     ml_mocker.with_response_body(Path(response_body_path).read_bytes())
     ml_mocker.mock_post()
 
-    async with AsyncHttpClient() as http:
-        manage = AsyncManageApi(AsyncApiClient(http))
-        resp = await manage.users.create(body)
+    async with AsyncMLClient() as ml:
+        resp = await ml.manage.users.create(body)
 
     assert resp.status_code == httpx.codes.BAD_REQUEST
     assert "Payload has errors in structure, content-type or values." in resp.text
@@ -813,9 +784,8 @@ async def test_get_user():
     ml_mocker.with_response_body(Path(response_body_path).read_bytes())
     ml_mocker.mock_get()
 
-    async with AsyncHttpClient() as http:
-        manage = AsyncManageApi(AsyncApiClient(http))
-        resp = await manage.users.get("admin", data_format="json")
+    async with AsyncMLClient() as ml:
+        resp = await ml.manage.users.get("admin", data_format="json")
 
     expected_uri = "/manage/v2/users/admin?view=default"
     assert resp.status_code == httpx.codes.OK
@@ -836,9 +806,8 @@ async def test_delete_user():
     ml_mocker.with_response_body(Path(response_body_path).read_bytes())
     ml_mocker.mock_delete()
 
-    async with AsyncHttpClient() as http:
-        manage = AsyncManageApi(AsyncApiClient(http))
-        resp = await manage.users.delete("custom-user")
+    async with AsyncMLClient() as ml:
+        resp = await ml.manage.users.delete("custom-user")
 
     assert resp.status_code == httpx.codes.NOT_FOUND
     assert "User does not exist: custom-user" in resp.text
@@ -859,9 +828,8 @@ async def test_get_user_properties():
     ml_mocker.with_response_body(Path(response_body_path).read_bytes())
     ml_mocker.mock_get()
 
-    async with AsyncHttpClient() as http:
-        manage = AsyncManageApi(AsyncApiClient(http))
-        resp = await manage.users.get_properties(user="admin", data_format="json")
+    async with AsyncMLClient() as ml:
+        resp = await ml.manage.users.get_properties(user="admin", data_format="json")
 
     assert resp.status_code == httpx.codes.OK
     assert resp.json()["user-name"] == "admin"
@@ -885,9 +853,8 @@ async def test_put_user_properties():
     ml_mocker.with_response_body(Path(response_body_path).read_bytes())
     ml_mocker.mock_put()
 
-    async with AsyncHttpClient() as http:
-        manage = AsyncManageApi(AsyncApiClient(http))
-        resp = await manage.users.put_properties(
+    async with AsyncMLClient() as ml:
+        resp = await ml.manage.users.put_properties(
             "non-existing-user",
             {"user-name": "custom-db"},
         )

@@ -107,8 +107,8 @@ Three mid-level API clients cover all of MarkLogic's API tiers:
         resp = ml.admin.get_timestamp()
         print(resp.text)  # 2024-06-21T14:08:32.130813Z
 
-Port routing is automatic. Manage and Admin requests go to ports 8002 and 8001
-regardless of the main client port.
+Port routing is automatic. Manage and Admin requests always go to ports 8002
+and 8001 regardless of the main client port.
 
 
 Full control

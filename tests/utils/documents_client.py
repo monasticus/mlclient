@@ -19,7 +19,7 @@ def assert_document_does_not_exist(
     uri: str,
 ):
     expected_msg = (
-        "[500 Internal Server Error] (RESTAPI-NODOCUMENT) "
+        "[404 Not Found] (RESTAPI-NODOCUMENT) "
         "RESTAPI-NODOCUMENT: (err:FOER0000) "
         "Resource or document does not exist:  "
         f"category: content message: {uri}"
@@ -37,7 +37,7 @@ def assert_document_does_not_exist(
 def assert_documents_exist(
     uris: list,
 ):
-    with MLClient(port=8000, auth_method="digest") as ml:
+    with MLClient(auth_method="digest") as ml:
         for i in range(0, len(uris), _URI_BATCH_SIZE):
             batch = uris[i : i + _URI_BATCH_SIZE]
             assert ml.documents.read(batch, output_type=bytes) != {}
@@ -46,7 +46,7 @@ def assert_documents_exist(
 def assert_documents_do_not_exist(
     uris: list,
 ):
-    with MLClient(port=8000, auth_method="digest") as ml:
+    with MLClient(auth_method="digest") as ml:
         for i in range(0, len(uris), _URI_BATCH_SIZE):
             batch = uris[i : i + _URI_BATCH_SIZE]
             assert ml.documents.read(batch, output_type=bytes) == {}
@@ -68,7 +68,7 @@ def assert_documents_exist_and_confirm_data(
     category: str | list[str] = "content",
     output_type: type | None = None,
 ):
-    with MLClient(port=8000, auth_method="digest") as ml:
+    with MLClient(auth_method="digest") as ml:
         actual_docs = ml.documents.read(
             list(expected.keys()),
             category=category,
@@ -93,7 +93,7 @@ def assert_documents_exist_and_confirm_data(
 def write_documents(
     docs: Document | Metadata | list[Document | Metadata],
 ):
-    with MLClient(port=8000, auth_method="digest") as ml:
+    with MLClient(auth_method="digest") as ml:
         resp = ml.documents.write(docs)
         documents = resp["documents"]
         if not isinstance(docs, list):
@@ -114,7 +114,7 @@ def delete_documents(
     uri: str | list[str],
 ):
     try:
-        with MLClient(port=8000, auth_method="digest") as ml:
+        with MLClient(auth_method="digest") as ml:
             if isinstance(uri, list):
                 for i in range(0, len(uri), _URI_BATCH_SIZE):
                     ml.documents.delete(uri[i : i + _URI_BATCH_SIZE])

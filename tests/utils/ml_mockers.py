@@ -618,11 +618,11 @@ class MLDocumentsMocker:
     def _build_no_document_error_get_response(
         uri: str,
     ) -> Response:
-        code = httpx.codes.INTERNAL_SERVER_ERROR
+        code = httpx.codes.NOT_FOUND
         content = {
             "errorResponse": {
                 "statusCode": code,
-                "status": "Internal Server Error",
+                "status": "Not Found",
                 "messageCode": "RESTAPI-NODOCUMENT",
                 "message": "RESTAPI-NODOCUMENT: (err:FOER0000) "
                 "Resource or document does not exist:  "
@@ -638,12 +638,12 @@ class MLDocumentsMocker:
         uri: str,
         body_part: MultipartPart,
     ) -> Response:
-        code = httpx.codes.INTERNAL_SERVER_ERROR
+        code = httpx.codes.NOT_FOUND
         operation = cls._get_post_erroneous_operation(uri, body_part)
         content = {
             "errorResponse": {
                 "statusCode": code,
-                "status": "Internal Server Error",
+                "status": "Not Found",
                 "messageCode": "XDMP-DOCNOTFOUND",
                 "message": f"XDMP-DOCNOTFOUND: {operation} -- Document not found",
             },

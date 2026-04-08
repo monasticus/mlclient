@@ -10,7 +10,7 @@ from tests.utils import resources as resources_utils
 from tests.utils.ml_mockers import MLRespXMocker
 
 RESOURCES = resources_utils.get_test_resources(__file__)
-ml_mocker = MLRespXMocker(router_base_url="http://localhost:8002")
+ml_mocker = MLRespXMocker(router_base_url="http://localhost:8000")
 ml_mock = ml_mocker.router
 
 

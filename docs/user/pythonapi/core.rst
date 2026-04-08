@@ -147,18 +147,19 @@ them to port 8002.
       +- .parser     -> MLResponseParser
       +- .documents, .eval, .logs -> high-level services
 
-Port routing is automatic. When the main ``port`` is already 8002 (the default),
-``.manage`` reuses the same HTTP connection. Otherwise, a separate connection to
-port 8002 is lazily created on first access. The same logic applies to
-``.admin`` and port 8001. All secondary connections share the same ``protocol``,
-``host``, ``auth_method``, ``username``, and ``password`` as the main client.
-They are also managed by the ``connect()`` / ``disconnect()`` lifecycle.
+Port routing is automatic. When the main ``port`` differs from 8002 or 8001,
+separate connections to ports 8002 and 8001 are lazily created on first access
+to ``.manage`` or ``.admin``. If the main port happens to be 8002 (or 8001),
+that connection is reused directly. All secondary connections share the same
+``protocol``, ``host``, ``auth_method``, ``username``, and ``password`` as the
+main client. They are also managed by the ``connect()`` / ``disconnect()``
+lifecycle.
 
 .. code-block:: python
 
     >>> from mlclient import MLClient
 
-    # Default port is 8002 - .manage reuses the connection, .admin creates one to 8001
+    # Default port is 8000 - .manage creates a connection to 8002, .admin to 8001
     >>> with MLClient() as ml:
     ...     resp = ml.manage.databases.get_list()
     ...     ts = ml.admin.get_timestamp()

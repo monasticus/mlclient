@@ -15,7 +15,7 @@ def test_write_job_with_documents_input():
         docs_client_utils.assert_documents_do_not_exist(uris)
 
         job = WriteDocumentsJob()
-        job.with_client_config(port=8000, auth_method="digest")
+        job.with_client_config(auth_method="digest")
         job.with_documents_input(docs)
         job.run_sync()
         assert job.report.completed == len(uris)
@@ -32,20 +32,19 @@ def test_write_job_with_documents_input():
 
 
 def test_read_job_with_documents_output():
-
     written_docs = list(docs_client_utils.generate_docs())
     uris = [doc.uri for doc in written_docs]
 
     try:
         # WRITE
         job = WriteDocumentsJob()
-        job.with_client_config(port=8000, auth_method="digest")
+        job.with_client_config(auth_method="digest")
         job.with_documents_input(written_docs)
         job.run_sync()
         docs_client_utils.assert_documents_exist(uris)
 
         job = ReadDocumentsJob()
-        job.with_client_config(port=8000, auth_method="digest")
+        job.with_client_config(auth_method="digest")
         job.with_uris_input(uris)
         job.run_sync()
         read_docs = job.documents
@@ -63,7 +62,6 @@ def test_read_job_with_documents_output():
 
 
 def test_read_job_with_filesystem_output():
-
     written_docs = list(docs_client_utils.generate_docs())
     uris = [doc.uri for doc in written_docs]
 
@@ -72,13 +70,13 @@ def test_read_job_with_filesystem_output():
     try:
         # WRITE
         job = WriteDocumentsJob()
-        job.with_client_config(port=8000, auth_method="digest")
+        job.with_client_config(auth_method="digest")
         job.with_documents_input(written_docs)
         job.run_sync()
         docs_client_utils.assert_documents_exist(uris)
 
         job = ReadDocumentsJob()
-        job.with_client_config(port=8000, auth_method="digest")
+        job.with_client_config(auth_method="digest")
         job.with_uris_input(uris)
         job.with_filesystem_output(output_dir)
         job.run_sync()

@@ -1,0 +1,13 @@
+{
+  "restart": {
+    "last-startup": {
+      "host-id": "123",
+      "value": "2026-03-16T11:06:25.657322+01:00"
+    },
+    "link": {
+      "kindref": "timestamp",
+      "uriref": "/admin/v1/timestamp"
+    },
+    "message": "Check for new timestamp to verify host restart."
+  }
+}

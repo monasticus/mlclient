@@ -23,7 +23,7 @@ def xquery():
 @respx.mock
 def test_eval(xquery):
     ml_mocker = MLRespXMocker(use_router=False)
-    ml_mocker.with_url("http://localhost:8002/v1/eval")
+    ml_mocker.with_url("http://localhost:8000/v1/eval")
     ml_mocker.with_request_content_type("application/x-www-form-urlencoded")
     ml_mocker.with_request_body(
         {
@@ -54,11 +54,11 @@ def test_get_documents():
         "test-get-documents.json",
     )
     ml_mocker = MLRespXMocker(use_router=False)
-    ml_mocker.with_url("http://localhost:8002/v1/documents")
+    ml_mocker.with_url("http://localhost:8000/v1/documents")
     ml_mocker.with_request_param("uri", "/path/to/non-existing/document.xml")
     ml_mocker.with_request_param("format", "json")
     ml_mocker.with_response_content_type("application/json; charset=UTF-8")
-    ml_mocker.with_response_code(500)
+    ml_mocker.with_response_code(404)
     ml_mocker.with_response_body(Path(response_body_path).read_bytes())
     ml_mocker.mock_get()
 
@@ -68,7 +68,7 @@ def test_get_documents():
             data_format="json",
         )
 
-    assert resp.status_code == httpx.codes.INTERNAL_SERVER_ERROR
+    assert resp.status_code == httpx.codes.NOT_FOUND
     assert resp.json()["errorResponse"]["messageCode"] == "RESTAPI-NODOCUMENT"
 
 
@@ -85,7 +85,7 @@ def test_post_documents():
         "test-post-documents.json",
     )
     ml_mocker = MLRespXMocker(use_router=False)
-    ml_mocker.with_url("http://localhost:8002/v1/documents")
+    ml_mocker.with_url("http://localhost:8000/v1/documents")
     ml_mocker.with_response_content_type("application/json; charset=UTF-8")
     ml_mocker.with_response_code(500)
     ml_mocker.with_response_body(Path(response_body_path).read_bytes())
@@ -113,7 +113,7 @@ def test_delete_documents():
         "test-delete-documents.xml",
     )
     ml_mocker = MLRespXMocker(use_router=False)
-    ml_mocker.with_url("http://localhost:8002/v1/documents")
+    ml_mocker.with_url("http://localhost:8000/v1/documents")
     ml_mocker.with_request_param("uri", "/path/to/non-existing/document.xml")
     ml_mocker.with_request_param("result", "wiped")
     ml_mocker.with_response_content_type("application/xml; charset=UTF-8")

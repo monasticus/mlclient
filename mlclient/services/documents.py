@@ -33,7 +33,17 @@ from mlclient.models.http import DocumentsDisposition as Disposition
 
 
 class DocumentsService:
-    """High-level service for /v1/documents CRUD operations."""
+    """High-level service for /v1/documents CRUD operations.
+
+    Notes
+    -----
+    MarkLogic's REST API (App-Services, port 8000) and Manage API (port 8002)
+    return different HTTP status codes for the same underlying errors. For
+    example, RESTAPI-NODOCUMENT and XDMP-DOCNOTFOUND are returned as
+    **404 Not Found** on the REST API but as **500 Internal Server Error**
+    on the Manage API. This is due to different error handler mappings on
+    each port.
+    """
 
     def __init__(self, api: ApiClient):
         self._api = api

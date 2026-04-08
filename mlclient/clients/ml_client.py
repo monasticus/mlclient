@@ -4,7 +4,7 @@ Exports sync and async entry points for MarkLogic interaction
 using a layered composition architecture:
     - .http     -> HttpClient / AsyncHttpClient (raw HTTP on main port)
     - .rest     -> RestApi / AsyncRestApi (/v1/* on main port)
-    - .manage   -> ManageApi / AsyncManageApi (/manage/v2/* on port 8002)
+    - .manage   -> ManageApi / AsyncManageApi (/manage/v2/*, always port 8002)
     - .admin    -> AdminApi / AsyncAdminApi (/admin/v1/* on port 8001)
     - .parser   -> MLResponseParser
     - .documents, .eval, .logs -> high-level services
@@ -32,6 +32,7 @@ from .http_client import (
     DEFAULT_RETRY_STRATEGY,
     MARKLOGIC_ADMIN_API_PORT,
     MARKLOGIC_MANAGE_API_PORT,
+    MARKLOGIC_REST_API_PORT,
     RESTART_RETRY_STRATEGY,
     AsyncHttpClient,
     HttpClient,
@@ -63,7 +64,7 @@ class MLClient:
     >>> from mlclient import MLClient
     >>> config = {
     ...     "host": "localhost",
-    ...     "port": 8002,
+    ...     "port": 8000,
     ...     "username": "admin",
     ...     "password": "admin",
     ... }
@@ -124,7 +125,7 @@ class MLClient:
         self,
         protocol: str = "http",
         host: str = "localhost",
-        port: int = MARKLOGIC_MANAGE_API_PORT,
+        port: int = MARKLOGIC_REST_API_PORT,
         auth_method: str = "basic",
         username: str = "admin",
         password: str = "admin",
@@ -138,7 +139,7 @@ class MLClient:
             A protocol used for HTTP requests (http / https)
         host : str, default "localhost"
             A host name
-        port : int, default 8002
+        port : int, default 8000
             An App Service port
         auth_method : str, default "basic"
             An authorization method (basic / digest)
@@ -343,7 +344,7 @@ class AsyncMLClient:
         self,
         protocol: str = "http",
         host: str = "localhost",
-        port: int = MARKLOGIC_MANAGE_API_PORT,
+        port: int = MARKLOGIC_REST_API_PORT,
         auth_method: str = "basic",
         username: str = "admin",
         password: str = "admin",
@@ -357,7 +358,7 @@ class AsyncMLClient:
             A protocol used for HTTP requests (http / https)
         host : str, default "localhost"
             A host name
-        port : int, default 8002
+        port : int, default 8000
             An App Service port
         auth_method : str, default "basic"
             An authorization method (basic / digest)

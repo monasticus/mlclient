@@ -6,10 +6,9 @@ import pytest
 import pytest_asyncio
 import respx
 
-from mlclient.clients.api_client import AsyncApiClient
-from mlclient.clients.http_client import AsyncHttpClient
+from mlclient import AsyncMLClient
 from mlclient.exceptions import MarkLogicError
-from mlclient.services.logs import AsyncLogsService, LogType
+from mlclient.services.logs import LogType
 from tests.utils import resources as resources_utils
 from tests.utils.ml_mockers import MLRespXMocker
 
@@ -18,8 +17,8 @@ ENDPOINT = "/manage/v2/logs"
 
 @pytest_asyncio.fixture
 async def svc():
-    async with AsyncHttpClient(auth_method="digest") as http:
-        yield AsyncLogsService(AsyncApiClient(http))
+    async with AsyncMLClient(auth_method="digest") as ml:
+        yield ml.logs
 
 
 @pytest.mark.asyncio

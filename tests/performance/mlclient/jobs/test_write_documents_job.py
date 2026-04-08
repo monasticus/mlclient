@@ -273,7 +273,7 @@ def _write_job_with_documents_input(
             docs_client_utils.generate_docs(docs_count, uri_template=uri_template),
         )
         job = WriteDocumentsJob(concurrency=concurrency, batch_size=batch_size)
-        job.with_client_config(port=8000, auth_method="digest")
+        job.with_client_config(auth_method="digest")
         job.with_documents_input(docs)
         await job.run()
         return job
@@ -289,7 +289,7 @@ def _write_job_with_filesystem_input(
 ):
     async def _run():
         job = WriteDocumentsJob(concurrency=concurrency, batch_size=batch_size)
-        job.with_client_config(port=8000, auth_method="digest")
+        job.with_client_config(auth_method="digest")
         job.with_filesystem_input(docs_path, uri_prefix=uri_prefix)
         await job.run()
         return job

@@ -2,9 +2,8 @@ import httpx
 import pytest
 import respx
 
+from mlclient import AsyncMLClient
 from mlclient.calls import EvalCall
-from mlclient.clients.api_client import AsyncApiClient
-from mlclient.clients.http_client import AsyncHttpClient
 from tests.utils.ml_mockers import MLRespXMocker
 
 
@@ -22,7 +21,7 @@ def xquery():
 @respx.mock
 async def test_call(xquery):
     ml_mocker = MLRespXMocker(use_router=False)
-    ml_mocker.with_url("http://localhost:8002/v1/eval")
+    ml_mocker.with_url("http://localhost:8000/v1/eval")
     ml_mocker.with_request_content_type("application/x-www-form-urlencoded")
     ml_mocker.with_request_body(
         {
@@ -40,9 +39,8 @@ async def test_call(xquery):
         xquery=xquery,
         variables={"element": "<parent><child/></parent>"},
     )
-    async with AsyncHttpClient() as http:
-        api = AsyncApiClient(http)
-        resp = await api.call(eval_call)
+    async with AsyncMLClient() as ml:
+        resp = await ml.rest.call(eval_call)
 
     assert resp.status_code == httpx.codes.OK
     assert "<new-parent><child/></new-parent>" in resp.text

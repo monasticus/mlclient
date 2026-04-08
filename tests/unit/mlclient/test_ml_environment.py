@@ -98,7 +98,7 @@ def test_load_file_default_values():
         "protocol": "http",
         "app_servers": [
             {
-                "identifier": "app",
+                "identifier": "app-services",
                 "port": 8000,
                 "auth_method": "digest",
                 "rest": True,
@@ -174,7 +174,7 @@ def test_load_default():
         "protocol": "http",
         "app_servers": [
             {
-                "identifier": "app",
+                "identifier": "app-services",
                 "port": 8000,
                 "auth_method": "digest",
                 "rest": True,
@@ -213,7 +213,7 @@ def test_load_in_child_directory():
         "protocol": "http",
         "app_servers": [
             {
-                "identifier": "app",
+                "identifier": "app-services",
                 "port": 8000,
                 "auth_method": "digest",
                 "rest": True,
@@ -250,7 +250,7 @@ def test_rest_servers():
     test_config = MLEnvironment.load("test")
     default_config = MLEnvironment.load("test-default")
     assert test_config.rest_servers == ["manage", "content", "test"]
-    assert default_config.rest_servers == ["app"]
+    assert default_config.rest_servers == ["app-services"]
 
 
 def test_provide_config():

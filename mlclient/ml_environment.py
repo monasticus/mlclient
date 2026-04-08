@@ -76,7 +76,7 @@ class MLEnvironment(BaseModel):
     app_servers: list[MLServerConfig] = Field(
         alias="app-servers",
         description="App Servers configurations' list",
-        default=[MLServerConfig(id="app", port=8000, rest=True)],
+        default=[MLServerConfig(id="app-services", port=8000, rest=True)],
     )
 
     @property

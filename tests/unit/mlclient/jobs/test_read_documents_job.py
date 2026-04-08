@@ -11,6 +11,7 @@ import respx
 from mlclient.exceptions import MarkLogicError
 from mlclient.jobs import ReadDocumentsJob
 from mlclient.models import Document, DocumentType, XMLDocument
+from mlclient.models.http import Category
 from mlclient.models.http import DocumentsBodyPart as BodyPart
 from tests.utils import filesystem as fs_utils
 from tests.utils.ml_mockers import MLDocumentsMocker, MLRespXMocker
@@ -148,6 +149,34 @@ def test_job_with_documents_output_and_some_metadata_categories():
 
         assert ml_mocker.router.calls.call_count == 1
         assert ml_mocker.router.calls.last.request.url.params.get("database") is None
+        assert ml_mocker.router.calls.last.request.url.params.get_list("category") == [
+            "content",
+            "quality",
+        ]
+        assert job.report.completed == uris_count
+        assert job.report.successful == uris_count
+        assert job.report.failed == 0
+        _confirm_documents_data(uris, docs, metadata=["quality"])
+
+
+@ml_mocker.router
+def test_job_with_documents_output_and_category_enum():
+    with ml_doc_mocker.scoped():
+        uris_count = 5
+        uris = [f"/some/dir/doc{i + 1}.xml" for i in range(uris_count)]
+        ml_doc_mocker.mock_document(
+            *_get_test_document_body_parts(uris_count, metadata=["quality"]),
+        )
+
+        job = ReadDocumentsJob(batch_size=5)
+
+        job.with_client_config(auth_method="digest")
+        job.with_uris_input(uris)
+        job.with_metadata(Category.QUALITY)
+        job.run_sync()
+        docs = job.documents
+
+        assert ml_mocker.router.calls.call_count == 1
         assert ml_mocker.router.calls.last.request.url.params.get_list("category") == [
             "content",
             "quality",

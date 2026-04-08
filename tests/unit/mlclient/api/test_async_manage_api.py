@@ -141,7 +141,8 @@ async def test_post_database():
 
     async with AsyncMLClient() as ml:
         resp = await ml.manage.databases.post(
-            "Documents", {"operation": "clear-database"},
+            "Documents",
+            {"operation": "clear-database"},
         )
 
     assert resp.status_code == httpx.codes.OK
@@ -404,7 +405,8 @@ async def test_get_forests():
 
     async with AsyncMLClient() as ml:
         resp = await ml.manage.forests.get_list(
-            data_format="json", database="Documents",
+            data_format="json",
+            database="Documents",
         )
 
     expected_uri = "/manage/v2/forests?view=default&database-id=Documents"

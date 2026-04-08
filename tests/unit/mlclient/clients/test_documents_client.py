@@ -62,7 +62,7 @@ def test_read_non_existing_doc(ml):
         ml.documents.read(uri)
 
     expected_error = (
-        "[500 Internal Server Error] (RESTAPI-NODOCUMENT) "
+        "[404 Not Found] (RESTAPI-NODOCUMENT) "
         "RESTAPI-NODOCUMENT: (err:FOER0000) "
         "Resource or document does not exist:  "
         f"category: content message: {uri}"
@@ -1409,7 +1409,7 @@ def test_create_metadata_document_when_doc_does_not_exists(ml):
         ml.documents.write(doc)
 
     expected_error = (
-        "[500 Internal Server Error] (XDMP-DOCNOTFOUND) XDMP-DOCNOTFOUND: "
+        "[404 Not Found] (XDMP-DOCNOTFOUND) XDMP-DOCNOTFOUND: "
         f'xdmp:document-set-collections("{uri}", "test-collection")'
         " -- Document not found"
     )

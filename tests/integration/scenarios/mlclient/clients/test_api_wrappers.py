@@ -1018,7 +1018,7 @@ class TestDocumentsManagement:
             uri=cls.DOCUMENT_BODY_PART_1.disposition.filename,
             data_format="json",
         )
-        assert resp.status_code == httpx.codes.INTERNAL_SERVER_ERROR
+        assert resp.status_code == httpx.codes.NOT_FOUND
         assert resp.json()["errorResponse"]["messageCode"] == "RESTAPI-NODOCUMENT"
 
     @classmethod

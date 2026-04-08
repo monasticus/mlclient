@@ -19,7 +19,7 @@ def assert_document_does_not_exist(
     uri: str,
 ):
     expected_msg = (
-        "[500 Internal Server Error] (RESTAPI-NODOCUMENT) "
+        "[404 Not Found] (RESTAPI-NODOCUMENT) "
         "RESTAPI-NODOCUMENT: (err:FOER0000) "
         "Resource or document does not exist:  "
         f"category: content message: {uri}"

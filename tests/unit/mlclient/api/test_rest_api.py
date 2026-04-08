@@ -58,7 +58,7 @@ def test_get_documents():
     ml_mocker.with_request_param("uri", "/path/to/non-existing/document.xml")
     ml_mocker.with_request_param("format", "json")
     ml_mocker.with_response_content_type("application/json; charset=UTF-8")
-    ml_mocker.with_response_code(500)
+    ml_mocker.with_response_code(404)
     ml_mocker.with_response_body(Path(response_body_path).read_bytes())
     ml_mocker.mock_get()
 
@@ -68,7 +68,7 @@ def test_get_documents():
             data_format="json",
         )
 
-    assert resp.status_code == httpx.codes.INTERNAL_SERVER_ERROR
+    assert resp.status_code == httpx.codes.NOT_FOUND
     assert resp.json()["errorResponse"]["messageCode"] == "RESTAPI-NODOCUMENT"
 
 

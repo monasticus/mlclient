@@ -19,6 +19,8 @@ It contains all custom exceptions related to ML Client:
         A custom Exception class representing MarkLogic errors.
     * UnsupportedFileExtensionError
         A custom Exception class for an unsupported file extension.
+    * InvalidMetadataError
+        A custom Exception class for invalid metadata XML.
     * ResourceNotFoundError
         A custom Exception class for a not found resource.
 """
@@ -118,6 +120,13 @@ class UnsupportedFileExtensionError(Exception):
     """A custom Exception class for an unsupported file extension.
 
     Raised while evaluating code from file with unsupported extension.
+    """
+
+
+class InvalidMetadataError(Exception):
+    """A custom Exception class for invalid metadata XML.
+
+    Raised when parsing a metadata XML file with unexpected elements or namespaces.
     """
 
 

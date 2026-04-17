@@ -43,6 +43,8 @@ from xml.dom import minidom
 import xmltodict
 from pydantic import BaseModel, Field
 
+from mlclient.exceptions import InvalidMetadataError
+
 logger = logging.getLogger(__name__)
 
 
@@ -846,6 +848,13 @@ class Metadata:
         "permissions": "permission",
         "metadata-values": "metadata-value",
     }
+    _VALID_XML_CHILDREN: ClassVar[set] = {
+        "collections",
+        "permissions",
+        "properties",
+        "quality",
+        "metadata-values",
+    }
 
     @classmethod
     def from_file(
@@ -895,14 +904,17 @@ class Metadata:
         file: TextIO,
     ) -> Metadata:
         """Initialize a Metadata instance from an XML file."""
-        raw_metadata = xmltodict.parse(
-            file.read(),
+        content = file.read()
+        cls._validate_xml_metadata(content)
+        parsed = xmltodict.parse(
+            content,
             process_namespaces=True,
             namespaces={
-                "http://marklogic.com/rest-api": None,
-                "http://marklogic.com/xdmp/property": None,
+                cls._RAPI_NS_URI: None,
+                cls._PROP_NS_URI: None,
             },
-        ).get("metadata")
+        )
+        raw_metadata = parsed["metadata"]
         for items, item in cls._XML_FILE_MAPPINGS.items():
             if items in raw_metadata:
                 values = raw_metadata[items][item]
@@ -934,6 +946,28 @@ class Metadata:
         if "quality" in raw_metadata:
             raw_metadata["quality"] = int(raw_metadata["quality"])
         return Metadata(**raw_metadata)
+
+    @classmethod
+    def _validate_xml_metadata(
+        cls,
+        content: str,
+    ) -> None:
+        """Validate XML metadata structure before parsing."""
+        root = ElemTree.fromstring(content)
+        expected_root = f"{{{cls._RAPI_NS_URI}}}metadata"
+        if root.tag != expected_root:
+            msg = f"Unexpected root element [{root.tag}]; expected [{expected_root}]"
+            raise InvalidMetadataError(msg)
+        valid_namespaces = {cls._RAPI_NS_URI, cls._PROP_NS_URI}
+        for child in root:
+            ns = child.tag.split("}")[0].lstrip("{") if "}" in child.tag else None
+            if ns not in valid_namespaces:
+                msg = f"Unexpected element [{child.tag}] in metadata"
+                raise InvalidMetadataError(msg)
+            local_name = child.tag.split("}")[1] if "}" in child.tag else child.tag
+            if ns == cls._RAPI_NS_URI and local_name not in cls._VALID_XML_CHILDREN:
+                msg = f"Unexpected element [{child.tag}] in metadata"
+                raise InvalidMetadataError(msg)
 
     def __init__(
         self,

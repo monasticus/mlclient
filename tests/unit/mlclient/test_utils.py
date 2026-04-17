@@ -25,6 +25,13 @@ def test_get_accept_header_for_text_format():
     assert text_accept_header == "text/plain"
 
 
+def test_get_accept_header_for_format_case_insensitive():
+    json_header = utils.get_accept_header_for_format("JSON")
+    xml_header = utils.get_accept_header_for_format("Xml")
+    assert json_header == "application/json"
+    assert xml_header == "application/xml"
+
+
 def test_get_accept_header_for_unsupported_format():
     with pytest.raises(exceptions.UnsupportedFormatError) as err:
         utils.get_accept_header_for_format("xxx")

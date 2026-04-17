@@ -47,6 +47,8 @@ def get_accept_header_for_format(
     UnsupportedFormatError
         If the format provided is not being supported
     """
+    data_format = data_format.lower()
+
     if data_format == "xml":
         return constants.HEADER_XML
     if data_format == "json":

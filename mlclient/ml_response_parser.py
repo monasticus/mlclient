@@ -58,7 +58,7 @@ class MLResponseParser:
         const.HEADER_PRIMITIVE_STRING: lambda data: data,
         const.HEADER_PRIMITIVE_INTEGER: int,
         const.HEADER_PRIMITIVE_DECIMAL: float,
-        const.HEADER_PRIMITIVE_BOOLEAN: bool,
+        const.HEADER_PRIMITIVE_BOOLEAN: lambda data: data.lower() == "true",
         const.HEADER_PRIMITIVE_DATE: lambda data: datetime.strptime(
             data,
             "%Y-%m-%d%z",

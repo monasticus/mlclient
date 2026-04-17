@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rapi:metadata xmlns:rapi="http://marklogic.com/rest-api"
+               xmlns:wrong="http://wrong-namespace.com">
+    <wrong:collections>
+        <wrong:collection>collection-1</wrong:collection>
+    </wrong:collections>
+    <rapi:quality>1</rapi:quality>
+</rapi:metadata>

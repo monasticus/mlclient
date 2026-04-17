@@ -32,6 +32,19 @@ from mlclient.models.http import DocumentsBodyPart as BodyPart
 from mlclient.models.http import DocumentsDisposition as Disposition
 
 
+def _normalize_category(
+    category: Category | str | list[Category | str] | None,
+) -> str | list[str] | None:
+    """Normalize category values from Category enums to strings."""
+    if category is None:
+        return None
+    if isinstance(category, list):
+        return [c.value if isinstance(c, Category) else c for c in category]
+    if isinstance(category, Category):
+        return category.value
+    return category
+
+
 class DocumentsService:
     """High-level service for /v1/documents CRUD operations.
 
@@ -92,7 +105,7 @@ class DocumentsService:
         self,
         uris: str | list[str] | tuple[str] | set[str],
         *,
-        category: str | list | None = None,
+        category: Category | str | list[Category | str] | None = None,
         database: str | None = None,
         output_type: type | None = None,
     ) -> Document | dict[str, Document]:
@@ -105,7 +118,7 @@ class DocumentsService:
         ----------
         uris : str | list[str] | tuple[str] | set[str]
             One or more URIs for documents in the database.
-        category : str | list | None, default None
+        category : Category | str | list[Category | str] | None, default None
             The category of data to fetch about the requested document.
         database : str | None, default None
             Perform this operation on the named content database.
@@ -134,7 +147,7 @@ class DocumentsService:
         self,
         uris: str | list[str] | tuple[str] | set[str],
         *,
-        category: str | list | None = None,
+        category: Category | str | list[Category | str] | None = None,
         database: str | None = None,
         output_type: type | None = None,
     ) -> Iterator[Document]:
@@ -146,7 +159,7 @@ class DocumentsService:
         ----------
         uris : str | list[str] | tuple[str] | set[str]
             One or more URIs for documents in the database.
-        category : str | list | None, default None
+        category : Category | str | list[Category | str] | None, default None
             The category of data to fetch about the requested document.
         database : str | None, default None
             Perform this operation on the named content database.
@@ -163,6 +176,7 @@ class DocumentsService:
         MarkLogicError
             If MarkLogic returns an error
         """
+        category = _normalize_category(category)
         call = DocumentsGetCall(
             uri=uris,
             category=category,
@@ -179,7 +193,7 @@ class DocumentsService:
         self,
         uris: str | list[str] | tuple[str] | set[str],
         *,
-        category: str | list | None = None,
+        category: Category | str | list[Category | str] | None = None,
         database: str | None = None,
         temporal_collection: str | None = None,
         wipe_temporal: bool | None = None,
@@ -190,7 +204,7 @@ class DocumentsService:
         ----------
         uris : str | list[str] | tuple[str] | set[str]
             The URI of a document to delete.
-        category : str | list | None, default None
+        category : Category | str | list[Category | str] | None, default None
             The category of data to remove/reset.
         database : str | None, default None
             Perform this operation on the named content database.
@@ -204,6 +218,7 @@ class DocumentsService:
         MarkLogicError
             If MarkLogic returns an error
         """
+        category = _normalize_category(category)
         call = DocumentsDeleteCall(
             uri=uris,
             category=category,
@@ -311,7 +326,7 @@ class DocumentsReader:
         cls,
         resp: Response,
         uris: str | list[str] | tuple[str] | set[str],
-        category: str | list | None,
+        category: str | list[str] | None,
         output_type: type | None = None,
     ) -> Iterator[Document]:
         """Parse a MarkLogic response to Documents."""
@@ -342,7 +357,7 @@ class DocumentsReader:
         parsed_resp: list[tuple],
         is_multipart: bool,
         uris: str | list[str] | tuple[str] | set[str],
-        category: str | list | None,
+        category: str | list[str] | None,
     ) -> Iterator[dict]:
         """Prepare data to initialize Document instances."""
         if is_multipart:
@@ -353,7 +368,7 @@ class DocumentsReader:
     def _pre_format_documents(
         cls,
         parsed_resp: list[tuple],
-        origin_category: str | list | None,
+        origin_category: str | list[str] | None,
     ) -> Iterator[dict]:
         """Prepare document parts to initialize Document instances."""
         expect_content, expect_metadata = cls._expect_categories(origin_category)
@@ -379,7 +394,7 @@ class DocumentsReader:
         cls,
         parsed_resp: list[tuple],
         origin_uris: str | list[str] | tuple[str] | set[str],
-        origin_category: str | list | None,
+        origin_category: str | list[str] | None,
     ) -> Iterator[dict]:
         """Prepare a single-part document to initialize Document instances."""
         headers, parsed_resp_body = parsed_resp[0]
@@ -411,14 +426,14 @@ class DocumentsReader:
     @classmethod
     def _expect_categories(
         cls,
-        origin_category: str | list | None,
+        origin_category: str | list[str] | None,
     ) -> tuple[bool, bool]:
         """Return expectation flags based on categories sent by a user."""
         expect_content = (
             not origin_category or Category.CONTENT.value in origin_category
         )
         expect_metadata = origin_category and any(
-            cat.value in origin_category for cat in Category if cat != cat.CONTENT
+            cat.value in origin_category for cat in Category if cat != Category.CONTENT
         )
         return expect_content, expect_metadata
 
@@ -506,7 +521,7 @@ class AsyncDocumentsService:
         self,
         uris: str | list[str] | tuple[str] | set[str],
         *,
-        category: str | list | None = None,
+        category: Category | str | list[Category | str] | None = None,
         database: str | None = None,
         output_type: type | None = None,
     ) -> Document | dict[str, Document]:
@@ -523,11 +538,12 @@ class AsyncDocumentsService:
         self,
         uris: str | list[str] | tuple[str] | set[str],
         *,
-        category: str | list | None = None,
+        category: Category | str | list[Category | str] | None = None,
         database: str | None = None,
         output_type: type | None = None,
     ) -> Iterator[Document]:
         """Read documents from MarkLogic as a stream."""
+        category = _normalize_category(category)
         call = DocumentsGetCall(
             uri=uris,
             category=category,
@@ -544,12 +560,13 @@ class AsyncDocumentsService:
         self,
         uris: str | list[str] | tuple[str] | set[str],
         *,
-        category: str | list | None = None,
+        category: Category | str | list[Category | str] | None = None,
         database: str | None = None,
         temporal_collection: str | None = None,
         wipe_temporal: bool | None = None,
     ):
         """Delete documents from MarkLogic."""
+        category = _normalize_category(category)
         call = DocumentsDeleteCall(
             uri=uris,
             category=category,

@@ -35,6 +35,7 @@ from pydantic import BaseModel
 from mlclient.clients import AsyncMLClient
 from mlclient.mimetypes import Mimetypes
 from mlclient.models import Document, DocumentType, Metadata
+from mlclient.models.http import Category
 
 logger = logging.getLogger(__name__)
 
@@ -192,12 +193,14 @@ class ReadDocumentsJob:
         """Set a database name."""
         self._database = database
 
-    def with_metadata(self, *args):
+    def with_metadata(self, *args: Category | str):
         """Add metadata category/ies to retrieve from a MarkLogic server."""
         if len(args) == 0:
             self._categories.append("metadata")
         else:
-            self._categories.extend(args)
+            self._categories.extend(
+                c.value if isinstance(c, Category) else c for c in args
+            )
 
     def with_uris_input(self, uris: Iterable[str]):
         """Add URIs to the job's input."""

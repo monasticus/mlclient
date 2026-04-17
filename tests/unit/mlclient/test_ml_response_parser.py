@@ -1463,6 +1463,24 @@ def test_parse_bytes_with_headers_single_plain_text_boolean_response(ml):
     }
 
 
+ml_mocker.with_name("single-plain-text-false-boolean-response")
+ml_mocker.with_url("/v1/eval")
+ml_mocker.with_request_content_type("application/x-www-form-urlencoded")
+ml_mocker.with_request_body({"xquery": "fn:false()"})
+ml_mocker.with_response_code(200)
+ml_mocker.with_response_body_part("boolean", "false")
+ml_mocker.mock_post()
+
+
+@ml_mock
+def test_parse_single_plain_text_false_boolean_response(ml):
+    resp = ml.rest.eval.post(xquery="fn:false()")
+    parsed_resp = MLResponseParser.parse(resp)
+
+    assert isinstance(parsed_resp, bool)
+    assert parsed_resp is False
+
+
 ml_mocker.with_name("single-plain-text-date-response")
 ml_mocker.with_url("/v1/eval")
 ml_mocker.with_request_content_type("application/x-www-form-urlencoded")

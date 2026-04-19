@@ -3,8 +3,8 @@
 from __future__ import annotations
 
 import asyncio
-import contextlib
 import json
+import logging
 import ssl
 import time
 from typing import NoReturn, Union
@@ -15,6 +15,8 @@ from httpx import AsyncClient, AsyncHTTPTransport, Auth, Response
 from httpx_retries import Retry, RetryTransport
 
 from mlclient import constants as const
+
+logger = logging.getLogger(__name__)
 
 # See ml_client._SHARED_SSL_CONTEXT for rationale (avoid repeated CA bundle loading).
 _SHARED_SSL_CONTEXT = ssl.create_default_context()
@@ -35,6 +37,8 @@ class RestartWaiter:
         host: str,
         auth: Auth,
         default_retry: Retry,
+        *,
+        probe_timeout: float = 5.0,
     ):
         """Initialize RestartWaiter instance.
 
@@ -48,11 +52,14 @@ class RestartWaiter:
             An httpx authentication handler (BasicAuth or DigestAuth)
         default_retry : Retry
             A default retry strategy for readiness probes
+        probe_timeout : float
+            Per-request timeout in seconds for individual readiness probes
         """
         self._protocol = protocol
         self._host = host
         self._auth = auth
         self._default_retry = default_retry
+        self._probe_timeout = probe_timeout
 
     def wait_for_restart_completion(
         self,
@@ -89,7 +96,8 @@ class RestartWaiter:
           host-id to host-name resolution from ``/manage/v2/hosts`` runs in
           parallel for the remaining hosts. If the current client host is one of
           the affected hosts, the method still waits for a timestamp newer than
-          that host's own ``last-startup`` value.
+          that host's own ``last-startup`` value. If host-id resolution fails,
+          the method falls back to polling the current host only.
 
         During an actual restart the timestamp endpoint can temporarily return
         ``503 Service Unavailable`` or fail with transport-level errors such as
@@ -111,9 +119,6 @@ class RestartWaiter:
 
         Raises
         ------
-        ValueError
-            If the restart response includes multiple hosts and their host ids
-            cannot be resolved to MarkLogic host names through the Manage API.
         TimeoutError
             If a recognized restart response is provided but MarkLogic does not
             report a new startup timestamp before ``timeout`` expires.
@@ -302,7 +307,6 @@ class RestartWaiter:
         restart_hosts_by_name = await self._resolve_restart_hosts(
             restart_timestamps,
             host_names_task,
-            current_host_task,
             current_host_baseline,
         )
         await asyncio.gather(
@@ -351,23 +355,24 @@ class RestartWaiter:
         self,
         restart_timestamps: dict[str, str],
         host_names_task: asyncio.Task[dict[str, str]],
-        current_host_task: asyncio.Task[None],
         current_host_baseline: asyncio.Future[str | None],
-    ) -> dict[str, str]:
-        """Resolve restart host ids to host names and publish current-host baseline."""
+    ) -> dict[str, str | None]:
+        """Resolve restart host ids to host names, falling back to current host only."""
         try:
             host_names_by_id = await host_names_task
             restart_hosts_by_name = self._get_restart_hosts_by_name(
                 restart_timestamps,
                 host_names_by_id,
             )
-            current_host_baseline.set_result(restart_hosts_by_name.get(self._host))
-        except Exception:
-            current_host_task.cancel()
-            with contextlib.suppress(asyncio.CancelledError, Exception):
-                await current_host_task
-            raise
+        except Exception as exc:
+            logger.warning(
+                "Host-id resolution failed, falling back to current host only: %s",
+                exc,
+            )
+            current_host_baseline.set_result(None)
+            return {self._host: None}
         else:
+            current_host_baseline.set_result(restart_hosts_by_name.get(self._host))
             return restart_hosts_by_name
 
     @staticmethod
@@ -376,12 +381,6 @@ class RestartWaiter:
         host_names_by_id: dict[str, str],
     ) -> dict[str, str]:
         """Return restart baseline timestamps keyed by host name."""
-        missing_host_ids = sorted(
-            host_id for host_id in restart_timestamps if host_id not in host_names_by_id
-        )
-        if missing_host_ids:
-            RestartWaiter._raise_missing_restart_hosts(missing_host_ids)
-
         return {
             host_names_by_id[host_id]: restart_timestamps[host_id]
             for host_id in restart_timestamps
@@ -425,7 +424,7 @@ class RestartWaiter:
         async with AsyncClient(
             transport=AsyncHTTPTransport(verify=_SHARED_SSL_CONTEXT),
             headers={"Connection": "close"},
-            timeout=5,
+            timeout=self._probe_timeout,
         ) as client:
             await self._poll_host_until_ready(
                 client,
@@ -591,14 +590,3 @@ class RestartWaiter:
             f"got {status_code} for host [{host}]."
         )
         raise AssertionError(msg)
-
-    @staticmethod
-    def _raise_missing_restart_hosts(
-        missing_host_ids: list[str],
-    ) -> NoReturn:
-        """Raise an error describing unresolved host ids from a restart payload."""
-        msg = (
-            "Could not resolve all restart host ids through /manage/v2/hosts. "
-            f"Missing host ids: [{', '.join(missing_host_ids)}]"
-        )
-        raise ValueError(msg)

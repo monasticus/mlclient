@@ -246,10 +246,11 @@ def test_wait_for_restart_completion_single_host_does_not_call_hosts_endpoint(
 
 
 @respx.mock
-def test_wait_for_restart_completion_raises_when_restart_hosts_cannot_be_resolved(
+def test_wait_for_restart_completion_falls_back_to_current_host_when_resolution_fails(
     waiter: RestartWaiter,
     json_restart_response_factory,
     ml_mocker: MLRespXMocker,
+    mocker_factory,
 ):
     restart_response = json_restart_response_factory(
         [
@@ -259,13 +260,20 @@ def test_wait_for_restart_completion_raises_when_restart_hosts_cannot_be_resolve
     )
     _mock_hosts_lookup_from_resource(ml_mocker, "hosts-single-node-a.json")
 
-    with pytest.raises(ValueError, match="Missing host ids"):
-        waiter.wait_for_restart_completion(
-            restart_response,
-            timeout=FAST_TIMEOUT,
-            poll_interval=FAST_POLL_INTERVAL,
-            retry=RESTART_RETRY_STRATEGY,
-        )
+    admin_mocker = mocker_factory()
+    admin_route = _mock_timestamp_route(
+        admin_mocker,
+        _timestamp_response(READY_TS),
+    )
+
+    waiter.wait_for_restart_completion(
+        restart_response,
+        timeout=MULTIHOST_TIMEOUT,
+        poll_interval=FAST_POLL_INTERVAL,
+        retry=RESTART_RETRY_STRATEGY,
+    )
+
+    assert admin_route.call_count == 1
 
 
 @respx.mock
@@ -405,7 +413,7 @@ def test_wait_for_restart_completion_raises_inside_running_loop(
 
 
 @respx.mock
-def test_wait_for_restart_completion_raises_when_hosts_endpoint_is_unavailable(
+def test_wait_for_restart_completion_falls_back_when_hosts_endpoint_unavailable(
     waiter: RestartWaiter,
     json_restart_response_factory,
     ml_mocker: MLRespXMocker,
@@ -424,15 +432,19 @@ def test_wait_for_restart_completion_raises_when_hosts_endpoint_is_unavailable(
     ml_mocker.mock_get()
 
     admin_mocker = mocker_factory()
-    _mock_timestamp_route(admin_mocker, _timestamp_response(BASELINE_TS))
+    admin_route = _mock_timestamp_route(
+        admin_mocker,
+        _timestamp_response(READY_TS),
+    )
 
-    with pytest.raises(ValueError, match="Missing host ids"):
-        waiter.wait_for_restart_completion(
-            restart_response,
-            timeout=FAST_TIMEOUT,
-            poll_interval=FAST_POLL_INTERVAL,
-            retry=RESTART_RETRY_STRATEGY,
-        )
+    waiter.wait_for_restart_completion(
+        restart_response,
+        timeout=MULTIHOST_TIMEOUT,
+        poll_interval=FAST_POLL_INTERVAL,
+        retry=RESTART_RETRY_STRATEGY,
+    )
+
+    assert admin_route.call_count == 1
 
 
 @respx.mock
@@ -909,3 +921,36 @@ async def test_async_wait_for_restart_completion_waits_for_new_timestamp(
 
     assert admin_route.call_count == 2
     sleep.assert_awaited_once()
+
+
+@respx.mock
+def test_wait_for_restart_completion_uses_custom_probe_timeout(
+    mocker: MockerFixture,
+    ml_mocker: MLRespXMocker,
+):
+    custom_timeout = 42.0
+    waiter = RestartWaiter(
+        protocol="http",
+        host="localhost",
+        auth=httpx.BasicAuth("admin", "admin"),
+        default_retry=TEST_DEFAULT_RETRY,
+        probe_timeout=custom_timeout,
+    )
+    _mock_timestamp_route(ml_mocker, _timestamp_response(READY_TS))
+    async_client_cls = mocker.patch(
+        "mlclient.clients.restart_waiter.AsyncClient",
+        wraps=httpx.AsyncClient,
+    )
+
+    waiter.wait_for_restart_completion(
+        response=None,
+        timeout=FAST_TIMEOUT,
+        poll_interval=FAST_POLL_INTERVAL,
+        retry=RESTART_RETRY_STRATEGY,
+    )
+
+    async_client_cls.assert_called_once_with(
+        transport=mocker.ANY,
+        headers={"Connection": "close"},
+        timeout=custom_timeout,
+    )

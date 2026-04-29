@@ -3,6 +3,8 @@ from __future__ import annotations
 import zlib
 from xml.etree.ElementTree import ElementTree, fromstring
 
+from mlclient import MLClient
+from mlclient.jobs import WriteDocumentsJob
 from mlclient.models import (
     BinaryDocument,
     DocumentType,
@@ -413,3 +415,43 @@ def test_update_document_metadata():
     finally:
         docs_client_utils.delete_documents(uri)
         docs_client_utils.assert_document_does_not_exist(uri)
+
+
+def test_read_and_delete_exceed_httpx_url_length_limit():
+    """Verify DocumentsService auto-batches URIs past the httpx URL limit.
+
+    With the URI template "/some/dir/doc-{N}.xml" the httpx MAX_URL_LENGTH
+    (65536 bytes) is exceeded around 2020 URIs in a single request. This test
+    uses 2050 URIs to prove the service transparently splits the request into
+    multiple batches end-to-end (write via job, then read, read_stream, delete
+    via the service) without raising httpx.InvalidURL.
+    """
+    uris_count = 2050
+    docs = list(docs_client_utils.generate_docs(count=uris_count))
+    uris = [doc.uri for doc in docs]
+
+    try:
+        docs_client_utils.assert_documents_do_not_exist(uris)
+
+        write_job = WriteDocumentsJob()
+        write_job.with_client_config(auth_method="digest")
+        write_job.with_documents_input(docs)
+        write_job.run_sync()
+        assert write_job.report.successful == uris_count
+
+        with MLClient(auth_method="digest") as ml:
+            read_docs = ml.documents.read(uris, output_type=bytes)
+            assert len(read_docs) == uris_count
+            for uri in uris:
+                assert uri in read_docs
+
+            streamed_uris = {
+                doc.uri for doc in ml.documents.read_stream(uris, output_type=bytes)
+            }
+            assert streamed_uris == set(uris)
+
+            ml.documents.delete(uris)
+
+        docs_client_utils.assert_documents_do_not_exist(uris)
+    finally:
+        docs_client_utils.delete_documents(uris)

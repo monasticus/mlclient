@@ -5,7 +5,7 @@ Provides parsed document operations on MarkLogic.
 
 from __future__ import annotations
 
-from collections.abc import Iterator
+from collections.abc import AsyncIterator, Iterator
 from typing import TYPE_CHECKING, Any
 
 from httpx import Response
@@ -31,6 +31,17 @@ from mlclient.models.http import Category
 from mlclient.models.http import DocumentsBodyPart as BodyPart
 from mlclient.models.http import DocumentsDisposition as Disposition
 
+_MAX_QUERY_BYTES = 48 * 1024
+"""Soft limit on the total size of ``uri=...`` query parameters per request.
+
+httpx enforces MAX_URL_LENGTH = 65536 bytes on the whole URL. Setting the
+per-batch budget at 48 KiB (75% of that limit) leaves headroom for the base
+URL, the endpoint path, and other query parameters (``database``, ``category``,
+``format``).
+"""
+
+_URI_PARAM_OVERHEAD = len("&uri=")
+
 
 def _normalize_category(
     category: Category | str | list[Category | str] | None,
@@ -43,6 +54,36 @@ def _normalize_category(
     if isinstance(category, Category):
         return category.value
     return category
+
+
+def _batched_uris(
+    uris: str | list[str] | tuple[str] | set[str],
+    max_query_bytes: int,
+) -> Iterator[str | list[str]]:
+    """Split URIs into batches whose combined query length stays under a limit.
+
+    Each URI contributes ``&uri=<uri>`` to the query string. A batch is closed
+    as soon as adding the next URI would push the running byte total past
+    ``max_query_bytes``. Single-string input is yielded as-is so
+    DocumentsGetCall keeps its non-multipart accept header path. A URI longer
+    than the budget on its own is still yielded alone - httpx will raise an
+    explicit error rather than silently truncating.
+    """
+    if isinstance(uris, str):
+        yield uris
+        return
+    batch: list[str] = []
+    batch_bytes = 0
+    for uri in uris:
+        uri_bytes = _URI_PARAM_OVERHEAD + len(uri.encode("utf-8"))
+        if batch and batch_bytes + uri_bytes > max_query_bytes:
+            yield batch
+            batch = []
+            batch_bytes = 0
+        batch.append(uri)
+        batch_bytes += uri_bytes
+    if batch:
+        yield batch
 
 
 class DocumentsService:
@@ -150,10 +191,13 @@ class DocumentsService:
         category: Category | str | list[Category | str] | None = None,
         database: str | None = None,
         output_type: type | None = None,
+        _max_query_bytes: int = _MAX_QUERY_BYTES,
     ) -> Iterator[Document]:
         """Return document(s) as an iterator, suitable for batch processing.
 
-        Unlike read(), does not materialize results into a dict.
+        Unlike read(), does not materialize results into a dict. URIs are
+        transparently split into batches whose combined query string stays below
+        the httpx URL length limit; each batch is a separate HTTP request.
 
         Parameters
         ----------
@@ -177,17 +221,18 @@ class DocumentsService:
             If MarkLogic returns an error
         """
         category = _normalize_category(category)
-        call = DocumentsGetCall(
-            uri=uris,
-            category=category,
-            database=database,
-            data_format="json",
-        )
-        resp = self._api.call(call)
-        if not resp.is_success:
-            resp_body = MLResponseParser.parse(resp)
-            raise MarkLogicError(resp_body["errorResponse"])
-        return DocumentsReader.parse(resp, uris, category, output_type)
+        for batch in _batched_uris(uris, _max_query_bytes):
+            call = DocumentsGetCall(
+                uri=batch,
+                category=category,
+                database=database,
+                data_format="json",
+            )
+            resp = self._api.call(call)
+            if not resp.is_success:
+                resp_body = MLResponseParser.parse(resp)
+                raise MarkLogicError(resp_body["errorResponse"])
+            yield from DocumentsReader.parse(resp, batch, category, output_type)
 
     def delete(
         self,
@@ -197,8 +242,13 @@ class DocumentsService:
         database: str | None = None,
         temporal_collection: str | None = None,
         wipe_temporal: bool | None = None,
+        _max_query_bytes: int = _MAX_QUERY_BYTES,
     ):
         """Delete document(s) content or metadata in a MarkLogic database.
+
+        URIs are transparently split into batches whose combined query string
+        stays below the httpx URL length limit; each batch is a separate
+        HTTP request.
 
         Parameters
         ----------
@@ -219,17 +269,18 @@ class DocumentsService:
             If MarkLogic returns an error
         """
         category = _normalize_category(category)
-        call = DocumentsDeleteCall(
-            uri=uris,
-            category=category,
-            database=database,
-            temporal_collection=temporal_collection,
-            wipe_temporal=wipe_temporal,
-        )
-        resp = self._api.call(call)
-        if not resp.is_success:
-            resp_body = MLResponseParser.parse(resp)
-            raise MarkLogicError(resp_body["errorResponse"])
+        for batch in _batched_uris(uris, _max_query_bytes):
+            call = DocumentsDeleteCall(
+                uri=batch,
+                category=category,
+                database=database,
+                temporal_collection=temporal_collection,
+                wipe_temporal=wipe_temporal,
+            )
+            resp = self._api.call(call)
+            if not resp.is_success:
+                resp_body = MLResponseParser.parse(resp)
+                raise MarkLogicError(resp_body["errorResponse"])
 
 
 class DocumentsSender:
@@ -526,13 +577,15 @@ class AsyncDocumentsService:
         output_type: type | None = None,
     ) -> Document | dict[str, Document]:
         """Read documents from MarkLogic."""
-        docs = await self.read_stream(
+        stream = self.read_stream(
             uris,
             category=category,
             database=database,
             output_type=output_type,
         )
-        return next(docs) if isinstance(uris, str) else {doc.uri: doc for doc in docs}
+        if isinstance(uris, str):
+            return await stream.__anext__()
+        return {doc.uri: doc async for doc in stream}
 
     async def read_stream(
         self,
@@ -541,20 +594,28 @@ class AsyncDocumentsService:
         category: Category | str | list[Category | str] | None = None,
         database: str | None = None,
         output_type: type | None = None,
-    ) -> Iterator[Document]:
-        """Read documents from MarkLogic as a stream."""
+        _max_query_bytes: int = _MAX_QUERY_BYTES,
+    ) -> AsyncIterator[Document]:
+        """Read documents from MarkLogic as a stream.
+
+        URIs are transparently split into batches whose combined query string
+        stays below the httpx URL length limit; each batch is awaited
+        separately so iteration remains lazy.
+        """
         category = _normalize_category(category)
-        call = DocumentsGetCall(
-            uri=uris,
-            category=category,
-            database=database,
-            data_format="json",
-        )
-        resp = await self._api.call(call)
-        if not resp.is_success:
-            resp_body = MLResponseParser.parse(resp)
-            raise MarkLogicError(resp_body["errorResponse"])
-        return DocumentsReader.parse(resp, uris, category, output_type)
+        for batch in _batched_uris(uris, _max_query_bytes):
+            call = DocumentsGetCall(
+                uri=batch,
+                category=category,
+                database=database,
+                data_format="json",
+            )
+            resp = await self._api.call(call)
+            if not resp.is_success:
+                resp_body = MLResponseParser.parse(resp)
+                raise MarkLogicError(resp_body["errorResponse"])
+            for doc in DocumentsReader.parse(resp, batch, category, output_type):
+                yield doc
 
     async def delete(
         self,
@@ -564,17 +625,19 @@ class AsyncDocumentsService:
         database: str | None = None,
         temporal_collection: str | None = None,
         wipe_temporal: bool | None = None,
+        _max_query_bytes: int = _MAX_QUERY_BYTES,
     ):
         """Delete documents from MarkLogic."""
         category = _normalize_category(category)
-        call = DocumentsDeleteCall(
-            uri=uris,
-            category=category,
-            database=database,
-            temporal_collection=temporal_collection,
-            wipe_temporal=wipe_temporal,
-        )
-        resp = await self._api.call(call)
-        if not resp.is_success:
-            resp_body = MLResponseParser.parse(resp)
-            raise MarkLogicError(resp_body["errorResponse"])
+        for batch in _batched_uris(uris, _max_query_bytes):
+            call = DocumentsDeleteCall(
+                uri=batch,
+                category=category,
+                database=database,
+                temporal_collection=temporal_collection,
+                wipe_temporal=wipe_temporal,
+            )
+            resp = await self._api.call(call)
+            if not resp.is_success:
+                resp_body = MLResponseParser.parse(resp)
+                raise MarkLogicError(resp_body["errorResponse"])

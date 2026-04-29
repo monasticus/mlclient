@@ -309,24 +309,26 @@ def test_job_with_multiple_batches():
 
 @ml_mocker.router
 def test_job_with_batch_exceeding_service_uri_limit():
-    """A job batch larger than the service-level URI limit still completes.
+    """A job batch larger than the httpx URL length limit still completes.
 
-    The service transparently splits oversized batches so the job does not hit
-    the httpx URL length limit. With 1000 URIs and a job batch size of 1000,
-    the service emits 2 HTTP calls (default _URI_BATCH_SIZE = 500).
+    The service transparently splits an oversized batch so the job does not
+    hit the httpx URL length limit. With the default 48 KiB query budget and
+    the URI shape used here (22-23 bytes each once &uri= overhead is added),
+    ~1933 URIs fit in a single request; 2000 URIs force at least two HTTP
+    calls.
     """
     with ml_doc_mocker.scoped():
-        uris_count = 1000
+        uris_count = 2000
         uris = [f"/some/dir/doc{i + 1}.xml" for i in range(uris_count)]
         ml_doc_mocker.mock_document(*_get_test_document_body_parts(uris_count))
 
-        job = ReadDocumentsJob(concurrency=1, batch_size=1000)
+        job = ReadDocumentsJob(concurrency=1, batch_size=uris_count)
 
         job.with_client_config(auth_method="digest")
         job.with_uris_input(uris)
         job.run_sync()
 
-        assert ml_mocker.router.calls.call_count == 2
+        assert ml_mocker.router.calls.call_count >= 2
         assert job.report.completed == uris_count
         assert job.report.successful == uris_count
         assert job.report.failed == 0

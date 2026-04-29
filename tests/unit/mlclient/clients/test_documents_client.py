@@ -2084,8 +2084,16 @@ def test_read_stream_multiple_uris(ml):
     assert any(isinstance(doc, BinaryDocument) for doc in docs)
 
 
+# Each test URI has the shape "/some/dir/doc0001.xml" -- a fixed-width 4-digit
+# number keeps every URI exactly 21 bytes long. With the 5-byte "&uri=" param
+# overhead each URI contributes exactly 26 bytes to the query string, so
+# _max_query_bytes = 26 * k fits exactly k URIs and no more.
+_TEST_URI_TEMPLATE = "/some/dir/doc{:04d}.xml"
+_TEST_URI_BYTES = len("&uri=") + len(_TEST_URI_TEMPLATE.format(0))
+
+
 @pytest.mark.parametrize(
-    ("uris_count", "batch_size", "expected_calls"),
+    ("uris_count", "uris_per_batch", "expected_calls"),
     [
         (4, 5, 1),
         (5, 5, 1),
@@ -2099,21 +2107,26 @@ def test_read_stream_multiple_uris(ml):
     ],
 )
 @ml_mocker.router
-def test_read_stream_batches_uris(ml, uris_count, batch_size, expected_calls):
+def test_read_stream_batches_uris(ml, uris_count, uris_per_batch, expected_calls):
     with ml_doc_mocker.scoped():
-        uris = [f"/some/dir/doc{i + 1}.xml" for i in range(uris_count)]
+        uris = [_TEST_URI_TEMPLATE.format(i + 1) for i in range(uris_count)]
         ml_doc_mocker.mock_document(
             *(test_data.xml_doc_body_part(uri) for uri in uris),
         )
 
-        docs = list(ml.documents.read_stream(uris, _batch_size=batch_size))
+        docs = list(
+            ml.documents.read_stream(
+                uris,
+                _max_query_bytes=_TEST_URI_BYTES * uris_per_batch,
+            ),
+        )
 
     assert len(docs) == uris_count
     assert ml_mocker.router.calls.call_count == expected_calls
 
 
 @pytest.mark.parametrize(
-    ("uris_count", "batch_size", "expected_calls"),
+    ("uris_count", "uris_per_batch", "expected_calls"),
     [
         (4, 5, 1),
         (5, 5, 1),
@@ -2127,10 +2140,10 @@ def test_read_stream_batches_uris(ml, uris_count, batch_size, expected_calls):
     ],
 )
 @ml_mocker.router
-def test_delete_batches_uris(ml, uris_count, batch_size, expected_calls):
-    uris = [f"/some/dir/doc{i + 1}.xml" for i in range(uris_count)]
+def test_delete_batches_uris(ml, uris_count, uris_per_batch, expected_calls):
+    uris = [_TEST_URI_TEMPLATE.format(i + 1) for i in range(uris_count)]
 
-    ml.documents.delete(uris, _batch_size=batch_size)
+    ml.documents.delete(uris, _max_query_bytes=_TEST_URI_BYTES * uris_per_batch)
 
     assert ml_mocker.router.calls.call_count == expected_calls
 
@@ -2139,7 +2152,7 @@ def test_delete_batches_uris(ml, uris_count, batch_size, expected_calls):
 def test_read_stream_single_uri_is_not_batched(ml):
     uri = "/some/dir/doc1.xml"
 
-    docs = list(ml.documents.read_stream(uri, _batch_size=1))
+    docs = list(ml.documents.read_stream(uri, _max_query_bytes=1))
 
     assert len(docs) == 1
     assert ml_mocker.router.calls.call_count == 1
@@ -2149,6 +2162,28 @@ def test_read_stream_single_uri_is_not_batched(ml):
 def test_delete_single_uri_is_not_batched(ml):
     uri = "/some/dir/doc1.xml"
 
-    ml.documents.delete(uri, _batch_size=1)
+    ml.documents.delete(uri, _max_query_bytes=1)
 
     assert ml_mocker.router.calls.call_count == 1
+
+
+@ml_mocker.router
+def test_read_stream_uri_longer_than_budget_is_sent_alone(ml):
+    """A URI that on its own exceeds the byte budget still gets its own batch.
+
+    This is a deliberate choice: httpx will surface a clear error rather than
+    have the service silently truncate or drop the URI.
+    """
+    long_uri = "/some/dir/" + ("x" * 200) + ".xml"
+    short_uri = "/some/dir/doc100.xml"
+    with ml_doc_mocker.scoped():
+        ml_doc_mocker.mock_document(
+            test_data.xml_doc_body_part(long_uri),
+            test_data.xml_doc_body_part(short_uri),
+        )
+        uris = [long_uri, short_uri]
+
+        docs = list(ml.documents.read_stream(uris, _max_query_bytes=50))
+
+    assert len(docs) == 2
+    assert ml_mocker.router.calls.call_count == 2

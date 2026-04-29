@@ -39,6 +39,9 @@ ml_doc_mocker = MLDocumentsMocker(DOC_BODY_PARTS)
 ml_mocker = MLRespXMocker(router_base_url="http://localhost:8000/v1/documents")
 ml_mocker.with_get_side_effect(side_effect=ml_doc_mocker.get_documents_side_effect)
 ml_mocker.with_post_side_effect(side_effect=ml_doc_mocker.post_documents_side_effect)
+ml_mocker.with_delete_side_effect(
+    side_effect=ml_doc_mocker.delete_documents_side_effect,
+)
 
 
 @pytest.fixture(autouse=True)
@@ -2079,3 +2082,73 @@ def test_read_stream_multiple_uris(ml):
     assert any(isinstance(doc, JSONDocument) for doc in docs)
     assert any(isinstance(doc, TextDocument) for doc in docs)
     assert any(isinstance(doc, BinaryDocument) for doc in docs)
+
+
+@pytest.mark.parametrize(
+    ("uris_count", "batch_size", "expected_calls"),
+    [
+        (4, 5, 1),
+        (5, 5, 1),
+        (6, 5, 2),
+        (10, 5, 2),
+        (11, 5, 3),
+        (499, 500, 1),
+        (500, 500, 1),
+        (501, 500, 2),
+        (1000, 500, 2),
+    ],
+)
+@ml_mocker.router
+def test_read_stream_batches_uris(ml, uris_count, batch_size, expected_calls):
+    with ml_doc_mocker.scoped():
+        uris = [f"/some/dir/doc{i + 1}.xml" for i in range(uris_count)]
+        ml_doc_mocker.mock_document(
+            *(test_data.xml_doc_body_part(uri) for uri in uris),
+        )
+
+        docs = list(ml.documents.read_stream(uris, _batch_size=batch_size))
+
+    assert len(docs) == uris_count
+    assert ml_mocker.router.calls.call_count == expected_calls
+
+
+@pytest.mark.parametrize(
+    ("uris_count", "batch_size", "expected_calls"),
+    [
+        (4, 5, 1),
+        (5, 5, 1),
+        (6, 5, 2),
+        (10, 5, 2),
+        (11, 5, 3),
+        (499, 500, 1),
+        (500, 500, 1),
+        (501, 500, 2),
+        (1000, 500, 2),
+    ],
+)
+@ml_mocker.router
+def test_delete_batches_uris(ml, uris_count, batch_size, expected_calls):
+    uris = [f"/some/dir/doc{i + 1}.xml" for i in range(uris_count)]
+
+    ml.documents.delete(uris, _batch_size=batch_size)
+
+    assert ml_mocker.router.calls.call_count == expected_calls
+
+
+@ml_mocker.router
+def test_read_stream_single_uri_is_not_batched(ml):
+    uri = "/some/dir/doc1.xml"
+
+    docs = list(ml.documents.read_stream(uri, _batch_size=1))
+
+    assert len(docs) == 1
+    assert ml_mocker.router.calls.call_count == 1
+
+
+@ml_mocker.router
+def test_delete_single_uri_is_not_batched(ml):
+    uri = "/some/dir/doc1.xml"
+
+    ml.documents.delete(uri, _batch_size=1)
+
+    assert ml_mocker.router.calls.call_count == 1

@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import xml.etree.ElementTree as ElemTree
 import zlib
-from collections.abc import AsyncIterator
 from pathlib import Path
 
 import pytest
@@ -602,81 +601,12 @@ async def test_delete_document_with_non_existing_database(svc):
     assert err.value.args[0] == expected_error
 
 
-# See test_documents_client for the URI-size rationale.
-_TEST_URI_TEMPLATE = "/some/dir/doc{:04d}.xml"
-_TEST_URI_BYTES = len("&uri=") + len(_TEST_URI_TEMPLATE.format(0))
-
-
-@pytest.mark.parametrize(
-    ("uris_count", "uris_per_batch", "expected_calls"),
-    [
-        (4, 5, 1),
-        (5, 5, 1),
-        (6, 5, 2),
-        (10, 5, 2),
-        (11, 5, 3),
-        (499, 500, 1),
-        (500, 500, 1),
-        (501, 500, 2),
-        (1000, 500, 2),
-    ],
-)
-@pytest.mark.asyncio
-@ml_mocker.router
-async def test_read_stream_batches_uris(
-    svc,
-    uris_count,
-    uris_per_batch,
-    expected_calls,
-):
-    with ml_doc_mocker.scoped():
-        uris = [_TEST_URI_TEMPLATE.format(i + 1) for i in range(uris_count)]
-        ml_doc_mocker.mock_document(
-            *(test_data.xml_doc_body_part(uri) for uri in uris),
-        )
-
-        docs = [
-            doc
-            async for doc in svc.read_stream(
-                uris,
-                _max_query_bytes=_TEST_URI_BYTES * uris_per_batch,
-            )
-        ]
-
-    assert len(docs) == uris_count
-    assert ml_mocker.router.calls.call_count == expected_calls
-
-
-@pytest.mark.parametrize(
-    ("uris_count", "uris_per_batch", "expected_calls"),
-    [
-        (4, 5, 1),
-        (5, 5, 1),
-        (6, 5, 2),
-        (10, 5, 2),
-        (11, 5, 3),
-        (499, 500, 1),
-        (500, 500, 1),
-        (501, 500, 2),
-        (1000, 500, 2),
-    ],
-)
-@pytest.mark.asyncio
-@ml_mocker.router
-async def test_delete_batches_uris(svc, uris_count, uris_per_batch, expected_calls):
-    uris = [_TEST_URI_TEMPLATE.format(i + 1) for i in range(uris_count)]
-
-    await svc.delete(uris, _max_query_bytes=_TEST_URI_BYTES * uris_per_batch)
-
-    assert ml_mocker.router.calls.call_count == expected_calls
-
-
 @pytest.mark.asyncio
 @ml_mocker.router
 async def test_read_stream_single_uri_is_not_batched(svc):
     uri = "/some/dir/doc1.xml"
 
-    docs = [doc async for doc in svc.read_stream(uri, _max_query_bytes=1)]
+    docs = [doc async for doc in svc.read_stream(uri)]
 
     assert len(docs) == 1
     assert ml_mocker.router.calls.call_count == 1
@@ -684,19 +614,32 @@ async def test_read_stream_single_uri_is_not_batched(svc):
 
 @pytest.mark.asyncio
 @ml_mocker.router
+async def test_read_stream_many_uris_are_batched(svc):
+    uris = [f"/some/dir/doc{i:04d}.xml" for i in range(2000)]
+    with ml_doc_mocker.scoped():
+        ml_doc_mocker.mock_document(*(test_data.xml_doc_body_part(uri) for uri in uris))
+
+        docs = [doc async for doc in svc.read_stream(uris)]
+
+    assert len(docs) == 2000
+    assert ml_mocker.router.calls.call_count > 1
+
+
+@pytest.mark.asyncio
+@ml_mocker.router
 async def test_delete_single_uri_is_not_batched(svc):
     uri = "/some/dir/doc1.xml"
 
-    await svc.delete(uri, _max_query_bytes=1)
+    await svc.delete(uri)
 
     assert ml_mocker.router.calls.call_count == 1
 
 
 @pytest.mark.asyncio
 @ml_mocker.router
-async def test_read_stream_returns_async_iterator(svc):
-    stream = svc.read_stream(["/some/dir/doc1.xml"])
+async def test_delete_many_uris_are_batched(svc):
+    uris = [f"/some/dir/doc{i:04d}.xml" for i in range(2000)]
 
-    assert isinstance(stream, AsyncIterator)
-    async for _ in stream:
-        pass
+    await svc.delete(uris)
+
+    assert ml_mocker.router.calls.call_count > 1

@@ -58,7 +58,7 @@ def _normalize_category(
 
 def _batched_uris(
     uris: str | list[str] | tuple[str] | set[str],
-    max_query_bytes: int,
+    max_query_bytes: int = _MAX_QUERY_BYTES,
 ) -> Iterator[str | list[str]]:
     """Split URIs into batches whose combined query length stays under a limit.
 
@@ -191,7 +191,6 @@ class DocumentsService:
         category: Category | str | list[Category | str] | None = None,
         database: str | None = None,
         output_type: type | None = None,
-        _max_query_bytes: int = _MAX_QUERY_BYTES,
     ) -> Iterator[Document]:
         """Return document(s) as an iterator, suitable for batch processing.
 
@@ -221,7 +220,7 @@ class DocumentsService:
             If MarkLogic returns an error
         """
         category = _normalize_category(category)
-        for batch in _batched_uris(uris, _max_query_bytes):
+        for batch in _batched_uris(uris):
             call = DocumentsGetCall(
                 uri=batch,
                 category=category,
@@ -242,7 +241,6 @@ class DocumentsService:
         database: str | None = None,
         temporal_collection: str | None = None,
         wipe_temporal: bool | None = None,
-        _max_query_bytes: int = _MAX_QUERY_BYTES,
     ):
         """Delete document(s) content or metadata in a MarkLogic database.
 
@@ -269,7 +267,7 @@ class DocumentsService:
             If MarkLogic returns an error
         """
         category = _normalize_category(category)
-        for batch in _batched_uris(uris, _max_query_bytes):
+        for batch in _batched_uris(uris):
             call = DocumentsDeleteCall(
                 uri=batch,
                 category=category,
@@ -594,7 +592,6 @@ class AsyncDocumentsService:
         category: Category | str | list[Category | str] | None = None,
         database: str | None = None,
         output_type: type | None = None,
-        _max_query_bytes: int = _MAX_QUERY_BYTES,
     ) -> AsyncIterator[Document]:
         """Read documents from MarkLogic as a stream.
 
@@ -603,7 +600,7 @@ class AsyncDocumentsService:
         separately so iteration remains lazy.
         """
         category = _normalize_category(category)
-        for batch in _batched_uris(uris, _max_query_bytes):
+        for batch in _batched_uris(uris):
             call = DocumentsGetCall(
                 uri=batch,
                 category=category,
@@ -625,11 +622,10 @@ class AsyncDocumentsService:
         database: str | None = None,
         temporal_collection: str | None = None,
         wipe_temporal: bool | None = None,
-        _max_query_bytes: int = _MAX_QUERY_BYTES,
     ):
         """Delete documents from MarkLogic."""
         category = _normalize_category(category)
-        for batch in _batched_uris(uris, _max_query_bytes):
+        for batch in _batched_uris(uris):
             call = DocumentsDeleteCall(
                 uri=batch,
                 category=category,

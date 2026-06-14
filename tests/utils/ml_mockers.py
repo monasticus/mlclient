@@ -333,6 +333,18 @@ class MLRespXMocker(MLMocker):
         self._resp_mock.side_effect = side_effect
         return self.mock_post()
 
+    def with_delete_side_effect(
+        self,
+        side_effect: (
+            Callable
+            | Exception
+            | type[Exception]
+            | Sequence[Response | Exception | type[Exception]]
+        ),
+    ) -> Route:
+        self._resp_mock.side_effect = side_effect
+        return self.mock_delete()
+
     def mock_response(
         self,
     ) -> Route:
@@ -439,6 +451,12 @@ class MLDocumentsMocker:
 
         doc_objects = self._build_doc_objects(body_parts)
         return self._build_successful_post_response(doc_objects)
+
+    @staticmethod
+    def delete_documents_side_effect(
+        request: Request,  # noqa: ARG004
+    ) -> Response:
+        return Response(status_code=204)
 
     def _build_single_part_response(
         self,

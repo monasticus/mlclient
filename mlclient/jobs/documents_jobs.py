@@ -253,7 +253,7 @@ class ReadDocumentsJob:
                     kwargs["category"] = list(dict.fromkeys(self._categories))
                 if self._fs_output_path is not None:
                     kwargs["output_type"] = bytes
-                for doc in await ml.documents.read_stream(batch, **kwargs):
+                async for doc in ml.documents.read_stream(batch, **kwargs):
                     self._report.add_successful_doc(doc.uri)
                     self._documents.append(doc)
             except Exception as err:

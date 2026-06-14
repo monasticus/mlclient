@@ -40,6 +40,9 @@ ml_doc_mocker = MLDocumentsMocker(DOC_BODY_PARTS)
 ml_mocker = MLRespXMocker(router_base_url="http://localhost:8000/v1/documents")
 ml_mocker.with_get_side_effect(side_effect=ml_doc_mocker.get_documents_side_effect)
 ml_mocker.with_post_side_effect(side_effect=ml_doc_mocker.post_documents_side_effect)
+ml_mocker.with_delete_side_effect(
+    side_effect=ml_doc_mocker.delete_documents_side_effect,
+)
 
 
 @pytest_asyncio.fixture
@@ -293,7 +296,7 @@ async def test_read_single_doc_using_custom_database(svc):
 async def test_read_stream_single_uri(svc):
     uri = "/some/dir/doc1.xml"
 
-    docs = list(await svc.read_stream([uri]))
+    docs = [doc async for doc in svc.read_stream([uri])]
 
     assert len(docs) == 1
     assert isinstance(docs[0], XMLDocument)
@@ -310,7 +313,7 @@ async def test_read_stream_multiple_uris(svc):
         "/some/dir/doc4.zip",
     ]
 
-    docs = list(await svc.read_stream(uris))
+    docs = [doc async for doc in svc.read_stream(uris)]
 
     assert len(docs) == 4
 
@@ -596,3 +599,47 @@ async def test_delete_document_with_non_existing_database(svc):
         "[404 Not Found] (XDMP-NOSUCHDB) XDMP-NOSUCHDB: No such database Document"
     )
     assert err.value.args[0] == expected_error
+
+
+@pytest.mark.asyncio
+@ml_mocker.router
+async def test_read_stream_single_uri_is_not_batched(svc):
+    uri = "/some/dir/doc1.xml"
+
+    docs = [doc async for doc in svc.read_stream(uri)]
+
+    assert len(docs) == 1
+    assert ml_mocker.router.calls.call_count == 1
+
+
+@pytest.mark.asyncio
+@ml_mocker.router
+async def test_read_stream_many_uris_are_batched(svc):
+    uris = [f"/some/dir/doc{i:04d}.xml" for i in range(2000)]
+    with ml_doc_mocker.scoped():
+        ml_doc_mocker.mock_document(*(test_data.xml_doc_body_part(uri) for uri in uris))
+
+        docs = [doc async for doc in svc.read_stream(uris)]
+
+    assert len(docs) == 2000
+    assert ml_mocker.router.calls.call_count > 1
+
+
+@pytest.mark.asyncio
+@ml_mocker.router
+async def test_delete_single_uri_is_not_batched(svc):
+    uri = "/some/dir/doc1.xml"
+
+    await svc.delete(uri)
+
+    assert ml_mocker.router.calls.call_count == 1
+
+
+@pytest.mark.asyncio
+@ml_mocker.router
+async def test_delete_many_uris_are_batched(svc):
+    uris = [f"/some/dir/doc{i:04d}.xml" for i in range(2000)]
+
+    await svc.delete(uris)
+
+    assert ml_mocker.router.calls.call_count > 1

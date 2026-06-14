@@ -8,12 +8,6 @@ from mlclient.exceptions import MarkLogicError
 from mlclient.mimetypes import Mimetypes
 from mlclient.models import Document, DocumentType, Metadata, RawDocument
 
-# httpx enforces MAX_URL_LENGTH = 65536 bytes. Each URI in the query string
-# takes ~85 bytes (5 for "&uri=" + ~80 for a typical MarkLogic URI). With
-# ~100 bytes of base URL overhead and a 25% safety margin, 500 URIs per
-# request stays well within the limit.
-_URI_BATCH_SIZE = 500
-
 
 def assert_document_does_not_exist(
     uri: str,
@@ -38,18 +32,14 @@ def assert_documents_exist(
     uris: list,
 ):
     with MLClient(auth_method="digest") as ml:
-        for i in range(0, len(uris), _URI_BATCH_SIZE):
-            batch = uris[i : i + _URI_BATCH_SIZE]
-            assert ml.documents.read(batch, output_type=bytes) != {}
+        assert ml.documents.read(uris, output_type=bytes) != {}
 
 
 def assert_documents_do_not_exist(
     uris: list,
 ):
     with MLClient(auth_method="digest") as ml:
-        for i in range(0, len(uris), _URI_BATCH_SIZE):
-            batch = uris[i : i + _URI_BATCH_SIZE]
-            assert ml.documents.read(batch, output_type=bytes) == {}
+        assert ml.documents.read(uris, output_type=bytes) == {}
 
 
 def assert_documents_exist_and_confirm_content_with_metadata(
@@ -115,11 +105,7 @@ def delete_documents(
 ):
     try:
         with MLClient(auth_method="digest") as ml:
-            if isinstance(uri, list):
-                for i in range(0, len(uri), _URI_BATCH_SIZE):
-                    ml.documents.delete(uri[i : i + _URI_BATCH_SIZE])
-            else:
-                ml.documents.delete(uri)
+            ml.documents.delete(uri)
     except MarkLogicError as err:
         pytest.fail(str(err))
 

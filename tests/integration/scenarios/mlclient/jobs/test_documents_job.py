@@ -24,7 +24,6 @@ def test_write_job_with_documents_input():
 
         docs_client_utils.assert_documents_exist_and_confirm_data(
             {doc.uri: doc for doc in docs},
-            output_type=bytes,
         )
     finally:
         docs_client_utils.delete_documents(uris)

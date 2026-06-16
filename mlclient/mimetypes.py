@@ -13,7 +13,7 @@ from typing import ClassVar
 import yaml
 
 from mlclient import utils
-from mlclient.models import DocumentType, Mimetype
+from mlclient.models.types import DocumentType, Mimetype
 
 
 class Mimetypes:
@@ -74,7 +74,7 @@ class Mimetypes:
         gen = (
             mimetype.mime_type
             for mimetype in cls._MIMETYPES
-            if uri.endswith(tuple(mimetype.extensions))
+            if uri.endswith(cls._dotted_extensions(mimetype))
         )
         return next(gen, None)
 
@@ -99,9 +99,20 @@ class Mimetypes:
         for mimetype in cls._MIMETYPES:
             if uri_or_mimetype.startswith(
                 mimetype.mime_type,
-            ) or uri_or_mimetype.endswith(tuple(mimetype.extensions)):
+            ) or uri_or_mimetype.endswith(cls._dotted_extensions(mimetype)):
                 return mimetype.document_type
         return DocumentType.BINARY
+
+    @staticmethod
+    def _dotted_extensions(mimetype: Mimetype) -> tuple[str, ...]:
+        """Return ``mimetype.extensions`` prefixed with a dot.
+
+        Without the dot, ``"c.txt".endswith(("t", ...))`` returns True for
+        the bare ``t`` registered under ``application/x-troff``, so unrelated
+        files like ``.txt`` get misclassified. The dot anchors the match to
+        the actual file extension boundary.
+        """
+        return tuple(f".{ext}" for ext in mimetype.extensions)
 
     @classmethod
     def _init_doc_type_mimetypes(

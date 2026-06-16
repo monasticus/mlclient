@@ -215,7 +215,7 @@ READ
         <ChildNode2>888e2050-7148-42c4-b33a-b3dd3505b87b</ChildNode2>
     </SomeEntity>'''
 
-**Read a document as string**
+**Read a document as string or bytes**
 
 .. code-block:: python
 
@@ -223,32 +223,19 @@ READ
 
     >>> mgr = MLClientManager("local")
     >>> with mgr.get_client("app-services") as ml:
-    ...     doc = ml.documents.read("/doc-1.xml", output_type=str)
+    ...     doc = ml.documents.read("/doc-1.xml")
 
     >>> doc.doc_type
     <DocumentType.XML: 'xml'>
 
-    >>> doc.content
+    >>> doc.content_string
     '''<?xml version="1.0" encoding="UTF-8"?>
     <SomeEntity>
         <ChildNode1>00001</ChildNode1>
         <ChildNode2>888e2050-7148-42c4-b33a-b3dd3505b87b</ChildNode2>
     </SomeEntity>'''
 
-**Read a document as bytes**
-
-.. code-block:: python
-
-    >>> from mlclient import MLClientManager
-
-    >>> mgr = MLClientManager("local")
-    >>> with mgr.get_client("app-services") as ml:
-    ...     doc = ml.documents.read("/doc-1.xml", output_type=bytes)
-
-    >>> doc.doc_type
-    <DocumentType.XML: 'xml'>
-
-    >>> doc.content
+    >>> doc.content_bytes
     b'''<?xml version="1.0" encoding="UTF-8"?>
     <SomeEntity>
         <ChildNode1>00001</ChildNode1>
@@ -328,7 +315,7 @@ WRITE (create / update)
     >>> from mlclient import MLClientManager
     >>> from mlclient.models import Document
 
-    >>> doc = Document.create("/doc-2.json", {"root": {"child": "data"}})
+    >>> doc = Document.create("/doc-1.xml", "<root><child>data</child></root>")
     >>> mgr = MLClientManager("local")
     >>> with mgr.get_client("app-services") as ml:
     ...     ml.documents.write(doc)
@@ -353,37 +340,16 @@ WRITE (create / update)
     ...     ml.documents.write(doc)
 
 
-**Put a raw document**
+**Put a document with raw bytes metadata**
 
 .. code-block:: python
 
     >>> from mlclient import MLClientManager
-    >>> from mlclient.models import Document, DocumentType
+    >>> from mlclient.models import Document
 
-    >>> doc = Document.create_raw(
+    >>> doc = Document.create(
     ...     "/doc-1.xml",
-    ...     b"<root><child>data</child></root>",
-    ...     doc_type=DocumentType.XML,
-    ... )
-    >>> doc
-    <mlclient.models.documents.RawDocument object at 0x7f9200929430>
-
-    >>> mgr = MLClientManager("local")
-    >>> with mgr.get_client("app-services") as ml:
-    ...     ml.documents.write(doc)
-
-
-**Put a raw document with metadata**
-
-.. code-block:: python
-
-    >>> from mlclient import MLClientManager
-    >>> from mlclient.models import Document, DocumentType
-
-    >>> doc = Document.create_raw(
-    ...     "/doc-1.xml",
-    ...     b"<root><child>data</child></root>",
-    ...     doc_type=DocumentType.XML,
+    ...     "<root><child>data</child></root>",
     ...     metadata=b'{"collections": ["some-collection"]}',
     ... )
 
@@ -413,10 +379,10 @@ WRITE (create / update)
 .. code-block:: python
 
     >>> from mlclient import MLClientManager
-    >>> from mlclient.models import Metadata, MetadataDocument
+    >>> from mlclient.models import Document, Metadata
 
     >>> metadata = Metadata(collections=["some-collection"])
-    >>> doc = MetadataDocument("/doc-2.json", metadata)
+    >>> doc = Document.metadata_update("/doc-2.json", metadata)
     >>> doc
     <mlclient.models.documents.MetadataDocument object at 0x7f9200929e20>
 
@@ -430,13 +396,9 @@ WRITE (create / update)
 .. code-block:: python
 
     >>> from mlclient import MLClientManager
-    >>> from mlclient.models import Document, DocumentType
+    >>> from mlclient.models import Document
 
-    >>> doc_1 = Document.create_raw(
-    ...     "/doc-1.xml",
-    ...     b"<root><child>data</child></root>",
-    ...     doc_type=DocumentType.XML,
-    ... )
+    >>> doc_1 = Document.create("/doc-1.xml", "<root><child>data</child></root>")
     >>> doc_2 = Document.create("/doc-2.json", {"root": {"child": "data"}})
 
     >>> mgr = MLClientManager("local")
@@ -449,16 +411,11 @@ WRITE (create / update)
 .. code-block:: python
 
     >>> from mlclient import MLClientManager
-    >>> from mlclient.models import Document, DocumentType, Metadata
+    >>> from mlclient.models import Document, Metadata
 
     >>> default_metadata = Metadata(collections=["some-collection"])
-    >>> doc_1 = Document.create_raw(
-    ...     "/doc-1.xml",
-    ...     b"<root><child>data</child></root>",
-    ...     doc_type=DocumentType.XML,
-    ... )
+    >>> doc_1 = Document.create("/doc-1.xml", "<root><child>data</child></root>")
     >>> doc_2 = Document.create("/doc-2.json", {"root": {"child": "data"}})
-
 
     >>> mgr = MLClientManager("local")
     >>> with mgr.get_client("app-services") as ml:

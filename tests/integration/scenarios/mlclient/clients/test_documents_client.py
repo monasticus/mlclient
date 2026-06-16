@@ -7,12 +7,9 @@ from mlclient import MLClient
 from mlclient.jobs import WriteDocumentsJob
 from mlclient.models import (
     BinaryDocument,
-    DocumentType,
     JSONDocument,
     Metadata,
     MetadataDocument,
-    RawDocument,
-    RawStringDocument,
     TextDocument,
     XMLDocument,
 )
@@ -24,7 +21,7 @@ def test_create_read_and_remove_xml_document():
     content = (
         b'<?xml version="1.0" encoding="UTF-8"?>\n<root><child>data</child></root>'
     )
-    doc = RawDocument(content, uri, DocumentType.XML)
+    doc = XMLDocument(content, uri)
 
     try:
         docs_client_utils.assert_document_does_not_exist(uri)
@@ -38,7 +35,7 @@ def test_create_read_and_remove_xml_document():
 def test_create_read_and_remove_json_document():
     uri = "/some/dir/doc2.json"
     content = b'{"root": {"child": "data"}}'
-    doc = RawDocument(content, uri, DocumentType.JSON)
+    doc = JSONDocument(content, uri)
 
     try:
         docs_client_utils.assert_document_does_not_exist(uri)
@@ -52,7 +49,7 @@ def test_create_read_and_remove_json_document():
 def test_create_read_and_remove_text_document():
     uri = "/some/dir/doc3.xqy"
     content = b'xquery version "1.0-ml";\n\nfn:current-date()'
-    doc = RawDocument(content, uri, DocumentType.TEXT)
+    doc = TextDocument(content, uri)
 
     try:
         docs_client_utils.assert_document_does_not_exist(uri)
@@ -66,50 +63,12 @@ def test_create_read_and_remove_text_document():
 def test_create_read_and_remove_binary_document():
     uri = "/some/dir/doc4.zip"
     content = zlib.compress(b'xquery version "1.0-ml";\n\nfn:current-date()')
-    doc = RawDocument(content, uri, DocumentType.BINARY)
+    doc = BinaryDocument(content, uri)
 
     try:
         docs_client_utils.assert_document_does_not_exist(uri)
         docs_client_utils.write_documents(doc)
         docs_client_utils.assert_documents_exist_and_confirm_data({uri: doc})
-    finally:
-        docs_client_utils.delete_documents(uri)
-        docs_client_utils.assert_document_does_not_exist(uri)
-
-
-def test_create_read_and_remove_document_using_string_output_type():
-    uri = "/some/dir/doc1.xml"
-    content = (
-        b'<?xml version="1.0" encoding="UTF-8"?>\n<root><child>data</child></root>\n'
-    )
-    doc = RawDocument(content, uri, DocumentType.XML)
-
-    try:
-        docs_client_utils.assert_document_does_not_exist(uri)
-        docs_client_utils.write_documents(doc)
-        docs_client_utils.assert_documents_exist_and_confirm_data(
-            {uri: doc},
-            output_type=str,
-        )
-    finally:
-        docs_client_utils.delete_documents(uri)
-        docs_client_utils.assert_document_does_not_exist(uri)
-
-
-def test_create_read_and_remove_document_using_bytes_output_type():
-    uri = "/some/dir/doc1.xml"
-    content = (
-        b'<?xml version="1.0" encoding="UTF-8"?>\n<root><child>data</child></root>\n'
-    )
-    doc = RawDocument(content, uri, DocumentType.XML)
-
-    try:
-        docs_client_utils.assert_document_does_not_exist(uri)
-        docs_client_utils.write_documents(doc)
-        docs_client_utils.assert_documents_exist_and_confirm_data(
-            {uri: doc},
-            output_type=bytes,
-        )
     finally:
         docs_client_utils.delete_documents(uri)
         docs_client_utils.assert_document_does_not_exist(uri)
@@ -132,52 +91,22 @@ def test_create_read_and_remove_document_with_metadata():
         docs_client_utils.assert_document_does_not_exist(uri)
 
 
-def test_create_read_and_remove_document_with_metadata_using_string_output_type():
-    uri = "/some/dir/doc2.json"
-    content = '{"root":{"child":"data"}}'
-    metadata = (
-        "{"
-        '"collections":["test-collection"],'
-        '"permissions":[],'
-        '"properties":{},'
-        '"quality":0,'
-        '"metadataValues":{}'
-        "}"
-    )
-    doc = RawStringDocument(content, uri, DocumentType.JSON, metadata)
-
-    try:
-        docs_client_utils.assert_document_does_not_exist(uri)
-        docs_client_utils.write_documents(doc)
-        docs_client_utils.assert_documents_exist_and_confirm_content_with_metadata(
-            {uri: doc},
-            output_type=str,
-        )
-    finally:
-        docs_client_utils.delete_documents(uri)
-        docs_client_utils.assert_document_does_not_exist(uri)
-
-
-def test_create_read_and_remove_document_with_metadata_using_bytes_output_type():
+def test_create_read_and_remove_document_with_raw_metadata():
     uri = "/some/dir/doc2.json"
     content = b'{"root":{"child":"data"}}'
-    metadata = (
-        b"{"
-        b'"collections":["test-collection"],'
-        b'"permissions":[],'
-        b'"properties":{},'
-        b'"quality":0,'
-        b'"metadataValues":{}'
-        b"}"
+    metadata = b'{"collections": ["test-collection"]}'
+    doc = JSONDocument(content, uri, metadata)
+    expected = JSONDocument(
+        content,
+        uri,
+        Metadata(collections=["test-collection"]),
     )
-    doc = RawDocument(content, uri, DocumentType.JSON, metadata)
 
     try:
         docs_client_utils.assert_document_does_not_exist(uri)
         docs_client_utils.write_documents(doc)
         docs_client_utils.assert_documents_exist_and_confirm_content_with_metadata(
-            {uri: doc},
-            output_type=bytes,
+            {uri: expected},
         )
     finally:
         docs_client_utils.delete_documents(uri)
@@ -189,19 +118,19 @@ def test_create_read_and_remove_multiple_documents():
     doc_1_content = (
         b'<?xml version="1.0" encoding="UTF-8"?>\n<root><child>data</child></root>'
     )
-    doc_1 = RawDocument(doc_1_content, doc_1_uri, DocumentType.XML)
+    doc_1 = XMLDocument(doc_1_content, doc_1_uri)
 
     doc_2_uri = "/some/dir/doc2.json"
     doc_2_content = b'{"root": {"child": "data"}}'
-    doc_2 = RawDocument(doc_2_content, doc_2_uri, DocumentType.JSON)
+    doc_2 = JSONDocument(doc_2_content, doc_2_uri)
 
     doc_3_uri = "/some/dir/doc3.xqy"
     doc_3_content = b'xquery version "1.0-ml";\n\nfn:current-date()'
-    doc_3 = RawDocument(doc_3_content, doc_3_uri, DocumentType.TEXT)
+    doc_3 = TextDocument(doc_3_content, doc_3_uri)
 
     doc_4_uri = "/some/dir/doc4.zip"
     doc_4_content = zlib.compress(b'xquery version "1.0-ml";\n\nfn:current-date()')
-    doc_4 = RawDocument(doc_4_content, doc_4_uri, DocumentType.BINARY)
+    doc_4 = BinaryDocument(doc_4_content, doc_4_uri)
 
     try:
         docs_client_utils.assert_documents_do_not_exist(
@@ -215,81 +144,6 @@ def test_create_read_and_remove_multiple_documents():
                 doc_3_uri: doc_3,
                 doc_4_uri: doc_4,
             },
-        )
-    finally:
-        docs_client_utils.delete_documents([doc_1_uri, doc_2_uri, doc_3_uri, doc_4_uri])
-        docs_client_utils.assert_documents_do_not_exist(
-            [doc_1_uri, doc_2_uri, doc_3_uri, doc_4_uri],
-        )
-
-
-def test_create_read_and_remove_multiple_documents_using_string_output_type():
-    doc_1_uri = "/some/dir/doc1.xml"
-    doc_1_content = (
-        b'<?xml version="1.0" encoding="UTF-8"?>\n<root><child>data</child></root>'
-    )
-    doc_1 = RawDocument(doc_1_content, doc_1_uri, DocumentType.XML)
-
-    doc_2_uri = "/some/dir/doc2.json"
-    doc_2_content = b'{"root":{"child":"data"}}'
-    doc_2 = RawDocument(doc_2_content, doc_2_uri, DocumentType.JSON)
-
-    doc_3_uri = "/some/dir/doc3.xqy"
-    doc_3_content = b'xquery version "1.0-ml";\n\nfn:current-date()'
-    doc_3 = RawDocument(doc_3_content, doc_3_uri, DocumentType.TEXT)
-
-    try:
-        docs_client_utils.assert_documents_do_not_exist(
-            [doc_1_uri, doc_2_uri, doc_3_uri],
-        )
-        docs_client_utils.write_documents([doc_1, doc_2, doc_3])
-        docs_client_utils.assert_documents_exist_and_confirm_data(
-            {
-                doc_1_uri: doc_1,
-                doc_2_uri: doc_2,
-                doc_3_uri: doc_3,
-            },
-            output_type=str,
-        )
-    finally:
-        docs_client_utils.delete_documents([doc_1_uri, doc_2_uri, doc_3_uri])
-        docs_client_utils.assert_documents_do_not_exist(
-            [doc_1_uri, doc_2_uri, doc_3_uri],
-        )
-
-
-def test_create_read_and_remove_multiple_documents_using_bytes_output_type():
-    doc_1_uri = "/some/dir/doc1.xml"
-    doc_1_content = (
-        b'<?xml version="1.0" encoding="UTF-8"?>\n<root><child>data</child></root>'
-    )
-    doc_1 = RawDocument(doc_1_content, doc_1_uri, DocumentType.XML)
-
-    doc_2_uri = "/some/dir/doc2.json"
-    doc_2_content = b'{"root":{"child":"data"}}'
-    doc_2 = RawDocument(doc_2_content, doc_2_uri, DocumentType.JSON)
-
-    doc_3_uri = "/some/dir/doc3.xqy"
-    doc_3_content = b'xquery version "1.0-ml";\n\nfn:current-date()'
-    doc_3 = RawDocument(doc_3_content, doc_3_uri, DocumentType.TEXT)
-
-    doc_4_uri = "/some/dir/doc4.zip"
-    doc_4_content = zlib.compress(b'xquery version "1.0-ml";\n\nfn:current-date()')
-    doc_4 = RawDocument(doc_4_content, doc_4_uri, DocumentType.BINARY)
-
-    try:
-        docs_client_utils.assert_documents_do_not_exist(
-            [doc_1_uri, doc_2_uri, doc_3_uri, doc_4_uri],
-        )
-        docs_client_utils.write_documents([doc_1, doc_2, doc_3, doc_4])
-        docs_client_utils.assert_documents_exist_and_confirm_data(
-            {
-                doc_1_uri: doc_1,
-                doc_2_uri: doc_2,
-                doc_3_uri: doc_3,
-                doc_4_uri: doc_4,
-            },
-            output_type=bytes,
         )
     finally:
         docs_client_utils.delete_documents([doc_1_uri, doc_2_uri, doc_3_uri, doc_4_uri])
@@ -377,8 +231,8 @@ def test_update_document():
     content_2 = (
         b'<?xml version="1.0" encoding="UTF-8"?>\n<root><child>data2</child></root>'
     )
-    doc_1 = RawDocument(content_1, uri, DocumentType.XML)
-    doc_2 = RawDocument(content_2, uri, DocumentType.XML)
+    doc_1 = XMLDocument(content_1, uri)
+    doc_2 = XMLDocument(content_2, uri)
 
     try:
         docs_client_utils.assert_document_does_not_exist(uri)
@@ -440,14 +294,12 @@ def test_read_and_delete_exceed_httpx_url_length_limit():
         assert write_job.report.successful == uris_count
 
         with MLClient(auth_method="digest") as ml:
-            read_docs = ml.documents.read(uris, output_type=bytes)
+            read_docs = ml.documents.read(uris)
             assert len(read_docs) == uris_count
             for uri in uris:
                 assert uri in read_docs
 
-            streamed_uris = {
-                doc.uri for doc in ml.documents.read_stream(uris, output_type=bytes)
-            }
+            streamed_uris = {doc.uri for doc in ml.documents.read_stream(uris)}
             assert streamed_uris == set(uris)
 
             ml.documents.delete(uris)

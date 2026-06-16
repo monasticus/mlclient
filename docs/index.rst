@@ -65,8 +65,11 @@ Read and write documents:
         print(doc.uri)       # /patient/record-1.json
         print(doc.content)   # {"name": "Smith", "id": "001"}
 
-        new_doc = Document.create("/patient/record-2.json", {"name": "Jones", "id": "002"})
-        ml.documents.write(new_doc)
+        xml_doc = Document.create("/patient/record-2.xml", "<patient><name>Jones</name></patient>")
+        ml.documents.write(xml_doc)
+
+        json_doc = Document.create("/patient/record-3.json", {"name": "Brown", "id": "003"})
+        ml.documents.write(json_doc)
 
 Available high-level services:
 

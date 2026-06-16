@@ -5,7 +5,7 @@ import shutil
 import pytest
 from mimeo import MimeoConfig, MimeoConfigFactory
 
-from mlclient.jobs import DocumentsLoader
+from mlclient.io import DocumentsLoader
 from tests.utils import documents_client as docs_client_utils
 from tests.utils import resources as resources_utils
 
@@ -39,19 +39,9 @@ def test_load_5_documents(benchmark):
     benchmark(_load_documents, path)
 
 
-def test_load_and_parse_5_documents(benchmark):
-    path = f"{TEST_RESOURCES_PATH}/output/output-5"
-    benchmark(_load_documents, path, False)
-
-
 def test_load_500_documents(benchmark):
     path = f"{TEST_RESOURCES_PATH}/output/output-500"
     benchmark(_load_documents, path)
-
-
-def test_load_and_parse_500_documents(benchmark):
-    path = f"{TEST_RESOURCES_PATH}/output/output-500"
-    benchmark(_load_documents, path, False)
 
 
 def test_load_15000_documents(benchmark):
@@ -59,19 +49,9 @@ def test_load_15000_documents(benchmark):
     benchmark(_load_documents, path)
 
 
-def test_load_and_parse_15000_documents(benchmark):
-    path = f"{TEST_RESOURCES_PATH}/output/output-15000"
-    benchmark(_load_documents, path, False)
-
-
 def test_load_200000_documents(benchmark):
     path = f"{TEST_RESOURCES_PATH}/output/output-200000"
     benchmark(_load_documents, path)
-
-
-def test_load_and_parse_200000_documents(benchmark):
-    path = f"{TEST_RESOURCES_PATH}/output/output-200000"
-    benchmark(_load_documents, path, False)
 
 
 def _get_mimeo_config(
@@ -90,7 +70,6 @@ def _get_mimeo_config(
 
 def _load_documents(
     path: str,
-    raw: bool = True,
 ):
-    for doc in DocumentsLoader.load(path, "/test-documents", raw):
+    for doc in DocumentsLoader.load(path, "/test-documents"):
         assert doc.uri.startswith("/test-documents/")

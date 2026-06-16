@@ -192,6 +192,12 @@ def test_not_equal_when_metadata_values_differ():
     assert metadata_1.__hash__() != metadata_2.__hash__()
 
 
+def test_not_equal_when_other_is_not_metadata():
+    metadata = Metadata(collections=["collection-1"])
+    assert metadata != "not a metadata"
+    assert metadata != 42
+
+
 def test_copy(metadata):
     cp = copy.copy(metadata)
     assert cp is not metadata
@@ -850,7 +856,7 @@ def test_to_xml(metadata):
 def test_to_xml_string(metadata):
     metadata_xml_string = metadata.to_xml_string()
     expected_lines = [
-        "<?xml version='1.0' encoding='utf-8'?>\n",
+        '<?xml version="1.0" encoding="UTF-8"?>\n',
         '<rapi:metadata xmlns:rapi="http://marklogic.com/rest-api">',
         "<rapi:collections>",
         "<rapi:collection>collection-1</rapi:collection>",
@@ -886,7 +892,7 @@ def test_to_xml_string(metadata):
 def test_to_xml_string_with_indent(metadata):
     metadata_xml_string = metadata.to_xml_string(indent=4)
     expected_lines = [
-        '<?xml version="1.0" encoding="utf-8"?>\n',
+        '<?xml version="1.0" encoding="UTF-8"?>\n',
         '<rapi:metadata xmlns:rapi="http://marklogic.com/rest-api">\n',
         "    <rapi:collections>\n",
         "        <rapi:collection>collection-1</rapi:collection>\n",
@@ -920,6 +926,163 @@ def test_to_xml_string_with_indent(metadata):
     assert isinstance(metadata_xml_string, str)
     for line in expected_lines:
         assert line in metadata_xml_string
+
+
+def test_to_json_string_returns_raw_bytes_payload_unchanged():
+    raw = b'{"collections":["c1"],"quality":7}'
+    metadata = Metadata(raw=raw)
+
+    assert metadata.to_json_string() == '{"collections":["c1"],"quality":7}'
+
+
+def test_to_json_string_returns_raw_string_payload_unchanged():
+    raw = '{"collections":["c1"],"quality":7}'
+    metadata = Metadata(raw=raw)
+
+    assert metadata.to_json_string() is raw
+
+
+def test_to_json_string_with_indent_reserializes_raw_payload():
+    metadata = Metadata(raw=b'{"collections":["c1"]}')
+
+    rendered = metadata.to_json_string(indent=2)
+
+    assert rendered != '{"collections":["c1"]}'
+    assert "\n" in rendered
+    assert "c1" in rendered
+
+
+def test_to_json_string_after_field_access_reserializes():
+    metadata = Metadata(raw=b'{"collections":["c1"]}')
+    metadata.collections()  # forces parse, drops raw
+
+    rendered = metadata.to_json_string()
+
+    assert "permissions" in rendered
+    assert "quality" in rendered
+
+
+def test_to_xml_string_returns_raw_bytes_payload_unchanged():
+    raw = (
+        b'<rapi:metadata xmlns:rapi="http://marklogic.com/rest-api">'
+        b"<rapi:collections><rapi:collection>c1</rapi:collection></rapi:collections>"
+        b"</rapi:metadata>"
+    )
+    metadata = Metadata(raw=raw)
+
+    assert metadata.to_xml_string() == raw.decode("utf-8")
+
+
+def test_to_xml_string_returns_raw_string_payload_unchanged():
+    raw = (
+        '<rapi:metadata xmlns:rapi="http://marklogic.com/rest-api">'
+        "<rapi:collections><rapi:collection>c1</rapi:collection></rapi:collections>"
+        "</rapi:metadata>"
+    )
+    metadata = Metadata(raw=raw)
+
+    assert metadata.to_xml_string() is raw
+
+
+def test_to_xml_string_with_indent_reserializes_raw_payload():
+    raw = (
+        b'<rapi:metadata xmlns:rapi="http://marklogic.com/rest-api">'
+        b"<rapi:collections><rapi:collection>c1</rapi:collection></rapi:collections>"
+        b"</rapi:metadata>"
+    )
+    metadata = Metadata(raw=raw)
+
+    rendered = metadata.to_xml_string(indent=4)
+
+    assert rendered != raw.decode("utf-8")
+    assert "<rapi:collection>c1</rapi:collection>" in rendered
+
+
+def test_collections_parse_from_raw_bytes_json():
+    raw = b'{"collections":["c1","c2"]}'
+    metadata = Metadata(raw=raw)
+
+    assert sorted(metadata.collections()) == ["c1", "c2"]
+
+
+def test_collections_parse_from_raw_bytes_xml():
+    raw = (
+        b'<rapi:metadata xmlns:rapi="http://marklogic.com/rest-api">'
+        b"<rapi:collections>"
+        b"<rapi:collection>c1</rapi:collection>"
+        b"<rapi:collection>c2</rapi:collection>"
+        b"</rapi:collections>"
+        b"</rapi:metadata>"
+    )
+    metadata = Metadata(raw=raw)
+
+    assert sorted(metadata.collections()) == ["c1", "c2"]
+
+
+def test_copy_preserves_unparsed_raw_payload():
+    raw = b'{"collections":["c1"]}'
+    metadata = Metadata(raw=raw)
+
+    cp = copy.copy(metadata)
+
+    assert cp.to_json_string() == '{"collections":["c1"]}'
+
+
+def test_copy_after_parse_yields_equal_metadata():
+    raw = b'{"collections":["c1"]}'
+    metadata = Metadata(raw=raw)
+    metadata.collections()  # forces parse
+
+    cp = copy.copy(metadata)
+
+    assert cp == metadata
+
+
+_RAPI_NS = "http://marklogic.com/rest-api"
+_PROP_NS = "http://marklogic.com/xdmp/property"
+
+
+def test_xml_with_all_empty_elements():
+    raw = (
+        f'<rapi:metadata xmlns:rapi="{_RAPI_NS}" xmlns:prop="{_PROP_NS}">'
+        "<rapi:collections/>"
+        "<rapi:permissions/>"
+        "<prop:properties/>"
+        "<rapi:quality>0</rapi:quality>"
+        "<rapi:metadata-values/>"
+        "</rapi:metadata>"
+    ).encode()
+    metadata = Metadata(raw=raw)
+
+    assert metadata.collections() == []
+    assert metadata.permissions() == []
+    assert metadata.properties() == {}
+    assert metadata.quality() == 0
+    assert metadata.metadata_values() == {}
+
+
+def test_xml_with_some_empty_elements():
+    raw = (
+        f'<rapi:metadata xmlns:rapi="{_RAPI_NS}">'
+        "<rapi:collections><rapi:collection>c1</rapi:collection></rapi:collections>"
+        "<rapi:permissions/>"
+        "</rapi:metadata>"
+    ).encode()
+    metadata = Metadata(raw=raw)
+
+    assert metadata.collections() == ["c1"]
+    assert metadata.permissions() == []
+
+
+def test_xml_with_only_root_element():
+    raw = f'<rapi:metadata xmlns:rapi="{_RAPI_NS}"/>'.encode()
+    metadata = Metadata(raw=raw)
+
+    assert metadata.collections() == []
+    assert metadata.permissions() == []
+    assert metadata.properties() == {}
+    assert metadata.quality() == 0
+    assert metadata.metadata_values() == {}
 
 
 def _assert_expected_alternative_lines_in_string(

@@ -1,8 +1,15 @@
+import pytest
+
 from mlclient.models import BinaryDocument, Document, DocumentType
 
 
 def test_is_document_subclass():
     assert issubclass(BinaryDocument, Document)
+
+
+def test_none_content_raises():
+    with pytest.raises(TypeError, match="BinaryDocument requires content"):
+        BinaryDocument(None)
 
 
 def test_content():
@@ -17,7 +24,7 @@ def test_content_bytes():
 
 def test_content_string():
     document = BinaryDocument(b'{"root": "data"}')
-    assert document.content_string == '{"root": "data"}'
+    assert document.content_string is None
 
 
 def test_doc_type():

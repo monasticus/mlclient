@@ -20,10 +20,6 @@ This package exports the following classes:
         A Document implementation representing a single MarkLogic TEXT document.
     * BinaryDocument
         A Document implementation representing a single MarkLogic BINARY document.
-    * RawDocument
-        A Document implementation representing a single MarkLogic document.
-    * RawStringDocument
-        A Document implementation representing a single MarkLogic document.
     * MetadataDocument
         A Document implementation representing a single MarkLogic document's metadata.
     * Metadata
@@ -41,17 +37,14 @@ Examples
 from .documents import (
     BinaryDocument,
     Document,
-    DocumentType,
     JSONDocument,
     Metadata,
     MetadataDocument,
-    Mimetype,
     Permission,
-    RawDocument,
-    RawStringDocument,
     TextDocument,
     XMLDocument,
 )
+from .types import DocumentType, Mimetype
 
 __all__ = [
     "BinaryDocument",
@@ -62,8 +55,6 @@ __all__ = [
     "MetadataDocument",
     "Mimetype",
     "Permission",
-    "RawDocument",
-    "RawStringDocument",
     "TextDocument",
     "XMLDocument",
 ]

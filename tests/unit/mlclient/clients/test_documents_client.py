@@ -15,8 +15,6 @@ from mlclient.models import (
     JSONDocument,
     Metadata,
     MetadataDocument,
-    RawDocument,
-    RawStringDocument,
     TextDocument,
     XMLDocument,
 )
@@ -213,72 +211,6 @@ def test_read_binary_doc_using_uri_list(ml):
 
 
 @ml_mocker.router
-def test_read_doc_as_string(ml):
-    uri = "/some/dir/doc1.xml"
-
-    document = ml.documents.read(uri, output_type=str)
-
-    assert isinstance(document, RawStringDocument)
-    assert document.uri == uri
-    assert document.doc_type == DocumentType.XML
-    assert isinstance(document.content, str)
-    assert document.content == '<?xml version="1.0" encoding="UTF-8"?>\n<root/>'
-    assert document.metadata is None
-    assert document.temporal_collection is None
-
-
-@ml_mocker.router
-def test_read_doc_as_string_using_uri_list(ml):
-    uri = "/some/dir/doc1.xml"
-
-    docs = ml.documents.read([uri], output_type=str)
-    assert isinstance(docs, dict)
-    assert len(docs) == 1
-
-    document = docs[uri]
-    assert isinstance(document, RawStringDocument)
-    assert document.uri == uri
-    assert document.doc_type == DocumentType.XML
-    assert isinstance(document.content, str)
-    assert document.content == '<?xml version="1.0" encoding="UTF-8"?>\n<root/>'
-    assert document.metadata is None
-    assert document.temporal_collection is None
-
-
-@ml_mocker.router
-def test_read_doc_as_bytes(ml):
-    uri = "/some/dir/doc2.json"
-
-    document = ml.documents.read(uri, output_type=bytes)
-
-    assert isinstance(document, RawDocument)
-    assert document.uri == uri
-    assert document.doc_type == DocumentType.JSON
-    assert isinstance(document.content, bytes)
-    assert document.content == b'{"root":{"child":"data"}}'
-    assert document.metadata is None
-    assert document.temporal_collection is None
-
-
-@ml_mocker.router
-def test_read_doc_as_bytes_using_uri_list(ml):
-    uri = "/some/dir/doc2.json"
-
-    docs = ml.documents.read([uri], output_type=bytes)
-    assert isinstance(docs, dict)
-    assert len(docs) == 1
-
-    document = docs[uri]
-    assert isinstance(document, RawDocument)
-    assert document.uri == uri
-    assert document.doc_type == DocumentType.JSON
-    assert isinstance(document.content, bytes)
-    assert document.content == b'{"root":{"child":"data"}}'
-    assert document.metadata is None
-    assert document.temporal_collection is None
-
-
-@ml_mocker.router
 def test_read_existing_and_non_existing_doc(ml):
     uris = [
         "/some/dir/doc1.xml",
@@ -347,110 +279,6 @@ def test_read_multiple_docs(ml):
     zip_content = zlib.compress(b'xquery version "1.0-ml";\n\nfn:current-date()')
     zip_doc = docs["/some/dir/doc4.zip"]
     assert isinstance(zip_doc, BinaryDocument)
-    assert zip_doc.uri == "/some/dir/doc4.zip"
-    assert zip_doc.doc_type == DocumentType.BINARY
-    assert isinstance(zip_doc.content, bytes)
-    assert zip_doc.content == zip_content
-    assert zip_doc.metadata is None
-    assert zip_doc.temporal_collection is None
-
-
-@ml_mocker.router
-def test_read_multiple_docs_as_string(ml):
-    uris = [
-        "/some/dir/doc1.xml",
-        "/some/dir/doc2.json",
-        "/some/dir/doc3.xqy",
-        "/some/dir/doc4.zip",
-    ]
-
-    docs = ml.documents.read(uris, output_type=str)
-
-    assert isinstance(docs, dict)
-    assert len(docs) == 4
-
-    xml_doc = docs["/some/dir/doc1.xml"]
-    assert isinstance(xml_doc, RawStringDocument)
-    assert xml_doc.uri == "/some/dir/doc1.xml"
-    assert xml_doc.doc_type == DocumentType.XML
-    assert isinstance(xml_doc.content, str)
-    assert xml_doc.content == ('<?xml version="1.0" encoding="UTF-8"?>\n<root/>')
-    assert xml_doc.metadata is None
-    assert xml_doc.temporal_collection is None
-
-    json_doc = docs["/some/dir/doc2.json"]
-    assert isinstance(json_doc, RawStringDocument)
-    assert json_doc.uri == "/some/dir/doc2.json"
-    assert json_doc.doc_type == DocumentType.JSON
-    assert isinstance(json_doc.content, str)
-    assert json_doc.content == '{"root":{"child":"data"}}'
-    assert json_doc.metadata is None
-    assert json_doc.temporal_collection is None
-
-    xqy_doc = docs["/some/dir/doc3.xqy"]
-    assert isinstance(xqy_doc, RawStringDocument)
-    assert xqy_doc.uri == "/some/dir/doc3.xqy"
-    assert xqy_doc.doc_type == DocumentType.TEXT
-    assert isinstance(xqy_doc.content, str)
-    assert xqy_doc.content == 'xquery version "1.0-ml";\n\nfn:current-date()'
-    assert xqy_doc.metadata is None
-    assert xqy_doc.temporal_collection is None
-
-    zip_content = zlib.compress(b'xquery version "1.0-ml";\n\nfn:current-date()')
-    zip_doc = docs["/some/dir/doc4.zip"]
-    assert isinstance(zip_doc, RawDocument)
-    assert zip_doc.uri == "/some/dir/doc4.zip"
-    assert zip_doc.doc_type == DocumentType.BINARY
-    assert isinstance(zip_doc.content, bytes)
-    assert zip_doc.content == zip_content
-    assert zip_doc.metadata is None
-    assert zip_doc.temporal_collection is None
-
-
-@ml_mocker.router
-def test_read_multiple_docs_as_bytes(ml):
-    uris = [
-        "/some/dir/doc1.xml",
-        "/some/dir/doc2.json",
-        "/some/dir/doc3.xqy",
-        "/some/dir/doc4.zip",
-    ]
-
-    docs = ml.documents.read(uris, output_type=bytes)
-
-    assert isinstance(docs, dict)
-    assert len(docs) == 4
-
-    xml_doc = docs["/some/dir/doc1.xml"]
-    assert isinstance(xml_doc, RawDocument)
-    assert xml_doc.uri == "/some/dir/doc1.xml"
-    assert xml_doc.doc_type == DocumentType.XML
-    assert isinstance(xml_doc.content, bytes)
-    assert xml_doc.content == (b'<?xml version="1.0" encoding="UTF-8"?>\n<root/>')
-    assert xml_doc.metadata is None
-    assert xml_doc.temporal_collection is None
-
-    json_doc = docs["/some/dir/doc2.json"]
-    assert isinstance(json_doc, RawDocument)
-    assert json_doc.uri == "/some/dir/doc2.json"
-    assert json_doc.doc_type == DocumentType.JSON
-    assert isinstance(json_doc.content, bytes)
-    assert json_doc.content == b'{"root":{"child":"data"}}'
-    assert json_doc.metadata is None
-    assert json_doc.temporal_collection is None
-
-    xqy_doc = docs["/some/dir/doc3.xqy"]
-    assert isinstance(xqy_doc, RawDocument)
-    assert xqy_doc.uri == "/some/dir/doc3.xqy"
-    assert xqy_doc.doc_type == DocumentType.TEXT
-    assert isinstance(xqy_doc.content, bytes)
-    assert xqy_doc.content == b'xquery version "1.0-ml";\n\nfn:current-date()'
-    assert xqy_doc.metadata is None
-    assert xqy_doc.temporal_collection is None
-
-    zip_content = zlib.compress(b'xquery version "1.0-ml";\n\nfn:current-date()')
-    zip_doc = docs["/some/dir/doc4.zip"]
-    assert isinstance(zip_doc, RawDocument)
     assert zip_doc.uri == "/some/dir/doc4.zip"
     assert zip_doc.doc_type == DocumentType.BINARY
     assert isinstance(zip_doc.content, bytes)
@@ -1341,10 +1169,10 @@ def test_read_multiple_docs_using_custom_database(ml):
 
 
 @ml_mocker.router
-def test_create_raw_document(ml):
+def test_create_xml_document_from_bytes(ml):
     uri = "/some/dir/doc1.xml"
     content = b"<root><child>data</child></root>"
-    doc = RawDocument(content, uri, DocumentType.XML)
+    doc = XMLDocument(content, uri)
 
     resp = ml.documents.write(doc)
 
@@ -1356,10 +1184,10 @@ def test_create_raw_document(ml):
 
 
 @ml_mocker.router
-def test_create_raw_string_document(ml):
+def test_create_json_document_from_string(ml):
     uri = "/some/dir/doc2.json"
     content = '{"root":{"child":"data"}}'
-    doc = RawStringDocument(content, uri, DocumentType.JSON)
+    doc = JSONDocument(content, uri)
 
     resp = ml.documents.write(doc)
 
@@ -1518,11 +1346,11 @@ def test_create_multiple_documents(ml):
 
 
 @ml_mocker.router
-def test_create_raw_document_with_metadata(ml):
+def test_create_xml_document_with_raw_bytes_metadata(ml):
     uri = "/some/dir/doc1.xml"
     content = b"<root><child>data</child></root>"
     metadata = b'{"collections": ["test-collection"]}'
-    doc = RawDocument(content, uri, DocumentType.XML, metadata)
+    doc = XMLDocument(content, uri, metadata)
 
     resp = ml.documents.write(doc)
 
@@ -1534,11 +1362,11 @@ def test_create_raw_document_with_metadata(ml):
 
 
 @ml_mocker.router
-def test_create_raw_string_document_with_metadata(ml):
+def test_create_xml_document_with_raw_string_metadata(ml):
     uri = "/some/dir/doc1.xml"
     content = "<root><child>data</child></root>"
     metadata = '{"collections": ["test-collection"]}'
-    doc = RawStringDocument(content, uri, DocumentType.XML, metadata)
+    doc = XMLDocument(content, uri, metadata)
 
     resp = ml.documents.write(doc)
 
@@ -1675,7 +1503,7 @@ def test_create_single_document_with_default_metadata(ml):
 
     uri = "/some/dir/doc1.xml"
     content = b"<root><child>data</child></root>"
-    doc = RawDocument(content, uri, DocumentType.XML)
+    doc = XMLDocument(content, uri)
 
     resp = ml.documents.write([default_metadata, doc])
 
@@ -1755,7 +1583,7 @@ def test_create_only_default_metadata(ml):
 def test_create_single_document_using_custom_database(ml):
     uri = "/some/dir/doc1.xml"
     content = b"<root><child>data</child></root>"
-    doc = RawDocument(content, uri, DocumentType.XML)
+    doc = XMLDocument(content, uri)
 
     resp = ml.documents.write(doc, database="Documents")
 
@@ -1826,7 +1654,7 @@ def test_create_multiple_documents_using_custom_database(ml):
 def test_create_document_with_temporal_collection(ml):
     uri = "/some/dir/doc1.xml"
     content = "<root><child>data</child><systemStart/><systemEnd/></root>"
-    doc = RawStringDocument(content, uri, DocumentType.XML)
+    doc = XMLDocument(content, uri)
 
     resp = ml.documents.write(doc, temporal_collection="temporal-collection")
 

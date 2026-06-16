@@ -13,24 +13,16 @@ This package exports the following classes:
         An async job reading documents from a MarkLogic database.
     * DocumentJobReport
         A class representing a documents job report.
-    * DocumentsLoader
-        A class parsing files into Documents.
 
 Examples
 --------
 >>> from mlclient.jobs import WriteDocumentsJob
 """
 
-from .documents_jobs import (
-    DocumentJobReport,
-    DocumentsLoader,
-    ReadDocumentsJob,
-    WriteDocumentsJob,
-)
+from .documents_jobs import DocumentJobReport, ReadDocumentsJob, WriteDocumentsJob
 
 __all__ = [
     "DocumentJobReport",
-    "DocumentsLoader",
     "ReadDocumentsJob",
     "WriteDocumentsJob",
 ]

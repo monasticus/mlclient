@@ -1,0 +1,67 @@
+services:
+
+  certs-init:
+    image: busybox
+    command: ["chown", "1000:1000", "/certs"]
+    volumes:
+      - ./.certs:/certs
+
+  kdc:
+    build:
+      context: .
+      dockerfile: Dockerfile.kdc
+    container_name: mlclient_integration_kdc
+    environment:
+      KRB5_REALM: "MLCLIENT.LOCAL"
+      KRB5_CLIENT_PRINCIPAL: "mlclient"
+      KRB5_SERVICE_KEYTAB: "/service-keytab/services.keytab"
+      KRB5_CLIENT_KEYTAB: "/client-keytab/client.keytab"
+    ports:
+      - "88:88/udp"
+      - "88:88/tcp"
+    volumes:
+      - service-keytab:/service-keytab
+      - ./.krb:/client-keytab
+    healthcheck:
+      test: ["CMD", "test", "-f", "/client-keytab/.kdc-ready"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+      start_period: 10s
+
+  marklogic:
+    build:
+      context: .
+      dockerfile: Dockerfile.marklogic
+    container_name: mlclient_integration
+    hostname: localhost
+    depends_on:
+      certs-init:
+        condition: service_completed_successfully
+      kdc:
+        condition: service_healthy
+    environment:
+      MARKLOGIC_INIT: "true"
+      MARKLOGIC_ADMIN_USERNAME: "admin"
+      MARKLOGIC_ADMIN_PASSWORD: "admin"
+      MLCLIENT_IT_CERTS_DIR: "/certs"
+      MLCLIENT_IT_SERVICE_KEYTAB: "/service-keytab/services.keytab"
+      MLCLIENT_IT_KERBEROS_PRINCIPAL: "mlclient@MLCLIENT.LOCAL"
+      KRB5_CONFIG: "/etc/krb5.conf"
+      TZ: "Europe/Prague"
+    ports:
+      - "8000-8012:8000-8012"
+      - "7997:7997"
+    volumes:
+      - ./.certs:/certs
+      - service-keytab:/service-keytab:ro
+      - ./krb5/krb5.conf:/etc/krb5.conf:ro
+    healthcheck:
+      test: ["CMD", "test", "-f", "/certs/.provisioned"]
+      interval: 10s
+      timeout: 5s
+      retries: 40
+      start_period: 60s
+
+volumes:
+  service-keytab:

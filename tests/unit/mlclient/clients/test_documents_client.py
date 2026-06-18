@@ -44,7 +44,7 @@ ml_mocker.with_delete_side_effect(
 
 @pytest.fixture(autouse=True)
 def ml() -> MLClient:
-    return MLClient(auth_method="digest")
+    return MLClient(auth="digest")
 
 
 @pytest.fixture(autouse=True)

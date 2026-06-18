@@ -18,7 +18,7 @@ def test_basic_job_with_documents_input():
 
     job = WriteDocumentsJob(batch_size=5)
 
-    job.with_client_config(auth_method="digest")
+    job.with_client_config(auth="digest")
     job.with_documents_input(docs)
     job.run_sync()
 
@@ -34,7 +34,7 @@ def test_basic_job_with_filesystem_input():
     input_path = resources_utils.get_test_resources_path(__file__)
     job = WriteDocumentsJob(batch_size=5)
 
-    job.with_client_config(auth_method="digest")
+    job.with_client_config(auth="digest")
     job.with_filesystem_input(input_path, "/root/dir")
     job.run_sync()
 
@@ -51,7 +51,7 @@ def test_basic_job_with_multiple_inputs():
 
     job = WriteDocumentsJob(batch_size=50)
 
-    job.with_client_config(auth_method="digest")
+    job.with_client_config(auth="digest")
     job.with_documents_input(docs[:2500])
     job.with_documents_input(docs[2500:])
     job.run_sync()
@@ -69,7 +69,7 @@ def test_job_with_custom_database():
 
     job = WriteDocumentsJob(batch_size=5)
 
-    job.with_client_config(auth_method="digest")
+    job.with_client_config(auth="digest")
     job.with_documents_input(docs)
     job.with_database("Documents")
     job.run_sync()

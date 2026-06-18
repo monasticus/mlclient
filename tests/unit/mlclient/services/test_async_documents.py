@@ -46,7 +46,7 @@ ml_mocker.with_delete_side_effect(
 
 @pytest_asyncio.fixture
 async def svc():
-    async with AsyncMLClient(auth_method="digest") as ml:
+    async with AsyncMLClient(auth="digest") as ml:
         yield ml.documents
 
 

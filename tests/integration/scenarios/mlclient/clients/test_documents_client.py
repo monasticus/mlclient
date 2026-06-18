@@ -288,12 +288,12 @@ def test_read_and_delete_exceed_httpx_url_length_limit():
         docs_client_utils.assert_documents_do_not_exist(uris)
 
         write_job = WriteDocumentsJob()
-        write_job.with_client_config(auth_method="digest")
+        write_job.with_client_config(auth="digest")
         write_job.with_documents_input(docs)
         write_job.run_sync()
         assert write_job.report.successful == uris_count
 
-        with MLClient(auth_method="digest") as ml:
+        with MLClient(auth="digest") as ml:
             read_docs = ml.documents.read(uris)
             assert len(read_docs) == uris_count
             for uri in uris:

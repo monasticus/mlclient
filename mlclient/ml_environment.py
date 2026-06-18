@@ -7,20 +7,20 @@ It exports the following classes:
         A class representing a MarkLogic configuration environment.
     * MLServerConfig
         A class representing MarkLogic App Server configuration.
-    * AuthMethod
-        An enumeration class representing authorization methods.
 """
 
 from __future__ import annotations
 
 import logging
-from enum import Enum
 from pathlib import Path
+from typing import Optional, Union
 
 import yaml
-from pydantic import BaseModel, Field, field_serializer
+from pydantic import BaseModel, Field
 
 from mlclient import constants
+from mlclient.auth import AuthConfig
+from mlclient.connection import CloudConfig, SSLConfig
 from mlclient.exceptions import (
     MLClientDirectoryNotFoundError,
     MLClientEnvironmentNotFoundError,
@@ -29,50 +29,64 @@ from mlclient.exceptions import (
 
 logger = logging.getLogger(__name__)
 
-
-class AuthMethod(Enum):
-    """An enumeration class representing authorization methods."""
-
-    BASIC = "basic"
-    DIGEST = "digest"
+Auth = Union[str, AuthConfig]
 
 
 class MLServerConfig(BaseModel):
-    """A class representing MarkLogic App Server configuration."""
+    """A class representing MarkLogic App Server configuration.
+
+    Connection and authentication settings default to ``None`` so an unset
+    field inherits the root-level value from MLEnvironment.
+    """
 
     identifier: str = Field(
         alias="id",
         description="A unique identifier of the App Server",
     )
     port: int = Field(description="A port number")
-    auth_method: AuthMethod = Field(
-        alias="auth",
-        description="An authorization method",
-        default=AuthMethod.DIGEST,
+    auth: Optional[Auth] = Field(
+        description="An authentication method; None inherits from root",
+        default=None,
+    )
+    username: Optional[str] = Field(
+        description="A username; None inherits from root",
+        default=None,
+    )
+    password: Optional[str] = Field(
+        description="A password; None inherits from root",
+        default=None,
+    )
+    ssl: Optional[SSLConfig] = Field(
+        description="SSL/TLS configuration; None inherits from root",
+        default=None,
     )
     rest: bool = Field(
         description="A flag informing if the App-Server is a REST server",
         default=False,
     )
 
-    @field_serializer("auth_method")
-    def serialize_auth(
-        self,
-        auth_method: AuthMethod,
-        _info,
-    ):
-        """Serialize auth field."""
-        return auth_method.value
-
 
 class MLEnvironment(BaseModel):
-    """A class representing a MarkLogic configuration environment."""
+    """A class representing a MarkLogic configuration environment.
+
+    Connection and authentication settings configured here act as defaults for
+    every app server and may be overridden per server.
+    """
 
     app_name: str = Field(alias="app-name", description="An application name")
     protocol: str = Field(description="An HTTP protocol", default="http")
     host: str = Field(description="A hostname", default="localhost")
     username: str = Field(description="An username", default="admin")
     password: str = Field(description="A password", default="admin")
+    auth: Auth = Field(description="An authentication method", default="digest")
+    ssl: Optional[SSLConfig] = Field(
+        description="SSL/TLS configuration",
+        default=None,
+    )
+    cloud: Optional[CloudConfig] = Field(
+        description="MarkLogic Cloud configuration",
+        default=None,
+    )
     app_servers: list[MLServerConfig] = Field(
         alias="app-servers",
         description="App Servers configurations' list",
@@ -105,18 +119,61 @@ class MLEnvironment(BaseModel):
             A configuration dictionary for an MLClient initialization
         """
         logger.debug("Getting configuration for the [%s] app server", app_server_id)
-        ml_config = self.model_dump(exclude={"app_name", "app_servers"})
-        app_server_gen = (
-            app_server
-            for app_server in self.app_servers
-            if app_server.identifier == app_server_id
+        ml_config = self._root_config()
+        app_server = self._find_app_server(app_server_id)
+        app_server_config = self._app_server_overrides(app_server)
+        return {**ml_config, **app_server_config}
+
+    def _root_config(self) -> dict:
+        """Return root-level connection and auth defaults.
+
+        A Cloud environment omits protocol and auth: Cloud forces HTTPS and
+        handles authentication via its API key, so passing the defaults would
+        conflict with the Cloud connection's enforced invariants.
+        """
+        if self.cloud is not None:
+            return {"host": self.host, "cloud": self.cloud}
+        return {
+            "protocol": self.protocol,
+            "host": self.host,
+            "username": self.username,
+            "password": self.password,
+            "auth": self.auth,
+            "ssl": self.ssl,
+            "cloud": None,
+        }
+
+    def _find_app_server(
+        self,
+        app_server_id: str,
+    ) -> MLServerConfig:
+        """Return the app server with the given id, or raise."""
+        app_server = next(
+            (
+                app_server
+                for app_server in self.app_servers
+                if app_server.identifier == app_server_id
+            ),
+            None,
         )
-        app_server = next(app_server_gen, None)
         if not app_server:
             msg = f"There's no [{app_server_id}] app server configuration!"
             raise NoSuchAppServerError(msg)
-        app_server_config = app_server.model_dump(exclude={"identifier", "rest"})
-        return {**ml_config, **app_server_config}
+        return app_server
+
+    @staticmethod
+    def _app_server_overrides(
+        app_server: MLServerConfig,
+    ) -> dict:
+        """Return non-None app server fields that override root defaults."""
+        overrides = {
+            "port": app_server.port,
+            "auth": app_server.auth,
+            "username": app_server.username,
+            "password": app_server.password,
+            "ssl": app_server.ssl,
+        }
+        return {key: value for key, value in overrides.items() if value is not None}
 
     @classmethod
     def load(

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import base64
 import json
 import re
 import xml.etree.ElementTree as ElemTree
@@ -31,7 +32,6 @@ def test_basic_job_with_documents_output():
 
         job = ReadDocumentsJob(batch_size=5)
 
-        job.with_client_config(auth_method="digest")
         job.with_uris_input(uris)
         job.run_sync()
         docs = job.documents
@@ -46,6 +46,26 @@ def test_basic_job_with_documents_output():
 
 
 @ml_mocker.router
+def test_job_runs_with_a_custom_client_config():
+    with ml_doc_mocker.scoped():
+        uris = ["/some/dir/doc1.xml"]
+        ml_doc_mocker.mock_document(*_get_test_document_body_parts(1))
+
+        job = ReadDocumentsJob(batch_size=1)
+
+        job.with_client_config(auth="basic", username="reader", password="read123")
+        job.with_uris_input(uris)
+        job.run_sync()
+
+    assert ml_mocker.router.calls.call_count == 1
+    assert job.report.successful == 1
+    authorization = ml_mocker.router.calls.last.request.headers["Authorization"]
+    scheme, _, token = authorization.partition(" ")
+    assert scheme == "Basic"
+    assert base64.b64decode(token).decode() == "reader:read123"
+
+
+@ml_mocker.router
 def test_basic_job_with_filesystem_output():
     with ml_doc_mocker.scoped():
         uris_count = 5
@@ -56,7 +76,6 @@ def test_basic_job_with_filesystem_output():
         assert not Path(output_dir).exists()
         try:
             job = ReadDocumentsJob(batch_size=5)
-            job.with_client_config(auth_method="digest")
             job.with_uris_input(uris)
             job.with_filesystem_output(output_dir)
             job.run_sync()
@@ -86,7 +105,6 @@ def test_basic_job_with_multiple_inputs():
 
         job = ReadDocumentsJob(batch_size=500)
 
-        job.with_client_config(auth_method="digest")
         job.with_uris_input(uris[:250])
         job.with_uris_input(uris[250:])
         job.run_sync()
@@ -112,7 +130,6 @@ def test_job_with_documents_output_and_full_metadata():
 
         job = ReadDocumentsJob(batch_size=5)
 
-        job.with_client_config(auth_method="digest")
         job.with_uris_input(uris)
         job.with_metadata()
         job.run_sync()
@@ -141,7 +158,6 @@ def test_job_with_documents_output_and_some_metadata_categories():
 
         job = ReadDocumentsJob(batch_size=5)
 
-        job.with_client_config(auth_method="digest")
         job.with_uris_input(uris)
         job.with_metadata("quality")
         job.run_sync()
@@ -170,7 +186,6 @@ def test_job_with_documents_output_and_category_enum():
 
         job = ReadDocumentsJob(batch_size=5)
 
-        job.with_client_config(auth_method="digest")
         job.with_uris_input(uris)
         job.with_metadata(Category.QUALITY)
         job.run_sync()
@@ -200,7 +215,6 @@ def test_basic_job_with_filesystem_output_and_full_metadata():
         assert not Path(output_dir).exists()
         try:
             job = ReadDocumentsJob(batch_size=5)
-            job.with_client_config(auth_method="digest")
             job.with_uris_input(uris)
             job.with_metadata()
             job.with_filesystem_output(output_dir)
@@ -235,7 +249,6 @@ def test_basic_job_with_filesystem_output_and_some_metadata_categories():
         assert not Path(output_dir).exists()
         try:
             job = ReadDocumentsJob(batch_size=5)
-            job.with_client_config(auth_method="digest")
             job.with_uris_input(uris)
             job.with_metadata("quality")
             job.with_filesystem_output(output_dir)
@@ -266,7 +279,6 @@ def test_job_with_custom_database():
 
         job = ReadDocumentsJob(batch_size=5)
 
-        job.with_client_config(auth_method="digest")
         job.with_database("Documents")
         job.with_uris_input(uris)
         job.run_sync()
@@ -293,7 +305,6 @@ def test_job_with_multiple_batches():
 
         job = ReadDocumentsJob(batch_size=5)
 
-        job.with_client_config(auth_method="digest")
         job.with_uris_input(uris)
         job.run_sync()
         docs = job.documents
@@ -324,7 +335,6 @@ def test_job_with_batch_exceeding_service_uri_limit():
 
         job = ReadDocumentsJob(concurrency=1, batch_size=uris_count)
 
-        job.with_client_config(auth_method="digest")
         job.with_uris_input(uris)
         job.run_sync()
 
@@ -358,7 +368,6 @@ def test_failing_job():
     mocker.mock_get()
 
     job = ReadDocumentsJob(batch_size=5)
-    job.with_client_config(auth_method="digest")
     job.with_uris_input(uris)
     job.run_sync()
     docs = job.documents
@@ -385,7 +394,6 @@ def test_failing_filesystem_write_step():
         assert output_dir_path.exists()
         try:
             job = ReadDocumentsJob(batch_size=5)
-            job.with_client_config(auth_method="digest")
             job.with_uris_input(uris)
             job.with_filesystem_output(str(output_dir_path))
             job.run_sync()

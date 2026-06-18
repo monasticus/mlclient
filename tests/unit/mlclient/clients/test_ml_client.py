@@ -8,6 +8,7 @@ from mlclient import MLClient
 from mlclient.api.rest_api import RestApi
 from mlclient.calls import DatabasesGetCall, TimestampGetCall
 from mlclient.clients import ml_client as ml_client_module
+from mlclient.http_config import DEFAULT_RETRY_STRATEGY
 from mlclient.ml_response_parser import MLResponseParser
 from mlclient.services.documents import DocumentsService
 from mlclient.services.eval import EvalService
@@ -19,16 +20,16 @@ def test_properties_delegate_to_http_client():
         protocol="https",
         host="ml.example.com",
         port=8123,
-        auth_method="digest",
+        auth="digest",
         username="user",
         password="pass",
     )
-    assert ml.http.protocol == "https"
-    assert ml.http.host == "ml.example.com"
-    assert ml.http.port == 8123
-    assert ml.http.auth_method == "digest"
-    assert ml.http.username == "user"
-    assert ml.http.password == "pass"
+    assert ml.http.config.protocol == "https"
+    assert ml.http.config.host == "ml.example.com"
+    assert ml.http.config.port == 8123
+    assert isinstance(ml.http.config.auth, httpx.DigestAuth)
+    assert ml.http.config.username == "user"
+    assert ml.http.config.password == "pass"
     assert ml.http.base_url == "https://ml.example.com:8123"
 
 
@@ -197,10 +198,11 @@ def test_wait_for_restart_builds_restart_waiter_and_uses_default_retry(
             poll_interval=0.5,
         )
 
-    kwargs = restart_waiter_cls.call_args.kwargs
-    assert kwargs["protocol"] == "https"
-    assert kwargs["host"] == "example.com"
-    assert isinstance(kwargs["auth"], httpx.BasicAuth)
+    config = restart_waiter_cls.call_args.args[0]
+    assert config.protocol == "https"
+    assert config.host == "example.com"
+    assert isinstance(config.auth, httpx.DigestAuth)
+    assert config.retry is DEFAULT_RETRY_STRATEGY
     waiter.wait_for_restart_completion.assert_called_once_with(
         response,
         timeout=12.0,

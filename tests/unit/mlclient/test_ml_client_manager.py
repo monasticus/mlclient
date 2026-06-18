@@ -1,3 +1,4 @@
+import httpx
 import pytest
 
 from mlclient import AsyncMLClient, MLClient, MLClientManager, MLEnvironment
@@ -115,12 +116,12 @@ def test_get_client_with_app_server_id():
     mgr = MLClientManager("test")
     with mgr.get_client("content") as ml:
         assert isinstance(ml, MLClient)
-        assert ml.http.protocol == "https"
-        assert ml.http.host == "localhost"
-        assert ml.http.port == 8100
-        assert ml.http.username == "my-marklogic-app-user"
-        assert ml.http.password == "my-marklogic-app-password"
-        assert ml.http.auth_method == "basic"
+        assert ml.http.config.protocol == "https"
+        assert ml.http.config.host == "localhost"
+        assert ml.http.config.port == 8100
+        assert ml.http.config.username == "my-marklogic-app-user"
+        assert ml.http.config.password == "my-marklogic-app-password"
+        assert isinstance(ml.http.config.auth, httpx.BasicAuth)
         assert ml.is_connected()
     assert not ml.is_connected()
 
@@ -129,12 +130,12 @@ def test_get_client_default():
     mgr = MLClientManager("test")
     with mgr.get_client() as ml:
         assert isinstance(ml, MLClient)
-        assert ml.http.protocol == "https"
-        assert ml.http.host == "localhost"
-        assert ml.http.port == 8002
-        assert ml.http.username == "my-marklogic-app-user"
-        assert ml.http.password == "my-marklogic-app-password"
-        assert ml.http.auth_method == "basic"
+        assert ml.http.config.protocol == "https"
+        assert ml.http.config.host == "localhost"
+        assert ml.http.config.port == 8002
+        assert ml.http.config.username == "my-marklogic-app-user"
+        assert ml.http.config.password == "my-marklogic-app-password"
+        assert isinstance(ml.http.config.auth, httpx.BasicAuth)
         assert ml.is_connected()
     assert not ml.is_connected()
 
@@ -160,12 +161,12 @@ def test_get_http_client():
     mgr = MLClientManager("test")
     with mgr.get_http_client("content") as client:
         assert isinstance(client, HttpClient)
-        assert client.protocol == "https"
-        assert client.host == "localhost"
-        assert client.port == 8100
-        assert client.username == "my-marklogic-app-user"
-        assert client.password == "my-marklogic-app-password"
-        assert client.auth_method == "basic"
+        assert client.config.protocol == "https"
+        assert client.config.host == "localhost"
+        assert client.config.port == 8100
+        assert client.config.username == "my-marklogic-app-user"
+        assert client.config.password == "my-marklogic-app-password"
+        assert isinstance(client.config.auth, httpx.BasicAuth)
 
 
 @pytest.mark.asyncio
@@ -173,12 +174,12 @@ async def test_get_async_client_with_app_server_id():
     mgr = MLClientManager("test")
     async with mgr.get_async_client("content") as ml:
         assert isinstance(ml, AsyncMLClient)
-        assert ml.http.protocol == "https"
-        assert ml.http.host == "localhost"
-        assert ml.http.port == 8100
-        assert ml.http.username == "my-marklogic-app-user"
-        assert ml.http.password == "my-marklogic-app-password"
-        assert ml.http.auth_method == "basic"
+        assert ml.http.config.protocol == "https"
+        assert ml.http.config.host == "localhost"
+        assert ml.http.config.port == 8100
+        assert ml.http.config.username == "my-marklogic-app-user"
+        assert ml.http.config.password == "my-marklogic-app-password"
+        assert isinstance(ml.http.config.auth, httpx.BasicAuth)
         assert ml.is_connected()
     assert not ml.is_connected()
 
@@ -188,12 +189,12 @@ async def test_get_async_client_default():
     mgr = MLClientManager("test")
     async with mgr.get_async_client() as ml:
         assert isinstance(ml, AsyncMLClient)
-        assert ml.http.protocol == "https"
-        assert ml.http.host == "localhost"
-        assert ml.http.port == 8002
-        assert ml.http.username == "my-marklogic-app-user"
-        assert ml.http.password == "my-marklogic-app-password"
-        assert ml.http.auth_method == "basic"
+        assert ml.http.config.protocol == "https"
+        assert ml.http.config.host == "localhost"
+        assert ml.http.config.port == 8002
+        assert ml.http.config.username == "my-marklogic-app-user"
+        assert ml.http.config.password == "my-marklogic-app-password"
+        assert isinstance(ml.http.config.auth, httpx.BasicAuth)
         assert ml.is_connected()
     assert not ml.is_connected()
 
@@ -219,9 +220,9 @@ def test_get_async_http_client():
     mgr = MLClientManager("test")
     ml = mgr.get_async_http_client("content")
     assert isinstance(ml, AsyncHttpClient)
-    assert ml.protocol == "https"
-    assert ml.host == "localhost"
-    assert ml.port == 8100
-    assert ml.username == "my-marklogic-app-user"
-    assert ml.password == "my-marklogic-app-password"
-    assert ml.auth_method == "basic"
+    assert ml.config.protocol == "https"
+    assert ml.config.host == "localhost"
+    assert ml.config.port == 8100
+    assert ml.config.username == "my-marklogic-app-user"
+    assert ml.config.password == "my-marklogic-app-password"
+    assert isinstance(ml.config.auth, httpx.BasicAuth)

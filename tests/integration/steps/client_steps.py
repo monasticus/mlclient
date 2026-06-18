@@ -13,7 +13,7 @@ from .common import parse_step_input
 
 @given("I connected to MarkLogic", target_fixture="ml")
 def init_ml() -> MLClient:
-    ml = MLClient(auth_method="digest")
+    ml = MLClient()
     ml.connect()
     return ml
 
@@ -76,7 +76,7 @@ def get_logs(
                 "<today>",
                 str(datetime.date.today()),
             )
-    params["filename"] = (f"{ml.http.port}_{logs_type.capitalize()}Log.txt",)
+    params["filename"] = (f"{ml.http.config.port}_{logs_type.capitalize()}Log.txt",)
     params["data_format"] = "json"
     return ml.manage.logs.get(**params)
 

@@ -5,21 +5,18 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
-import ssl
 import time
 from typing import NoReturn, Union
 from xml.etree import ElementTree
 
 import httpx
-from httpx import AsyncClient, AsyncHTTPTransport, Auth, Response
+from httpx import AsyncClient, AsyncHTTPTransport, Response
 from httpx_retries import Retry, RetryTransport
 
 from mlclient import constants as const
+from mlclient.http_config import HTTPConfig
 
 logger = logging.getLogger(__name__)
-
-# See ml_client._SHARED_SSL_CONTEXT for rationale (avoid repeated CA bundle loading).
-_SHARED_SSL_CONTEXT = ssl.create_default_context()
 
 _RestartTimestampBaseline = Union[asyncio.Future, str, None]
 _MARKLOGIC_ADMIN_API_PORT = 8001
@@ -33,10 +30,7 @@ class RestartWaiter:
 
     def __init__(
         self,
-        protocol: str,
-        host: str,
-        auth: Auth,
-        default_retry: Retry,
+        config: HTTPConfig,
         *,
         probe_timeout: float = 5.0,
     ):
@@ -44,21 +38,15 @@ class RestartWaiter:
 
         Parameters
         ----------
-        protocol : str
-            A protocol used for HTTP requests (http / https)
-        host : str
-            A host name
-        auth : Auth
-            An httpx authentication handler (BasicAuth or DigestAuth)
-        default_retry : Retry
-            A default retry strategy for readiness probes
+        config : HTTPConfig
+            The client connection configuration. The waiter reaches MarkLogic on
+            the same protocol, host, auth handler, SSL verification and retry
+            strategy as the client that spawned it, but on the fixed Admin and
+            Manage ports.
         probe_timeout : float
             Per-request timeout in seconds for individual readiness probes
         """
-        self._protocol = protocol
-        self._host = host
-        self._auth = auth
-        self._default_retry = default_retry
+        self._config = config
         self._probe_timeout = probe_timeout
 
     def wait_for_restart_completion(
@@ -131,7 +119,7 @@ class RestartWaiter:
                 restart_timestamps,
                 timeout,
                 poll_interval,
-                retry or self._default_retry,
+                retry or self._config.retry,
             ),
         )
 
@@ -153,7 +141,7 @@ class RestartWaiter:
             restart_timestamps,
             timeout,
             poll_interval,
-            retry or self._default_retry,
+            retry or self._config.retry,
         )
 
     @staticmethod
@@ -264,7 +252,7 @@ class RestartWaiter:
         """Wait for restart readiness, probing the current host immediately."""
         if not restart_timestamps:
             await self._wait_for_host_ready(
-                self._host,
+                self._config.host,
                 None,
                 timeout,
                 poll_interval,
@@ -274,7 +262,7 @@ class RestartWaiter:
 
         if len(restart_timestamps) == 1:
             await self._wait_for_host_ready(
-                self._host,
+                self._config.host,
                 next(iter(restart_timestamps.values())),
                 timeout,
                 poll_interval,
@@ -322,7 +310,7 @@ class RestartWaiter:
                     ),
                 )
                 for host, baseline_timestamp in restart_hosts_by_name.items()
-                if host != self._host
+                if host != self._config.host
             ],
         )
 
@@ -341,7 +329,7 @@ class RestartWaiter:
         current_host_baseline: asyncio.Future[str | None] = loop.create_future()
         current_host_task = asyncio.create_task(
             self._wait_for_host_ready(
-                self._host,
+                self._config.host,
                 current_host_baseline,
                 timeout,
                 poll_interval,
@@ -370,9 +358,11 @@ class RestartWaiter:
                 exc,
             )
             current_host_baseline.set_result(None)
-            return {self._host: None}
+            return {self._config.host: None}
         else:
-            current_host_baseline.set_result(restart_hosts_by_name.get(self._host))
+            current_host_baseline.set_result(
+                restart_hosts_by_name.get(self._config.host),
+            )
             return restart_hosts_by_name
 
     @staticmethod
@@ -390,14 +380,14 @@ class RestartWaiter:
         """Return MarkLogic host names keyed by host id."""
         async with AsyncClient(
             transport=RetryTransport(
-                transport=AsyncHTTPTransport(verify=_SHARED_SSL_CONTEXT),
-                retry=self._default_retry,
+                transport=AsyncHTTPTransport(verify=self._config.transport_verify()),
+                retry=self._config.retry,
             ),
         ) as client:
             response = await client.get(
-                f"{self._protocol}://{self._host}:{_MARKLOGIC_MANAGE_API_PORT}"
+                f"{self._config.protocol}://{self._config.host}:{_MARKLOGIC_MANAGE_API_PORT}"
                 f"{_HOSTS_ENDPOINT}",
-                auth=self._auth,
+                auth=self._config.auth,
                 params={"format": "json"},
             )
 
@@ -422,7 +412,7 @@ class RestartWaiter:
     ) -> None:
         """Wait for a single host to report readiness via the timestamp endpoint."""
         async with AsyncClient(
-            transport=AsyncHTTPTransport(verify=_SHARED_SSL_CONTEXT),
+            transport=AsyncHTTPTransport(verify=self._config.transport_verify()),
             headers={"Connection": "close"},
             timeout=self._probe_timeout,
         ) as client:
@@ -474,7 +464,7 @@ class RestartWaiter:
         try:
             response = await client.get(
                 self._get_timestamp_url(host),
-                auth=self._auth,
+                auth=self._config.auth,
             )
         except Exception as exc:
             if not retry.is_retryable_exception(exc):
@@ -508,7 +498,7 @@ class RestartWaiter:
     def _get_timestamp_url(self, host: str) -> str:
         """Return the Admin timestamp URL for a host."""
         return (
-            f"{self._protocol}://{host}:{_MARKLOGIC_ADMIN_API_PORT}"
+            f"{self._config.protocol}://{host}:{_MARKLOGIC_ADMIN_API_PORT}"
             f"{_RESTART_TIMESTAMP_PATH}"
         )
 

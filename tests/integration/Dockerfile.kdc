@@ -1,0 +1,11 @@
+FROM debian:bookworm-slim
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends krb5-kdc krb5-admin-server krb5-user \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY krb5/krb5.conf /etc/krb5.conf
+COPY krb5/kdc-entrypoint.sh /usr/local/bin/kdc-entrypoint.sh
+RUN chmod +x /usr/local/bin/kdc-entrypoint.sh
+
+ENTRYPOINT ["/usr/local/bin/kdc-entrypoint.sh"]

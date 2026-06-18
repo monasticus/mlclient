@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import xml.etree.ElementTree as ElemTree
 import zlib
-from pathlib import Path
 
 import pytest
 import pytest_asyncio
@@ -46,7 +45,7 @@ ml_mocker.with_delete_side_effect(
 
 @pytest_asyncio.fixture
 async def svc():
-    async with AsyncMLClient(auth_method="digest") as ml:
+    async with AsyncMLClient() as ml:
         yield ml.documents
 
 
@@ -553,7 +552,7 @@ async def test_delete_document_with_wipe_temporal(svc):
 async def test_delete_document_with_non_existing_database(svc):
     uri = "/some/dir/doc1.xml"
 
-    response_body_path = resources_utils.get_test_resource_path(
+    response_body = resources_utils.read_test_resource_bytes(
         __file__,
         "test-delete-document-with-non-existing-database.xml",
     )
@@ -564,7 +563,7 @@ async def test_delete_document_with_non_existing_database(svc):
     mocker.with_request_param("database", "Document")
     mocker.with_response_content_type("application/xml; charset=UTF-8")
     mocker.with_response_code(404)
-    mocker.with_response_body(Path(response_body_path).read_bytes())
+    mocker.with_response_body(response_body)
     mocker.mock_delete()
 
     with pytest.raises(MarkLogicError) as err:

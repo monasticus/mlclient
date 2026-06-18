@@ -46,6 +46,13 @@ def get_test_resource_json(
         return json.load(file)
 
 
+def read_test_resource_bytes(
+    test_path: str,
+    resource: str,
+) -> bytes:
+    return Path(get_test_resource_path(test_path, resource)).read_bytes()
+
+
 def get_test_resource_path(
     test_path: str,
     resource: str,

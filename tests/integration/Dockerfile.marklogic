@@ -1,0 +1,24 @@
+FROM progressofficial/marklogic-db:11.2.0-centos
+
+USER root
+
+# The CentOS 7 base only offers Python 3.6, too old for the provisioning code.
+# Install a self-contained modern Python instead, then add the provisioning
+# dependencies as prebuilt wheels (no compiler or Rust toolchain needed).
+ARG PYTHON_BUILD=20240814
+ARG PYTHON_VERSION=3.11.9
+RUN curl -sL -o /tmp/python.tar.gz \
+        "https://github.com/astral-sh/python-build-standalone/releases/download/${PYTHON_BUILD}/cpython-${PYTHON_VERSION}+${PYTHON_BUILD}-x86_64-unknown-linux-gnu-install_only.tar.gz" \
+    && tar -xzf /tmp/python.tar.gz -C /opt \
+    && rm /tmp/python.tar.gz \
+    && /opt/python/bin/python3 -m pip install --no-cache-dir httpx cryptography
+
+COPY provision /opt/mlclient/provision
+COPY entrypoint.sh /opt/mlclient/entrypoint.sh
+RUN chmod +x /opt/mlclient/entrypoint.sh
+
+USER marklogic_user
+
+ENV PATH=/opt/python/bin:$PATH
+ENV PYTHONPATH=/opt/mlclient
+ENTRYPOINT ["/tini", "--", "/opt/mlclient/entrypoint.sh"]

@@ -18,8 +18,9 @@ Examples
 """
 
 from .api_client import ApiClient, AsyncApiClient
+from mlclient.http_config import DEFAULT_RETRY_STRATEGY
+
 from .http_client import (
-    DEFAULT_RETRY_STRATEGY,
     MARKLOGIC_ADMIN_API_PORT,
     MARKLOGIC_MANAGE_API_PORT,
     MARKLOGIC_REST_API_PORT,

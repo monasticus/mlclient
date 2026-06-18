@@ -21,9 +21,7 @@ pytest_plugins = [
 
 @pytest.fixture(scope="class")
 def ml_client():
-    with MLClient(
-        auth_method="digest",
-    ) as ml:
+    with MLClient() as ml:
         yield ml
 
 

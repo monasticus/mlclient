@@ -13,7 +13,7 @@ from .common import parse_step_input
 
 @given("I connected to MarkLogic", target_fixture="ml")
 def init_ml() -> MLClient:
-    ml = MLClient(auth_method="digest")
+    ml = MLClient()
     ml.connect()
     return ml
 

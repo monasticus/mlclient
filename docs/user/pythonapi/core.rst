@@ -151,9 +151,9 @@ Port routing is automatic. When the main ``port`` differs from 8002 or 8001,
 separate connections to ports 8002 and 8001 are lazily created on first access
 to ``.manage`` or ``.admin``. If the main port happens to be 8002 (or 8001),
 that connection is reused directly. All secondary connections share the same
-``protocol``, ``host``, ``auth_method``, ``username``, and ``password`` as the
-main client. They are also managed by the ``connect()`` / ``disconnect()``
-lifecycle.
+``protocol``, ``host``, ``auth``, ``username``, ``password``, ``ssl``, and
+``cloud`` as the main client. They are also managed by the
+``connect()`` / ``disconnect()`` lifecycle.
 
 .. code-block:: python
 
@@ -999,6 +999,230 @@ DELETE request
     ...         "/manage/v2/databases/CustomDatabase",
     ...         params={"forest-delete": "configuration"}
     ...     )
+
+
+Connection and authentication
+------------------------------
+
+MLClient models two independent concerns separately:
+
+- **Connection** -- the transport: HTTP, HTTPS, mutual TLS, or MarkLogic Cloud.
+  Chosen from ``protocol``, ``ssl`` (:class:`~mlclient.connection.SSLConfig`),
+  and ``cloud`` (:class:`~mlclient.connection.CloudConfig`).
+- **Authentication** -- how the client proves its identity, chosen from ``auth``
+  with credentials supplied via ``username`` / ``password``.
+
+Both are validated when the client is constructed, so an unsupported combination
+raises :class:`~mlclient.exceptions.ConfigError` immediately rather than failing
+on the first request.
+
+Connection modes
+^^^^^^^^^^^^^^^^
+
+================  ==============================================================  ==================
+Mode              How to select it                                                Protocol / port
+================  ==============================================================  ==================
+HTTP              default                                                         ``http`` / ``8000``
+HTTPS             ``protocol="https"``                                            ``https``
+Mutual TLS        ``ssl=SSLConfig(cert_file=..., key_file=...)``                  ``https``
+MarkLogic Cloud   ``cloud=CloudConfig(api_key=..., base_path=...)``               ``https`` / ``443``
+================  ==============================================================  ==================
+
+A client certificate implies HTTPS, so the protocol is inferred. MarkLogic Cloud
+forces HTTPS on port 443 and routes every API tier through a single connection
+using the configured ``base_path``; passing a conflicting ``protocol`` or
+``port`` raises :class:`~mlclient.exceptions.ConfigError`.
+
+.. code-block:: python
+
+    >>> from mlclient import MLClient
+    >>> from mlclient.connection import SSLConfig, CloudConfig
+
+    # Plain HTTP (default)
+    >>> ml = MLClient(host="ml.example.com", port=8000)
+
+    # HTTPS with server-certificate verification
+    >>> ml = MLClient(protocol="https", host="ml.example.com", port=8443)
+
+    # HTTPS verified against a custom CA bundle
+    >>> ml = MLClient(
+    ...     protocol="https",
+    ...     host="ml.example.com",
+    ...     port=8443,
+    ...     ssl=SSLConfig(verify="/etc/ssl/corp-ca.pem"),
+    ... )
+
+    # Mutual TLS - the client certificate forces HTTPS
+    >>> ml = MLClient(
+    ...     host="ml.example.com",
+    ...     port=8443,
+    ...     ssl=SSLConfig(cert_file="/client.pem", key_file="/client-key.pem"),
+    ... )
+
+    # Mutual TLS with an encrypted client key - key_password decrypts it
+    >>> ml = MLClient(
+    ...     host="ml.example.com",
+    ...     port=8443,
+    ...     ssl=SSLConfig(
+    ...         cert_file="/client.pem",
+    ...         key_file="/client-key.pem",
+    ...         key_password="my-key-passphrase",
+    ...     ),
+    ... )
+
+    # MarkLogic Cloud
+    >>> ml = MLClient(
+    ...     host="my-org.marklogic.cloud",
+    ...     cloud=CloudConfig(api_key="my-api-key", base_path="/ml/my-instance"),
+    ... )
+
+Authentication methods
+^^^^^^^^^^^^^^^^^^^^^^
+
+The ``auth`` parameter accepts a string shortcut, an
+:class:`~mlclient.auth.AuthConfig` for methods that need more than a username
+and password, a custom :class:`httpx.Auth`, or ``None`` for application-level
+auth. Credentials always come from ``username`` / ``password`` -- never from
+``AuthConfig``.
+
+================================================  ====================  ============================================
+``auth`` value                                    Method                Credentials
+================================================  ====================  ============================================
+``"digest"`` (default)                            HTTP digest           ``username`` / ``password``
+``"basic"``                                       HTTP basic            ``username`` / ``password``
+``"digestbasic"``                                 HTTP digest           ``username`` / ``password``
+``"certificate"``                                 Client certificate    ``ssl`` client cert
+``"kerberos"``                                    Kerberos / SPNEGO     ambient ticket cache
+``AuthConfig(method="oauth", token=...)``         OAuth 2.0 Bearer      pre-acquired token
+``AuthConfig(method="kerberos", ...)``            Kerberos / SPNEGO     ambient ticket cache, custom SPN
+``None``                                          application-level     none
+a custom :class:`httpx.Auth` instance             custom                supplied by the handler
+================================================  ====================  ============================================
+
+``"certificate"`` and ``"kerberos"`` are accepted as plain strings because they
+need no extra data: certificate identity comes from the ``ssl`` client cert, and
+Kerberos defaults to the ``HTTP`` service on the request host. Use ``AuthConfig``
+only to override the Kerberos SPN (``service`` / ``hostname``), or for OAuth,
+which has no default token.
+
+With mutual TLS, ``auth`` defaults to ``"certificate"``, so it need not be set
+explicitly. Kerberos relies on the optional ``pyspnego`` dependency
+(``pip install mlclient[kerberos]``); the import is verified at client creation
+so a missing dependency fails early.
+
+.. code-block:: python
+
+    >>> from mlclient import MLClient
+    >>> from mlclient.auth import AuthConfig
+    >>> from mlclient.connection import SSLConfig
+
+    # Digest (default) - explicit here for clarity
+    >>> ml = MLClient(auth="digest", username="my-user", password="my-password")
+
+    # Basic auth
+    >>> ml = MLClient(auth="basic", username="my-user", password="my-password")
+
+    # Client certificate - the cert is the identity, and forces HTTPS;
+    # auth defaults to "certificate", so setting it explicitly is optional
+    >>> ml = MLClient(
+    ...     host="ml.example.com",
+    ...     port=8443,
+    ...     ssl=SSLConfig(cert_file="/client.pem", key_file="/client-key.pem"),
+    ... )
+
+    # Double auth - the client cert sets up mutual TLS as transport, but the
+    # user identity comes from a digest credential. Set auth explicitly to keep
+    # it instead of letting mutual TLS default it to "certificate".
+    >>> ml = MLClient(
+    ...     host="ml.example.com",
+    ...     port=8443,
+    ...     auth="digest",
+    ...     username="my-user",
+    ...     password="my-password",
+    ...     ssl=SSLConfig(cert_file="/client.pem", key_file="/client-key.pem"),
+    ... )
+
+    # OAuth 2.0 Bearer token
+    >>> ml = MLClient(auth=AuthConfig(method="oauth", token="jwt-token"))
+
+    # Kerberos / SPNEGO - credentials come from the ambient ticket cache
+    >>> ml = MLClient(protocol="https", auth="kerberos")
+
+    # Kerberos with a custom SPN - AuthConfig overrides service / hostname
+    >>> ml = MLClient(
+    ...     protocol="https",
+    ...     auth=AuthConfig(method="kerberos", service="HTTP", hostname="ml.example.com"),
+    ... )
+
+    # Application-level auth - no HTTP auth header is added
+    >>> ml = MLClient(auth=None)
+
+    # A custom httpx.Auth handler is passed through unchanged
+    >>> import httpx
+    >>> ml = MLClient(auth=httpx.BasicAuth("my-user", "my-password"))
+
+Valid and rejected combinations
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Validation rejects combinations MarkLogic cannot serve, and warns on ones that
+are valid but risky (basic auth over plain HTTP logs a cleartext-credentials
+warning rather than raising).
+
+================================================  =========  ===================================================
+Combination                                       Result     Reason
+================================================  =========  ===================================================
+HTTP + digest / basic                             valid      default credential auth
+HTTPS + digest / basic / oauth / kerberos         valid      credential or token auth over TLS
+Mutual TLS + certificate                          valid      client certificate proves identity
+Mutual TLS + explicit ``auth="digest"``           valid      double auth: certificate plus digest header
+Cloud + ``auth=None``                             valid      Cloud authenticates via its API key
+``certificate`` without a client cert             rejected   certificate auth requires a client cert over HTTPS
+client cert + ``protocol="http"``                 rejected   mutual TLS requires HTTPS
+Cloud + any explicit ``auth``                     rejected   Cloud handles authentication internally
+Cloud + ``protocol="http"`` or custom ``port``    rejected   Cloud forces HTTPS on port 443
+================================================  =========  ===================================================
+
+A client certificate plays one of two roles. On its own it *is* the identity:
+mutual TLS defaults ``auth`` to ``"certificate"`` and no auth header is sent. Set
+``auth`` to a credential method explicitly and the certificate drops to being
+just the transport - mutual TLS sets up the TLS channel while a digest or basic
+header carries the MarkLogic user identity. That second arrangement is *double
+auth*.
+
+.. code-block:: python
+
+    >>> from mlclient import MLClient
+    >>> from mlclient.auth import AuthConfig
+    >>> from mlclient.connection import SSLConfig, CloudConfig
+    >>> from mlclient.exceptions import ConfigError
+
+    # Certificate auth without a client certificate
+    >>> try:
+    ...     MLClient(auth=AuthConfig(method="certificate"))
+    ... except ConfigError as exc:
+    ...     print("rejected")
+    rejected
+
+    # A client certificate cannot be used over plain HTTP
+    >>> try:
+    ...     MLClient(
+    ...         protocol="http",
+    ...         ssl=SSLConfig(cert_file="/client.pem", key_file="/client-key.pem"),
+    ...     )
+    ... except ConfigError as exc:
+    ...     print("rejected")
+    rejected
+
+    # A Cloud connection rejects an explicit auth method
+    >>> try:
+    ...     MLClient(
+    ...         host="my-org.marklogic.cloud",
+    ...         cloud=CloudConfig(api_key="my-api-key", base_path="/ml/x"),
+    ...         auth="digest",
+    ...     )
+    ... except ConfigError as exc:
+    ...     print("rejected")
+    rejected
 
 
 Restart readiness

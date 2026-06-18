@@ -6,6 +6,7 @@ from pytest_mock import MockerFixture
 
 from mlclient.clients import http_client as http_client_module
 from mlclient.clients.http_client import HttpClient
+from mlclient.connection import CloudConfig
 from tests.utils import resources as resources_utils
 from tests.utils.ml_mockers import MLRespXMocker
 
@@ -348,19 +349,39 @@ def test_request_logs_debug_response_retrieved_no_body(mocker: MockerFixture):
     assert "Response retrieved" in debug_messages
 
 
+@respx.mock
+def test_cloud_request_applies_base_path():
+    base_url = "https://example.marklogic.cloud:443"
+    respx.post(f"{base_url}/token").mock(
+        return_value=httpx.Response(200, json={"access_token": "tok-1"}),
+    )
+    endpoint_route = respx.get(
+        f"{base_url}/ml/example/manage/manage/v2/servers",
+    ).mock(return_value=httpx.Response(200, text="ok"))
+
+    with HttpClient(
+        host="example.marklogic.cloud",
+        cloud=CloudConfig(api_key="mk-1", base_path="/ml/example/manage"),
+    ) as client:
+        resp = client.get("/manage/v2/servers")
+
+    assert resp.status_code == httpx.codes.OK
+    assert endpoint_route.called
+
+
 def test_properties():
     client = HttpClient(
         protocol="https",
         host="ml.example.com",
         port=8123,
-        auth_method="digest",
+        auth="digest",
         username="user",
         password="pass",
     )
     assert client.protocol == "https"
     assert client.host == "ml.example.com"
     assert client.port == 8123
-    assert client.auth_method == "digest"
+    assert client.auth == "digest"
     assert client.username == "user"
     assert client.password == "pass"
     assert client.base_url == "https://ml.example.com:8123"

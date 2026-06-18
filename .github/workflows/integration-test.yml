@@ -8,17 +8,6 @@ on:
 jobs:
   integration-tests:
     runs-on: ubuntu-latest
-    services:
-      marklogic:
-        image: marklogicdb/marklogic-db:latest-10.0
-        ports:
-          - 8000:8000
-          - 8001:8001
-          - 8002:8002
-        env:
-          MARKLOGIC_INIT: true
-          MARKLOGIC_ADMIN_USERNAME: admin
-          MARKLOGIC_ADMIN_PASSWORD: admin
 
     steps:
       - uses: actions/checkout@v3
@@ -28,13 +17,40 @@ jobs:
         with:
           python-version: "3.11"
 
+      - name: Install Kerberos client libraries
+        run: sudo apt-get update && sudo apt-get install -y libkrb5-dev krb5-user
+
       - name: Install MLClient with poetry
         run: |
           pip install poetry
-          poetry install
+          poetry install --extras kerberos
 
-      - name: Wait for MarkLogic readiness
-        run: poetry run python dev/scripts/wait-for-marklogic/wait_for_marklogic.py
+      - name: Start MarkLogic and provision the connection matrix
+        run: docker compose -f tests/integration/docker-compose.yaml up -d --build
+
+      - name: Wait for provisioning to complete
+        run: |
+          for _ in $(seq 1 120); do
+            health=$(docker inspect --format '{{.State.Health.Status}}' mlclient_integration)
+            state=$(docker inspect --format '{{.State.Status}}' mlclient_integration)
+            echo "MarkLogic state: ${state}, health: ${health}"
+            [ "${health}" = "healthy" ] && exit 0
+            if [ "${state}" = "exited" ]; then
+              echo "MarkLogic container exited before becoming healthy" >&2
+              docker logs mlclient_integration
+              exit 1
+            fi
+            sleep 10
+          done
+          echo "MarkLogic did not become healthy in time" >&2
+          docker logs mlclient_integration
+          exit 1
 
       - name: Test code with pytest
+        env:
+          MLCLIENT_IT_CERTS_DIR: tests/integration/.certs
         run: poetry run pytest tests/integration/
+
+      - name: Dump MarkLogic logs on failure
+        if: failure()
+        run: docker logs mlclient_integration

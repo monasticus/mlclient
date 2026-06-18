@@ -21,7 +21,7 @@ def assert_document_does_not_exist(
         f"category: content message: {uri}"
     )
     with (
-        MLClient(auth_method="digest") as ml,
+        MLClient() as ml,
         pytest.raises(
             MarkLogicError,
         ) as err,
@@ -33,14 +33,14 @@ def assert_document_does_not_exist(
 def assert_documents_exist(
     uris: list,
 ):
-    with MLClient(auth_method="digest") as ml:
+    with MLClient() as ml:
         assert ml.documents.read(uris) != {}
 
 
 def assert_documents_do_not_exist(
     uris: list,
 ):
-    with MLClient(auth_method="digest") as ml:
+    with MLClient() as ml:
         assert ml.documents.read(uris) == {}
 
 
@@ -54,7 +54,7 @@ def assert_documents_exist_and_confirm_data(
     expected: dict,
     category: str | list[str] = "content",
 ):
-    with MLClient(auth_method="digest") as ml:
+    with MLClient() as ml:
         actual_docs = ml.documents.read(list(expected.keys()), category=category)
         assert len(actual_docs) == len(expected)
         for uri, actual_doc in actual_docs.items():
@@ -70,7 +70,7 @@ def assert_documents_exist_and_confirm_data(
 def write_documents(
     docs: Document | Metadata | list[Document | Metadata],
 ):
-    with MLClient(auth_method="digest") as ml:
+    with MLClient() as ml:
         resp = ml.documents.write(docs)
         documents = resp["documents"]
         if not isinstance(docs, list):
@@ -91,7 +91,7 @@ def delete_documents(
     uri: str | list[str],
 ):
     try:
-        with MLClient(auth_method="digest") as ml:
+        with MLClient() as ml:
             ml.documents.delete(uri)
     except MarkLogicError as err:
         pytest.fail(str(err))

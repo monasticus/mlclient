@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from pathlib import Path
-
 import pytest
 import pytest_asyncio
 import respx
@@ -17,7 +15,7 @@ ENDPOINT = "/manage/v2/logs"
 
 @pytest_asyncio.fixture
 async def svc():
-    async with AsyncMLClient(auth_method="digest") as ml:
+    async with AsyncMLClient() as ml:
         yield ml.logs
 
 
@@ -373,7 +371,7 @@ async def test_get_logs_list_unauthorized(svc):
 @pytest.mark.asyncio
 @respx.mock
 async def test_get_logs_list_no_such_host(svc):
-    response_body_path = resources_utils.get_test_resource_path(
+    response_body = resources_utils.read_test_resource_bytes(
         __file__,
         "no-such-host.json",
     )
@@ -384,7 +382,7 @@ async def test_get_logs_list_no_such_host(svc):
     ml_mocker.with_response_content_type("application/json; charset=UTF-8")
     ml_mocker.with_response_code(404)
     ml_mocker.with_response_content_type("application/json; charset=UTF-8")
-    ml_mocker.with_response_body(Path(response_body_path).read_bytes())
+    ml_mocker.with_response_body(response_body)
     ml_mocker.mock_get()
 
     with pytest.raises(MarkLogicError) as err:

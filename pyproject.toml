@@ -50,6 +50,10 @@ xmltodict = "^0.13.0"
 hagis = "^0.8.7"
 aiofiles = "^24.1.0"
 httpx-retries = "^0.4.5"
+pyspnego = { version = "^0.12.1", extras = ["kerberos"], optional = true }
+
+[tool.poetry.extras]
+kerberos = ["pyspnego"]
 
 [tool.poetry.group.dev.dependencies]
 ruff = "*"
@@ -66,6 +70,7 @@ requests = "^2.32.3"
 responses = "^0.23.3"
 deepdiff = "^8.6.2"
 mimeograph = "^1.1.0"
+pyjwt = "^2.13.0"
 
 [tool.poetry.group.docs]
 optional = true
@@ -173,6 +178,18 @@ max-complexity = 10
     "UP007", # pydantic evaluates field annotations at runtime; X | Y needs 3.10+
     "UP045", # pydantic evaluates field annotations at runtime; Optional needs 3.10+
 ]
+"mlclient/connection.py" = [
+    "UP007", # pydantic evaluates field annotations at runtime; X | Y needs 3.10+
+    "UP045", # pydantic evaluates field annotations at runtime; Optional needs 3.10+
+]
+"mlclient/auth.py" = [
+    "UP045", # pydantic evaluates field annotations at runtime; Optional needs 3.10+
+    "PLR0913", # build_auth mirrors the connection params it resolves
+]
+"mlclient/ml_environment.py" = [
+    "UP007", # pydantic evaluates field annotations at runtime; X | Y needs 3.10+
+    "UP045", # pydantic evaluates field annotations at runtime; Optional needs 3.10+
+]
 "mlclient/models/documents.py" = [
     "PLR0913" # allow many arguments as they depend on ML structure
 ]
@@ -193,6 +210,10 @@ max-complexity = 10
 ]
 "tests/utils/__init__.py" = [
     "T201" # allow printing by MLResponseBuilder
+]
+"tests/integration/provision/provision.py" = [
+    "T201", # provisioning is a CLI script - progress goes to stdout
+    "PERF203" # retry loop must catch transport errors per attempt
 ]
 "tests/utils/ml_mockers.py" = [
     "T201", # allow printing by MLMocker

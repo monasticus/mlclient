@@ -1,6 +1,6 @@
 """The ML Data module.
 
-It exports 5 classes:
+It exports the following classes:
     * DocumentType
         An enumeration class representing document types.
     * Document
@@ -13,10 +13,6 @@ It exports 5 classes:
         A Document implementation representing a single MarkLogic TEXT document.
     * BinaryDocument
         A Document implementation representing a single MarkLogic BINARY document.
-    * RawDocument
-        A Document implementation representing a single MarkLogic document.
-    * RawStringDocument
-        A Document implementation representing a single MarkLogic document.
     * MetadataDocument
         A Document implementation representing a single MarkLogic document's metadata.
     * Metadata
@@ -35,26 +31,17 @@ import logging
 import re
 import xml.etree.ElementTree as ElemTree
 from abc import ABCMeta, abstractmethod
-from enum import Enum
 from pathlib import Path
 from typing import Any, ClassVar, TextIO
 from xml.dom import minidom
 
 import xmltodict
-from pydantic import BaseModel, Field
 
 from mlclient.exceptions import InvalidMetadataError
+from mlclient.mimetypes import Mimetypes
+from mlclient.models.types import DocumentType
 
 logger = logging.getLogger(__name__)
-
-
-class DocumentType(Enum):
-    """An enumeration class representing document types."""
-
-    XML: str = "xml"
-    JSON: str = "json"
-    BINARY: str = "binary"
-    TEXT: str = "text"
 
 
 class Document(metaclass=ABCMeta):
@@ -82,6 +69,8 @@ class Document(metaclass=ABCMeta):
         """
         self._uri = self._get_non_blank_uri(uri)
         self._doc_type = doc_type
+        if isinstance(metadata, (bytes, str)):
+            metadata = Metadata(raw=metadata)
         self._metadata = metadata
         self._temporal_collection = temporal_collection
 
@@ -118,36 +107,63 @@ class Document(metaclass=ABCMeta):
         content: ElemTree.Element | dict | str | bytes | None = None,
         *,
         doc_type: DocumentType | str | None = None,
-        metadata: Metadata | None = None,
+        metadata: Metadata | bytes | str | None = None,
         temporal_collection: str | None = None,
     ) -> Document:
-        """Instantiate Document based on the document or content type.
+        """Instantiate a typed Document, inferring type from content and URI.
+
+        The factory methods (``create``, ``xml``, ``json``, ``text``,
+        ``binary``, ``metadata_update``) take ``uri`` first - they read as
+        "create a document at this URI with this content". The concrete
+        constructors (``XMLDocument`` etc.) take ``content`` first, since
+        content is their only required argument and a URI-less document is
+        valid (e.g. one loaded from a file, with its URI assigned on write).
+
+        Type inference order:
+        1. Explicit ``doc_type`` parameter.
+        2. ``ElemTree.Element`` content -> XML.
+        3. ``dict`` content -> JSON.
+        4. ``str`` or ``bytes`` content + ``uri`` -> ``Mimetypes.get_doc_type(uri)``
+           (fallback: BINARY when the extension is unrecognised).
+        5. ``str`` content, no URI -> TEXT.
+        6. ``bytes`` content, no URI -> BINARY.
 
         Parameters
         ----------
         uri : str | None, default None
-            A document URI
+            A document URI.
         content : ElemTree.Element | dict | str | bytes | None, default None
-            A document content
+            A document content.
         doc_type : DocumentType | str | None, default None
-            A document type
-        metadata : Metadata | None, default None
-            A document metadata
+            A document type override.
+        metadata : Metadata | bytes | str | None, default None
+            A document metadata.
         temporal_collection : str | None, default None
-            The temporal collection
+            The temporal collection.
 
         Returns
         -------
         Document
-            A Document implementation instance
+            A typed Document subclass instance.
+
+        Raises
+        ------
+        TypeError
+            If both ``content`` and ``doc_type`` are None (use
+            ``Document.metadata_update()`` for metadata-only updates).
         """
         if isinstance(doc_type, str):
             doc_type = DocumentType(doc_type)
 
         if content is None and doc_type is None:
-            return MetadataDocument(uri=uri, metadata=metadata)
+            msg = (
+                "Cannot infer document type: provide content, doc_type, "
+                "or use Document.metadata_update() for metadata-only updates"
+            )
+            raise TypeError(msg)
 
-        impl = _get_document_impl(content, doc_type)
+        resolved_type = _resolve_doc_type(content, doc_type, uri)
+        impl = _TYPED_IMPLS[resolved_type]
         return impl(
             content=content,
             uri=uri,
@@ -156,54 +172,183 @@ class Document(metaclass=ABCMeta):
         )
 
     @classmethod
-    def create_raw(
+    def xml(
+        cls,
+        uri: str | None = None,
+        content: ElemTree.Element | str | bytes | None = None,
+        *,
+        metadata: Metadata | bytes | str | None = None,
+        temporal_collection: str | None = None,
+    ) -> XMLDocument:
+        """Instantiate an XMLDocument.
+
+        Accepts ``ElemTree.Element``, ``str``, or ``bytes`` content.
+        String and bytes are stored as-is; parsing to ElementTree is deferred
+        to the first ``.content`` access.
+
+        Parameters
+        ----------
+        uri : str | None, default None
+            A document URI.
+        content : ElemTree.Element | str | bytes
+            XML content. Required; ``None`` raises ``TypeError``.
+        metadata : Metadata | bytes | str | None, default None
+            A document metadata.
+        temporal_collection : str | None, default None
+            The temporal collection.
+
+        Returns
+        -------
+        XMLDocument
+        """
+        return XMLDocument(
+            content=content,
+            uri=uri,
+            metadata=metadata,
+            temporal_collection=temporal_collection,
+        )
+
+    @classmethod
+    def json(
+        cls,
+        uri: str | None = None,
+        content: dict | str | bytes | None = None,
+        *,
+        metadata: Metadata | bytes | str | None = None,
+        temporal_collection: str | None = None,
+    ) -> JSONDocument:
+        """Instantiate a JSONDocument.
+
+        Accepts ``dict``, ``str``, or ``bytes`` content.
+        String and bytes are stored as-is; parsing to dict is deferred to the
+        first ``.content`` access.
+
+        Parameters
+        ----------
+        uri : str | None, default None
+            A document URI.
+        content : dict | str | bytes
+            JSON content. Required; ``None`` raises ``TypeError``.
+        metadata : Metadata | bytes | str | None, default None
+            A document metadata.
+        temporal_collection : str | None, default None
+            The temporal collection.
+
+        Returns
+        -------
+        JSONDocument
+        """
+        return JSONDocument(
+            content=content,
+            uri=uri,
+            metadata=metadata,
+            temporal_collection=temporal_collection,
+        )
+
+    @classmethod
+    def text(
+        cls,
+        uri: str | None = None,
+        content: str | bytes | None = None,
+        *,
+        metadata: Metadata | bytes | str | None = None,
+        temporal_collection: str | None = None,
+    ) -> TextDocument:
+        """Instantiate a TextDocument.
+
+        Parameters
+        ----------
+        uri : str | None, default None
+            A document URI.
+        content : str | bytes
+            Text content. Required; ``None`` raises ``TypeError``.
+        metadata : Metadata | bytes | str | None, default None
+            A document metadata.
+        temporal_collection : str | None, default None
+            The temporal collection.
+
+        Returns
+        -------
+        TextDocument
+        """
+        return TextDocument(
+            content=content,
+            uri=uri,
+            metadata=metadata,
+            temporal_collection=temporal_collection,
+        )
+
+    @classmethod
+    def binary(
+        cls,
+        uri: str | None = None,
+        content: bytes | None = None,
+        *,
+        metadata: Metadata | bytes | str | None = None,
+        temporal_collection: str | None = None,
+    ) -> BinaryDocument:
+        """Instantiate a BinaryDocument.
+
+        Parameters
+        ----------
+        uri : str | None, default None
+            A document URI.
+        content : bytes
+            Binary content. Required; ``None`` raises ``TypeError``.
+        metadata : Metadata | bytes | str | None, default None
+            A document metadata.
+        temporal_collection : str | None, default None
+            The temporal collection.
+
+        Returns
+        -------
+        BinaryDocument
+        """
+        return BinaryDocument(
+            content=content,
+            uri=uri,
+            metadata=metadata,
+            temporal_collection=temporal_collection,
+        )
+
+    @classmethod
+    def metadata_update(
         cls,
         uri: str,
-        content: bytes | str,
+        metadata: Metadata | bytes | str,
         *,
-        doc_type: DocumentType | str,
-        metadata: bytes | str | None = None,
         temporal_collection: str | None = None,
-    ) -> Document:
-        """Instantiate Document based on the document type.
+    ) -> MetadataDocument:
+        """Instantiate a MetadataDocument for a metadata-only update.
+
+        Updates the metadata of an existing MarkLogic document without
+        touching its content body.
 
         Parameters
         ----------
         uri : str
-            A document URI
-        content : bytes | str
-            A document content
-        doc_type : DocumentType | str
-            A document type
-        metadata : bytes | str | None, default None
-            A document metadata
+            A document URI.
+        metadata : Metadata | bytes | str
+            Document metadata to apply.
         temporal_collection : str | None, default None
-            The temporal collection
+            The temporal collection.
 
         Returns
         -------
-        Document
-            A raw Document implementation instance
+        MetadataDocument
 
         Raises
         ------
-        NotImplementedError
-            If content type is neither bytes nor str
+        TypeError
+            If uri is blank or metadata is None.
         """
-        if isinstance(doc_type, str):
-            doc_type = DocumentType(doc_type)
-
-        if isinstance(content, bytes):
-            impl = RawDocument
-        elif isinstance(content, str):
-            impl = RawStringDocument
-        else:
-            msg = "Raw document can store content only in [bytes] or [str] format!"
-            raise NotImplementedError(msg)
-
-        return impl(
-            content=content,
-            doc_type=doc_type,
+        if not uri or (isinstance(uri, str) and not uri.strip()):
+            msg = "uri is required for Document.metadata_update()"
+            raise TypeError(msg)
+        if metadata is None:
+            msg = "metadata is required for Document.metadata_update()"
+            raise TypeError(msg)
+        return MetadataDocument(
             uri=uri,
             metadata=metadata,
             temporal_collection=temporal_collection,
@@ -216,10 +361,14 @@ class Document(metaclass=ABCMeta):
     ) -> Any:
         """A document content.
 
+        Typed content-bearing implementations narrow this to a non-``None``
+        return type (``ElemTree.ElementTree``, ``dict``, ``str``, ``bytes``).
+        ``MetadataDocument`` carries no content body and returns ``None``.
+
         Returns
         -------
         Any
-            A document's content
+            A document's content, or ``None`` for metadata-only documents.
         """
         raise NotImplementedError
 
@@ -227,13 +376,20 @@ class Document(metaclass=ABCMeta):
     @abstractmethod
     def content_bytes(
         self,
-    ) -> bytes:
+    ) -> bytes | None:
         """A document content bytes.
+
+        Typed content-bearing documents (``XMLDocument``, ``JSONDocument``,
+        ``TextDocument``, ``BinaryDocument``) always return ``bytes`` and
+        narrow this return type accordingly. ``MetadataDocument`` carries no
+        content body and returns ``None``; callers that operate on a generic
+        ``Document`` must handle that case before writing to a bytes sink.
 
         Returns
         -------
-        bytes
-            A document's content bytes
+        bytes | None
+            A document's content bytes, or ``None`` for metadata-only
+            documents.
         """
         raise NotImplementedError
 
@@ -241,13 +397,20 @@ class Document(metaclass=ABCMeta):
     @abstractmethod
     def content_string(
         self,
-    ) -> str:
-        """A document content in string format.
+    ) -> str | None:
+        """A document content as a string.
+
+        ``XMLDocument``, ``JSONDocument`` and ``TextDocument`` always return
+        ``str`` and narrow this return type accordingly. ``BinaryDocument``
+        and ``MetadataDocument`` return ``None`` - binary content has no
+        meaningful string representation and metadata-only documents carry
+        no content body.
 
         Returns
         -------
-        str
-            A document's content in string format
+        str | None
+            A document's content as a string, or ``None`` for binary or
+            metadata-only documents.
         """
         raise NotImplementedError
 
@@ -290,146 +453,253 @@ class Document(metaclass=ABCMeta):
 class JSONDocument(Document):
     """A Document implementation representing a single MarkLogic JSON document.
 
-    This implementation stores content in dict format.
+    Accepts ``dict``, ``str``, or ``bytes`` content. String and bytes are stored
+    as-is; parsing to ``dict`` is deferred to the first ``.content`` access.
     """
 
     def __init__(
         self,
-        content: dict,
+        content: dict | str | bytes,
         uri: str | None = None,
-        metadata: Metadata | None = None,
+        metadata: Metadata | bytes | str | None = None,
         temporal_collection: str | None = None,
     ):
-        """Initialize JSONDocument instance.
-
-        Parameters
-        ----------
-        content : dict
-            A document content
-        uri : str
-            A document URI
-        metadata : Metadata
-            A document metadata
-        temporal_collection : bool
-            The temporal colllection
-        """
+        if content is None:
+            msg = (
+                "JSONDocument requires content; "
+                "use Document.metadata_update() for metadata-only updates"
+            )
+            raise TypeError(msg)
         super().__init__(uri, DocumentType.JSON, metadata, temporal_collection)
-        self._content = content
+        self._parsed: dict | None = content if isinstance(content, dict) else None
+        self._content_bytes: bytes | None = (
+            content if isinstance(content, bytes) else None
+        )
+        self._content_string: str | None = content if isinstance(content, str) else None
 
     @property
-    def content(
-        self,
-    ) -> dict:
-        """A document content.
+    def content(self) -> dict:
+        """A parsed dict representation of JSON content.
+
+        Parsing from the raw string/bytes form is deferred to the first access
+        and cached for subsequent calls.
 
         Returns
         -------
         dict
-            A document's content
+            The parsed JSON content as a dictionary.
         """
-        return self._content
+        if self._parsed is None:
+            raw = (
+                self._content_bytes
+                if self._content_bytes is not None
+                else self._content_string
+            )
+            self._parsed = json.loads(raw)
+        return self._parsed
 
     @property
-    def content_bytes(
-        self,
-    ) -> bytes:
-        """A document content bytes.
+    def content_bytes(self) -> bytes:
+        """A UTF-8 encoded representation of the JSON content.
+
+        Computed once on first access and cached for subsequent calls.
 
         Returns
         -------
         bytes
-            A document's content bytes
+            The content encoded as UTF-8 bytes.
         """
-        return self.content_string.encode("utf-8")
+        if self._content_bytes is None:
+            if self._content_string is not None:
+                self._content_bytes = self._content_string.encode("utf-8")
+            else:
+                self._content_bytes = json.dumps(self._parsed).encode("utf-8")
+        return self._content_bytes
 
     @property
-    def content_string(
-        self,
-    ) -> str:
-        """A document content in string format.
+    def content_string(self) -> str:
+        """A string representation of the JSON content.
+
+        Computed once on first access and cached for subsequent calls.
 
         Returns
         -------
         str
-            A document's content in string format
+            The content as a string.
         """
-        return json.dumps(self._content)
+        if self._content_string is None:
+            if self._content_bytes is not None:
+                self._content_string = self._content_bytes.decode("utf-8")
+            else:
+                self._content_string = json.dumps(self._parsed)
+        return self._content_string
+
+    def invalidate(self) -> JSONDocument:
+        """Drop cached bytes/string serializations of the parsed dict.
+
+        Use this when the parsed ``.content`` has been mutated externally so
+        that subsequent ``.content_bytes`` / ``.content_string`` calls
+        re-serialize from the parsed form instead of returning stale cached
+        output. Has no effect when the document has not been parsed yet.
+
+        Returns
+        -------
+        JSONDocument
+            ``self``, so the call can be chained directly into a write.
+
+        Examples
+        --------
+        >>> doc.content["name"] = "Smith"
+        >>> ml.documents.write(doc.invalidate())
+        """
+        if self._parsed is not None:
+            self._content_bytes = None
+            self._content_string = None
+        return self
 
 
 class XMLDocument(Document):
     """A Document implementation representing a single MarkLogic XML document.
 
-    This implementation stores content in ElemTree.ElementTree format.
+    Accepts ``ElemTree.Element``, ``str``, or ``bytes`` content.
+    String and bytes are stored as-is; parsing to ``ElementTree`` is deferred
+    to the first ``.content`` access.
     """
+
+    _XML_DECL_RE: ClassVar = re.compile(r"^\s*<\?xml[^?]*\?>\s*")
 
     def __init__(
         self,
-        content: ElemTree.ElementTree,
+        content: ElemTree.ElementTree | ElemTree.Element | str | bytes,
         uri: str | None = None,
-        metadata: Metadata | None = None,
+        metadata: Metadata | bytes | str | None = None,
         temporal_collection: str | None = None,
     ):
-        """Initialize XMLDocument instance.
-
-        Parameters
-        ----------
-        content : ElemTree.ElementTree
-            A document content
-        uri : str
-            A document URI
-        metadata : Metadata
-            A document metadata
-        temporal_collection : bool
-            The temporal colllection
-        """
+        if content is None:
+            msg = (
+                "XMLDocument requires content; "
+                "use Document.metadata_update() for metadata-only updates"
+            )
+            raise TypeError(msg)
         super().__init__(uri, DocumentType.XML, metadata, temporal_collection)
-        self._content = content
+        if isinstance(content, ElemTree.Element):
+            self._parsed: ElemTree.ElementTree | None = ElemTree.ElementTree(content)
+        elif isinstance(content, ElemTree.ElementTree):
+            self._parsed = content
+        else:
+            self._parsed = None
+        self._content_bytes: bytes | None = (
+            content if isinstance(content, bytes) else None
+        )
+        self._content_string: str | None = content if isinstance(content, str) else None
 
     @property
-    def content(
-        self,
-    ) -> ElemTree.ElementTree:
-        """A document content.
+    def content(self) -> ElemTree.ElementTree:
+        """A parsed ElementTree representation of the XML content.
+
+        Parsing from the raw string/bytes form is deferred to the first access
+        and cached for subsequent calls.
 
         Returns
         -------
         ElemTree.ElementTree
-            A document's content
+            The parsed XML content as an ElementTree.
         """
-        return self._content
+        if self._parsed is None:
+            if self._content_bytes is not None:
+                self._parsed = ElemTree.ElementTree(
+                    ElemTree.fromstring(self._content_bytes),
+                )
+            else:
+                source = self._XML_DECL_RE.sub("", self._content_string, count=1)
+                self._parsed = ElemTree.ElementTree(ElemTree.fromstring(source))
+        return self._parsed
 
     @property
-    def content_bytes(
-        self,
-    ) -> bytes:
-        """A document content bytes.
+    def content_bytes(self) -> bytes:
+        """A UTF-8 encoded representation of the XML content with declaration.
+
+        Computed once on first access and cached for subsequent calls.
 
         Returns
         -------
         bytes
-            A document's content bytes
+            The content encoded as UTF-8 bytes.
         """
-        return ElemTree.tostring(
-            self._content.getroot(),
-            encoding="UTF-8",
-            xml_declaration=True,
-        ).replace(
-            b"<?xml version='1.0' encoding='UTF-8'?>",
-            b'<?xml version="1.0" encoding="UTF-8"?>',
-        )
+        if self._content_bytes is None:
+            if self._content_string is not None:
+                self._content_bytes = self._content_string.encode("utf-8")
+            else:
+                self._content_bytes = self._serialize_tree()
+        return self._content_bytes
 
     @property
-    def content_string(
-        self,
-    ) -> str:
-        """A document content in string format.
+    def content_string(self) -> str:
+        """A string representation of the XML content.
+
+        Computed once on first access and cached for subsequent calls.
 
         Returns
         -------
         str
-            A document's content in string format
+            The content as a string.
         """
-        return self.content_bytes.decode("utf-8")
+        if self._content_string is None:
+            if self._content_bytes is not None:
+                self._content_string = self._content_bytes.decode("utf-8")
+            else:
+                self._content_string = self._serialize_tree().decode("utf-8")
+        return self._content_string
+
+    def _serialize_tree(self) -> bytes:
+        """Serialize the parsed ElementTree to UTF-8 bytes with XML declaration."""
+        return _normalize_xml_declaration(
+            ElemTree.tostring(
+                self._parsed.getroot(),
+                encoding="UTF-8",
+                xml_declaration=True,
+            ),
+        )
+
+    def xpath(self, expr: str, **namespaces: str) -> list:
+        """Run an XPath expression against the document content.
+
+        Parameters
+        ----------
+        expr : str
+            XPath expression.
+        **namespaces : str
+            Namespace prefix-to-URI mappings used in ``expr``.
+
+        Returns
+        -------
+        list
+            Matching elements.
+        """
+        return self.content.findall(expr, namespaces or None)
+
+    def invalidate(self) -> XMLDocument:
+        """Drop cached bytes/string serializations of the parsed ElementTree.
+
+        Use this when the parsed ``.content`` has been mutated externally so
+        that subsequent ``.content_bytes`` / ``.content_string`` calls
+        re-serialize from the parsed form instead of returning stale cached
+        output. Has no effect when the document has not been parsed yet.
+
+        Returns
+        -------
+        XMLDocument
+            ``self``, so the call can be chained directly into a write.
+
+        Examples
+        --------
+        >>> doc.content.find("name").text = "Smith"
+        >>> ml.documents.write(doc.invalidate())
+        """
+        if self._parsed is not None:
+            self._content_bytes = None
+            self._content_string = None
+        return self
 
 
 class TextDocument(Document):
@@ -440,65 +710,59 @@ class TextDocument(Document):
 
     def __init__(
         self,
-        content: str,
+        content: str | bytes,
         uri: str | None = None,
-        metadata: Metadata | None = None,
+        metadata: Metadata | bytes | str | None = None,
         temporal_collection: str | None = None,
     ):
-        """Initialize TextDocument instance.
-
-        Parameters
-        ----------
-        content : str
-            A document content
-        uri : str
-            A document URI
-        metadata : Metadata
-            A document metadata
-        temporal_collection : bool
-            The temporal colllection
-        """
+        if content is None:
+            msg = (
+                "TextDocument requires content; "
+                "use Document.metadata_update() for metadata-only updates"
+            )
+            raise TypeError(msg)
         super().__init__(uri, DocumentType.TEXT, metadata, temporal_collection)
-        self._content = content
+        self._content_string: str | None = content if isinstance(content, str) else None
+        self._content_bytes: bytes | None = (
+            content if isinstance(content, bytes) else None
+        )
 
     @property
-    def content(
-        self,
-    ) -> str:
+    def content(self) -> str:
         """A document content.
 
         Returns
         -------
         str
-            A document's content
+            The text content.
         """
-        return self._content
+        return self.content_string
 
     @property
-    def content_bytes(
-        self,
-    ) -> bytes:
-        """A document content bytes.
+    def content_bytes(self) -> bytes:
+        """A document content as bytes.
 
         Returns
         -------
         bytes
-            A document's content bytes
+            The text content encoded as UTF-8.
         """
-        return self._content.encode("utf-8")
+        if self._content_bytes is None:
+            self._content_bytes = self._content_string.encode("utf-8")
+        return self._content_bytes
 
     @property
-    def content_string(
-        self,
-    ) -> str:
-        """A document content in string format.
+    def content_string(self) -> str:
+        """A document content as a string.
 
         Returns
         -------
         str
-            A document's content in string format
+            The text content.
         """
-        return self.content
+        if self._content_string is None:
+            self._content_string = self._content_bytes.decode("utf-8")
+        return self._content_string
 
 
 class BinaryDocument(Document):
@@ -511,309 +775,158 @@ class BinaryDocument(Document):
         self,
         content: bytes,
         uri: str | None = None,
-        metadata: Metadata | None = None,
+        metadata: Metadata | bytes | str | None = None,
         temporal_collection: str | None = None,
     ):
-        """Initialize BinaryDocument instance.
-
-        Parameters
-        ----------
-        content : bytes
-            A document content
-        uri : str
-            A document URI
-        metadata : Metadata
-            A document metadata
-        temporal_collection : bool
-            The temporal colllection
-        """
+        if content is None:
+            msg = (
+                "BinaryDocument requires content; "
+                "use Document.metadata_update() for metadata-only updates"
+            )
+            raise TypeError(msg)
         super().__init__(uri, DocumentType.BINARY, metadata, temporal_collection)
-        self._content = content
+        self._content_bytes = content
 
     @property
-    def content(
-        self,
-    ) -> bytes:
+    def content(self) -> bytes:
         """A document content.
 
         Returns
         -------
         bytes
-            A document's content
+            The binary content.
         """
-        return self._content
+        return self._content_bytes
 
     @property
-    def content_bytes(
-        self,
-    ) -> bytes:
-        """A document content bytes.
+    def content_bytes(self) -> bytes:
+        """A document content as bytes.
 
         Returns
         -------
         bytes
-            A document's content bytes
+            The binary content.
         """
-        return self.content
+        return self._content_bytes
 
     @property
-    def content_string(
-        self,
-    ) -> str:
-        """A document content bytes.
+    def content_string(self) -> None:
+        """A document content as a string.
 
         Returns
         -------
-        str
-            A document's content bytes
+        None
+            Always None; binary content has no meaningful string
+            representation.
         """
-        return self._content.decode("utf-8")
-
-
-class RawDocument(Document):
-    """A Document implementation representing a single MarkLogic document.
-
-    This implementation stores content in bytes format.
-    """
-
-    def __init__(
-        self,
-        content: bytes,
-        uri: str | None = None,
-        doc_type: DocumentType | None = DocumentType.XML,
-        metadata: bytes | None = None,
-        temporal_collection: str | None = None,
-    ):
-        """Initialize RawDocument instance.
-
-        Parameters
-        ----------
-        content : bytes
-            A document content
-        uri : str
-            A document URI
-        doc_type : DocumentType | None
-            A document type
-        metadata : bytes
-            A document metadata
-        temporal_collection : bool
-            The temporal colllection
-        """
-        super().__init__(uri, doc_type, metadata, temporal_collection)
-        self._content = content
-
-    @property
-    def content(
-        self,
-    ) -> bytes:
-        """A document content.
-
-        Returns
-        -------
-        bytes
-            A document's content
-        """
-        return self._content
-
-    @property
-    def content_bytes(
-        self,
-    ) -> bytes:
-        """A document content bytes.
-
-        Returns
-        -------
-        bytes
-            A document's content bytes
-        """
-        return self.content
-
-    @property
-    def content_string(
-        self,
-    ) -> str:
-        """A document content in string format.
-
-        Returns
-        -------
-        str
-            A document's content in string format
-        """
-        return self._content.decode("utf-8")
-
-
-class RawStringDocument(Document):
-    """A Document implementation representing a single MarkLogic document.
-
-    This implementation stores content in a string format.
-    """
-
-    def __init__(
-        self,
-        content: str,
-        uri: str | None = None,
-        doc_type: DocumentType | None = DocumentType.XML,
-        metadata: str | None = None,
-        temporal_collection: str | None = None,
-    ):
-        """Initialize RawStringDocument instance.
-
-        Parameters
-        ----------
-        content : str
-            A document content
-        uri : str
-            A document URI
-        doc_type : DocumentType | None
-            A document type
-        metadata : str
-            A document metadata
-        temporal_collection : bool
-            The temporal colllection
-        """
-        super().__init__(uri, doc_type, metadata, temporal_collection)
-        self._content = content
-
-    @property
-    def content(
-        self,
-    ) -> str:
-        """A document content.
-
-        Returns
-        -------
-        str
-            A document's content
-        """
-        return self._content
-
-    @property
-    def content_bytes(
-        self,
-    ) -> bytes:
-        """A document content bytes.
-
-        Returns
-        -------
-        bytes
-            A document's content bytes
-        """
-        return self._content.encode("utf-8")
-
-    @property
-    def content_string(
-        self,
-    ) -> str:
-        """A document content in string format.
-
-        Returns
-        -------
-        str
-            A document's content in string format
-        """
-        return self.content
+        return None
 
 
 class MetadataDocument(Document):
-    """A Document implementation representing a single MarkLogic document's metadata.
+    """A Document implementation for metadata-only updates.
 
-    This implementation does not store any content.
+    Does not store document content. Use ``Document.metadata_update()`` to
+    create instances rather than calling the constructor directly.
     """
 
     def __init__(
         self,
         uri: str,
-        metadata: Metadata,
+        metadata: Metadata | bytes | str,
+        temporal_collection: str | None = None,
     ):
-        """Initialize RawStringDocument instance.
-
-        Parameters
-        ----------
-        uri : str
-            A document URI
-        metadata : Metadata
-            A document metadata
-        """
-        super().__init__(uri, doc_type=None, metadata=metadata)
+        super().__init__(
+            uri,
+            doc_type=None,
+            metadata=metadata,
+            temporal_collection=temporal_collection,
+        )
 
     @property
-    def content(
-        self,
-    ) -> None:
+    def content(self) -> None:
         """A document content.
 
         Returns
         -------
         None
-            A document's content
+            Always None; metadata-only documents have no content.
         """
-        return
+        return None
 
     @property
-    def content_bytes(
-        self,
-    ) -> None:
-        """A document content bytes.
+    def content_bytes(self) -> None:
+        """A document content as bytes.
 
         Returns
         -------
         None
-            A document's content bytes
+            Always None; metadata-only documents have no content.
         """
-        return
+        return None
 
     @property
-    def content_string(
-        self,
-    ) -> None:
-        """A document content in string format.
+    def content_string(self) -> None:
+        """A document content as a string.
 
         Returns
         -------
         None
-            A document's content in string format
+            Always None; metadata-only documents have no content.
         """
-        return
+        return None
 
 
-def _get_document_impl(
+_TYPED_IMPLS: dict[DocumentType, type] = {
+    DocumentType.XML: XMLDocument,
+    DocumentType.JSON: JSONDocument,
+    DocumentType.TEXT: TextDocument,
+    DocumentType.BINARY: BinaryDocument,
+}
+
+
+def _resolve_doc_type(
     content: ElemTree.Element | dict | str | bytes | None,
     doc_type: DocumentType | None,
-):
-    """Return Document's implementation based on document type or content.
+    uri: str | None,
+) -> DocumentType:
+    """Resolve the document type from an explicit type, content Python type, and URI.
 
-    Parameters
-    ----------
-    content : ElemTree.Element | dict | str | bytes | None
-        A document content
-    doc_type : DocumentType | None
-        A document type
-
-    Returns
-    -------
-    Document
-        A Document's subclass reference
+    Resolution order:
+    1. Explicit ``doc_type``.
+    2. ``ElemTree.Element`` -> XML.
+    3. ``dict`` -> JSON.
+    4. ``str``/``bytes`` + ``uri`` -> ``Mimetypes.get_doc_type(uri)``.
+    5. ``str`` + no URI -> TEXT.
+    6. ``bytes`` + no URI -> BINARY.
     """
-    if doc_type == DocumentType.XML:
-        impl = XMLDocument
-    elif doc_type == DocumentType.JSON:
-        impl = JSONDocument
-    elif doc_type == DocumentType.TEXT:
-        impl = TextDocument
-    elif doc_type == DocumentType.BINARY:
-        impl = BinaryDocument
-    elif isinstance(content, ElemTree.Element):
-        impl = XMLDocument
-    elif isinstance(content, dict):
-        impl = JSONDocument
-    elif isinstance(content, str):
-        impl = TextDocument
-    elif isinstance(content, bytes):
-        impl = BinaryDocument
-    else:
-        msg = "Unsupported document type! Document types are: XML, JSON, TEXT, BINARY!"
-        raise NotImplementedError(msg)
-    return impl
+    if doc_type is not None:
+        return doc_type
+    if isinstance(content, ElemTree.Element):
+        return DocumentType.XML
+    if isinstance(content, dict):
+        return DocumentType.JSON
+    if isinstance(content, (str, bytes)):
+        if uri:
+            return Mimetypes.get_doc_type(uri)
+        return DocumentType.TEXT if isinstance(content, str) else DocumentType.BINARY
+    msg = "Unsupported document type! Document types are: XML, JSON, TEXT, BINARY!"
+    raise NotImplementedError(msg)
+
+
+_XML_DECL_RE = re.compile(
+    rb"^\s*<\?xml\s+version=['\"][^'\"]*['\"]\s+encoding=['\"][^'\"]*['\"]\s*\?>",
+)
+_XML_DECL_CANONICAL = b'<?xml version="1.0" encoding="UTF-8"?>'
+
+
+def _normalize_xml_declaration(serialized: bytes) -> bytes:
+    """Rewrite the leading XML declaration to a canonical form.
+
+    Produces ``<?xml version="1.0" encoding="UTF-8"?>`` regardless of the
+    quote style and encoding case emitted by ElementTree (single quotes,
+    lowercase ``utf-8``) or minidom (double quotes, lowercase ``utf-8``).
+    """
+    return _XML_DECL_RE.sub(_XML_DECL_CANONICAL, serialized, count=1)
 
 
 class Metadata:
@@ -885,7 +998,23 @@ class Metadata:
         file: TextIO,
     ) -> Metadata:
         """Initialize a Metadata instance from a JSON file."""
-        raw_metadata = json.load(file)
+        return Metadata(**cls._parse_json(file.read()))
+
+    @classmethod
+    def _from_xml_file(
+        cls,
+        file: TextIO,
+    ) -> Metadata:
+        """Initialize a Metadata instance from an XML file."""
+        return Metadata(**cls._parse_xml(file.read()))
+
+    @classmethod
+    def _parse_json(
+        cls,
+        content: str,
+    ) -> dict:
+        """Parse a JSON metadata payload to Metadata constructor kwargs."""
+        raw_metadata = json.loads(content)
         if "permissions" in raw_metadata:
             permissions = []
             for permission in raw_metadata["permissions"]:
@@ -896,15 +1025,20 @@ class Metadata:
         if "metadataValues" in raw_metadata:
             raw_metadata["metadata_values"] = raw_metadata["metadataValues"]
             del raw_metadata["metadataValues"]
-        return Metadata(**raw_metadata)
+        return raw_metadata
 
     @classmethod
-    def _from_xml_file(
+    def _parse_xml(
         cls,
-        file: TextIO,
-    ) -> Metadata:
-        """Initialize a Metadata instance from an XML file."""
-        content = file.read()
+        content: str,
+    ) -> dict:
+        """Parse an XML metadata payload to Metadata constructor kwargs.
+
+        Empty XML elements (``<rapi:collections/>``, ``<rapi:permissions/>``
+        etc.) are normal in MarkLogic responses for documents that have no
+        values for a category. ``xmltodict`` represents them as ``None``;
+        treat them as absent so ``Metadata.__init__`` defaults take over.
+        """
         cls._validate_xml_metadata(content)
         parsed = xmltodict.parse(
             content,
@@ -914,7 +1048,8 @@ class Metadata:
                 cls._PROP_NS_URI: None,
             },
         )
-        raw_metadata = parsed["metadata"]
+        metadata_node = parsed["metadata"] or {}
+        raw_metadata = {k: v for k, v in metadata_node.items() if v is not None}
         for items, item in cls._XML_FILE_MAPPINGS.items():
             if items in raw_metadata:
                 values = raw_metadata[items][item]
@@ -945,7 +1080,7 @@ class Metadata:
             del raw_metadata["metadata-values"]
         if "quality" in raw_metadata:
             raw_metadata["quality"] = int(raw_metadata["quality"])
-        return Metadata(**raw_metadata)
+        return raw_metadata
 
     @classmethod
     def _validate_xml_metadata(
@@ -976,6 +1111,8 @@ class Metadata:
         properties: dict | None = None,
         quality: int = 0,
         metadata_values: dict | None = None,
+        *,
+        raw: bytes | str | None = None,
     ):
         """Initialize Metadata instance.
 
@@ -991,12 +1128,45 @@ class Metadata:
             Document's quality
         metadata_values : dict | None
             Document's metadata values
+        raw : bytes | str | None
+            Raw metadata payload. When set, parsing is deferred until a field
+            accessor is called. Format is auto-detected: a leading ``<`` (after
+            whitespace) is treated as XML, anything else as JSON. Once parsed
+            the raw form is discarded and ``to_json_string`` / ``to_xml_string``
+            re-serialize from the parsed state.
         """
-        self._collections = list(set(collections)) if collections else []
-        self._permissions = self._get_clean_permissions(permissions)
-        self._properties = self._get_clean_dict(properties)
-        self._quality = quality
-        self._metadata_values = self._get_clean_dict(metadata_values)
+        self._raw: bytes | str | None = raw
+        if raw is not None:
+            self._collections: list | None = None
+            self._permissions: list | None = None
+            self._properties: dict | None = None
+            self._quality: int | None = None
+            self._metadata_values: dict | None = None
+        else:
+            self._collections = list(set(collections)) if collections else []
+            self._permissions = self._get_clean_permissions(permissions)
+            self._properties = self._get_clean_dict(properties)
+            self._quality = quality
+            self._metadata_values = self._get_clean_dict(metadata_values)
+
+    def _ensure_parsed(self) -> None:
+        """Materialize parsed fields from the raw payload, then discard raw."""
+        if self._collections is not None:
+            return
+        source = (
+            self._raw.decode("utf-8") if isinstance(self._raw, bytes) else self._raw
+        )
+        kwargs = (
+            self._parse_xml(source)
+            if source.lstrip().startswith("<")
+            else self._parse_json(source)
+        )
+        self._collections = list(set(kwargs.get("collections") or []))
+        self._permissions = self._get_clean_permissions(kwargs.get("permissions"))
+        self._properties = self._get_clean_dict(kwargs.get("properties"))
+        self._quality = kwargs.get("quality", 0)
+        self._metadata_values = self._get_clean_dict(kwargs.get("metadata_values"))
+        self._raw = None
 
     def __eq__(
         self,
@@ -1015,11 +1185,13 @@ class Metadata:
             True if there's no difference between internal Metadata fields.
             Otherwise, False.
         """
+        if not isinstance(other, Metadata):
+            return False
+        self._ensure_parsed()
         collections_diff = set(self._collections).difference(set(other.collections()))
         permissions_diff = set(self._permissions).difference(set(other.permissions()))
         return (
-            isinstance(other, Metadata)
-            and collections_diff == set()
+            collections_diff == set()
             and permissions_diff == set()
             and self._properties == other.properties()
             and self._quality == other.quality()
@@ -1046,7 +1218,9 @@ class Metadata:
     def __copy__(
         self,
     ) -> Metadata:
-        """Copy Metadata instance."""
+        """Copy Metadata instance, preserving the unparsed raw payload if any."""
+        if self._raw is not None:
+            return Metadata(raw=self._raw)
         return Metadata(
             collections=self.collections(),
             permissions=self.permissions(),
@@ -1059,31 +1233,59 @@ class Metadata:
         self,
     ) -> list:
         """Return document's collections."""
+        self._ensure_parsed()
         return self._collections.copy()
 
     def permissions(
         self,
     ) -> list:
         """Return document's permissions."""
+        self._ensure_parsed()
         return [copy.copy(perm) for perm in self._permissions]
 
     def properties(
         self,
     ) -> dict:
         """Return document's properties."""
+        self._ensure_parsed()
         return self._properties.copy()
 
     def quality(
         self,
     ) -> int:
         """Return document's quality."""
+        self._ensure_parsed()
         return self._quality
 
     def metadata_values(
         self,
     ) -> dict:
         """Return document's metadata values."""
+        self._ensure_parsed()
         return self._metadata_values.copy()
+
+    def raw(
+        self,
+    ) -> bytes | str | None:
+        """Return the raw metadata payload, or None if not available.
+
+        Available when the instance was created via ``Metadata(raw=...)`` and
+        no field has been read or modified yet. Returns the payload in the
+        original type (``bytes`` or ``str``) so consumers can route it to
+        bytes-oriented sinks (file writes, multipart bodies) without an
+        unnecessary decode/encode round-trip.
+
+        Once a field accessor is called, the raw payload is discarded and
+        ``raw()`` returns None; use ``to_json_string()`` / ``to_xml_string()``
+        instead.
+
+        Returns
+        -------
+        bytes | str | None
+            The raw payload in its original type, or None if the metadata was
+            built from fields or has already been parsed.
+        """
+        return self._raw
 
     def set_quality(
         self,
@@ -1103,6 +1305,7 @@ class Metadata:
         """
         allow = isinstance(quality, int)
         if allow:
+            self._ensure_parsed()
             self._quality = quality
         return allow
 
@@ -1154,6 +1357,7 @@ class Metadata:
         """
         allow = role_name is not None and capability is not None
         if allow:
+            self._ensure_parsed()
             permission = self._get_permission_for_role(self._permissions, role_name)
             if permission is not None:
                 return permission.add_capability(capability)
@@ -1177,6 +1381,7 @@ class Metadata:
             A property value
         """
         if name and value:
+            self._ensure_parsed()
             self._properties[name] = value
 
     def put_metadata_value(
@@ -1194,6 +1399,7 @@ class Metadata:
             A metadata value
         """
         if name and value:
+            self._ensure_parsed()
             self._metadata_values[name] = value
 
     def remove_collection(
@@ -1239,6 +1445,7 @@ class Metadata:
         """
         allow = role_name is not None and capability is not None
         if allow:
+            self._ensure_parsed()
             permission = self._get_permission_for_role(self._permissions, role_name)
             allow = permission is not None
             if allow:
@@ -1265,6 +1472,7 @@ class Metadata:
         bool
             True if the document has a property with such name. Otherwise, False.
         """
+        self._ensure_parsed()
         return self._properties.pop(name, None) is not None
 
     def remove_metadata_value(
@@ -1283,6 +1491,7 @@ class Metadata:
         bool
             True if the document has a metadata with such name. Otherwise, False.
         """
+        self._ensure_parsed()
         return self._metadata_values.pop(name, None) is not None
 
     def to_json_string(
@@ -1290,6 +1499,10 @@ class Metadata:
         indent: int | None = None,
     ) -> str:
         """Return a stringified JSON representation of the Metadata instance.
+
+        When the instance was created from a raw JSON payload and no field has
+        been read or modified yet, the original payload is returned without
+        re-serialization.
 
         Parameters
         ----------
@@ -1301,12 +1514,20 @@ class Metadata:
         str
             Metadata in a stringified JSON representation
         """
+        if indent is None and self._raw is not None:
+            source = (
+                self._raw.decode("utf-8") if isinstance(self._raw, bytes) else self._raw
+            )
+            stripped = source.lstrip()
+            if stripped.startswith(("{", "[")):
+                return source
         return json.dumps(self.to_json(), indent=indent)
 
     def to_json(
         self,
     ) -> dict:
         """Return a JSON representation of the Metadata instance."""
+        self._ensure_parsed()
         return {
             self._COLLECTIONS_KEY: self.collections(),
             self._PERMISSIONS_KEY: [p.to_json() for p in self._permissions],
@@ -1321,6 +1542,10 @@ class Metadata:
     ) -> str:
         """Return a stringified XML representation of the Metadata instance.
 
+        When the instance was created from a raw XML payload and no field has
+        been read or modified yet, the original payload is returned without
+        re-serialization.
+
         Parameters
         ----------
         indent : int | None
@@ -1331,6 +1556,12 @@ class Metadata:
         str
             Metadata in a stringified XML representation
         """
+        if indent is None and self._raw is not None:
+            source = (
+                self._raw.decode("utf-8") if isinstance(self._raw, bytes) else self._raw
+            )
+            if source.lstrip().startswith("<"):
+                return source
         metadata_xml = self.to_xml().getroot()
         if indent is None:
             metadata_str = ElemTree.tostring(
@@ -1346,12 +1577,13 @@ class Metadata:
                 indent=" " * indent,
                 encoding="utf-8",
             )
-        return metadata_str.decode("ascii")
+        return _normalize_xml_declaration(metadata_str).decode("ascii")
 
     def to_xml(
         self,
     ) -> ElemTree.ElementTree:
         """Return an XML representation of the Metadata instance."""
+        self._ensure_parsed()
         attrs = {self._RAPI_NS_PREFIX: self._RAPI_NS_URI}
         root = ElemTree.Element(self._METADATA_TAG, attrib=attrs)
 
@@ -1640,11 +1872,3 @@ class Permission:
             "role-name": self.role_name(),
             "capabilities": list(self.capabilities()),
         }
-
-
-class Mimetype(BaseModel):
-    """A class representing a mime type."""
-
-    mime_type: str = Field(alias="mime-type")
-    extensions: list[str]
-    document_type: DocumentType = Field(alias="doc-type")

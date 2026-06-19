@@ -99,3 +99,17 @@ def test_doc_type_for_content_type_bin():
 def test_doc_type_for_content_type_bin_unknown_ext():
     doc_type = Mimetypes.get_doc_type("unknown")
     assert doc_type == DocumentType.BINARY
+
+
+def test_mimetype_does_not_match_extension_substring():
+    # ".txt" must not be matched by ".t" (registered under application/x-troff).
+    assert Mimetypes.get_mimetype("notes.txt") == "text/plain"
+
+
+def test_doc_type_does_not_match_extension_substring():
+    assert Mimetypes.get_doc_type("notes.txt") == DocumentType.TEXT
+
+
+def test_mimetype_anchored_to_dot():
+    # A directory named ".t" inside the path must not influence the match.
+    assert Mimetypes.get_mimetype("/path/with.t/file.txt") == "text/plain"

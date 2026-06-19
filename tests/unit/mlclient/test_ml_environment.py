@@ -1,4 +1,3 @@
-import os
 import shutil
 from pathlib import Path
 
@@ -198,11 +197,10 @@ def test_load_non_existing():
     assert actual_msg == expected_msg
 
 
-def test_load_in_child_directory():
+def test_load_in_child_directory(monkeypatch):
     # Note: the test-default environment configuration is copied from the test resources
     # to .mlclient directory in a setup step
-    curr_dir = Path.cwd()
-    os.chdir(_SCRIPT_DIR)
+    monkeypatch.chdir(_SCRIPT_DIR)
 
     config = MLEnvironment.load("test-default")
     assert config.model_dump() == {
@@ -226,14 +224,9 @@ def test_load_in_child_directory():
         for app_server_config in config.app_servers
     )
 
-    os.chdir(curr_dir)
 
-
-def test_load_in_parent_directory():
-    # Note: the test-default environment configuration is copied from the test resources
-    # to .mlclient directory in a setup step
-    curr_dir = Path.cwd()
-    os.chdir(Path(_SCRIPT_DIR).parent.parent.parent.parent)
+def test_load_in_parent_directory(tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
 
     with pytest.raises(MLClientDirectoryNotFoundError) as err:
         MLEnvironment.load("test-default")
@@ -242,8 +235,6 @@ def test_load_in_parent_directory():
     )
     actual_msg = err.value.args[0]
     assert actual_msg == expected_msg
-
-    os.chdir(curr_dir)
 
 
 def test_rest_servers():

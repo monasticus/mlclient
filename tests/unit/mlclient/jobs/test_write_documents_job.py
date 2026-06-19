@@ -2,7 +2,7 @@ import respx
 
 from mlclient.exceptions import MarkLogicError
 from mlclient.jobs import WriteDocumentsJob
-from mlclient.models import DocumentType, RawDocument
+from mlclient.models import XMLDocument
 from tests.utils import resources as resources_utils
 from tests.utils.ml_mockers import MLDocumentsMocker, MLRespXMocker
 
@@ -122,4 +122,4 @@ def _get_test_docs(
     for i in range(count):
         uri = f"/some/dir/doc{i + 1}.xml"
         content = b"<root><child>data</child></root>"
-        yield RawDocument(content, uri, DocumentType.XML)
+        yield XMLDocument(content, uri)

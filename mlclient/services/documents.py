@@ -20,13 +20,7 @@ if TYPE_CHECKING:
 
 from mlclient.mimetypes import Mimetypes
 from mlclient.ml_response_parser import MLResponseParser
-from mlclient.models import (
-    Document,
-    Metadata,
-    MetadataDocument,
-    RawDocument,
-    RawStringDocument,
-)
+from mlclient.models import Document, Metadata, MetadataDocument
 from mlclient.models.http import Category
 from mlclient.models.http import DocumentsBodyPart as BodyPart
 from mlclient.models.http import DocumentsDisposition as Disposition
@@ -148,7 +142,6 @@ class DocumentsService:
         *,
         category: Category | str | list[Category | str] | None = None,
         database: str | None = None,
-        output_type: type | None = None,
     ) -> Document | dict[str, Document]:
         """Return document(s) content or metadata from a MarkLogic database.
 
@@ -163,8 +156,6 @@ class DocumentsService:
             The category of data to fetch about the requested document.
         database : str | None, default None
             Perform this operation on the named content database.
-        output_type : type | None, default None
-            A raw output type (supported: str, bytes)
 
         Returns
         -------
@@ -180,7 +171,6 @@ class DocumentsService:
             uris,
             category=category,
             database=database,
-            output_type=output_type,
         )
         return next(docs) if isinstance(uris, str) else {doc.uri: doc for doc in docs}
 
@@ -190,7 +180,6 @@ class DocumentsService:
         *,
         category: Category | str | list[Category | str] | None = None,
         database: str | None = None,
-        output_type: type | None = None,
     ) -> Iterator[Document]:
         """Return document(s) as an iterator, suitable for batch processing.
 
@@ -206,8 +195,6 @@ class DocumentsService:
             The category of data to fetch about the requested document.
         database : str | None, default None
             Perform this operation on the named content database.
-        output_type : type | None, default None
-            A raw output type (supported: str, bytes)
 
         Returns
         -------
@@ -231,7 +218,7 @@ class DocumentsService:
             if not resp.is_success:
                 resp_body = MLResponseParser.parse(resp)
                 raise MarkLogicError(resp_body["errorResponse"])
-            yield from DocumentsReader.parse(resp, batch, category, output_type)
+            yield from DocumentsReader.parse(resp, batch, category)
 
     def delete(
         self,
@@ -333,9 +320,6 @@ class DocumentsSender:
         document: Document,
     ) -> BodyPart:
         """Instantiate BodyPart with Document's metadata."""
-        metadata = document.metadata
-        if type(document) not in (RawDocument, RawStringDocument):
-            metadata = metadata.to_json_string()
         return BodyPart(
             **{
                 "content-type": constants.HEADER_JSON,
@@ -344,7 +328,7 @@ class DocumentsSender:
                     "filename": document.uri,
                     "category": "metadata",
                 },
-                "content": metadata,
+                "content": document.metadata.to_json_string(),
             },
         )
 
@@ -354,7 +338,6 @@ class DocumentsSender:
         metadata: Metadata,
     ) -> BodyPart:
         """Instantiate BodyPart with default metadata."""
-        metadata = metadata.to_json_string()
         return BodyPart(
             **{
                 "content-type": constants.HEADER_JSON,
@@ -362,7 +345,7 @@ class DocumentsSender:
                     "type": "inline",
                     "category": "metadata",
                 },
-                "content": metadata,
+                "content": metadata.to_json_string(),
             },
         )
 
@@ -376,23 +359,21 @@ class DocumentsReader:
         resp: Response,
         uris: str | list[str] | tuple[str] | set[str],
         category: str | list[str] | None,
-        output_type: type | None = None,
     ) -> Iterator[Document]:
         """Parse a MarkLogic response to Documents."""
-        parsed_resp = cls._parse_response(resp, output_type)
+        parsed_resp = cls._parse_response(resp)
         content_type = resp.headers.get(constants.HEADER_NAME_CONTENT_TYPE)
         is_multipart = content_type.startswith(constants.HEADER_MULTIPART_MIXED)
         documents_data = cls._pre_format_data(parsed_resp, is_multipart, uris, category)
-        return cls._parse_to_documents(documents_data, output_type)
+        return cls._parse_to_documents(documents_data)
 
     @classmethod
     def _parse_response(
         cls,
         resp: Response,
-        output_type: type | None,
     ) -> list[tuple]:
         """Parse a response from a MarkLogic server."""
-        parsed_resp = MLResponseParser.parse_with_headers(resp, output_type)
+        parsed_resp = MLResponseParser.parse_with_headers(resp, output_type=bytes)
         if not isinstance(parsed_resp, list):
             headers, _ = parsed_resp
             if headers.get(constants.HEADER_NAME_CONTENT_LENGTH) == "0":
@@ -464,12 +445,9 @@ class DocumentsReader:
     @classmethod
     def _pre_format_metadata(
         cls,
-        raw_metadata: dict | bytes | str,
-    ) -> dict | bytes | str:
-        """Prepare raw metadata from a MarkLogic server response."""
-        if isinstance(raw_metadata, dict) and "metadataValues" in raw_metadata:
-            raw_metadata["metadata_values"] = raw_metadata["metadataValues"]
-            del raw_metadata["metadataValues"]
+        raw_metadata: bytes | str,
+    ) -> bytes | str:
+        """Forward raw metadata bytes/string from a MarkLogic server response."""
         return raw_metadata
 
     @classmethod
@@ -508,31 +486,28 @@ class DocumentsReader:
     def _parse_to_documents(
         cls,
         documents_data: Iterator[dict],
-        output_type: type | None,
     ) -> Iterator[Document]:
         """Parse pre-formatted data to Document instances."""
         for document_data in documents_data:
-            yield cls._parse_to_document(document_data, output_type)
+            yield cls._parse_to_document(document_data)
 
     @classmethod
     def _parse_to_document(
         cls,
         document_data: dict,
-        output_type: type | None,
     ) -> Document:
         """Parse pre-formatted data to a Document instance."""
         uri = document_data.get("uri")
         doc_format = document_data.get("format")
         content = document_data.get("content")
-        metadata = document_data.get("metadata")
+        raw_metadata = document_data.get("metadata")
 
-        if output_type in (bytes, str):
-            factory_function = Document.create_raw
-        else:
-            metadata = Metadata(**metadata) if metadata else metadata
-            factory_function = Document.create
+        metadata = Metadata(raw=raw_metadata) if raw_metadata else None
 
-        return factory_function(
+        if content is None:
+            return Document.metadata_update(uri, metadata or Metadata())
+
+        return Document.create(
             content=content,
             doc_type=doc_format,
             uri=uri,
@@ -572,14 +547,12 @@ class AsyncDocumentsService:
         *,
         category: Category | str | list[Category | str] | None = None,
         database: str | None = None,
-        output_type: type | None = None,
     ) -> Document | dict[str, Document]:
         """Read documents from MarkLogic."""
         stream = self.read_stream(
             uris,
             category=category,
             database=database,
-            output_type=output_type,
         )
         if isinstance(uris, str):
             return await stream.__anext__()
@@ -591,7 +564,6 @@ class AsyncDocumentsService:
         *,
         category: Category | str | list[Category | str] | None = None,
         database: str | None = None,
-        output_type: type | None = None,
     ) -> AsyncIterator[Document]:
         """Read documents from MarkLogic as a stream.
 
@@ -611,7 +583,7 @@ class AsyncDocumentsService:
             if not resp.is_success:
                 resp_body = MLResponseParser.parse(resp)
                 raise MarkLogicError(resp_body["errorResponse"])
-            for doc in DocumentsReader.parse(resp, batch, category, output_type):
+            for doc in DocumentsReader.parse(resp, batch, category):
                 yield doc
 
     async def delete(

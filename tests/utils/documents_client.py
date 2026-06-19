@@ -1,12 +1,14 @@
 from __future__ import annotations
 
+from xml.etree import ElementTree as ElemTree
+
 import pytest
 from mimeo import MimeoConfig, MimeoConfigFactory, Mimeograph
 
 from mlclient import MLClient
 from mlclient.exceptions import MarkLogicError
 from mlclient.mimetypes import Mimetypes
-from mlclient.models import Document, DocumentType, Metadata, RawDocument
+from mlclient.models import Document, DocumentType, Metadata, XMLDocument
 
 
 def assert_document_does_not_exist(
@@ -32,50 +34,35 @@ def assert_documents_exist(
     uris: list,
 ):
     with MLClient(auth_method="digest") as ml:
-        assert ml.documents.read(uris, output_type=bytes) != {}
+        assert ml.documents.read(uris) != {}
 
 
 def assert_documents_do_not_exist(
     uris: list,
 ):
     with MLClient(auth_method="digest") as ml:
-        assert ml.documents.read(uris, output_type=bytes) == {}
+        assert ml.documents.read(uris) == {}
 
 
 def assert_documents_exist_and_confirm_content_with_metadata(
     expected: dict,
-    output_type: type | None = None,
 ):
-    assert_documents_exist_and_confirm_data(
-        expected,
-        ["content", "metadata"],
-        output_type,
-    )
+    assert_documents_exist_and_confirm_data(expected, ["content", "metadata"])
 
 
 def assert_documents_exist_and_confirm_data(
     expected: dict,
     category: str | list[str] = "content",
-    output_type: type | None = None,
 ):
     with MLClient(auth_method="digest") as ml:
-        actual_docs = ml.documents.read(
-            list(expected.keys()),
-            category=category,
-            output_type=output_type,
-        )
+        actual_docs = ml.documents.read(list(expected.keys()), category=category)
         assert len(actual_docs) == len(expected)
         for uri, actual_doc in actual_docs.items():
             expected_doc = expected.get(uri)
             assert expected_doc is not None
             assert actual_doc.uri == expected_doc.uri
             assert actual_doc.doc_type == expected_doc.doc_type
-            if output_type is str:
-                assert actual_doc.content == expected_doc.content_string
-            elif output_type is bytes:
-                assert actual_doc.content == expected_doc.content_bytes
-            else:
-                assert actual_doc.content_bytes == expected_doc.content_bytes
+            _assert_content_equal(actual_doc, expected_doc)
             if category not in ("content", ["content"]):
                 assert actual_doc.metadata == expected_doc.metadata
 
@@ -123,20 +110,18 @@ def generate_docs(
     )
     metadata = None
     if with_metadata:
-        metadata = (
-            Metadata(
-                collections=["test-collection"],
-                quality=5,
-            )
-            .to_json_string()
-            .encode("utf-8")
+        metadata = Metadata(
+            collections=["test-collection"],
+            quality=5,
         )
+    if document_type != DocumentType.XML:
+        msg = f"generate_docs only supports XML, got {document_type}"
+        raise NotImplementedError(msg)
     for i in range(count):
-        yield RawDocument(
+        yield XMLDocument(
             content=content,
             metadata=metadata,
             uri=uri_template.format(i + 1),
-            doc_type=document_type,
         )
 
 
@@ -149,6 +134,20 @@ def generate_docs_with_mimeo(
         for mimeo_config in mimeo_configs:
             config_id = f"config-{mimeo_config.templates[0].count}"
             mimeo.submit((config_id, mimeo_config))
+
+
+def _assert_content_equal(
+    actual: Document,
+    expected: Document,
+):
+    if actual.doc_type == DocumentType.JSON:
+        assert actual.content == expected.content
+    elif actual.doc_type == DocumentType.XML:
+        assert ElemTree.tostring(actual.content.getroot()) == ElemTree.tostring(
+            expected.content.getroot(),
+        )
+    else:
+        assert actual.content_bytes == expected.content_bytes
 
 
 def _get_mimeo_config(

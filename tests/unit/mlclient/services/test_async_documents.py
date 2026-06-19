@@ -16,12 +16,11 @@ from mlclient.models import (
     JSONDocument,
     Metadata,
     MetadataDocument,
-    RawDocument,
-    RawStringDocument,
     TextDocument,
     XMLDocument,
 )
 from mlclient.models.http import Category
+from mlclient.services.documents import DocumentsSender
 from tests.utils import data as test_data
 from tests.utils import resources as resources_utils
 from tests.utils.data import MetadataSpec
@@ -132,30 +131,6 @@ async def test_read_binary_doc(svc):
     assert isinstance(document, BinaryDocument)
     assert document.uri == uri
     assert document.content == content
-
-
-@pytest.mark.asyncio
-@ml_mocker.router
-async def test_read_doc_as_string(svc):
-    uri = "/some/dir/doc1.xml"
-
-    document = await svc.read(uri, output_type=str)
-
-    assert isinstance(document, RawStringDocument)
-    assert document.uri == uri
-    assert document.content == '<?xml version="1.0" encoding="UTF-8"?>\n<root/>'
-
-
-@pytest.mark.asyncio
-@ml_mocker.router
-async def test_read_doc_as_bytes(svc):
-    uri = "/some/dir/doc2.json"
-
-    document = await svc.read(uri, output_type=bytes)
-
-    assert isinstance(document, RawDocument)
-    assert document.uri == uri
-    assert document.content == b'{"root":{"child":"data"}}'
 
 
 @pytest.mark.asyncio
@@ -320,10 +295,10 @@ async def test_read_stream_multiple_uris(svc):
 
 @pytest.mark.asyncio
 @ml_mocker.router
-async def test_create_raw_document(svc):
+async def test_create_xml_document_from_bytes(svc):
     uri = "/some/dir/doc1.xml"
     content = b"<root><child>data</child></root>"
-    doc = RawDocument(content, uri, DocumentType.XML)
+    doc = XMLDocument(content, uri)
 
     resp = await svc.write(doc)
 
@@ -416,7 +391,7 @@ async def test_create_metadata_document_when_doc_does_not_exist(svc):
 async def test_create_document_with_temporal_collection(svc):
     uri = "/some/dir/doc1.xml"
     content = "<root><child>data</child><systemStart/><systemEnd/></root>"
-    doc = RawStringDocument(content, uri, DocumentType.XML)
+    doc = XMLDocument(content, uri)
 
     resp = await svc.write(doc, temporal_collection="temporal-collection")
 
@@ -643,3 +618,30 @@ async def test_delete_many_uris_are_batched(svc):
     await svc.delete(uris)
 
     assert ml_mocker.router.calls.call_count > 1
+
+
+# --- DocumentsSender unit tests ---
+
+
+def test_documents_sender_metadata_document_with_raw_bytes_metadata():
+    doc = MetadataDocument("/x.xml", b'{"collections": ["c1"]}')
+    parts = DocumentsSender.parse(doc)
+
+    assert len(parts) == 1
+    assert parts[0].content == '{"collections": ["c1"]}'
+
+
+def test_documents_sender_metadata_document_with_raw_str_metadata():
+    doc = MetadataDocument("/x.xml", '{"collections": ["c1"]}')
+    parts = DocumentsSender.parse(doc)
+
+    assert len(parts) == 1
+    assert parts[0].content == '{"collections": ["c1"]}'
+
+
+def test_documents_sender_metadata_document_with_metadata_object():
+    doc = MetadataDocument("/x.xml", Metadata(collections=["c1"]))
+    parts = DocumentsSender.parse(doc)
+
+    assert len(parts) == 1
+    assert '"collections"' in parts[0].content

@@ -31,7 +31,7 @@ def test_basic_job_with_documents_output():
 
         job = ReadDocumentsJob(batch_size=5)
 
-        job.with_client_config(auth_method="digest")
+        job.with_client_config(auth="digest")
         job.with_uris_input(uris)
         job.run_sync()
         docs = job.documents
@@ -56,7 +56,7 @@ def test_basic_job_with_filesystem_output():
         assert not Path(output_dir).exists()
         try:
             job = ReadDocumentsJob(batch_size=5)
-            job.with_client_config(auth_method="digest")
+            job.with_client_config(auth="digest")
             job.with_uris_input(uris)
             job.with_filesystem_output(output_dir)
             job.run_sync()
@@ -86,7 +86,7 @@ def test_basic_job_with_multiple_inputs():
 
         job = ReadDocumentsJob(batch_size=500)
 
-        job.with_client_config(auth_method="digest")
+        job.with_client_config(auth="digest")
         job.with_uris_input(uris[:250])
         job.with_uris_input(uris[250:])
         job.run_sync()
@@ -112,7 +112,7 @@ def test_job_with_documents_output_and_full_metadata():
 
         job = ReadDocumentsJob(batch_size=5)
 
-        job.with_client_config(auth_method="digest")
+        job.with_client_config(auth="digest")
         job.with_uris_input(uris)
         job.with_metadata()
         job.run_sync()
@@ -141,7 +141,7 @@ def test_job_with_documents_output_and_some_metadata_categories():
 
         job = ReadDocumentsJob(batch_size=5)
 
-        job.with_client_config(auth_method="digest")
+        job.with_client_config(auth="digest")
         job.with_uris_input(uris)
         job.with_metadata("quality")
         job.run_sync()
@@ -170,7 +170,7 @@ def test_job_with_documents_output_and_category_enum():
 
         job = ReadDocumentsJob(batch_size=5)
 
-        job.with_client_config(auth_method="digest")
+        job.with_client_config(auth="digest")
         job.with_uris_input(uris)
         job.with_metadata(Category.QUALITY)
         job.run_sync()
@@ -200,7 +200,7 @@ def test_basic_job_with_filesystem_output_and_full_metadata():
         assert not Path(output_dir).exists()
         try:
             job = ReadDocumentsJob(batch_size=5)
-            job.with_client_config(auth_method="digest")
+            job.with_client_config(auth="digest")
             job.with_uris_input(uris)
             job.with_metadata()
             job.with_filesystem_output(output_dir)
@@ -235,7 +235,7 @@ def test_basic_job_with_filesystem_output_and_some_metadata_categories():
         assert not Path(output_dir).exists()
         try:
             job = ReadDocumentsJob(batch_size=5)
-            job.with_client_config(auth_method="digest")
+            job.with_client_config(auth="digest")
             job.with_uris_input(uris)
             job.with_metadata("quality")
             job.with_filesystem_output(output_dir)
@@ -266,7 +266,7 @@ def test_job_with_custom_database():
 
         job = ReadDocumentsJob(batch_size=5)
 
-        job.with_client_config(auth_method="digest")
+        job.with_client_config(auth="digest")
         job.with_database("Documents")
         job.with_uris_input(uris)
         job.run_sync()
@@ -293,7 +293,7 @@ def test_job_with_multiple_batches():
 
         job = ReadDocumentsJob(batch_size=5)
 
-        job.with_client_config(auth_method="digest")
+        job.with_client_config(auth="digest")
         job.with_uris_input(uris)
         job.run_sync()
         docs = job.documents
@@ -324,7 +324,7 @@ def test_job_with_batch_exceeding_service_uri_limit():
 
         job = ReadDocumentsJob(concurrency=1, batch_size=uris_count)
 
-        job.with_client_config(auth_method="digest")
+        job.with_client_config(auth="digest")
         job.with_uris_input(uris)
         job.run_sync()
 
@@ -358,7 +358,7 @@ def test_failing_job():
     mocker.mock_get()
 
     job = ReadDocumentsJob(batch_size=5)
-    job.with_client_config(auth_method="digest")
+    job.with_client_config(auth="digest")
     job.with_uris_input(uris)
     job.run_sync()
     docs = job.documents
@@ -385,7 +385,7 @@ def test_failing_filesystem_write_step():
         assert output_dir_path.exists()
         try:
             job = ReadDocumentsJob(batch_size=5)
-            job.with_client_config(auth_method="digest")
+            job.with_client_config(auth="digest")
             job.with_uris_input(uris)
             job.with_filesystem_output(str(output_dir_path))
             job.run_sync()

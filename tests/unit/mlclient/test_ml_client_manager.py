@@ -120,7 +120,7 @@ def test_get_client_with_app_server_id():
         assert ml.http.port == 8100
         assert ml.http.username == "my-marklogic-app-user"
         assert ml.http.password == "my-marklogic-app-password"
-        assert ml.http.auth_method == "basic"
+        assert ml.http.auth == "basic"
         assert ml.is_connected()
     assert not ml.is_connected()
 
@@ -134,7 +134,7 @@ def test_get_client_default():
         assert ml.http.port == 8002
         assert ml.http.username == "my-marklogic-app-user"
         assert ml.http.password == "my-marklogic-app-password"
-        assert ml.http.auth_method == "basic"
+        assert ml.http.auth == "basic"
         assert ml.is_connected()
     assert not ml.is_connected()
 
@@ -165,7 +165,7 @@ def test_get_http_client():
         assert client.port == 8100
         assert client.username == "my-marklogic-app-user"
         assert client.password == "my-marklogic-app-password"
-        assert client.auth_method == "basic"
+        assert client.auth == "basic"
 
 
 @pytest.mark.asyncio
@@ -178,7 +178,7 @@ async def test_get_async_client_with_app_server_id():
         assert ml.http.port == 8100
         assert ml.http.username == "my-marklogic-app-user"
         assert ml.http.password == "my-marklogic-app-password"
-        assert ml.http.auth_method == "basic"
+        assert ml.http.auth == "basic"
         assert ml.is_connected()
     assert not ml.is_connected()
 
@@ -193,7 +193,7 @@ async def test_get_async_client_default():
         assert ml.http.port == 8002
         assert ml.http.username == "my-marklogic-app-user"
         assert ml.http.password == "my-marklogic-app-password"
-        assert ml.http.auth_method == "basic"
+        assert ml.http.auth == "basic"
         assert ml.is_connected()
     assert not ml.is_connected()
 
@@ -224,4 +224,4 @@ def test_get_async_http_client():
     assert ml.port == 8100
     assert ml.username == "my-marklogic-app-user"
     assert ml.password == "my-marklogic-app-password"
-    assert ml.auth_method == "basic"
+    assert ml.auth == "basic"

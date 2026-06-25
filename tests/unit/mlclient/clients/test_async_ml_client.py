@@ -21,14 +21,14 @@ def test_properties_delegate_to_http_client():
         protocol="https",
         host="ml.example.com",
         port=8123,
-        auth_method="digest",
+        auth="digest",
         username="user",
         password="pass",
     )
     assert ml.http.protocol == "https"
     assert ml.http.host == "ml.example.com"
     assert ml.http.port == 8123
-    assert ml.http.auth_method == "digest"
+    assert ml.http.auth == "digest"
     assert ml.http.username == "user"
     assert ml.http.password == "pass"
     assert ml.http.base_url == "https://ml.example.com:8123"
@@ -216,7 +216,7 @@ async def test_wait_for_restart_builds_restart_waiter_and_uses_default_retry(
     kwargs = restart_waiter_cls.call_args.kwargs
     assert kwargs["protocol"] == "https"
     assert kwargs["host"] == "example.com"
-    assert isinstance(kwargs["auth"], httpx.BasicAuth)
+    assert isinstance(kwargs["auth"], httpx.DigestAuth)
     waiter.async_wait_for_restart_completion.assert_called_once_with(
         response,
         timeout=12.0,

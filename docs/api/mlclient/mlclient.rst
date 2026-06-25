@@ -24,6 +24,22 @@ mlclient.ml_environment module
    :undoc-members:
    :show-inheritance:
 
+mlclient.connection module
+---------------------------
+
+.. automodule:: mlclient.connection
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+mlclient.auth module
+--------------------
+
+.. automodule:: mlclient.auth
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 mlclient.constants module
 -------------------------
 

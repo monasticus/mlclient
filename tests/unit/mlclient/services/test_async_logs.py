@@ -17,7 +17,7 @@ ENDPOINT = "/manage/v2/logs"
 
 @pytest_asyncio.fixture
 async def svc():
-    async with AsyncMLClient(auth_method="digest") as ml:
+    async with AsyncMLClient(auth="digest") as ml:
         yield ml.logs
 
 

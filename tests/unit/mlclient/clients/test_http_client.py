@@ -353,14 +353,14 @@ def test_properties():
         protocol="https",
         host="ml.example.com",
         port=8123,
-        auth_method="digest",
+        auth="digest",
         username="user",
         password="pass",
     )
     assert client.protocol == "https"
     assert client.host == "ml.example.com"
     assert client.port == 8123
-    assert client.auth_method == "digest"
+    assert client.auth == "digest"
     assert client.username == "user"
     assert client.password == "pass"
     assert client.base_url == "https://ml.example.com:8123"

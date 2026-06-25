@@ -16,12 +16,14 @@ import logging
 from functools import cached_property
 from types import TracebackType
 
-from httpx import BasicAuth, DigestAuth, Response
+from httpx import Response
 from httpx_retries import Retry
 
 from mlclient.api.admin_api import AdminApi, AsyncAdminApi
 from mlclient.api.manage_api import AsyncManageApi, ManageApi
 from mlclient.api.rest_api import AsyncRestApi, RestApi
+from mlclient.auth import AuthParam, build_auth
+from mlclient.connection import UNSET, CloudConfig, SSLConfig
 from mlclient.ml_response_parser import MLResponseParser
 from mlclient.services.documents import AsyncDocumentsService, DocumentsService
 from mlclient.services.eval import AsyncEvalService, EvalService
@@ -32,7 +34,6 @@ from .http_client import (
     DEFAULT_RETRY_STRATEGY,
     MARKLOGIC_ADMIN_API_PORT,
     MARKLOGIC_MANAGE_API_PORT,
-    MARKLOGIC_REST_API_PORT,
     RESTART_RETRY_STRATEGY,
     AsyncHttpClient,
     HttpClient,
@@ -123,12 +124,14 @@ class MLClient:
 
     def __init__(
         self,
-        protocol: str = "http",
+        protocol=UNSET,
         host: str = "localhost",
-        port: int = MARKLOGIC_REST_API_PORT,
-        auth_method: str = "basic",
+        port=UNSET,
+        auth: AuthParam = UNSET,
         username: str = "admin",
         password: str = "admin",
+        ssl: SSLConfig | None = None,
+        cloud: CloudConfig | None = None,
         retry: Retry | None = None,
     ):
         """Initialize MLClient instance.
@@ -141,12 +144,20 @@ class MLClient:
             A host name
         port : int, default 8000
             An App Service port
-        auth_method : str, default "basic"
-            An authorization method (basic / digest)
+        auth : str | httpx.Auth | AuthConfig | None, default "digest"
+            An authentication method: a string shortcut ("basic", "digest",
+            "digestbasic", "certificate", "kerberos"), an AuthConfig, a custom
+            httpx.Auth, or None
         username : str, default "admin"
             A username
         password : str, default "admin"
             A password
+        ssl : SSLConfig | None, default None
+            SSL/TLS configuration; a client certificate forces HTTPS and
+            defaults the auth method to "certificate"
+        cloud : CloudConfig | None, default None
+            MarkLogic Cloud configuration; forces HTTPS on port 443 and handles
+            authentication via the API key
         retry : Retry | None, default Retry(total=5, backoff_factor=0.5)
             A retry strategy
         """
@@ -154,9 +165,11 @@ class MLClient:
             protocol=protocol,
             host=host,
             port=port,
-            auth_method=auth_method,
+            auth=auth,
             username=username,
             password=password,
+            ssl=ssl,
+            cloud=cloud,
             retry=retry,
         )
         self._manage_http = None
@@ -272,13 +285,16 @@ class MLClient:
         )
 
     def _get_restart_waiter(self) -> RestartWaiter:
-        auth_impl = BasicAuth if self._http.auth_method == "basic" else DigestAuth
-        auth = auth_impl(self._http.username, self._http.password)
         return RestartWaiter(
             protocol=self._http.protocol,
             host=self._http.host,
-            auth=auth,
+            auth=build_auth(
+                self._http.auth,
+                self._http.username,
+                self._http.password,
+            ),
             default_retry=DEFAULT_RETRY_STRATEGY,
+            verify=self._http.ssl.verify if self._http.ssl else True,
         )
 
     def _get_manage_http(self) -> HttpClient:
@@ -286,9 +302,11 @@ class MLClient:
 
         The Management API is only available on the fixed Manage server
         port (8002). If the main client already uses port 8002, it is reused.
-        Otherwise, a separate HttpClient is lazily created.
+        Otherwise, a separate HttpClient is lazily created. Cloud connections
+        route every API through the single port-443 connection via base_path,
+        so the main client is reused.
         """
-        if self._http.port == MARKLOGIC_MANAGE_API_PORT:
+        if self._http.cloud is not None or self._http.port == MARKLOGIC_MANAGE_API_PORT:
             return self._http
         if self._manage_http is None:
             self._manage_http = self._create_secondary_http(
@@ -301,9 +319,11 @@ class MLClient:
 
         The Admin API is only available on the fixed Admin server port (8001).
         If the main client already uses port 8001, it is reused. Otherwise,
-        a separate HttpClient is lazily created.
+        a separate HttpClient is lazily created. Cloud connections route every
+        API through the single port-443 connection via base_path, so the main
+        client is reused.
         """
-        if self._http.port == MARKLOGIC_ADMIN_API_PORT:
+        if self._http.cloud is not None or self._http.port == MARKLOGIC_ADMIN_API_PORT:
             return self._http
         if self._admin_http is None:
             self._admin_http = self._create_secondary_http(MARKLOGIC_ADMIN_API_PORT)
@@ -315,9 +335,11 @@ class MLClient:
             protocol=self._http.protocol,
             host=self._http.host,
             port=port,
-            auth_method=self._http.auth_method,
+            auth=self._http.auth,
             username=self._http.username,
             password=self._http.password,
+            ssl=self._http.ssl,
+            cloud=self._http.cloud,
         )
         if self.is_connected():
             http.connect()
@@ -342,12 +364,14 @@ class AsyncMLClient:
 
     def __init__(
         self,
-        protocol: str = "http",
+        protocol=UNSET,
         host: str = "localhost",
-        port: int = MARKLOGIC_REST_API_PORT,
-        auth_method: str = "basic",
+        port=UNSET,
+        auth: AuthParam = UNSET,
         username: str = "admin",
         password: str = "admin",
+        ssl: SSLConfig | None = None,
+        cloud: CloudConfig | None = None,
         retry: Retry | None = None,
     ):
         """Initialize AsyncMLClient instance.
@@ -360,34 +384,57 @@ class AsyncMLClient:
             A host name
         port : int, default 8000
             An App Service port
-        auth_method : str, default "basic"
-            An authorization method (basic / digest)
+        auth : str | httpx.Auth | AuthConfig | None, default "digest"
+            An authentication method: a string shortcut ("basic", "digest",
+            "digestbasic", "certificate", "kerberos"), an AuthConfig, a custom
+            httpx.Auth, or None
         username : str, default "admin"
             A username
         password : str, default "admin"
             A password
+        ssl : SSLConfig | None, default None
+            SSL/TLS configuration; a client certificate forces HTTPS and
+            defaults the auth method to "certificate"
+        cloud : CloudConfig | None, default None
+            MarkLogic Cloud configuration; forces HTTPS on port 443 and handles
+            authentication via the API key
         retry : Retry | None, default Retry(total=5, backoff_factor=0.5)
             A retry strategy
         """
         http_kwargs = {
             "protocol": protocol,
             "host": host,
-            "auth_method": auth_method,
+            "auth": auth,
             "username": username,
             "password": password,
+            "ssl": ssl,
+            "cloud": cloud,
             "retry": retry,
         }
         self._http = AsyncHttpClient(port=port, **http_kwargs)
-        self._manage_http = (
-            self._http
-            if port == MARKLOGIC_MANAGE_API_PORT
-            else AsyncHttpClient(port=MARKLOGIC_MANAGE_API_PORT, **http_kwargs)
+        self._manage_http = self._create_secondary_async_http(
+            MARKLOGIC_MANAGE_API_PORT,
+            http_kwargs,
         )
-        self._admin_http = (
-            self._http
-            if port == MARKLOGIC_ADMIN_API_PORT
-            else AsyncHttpClient(port=MARKLOGIC_ADMIN_API_PORT, **http_kwargs)
+        self._admin_http = self._create_secondary_async_http(
+            MARKLOGIC_ADMIN_API_PORT,
+            http_kwargs,
         )
+
+    def _create_secondary_async_http(
+        self,
+        port: int,
+        http_kwargs: dict,
+    ) -> AsyncHttpClient:
+        """Return a fixed-port client, reusing the main one when it fits.
+
+        Cloud connections route every API through the single port-443
+        connection via base_path, so the main client is reused. The main client
+        is also reused when it already targets the requested fixed port.
+        """
+        if self._http.cloud is not None or self._http.port == port:
+            return self._http
+        return AsyncHttpClient(port=port, **http_kwargs)
 
     async def __aenter__(self):
         """Connect and return self for use as an async context manager."""
@@ -499,11 +546,14 @@ class AsyncMLClient:
         )
 
     def _get_restart_waiter(self) -> RestartWaiter:
-        auth_impl = BasicAuth if self._http.auth_method == "basic" else DigestAuth
-        auth = auth_impl(self._http.username, self._http.password)
         return RestartWaiter(
             protocol=self._http.protocol,
             host=self._http.host,
-            auth=auth,
+            auth=build_auth(
+                self._http.auth,
+                self._http.username,
+                self._http.password,
+            ),
             default_retry=DEFAULT_RETRY_STRATEGY,
+            verify=self._http.ssl.verify if self._http.ssl else True,
         )

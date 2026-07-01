@@ -1,5 +1,3 @@
-from pathlib import Path
-
 import httpx
 import pytest
 import respx
@@ -29,7 +27,7 @@ async def test_custom_call():
 @pytest.mark.asyncio
 @respx.mock
 async def test_get_timestamp():
-    response_body_path = resources_utils.get_test_resource_path(
+    response_body = resources_utils.read_test_resource_bytes(
         __file__,
         "test-get-timestamp.txt",
     )
@@ -37,7 +35,7 @@ async def test_get_timestamp():
     ml_mocker.with_url("http://localhost:8001/admin/v1/timestamp")
     ml_mocker.with_response_content_type("text/plain; charset=UTF-8")
     ml_mocker.with_response_code(200)
-    ml_mocker.with_response_body(Path(response_body_path).read_bytes())
+    ml_mocker.with_response_body(response_body)
     ml_mocker.mock_get()
 
     async with AsyncMLClient() as ml:
@@ -50,7 +48,7 @@ async def test_get_timestamp():
 @pytest.mark.asyncio
 @respx.mock
 async def test_get_server_config():
-    response_body_path = resources_utils.get_test_resource_path(
+    response_body = resources_utils.read_test_resource_bytes(
         __file__,
         "test-get-server-config.xml",
     )
@@ -58,7 +56,7 @@ async def test_get_server_config():
     ml_mocker.with_url("http://localhost:8001/admin/v1/server-config")
     ml_mocker.with_response_content_type("application/xml; charset=UTF-8")
     ml_mocker.with_response_code(200)
-    ml_mocker.with_response_body(Path(response_body_path).read_bytes())
+    ml_mocker.with_response_body(response_body)
     ml_mocker.mock_get()
 
     async with AsyncMLClient() as ml:

@@ -17,8 +17,8 @@ Read the full documentation at [Read the Docs](https://mlclient.readthedocs.io).
 pip install mlclient
 ```
 
-By default MLClient connects to `localhost:8000` with basic auth (`admin`/`admin`).
-Pass `host`, `port`, `username`, `password`, or `auth_method` to override:
+By default MLClient connects to `localhost:8000` over HTTP with digest auth (`admin`/`admin`).
+Pass `host`, `port`, `username`, `password`, or `auth` to override:
 
 ```python
 config = {
@@ -26,7 +26,7 @@ config = {
     "port": 8040,
     "username": "my-user",
     "password": "my-password",
-    "auth_method": "digest",
+    "auth": "digest",
 }
 ml = MLClient(**config)
 ```
@@ -110,6 +110,39 @@ async with AsyncMLClient() as ml:
     doc = await ml.documents.read("/patient/record-1.xml")
     resp = await ml.http.get("/manage/v2/servers")
 ```
+
+## Connection & authentication
+
+Connection (transport) and authentication (identity) are configured separately.
+The transport is chosen from `protocol`, `ssl`, and `cloud`; the auth method from
+`auth`. Invalid combinations are rejected when the client is created, not at
+request time.
+
+Supported connection modes:
+
+| Mode             | How to select it                              | Protocol / port |
+|------------------|-----------------------------------------------|-----------------|
+| HTTP             | default                                       | `http` / `8000` |
+| HTTPS            | `protocol="https"`                            | `https`         |
+| Mutual TLS       | `ssl=SSLConfig(cert_file=..., key_file=...)`  | `https`         |
+| MarkLogic Cloud  | `cloud=CloudConfig(api_key=..., base_path=...)` | `https` / `443` |
+
+Supported authentication methods (`auth=`):
+
+| `auth` value                          | Method               | Credentials from |
+|---------------------------------------|----------------------|------------------|
+| `"digest"` (default)                  | HTTP digest          | `username` / `password` |
+| `"basic"`                             | HTTP basic           | `username` / `password` |
+| `"certificate"`                       | Client certificate   | `ssl` client cert (auto-selected with mutual TLS) |
+| `"kerberos"`                          | Kerberos / SPNEGO    | ambient ticket cache (`mlclient[kerberos]`) |
+| `AuthConfig(method="oauth", ...)`     | OAuth 2.0 Bearer     | pre-acquired token |
+| `AuthConfig(method="kerberos", ...)`  | Kerberos / SPNEGO    | as above, with a custom SPN (`service` / `hostname`) |
+| `None`                                | application-level    | none (Cloud handles its own) |
+| any `httpx.Auth`                      | custom               | your handler |
+
+See the [Connection & authentication guide](https://mlclient.readthedocs.io)
+for initialization examples per method and the full matrix of valid and rejected
+combinations.
 
 ## CLI
 

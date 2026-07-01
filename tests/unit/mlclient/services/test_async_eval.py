@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from pathlib import Path
-
 import pytest
 import pytest_asyncio
 import respx
@@ -352,7 +350,7 @@ async def test_eval_file_javascript(svc):
 @pytest.mark.asyncio
 @respx.mock
 async def test_eval_with_marklogic_error(svc):
-    error_path = resources_utils.get_test_resource_path(
+    error_body = resources_utils.read_test_resource_bytes(
         __file__,
         "marklogic-error.html",
     )
@@ -364,7 +362,7 @@ async def test_eval_with_marklogic_error(svc):
     ml_mocker.with_request_body({"xquery": code})
     ml_mocker.with_response_code(400)
     ml_mocker.with_response_content_type("text/html; charset=utf-8")
-    ml_mocker.with_response_body(Path(error_path).read_bytes())
+    ml_mocker.with_response_body(error_body)
     ml_mocker.mock_post()
 
     with pytest.raises(MarkLogicError) as err:

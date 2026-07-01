@@ -35,6 +35,7 @@ import yaml
 from haggis.logs import add_logging_level
 
 from . import utils
+from .auth import AuthConfig, MarkLogicCloudAuth, OAuthBearerAuth
 from .clients import (
     DEFAULT_RETRY_STRATEGY,
     MARKLOGIC_ADMIN_API_PORT,
@@ -48,6 +49,7 @@ from .clients import (
     HttpClient,
     MLClient,
 )
+from .connection import CloudConfig, SSLConfig
 from .ml_client_manager import MLClientManager
 from .ml_environment import MLEnvironment
 from .ml_response_parser import MLResponseParser
@@ -71,11 +73,16 @@ __all__ = [
     "AsyncApiClient",
     "AsyncHttpClient",
     "AsyncMLClient",
+    "AuthConfig",
+    "CloudConfig",
     "HttpClient",
     "MLClient",
     "MLClientManager",
     "MLEnvironment",
     "MLResponseParser",
+    "MarkLogicCloudAuth",
+    "OAuthBearerAuth",
+    "SSLConfig",
     "__version__",
     "setup_logger",
 ]

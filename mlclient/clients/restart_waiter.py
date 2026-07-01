@@ -18,8 +18,7 @@ from mlclient import constants as const
 
 logger = logging.getLogger(__name__)
 
-# See ml_client._SHARED_SSL_CONTEXT for rationale (avoid repeated CA bundle loading).
-_SHARED_SSL_CONTEXT = ssl.create_default_context()
+_TransportVerify = Union[bool, ssl.SSLContext]
 
 _RestartTimestampBaseline = Union[asyncio.Future, str, None]
 _MARKLOGIC_ADMIN_API_PORT = 8001
@@ -35,9 +34,10 @@ class RestartWaiter:
         self,
         protocol: str,
         host: str,
-        auth: Auth,
+        auth: Auth | None,
         default_retry: Retry,
         *,
+        verify: _TransportVerify = True,
         probe_timeout: float = 5.0,
     ):
         """Initialize RestartWaiter instance.
@@ -48,10 +48,13 @@ class RestartWaiter:
             A protocol used for HTTP requests (http / https)
         host : str
             A host name
-        auth : Auth
-            An httpx authentication handler (BasicAuth or DigestAuth)
+        auth : Auth | None
+            An httpx authentication handler, or None for application-level auth
         default_retry : Retry
             A default retry strategy for readiness probes
+        verify : bool | ssl.SSLContext, default True
+            The transport verification setting, matching the client connection:
+            a shared SSL context, or False to disable verification
         probe_timeout : float
             Per-request timeout in seconds for individual readiness probes
         """
@@ -59,6 +62,7 @@ class RestartWaiter:
         self._host = host
         self._auth = auth
         self._default_retry = default_retry
+        self._verify = verify
         self._probe_timeout = probe_timeout
 
     def wait_for_restart_completion(
@@ -390,7 +394,7 @@ class RestartWaiter:
         """Return MarkLogic host names keyed by host id."""
         async with AsyncClient(
             transport=RetryTransport(
-                transport=AsyncHTTPTransport(verify=_SHARED_SSL_CONTEXT),
+                transport=AsyncHTTPTransport(verify=self._verify),
                 retry=self._default_retry,
             ),
         ) as client:
@@ -422,7 +426,7 @@ class RestartWaiter:
     ) -> None:
         """Wait for a single host to report readiness via the timestamp endpoint."""
         async with AsyncClient(
-            transport=AsyncHTTPTransport(verify=_SHARED_SSL_CONTEXT),
+            transport=AsyncHTTPTransport(verify=self._verify),
             headers={"Connection": "close"},
             timeout=self._probe_timeout,
         ) as client:

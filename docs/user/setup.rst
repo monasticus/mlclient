@@ -23,6 +23,68 @@ YAML file:
    .. literalinclude:: setup/mlclient-local.yaml
       :language: YAML
 
+Root-level defaults and per-server overrides
+---------------------------------------------
+
+Connection and authentication settings declared at the top level of the file
+(``protocol``, ``host``, ``username``, ``password``, ``auth``, ``ssl``, ``cloud``)
+act as defaults for every app server. Any of ``auth``, ``username``,
+``password``, or ``ssl`` may be overridden per server; an unset field inherits
+the root value. This mirrors the :class:`~mlclient.MLClient` connection model -
+see :doc:`pythonapi/core` for the full matrix of connection modes and auth
+methods. For example, an HTTPS environment with a mutual-TLS app server:
+
+   .. code-block:: yaml
+
+      app-name: migration-app
+      protocol: https
+      host: ml.example.com
+      username: admin
+      password: admin
+      auth: digest
+      ssl:
+        verify: /etc/ssl/corp-ca.pem
+      app-servers:
+
+        - id: content
+          port: 8100
+
+        - id: secure
+          port: 8200
+          ssl:
+            cert_file: /client.pem
+            key_file: /client-key.pem
+
+The ``content`` server inherits the root digest auth and CA bundle, while
+``secure`` presents a client certificate and so authenticates via mutual TLS.
+
+The ``auth`` field accepts the same string shortcuts as the Python API:
+``digest``, ``basic``, ``digestbasic``, ``certificate``, and ``kerberos``. A
+server presenting a client certificate may leave ``auth`` unset (it defaults to
+``certificate``), set ``auth: certificate`` explicitly, or set a credential
+method such as ``auth: digest`` for double auth - the certificate then sets up
+mutual TLS while the credential carries the user identity.
+
+A MarkLogic Cloud environment declares ``cloud`` at the root and omits
+``protocol`` and ``auth`` (Cloud forces HTTPS and authenticates via its API key).
+Cloud collapses every tier onto a single HTTPS connection on port 443, routing
+each one through the ``base-path`` rather than a distinct port. Because there is
+only one connection and its port is fixed, a Cloud environment needs no
+``app-servers`` section at all - the default REST app server is enough:
+
+   .. code-block:: yaml
+
+      app-name: migration-app
+      host: my-org.marklogic.cloud
+      cloud:
+        api-key: my-api-key
+        base-path: /ml/my-instance
+
+``port`` is optional everywhere and defaults to the connection's own port (8000
+for on-premises, 443 for Cloud), so it need only be set for app servers on a
+non-default port. Declare ``app-servers`` explicitly only to name additional
+servers or override per-server settings.
+
 MLEnvironment class
 -------------------
 Having the environment file, you can instantiate ``MLEnvironment`` class using your environment::
@@ -30,7 +92,7 @@ Having the environment file, you can instantiate ``MLEnvironment`` class using y
    >>> from mlclient import MLEnvironment
    >>> env = MLEnvironment.load("local")
    >>> env
-   MLEnvironment(app_name='migration-app', protocol='http', host='localhost', username='admin', password='admin', app_servers=[MLServerConfig(identifier='manage', port=8002, auth=<AuthMethod.BASIC: 'basic'>), MLServerConfig(identifier='content', port=8100, auth=<AuthMethod.BASIC: 'basic'>), MLServerConfig(identifier='modules', port=8101, auth=<AuthMethod.BASIC: 'basic'>), MLServerConfig(identifier='schemas', port=8102, auth=<AuthMethod.BASIC: 'basic'>), MLServerConfig(identifier='test', port=8103, auth=<AuthMethod.BASIC: 'basic'>)])
+   MLEnvironment(app_name='migration-app', protocol='http', host='localhost', username='admin', password='admin', auth='digest', ssl=None, cloud=None, app_servers=[MLServerConfig(identifier='manage', port=8002, auth='basic', username=None, password=None, ssl=None, rest=False), MLServerConfig(identifier='content', port=8100, auth='basic', username=None, password=None, ssl=None, rest=False), MLServerConfig(identifier='modules', port=8101, auth='basic', username=None, password=None, ssl=None, rest=False), MLServerConfig(identifier='schemas', port=8102, auth='basic', username=None, password=None, ssl=None, rest=False), MLServerConfig(identifier='test', port=8103, auth='basic', username=None, password=None, ssl=None, rest=False)])
 
 This code will work in every subdirectory of the ``migration-app`` project as it looks for ``.mlclient`` recursively.
 
@@ -50,7 +112,7 @@ This code will work in every subdirectory of the ``migration-app`` project as it
        >>> from mlclient import MLEnvironment
        >>> env = MLEnvironment.load_file("path/to/mlclient-local.yaml")
        >>> env
-       MLEnvironment(app_name='migration-app', protocol='http', host='localhost', username='admin', password='admin', app_servers=[MLServerConfig(identifier='manage', port=8002, auth=<AuthMethod.BASIC: 'basic'>), MLServerConfig(identifier='content', port=8100, auth=<AuthMethod.BASIC: 'basic'>), MLServerConfig(identifier='modules', port=8101, auth=<AuthMethod.BASIC: 'basic'>), MLServerConfig(identifier='schemas', port=8102, auth=<AuthMethod.BASIC: 'basic'>), MLServerConfig(identifier='test', port=8103, auth=<AuthMethod.BASIC: 'basic'>)])
+       MLEnvironment(app_name='migration-app', protocol='http', host='localhost', username='admin', password='admin', auth='digest', ssl=None, cloud=None, app_servers=[MLServerConfig(identifier='manage', port=8002, auth='basic', username=None, password=None, ssl=None, rest=False), MLServerConfig(identifier='content', port=8100, auth='basic', username=None, password=None, ssl=None, rest=False), MLServerConfig(identifier='modules', port=8101, auth='basic', username=None, password=None, ssl=None, rest=False), MLServerConfig(identifier='schemas', port=8102, auth='basic', username=None, password=None, ssl=None, rest=False), MLServerConfig(identifier='test', port=8103, auth='basic', username=None, password=None, ssl=None, rest=False)])
 
 
 MLClientManager class

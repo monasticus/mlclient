@@ -23,6 +23,8 @@ It contains all custom exceptions related to ML Client:
         A custom Exception class for invalid metadata XML.
     * ResourceNotFoundError
         A custom Exception class for a not found resource.
+    * ConfigError
+        A custom Exception class for invalid connection/authentication config.
 """
 
 from __future__ import annotations
@@ -32,6 +34,15 @@ class WrongParametersError(Exception):
     """A custom Exception class for wrong parameters.
 
     Raised when attempting to call a REST Resource with incorrect parameters.
+    """
+
+
+class ConfigError(Exception):
+    """A custom Exception class for invalid connection/authentication config.
+
+    Raised at client creation time when connection and authentication settings
+    form a combination MarkLogic cannot support (e.g. certificate auth without
+    a client certificate, or a Cloud connection mixed with explicit auth).
     """
 
 

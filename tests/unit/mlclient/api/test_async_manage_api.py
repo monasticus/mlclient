@@ -1,5 +1,3 @@
-from pathlib import Path
-
 import httpx
 import pytest
 import respx
@@ -29,7 +27,7 @@ async def test_custom_call():
 @pytest.mark.asyncio
 @respx.mock
 async def test_get_logs():
-    response_body_path = resources_utils.get_test_resource_path(
+    response_body = resources_utils.read_test_resource_bytes(
         __file__,
         "test-get-logs.json",
     )
@@ -39,7 +37,7 @@ async def test_get_logs():
     ml_mocker.with_request_param("filename", "ErrorLog.txt")
     ml_mocker.with_response_content_type("application/json; charset=UTF-8")
     ml_mocker.with_response_code(200)
-    ml_mocker.with_response_body(Path(response_body_path).read_bytes())
+    ml_mocker.with_response_body(response_body)
     ml_mocker.mock_get()
 
     async with AsyncMLClient() as ml:
@@ -52,7 +50,7 @@ async def test_get_logs():
 @pytest.mark.asyncio
 @respx.mock
 async def test_get_databases():
-    response_body_path = resources_utils.get_test_resource_path(
+    response_body = resources_utils.read_test_resource_bytes(
         __file__,
         "test-get-databases.json",
     )
@@ -62,7 +60,7 @@ async def test_get_databases():
     ml_mocker.with_request_param("view", "default")
     ml_mocker.with_response_content_type("application/json; charset=UTF-8")
     ml_mocker.with_response_code(200)
-    ml_mocker.with_response_body(Path(response_body_path).read_bytes())
+    ml_mocker.with_response_body(response_body)
     ml_mocker.mock_get()
 
     async with AsyncMLClient() as ml:
@@ -78,7 +76,7 @@ async def test_get_databases():
 async def test_post_databases():
     body = '<database-properties xmlns="http://marklogic.com/manage" />'
 
-    response_body_path = resources_utils.get_test_resource_path(
+    response_body = resources_utils.read_test_resource_bytes(
         __file__,
         "test-post-databases.xml",
     )
@@ -86,7 +84,7 @@ async def test_post_databases():
     ml_mocker.with_url("http://localhost:8002/manage/v2/databases")
     ml_mocker.with_response_content_type("application/xml; charset=UTF-8")
     ml_mocker.with_response_code(400)
-    ml_mocker.with_response_body(Path(response_body_path).read_bytes())
+    ml_mocker.with_response_body(response_body)
     ml_mocker.mock_post()
 
     async with AsyncMLClient() as ml:
@@ -102,7 +100,7 @@ async def test_post_databases():
 @pytest.mark.asyncio
 @respx.mock
 async def test_get_database():
-    response_body_path = resources_utils.get_test_resource_path(
+    response_body = resources_utils.read_test_resource_bytes(
         __file__,
         "test-get-database.json",
     )
@@ -112,7 +110,7 @@ async def test_get_database():
     ml_mocker.with_request_param("view", "default")
     ml_mocker.with_response_content_type("application/json; charset=UTF-8")
     ml_mocker.with_response_code(200)
-    ml_mocker.with_response_body(Path(response_body_path).read_bytes())
+    ml_mocker.with_response_body(response_body)
     ml_mocker.mock_get()
 
     async with AsyncMLClient() as ml:
@@ -126,7 +124,7 @@ async def test_get_database():
 @pytest.mark.asyncio
 @respx.mock
 async def test_post_database():
-    response_body_path = resources_utils.get_test_resource_path(
+    response_body = resources_utils.read_test_resource_bytes(
         __file__,
         "test-post-database.xml",
     )
@@ -136,7 +134,7 @@ async def test_post_database():
     ml_mocker.with_request_body({"operation": "clear-database"})
     ml_mocker.with_response_content_type("application/xml; charset=UTF-8")
     ml_mocker.with_response_code(200)
-    ml_mocker.with_response_body(Path(response_body_path).read_bytes())
+    ml_mocker.with_response_body(response_body)
     ml_mocker.mock_post()
 
     async with AsyncMLClient() as ml:
@@ -168,7 +166,7 @@ async def test_delete_database():
 @pytest.mark.asyncio
 @respx.mock
 async def test_get_database_properties():
-    response_body_path = resources_utils.get_test_resource_path(
+    response_body = resources_utils.read_test_resource_bytes(
         __file__,
         "test-get-database-properties.json",
     )
@@ -179,7 +177,7 @@ async def test_get_database_properties():
     ml_mocker.with_request_param("format", "json")
     ml_mocker.with_response_content_type("application/json; charset=UTF-8")
     ml_mocker.with_response_code(200)
-    ml_mocker.with_response_body(Path(response_body_path).read_bytes())
+    ml_mocker.with_response_body(response_body)
     ml_mocker.mock_get()
 
     async with AsyncMLClient() as ml:
@@ -195,7 +193,7 @@ async def test_get_database_properties():
 @pytest.mark.asyncio
 @respx.mock
 async def test_put_database_properties():
-    response_body_path = resources_utils.get_test_resource_path(
+    response_body = resources_utils.read_test_resource_bytes(
         __file__,
         "test-put-database-properties.json",
     )
@@ -207,7 +205,7 @@ async def test_put_database_properties():
     ml_mocker.with_request_body({"database-name": "custom-db"})
     ml_mocker.with_response_content_type("application/json; charset=UTF-8")
     ml_mocker.with_response_code(404)
-    ml_mocker.with_response_body(Path(response_body_path).read_bytes())
+    ml_mocker.with_response_body(response_body)
     ml_mocker.mock_put()
 
     async with AsyncMLClient() as ml:
@@ -223,7 +221,7 @@ async def test_put_database_properties():
 @pytest.mark.asyncio
 @respx.mock
 async def test_get_servers():
-    response_body_path = resources_utils.get_test_resource_path(
+    response_body = resources_utils.read_test_resource_bytes(
         __file__,
         "test-get-servers.json",
     )
@@ -233,7 +231,7 @@ async def test_get_servers():
     ml_mocker.with_request_param("view", "default")
     ml_mocker.with_response_content_type("application/json; charset=UTF-8")
     ml_mocker.with_response_code(200)
-    ml_mocker.with_response_body(Path(response_body_path).read_bytes())
+    ml_mocker.with_response_body(response_body)
     ml_mocker.mock_get()
 
     async with AsyncMLClient() as ml:
@@ -247,7 +245,7 @@ async def test_get_servers():
 @pytest.mark.asyncio
 @respx.mock
 async def test_post_servers():
-    response_body_path = resources_utils.get_test_resource_path(
+    response_body = resources_utils.read_test_resource_bytes(
         __file__,
         "test-post-servers.xml",
     )
@@ -257,7 +255,7 @@ async def test_post_servers():
     ml_mocker.with_request_param("server-type", "http")
     ml_mocker.with_response_content_type("application/xml; charset=UTF-8")
     ml_mocker.with_response_code(400)
-    ml_mocker.with_response_body(Path(response_body_path).read_bytes())
+    ml_mocker.with_response_body(response_body)
     ml_mocker.mock_post()
 
     async with AsyncMLClient() as ml:
@@ -276,7 +274,7 @@ async def test_post_servers():
 @pytest.mark.asyncio
 @respx.mock
 async def test_get_server():
-    response_body_path = resources_utils.get_test_resource_path(
+    response_body = resources_utils.read_test_resource_bytes(
         __file__,
         "test-get-server.json",
     )
@@ -287,7 +285,7 @@ async def test_get_server():
     ml_mocker.with_request_param("view", "default")
     ml_mocker.with_response_content_type("application/json; charset=UTF-8")
     ml_mocker.with_response_code(200)
-    ml_mocker.with_response_body(Path(response_body_path).read_bytes())
+    ml_mocker.with_response_body(response_body)
     ml_mocker.mock_get()
 
     async with AsyncMLClient() as ml:
@@ -305,7 +303,7 @@ async def test_get_server():
 @pytest.mark.asyncio
 @respx.mock
 async def test_delete_server():
-    response_body_path = resources_utils.get_test_resource_path(
+    response_body = resources_utils.read_test_resource_bytes(
         __file__,
         "test-delete-server.xml",
     )
@@ -314,7 +312,7 @@ async def test_delete_server():
     ml_mocker.with_request_param("group-id", "Non-existing-group")
     ml_mocker.with_response_content_type("application/xml; charset=UTF-8")
     ml_mocker.with_response_code(404)
-    ml_mocker.with_response_body(Path(response_body_path).read_bytes())
+    ml_mocker.with_response_body(response_body)
     ml_mocker.mock_delete()
 
     async with AsyncMLClient() as ml:
@@ -330,7 +328,7 @@ async def test_delete_server():
 @pytest.mark.asyncio
 @respx.mock
 async def test_get_server_properties():
-    response_body_path = resources_utils.get_test_resource_path(
+    response_body = resources_utils.read_test_resource_bytes(
         __file__,
         "test-get-server-properties.json",
     )
@@ -342,7 +340,7 @@ async def test_get_server_properties():
     ml_mocker.with_request_param("format", "json")
     ml_mocker.with_response_content_type("application/json; charset=UTF-8")
     ml_mocker.with_response_code(200)
-    ml_mocker.with_response_body(Path(response_body_path).read_bytes())
+    ml_mocker.with_response_body(response_body)
     ml_mocker.mock_get()
 
     async with AsyncMLClient() as ml:
@@ -359,7 +357,7 @@ async def test_get_server_properties():
 @pytest.mark.asyncio
 @respx.mock
 async def test_put_server_properties():
-    response_body_path = resources_utils.get_test_resource_path(
+    response_body = resources_utils.read_test_resource_bytes(
         __file__,
         "test-put-server-properties.json",
     )
@@ -372,7 +370,7 @@ async def test_put_server_properties():
     ml_mocker.with_request_body({"server-name": "non-existing-server"})
     ml_mocker.with_response_content_type("application/json; charset=UTF-8")
     ml_mocker.with_response_code(404)
-    ml_mocker.with_response_body(Path(response_body_path).read_bytes())
+    ml_mocker.with_response_body(response_body)
     ml_mocker.mock_put()
 
     async with AsyncMLClient() as ml:
@@ -389,7 +387,7 @@ async def test_put_server_properties():
 @pytest.mark.asyncio
 @respx.mock
 async def test_get_forests():
-    response_body_path = resources_utils.get_test_resource_path(
+    response_body = resources_utils.read_test_resource_bytes(
         __file__,
         "test-get-forests.json",
     )
@@ -400,7 +398,7 @@ async def test_get_forests():
     ml_mocker.with_request_param("database-id", "Documents")
     ml_mocker.with_response_content_type("application/json; charset=UTF-8")
     ml_mocker.with_response_code(200)
-    ml_mocker.with_response_body(Path(response_body_path).read_bytes())
+    ml_mocker.with_response_body(response_body)
     ml_mocker.mock_get()
 
     async with AsyncMLClient() as ml:
@@ -419,7 +417,7 @@ async def test_get_forests():
 async def test_post_forests():
     body = '<forest-create xmlns="http://marklogic.com/manage" />'
 
-    response_body_path = resources_utils.get_test_resource_path(
+    response_body = resources_utils.read_test_resource_bytes(
         __file__,
         "test-post-forests.xml",
     )
@@ -427,7 +425,7 @@ async def test_post_forests():
     ml_mocker.with_url("http://localhost:8002/manage/v2/forests")
     ml_mocker.with_response_content_type("application/xml; charset=UTF-8")
     ml_mocker.with_response_code(500)
-    ml_mocker.with_response_body(Path(response_body_path).read_bytes())
+    ml_mocker.with_response_body(response_body)
     ml_mocker.mock_post()
 
     async with AsyncMLClient() as ml:
@@ -441,7 +439,7 @@ async def test_post_forests():
 async def test_put_forests():
     body = '<forest-migrate xmlns="http://marklogic.com/manage" />'
 
-    response_body_path = resources_utils.get_test_resource_path(
+    response_body = resources_utils.read_test_resource_bytes(
         __file__,
         "test-put-forests.xml",
     )
@@ -449,7 +447,7 @@ async def test_put_forests():
     ml_mocker.with_url("http://localhost:8002/manage/v2/forests")
     ml_mocker.with_response_content_type("application/xml; charset=UTF-8")
     ml_mocker.with_response_code(400)
-    ml_mocker.with_response_body(Path(response_body_path).read_bytes())
+    ml_mocker.with_response_body(response_body)
     ml_mocker.mock_put()
 
     async with AsyncMLClient() as ml:
@@ -465,7 +463,7 @@ async def test_put_forests():
 @pytest.mark.asyncio
 @respx.mock
 async def test_get_forest():
-    response_body_path = resources_utils.get_test_resource_path(
+    response_body = resources_utils.read_test_resource_bytes(
         __file__,
         "test-get-forest.json",
     )
@@ -476,7 +474,7 @@ async def test_get_forest():
     ml_mocker.with_request_param("view", "default")
     ml_mocker.with_response_content_type("application/json; charset=UTF-8")
     ml_mocker.with_response_code(200)
-    ml_mocker.with_response_body(Path(response_body_path).read_bytes())
+    ml_mocker.with_response_body(response_body)
     ml_mocker.mock_get()
 
     async with AsyncMLClient() as ml:
@@ -490,7 +488,7 @@ async def test_get_forest():
 @pytest.mark.asyncio
 @respx.mock
 async def test_post_forest():
-    response_body_path = resources_utils.get_test_resource_path(
+    response_body = resources_utils.read_test_resource_bytes(
         __file__,
         "test-post-forest.xml",
     )
@@ -501,7 +499,7 @@ async def test_post_forest():
     ml_mocker.with_request_body({"state": "clear"})
     ml_mocker.with_response_content_type("application/xml; charset=UTF-8")
     ml_mocker.with_response_code(404)
-    ml_mocker.with_response_body(Path(response_body_path).read_bytes())
+    ml_mocker.with_response_body(response_body)
     ml_mocker.mock_post()
 
     async with AsyncMLClient() as ml:
@@ -531,7 +529,7 @@ async def test_delete_forest():
 @pytest.mark.asyncio
 @respx.mock
 async def test_get_forest_properties():
-    response_body_path = resources_utils.get_test_resource_path(
+    response_body = resources_utils.read_test_resource_bytes(
         __file__,
         "test-get-forest-properties.json",
     )
@@ -542,7 +540,7 @@ async def test_get_forest_properties():
     ml_mocker.with_request_param("format", "json")
     ml_mocker.with_response_content_type("application/json; charset=UTF-8")
     ml_mocker.with_response_code(200)
-    ml_mocker.with_response_body(Path(response_body_path).read_bytes())
+    ml_mocker.with_response_body(response_body)
     ml_mocker.mock_get()
 
     async with AsyncMLClient() as ml:
@@ -558,7 +556,7 @@ async def test_get_forest_properties():
 @pytest.mark.asyncio
 @respx.mock
 async def test_put_forest_properties():
-    response_body_path = resources_utils.get_test_resource_path(
+    response_body = resources_utils.read_test_resource_bytes(
         __file__,
         "test-put-forest-properties.json",
     )
@@ -570,7 +568,7 @@ async def test_put_forest_properties():
     ml_mocker.with_request_body({"forest-name": "custom-forest"})
     ml_mocker.with_response_content_type("application/json; charset=UTF-8")
     ml_mocker.with_response_code(404)
-    ml_mocker.with_response_body(Path(response_body_path).read_bytes())
+    ml_mocker.with_response_body(response_body)
     ml_mocker.mock_put()
 
     async with AsyncMLClient() as ml:
@@ -586,7 +584,7 @@ async def test_put_forest_properties():
 @pytest.mark.asyncio
 @respx.mock
 async def test_get_roles():
-    response_body_path = resources_utils.get_test_resource_path(
+    response_body = resources_utils.read_test_resource_bytes(
         __file__,
         "test-get-roles.json",
     )
@@ -596,7 +594,7 @@ async def test_get_roles():
     ml_mocker.with_request_param("view", "default")
     ml_mocker.with_response_content_type("application/json; charset=UTF-8")
     ml_mocker.with_response_code(200)
-    ml_mocker.with_response_body(Path(response_body_path).read_bytes())
+    ml_mocker.with_response_body(response_body)
     ml_mocker.mock_get()
 
     async with AsyncMLClient() as ml:
@@ -612,7 +610,7 @@ async def test_get_roles():
 async def test_post_roles():
     body = '<role-properties xmlns="http://marklogic.com/manage/role/properties" />'
 
-    response_body_path = resources_utils.get_test_resource_path(
+    response_body = resources_utils.read_test_resource_bytes(
         __file__,
         "test-post-roles.xml",
     )
@@ -620,7 +618,7 @@ async def test_post_roles():
     ml_mocker.with_url("http://localhost:8002/manage/v2/roles")
     ml_mocker.with_response_content_type("application/xml; charset=UTF-8")
     ml_mocker.with_response_code(400)
-    ml_mocker.with_response_body(Path(response_body_path).read_bytes())
+    ml_mocker.with_response_body(response_body)
     ml_mocker.mock_post()
 
     async with AsyncMLClient() as ml:
@@ -633,7 +631,7 @@ async def test_post_roles():
 @pytest.mark.asyncio
 @respx.mock
 async def test_get_role():
-    response_body_path = resources_utils.get_test_resource_path(
+    response_body = resources_utils.read_test_resource_bytes(
         __file__,
         "test-get-role.json",
     )
@@ -643,7 +641,7 @@ async def test_get_role():
     ml_mocker.with_request_param("view", "default")
     ml_mocker.with_response_content_type("application/json; charset=UTF-8")
     ml_mocker.with_response_code(200)
-    ml_mocker.with_response_body(Path(response_body_path).read_bytes())
+    ml_mocker.with_response_body(response_body)
     ml_mocker.mock_get()
 
     async with AsyncMLClient() as ml:
@@ -673,7 +671,7 @@ async def test_delete_role():
 @pytest.mark.asyncio
 @respx.mock
 async def test_get_role_properties():
-    response_body_path = resources_utils.get_test_resource_path(
+    response_body = resources_utils.read_test_resource_bytes(
         __file__,
         "test-get-role-properties.json",
     )
@@ -682,7 +680,7 @@ async def test_get_role_properties():
     ml_mocker.with_request_param("format", "json")
     ml_mocker.with_response_content_type("application/json; charset=UTF-8")
     ml_mocker.with_response_code(200)
-    ml_mocker.with_response_body(Path(response_body_path).read_bytes())
+    ml_mocker.with_response_body(response_body)
     ml_mocker.mock_get()
 
     async with AsyncMLClient() as ml:
@@ -695,7 +693,7 @@ async def test_get_role_properties():
 @pytest.mark.asyncio
 @respx.mock
 async def test_put_role_properties():
-    response_body_path = resources_utils.get_test_resource_path(
+    response_body = resources_utils.read_test_resource_bytes(
         __file__,
         "test-put-role-properties.json",
     )
@@ -707,7 +705,7 @@ async def test_put_role_properties():
     ml_mocker.with_request_body({"role-name": "custom-db"})
     ml_mocker.with_response_content_type("application/json; charset=UTF-8")
     ml_mocker.with_response_code(400)
-    ml_mocker.with_response_body(Path(response_body_path).read_bytes())
+    ml_mocker.with_response_body(response_body)
     ml_mocker.mock_put()
 
     async with AsyncMLClient() as ml:
@@ -726,7 +724,7 @@ async def test_put_role_properties():
 @pytest.mark.asyncio
 @respx.mock
 async def test_get_users():
-    response_body_path = resources_utils.get_test_resource_path(
+    response_body = resources_utils.read_test_resource_bytes(
         __file__,
         "test-get-users.json",
     )
@@ -736,7 +734,7 @@ async def test_get_users():
     ml_mocker.with_request_param("view", "default")
     ml_mocker.with_response_content_type("application/json; charset=UTF-8")
     ml_mocker.with_response_code(200)
-    ml_mocker.with_response_body(Path(response_body_path).read_bytes())
+    ml_mocker.with_response_body(response_body)
     ml_mocker.mock_get()
 
     async with AsyncMLClient() as ml:
@@ -752,7 +750,7 @@ async def test_get_users():
 async def test_post_users():
     body = '<user-properties xmlns="http://marklogic.com/manage/user/properties" />'
 
-    response_body_path = resources_utils.get_test_resource_path(
+    response_body = resources_utils.read_test_resource_bytes(
         __file__,
         "test-post-users.xml",
     )
@@ -760,7 +758,7 @@ async def test_post_users():
     ml_mocker.with_url("http://localhost:8002/manage/v2/users")
     ml_mocker.with_response_content_type("application/xml; charset=UTF-8")
     ml_mocker.with_response_code(400)
-    ml_mocker.with_response_body(Path(response_body_path).read_bytes())
+    ml_mocker.with_response_body(response_body)
     ml_mocker.mock_post()
 
     async with AsyncMLClient() as ml:
@@ -773,7 +771,7 @@ async def test_post_users():
 @pytest.mark.asyncio
 @respx.mock
 async def test_get_user():
-    response_body_path = resources_utils.get_test_resource_path(
+    response_body = resources_utils.read_test_resource_bytes(
         __file__,
         "test-get-user.json",
     )
@@ -783,7 +781,7 @@ async def test_get_user():
     ml_mocker.with_request_param("view", "default")
     ml_mocker.with_response_content_type("application/json; charset=UTF-8")
     ml_mocker.with_response_code(200)
-    ml_mocker.with_response_body(Path(response_body_path).read_bytes())
+    ml_mocker.with_response_body(response_body)
     ml_mocker.mock_get()
 
     async with AsyncMLClient() as ml:
@@ -797,7 +795,7 @@ async def test_get_user():
 @pytest.mark.asyncio
 @respx.mock
 async def test_delete_user():
-    response_body_path = resources_utils.get_test_resource_path(
+    response_body = resources_utils.read_test_resource_bytes(
         __file__,
         "test-delete-user.xml",
     )
@@ -805,7 +803,7 @@ async def test_delete_user():
     ml_mocker.with_url("http://localhost:8002/manage/v2/users/custom-user")
     ml_mocker.with_response_content_type("application/xml; charset=UTF-8")
     ml_mocker.with_response_code(404)
-    ml_mocker.with_response_body(Path(response_body_path).read_bytes())
+    ml_mocker.with_response_body(response_body)
     ml_mocker.mock_delete()
 
     async with AsyncMLClient() as ml:
@@ -818,7 +816,7 @@ async def test_delete_user():
 @pytest.mark.asyncio
 @respx.mock
 async def test_get_user_properties():
-    response_body_path = resources_utils.get_test_resource_path(
+    response_body = resources_utils.read_test_resource_bytes(
         __file__,
         "test-get-user-properties.json",
     )
@@ -827,7 +825,7 @@ async def test_get_user_properties():
     ml_mocker.with_request_param("format", "json")
     ml_mocker.with_response_content_type("application/json; charset=UTF-8")
     ml_mocker.with_response_code(200)
-    ml_mocker.with_response_body(Path(response_body_path).read_bytes())
+    ml_mocker.with_response_body(response_body)
     ml_mocker.mock_get()
 
     async with AsyncMLClient() as ml:
@@ -840,7 +838,7 @@ async def test_get_user_properties():
 @pytest.mark.asyncio
 @respx.mock
 async def test_put_user_properties():
-    response_body_path = resources_utils.get_test_resource_path(
+    response_body = resources_utils.read_test_resource_bytes(
         __file__,
         "test-put-user-properties.json",
     )
@@ -852,7 +850,7 @@ async def test_put_user_properties():
     ml_mocker.with_request_body({"user-name": "custom-db"})
     ml_mocker.with_response_content_type("application/json; charset=UTF-8")
     ml_mocker.with_response_code(404)
-    ml_mocker.with_response_body(Path(response_body_path).read_bytes())
+    ml_mocker.with_response_body(response_body)
     ml_mocker.mock_put()
 
     async with AsyncMLClient() as ml:

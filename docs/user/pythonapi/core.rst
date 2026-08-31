@@ -497,6 +497,28 @@ DELETE
     ... )
 
 
+WITHIN A TRANSACTION
+""""""""""""""""""""
+
+``read``, ``write`` and ``delete`` accept a ``txid`` to run inside an open
+multi-statement transaction. Pass the id explicitly, or spread a
+``TransactionService`` with ``**`` to carry both the ``txid`` and the
+transaction's database. See `TransactionService`_ for the full transaction
+lifecycle.
+
+.. code-block:: python
+
+    >>> from mlclient import MLClientManager
+    >>> from mlclient.models import Document
+
+    >>> doc = Document.create("/doc-1.xml", "<root><child>data</child></root>")
+    >>> mgr = MLClientManager("local")
+    >>> with mgr.get_client("app-services") as ml:
+    ...     with ml.transaction() as txn:
+    ...         ml.documents.write(doc, **txn)
+    ...         ml.documents.read("/doc-1.xml", txid=txn.id)
+
+
 EvalService
 ^^^^^^^^^^^
 
@@ -847,6 +869,112 @@ Get limited logs
     ...         end_time="2024-02-03",
     ...         regex="Memory [^1]{1,2}%",
     ...     )
+
+
+TransactionService
+^^^^^^^^^^^^^^^^^^
+
+A multi-statement transaction groups several document or eval operations so they
+commit or roll back as a unit. Open one with ``ml.transaction()``; the returned
+``TransactionService`` is a context manager that commits on a clean exit and
+rolls back if the block raises.
+
+Spread it with ``**`` into any content operation to run that operation inside the
+transaction - it unpacks to ``txid`` (and ``database``, when the transaction was
+opened against one).
+
+Commit on clean exit
+""""""""""""""""""""
+
+.. code-block:: python
+
+    >>> from mlclient import MLClientManager
+    >>> from mlclient.models import Document
+
+    >>> doc_1 = Document.create("/doc-1.xml", "<root>1</root>")
+    >>> doc_2 = Document.create("/doc-2.xml", "<root>2</root>")
+
+    >>> mgr = MLClientManager("local")
+    >>> with mgr.get_client("app-services") as ml:
+    ...     with ml.transaction() as txn:
+    ...         ml.documents.write([doc_1, doc_2], **txn)
+    ...         ml.eval.xquery('xdmp:document-insert("/doc-3.xml", <root>3</root>)', **txn)
+    ...     # all three inserts commit together here, on the clean exit
+
+Opened against a specific database, ``**txn`` carries the database too:
+
+.. code-block:: python
+
+    >>> with mgr.get_client("app-services") as ml:
+    ...     with ml.transaction(database="Documents") as txn:
+    ...         ml.documents.write(doc_1, **txn)
+    ...         ml.documents.read("/doc-1.xml", **txn)
+
+Roll back on error
+""""""""""""""""""
+
+Raising anything inside the block rolls the transaction back - the partial write
+never becomes visible:
+
+.. code-block:: python
+
+    >>> with mgr.get_client("app-services") as ml:
+    ...     try:
+    ...         with ml.transaction() as txn:
+    ...             ml.documents.write(doc_1, **txn)
+    ...             raise RuntimeError("validation failed")
+    ...     except RuntimeError:
+    ...         pass  # already rolled back on the way out; /doc-1.xml was not written
+
+Inspect id and status
+"""""""""""""""""""""
+
+.. code-block:: python
+
+    >>> with mgr.get_client("app-services") as ml:
+    ...     with ml.transaction() as txn:
+    ...         txn.id           # the server-assigned transaction id
+    ...         txn.status()     # {'transaction-status': {...}}
+
+Manual commit and rollback
+""""""""""""""""""""""""""
+
+Without a ``with`` block you own the lifecycle - commit or roll back yourself:
+
+.. code-block:: python
+
+    >>> with mgr.get_client("app-services") as ml:
+    ...     txn = ml.transaction()
+    ...     try:
+    ...         ml.documents.write(doc_1, **txn)
+    ...         txn.commit()
+    ...     except Exception:
+    ...         txn.rollback()
+    ...         raise
+
+API level
+"""""""""
+
+The mid-level ``ml.rest.transactions`` API has no context manager: create the
+transaction, thread its id through each call, and drive commit or rollback
+yourself. The id is the last path segment of the ``Location`` header on the
+``303`` create response:
+
+.. code-block:: python
+
+    >>> from mlclient import MLClient
+    >>> from mlclient.models import Document
+
+    >>> doc = Document.create("/doc-1.xml", "<root>data</root>")
+    >>> with MLClient() as ml:
+    ...     location = ml.rest.transactions.create().headers["Location"]
+    ...     txid = location.rsplit("/", 1)[-1]
+    ...     try:
+    ...         ml.documents.write(doc, txid=txid)
+    ...         ml.rest.transactions.post(txid, result="commit")
+    ...     except Exception:
+    ...         ml.rest.transactions.post(txid, result="rollback")
+    ...         raise
 
 
 Mid-level API clients

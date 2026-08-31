@@ -37,6 +37,47 @@ class TestEvalEndpoint:
         assert parsed_resp == "<new-parent><child/></new-parent>"
 
 
+class TestTransactionsEndpoint:
+    @pytest.mark.ml_access
+    def test_transaction_lifecycle_returns_expected_status_codes(
+        self,
+        ml_client: MLClient,
+    ):
+        txid = None
+        try:
+            create_resp = ml_client.rest.transactions.create()
+            assert create_resp.status_code == httpx.codes.SEE_OTHER
+            txid = create_resp.headers["Location"].rsplit("/", 1)[-1]
+
+            status_resp = ml_client.rest.transactions.get(txid, data_format="json")
+            assert status_resp.status_code == httpx.codes.OK
+            status = MLResponseParser.parse(status_resp)["transaction-status"]
+            assert status["transaction-id"] == txid
+
+            commit_resp = ml_client.rest.transactions.post(txid, result="commit")
+            assert commit_resp.status_code == httpx.codes.NO_CONTENT
+            txid = None
+        finally:
+            self._rollback_quietly(ml_client, txid)
+
+    @pytest.mark.ml_access
+    def test_status_of_committed_transaction_is_rejected(self, ml_client: MLClient):
+        create_resp = ml_client.rest.transactions.create()
+        txid = create_resp.headers["Location"].rsplit("/", 1)[-1]
+        ml_client.rest.transactions.post(txid, result="commit")
+
+        status_resp = ml_client.rest.transactions.get(txid, data_format="json")
+
+        assert status_resp.status_code == httpx.codes.BAD_REQUEST
+        error = MLResponseParser.parse(status_resp)["errorResponse"]
+        assert error["messageCode"] == "REST-INVALIDPARAM"
+
+    @classmethod
+    def _rollback_quietly(cls, ml: MLClient, txid: str | None):
+        if txid is not None:
+            ml.rest.transactions.post(txid, result="rollback")
+
+
 class TestLogsEndpoint:
     TEST_LOGS_COUNT = 10
 

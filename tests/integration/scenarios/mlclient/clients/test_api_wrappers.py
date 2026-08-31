@@ -1,28 +1,100 @@
 from __future__ import annotations
 
+import datetime
+from time import sleep
 from typing import ClassVar
 
 import httpx
 import pytest
 from httpx import Response
-from pytest_bdd import scenarios
 
 from mlclient import MLClient, MLResponseParser
 from mlclient.models.http import DocumentsBodyPart as BodyPart
 
-scenarios("../../../features/mlclient/clients/api_wrappers.feature")
-
-pytest_plugins = [
-    "tests.integration.steps.client_steps",
-    "tests.integration.steps.responses",
-    "tests.integration.steps.setup",
-]
+EVAL_XQUERY = (
+    "xquery version '1.0-ml';\n\n"
+    "declare variable $element as element() external;\n\n"
+    "<new-parent>{$element/child::element()}</new-parent>"
+)
 
 
 @pytest.fixture(scope="class")
 def ml_client():
     with MLClient() as ml:
         yield ml
+
+
+class TestEvalEndpoint:
+    @pytest.mark.ml_access
+    def test_eval_returns_multipart_response(self, ml_client: MLClient):
+        resp = ml_client.rest.eval.post(
+            xquery=EVAL_XQUERY,
+            variables={"element": "<parent><child/></parent>"},
+        )
+
+        assert resp.status_code == httpx.codes.OK
+        parsed_resp = MLResponseParser.parse(resp, str)
+        assert parsed_resp == "<new-parent><child/></new-parent>"
+
+
+class TestLogsEndpoint:
+    TEST_LOGS_COUNT = 10
+
+    @pytest.mark.ml_access
+    def test_error_logs_contain_produced_entries(self, ml_client: MLClient):
+        self._produce_test_logs(ml_client)
+        sleep(1)
+
+        resp = ml_client.manage.logs.get(
+            filename=f"{ml_client.http.config.port}_ErrorLog.txt",
+            data_format="json",
+            start_time=str(datetime.date.today()),
+            regex="Test Log .{1,2}",
+        )
+
+        assert resp.status_code == httpx.codes.OK
+        logfile = resp.json()["logfile"]
+        assert "message" not in logfile
+        assert isinstance(logfile.get("log"), list) or len(logfile) == 6
+        assert len(logfile["log"]) % self.TEST_LOGS_COUNT == 0
+
+    @pytest.mark.ml_access
+    def test_access_logs_record_eval_requests(self, ml_client: MLClient):
+        self._produce_test_logs(ml_client)
+        sleep(1)
+
+        resp = ml_client.manage.logs.get(
+            filename=f"{ml_client.http.config.port}_AccessLog.txt",
+            data_format="json",
+        )
+
+        assert resp.status_code == httpx.codes.OK
+        logfile = resp.json()["logfile"]
+        assert "log" not in logfile
+        assert isinstance(logfile.get("message"), str) or len(logfile) == 6
+        eval_logs = [
+            line
+            for line in logfile["message"].split("\n")
+            if '"POST /v1/eval HTTP/1.1"' in line and "python-httpx" in line
+        ]
+        assert len(eval_logs) >= self.TEST_LOGS_COUNT
+
+    @pytest.mark.ml_access
+    def test_request_logs_have_expected_structure(self, ml_client: MLClient):
+        resp = ml_client.manage.logs.get(
+            filename=f"{ml_client.http.config.port}_RequestLog.txt",
+            data_format="json",
+        )
+
+        assert resp.status_code == httpx.codes.OK
+        logfile = resp.json()["logfile"]
+        assert "log" not in logfile
+        assert isinstance(logfile.get("message"), str) or len(logfile) == 6
+
+    @classmethod
+    def _produce_test_logs(cls, ml: MLClient):
+        for i in range(1, cls.TEST_LOGS_COUNT + 1):
+            ml.rest.eval.post(xquery=f'xdmp:log("Test Log {i}", "error")')
 
 
 class TestDatabasesManagement:

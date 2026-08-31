@@ -11,10 +11,12 @@ mlclient package
 .. toctree::
    :maxdepth: 1
 
+   api/mlclient.api
    calls/mlclient.calls
    clients/mlclient.clients
    jobs/mlclient.jobs
    models/mlclient.models
+   services/mlclient.services
 
 mlclient.ml_environment module
 --------------------------

@@ -1168,6 +1168,19 @@ def test_read_multiple_docs_using_custom_database(ml):
     assert zip_doc.temporal_collection is None
 
 
+@respx.mock
+def test_read_forwards_txid(ml):
+    uri = "/some/dir/doc1.xml"
+
+    mocker = MLRespXMocker(use_router=False)
+    mocker.with_url("http://localhost:8000/v1/documents")
+    mocker.with_request_param("uri", uri)
+    mocker.with_request_param("txid", "txn-123")
+    mocker.with_get_side_effect(side_effect=ml_doc_mocker.get_documents_side_effect)
+
+    ml.documents.read(uri, txid="txn-123")
+
+
 @ml_mocker.router
 def test_create_xml_document_from_bytes(ml):
     uri = "/some/dir/doc1.xml"
@@ -1650,6 +1663,18 @@ def test_create_multiple_documents_using_custom_database(ml):
     assert doc_4_info["category"] == ["metadata", "content"]
 
 
+@respx.mock
+def test_write_forwards_txid(ml):
+    doc = XMLDocument(b"<root/>", "/some/dir/doc1.xml")
+
+    mocker = MLRespXMocker(use_router=False)
+    mocker.with_url("http://localhost:8000/v1/documents")
+    mocker.with_request_param("txid", "txn-123")
+    mocker.with_post_side_effect(side_effect=ml_doc_mocker.post_documents_side_effect)
+
+    ml.documents.write(doc, txid="txn-123")
+
+
 @ml_mocker.router
 def test_create_document_with_temporal_collection(ml):
     uri = "/some/dir/doc1.xml"
@@ -1828,6 +1853,24 @@ def test_delete_document_with_non_existing_database(ml):
 
 
 @respx.mock
+def test_delete_forwards_txid(ml):
+    uri = "/some/dir/doc1.xml"
+
+    mocker = MLRespXMocker(use_router=False)
+    mocker.with_url("http://localhost:8000/v1/documents")
+    mocker.with_request_param("uri", uri)
+    mocker.with_request_param("txid", "txn-123")
+    mocker.with_response_code(204)
+    mocker.with_empty_response_body()
+    mocker.mock_delete()
+
+    try:
+        ml.documents.delete(uri, txid="txn-123")
+    except MarkLogicError as err:
+        pytest.fail(str(err))
+
+
+@respx.mock
 def test_delete_document_with_temporal_collection(ml):
     uri = "/some/dir/doc1.xml"
 
@@ -1950,26 +1993,3 @@ def test_delete_many_uris_are_batched(ml):
     ml.documents.delete(uris)
 
     assert ml_mocker.router.calls.call_count > 1
-
-
-@ml_mocker.router
-def test_write_forwards_txid(ml):
-    doc = XMLDocument(b"<root/>", "/some/dir/doc1.xml")
-
-    ml.documents.write(doc, txid="txn-123")
-
-    assert ml_mocker.router.calls.last.request.url.params["txid"] == "txn-123"
-
-
-@ml_mocker.router
-def test_read_forwards_txid(ml):
-    ml.documents.read("/some/dir/doc1.xml", txid="txn-123")
-
-    assert ml_mocker.router.calls.last.request.url.params["txid"] == "txn-123"
-
-
-@ml_mocker.router
-def test_delete_forwards_txid(ml):
-    ml.documents.delete("/some/dir/doc1.xml", txid="txn-123")
-
-    assert ml_mocker.router.calls.last.request.url.params["txid"] == "txn-123"

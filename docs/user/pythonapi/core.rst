@@ -178,13 +178,14 @@ They allow you to manage configuration or documents in MarkLogic with ease.
 Each service ensures that you can perform all the operations in the corresponding area.
 For example, some of the high-level services are:
 
-==========================================  ===================
+==========================================  =======================
 Service                                     Endpoint
-==========================================  ===================
+==========================================  =======================
 ``ml.documents``                            ``/v1/documents``
 ``ml.eval``                                 ``/v1/eval``
 ``ml.logs``                                 ``/manage/v2/logs``
-==========================================  ===================
+``ml.transaction()``                        ``/v1/transactions``
+==========================================  =======================
 
 DocumentsService
 ^^^^^^^^^^^^^^^^
@@ -293,6 +294,20 @@ READ
 
     >>> docs["/doc-4.zip"]
     <mlclient.models.documents.BinaryDocument object at 0x7f9200920970>
+
+**Stream documents one at a time**
+
+``read_stream`` yields each document as it arrives instead of building the whole
+result in memory - preferable for large URI lists:
+
+.. code-block:: python
+
+    >>> from mlclient import MLClientManager
+
+    >>> mgr = MLClientManager("local")
+    >>> with mgr.get_client("app-services") as ml:
+    ...     for doc in ml.documents.read_stream(["/doc-1.xml", "/doc-2.json"]):
+    ...         print(doc.uri)
 
 **Read documents from a custom database**
 
@@ -913,27 +928,27 @@ Opened against a specific database, ``**txn`` carries the database too:
 Roll back on error
 """"""""""""""""""
 
-Raising anything inside the block rolls the transaction back - the partial write
-never becomes visible:
-
-.. code-block:: python
-
-    >>> with mgr.get_client("app-services") as ml:
-    ...     try:
-    ...         with ml.transaction() as txn:
-    ...             ml.documents.write(doc_1, **txn)
-    ...             raise RuntimeError("validation failed")
-    ...     except RuntimeError:
-    ...         pass  # already rolled back on the way out; /doc-1.xml was not written
-
-Inspect id and status
-"""""""""""""""""""""
+If anything in the block raises, the transaction rolls back on the way out - even
+an operation that already succeeded never becomes visible:
 
 .. code-block:: python
 
     >>> with mgr.get_client("app-services") as ml:
     ...     with ml.transaction() as txn:
+    ...         ml.documents.write(doc_1, **txn)
+    ...         ml.documents.read("/missing.xml", **txn)   # raises RESTAPI-NODOCUMENT
+    ...     # the read raised, so the block exits with an error and rolls back:
+    ...     # doc_1 was never written
+
+Read transaction details
+""""""""""""""""""""""""
+
+.. code-block:: python
+
+    >>> with mgr.get_client("app-services") as ml:
+    ...     with ml.transaction(database="Documents") as txn:
     ...         txn.id           # the server-assigned transaction id
+    ...         txn.database     # the database it was opened against, or None
     ...         txn.status()     # {'transaction-status': {...}}
 
 Manual commit and rollback
@@ -950,30 +965,6 @@ Without a ``with`` block you own the lifecycle - commit or roll back yourself:
     ...         txn.commit()
     ...     except Exception:
     ...         txn.rollback()
-    ...         raise
-
-API level
-"""""""""
-
-The mid-level ``ml.rest.transactions`` API has no context manager: create the
-transaction, thread its id through each call, and drive commit or rollback
-yourself. The id is the last path segment of the ``Location`` header on the
-``303`` create response:
-
-.. code-block:: python
-
-    >>> from mlclient import MLClient
-    >>> from mlclient.models import Document
-
-    >>> doc = Document.create("/doc-1.xml", "<root>data</root>")
-    >>> with MLClient() as ml:
-    ...     location = ml.rest.transactions.create().headers["Location"]
-    ...     txid = location.rsplit("/", 1)[-1]
-    ...     try:
-    ...         ml.documents.write(doc, txid=txid)
-    ...         ml.rest.transactions.post(txid, result="commit")
-    ...     except Exception:
-    ...         ml.rest.transactions.post(txid, result="rollback")
     ...         raise
 
 
@@ -1003,6 +994,29 @@ RestApi
     ...     print(parsed)
     ...
     App-Services
+
+Transactions
+""""""""""""
+
+``ml.rest.transactions`` has no context manager: create the transaction, thread
+its id through each call, and drive commit or rollback yourself. The id is the
+last path segment of the ``Location`` header on the ``303`` create response:
+
+.. code-block:: python
+
+    >>> from mlclient import MLClient
+    >>> from mlclient.models import Document
+
+    >>> doc = Document.create("/doc-1.xml", "<root>data</root>")
+    >>> with MLClient() as ml:
+    ...     location = ml.rest.transactions.create().headers["Location"]
+    ...     txid = location.rsplit("/", 1)[-1]
+    ...     try:
+    ...         ml.documents.write(doc, txid=txid)
+    ...         ml.rest.transactions.post(txid, result="commit")
+    ...     except Exception:
+    ...         ml.rest.transactions.post(txid, result="rollback")
+    ...         raise
 
 ManageApi
 ^^^^^^^^^

@@ -73,13 +73,14 @@ Read and write documents:
 
 Available high-level services:
 
-==================  =====================  =======================================
-Service             Endpoint               Description
-==================  =====================  =======================================
-``ml.documents``    ``/v1/documents``       Read, write, delete documents
-``ml.eval``         ``/v1/eval``            Evaluate XQuery and JavaScript
-``ml.logs``         ``/manage/v2/logs``     Retrieve and filter server logs
-==================  =====================  =======================================
+======================  =======================  =======================================
+Service                 Endpoint                 Description
+======================  =======================  =======================================
+``ml.documents``        ``/v1/documents``        Read, write, delete documents
+``ml.eval``             ``/v1/eval``             Evaluate XQuery and JavaScript
+``ml.logs``             ``/manage/v2/logs``      Retrieve and filter server logs
+``ml.transaction()``    ``/v1/transactions``     Group operations into a transaction
+======================  =======================  =======================================
 
 
 More control

@@ -644,3 +644,29 @@ def test_documents_sender_metadata_document_with_metadata_object():
 
     assert len(parts) == 1
     assert '"collections"' in parts[0].content
+
+
+@pytest.mark.asyncio
+@ml_mocker.router
+async def test_write_forwards_txid(svc):
+    doc = XMLDocument(b"<root/>", "/some/dir/doc1.xml")
+
+    await svc.write(doc, txid="txn-123")
+
+    assert ml_mocker.router.calls.last.request.url.params["txid"] == "txn-123"
+
+
+@pytest.mark.asyncio
+@ml_mocker.router
+async def test_read_forwards_txid(svc):
+    await svc.read("/some/dir/doc1.xml", txid="txn-123")
+
+    assert ml_mocker.router.calls.last.request.url.params["txid"] == "txn-123"
+
+
+@pytest.mark.asyncio
+@ml_mocker.router
+async def test_delete_forwards_txid(svc):
+    await svc.delete("/some/dir/doc1.xml", txid="txn-123")
+
+    assert ml_mocker.router.calls.last.request.url.params["txid"] == "txn-123"

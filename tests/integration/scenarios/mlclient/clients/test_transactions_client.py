@@ -6,6 +6,7 @@ import pytest
 
 from mlclient import MLClient
 from mlclient.exceptions import MarkLogicError
+from mlclient.models import XMLDocument
 
 
 @pytest.fixture(scope="class")
@@ -16,8 +17,6 @@ def ml_client():
 
 class TestTransactions:
     TEST_DOC_URI = "/some/dir/txn-doc.xml"
-    INSERT = f'xdmp:document-insert("{TEST_DOC_URI}", <root/>)'
-    DOC_AVAILABLE = f'fn:doc-available("{TEST_DOC_URI}")'
     WRITE_DATABASE = "Modules"
     TRANSACTION_NAME = "mlclient-it-txn"
 
@@ -90,19 +89,22 @@ class TestTransactions:
 
     @classmethod
     def _write(cls, ml: MLClient, txn):
-        ml.eval.xquery(cls.INSERT, **txn)
+        ml.documents.write(XMLDocument(b"<root/>", cls.TEST_DOC_URI), **txn)
 
     @classmethod
     def _assert_visible_in(cls, ml: MLClient, txn):
-        assert ml.eval.xquery(cls.DOC_AVAILABLE, **txn) is True
+        doc = ml.documents.read(cls.TEST_DOC_URI, **txn)
+        assert doc.uri == cls.TEST_DOC_URI
 
     @classmethod
     def _assert_visible(cls, ml: MLClient, database: str | None = None):
-        assert ml.eval.xquery(cls.DOC_AVAILABLE, database=database) is True
+        doc = ml.documents.read(cls.TEST_DOC_URI, database=database)
+        assert doc.uri == cls.TEST_DOC_URI
 
     @classmethod
     def _assert_not_visible(cls, ml: MLClient, database: str | None = None):
-        assert ml.eval.xquery(cls.DOC_AVAILABLE, database=database) is False
+        with pytest.raises(MarkLogicError):
+            ml.documents.read(cls.TEST_DOC_URI, database=database)
 
     @classmethod
     def _assert_status_active(cls, txn):
@@ -117,8 +119,4 @@ class TestTransactions:
 
     @classmethod
     def _delete(cls, ml: MLClient, database: str | None = None):
-        if ml.eval.xquery(cls.DOC_AVAILABLE, database=database) is True:
-            ml.eval.xquery(
-                f'xdmp:document-delete("{cls.TEST_DOC_URI}")',
-                database=database,
-            )
+        ml.documents.delete(cls.TEST_DOC_URI, database=database)

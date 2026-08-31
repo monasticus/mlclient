@@ -1950,3 +1950,26 @@ def test_delete_many_uris_are_batched(ml):
     ml.documents.delete(uris)
 
     assert ml_mocker.router.calls.call_count > 1
+
+
+@ml_mocker.router
+def test_write_forwards_txid(ml):
+    doc = XMLDocument(b"<root/>", "/some/dir/doc1.xml")
+
+    ml.documents.write(doc, txid="txn-123")
+
+    assert ml_mocker.router.calls.last.request.url.params["txid"] == "txn-123"
+
+
+@ml_mocker.router
+def test_read_forwards_txid(ml):
+    ml.documents.read("/some/dir/doc1.xml", txid="txn-123")
+
+    assert ml_mocker.router.calls.last.request.url.params["txid"] == "txn-123"
+
+
+@ml_mocker.router
+def test_delete_forwards_txid(ml):
+    ml.documents.delete("/some/dir/doc1.xml", txid="txn-123")
+
+    assert ml_mocker.router.calls.last.request.url.params["txid"] == "txn-123"

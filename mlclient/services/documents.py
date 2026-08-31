@@ -102,6 +102,7 @@ class DocumentsService:
         *,
         database: str | None = None,
         temporal_collection: str | None = None,
+        txid: str | None = None,
     ) -> dict:
         """Write (create or update) document(s) content or metadata.
 
@@ -113,6 +114,8 @@ class DocumentsService:
             Perform this operation on the named content database.
         temporal_collection : str | None, default None
             Temporal collection name.
+        txid : str | None, default None
+            Perform this operation within the named multi-statement transaction.
 
         Returns
         -------
@@ -129,6 +132,7 @@ class DocumentsService:
             body_parts=body_parts,
             database=database,
             temporal_collection=temporal_collection,
+            txid=txid,
         )
         resp = self._api.call(call)
         if not resp.is_success:
@@ -142,6 +146,7 @@ class DocumentsService:
         *,
         category: Category | str | list[Category | str] | None = None,
         database: str | None = None,
+        txid: str | None = None,
     ) -> Document | dict[str, Document]:
         """Return document(s) content or metadata from a MarkLogic database.
 
@@ -156,6 +161,8 @@ class DocumentsService:
             The category of data to fetch about the requested document.
         database : str | None, default None
             Perform this operation on the named content database.
+        txid : str | None, default None
+            Perform this operation within the named multi-statement transaction.
 
         Returns
         -------
@@ -171,6 +178,7 @@ class DocumentsService:
             uris,
             category=category,
             database=database,
+            txid=txid,
         )
         return next(docs) if isinstance(uris, str) else {doc.uri: doc for doc in docs}
 
@@ -180,6 +188,7 @@ class DocumentsService:
         *,
         category: Category | str | list[Category | str] | None = None,
         database: str | None = None,
+        txid: str | None = None,
     ) -> Iterator[Document]:
         """Return document(s) as an iterator, suitable for batch processing.
 
@@ -195,6 +204,8 @@ class DocumentsService:
             The category of data to fetch about the requested document.
         database : str | None, default None
             Perform this operation on the named content database.
+        txid : str | None, default None
+            Perform this operation within the named multi-statement transaction.
 
         Returns
         -------
@@ -213,6 +224,7 @@ class DocumentsService:
                 category=category,
                 database=database,
                 data_format="json",
+                txid=txid,
             )
             resp = self._api.call(call)
             if not resp.is_success:
@@ -228,6 +240,7 @@ class DocumentsService:
         database: str | None = None,
         temporal_collection: str | None = None,
         wipe_temporal: bool | None = None,
+        txid: str | None = None,
     ):
         """Delete document(s) content or metadata in a MarkLogic database.
 
@@ -247,6 +260,8 @@ class DocumentsService:
             Temporal collection name.
         wipe_temporal : bool | None, default None
             Remove all versions of a temporal document.
+        txid : str | None, default None
+            Perform this operation within the named multi-statement transaction.
 
         Raises
         ------
@@ -261,6 +276,7 @@ class DocumentsService:
                 database=database,
                 temporal_collection=temporal_collection,
                 wipe_temporal=wipe_temporal,
+                txid=txid,
             )
             resp = self._api.call(call)
             if not resp.is_success:
@@ -527,6 +543,7 @@ class AsyncDocumentsService:
         *,
         database: str | None = None,
         temporal_collection: str | None = None,
+        txid: str | None = None,
     ) -> dict:
         """Write documents to MarkLogic."""
         body_parts = DocumentsSender.parse(data)
@@ -534,6 +551,7 @@ class AsyncDocumentsService:
             body_parts=body_parts,
             database=database,
             temporal_collection=temporal_collection,
+            txid=txid,
         )
         resp = await self._api.call(call)
         if not resp.is_success:
@@ -547,12 +565,14 @@ class AsyncDocumentsService:
         *,
         category: Category | str | list[Category | str] | None = None,
         database: str | None = None,
+        txid: str | None = None,
     ) -> Document | dict[str, Document]:
         """Read documents from MarkLogic."""
         stream = self.read_stream(
             uris,
             category=category,
             database=database,
+            txid=txid,
         )
         if isinstance(uris, str):
             return await stream.__anext__()
@@ -564,6 +584,7 @@ class AsyncDocumentsService:
         *,
         category: Category | str | list[Category | str] | None = None,
         database: str | None = None,
+        txid: str | None = None,
     ) -> AsyncIterator[Document]:
         """Read documents from MarkLogic as a stream.
 
@@ -578,6 +599,7 @@ class AsyncDocumentsService:
                 category=category,
                 database=database,
                 data_format="json",
+                txid=txid,
             )
             resp = await self._api.call(call)
             if not resp.is_success:
@@ -594,6 +616,7 @@ class AsyncDocumentsService:
         database: str | None = None,
         temporal_collection: str | None = None,
         wipe_temporal: bool | None = None,
+        txid: str | None = None,
     ):
         """Delete documents from MarkLogic."""
         category = _normalize_category(category)
@@ -604,6 +627,7 @@ class AsyncDocumentsService:
                 database=database,
                 temporal_collection=temporal_collection,
                 wipe_temporal=wipe_temporal,
+                txid=txid,
             )
             resp = await self._api.call(call)
             if not resp.is_success:

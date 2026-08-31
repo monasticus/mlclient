@@ -306,3 +306,40 @@ def test_read_and_delete_exceed_httpx_url_length_limit():
         docs_client_utils.assert_documents_do_not_exist(uris)
     finally:
         docs_client_utils.delete_documents(uris)
+
+
+def test_write_within_transaction_is_isolated_until_commit():
+    uri = "/some/dir/txn-doc.xml"
+    doc = XMLDocument(b"<root><child>data</child></root>", uri)
+
+    try:
+        docs_client_utils.assert_document_does_not_exist(uri)
+        with MLClient() as ml:
+            txid = _open_transaction(ml)
+            ml.documents.write(doc, txid=txid)
+            docs_client_utils.assert_document_does_not_exist(uri)
+            ml.rest.transactions.post(txid, result="commit")
+        docs_client_utils.assert_documents_exist_and_confirm_data({uri: doc})
+    finally:
+        docs_client_utils.delete_documents(uri)
+        docs_client_utils.assert_document_does_not_exist(uri)
+
+
+def test_write_within_transaction_rolled_back_is_discarded():
+    uri = "/some/dir/txn-doc.xml"
+    doc = XMLDocument(b"<root><child>data</child></root>", uri)
+
+    try:
+        docs_client_utils.assert_document_does_not_exist(uri)
+        with MLClient() as ml:
+            txid = _open_transaction(ml)
+            ml.documents.write(doc, txid=txid)
+            ml.rest.transactions.post(txid, result="rollback")
+        docs_client_utils.assert_document_does_not_exist(uri)
+    finally:
+        docs_client_utils.delete_documents(uri)
+
+
+def _open_transaction(ml: MLClient) -> str:
+    location = ml.rest.transactions.create().headers["Location"]
+    return location.rsplit("/", 1)[-1]

@@ -154,6 +154,25 @@ def test_post_with_customized_params_and_headers_and_json_body():
 
 
 @respx.mock
+def test_post_does_not_follow_created_resource_redirect():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8000/v1/transactions")
+    ml_mocker.with_response_code(303)
+    ml_mocker.with_response_header("Location", "/v1/transactions/12345")
+    ml_mocker.with_empty_response_body()
+    ml_mocker.mock_post()
+
+    with HttpClient() as client:
+        resp = client.post(
+            "/v1/transactions",
+            headers={"Content-Type": "text/plain"},
+        )
+
+    assert resp.status_code == httpx.codes.SEE_OTHER
+    assert resp.headers.get("Location") == "/v1/transactions/12345"
+
+
+@respx.mock
 def test_put():
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url("http://localhost:8000/v1/documents")

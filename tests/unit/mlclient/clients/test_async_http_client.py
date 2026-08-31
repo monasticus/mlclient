@@ -138,6 +138,26 @@ async def test_post_with_customized_params_and_headers_and_body_different_than_j
 
 @pytest.mark.asyncio
 @respx.mock
+async def test_post_does_not_follow_created_resource_redirect():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8000/v1/transactions")
+    ml_mocker.with_response_code(303)
+    ml_mocker.with_response_header("Location", "/v1/transactions/12345")
+    ml_mocker.with_empty_response_body()
+    ml_mocker.mock_post()
+
+    async with AsyncHttpClient() as client:
+        resp = await client.post(
+            "/v1/transactions",
+            headers={"Content-Type": "text/plain"},
+        )
+
+    assert resp.status_code == httpx.codes.SEE_OTHER
+    assert resp.headers.get("Location") == "/v1/transactions/12345"
+
+
+@pytest.mark.asyncio
+@respx.mock
 async def test_post_with_customized_params_and_headers_and_json_body():
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url("http://localhost:8002/manage/v2/databases/Documents")

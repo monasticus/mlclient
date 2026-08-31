@@ -1,5 +1,3 @@
-from pathlib import Path
-
 import httpx
 import pytest
 import respx
@@ -69,7 +67,7 @@ async def test_eval(xquery):
 @pytest.mark.asyncio
 @respx.mock
 async def test_get_documents():
-    response_body_path = resources_utils.get_test_resource_path(
+    response_body = resources_utils.read_test_resource_bytes(
         __file__,
         "test-get-documents.json",
     )
@@ -79,7 +77,7 @@ async def test_get_documents():
     ml_mocker.with_request_param("format", "json")
     ml_mocker.with_response_content_type("application/json; charset=UTF-8")
     ml_mocker.with_response_code(404)
-    ml_mocker.with_response_body(Path(response_body_path).read_bytes())
+    ml_mocker.with_response_body(response_body)
     ml_mocker.mock_get()
 
     async with AsyncMLClient() as ml:
@@ -101,7 +99,7 @@ async def test_post_documents():
         "content": {"root": "data"},
     }
 
-    response_body_path = resources_utils.get_test_resource_path(
+    response_body = resources_utils.read_test_resource_bytes(
         __file__,
         "test-post-documents.json",
     )
@@ -109,7 +107,7 @@ async def test_post_documents():
     ml_mocker.with_url("http://localhost:8000/v1/documents")
     ml_mocker.with_response_content_type("application/json; charset=UTF-8")
     ml_mocker.with_response_code(500)
-    ml_mocker.with_response_body(Path(response_body_path).read_bytes())
+    ml_mocker.with_response_body(response_body)
     ml_mocker.mock_post()
 
     async with AsyncMLClient() as ml:
@@ -130,7 +128,7 @@ async def test_post_documents():
 @pytest.mark.asyncio
 @respx.mock
 async def test_delete_documents():
-    response_body_path = resources_utils.get_test_resource_path(
+    response_body = resources_utils.read_test_resource_bytes(
         __file__,
         "test-delete-documents.xml",
     )
@@ -140,7 +138,7 @@ async def test_delete_documents():
     ml_mocker.with_request_param("result", "wiped")
     ml_mocker.with_response_content_type("application/xml; charset=UTF-8")
     ml_mocker.with_response_code(400)
-    ml_mocker.with_response_body(Path(response_body_path).read_bytes())
+    ml_mocker.with_response_body(response_body)
     ml_mocker.mock_delete()
 
     async with AsyncMLClient() as ml:

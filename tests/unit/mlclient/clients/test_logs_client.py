@@ -16,7 +16,7 @@ ENDPOINT = "/manage/v2/logs"
 
 @pytest.fixture(autouse=True)
 def ml() -> MLClient:
-    return MLClient(auth_method="digest")
+    return MLClient()
 
 
 @pytest.fixture(autouse=True)

@@ -38,7 +38,7 @@ class MLResponseParser:
     ...     "port": 8002,
     ...     "username": "admin",
     ...     "password": "admin",
-    ...     "auth_method": "digest",
+    ...     "auth": "digest",
     ... }
     >>> with MLClient(**config) as ml:
     ...     resp = ml.rest.eval.post(xquery="xdmp:database() => xdmp:database-name()")

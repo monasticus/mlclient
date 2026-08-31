@@ -15,6 +15,7 @@ from mlclient import (
     RESTART_RETRY_STRATEGY,
 )
 from mlclient.clients.restart_waiter import RestartWaiter
+from mlclient.http_config import HTTPConfig
 from tests.utils import resources as resources_utils
 from tests.utils.ml_mockers import MLRespXMocker
 
@@ -91,14 +92,20 @@ def _mock_hosts_lookup_from_resource(
     return mocker.mock_get()
 
 
-@pytest.fixture
-def waiter() -> RestartWaiter:
-    return RestartWaiter(
+def _waiter_config() -> HTTPConfig:
+    return HTTPConfig.resolve(
         protocol="http",
         host="localhost",
-        auth=httpx.BasicAuth("admin", "admin"),
-        default_retry=TEST_DEFAULT_RETRY,
+        auth="basic",
+        username="admin",
+        password="admin",
+        retry=TEST_DEFAULT_RETRY,
     )
+
+
+@pytest.fixture
+def waiter() -> RestartWaiter:
+    return RestartWaiter(_waiter_config())
 
 
 @pytest.fixture
@@ -930,10 +937,7 @@ def test_wait_for_restart_completion_uses_custom_probe_timeout(
 ):
     custom_timeout = 42.0
     waiter = RestartWaiter(
-        protocol="http",
-        host="localhost",
-        auth=httpx.BasicAuth("admin", "admin"),
-        default_retry=TEST_DEFAULT_RETRY,
+        _waiter_config(),
         probe_timeout=custom_timeout,
     )
     _mock_timestamp_route(ml_mocker, _timestamp_response(READY_TS))

@@ -6,24 +6,17 @@ Exports sync and async HTTP clients for raw communication with MarkLogic.
 from __future__ import annotations
 
 import logging
-import ssl
 from collections.abc import Mapping
 from types import TracebackType
 
 import httpx
-from httpx import (
-    AsyncClient,
-    AsyncHTTPTransport,
-    Auth,
-    BasicAuth,
-    Client,
-    DigestAuth,
-    HTTPTransport,
-    Response,
-)
+from httpx import AsyncClient, AsyncHTTPTransport, Client, HTTPTransport, Response
 from httpx_retries import Retry, RetryTransport
 
 from mlclient import constants as const
+from mlclient.auth import AuthParam
+from mlclient.connection import UNSET, CloudConfig, SSLConfig
+from mlclient.http_config import HTTPConfig
 from mlclient.mimetypes import Mimetypes
 from mlclient.models import DocumentType
 
@@ -35,15 +28,6 @@ MARKLOGIC_REST_API_PORT = 8000
 MARKLOGIC_ADMIN_API_PORT = 8001
 MARKLOGIC_MANAGE_API_PORT = 8002
 
-# Reuse a single SSL context across all clients. Without this, every
-# HTTPTransport() call invokes ssl.SSLContext.load_verify_locations which
-# re-reads the system CA bundle from disk (~60-120 ms each).
-_SHARED_SSL_CONTEXT = ssl.create_default_context()
-
-DEFAULT_RETRY_STRATEGY = Retry(
-    total=5,
-    backoff_factor=0.5,
-)
 RESTART_RETRY_STRATEGY = Retry(
     total=12,
     allowed_methods=["GET"],
@@ -64,32 +48,29 @@ RESTART_RETRY_STRATEGY = Retry(
 class HttpClientBase:
     """Shared base for sync and async HTTP clients.
 
+    All connection and authentication details live in a single resolved
+    :class:`~mlclient.http_config.HTTPConfig`, exposed as ``config``. Callers
+    read connection details through ``config`` rather than rebuilding the base
+    URL, auth handler or verification setting by hand.
+
     Attributes
     ----------
-    protocol : str
-        a protocol used for HTTP requests (http / https)
-    host : str
-        a host name
-    port : int
-        an App Service port
-    auth_method : str
-        an authorization method (basic / digest)
-    username : str
-        a username
-    password : str
-        a password
+    config : HTTPConfig
+        the resolved connection and authentication configuration
     base_url : str
         a base url built based on the protocol, the host name and the port
     """
 
     def __init__(
         self,
-        protocol: str = "http",
+        protocol=UNSET,
         host: str = "localhost",
-        port: int = MARKLOGIC_REST_API_PORT,
-        auth_method: str = "basic",
+        port=UNSET,
+        auth: AuthParam = UNSET,
         username: str = "admin",
         password: str = "admin",
+        ssl: SSLConfig | None = None,
+        cloud: CloudConfig | None = None,
         retry: Retry | None = None,
     ):
         """Initialize HttpClientBase instance.
@@ -102,25 +83,53 @@ class HttpClientBase:
             A host name
         port : int, default 8000
             An App Service port
-        auth_method : str, default "basic"
-            An authorization method (basic / digest)
+        auth : str | httpx.Auth | AuthConfig | None, default "digest"
+            An authentication method: a string shortcut ("basic", "digest",
+            "digestbasic", "certificate", "kerberos"), an AuthConfig, a custom
+            httpx.Auth, or None
         username : str, default "admin"
             A username
         password : str, default "admin"
             A password
+        ssl : SSLConfig | None, default None
+            SSL/TLS configuration
+        cloud : CloudConfig | None, default None
+            MarkLogic Cloud configuration
         retry : Retry | None, default Retry(total=5, backoff_factor=0.5)
             A retry strategy
         """
-        self.protocol: str = protocol
-        self.host: str = host
-        self.port: int = port
-        self.auth_method: str = auth_method
-        self.username: str = username
-        self.password: str = password
-        self.base_url: str = f"{protocol}://{host}:{port}"
-        self._retry: Retry = retry or DEFAULT_RETRY_STRATEGY
-        auth_impl = BasicAuth if auth_method == "basic" else DigestAuth
-        self._auth: Auth = auth_impl(username, password)
+        self.config: HTTPConfig = HTTPConfig.resolve(
+            protocol=protocol,
+            host=host,
+            port=port,
+            auth=auth,
+            username=username,
+            password=password,
+            ssl=ssl,
+            cloud=cloud,
+            retry=retry,
+        )
+
+    @classmethod
+    def with_config(
+        cls,
+        config: HTTPConfig,
+    ):
+        """Build a client from an already-resolved configuration.
+
+        Used to derive fixed-port siblings (Admin, Manage) from a main client
+        via :meth:`HTTPConfig.at_port` without re-resolving the connection. The
+        transport (``_client``) defaults to None via the class attribute until
+        the client connects.
+        """
+        client = cls.__new__(cls)
+        client.config = config
+        return client
+
+    @property
+    def base_url(self) -> str:
+        """A base url built from the protocol, the host name and the port."""
+        return self.config.base_url
 
     def _prepare_request(
         self,
@@ -132,7 +141,7 @@ class HttpClientBase:
         request = {
             "params": params or {},
             "headers": headers or {},
-            "auth": self._auth,
+            "auth": self.config.auth,
         }
         if body is not None:
             content_type = (headers or {}).get(const.HEADER_NAME_CONTENT_TYPE)
@@ -186,27 +195,23 @@ class HttpClientBase:
             return f"{start_line}\n{headers}\n\n{response.text}"
         return f"{start_line}\n{headers}"
 
+    def _build_url(self, endpoint: str) -> str:
+        """Build a full request URL, applying the Cloud base path if present."""
+        return self.config.build_url(endpoint)
+
 
 class HttpClient(HttpClientBase):
     """A low-level class used to send HTTP requests to a MarkLogic instance.
 
     Attributes
     ----------
-    protocol : str
-        a protocol used for HTTP requests (http / https)
-    host : str
-        a host name
-    port : int
-        an App Service port
-    auth_method : str
-        an authorization method (basic / digest)
-    username : str
-        a username
-    password : str
-        a password
+    config : HTTPConfig
+        the resolved connection and authentication configuration
     base_url : str
         a base url built based on the protocol, the host name and the port
     """
+
+    _client: Client | None = None
 
     def __init__(self, **kwargs):
         """Initialize HttpClient instance.
@@ -219,17 +224,20 @@ class HttpClient(HttpClientBase):
             A host name
         port : int, default 8000
             An App Service port
-        auth_method : str, default "basic"
-            An authorization method (basic / digest)
+        auth : str | httpx.Auth | AuthConfig | None, default "digest"
+            An authentication method
         username : str, default "admin"
             A username
         password : str, default "admin"
             A password
+        ssl : SSLConfig | None, default None
+            SSL/TLS configuration
+        cloud : CloudConfig | None, default None
+            MarkLogic Cloud configuration
         retry : Retry | None, default Retry(total=5, backoff_factor=0.5)
             A retry strategy
         """
         super().__init__(**kwargs)
-        self._client: Client | None = None
 
     def __enter__(self):
         """Connect and return self for use as a context manager."""
@@ -248,9 +256,9 @@ class HttpClient(HttpClientBase):
     def connect(self):
         """Start an HTTP session."""
         logger.debug("Initiating a connection with %s", self.base_url)
-        transport = HTTPTransport(verify=_SHARED_SSL_CONTEXT)
+        transport = HTTPTransport(verify=self.config.transport_verify())
         self._client = Client(
-            transport=RetryTransport(transport=transport, retry=self._retry),
+            transport=RetryTransport(transport=transport, retry=self.config.retry),
             follow_redirects=True,
         )
 
@@ -420,7 +428,7 @@ class HttpClient(HttpClientBase):
         """Send a request."""
         logger.info("Sending a request... %s %s", method.upper(), endpoint)
 
-        url = self.base_url + endpoint
+        url = self._build_url(endpoint)
         if self.is_connected():
             return self._client.request(method, url, **request)
 
@@ -430,9 +438,9 @@ class HttpClient(HttpClientBase):
             method.upper(),
             endpoint,
         )
-        transport = HTTPTransport(verify=_SHARED_SSL_CONTEXT)
+        transport = HTTPTransport(verify=self.config.transport_verify())
         with Client(
-            transport=RetryTransport(transport=transport, retry=self._retry),
+            transport=RetryTransport(transport=transport, retry=self.config.retry),
             follow_redirects=True,
         ) as client:
             return client.request(method, url, **request)
@@ -443,21 +451,13 @@ class AsyncHttpClient(HttpClientBase):
 
     Attributes
     ----------
-    protocol : str
-        a protocol used for HTTP requests (http / https)
-    host : str
-        a host name
-    port : int
-        an App Service port
-    auth_method : str
-        an authorization method (basic / digest)
-    username : str
-        a username
-    password : str
-        a password
+    config : HTTPConfig
+        the resolved connection and authentication configuration
     base_url : str
         a base url built based on the protocol, the host name and the port
     """
+
+    _client: AsyncClient | None = None
 
     def __init__(self, **kwargs):
         """Initialize AsyncHttpClient instance.
@@ -470,17 +470,20 @@ class AsyncHttpClient(HttpClientBase):
             A host name
         port : int, default 8000
             An App Service port
-        auth_method : str, default "basic"
-            An authorization method (basic / digest)
+        auth : str | httpx.Auth | AuthConfig | None, default "digest"
+            An authentication method
         username : str, default "admin"
             A username
         password : str, default "admin"
             A password
+        ssl : SSLConfig | None, default None
+            SSL/TLS configuration
+        cloud : CloudConfig | None, default None
+            MarkLogic Cloud configuration
         retry : Retry | None, default Retry(total=5, backoff_factor=0.5)
             A retry strategy
         """
         super().__init__(**kwargs)
-        self._client: AsyncClient | None = None
 
     async def __aenter__(self):
         """Connect and return self for use as an async context manager."""
@@ -499,9 +502,9 @@ class AsyncHttpClient(HttpClientBase):
     async def connect(self):
         """Start an async HTTP session."""
         logger.debug("Initiating a connection with %s", self.base_url)
-        transport = AsyncHTTPTransport(verify=_SHARED_SSL_CONTEXT)
+        transport = AsyncHTTPTransport(verify=self.config.transport_verify())
         self._client = AsyncClient(
-            transport=RetryTransport(transport=transport, retry=self._retry),
+            transport=RetryTransport(transport=transport, retry=self.config.retry),
             follow_redirects=True,
         )
 
@@ -683,7 +686,7 @@ class AsyncHttpClient(HttpClientBase):
         """Send a request asynchronously."""
         logger.info("Sending a request... %s %s", method.upper(), endpoint)
 
-        url = self.base_url + endpoint
+        url = self._build_url(endpoint)
         if self.is_connected():
             return await self._client.request(method, url, **request)
 
@@ -693,9 +696,9 @@ class AsyncHttpClient(HttpClientBase):
             method.upper(),
             endpoint,
         )
-        transport = AsyncHTTPTransport(verify=_SHARED_SSL_CONTEXT)
+        transport = AsyncHTTPTransport(verify=self.config.transport_verify())
         async with AsyncClient(
-            transport=RetryTransport(transport=transport, retry=self._retry),
+            transport=RetryTransport(transport=transport, retry=self.config.retry),
             follow_redirects=True,
         ) as client:
             return await client.request(method, url, **request)

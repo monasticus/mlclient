@@ -19,8 +19,8 @@ A Python client for MarkLogic Server. Three API layers, async out of the box, CL
 
     pip install mlclient
 
-By default MLClient connects to ``localhost:8000`` with basic auth (``admin``/``admin``).
-Pass ``host``, ``port``, ``username``, ``password``, or ``auth_method`` to override:
+By default MLClient connects to ``localhost:8000`` over HTTP with digest auth (``admin``/``admin``).
+Pass ``host``, ``port``, ``username``, ``password``, or ``auth`` to override:
 
 .. code-block:: python
 
@@ -29,7 +29,7 @@ Pass ``host``, ``port``, ``username``, ``password``, or ``auth_method`` to overr
         "port": 8040,
         "username": "my-user",
         "password": "my-password",
-        "auth_method": "digest",
+        "auth": "digest",
     }
     ml = MLClient(**config)
 

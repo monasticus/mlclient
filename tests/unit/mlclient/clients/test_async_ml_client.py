@@ -9,7 +9,7 @@ from mlclient.api.rest_api import AsyncRestApi
 from mlclient.calls import DatabasesGetCall, TimestampGetCall
 from mlclient.clients import ml_client as ml_client_module
 from mlclient.clients.ml_client import AsyncMLClient
-from mlclient.http_config import DEFAULT_RETRY_STRATEGY
+from mlclient.http_config import DEFAULT_RETRY_STRATEGY, HTTPConfig
 from mlclient.ml_response_parser import MLResponseParser
 from mlclient.services.documents import AsyncDocumentsService
 from mlclient.services.eval import AsyncEvalService
@@ -154,6 +154,95 @@ async def test_manage_uses_port_8002_when_main_port_differs():
         resp = await ml.manage.databases.get_list()
 
     assert resp.status_code == 200
+
+
+def test_http_config_supersedes_connection_kwargs():
+    config = HTTPConfig.resolve(host="resolved.example.com", port=8123)
+
+    ml = AsyncMLClient(host="ignored.example.com", port=9999, http_config=config)
+
+    assert ml.http.config is config
+    assert ml.http.base_url == "http://resolved.example.com:8123"
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_only_manage_config_given_admin_still_derived():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://manage.example.com:9002/manage/v2/databases")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("application/json")
+    ml_mocker.with_response_body({"database-default-list": {}})
+    ml_mocker.mock_get()
+
+    ml_mocker.with_url("http://localhost:8001/admin/v1/timestamp")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("text/plain")
+    ml_mocker.with_response_body("2026-03-23T00:00:00")
+    ml_mocker.mock_get()
+
+    manage_config = HTTPConfig.resolve(host="manage.example.com", port=9002)
+    async with AsyncMLClient(port=8000, manage_config=manage_config) as ml:
+        manage_resp = await ml.manage.databases.get_list()
+        admin_resp = await ml.admin.get_timestamp()
+
+    assert manage_resp.status_code == 200
+    assert admin_resp.status_code == 200
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_only_admin_config_given_manage_still_derived():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://admin.example.com:9001/admin/v1/timestamp")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("text/plain")
+    ml_mocker.with_response_body("2026-03-23T00:00:00")
+    ml_mocker.mock_get()
+
+    ml_mocker.with_url("http://localhost:8002/manage/v2/databases")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("application/json")
+    ml_mocker.with_response_body({"database-default-list": {}})
+    ml_mocker.mock_get()
+
+    admin_config = HTTPConfig.resolve(host="admin.example.com", port=9001)
+    async with AsyncMLClient(port=8000, admin_config=admin_config) as ml:
+        admin_resp = await ml.admin.get_timestamp()
+        manage_resp = await ml.manage.databases.get_list()
+
+    assert admin_resp.status_code == 200
+    assert manage_resp.status_code == 200
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_both_manage_and_admin_configs_given():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://manage.example.com:9002/manage/v2/databases")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("application/json")
+    ml_mocker.with_response_body({"database-default-list": {}})
+    ml_mocker.mock_get()
+
+    ml_mocker.with_url("http://admin.example.com:9001/admin/v1/timestamp")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("text/plain")
+    ml_mocker.with_response_body("2026-03-23T00:00:00")
+    ml_mocker.mock_get()
+
+    manage_config = HTTPConfig.resolve(host="manage.example.com", port=9002)
+    admin_config = HTTPConfig.resolve(host="admin.example.com", port=9001)
+    async with AsyncMLClient(
+        port=8000,
+        manage_config=manage_config,
+        admin_config=admin_config,
+    ) as ml:
+        manage_resp = await ml.manage.databases.get_list()
+        admin_resp = await ml.admin.get_timestamp()
+
+    assert manage_resp.status_code == 200
+    assert admin_resp.status_code == 200
 
 
 @pytest.mark.asyncio

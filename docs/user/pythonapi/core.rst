@@ -150,10 +150,11 @@ them to port 8002.
 Port routing is automatic. When the main ``port`` differs from 8002 or 8001,
 separate connections to ports 8002 and 8001 are lazily created on first access
 to ``.manage`` or ``.admin``. If the main port happens to be 8002 (or 8001),
-that connection is reused directly. All secondary connections share the same
-``protocol``, ``host``, ``auth``, ``username``, ``password``, ``ssl``, and
-``cloud`` as the main client. They are also managed by the
-``connect()`` / ``disconnect()`` lifecycle.
+that connection is reused directly. By default every secondary connection
+shares the same ``protocol``, ``host``, ``auth``, ``username``, ``password``,
+``ssl``, and ``cloud`` as the main client, differing only in port (see
+`Manage or Admin on a different host or credentials`_ to override this). They
+are also managed by the ``connect()`` / ``disconnect()`` lifecycle.
 
 .. code-block:: python
 
@@ -168,6 +169,34 @@ that connection is reused directly. All secondary connections share the same
     >>> with MLClient(port=8040) as ml:
     ...     resp = ml.rest.eval.post(xquery="1")
     ...     dbs = ml.manage.databases.get_list()
+
+Manage or Admin on a different host or credentials
+"""""""""""""""""""""""""""""""""""""""""""""""""""
+
+Derivation only changes the port; it keeps the primary host, protocol, and
+credentials. When the Manage or Admin tier lives on a different host, needs
+different credentials, or listens on a non-standard port (for example behind a
+reverse proxy), pass a fully resolved :class:`~mlclient.http_config.HTTPConfig`
+as ``manage_config`` or ``admin_config``. That tier then uses the given
+configuration as-is instead of deriving one from the primary connection; the
+other tier keeps deriving as usual.
+
+.. code-block:: python
+
+    >>> from mlclient import MLClient
+    >>> from mlclient.http_config import HTTPConfig
+
+    # Manage lives behind a proxy on a different host and port;
+    # .admin is still derived from the primary connection (localhost:8001)
+    >>> manage_config = HTTPConfig.resolve(
+    ...     host="manage-proxy.example.com",
+    ...     port=9002,
+    ...     username="manage-user",
+    ...     password="manage-password",
+    ... )
+    >>> with MLClient(host="ml.example.com", manage_config=manage_config) as ml:
+    ...     dbs = ml.manage.databases.get_list()
+    ...     ts = ml.admin.get_timestamp()
 
 
 High-level services

@@ -16,8 +16,21 @@ from cleo.helpers import argument, option
 from cleo.io.inputs.argument import Argument
 from cleo.io.inputs.option import Option
 
-from mlclient import MLEnvironment, constants
+from mlclient import MLClient, MLEnvironment, constants
 from mlclient.exceptions import EnvironmentFileExistsError, WrongParametersError
+
+MANAGE_PORT = 8002
+ADMIN_PORT = 8001
+
+_SERVER_AUTH_TO_CLIENT = {
+    "digest": "digest",
+    "basic": "basic",
+    "digestbasic": "digestbasic",
+    "digest-basic": "digestbasic",
+    "certificate": "certificate",
+    "kerberos-ticket": "kerberos",
+    "application-level": "digest",
+}
 
 _TEMPLATE = """\
 app-name: my-app
@@ -152,7 +165,12 @@ class InitEnvCommand(Command):
         """Execute the command."""
         name = self.argument("name")
         if self.option("from-host"):
-            raise NotImplementedError
+            if not name:
+                msg = "--from-host requires an environment name"
+                raise WrongParametersError(msg)
+            content = self._render_from_host(name, self.option("from-host"))
+            self._write_env_file(name, content)
+            return 0
         if self.option("from-gradle"):
             if not name:
                 msg = "--from-gradle requires an environment name"
@@ -185,6 +203,63 @@ class InitEnvCommand(Command):
         """Resolve the configuration file path in cwd, or home when --global."""
         base = Path.home() if self.option("global") else Path.cwd()
         return base / constants.ML_CLIENT_DIR / f"mlclient-{name}.yaml"
+
+    def _render_from_host(
+        self,
+        app_name: str,
+        spec: str,
+    ) -> str:
+        """Map a running MarkLogic's App Servers to an MLEnvironment YAML document.
+
+        Connects to the host's Manage server, discovers its App Servers, and
+        keeps those whose name matches ``app_name`` (all of them when nothing
+        matches). Manage and Admin are emitted only when they diverge from the
+        root connection; a matching pair is left for the client to derive.
+        """
+        host, port = _split_host_port(spec)
+        username = self.option("username") or "admin"
+        password = self.option("password") or self.secret("Password:")
+        root = {
+            "app-name": app_name,
+            "protocol": "http",
+            "host": host,
+            "username": username,
+            "password": password,
+            "auth": "digest",
+        }
+        servers = self._discover_servers(host, port, username, password)
+        env = _drop_none(
+            {**root, "app-servers": _select_app_servers(servers, app_name, root)},
+        )
+        try:
+            MLEnvironment(**env)
+        except ValidationError as error:
+            msg = f"Discovered configuration from [{host}] is not valid: {error}"
+            raise WrongParametersError(msg) from error
+        return yaml.safe_dump(env, sort_keys=False)
+
+    def _discover_servers(
+        self,
+        host: str,
+        port: int,
+        username: str,
+        password: str,
+    ) -> list[dict]:
+        """Read every HTTP App Server's connection detail from the Manage API."""
+        # ponytail: http only; from-host over TLS needs a protocol/ssl flag.
+        with MLClient(
+            host=host,
+            port=port,
+            username=username,
+            password=password,
+        ) as ml:
+            listing = ml.manage.servers.get_list(data_format="json").json()
+            items = listing["server-default-list"]["list-items"]["list-item"]
+            return [
+                _server_details(ml, item)
+                for item in items
+                if item.get("kindref") == "http"
+            ]
 
     def _render_from_gradle(
         self,
@@ -229,6 +304,107 @@ class InitEnvCommand(Command):
             msg = f"No ml-gradle properties found for [{selector}]"
             raise WrongParametersError(msg)
         return base
+
+
+def _select_app_servers(
+    servers: list[dict],
+    app_name: str,
+    root: dict,
+) -> list[dict] | None:
+    """Turn discovered servers into app-server entries.
+
+    Servers whose name matches ``app_name`` become REST entries (all servers
+    when nothing matches). The Manage and Admin tiers are emitted only when
+    their protocol or auth diverges from the root connection.
+    """
+    matches = [
+        server
+        for server in servers
+        if app_name.lower() in server["id"].lower()
+    ] or servers
+    entries = []
+    for server in matches:
+        if server["port"] in (MANAGE_PORT, ADMIN_PORT):
+            tier = _tier_override(server, root)
+            if tier:
+                entries.append(tier)
+        else:
+            entries.append(_app_server_entry(server, root, rest=True))
+    return entries or None
+
+
+def _tier_override(
+    server: dict,
+    root: dict,
+) -> dict | None:
+    """Emit a Manage/Admin entry only when it diverges from the root connection."""
+    tier_id = "manage" if server["port"] == MANAGE_PORT else "admin"
+    entry = _app_server_entry(server, root, rest=False)
+    entry["id"] = tier_id
+    entry.pop("port")
+    entry.pop("rest", None)
+    return entry if set(entry) > {"id"} else None
+
+
+def _app_server_entry(
+    server: dict,
+    root: dict,
+    rest: bool,
+) -> dict:
+    """Build one app-server dict, omitting fields that match the root connection."""
+    return _drop_none(
+        {
+            "id": server["id"],
+            "port": server["port"],
+            "rest": rest or None,
+            "protocol": _diff(server["protocol"], root["protocol"]),
+            "auth": _diff(server["auth"], root["auth"]),
+        },
+    )
+
+
+def _server_details(
+    ml: MLClient,
+    item: dict,
+) -> dict:
+    """Read one App Server's port, protocol and client auth from its properties."""
+    group = item["groupnameref"]
+    props = ml.manage.servers.get_properties(
+        item["nameref"],
+        group,
+        data_format="json",
+    ).json()
+    return {
+        "id": props["server-name"],
+        "port": props.get("port"),
+        "protocol": "https" if props.get("ssl-certificate-template") else "http",
+        "auth": _client_auth(props.get("authentication")),
+    }
+
+
+def _split_host_port(
+    spec: str,
+) -> tuple[str, int]:
+    """Split a ``host[:port]`` spec, defaulting to the Manage port."""
+    host, _, port = spec.partition(":")
+    return host, int(port) if port else MANAGE_PORT
+
+
+def _client_auth(
+    server_auth: str | None,
+) -> str:
+    """Map a server's authentication scheme to a client auth method."""
+    if server_auth is None:
+        return "digest"
+    return _SERVER_AUTH_TO_CLIENT.get(server_auth.lower(), "digest")
+
+
+def _diff(
+    value: str | None,
+    root_value: str | None,
+) -> str | None:
+    """Return the value only when it differs from the root's, else None."""
+    return value if value != root_value else None
 
 
 def _app_servers(

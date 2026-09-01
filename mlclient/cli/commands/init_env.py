@@ -231,11 +231,6 @@ class InitEnvCommand(Command):
         env = _drop_none(
             {**root, "app-servers": _select_app_servers(servers, app_name, root)},
         )
-        try:
-            MLEnvironment(**env)
-        except ValidationError as error:
-            msg = f"Discovered configuration from [{host}] is not valid: {error}"
-            raise WrongParametersError(msg) from error
         return yaml.safe_dump(env, sort_keys=False)
 
     def _discover_servers(

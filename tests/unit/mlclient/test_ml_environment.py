@@ -56,7 +56,11 @@ _TEST_ENV_DUMP = _environment(
 
 _DEFAULT_ENV_DUMP = _environment(
     "my-default-app",
-    [_server("app-services", None, None, rest=True)],
+    [
+        _server("app-services", None, None, rest=True),
+        _server("manage", 8002, None, rest=False),
+        _server("admin", 8001, None, rest=False),
+    ],
 )
 
 

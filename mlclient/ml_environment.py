@@ -16,17 +16,17 @@ from pathlib import Path
 from typing import Optional, Union
 
 import yaml
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 from mlclient import constants
 from mlclient.auth import AuthConfig
 from mlclient.connection import CloudConfig, SSLConfig
-from mlclient.http_config import HTTPConfig
 from mlclient.exceptions import (
     MLClientDirectoryNotFoundError,
     MLClientEnvironmentNotFoundError,
     NoSuchAppServerError,
 )
+from mlclient.http_config import HTTPConfig
 
 logger = logging.getLogger(__name__)
 
@@ -74,14 +74,27 @@ class MLServerConfig(BaseModel):
     )
 
 
+_DEFAULT_APP_SERVERS = [
+    MLServerConfig(id="app-services", rest=True),
+    MLServerConfig(id="manage", port=8002),
+    MLServerConfig(id="admin", port=8001),
+]
+
+
 class MLEnvironment(BaseModel):
     """A class representing a MarkLogic configuration environment.
 
     Connection and authentication settings configured here act as defaults for
-    every app server and may be overridden per server.
+    every app server and may be overridden per server. The App Services, Manage
+    and Admin servers always exist; a user entry sharing one of their ids
+    overrides it.
     """
 
-    app_name: str = Field(alias="app-name", description="An application name")
+    app_name: Optional[str] = Field(
+        alias="app-name",
+        description="An application name; a label used to scope discovery when set",
+        default=None,
+    )
     protocol: str = Field(description="An HTTP protocol", default="http")
     host: str = Field(description="A hostname", default="localhost")
     username: str = Field(description="An username", default="admin")
@@ -98,12 +111,22 @@ class MLEnvironment(BaseModel):
     app_servers: list[MLServerConfig] = Field(
         alias="app-servers",
         description="App Servers configurations' list",
-        default=[
-            MLServerConfig(id="app-services", rest=True),
-            MLServerConfig(id="manage", port=8002),
-            MLServerConfig(id="admin", port=8001),
-        ],
+        default_factory=lambda: [s.model_copy() for s in _DEFAULT_APP_SERVERS],
     )
+
+    @model_validator(mode="after")
+    def _ensure_default_app_servers(self) -> MLEnvironment:
+        """Guarantee the App Services, Manage and Admin servers always exist.
+
+        User entries keep their position and win on id collision; any default
+        the user did not define is appended, copied so environments never share
+        a server instance.
+        """
+        by_id = {server.identifier: server for server in self.app_servers}
+        for default in _DEFAULT_APP_SERVERS:
+            by_id.setdefault(default.identifier, default.model_copy())
+        self.app_servers = list(by_id.values())
+        return self
 
     @property
     def rest_servers(

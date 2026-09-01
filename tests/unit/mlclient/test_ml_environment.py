@@ -51,6 +51,8 @@ _TEST_ENV_DUMP = _environment(
         _server("modules", 8101, "basic", rest=False),
         _server("schemas", 8102, "basic", rest=False),
         _server("test", 8103, "basic", rest=True),
+        _server("app-services", None, None, rest=True),
+        _server("admin", 8001, None, rest=False),
     ],
 )
 
@@ -171,7 +173,7 @@ def test_load_in_parent_directory(tmp_path, monkeypatch):
 def test_rest_servers():
     test_config = MLEnvironment.load("test")
     default_config = MLEnvironment.load("test-default")
-    assert test_config.rest_servers == ["manage", "content", "test"]
+    assert test_config.rest_servers == ["manage", "content", "test", "app-services"]
     assert default_config.rest_servers == ["app-services"]
 
 
@@ -195,6 +197,31 @@ def test_provide_config_non_existing_server():
     expected_msg = "There's no [non-existing] app server configuration!"
     actual_msg = err.value.args[0]
     assert actual_msg == expected_msg
+
+
+def test_default_servers_present_when_user_defines_own():
+    config = MLEnvironment(
+        **{
+            "app-name": "app",
+            "app-servers": [{"id": "content", "port": 8100, "rest": True}],
+        },
+    )
+    identifiers = [server.identifier for server in config.app_servers]
+    assert identifiers == ["content", "app-services", "manage", "admin"]
+    assert config.provide_config("manage").port == 8002
+    assert config.provide_config("admin").port == 8001
+
+
+def test_user_server_overrides_default_of_same_id():
+    config = MLEnvironment(
+        **{
+            "app-name": "app",
+            "app-servers": [{"id": "manage", "port": 8100, "rest": True}],
+        },
+    )
+    identifiers = [server.identifier for server in config.app_servers]
+    assert identifiers == ["manage", "app-services", "admin"]
+    assert config.provide_config("manage").port == 8100
 
 
 def test_root_auth_inherited_when_server_omits_it():

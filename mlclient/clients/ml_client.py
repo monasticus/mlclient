@@ -25,6 +25,7 @@ from mlclient.api.manage_api import AsyncManageApi, ManageApi
 from mlclient.api.rest_api import AsyncRestApi, RestApi
 from mlclient.auth import AuthParam
 from mlclient.connection import UNSET, CloudConfig, SSLConfig
+from mlclient.http_config import HTTPConfig
 from mlclient.ml_response_parser import MLResponseParser
 from mlclient.services.documents import AsyncDocumentsService, DocumentsService
 from mlclient.services.eval import AsyncEvalService, EvalService
@@ -140,8 +141,17 @@ class MLClient:
         ssl: SSLConfig | None = None,
         cloud: CloudConfig | None = None,
         retry: Retry | None = None,
+        *,
+        http_config: HTTPConfig | None = None,
+        manage_config: HTTPConfig | None = None,
+        admin_config: HTTPConfig | None = None,
     ):
         """Initialize MLClient instance.
+
+        The connection parameters describe the primary connection. The Manage
+        (8002) and Admin (8001) connections are derived from it by default; pass
+        ``manage_config`` / ``admin_config`` only to point them at a different
+        host, credentials or port.
 
         Parameters
         ----------
@@ -167,6 +177,15 @@ class MLClient:
             authentication via the API key
         retry : Retry | None, default Retry(total=5, backoff_factor=0.5)
             A retry strategy
+        http_config : HTTPConfig | None, default None
+            An already-resolved primary configuration; when given, the
+            connection parameters above are ignored
+        manage_config : HTTPConfig | None, default None
+            An already-resolved Manage configuration; when given, it is used
+            instead of deriving the Manage connection from the primary
+        admin_config : HTTPConfig | None, default None
+            An already-resolved Admin configuration; when given, it is used
+            instead of deriving the Admin connection from the primary
         """
         self._http = HttpClient(
             protocol=protocol,
@@ -178,9 +197,10 @@ class MLClient:
             ssl=ssl,
             cloud=cloud,
             retry=retry,
+            config=http_config,
         )
-        self._manage_http = None
-        self._admin_http = None
+        self._manage_http = HttpClient(config=manage_config) if manage_config else None
+        self._admin_http = HttpClient(config=admin_config) if admin_config else None
 
     def __enter__(self):
         """Connect and return self for use as a context manager."""
@@ -319,39 +339,39 @@ class MLClient:
         """Return HttpClient for manage API (always port 8002).
 
         The Management API is only available on the fixed Manage server
-        port (8002). If the main client already uses port 8002, it is reused.
-        Otherwise, a separate HttpClient is lazily created. Cloud connections
-        route every API through the single port-443 connection via base_path,
-        so the main client is reused.
+        port (8002). An injected Manage configuration is used as-is; otherwise
+        the main client is reused when it already targets port 8002 or runs on
+        Cloud (every API routes through the single port-443 connection), and a
+        separate HttpClient is lazily created in the remaining case.
         """
+        if self._manage_http is not None:
+            return self._manage_http
         config = self._http.config
         if config.cloud is not None or config.port == MARKLOGIC_MANAGE_API_PORT:
             return self._http
-        if self._manage_http is None:
-            self._manage_http = self._create_secondary_http(
-                MARKLOGIC_MANAGE_API_PORT,
-            )
+        self._manage_http = self._create_secondary_http(MARKLOGIC_MANAGE_API_PORT)
         return self._manage_http
 
     def _get_admin_http(self) -> HttpClient:
         """Return HttpClient for admin API (always port 8001).
 
         The Admin API is only available on the fixed Admin server port (8001).
-        If the main client already uses port 8001, it is reused. Otherwise,
-        a separate HttpClient is lazily created. Cloud connections route every
-        API through the single port-443 connection via base_path, so the main
-        client is reused.
+        An injected Admin configuration is used as-is; otherwise the main client
+        is reused when it already targets port 8001 or runs on Cloud (every API
+        routes through the single port-443 connection), and a separate
+        HttpClient is lazily created in the remaining case.
         """
+        if self._admin_http is not None:
+            return self._admin_http
         config = self._http.config
         if config.cloud is not None or config.port == MARKLOGIC_ADMIN_API_PORT:
             return self._http
-        if self._admin_http is None:
-            self._admin_http = self._create_secondary_http(MARKLOGIC_ADMIN_API_PORT)
+        self._admin_http = self._create_secondary_http(MARKLOGIC_ADMIN_API_PORT)
         return self._admin_http
 
     def _create_secondary_http(self, port: int) -> HttpClient:
         """Create and optionally connect a secondary HttpClient."""
-        http = HttpClient.with_config(self._http.config.at_port(port))
+        http = HttpClient(config=self._http.config.clone(port=port))
         if self.is_connected():
             http.connect()
         return http
@@ -385,8 +405,17 @@ class AsyncMLClient:
         ssl: SSLConfig | None = None,
         cloud: CloudConfig | None = None,
         retry: Retry | None = None,
+        *,
+        http_config: HTTPConfig | None = None,
+        manage_config: HTTPConfig | None = None,
+        admin_config: HTTPConfig | None = None,
     ):
         """Initialize AsyncMLClient instance.
+
+        The connection parameters describe the primary connection. The Manage
+        (8002) and Admin (8001) connections are derived from it by default; pass
+        ``manage_config`` / ``admin_config`` only to point them at a different
+        host, credentials or port.
 
         Parameters
         ----------
@@ -412,6 +441,15 @@ class AsyncMLClient:
             authentication via the API key
         retry : Retry | None, default Retry(total=5, backoff_factor=0.5)
             A retry strategy
+        http_config : HTTPConfig | None, default None
+            An already-resolved primary configuration; when given, the
+            connection parameters above are ignored
+        manage_config : HTTPConfig | None, default None
+            An already-resolved Manage configuration; when given, it is used
+            instead of deriving the Manage connection from the primary
+        admin_config : HTTPConfig | None, default None
+            An already-resolved Admin configuration; when given, it is used
+            instead of deriving the Admin connection from the primary
         """
         self._http = AsyncHttpClient(
             protocol=protocol,
@@ -423,12 +461,17 @@ class AsyncMLClient:
             ssl=ssl,
             cloud=cloud,
             retry=retry,
+            config=http_config,
         )
-        self._manage_http = self._create_secondary_async_http(
-            MARKLOGIC_MANAGE_API_PORT,
+        self._manage_http = (
+            AsyncHttpClient(config=manage_config)
+            if manage_config
+            else self._create_secondary_async_http(MARKLOGIC_MANAGE_API_PORT)
         )
-        self._admin_http = self._create_secondary_async_http(
-            MARKLOGIC_ADMIN_API_PORT,
+        self._admin_http = (
+            AsyncHttpClient(config=admin_config)
+            if admin_config
+            else self._create_secondary_async_http(MARKLOGIC_ADMIN_API_PORT)
         )
 
     def _create_secondary_async_http(
@@ -444,7 +487,7 @@ class AsyncMLClient:
         config = self._http.config
         if config.cloud is not None or config.port == port:
             return self._http
-        return AsyncHttpClient.with_config(config.at_port(port))
+        return AsyncHttpClient(config=config.clone(port=port))
 
     async def __aenter__(self):
         """Connect and return self for use as an async context manager."""

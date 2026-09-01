@@ -7,6 +7,7 @@ from pytest_mock import MockerFixture
 
 from mlclient.clients import http_client as http_client_module
 from mlclient.clients.http_client import AsyncHttpClient
+from mlclient.http_config import HTTPConfig
 from tests.utils import resources as resources_utils
 from tests.utils.ml_mockers import MLRespXMocker
 
@@ -402,3 +403,19 @@ def test_properties():
     assert client.config.username == "user"
     assert client.config.password == "pass"
     assert client.base_url == "https://ml.example.com:8123"
+
+
+def test_config_is_read_only():
+    client = AsyncHttpClient(host="ml.example.com")
+
+    with pytest.raises(AttributeError):
+        client.config = HTTPConfig.resolve(host="other.example.com")
+
+
+def test_prebuilt_config_supersedes_connection_kwargs():
+    config = HTTPConfig.resolve(host="resolved.example.com", port=8002)
+
+    client = AsyncHttpClient(host="ignored.example.com", port=9999, config=config)
+
+    assert client.config is config
+    assert client.base_url == "http://resolved.example.com:8002"

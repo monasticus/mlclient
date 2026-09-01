@@ -52,8 +52,8 @@ class HTTPConfig:
 
     ``auth`` is the built httpx.Auth handler applied to each request. The
     descriptor it was built from (a shortcut string, an AuthConfig, a custom
-    handler or None) is retained internally so a fixed-port sibling connection
-    can be derived via :meth:`at_port`.
+    handler or None) is retained internally so an independent variant can be
+    derived via :meth:`clone`.
     """
 
     def __init__(
@@ -217,27 +217,32 @@ class HTTPConfig:
             endpoint = f"/{base_path.strip('/')}/{endpoint.lstrip('/')}"
         return self.base_url + endpoint
 
-    def at_port(self, port: int) -> HTTPConfig:
-        """Return a sibling configuration bound to a different port.
+    def clone(self, **overrides) -> HTTPConfig:
+        """Return an independent config, overriding the given fields.
 
-        Fixed-port APIs (Admin on 8001, Manage on 8002) reuse the connection
-        mode and identity of the main client but target their own port. Cloud
-        routes every tier through its single port-443 connection, so a Cloud
-        config yields itself unchanged.
+        Accepts any resolve() parameter (``port``, ``host``, ``auth``, ...);
+        unspecified fields keep this config's values. The result is produced by
+        a fresh resolve(), so it carries its own httpx.Auth handler and shares
+        no mutable state with this instance - safe to hand to a separate client.
+
+        Fixed-port siblings (Admin on 8001, Manage on 8002) use
+        ``config.clone(port=...)``. Cloud routes every tier through its single
+        port-443 connection, so a Cloud config yields itself unchanged.
         """
         if self._connection.is_cloud:
             return self
-        return self.resolve(
-            protocol=self.protocol,
-            host=self._host,
-            port=port,
-            auth=self._auth_method,
-            username=self._username,
-            password=self._password,
-            ssl=self._connection.ssl,
-            cloud=self._connection.cloud,
-            retry=self._retry,
-        )
+        base = {
+            "protocol": self.protocol,
+            "host": self._host,
+            "port": self.port,
+            "auth": self._auth_method,
+            "username": self._username,
+            "password": self._password,
+            "ssl": self._connection.ssl,
+            "cloud": self._connection.cloud,
+            "retry": self._retry,
+        }
+        return self.resolve(**{**base, **overrides})
 
     @staticmethod
     def _build_base_url(protocol: str, host: str, port: int) -> str:

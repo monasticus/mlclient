@@ -72,6 +72,7 @@ class HttpClientBase:
         ssl: SSLConfig | None = None,
         cloud: CloudConfig | None = None,
         retry: Retry | None = None,
+        config: HTTPConfig | None = None,
     ):
         """Initialize HttpClientBase instance.
 
@@ -97,8 +98,13 @@ class HttpClientBase:
             MarkLogic Cloud configuration
         retry : Retry | None, default Retry(total=5, backoff_factor=0.5)
             A retry strategy
+        config : HTTPConfig | None, default None
+            An already-resolved configuration. When given, the connection
+            parameters above are ignored and this configuration is used as-is;
+            derive it through :meth:`HTTPConfig.clone` so its httpx.Auth handler
+            is not shared with another client.
         """
-        self.config: HTTPConfig = HTTPConfig.resolve(
+        self._config = config or HTTPConfig.resolve(
             protocol=protocol,
             host=host,
             port=port,
@@ -110,21 +116,10 @@ class HttpClientBase:
             retry=retry,
         )
 
-    @classmethod
-    def with_config(
-        cls,
-        config: HTTPConfig,
-    ):
-        """Build a client from an already-resolved configuration.
-
-        Used to derive fixed-port siblings (Admin, Manage) from a main client
-        via :meth:`HTTPConfig.at_port` without re-resolving the connection. The
-        transport (``_client``) defaults to None via the class attribute until
-        the client connects.
-        """
-        client = cls.__new__(cls)
-        client.config = config
-        return client
+    @property
+    def config(self) -> HTTPConfig:
+        """The resolved connection and authentication configuration."""
+        return self._config
 
     @property
     def base_url(self) -> str:

@@ -47,6 +47,10 @@ class MLServerConfig(BaseModel):
         description="A port number; None uses the connection's default port",
         default=None,
     )
+    protocol: Optional[str] = Field(
+        description="An HTTP protocol; None inherits from root",
+        default=None,
+    )
     auth: Optional[Auth] = Field(
         description="An authentication method; None inherits from root",
         default=None,
@@ -174,6 +178,7 @@ class MLEnvironment(BaseModel):
         """Return non-None app server fields that override root defaults."""
         overrides = {
             "port": app_server.port,
+            "protocol": app_server.protocol,
             "auth": app_server.auth,
             "username": app_server.username,
             "password": app_server.password,

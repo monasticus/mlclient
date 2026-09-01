@@ -19,6 +19,7 @@ def _server(identifier, port, auth, rest):
     return {
         "identifier": identifier,
         "port": port,
+        "protocol": None,
         "auth": auth,
         "username": None,
         "password": None,
@@ -239,6 +240,30 @@ def test_server_credentials_override_root():
         },
     )
     assert config.provide_config("content")["username"] == "reader"
+
+
+def test_root_protocol_inherited_when_server_omits_it():
+    config = MLEnvironment(
+        **{
+            "app-name": "app",
+            "protocol": "https",
+            "app-servers": [{"id": "content", "port": 8100}],
+        },
+    )
+    assert config.provide_config("content")["protocol"] == "https"
+
+
+def test_server_protocol_overrides_root():
+    config = MLEnvironment(
+        **{
+            "app-name": "app",
+            "protocol": "http",
+            "app-servers": [
+                {"id": "secure", "port": 8010, "protocol": "https"},
+            ],
+        },
+    )
+    assert config.provide_config("secure")["protocol"] == "https"
 
 
 def test_root_ssl_inherited():

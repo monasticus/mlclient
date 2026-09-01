@@ -9,13 +9,15 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import yaml
 from cleo.commands.command import Command
+from pydantic import ValidationError
 from cleo.helpers import argument, option
 from cleo.io.inputs.argument import Argument
 from cleo.io.inputs.option import Option
 
-from mlclient import constants
-from mlclient.exceptions import EnvironmentFileExistsError
+from mlclient import MLEnvironment, constants
+from mlclient.exceptions import EnvironmentFileExistsError, WrongParametersError
 
 _TEMPLATE = """\
 app-name: my-app
@@ -51,6 +53,16 @@ app-servers:
   #   username: rest-user
   #   ssl:
   #     verify: false
+"""
+
+_GRADLE_NA_HINTS = """
+# Not derivable from ml-gradle - uncomment and set if the connection needs them:
+# ssl:
+#   cert_file: /path/client.pem
+#   key_file: /path/client.key
+#   key_password: <passphrase>
+# cloud:
+#   token-duration: 0
 """
 
 
@@ -139,8 +151,15 @@ class InitEnvCommand(Command):
     ) -> int:
         """Execute the command."""
         name = self.argument("name")
-        if self.option("from-gradle") or self.option("from-host"):
+        if self.option("from-host"):
             raise NotImplementedError
+        if self.option("from-gradle"):
+            if not name:
+                msg = "--from-gradle requires an environment name"
+                raise WrongParametersError(msg)
+            content = self._render_from_gradle(self.option("from-gradle"))
+            self._write_env_file(name, content)
+            return 0
         if not name or self.option("interactive"):
             raise NotImplementedError
         self._write_env_file(name, _TEMPLATE)
@@ -166,3 +185,196 @@ class InitEnvCommand(Command):
         """Resolve the configuration file path in cwd, or home when --global."""
         base = Path.home() if self.option("global") else Path.cwd()
         return base / constants.ML_CLIENT_DIR / f"mlclient-{name}.yaml"
+
+    def _render_from_gradle(
+        self,
+        selector: str,
+    ) -> str:
+        """Map ml-gradle properties to an MLEnvironment YAML document."""
+        props = self._load_gradle_props(selector)
+        env = _drop_none(
+            {
+                "app-name": props.get("mlAppName"),
+                "protocol": _protocol(props, "ml"),
+                "host": props.get("mlHost"),
+                "username": props.get("mlUsername"),
+                "password": props.get("mlPassword"),
+                "auth": _lower(props.get("mlAuthentication")),
+                "ssl": {"verify": False} if _has_simple_ssl(props) else None,
+                "cloud": _cloud(props),
+                "app-servers": _app_servers(props) or None,
+            },
+        )
+        try:
+            MLEnvironment(**env)
+        except ValidationError as error:
+            msg = (
+                f"ml-gradle properties for [{selector}] do not form a valid "
+                f"environment: {error}"
+            )
+            raise WrongParametersError(msg) from error
+        return yaml.safe_dump(env, sort_keys=False) + _GRADLE_NA_HINTS
+
+    def _load_gradle_props(
+        self,
+        selector: str,
+    ) -> dict[str, str]:
+        """Parse a gradle properties file, or merge base + gradle-<env> overlay."""
+        path = Path(selector)
+        if path.is_file():
+            return _parse_properties(path)
+        base = _parse_properties(Path.cwd() / "gradle.properties")
+        base.update(_parse_properties(Path.cwd() / f"gradle-{selector}.properties"))
+        if not base:
+            msg = f"No ml-gradle properties found for [{selector}]"
+            raise WrongParametersError(msg)
+        return base
+
+
+def _app_servers(
+    props: dict[str, str],
+) -> list[dict]:
+    """Build the app-servers list: REST always, others only when overridden.
+
+    A server emits ``protocol`` only when its scheme / simple-SSL flags differ
+    from the root connection; otherwise the model inherits the root protocol.
+    Alongside protocol, only an explicit port, credential, or auth method makes
+    a non-REST server worth emitting.
+    """
+    root_protocol = _protocol(props, "ml")
+    servers = []
+    if props.get("mlRestPort"):
+        rest_keys = {
+            "port": "mlRestPort",
+            "username": "mlRestAdminUsername",
+            "password": "mlRestAdminPassword",
+            "auth": "mlRestAuthentication",
+        }
+        server = _server("rest", props, rest_keys, rest=True)
+        _apply_server_protocol(server, props, "mlRest", root_protocol)
+        servers.append(server)
+    others = (
+        ("app-services", "mlAppServices"),
+        ("manage", "mlManage"),
+        ("admin", "mlAdmin"),
+    )
+    for server_id, prefix in others:
+        keys = {
+            "port": f"{prefix}Port",
+            "username": f"{prefix}Username",
+            "password": f"{prefix}Password",
+            "auth": f"{prefix}Authentication",
+        }
+        server = _server(server_id, props, keys)
+        _apply_server_protocol(server, props, prefix, root_protocol)
+        if set(server) > {"id"}:
+            servers.append(server)
+    return servers
+
+
+def _apply_server_protocol(
+    server: dict,
+    props: dict[str, str],
+    prefix: str,
+    root_protocol: str | None,
+) -> None:
+    """Set a server's protocol when it differs from the root connection's."""
+    protocol = _protocol(props, prefix)
+    if protocol is not None and protocol != (root_protocol or "http"):
+        server["protocol"] = protocol
+
+
+def _server(
+    server_id: str,
+    props: dict[str, str],
+    keys: dict[str, str],
+    rest: bool = False,
+) -> dict:
+    """Build one app-server dict from its ml-gradle per-connection properties."""
+    return _drop_none(
+        {
+            "id": server_id,
+            "port": _int(props.get(keys["port"])),
+            "rest": rest or None,
+            "username": props.get(keys["username"]),
+            "password": props.get(keys["password"]),
+            "auth": _lower(props.get(keys["auth"])),
+        },
+    )
+
+
+def _cloud(
+    props: dict[str, str],
+) -> dict | None:
+    """Build the cloud block from ml-gradle cloud properties, if any are set."""
+    cloud = _drop_none(
+        {
+            "api-key": props.get("mlCloudApiKey"),
+            "base-path": props.get("mlCloudBasePath"),
+        },
+    )
+    return cloud or None
+
+
+def _protocol(
+    props: dict[str, str],
+    prefix: str,
+) -> str | None:
+    """Resolve a connection's protocol from its scheme / simple-SSL flags.
+
+    Returns None when neither is set, so the connection inherits its protocol.
+    """
+    scheme = _lower(props.get(f"{prefix}Scheme"))
+    simple_ssl = _lower(props.get(f"{prefix}SimpleSsl"))
+    if scheme == "https" or simple_ssl == "true":
+        return "https"
+    if scheme == "http" or simple_ssl == "false":
+        return "http"
+    return None
+
+
+def _has_simple_ssl(
+    props: dict[str, str],
+) -> bool:
+    """Detect any ml-gradle simple-SSL flag."""
+    return any(
+        key.endswith("SimpleSsl") and _lower(value) == "true"
+        for key, value in props.items()
+    )
+
+
+def _parse_properties(
+    path: Path,
+) -> dict[str, str]:
+    """Read a Java .properties file into a dict, skipping blanks and comments."""
+    if not path.is_file():
+        return {}
+    props = {}
+    for raw in path.read_text().splitlines():
+        line = raw.strip()
+        if not line or line.startswith(("#", "!")) or "=" not in line:
+            continue
+        key, value = line.split("=", 1)
+        props[key.strip()] = value.strip()
+    return props
+
+
+def _drop_none(
+    mapping: dict,
+) -> dict:
+    """Return the mapping without keys whose value is None."""
+    return {key: value for key, value in mapping.items() if value is not None}
+
+
+def _lower(
+    value: str | None,
+) -> str | None:
+    """Lowercase a value, tolerating None."""
+    return value.lower() if value is not None else None
+
+
+def _int(
+    value: str | None,
+) -> int | None:
+    """Parse an int, tolerating None."""
+    return int(value) if value is not None else None

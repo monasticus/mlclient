@@ -266,6 +266,20 @@ async def test_read_single_doc_using_custom_database(svc):
 
 
 @pytest.mark.asyncio
+@respx.mock
+async def test_read_forwards_txid(svc):
+    uri = "/some/dir/doc1.xml"
+
+    mocker = MLRespXMocker(use_router=False)
+    mocker.with_url("http://localhost:8000/v1/documents")
+    mocker.with_request_param("uri", uri)
+    mocker.with_request_param("txid", "txn-123")
+    mocker.with_get_side_effect(side_effect=ml_doc_mocker.get_documents_side_effect)
+
+    await svc.read(uri, txid="txn-123")
+
+
+@pytest.mark.asyncio
 @ml_mocker.router
 async def test_read_stream_single_uri(svc):
     uri = "/some/dir/doc1.xml"
@@ -397,6 +411,19 @@ async def test_create_document_with_temporal_collection(svc):
     documents = resp["documents"]
     assert len(documents) == 1
     assert documents[0]["uri"] == uri
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_write_forwards_txid(svc):
+    doc = XMLDocument(b"<root/>", "/some/dir/doc1.xml")
+
+    mocker = MLRespXMocker(use_router=False)
+    mocker.with_url("http://localhost:8000/v1/documents")
+    mocker.with_request_param("txid", "txn-123")
+    mocker.with_post_side_effect(side_effect=ml_doc_mocker.post_documents_side_effect)
+
+    await svc.write(doc, txid="txn-123")
 
 
 @pytest.mark.asyncio
@@ -573,6 +600,25 @@ async def test_delete_document_with_non_existing_database(svc):
         "[404 Not Found] (XDMP-NOSUCHDB) XDMP-NOSUCHDB: No such database Document"
     )
     assert err.value.args[0] == expected_error
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_delete_forwards_txid(svc):
+    uri = "/some/dir/doc1.xml"
+
+    mocker = MLRespXMocker(use_router=False)
+    mocker.with_url("http://localhost:8000/v1/documents")
+    mocker.with_request_param("uri", uri)
+    mocker.with_request_param("txid", "txn-123")
+    mocker.with_response_code(204)
+    mocker.with_empty_response_body()
+    mocker.mock_delete()
+
+    try:
+        await svc.delete(uri, txid="txn-123")
+    except MarkLogicError as err:
+        pytest.fail(str(err))
 
 
 @pytest.mark.asyncio

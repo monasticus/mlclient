@@ -1168,6 +1168,19 @@ def test_read_multiple_docs_using_custom_database(ml):
     assert zip_doc.temporal_collection is None
 
 
+@respx.mock
+def test_read_forwards_txid(ml):
+    uri = "/some/dir/doc1.xml"
+
+    mocker = MLRespXMocker(use_router=False)
+    mocker.with_url("http://localhost:8000/v1/documents")
+    mocker.with_request_param("uri", uri)
+    mocker.with_request_param("txid", "txn-123")
+    mocker.with_get_side_effect(side_effect=ml_doc_mocker.get_documents_side_effect)
+
+    ml.documents.read(uri, txid="txn-123")
+
+
 @ml_mocker.router
 def test_create_xml_document_from_bytes(ml):
     uri = "/some/dir/doc1.xml"
@@ -1650,6 +1663,18 @@ def test_create_multiple_documents_using_custom_database(ml):
     assert doc_4_info["category"] == ["metadata", "content"]
 
 
+@respx.mock
+def test_write_forwards_txid(ml):
+    doc = XMLDocument(b"<root/>", "/some/dir/doc1.xml")
+
+    mocker = MLRespXMocker(use_router=False)
+    mocker.with_url("http://localhost:8000/v1/documents")
+    mocker.with_request_param("txid", "txn-123")
+    mocker.with_post_side_effect(side_effect=ml_doc_mocker.post_documents_side_effect)
+
+    ml.documents.write(doc, txid="txn-123")
+
+
 @ml_mocker.router
 def test_create_document_with_temporal_collection(ml):
     uri = "/some/dir/doc1.xml"
@@ -1825,6 +1850,24 @@ def test_delete_document_with_non_existing_database(ml):
         "[404 Not Found] (XDMP-NOSUCHDB) XDMP-NOSUCHDB: No such database Document"
     )
     assert err.value.args[0] == expected_error
+
+
+@respx.mock
+def test_delete_forwards_txid(ml):
+    uri = "/some/dir/doc1.xml"
+
+    mocker = MLRespXMocker(use_router=False)
+    mocker.with_url("http://localhost:8000/v1/documents")
+    mocker.with_request_param("uri", uri)
+    mocker.with_request_param("txid", "txn-123")
+    mocker.with_response_code(204)
+    mocker.with_empty_response_body()
+    mocker.mock_delete()
+
+    try:
+        ml.documents.delete(uri, txid="txn-123")
+    except MarkLogicError as err:
+        pytest.fail(str(err))
 
 
 @respx.mock

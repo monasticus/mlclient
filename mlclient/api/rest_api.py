@@ -18,10 +18,11 @@ if TYPE_CHECKING:
 
 from .documents import AsyncDocumentsApi, DocumentsApi
 from .eval import AsyncEvalApi, EvalApi
+from .transactions import AsyncTransactionsApi, TransactionsApi
 
 
 class RestApi:
-    """REST API group for /v1/* endpoints (eval, documents).
+    """REST API group for /v1/* endpoints (eval, documents, transactions).
 
     Requires a REST app server.
     """
@@ -54,9 +55,14 @@ class RestApi:
         """Return the documents API group."""
         return DocumentsApi(self._api)
 
+    @cached_property
+    def transactions(self) -> TransactionsApi:
+        """Return the transactions API group."""
+        return TransactionsApi(self._api)
+
 
 class AsyncRestApi:
-    """Async REST API group for /v1/* endpoints (eval, documents)."""
+    """Async REST API group for /v1/* endpoints (eval, documents, transactions)."""
 
     def __init__(self, api: AsyncApiClient):
         self._api = api
@@ -74,3 +80,8 @@ class AsyncRestApi:
     def documents(self) -> AsyncDocumentsApi:
         """Return the documents API group."""
         return AsyncDocumentsApi(self._api)
+
+    @cached_property
+    def transactions(self) -> AsyncTransactionsApi:
+        """Return the transactions API group."""
+        return AsyncTransactionsApi(self._api)

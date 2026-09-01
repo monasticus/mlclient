@@ -259,7 +259,6 @@ class HttpClient(HttpClientBase):
         transport = HTTPTransport(verify=self.config.transport_verify())
         self._client = Client(
             transport=RetryTransport(transport=transport, retry=self.config.retry),
-            follow_redirects=True,
         )
 
     def disconnect(self):
@@ -441,7 +440,6 @@ class HttpClient(HttpClientBase):
         transport = HTTPTransport(verify=self.config.transport_verify())
         with Client(
             transport=RetryTransport(transport=transport, retry=self.config.retry),
-            follow_redirects=True,
         ) as client:
             return client.request(method, url, **request)
 
@@ -505,7 +503,6 @@ class AsyncHttpClient(HttpClientBase):
         transport = AsyncHTTPTransport(verify=self.config.transport_verify())
         self._client = AsyncClient(
             transport=RetryTransport(transport=transport, retry=self.config.retry),
-            follow_redirects=True,
         )
 
     async def disconnect(self):
@@ -699,6 +696,5 @@ class AsyncHttpClient(HttpClientBase):
         transport = AsyncHTTPTransport(verify=self.config.transport_verify())
         async with AsyncClient(
             transport=RetryTransport(transport=transport, retry=self.config.retry),
-            follow_redirects=True,
         ) as client:
             return await client.request(method, url, **request)

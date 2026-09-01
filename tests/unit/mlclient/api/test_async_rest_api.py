@@ -153,3 +153,56 @@ async def test_delete_documents():
         "invalid parameters: result "
         "for /path/to/non-existing/document.xml"
     ) in resp.text
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_create_transaction():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8000/v1/transactions")
+    ml_mocker.with_request_param("name", "my-txn")
+    ml_mocker.with_response_code(303)
+    ml_mocker.with_response_header("Location", "/v1/transactions/12345")
+    ml_mocker.with_empty_response_body()
+    ml_mocker.mock_post()
+
+    async with AsyncMLClient() as ml:
+        resp = await ml.rest.transactions.create(name="my-txn")
+
+    assert resp.status_code == httpx.codes.SEE_OTHER
+    assert resp.headers.get("Location") == "/v1/transactions/12345"
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_get_transaction():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8000/v1/transactions/12345")
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body({"transaction-status": {"transaction-id": "12345"}})
+    ml_mocker.mock_get()
+
+    async with AsyncMLClient() as ml:
+        resp = await ml.rest.transactions.get("12345", data_format="json")
+
+    assert resp.status_code == httpx.codes.OK
+    assert resp.json()["transaction-status"]["transaction-id"] == "12345"
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_post_transaction():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8000/v1/transactions/12345")
+    ml_mocker.with_request_param("result", "commit")
+    ml_mocker.with_response_code(204)
+    ml_mocker.with_empty_response_body()
+    ml_mocker.mock_post()
+
+    async with AsyncMLClient() as ml:
+        resp = await ml.rest.transactions.post("12345", result="commit")
+
+    assert resp.status_code == httpx.codes.NO_CONTENT
+    assert resp.content == b""

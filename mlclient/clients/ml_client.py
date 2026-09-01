@@ -8,6 +8,7 @@ using a layered composition architecture:
     - .admin    -> AdminApi / AsyncAdminApi (/admin/v1/* on port 8001)
     - .parser   -> MLResponseParser
     - .documents, .eval, .logs -> high-level services
+    - .transaction() -> open a scoped transaction (context manager)
 """
 
 from __future__ import annotations
@@ -28,6 +29,12 @@ from mlclient.ml_response_parser import MLResponseParser
 from mlclient.services.documents import AsyncDocumentsService, DocumentsService
 from mlclient.services.eval import AsyncEvalService, EvalService
 from mlclient.services.logs import AsyncLogsService, LogsService
+from mlclient.services.transactions import (
+    AsyncTransactionService,
+    TransactionService,
+    async_open_transaction,
+    open_transaction,
+)
 
 from .api_client import ApiClient, AsyncApiClient
 from .http_client import (
@@ -56,6 +63,7 @@ class MLClient:
     - ``ml.documents.read("/doc.json")`` -- high-level, parsed results
     - ``ml.eval.xquery("1+1")`` -- high-level, parsed results
     - ``ml.logs.get(log_type=...)`` -- high-level, parsed results
+    - ``ml.transaction(database=...)`` -- open a scoped transaction (context manager)
 
     Examples
     --------
@@ -228,6 +236,27 @@ class MLClient:
         """High-level logs service."""
         return LogsService(ApiClient(self._get_manage_http()))
 
+    def transaction(
+        self,
+        *,
+        name: str | None = None,
+        time_limit: int | None = None,
+        database: str | None = None,
+    ) -> TransactionService:
+        """Open a multi-statement transaction and return a service scoped to it.
+
+        Use as a context manager to commit on a clean exit and roll back on error:
+
+        >>> with ml.transaction(database="my-db") as txn:  # doctest: +SKIP
+        ...     ml.eval.xquery("...", **txn)
+        """
+        return open_transaction(
+            ApiClient(self._http),
+            name=name,
+            time_limit=time_limit,
+            database=database,
+        )
+
     def connect(self):
         """Start an HTTP session."""
         self._http.connect()
@@ -342,6 +371,7 @@ class AsyncMLClient:
     - ``ml.documents.read("/doc.json")`` -- high-level, parsed results
     - ``ml.eval.xquery("1+1")`` -- high-level, parsed results
     - ``ml.logs.get(log_type=...)`` -- high-level, parsed results
+    - ``ml.transaction(database=...)`` -- open a scoped transaction (context manager)
     """
 
     def __init__(
@@ -469,6 +499,28 @@ class AsyncMLClient:
     def logs(self) -> AsyncLogsService:
         """High-level logs service."""
         return AsyncLogsService(AsyncApiClient(self._manage_http))
+
+    async def transaction(
+        self,
+        *,
+        name: str | None = None,
+        time_limit: int | None = None,
+        database: str | None = None,
+    ) -> AsyncTransactionService:
+        """Open a multi-statement transaction and return a service scoped to it.
+
+        Use as an async context manager to commit on a clean exit and roll back
+        on error:
+
+        >>> async with await ml.transaction(database="my-db") as txn:  # doctest: +SKIP
+        ...     await ml.eval.xquery("...", **txn)
+        """
+        return await async_open_transaction(
+            AsyncApiClient(self._http),
+            name=name,
+            time_limit=time_limit,
+            database=database,
+        )
 
     async def connect(self):
         """Start an HTTP session."""

@@ -10,7 +10,7 @@ It exports 3 top-level API group classes:
 
 It also exports resource-level API classes used by RestApi and ManageApi:
     * DatabasesApi, DocumentsApi, EvalApi, ForestsApi, LogsApi,
-      RolesApi, ServersApi, UsersApi
+      RolesApi, ServersApi, TransactionsApi, UsersApi
 
 Each resource-level API wraps ApiCall objects and returns raw httpx.Response objects.
 """
@@ -25,6 +25,7 @@ from .manage_api import AsyncManageApi, ManageApi
 from .rest_api import AsyncRestApi, RestApi
 from .roles import AsyncRolesApi, RolesApi
 from .servers import AsyncServersApi, ServersApi
+from .transactions import AsyncTransactionsApi, TransactionsApi
 from .users import AsyncUsersApi, UsersApi
 
 __all__ = [
@@ -39,6 +40,7 @@ __all__ = [
     "AsyncRestApi",
     "AsyncRolesApi",
     "AsyncServersApi",
+    "AsyncTransactionsApi",
     "AsyncUsersApi",
     "DatabasesApi",
     "DocumentsApi",
@@ -49,5 +51,6 @@ __all__ = [
     "RestApi",
     "RolesApi",
     "ServersApi",
+    "TransactionsApi",
     "UsersApi",
 ]

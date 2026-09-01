@@ -161,3 +161,29 @@ class ResourceNotFoundError(Exception):
             A resource name
         """
         super().__init__(f"No such resource: [{resource_name}]")
+
+
+class EnvironmentFileExistsError(Exception):
+    """A custom Exception class for an already existing environment file.
+
+    Raised when scaffolding an environment configuration that would overwrite
+    an existing file without the force flag.
+    """
+
+    def __init__(
+        self,
+        file_path: str,
+    ):
+        """Initialize EnvironmentFileExistsError exception with details.
+
+        Extends Exception constructor with a custom message.
+
+        Parameters
+        ----------
+        file_path : str
+            A path of the existing configuration file
+        """
+        super().__init__(
+            f"Configuration file already exists: [{file_path}]. Use --force to "
+            f"overwrite.",
+        )

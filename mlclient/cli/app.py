@@ -23,7 +23,7 @@ from cleo.io.outputs.output import Output, Verbosity
 
 from mlclient import __version__ as ml_client_version
 from mlclient import setup_logger
-from mlclient.cli.commands import CallEvalCommand, CallLogsCommand
+from mlclient.cli.commands import CallEvalCommand, CallLogsCommand, InitEnvCommand
 
 
 class MLCLIentApplication(Application):
@@ -40,6 +40,7 @@ class MLCLIentApplication(Application):
         self.set_display_name(self._DISPLAY_NAME)
         self.add(CallLogsCommand())
         self.add(CallEvalCommand())
+        self.add(InitEnvCommand())
 
     def create_io(
         self,

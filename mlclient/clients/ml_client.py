@@ -142,7 +142,7 @@ class MLClient:
         cloud: CloudConfig | None = None,
         retry: Retry | None = None,
         *,
-        http_config: HTTPConfig | None = None,
+        config: HTTPConfig | None = None,
         manage_config: HTTPConfig | None = None,
         admin_config: HTTPConfig | None = None,
     ):
@@ -177,7 +177,7 @@ class MLClient:
             authentication via the API key
         retry : Retry | None, default Retry(total=5, backoff_factor=0.5)
             A retry strategy
-        http_config : HTTPConfig | None, default None
+        config : HTTPConfig | None, default None
             An already-resolved primary configuration; when given, the
             connection parameters above are ignored
         manage_config : HTTPConfig | None, default None
@@ -197,7 +197,7 @@ class MLClient:
             ssl=ssl,
             cloud=cloud,
             retry=retry,
-            config=http_config,
+            config=config,
         )
         self._manage_http = HttpClient(config=manage_config) if manage_config else None
         self._admin_http = HttpClient(config=admin_config) if admin_config else None
@@ -406,7 +406,7 @@ class AsyncMLClient:
         cloud: CloudConfig | None = None,
         retry: Retry | None = None,
         *,
-        http_config: HTTPConfig | None = None,
+        config: HTTPConfig | None = None,
         manage_config: HTTPConfig | None = None,
         admin_config: HTTPConfig | None = None,
     ):
@@ -441,7 +441,7 @@ class AsyncMLClient:
             authentication via the API key
         retry : Retry | None, default Retry(total=5, backoff_factor=0.5)
             A retry strategy
-        http_config : HTTPConfig | None, default None
+        config : HTTPConfig | None, default None
             An already-resolved primary configuration; when given, the
             connection parameters above are ignored
         manage_config : HTTPConfig | None, default None
@@ -461,7 +461,7 @@ class AsyncMLClient:
             ssl=ssl,
             cloud=cloud,
             retry=retry,
-            config=http_config,
+            config=config,
         )
         self._manage_http = (
             AsyncHttpClient(config=manage_config)

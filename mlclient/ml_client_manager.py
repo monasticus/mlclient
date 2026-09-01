@@ -96,8 +96,7 @@ class MLClientManager:
             configured for the environment
         """
         rest_server_id = self._get_rest_server_id(rest_server_id)
-        app_server_config = self.config.provide_config(rest_server_id)
-        return MLClient(**app_server_config)
+        return MLClient(config=self.config.provide_config(rest_server_id))
 
     def get_async_client(
         self,
@@ -128,8 +127,7 @@ class MLClientManager:
             configured for the environment
         """
         rest_server_id = self._get_rest_server_id(rest_server_id)
-        app_server_config = self.config.provide_config(rest_server_id)
-        return AsyncMLClient(**app_server_config)
+        return AsyncMLClient(config=self.config.provide_config(rest_server_id))
 
     def get_async_http_client(
         self,
@@ -147,8 +145,7 @@ class MLClientManager:
         AsyncHttpClient
             An AsyncHttpClient instance
         """
-        app_server_config = self.config.provide_config(app_server_id)
-        return AsyncHttpClient(**app_server_config)
+        return AsyncHttpClient(config=self.config.provide_config(app_server_id))
 
     def get_http_client(
         self,
@@ -166,8 +163,7 @@ class MLClientManager:
         HttpClient
             An HttpClient instance
         """
-        app_server_config = self.config.provide_config(app_server_id)
-        return HttpClient(**app_server_config)
+        return HttpClient(config=self.config.provide_config(app_server_id))
 
     def _get_rest_server_id(
         self,

@@ -21,6 +21,7 @@ from pydantic import BaseModel, Field
 from mlclient import constants
 from mlclient.auth import AuthConfig
 from mlclient.connection import CloudConfig, SSLConfig
+from mlclient.http_config import HTTPConfig
 from mlclient.exceptions import (
     MLClientDirectoryNotFoundError,
     MLClientEnvironmentNotFoundError,
@@ -112,8 +113,12 @@ class MLEnvironment(BaseModel):
     def provide_config(
         self,
         app_server_id: str,
-    ) -> dict:
-        """Provide an app server configuration for MLClient's use.
+    ) -> HTTPConfig:
+        """Provide a resolved connection configuration for an App Server.
+
+        The root-level connection and auth defaults are merged with the app
+        server's overrides and resolved into an HTTPConfig ready to hand to a
+        client via its ``config`` parameter.
 
         Parameters
         ----------
@@ -122,8 +127,8 @@ class MLEnvironment(BaseModel):
 
         Returns
         -------
-        dict
-            A configuration dictionary for an MLClient initialization
+        HTTPConfig
+            A resolved configuration for a client initialization
         """
         logger.debug("Getting configuration for the [%s] app server", app_server_id)
         ml_config = self._root_config()
@@ -132,7 +137,7 @@ class MLEnvironment(BaseModel):
         merged = {**ml_config, **app_server_config}
         if app_server.ssl is not None:
             merged["ssl"] = self._merge_ssl(self.ssl, app_server.ssl)
-        return merged
+        return HTTPConfig.resolve(**merged)
 
     def _root_config(self) -> dict:
         """Return root-level connection and auth defaults.

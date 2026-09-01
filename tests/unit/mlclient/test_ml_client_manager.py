@@ -1,9 +1,11 @@
 import httpx
 import pytest
+import respx
 
 from mlclient import AsyncMLClient, MLClient, MLClientManager, MLEnvironment
 from mlclient.clients import AsyncHttpClient, HttpClient
 from mlclient.exceptions import NoRestServerConfiguredError, NotARestServerError
+from tests.utils.ml_mockers import MLRespXMocker
 
 
 @pytest.fixture(autouse=True)
@@ -138,6 +140,40 @@ def test_get_client_default():
         assert isinstance(ml.http.config.auth, httpx.BasicAuth)
         assert ml.is_connected()
     assert not ml.is_connected()
+
+
+@respx.mock
+def test_get_client_wires_env_manage_and_admin_servers():
+    env = MLEnvironment(
+        **{
+            "app-name": "app",
+            "host": "localhost",
+            "app-servers": [
+                {"id": "content", "port": 8100, "rest": True},
+                {"id": "manage", "port": 9002},
+                {"id": "admin", "port": 9001},
+            ],
+        },
+    )
+    mgr = MLClientManager("test")
+    mgr.config = env
+
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:9002/manage/v2/databases")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("application/json")
+    ml_mocker.with_response_body({"database-default-list": {}})
+    ml_mocker.mock_get()
+
+    ml_mocker.with_url("http://localhost:9001/admin/v1/timestamp")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("text/plain")
+    ml_mocker.with_response_body("2026-03-23T00:00:00")
+    ml_mocker.mock_get()
+
+    with mgr.get_client("content") as ml:
+        assert ml.manage.databases.get_list().status_code == 200
+        assert ml.admin.get_timestamp().status_code == 200
 
 
 def test_get_client_default_no_rest_servers_configured():

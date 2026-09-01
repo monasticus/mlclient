@@ -1,6 +1,7 @@
 import shutil
 from pathlib import Path
 
+import httpx
 import pytest
 
 from mlclient import MLClient, MLEnvironment, constants
@@ -172,16 +173,15 @@ def test_rest_servers():
 
 def test_provide_config():
     config = MLEnvironment.load("test")
-    assert config.provide_config("manage") == {
-        "protocol": "http",
-        "host": "localhost",
-        "username": "admin",
-        "password": "admin",
-        "auth": "basic",
-        "ssl": None,
-        "cloud": None,
-        "port": 8002,
-    }
+    resolved = config.provide_config("manage")
+    assert resolved.protocol == "http"
+    assert resolved.host == "localhost"
+    assert resolved.port == 8002
+    assert resolved.username == "admin"
+    assert resolved.password == "admin"
+    assert isinstance(resolved.auth, httpx.BasicAuth)
+    assert resolved.ssl is None
+    assert resolved.cloud is None
 
 
 def test_provide_config_non_existing_server():
@@ -201,7 +201,7 @@ def test_root_auth_inherited_when_server_omits_it():
             "app-servers": [{"id": "content", "port": 8100}],
         },
     )
-    assert config.provide_config("content")["auth"] == "basic"
+    assert isinstance(config.provide_config("content").auth, httpx.BasicAuth)
 
 
 def test_server_auth_overrides_root():
@@ -212,7 +212,7 @@ def test_server_auth_overrides_root():
             "app-servers": [{"id": "content", "port": 8100, "auth": "basic"}],
         },
     )
-    assert config.provide_config("content")["auth"] == "basic"
+    assert isinstance(config.provide_config("content").auth, httpx.BasicAuth)
 
 
 def test_root_credentials_inherited():
@@ -225,8 +225,8 @@ def test_root_credentials_inherited():
         },
     )
     resolved = config.provide_config("content")
-    assert resolved["username"] == "root-user"
-    assert resolved["password"] == "root-pass"
+    assert resolved.username == "root-user"
+    assert resolved.password == "root-pass"
 
 
 def test_server_credentials_override_root():
@@ -239,7 +239,7 @@ def test_server_credentials_override_root():
             ],
         },
     )
-    assert config.provide_config("content")["username"] == "reader"
+    assert config.provide_config("content").username == "reader"
 
 
 def test_root_protocol_inherited_when_server_omits_it():
@@ -250,7 +250,7 @@ def test_root_protocol_inherited_when_server_omits_it():
             "app-servers": [{"id": "content", "port": 8100}],
         },
     )
-    assert config.provide_config("content")["protocol"] == "https"
+    assert config.provide_config("content").protocol == "https"
 
 
 def test_server_protocol_overrides_root():
@@ -263,7 +263,7 @@ def test_server_protocol_overrides_root():
             ],
         },
     )
-    assert config.provide_config("secure")["protocol"] == "https"
+    assert config.provide_config("secure").protocol == "https"
 
 
 def test_root_ssl_inherited():
@@ -275,7 +275,7 @@ def test_root_ssl_inherited():
             "app-servers": [{"id": "content", "port": 8100}],
         },
     )
-    assert config.provide_config("content")["ssl"].verify == "/certs/ca.pem"
+    assert config.provide_config("content").ssl.verify == "/certs/ca.pem"
 
 
 def test_server_ssl_merges_client_cert_over_root_verify():
@@ -296,7 +296,7 @@ def test_server_ssl_merges_client_cert_over_root_verify():
             ],
         },
     )
-    resolved_ssl = config.provide_config("secure")["ssl"]
+    resolved_ssl = config.provide_config("secure").ssl
     assert resolved_ssl.cert_file == "/certs/client.pem"
     assert resolved_ssl.key_file == "/certs/client-key.pem"
     assert resolved_ssl.verify == "/certs/root-ca.pem"
@@ -317,7 +317,7 @@ def test_server_ssl_overrides_root_verify():
             ],
         },
     )
-    assert config.provide_config("secure")["ssl"].verify == "/certs/other-ca.pem"
+    assert config.provide_config("secure").ssl.verify == "/certs/other-ca.pem"
 
 
 def test_server_ssl_used_when_root_has_no_ssl():
@@ -337,7 +337,7 @@ def test_server_ssl_used_when_root_has_no_ssl():
             ],
         },
     )
-    resolved_ssl = config.provide_config("secure")["ssl"]
+    resolved_ssl = config.provide_config("secure").ssl
     assert resolved_ssl.cert_file == "/certs/client.pem"
     assert resolved_ssl.verify is True
 
@@ -353,20 +353,31 @@ def test_server_ssl_can_disable_root_verify():
             ],
         },
     )
-    assert config.provide_config("secure")["ssl"].verify is False
+    assert config.provide_config("secure").ssl.verify is False
 
 
-def test_complex_auth_parsed_as_auth_config():
+def test_complex_auth_resolved_as_certificate():
     config = MLEnvironment(
         **{
             "app-name": "app",
             "protocol": "https",
             "app-servers": [
-                {"id": "secure", "port": 8010, "auth": {"method": "certificate"}},
+                {
+                    "id": "secure",
+                    "port": 8010,
+                    "auth": {"method": "certificate"},
+                    "ssl": {
+                        "cert_file": "/certs/client.pem",
+                        "key_file": "/certs/client-key.pem",
+                    },
+                },
             ],
         },
     )
-    assert config.provide_config("secure")["auth"].method == "certificate"
+    resolved = config.provide_config("secure")
+    assert resolved.protocol == "https"
+    assert resolved.connection.is_mutual_tls
+    assert resolved.auth is None
 
 
 def test_cloud_config_in_provide_config():
@@ -379,8 +390,8 @@ def test_cloud_config_in_provide_config():
         },
     )
     resolved = config.provide_config("content")
-    assert resolved["cloud"].api_key == "mk-1"
-    assert resolved["cloud"].base_path == "/ml/x/manage"
+    assert resolved.cloud.api_key == "mk-1"
+    assert resolved.cloud.base_path == "/ml/x/manage"
 
 
 def test_cloud_environment_needs_no_app_servers_or_port():
@@ -392,8 +403,8 @@ def test_cloud_environment_needs_no_app_servers_or_port():
         },
     )
     resolved = config.provide_config("app-services")
-    assert "port" not in resolved
-    ml = MLClient(**resolved)
+    assert resolved.port == 443
+    ml = MLClient(config=resolved)
     assert ml.http.config.port == 443
 
 
@@ -401,4 +412,4 @@ def test_no_root_auth_defaults_to_digest():
     config = MLEnvironment(
         **{"app-name": "app", "app-servers": [{"id": "content", "port": 8100}]},
     )
-    assert config.provide_config("content")["auth"] == "digest"
+    assert isinstance(config.provide_config("content").auth, httpx.DigestAuth)

@@ -156,10 +156,10 @@ async def test_manage_uses_port_8002_when_main_port_differs():
     assert resp.status_code == 200
 
 
-def test_http_config_supersedes_connection_kwargs():
+def test_config_supersedes_connection_kwargs():
     config = HTTPConfig.resolve(host="resolved.example.com", port=8123)
 
-    ml = AsyncMLClient(host="ignored.example.com", port=9999, http_config=config)
+    ml = AsyncMLClient(host="ignored.example.com", port=9999, config=config)
 
     assert ml.http.config is config
     assert ml.http.base_url == "http://resolved.example.com:8123"

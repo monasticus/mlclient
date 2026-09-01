@@ -1,26 +1,33 @@
-"""The Init Env Command module.
+"""The Env Init Command module.
 
-It exports an implementation for 'init env' command:
-    * InitEnvCommand
+It exports an implementation for 'env init' command:
+    * EnvInitCommand
         Scaffolds an MLClient environment configuration file.
 """
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from pathlib import Path
 
 import yaml
 from cleo.commands.command import Command
-from pydantic import ValidationError
 from cleo.helpers import argument, option
 from cleo.io.inputs.argument import Argument
 from cleo.io.inputs.option import Option
+from cleo.ui.question import Question
+from pydantic import ValidationError
 
 from mlclient import MLClient, MLEnvironment, constants
 from mlclient.exceptions import EnvironmentFileExistsError, WrongParametersError
 
 MANAGE_PORT = 8002
 ADMIN_PORT = 8001
+MAX_PORT = 65535
+
+_CLIENT_AUTH_METHODS = ("basic", "digest", "digestbasic")
+
+_COMMENTED_APP_NAME = "# app-name: <optional; scopes discovery when set>\n"
 
 _SERVER_AUTH_TO_CLIENT = {
     "digest": "digest",
@@ -79,7 +86,19 @@ _GRADLE_NA_HINTS = """
 """
 
 
-class InitEnvCommand(Command):
+@dataclass
+class _HostConnection:
+    """Resolved --from-host connection details, ready for discovery."""
+
+    name: str
+    host: str
+    port: int
+    username: str
+    password: str
+    auth: str
+
+
+class EnvInitCommand(Command):
     """Scaffolds an MLClient environment configuration file.
 
     Writes .mlclient/mlclient-<name>.yaml. Without a source option it emits a
@@ -87,7 +106,7 @@ class InitEnvCommand(Command):
     --from-host derives it by querying a running MarkLogic instance.
 
     Usage:
-      init env [options] [--] [<name>]
+      env init [options] [--] [<name>]
 
     Arguments:
       name
@@ -104,13 +123,15 @@ class InitEnvCommand(Command):
             Username for --from-host
       -p, --password=PASSWORD
             Password for --from-host (prompted if omitted)
+      -a, --auth=AUTH
+            Auth method for --from-host (basic, digest or digestbasic)
       -g, --global
             Write to the home directory instead of the current directory
       -f, --force
             Overwrite an existing configuration file
     """
 
-    name: str = "init env"
+    name: str = "env init"
     description: str = "Scaffolds an MLClient environment configuration file"
     arguments: list[Argument] = [
         argument(
@@ -129,10 +150,17 @@ class InitEnvCommand(Command):
             "from-gradle",
             description="Derive from ml-gradle properties (an env name or a file path)",
             flag=False,
+            value_required=False,
         ),
         option(
             "from-host",
             description="Derive by querying a MarkLogic host (host[:port])",
+            flag=False,
+            value_required=False,
+        ),
+        option(
+            "app-name",
+            description="Application label; scopes --from-host to matching servers",
             flag=False,
         ),
         option(
@@ -145,6 +173,12 @@ class InitEnvCommand(Command):
             "password",
             "p",
             description="Password for --from-host (prompted if omitted)",
+            flag=False,
+        ),
+        option(
+            "auth",
+            "a",
+            description="Auth method for --from-host (basic, digest or digestbasic)",
             flag=False,
         ),
         option(
@@ -163,25 +197,142 @@ class InitEnvCommand(Command):
         self,
     ) -> int:
         """Execute the command."""
+        if self._option_present("from-host"):
+            return self._handle_from_host()
+        if self._option_present("from-gradle"):
+            return self._handle_from_gradle()
+        return self._handle_scaffold()
+
+    def _handle_scaffold(
+        self,
+    ) -> int:
+        """Write the commented template, or run the wizard when no name is given."""
         name = self.argument("name")
-        if self.option("from-host"):
-            if not name:
-                msg = "--from-host requires an environment name"
-                raise WrongParametersError(msg)
-            content = self._render_from_host(name, self.option("from-host"))
-            self._write_env_file(name, content)
+        if name and not self.option("interactive"):
+            self._write_env_file(name, _TEMPLATE)
             return 0
-        if self.option("from-gradle"):
-            if not name:
-                msg = "--from-gradle requires an environment name"
-                raise WrongParametersError(msg)
-            content = self._render_from_gradle(self.option("from-gradle"))
-            self._write_env_file(name, content)
-            return 0
-        if not name or self.option("interactive"):
-            raise NotImplementedError
-        self._write_env_file(name, _TEMPLATE)
+        return self._run_wizard(name)
+
+    def _run_wizard(
+        self,
+        name: str | None,
+    ) -> int:
+        """Interactively scaffold an environment: pick a name, then a source mode.
+
+        ``blank`` writes the commented template, ``gradle`` derives from ml-gradle
+        properties (defaulting the selector to the name) and ``server`` discovers
+        a running instance's App Servers.
+        """
+        name = name or self._ask_name()
+        mode = self.choice("Source", ["blank", "gradle", "server"], 0)
+        if mode == "gradle":
+            selector = self.ask(
+                "Gradle environment name or properties file path:",
+                name,
+            )
+            content = self._render_from_gradle(selector)
+        elif mode == "server":
+            content = self._render_from_host(
+                self.option("app-name"),
+                self._prompt_host_connection(name),
+            )
+        else:
+            content = _TEMPLATE
+        self._write_env_file(name, content)
         return 0
+
+    def _prompt_host_connection(
+        self,
+        name: str,
+    ) -> _HostConnection:
+        """Prompt for the connection fields, defaulting to local-development values."""
+        host, port, username, password = self._prompt_connection_fields(
+            host=None,
+            port=None,
+            username=None,
+            password=None,
+            password_default="admin",
+        )
+        auth = self._resolve_auth()
+        return _HostConnection(name, host, port, username, password, auth)
+
+    def _option_present(
+        self,
+        option_name: str,
+    ) -> bool:
+        """Report whether an option token appeared, even without a value.
+
+        ``self.option`` collapses an absent option and one passed without a value
+        both to ``None``; only the raw input distinguishes them, which is what
+        lets ``--from-host`` with no value trigger the interactive wizard.
+        """
+        return self.io.input.has_parameter_option(f"--{option_name}", only_params=True)
+
+    def _handle_from_host(
+        self,
+    ) -> int:
+        """Resolve the connection, prompting for whatever is missing, then write."""
+        conn = self._resolve_host_connection()
+        content = self._render_from_host(self.option("app-name"), conn)
+        self._write_env_file(conn.name, content)
+        return 0
+
+    def _resolve_host_connection(
+        self,
+    ) -> _HostConnection:
+        """Merge command-line connection details with interactive prompts.
+
+        A fully specified invocation (host, name, username and password all given
+        and no ``--interactive``) resolves without prompting. Otherwise every
+        field not supplied on the command line is prompted for, defaulting to the
+        conventional local-development values.
+        """
+        spec = self.option("from-host")
+        host, port = _split_host_port(spec) if spec else (None, MANAGE_PORT)
+        port_given = bool(spec) and ":" in spec
+        name = self.argument("name")
+        username = self.option("username")
+        password = self.option("password")
+        auth = self._resolve_auth()
+
+        if host and name and username and password and not self.option("interactive"):
+            return _HostConnection(name, host, port, username, password, auth)
+
+        name = name or self._ask_name()
+        host, port, username, password = self._prompt_connection_fields(
+            host=host,
+            port=port if port_given else None,
+            username=username,
+            password=password,
+        )
+        return _HostConnection(name, host, port, username, password, auth)
+
+    def _prompt_connection_fields(
+        self,
+        host: str | None,
+        port: int | None,
+        username: str | None,
+        password: str | None,
+        password_default: str | None = None,
+    ) -> tuple[str, int, str, str]:
+        """Prompt for missing connection fields with local-dev defaults."""
+        host = host or self.ask("Host:", "localhost")
+        port = port or self._ask_port()
+        username = username or self.ask("Username:", "admin")
+        password = password or self.secret("Password:") or password_default
+        return host, port, username, password
+
+    def _resolve_auth(
+        self,
+    ) -> str:
+        """Validate the --auth option, defaulting to digest."""
+        auth = self.option("auth")
+        if auth is None:
+            return "digest"
+        if auth.lower() not in _CLIENT_AUTH_METHODS:
+            msg = f"Unsupported auth method [{auth}]; use basic, digest or digestbasic"
+            raise WrongParametersError(msg)
+        return auth.lower()
 
     def _write_env_file(
         self,
@@ -206,32 +357,35 @@ class InitEnvCommand(Command):
 
     def _render_from_host(
         self,
-        app_name: str,
-        spec: str,
+        app_name: str | None,
+        conn: _HostConnection,
     ) -> str:
         """Map a running MarkLogic's App Servers to an MLEnvironment YAML document.
 
-        Connects to the host's Manage server, discovers its App Servers, and
-        keeps those whose name matches ``app_name`` (all of them when nothing
-        matches). Manage and Admin are emitted only when they diverge from the
-        root connection; a matching pair is left for the client to derive.
+        Connects to the host's Manage server and discovers its App Servers. When
+        ``app_name`` is given it both labels the environment and keeps only the
+        servers whose name matches it; when omitted every server is kept and the
+        label is left commented out. Manage and Admin are emitted only when they
+        diverge from the root connection; a matching pair is left for the client
+        to derive.
         """
-        host, port = _split_host_port(spec)
-        username = self.option("username") or "admin"
-        password = self.option("password") or self.secret("Password:")
         root = {
-            "app-name": app_name,
             "protocol": "http",
-            "host": host,
-            "username": username,
-            "password": password,
-            "auth": "digest",
+            "host": conn.host,
+            "username": conn.username,
+            "password": conn.password,
+            "auth": conn.auth,
         }
-        servers = self._discover_servers(host, port, username, password)
+        servers = self._discover_servers(
+            conn.host,
+            conn.port,
+            conn.username,
+            conn.password,
+        )
         env = _drop_none(
             {**root, "app-servers": _select_app_servers(servers, app_name, root)},
         )
-        return yaml.safe_dump(env, sort_keys=False)
+        return _render_env(app_name, env)
 
     def _discover_servers(
         self,
@@ -256,15 +410,49 @@ class InitEnvCommand(Command):
                 if item.get("kindref") == "http"
             ]
 
+    def _handle_from_gradle(
+        self,
+    ) -> int:
+        """Resolve the gradle selector and env name, prompting for what's missing."""
+        selector = self.option("from-gradle")
+        if selector:
+            name = self._resolve_gradle_name(selector)
+        else:
+            name = self.argument("name") or self._ask_name()
+            selector = self.ask("Gradle environment name or properties file path:")
+        content = self._render_from_gradle(selector)
+        self._write_env_file(name, content)
+        return 0
+
+    def _resolve_gradle_name(
+        self,
+        selector: str,
+    ) -> str:
+        """Pick the environment name for a gradle selector.
+
+        A name given on the command line wins. Otherwise a plain env-name
+        selector doubles as the name, while a properties-file selector has no
+        name to borrow and is prompted for; ``--interactive`` forces the prompt
+        even for a derivable name, defaulting to the selector.
+        """
+        name = self.argument("name")
+        if name:
+            return name
+        selector_is_file = Path(selector).is_file()
+        if not selector_is_file and not self.option("interactive"):
+            return selector
+        default = None if selector_is_file else selector
+        return self._ask_name(default)
+
     def _render_from_gradle(
         self,
         selector: str,
     ) -> str:
         """Map ml-gradle properties to an MLEnvironment YAML document."""
         props = self._load_gradle_props(selector)
+        app_name = props.get("mlAppName")
         env = _drop_none(
             {
-                "app-name": props.get("mlAppName"),
                 "protocol": _protocol(props, "ml"),
                 "host": props.get("mlHost"),
                 "username": props.get("mlUsername"),
@@ -276,14 +464,14 @@ class InitEnvCommand(Command):
             },
         )
         try:
-            MLEnvironment(**env)
+            MLEnvironment(**{"app-name": app_name, **env})
         except ValidationError as error:
             msg = (
                 f"ml-gradle properties for [{selector}] do not form a valid "
                 f"environment: {error}"
             )
             raise WrongParametersError(msg) from error
-        return yaml.safe_dump(env, sort_keys=False) + _GRADLE_NA_HINTS
+        return _render_env(app_name, env) + _GRADLE_NA_HINTS
 
     def _load_gradle_props(
         self,
@@ -300,23 +488,73 @@ class InitEnvCommand(Command):
             raise WrongParametersError(msg)
         return base
 
+    def _ask_name(
+        self,
+        default: str | None = None,
+    ) -> str:
+        """Prompt for an environment name, re-asking until it is non-empty."""
+        question = Question("Environment name:", default)
+        question.set_validator(_require_non_empty)
+        question.set_max_attempts(5)
+        return self.ask(question)
+
+    def _ask_port(
+        self,
+    ) -> int:
+        """Prompt for a port, re-asking until it is a valid port number."""
+        question = Question("Port:", str(MANAGE_PORT))
+        question.set_validator(_require_valid_port)
+        question.set_max_attempts(5)
+        return int(self.ask(question))
+
+
+def _require_non_empty(
+    value: str | None,
+) -> str:
+    """Reject a blank answer so an environment is never named after nothing."""
+    if not value or not value.strip():
+        msg = "Environment name must not be empty"
+        raise ValueError(msg)
+    return value.strip()
+
+
+def _require_valid_port(
+    value: str,
+) -> str:
+    """Reject an answer that is not a port number in the 1-65535 range."""
+    if not str(value).isdigit() or not 1 <= int(value) <= MAX_PORT:
+        msg = "Port must be a whole number between 1 and 65535"
+        raise ValueError(msg)
+    return value
+
+
+def _render_env(
+    app_name: str | None,
+    env: dict,
+) -> str:
+    """Serialise the environment, commenting out the app-name label when unset."""
+    if app_name:
+        return yaml.safe_dump({"app-name": app_name, **env}, sort_keys=False)
+    return _COMMENTED_APP_NAME + yaml.safe_dump(env, sort_keys=False)
+
 
 def _select_app_servers(
     servers: list[dict],
-    app_name: str,
+    app_name: str | None,
     root: dict,
 ) -> list[dict] | None:
     """Turn discovered servers into app-server entries.
 
-    Servers whose name matches ``app_name`` become REST entries (all servers
-    when nothing matches). The Manage and Admin tiers are emitted only when
-    their protocol or auth diverges from the root connection.
+    When ``app_name`` is given, servers whose name matches it become REST
+    entries (all servers when nothing matches); without it every server is
+    kept. The Manage and Admin tiers are emitted only when their protocol or
+    auth diverges from the root connection.
     """
-    matches = [
-        server
-        for server in servers
-        if app_name.lower() in server["id"].lower()
-    ] or servers
+    matches = servers
+    if app_name:
+        matches = [
+            server for server in servers if app_name.lower() in server["id"].lower()
+        ] or servers
     entries = []
     for server in matches:
         if server["port"] in (MANAGE_PORT, ADMIN_PORT):

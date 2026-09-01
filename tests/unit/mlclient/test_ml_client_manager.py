@@ -60,6 +60,10 @@ def ml_config_no_rest() -> MLEnvironment:
         "protocol": "https",
         "app-servers": [
             {
+                "id": "app-services",
+                "rest": False,
+            },
+            {
                 "id": "manage",
                 "port": 8002,
                 "auth": "basic",

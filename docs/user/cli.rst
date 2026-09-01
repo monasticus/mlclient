@@ -27,6 +27,9 @@ MLClient provides you a nice command line interface using `cleo <https://github.
       call eval  Sends a GET request to the /v1/eval endpoint
       call logs  Sends a GET request to the /manage/v2/logs endpoint
 
+     env
+      env init   Scaffolds an MLClient environment configuration file
+
 .. caution::
 
     All MLClient commands use MLClient Environment. To set it up, see :doc:`./setup`.
@@ -35,4 +38,5 @@ MLClient provides you a nice command line interface using `cleo <https://github.
    :hidden:
 
    cli/call
+   cli/env
 

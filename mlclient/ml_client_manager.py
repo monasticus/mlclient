@@ -12,7 +12,6 @@ import logging
 
 from mlclient.clients import AsyncHttpClient, AsyncMLClient, HttpClient, MLClient
 from mlclient.exceptions import NoRestServerConfiguredError, NotARestServerError
-from mlclient.http_config import HTTPConfig
 from mlclient.ml_environment import MLEnvironment
 
 logger = logging.getLogger(__name__)
@@ -99,8 +98,8 @@ class MLClientManager:
         rest_server_id = self._get_rest_server_id(rest_server_id)
         return MLClient(
             config=self.config.provide_config(rest_server_id),
-            manage_config=self._optional_config("manage"),
-            admin_config=self._optional_config("admin"),
+            manage_config=self.config.provide_config("manage"),
+            admin_config=self.config.provide_config("admin"),
         )
 
     def get_async_client(
@@ -134,8 +133,8 @@ class MLClientManager:
         rest_server_id = self._get_rest_server_id(rest_server_id)
         return AsyncMLClient(
             config=self.config.provide_config(rest_server_id),
-            manage_config=self._optional_config("manage"),
-            admin_config=self._optional_config("admin"),
+            manage_config=self.config.provide_config("manage"),
+            admin_config=self.config.provide_config("admin"),
         )
 
     def get_async_http_client(
@@ -173,22 +172,6 @@ class MLClientManager:
             An HttpClient instance
         """
         return HttpClient(config=self.config.provide_config(app_server_id))
-
-    def _optional_config(
-        self,
-        app_server_id: str,
-    ) -> HTTPConfig | None:
-        """Resolve an app server's config when the environment defines it.
-
-        The Manage (8002) and Admin (8001) tiers are wired explicitly only when
-        the environment declares them; otherwise the client derives them from
-        the primary connection.
-        """
-        configured = any(
-            app_server.identifier == app_server_id
-            for app_server in self.config.app_servers
-        )
-        return self.config.provide_config(app_server_id) if configured else None
 
     def _get_rest_server_id(
         self,

@@ -93,6 +93,12 @@ for on-premises, 443 for Cloud), so it need only be set for app servers on a
 non-default port. Declare ``app-servers`` explicitly only to name additional
 servers or override per-server settings.
 
+Three app servers are always present even when you list none: ``app-services``
+(the port-8000 REST server), ``manage`` (8002), and ``admin`` (8001). Anything
+you declare is added to them; an entry whose ``id`` matches one of the three
+overrides that predefined server - for example, declaring ``admin`` on a
+non-standard port or ``app-services`` with ``rest: false``.
+
 MLEnvironment class
 -------------------
 Having the environment file, you can instantiate ``MLEnvironment`` class using your environment::
@@ -100,7 +106,7 @@ Having the environment file, you can instantiate ``MLEnvironment`` class using y
    >>> from mlclient import MLEnvironment
    >>> env = MLEnvironment.load("local")
    >>> env
-   MLEnvironment(app_name='migration-app', protocol='http', host='localhost', username='admin', password='admin', auth='digest', ssl=None, cloud=None, app_servers=[MLServerConfig(identifier='manage', port=8002, auth='basic', username=None, password=None, ssl=None, rest=False), MLServerConfig(identifier='content', port=8100, auth='basic', username=None, password=None, ssl=None, rest=False), MLServerConfig(identifier='modules', port=8101, auth='basic', username=None, password=None, ssl=None, rest=False), MLServerConfig(identifier='schemas', port=8102, auth='basic', username=None, password=None, ssl=None, rest=False), MLServerConfig(identifier='test', port=8103, auth='basic', username=None, password=None, ssl=None, rest=False)])
+   MLEnvironment(app_name='migration-app', protocol='http', host='localhost', username='admin', password='admin', auth='digest', ssl=None, cloud=None, app_servers=[MLServerConfig(identifier='manage', port=8002, protocol=None, auth='basic', username=None, password=None, ssl=None, rest=False), MLServerConfig(identifier='content', port=8100, protocol=None, auth='basic', username=None, password=None, ssl=None, rest=False), MLServerConfig(identifier='modules', port=8101, protocol=None, auth='basic', username=None, password=None, ssl=None, rest=False), MLServerConfig(identifier='schemas', port=8102, protocol=None, auth='basic', username=None, password=None, ssl=None, rest=False), MLServerConfig(identifier='test', port=8103, protocol=None, auth='basic', username=None, password=None, ssl=None, rest=False), MLServerConfig(identifier='app-services', port=None, protocol=None, auth=None, username=None, password=None, ssl=None, rest=True), MLServerConfig(identifier='admin', port=8001, protocol=None, auth=None, username=None, password=None, ssl=None, rest=False)])
 
 This code will work in every subdirectory of the ``migration-app`` project as it looks for ``.mlclient`` recursively.
 
@@ -108,7 +114,7 @@ This code will work in every subdirectory of the ``migration-app`` project as it
 
    >>> from mlclient import MLClient, MLEnvironment
    >>> env = MLEnvironment.load("local")
-   >>> with MLClient(**env.provide_config("content")) as ml:
+   >>> with MLClient(config=env.provide_config("content")) as ml:
    ...     result = ml.eval.xquery("xdmp:database() => xdmp:database-name()")
    ...
 
@@ -120,7 +126,7 @@ This code will work in every subdirectory of the ``migration-app`` project as it
        >>> from mlclient import MLEnvironment
        >>> env = MLEnvironment.load_file("path/to/mlclient-local.yaml")
        >>> env
-       MLEnvironment(app_name='migration-app', protocol='http', host='localhost', username='admin', password='admin', auth='digest', ssl=None, cloud=None, app_servers=[MLServerConfig(identifier='manage', port=8002, auth='basic', username=None, password=None, ssl=None, rest=False), MLServerConfig(identifier='content', port=8100, auth='basic', username=None, password=None, ssl=None, rest=False), MLServerConfig(identifier='modules', port=8101, auth='basic', username=None, password=None, ssl=None, rest=False), MLServerConfig(identifier='schemas', port=8102, auth='basic', username=None, password=None, ssl=None, rest=False), MLServerConfig(identifier='test', port=8103, auth='basic', username=None, password=None, ssl=None, rest=False)])
+       MLEnvironment(app_name='migration-app', protocol='http', host='localhost', username='admin', password='admin', auth='digest', ssl=None, cloud=None, app_servers=[MLServerConfig(identifier='manage', port=8002, protocol=None, auth='basic', username=None, password=None, ssl=None, rest=False), MLServerConfig(identifier='content', port=8100, protocol=None, auth='basic', username=None, password=None, ssl=None, rest=False), MLServerConfig(identifier='modules', port=8101, protocol=None, auth='basic', username=None, password=None, ssl=None, rest=False), MLServerConfig(identifier='schemas', port=8102, protocol=None, auth='basic', username=None, password=None, ssl=None, rest=False), MLServerConfig(identifier='test', port=8103, protocol=None, auth='basic', username=None, password=None, ssl=None, rest=False), MLServerConfig(identifier='app-services', port=None, protocol=None, auth=None, username=None, password=None, ssl=None, rest=True), MLServerConfig(identifier='admin', port=8001, protocol=None, auth=None, username=None, password=None, ssl=None, rest=False)])
 
 
 MLClientManager class

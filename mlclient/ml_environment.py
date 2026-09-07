@@ -139,6 +139,13 @@ class MLEnvironment(BaseModel):
         return self
 
     @property
+    def app_server_ids(
+        self,
+    ) -> list[str]:
+        """App server identifiers."""
+        return [app_server.identifier for app_server in self.app_servers]
+
+    @property
     def rest_servers(
         self,
     ) -> list[str]:

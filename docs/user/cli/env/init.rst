@@ -15,7 +15,7 @@ env init
     Options:
       -i, --interactive                Run the wizard even when a name is given
           --from-gradle[=FROM-GRADLE]  Derive from ml-gradle properties (an env name or a file path)
-          --from-host[=FROM-HOST]      Derive by querying a MarkLogic host (host[:port])
+          --from-host[=FROM-HOST]      Derive by querying a MarkLogic host ([protocol://]host[:port])
           --app-name=APP-NAME          Application label; scopes --from-host to matching servers
       -u, --username=USERNAME          Username for --from-host
       -p, --password=PASSWORD          Password for --from-host
@@ -104,19 +104,24 @@ Derive from a running host
 ``--from-host`` connects to a MarkLogic host's Manage server and maps its App
 Servers into an environment. When both the environment name and ``--from-host``
 are present, the command is non-interactive unless ``--interactive`` is also
-passed. Missing connection fields then use ``localhost``, port ``8002``, user
-``admin``, password ``admin``, and ``digest`` authentication:
+passed. Missing connection fields then use ``http``, ``localhost``, port ``8002``,
+user ``admin``, password ``admin``, and ``digest`` authentication:
 
 .. code-block:: bash
 
     ml env init local --from-host
 
-The value accepts ``host`` or ``host:port`` (the port defaults to the Manage port
-8002). An explicit port is used for the connection:
+The value accepts ``host``, ``host:port`` or a URL with a protocol
+(``protocol://host[:port]``). The port defaults to the Manage port 8002 and the
+protocol defaults to ``http``; ``https`` connects over TLS. Because dev MarkLogic
+serves self-signed certificates, ``https`` discovery skips certificate
+verification and writes ``ssl: {verify: false}`` into the generated file so it
+loads the same way; point ``ssl.verify`` at a CA bundle for a trusted cert. An
+explicit protocol and port are used for the connection:
 
 .. code-block:: bash
 
-    ml env init prod --from-host=ml.example.com:9000 --username=admin --password=secret
+    ml env init prod --from-host=https://ml.example.com:9000 --username=admin --password=secret
 
 When the name is omitted, or ``--interactive`` is passed, the command asks only
 for values not supplied through options. The password is not echoed:
@@ -150,6 +155,13 @@ connection when the generated file is loaded. A server whose authentication sche
 has no MLClient equivalent (``saml``) is skipped with a logged warning, since it
 cannot be reproduced. An ``oauth`` scheme is kept as-is - add the bearer token
 before loading the environment.
+
+When the host is a name rather than ``localhost`` or a bare IP address, the
+connection is assumed to pass through a load balancer that terminates it, so each
+server inherits the root protocol and authentication and their own listener
+settings are not recorded. A ``localhost`` or IP host reaches MarkLogic directly,
+so each server's own protocol and authentication are written out where they
+diverge from the root.
 
 ``--app-name`` both labels the environment and scopes discovery to the servers
 whose name matches it; without it every discovered server is kept and the label

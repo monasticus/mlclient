@@ -7,6 +7,8 @@ It exports an implementation for 'env init' command:
 
 from __future__ import annotations
 
+import asyncio
+import ipaddress
 import logging
 from dataclasses import dataclass
 from pathlib import Path
@@ -19,9 +21,11 @@ from cleo.io.inputs.argument import Argument
 from cleo.io.inputs.option import Option
 from cleo.io.io import IO
 from cleo.ui.question import Question
+from httpx import HTTPError
 from pydantic import ValidationError
 
-from mlclient import MLClient, MLEnvironment, constants
+from mlclient import AsyncMLClient, MLEnvironment, constants
+from mlclient.connection import SSLConfig
 from mlclient.exceptions import EnvironmentFileExistsError, WrongParametersError
 from mlclient.http_config import HTTPConfig
 
@@ -34,6 +38,7 @@ HEALTH_PORT = 7997
 MAX_PORT = 65535
 
 _CLIENT_AUTH_METHODS = ("basic", "digest", "digestbasic")
+_PROTOCOLS = ("http", "https")
 
 _COMMENTED_APP_NAME = "# app-name: <optional; scopes discovery when set>\n"
 _DEFAULT_APP_SERVERS = (
@@ -106,6 +111,7 @@ class _HostConnection:
     """Resolved --from-host connection details, ready for discovery."""
 
     name: str
+    protocol: str
     host: str
     port: int
     username: str
@@ -141,7 +147,7 @@ class EnvInitCommand(Command):
           --from-gradle[=FROM-GRADLE]
             Derive from ml-gradle properties (an env name or a file path)
           --from-host[=FROM-HOST]
-            Derive by querying a MarkLogic host (host[:port])
+            Derive by querying a MarkLogic host ([protocol://]host[:port])
           --app-name=APP-NAME
             Application label; scopes --from-host to matching servers
       -u, --username=USERNAME
@@ -179,7 +185,7 @@ class EnvInitCommand(Command):
         ),
         option(
             "from-host",
-            description="Derive by querying a MarkLogic host (host[:port])",
+            description="Derive by querying a MarkLogic host ([protocol://]host[:port])",
             flag=False,
             value_required=False,
         ),
@@ -280,14 +286,15 @@ class EnvInitCommand(Command):
         name: str,
     ) -> _HostConnection:
         """Prompt for the connection fields, defaulting to local-development values."""
-        host, port, username, password = self._prompt_connection_fields(
+        protocol, host, port, username, password = self._prompt_connection_fields(
+            protocol=None,
             host=None,
             port=None,
             username=self.option("username"),
             password=self.option("password"),
         )
         auth = self._resolve_auth(prompt=True)
-        return _HostConnection(name, host, port, username, password, auth)
+        return _HostConnection(name, protocol, host, port, username, password, auth)
 
     def _option_present(
         self,
@@ -320,30 +327,32 @@ class EnvInitCommand(Command):
         mode is requested, only fields not supplied on the command line are asked.
         """
         spec = self.option("from-host")
-        host, port = _split_host_port(spec) if spec else (None, MANAGE_PORT)
-        port_given = bool(spec) and ":" in spec
+        protocol, host, port = _parse_host_spec(spec) if spec else (None, None, None)
         name = self.argument("name")
         username = self.option("username")
         password = self.option("password")
         if name and not self.option("interactive"):
             return _HostConnection(
                 name,
+                protocol or "http",
                 host or "localhost",
-                port,
+                port or MANAGE_PORT,
                 username if username is not None else "admin",
                 password if password is not None else "admin",
                 self._resolve_auth(),
             )
 
         name = name or self._ask_name()
-        host, port, username, password = self._prompt_connection_fields(
+        protocol, host, port, username, password = self._prompt_connection_fields(
+            protocol=protocol,
             host=host,
-            port=port if port_given else None,
+            port=port,
             username=username,
             password=password,
         )
         return _HostConnection(
             name,
+            protocol,
             host,
             port,
             username,
@@ -353,12 +362,14 @@ class EnvInitCommand(Command):
 
     def _prompt_connection_fields(
         self,
+        protocol: str | None,
         host: str | None,
         port: int | None,
         username: str | None,
         password: str | None,
-    ) -> tuple[str, int, str, str]:
+    ) -> tuple[str, str, int, str, str]:
         """Prompt for missing connection fields with local-dev defaults."""
+        protocol = protocol or self.choice("Protocol", list(_PROTOCOLS), 0)
         host = host or self.ask("Host [<comment>localhost</comment>]:", "localhost")
         port = port or self._ask_port()
         if username is None:
@@ -370,7 +381,7 @@ class EnvInitCommand(Command):
                     "admin",
                 ),
             )
-        return host, port, username, password
+        return protocol, host, port, username, password
 
     def _resolve_auth(
         self,
@@ -425,13 +436,16 @@ class EnvInitCommand(Command):
         to derive.
         """
         root = {
-            "protocol": "http",
+            "protocol": conn.protocol,
             "host": conn.host,
             "username": conn.username,
             "password": conn.password,
             "auth": conn.auth,
+            "ssl": _discovery_ssl(conn.protocol),
         }
         servers = self._discover_servers(conn)
+        if _is_load_balancer(conn.host):
+            servers = [_via_load_balancer(server, root) for server in servers]
         env = _drop_none(
             {**root, "app-servers": _select_app_servers(servers, app_name, root)},
         )
@@ -442,24 +456,9 @@ class EnvInitCommand(Command):
         conn: _HostConnection,
     ) -> list[dict]:
         """Read every HTTP App Server's connection detail from the Manage API."""
-        # ponytail: http only; from-host over TLS needs a protocol/ssl flag.
-        self.line(f"Connecting to <info>http://{conn.host}:{conn.port}</info>...")
-        manage_config = HTTPConfig.resolve(
-            host=conn.host,
-            port=conn.port,
-            username=conn.username,
-            password=conn.password,
-            auth=conn.auth,
-        )
-        with MLClient(manage_config=manage_config) as ml:
-            listing = ml.manage.servers.get_list(data_format="json").json()
-            items = listing["server-default-list"]["list-items"]["list-item"]
-            discovered = (
-                _server_details(ml, item)
-                for item in items
-                if item.get("kindref") == "http"
-            )
-            return [server for server in discovered if server is not None]
+        url = f"{conn.protocol}://{conn.host}:{conn.port}"
+        self.line(f"Connecting to <info>{url}</info>...")
+        return asyncio.run(_read_servers(conn, url))
 
     def _handle_from_gradle(
         self,
@@ -683,8 +682,36 @@ def _app_server_entry(
     )
 
 
-def _server_details(
-    ml: MLClient,
+async def _read_servers(
+    conn: _HostConnection,
+    url: str,
+) -> list[dict]:
+    """Fetch every HTTP App Server's detail concurrently over the Manage API."""
+    ssl = _discovery_ssl(conn.protocol)
+    manage_config = HTTPConfig.resolve(
+        protocol=conn.protocol,
+        host=conn.host,
+        port=conn.port,
+        username=conn.username,
+        password=conn.password,
+        auth=conn.auth,
+        ssl=SSLConfig(**ssl) if ssl else None,
+    )
+    async with AsyncMLClient(manage_config=manage_config) as ml:
+        listing = await _read_server_listing(ml, url)
+        items = listing["server-default-list"]["list-items"]["list-item"]
+        details = await asyncio.gather(
+            *(
+                _server_details(ml, item)
+                for item in items
+                if item.get("kindref") == "http"
+            ),
+        )
+        return [server for server in details if server is not None]
+
+
+async def _server_details(
+    ml: AsyncMLClient,
     item: dict,
 ) -> dict | None:
     """Read one App Server's connection detail, or skip it when unsupported.
@@ -694,10 +721,12 @@ def _server_details(
     with a substitute auth that would silently connect the wrong way.
     """
     group = item["groupnameref"]
-    props = ml.manage.servers.get_properties(
-        item["nameref"],
-        group,
-        data_format="json",
+    props = (
+        await ml.manage.servers.get_properties(
+            item["nameref"],
+            group,
+            data_format="json",
+        )
     ).json()
     server_name = props["server-name"]
     auth = props.get("authentication")
@@ -720,18 +749,106 @@ def _server_details(
     }
 
 
-def _split_host_port(
+async def _read_server_listing(
+    ml: AsyncMLClient,
+    url: str,
+) -> dict:
+    """Fetch and parse the Manage server listing, or explain why it failed.
+
+    The listing is discovered over a raw response, so an unreachable host, a
+    wrong port, a TLS-only server answering plain http, or bad credentials each
+    surface differently - a transport error, an error status, or a non-JSON
+    body. Left to the caller, the last two collapse into a cryptic
+    ``Expecting value`` JSONDecodeError, so each is turned into a
+    connection-failure message that names the endpoint and its status.
+    """
+    try:
+        response = await ml.manage.servers.get_list(data_format="json")
+    except HTTPError as error:
+        msg = f"Could not connect to {url}: {error}"
+        raise WrongParametersError(msg) from error
+    if not response.is_success:
+        msg = (
+            f"Could not read the App Server listing from {url}: "
+            f"HTTP {response.status_code} {response.reason_phrase}."
+        )
+        raise WrongParametersError(msg)
+    try:
+        return response.json()
+    except ValueError as error:
+        msg = (
+            f"Could not read the App Server listing from {url}: the response "
+            f"was not valid JSON (HTTP {response.status_code})."
+        )
+        raise WrongParametersError(msg) from error
+
+
+def _is_load_balancer(
+    host: str,
+) -> bool:
+    """Treat any non-local hostname as sitting behind a load balancer.
+
+    ``localhost`` and bare IP addresses reach a MarkLogic host directly, so each
+    App Server's own protocol and authentication are reproducible. Any other name
+    resolves through a balancer that terminates the connection, so the client
+    reaches every server with the root protocol and auth - the servers' own
+    listener settings would only misdirect a reloaded environment.
+    """
+    if host == "localhost":
+        return False
+    try:
+        ipaddress.ip_address(host)
+    except ValueError:
+        return True
+    return False
+
+
+def _via_load_balancer(
+    server: dict,
+    root: dict,
+) -> dict:
+    """Rewrite a discovered server to inherit the balancer's protocol and auth."""
+    return {**server, "protocol": root["protocol"], "auth": root["auth"]}
+
+
+def _discovery_ssl(
+    protocol: str,
+) -> dict | None:
+    """SSL settings for talking to a discovered host, recorded in the env too.
+
+    Dev MarkLogic serves self-signed certificates, so verification is disabled for
+    an ``https`` connection and written into the generated file so it loads the
+    same way. Point ``ssl.verify`` at a CA bundle when the host has a trusted cert.
+    """
+    return {"verify": False} if protocol == "https" else None
+
+
+def _parse_host_spec(
     spec: str,
-) -> tuple[str, int]:
-    """Split a ``host[:port]`` spec, defaulting to the Manage port."""
-    host, _, port = spec.partition(":")
+) -> tuple[str | None, str, int | None]:
+    """Split a ``[protocol://]host[:port]`` spec; protocol/port are None when absent."""
+    protocol, host_port = _split_scheme(spec)
+    host, _, port = host_port.partition(":")
     if not host:
         msg = "--from-host requires a host name"
         raise WrongParametersError(msg)
     try:
-        return host, int(_require_valid_port(port)) if port else MANAGE_PORT
+        return protocol, host, int(_require_valid_port(port)) if port else None
     except ValueError as error:
         raise WrongParametersError(str(error)) from error
+
+
+def _split_scheme(
+    spec: str,
+) -> tuple[str | None, str]:
+    """Peel an optional ``protocol://`` prefix, validating the scheme."""
+    if "://" not in spec:
+        return None, spec
+    protocol, _, remainder = spec.partition("://")
+    if protocol.lower() not in _PROTOCOLS:
+        msg = f"Unsupported protocol [{protocol}]; use http or https"
+        raise WrongParametersError(msg)
+    return protocol.lower(), remainder
 
 
 def _client_auth(

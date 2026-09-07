@@ -7,6 +7,7 @@ It exports an implementation for 'env init' command:
 
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass
 from pathlib import Path
 from textwrap import indent
@@ -23,6 +24,8 @@ from pydantic import ValidationError
 from mlclient import MLClient, MLEnvironment, constants
 from mlclient.exceptions import EnvironmentFileExistsError, WrongParametersError
 from mlclient.http_config import HTTPConfig
+
+logger = logging.getLogger(__name__)
 
 MANAGE_PORT = 8002
 ADMIN_PORT = 8001
@@ -46,7 +49,10 @@ _SERVER_AUTH_TO_CLIENT = {
     "certificate": "certificate",
     "kerberos-ticket": "kerberos",
     "application-level": "app",
+    "oauth": "oauth",
 }
+
+_UNSUPPORTED_SERVER_AUTH = ("saml",)
 
 _TEMPLATE = """\
 app-name: my-app
@@ -216,9 +222,14 @@ class EnvInitCommand(Command):
         self,
     ) -> int:
         """Execute the command."""
-        if self._option_present("from-host"):
+        from_host = self._option_present("from-host")
+        from_gradle = self._option_present("from-gradle")
+        if from_host and from_gradle:
+            msg = "Use only one of --from-host or --from-gradle, not both"
+            raise WrongParametersError(msg)
+        if from_host:
             return self._handle_from_host()
-        if self._option_present("from-gradle"):
+        if from_gradle:
             return self._handle_from_gradle()
         return self._handle_scaffold()
 
@@ -443,11 +454,12 @@ class EnvInitCommand(Command):
         with MLClient(manage_config=manage_config) as ml:
             listing = ml.manage.servers.get_list(data_format="json").json()
             items = listing["server-default-list"]["list-items"]["list-item"]
-            return [
+            discovered = (
                 _server_details(ml, item)
                 for item in items
                 if item.get("kindref") == "http"
-            ]
+            )
+            return [server for server in discovered if server is not None]
 
     def _handle_from_gradle(
         self,
@@ -674,22 +686,37 @@ def _app_server_entry(
 def _server_details(
     ml: MLClient,
     item: dict,
-) -> dict:
-    """Read one App Server's port, protocol and client auth from its properties."""
+) -> dict | None:
+    """Read one App Server's connection detail, or skip it when unsupported.
+
+    A server whose authentication scheme has no MLClient equivalent (e.g. SAML)
+    cannot be reproduced, so it is dropped with a warning rather than emitted
+    with a substitute auth that would silently connect the wrong way.
+    """
     group = item["groupnameref"]
     props = ml.manage.servers.get_properties(
         item["nameref"],
         group,
         data_format="json",
     ).json()
+    server_name = props["server-name"]
+    auth = props.get("authentication")
+    if auth is not None and auth.lower() in _UNSUPPORTED_SERVER_AUTH:
+        logger.warning(
+            "Skipping App Server %r: its %r authentication has no MLClient "
+            "equivalent.",
+            server_name,
+            auth.lower(),
+        )
+        return None
     return {
-        "id": props["server-name"],
+        "id": server_name,
         "port": props.get("port"),
         "rest": str(props.get("url-rewriter", "")).startswith(
             "/MarkLogic/rest-api/",
         ),
         "protocol": "https" if props.get("ssl-certificate-template") else "http",
-        "auth": _client_auth(props.get("authentication")),
+        "auth": _client_auth(auth),
     }
 
 

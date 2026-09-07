@@ -12,12 +12,7 @@ from cleo.testers.command_tester import CommandTester
 
 from mlclient import MLEnvironment
 from mlclient.cli import MLCLIentApplication
-from mlclient.cli.commands.env_init import (
-    _TEMPLATE,
-    _client_auth,
-    _diff,
-    _split_host_port,
-)
+from mlclient.cli.commands.env_init import _TEMPLATE
 from mlclient.exceptions import EnvironmentFileExistsError, WrongParametersError
 from tests.utils.ml_mockers import MLRespXMocker
 
@@ -91,11 +86,12 @@ def _mock_discovery(
         props = {
             "server-name": server["name"],
             "port": server["port"],
-            "authentication": server["auth"],
             "url-rewriter": (
                 "/MarkLogic/rest-api/rewriter.xml" if server["rest"] else ""
             ),
         }
+        if server["auth"] is not None:
+            props["authentication"] = server["auth"]
         if server["ssl"]:
             props["ssl-certificate-template"] = "cert-template"
         mocker.with_url(
@@ -110,7 +106,46 @@ def _mock_discovery(
         mocker.mock_get()
 
 
-# --- template and dispatch ---------------------------------------------------
+# --- dispatch ----------------------------------------------------------------
+
+
+def test_wizard_default_mode_is_blank():
+    tester = _get_tester()
+    tester.execute("", inputs="my-env\n\n")
+
+    assert _written_env("my-env").read_text() == _TEMPLATE
+
+
+def test_wizard_reprompts_until_name_is_non_empty():
+    tester = _get_tester()
+    tester.execute("", inputs="\n   \nmy-env\nblank\n")
+
+    assert _written_env("my-env").read_text() == _TEMPLATE
+    assert not _written_env("None").exists()
+
+
+def test_wizard_interactive_flag_runs_wizard_for_named_env():
+    tester = _get_tester()
+    tester.execute("my-env --interactive", inputs="blank\n")
+
+    assert _written_env("my-env").read_text() == _TEMPLATE
+
+
+def test_handle_rejects_both_from_host_and_from_gradle(tmp_path: Path):
+    (tmp_path / "gradle-dev.properties").write_text(
+        "mlHost=gradle-host\nmlScheme=http\n",
+    )
+
+    tester = _get_tester()
+    with pytest.raises(WrongParametersError) as err:
+        tester.execute("prod --from-host=host-host --from-gradle=dev")
+
+    assert "--from-host" in err.value.args[0]
+    assert "--from-gradle" in err.value.args[0]
+    assert not _written_env("prod").exists()
+
+
+# --- blank -------------------------------------------------------------------
 
 
 def test_writes_commented_template_when_only_name_given():
@@ -129,87 +164,6 @@ def test_wizard_prompts_for_name_then_blank_mode_writes_template():
     assert _written_env("my-env").read_text() == _TEMPLATE
 
 
-def test_wizard_default_mode_is_blank():
-    tester = _get_tester()
-    tester.execute("", inputs="my-env\n\n")
-
-    assert _written_env("my-env").read_text() == _TEMPLATE
-
-
-def test_wizard_reprompts_until_name_is_non_empty():
-    tester = _get_tester()
-    tester.execute("", inputs="\n   \nmy-env\nblank\n")
-
-    assert _written_env("my-env").read_text() == _TEMPLATE
-    assert not _written_env("None").exists()
-
-
-@respx.mock
-def test_from_host_reprompts_on_invalid_port(mocker):
-    _mock_discovery("ml.example.com", [_server("my-app", 8010)])
-    mocker.patch("cleo.commands.command.Command.secret", return_value="pw")
-
-    tester = _get_tester()
-    tester.execute(
-        "prod --from-host=ml.example.com --username=ops --interactive",
-        inputs="notaport\n8002\n\n",
-    )
-
-    assert _load_written("prod")["host"] == "ml.example.com"
-
-
-def test_wizard_interactive_flag_runs_wizard_for_named_env():
-    tester = _get_tester()
-    tester.execute("my-env --interactive", inputs="blank\n")
-
-    assert _written_env("my-env").read_text() == _TEMPLATE
-
-
-def test_wizard_gradle_mode_derives_from_selector(tmp_path: Path):
-    (tmp_path / "gradle-dev.properties").write_text("mlHost=localhost\nmlScheme=http\n")
-
-    tester = _get_tester()
-    tester.execute("dev --interactive", inputs="gradle\ndev\n")
-
-    assert MLEnvironment.load_file(_written_env("dev").as_posix())
-
-
-@respx.mock
-def test_wizard_server_mode_discovers_running_instance(mocker):
-    _mock_discovery("ml.example.com", [_server("my-app", 8010)])
-    mocker.patch("cleo.commands.command.Command.secret", return_value="pw")
-
-    tester = _get_tester()
-    tester.execute(
-        "prod --interactive",
-        inputs="server\nml.example.com\n8002\nops\nbasic\n",
-    )
-
-    env = _load_written("prod")
-    assert env["host"] == "ml.example.com"
-    assert env["username"] == "ops"
-    assert env["password"] == "pw"
-    assert "Connecting to http://ml.example.com:8002..." in tester.io.fetch_output()
-    assert env["auth"] == "basic"
-
-
-@pytest.mark.parametrize(
-    ("arguments", "inputs"),
-    [("prod --interactive", "server\n\n\n\n0\n"), ("", "prod\nserver\n\n\n\n0\n")],
-)
-@respx.mock
-def test_wizard_server_mode_accepts_default_password(mocker, arguments, inputs):
-    _mock_discovery("localhost", [_server("my-app", 8010)])
-    mocker.patch("cleo.ui.question.getpass.getpass", return_value="")
-
-    tester = _get_tester()
-    tester.execute(arguments, inputs=inputs)
-
-    assert _load_written("prod")["password"] == "admin"
-    assert _load_written("prod")["auth"] == "basic"
-    assert "Connecting to http://localhost:8002..." in tester.io.fetch_output()
-
-
 # --- file handling -----------------------------------------------------------
 
 
@@ -218,8 +172,12 @@ def test_refuses_to_overwrite_existing_file():
     _written_env("my-env").write_text("existing")
 
     tester = _get_tester()
-    with pytest.raises(EnvironmentFileExistsError):
+    with pytest.raises(EnvironmentFileExistsError) as err:
         tester.execute("my-env")
+
+    message = err.value.args[0]
+    assert _written_env("my-env").as_posix() in message
+    assert "--force" in message
 
 
 def test_force_overwrites_existing_file():
@@ -246,7 +204,16 @@ def test_global_writes_to_home_directory(
     assert (home / ".mlclient" / "mlclient-my-env.yaml").read_text() == _TEMPLATE
 
 
-# --- from-gradle -------------------------------------------------------------
+# --- gradle ------------------------------------------------------------------
+
+
+def test_wizard_gradle_mode_derives_from_selector(tmp_path: Path):
+    (tmp_path / "gradle-dev.properties").write_text("mlHost=localhost\nmlScheme=http\n")
+
+    tester = _get_tester()
+    tester.execute("dev --interactive", inputs="gradle\ndev\n")
+
+    assert MLEnvironment.load_file(_written_env("dev").as_posix())
 
 
 def test_from_gradle_derives_name_from_env_selector(tmp_path: Path):
@@ -383,12 +350,89 @@ def test_from_gradle_reads_a_file_path(tmp_path: Path):
     env = _load_written("plain")
     assert env["app-name"] == "plain"
     assert env["protocol"] == "http"
+    assert "auth" not in env
     assert "app-servers" not in env
     assert "ssl" not in env
     assert "cloud" not in env
 
 
-# --- from-host: connection ---------------------------------------------------
+def test_from_gradle_writes_rest_server_credentials(tmp_path: Path):
+    (tmp_path / "gradle-rest.properties").write_text(
+        "mlHost=localhost\nmlScheme=http\n"
+        "mlRestPort=8010\n"
+        "mlRestAdminUsername=rest-admin\n"
+        "mlRestAdminPassword=rest-secret\n",
+    )
+
+    tester = _get_tester()
+    tester.execute("rest --from-gradle=rest")
+
+    servers = {server["id"]: server for server in _load_written("rest")["app-servers"]}
+    assert servers["rest"]["username"] == "rest-admin"
+    assert servers["rest"]["password"] == "rest-secret"
+    assert MLEnvironment.load_file(_written_env("rest").as_posix())
+
+
+def test_from_gradle_emits_app_services_override(tmp_path: Path):
+    (tmp_path / "gradle-appsvc.properties").write_text(
+        "mlHost=localhost\nmlScheme=http\n"
+        "mlAppServicesPort=8000\n"
+        "mlAppServicesAuthentication=basic\n",
+    )
+
+    tester = _get_tester()
+    tester.execute("appsvc --from-gradle=appsvc")
+
+    servers = {
+        server["id"]: server for server in _load_written("appsvc")["app-servers"]
+    }
+    assert servers["app-services"]["auth"] == "basic"
+    assert servers["app-services"]["port"] == 8000
+
+
+def test_from_gradle_root_protocol_https_from_scheme(tmp_path: Path):
+    (tmp_path / "gradle-https.properties").write_text(
+        "mlHost=localhost\nmlScheme=https\n",
+    )
+
+    tester = _get_tester()
+    tester.execute("https --from-gradle=https")
+
+    env = _load_written("https")
+    assert env["protocol"] == "https"
+    assert "ssl" not in env
+
+
+def test_from_gradle_emits_rest_protocol_when_divergent(tmp_path: Path):
+    (tmp_path / "gradle-restssl.properties").write_text(
+        "mlHost=localhost\nmlScheme=http\n"
+        "mlRestPort=8010\n"
+        "mlRestSimpleSsl=true\n",
+    )
+
+    tester = _get_tester()
+    tester.execute("restssl --from-gradle=restssl")
+
+    servers = {
+        server["id"]: server for server in _load_written("restssl")["app-servers"]
+    }
+    assert servers["rest"]["protocol"] == "https"
+
+
+def test_from_gradle_ssl_verify_from_non_root_simple_ssl(tmp_path: Path):
+    (tmp_path / "gradle-nrssl.properties").write_text(
+        "mlHost=localhost\nmlScheme=http\n"
+        "mlRestPort=8010\n"
+        "mlRestSimpleSsl=true\n",
+    )
+
+    tester = _get_tester()
+    tester.execute("nrssl --from-gradle=nrssl")
+
+    assert _load_written("nrssl")["ssl"] == {"verify": False}
+
+
+# --- host: connection --------------------------------------------------------
 
 
 @respx.mock
@@ -418,6 +462,56 @@ def test_from_host_prompts_for_name_when_omitted():
     tester.execute(
         "--from-host=ml.example.com:8002 --username=ops --password=pw",
         inputs="prod\n\n",
+    )
+
+    assert _load_written("prod")["host"] == "ml.example.com"
+
+
+@respx.mock
+def test_wizard_server_mode_discovers_running_instance(mocker):
+    _mock_discovery("ml.example.com", [_server("my-app", 8010)])
+    mocker.patch("cleo.commands.command.Command.secret", return_value="pw")
+
+    tester = _get_tester()
+    tester.execute(
+        "prod --interactive",
+        inputs="server\nml.example.com\n8002\nops\nbasic\n",
+    )
+
+    env = _load_written("prod")
+    assert env["host"] == "ml.example.com"
+    assert env["username"] == "ops"
+    assert env["password"] == "pw"
+    assert "Connecting to http://ml.example.com:8002..." in tester.io.fetch_output()
+    assert env["auth"] == "basic"
+
+
+@pytest.mark.parametrize(
+    ("arguments", "inputs"),
+    [("prod --interactive", "server\n\n\n\n0\n"), ("", "prod\nserver\n\n\n\n0\n")],
+)
+@respx.mock
+def test_wizard_server_mode_accepts_default_password(mocker, arguments, inputs):
+    _mock_discovery("localhost", [_server("my-app", 8010)])
+    mocker.patch("cleo.ui.question.getpass.getpass", return_value="")
+
+    tester = _get_tester()
+    tester.execute(arguments, inputs=inputs)
+
+    assert _load_written("prod")["password"] == "admin"
+    assert _load_written("prod")["auth"] == "basic"
+    assert "Connecting to http://localhost:8002..." in tester.io.fetch_output()
+
+
+@respx.mock
+def test_from_host_reprompts_on_invalid_port(mocker):
+    _mock_discovery("ml.example.com", [_server("my-app", 8010)])
+    mocker.patch("cleo.commands.command.Command.secret", return_value="pw")
+
+    tester = _get_tester()
+    tester.execute(
+        "prod --from-host=ml.example.com --username=ops --interactive",
+        inputs="notaport\n8002\n\n",
     )
 
     assert _load_written("prod")["host"] == "ml.example.com"
@@ -555,6 +649,18 @@ def test_from_host_defaults_auth_to_digest():
     assert _load_written("prod")["auth"] == "digest"
 
 
+@respx.mock
+def test_from_host_normalizes_uppercase_auth():
+    _mock_discovery("ml.example.com", [_server("my-app", 8010)])
+
+    tester = _get_tester()
+    tester.execute(
+        "prod --from-host=ml.example.com --username=ops --password=pw --auth=BASIC",
+    )
+
+    assert _load_written("prod")["auth"] == "basic"
+
+
 def test_from_host_rejects_unsupported_auth():
     tester = _get_tester()
     with pytest.raises(WrongParametersError):
@@ -606,7 +712,7 @@ def test_from_host_preserves_explicit_credentials_on_wire(arguments, inputs, pas
     assert "Connecting to http://localhost:8002..." in output
 
 
-# --- from-host: app-name label -----------------------------------------------
+# --- host: app-name label ----------------------------------------------------
 
 
 @respx.mock
@@ -633,7 +739,7 @@ def test_from_host_comments_out_app_name_when_absent():
     assert "app-name" not in _load_written("prod")
 
 
-# --- from-host: server filtering ---------------------------------------------
+# --- host: server filtering --------------------------------------------------
 
 
 @respx.mock
@@ -650,6 +756,25 @@ def test_from_host_filters_servers_by_app_name():
     )
 
     env = _load_written("prod")
+    assert env["app-servers"] == [{"id": "my-app", "port": 8010, "rest": True}]
+
+
+@respx.mock
+def test_wizard_server_mode_filters_by_app_name(mocker):
+    _mock_discovery(
+        "ml.example.com",
+        [_server("my-app", 8010), _server("other-app", 4000)],
+    )
+    mocker.patch("cleo.commands.command.Command.secret", return_value="pw")
+
+    tester = _get_tester()
+    tester.execute(
+        "prod --interactive --app-name=my-app",
+        inputs="server\nml.example.com\n8002\nops\ndigest\n",
+    )
+
+    env = _load_written("prod")
+    assert env["app-name"] == "my-app"
     assert env["app-servers"] == [{"id": "my-app", "port": 8010, "rest": True}]
 
 
@@ -683,7 +808,7 @@ def test_from_host_keeps_all_servers_when_app_name_absent():
     assert [server["id"] for server in env["app-servers"]] == ["alpha", "beta"]
 
 
-# --- from-host: manage / admin tiers -----------------------------------------
+# --- host: manage / admin tiers ----------------------------------------------
 
 
 @respx.mock
@@ -780,7 +905,7 @@ def test_from_host_emits_manage_when_protocol_diverges():
     ]
 
 
-# --- from-host: protocol and server kind -------------------------------------
+# --- host: protocol and server kind ------------------------------------------
 
 
 @pytest.mark.parametrize(
@@ -909,35 +1034,53 @@ def test_from_host_omits_app_servers_when_no_http_server_found():
     assert "app-servers" not in _load_written("prod")
 
 
-# --- module helpers ----------------------------------------------------------
+@respx.mock
+def test_from_host_skips_server_with_unsupported_auth(caplog):
+    _mock_discovery(
+        "localhost",
+        [_server("keep", 8010), _server("saml-app", 8011, auth="saml")],
+    )
+
+    tester = _get_tester()
+    with caplog.at_level("WARNING"):
+        tester.execute("prod --from-host=localhost --username=admin --password=pw")
+
+    identifiers = [server["id"] for server in _load_written("prod")["app-servers"]]
+    assert identifiers == ["keep"]
+    assert "saml-app" in caplog.text
+    assert "saml" in caplog.text.lower()
 
 
-def test_split_host_port_defaults_to_manage_port():
-    assert _split_host_port("localhost") == ("localhost", 8002)
-
-
-def test_split_host_port_reads_explicit_port():
-    assert _split_host_port("localhost:9000") == ("localhost", 9000)
+# --- host: auth mapping ------------------------------------------------------
 
 
 @pytest.mark.parametrize(
     ("server_auth", "expected"),
     [
-        (None, "digest"),
         ("basic", "basic"),
-        ("DIGEST", "digest"),
+        ("digestbasic", "digestbasic"),
+        ("certificate", "certificate"),
         ("kerberos-ticket", "kerberos"),
         ("application-level", "app"),
-        ("unknown-scheme", "digest"),
+        ("oauth", "oauth"),
     ],
 )
-def test_client_auth_maps_server_scheme(server_auth, expected):
-    assert _client_auth(server_auth) == expected
+@respx.mock
+def test_from_host_maps_discovered_server_auth(server_auth, expected):
+    _mock_discovery("localhost", [_server("content", 8010, auth=server_auth)])
+
+    tester = _get_tester()
+    tester.execute("prod --from-host=localhost --username=admin --password=pw")
+
+    assert _load_written("prod")["app-servers"][0]["auth"] == expected
 
 
-def test_diff_returns_none_when_equal():
-    assert _diff("http", "http") is None
+@pytest.mark.parametrize("server_auth", ["digest", "unknown-scheme", None])
+@respx.mock
+def test_from_host_treats_unmapped_server_auth_as_digest(server_auth):
+    _mock_discovery("localhost", [_server("content", 8010, auth=server_auth)])
 
+    tester = _get_tester()
+    tester.execute("prod --from-host=localhost --username=admin --password=pw")
 
-def test_diff_returns_value_when_different():
-    assert _diff("https", "http") == "https"
+    assert "auth" not in _load_written("prod")["app-servers"][0]

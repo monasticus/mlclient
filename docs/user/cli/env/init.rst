@@ -146,7 +146,10 @@ defaults: ``app-services`` (8000), ``manage`` (8002), ``admin`` (8001), and
 ``health`` (7997, application-level auth).
 
 Overrides retain the port and authentication needed to reproduce the discovered
-connection when the generated file is loaded.
+connection when the generated file is loaded. A server whose authentication scheme
+has no MLClient equivalent (``saml``) is skipped with a logged warning, since it
+cannot be reproduced. An ``oauth`` scheme is kept as-is - add the bearer token
+before loading the environment.
 
 ``--app-name`` both labels the environment and scopes discovery to the servers
 whose name matches it; without it every discovered server is kept and the label

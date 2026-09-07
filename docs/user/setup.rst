@@ -68,12 +68,12 @@ that server alone - while every unset field still inherits from the root.
 
 The ``auth`` field accepts the Python API shortcuts ``digest``, ``basic``,
 ``digestbasic``, ``certificate``, and ``kerberos``, plus the YAML alias
-``app-level``. A server presenting a client certificate can set
+``app``. A server presenting a client certificate can set
 ``auth: certificate`` explicitly, or use a credential method such as
 ``auth: digest`` for double auth. An omitted server ``auth`` inherits the root
 setting, which defaults to ``digest``.
 
-Use ``auth: app-level`` when MarkLogic performs application-level authentication.
+Use ``auth: app`` when MarkLogic performs application-level authentication.
 MLClient then sends no HTTP authentication header and MarkLogic uses the App
 Server's configured default user.
 

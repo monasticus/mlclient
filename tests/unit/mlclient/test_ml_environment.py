@@ -216,6 +216,27 @@ def test_default_servers_present_when_user_defines_own():
     assert config.provide_config("health").auth is None
 
 
+def test_app_name_defaults_to_none_when_omitted():
+    config = MLEnvironment(
+        **{"app-servers": [{"id": "content", "port": 8100, "rest": True}]},
+    )
+    assert config.app_name is None
+    assert config.provide_config("content").port == 8100
+
+
+def test_default_manage_and_admin_inherit_root_auth():
+    config = MLEnvironment(
+        **{
+            "app-name": "app",
+            "auth": "basic",
+            "app-servers": [{"id": "content", "port": 8100, "rest": True}],
+        },
+    )
+    assert isinstance(config.provide_config("manage").auth, httpx.BasicAuth)
+    assert isinstance(config.provide_config("admin").auth, httpx.BasicAuth)
+    assert config.provide_config("health").auth is None
+
+
 def test_user_server_overrides_default_of_same_id():
     config = MLEnvironment(
         **{

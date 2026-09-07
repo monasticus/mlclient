@@ -153,6 +153,27 @@ def test_config_supersedes_connection_kwargs():
 
 
 @respx.mock
+def test_derived_secondaries_use_injected_primary_host():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://primary.example.com:8002/manage/v2/databases")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("application/json")
+    ml_mocker.with_response_body({"database-default-list": {}})
+    ml_mocker.mock_get()
+
+    ml_mocker.with_url("http://primary.example.com:8001/admin/v1/timestamp")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("text/plain")
+    ml_mocker.with_response_body("2026-03-23T00:00:00")
+    ml_mocker.mock_get()
+
+    config = HTTPConfig.resolve(host="primary.example.com", port=8100)
+    with MLClient(config=config) as ml:
+        assert ml.manage.databases.get_list().status_code == 200
+        assert ml.admin.get_timestamp().status_code == 200
+
+
+@respx.mock
 def test_only_manage_config_given_admin_still_derived():
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url("http://manage.example.com:9002/manage/v2/databases")

@@ -266,6 +266,67 @@ def test_from_gradle_reports_when_no_properties_found():
         tester.execute("dev --from-gradle=dev")
 
 
+def test_from_gradle_unknown_profile_lists_available_profiles(tmp_path: Path):
+    (tmp_path / "gradle-dev.properties").write_text("mlHost=localhost\n")
+    (tmp_path / "gradle-prod.properties").write_text("mlHost=localhost\n")
+
+    tester = _get_tester()
+    with pytest.raises(WrongParametersError) as error:
+        tester.execute("staging --from-gradle=staging")
+
+    message = str(error.value)
+    assert "staging" in message
+    assert "dev" in message
+    assert "prod" in message
+    assert ".properties" not in message
+
+
+def test_from_gradle_missing_file_lists_files_in_its_directory(tmp_path: Path):
+    sub = tmp_path / "proj"
+    sub.mkdir()
+    (sub / "gradle.properties").write_text("mlHost=localhost\n")
+    (sub / "gradle-dev.properties").write_text("mlHost=localhost\n")
+
+    selector = (sub / "gradle-missing.properties").as_posix()
+    tester = _get_tester()
+    with pytest.raises(WrongParametersError) as error:
+        tester.execute(f"x --from-gradle={selector}")
+
+    message = str(error.value)
+    assert "gradle.properties" in message
+    assert "gradle-dev.properties" in message
+
+
+def test_from_gradle_missing_file_in_cwd_omits_dot_directory(tmp_path: Path):
+    (tmp_path / "gradle-dev.properties").write_text("mlHost=localhost\n")
+
+    tester = _get_tester()
+    with pytest.raises(WrongParametersError) as error:
+        tester.execute("--from-gradle=missing.properties")
+
+    message = str(error.value)
+    assert "Files:" in message
+    assert "Files in" not in message
+
+
+def test_from_gradle_missing_file_does_not_fall_back_to_cwd_base(tmp_path: Path):
+    sub = tmp_path / "proj"
+    sub.mkdir()
+    (sub / "gradle.properties").write_text("mlHost=base-host\nmlScheme=http\n")
+
+    selector = (sub / "gradle-dev.properties").as_posix()
+    tester = _get_tester()
+    with pytest.raises(WrongParametersError):
+        tester.execute(f"x --from-gradle={selector}")
+
+
+def test_from_gradle_reports_missing_source_before_prompting_for_name(tmp_path: Path):
+    selector = (tmp_path / "gradle-nope.properties").as_posix()
+    tester = _get_tester()
+    with pytest.raises(WrongParametersError):
+        tester.execute(f"--from-gradle={selector}")
+
+
 def test_from_gradle_comments_out_app_name_when_absent(tmp_path: Path):
     (tmp_path / "gradle-plain.properties").write_text(
         "mlHost=localhost\nmlScheme=http\n",
@@ -393,7 +454,46 @@ def test_from_gradle_emits_app_services_override(tmp_path: Path):
         server["id"]: server for server in _load_written("appsvc")["app-servers"]
     }
     assert servers["app-services"]["auth"] == "basic"
-    assert servers["app-services"]["port"] == 8000
+    assert "port" not in servers["app-services"]
+    assert servers["app-services"]["rest"] is True
+    loaded = MLEnvironment.load_file(_written_env("appsvc").as_posix())
+    assert "app-services" in loaded.rest_servers
+    assert loaded.provide_config("app-services").port == 8000
+
+
+def test_from_gradle_omits_default_app_services_on_standard_port(tmp_path: Path):
+    (tmp_path / "gradle-plain.properties").write_text(
+        "mlHost=localhost\nmlScheme=http\nmlAppServicesPort=8000\n",
+    )
+
+    tester = _get_tester()
+    tester.execute("plain --from-gradle=plain")
+
+    assert "app-servers" not in _load_written("plain")
+
+
+def test_from_gradle_omits_manage_on_standard_port(tmp_path: Path):
+    (tmp_path / "gradle-mng.properties").write_text(
+        "mlHost=localhost\nmlScheme=http\nmlManagePort=8002\n",
+    )
+
+    tester = _get_tester()
+    tester.execute("mng --from-gradle=mng")
+
+    assert "app-servers" not in _load_written("mng")
+
+
+def test_from_gradle_emits_app_services_on_relocated_port(tmp_path: Path):
+    (tmp_path / "gradle-relo.properties").write_text(
+        "mlHost=localhost\nmlScheme=http\nmlAppServicesPort=8010\n",
+    )
+
+    tester = _get_tester()
+    tester.execute("relo --from-gradle=relo")
+
+    assert _load_written("relo")["app-servers"] == [
+        {"id": "app-services", "port": 8010, "rest": True},
+    ]
 
 
 def test_from_gradle_root_protocol_https_from_scheme(tmp_path: Path):
@@ -411,9 +511,7 @@ def test_from_gradle_root_protocol_https_from_scheme(tmp_path: Path):
 
 def test_from_gradle_emits_rest_protocol_when_divergent(tmp_path: Path):
     (tmp_path / "gradle-restssl.properties").write_text(
-        "mlHost=localhost\nmlScheme=http\n"
-        "mlRestPort=8010\n"
-        "mlRestSimpleSsl=true\n",
+        "mlHost=localhost\nmlScheme=http\nmlRestPort=8010\nmlRestSimpleSsl=true\n",
     )
 
     tester = _get_tester()
@@ -427,9 +525,7 @@ def test_from_gradle_emits_rest_protocol_when_divergent(tmp_path: Path):
 
 def test_from_gradle_ssl_verify_from_non_root_simple_ssl(tmp_path: Path):
     (tmp_path / "gradle-nrssl.properties").write_text(
-        "mlHost=localhost\nmlScheme=http\n"
-        "mlRestPort=8010\n"
-        "mlRestSimpleSsl=true\n",
+        "mlHost=localhost\nmlScheme=http\nmlRestPort=8010\nmlRestSimpleSsl=true\n",
     )
 
     tester = _get_tester()
@@ -867,8 +963,7 @@ def test_from_host_writes_app_name_when_provided():
 
     tester = _get_tester()
     tester.execute(
-        "prod --from-host=localhost --username=admin "
-        "--password=pw --app-name=my-app",
+        "prod --from-host=localhost --username=admin --password=pw --app-name=my-app",
     )
 
     assert _load_written("prod")["app-name"] == "my-app"
@@ -897,8 +992,7 @@ def test_from_host_filters_servers_by_app_name():
 
     tester = _get_tester()
     tester.execute(
-        "prod --from-host=localhost --username=admin "
-        "--password=pw --app-name=my-app",
+        "prod --from-host=localhost --username=admin --password=pw --app-name=my-app",
     )
 
     env = _load_written("prod")
@@ -963,8 +1057,8 @@ def test_from_host_omits_manage_and_admin_when_consistent_with_root():
         "localhost",
         [
             _server("my-app", 8010),
-            _server("Manage", 8002),
-            _server("Admin", 8001),
+            _server("Manage", 8002, rest=False),
+            _server("Admin", 8001, rest=False),
         ],
     )
 
@@ -1016,7 +1110,7 @@ def test_from_host_emits_lowercase_app_services_override():
 
 @respx.mock
 def test_from_host_emits_manage_when_auth_diverges():
-    _mock_discovery("localhost", [_server("Manage", 8002, auth="basic")])
+    _mock_discovery("localhost", [_server("Manage", 8002, auth="basic", rest=False)])
 
     tester = _get_tester()
     tester.execute("prod --from-host=localhost --username=admin --password=pw")
@@ -1028,7 +1122,7 @@ def test_from_host_emits_manage_when_auth_diverges():
 
 @respx.mock
 def test_from_host_emits_admin_when_auth_diverges():
-    _mock_discovery("localhost", [_server("Admin", 8001, auth="basic")])
+    _mock_discovery("localhost", [_server("Admin", 8001, auth="basic", rest=False)])
 
     tester = _get_tester()
     tester.execute("prod --from-host=localhost --username=admin --password=pw")
@@ -1040,7 +1134,7 @@ def test_from_host_emits_admin_when_auth_diverges():
 
 @respx.mock
 def test_from_host_emits_manage_when_protocol_diverges():
-    _mock_discovery("localhost", [_server("Manage", 8002, ssl=True)])
+    _mock_discovery("localhost", [_server("Manage", 8002, ssl=True, rest=False)])
 
     tester = _get_tester()
     tester.execute("prod --from-host=localhost --username=admin --password=pw")
@@ -1073,7 +1167,7 @@ def test_from_host_named_host_inherits_root_protocol_and_auth():
 def test_from_host_named_host_omits_default_server_overrides():
     _mock_discovery(
         "ml.example.com",
-        [_server("Manage", 8002, ssl=True)],
+        [_server("Manage", 8002, ssl=True, rest=False)],
         protocol="https",
     )
 
@@ -1083,6 +1177,68 @@ def test_from_host_named_host_omits_default_server_overrides():
     )
 
     assert "app-servers" not in _load_written("prod")
+
+
+@respx.mock
+def test_from_host_named_host_omits_default_health_server():
+    _mock_discovery(
+        "ml.example.com",
+        [_server("HealthCheck", 7997, ssl=True, rest=False)],
+        protocol="https",
+    )
+
+    tester = _get_tester()
+    tester.execute(
+        "prod --from-host=https://ml.example.com --username=admin --password=pw",
+    )
+
+    assert "app-servers" not in _load_written("prod")
+
+
+@respx.mock
+def test_from_host_named_host_records_default_on_relocated_port():
+    _mock_discovery(
+        "ml.example.com",
+        [_server("Manage", 9002, ssl=True, rest=False)],
+        protocol="https",
+    )
+
+    tester = _get_tester()
+    tester.execute(
+        "prod --from-host=https://ml.example.com --username=admin --password=pw",
+    )
+
+    assert _load_written("prod")["app-servers"] == [
+        {"id": "manage", "port": 9002},
+    ]
+
+
+@respx.mock
+def test_from_host_named_host_records_default_rest_divergence():
+    _mock_discovery(
+        "ml.example.com",
+        [_server("App-Services", 8000, ssl=True, rest=False)],
+        protocol="https",
+    )
+
+    tester = _get_tester()
+    tester.execute(
+        "prod --from-host=https://ml.example.com --username=admin --password=pw",
+    )
+
+    assert _load_written("prod")["app-servers"] == [
+        {"id": "app-services", "rest": False},
+    ]
+
+
+@respx.mock
+def test_from_host_direct_relocated_default_keeps_canonical_id():
+    _mock_discovery("localhost", [_server("Manage", 9002, rest=False)])
+
+    tester = _get_tester()
+    tester.execute("prod --from-host=localhost --username=admin --password=pw")
+
+    assert _load_written("prod")["app-servers"] == [{"id": "manage", "port": 9002}]
 
 
 @respx.mock

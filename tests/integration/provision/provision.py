@@ -458,21 +458,27 @@ class ManagementSession:
     def _request(self, method: str, url: str, **kwargs) -> httpx.Response:
         """Send a request, retrying across the restarts configuration triggers.
 
-        Creating servers and installing certificates restart MarkLogic, which
-        drops in-flight connections. On a transport error the host is given time
-        to come back before the request is retried.
+        Creating servers and installing certificates restart MarkLogic. Mid
+        restart the host either drops in-flight connections (raising a transport
+        error) or answers with a 503 "Restarting to reload server config". Both
+        mean "try again once the host is back", so both wait for health and
+        retry.
         """
         last_error: httpx.HTTPError | None = None
         for _ in range(REQUEST_ATTEMPTS):
             try:
-                return self._client.request(method, url, **kwargs)
+                response = self._client.request(method, url, **kwargs)
             except httpx.HTTPError as error:
                 last_error = error
                 self._await_health()
-        if last_error is None:
-            msg = "request was never attempted; REQUEST_ATTEMPTS must be positive"
-            raise RuntimeError(msg)
-        raise last_error
+                continue
+            if response.status_code == httpx.codes.SERVICE_UNAVAILABLE:
+                self._await_health()
+                continue
+            return response
+        if last_error is not None:
+            raise last_error
+        return response
 
 
 def _expect(response: httpx.Response, *accepted: int) -> None:

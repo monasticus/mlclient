@@ -65,10 +65,10 @@ runs a short wizard that asks for the name, then a source
 Derive from ml-gradle properties
 --------------------------------
 
-``--from-gradle`` reads an ml-gradle setup. Its value is either an environment
-name (``gradle.properties`` merged with ``gradle-<env>.properties``) or a path to
-a properties file. A plain environment-name selector doubles as the environment
-name:
+``--from-gradle`` reads an ml-gradle setup. A selector ending in ``.properties``
+is a file path; anything else is an environment name. A name reads
+``gradle-<env>.properties`` from the current directory merged over
+``gradle.properties`` and doubles as the environment name:
 
 .. code-block:: bash
 
@@ -80,11 +80,16 @@ Give an explicit name to override the derived one:
 
     ml env init my-dev --from-gradle=dev
 
-A properties-file selector has no name to borrow, so the command prompts for one:
+A file-path selector is parsed on its own, with no overlay merge, and has no name
+to borrow, so the command prompts for one:
 
 .. code-block:: bash
 
     ml env init --from-gradle=./gradle-dev.properties
+
+The gradle source is validated before anything is prompted: an unknown
+environment name is reported with the available profiles, and a missing file is
+reported with the ``.properties`` files found in its directory.
 
 Passing ``--from-gradle`` with no value prompts for both the name and the
 selector, and ``--interactive`` forces the name prompt even for a derivable name:

@@ -40,12 +40,19 @@ MAX_PORT = 65535
 _CLIENT_AUTH_METHODS = ("basic", "digest", "digestbasic")
 _PROTOCOLS = ("http", "https")
 
+_DEFAULT_SERVERS_BY_NAME = {
+    "App-Services": ("app-services", APP_SERVICES_PORT, True),
+    "Manage": ("manage", MANAGE_PORT, False),
+    "Admin": ("admin", ADMIN_PORT, False),
+    "HealthCheck": ("health", HEALTH_PORT, False),
+}
+
 _COMMENTED_APP_NAME = "# app-name: <optional; scopes discovery when set>\n"
-_DEFAULT_APP_SERVERS = (
+_DEFAULT_SERVERS_SUMMARY = (
     "Defaults omitted unless overridden: app-services (8000, REST), "
     "manage (8002), admin (8001), health (7997, app).\n"
 )
-_DEFAULT_APP_SERVERS_HINT = f"  # {_DEFAULT_APP_SERVERS}"
+_DEFAULT_SERVERS_HINT = f"  # {_DEFAULT_SERVERS_SUMMARY}"
 
 _SERVER_AUTH_TO_CLIENT = {
     "digest": "digest",
@@ -239,6 +246,18 @@ class EnvInitCommand(Command):
             return self._handle_from_gradle()
         return self._handle_scaffold()
 
+    def _option_present(
+        self,
+        option_name: str,
+    ) -> bool:
+        """Report whether an option token appeared, even without a value.
+
+        ``self.option`` collapses an absent option and one passed without a value
+        both to ``None``; only the raw input distinguishes them, which lets a bare
+        ``--from-host`` use defaults or prompt when ``--interactive`` is set.
+        """
+        return self.io.input.has_parameter_option(f"--{option_name}", only_params=True)
+
     def _handle_scaffold(
         self,
     ) -> int:
@@ -262,15 +281,8 @@ class EnvInitCommand(Command):
         name = name or self._ask_name()
         mode = self.choice("Source", ["blank", "gradle", "server"], 0)
         if mode == "gradle":
-            prompt = (
-                "Gradle environment name or properties file path "
-                f"[<comment>{name}</comment>]:"
-            )
-            selector = self.ask(
-                prompt,
-                name,
-            )
-            content = self._render_from_gradle(selector)
+            selector = self._ask_gradle_selector(name)
+            content = self._render_from_gradle(selector, _load_gradle_props(selector))
         elif mode == "server":
             content = self._render_from_host(
                 self.option("app-name"),
@@ -293,20 +305,15 @@ class EnvInitCommand(Command):
             username=self.option("username"),
             password=self.option("password"),
         )
-        auth = self._resolve_auth(prompt=True)
-        return _HostConnection(name, protocol, host, port, username, password, auth)
-
-    def _option_present(
-        self,
-        option_name: str,
-    ) -> bool:
-        """Report whether an option token appeared, even without a value.
-
-        ``self.option`` collapses an absent option and one passed without a value
-        both to ``None``; only the raw input distinguishes them, which lets a bare
-        ``--from-host`` use defaults or prompt when ``--interactive`` is set.
-        """
-        return self.io.input.has_parameter_option(f"--{option_name}", only_params=True)
+        return _HostConnection(
+            name=name,
+            protocol=protocol,
+            host=host,
+            port=port,
+            username=username,
+            password=password,
+            auth=self._resolve_auth(prompt=True),
+        )
 
     def _handle_from_host(
         self,
@@ -333,13 +340,13 @@ class EnvInitCommand(Command):
         password = self.option("password")
         if name and not self.option("interactive"):
             return _HostConnection(
-                name,
-                protocol or "http",
-                host or "localhost",
-                port or MANAGE_PORT,
-                username if username is not None else "admin",
-                password if password is not None else "admin",
-                self._resolve_auth(),
+                name=name,
+                protocol=protocol or "http",
+                host=host or "localhost",
+                port=port or MANAGE_PORT,
+                username=username if username is not None else "admin",
+                password=password if password is not None else "admin",
+                auth=self._resolve_auth(),
             )
 
         name = name or self._ask_name()
@@ -351,13 +358,13 @@ class EnvInitCommand(Command):
             password=password,
         )
         return _HostConnection(
-            name,
-            protocol,
-            host,
-            port,
-            username,
-            password,
-            self._resolve_auth(prompt=True),
+            name=name,
+            protocol=protocol,
+            host=host,
+            port=port,
+            username=username,
+            password=password,
+            auth=self._resolve_auth(prompt=True),
         )
 
     def _prompt_connection_fields(
@@ -400,27 +407,6 @@ class EnvInitCommand(Command):
             raise WrongParametersError(msg)
         return auth.lower()
 
-    def _write_env_file(
-        self,
-        name: str,
-        content: str,
-    ) -> None:
-        """Write the environment file, refusing to clobber unless forced."""
-        target = self._target_path(name)
-        if target.exists() and not self.option("force"):
-            raise EnvironmentFileExistsError(target.as_posix())
-        target.parent.mkdir(exist_ok=True)
-        target.write_text(content)
-        self.line(f"Created <info>{target.as_posix()}</info>")
-
-    def _target_path(
-        self,
-        name: str,
-    ) -> Path:
-        """Resolve the configuration file path in cwd, or home when --global."""
-        base = Path.home() if self.option("global") else Path.cwd()
-        return base / constants.ML_CLIENT_DIR / f"mlclient-{name}.yaml"
-
     def _render_from_host(
         self,
         app_name: str | None,
@@ -444,10 +430,16 @@ class EnvInitCommand(Command):
             "ssl": _discovery_ssl(conn.protocol),
         }
         servers = self._discover_servers(conn)
-        if _is_load_balancer(conn.host):
-            servers = [_via_load_balancer(server, root) for server in servers]
         env = _drop_none(
-            {**root, "app-servers": _select_app_servers(servers, app_name, root)},
+            {
+                **root,
+                "app-servers": _select_app_servers(
+                    servers,
+                    app_name,
+                    root,
+                    _is_load_balancer(conn.host),
+                ),
+            },
         )
         return _render_env(app_name, env)
 
@@ -466,15 +458,13 @@ class EnvInitCommand(Command):
         """Resolve the gradle selector and env name, prompting for what's missing."""
         selector = self.option("from-gradle")
         if selector:
+            props = _load_gradle_props(selector)
             name = self._resolve_gradle_name(selector)
         else:
             name = self.argument("name") or self._ask_name()
-            prompt = (
-                "Gradle environment name or properties file path "
-                f"[<comment>{name}</comment>]:"
-            )
-            selector = self.ask(prompt, name)
-        content = self._render_from_gradle(selector)
+            selector = self._ask_gradle_selector(name)
+            props = _load_gradle_props(selector)
+        content = self._render_from_gradle(selector, props)
         self._write_env_file(name, content)
         return 0
 
@@ -492,7 +482,7 @@ class EnvInitCommand(Command):
         name = self.argument("name")
         if name:
             return name
-        selector_is_file = Path(selector).is_file()
+        selector_is_file = _is_gradle_file_selector(selector)
         if not selector_is_file and not self.option("interactive"):
             return selector
         default = None if selector_is_file else selector
@@ -501,9 +491,9 @@ class EnvInitCommand(Command):
     def _render_from_gradle(
         self,
         selector: str,
+        props: dict[str, str],
     ) -> str:
         """Map ml-gradle properties to an MLEnvironment YAML document."""
-        props = self._load_gradle_props(selector)
         app_name = props.get("mlAppName")
         env = _drop_none(
             {
@@ -527,20 +517,37 @@ class EnvInitCommand(Command):
             raise WrongParametersError(msg) from error
         return _render_env(app_name, env) + _GRADLE_NA_HINTS
 
-    def _load_gradle_props(
+    def _write_env_file(
         self,
-        selector: str,
-    ) -> dict[str, str]:
-        """Parse a gradle properties file, or merge base + gradle-<env> overlay."""
-        path = Path(selector)
-        if path.is_file():
-            return _parse_properties(path)
-        base = _parse_properties(Path.cwd() / "gradle.properties")
-        base.update(_parse_properties(Path.cwd() / f"gradle-{selector}.properties"))
-        if not base:
-            msg = f"No ml-gradle properties found for [{selector}]"
-            raise WrongParametersError(msg)
-        return base
+        name: str,
+        content: str,
+    ) -> None:
+        """Write the environment file, refusing to clobber unless forced."""
+        target = self._target_path(name)
+        if target.exists() and not self.option("force"):
+            raise EnvironmentFileExistsError(target.as_posix())
+        target.parent.mkdir(exist_ok=True)
+        target.write_text(content)
+        self.line(f"Created <info>{target.as_posix()}</info>")
+
+    def _target_path(
+        self,
+        name: str,
+    ) -> Path:
+        """Resolve the configuration file path in cwd, or home when --global."""
+        base = Path.home() if self.option("global") else Path.cwd()
+        return base / constants.ML_CLIENT_DIR / f"mlclient-{name}.yaml"
+
+    def _ask_gradle_selector(
+        self,
+        name: str,
+    ) -> str:
+        """Prompt for a gradle env name or properties path, defaulting to the name."""
+        prompt = (
+            "Gradle environment name or properties file path "
+            f"[<comment>{name}</comment>]:"
+        )
+        return self.ask(prompt, name)
 
     def _ask_name(
         self,
@@ -591,10 +598,10 @@ def _render_env(
     servers = data.pop("app-servers", None)
     content = yaml.safe_dump(data, sort_keys=False)
     if servers:
-        content += "app-servers:\n" + _DEFAULT_APP_SERVERS_HINT
+        content += "app-servers:\n" + _DEFAULT_SERVERS_HINT
         content += indent(yaml.safe_dump(servers, sort_keys=False), "  ")
     else:
-        content += f"\n# app-servers:\n#   {_DEFAULT_APP_SERVERS}"
+        content += f"\n# app-servers:\n#   {_DEFAULT_SERVERS_SUMMARY}"
     return ("" if app_name else _COMMENTED_APP_NAME) + content
 
 
@@ -602,84 +609,105 @@ def _select_app_servers(
     servers: list[dict],
     app_name: str | None,
     root: dict,
+    is_load_balancer: bool,
 ) -> list[dict] | None:
     """Turn discovered servers into app-server entries.
 
     When ``app_name`` is given, only matching servers are kept (all servers when
-    nothing matches); without it every server is kept. The Manage and Admin tiers
-    are emitted only when their protocol or auth diverges from the root connection.
+    nothing matches); without it every server is kept. A predefined default is
+    emitted only when it diverges from what the loaded environment already
+    provides: behind a load balancer only a divergent port or REST flag counts,
+    because the balancer terminates the connection and every server is reached with
+    the root protocol and auth; a directly reached host also compares protocol and
+    auth. A default matching on every compared field is left out entirely.
     """
     matches = servers
     if app_name:
         matches = [
             server for server in servers if app_name.lower() in server["id"].lower()
         ] or servers
-    entries = []
-    for server in matches:
-        if server["port"] in (
-            APP_SERVICES_PORT,
-            ADMIN_PORT,
-            MANAGE_PORT,
-            HEALTH_PORT,
-        ):
-            override = _default_server_override(server, root)
-            if override:
-                entries.append(override)
-        else:
-            entries.append(_app_server_entry(server, root, rest=server["rest"]))
-    return entries or None
-
-
-def _default_server_override(
-    server: dict,
-    root: dict,
-) -> dict | None:
-    """Emit a lowercase default-server entry only when it diverges from defaults."""
-    server_id = {
-        APP_SERVICES_PORT: "app-services",
-        ADMIN_PORT: "admin",
-        MANAGE_PORT: "manage",
-        HEALTH_PORT: "health",
-    }[server["port"]]
-    default_auth = "app" if server_id == "health" else root["auth"]
-    entry = _drop_none(
-        {
-            "id": server_id,
-            "protocol": _diff(server["protocol"], root["protocol"]),
-            "auth": _diff(server["auth"], default_auth),
-        },
-    )
-    if server_id == "app-services" and not server["rest"]:
-        entry["rest"] = False
-    if server_id == "app-services" and set(entry) > {"id"}:
-        entry.setdefault("rest", True)
-    if server_id == "health" and server["rest"]:
-        entry["rest"] = True
-    if set(entry) == {"id"}:
-        return None
-    # A declared server replaces its predefined entry, including port and auth.
-    if server_id != "app-services":
-        entry["port"] = server["port"]
-    if server_id == "health":
-        entry["auth"] = server["auth"]
-    return entry
+    entries = [_app_server_entry(server, root, is_load_balancer) for server in matches]
+    return [entry for entry in entries if entry] or None
 
 
 def _app_server_entry(
     server: dict,
     root: dict,
-    rest: bool,
+    is_load_balancer: bool,
+) -> dict | None:
+    """Build one app-server entry, or None when a default matches the environment.
+
+    A predefined default is matched by its MarkLogic name so a relocated one keeps
+    its canonical id and replaces the predefined entry instead of adding a
+    duplicate; anything else is a custom server that is always recorded.
+    """
+    default = _DEFAULT_SERVERS_BY_NAME.get(server["id"])
+    if default is None:
+        return _custom_server_entry(server, root, is_load_balancer)
+    return _default_server_entry(server, default, root, is_load_balancer)
+
+
+def _default_server_entry(
+    server: dict,
+    default: tuple[str, int, bool],
+    root: dict,
+    is_load_balancer: bool,
+) -> dict | None:
+    """Emit a lowercase default-server override only when it diverges.
+
+    A load-balanced host compares only port and REST; a directly reached one also
+    compares protocol and auth. Because an emitted entry replaces the predefined
+    default and inherits nothing from it, every field needed to reproduce the
+    server is restated - the port unless it is the connection default, the REST
+    flag whenever it is set or diverges, and health's own auth which never matches
+    the root.
+    """
+    server_id, standard_port, default_rest = default
+    expected_auth = "app" if server_id == "health" else root["auth"]
+    port_diverges = server["port"] != standard_port
+    rest_diverges = server["rest"] != default_rest
+    protocol_diverges = not is_load_balancer and server["protocol"] != root["protocol"]
+    auth_diverges = not is_load_balancer and server["auth"] != expected_auth
+    if not (port_diverges or rest_diverges or protocol_diverges or auth_diverges):
+        return None
+    entry = {"id": server_id}
+    if server["port"] != APP_SERVICES_PORT:
+        entry["port"] = server["port"]
+    if server["rest"] or rest_diverges:
+        entry["rest"] = server["rest"]
+    if protocol_diverges:
+        entry["protocol"] = server["protocol"]
+    if auth_diverges or server_id == "health":
+        entry["auth"] = server["auth"]
+    return entry
+
+
+def _custom_server_entry(
+    server: dict,
+    root: dict,
+    is_load_balancer: bool,
 ) -> dict:
-    """Build one app-server dict, omitting fields that match the root connection."""
-    return _drop_none(
-        {
-            "id": server["id"],
-            "port": server["port"],
-            "rest": rest or None,
-            "protocol": _diff(server["protocol"], root["protocol"]),
-            "auth": _diff(server["auth"], root["auth"]),
-        },
-    )
+    """Build one entry for a server with no predefined default, always recorded."""
+    entry = {"id": server["id"], "port": server["port"]}
+    if server["rest"]:
+        entry["rest"] = True
+    if not is_load_balancer:
+        _record_divergent_connection(entry, server, root)
+    return entry
+
+
+def _record_divergent_connection(
+    entry: dict,
+    server: dict,
+    root: dict,
+) -> None:
+    """Record a server's protocol and auth when they differ from the root."""
+    protocol = _diff(server["protocol"], root["protocol"])
+    if protocol is not None:
+        entry["protocol"] = protocol
+    auth = _diff(server["auth"], root["auth"])
+    if auth is not None:
+        entry["auth"] = auth
 
 
 async def _read_servers(
@@ -732,8 +760,7 @@ async def _server_details(
     auth = props.get("authentication")
     if auth is not None and auth.lower() in _UNSUPPORTED_SERVER_AUTH:
         logger.warning(
-            "Skipping App Server %r: its %r authentication has no MLClient "
-            "equivalent.",
+            "Skipping App Server %r: its %r authentication has no MLClient equivalent.",
             server_name,
             auth.lower(),
         )
@@ -803,14 +830,6 @@ def _is_load_balancer(
     return False
 
 
-def _via_load_balancer(
-    server: dict,
-    root: dict,
-) -> dict:
-    """Rewrite a discovered server to inherit the balancer's protocol and auth."""
-    return {**server, "protocol": root["protocol"], "auth": root["auth"]}
-
-
 def _discovery_ssl(
     protocol: str,
 ) -> dict | None:
@@ -827,8 +846,14 @@ def _parse_host_spec(
     spec: str,
 ) -> tuple[str | None, str, int | None]:
     """Split a ``[protocol://]host[:port]`` spec; protocol/port are None when absent."""
-    protocol, host_port = _split_scheme(spec)
-    host, _, port = host_port.partition(":")
+    protocol = None
+    if "://" in spec:
+        scheme, _, spec = spec.partition("://")
+        if scheme.lower() not in _PROTOCOLS:
+            msg = f"Unsupported protocol [{scheme}]; use http or https"
+            raise WrongParametersError(msg)
+        protocol = scheme.lower()
+    host, _, port = spec.partition(":")
     if not host:
         msg = "--from-host requires a host name"
         raise WrongParametersError(msg)
@@ -836,19 +861,6 @@ def _parse_host_spec(
         return protocol, host, int(_require_valid_port(port)) if port else None
     except ValueError as error:
         raise WrongParametersError(str(error)) from error
-
-
-def _split_scheme(
-    spec: str,
-) -> tuple[str | None, str]:
-    """Peel an optional ``protocol://`` prefix, validating the scheme."""
-    if "://" not in spec:
-        return None, spec
-    protocol, _, remainder = spec.partition("://")
-    if protocol.lower() not in _PROTOCOLS:
-        msg = f"Unsupported protocol [{protocol}]; use http or https"
-        raise WrongParametersError(msg)
-    return protocol.lower(), remainder
 
 
 def _client_auth(
@@ -871,14 +883,19 @@ def _diff(
 def _app_servers(
     props: dict[str, str],
 ) -> list[dict]:
-    """Build the app-servers list: REST always, others only when overridden.
+    """Build the app-servers list, keeping only divergent entries.
 
-    A server emits ``protocol`` only when its scheme / simple-SSL flags differ
-    from the root connection; otherwise the model inherits the root protocol.
-    Alongside protocol, only an explicit port, credential, or auth method makes
-    a non-REST server worth emitting.
+    The dedicated REST server is always emitted; a predefined default only when it
+    diverges from what the loaded environment already provides.
+    A server emits ``protocol`` only when its scheme / simple-SSL flags differ from
+    the root connection. A predefined default (app-services, manage, admin) is left
+    out entirely when its port is the standard one and no protocol, credential or
+    auth diverges; when it is emitted the standard port stays implicit and only
+    app-services restates its REST flag, which the replacing entry would otherwise
+    lose.
     """
     root_protocol = _protocol(props, "ml")
+    root_auth = _config_auth(props.get("mlAuthentication")) or "digest"
     servers = []
     if props.get("mlRestPort"):
         rest_keys = {
@@ -890,12 +907,12 @@ def _app_servers(
         server = _server("rest", props, rest_keys, rest=True)
         _apply_server_protocol(server, props, "mlRest", root_protocol)
         servers.append(server)
-    others = (
-        ("app-services", "mlAppServices"),
-        ("manage", "mlManage"),
-        ("admin", "mlAdmin"),
+    defaults = (
+        ("app-services", "mlAppServices", APP_SERVICES_PORT),
+        ("manage", "mlManage", MANAGE_PORT),
+        ("admin", "mlAdmin", ADMIN_PORT),
     )
-    for server_id, prefix in others:
+    for server_id, prefix, standard_port in defaults:
         keys = {
             "port": f"{prefix}Port",
             "username": f"{prefix}Username",
@@ -904,9 +921,43 @@ def _app_servers(
         }
         server = _server(server_id, props, keys)
         _apply_server_protocol(server, props, prefix, root_protocol)
-        if set(server) > {"id"}:
-            servers.append(server)
+        entry = _default_gradle_entry(server, standard_port, root_auth)
+        if entry:
+            servers.append(entry)
     return servers
+
+
+def _default_gradle_entry(
+    server: dict,
+    standard_port: int,
+    root_auth: str,
+) -> dict | None:
+    """Reduce a default server to the fields that diverge, or None when it matches.
+
+    Only genuine app-server settings are compared - port, protocol and auth; the
+    standard port is implicit (omitted unless relocated), auth is dropped when it
+    equals the root's, and app-services always restates ``rest: true`` because the
+    entry replaces the predefined default rather than merging onto it.
+    """
+    port = server.get("port")
+    auth = server.get("auth")
+    diverges = (
+        (port is not None and port != standard_port)
+        or "protocol" in server
+        or (auth is not None and auth != root_auth)
+    )
+    if not diverges:
+        return None
+    entry = {"id": server["id"]}
+    if port is not None and port != APP_SERVICES_PORT:
+        entry["port"] = port
+    if "protocol" in server:
+        entry["protocol"] = server["protocol"]
+    if auth is not None and auth != root_auth:
+        entry["auth"] = auth
+    if server["id"] == "app-services":
+        entry["rest"] = True
+    return entry
 
 
 def _apply_server_protocol(
@@ -978,6 +1029,60 @@ def _has_simple_ssl(
         key.endswith("SimpleSsl") and _lower(value) == "true"
         for key, value in props.items()
     )
+
+
+def _load_gradle_props(
+    selector: str,
+) -> dict[str, str]:
+    """Read ml-gradle properties for a file-path selector or a profile name.
+
+    A ``.properties`` selector is a file path: it is parsed on its own when it
+    exists, otherwise the command lists the profiles living beside it. A plain
+    name is a profile: ``gradle-<name>.properties`` in the current directory,
+    merged over ``gradle.properties``; a missing profile lists the available
+    ones.
+    """
+    if _is_gradle_file_selector(selector):
+        path = Path(selector)
+        if path.is_file():
+            return _parse_properties(path)
+        raise WrongParametersError(_missing_gradle_file_message(path))
+    overlay = Path.cwd() / f"gradle-{selector}.properties"
+    if not overlay.is_file():
+        raise WrongParametersError(_unknown_gradle_profile_message(selector))
+    props = _parse_properties(Path.cwd() / "gradle.properties")
+    props.update(_parse_properties(overlay))
+    return props
+
+
+def _is_gradle_file_selector(
+    selector: str,
+) -> bool:
+    """Tell a file-path selector from a profile name; a path ends in .properties."""
+    return selector.endswith(".properties")
+
+
+def _missing_gradle_file_message(
+    path: Path,
+) -> str:
+    """Report the missing file, listing the .properties files beside it."""
+    directory = path.parent
+    files = sorted(sibling.name for sibling in directory.glob("*.properties"))
+    location = "" if directory == Path() else f" in {directory}"
+    available = f" Files{location}: {', '.join(files)}." if files else ""
+    return f"No properties file at [{path}].{available}"
+
+
+def _unknown_gradle_profile_message(
+    selector: str,
+) -> str:
+    """Report the unknown profile, listing the profiles present in the cwd."""
+    profiles = sorted(
+        path.name.removeprefix("gradle-").removesuffix(".properties")
+        for path in Path.cwd().glob("gradle-*.properties")
+    )
+    available = f" Available profiles: {', '.join(profiles)}." if profiles else ""
+    return f"No ml-gradle properties found for [{selector}].{available}"
 
 
 def _parse_properties(

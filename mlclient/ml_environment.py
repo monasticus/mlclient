@@ -13,10 +13,10 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
-from typing import Optional, Union
+from typing import Annotated, Optional, Union
 
 import yaml
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, BeforeValidator, Field, model_validator
 
 from mlclient import constants
 from mlclient.auth import AuthConfig
@@ -30,7 +30,16 @@ from mlclient.http_config import HTTPConfig
 
 logger = logging.getLogger(__name__)
 
-Auth = Union[str, AuthConfig]
+
+def _normalize_auth(value):
+    """Resolve the environment's app alias to no HTTP auth."""
+    return None if value == "app" else value
+
+
+Auth = Annotated[
+    Optional[Union[str, AuthConfig]],
+    BeforeValidator(_normalize_auth),
+]
 
 
 class MLServerConfig(BaseModel):
@@ -52,8 +61,8 @@ class MLServerConfig(BaseModel):
         description="An HTTP protocol; None inherits from root",
         default=None,
     )
-    auth: Optional[Auth] = Field(
-        description="An authentication method; None inherits from root",
+    auth: Auth = Field(
+        description="An authentication method; omitted inherits from root",
         default=None,
     )
     username: Optional[str] = Field(
@@ -78,6 +87,7 @@ _DEFAULT_APP_SERVERS = [
     MLServerConfig(id="app-services", rest=True),
     MLServerConfig(id="manage", port=8002),
     MLServerConfig(id="admin", port=8001),
+    MLServerConfig(id="health", port=7997, auth="app"),
 ]
 
 
@@ -85,8 +95,8 @@ class MLEnvironment(BaseModel):
     """A class representing a MarkLogic configuration environment.
 
     Connection and authentication settings configured here act as defaults for
-    every app server and may be overridden per server. The App Services, Manage
-    and Admin servers always exist; a user entry sharing one of their ids
+    every app server and may be overridden per server. The App Services, Manage,
+    Admin and Health servers always exist; a user entry sharing one of their ids
     overrides it.
     """
 
@@ -116,7 +126,7 @@ class MLEnvironment(BaseModel):
 
     @model_validator(mode="after")
     def _ensure_default_app_servers(self) -> MLEnvironment:
-        """Guarantee the App Services, Manage and Admin servers always exist.
+        """Guarantee the App Services, Manage, Admin and Health servers exist.
 
         User entries keep their position and win on id collision; any default
         the user did not define is appended, copied so environments never share
@@ -207,16 +217,20 @@ class MLEnvironment(BaseModel):
     def _app_server_overrides(
         app_server: MLServerConfig,
     ) -> dict:
-        """Return non-None app server fields that override root defaults."""
+        """Return app server fields that override root defaults."""
         overrides = {
             "port": app_server.port,
             "protocol": app_server.protocol,
-            "auth": app_server.auth,
             "username": app_server.username,
             "password": app_server.password,
             "ssl": app_server.ssl,
         }
-        return {key: value for key, value in overrides.items() if value is not None}
+        overrides = {
+            key: value for key, value in overrides.items() if value is not None
+        }
+        if "auth" in app_server.model_fields_set:
+            overrides["auth"] = app_server.auth
+        return overrides
 
     @staticmethod
     def _merge_ssl(

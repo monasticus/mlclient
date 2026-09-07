@@ -53,6 +53,7 @@ _TEST_ENV_DUMP = _environment(
         _server("test", 8103, "basic", rest=True),
         _server("app-services", None, None, rest=True),
         _server("admin", 8001, None, rest=False),
+        _server("health", 7997, None, rest=False),
     ],
 )
 
@@ -62,6 +63,7 @@ _DEFAULT_ENV_DUMP = _environment(
         _server("app-services", None, None, rest=True),
         _server("manage", 8002, None, rest=False),
         _server("admin", 8001, None, rest=False),
+        _server("health", 7997, None, rest=False),
     ],
 )
 
@@ -207,9 +209,11 @@ def test_default_servers_present_when_user_defines_own():
         },
     )
     identifiers = [server.identifier for server in config.app_servers]
-    assert identifiers == ["content", "app-services", "manage", "admin"]
+    assert identifiers == ["content", "app-services", "manage", "admin", "health"]
     assert config.provide_config("manage").port == 8002
     assert config.provide_config("admin").port == 8001
+    assert config.provide_config("health").port == 7997
+    assert config.provide_config("health").auth is None
 
 
 def test_user_server_overrides_default_of_same_id():
@@ -220,7 +224,7 @@ def test_user_server_overrides_default_of_same_id():
         },
     )
     identifiers = [server.identifier for server in config.app_servers]
-    assert identifiers == ["manage", "app-services", "admin"]
+    assert identifiers == ["manage", "app-services", "admin", "health"]
     assert config.provide_config("manage").port == 8100
 
 
@@ -244,6 +248,32 @@ def test_server_auth_overrides_root():
         },
     )
     assert isinstance(config.provide_config("content").auth, httpx.BasicAuth)
+
+
+@pytest.mark.parametrize("auth", ["app", None])
+def test_root_app_auth_resolves_to_none(auth):
+    config = MLEnvironment(
+        **{
+            "app-name": "app",
+            "auth": auth,
+            "app-servers": [{"id": "content", "port": 8100}],
+        },
+    )
+    assert config.auth is None
+    assert config.provide_config("content").auth is None
+
+
+@pytest.mark.parametrize("auth", ["app", None])
+def test_server_app_auth_overrides_root(auth):
+    config = MLEnvironment(
+        **{
+            "app-name": "app",
+            "auth": "digest",
+            "app-servers": [{"id": "content", "port": 8100, "auth": auth}],
+        },
+    )
+    assert config.app_servers[0].auth is None
+    assert config.provide_config("content").auth is None
 
 
 def test_root_credentials_inherited():

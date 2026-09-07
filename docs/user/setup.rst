@@ -66,12 +66,16 @@ single SSL field by setting it explicitly - ``verify: /etc/ssl/other-ca.pem`` fo
 a different CA bundle, or ``verify: false`` to disable server verification for
 that server alone - while every unset field still inherits from the root.
 
-The ``auth`` field accepts the same string shortcuts as the Python API:
-``digest``, ``basic``, ``digestbasic``, ``certificate``, and ``kerberos``. A
-server presenting a client certificate may leave ``auth`` unset (it defaults to
-``certificate``), set ``auth: certificate`` explicitly, or set a credential
-method such as ``auth: digest`` for double auth - the certificate then sets up
-mutual TLS while the credential carries the user identity.
+The ``auth`` field accepts the Python API shortcuts ``digest``, ``basic``,
+``digestbasic``, ``certificate``, and ``kerberos``, plus the YAML alias
+``app-level``. A server presenting a client certificate can set
+``auth: certificate`` explicitly, or use a credential method such as
+``auth: digest`` for double auth. An omitted server ``auth`` inherits the root
+setting, which defaults to ``digest``.
+
+Use ``auth: app-level`` when MarkLogic performs application-level authentication.
+MLClient then sends no HTTP authentication header and MarkLogic uses the App
+Server's configured default user.
 
 A MarkLogic Cloud environment declares ``cloud`` at the root and omits
 ``protocol`` and ``auth`` (Cloud forces HTTPS and authenticates via its API key).
@@ -93,10 +97,11 @@ for on-premises, 443 for Cloud), so it need only be set for app servers on a
 non-default port. Declare ``app-servers`` explicitly only to name additional
 servers or override per-server settings.
 
-Three app servers are always present even when you list none: ``app-services``
-(the port-8000 REST server), ``manage`` (8002), and ``admin`` (8001). Anything
-you declare is added to them; an entry whose ``id`` matches one of the three
-overrides that predefined server - for example, declaring ``admin`` on a
+Four app servers are always present even when you list none: ``app-services``
+(the port-8000 REST server), ``manage`` (8002), ``admin`` (8001), and ``health``
+(7997, application-level auth). Anything you declare is added to them; an entry
+whose ``id`` matches one of the four overrides that predefined server - for
+example, declaring ``admin`` on a
 non-standard port or ``app-services`` with ``rest: false``.
 
 MLEnvironment class
@@ -106,7 +111,7 @@ Having the environment file, you can instantiate ``MLEnvironment`` class using y
    >>> from mlclient import MLEnvironment
    >>> env = MLEnvironment.load("local")
    >>> env
-   MLEnvironment(app_name='migration-app', protocol='http', host='localhost', username='admin', password='admin', auth='digest', ssl=None, cloud=None, app_servers=[MLServerConfig(identifier='manage', port=8002, protocol=None, auth='basic', username=None, password=None, ssl=None, rest=False), MLServerConfig(identifier='content', port=8100, protocol=None, auth='basic', username=None, password=None, ssl=None, rest=False), MLServerConfig(identifier='modules', port=8101, protocol=None, auth='basic', username=None, password=None, ssl=None, rest=False), MLServerConfig(identifier='schemas', port=8102, protocol=None, auth='basic', username=None, password=None, ssl=None, rest=False), MLServerConfig(identifier='test', port=8103, protocol=None, auth='basic', username=None, password=None, ssl=None, rest=False), MLServerConfig(identifier='app-services', port=None, protocol=None, auth=None, username=None, password=None, ssl=None, rest=True), MLServerConfig(identifier='admin', port=8001, protocol=None, auth=None, username=None, password=None, ssl=None, rest=False)])
+   MLEnvironment(app_name='migration-app', protocol='http', host='localhost', username='admin', password='admin', auth='digest', ssl=None, cloud=None, app_servers=[MLServerConfig(identifier='manage', port=8002, protocol=None, auth='basic', username=None, password=None, ssl=None, rest=False), MLServerConfig(identifier='content', port=8100, protocol=None, auth='basic', username=None, password=None, ssl=None, rest=False), MLServerConfig(identifier='modules', port=8101, protocol=None, auth='basic', username=None, password=None, ssl=None, rest=False), MLServerConfig(identifier='schemas', port=8102, protocol=None, auth='basic', username=None, password=None, ssl=None, rest=False), MLServerConfig(identifier='test', port=8103, protocol=None, auth='basic', username=None, password=None, ssl=None, rest=False), MLServerConfig(identifier='app-services', port=None, protocol=None, auth=None, username=None, password=None, ssl=None, rest=True), MLServerConfig(identifier='admin', port=8001, protocol=None, auth=None, username=None, password=None, ssl=None, rest=False), MLServerConfig(identifier='health', port=7997, protocol=None, auth=None, username=None, password=None, ssl=None, rest=False)])
 
 This code will work in every subdirectory of the ``migration-app`` project as it looks for ``.mlclient`` recursively.
 
@@ -126,7 +131,7 @@ This code will work in every subdirectory of the ``migration-app`` project as it
        >>> from mlclient import MLEnvironment
        >>> env = MLEnvironment.load_file("path/to/mlclient-local.yaml")
        >>> env
-       MLEnvironment(app_name='migration-app', protocol='http', host='localhost', username='admin', password='admin', auth='digest', ssl=None, cloud=None, app_servers=[MLServerConfig(identifier='manage', port=8002, protocol=None, auth='basic', username=None, password=None, ssl=None, rest=False), MLServerConfig(identifier='content', port=8100, protocol=None, auth='basic', username=None, password=None, ssl=None, rest=False), MLServerConfig(identifier='modules', port=8101, protocol=None, auth='basic', username=None, password=None, ssl=None, rest=False), MLServerConfig(identifier='schemas', port=8102, protocol=None, auth='basic', username=None, password=None, ssl=None, rest=False), MLServerConfig(identifier='test', port=8103, protocol=None, auth='basic', username=None, password=None, ssl=None, rest=False), MLServerConfig(identifier='app-services', port=None, protocol=None, auth=None, username=None, password=None, ssl=None, rest=True), MLServerConfig(identifier='admin', port=8001, protocol=None, auth=None, username=None, password=None, ssl=None, rest=False)])
+       MLEnvironment(app_name='migration-app', protocol='http', host='localhost', username='admin', password='admin', auth='digest', ssl=None, cloud=None, app_servers=[MLServerConfig(identifier='manage', port=8002, protocol=None, auth='basic', username=None, password=None, ssl=None, rest=False), MLServerConfig(identifier='content', port=8100, protocol=None, auth='basic', username=None, password=None, ssl=None, rest=False), MLServerConfig(identifier='modules', port=8101, protocol=None, auth='basic', username=None, password=None, ssl=None, rest=False), MLServerConfig(identifier='schemas', port=8102, protocol=None, auth='basic', username=None, password=None, ssl=None, rest=False), MLServerConfig(identifier='test', port=8103, protocol=None, auth='basic', username=None, password=None, ssl=None, rest=False), MLServerConfig(identifier='app-services', port=None, protocol=None, auth=None, username=None, password=None, ssl=None, rest=True), MLServerConfig(identifier='admin', port=8001, protocol=None, auth=None, username=None, password=None, ssl=None, rest=False), MLServerConfig(identifier='health', port=7997, protocol=None, auth=None, username=None, password=None, ssl=None, rest=False)])
 
 
 MLClientManager class

@@ -18,7 +18,7 @@ env init
           --from-host[=FROM-HOST]      Derive by querying a MarkLogic host (host[:port])
           --app-name=APP-NAME          Application label; scopes --from-host to matching servers
       -u, --username=USERNAME          Username for --from-host
-      -p, --password=PASSWORD          Password for --from-host (prompted if omitted)
+      -p, --password=PASSWORD          Password for --from-host
       -a, --auth=AUTH                  Auth method for --from-host (basic, digest or digestbasic)
       -g, --global                     Write to the home directory instead of the current directory
       -f, --force                      Overwrite an existing configuration file
@@ -37,8 +37,7 @@ file unless you pass ``--force``. To load the result, see :doc:`../../setup`.
 
 There are three sources for a new environment: a blank commented template, a set
 of ml-gradle properties (``--from-gradle``), or a running MarkLogic instance
-queried over its Manage API (``--from-host``). Each source resolves whatever it
-needs, prompting only for what the command line left out.
+queried over its Manage API (``--from-host``).
 
 
 Scaffold a blank template
@@ -103,26 +102,36 @@ Derive from a running host
 --------------------------
 
 ``--from-host`` connects to a MarkLogic host's Manage server and maps its App
-Servers into an environment. Give the connection fully to resolve without any
-prompt:
+Servers into an environment. When both the environment name and ``--from-host``
+are present, the command is non-interactive unless ``--interactive`` is also
+passed. Missing connection fields then use ``localhost``, port ``8002``, user
+``admin``, password ``admin``, and ``digest`` authentication:
 
 .. code-block:: bash
 
-    ml env init prod --from-host=ml.example.com --username=admin --password=secret
+    ml env init local --from-host
 
 The value accepts ``host`` or ``host:port`` (the port defaults to the Manage port
-8002). Any of the name, username, password and auth method that you omit is
-prompted for; the password is never echoed:
+8002). An explicit port is used for the connection:
 
 .. code-block:: bash
 
-    ml env init prod --from-host=ml.example.com:8002 --username=admin
+    ml env init prod --from-host=ml.example.com:9000 --username=admin --password=secret
 
-Passing ``--from-host`` with no value prompts for every connection field:
+When the name is omitted, or ``--interactive`` is passed, the command asks only
+for values not supplied through options. The password is not echoed:
 
 .. code-block:: bash
 
     ml env init --from-host
+
+.. code-block:: bash
+
+    ml env init prod --from-host=ml.example.com:8002 --username=admin --interactive
+
+The ``server`` source in the wizard also honours ``--username``, ``--password``
+and ``--auth``. An explicit empty password (``--password=''``) is preserved;
+pressing Enter at the password prompt accepts the displayed ``admin`` default.
 
 ``--auth`` selects the client authentication method and accepts ``basic``,
 ``digest`` (the default) or ``digestbasic``; any other value is rejected:
@@ -130,6 +139,14 @@ Passing ``--from-host`` with no value prompts for every connection field:
 .. code-block:: bash
 
     ml env init prod --from-host=ml.example.com -u admin -p secret --auth=basic
+
+Before querying the Manage API the command prints the target URL. Generated
+YAML omits unchanged predefined servers and includes a comment listing their
+defaults: ``app-services`` (8000), ``manage`` (8002), ``admin`` (8001), and
+``health`` (7997, application-level auth).
+
+Overrides retain the port and authentication needed to reproduce the discovered
+connection when the generated file is loaded.
 
 ``--app-name`` both labels the environment and scopes discovery to the servers
 whose name matches it; without it every discovered server is kept and the label

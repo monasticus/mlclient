@@ -13,10 +13,10 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
-from typing import Optional, Union
+from typing import Annotated, Optional, Union
 
 import yaml
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, BeforeValidator, Field, model_validator
 
 from mlclient import constants
 from mlclient.auth import AuthConfig
@@ -26,10 +26,20 @@ from mlclient.exceptions import (
     MLClientEnvironmentNotFoundError,
     NoSuchAppServerError,
 )
+from mlclient.http_config import HTTPConfig
 
 logger = logging.getLogger(__name__)
 
-Auth = Union[str, AuthConfig]
+
+def _normalize_auth(value):
+    """Resolve the environment's app alias to no HTTP auth."""
+    return None if value == "app" else value
+
+
+Auth = Annotated[
+    Optional[Union[str, AuthConfig]],
+    BeforeValidator(_normalize_auth),
+]
 
 
 class MLServerConfig(BaseModel):
@@ -47,8 +57,12 @@ class MLServerConfig(BaseModel):
         description="A port number; None uses the connection's default port",
         default=None,
     )
-    auth: Optional[Auth] = Field(
-        description="An authentication method; None inherits from root",
+    protocol: Optional[str] = Field(
+        description="An HTTP protocol; None inherits from root",
+        default=None,
+    )
+    auth: Auth = Field(
+        description="An authentication method; omitted inherits from root",
         default=None,
     )
     username: Optional[str] = Field(
@@ -69,14 +83,28 @@ class MLServerConfig(BaseModel):
     )
 
 
+_DEFAULT_APP_SERVERS = [
+    MLServerConfig(id="app-services", rest=True),
+    MLServerConfig(id="manage", port=8002),
+    MLServerConfig(id="admin", port=8001),
+    MLServerConfig(id="health", port=7997, auth="app"),
+]
+
+
 class MLEnvironment(BaseModel):
     """A class representing a MarkLogic configuration environment.
 
     Connection and authentication settings configured here act as defaults for
-    every app server and may be overridden per server.
+    every app server and may be overridden per server. The App Services, Manage,
+    Admin and Health servers always exist; a user entry sharing one of their ids
+    overrides it.
     """
 
-    app_name: str = Field(alias="app-name", description="An application name")
+    app_name: Optional[str] = Field(
+        alias="app-name",
+        description="An application name; a label used to scope discovery when set",
+        default=None,
+    )
     protocol: str = Field(description="An HTTP protocol", default="http")
     host: str = Field(description="A hostname", default="localhost")
     username: str = Field(description="An username", default="admin")
@@ -93,8 +121,22 @@ class MLEnvironment(BaseModel):
     app_servers: list[MLServerConfig] = Field(
         alias="app-servers",
         description="App Servers configurations' list",
-        default=[MLServerConfig(id="app-services", rest=True)],
+        default_factory=lambda: [s.model_copy() for s in _DEFAULT_APP_SERVERS],
     )
+
+    @model_validator(mode="after")
+    def _ensure_default_app_servers(self) -> MLEnvironment:
+        """Guarantee the App Services, Manage, Admin and Health servers exist.
+
+        User entries keep their position and win on id collision; any default
+        the user did not define is appended, copied so environments never share
+        a server instance.
+        """
+        by_id = {server.identifier: server for server in self.app_servers}
+        for default in _DEFAULT_APP_SERVERS:
+            by_id.setdefault(default.identifier, default.model_copy())
+        self.app_servers = list(by_id.values())
+        return self
 
     @property
     def rest_servers(
@@ -108,8 +150,12 @@ class MLEnvironment(BaseModel):
     def provide_config(
         self,
         app_server_id: str,
-    ) -> dict:
-        """Provide an app server configuration for MLClient's use.
+    ) -> HTTPConfig:
+        """Provide a resolved connection configuration for an App Server.
+
+        The root-level connection and auth defaults are merged with the app
+        server's overrides and resolved into an HTTPConfig ready to hand to a
+        client via its ``config`` parameter.
 
         Parameters
         ----------
@@ -118,8 +164,8 @@ class MLEnvironment(BaseModel):
 
         Returns
         -------
-        dict
-            A configuration dictionary for an MLClient initialization
+        HTTPConfig
+            A resolved configuration for a client initialization
         """
         logger.debug("Getting configuration for the [%s] app server", app_server_id)
         ml_config = self._root_config()
@@ -128,7 +174,7 @@ class MLEnvironment(BaseModel):
         merged = {**ml_config, **app_server_config}
         if app_server.ssl is not None:
             merged["ssl"] = self._merge_ssl(self.ssl, app_server.ssl)
-        return merged
+        return HTTPConfig.resolve(**merged)
 
     def _root_config(self) -> dict:
         """Return root-level connection and auth defaults.
@@ -171,15 +217,20 @@ class MLEnvironment(BaseModel):
     def _app_server_overrides(
         app_server: MLServerConfig,
     ) -> dict:
-        """Return non-None app server fields that override root defaults."""
+        """Return app server fields that override root defaults."""
         overrides = {
             "port": app_server.port,
-            "auth": app_server.auth,
+            "protocol": app_server.protocol,
             "username": app_server.username,
             "password": app_server.password,
             "ssl": app_server.ssl,
         }
-        return {key: value for key, value in overrides.items() if value is not None}
+        overrides = {
+            key: value for key, value in overrides.items() if value is not None
+        }
+        if "auth" in app_server.model_fields_set:
+            overrides["auth"] = app_server.auth
+        return overrides
 
     @staticmethod
     def _merge_ssl(

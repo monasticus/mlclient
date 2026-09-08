@@ -4,7 +4,11 @@ import respx
 
 from mlclient import AsyncMLClient, MLClient, MLClientManager, MLEnvironment
 from mlclient.clients import AsyncHttpClient, HttpClient
-from mlclient.exceptions import NoRestServerConfiguredError, NotARestServerError
+from mlclient.exceptions import (
+    NoRestServerConfiguredError,
+    NoSuchAppServerError,
+    NotARestServerError,
+)
 from tests.utils.ml_mockers import MLRespXMocker
 
 
@@ -232,6 +236,13 @@ def test_get_client_not_a_rest_server():
     )
 
 
+def test_get_client_unknown_app_server():
+    mgr = MLClientManager("test")
+    with pytest.raises(NoSuchAppServerError) as err:
+        mgr.get_client("missing")
+    assert err.value.args[0] == "There's no [missing] app server configuration!"
+
+
 def test_get_http_client():
     mgr = MLClientManager("test")
     with mgr.get_http_client("content") as client:
@@ -289,6 +300,13 @@ def test_get_async_client_not_a_rest_server():
     assert err.value.args[0] == (
         "[modules] App-Server is not configured as a REST one."
     )
+
+
+def test_get_async_client_unknown_app_server():
+    mgr = MLClientManager("test")
+    with pytest.raises(NoSuchAppServerError) as err:
+        mgr.get_async_client("missing")
+    assert err.value.args[0] == "There's no [missing] app server configuration!"
 
 
 def test_get_async_http_client():

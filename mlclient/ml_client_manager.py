@@ -11,7 +11,11 @@ from __future__ import annotations
 import logging
 
 from mlclient.clients import AsyncHttpClient, AsyncMLClient, HttpClient, MLClient
-from mlclient.exceptions import NoRestServerConfiguredError, NotARestServerError
+from mlclient.exceptions import (
+    NoRestServerConfiguredError,
+    NoSuchAppServerError,
+    NotARestServerError,
+)
 from mlclient.ml_environment import MLEnvironment
 
 logger = logging.getLogger(__name__)
@@ -191,6 +195,8 @@ class MLClientManager:
 
         Raises
         ------
+        NoSuchAppServerError
+            If no App-Server is configured under the given identifier
         NotARestServerError
             If the App-Server identifier does not point to a REST server
         NoRestServerConfiguredError
@@ -207,6 +213,9 @@ class MLClientManager:
             rest_server_id = self.config.rest_servers[0]
             logger.debug("Identified REST app server id: [%s]", rest_server_id)
             return rest_server_id
+        if rest_server_id not in self.config.app_server_ids:
+            msg = f"There's no [{rest_server_id}] app server configuration!"
+            raise NoSuchAppServerError(msg)
         if rest_server_id not in self.config.rest_servers:
             msg = f"[{rest_server_id}] App-Server is not configured as a REST one."
             raise NotARestServerError(msg)

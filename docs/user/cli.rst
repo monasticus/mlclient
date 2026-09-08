@@ -29,6 +29,7 @@ MLClient provides you a nice command line interface using `cleo <https://github.
 
      env
       env init   Scaffolds an MLClient environment configuration file
+      env show   Lists MLClient environments, or renders one environment's settings
 
 .. caution::
 

@@ -4,7 +4,13 @@ from pathlib import Path
 import httpx
 import pytest
 
-from mlclient import MLClient, MLEnvironment, constants
+from mlclient import (
+    MLClient,
+    MLEnvironment,
+    constants,
+    find_mlclient_directory,
+    find_mlclient_environment,
+)
 from mlclient.exceptions import (
     MLClientDirectoryNotFoundError,
     MLClientEnvironmentNotFoundError,
@@ -144,6 +150,43 @@ def test_load_non_existing():
     )
     actual_msg = err.value.args[0]
     assert actual_msg == expected_msg
+
+
+def test_find_mlclient_environment_returns_config_path():
+    env_file_path = find_mlclient_environment("test")
+    assert env_file_path.name == "mlclient-test.yaml"
+
+
+def test_find_mlclient_environment_non_existing():
+    with pytest.raises(MLClientEnvironmentNotFoundError) as err:
+        find_mlclient_environment("non-existing")
+    expected_msg = (
+        "MLClient's environment configuration has not been found for [non-existing]!"
+    )
+    assert err.value.args[0] == expected_msg
+
+
+def test_find_mlclient_directory_returns_directory():
+    ml_client_dir = find_mlclient_directory(Path.cwd())
+    assert ml_client_dir.name == constants.ML_CLIENT_DIR
+
+
+def test_find_mlclient_directory_in_ancestor(monkeypatch):
+    monkeypatch.chdir(_SCRIPT_DIR)
+
+    ml_client_dir = find_mlclient_directory(Path.cwd())
+    assert ml_client_dir.name == constants.ML_CLIENT_DIR
+
+
+def test_find_mlclient_directory_non_existing(tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+
+    with pytest.raises(MLClientDirectoryNotFoundError) as err:
+        find_mlclient_directory(Path.cwd())
+    expected_msg = (
+        ".mlclient directory has not been found in any of parent directories!"
+    )
+    assert err.value.args[0] == expected_msg
 
 
 def test_load_in_child_directory(monkeypatch):

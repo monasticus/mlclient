@@ -151,7 +151,7 @@ def test_get_client_default():
 
 
 @respx.mock
-def test_get_client_wires_env_manage_and_admin_servers():
+def test_get_client_wires_env_manage_admin_and_health_servers():
     env = MLEnvironment(
         **{
             "app-name": "app",
@@ -178,15 +178,21 @@ def test_get_client_wires_env_manage_and_admin_servers():
     ml_mocker.with_response_content_type("text/plain")
     ml_mocker.with_response_body("2026-03-23T00:00:00")
     ml_mocker.mock_get()
+
+    ml_mocker.with_url("http://localhost:7997/")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_empty_response_body()
+    ml_mocker.mock_head()
 
     with mgr.get_client("content") as ml:
         assert ml.manage.databases.get_list().status_code == 200
         assert ml.admin.get_timestamp().status_code == 200
+        assert ml.healthcheck() is True
 
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_get_async_client_wires_env_manage_and_admin_servers():
+async def test_get_async_client_wires_env_manage_admin_and_health_servers():
     env = MLEnvironment(
         **{
             "app-name": "app",
@@ -214,9 +220,15 @@ async def test_get_async_client_wires_env_manage_and_admin_servers():
     ml_mocker.with_response_body("2026-03-23T00:00:00")
     ml_mocker.mock_get()
 
+    ml_mocker.with_url("http://localhost:7997/")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_empty_response_body()
+    ml_mocker.mock_head()
+
     async with mgr.get_async_client("content") as ml:
         assert (await ml.manage.databases.get_list()).status_code == 200
         assert (await ml.admin.get_timestamp()).status_code == 200
+        assert await ml.healthcheck() is True
 
 
 def test_get_client_default_no_rest_servers_configured():

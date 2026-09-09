@@ -104,6 +104,7 @@ class MLClientManager:
             config=self.config.provide_config(rest_server_id),
             manage_config=self.config.provide_config("manage"),
             admin_config=self.config.provide_config("admin"),
+            health_config=self.config.provide_config("health"),
         )
 
     def get_async_client(
@@ -139,6 +140,7 @@ class MLClientManager:
             config=self.config.provide_config(rest_server_id),
             manage_config=self.config.provide_config("manage"),
             admin_config=self.config.provide_config("admin"),
+            health_config=self.config.provide_config("health"),
         )
 
     def get_async_http_client(

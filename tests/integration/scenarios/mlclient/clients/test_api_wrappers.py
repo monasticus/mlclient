@@ -9,6 +9,8 @@ import pytest
 from httpx import Response
 
 from mlclient import MLClient, MLResponseParser
+from mlclient.clients.http_client import MARKLOGIC_MANAGE_PORT
+from mlclient.http_config import HTTPConfig
 from mlclient.models.http import DocumentsBodyPart as BodyPart
 
 EVAL_XQUERY = (
@@ -35,6 +37,22 @@ class TestEvalEndpoint:
         assert resp.status_code == httpx.codes.OK
         parsed_resp = MLResponseParser.parse(resp, str)
         assert parsed_resp == "<new-parent><child/></new-parent>"
+
+
+class TestHealthCheckEndpoint:
+    @pytest.mark.ml_access
+    def test_healthcheck_reports_running_server(self, ml_client: MLClient):
+        assert ml_client.healthcheck() is True
+
+    @pytest.mark.ml_access
+    def test_healthcheck_raises_when_probing_an_authenticated_server(self):
+        authenticated = HTTPConfig.resolve(port=MARKLOGIC_MANAGE_PORT, auth=None)
+        with MLClient(health_config=authenticated) as ml, pytest.raises(
+            httpx.HTTPStatusError,
+        ) as exc:
+            ml.healthcheck()
+
+        assert exc.value.response.status_code == httpx.codes.UNAUTHORIZED
 
 
 class TestTransactionsEndpoint:

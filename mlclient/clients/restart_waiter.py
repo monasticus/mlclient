@@ -19,8 +19,8 @@ from mlclient.http_config import HTTPConfig
 logger = logging.getLogger(__name__)
 
 _RestartTimestampBaseline = Union[asyncio.Future, str, None]
-_MARKLOGIC_ADMIN_API_PORT = 8001
-_MARKLOGIC_MANAGE_API_PORT = 8002
+_MARKLOGIC_ADMIN_PORT = 8001
+_MARKLOGIC_MANAGE_PORT = 8002
 _HOSTS_ENDPOINT = "/manage/v2/hosts"
 _RESTART_TIMESTAMP_PATH = "/admin/v1/timestamp"
 
@@ -385,7 +385,7 @@ class RestartWaiter:
             ),
         ) as client:
             response = await client.get(
-                f"{self._config.protocol}://{self._config.host}:{_MARKLOGIC_MANAGE_API_PORT}"
+                f"{self._config.protocol}://{self._config.host}:{_MARKLOGIC_MANAGE_PORT}"
                 f"{_HOSTS_ENDPOINT}",
                 auth=self._config.auth,
                 params={"format": "json"},
@@ -498,7 +498,7 @@ class RestartWaiter:
     def _get_timestamp_url(self, host: str) -> str:
         """Return the Admin timestamp URL for a host."""
         return (
-            f"{self._config.protocol}://{host}:{_MARKLOGIC_ADMIN_API_PORT}"
+            f"{self._config.protocol}://{host}:{_MARKLOGIC_ADMIN_PORT}"
             f"{_RESTART_TIMESTAMP_PATH}"
         )
 

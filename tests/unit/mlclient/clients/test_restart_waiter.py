@@ -10,8 +10,8 @@ from httpx_retries import Retry
 from pytest_mock import MockerFixture
 
 from mlclient import (
-    MARKLOGIC_ADMIN_API_PORT,
-    MARKLOGIC_MANAGE_API_PORT,
+    MARKLOGIC_ADMIN_PORT,
+    MARKLOGIC_MANAGE_PORT,
     RESTART_RETRY_STRATEGY,
 )
 from mlclient.clients.restart_waiter import RestartWaiter
@@ -32,11 +32,11 @@ MULTIHOST_TIMEOUT = 0.5
 
 
 def _admin_timestamp_url(host: str = "localhost") -> str:
-    return f"http://{host}:{MARKLOGIC_ADMIN_API_PORT}/admin/v1/timestamp"
+    return f"http://{host}:{MARKLOGIC_ADMIN_PORT}/admin/v1/timestamp"
 
 
 def _manage_hosts_url() -> str:
-    return f"http://localhost:{MARKLOGIC_MANAGE_API_PORT}/manage/v2/hosts"
+    return f"http://localhost:{MARKLOGIC_MANAGE_PORT}/manage/v2/hosts"
 
 
 def _sequence_side_effect(*results: httpx.Response | Exception):

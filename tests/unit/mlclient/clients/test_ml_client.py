@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import httpx
+import pytest
 import respx
+from httpx_retries import Retry
 from pytest_mock import MockerFixture
 
 from mlclient import MLClient
@@ -248,6 +250,114 @@ def test_both_manage_and_admin_configs_given():
 
     assert manage_resp.status_code == 200
     assert admin_resp.status_code == 200
+
+
+@respx.mock
+def test_healthcheck_uses_port_7997_when_main_port_differs():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:7997/")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_empty_response_body()
+    ml_mocker.mock_head()
+
+    with MLClient(port=8000) as ml:
+        assert ml.healthcheck() is True
+
+
+@respx.mock
+def test_healthcheck_uses_main_port_when_already_7997():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:7997/")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_empty_response_body()
+    ml_mocker.mock_head()
+
+    with MLClient(port=7997) as ml:
+        assert ml.healthcheck() is True
+
+
+@respx.mock
+def test_healthcheck_returns_false_on_unhealthy_status():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:7997/")
+    ml_mocker.with_response_code(503)
+    ml_mocker.with_empty_response_body()
+    route = ml_mocker.mock_head()
+
+    with MLClient(port=8000) as ml:
+        assert ml.healthcheck() is False
+    assert route.call_count == 1
+
+
+@respx.mock
+def test_healthcheck_uses_injected_health_config():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://health.example.com:9997/")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_empty_response_body()
+    ml_mocker.mock_head()
+
+    health_config = HTTPConfig.resolve(host="health.example.com", port=9997, auth=None)
+    with MLClient(port=8000, health_config=health_config) as ml:
+        assert ml.healthcheck() is True
+
+
+@respx.mock
+def test_healthcheck_derived_connection_sends_no_authorization():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("https://localhost:7997/")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_empty_response_body()
+    route = ml_mocker.mock_head()
+
+    with MLClient(protocol="https", port=8000, auth="basic") as ml:
+        assert ml.healthcheck() is True
+    assert "Authorization" not in route.calls.last.request.headers
+
+
+@respx.mock
+def test_healthcheck_returns_false_with_injected_config_on_server_error():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://health.example.com:9997/")
+    ml_mocker.with_response_code(503)
+    ml_mocker.with_empty_response_body()
+    route = ml_mocker.mock_head()
+
+    health_config = HTTPConfig.resolve(host="health.example.com", port=9997, auth=None)
+    with MLClient(port=8000, health_config=health_config) as ml:
+        assert ml.healthcheck() is False
+    assert route.call_count == 1
+
+
+@respx.mock
+def test_healthcheck_propagates_explicit_retry_from_injected_config():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://health.example.com:9997/")
+    ml_mocker.with_response_code(503)
+    ml_mocker.with_empty_response_body()
+    route = ml_mocker.mock_head()
+
+    health_config = HTTPConfig.resolve(
+        host="health.example.com",
+        port=9997,
+        auth=None,
+        retry=Retry(total=1, backoff_factor=0),
+    )
+    with MLClient(port=8000, health_config=health_config) as ml:
+        assert ml.healthcheck() is False
+    assert route.call_count == 2
+
+
+@respx.mock
+def test_healthcheck_raises_on_client_error_instead_of_reporting_unhealthy():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:7997/")
+    ml_mocker.with_response_code(401)
+    ml_mocker.with_empty_response_body()
+    ml_mocker.mock_head()
+
+    with MLClient(port=8000) as ml, pytest.raises(httpx.HTTPStatusError):
+        ml.healthcheck()
 
 
 @respx.mock

@@ -21,9 +21,11 @@ from .api_client import ApiClient, AsyncApiClient
 from mlclient.http_config import DEFAULT_RETRY_STRATEGY
 
 from .http_client import (
-    MARKLOGIC_ADMIN_API_PORT,
-    MARKLOGIC_MANAGE_API_PORT,
-    MARKLOGIC_REST_API_PORT,
+    MARKLOGIC_ADMIN_PORT,
+    MARKLOGIC_APP_SERVICES_PORT,
+    MARKLOGIC_HEALTHCHECK_PORT,
+    MARKLOGIC_MANAGE_PORT,
+    NO_RETRY_STRATEGY,
     RESTART_RETRY_STRATEGY,
     AsyncHttpClient,
     HttpClient,
@@ -32,9 +34,11 @@ from .ml_client import AsyncMLClient, MLClient
 
 __all__ = [
     "DEFAULT_RETRY_STRATEGY",
-    "MARKLOGIC_ADMIN_API_PORT",
-    "MARKLOGIC_MANAGE_API_PORT",
-    "MARKLOGIC_REST_API_PORT",
+    "MARKLOGIC_ADMIN_PORT",
+    "MARKLOGIC_APP_SERVICES_PORT",
+    "MARKLOGIC_HEALTHCHECK_PORT",
+    "MARKLOGIC_MANAGE_PORT",
+    "NO_RETRY_STRATEGY",
     "RESTART_RETRY_STRATEGY",
     "ApiClient",
     "AsyncApiClient",

@@ -53,14 +53,16 @@ the client.
 
 ``HttpClient`` also exposes the standard MarkLogic endpoint ports as public constants:
 
-- ``MARKLOGIC_REST_API_PORT`` = ``8000``
-- ``MARKLOGIC_ADMIN_API_PORT`` = ``8001``
-- ``MARKLOGIC_MANAGE_API_PORT`` = ``8002``
+- ``MARKLOGIC_APP_SERVICES_PORT`` = ``8000``
+- ``MARKLOGIC_ADMIN_PORT`` = ``8001``
+- ``MARKLOGIC_MANAGE_PORT`` = ``8002``
+- ``MARKLOGIC_HEALTHCHECK_PORT`` = ``7997``
 
-Two retry presets are also exported:
+Three retry presets are also exported:
 
 - ``DEFAULT_RETRY_STRATEGY`` for normal requests
 - ``RESTART_RETRY_STRATEGY`` for Admin timestamp polling during restart windows
+- ``NO_RETRY_STRATEGY`` to send a request once with no retries (used by the health probe)
 
 Connection
 ^^^^^^^^^^
@@ -1444,3 +1446,51 @@ restart windows:
 
 For multi-host restart responses, the method waits for all affected hosts
 before it returns.
+
+
+Health check
+------------
+
+:meth:`~mlclient.MLClient.healthcheck` reports whether MarkLogic's HealthCheck
+app server answers. That server is unauthenticated by design and returns
+``200 OK`` only while the node is healthy - load balancers treat any other
+status as unhealthy.
+
+.. code-block:: python
+
+    >>> from mlclient import MLClient
+
+    >>> with MLClient() as ml:
+    ...     ml.healthcheck()
+    True
+
+The probe maps the response to a verdict:
+
+- ``2xx`` -> ``True`` (healthy)
+- ``5xx`` -> ``False`` (server up but not ready)
+- ``4xx`` -> raises :class:`httpx.HTTPStatusError`; a client error means the
+  request was misdirected (for example, aimed at an authenticated server), not
+  that the node is unhealthy
+
+A health check is a point-in-time snapshot, so the probe runs with
+``NO_RETRY_STRATEGY`` (no retries) rather than retrying a ``5xx``. It
+reuses the main connection when that already targets port ``7997`` or runs on
+Cloud; otherwise it derives an unauthenticated connection to ``7997`` from the
+primary host. To point it elsewhere - a different host, port, or an explicit
+retry policy - pass a resolved :class:`~mlclient.http_config.HTTPConfig` as
+``health_config`` (mirroring ``manage_config`` / ``admin_config``); an explicit
+``retry`` on that config is honored instead of the no-retry default.
+
+.. code-block:: python
+
+    >>> from mlclient import MLClient
+    >>> from mlclient.http_config import HTTPConfig
+
+    >>> health_config = HTTPConfig.resolve(
+    ...     host="healthcheck.example.com",
+    ...     port=7997,
+    ...     auth=None,
+    ... )
+    >>> with MLClient(host="ml.example.com", health_config=health_config) as ml:
+    ...     ml.healthcheck()
+    True

@@ -7,6 +7,9 @@ It exports an implementation for 'env show' command:
 
 from __future__ import annotations
 
+import os
+import subprocess
+import sys
 from pathlib import Path
 
 import yaml
@@ -60,6 +63,8 @@ class EnvShowCommand(Command):
             Print the raw configuration file instead of a rendered table
       -s, --secrets
             Reveal secret values instead of masking them
+      -c, --copy
+            Copy a simple setting value to the clipboard, including secrets
     """
 
     name: str = "env show"
@@ -93,6 +98,13 @@ class EnvShowCommand(Command):
             "s",
             description="Reveal secret values instead of masking them",
         ),
+        option(
+            "copy",
+            "c",
+            description=(
+                "Copy a simple setting value to the clipboard, including secrets"
+            ),
+        ),
     ]
 
     def handle(
@@ -100,9 +112,14 @@ class EnvShowCommand(Command):
     ) -> int:
         """Execute the command."""
         name = self.argument("name")
-        if name:
-            return self._show(name)
-        return self._list()
+        status = self._show(name) if name else self._list()
+        if self.option("copy") and (not self.argument("setting") or self.option("raw")):
+            self.line_error(
+                "--copy only works for individual settings without --raw; "
+                "ignoring --copy.",
+                style="fg=yellow;options=dark",
+            )
+        return status
 
     def _list(
         self,
@@ -153,6 +170,7 @@ class EnvShowCommand(Command):
         """Print a single root setting, or render one app server as a table."""
         if setting in config:
             self.line(_styled_value(setting, config[setting], reveal=reveal))
+            self._copy_setting(setting, config[setting])
             return 0
         server = _find_server(setting, servers)
         if server is not None:
@@ -161,9 +179,32 @@ class EnvShowCommand(Command):
                 {k: v for k, v in server.items() if k != "id"},
                 reveal=reveal,
             )
+            self._copy_setting(setting, server)
             return 0
         message = f"No setting [{setting}]."
         raise WrongParametersError(message)
+
+    def _copy_setting(self, setting: str, value: object) -> None:
+        """Copy an unmasked scalar while keeping clipboard failures non-fatal."""
+        if not self.option("copy"):
+            return
+        if not isinstance(value, (str, int, float, bool)):
+            self.line_error(
+                "--copy only works for simple values "
+                "(text, numbers, booleans); ignoring --copy.",
+                style="fg=yellow;options=dark",
+            )
+            return
+        try:
+            _copy_to_clipboard(_display_value(setting, value, reveal=True))
+        except (OSError, subprocess.SubprocessError):
+            self.line_error(
+                "Could not copy to clipboard. Check that a clipboard "
+                "tool and a desktop session are available.",
+                style="fg=yellow;options=dark",
+            )
+            return
+        self.line("Copied to clipboard.", style="fg=green;options=italic")
 
     def _render_settings(
         self,
@@ -229,6 +270,28 @@ class EnvShowCommand(Command):
         self.line(
             f"<options=italic>Reading <fg=green;options=italic>{source}</>{scope}</>\n",
         )
+
+
+def _copy_to_clipboard(text: str) -> None:
+    """Send text through stdin to the platform's clipboard tool."""
+    encoding = "utf-8"
+    if sys.platform == "win32":
+        command = ["clip"]
+        encoding = "utf-16"
+    elif sys.platform == "darwin":
+        command = ["pbcopy"]
+    elif os.environ.get("WAYLAND_DISPLAY"):
+        command = ["wl-copy"]
+    else:
+        command = ["xclip", "-selection", "clipboard"]
+    subprocess.run(
+        command,
+        input=text.encode(encoding),
+        check=True,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+        timeout=5,
+    )
 
 
 def _read_config(path: Path) -> dict:

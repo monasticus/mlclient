@@ -17,6 +17,7 @@ env show
       -g, --global         Read from the home directory instead of the current directory
           --raw            Print the raw configuration file instead of a rendered table
       -s, --secrets        Reveal secret values instead of masking them
+      -c, --copy           Copy a simple setting value to the clipboard, including secrets
 
       -h, --help           Display help for the given command. When no command is given display help for the list command.
       -q, --quiet          Do not output any message.
@@ -94,3 +95,32 @@ also covers the predefined servers (``app-services``, ``manage``, ``admin``,
 .. code-block:: bash
 
     ml env show local rest
+
+
+Copy a setting to the clipboard
+-------------------------------
+
+Use ``--copy`` (``-c``) with a single setting to copy its value while still
+printing it:
+
+.. code-block:: bash
+
+    ml env show local host --copy
+    ml env show local password -c
+
+The command prints ``Copied to clipboard.`` in green italics after a successful
+copy. Passwords
+remain masked in the terminal unless ``--secrets`` (``-s``) is also passed,
+but the clipboard always receives the original, unmasked value. Copied text
+has no styling or extra newline; booleans are copied as ``true`` or ``false``.
+
+Copying supports text, numbers, and booleans. For mappings, lists, null values,
+or app server tables, the command warns and displays the requested output
+without copying. Warnings appear after the result in dim yellow.
+The command also warns and ignores ``--copy`` when listing environments,
+showing an entire environment, or using ``--raw``.
+
+Clipboard access uses ``xclip`` on Linux/X11, ``wl-copy`` from ``wl-clipboard``
+on Wayland, ``pbcopy`` on macOS, or ``clip`` on Windows. If the tool or clipboard
+session is unavailable, the command warns, keeps the displayed result, and
+still exits successfully.

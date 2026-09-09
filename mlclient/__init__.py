@@ -22,6 +22,12 @@ This package exports the following classes:
     * MLResponseParser
         A MarkLogic HTTP response parser.
 
+This package exports the following functions:
+    * find_mlclient_environment
+        Locate a named environment's configuration file in the nearest .mlclient.
+    * find_mlclient_directory
+        Locate the nearest .mlclient directory at a path or in an ancestor.
+
 Examples
 --------
 >>> from mlclient import MLClient
@@ -51,7 +57,11 @@ from .clients import (
 )
 from .connection import CloudConfig, SSLConfig
 from .ml_client_manager import MLClientManager
-from .ml_environment import MLEnvironment
+from .ml_environment import (
+    MLEnvironment,
+    find_mlclient_directory,
+    find_mlclient_environment,
+)
 from .ml_response_parser import MLResponseParser
 
 
@@ -84,6 +94,8 @@ __all__ = [
     "OAuthBearerAuth",
     "SSLConfig",
     "__version__",
+    "find_mlclient_directory",
+    "find_mlclient_environment",
     "setup_logger",
 ]
 

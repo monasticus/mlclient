@@ -7,6 +7,13 @@ It exports the following classes:
         A class representing a MarkLogic configuration environment.
     * MLServerConfig
         A class representing MarkLogic App Server configuration.
+
+It exports the following functions:
+
+    * find_mlclient_environment
+        Locate a named environment's configuration file in the nearest .mlclient.
+    * find_mlclient_directory
+        Locate the nearest .mlclient directory at a path or in an ancestor.
 """
 
 from __future__ import annotations
@@ -84,10 +91,7 @@ class MLServerConfig(BaseModel):
 
 
 _DEFAULT_APP_SERVERS = [
-    MLServerConfig(id="app-services", rest=True),
-    MLServerConfig(id="manage", port=8002),
-    MLServerConfig(id="admin", port=8001),
-    MLServerConfig(id="health", port=7997, auth="app"),
+    MLServerConfig(**server) for server in constants.DEFAULT_APP_SERVERS
 ]
 
 
@@ -291,8 +295,8 @@ class MLEnvironment(BaseModel):
             "Loading MLClient configuration for the environment: [%s]",
             env_name,
         )
-        env_file_path = cls._find_mlclient_environment(env_name)
-        return cls.load_file(env_file_path)
+        env_file_path = find_mlclient_environment(env_name)
+        return cls.load_file(env_file_path.as_posix())
 
     @classmethod
     def load_file(
@@ -315,85 +319,6 @@ class MLEnvironment(BaseModel):
         source_config = cls._get_source_config(file_path)
         return MLEnvironment(**source_config)
 
-    @classmethod
-    def _find_mlclient_environment(
-        cls,
-        env_name: str,
-    ) -> str:
-        """Return MLClient environment configuration path.
-
-        Parameters
-        ----------
-        env_name : str
-            An MLClient environment name
-
-        Returns
-        -------
-        str
-            An MLClient environment configuration path
-
-        Raises
-        ------
-        MLClientDirectoryNotFoundError
-            If .mlclient directory has not been found
-        MLClientEnvironmentNotFoundError
-            If there's no .mlclient/mlclient-<env_name>.yaml file
-        """
-        ml_client_dir = cls._find_mlclient_directory(Path.cwd())
-        env_file_name = f"mlclient-{env_name}.yaml"
-        env_file_path = next(Path(ml_client_dir).glob(env_file_name), None)
-        if not env_file_path:
-            msg = (
-                f"MLClient's environment configuration has not been found for "
-                f"[{env_name}]!"
-            )
-            raise MLClientEnvironmentNotFoundError(msg)
-        logger.debug("MLClient configuration file found: [%s]", env_file_name)
-        return env_file_path.as_posix()
-
-    @classmethod
-    def _find_mlclient_directory(
-        cls,
-        path: Path,
-    ) -> str:
-        """Return MLClient configuration path.
-
-        Recursively searches for .mlclient directory. If it is not being found,
-        it tries in a parent until it reaches root dir.
-
-        Parameters
-        ----------
-        path : Path
-            A path to look for .mlclient subdirectory
-
-        Returns
-        -------
-        str
-            An MLClient configuration path
-
-        Raises
-        ------
-        MLClientDirectoryNotFoundError
-            If .mlclient directory has not been found
-        """
-        if Path.as_posix(path) in (".", "/"):
-            msg = (
-                f"{constants.ML_CLIENT_DIR} directory has not been found in any of "
-                f"parent directories!"
-            )
-            raise MLClientDirectoryNotFoundError(msg)
-        mlclient_dir = next(
-            (path for path in path.glob(constants.ML_CLIENT_DIR) if path.is_dir()),
-            None,
-        )
-        if mlclient_dir:
-            logger.debug(
-                "MLClient configuration home directory found: [%s]",
-                mlclient_dir,
-            )
-            return mlclient_dir.as_posix()
-        return cls._find_mlclient_directory(path.parent)
-
     @staticmethod
     def _get_source_config(
         file_path: str,
@@ -412,3 +337,78 @@ class MLEnvironment(BaseModel):
         """
         with Path(file_path).open() as config_file:
             return yaml.safe_load(config_file.read())
+
+
+def find_mlclient_environment(
+    env_name: str,
+) -> Path:
+    """Return the configuration file path for a named MLClient environment.
+
+    Searches the nearest .mlclient directory (see find_mlclient_directory) for a
+    file matching the mlclient-<env_name>.yaml pattern.
+
+    Parameters
+    ----------
+    env_name : str
+        An MLClient environment name
+
+    Returns
+    -------
+    Path
+        The environment's configuration file path
+
+    Raises
+    ------
+    MLClientDirectoryNotFoundError
+        If no .mlclient directory has been found
+    MLClientEnvironmentNotFoundError
+        If the .mlclient directory has no mlclient-<env_name>.yaml file
+    """
+    ml_client_dir = find_mlclient_directory(Path.cwd())
+    env_file_name = f"mlclient-{env_name}.yaml"
+    env_file_path = next(ml_client_dir.glob(env_file_name), None)
+    if not env_file_path:
+        msg = (
+            f"MLClient's environment configuration has not been found for [{env_name}]!"
+        )
+        raise MLClientEnvironmentNotFoundError(msg)
+    logger.debug("MLClient configuration file found: [%s]", env_file_name)
+    return env_file_path
+
+
+def find_mlclient_directory(
+    path: Path,
+) -> Path:
+    """Return the nearest .mlclient directory at path or in an ancestor.
+
+    Searches path and, failing there, each parent up to the root.
+
+    Parameters
+    ----------
+    path : Path
+        A path to start the search from
+
+    Returns
+    -------
+    Path
+        The located .mlclient directory
+
+    Raises
+    ------
+    MLClientDirectoryNotFoundError
+        If no .mlclient directory exists at path or any of its parents
+    """
+    if path.as_posix() in (".", "/"):
+        msg = (
+            f"{constants.ML_CLIENT_DIR} directory has not been found in any of "
+            f"parent directories!"
+        )
+        raise MLClientDirectoryNotFoundError(msg)
+    mlclient_dir = next(
+        (child for child in path.glob(constants.ML_CLIENT_DIR) if child.is_dir()),
+        None,
+    )
+    if mlclient_dir:
+        logger.debug("MLClient configuration home directory found: [%s]", mlclient_dir)
+        return mlclient_dir
+    return find_mlclient_directory(path.parent)

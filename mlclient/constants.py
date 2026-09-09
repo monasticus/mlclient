@@ -31,10 +31,25 @@ HEADER_PRIMITIVE_DATE = "date"
 HEADER_PRIMITIVE_DATE_TIME = "dateTime"
 HEADER_PRIMITIVE_DOCUMENT_NODE = "document-node()"
 
+# APP SERVERS
+APP_SERVICES_PORT = 8000
+MANAGE_PORT = 8002
+ADMIN_PORT = 8001
+HEALTH_PORT = 7997
+DEFAULT_APP_SERVERS = (
+    {"id": "app-services", "rest": True},
+    {"id": "manage", "port": MANAGE_PORT},
+    {"id": "admin", "port": ADMIN_PORT},
+    {"id": "health", "port": HEALTH_PORT, "auth": "app"},
+)
+
 # PATHS
 ML_CLIENT_DIR = ".mlclient"
 
 __all__ = [
+    "ADMIN_PORT",
+    "APP_SERVICES_PORT",
+    "DEFAULT_APP_SERVERS",
     "HEADER_HTML",
     "HEADER_JSON",
     "HEADER_MULTIPART_MIXED",
@@ -51,6 +66,8 @@ __all__ = [
     "HEADER_PRIMITIVE_STRING",
     "HEADER_XML",
     "HEADER_X_WWW_FORM_URLENCODED",
+    "HEALTH_PORT",
+    "MANAGE_PORT",
     "METHOD_DELETE",
     "METHOD_GET",
     "METHOD_POST",

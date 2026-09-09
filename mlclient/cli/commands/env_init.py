@@ -26,15 +26,17 @@ from pydantic import ValidationError
 
 from mlclient import AsyncMLClient, MLEnvironment, constants
 from mlclient.connection import SSLConfig
+from mlclient.constants import (
+    ADMIN_PORT,
+    APP_SERVICES_PORT,
+    HEALTH_PORT,
+    MANAGE_PORT,
+)
 from mlclient.exceptions import EnvironmentFileExistsError, WrongParametersError
 from mlclient.http_config import HTTPConfig
 
 logger = logging.getLogger(__name__)
 
-MANAGE_PORT = 8002
-ADMIN_PORT = 8001
-APP_SERVICES_PORT = 8000
-HEALTH_PORT = 7997
 MAX_PORT = 65535
 
 _CLIENT_AUTH_METHODS = ("basic", "digest", "digestbasic")

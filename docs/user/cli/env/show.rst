@@ -50,14 +50,20 @@ Render one environment
 ----------------------
 
 Given a name it renders that environment's settings as a table, with the app
-servers in a second table. Passwords and other secrets are masked:
+servers in a second table. Passwords and API keys are masked, including those
+nested in mappings and lists:
 
 .. code-block:: bash
 
     ml env show local
 
+An empty file is rendered as an empty environment. Otherwise, the YAML must
+contain a mapping. ``app-servers`` may be omitted, null, or a list of mappings,
+each with a non-empty string ``id``. Invalid YAML or an invalid structure
+produces an error naming the file without printing its contents.
+
 Pass ``--raw`` to print the configuration file verbatim instead - no table, no
-masking:
+masking or YAML validation:
 
 .. code-block:: bash
 

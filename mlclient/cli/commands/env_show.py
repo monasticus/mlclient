@@ -18,12 +18,6 @@ from cleo.io.inputs.option import Option
 from cleo.ui.table import Table
 
 from mlclient import constants, find_mlclient_directory
-from mlclient.cli.commands.env_init import (
-    ADMIN_PORT,
-    APP_SERVICES_PORT,
-    HEALTH_PORT,
-    MANAGE_PORT,
-)
 from mlclient.exceptions import MLClientDirectoryNotFoundError, WrongParametersError
 
 _FILE_PREFIX = "mlclient-"
@@ -31,10 +25,12 @@ _FILE_SUFFIX = ".yaml"
 _SECRET_MASK = "****"
 _APP_SERVERS_KEY = "app-servers"
 _PREDEFINED_SERVERS = {
-    "app-services": {"id": "app-services", "port": APP_SERVICES_PORT, "rest": True},
-    "manage": {"id": "manage", "port": MANAGE_PORT},
-    "admin": {"id": "admin", "port": ADMIN_PORT},
-    "health": {"id": "health", "port": HEALTH_PORT, "auth": "app"},
+    server["id"]: {
+        "id": server["id"],
+        "port": constants.APP_SERVICES_PORT,
+        **server,
+    }
+    for server in constants.DEFAULT_APP_SERVERS
 }
 
 
@@ -135,7 +131,7 @@ class EnvShowCommand(Command):
             self.line(Formatter.escape(path.read_text().rstrip("\n")))
             return 0
         self._announce_source(directory, path)
-        config = yaml.safe_load(path.read_text()) or {}
+        config = _read_config(path)
         servers = config.pop(_APP_SERVERS_KEY, None) or []
         reveal = self.option("secrets")
         setting = self.argument("setting")
@@ -235,6 +231,38 @@ class EnvShowCommand(Command):
         )
 
 
+def _read_config(path: Path) -> dict:
+    """Read YAML and validate the structure needed to render an environment."""
+    try:
+        config = yaml.safe_load(path.read_text())
+    except yaml.YAMLError:
+        message = f"Invalid YAML in {path}."
+        raise WrongParametersError(message) from None
+    if config is None:
+        return {}
+    if not isinstance(config, dict):
+        message = f"Environment in {path} must be a mapping."
+        raise WrongParametersError(message)
+    servers = config.get(_APP_SERVERS_KEY)
+    if servers is None:
+        return config
+    if not isinstance(servers, list):
+        message = f"In {path}, app-servers must be a list."
+        raise WrongParametersError(message)
+    for server in servers:
+        if (
+            not isinstance(server, dict)
+            or not isinstance(server.get("id"), str)
+            or not server["id"].strip()
+        ):
+            message = (
+                f"In {path}, each app server must be a mapping "
+                "with a non-empty string id."
+            )
+            raise WrongParametersError(message)
+    return config
+
+
 def _env_names(
     directory: Path,
 ) -> list[str]:
@@ -270,12 +298,7 @@ def _server_columns(
     servers: list[dict],
 ) -> list[str]:
     """Collect the union of server keys, keeping first-seen order."""
-    columns: list[str] = []
-    for server in servers:
-        for key in server:
-            if key not in columns:
-                columns.append(key)
-    return columns
+    return list(dict.fromkeys(key for server in servers for key in server))
 
 
 def _title(text: str) -> str:
@@ -337,7 +360,7 @@ def _display_value(
     if isinstance(value, bool):
         return "true" if value else "false"
     if isinstance(value, list):
-        return ", ".join(str(item) for item in value)
+        return ", ".join(_display_value(key, item, reveal=reveal) for item in value)
     return str(value)
 
 

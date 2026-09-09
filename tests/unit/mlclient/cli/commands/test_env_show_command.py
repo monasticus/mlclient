@@ -139,6 +139,18 @@ def test_renders_settings_and_masks_password() -> None:
     assert "****" in output
 
 
+@pytest.mark.parametrize("content", ["", "# Empty environment\n", "null\n"])
+def test_renders_empty_environment(content: str) -> None:
+    _write_env("dev", {})
+    (Path.cwd() / ".mlclient" / "mlclient-dev.yaml").write_text(content)
+    tester = _get_tester()
+
+    tester.execute("dev")
+
+    assert tester.status_code == 0
+    assert "Setting" in tester.io.fetch_output()
+
+
 def test_renders_app_servers() -> None:
     _write_env(
         "dev",
@@ -158,6 +170,18 @@ def test_renders_app_servers() -> None:
     assert "app-services" in output
     assert "manage" in output
     assert "8002" in output
+
+
+@pytest.mark.parametrize("servers", [None, []])
+def test_renders_environment_without_app_servers(servers: object) -> None:
+    _write_env("dev", {"host": "dev.example.com", "app-servers": servers})
+    tester = _get_tester()
+
+    tester.execute("dev")
+
+    assert tester.status_code == 0
+    assert "dev.example.com" in tester.io.fetch_output()
+    assert "App Servers" not in tester.io.fetch_output()
 
 
 def test_full_view_omits_predefined_servers_absent_from_file() -> None:
@@ -185,6 +209,42 @@ def test_masks_nested_secrets() -> None:
     assert "****" in output
 
 
+@pytest.mark.parametrize("secrets", [False, True])
+def test_masks_secrets_in_lists(secrets: bool) -> None:
+    items = [{"password": "list-secret"}, [{"api-key": "nested-secret"}]]
+    _write_env(
+        "dev",
+        {"items": items},
+    )
+    tester = _get_tester()
+
+    tester.execute("dev" + (" --secrets" if secrets else ""))
+
+    output = tester.io.fetch_output()
+    assert tester.status_code == 0
+    assert ("list-secret" in output) is secrets
+    assert ("nested-secret" in output) is secrets
+    assert ("****" in output) is not secrets
+
+
+@pytest.mark.parametrize("secrets", [False, True])
+def test_masks_app_server_secrets_in_lists(secrets: bool) -> None:
+    items = [{"password": "list-secret"}, [{"api-key": "nested-secret"}]]
+    _write_env(
+        "dev",
+        {"app-servers": [{"id": "rest", "items": items}]},
+    )
+    tester = _get_tester()
+
+    tester.execute("dev" + (" --secrets" if secrets else ""))
+
+    output = tester.io.fetch_output()
+    assert tester.status_code == 0
+    assert ("list-secret" in output) is secrets
+    assert ("nested-secret" in output) is secrets
+    assert ("****" in output) is not secrets
+
+
 def test_show_secrets_reveals_password() -> None:
     _write_env("dev", {"host": "dev.example.com", "password": "s3cret"})
 
@@ -209,6 +269,17 @@ def test_raw_prints_file_verbatim_without_masking() -> None:
     assert "****" not in output
 
 
+def test_raw_prints_invalid_yaml_without_parsing() -> None:
+    _write_env("dev", {})
+    (Path.cwd() / ".mlclient" / "mlclient-dev.yaml").write_text("host: [")
+    tester = _get_tester()
+
+    tester.execute("dev --raw")
+
+    assert tester.status_code == 0
+    assert tester.io.fetch_output() == "host: [\n"
+
+
 def test_reports_unknown_environment() -> None:
     _write_env("dev", {"host": "dev.example.com"})
     tester = _get_tester()
@@ -219,6 +290,52 @@ def test_reports_unknown_environment() -> None:
     message = str(error.value)
     assert "prod" in message
     assert "dev" in message
+
+
+@pytest.mark.parametrize("config", [[], ["host"], "host", 1, False, ""])
+def test_reports_non_mapping_environment(config: object) -> None:
+    directory = Path.cwd() / ".mlclient"
+    directory.mkdir()
+    (directory / "mlclient-dev.yaml").write_text(yaml.safe_dump(config))
+    tester = _get_tester()
+
+    with pytest.raises(WrongParametersError, match="must be a mapping"):
+        tester.execute("dev")
+
+
+@pytest.mark.parametrize("servers", [{}, "rest", 1, False])
+def test_reports_non_list_app_servers(servers: object) -> None:
+    _write_env("dev", {"app-servers": servers})
+    tester = _get_tester()
+
+    with pytest.raises(WrongParametersError, match="app-servers must be a list"):
+        tester.execute("dev")
+
+
+@pytest.mark.parametrize(
+    "server", [None, "rest", [], {}, {"id": 1}, {"id": ""}, {"id": " "}],
+)
+def test_reports_invalid_app_server(server: object) -> None:
+    _write_env("dev", {"app-servers": [server]})
+    tester = _get_tester()
+
+    with pytest.raises(WrongParametersError, match="non-empty string id"):
+        tester.execute("dev")
+
+
+def test_reports_invalid_yaml_without_revealing_contents() -> None:
+    _write_env("dev", {})
+    path = Path.cwd() / ".mlclient" / "mlclient-dev.yaml"
+    path.write_text("password: [secret-value")
+    tester = _get_tester()
+
+    with pytest.raises(WrongParametersError) as error:
+        tester.execute("dev")
+
+    message = str(error.value)
+    assert "Invalid YAML" in message
+    assert str(path) in message
+    assert "secret-value" not in message
 
 
 def test_setting_prints_root_scalar_value() -> None:
@@ -244,6 +361,24 @@ def test_setting_masks_root_secret() -> None:
     assert "****" in output
 
 
+@pytest.mark.parametrize("secrets", [False, True])
+def test_setting_masks_secrets_in_lists(secrets: bool) -> None:
+    items = [{"password": "list-secret"}, [{"api-key": "nested-secret"}]]
+    _write_env(
+        "dev",
+        {"items": items},
+    )
+    tester = _get_tester()
+
+    tester.execute("dev items" + (" --secrets" if secrets else ""))
+
+    output = tester.io.fetch_output()
+    assert tester.status_code == 0
+    assert ("list-secret" in output) is secrets
+    assert ("nested-secret" in output) is secrets
+    assert ("****" in output) is not secrets
+
+
 def test_setting_renders_app_server_table() -> None:
     _write_env(
         "dev",
@@ -266,16 +401,58 @@ def test_setting_renders_app_server_table() -> None:
     assert "manage" not in output
 
 
-def test_setting_renders_predefined_app_server_absent_from_file() -> None:
+@pytest.mark.parametrize("secrets", [False, True])
+def test_setting_masks_app_server_secrets_in_lists(secrets: bool) -> None:
+    items = [{"password": "list-secret"}, [{"api-key": "nested-secret"}]]
+    _write_env(
+        "dev",
+        {"app-servers": [{"id": "rest", "items": items}]},
+    )
+    tester = _get_tester()
+
+    tester.execute("dev rest" + (" --secrets" if secrets else ""))
+
+    output = tester.io.fetch_output()
+    assert tester.status_code == 0
+    assert ("list-secret" in output) is secrets
+    assert ("nested-secret" in output) is secrets
+    assert ("****" in output) is not secrets
+
+
+@pytest.mark.parametrize(
+    ("server_id", "settings"),
+    [
+        ("app-services", ("8000", "rest", "true")),
+        ("manage", ("8002",)),
+        ("admin", ("8001",)),
+        ("health", ("7997", "auth", "app")),
+    ],
+)
+def test_setting_renders_predefined_app_server_absent_from_file(
+    server_id: str,
+    settings: tuple[str, ...],
+) -> None:
     _write_env("dev", {"host": "dev.example.com"})
 
     tester = _get_tester()
+    tester.execute(f"dev {server_id}")
+
+    output = tester.io.fetch_output()
+    assert tester.status_code == 0
+    assert server_id in output
+    assert all(value in output for value in settings)
+
+
+def test_setting_prefers_configured_server_over_predefined_default() -> None:
+    _write_env("dev", {"app-servers": [{"id": "manage", "port": 9002}]})
+    tester = _get_tester()
+
     tester.execute("dev manage")
 
     output = tester.io.fetch_output()
     assert tester.status_code == 0
-    assert "manage" in output
-    assert "8002" in output
+    assert "9002" in output
+    assert "8002" not in output
 
 
 def test_reports_unknown_setting() -> None:

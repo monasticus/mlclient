@@ -91,10 +91,7 @@ class MLServerConfig(BaseModel):
 
 
 _DEFAULT_APP_SERVERS = [
-    MLServerConfig(id="app-services", rest=True),
-    MLServerConfig(id="manage", port=8002),
-    MLServerConfig(id="admin", port=8001),
-    MLServerConfig(id="health", port=7997, auth="app"),
+    MLServerConfig(**server) for server in constants.DEFAULT_APP_SERVERS
 ]
 
 

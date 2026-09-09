@@ -152,7 +152,8 @@ class HttpClientBase:
                 request["content"] = body
 
         logger.debug(
-            "Request details: %s",
+            "Request details: base_url [%s] %s",
+            self.base_url,
             " ".join(
                 f"{k} [{v if k != 'auth' else v.__class__.__name__}]"
                 for k, v in request.items()

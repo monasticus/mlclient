@@ -20,6 +20,7 @@ MLClient provides you a nice command line interface using `cleo <https://github.
       -v|vv|vvv, --verbose  Increase the verbosity of messages: 1 for normal output, 2 for more verbose output and 3 for debug.
 
     Available commands:
+      health     Reports whether a MarkLogic environment's HealthCheck server is up
       help       Displays help for a command.
       list       Lists commands.
 
@@ -38,6 +39,7 @@ MLClient provides you a nice command line interface using `cleo <https://github.
 .. toctree::
    :hidden:
 
+   cli/health
    cli/call
    cli/env
 

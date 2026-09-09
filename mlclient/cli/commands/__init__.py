@@ -9,6 +9,8 @@ It contains all CLI commands modules:
         The Env Init Command module.
     * env_show
         The Env Show Command module.
+    * health
+        The Health Command module.
 
 It exports the following commands:
     * CallEvalCommand
@@ -19,11 +21,20 @@ It exports the following commands:
         Scaffolds an MLClient environment configuration file.
     * EnvShowCommand
         Lists MLClient environments, or renders one environment's settings.
+    * HealthCommand
+        Reports whether a MarkLogic environment's HealthCheck server is up.
 """
 
 from .call_eval import CallEvalCommand
 from .call_logs import CallLogsCommand
 from .env_init import EnvInitCommand
 from .env_show import EnvShowCommand
+from .health import HealthCommand
 
-__all__ = ["CallEvalCommand", "CallLogsCommand", "EnvInitCommand", "EnvShowCommand"]
+__all__ = [
+    "CallEvalCommand",
+    "CallLogsCommand",
+    "EnvInitCommand",
+    "EnvShowCommand",
+    "HealthCommand",
+]

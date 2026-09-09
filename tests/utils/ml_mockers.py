@@ -88,6 +88,12 @@ class MLMocker(metaclass=ABCMeta):
         self.with_method("GET")
         return self.mock_response()
 
+    def mock_head(
+        self,
+    ):
+        self.with_method("HEAD")
+        return self.mock_response()
+
     def mock_delete(
         self,
     ):

@@ -298,6 +298,31 @@ class HttpClient(HttpClientBase):
         """
         return self.request("GET", endpoint, params=params, headers=headers)
 
+    def head(
+        self,
+        endpoint: str,
+        *,
+        params: dict | None = None,
+        headers: dict | None = None,
+    ) -> Response:
+        """Send a HEAD request.
+
+        Parameters
+        ----------
+        endpoint : str
+            A REST endpoint to call
+        params : dict | None
+            Request parameters
+        headers : dict | None
+            Request headers
+
+        Returns
+        -------
+        Response
+            An HTTP response
+        """
+        return self.request("HEAD", endpoint, params=params, headers=headers)
+
     def post(
         self,
         endpoint: str,
@@ -541,6 +566,31 @@ class AsyncHttpClient(HttpClientBase):
             An HTTP response
         """
         return await self.request("GET", endpoint, params=params, headers=headers)
+
+    async def head(
+        self,
+        endpoint: str,
+        *,
+        params: dict | None = None,
+        headers: dict | None = None,
+    ) -> Response:
+        """Send an async HEAD request.
+
+        Parameters
+        ----------
+        endpoint : str
+            A REST endpoint to call
+        params : dict | None
+            Request parameters
+        headers : dict | None
+            Request headers
+
+        Returns
+        -------
+        Response
+            An HTTP response
+        """
+        return await self.request("HEAD", endpoint, params=params, headers=headers)
 
     async def post(
         self,

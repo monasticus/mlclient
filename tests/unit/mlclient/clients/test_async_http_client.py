@@ -99,6 +99,46 @@ async def test_get_with_customized_params_and_headers():
 
 @pytest.mark.asyncio
 @respx.mock
+async def test_head():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/manage/v2/servers")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_empty_response_body()
+    ml_mocker.with_response_content_type("application/xml; charset=UTF-8")
+    ml_mocker.mock_head()
+
+    async with AsyncHttpClient(port=8002) as client:
+        resp = await client.head("/manage/v2/servers")
+    assert resp.status_code == httpx.codes.OK
+    assert resp.content == b""
+    assert resp.headers.get("Content-Type") == "application/xml; charset=UTF-8"
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_head_with_customized_params_and_headers():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/manage/v2/servers")
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_header("custom-header", "custom-value")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_empty_response_body()
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.mock_head()
+
+    async with AsyncHttpClient(port=8002) as client:
+        resp = await client.head(
+            "/manage/v2/servers",
+            params={"format": "json"},
+            headers={"custom-header": "custom-value"},
+        )
+    assert resp.status_code == httpx.codes.OK
+    assert resp.content == b""
+    assert resp.headers.get("Content-Type") == "application/json; charset=UTF-8"
+
+
+@pytest.mark.asyncio
+@respx.mock
 async def test_post():
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url("http://localhost:8002/manage/v2/databases/Documents")

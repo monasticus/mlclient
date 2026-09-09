@@ -1472,14 +1472,20 @@ The probe maps the response to a verdict:
   request was misdirected (for example, aimed at an authenticated server), not
   that the node is unhealthy
 
-A health check is a point-in-time snapshot, so the probe runs with
-``NO_RETRY_STRATEGY`` (no retries) rather than retrying a ``5xx``. It
-reuses the main connection when that already targets port ``7997`` or runs on
-Cloud; otherwise it derives an unauthenticated connection to ``7997`` from the
-primary host. To point it elsewhere - a different host, port, or an explicit
-retry policy - pass a resolved :class:`~mlclient.http_config.HTTPConfig` as
-``health_config`` (mirroring ``manage_config`` / ``admin_config``); an explicit
-``retry`` on that config is honored instead of the no-retry default.
+By default, health checks use a separate connection derived from the primary
+configuration, overriding the port to ``7997``, authentication to none, and
+retry to ``NO_RETRY_STRATEGY``. This also applies when the primary connection
+already targets ``7997``. Cloud connections retain their gateway port and
+Cloud authentication, while health requests still default to no retries.
+
+Pass a resolved :class:`~mlclient.http_config.HTTPConfig` as ``health_config``
+to supply the health connection explicitly. Its host, port, authentication
+and TLS settings are preserved. When ``retry`` was omitted or passed as
+``None``, health requests use ``NO_RETRY_STRATEGY``. An explicitly supplied
+strategy is preserved, including ``DEFAULT_RETRY_STRATEGY`` itself.
+``HTTPConfig.clone()`` retains whether retry was explicitly configured;
+``has_explicit_retry`` exposes that distinction without changing the normal
+``HTTPConfig.retry`` default for other requests.
 
 .. code-block:: python
 

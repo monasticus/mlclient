@@ -64,7 +64,7 @@ class HTTPConfig:
         auth: httpx.Auth | None,
         username: str,
         password: str,
-        retry: Retry,
+        retry: Retry | None,
     ):
         """Initialize HTTPConfig from already-resolved parts.
 
@@ -118,7 +118,8 @@ class HTTPConfig:
         cloud : CloudConfig | None, default None
             MarkLogic Cloud configuration.
         retry : Retry | None, default DEFAULT_RETRY_STRATEGY
-            The retry strategy for transport creation.
+            The retry strategy for transport creation. None leaves the strategy
+            unspecified, using DEFAULT_RETRY_STRATEGY for ordinary requests.
 
         Returns
         -------
@@ -143,7 +144,7 @@ class HTTPConfig:
             auth,
             username,
             password,
-            retry or DEFAULT_RETRY_STRATEGY,
+            retry,
         )
 
     @property
@@ -204,7 +205,12 @@ class HTTPConfig:
     @property
     def retry(self) -> Retry:
         """The retry strategy for transport creation."""
-        return self._retry
+        return self._retry if self._retry is not None else DEFAULT_RETRY_STRATEGY
+
+    @property
+    def has_explicit_retry(self) -> bool:
+        """Whether a retry strategy was supplied rather than left to the default."""
+        return self._retry is not None
 
     def transport_verify(self) -> ssl.SSLContext | bool:
         """Return the SSL verification setting for transport creation."""
@@ -227,10 +233,13 @@ class HTTPConfig:
 
         Fixed-port siblings (Admin on 8001, Manage on 8002) use
         ``config.clone(port=...)``. Cloud routes every tier through its single
-        port-443 connection, so a Cloud config yields itself unchanged.
+        port-443 connection, so Cloud ignores port overrides. Other overrides
+        still produce a fresh config, including a changed retry strategy.
         """
         if self._connection.is_cloud:
-            return self
+            overrides.pop("port", None)
+            if not overrides:
+                return self
         base = {
             "protocol": self.protocol,
             "host": self._host,

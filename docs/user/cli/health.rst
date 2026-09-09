@@ -30,9 +30,9 @@ The command sends a ``HEAD /`` request to the environment's HealthCheck server
 - ``HEALTHY`` (green) when the server answers with a success code,
 - ``UNHEALTHY`` (red) when it answers with a failure code.
 
-A server that cannot be reached raises the underlying transport error rather
-than printing a status. The exit code is ``0`` only when the status is
-``HEALTHY``, so the command is usable in scripts and health gates.
+The command uses the environment's ``health`` configuration directly; no REST
+server is required. A single check exits with ``0`` for ``HEALTHY`` and ``1``
+for ``UNHEALTHY``.
 
 
 Check once
@@ -47,7 +47,10 @@ Watch until interrupted
 -----------------------
 
 Pass ``--watch`` (``-w``) to keep polling until you interrupt with Ctrl-C. Each
-status is printed on its own line, prefixed with the local timestamp:
+status is printed on its own line, prefixed with the local timestamp. When the
+server cannot be reached or a request times out, ``UNREACHABLE`` (yellow) is
+printed and polling continues. Subsequent successful requests show the current
+health status. Ctrl-C stops polling cleanly:
 
 .. code-block:: bash
 
@@ -71,6 +74,9 @@ scrolling the terminal, keeping the last ``--lines`` (``-l``) statuses visible
 .. code-block:: bash
 
     ml health -e local --watch --overwrite --lines 5
+
+With ``--no-ansi``, statuses are appended normally instead of repainting.
+Redirected output behaves the same way unless ANSI is explicitly enabled.
 
 Without ``--watch`` the ``--interval``, ``--overwrite`` and ``--lines`` options
 are ignored.

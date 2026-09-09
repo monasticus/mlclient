@@ -26,7 +26,7 @@ from mlclient.api.manage_api import AsyncManageApi, ManageApi
 from mlclient.api.rest_api import AsyncRestApi, RestApi
 from mlclient.auth import AuthParam
 from mlclient.connection import UNSET, CloudConfig, SSLConfig
-from mlclient.http_config import DEFAULT_RETRY_STRATEGY, HTTPConfig
+from mlclient.http_config import HTTPConfig
 from mlclient.ml_response_parser import MLResponseParser
 from mlclient.services.documents import AsyncDocumentsService, DocumentsService
 from mlclient.services.eval import AsyncEvalService, EvalService
@@ -194,8 +194,9 @@ class MLClient:
             instead of deriving the Admin connection from the primary
         health_config : HTTPConfig | None, default None
             An already-resolved HealthCheck configuration; when given, it is used
-            instead of deriving the HealthCheck connection (port 7997, no auth)
-            from the primary
+            instead of deriving the HealthCheck connection (port 7997, no auth,
+            no retries) from the primary. Unspecified retries default to no
+            retries; an explicitly supplied retry strategy is preserved
         """
         self._http = HttpClient(
             protocol=protocol,
@@ -212,7 +213,7 @@ class MLClient:
         self._manage_http = HttpClient(config=manage_config) if manage_config else None
         self._admin_http = HttpClient(config=admin_config) if admin_config else None
         self._health_http = (
-            HttpClient(config=health_config.clone(retry=_health_retry(health_config)))
+            HttpClient(config=_resolve_health_config(health_config))
             if health_config
             else None
         )
@@ -408,24 +409,18 @@ class MLClient:
         return self._admin_http
 
     def _get_health_http(self) -> HttpClient:
-        """Return HttpClient for the HealthCheck app server (always port 7997).
+        """Return the dedicated HealthCheck client.
 
-        An injected HealthCheck configuration supplies host/port/auth; otherwise
-        the main client is reused when it already targets port 7997 or runs on
-        Cloud (every connection routes through the single port-443 connection),
-        and a separate unauthenticated HttpClient is lazily created in the
-        remaining case. Unless the source config set retry explicitly, the probe
-        runs with a point-in-time retry policy (no retries) - see _health_retry.
+        Injected settings are preserved, with no retries when unspecified.
+        Otherwise clone the primary config with port 7997, no auth and no
+        retries. Cloud retains its gateway port and authentication.
         """
         if self._health_http is not None:
             return self._health_http
-        config = self._http.config
-        if config.cloud is not None or config.port == MARKLOGIC_HEALTHCHECK_PORT:
-            return self._http
         self._health_http = self._create_secondary_http(
             MARKLOGIC_HEALTHCHECK_PORT,
             auth=None,
-            retry=_health_retry(config),
+            retry=NO_RETRY_STRATEGY,
         )
         return self._health_http
 
@@ -515,8 +510,9 @@ class AsyncMLClient:
             instead of deriving the Admin connection from the primary
         health_config : HTTPConfig | None, default None
             An already-resolved HealthCheck configuration; when given, it is used
-            instead of deriving the HealthCheck connection (port 7997, no auth)
-            from the primary
+            instead of deriving the HealthCheck connection (port 7997, no auth,
+            no retries) from the primary. Unspecified retries default to no
+            retries; an explicitly supplied retry strategy is preserved
         """
         self._http = AsyncHttpClient(
             protocol=protocol,
@@ -542,20 +538,21 @@ class AsyncMLClient:
         )
         self._health_http = (
             AsyncHttpClient(
-                config=health_config.clone(retry=_health_retry(health_config)),
+                config=_resolve_health_config(health_config),
             )
             if health_config
-            else self._create_secondary_async_http(
-                MARKLOGIC_HEALTHCHECK_PORT,
-                auth=None,
-                retry=_health_retry(self._http.config),
+            else AsyncHttpClient(
+                config=self._http.config.clone(
+                    port=MARKLOGIC_HEALTHCHECK_PORT,
+                    auth=None,
+                    retry=NO_RETRY_STRATEGY,
+                ),
             )
         )
 
     def _create_secondary_async_http(
         self,
         port: int,
-        **overrides,
     ) -> AsyncHttpClient:
         """Return a fixed-port client, reusing the main one when it fits.
 
@@ -566,7 +563,7 @@ class AsyncMLClient:
         config = self._http.config
         if config.cloud is not None or config.port == port:
             return self._http
-        return AsyncHttpClient(config=config.clone(port=port, **overrides))
+        return AsyncHttpClient(config=config.clone(port=port))
 
     async def __aenter__(self):
         """Connect and return self for use as an async context manager."""
@@ -726,16 +723,11 @@ class AsyncMLClient:
         return RestartWaiter(self._http.config)
 
 
-def _health_retry(source: HTTPConfig) -> Retry:
-    """Pick the retry policy for a health probe derived from ``source``.
-
-    A caller who set retry explicitly has it propagated; otherwise the probe
-    falls back to the point-in-time NO_RETRY_STRATEGY rather than the resolve()
-    default, which would retry a 503 (HEAD is idempotent) for ~15s.
-    """
-    if source.retry is DEFAULT_RETRY_STRATEGY:
-        return NO_RETRY_STRATEGY
-    return source.retry
+def _resolve_health_config(config: HTTPConfig) -> HTTPConfig:
+    """Preserve an injected config, defaulting only unspecified health retries."""
+    if config.has_explicit_retry:
+        return config
+    return config.clone(retry=NO_RETRY_STRATEGY)
 
 
 def _healthy_or_raise(response: Response) -> bool:

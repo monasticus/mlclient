@@ -26,6 +26,12 @@ def test_default_is_http_digest():
     assert request.headers["Authorization"].startswith("Digest ")
 
 
+def test_limits_reach_the_primary_config():
+    limits = httpx.Limits(max_connections=5)
+    ml = MLClient(limits=limits)
+    assert ml.http.config.limits is limits
+
+
 def test_https_server_cert_only():
     ml = MLClient(protocol="https", port=8003)
     assert ml.http.config.protocol == "https"

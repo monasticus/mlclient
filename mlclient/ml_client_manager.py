@@ -44,8 +44,8 @@ class MLClientManager:
             working directory through its parents.
         **overrides
             HTTPConfig.clone keyword arguments: protocol, host, port, auth,
-            username, password, ssl, cloud and retry. Applied to every server;
-            per-call overrides take precedence. Retry is configured only in
+            username, password, ssl, cloud, retry and limits. Applied to every
+            server; per-call overrides take precedence. Retry is configured only in
             Python and an explicit strategy also applies to health. These
             defaults do not modify the environment file.
 
@@ -90,7 +90,8 @@ class MLClientManager:
         MLEnvironment
             An independent copy of the environment model. Mutating it does not
             change the manager unless it is assigned back through this property.
-            Manager HTTP overrides, including retry, are not part of this model.
+            Manager HTTP overrides, including retry and limits, are not part of
+            this model.
         """
         return self._config.model_copy(deep=True)
 
@@ -130,8 +131,8 @@ class MLClientManager:
             The identifier is required; the server need not be marked as REST.
         **overrides
             HTTPConfig.clone keyword arguments: protocol, host, port, auth,
-            username, password, ssl, cloud and retry. Values override manager
-            defaults, which override environment settings. Cloud retains its
+            username, password, ssl, cloud, retry and limits. Values override
+            manager defaults, which override environment settings. Cloud retains its
             gateway port even when a port override is supplied. Retry is a
             Python-only HTTP option, not an environment YAML setting.
 
@@ -185,8 +186,8 @@ class MLClientManager:
             identifier does not require the server to be marked as REST.
         **overrides
             HTTPConfig.clone keyword arguments: protocol, host, port, auth,
-            username, password, ssl, cloud and retry. Values override manager
-            defaults, which override environment settings. Cloud retains its
+            username, password, ssl, cloud, retry and limits. Values override
+            manager defaults, which override environment settings. Cloud retains its
             gateway port even when a port override is supplied. Retry is a
             Python-only HTTP option, not an environment YAML setting.
 
@@ -241,8 +242,8 @@ class MLClientManager:
             identifier does not require the server to be marked as REST.
         **overrides
             HTTPConfig.clone keyword arguments: protocol, host, port, auth,
-            username, password, ssl, cloud and retry. Values override manager
-            defaults, which override environment settings. Cloud retains its
+            username, password, ssl, cloud, retry and limits. Values override
+            manager defaults, which override environment settings. Cloud retains its
             gateway port even when a port override is supplied. Retry is a
             Python-only HTTP option, not an environment YAML setting.
 
@@ -294,8 +295,8 @@ class MLClientManager:
             The identifier is required; the server need not be marked as REST.
         **overrides
             HTTPConfig.clone keyword arguments: protocol, host, port, auth,
-            username, password, ssl, cloud and retry. Values override manager
-            defaults, which override environment settings. Cloud retains its
+            username, password, ssl, cloud, retry and limits. Values override
+            manager defaults, which override environment settings. Cloud retains its
             gateway port even when a port override is supplied. Retry is a
             Python-only HTTP option, not an environment YAML setting.
 
@@ -341,8 +342,8 @@ class MLClientManager:
             The identifier is required; the server need not be marked as REST.
         **overrides
             HTTPConfig.clone keyword arguments: protocol, host, port, auth,
-            username, password, ssl, cloud and retry. Values override manager
-            defaults, which override environment settings. Cloud retains its
+            username, password, ssl, cloud, retry and limits. Values override
+            manager defaults, which override environment settings. Cloud retains its
             gateway port even when a port override is supplied. Retry is a
             Python-only HTTP option, not an environment YAML setting.
 
@@ -395,8 +396,8 @@ class MLClientManager:
             identifier does not require the server to be marked as REST.
         **overrides
             HTTPConfig.clone keyword arguments: protocol, host, port, auth,
-            username, password, ssl, cloud and retry. Values override manager
-            defaults, which override environment settings. Cloud retains its
+            username, password, ssl, cloud, retry and limits. Values override
+            manager defaults, which override environment settings. Cloud retains its
             gateway port even when a port override is supplied. Retry is a
             Python-only HTTP option, not an environment YAML setting.
 

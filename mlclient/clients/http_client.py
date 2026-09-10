@@ -75,6 +75,7 @@ class HttpClientBase:
         ssl: SSLConfig | None = None,
         cloud: CloudConfig | None = None,
         retry: Retry | None = None,
+        limits: httpx.Limits | None = None,
         config: HTTPConfig | None = None,
         session_owner: HttpClient | AsyncHttpClient | None = None,
     ):
@@ -102,6 +103,8 @@ class HttpClientBase:
             MarkLogic Cloud configuration
         retry : Retry | None, default Retry(total=5, backoff_factor=0.5)
             A retry strategy
+        limits : httpx.Limits | None, default None
+            Connection-pool limits; None defers to httpx's own default
         session_owner : HttpClient | AsyncHttpClient | None, default None
             Keep a lazily opened session while this owner is connected. The
             owner must disconnect its children when its lifecycle ends.
@@ -121,6 +124,7 @@ class HttpClientBase:
             ssl=ssl,
             cloud=cloud,
             retry=retry,
+            limits=limits,
         )
 
     @property
@@ -239,6 +243,8 @@ class HttpClient(HttpClientBase):
             MarkLogic Cloud configuration
         retry : Retry | None, default Retry(total=5, backoff_factor=0.5)
             A retry strategy
+        limits : httpx.Limits | None, default None
+            Connection-pool limits; None defers to httpx's own default
         """
         super().__init__(**kwargs)
 
@@ -261,7 +267,7 @@ class HttpClient(HttpClientBase):
         if self.is_connected():
             return
         logger.debug("Initiating a connection with %s", self.base_url)
-        transport = HTTPTransport(verify=self.config.transport_verify())
+        transport = HTTPTransport(**self.config.transport_options())
         self._client = Client(
             transport=RetryTransport(transport=transport, retry=self.config.retry),
         )
@@ -469,7 +475,7 @@ class HttpClient(HttpClientBase):
             method.upper(),
             endpoint,
         )
-        transport = HTTPTransport(verify=self.config.transport_verify())
+        transport = HTTPTransport(**self.config.transport_options())
         with Client(
             transport=RetryTransport(transport=transport, retry=self.config.retry),
         ) as client:
@@ -512,6 +518,8 @@ class AsyncHttpClient(HttpClientBase):
             MarkLogic Cloud configuration
         retry : Retry | None, default Retry(total=5, backoff_factor=0.5)
             A retry strategy
+        limits : httpx.Limits | None, default None
+            Connection-pool limits; None defers to httpx's own default
         """
         super().__init__(**kwargs)
 
@@ -534,7 +542,7 @@ class AsyncHttpClient(HttpClientBase):
         if self.is_connected():
             return
         logger.debug("Initiating a connection with %s", self.base_url)
-        transport = AsyncHTTPTransport(verify=self.config.transport_verify())
+        transport = AsyncHTTPTransport(**self.config.transport_options())
         self._client = AsyncClient(
             transport=RetryTransport(transport=transport, retry=self.config.retry),
         )
@@ -754,7 +762,7 @@ class AsyncHttpClient(HttpClientBase):
             method.upper(),
             endpoint,
         )
-        transport = AsyncHTTPTransport(verify=self.config.transport_verify())
+        transport = AsyncHTTPTransport(**self.config.transport_options())
         async with AsyncClient(
             transport=RetryTransport(transport=transport, retry=self.config.retry),
         ) as client:

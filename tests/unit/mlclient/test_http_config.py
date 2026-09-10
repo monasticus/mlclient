@@ -107,6 +107,50 @@ def test_cloud_clone_applies_retry_without_changing_gateway():
     assert config.has_explicit_retry is False
 
 
+def test_clone_carries_limits():
+    limits = httpx.Limits(max_connections=5)
+    config = HTTPConfig.resolve(host="ml.example.com", limits=limits)
+
+    assert config.clone(port=8002).limits is limits
+
+
+def test_unset_limits_defers_to_httpx():
+    config = HTTPConfig.resolve()
+
+    assert config.limits is None
+    assert "limits" not in config.transport_options()
+
+
+def test_explicit_limits_reach_the_transport():
+    limits = httpx.Limits(max_connections=5)
+    config = HTTPConfig.resolve(limits=limits)
+
+    assert config.transport_options()["limits"] is limits
+
+
+def test_clone_can_restore_unspecified_limits():
+    config = HTTPConfig.resolve(limits=httpx.Limits(max_connections=5))
+
+    sibling = config.clone(limits=None)
+
+    assert sibling.limits is None
+    assert config.limits is not None
+
+
+def test_cloud_clone_applies_limits_without_changing_gateway():
+    config = HTTPConfig.resolve(
+        host="x.marklogic.cloud",
+        cloud=CloudConfig(api_key="mk-1", base_path="/ml/example/manage"),
+    )
+    limits = httpx.Limits(max_connections=5)
+
+    sibling = config.clone(port=7997, limits=limits)
+
+    assert sibling.base_url == config.base_url
+    assert sibling.limits is limits
+    assert config.limits is None
+
+
 @pytest.mark.parametrize(
     "overrides",
     [
@@ -118,6 +162,7 @@ def test_cloud_clone_applies_retry_without_changing_gateway():
         {"password": "other"},
         {"ssl": SSLConfig(verify=False), "protocol": "https"},
         {"retry": Retry(total=0)},
+        {"limits": httpx.Limits(max_connections=5)},
     ],
 )
 def test_session_sharing_rejects_different_settings(overrides):
@@ -140,3 +185,12 @@ def test_session_sharing_requires_same_custom_auth_and_retry():
         config.clone(auth=httpx.BasicAuth("user", "pass")),
     )
     assert not config.can_share_session(config.clone(retry=Retry(total=2)))
+
+
+def test_session_sharing_requires_same_limits_object():
+    limits = httpx.Limits(max_connections=5)
+    config = HTTPConfig.resolve(limits=limits)
+    assert config.can_share_session(config.clone())
+    assert not config.can_share_session(
+        config.clone(limits=httpx.Limits(max_connections=5)),
+    )

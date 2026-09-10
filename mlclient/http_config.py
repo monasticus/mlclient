@@ -65,6 +65,7 @@ class HTTPConfig:
         username: str,
         password: str,
         retry: Retry | None,
+        limits: httpx.Limits | None,
     ):
         """Initialize HTTPConfig from already-resolved parts.
 
@@ -78,6 +79,7 @@ class HTTPConfig:
         self._username = username
         self._password = password
         self._retry = retry
+        self._limits = limits
 
     @classmethod
     def resolve(
@@ -92,6 +94,7 @@ class HTTPConfig:
         ssl: SSLConfig | None = None,
         cloud: CloudConfig | None = None,
         retry: Retry | None = None,
+        limits: httpx.Limits | None = None,
     ) -> HTTPConfig:
         """Resolve connection and auth parameters into an HTTPConfig.
 
@@ -120,6 +123,9 @@ class HTTPConfig:
         retry : Retry | None, default DEFAULT_RETRY_STRATEGY
             The retry strategy for transport creation. None leaves the strategy
             unspecified, using DEFAULT_RETRY_STRATEGY for ordinary requests.
+        limits : httpx.Limits | None, default None
+            The connection-pool limits for transport creation. None leaves the
+            limits unset, deferring to httpx's own default.
 
         Returns
         -------
@@ -145,6 +151,7 @@ class HTTPConfig:
             username,
             password,
             retry,
+            limits,
         )
 
     @property
@@ -211,8 +218,9 @@ class HTTPConfig:
         """Whether two configurations can safely use the same HTTP session.
 
         Compare connection and credential values, but require the same retry
-        strategy object and, for custom authentication, the same handler.
-        Custom strategies and handlers may carry behavior beyond their fields.
+        strategy and pool-limits objects and, for custom authentication, the
+        same handler. Custom strategies and handlers may carry behavior beyond
+        their fields.
         """
         same_auth = (
             self.auth_method is other.auth_method
@@ -227,6 +235,7 @@ class HTTPConfig:
             and self.password == other.password
             and same_auth
             and self.retry is other.retry
+            and self.limits is other.limits
         )
 
     @property
@@ -239,9 +248,25 @@ class HTTPConfig:
         """Whether a retry strategy was supplied rather than left to the default."""
         return self._retry is not None
 
+    @property
+    def limits(self) -> httpx.Limits | None:
+        """The connection-pool limits, or None to defer to httpx's default."""
+        return self._limits
+
     def transport_verify(self) -> ssl.SSLContext | bool:
         """Return the SSL verification setting for transport creation."""
         return transport_verify(self._connection)
+
+    def transport_options(self) -> dict:
+        """Keyword arguments for an httpx transport.
+
+        Always carries ``verify``; carries ``limits`` only when explicitly set,
+        so an unset value defers to httpx's own default.
+        """
+        options = {"verify": self.transport_verify()}
+        if self._limits is not None:
+            options["limits"] = self._limits
+        return options
 
     def build_url(self, endpoint: str) -> str:
         """Build a full request URL, applying the Cloud base path if present."""
@@ -277,6 +302,7 @@ class HTTPConfig:
             "ssl": self._connection.ssl,
             "cloud": self._connection.cloud,
             "retry": self._retry,
+            "limits": self._limits,
         }
         return self.resolve(**{**base, **overrides})
 

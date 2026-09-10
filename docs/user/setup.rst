@@ -199,31 +199,40 @@ API. For example, ``get_client("manage", port=9002)`` uses port ``9002`` for
 both ``ml.http`` and ``ml.manage``. Neither the YAML file nor subsequent calls
 are modified by per-call overrides.
 
-Configuring HTTP retry in Python
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Configuring HTTP retry and limits in Python
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-``retry`` is an HTTP client option, **not an environment setting**: it cannot
-be configured in the environment YAML. Set it on ``MLClient`` or ``HTTPConfig``
-when creating a client directly, or through the manager and its factories:
+``retry`` and ``limits`` are HTTP client options, **not environment settings**:
+neither can be configured in the environment YAML. ``limits`` caps the
+connection pool - ``max_connections`` acts as a semaphore over concurrent
+requests. Set them on ``MLClient`` or ``HTTPConfig`` when creating a client
+directly, or through the manager and its factories:
 
 .. code-block:: python
 
+   >>> import httpx
    >>> from httpx_retries import Retry
    >>> from mlclient.clients.http_client import NO_RETRY_STRATEGY
-   >>> mgr = MLClientManager("local", retry=Retry(total=2))
+   >>> mgr = MLClientManager(
+   ...     "local",
+   ...     retry=Retry(total=2),
+   ...     limits=httpx.Limits(max_connections=10),
+   ... )
    >>> with mgr.get_client("content") as ml:
    ...     result = ml.eval.xquery("1 + 1")
    >>> with mgr.get_client("health", retry=NO_RETRY_STRATEGY) as ml:
    ...     healthy = ml.healthcheck()
 
-The manager's explicit retry strategy applies to every server, including
-Health. The per-call strategy overrides it for the selected server. There is
-no YAML retry value underneath these two levels.
+The manager's values apply to every server, including Health; a per-call value
+overrides it for the selected server. There is no YAML retry or limits value
+underneath these two levels.
 
-Without an explicit retry strategy, the manager uses ``NO_RETRY_STRATEGY`` for
-``health`` and ``DEFAULT_RETRY_STRATEGY`` for other servers. Passing
-``retry=None`` per call restores that server's default, even when the manager
-specifies a strategy:
+The two differ in their defaults. Without an explicit retry strategy, the
+manager uses ``NO_RETRY_STRATEGY`` for ``health`` and ``DEFAULT_RETRY_STRATEGY``
+for other servers; passing ``retry=None`` per call restores that server's
+default even when the manager specifies a strategy. ``limits`` has no library
+default: when left unset it is not passed to the transport and ``httpx`` applies
+its own default (``max_connections=100``, ``max_keepalive_connections=20``).
 
 .. code-block:: python
 

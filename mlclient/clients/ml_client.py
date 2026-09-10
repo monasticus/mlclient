@@ -20,7 +20,7 @@ from functools import cached_property
 from types import TracebackType
 from xml.etree import ElementTree
 
-from httpx import RequestError, Response
+from httpx import Limits, RequestError, Response
 from httpx_retries import Retry
 
 from mlclient.api.admin_api import AdminApi, AsyncAdminApi
@@ -150,6 +150,7 @@ class MLClient:
         ssl: SSLConfig | None = None,
         cloud: CloudConfig | None = None,
         retry: Retry | None = None,
+        limits: Limits | None = None,
         *,
         config: HTTPConfig | None = None,
         manage_config: HTTPConfig | None = None,
@@ -188,6 +189,8 @@ class MLClient:
             authentication via the API key
         retry : Retry | None, default Retry(total=5, backoff_factor=0.5)
             A retry strategy
+        limits : httpx.Limits | None, default None
+            Connection-pool limits; None defers to httpx's own default
         config : HTTPConfig | None, default None
             An already-resolved primary configuration; when given, the
             connection parameters above are ignored
@@ -213,6 +216,7 @@ class MLClient:
             ssl=ssl,
             cloud=cloud,
             retry=retry,
+            limits=limits,
             config=config,
         )
         self._manage_http = self._secondary_http(
@@ -474,6 +478,7 @@ class AsyncMLClient:
         ssl: SSLConfig | None = None,
         cloud: CloudConfig | None = None,
         retry: Retry | None = None,
+        limits: Limits | None = None,
         *,
         config: HTTPConfig | None = None,
         manage_config: HTTPConfig | None = None,
@@ -512,6 +517,8 @@ class AsyncMLClient:
             authentication via the API key
         retry : Retry | None, default Retry(total=5, backoff_factor=0.5)
             A retry strategy
+        limits : httpx.Limits | None, default None
+            Connection-pool limits; None defers to httpx's own default
         config : HTTPConfig | None, default None
             An already-resolved primary configuration; when given, the
             connection parameters above are ignored
@@ -537,6 +544,7 @@ class AsyncMLClient:
             ssl=ssl,
             cloud=cloud,
             retry=retry,
+            limits=limits,
             config=config,
         )
         self._manage_http = self._secondary_http(

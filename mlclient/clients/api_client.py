@@ -9,6 +9,7 @@ from __future__ import annotations
 from httpx import Response
 
 from mlclient.calls import ApiCall
+from mlclient.connection import UNSET
 
 from .http_client import AsyncHttpClient, HttpClient
 
@@ -19,13 +20,19 @@ class ApiClient:
     def __init__(self, http: HttpClient):
         self._http = http
 
-    def call(self, call_: ApiCall) -> Response:
+    def call(self, call_: ApiCall, *, timeout=UNSET) -> Response:
         """Send a request using an ApiCall object.
 
         Parameters
         ----------
         call_ : ApiCall
             A specific endpoint call implementation
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request timeout applied to this call only. Unset uses the
+            client's configured timeout. None disables every HTTP timeout; a
+            number sets all four components to that many seconds; an
+            httpx.Timeout overrides them. It is an execution option, never sent
+            as a request parameter, header or body.
 
         Returns
         -------
@@ -38,6 +45,7 @@ class ApiClient:
             params=call_.params,
             headers=call_.headers,
             body=call_.body,
+            timeout=timeout,
         )
 
 
@@ -47,13 +55,19 @@ class AsyncApiClient:
     def __init__(self, http: AsyncHttpClient):
         self._http = http
 
-    async def call(self, call_: ApiCall) -> Response:
+    async def call(self, call_: ApiCall, *, timeout=UNSET) -> Response:
         """Send a request using an ApiCall object.
 
         Parameters
         ----------
         call_ : ApiCall
             A specific endpoint call implementation
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request timeout applied to this call only. Unset uses the
+            client's configured timeout. None disables every HTTP timeout; a
+            number sets all four components to that many seconds; an
+            httpx.Timeout overrides them. It is an execution option, never sent
+            as a request parameter, header or body.
 
         Returns
         -------
@@ -66,4 +80,5 @@ class AsyncApiClient:
             params=call_.params,
             headers=call_.headers,
             body=call_.body,
+            timeout=timeout,
         )

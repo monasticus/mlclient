@@ -12,6 +12,7 @@ from typing import TYPE_CHECKING
 
 from mlclient.calls import LogsCall
 from mlclient.clients.api_client import ApiClient
+from mlclient.connection import UNSET
 from mlclient.exceptions import InvalidLogTypeError, MarkLogicError
 
 if TYPE_CHECKING:
@@ -68,6 +69,7 @@ class LogsService:
         end_time: str | None = None,
         regex: str | None = None,
         host: str | None = None,
+        timeout=UNSET,
     ) -> Iterator[dict]:
         """Return logs from a MarkLogic server.
 
@@ -85,6 +87,11 @@ class LogsService:
             A regex to search error logs
         host : str | None, default None
             A host name with logs to retrieve
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request HTTP timeout for this call. Unset uses the client's
+            configured timeout; None disables every HTTP timeout; a number sets
+            all four components to that many seconds; an httpx.Timeout overrides
+            them.
 
         Returns
         -------
@@ -107,7 +114,7 @@ class LogsService:
             host=host,
         )
 
-        resp = self._api.call(call)
+        resp = self._api.call(call, timeout=timeout)
         resp_body = resp.json()
         if not resp.is_success:
             raise MarkLogicError(resp_body["errorResponse"])
@@ -117,6 +124,8 @@ class LogsService:
     def list(
         self,
         host: str | None = None,
+        *,
+        timeout=UNSET,
     ) -> dict:
         """Return a logs list from a MarkLogic server.
 
@@ -124,6 +133,11 @@ class LogsService:
         ----------
         host : str | None, default None
             A host name with log files to retrieve
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request HTTP timeout for this call. Unset uses the client's
+            configured timeout; None disables every HTTP timeout; a number sets
+            all four components to that many seconds; an httpx.Timeout overrides
+            them.
 
         Returns
         -------
@@ -137,7 +151,7 @@ class LogsService:
         """
         call = self._get_call(host=host)
 
-        resp = self._api.call(call)
+        resp = self._api.call(call, timeout=timeout)
         resp_body = resp.json()
         if "errorResponse" in resp_body:
             raise MarkLogicError(resp_body["errorResponse"])
@@ -273,6 +287,7 @@ class AsyncLogsService(LogsService):
         end_time: str | None = None,
         regex: str | None = None,
         host: str | None = None,
+        timeout=UNSET,
     ) -> Iterator[dict]:
         """Return logs from a MarkLogic server."""
         if isinstance(log_type, str):
@@ -286,7 +301,7 @@ class AsyncLogsService(LogsService):
             host=host,
         )
 
-        resp = await self._api.call(call)
+        resp = await self._api.call(call, timeout=timeout)
         resp_body = resp.json()
         if not resp.is_success:
             raise MarkLogicError(resp_body["errorResponse"])
@@ -296,11 +311,13 @@ class AsyncLogsService(LogsService):
     async def list(  # type: ignore[override]
         self,
         host: str | None = None,
+        *,
+        timeout=UNSET,
     ) -> dict:
         """Return a logs list from a MarkLogic server."""
         call = self._get_call(host=host)
 
-        resp = await self._api.call(call)
+        resp = await self._api.call(call, timeout=timeout)
         resp_body = resp.json()
         if "errorResponse" in resp_body:
             raise MarkLogicError(resp_body["errorResponse"])

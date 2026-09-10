@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING
 from httpx import Response
 
 from mlclient.calls import TransactionGetCall, TransactionPostCall, TransactionsPostCall
+from mlclient.connection import UNSET
 
 # Avoid circular import: ApiClient -> api classes -> ApiClient
 if TYPE_CHECKING:
@@ -30,6 +31,7 @@ class TransactionsApi:
         name: str | None = None,
         time_limit: int | None = None,
         database: str | None = None,
+        timeout=UNSET,
     ) -> Response:
         """Create a multi-statement transaction.
 
@@ -47,6 +49,11 @@ class TransactionsApi:
         database : str
             Evaluate against the named content database instead of the default
             content database associated with the REST API instance.
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request timeout for this call. Unset uses the client's
+            configured timeout; None disables every HTTP timeout; a number sets
+            all four components to that many seconds; an httpx.Timeout overrides
+            them. It is an execution option, never sent as a request parameter.
 
         Returns
         -------
@@ -58,7 +65,7 @@ class TransactionsApi:
             time_limit=time_limit,
             database=database,
         )
-        return self._api.call(call)
+        return self._api.call(call, timeout=timeout)
 
     def get(
         self,
@@ -66,6 +73,7 @@ class TransactionsApi:
         *,
         data_format: str | None = None,
         database: str | None = None,
+        timeout=UNSET,
     ) -> Response:
         """Retrieve the status of the specified transaction.
 
@@ -80,6 +88,11 @@ class TransactionsApi:
         database : str
             Evaluate against the named content database instead of the default
             content database associated with the REST API instance.
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request timeout for this call. Unset uses the client's
+            configured timeout; None disables every HTTP timeout; a number sets
+            all four components to that many seconds; an httpx.Timeout overrides
+            them. It is an execution option, never sent as a request parameter.
 
         Returns
         -------
@@ -91,7 +104,7 @@ class TransactionsApi:
             data_format=data_format,
             database=database,
         )
-        return self._api.call(call)
+        return self._api.call(call, timeout=timeout)
 
     def post(
         self,
@@ -99,6 +112,7 @@ class TransactionsApi:
         *,
         result: str,
         database: str | None = None,
+        timeout=UNSET,
     ) -> Response:
         """Commit or roll back the specified transaction.
 
@@ -113,6 +127,11 @@ class TransactionsApi:
         database : str
             Evaluate against the named content database instead of the default
             content database associated with the REST API instance.
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request timeout for this call. Unset uses the client's
+            configured timeout; None disables every HTTP timeout; a number sets
+            all four components to that many seconds; an httpx.Timeout overrides
+            them. It is an execution option, never sent as a request parameter.
 
         Returns
         -------
@@ -124,7 +143,7 @@ class TransactionsApi:
             result=result,
             database=database,
         )
-        return self._api.call(call)
+        return self._api.call(call, timeout=timeout)
 
 
 class AsyncTransactionsApi:
@@ -139,6 +158,7 @@ class AsyncTransactionsApi:
         name: str | None = None,
         time_limit: int | None = None,
         database: str | None = None,
+        timeout=UNSET,
     ) -> Response:
         """Create a multi-statement transaction."""
         call = TransactionsPostCall(
@@ -146,7 +166,7 @@ class AsyncTransactionsApi:
             time_limit=time_limit,
             database=database,
         )
-        return await self._api.call(call)
+        return await self._api.call(call, timeout=timeout)
 
     async def get(
         self,
@@ -154,6 +174,7 @@ class AsyncTransactionsApi:
         *,
         data_format: str | None = None,
         database: str | None = None,
+        timeout=UNSET,
     ) -> Response:
         """Retrieve the status of the specified transaction."""
         call = TransactionGetCall(
@@ -161,7 +182,7 @@ class AsyncTransactionsApi:
             data_format=data_format,
             database=database,
         )
-        return await self._api.call(call)
+        return await self._api.call(call, timeout=timeout)
 
     async def post(
         self,
@@ -169,6 +190,7 @@ class AsyncTransactionsApi:
         *,
         result: str,
         database: str | None = None,
+        timeout=UNSET,
     ) -> Response:
         """Commit or roll back the specified transaction."""
         call = TransactionPostCall(
@@ -176,4 +198,4 @@ class AsyncTransactionsApi:
             result=result,
             database=database,
         )
-        return await self._api.call(call)
+        return await self._api.call(call, timeout=timeout)

@@ -14,6 +14,7 @@ from mlclient.calls import (
     RolesGetCall,
     RolesPostCall,
 )
+from mlclient.connection import UNSET
 
 # Avoid circular import: ApiClient -> api classes -> ApiClient
 if TYPE_CHECKING:
@@ -36,6 +37,7 @@ class RolesApi:
         *,
         data_format: str | None = None,
         view: str | None = None,
+        timeout=UNSET,
     ) -> Response:
         """Retrieve a summary of the roles in the security database.
 
@@ -47,6 +49,11 @@ class RolesApi:
             The format of the returned data. Can be either html, json, or xml (default).
         view : str
             A specific view of the returned data. Can be: describe, or default.
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request timeout for this call. Unset uses the client's
+            configured timeout; None disables every HTTP timeout; a number sets
+            all four components to that many seconds; an httpx.Timeout overrides
+            them. It is an execution option, never sent as a request parameter.
 
         Returns
         -------
@@ -54,11 +61,13 @@ class RolesApi:
             An HTTP response with the roles summary
         """
         call = RolesGetCall(data_format=data_format, view=view)
-        return self._api.call(call)
+        return self._api.call(call, timeout=timeout)
 
     def create(
         self,
         body: str | dict,
+        *,
+        timeout=UNSET,
     ) -> Response:
         """Create a new role in the security database.
 
@@ -68,6 +77,11 @@ class RolesApi:
         ----------
         body : str | dict
             A role properties in XML or JSON format.
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request timeout for this call. Unset uses the client's
+            configured timeout; None disables every HTTP timeout; a number sets
+            all four components to that many seconds; an httpx.Timeout overrides
+            them. It is an execution option, never sent as a request parameter.
 
         Returns
         -------
@@ -75,7 +89,7 @@ class RolesApi:
             An HTTP response
         """
         call = RolesPostCall(body=body)
-        return self._api.call(call)
+        return self._api.call(call, timeout=timeout)
 
     def get(
         self,
@@ -83,6 +97,7 @@ class RolesApi:
         *,
         data_format: str | None = None,
         view: str | None = None,
+        timeout=UNSET,
     ) -> Response:
         """Retrieve the configuration for the specified role.
 
@@ -97,6 +112,11 @@ class RolesApi:
             This parameter is not meaningful with view=edit.
         view : str
             A specific view of the returned data. Can be: describe, or default.
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request timeout for this call. Unset uses the client's
+            configured timeout; None disables every HTTP timeout; a number sets
+            all four components to that many seconds; an httpx.Timeout overrides
+            them. It is an execution option, never sent as a request parameter.
 
         Returns
         -------
@@ -104,11 +124,13 @@ class RolesApi:
             An HTTP response with the role details
         """
         call = RoleGetCall(role=role, data_format=data_format, view=view)
-        return self._api.call(call)
+        return self._api.call(call, timeout=timeout)
 
     def delete(
         self,
         role: str,
+        *,
+        timeout=UNSET,
     ) -> Response:
         """Delete the specified role from the security database.
 
@@ -118,6 +140,11 @@ class RolesApi:
         ----------
         role : str
             A role identifier. The role can be identified either by ID or name.
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request timeout for this call. Unset uses the client's
+            configured timeout; None disables every HTTP timeout; a number sets
+            all four components to that many seconds; an httpx.Timeout overrides
+            them. It is an execution option, never sent as a request parameter.
 
         Returns
         -------
@@ -125,13 +152,14 @@ class RolesApi:
             An HTTP response
         """
         call = RoleDeleteCall(role=role)
-        return self._api.call(call)
+        return self._api.call(call, timeout=timeout)
 
     def get_properties(
         self,
         role: str,
         *,
         data_format: str | None = None,
+        timeout=UNSET,
     ) -> Response:
         """Retrieve the properties of the specified role.
 
@@ -144,6 +172,11 @@ class RolesApi:
         data_format : str
             The format of the returned data. Can be either json or xml (default).
             This parameter overrides the Accept header if both are present.
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request timeout for this call. Unset uses the client's
+            configured timeout; None disables every HTTP timeout; a number sets
+            all four components to that many seconds; an httpx.Timeout overrides
+            them. It is an execution option, never sent as a request parameter.
 
         Returns
         -------
@@ -151,12 +184,14 @@ class RolesApi:
             An HTTP response with the role properties
         """
         call = RolePropertiesGetCall(role=role, data_format=data_format)
-        return self._api.call(call)
+        return self._api.call(call, timeout=timeout)
 
     def put_properties(
         self,
         role: str,
         body: str | dict,
+        *,
+        timeout=UNSET,
     ) -> Response:
         """Update the properties for the specified role.
 
@@ -168,6 +203,11 @@ class RolesApi:
             A role identifier. The role can be identified either by ID or name.
         body : str | dict
             A role properties in XML or JSON format.
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request timeout for this call. Unset uses the client's
+            configured timeout; None disables every HTTP timeout; a number sets
+            all four components to that many seconds; an httpx.Timeout overrides
+            them. It is an execution option, never sent as a request parameter.
 
         Returns
         -------
@@ -175,7 +215,7 @@ class RolesApi:
             An HTTP response
         """
         call = RolePropertiesPutCall(role=role, body=body)
-        return self._api.call(call)
+        return self._api.call(call, timeout=timeout)
 
 
 class AsyncRolesApi:
@@ -189,18 +229,21 @@ class AsyncRolesApi:
         *,
         data_format: str | None = None,
         view: str | None = None,
+        timeout=UNSET,
     ) -> Response:
         """Retrieve a summary of the roles in the security database."""
         call = RolesGetCall(data_format=data_format, view=view)
-        return await self._api.call(call)
+        return await self._api.call(call, timeout=timeout)
 
     async def create(
         self,
         body: str | dict,
+        *,
+        timeout=UNSET,
     ) -> Response:
         """Create a new role in the security database."""
         call = RolesPostCall(body=body)
-        return await self._api.call(call)
+        return await self._api.call(call, timeout=timeout)
 
     async def get(
         self,
@@ -208,34 +251,40 @@ class AsyncRolesApi:
         *,
         data_format: str | None = None,
         view: str | None = None,
+        timeout=UNSET,
     ) -> Response:
         """Retrieve the configuration for the specified role."""
         call = RoleGetCall(role=role, data_format=data_format, view=view)
-        return await self._api.call(call)
+        return await self._api.call(call, timeout=timeout)
 
     async def delete(
         self,
         role: str,
+        *,
+        timeout=UNSET,
     ) -> Response:
         """Delete the specified role from the security database."""
         call = RoleDeleteCall(role=role)
-        return await self._api.call(call)
+        return await self._api.call(call, timeout=timeout)
 
     async def get_properties(
         self,
         role: str,
         *,
         data_format: str | None = None,
+        timeout=UNSET,
     ) -> Response:
         """Retrieve the properties of the specified role."""
         call = RolePropertiesGetCall(role=role, data_format=data_format)
-        return await self._api.call(call)
+        return await self._api.call(call, timeout=timeout)
 
     async def put_properties(
         self,
         role: str,
         body: str | dict,
+        *,
+        timeout=UNSET,
     ) -> Response:
         """Update the properties for the specified role."""
         call = RolePropertiesPutCall(role=role, body=body)
-        return await self._api.call(call)
+        return await self._api.call(call, timeout=timeout)

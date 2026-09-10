@@ -20,7 +20,7 @@ from functools import cached_property
 from types import TracebackType
 from xml.etree import ElementTree
 
-from httpx import Limits, RequestError, Response, Timeout
+from httpx import Limits, RequestError, Response
 from httpx_retries import Retry
 
 from mlclient.api.admin_api import AdminApi, AsyncAdminApi
@@ -29,7 +29,7 @@ from mlclient.api.rest_api import AsyncRestApi, RestApi
 from mlclient.auth import AuthParam
 from mlclient.connection import UNSET, CloudConfig, SSLConfig
 from mlclient.exceptions import MarkLogicError
-from mlclient.http_config import HTTPConfig
+from mlclient.http_config import HEALTH_TIMEOUT, HTTPConfig
 from mlclient.ml_response_parser import MLResponseParser
 from mlclient.models.version import MarkLogicVersion
 from mlclient.services.documents import AsyncDocumentsService, DocumentsService
@@ -151,7 +151,7 @@ class MLClient:
         cloud: CloudConfig | None = None,
         retry: Retry | None = None,
         limits: Limits | None = None,
-        timeout: Timeout | None = None,
+        timeout=UNSET,
         *,
         config: HTTPConfig | None = None,
         manage_config: HTTPConfig | None = None,
@@ -192,9 +192,12 @@ class MLClient:
             A retry strategy
         limits : httpx.Limits | None, default None
             Connection-pool limits; None defers to httpx's own default
-        timeout : httpx.Timeout | None, default Timeout(connect=5, read=60, \
-write=60, pool=5)
-            A request timeout
+        timeout : httpx.Timeout | float | None, default unset
+            The request timeout. Unset uses DEFAULT_TIMEOUT (connect=5, read=60,
+            write=60, pool=5 seconds). None disables every HTTP timeout. A number
+            sets all four components to that many seconds. An httpx.Timeout fully
+            overrides them without merging. The derived HealthCheck connection
+            always uses HEALTH_TIMEOUT, independent of this value
         config : HTTPConfig | None, default None
             An already-resolved primary configuration; when given, the
             connection parameters above are ignored
@@ -207,8 +210,11 @@ write=60, pool=5)
         health_config : HTTPConfig | None, default None
             An already-resolved HealthCheck configuration; when given, it is used
             instead of deriving the HealthCheck connection (port 7997, no auth,
-            no retries) from the primary. Unspecified retries default to no
-            retries; an explicitly supplied retry strategy is preserved
+            no retries, HEALTH_TIMEOUT) from the primary. Retry and timeout are
+            resolved independently: an unspecified retry defaults to no retries
+            and an unspecified timeout to HEALTH_TIMEOUT, while an explicitly
+            supplied retry strategy or timeout (including None to disable it) is
+            preserved
         """
         self._http = HttpClient(
             protocol=protocol,
@@ -237,6 +243,7 @@ write=60, pool=5)
                 port=MARKLOGIC_HEALTHCHECK_PORT,
                 auth=None,
                 retry=NO_RETRY_STRATEGY,
+                timeout=HEALTH_TIMEOUT,
             ),
         )
 
@@ -274,10 +281,18 @@ write=60, pool=5)
         """Admin API (``/admin/v1/*``) - requires Admin server (port 8001)."""
         return AdminApi(ApiClient(self._admin_http))
 
-    def healthcheck(self) -> bool:
+    def healthcheck(self, *, timeout=UNSET) -> bool:
         """Report whether the HealthCheck app server (port 7997) is healthy.
 
         Sends a HEAD request to ``/`` on the HealthCheck connection.
+
+        Parameters
+        ----------
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request timeout for this probe. Unset uses the HealthCheck
+            connection's timeout (HEALTH_TIMEOUT unless overridden). None
+            disables every HTTP timeout; a number sets all four components to
+            that many seconds; an httpx.Timeout overrides them.
 
         Returns
         -------
@@ -291,7 +306,7 @@ write=60, pool=5)
             misdirected request (the HealthCheck server takes no auth) rather
             than an unhealthy server
         """
-        return _healthy_or_raise(self._health_http.head("/"))
+        return _healthy_or_raise(self._health_http.head("/", timeout=timeout))
 
     @property
     def parser(self) -> type[MLResponseParser]:
@@ -375,6 +390,7 @@ write=60, pool=5)
         name: str | None = None,
         time_limit: int | None = None,
         database: str | None = None,
+        timeout=UNSET,
     ) -> TransactionService:
         """Open a multi-statement transaction and return a service scoped to it.
 
@@ -382,12 +398,21 @@ write=60, pool=5)
 
         >>> with ml.transaction(database="my-db") as txn:  # doctest: +SKIP
         ...     ml.eval.xquery("...", **txn)
+
+        ``timeout`` bounds only the HTTP request that opens the transaction:
+        unset uses the client's configured timeout, None disables every HTTP
+        timeout, a number sets all four components to that many seconds, and an
+        httpx.Timeout overrides them. It is unrelated to ``time_limit``, the
+        server-side lifetime of the transaction. Subsequent operations
+        (status/commit/rollback and content ops run with ``**txn``) accept their
+        own ``timeout``.
         """
         return open_transaction(
             ApiClient(self._http),
             name=name,
             time_limit=time_limit,
             database=database,
+            timeout=timeout,
         )
 
     def connect(self):
@@ -484,7 +509,7 @@ class AsyncMLClient:
         cloud: CloudConfig | None = None,
         retry: Retry | None = None,
         limits: Limits | None = None,
-        timeout: Timeout | None = None,
+        timeout=UNSET,
         *,
         config: HTTPConfig | None = None,
         manage_config: HTTPConfig | None = None,
@@ -525,9 +550,12 @@ class AsyncMLClient:
             A retry strategy
         limits : httpx.Limits | None, default None
             Connection-pool limits; None defers to httpx's own default
-        timeout : httpx.Timeout | None, default Timeout(connect=5, read=60, \
-write=60, pool=5)
-            A request timeout
+        timeout : httpx.Timeout | float | None, default unset
+            The request timeout. Unset uses DEFAULT_TIMEOUT (connect=5, read=60,
+            write=60, pool=5 seconds). None disables every HTTP timeout. A number
+            sets all four components to that many seconds. An httpx.Timeout fully
+            overrides them without merging. The derived HealthCheck connection
+            always uses HEALTH_TIMEOUT, independent of this value
         config : HTTPConfig | None, default None
             An already-resolved primary configuration; when given, the
             connection parameters above are ignored
@@ -540,8 +568,11 @@ write=60, pool=5)
         health_config : HTTPConfig | None, default None
             An already-resolved HealthCheck configuration; when given, it is used
             instead of deriving the HealthCheck connection (port 7997, no auth,
-            no retries) from the primary. Unspecified retries default to no
-            retries; an explicitly supplied retry strategy is preserved
+            no retries, HEALTH_TIMEOUT) from the primary. Retry and timeout are
+            resolved independently: an unspecified retry defaults to no retries
+            and an unspecified timeout to HEALTH_TIMEOUT, while an explicitly
+            supplied retry strategy or timeout (including None to disable it) is
+            preserved
         """
         self._http = AsyncHttpClient(
             protocol=protocol,
@@ -570,6 +601,7 @@ write=60, pool=5)
                 port=MARKLOGIC_HEALTHCHECK_PORT,
                 auth=None,
                 retry=NO_RETRY_STRATEGY,
+                timeout=HEALTH_TIMEOUT,
             ),
         )
 
@@ -613,10 +645,18 @@ write=60, pool=5)
         """Admin API (``/admin/v1/*``) - requires Admin server (port 8001)."""
         return AsyncAdminApi(AsyncApiClient(self._admin_http))
 
-    async def healthcheck(self) -> bool:
+    async def healthcheck(self, *, timeout=UNSET) -> bool:
         """Report whether the HealthCheck app server (port 7997) is healthy.
 
         Sends a HEAD request to ``/`` on the HealthCheck connection.
+
+        Parameters
+        ----------
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request timeout for this probe. Unset uses the HealthCheck
+            connection's timeout (HEALTH_TIMEOUT unless overridden). None
+            disables every HTTP timeout; a number sets all four components to
+            that many seconds; an httpx.Timeout overrides them.
 
         Returns
         -------
@@ -630,7 +670,7 @@ write=60, pool=5)
             misdirected request (the HealthCheck server takes no auth) rather
             than an unhealthy server
         """
-        return _healthy_or_raise(await self._health_http.head("/"))
+        return _healthy_or_raise(await self._health_http.head("/", timeout=timeout))
 
     @property
     def parser(self) -> type[MLResponseParser]:
@@ -713,6 +753,7 @@ write=60, pool=5)
         name: str | None = None,
         time_limit: int | None = None,
         database: str | None = None,
+        timeout=UNSET,
     ) -> AsyncTransactionService:
         """Open a multi-statement transaction and return a service scoped to it.
 
@@ -721,12 +762,21 @@ write=60, pool=5)
 
         >>> async with await ml.transaction(database="my-db") as txn:  # doctest: +SKIP
         ...     await ml.eval.xquery("...", **txn)
+
+        ``timeout`` bounds only the HTTP request that opens the transaction:
+        unset uses the client's configured timeout, None disables every HTTP
+        timeout, a number sets all four components to that many seconds, and an
+        httpx.Timeout overrides them. It is unrelated to ``time_limit``, the
+        server-side lifetime of the transaction. Subsequent operations
+        (status/commit/rollback and content ops run with ``**txn``) accept their
+        own ``timeout``.
         """
         return await async_open_transaction(
             AsyncApiClient(self._http),
             name=name,
             time_limit=time_limit,
             database=database,
+            timeout=timeout,
         )
 
     async def connect(self):
@@ -808,10 +858,18 @@ def _admin_config_version(server_config: str) -> str | None:
 
 
 def _resolve_health_config(config: HTTPConfig) -> HTTPConfig:
-    """Preserve an injected config, defaulting only unspecified health retries."""
-    if config.has_explicit_retry:
-        return config
-    return config.clone(retry=NO_RETRY_STRATEGY)
+    """Default an injected health config's unset retry and timeout independently.
+
+    An unspecified retry falls back to NO_RETRY_STRATEGY and an unspecified
+    timeout to HEALTH_TIMEOUT. An explicit value for either - including a
+    timeout of None to disable it - is preserved.
+    """
+    overrides = {}
+    if not config.has_explicit_retry:
+        overrides["retry"] = NO_RETRY_STRATEGY
+    if not config.has_explicit_timeout:
+        overrides["timeout"] = HEALTH_TIMEOUT
+    return config.clone(**overrides) if overrides else config
 
 
 def _healthy_or_raise(response: Response) -> bool:

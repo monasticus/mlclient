@@ -7,7 +7,7 @@ from pytest_mock import MockerFixture
 
 from mlclient.clients import http_client as http_client_module
 from mlclient.clients.http_client import HttpClient
-from mlclient.connection import CloudConfig
+from mlclient.connection import UNSET, CloudConfig
 from mlclient.http_config import HTTPConfig
 from tests.utils import resources as resources_utils
 from tests.utils.ml_mockers import MLRespXMocker
@@ -460,3 +460,117 @@ def test_prebuilt_config_supersedes_connection_kwargs():
 
     assert client.config is config
     assert client.base_url == "http://resolved.example.com:8002"
+
+
+def _sent_timeout(route):
+    return route.calls.last.request.extensions["timeout"]
+
+
+@respx.mock
+def test_config_default_timeout_reaches_transport():
+    route = respx.get("http://localhost:8002/x").mock(
+        return_value=httpx.Response(200, text="ok"),
+    )
+    with HttpClient(port=8002) as client:
+        client.get("/x")
+    assert _sent_timeout(route) == {
+        "connect": 5.0,
+        "read": 60.0,
+        "write": 60.0,
+        "pool": 5.0,
+    }
+
+
+@respx.mock
+def test_explicit_config_timeout_reaches_transport():
+    route = respx.get("http://localhost:8002/x").mock(
+        return_value=httpx.Response(200, text="ok"),
+    )
+    config = HTTPConfig.resolve(port=8002, timeout=httpx.Timeout(1.0))
+    with HttpClient(config=config) as client:
+        client.get("/x")
+    assert _sent_timeout(route) == {
+        "connect": 1.0,
+        "read": 1.0,
+        "write": 1.0,
+        "pool": 1.0,
+    }
+
+
+@respx.mock
+def test_per_request_number_timeout_sets_all_components():
+    route = respx.get("http://localhost:8002/x").mock(
+        return_value=httpx.Response(200, text="ok"),
+    )
+    with HttpClient(port=8002) as client:
+        client.get("/x", timeout=2.5)
+    assert _sent_timeout(route) == {
+        "connect": 2.5,
+        "read": 2.5,
+        "write": 2.5,
+        "pool": 2.5,
+    }
+
+
+@respx.mock
+def test_per_request_none_disables_timeout():
+    route = respx.get("http://localhost:8002/x").mock(
+        return_value=httpx.Response(200, text="ok"),
+    )
+    with HttpClient(port=8002) as client:
+        client.get("/x", timeout=None)
+    assert _sent_timeout(route) == {
+        "connect": None,
+        "read": None,
+        "write": None,
+        "pool": None,
+    }
+
+
+@respx.mock
+def test_per_request_httpx_timeout_reaches_transport():
+    route = respx.get("http://localhost:8002/x").mock(
+        return_value=httpx.Response(200, text="ok"),
+    )
+    with HttpClient(port=8002) as client:
+        client.get(
+            "/x",
+            timeout=httpx.Timeout(connect=1.0, read=2.0, write=3.0, pool=4.0),
+        )
+    assert _sent_timeout(route) == {
+        "connect": 1.0,
+        "read": 2.0,
+        "write": 3.0,
+        "pool": 4.0,
+    }
+
+
+@respx.mock
+def test_per_request_timeout_does_not_mutate_shared_default():
+    route = respx.get("http://localhost:8002/x").mock(
+        return_value=httpx.Response(200, text="ok"),
+    )
+    with HttpClient(port=8002) as client:
+        client.get("/x", timeout=2.5)
+        client.get("/x")
+    assert _sent_timeout(route) == {
+        "connect": 5.0,
+        "read": 60.0,
+        "write": 60.0,
+        "pool": 5.0,
+    }
+
+
+@respx.mock
+def test_unset_per_request_uses_config_default():
+    route = respx.get("http://localhost:8002/x").mock(
+        return_value=httpx.Response(200, text="ok"),
+    )
+    with HttpClient(port=8002) as client:
+        client.get("/x", timeout=UNSET)
+    assert _sent_timeout(route) == {
+        "connect": 5.0,
+        "read": 60.0,
+        "write": 60.0,
+        "pool": 5.0,
+    }

@@ -41,6 +41,53 @@ async def test_eval_raw_xquery_empty(svc):
 
 @pytest.mark.asyncio
 @respx.mock
+async def test_eval_timeout_reaches_transport_and_is_not_a_query_variable(svc):
+    code = "()"
+
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8000/v1/eval")
+    ml_mocker.with_request_content_type("application/x-www-form-urlencoded")
+    ml_mocker.with_request_body({"xquery": code})
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_empty_response_body()
+    route = ml_mocker.mock_post()
+
+    await svc.xquery(code, timeout=2)
+
+    assert route.calls.last.request.extensions["timeout"] == {
+        "connect": 2.0,
+        "read": 2.0,
+        "write": 2.0,
+        "pool": 2.0,
+    }
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_eval_variable_named_timeout_is_sent_as_query_variable(svc):
+    code = "declare variable $timeout external; $timeout"
+
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8000/v1/eval")
+    ml_mocker.with_request_content_type("application/x-www-form-urlencoded")
+    ml_mocker.with_request_body({"xquery": code, "vars": '{"timeout": 30}'})
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body_part("integer", "30")
+    route = ml_mocker.mock_post()
+
+    resp = await svc.xquery(code, variables={"timeout": 30}, timeout=2)
+
+    assert resp == 30
+    assert route.calls.last.request.extensions["timeout"] == {
+        "connect": 2.0,
+        "read": 2.0,
+        "write": 2.0,
+        "pool": 2.0,
+    }
+
+
+@pytest.mark.asyncio
+@respx.mock
 async def test_eval_raw_xquery_single_item(svc):
     code = "''"
 

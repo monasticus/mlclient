@@ -497,6 +497,44 @@ async def test_healthcheck_returns_false_on_unhealthy_status():
 
 @pytest.mark.asyncio
 @respx.mock
+async def test_healthcheck_defaults_to_health_timeout():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:7997/")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_empty_response_body()
+    route = ml_mocker.mock_head()
+
+    async with AsyncMLClient(port=8000) as ml:
+        await ml.healthcheck()
+    assert route.calls.last.request.extensions["timeout"] == {
+        "connect": 5.0,
+        "read": 5.0,
+        "write": 5.0,
+        "pool": 5.0,
+    }
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_healthcheck_per_call_timeout_reaches_transport():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:7997/")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_empty_response_body()
+    route = ml_mocker.mock_head()
+
+    async with AsyncMLClient(port=8000) as ml:
+        await ml.healthcheck(timeout=2)
+    assert route.calls.last.request.extensions["timeout"] == {
+        "connect": 2.0,
+        "read": 2.0,
+        "write": 2.0,
+        "pool": 2.0,
+    }
+
+
+@pytest.mark.asyncio
+@respx.mock
 async def test_healthcheck_uses_injected_health_config():
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url("http://health.example.com:9997/")

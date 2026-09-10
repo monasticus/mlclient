@@ -48,6 +48,28 @@ DEFAULT_TIMEOUT = httpx.Timeout(
     pool=5.0,
 )
 
+HEALTH_TIMEOUT = httpx.Timeout(5.0)
+
+
+def _normalize_timeout(timeout):
+    """Turn a timeout argument into UNSET or a comparable httpx.Timeout.
+
+    UNSET stays UNSET (no explicit value). None disables every HTTP timeout.
+    A number sets all four components to that many seconds. An httpx.Timeout is
+    kept as-is. Normalizing an already-normalized value is idempotent, so
+    clone() can pass a stored value straight back through resolve().
+    """
+    if timeout is UNSET:
+        return UNSET
+    if isinstance(timeout, httpx.Timeout):
+        return timeout
+    return httpx.Timeout(timeout)
+
+
+def _timeout_components(timeout: httpx.Timeout) -> tuple:
+    """Return a timeout's four components for unambiguous comparison."""
+    return (timeout.connect, timeout.read, timeout.write, timeout.pool)
+
 
 class HTTPConfig:
     """Resolved connection and authentication details for a MarkLogic client.
@@ -73,7 +95,7 @@ class HTTPConfig:
         password: str,
         retry: Retry | None,
         limits: httpx.Limits | None,
-        timeout: httpx.Timeout | None,
+        timeout,
     ):
         """Initialize HTTPConfig from already-resolved parts.
 
@@ -88,7 +110,7 @@ class HTTPConfig:
         self._password = password
         self._retry = retry
         self._limits = limits
-        self._timeout = timeout
+        self._timeout = _normalize_timeout(timeout)
 
     @classmethod
     def resolve(
@@ -104,7 +126,7 @@ class HTTPConfig:
         cloud: CloudConfig | None = None,
         retry: Retry | None = None,
         limits: httpx.Limits | None = None,
-        timeout: httpx.Timeout | None = None,
+        timeout=UNSET,
     ) -> HTTPConfig:
         """Resolve connection and auth parameters into an HTTPConfig.
 
@@ -136,9 +158,11 @@ class HTTPConfig:
         limits : httpx.Limits | None, default None
             The connection-pool limits for transport creation. None leaves the
             limits unset, deferring to httpx's own default.
-        timeout : httpx.Timeout | None, default DEFAULT_TIMEOUT
-            The request timeout. None leaves the timeout unspecified, using
-            DEFAULT_TIMEOUT.
+        timeout : httpx.Timeout | float | None | UNSET, default UNSET
+            The request timeout. UNSET leaves it unspecified, using
+            DEFAULT_TIMEOUT. None disables every HTTP timeout. A number sets all
+            four components (connect, read, write, pool) to that many seconds.
+            An httpx.Timeout fully overrides the timeout without merging.
 
         Returns
         -------
@@ -231,10 +255,13 @@ class HTTPConfig:
     def can_share_session(self, other: HTTPConfig) -> bool:
         """Whether two configurations can safely use the same HTTP session.
 
-        Compare connection and credential values, but require the same retry
-        strategy, pool-limits and timeout objects and, for custom
-        authentication, the same handler. Custom strategies and handlers may
-        carry behavior beyond their fields.
+        Compare connection and credential values, and require the same retry
+        strategy and pool-limits objects and, for custom authentication, the
+        same handler. Custom strategies and handlers may carry behavior beyond
+        their fields. Timeout is compared by its effective connect/read/write/
+        pool components, so equivalent values share a session even when built
+        separately, while any component difference (including disabled versus
+        bounded) blocks sharing.
         """
         same_auth = (
             self.auth_method is other.auth_method
@@ -250,7 +277,7 @@ class HTTPConfig:
             and same_auth
             and self.retry is other.retry
             and self.limits is other.limits
-            and self.timeout is other.timeout
+            and _timeout_components(self.timeout) == _timeout_components(other.timeout)
         )
 
     @property
@@ -270,8 +297,18 @@ class HTTPConfig:
 
     @property
     def timeout(self) -> httpx.Timeout:
-        """The request timeout for HTTP session creation."""
-        return self._timeout if self._timeout is not None else DEFAULT_TIMEOUT
+        """The effective request timeout, defaulting to DEFAULT_TIMEOUT.
+
+        A timeout of ``httpx.Timeout(None)`` (all components None) means every
+        HTTP timeout is disabled; it is still an explicit value, distinct from
+        the unset case that resolves to DEFAULT_TIMEOUT.
+        """
+        return self._timeout if self._timeout is not UNSET else DEFAULT_TIMEOUT
+
+    @property
+    def has_explicit_timeout(self) -> bool:
+        """Whether a timeout was supplied rather than left to the default."""
+        return self._timeout is not UNSET
 
     def transport_verify(self) -> ssl.SSLContext | bool:
         """Return the SSL verification setting for transport creation."""

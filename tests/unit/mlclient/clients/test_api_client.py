@@ -4,6 +4,8 @@ import respx
 
 from mlclient import MLClient
 from mlclient.calls import EvalCall
+from mlclient.clients.api_client import ApiClient, AsyncApiClient
+from mlclient.clients.http_client import AsyncHttpClient, HttpClient
 from tests.utils.ml_mockers import MLRespXMocker
 
 
@@ -43,3 +45,34 @@ def test_call(xquery):
 
     assert resp.status_code == httpx.codes.OK
     assert "<new-parent><child/></new-parent>" in resp.text
+
+
+@respx.mock
+def test_call_forwards_timeout_to_transport():
+    route = respx.post("http://localhost:8000/v1/eval").mock(
+        return_value=httpx.Response(200, text="()"),
+    )
+    with HttpClient() as http:
+        ApiClient(http).call(EvalCall(xquery="()"), timeout=2)
+    assert route.calls.last.request.extensions["timeout"] == {
+        "connect": 2.0,
+        "read": 2.0,
+        "write": 2.0,
+        "pool": 2.0,
+    }
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_async_call_forwards_timeout_to_transport():
+    route = respx.post("http://localhost:8000/v1/eval").mock(
+        return_value=httpx.Response(200, text="()"),
+    )
+    async with AsyncHttpClient() as http:
+        await AsyncApiClient(http).call(EvalCall(xquery="()"), timeout=2)
+    assert route.calls.last.request.extensions["timeout"] == {
+        "connect": 2.0,
+        "read": 2.0,
+        "write": 2.0,
+        "pool": 2.0,
+    }

@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING
 from httpx import Response
 
 from mlclient.calls import EvalCall
+from mlclient.connection import UNSET
 
 # Avoid circular import: ApiClient -> api classes -> ApiClient
 if TYPE_CHECKING:
@@ -30,6 +31,7 @@ class EvalApi:
         variables: dict | None = None,
         database: str | None = None,
         txid: str | None = None,
+        timeout=UNSET,
     ) -> Response:
         """Evaluate an ad-hoc query expressed using XQuery or server-side JavaScript.
 
@@ -54,6 +56,11 @@ class EvalApi:
         txid : str
             The transaction identifier of the multi-statement transaction
             in which to service this request.
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request timeout for this call. Unset uses the client's
+            configured timeout; None disables every HTTP timeout; a number sets
+            all four components to that many seconds; an httpx.Timeout overrides
+            them. It is an execution option, never sent as a request parameter.
 
         Returns
         -------
@@ -68,7 +75,7 @@ class EvalApi:
             database=database,
             txid=txid,
         )
-        return self._api.call(call)
+        return self._api.call(call, timeout=timeout)
 
 
 class AsyncEvalApi:
@@ -85,6 +92,7 @@ class AsyncEvalApi:
         variables: dict | None = None,
         database: str | None = None,
         txid: str | None = None,
+        timeout=UNSET,
     ) -> Response:
         """Evaluate an ad-hoc query expressed using XQuery or server-side JavaScript."""
         call = EvalCall(
@@ -94,4 +102,4 @@ class AsyncEvalApi:
             database=database,
             txid=txid,
         )
-        return await self._api.call(call)
+        return await self._api.call(call, timeout=timeout)

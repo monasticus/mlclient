@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING
 from httpx import Response
 
 from mlclient.calls import DocumentsDeleteCall, DocumentsGetCall, DocumentsPostCall
+from mlclient.connection import UNSET
 from mlclient.models.http import DocumentsBodyPart as BodyPart
 
 # Avoid circular import: ApiClient -> api classes -> ApiClient
@@ -34,6 +35,7 @@ class DocumentsApi:
         transform: str | None = None,
         transform_params: dict | None = None,
         txid: str | None = None,
+        timeout=UNSET,
     ) -> Response:
         """Retrieve document content and/or metadata from the database.
 
@@ -76,6 +78,11 @@ class DocumentsApi:
             The transaction identifier of the multi-statement transaction in which
             to service this request. Use the /transactions service to create and manage
             multi-statement transactions.
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request timeout for this call. Unset uses the client's
+            configured timeout; None disables every HTTP timeout; a number sets
+            all four components to that many seconds; an httpx.Timeout overrides
+            them. It is an execution option, never sent as a request parameter.
 
         Returns
         -------
@@ -92,7 +99,7 @@ class DocumentsApi:
             transform_params=transform_params,
             txid=txid,
         )
-        return self._api.call(call)
+        return self._api.call(call, timeout=timeout)
 
     def post(
         self,
@@ -104,6 +111,7 @@ class DocumentsApi:
         txid: str | None = None,
         temporal_collection: str | None = None,
         system_time: str | None = None,
+        timeout=UNSET,
     ) -> Response:
         """Insert or update content and/or metadata for multiple documents.
 
@@ -136,6 +144,11 @@ class DocumentsApi:
             Set the system start time for the insertion or update.
             This time will override the system time set by MarkLogic.
             Ignored if temporal-collection is not included in the request.
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request timeout for this call. Unset uses the client's
+            configured timeout; None disables every HTTP timeout; a number sets
+            all four components to that many seconds; an httpx.Timeout overrides
+            them. It is an execution option, never sent as a request parameter.
 
         Returns
         -------
@@ -152,7 +165,7 @@ class DocumentsApi:
             temporal_collection=temporal_collection,
             system_time=system_time,
         )
-        return self._api.call(call)
+        return self._api.call(call, timeout=timeout)
 
     def delete(
         self,
@@ -164,6 +177,7 @@ class DocumentsApi:
         temporal_collection: str | None = None,
         system_time: str | None = None,
         wipe_temporal: bool | None = None,
+        timeout=UNSET,
     ) -> Response:
         """Remove documents, or reset document metadata.
 
@@ -201,6 +215,11 @@ class DocumentsApi:
             Remove all versions of a temporal document rather than performing
             a temporal delete. You can only use this parameter when you also specify
             a temporal-collection parameter.
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request timeout for this call. Unset uses the client's
+            configured timeout; None disables every HTTP timeout; a number sets
+            all four components to that many seconds; an httpx.Timeout overrides
+            them. It is an execution option, never sent as a request parameter.
 
         Returns
         -------
@@ -216,7 +235,7 @@ class DocumentsApi:
             system_time=system_time,
             wipe_temporal=wipe_temporal,
         )
-        return self._api.call(call)
+        return self._api.call(call, timeout=timeout)
 
 
 class AsyncDocumentsApi:
@@ -236,6 +255,7 @@ class AsyncDocumentsApi:
         transform: str | None = None,
         transform_params: dict | None = None,
         txid: str | None = None,
+        timeout=UNSET,
     ) -> Response:
         """Retrieve document content and/or metadata from the database."""
         call = DocumentsGetCall(
@@ -248,7 +268,7 @@ class AsyncDocumentsApi:
             transform_params=transform_params,
             txid=txid,
         )
-        return await self._api.call(call)
+        return await self._api.call(call, timeout=timeout)
 
     async def post(
         self,
@@ -260,6 +280,7 @@ class AsyncDocumentsApi:
         txid: str | None = None,
         temporal_collection: str | None = None,
         system_time: str | None = None,
+        timeout=UNSET,
     ) -> Response:
         """Insert or update content and/or metadata for multiple documents."""
         call = DocumentsPostCall(
@@ -271,7 +292,7 @@ class AsyncDocumentsApi:
             temporal_collection=temporal_collection,
             system_time=system_time,
         )
-        return await self._api.call(call)
+        return await self._api.call(call, timeout=timeout)
 
     async def delete(
         self,
@@ -283,6 +304,7 @@ class AsyncDocumentsApi:
         temporal_collection: str | None = None,
         system_time: str | None = None,
         wipe_temporal: bool | None = None,
+        timeout=UNSET,
     ) -> Response:
         """Remove documents, or reset document metadata."""
         call = DocumentsDeleteCall(
@@ -294,4 +316,4 @@ class AsyncDocumentsApi:
             system_time=system_time,
             wipe_temporal=wipe_temporal,
         )
-        return await self._api.call(call)
+        return await self._api.call(call, timeout=timeout)

@@ -14,6 +14,7 @@ from mlclient.calls import (
     ServersGetCall,
     ServersPostCall,
 )
+from mlclient.connection import UNSET
 
 # Avoid circular import: ApiClient -> api classes -> ApiClient
 if TYPE_CHECKING:
@@ -38,6 +39,7 @@ class ServersApi:
         group_id: str | None = None,
         view: str | None = None,
         full_refs: bool | None = None,
+        timeout=UNSET,
     ) -> Response:
         """Retrieve data about the App Servers in the cluster.
 
@@ -61,6 +63,11 @@ class ServersApi:
             If set to true, full detail is returned for all relationship references.
             A value of false (the default) indicates to return detail only for first
             references. This parameter is not meaningful with view=package.
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request timeout for this call. Unset uses the client's
+            configured timeout; None disables every HTTP timeout; a number sets
+            all four components to that many seconds; an httpx.Timeout overrides
+            them. It is an execution option, never sent as a request parameter.
 
         Returns
         -------
@@ -73,7 +80,7 @@ class ServersApi:
             view=view,
             full_refs=full_refs,
         )
-        return self._api.call(call)
+        return self._api.call(call, timeout=timeout)
 
     def create(
         self,
@@ -81,6 +88,7 @@ class ServersApi:
         *,
         group_id: str | None = None,
         server_type: str | None = None,
+        timeout=UNSET,
     ) -> Response:
         """Create a new App Server in the specified group.
 
@@ -100,6 +108,11 @@ class ServersApi:
             The App Server type must be specified by this parameter or in the request
             payload. If it is specified in both places, the values must be the same.
             The valid types are: http, odbc, xdbc, or webdav.
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request timeout for this call. Unset uses the client's
+            configured timeout; None disables every HTTP timeout; a number sets
+            all four components to that many seconds; an httpx.Timeout overrides
+            them. It is an execution option, never sent as a request parameter.
 
         Returns
         -------
@@ -107,7 +120,7 @@ class ServersApi:
             An HTTP response
         """
         call = ServersPostCall(body=body, group_id=group_id, server_type=server_type)
-        return self._api.call(call)
+        return self._api.call(call, timeout=timeout)
 
     def get(
         self,
@@ -119,6 +132,7 @@ class ServersApi:
         host_id: str | None = None,
         full_refs: bool | None = None,
         modules: bool | None = None,
+        timeout=UNSET,
     ) -> Response:
         """Retrieve data about a specific App Server.
 
@@ -154,6 +168,11 @@ class ServersApi:
             of the modules database for the App Server in the results, if one exists.
             It is an error to request a modules database manifest for an App Server
             that uses the filesystem for modules. Default: false.
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request timeout for this call. Unset uses the client's
+            configured timeout; None disables every HTTP timeout; a number sets
+            all four components to that many seconds; an httpx.Timeout overrides
+            them. It is an execution option, never sent as a request parameter.
 
         Returns
         -------
@@ -169,12 +188,14 @@ class ServersApi:
             full_refs=full_refs,
             modules=modules,
         )
-        return self._api.call(call)
+        return self._api.call(call, timeout=timeout)
 
     def delete(
         self,
         server: str,
         group_id: str,
+        *,
+        timeout=UNSET,
     ) -> Response:
         """Delete the specified App Server from the specified group.
 
@@ -187,6 +208,11 @@ class ServersApi:
         group_id : str
             The id or name of the group to which the App Server belongs.
             This parameter is required.
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request timeout for this call. Unset uses the client's
+            configured timeout; None disables every HTTP timeout; a number sets
+            all four components to that many seconds; an httpx.Timeout overrides
+            them. It is an execution option, never sent as a request parameter.
 
         Returns
         -------
@@ -194,7 +220,7 @@ class ServersApi:
             An HTTP response
         """
         call = ServerDeleteCall(server=server, group_id=group_id)
-        return self._api.call(call)
+        return self._api.call(call, timeout=timeout)
 
     def get_properties(
         self,
@@ -202,6 +228,7 @@ class ServersApi:
         group_id: str,
         *,
         data_format: str | None = None,
+        timeout=UNSET,
     ) -> Response:
         """Retrieve the modifiable properties of the specified App Server.
 
@@ -217,6 +244,11 @@ class ServersApi:
         data_format : str
             The format of the returned data. Can be either json or xml (default).
             This parameter overrides the Accept header if both are present.
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request timeout for this call. Unset uses the client's
+            configured timeout; None disables every HTTP timeout; a number sets
+            all four components to that many seconds; an httpx.Timeout overrides
+            them. It is an execution option, never sent as a request parameter.
 
         Returns
         -------
@@ -228,13 +260,15 @@ class ServersApi:
             group_id=group_id,
             data_format=data_format,
         )
-        return self._api.call(call)
+        return self._api.call(call, timeout=timeout)
 
     def put_properties(
         self,
         server: str,
         group_id: str,
         body: str | dict,
+        *,
+        timeout=UNSET,
     ) -> Response:
         """Modify the properties of the specified App Server.
 
@@ -249,6 +283,11 @@ class ServersApi:
             This parameter is required.
         body : str | dict
             A server properties in XML or JSON format.
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request timeout for this call. Unset uses the client's
+            configured timeout; None disables every HTTP timeout; a number sets
+            all four components to that many seconds; an httpx.Timeout overrides
+            them. It is an execution option, never sent as a request parameter.
 
         Returns
         -------
@@ -256,7 +295,7 @@ class ServersApi:
             An HTTP response
         """
         call = ServerPropertiesPutCall(server=server, group_id=group_id, body=body)
-        return self._api.call(call)
+        return self._api.call(call, timeout=timeout)
 
 
 class AsyncServersApi:
@@ -272,6 +311,7 @@ class AsyncServersApi:
         group_id: str | None = None,
         view: str | None = None,
         full_refs: bool | None = None,
+        timeout=UNSET,
     ) -> Response:
         """Retrieve data about the App Servers in the cluster."""
         call = ServersGetCall(
@@ -280,7 +320,7 @@ class AsyncServersApi:
             view=view,
             full_refs=full_refs,
         )
-        return await self._api.call(call)
+        return await self._api.call(call, timeout=timeout)
 
     async def create(
         self,
@@ -288,10 +328,11 @@ class AsyncServersApi:
         *,
         group_id: str | None = None,
         server_type: str | None = None,
+        timeout=UNSET,
     ) -> Response:
         """Create a new App Server in the specified group."""
         call = ServersPostCall(body=body, group_id=group_id, server_type=server_type)
-        return await self._api.call(call)
+        return await self._api.call(call, timeout=timeout)
 
     async def get(
         self,
@@ -303,6 +344,7 @@ class AsyncServersApi:
         host_id: str | None = None,
         full_refs: bool | None = None,
         modules: bool | None = None,
+        timeout=UNSET,
     ) -> Response:
         """Retrieve data about a specific App Server."""
         call = ServerGetCall(
@@ -314,16 +356,18 @@ class AsyncServersApi:
             full_refs=full_refs,
             modules=modules,
         )
-        return await self._api.call(call)
+        return await self._api.call(call, timeout=timeout)
 
     async def delete(
         self,
         server: str,
         group_id: str,
+        *,
+        timeout=UNSET,
     ) -> Response:
         """Delete the specified App Server from the specified group."""
         call = ServerDeleteCall(server=server, group_id=group_id)
-        return await self._api.call(call)
+        return await self._api.call(call, timeout=timeout)
 
     async def get_properties(
         self,
@@ -331,6 +375,7 @@ class AsyncServersApi:
         group_id: str,
         *,
         data_format: str | None = None,
+        timeout=UNSET,
     ) -> Response:
         """Retrieve the modifiable properties of the specified App Server."""
         call = ServerPropertiesGetCall(
@@ -338,14 +383,16 @@ class AsyncServersApi:
             group_id=group_id,
             data_format=data_format,
         )
-        return await self._api.call(call)
+        return await self._api.call(call, timeout=timeout)
 
     async def put_properties(
         self,
         server: str,
         group_id: str,
         body: str | dict,
+        *,
+        timeout=UNSET,
     ) -> Response:
         """Modify the properties of the specified App Server."""
         call = ServerPropertiesPutCall(server=server, group_id=group_id, body=body)
-        return await self._api.call(call)
+        return await self._api.call(call, timeout=timeout)

@@ -13,6 +13,7 @@ import aiofiles
 
 from mlclient.calls import EvalCall
 from mlclient.clients.api_client import ApiClient
+from mlclient.connection import UNSET
 
 if TYPE_CHECKING:
     from mlclient.clients.api_client import AsyncApiClient
@@ -49,6 +50,7 @@ class EvalService:
         database: str | None = None,
         txid: str | None = None,
         output_type: type | None = None,
+        timeout=UNSET,
         **kwargs,
     ) -> (
         bytes
@@ -75,6 +77,13 @@ class EvalService:
             Transaction identifier
         output_type : type | None, default None
             A raw output type (supported: str, bytes)
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request HTTP timeout for this evaluation. Unset uses the
+            client's configured timeout; None disables every HTTP timeout; a
+            number sets all four components to that many seconds; an
+            httpx.Timeout overrides them. It bounds the HTTP request only and is
+            never sent as a query variable - to pass a query variable literally
+            named "timeout" use variables={"timeout": ...}.
         kwargs : dict
             Key value arguments used as variables
 
@@ -88,6 +97,7 @@ class EvalService:
             database=database,
             txid=txid,
             output_type=output_type,
+            timeout=timeout,
             **kwargs,
         )
 
@@ -99,6 +109,7 @@ class EvalService:
         database: str | None = None,
         txid: str | None = None,
         output_type: type | None = None,
+        timeout=UNSET,
         **kwargs,
     ) -> (
         bytes
@@ -125,6 +136,13 @@ class EvalService:
             Transaction identifier
         output_type : type | None, default None
             A raw output type (supported: str, bytes)
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request HTTP timeout for this evaluation. Unset uses the
+            client's configured timeout; None disables every HTTP timeout; a
+            number sets all four components to that many seconds; an
+            httpx.Timeout overrides them. It bounds the HTTP request only and is
+            never sent as a query variable - to pass a query variable literally
+            named "timeout" use variables={"timeout": ...}.
         kwargs : dict
             Key value arguments used as variables
 
@@ -138,6 +156,7 @@ class EvalService:
             database=database,
             txid=txid,
             output_type=output_type,
+            timeout=timeout,
             **kwargs,
         )
 
@@ -149,6 +168,7 @@ class EvalService:
         database: str | None = None,
         txid: str | None = None,
         output_type: type | None = None,
+        timeout=UNSET,
         **kwargs,
     ) -> (
         bytes
@@ -168,6 +188,7 @@ class EvalService:
             database=database,
             txid=txid,
             output_type=output_type,
+            timeout=timeout,
             **kwargs,
         )
 
@@ -179,6 +200,7 @@ class EvalService:
         database: str | None = None,
         txid: str | None = None,
         output_type: type | None = None,
+        timeout=UNSET,
         **kwargs,
     ) -> (
         bytes
@@ -198,6 +220,7 @@ class EvalService:
             database=database,
             txid=txid,
             output_type=output_type,
+            timeout=timeout,
             **kwargs,
         )
 
@@ -209,6 +232,7 @@ class EvalService:
         database: str | None = None,
         txid: str | None = None,
         output_type: type | None = None,
+        timeout=UNSET,
         **kwargs,
     ) -> (
         bytes
@@ -235,6 +259,13 @@ class EvalService:
             Transaction identifier
         output_type : type | None, default None
             A raw output type (supported: str, bytes)
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request HTTP timeout for this evaluation. Unset uses the
+            client's configured timeout; None disables every HTTP timeout; a
+            number sets all four components to that many seconds; an
+            httpx.Timeout overrides them. It bounds the HTTP request only and is
+            never sent as a query variable - to pass a query variable literally
+            named "timeout" use variables={"timeout": ...}.
         kwargs : dict
             Key value arguments used as variables
 
@@ -248,6 +279,7 @@ class EvalService:
             database=database,
             txid=txid,
             output_type=output_type,
+            timeout=timeout,
             **kwargs,
         )
 
@@ -261,6 +293,7 @@ class EvalService:
         database: str | None = None,
         txid: str | None = None,
         output_type: type | None = None,
+        timeout=UNSET,
         **kwargs,
     ):
         """Evaluate code in a MarkLogic server (general-purpose).
@@ -284,6 +317,13 @@ class EvalService:
             Transaction identifier
         output_type : type | None, default None
             A raw output type (supported: str, bytes)
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request HTTP timeout for this evaluation. Unset uses the
+            client's configured timeout; None disables every HTTP timeout; a
+            number sets all four components to that many seconds; an
+            httpx.Timeout overrides them. It bounds the HTTP request only and is
+            never sent as a query variable - to pass a query variable literally
+            named "timeout" use variables={"timeout": ...}.
         kwargs : dict
             Key value arguments used as variables
 
@@ -304,6 +344,7 @@ class EvalService:
             database=database,
             txid=txid,
             output_type=output_type,
+            timeout=timeout,
             **kwargs,
         )
 
@@ -316,6 +357,7 @@ class EvalService:
         database: str | None = None,
         txid: str | None = None,
         output_type: type | None = None,
+        timeout=UNSET,
         **kwargs,
     ):
         """Execute eval and return parsed result."""
@@ -329,7 +371,7 @@ class EvalService:
             txid=txid,
             **kwargs,
         )
-        resp = self._api.call(call)
+        resp = self._api.call(call, timeout=timeout)
         parsed_resp = MLResponseParser.parse(resp, output_type=output_type)
         if not resp.is_success:
             raise MarkLogicError(parsed_resp)
@@ -442,6 +484,7 @@ class AsyncEvalService:
         database: str | None = None,
         txid: str | None = None,
         output_type: type | None = None,
+        timeout=UNSET,
         **kwargs,
     ) -> (
         bytes
@@ -461,6 +504,7 @@ class AsyncEvalService:
             database=database,
             txid=txid,
             output_type=output_type,
+            timeout=timeout,
             **kwargs,
         )
 
@@ -472,6 +516,7 @@ class AsyncEvalService:
         database: str | None = None,
         txid: str | None = None,
         output_type: type | None = None,
+        timeout=UNSET,
         **kwargs,
     ) -> (
         bytes
@@ -491,6 +536,7 @@ class AsyncEvalService:
             database=database,
             txid=txid,
             output_type=output_type,
+            timeout=timeout,
             **kwargs,
         )
 
@@ -502,6 +548,7 @@ class AsyncEvalService:
         database: str | None = None,
         txid: str | None = None,
         output_type: type | None = None,
+        timeout=UNSET,
         **kwargs,
     ) -> (
         bytes
@@ -521,6 +568,7 @@ class AsyncEvalService:
             database=database,
             txid=txid,
             output_type=output_type,
+            timeout=timeout,
             **kwargs,
         )
 
@@ -532,6 +580,7 @@ class AsyncEvalService:
         database: str | None = None,
         txid: str | None = None,
         output_type: type | None = None,
+        timeout=UNSET,
         **kwargs,
     ) -> (
         bytes
@@ -551,6 +600,7 @@ class AsyncEvalService:
             database=database,
             txid=txid,
             output_type=output_type,
+            timeout=timeout,
             **kwargs,
         )
 
@@ -562,6 +612,7 @@ class AsyncEvalService:
         database: str | None = None,
         txid: str | None = None,
         output_type: type | None = None,
+        timeout=UNSET,
         **kwargs,
     ) -> (
         bytes
@@ -581,6 +632,7 @@ class AsyncEvalService:
             database=database,
             txid=txid,
             output_type=output_type,
+            timeout=timeout,
             **kwargs,
         )
 
@@ -594,6 +646,7 @@ class AsyncEvalService:
         database: str | None = None,
         txid: str | None = None,
         output_type: type | None = None,
+        timeout=UNSET,
         **kwargs,
     ):
         """Evaluate code in a MarkLogic server (general-purpose)."""
@@ -605,6 +658,7 @@ class AsyncEvalService:
             database=database,
             txid=txid,
             output_type=output_type,
+            timeout=timeout,
             **kwargs,
         )
 
@@ -617,6 +671,7 @@ class AsyncEvalService:
         database: str | None = None,
         txid: str | None = None,
         output_type: type | None = None,
+        timeout=UNSET,
         **kwargs,
     ):
         """Execute eval and return parsed result."""
@@ -630,7 +685,7 @@ class AsyncEvalService:
             txid=txid,
             **kwargs,
         )
-        resp = await self._api.call(call)
+        resp = await self._api.call(call, timeout=timeout)
         parsed_resp = MLResponseParser.parse(resp, output_type=output_type)
         if not resp.is_success:
             raise MarkLogicError(parsed_resp)

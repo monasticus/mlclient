@@ -243,6 +243,74 @@ not passed to the transport and ``httpx`` applies its own default
    >>> with mgr.get_client("health", retry=None) as ml:
    ...     healthy = ml.healthcheck()  # No retries despite the manager's setting.
 
+Timeout: values, inheritance and per-request overrides
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+``timeout`` is a Python HTTP client setting, never an environment YAML value.
+It resolves through four levels, each overriding the one below it: the
+per-server-kind default, the manager's explicit value, the factory-call value,
+and the per-request value passed to an individual operation. Every level
+accepts the same forms:
+
+- unset (the default) - inherit the level below, ending at ``DEFAULT_TIMEOUT``;
+- a number - set all four components to that many seconds;
+- an ``httpx.Timeout`` - set the four components independently, no merge;
+- ``None`` - **disable** every HTTP timeout (an unbounded request), which is
+  not the same as leaving it unset.
+
+An ``httpx.Timeout`` has four independent components: ``connect`` (waiting for
+the socket to open), ``read`` (waiting between chunks of the response),
+``write`` (waiting between chunks of the request body) and ``pool`` (waiting
+for a free connection from the pool). A bare number sets all four.
+
+Without an explicit value, the ``health`` server uses ``HEALTH_TIMEOUT``
+(5 seconds on all components) and every other server uses ``DEFAULT_TIMEOUT``
+(``connect=5``, ``read=60``, ``write=60``, ``pool=5``). A ``MLClient`` created
+directly always probes health with ``HEALTH_TIMEOUT`` regardless of its main
+timeout; a manager's explicit ``timeout`` applies to every server including
+health.
+
+Every operation accepts a keyword-only ``timeout`` that overrides the client
+default for that one request without mutating shared configuration:
+
+.. code-block:: python
+
+   >>> import httpx
+   >>> with MLClientManager("local").get_client("content") as ml:
+   ...     ml.eval.xquery("1 + 1", timeout=2)                 # 2s on all four components
+   ...     ml.eval.xquery("1 + 1", timeout=httpx.Timeout(read=120.0))  # slow read only
+   ...     ml.documents.read("/doc.xml", timeout=None)        # no timeout
+   ...     ml.healthcheck(timeout=2)                          # override the 5s health probe
+
+For ``eval`` the ``timeout`` bounds the HTTP request only; it is never sent as
+a query variable. To pass a query variable that happens to be named
+``timeout``, put it in ``variables`` - the two are independent:
+
+.. code-block:: python
+
+   >>> with MLClientManager("local").get_client("content") as ml:
+   ...     ml.eval.xquery(
+   ...         "declare variable $timeout external; $timeout",
+   ...         variables={"timeout": 30},  # the query variable
+   ...         timeout=2,                   # the HTTP request timeout
+   ...     )
+
+Three separate limits are easy to confuse:
+
+- the **HTTP timeout** described here bounds a single HTTP request at the
+  client;
+- a **server-side execution limit** (for example a transaction's
+  ``time_limit``, or a request's server ``time-limit``) bounds work inside
+  MarkLogic and is unrelated to this setting;
+- the **total wall-clock time** of an operation is not bounded by either: with
+  retries enabled, a request that times out is retried, so the real time a call
+  can take is roughly the per-request timeout multiplied by the number of
+  attempts, plus backoff. The timeout applies per attempt, not cumulatively.
+
+Session sharing compares the effective timeout by its four components, so
+separately built but equal timeouts still share a session; a disabled timeout
+never shares with a bounded one.
+
 Async clients, raw HTTP and resolved configuration
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

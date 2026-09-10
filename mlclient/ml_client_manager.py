@@ -10,11 +10,12 @@ from __future__ import annotations
 
 from mlclient.clients import AsyncHttpClient, AsyncMLClient, HttpClient, MLClient
 from mlclient.clients.http_client import NO_RETRY_STRATEGY
+from mlclient.connection import UNSET
 from mlclient.exceptions import (
     NoRestServerConfiguredError,
     NoSuchAppServerError,
 )
-from mlclient.http_config import HTTPConfig
+from mlclient.http_config import HEALTH_TIMEOUT, HTTPConfig
 from mlclient.ml_environment import MLEnvironment
 
 
@@ -45,9 +46,10 @@ class MLClientManager:
         **overrides
             HTTPConfig.clone keyword arguments: protocol, host, port, auth,
             username, password, ssl, cloud, retry, limits and timeout. Applied
-            to every server; per-call overrides take precedence. Retry is
-            configured only in Python and an explicit strategy also applies to
-            health. These defaults do not modify the environment file.
+            to every server; per-call overrides take precedence. Retry and
+            timeout are configured only in Python; an explicit strategy or
+            timeout also applies to health. These defaults do not modify the
+            environment file.
 
         Raises
         ------
@@ -124,6 +126,12 @@ class MLClientManager:
         servers use DEFAULT_RETRY_STRATEGY. Passing retry=None in this call
         restores the selected server's default, overriding a manager strategy.
 
+        Retry and timeout resolve independently. Without an explicit timeout,
+        health uses HEALTH_TIMEOUT and other servers use DEFAULT_TIMEOUT. A
+        manager timeout applies to every server including health; timeout=None
+        at any level disables every HTTP timeout, while timeout=UNSET in this
+        call inherits the manager value rather than clearing it.
+
         Parameters
         ----------
         app_server_id : str
@@ -159,11 +167,11 @@ class MLClientManager:
             optional dependency.
         """
         config = self._config.provide_config(app_server_id)
-        overrides = {**self._overrides, **overrides}
+        overrides = {**self._overrides, **_without_unset(overrides)}
         if overrides:
             config = config.clone(**overrides)
-        if app_server_id == "health" and not config.has_explicit_retry:
-            return config.clone(retry=NO_RETRY_STRATEGY)
+        if app_server_id == "health":
+            config = _apply_health_defaults(config)
         return config
 
     def get_client(self, app_server_id: str | None = None, **overrides) -> MLClient:
@@ -473,3 +481,18 @@ class MLClientManager:
             msg = f"There's no [{app_server_id}] app server configuration!"
             raise NoSuchAppServerError(msg)
         return app_server_id
+
+
+def _without_unset(overrides: dict) -> dict:
+    """Drop UNSET-valued overrides so a per-call UNSET inherits the manager value."""
+    return {key: value for key, value in overrides.items() if value is not UNSET}
+
+
+def _apply_health_defaults(config: HTTPConfig) -> HTTPConfig:
+    """Default health's unset retry and timeout independently of one another."""
+    overrides = {}
+    if not config.has_explicit_retry:
+        overrides["retry"] = NO_RETRY_STRATEGY
+    if not config.has_explicit_timeout:
+        overrides["timeout"] = HEALTH_TIMEOUT
+    return config.clone(**overrides) if overrides else config

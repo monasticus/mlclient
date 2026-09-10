@@ -14,6 +14,7 @@ from mlclient.calls import (
     UsersGetCall,
     UsersPostCall,
 )
+from mlclient.connection import UNSET
 
 # Avoid circular import: ApiClient -> api classes -> ApiClient
 if TYPE_CHECKING:
@@ -36,6 +37,7 @@ class UsersApi:
         *,
         data_format: str | None = None,
         view: str | None = None,
+        timeout=UNSET,
     ) -> Response:
         """Retrieve a summary of the users in the cluster.
 
@@ -47,6 +49,11 @@ class UsersApi:
             The format of the returned data. Can be either html, json, or xml (default).
         view : str
             A specific view of the returned data. Can be: describe, or default.
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request timeout for this call. Unset uses the client's
+            configured timeout; None disables every HTTP timeout; a number sets
+            all four components to that many seconds; an httpx.Timeout overrides
+            them. It is an execution option, never sent as a request parameter.
 
         Returns
         -------
@@ -54,11 +61,13 @@ class UsersApi:
             An HTTP response with the users summary
         """
         call = UsersGetCall(data_format=data_format, view=view)
-        return self._api.call(call)
+        return self._api.call(call, timeout=timeout)
 
     def create(
         self,
         body: str | dict,
+        *,
+        timeout=UNSET,
     ) -> Response:
         """Create a new user in the security database.
 
@@ -68,6 +77,11 @@ class UsersApi:
         ----------
         body : str | dict
             A user properties in XML or JSON format.
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request timeout for this call. Unset uses the client's
+            configured timeout; None disables every HTTP timeout; a number sets
+            all four components to that many seconds; an httpx.Timeout overrides
+            them. It is an execution option, never sent as a request parameter.
 
         Returns
         -------
@@ -75,7 +89,7 @@ class UsersApi:
             An HTTP response
         """
         call = UsersPostCall(body=body)
-        return self._api.call(call)
+        return self._api.call(call, timeout=timeout)
 
     def get(
         self,
@@ -83,6 +97,7 @@ class UsersApi:
         *,
         data_format: str | None = None,
         view: str | None = None,
+        timeout=UNSET,
     ) -> Response:
         """Retrieve the configuration for the specified user.
 
@@ -97,6 +112,11 @@ class UsersApi:
             This parameter is not meaningful with view=edit.
         view : str
             A specific view of the returned data. Can be: describe, or default.
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request timeout for this call. Unset uses the client's
+            configured timeout; None disables every HTTP timeout; a number sets
+            all four components to that many seconds; an httpx.Timeout overrides
+            them. It is an execution option, never sent as a request parameter.
 
         Returns
         -------
@@ -104,11 +124,13 @@ class UsersApi:
             An HTTP response with the user details
         """
         call = UserGetCall(user=user, data_format=data_format, view=view)
-        return self._api.call(call)
+        return self._api.call(call, timeout=timeout)
 
     def delete(
         self,
         user: str,
+        *,
+        timeout=UNSET,
     ) -> Response:
         """Delete the specified user from the security database.
 
@@ -118,6 +140,11 @@ class UsersApi:
         ----------
         user : str
             A user identifier. The user can be identified either by ID or name.
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request timeout for this call. Unset uses the client's
+            configured timeout; None disables every HTTP timeout; a number sets
+            all four components to that many seconds; an httpx.Timeout overrides
+            them. It is an execution option, never sent as a request parameter.
 
         Returns
         -------
@@ -125,13 +152,14 @@ class UsersApi:
             An HTTP response
         """
         call = UserDeleteCall(user=user)
-        return self._api.call(call)
+        return self._api.call(call, timeout=timeout)
 
     def get_properties(
         self,
         user: str,
         *,
         data_format: str | None = None,
+        timeout=UNSET,
     ) -> Response:
         """Retrieve the properties of the specified user.
 
@@ -144,6 +172,11 @@ class UsersApi:
         data_format : str
             The format of the returned data. Can be either json or xml (default).
             This parameter overrides the Accept header if both are present.
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request timeout for this call. Unset uses the client's
+            configured timeout; None disables every HTTP timeout; a number sets
+            all four components to that many seconds; an httpx.Timeout overrides
+            them. It is an execution option, never sent as a request parameter.
 
         Returns
         -------
@@ -151,12 +184,14 @@ class UsersApi:
             An HTTP response with the user properties
         """
         call = UserPropertiesGetCall(user=user, data_format=data_format)
-        return self._api.call(call)
+        return self._api.call(call, timeout=timeout)
 
     def put_properties(
         self,
         user: str,
         body: str | dict,
+        *,
+        timeout=UNSET,
     ) -> Response:
         """Update the properties for the specified user.
 
@@ -168,6 +203,11 @@ class UsersApi:
             A user identifier. The user can be identified either by ID or name.
         body : str | dict
             A user properties in XML or JSON format.
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request timeout for this call. Unset uses the client's
+            configured timeout; None disables every HTTP timeout; a number sets
+            all four components to that many seconds; an httpx.Timeout overrides
+            them. It is an execution option, never sent as a request parameter.
 
         Returns
         -------
@@ -175,7 +215,7 @@ class UsersApi:
             An HTTP response
         """
         call = UserPropertiesPutCall(user=user, body=body)
-        return self._api.call(call)
+        return self._api.call(call, timeout=timeout)
 
 
 class AsyncUsersApi:
@@ -189,18 +229,21 @@ class AsyncUsersApi:
         *,
         data_format: str | None = None,
         view: str | None = None,
+        timeout=UNSET,
     ) -> Response:
         """Retrieve a summary of the users in the cluster."""
         call = UsersGetCall(data_format=data_format, view=view)
-        return await self._api.call(call)
+        return await self._api.call(call, timeout=timeout)
 
     async def create(
         self,
         body: str | dict,
+        *,
+        timeout=UNSET,
     ) -> Response:
         """Create a new user in the security database."""
         call = UsersPostCall(body=body)
-        return await self._api.call(call)
+        return await self._api.call(call, timeout=timeout)
 
     async def get(
         self,
@@ -208,34 +251,40 @@ class AsyncUsersApi:
         *,
         data_format: str | None = None,
         view: str | None = None,
+        timeout=UNSET,
     ) -> Response:
         """Retrieve the configuration for the specified user."""
         call = UserGetCall(user=user, data_format=data_format, view=view)
-        return await self._api.call(call)
+        return await self._api.call(call, timeout=timeout)
 
     async def delete(
         self,
         user: str,
+        *,
+        timeout=UNSET,
     ) -> Response:
         """Delete the specified user from the security database."""
         call = UserDeleteCall(user=user)
-        return await self._api.call(call)
+        return await self._api.call(call, timeout=timeout)
 
     async def get_properties(
         self,
         user: str,
         *,
         data_format: str | None = None,
+        timeout=UNSET,
     ) -> Response:
         """Retrieve the properties of the specified user."""
         call = UserPropertiesGetCall(user=user, data_format=data_format)
-        return await self._api.call(call)
+        return await self._api.call(call, timeout=timeout)
 
     async def put_properties(
         self,
         user: str,
         body: str | dict,
+        *,
+        timeout=UNSET,
     ) -> Response:
         """Update the properties for the specified user."""
         call = UserPropertiesPutCall(user=user, body=body)
-        return await self._api.call(call)
+        return await self._api.call(call, timeout=timeout)

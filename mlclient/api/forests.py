@@ -16,6 +16,7 @@ from mlclient.calls import (
     ForestsPostCall,
     ForestsPutCall,
 )
+from mlclient.connection import UNSET
 
 # Avoid circular import: ApiClient -> api classes -> ApiClient
 if TYPE_CHECKING:
@@ -42,6 +43,7 @@ class ForestsApi:
         group: str | None = None,
         host: str | None = None,
         full_refs: bool | None = None,
+        timeout=UNSET,
     ) -> Response:
         """Retrieve data about the forests in the cluster.
 
@@ -71,6 +73,11 @@ class ForestsApi:
             If set to true, full detail is returned for all relationship references.
             A value of false (the default) indicates to return detail only for first
             references.
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request timeout for this call. Unset uses the client's
+            configured timeout; None disables every HTTP timeout; a number sets
+            all four components to that many seconds; an httpx.Timeout overrides
+            them. It is an execution option, never sent as a request parameter.
 
         Returns
         -------
@@ -85,13 +92,14 @@ class ForestsApi:
             host=host,
             full_refs=full_refs,
         )
-        return self._api.call(call)
+        return self._api.call(call, timeout=timeout)
 
     def create(
         self,
         body: str | dict,
         *,
         wait_for_forest_to_mount: bool | None = None,
+        timeout=UNSET,
     ) -> Response:
         """Create a new forest, including replicas if specified.
 
@@ -107,6 +115,11 @@ class ForestsApi:
         wait_for_forest_to_mount : bool
             Whether to wait for the new forest to mount before sending a response
             to this request. Allowed values: true (default) or false.
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request timeout for this call. Unset uses the client's
+            configured timeout; None disables every HTTP timeout; a number sets
+            all four components to that many seconds; an httpx.Timeout overrides
+            them. It is an execution option, never sent as a request parameter.
 
         Returns
         -------
@@ -117,11 +130,13 @@ class ForestsApi:
             body=body,
             wait_for_forest_to_mount=wait_for_forest_to_mount,
         )
-        return self._api.call(call)
+        return self._api.call(call, timeout=timeout)
 
     def put(
         self,
         body: str | dict,
+        *,
+        timeout=UNSET,
     ) -> Response:
         """Perform an operation on one or more forests.
 
@@ -134,6 +149,11 @@ class ForestsApi:
         ----------
         body : str | dict
             A forest properties in XML or JSON format.
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request timeout for this call. Unset uses the client's
+            configured timeout; None disables every HTTP timeout; a number sets
+            all four components to that many seconds; an httpx.Timeout overrides
+            them. It is an execution option, never sent as a request parameter.
 
         Returns
         -------
@@ -141,7 +161,7 @@ class ForestsApi:
             An HTTP response
         """
         call = ForestsPutCall(body=body)
-        return self._api.call(call)
+        return self._api.call(call, timeout=timeout)
 
     def get(
         self,
@@ -149,6 +169,7 @@ class ForestsApi:
         *,
         data_format: str | None = None,
         view: str | None = None,
+        timeout=UNSET,
     ) -> Response:
         """Retrieve information about a forest.
 
@@ -166,6 +187,11 @@ class ForestsApi:
             A specific view of the returned data.
             Can be properties-schema, config, edit, package, describe, status,
             xdmp:server-status or default.
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request timeout for this call. Unset uses the client's
+            configured timeout; None disables every HTTP timeout; a number sets
+            all four components to that many seconds; an httpx.Timeout overrides
+            them. It is an execution option, never sent as a request parameter.
 
         Returns
         -------
@@ -173,12 +199,14 @@ class ForestsApi:
             An HTTP response with the forest details
         """
         call = ForestGetCall(forest=forest, data_format=data_format, view=view)
-        return self._api.call(call)
+        return self._api.call(call, timeout=timeout)
 
     def post(
         self,
         forest: str,
         body: str | dict,
+        *,
+        timeout=UNSET,
     ) -> Response:
         """Initiate a state change on a forest, such as a merge, restart, or attach.
 
@@ -192,6 +220,11 @@ class ForestsApi:
             A list of properties. Need to include the 'state' property (the type
             of state change to initiate).
             Allowed values: clear, merge, restart, attach, detach, retire, employ.
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request timeout for this call. Unset uses the client's
+            configured timeout; None disables every HTTP timeout; a number sets
+            all four components to that many seconds; an httpx.Timeout overrides
+            them. It is an execution option, never sent as a request parameter.
 
         Returns
         -------
@@ -199,7 +232,7 @@ class ForestsApi:
             An HTTP response
         """
         call = ForestPostCall(forest=forest, body=body)
-        return self._api.call(call)
+        return self._api.call(call, timeout=timeout)
 
     def delete(
         self,
@@ -207,6 +240,7 @@ class ForestsApi:
         *,
         level: str,
         replicas: str | None = None,
+        timeout=UNSET,
     ) -> Response:
         """Delete a forest.
 
@@ -225,6 +259,11 @@ class ForestsApi:
             Determines how to process the replicas.
             Allowed values: detach to detach the replica but keep it; delete to detach
             and delete the replica.
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request timeout for this call. Unset uses the client's
+            configured timeout; None disables every HTTP timeout; a number sets
+            all four components to that many seconds; an httpx.Timeout overrides
+            them. It is an execution option, never sent as a request parameter.
 
         Returns
         -------
@@ -232,13 +271,14 @@ class ForestsApi:
             An HTTP response
         """
         call = ForestDeleteCall(forest=forest, level=level, replicas=replicas)
-        return self._api.call(call)
+        return self._api.call(call, timeout=timeout)
 
     def get_properties(
         self,
         forest: str,
         *,
         data_format: str | None = None,
+        timeout=UNSET,
     ) -> Response:
         """Retrieve the modifiable properties of a forest.
 
@@ -251,6 +291,11 @@ class ForestsApi:
         data_format : str
             The format of the returned data. Can be either json or xml (default).
             This parameter overrides the Accept header if both are present.
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request timeout for this call. Unset uses the client's
+            configured timeout; None disables every HTTP timeout; a number sets
+            all four components to that many seconds; an httpx.Timeout overrides
+            them. It is an execution option, never sent as a request parameter.
 
         Returns
         -------
@@ -258,12 +303,14 @@ class ForestsApi:
             An HTTP response with the forest properties
         """
         call = ForestPropertiesGetCall(forest=forest, data_format=data_format)
-        return self._api.call(call)
+        return self._api.call(call, timeout=timeout)
 
     def put_properties(
         self,
         forest: str,
         body: str | dict,
+        *,
+        timeout=UNSET,
     ) -> Response:
         """Modify the configuration of a forest.
 
@@ -275,6 +322,11 @@ class ForestsApi:
             A forest identifier. The forest can be identified either by ID or name.
         body : str | dict
             A forest properties in XML or JSON format.
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request timeout for this call. Unset uses the client's
+            configured timeout; None disables every HTTP timeout; a number sets
+            all four components to that many seconds; an httpx.Timeout overrides
+            them. It is an execution option, never sent as a request parameter.
 
         Returns
         -------
@@ -282,7 +334,7 @@ class ForestsApi:
             An HTTP response
         """
         call = ForestPropertiesPutCall(forest=forest, body=body)
-        return self._api.call(call)
+        return self._api.call(call, timeout=timeout)
 
 
 class AsyncForestsApi:
@@ -300,6 +352,7 @@ class AsyncForestsApi:
         group: str | None = None,
         host: str | None = None,
         full_refs: bool | None = None,
+        timeout=UNSET,
     ) -> Response:
         """Retrieve data about the forests in the cluster."""
         call = ForestsGetCall(
@@ -310,28 +363,31 @@ class AsyncForestsApi:
             host=host,
             full_refs=full_refs,
         )
-        return await self._api.call(call)
+        return await self._api.call(call, timeout=timeout)
 
     async def create(
         self,
         body: str | dict,
         *,
         wait_for_forest_to_mount: bool | None = None,
+        timeout=UNSET,
     ) -> Response:
         """Create a new forest, including replicas if specified."""
         call = ForestsPostCall(
             body=body,
             wait_for_forest_to_mount=wait_for_forest_to_mount,
         )
-        return await self._api.call(call)
+        return await self._api.call(call, timeout=timeout)
 
     async def put(
         self,
         body: str | dict,
+        *,
+        timeout=UNSET,
     ) -> Response:
         """Perform an operation on one or more forests."""
         call = ForestsPutCall(body=body)
-        return await self._api.call(call)
+        return await self._api.call(call, timeout=timeout)
 
     async def get(
         self,
@@ -339,19 +395,22 @@ class AsyncForestsApi:
         *,
         data_format: str | None = None,
         view: str | None = None,
+        timeout=UNSET,
     ) -> Response:
         """Retrieve information about a forest."""
         call = ForestGetCall(forest=forest, data_format=data_format, view=view)
-        return await self._api.call(call)
+        return await self._api.call(call, timeout=timeout)
 
     async def post(
         self,
         forest: str,
         body: str | dict,
+        *,
+        timeout=UNSET,
     ) -> Response:
         """Initiate a state change on a forest, such as a merge, restart, or attach."""
         call = ForestPostCall(forest=forest, body=body)
-        return await self._api.call(call)
+        return await self._api.call(call, timeout=timeout)
 
     async def delete(
         self,
@@ -359,26 +418,30 @@ class AsyncForestsApi:
         *,
         level: str,
         replicas: str | None = None,
+        timeout=UNSET,
     ) -> Response:
         """Delete a forest."""
         call = ForestDeleteCall(forest=forest, level=level, replicas=replicas)
-        return await self._api.call(call)
+        return await self._api.call(call, timeout=timeout)
 
     async def get_properties(
         self,
         forest: str,
         *,
         data_format: str | None = None,
+        timeout=UNSET,
     ) -> Response:
         """Retrieve the modifiable properties of a forest."""
         call = ForestPropertiesGetCall(forest=forest, data_format=data_format)
-        return await self._api.call(call)
+        return await self._api.call(call, timeout=timeout)
 
     async def put_properties(
         self,
         forest: str,
         body: str | dict,
+        *,
+        timeout=UNSET,
     ) -> Response:
         """Modify the configuration of a forest."""
         call = ForestPropertiesPutCall(forest=forest, body=body)
-        return await self._api.call(call)
+        return await self._api.call(call, timeout=timeout)

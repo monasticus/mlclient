@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING
 from httpx import Response
 
 from mlclient.calls import LogsCall
+from mlclient.connection import UNSET
 
 # Avoid circular import: ApiClient -> api classes -> ApiClient
 if TYPE_CHECKING:
@@ -33,6 +34,7 @@ class LogsApi:
         start_time: str | None = None,
         end_time: str | None = None,
         regex: str | None = None,
+        timeout=UNSET,
     ) -> Response:
         """Retrieve the contents of a log file.
 
@@ -53,6 +55,11 @@ class LogsApi:
             The end time for the log data.
         regex : str
             Filters the log data, based on a regular expression.
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request timeout for this call. Unset uses the client's
+            configured timeout; None disables every HTTP timeout; a number sets
+            all four components to that many seconds; an httpx.Timeout overrides
+            them. It is an execution option, never sent as a request parameter.
 
         Returns
         -------
@@ -67,7 +74,7 @@ class LogsApi:
             end_time=end_time,
             regex=regex,
         )
-        return self._api.call(call)
+        return self._api.call(call, timeout=timeout)
 
 
 class AsyncLogsApi:
@@ -85,6 +92,7 @@ class AsyncLogsApi:
         start_time: str | None = None,
         end_time: str | None = None,
         regex: str | None = None,
+        timeout=UNSET,
     ) -> Response:
         """Retrieve the contents of a log file."""
         call = LogsCall(
@@ -95,4 +103,4 @@ class AsyncLogsApi:
             end_time=end_time,
             regex=regex,
         )
-        return await self._api.call(call)
+        return await self._api.call(call, timeout=timeout)

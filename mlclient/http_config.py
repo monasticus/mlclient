@@ -41,6 +41,13 @@ DEFAULT_RETRY_STRATEGY = Retry(
     backoff_factor=0.5,
 )
 
+DEFAULT_TIMEOUT = httpx.Timeout(
+    connect=5.0,
+    read=60.0,
+    write=60.0,
+    pool=5.0,
+)
+
 
 class HTTPConfig:
     """Resolved connection and authentication details for a MarkLogic client.
@@ -66,6 +73,7 @@ class HTTPConfig:
         password: str,
         retry: Retry | None,
         limits: httpx.Limits | None,
+        timeout: httpx.Timeout | None,
     ):
         """Initialize HTTPConfig from already-resolved parts.
 
@@ -80,6 +88,7 @@ class HTTPConfig:
         self._password = password
         self._retry = retry
         self._limits = limits
+        self._timeout = timeout
 
     @classmethod
     def resolve(
@@ -95,6 +104,7 @@ class HTTPConfig:
         cloud: CloudConfig | None = None,
         retry: Retry | None = None,
         limits: httpx.Limits | None = None,
+        timeout: httpx.Timeout | None = None,
     ) -> HTTPConfig:
         """Resolve connection and auth parameters into an HTTPConfig.
 
@@ -126,6 +136,9 @@ class HTTPConfig:
         limits : httpx.Limits | None, default None
             The connection-pool limits for transport creation. None leaves the
             limits unset, deferring to httpx's own default.
+        timeout : httpx.Timeout | None, default DEFAULT_TIMEOUT
+            The request timeout. None leaves the timeout unspecified, using
+            DEFAULT_TIMEOUT.
 
         Returns
         -------
@@ -152,6 +165,7 @@ class HTTPConfig:
             password,
             retry,
             limits,
+            timeout,
         )
 
     @property
@@ -218,9 +232,9 @@ class HTTPConfig:
         """Whether two configurations can safely use the same HTTP session.
 
         Compare connection and credential values, but require the same retry
-        strategy and pool-limits objects and, for custom authentication, the
-        same handler. Custom strategies and handlers may carry behavior beyond
-        their fields.
+        strategy, pool-limits and timeout objects and, for custom
+        authentication, the same handler. Custom strategies and handlers may
+        carry behavior beyond their fields.
         """
         same_auth = (
             self.auth_method is other.auth_method
@@ -236,6 +250,7 @@ class HTTPConfig:
             and same_auth
             and self.retry is other.retry
             and self.limits is other.limits
+            and self.timeout is other.timeout
         )
 
     @property
@@ -252,6 +267,11 @@ class HTTPConfig:
     def limits(self) -> httpx.Limits | None:
         """The connection-pool limits, or None to defer to httpx's default."""
         return self._limits
+
+    @property
+    def timeout(self) -> httpx.Timeout:
+        """The request timeout for HTTP session creation."""
+        return self._timeout if self._timeout is not None else DEFAULT_TIMEOUT
 
     def transport_verify(self) -> ssl.SSLContext | bool:
         """Return the SSL verification setting for transport creation."""
@@ -303,6 +323,7 @@ class HTTPConfig:
             "cloud": self._connection.cloud,
             "retry": self._retry,
             "limits": self._limits,
+            "timeout": self._timeout,
         }
         return self.resolve(**{**base, **overrides})
 

@@ -32,6 +32,12 @@ def test_limits_reach_the_primary_config():
     assert ml.http.config.limits is limits
 
 
+def test_timeout_reaches_the_primary_config():
+    timeout = httpx.Timeout(1.0)
+    ml = MLClient(timeout=timeout)
+    assert ml.http.config.timeout is timeout
+
+
 def test_https_server_cert_only():
     ml = MLClient(protocol="https", port=8003)
     assert ml.http.config.protocol == "https"

@@ -76,6 +76,7 @@ class HttpClientBase:
         cloud: CloudConfig | None = None,
         retry: Retry | None = None,
         limits: httpx.Limits | None = None,
+        timeout: httpx.Timeout | None = None,
         config: HTTPConfig | None = None,
         session_owner: HttpClient | AsyncHttpClient | None = None,
     ):
@@ -105,6 +106,9 @@ class HttpClientBase:
             A retry strategy
         limits : httpx.Limits | None, default None
             Connection-pool limits; None defers to httpx's own default
+        timeout : httpx.Timeout | None, default Timeout(connect=5, read=60, \
+write=60, pool=5)
+            A request timeout
         session_owner : HttpClient | AsyncHttpClient | None, default None
             Keep a lazily opened session while this owner is connected. The
             owner must disconnect its children when its lifecycle ends.
@@ -125,6 +129,7 @@ class HttpClientBase:
             cloud=cloud,
             retry=retry,
             limits=limits,
+            timeout=timeout,
         )
 
     @property
@@ -245,6 +250,9 @@ class HttpClient(HttpClientBase):
             A retry strategy
         limits : httpx.Limits | None, default None
             Connection-pool limits; None defers to httpx's own default
+        timeout : httpx.Timeout | None, default Timeout(connect=5, read=60, \
+write=60, pool=5)
+            A request timeout
         """
         super().__init__(**kwargs)
 
@@ -270,6 +278,7 @@ class HttpClient(HttpClientBase):
         transport = HTTPTransport(**self.config.transport_options())
         self._client = Client(
             transport=RetryTransport(transport=transport, retry=self.config.retry),
+            timeout=self.config.timeout,
         )
 
     def disconnect(self):
@@ -478,6 +487,7 @@ class HttpClient(HttpClientBase):
         transport = HTTPTransport(**self.config.transport_options())
         with Client(
             transport=RetryTransport(transport=transport, retry=self.config.retry),
+            timeout=self.config.timeout,
         ) as client:
             return client.request(method, url, **request)
 
@@ -520,6 +530,9 @@ class AsyncHttpClient(HttpClientBase):
             A retry strategy
         limits : httpx.Limits | None, default None
             Connection-pool limits; None defers to httpx's own default
+        timeout : httpx.Timeout | None, default Timeout(connect=5, read=60, \
+write=60, pool=5)
+            A request timeout
         """
         super().__init__(**kwargs)
 
@@ -545,6 +558,7 @@ class AsyncHttpClient(HttpClientBase):
         transport = AsyncHTTPTransport(**self.config.transport_options())
         self._client = AsyncClient(
             transport=RetryTransport(transport=transport, retry=self.config.retry),
+            timeout=self.config.timeout,
         )
 
     async def disconnect(self):
@@ -765,5 +779,6 @@ class AsyncHttpClient(HttpClientBase):
         transport = AsyncHTTPTransport(**self.config.transport_options())
         async with AsyncClient(
             transport=RetryTransport(transport=transport, retry=self.config.retry),
+            timeout=self.config.timeout,
         ) as client:
             return await client.request(method, url, **request)

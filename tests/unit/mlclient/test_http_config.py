@@ -5,7 +5,11 @@ import pytest
 from httpx_retries import Retry
 
 from mlclient.connection import CloudConfig, SSLConfig
-from mlclient.http_config import DEFAULT_RETRY_STRATEGY, HTTPConfig
+from mlclient.http_config import (
+    DEFAULT_RETRY_STRATEGY,
+    DEFAULT_TIMEOUT,
+    HTTPConfig,
+)
 
 
 def test_clone_rebinds_non_cloud_connection():
@@ -151,6 +155,30 @@ def test_cloud_clone_applies_limits_without_changing_gateway():
     assert config.limits is None
 
 
+def test_clone_carries_timeout():
+    timeout = httpx.Timeout(1.0)
+    config = HTTPConfig.resolve(host="ml.example.com", timeout=timeout)
+
+    assert config.clone(port=8002).timeout is timeout
+
+
+@pytest.mark.parametrize("timeout", [None, DEFAULT_TIMEOUT, httpx.Timeout(1.0)])
+def test_timeout_resolves_default_when_unset(timeout):
+    config = HTTPConfig.resolve(timeout=timeout)
+    sibling = config.clone(port=8002)
+
+    assert config.timeout is (timeout if timeout is not None else DEFAULT_TIMEOUT)
+    assert sibling.timeout is config.timeout
+
+
+def test_clone_can_restore_unspecified_timeout():
+    config = HTTPConfig.resolve(timeout=httpx.Timeout(1.0))
+
+    sibling = config.clone(timeout=None)
+
+    assert sibling.timeout is DEFAULT_TIMEOUT
+
+
 @pytest.mark.parametrize(
     "overrides",
     [
@@ -163,6 +191,7 @@ def test_cloud_clone_applies_limits_without_changing_gateway():
         {"ssl": SSLConfig(verify=False), "protocol": "https"},
         {"retry": Retry(total=0)},
         {"limits": httpx.Limits(max_connections=5)},
+        {"timeout": httpx.Timeout(1.0)},
     ],
 )
 def test_session_sharing_rejects_different_settings(overrides):
@@ -194,3 +223,15 @@ def test_session_sharing_requires_same_limits_object():
     assert not config.can_share_session(
         config.clone(limits=httpx.Limits(max_connections=5)),
     )
+
+
+def test_session_sharing_requires_same_timeout_object():
+    timeout = httpx.Timeout(1.0)
+    config = HTTPConfig.resolve(timeout=timeout)
+    assert config.can_share_session(config.clone())
+    assert not config.can_share_session(config.clone(timeout=httpx.Timeout(1.0)))
+
+
+def test_session_sharing_shares_default_timeout():
+    config = HTTPConfig.resolve()
+    assert config.can_share_session(HTTPConfig.resolve())

@@ -20,7 +20,7 @@ from functools import cached_property
 from types import TracebackType
 from xml.etree import ElementTree
 
-from httpx import Limits, RequestError, Response
+from httpx import Limits, RequestError, Response, Timeout
 from httpx_retries import Retry
 
 from mlclient.api.admin_api import AdminApi, AsyncAdminApi
@@ -151,6 +151,7 @@ class MLClient:
         cloud: CloudConfig | None = None,
         retry: Retry | None = None,
         limits: Limits | None = None,
+        timeout: Timeout | None = None,
         *,
         config: HTTPConfig | None = None,
         manage_config: HTTPConfig | None = None,
@@ -191,6 +192,9 @@ class MLClient:
             A retry strategy
         limits : httpx.Limits | None, default None
             Connection-pool limits; None defers to httpx's own default
+        timeout : httpx.Timeout | None, default Timeout(connect=5, read=60, \
+write=60, pool=5)
+            A request timeout
         config : HTTPConfig | None, default None
             An already-resolved primary configuration; when given, the
             connection parameters above are ignored
@@ -217,6 +221,7 @@ class MLClient:
             cloud=cloud,
             retry=retry,
             limits=limits,
+            timeout=timeout,
             config=config,
         )
         self._manage_http = self._secondary_http(
@@ -479,6 +484,7 @@ class AsyncMLClient:
         cloud: CloudConfig | None = None,
         retry: Retry | None = None,
         limits: Limits | None = None,
+        timeout: Timeout | None = None,
         *,
         config: HTTPConfig | None = None,
         manage_config: HTTPConfig | None = None,
@@ -519,6 +525,9 @@ class AsyncMLClient:
             A retry strategy
         limits : httpx.Limits | None, default None
             Connection-pool limits; None defers to httpx's own default
+        timeout : httpx.Timeout | None, default Timeout(connect=5, read=60, \
+write=60, pool=5)
+            A request timeout
         config : HTTPConfig | None, default None
             An already-resolved primary configuration; when given, the
             connection parameters above are ignored
@@ -545,6 +554,7 @@ class AsyncMLClient:
             cloud=cloud,
             retry=retry,
             limits=limits,
+            timeout=timeout,
             config=config,
         )
         self._manage_http = self._secondary_http(

@@ -53,7 +53,10 @@ the client.
 
 Connection-pool limits can be customized the same way via a ``limits`` argument
 (an ``httpx.Limits``). Unlike ``retry``, there is no library default: when
-omitted, ``limits`` is left unset and ``httpx`` applies its own default.
+omitted, ``limits`` is left unset and ``httpx`` applies its own default. The
+per-request ``timeout`` (an ``httpx.Timeout``) is customized the same way and,
+like ``retry``, falls back to a library default (``DEFAULT_TIMEOUT``) when
+omitted.
 
 ``HttpClient`` also exposes the standard MarkLogic endpoint ports as public constants:
 
@@ -164,10 +167,10 @@ client's lifecycle, requests use short-lived sessions.
 
 An auxiliary API reuses the primary session when its complete configuration
 matches, including injected configurations on custom ports. Matching includes
-host, connection mode, credentials, authentication, retry strategy and pool
-limits. For custom auth handlers, retry strategies and limits, sharing requires
-the same object; separately constructed values remain separate even if their
-fields match.
+host, connection mode, credentials, authentication, retry strategy, pool limits
+and timeout. For custom auth handlers, retry strategies, limits and timeouts,
+sharing requires the same object; separately constructed values remain separate
+even if their fields match.
 This avoids combining custom behavior by comparing only a port or URL.
 
 .. code-block:: python

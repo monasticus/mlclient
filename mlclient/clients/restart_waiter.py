@@ -383,6 +383,7 @@ class RestartWaiter:
                 transport=AsyncHTTPTransport(**self._config.transport_options()),
                 retry=self._config.retry,
             ),
+            timeout=self._config.timeout,
         ) as client:
             response = await client.get(
                 f"{self._config.protocol}://{self._config.host}:{_MARKLOGIC_MANAGE_PORT}"

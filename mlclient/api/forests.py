@@ -83,6 +83,12 @@ class ForestsApi:
         -------
         Response
             An HTTP response with the forests summary
+
+        Raises
+        ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
         """
         call = ForestsGetCall(
             data_format=data_format,
@@ -125,6 +131,12 @@ class ForestsApi:
         -------
         Response
             An HTTP response
+
+        Raises
+        ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
         """
         call = ForestsPostCall(
             body=body,
@@ -159,6 +171,12 @@ class ForestsApi:
         -------
         Response
             An HTTP response
+
+        Raises
+        ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
         """
         call = ForestsPutCall(body=body)
         return self._api.call(call, timeout=timeout)
@@ -197,6 +215,12 @@ class ForestsApi:
         -------
         Response
             An HTTP response with the forest details
+
+        Raises
+        ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
         """
         call = ForestGetCall(forest=forest, data_format=data_format, view=view)
         return self._api.call(call, timeout=timeout)
@@ -230,6 +254,12 @@ class ForestsApi:
         -------
         Response
             An HTTP response
+
+        Raises
+        ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
         """
         call = ForestPostCall(forest=forest, body=body)
         return self._api.call(call, timeout=timeout)
@@ -269,6 +299,12 @@ class ForestsApi:
         -------
         Response
             An HTTP response
+
+        Raises
+        ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
         """
         call = ForestDeleteCall(forest=forest, level=level, replicas=replicas)
         return self._api.call(call, timeout=timeout)
@@ -301,6 +337,12 @@ class ForestsApi:
         -------
         Response
             An HTTP response with the forest properties
+
+        Raises
+        ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
         """
         call = ForestPropertiesGetCall(forest=forest, data_format=data_format)
         return self._api.call(call, timeout=timeout)
@@ -332,6 +374,12 @@ class ForestsApi:
         -------
         Response
             An HTTP response
+
+        Raises
+        ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
         """
         call = ForestPropertiesPutCall(forest=forest, body=body)
         return self._api.call(call, timeout=timeout)
@@ -354,7 +402,51 @@ class AsyncForestsApi:
         full_refs: bool | None = None,
         timeout=UNSET,
     ) -> Response:
-        """Retrieve data about the forests in the cluster."""
+        """Retrieve data about the forests in the cluster.
+
+        The data returned depends on the view. If no view is specified, this
+        request returns a summary of the forests in the cluster.
+
+        Documentation: https://docs.marklogic.com/REST/GET/manage/v2/forests
+
+        Parameters
+        ----------
+        data_format : str
+            The format of the returned data. Can be either html, json, or xml (default).
+        view : str
+            A specific view of the returned data.
+            Can be either describe, default, status, metrics, schema, storage,
+            or properties-schema.
+        database : str
+            Returns a summary of the forests for the specified database.
+            The database can be identified either by id or name.
+        group : str
+            Returns a summary of the forests for the specified group.
+            The group can be identified either by id or name.
+        host : str
+            Returns a summary of the forests for the specified host.
+            The host can be identified either by id or name.
+        full_refs : bool
+            If set to true, full detail is returned for all relationship references.
+            A value of false (the default) indicates to return detail only for first
+            references.
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request timeout for this call. Unset uses the client's
+            configured timeout; None disables every HTTP timeout; a number sets
+            all four components to that many seconds; an httpx.Timeout overrides
+            them. It is an execution option, never sent as a request parameter.
+
+        Returns
+        -------
+        Response
+            An HTTP response with the forests summary
+
+        Raises
+        ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
+        """
         call = ForestsGetCall(
             data_format=data_format,
             view=view,
@@ -372,7 +464,37 @@ class AsyncForestsApi:
         wait_for_forest_to_mount: bool | None = None,
         timeout=UNSET,
     ) -> Response:
-        """Create a new forest, including replicas if specified."""
+        """Create a new forest, including replicas if specified.
+
+        If a database id or database is included, attach the new forest(s)
+        to the database.
+
+        Documentation: https://docs.marklogic.com/REST/POST/manage/v2/forests
+
+        Parameters
+        ----------
+        body : str | dict
+            A forest properties in XML or JSON format.
+        wait_for_forest_to_mount : bool
+            Whether to wait for the new forest to mount before sending a response
+            to this request. Allowed values: true (default) or false.
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request timeout for this call. Unset uses the client's
+            configured timeout; None disables every HTTP timeout; a number sets
+            all four components to that many seconds; an httpx.Timeout overrides
+            them. It is an execution option, never sent as a request parameter.
+
+        Returns
+        -------
+        Response
+            An HTTP response
+
+        Raises
+        ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
+        """
         call = ForestsPostCall(
             body=body,
             wait_for_forest_to_mount=wait_for_forest_to_mount,
@@ -385,7 +507,34 @@ class AsyncForestsApi:
         *,
         timeout=UNSET,
     ) -> Response:
-        """Perform an operation on one or more forests."""
+        """Perform an operation on one or more forests.
+
+        Such as combining multiple forests into a single new one, or migrating
+        the data in the forests to a new data directory.
+
+        Documentation: https://docs.marklogic.com/REST/PUT/manage/v2/forests
+
+        Parameters
+        ----------
+        body : str | dict
+            A forest properties in XML or JSON format.
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request timeout for this call. Unset uses the client's
+            configured timeout; None disables every HTTP timeout; a number sets
+            all four components to that many seconds; an httpx.Timeout overrides
+            them. It is an execution option, never sent as a request parameter.
+
+        Returns
+        -------
+        Response
+            An HTTP response
+
+        Raises
+        ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
+        """
         call = ForestsPutCall(body=body)
         return await self._api.call(call, timeout=timeout)
 
@@ -397,7 +546,39 @@ class AsyncForestsApi:
         view: str | None = None,
         timeout=UNSET,
     ) -> Response:
-        """Retrieve information about a forest."""
+        """Retrieve information about a forest.
+
+        The forest can be identified either by ID or name.
+
+        Documentation: https://docs.marklogic.com/REST/GET/manage/v2/forests/[id-or-name]
+
+        Parameters
+        ----------
+        forest : str
+            A forest identifier. The forest can be identified either by ID or name.
+        data_format : str
+            The format of the returned data. Can be either html, json, or xml (default).
+        view : str
+            A specific view of the returned data.
+            Can be properties-schema, config, edit, package, describe, status,
+            xdmp:server-status or default.
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request timeout for this call. Unset uses the client's
+            configured timeout; None disables every HTTP timeout; a number sets
+            all four components to that many seconds; an httpx.Timeout overrides
+            them. It is an execution option, never sent as a request parameter.
+
+        Returns
+        -------
+        Response
+            An HTTP response with the forest details
+
+        Raises
+        ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
+        """
         call = ForestGetCall(forest=forest, data_format=data_format, view=view)
         return await self._api.call(call, timeout=timeout)
 
@@ -408,7 +589,35 @@ class AsyncForestsApi:
         *,
         timeout=UNSET,
     ) -> Response:
-        """Initiate a state change on a forest, such as a merge, restart, or attach."""
+        """Initiate a state change on a forest, such as a merge, restart, or attach.
+
+        Documentation: https://docs.marklogic.com/REST/POST/manage/v2/forests/[id-or-name]
+
+        Parameters
+        ----------
+        forest : str
+            A forest identifier. The forest can be identified either by ID or name.
+        body : dict
+            A list of properties. Need to include the 'state' property (the type
+            of state change to initiate).
+            Allowed values: clear, merge, restart, attach, detach, retire, employ.
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request timeout for this call. Unset uses the client's
+            configured timeout; None disables every HTTP timeout; a number sets
+            all four components to that many seconds; an httpx.Timeout overrides
+            them. It is an execution option, never sent as a request parameter.
+
+        Returns
+        -------
+        Response
+            An HTTP response
+
+        Raises
+        ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
+        """
         call = ForestPostCall(forest=forest, body=body)
         return await self._api.call(call, timeout=timeout)
 
@@ -420,7 +629,40 @@ class AsyncForestsApi:
         replicas: str | None = None,
         timeout=UNSET,
     ) -> Response:
-        """Delete a forest."""
+        """Delete a forest.
+
+        Documentation: https://docs.marklogic.com/REST/DELETE/manage/v2/forests/[id-or-name]
+
+        Parameters
+        ----------
+        forest : str
+            A forest identifier. The forest can be identified either by ID or name.
+        level : str
+            The type of state change to initiate. Allowed values: full, config-only.
+            A config-only deletion removes only the forest configuration;
+            the data contained in the forest remains on disk.
+            A full deletion removes both the forest configuration and the data.
+        replicas : str
+            Determines how to process the replicas.
+            Allowed values: detach to detach the replica but keep it; delete to detach
+            and delete the replica.
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request timeout for this call. Unset uses the client's
+            configured timeout; None disables every HTTP timeout; a number sets
+            all four components to that many seconds; an httpx.Timeout overrides
+            them. It is an execution option, never sent as a request parameter.
+
+        Returns
+        -------
+        Response
+            An HTTP response
+
+        Raises
+        ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
+        """
         call = ForestDeleteCall(forest=forest, level=level, replicas=replicas)
         return await self._api.call(call, timeout=timeout)
 
@@ -431,7 +673,34 @@ class AsyncForestsApi:
         data_format: str | None = None,
         timeout=UNSET,
     ) -> Response:
-        """Retrieve the modifiable properties of a forest."""
+        """Retrieve the modifiable properties of a forest.
+
+        Documentation: https://docs.marklogic.com/REST/GET/manage/v2/forests/[id-or-name]/properties
+
+        Parameters
+        ----------
+        forest : str
+            A forest identifier. The forest can be identified either by ID or name.
+        data_format : str
+            The format of the returned data. Can be either json or xml (default).
+            This parameter overrides the Accept header if both are present.
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request timeout for this call. Unset uses the client's
+            configured timeout; None disables every HTTP timeout; a number sets
+            all four components to that many seconds; an httpx.Timeout overrides
+            them. It is an execution option, never sent as a request parameter.
+
+        Returns
+        -------
+        Response
+            An HTTP response with the forest properties
+
+        Raises
+        ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
+        """
         call = ForestPropertiesGetCall(forest=forest, data_format=data_format)
         return await self._api.call(call, timeout=timeout)
 
@@ -442,6 +711,32 @@ class AsyncForestsApi:
         *,
         timeout=UNSET,
     ) -> Response:
-        """Modify the configuration of a forest."""
+        """Modify the configuration of a forest.
+
+        Documentation: https://docs.marklogic.com/REST/PUT/manage/v2/forests/[id-or-name]/properties
+
+        Parameters
+        ----------
+        forest : str
+            A forest identifier. The forest can be identified either by ID or name.
+        body : str | dict
+            A forest properties in XML or JSON format.
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request timeout for this call. Unset uses the client's
+            configured timeout; None disables every HTTP timeout; a number sets
+            all four components to that many seconds; an httpx.Timeout overrides
+            them. It is an execution option, never sent as a request parameter.
+
+        Returns
+        -------
+        Response
+            An HTTP response
+
+        Raises
+        ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
+        """
         call = ForestPropertiesPutCall(forest=forest, body=body)
         return await self._api.call(call, timeout=timeout)

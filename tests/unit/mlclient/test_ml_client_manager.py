@@ -166,9 +166,9 @@ def test_config_override_precedence_and_environment_isolation():
 def test_timeout_defaults_per_server_kind_without_manager_override():
     manager = MLClientManager("test")
 
-    assert manager.get_config("content").timeout is DEFAULT_TIMEOUT
+    assert manager.get_config("content").timeout == DEFAULT_TIMEOUT
     assert not manager.get_config("content").has_explicit_timeout
-    assert manager.get_config("health").timeout is HEALTH_TIMEOUT
+    assert manager.get_config("health").timeout == HEALTH_TIMEOUT
 
 
 def test_manager_timeout_applies_to_every_server_including_health():

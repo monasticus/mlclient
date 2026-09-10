@@ -51,6 +51,12 @@ class ManageApi:
         -------
         Response
             An HTTP response
+
+        Raises
+        ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
         """
         return self._api.call(call_, timeout=timeout)
 
@@ -92,7 +98,29 @@ class AsyncManageApi:
         self._api = api
 
     async def call(self, call_: ApiCall, *, timeout=UNSET) -> Response:
-        """Send a custom ApiCall."""
+        """Send a custom ApiCall.
+
+        Parameters
+        ----------
+        call_ : ApiCall
+            A specific endpoint call implementation
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request timeout for this call. Unset uses the client's
+            configured timeout; None disables every HTTP timeout; a number sets
+            all four components to that many seconds; an httpx.Timeout overrides
+            them. It is an execution option, never sent as a request parameter.
+
+        Returns
+        -------
+        Response
+            An HTTP response
+
+        Raises
+        ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
+        """
         return await self._api.call(call_, timeout=timeout)
 
     @cached_property

@@ -8,6 +8,8 @@ from mlclient.connection import UNSET, CloudConfig, SSLConfig
 from mlclient.http_config import (
     DEFAULT_RETRY_STRATEGY,
     DEFAULT_TIMEOUT,
+    HEALTH_TIMEOUT,
+    NO_RETRY_STRATEGY,
     HTTPConfig,
 )
 
@@ -115,7 +117,7 @@ def test_clone_carries_limits():
     limits = httpx.Limits(max_connections=5)
     config = HTTPConfig.resolve(host="ml.example.com", limits=limits)
 
-    assert config.clone(port=8002).limits is limits
+    assert config.clone(port=8002).limits == limits
 
 
 def test_unset_limits_defers_to_httpx():
@@ -129,7 +131,7 @@ def test_explicit_limits_reach_the_transport():
     limits = httpx.Limits(max_connections=5)
     config = HTTPConfig.resolve(limits=limits)
 
-    assert config.transport_options()["limits"] is limits
+    assert config.transport_options()["limits"] == limits
 
 
 def test_clone_can_restore_unspecified_limits():
@@ -151,7 +153,7 @@ def test_cloud_clone_applies_limits_without_changing_gateway():
     sibling = config.clone(port=7997, limits=limits)
 
     assert sibling.base_url == config.base_url
-    assert sibling.limits is limits
+    assert sibling.limits == limits
     assert config.limits is None
 
 
@@ -159,15 +161,15 @@ def test_clone_carries_timeout():
     timeout = httpx.Timeout(1.0)
     config = HTTPConfig.resolve(host="ml.example.com", timeout=timeout)
 
-    assert config.clone(port=8002).timeout is timeout
+    assert config.clone(port=8002).timeout == timeout
 
 
 def test_timeout_resolves_default_when_unset():
     config = HTTPConfig.resolve()
 
-    assert config.timeout is DEFAULT_TIMEOUT
+    assert config.timeout == DEFAULT_TIMEOUT
     assert not config.has_explicit_timeout
-    assert config.clone(port=8002).timeout is DEFAULT_TIMEOUT
+    assert config.clone(port=8002).timeout == DEFAULT_TIMEOUT
 
 
 def test_timeout_none_disables_every_component():
@@ -186,13 +188,81 @@ def test_number_sets_all_four_components(timeout):
     assert config.timeout == httpx.Timeout(30.0)
 
 
+def test_timeout_configuration_is_isolated_from_input_and_clones():
+    supplied = httpx.Timeout(30)
+    config = HTTPConfig.resolve(timeout=supplied)
+    clone = config.clone()
+    supplied.read = 1
+    config.timeout.write = 2
+
+    assert config.timeout == httpx.Timeout(30)
+    assert clone.timeout == httpx.Timeout(30)
+
+
+def test_default_timeout_cannot_be_mutated_through_configuration():
+    before = httpx.Timeout(DEFAULT_TIMEOUT)
+    config = HTTPConfig.resolve()
+    config.timeout.read = 1
+
+    assert before == DEFAULT_TIMEOUT
+    assert HTTPConfig.resolve().timeout == before
+
+
+def test_limits_configuration_is_isolated_from_input_and_transport_options():
+    limits = httpx.Limits(max_connections=5)
+    config = HTTPConfig.resolve(limits=limits)
+    clone = config.clone()
+    limits.max_connections = 1
+    config.limits.max_connections = 2
+    config.transport_options()["limits"].max_connections = 3
+
+    assert config.limits == httpx.Limits(max_connections=5)
+    assert clone.limits == httpx.Limits(max_connections=5)
+
+
 def test_clone_can_restore_unspecified_timeout():
     config = HTTPConfig.resolve(timeout=httpx.Timeout(1.0))
 
     sibling = config.clone(timeout=UNSET)
 
-    assert sibling.timeout is DEFAULT_TIMEOUT
+    assert sibling.timeout == DEFAULT_TIMEOUT
     assert not sibling.has_explicit_timeout
+
+
+@pytest.mark.parametrize("timeout", [UNSET, None, 17])
+@pytest.mark.parametrize("retry", [None, DEFAULT_RETRY_STRATEGY, Retry(total=2)])
+def test_health_defaults_resolve_retry_and_timeout_independently(timeout, retry):
+    config = HTTPConfig.resolve(timeout=timeout, retry=retry)
+    health = config.with_health_defaults()
+
+    assert health.retry is (NO_RETRY_STRATEGY if retry is None else retry)
+    assert health.timeout == (
+        HEALTH_TIMEOUT if timeout is UNSET else httpx.Timeout(timeout)
+    )
+    assert config.has_explicit_timeout is (timeout is not UNSET)
+    assert config.has_explicit_retry is (retry is not None)
+    health.timeout.read = 100
+    assert httpx.Timeout(5) == HEALTH_TIMEOUT
+
+
+@pytest.mark.parametrize(
+    "overrides",
+    [
+        {"max_connections": 10},
+        {"max_keepalive_connections": 3},
+        {"keepalive_expiry": 30},
+    ],
+)
+def test_session_sharing_rejects_a_difference_in_any_limit(overrides):
+    values = {
+        "max_connections": 5,
+        "max_keepalive_connections": 2,
+        "keepalive_expiry": 5,
+    }
+    config = HTTPConfig.resolve(limits=httpx.Limits(**values))
+    other = HTTPConfig.resolve(limits=httpx.Limits(**{**values, **overrides}))
+
+    assert not config.can_share_session(other)
 
 
 @pytest.mark.parametrize(
@@ -232,11 +302,11 @@ def test_session_sharing_requires_same_custom_auth_and_retry():
     assert not config.can_share_session(config.clone(retry=Retry(total=2)))
 
 
-def test_session_sharing_requires_same_limits_object():
+def test_session_sharing_compares_limits_values():
     limits = httpx.Limits(max_connections=5)
     config = HTTPConfig.resolve(limits=limits)
     assert config.can_share_session(config.clone())
-    assert not config.can_share_session(
+    assert config.can_share_session(
         config.clone(limits=httpx.Limits(max_connections=5)),
     )
 

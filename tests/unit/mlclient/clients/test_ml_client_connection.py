@@ -29,13 +29,13 @@ def test_default_is_http_digest():
 def test_limits_reach_the_primary_config():
     limits = httpx.Limits(max_connections=5)
     ml = MLClient(limits=limits)
-    assert ml.http.config.limits is limits
+    assert ml.http.config.limits == limits
 
 
 def test_timeout_reaches_the_primary_config():
     timeout = httpx.Timeout(1.0)
     ml = MLClient(timeout=timeout)
-    assert ml.http.config.timeout is timeout
+    assert ml.http.config.timeout == timeout
 
 
 def test_https_server_cert_only():

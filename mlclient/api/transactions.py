@@ -59,6 +59,12 @@ class TransactionsApi:
         -------
         Response
             An HTTP response with a ``Location`` header carrying the transaction id
+
+        Raises
+        ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
         """
         call = TransactionsPostCall(
             name=name,
@@ -98,6 +104,12 @@ class TransactionsApi:
         -------
         Response
             An HTTP response with the transaction status
+
+        Raises
+        ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
         """
         call = TransactionGetCall(
             txid=txid,
@@ -137,6 +149,12 @@ class TransactionsApi:
         -------
         Response
             An HTTP response
+
+        Raises
+        ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
         """
         call = TransactionPostCall(
             txid=txid,
@@ -160,7 +178,39 @@ class AsyncTransactionsApi:
         database: str | None = None,
         timeout=UNSET,
     ) -> Response:
-        """Create a multi-statement transaction."""
+        """Create a multi-statement transaction.
+
+        The response is a 303 redirect whose ``Location`` header carries the new
+        transaction id (``/v1/transactions/{txid}``); the redirect is not followed.
+
+        Documentation: https://docs.marklogic.com/REST/POST/v1/transactions
+
+        Parameters
+        ----------
+        name : str
+            A name to assign to the transaction.
+        time_limit : int
+            The maximum number of seconds for the transaction to remain open.
+        database : str
+            Evaluate against the named content database instead of the default
+            content database associated with the REST API instance.
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request timeout for this call. Unset uses the client's
+            configured timeout; None disables every HTTP timeout; a number sets
+            all four components to that many seconds; an httpx.Timeout overrides
+            them. It is an execution option, never sent as a request parameter.
+
+        Returns
+        -------
+        Response
+            An HTTP response with a ``Location`` header carrying the transaction id
+
+        Raises
+        ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
+        """
         call = TransactionsPostCall(
             name=name,
             time_limit=time_limit,
@@ -176,7 +226,36 @@ class AsyncTransactionsApi:
         database: str | None = None,
         timeout=UNSET,
     ) -> Response:
-        """Retrieve the status of the specified transaction."""
+        """Retrieve the status of the specified transaction.
+
+        Documentation: https://docs.marklogic.com/REST/GET/v1/transactions/[txid]
+
+        Parameters
+        ----------
+        txid : str
+            A transaction identifier.
+        data_format : str
+            The format of the returned data. Can be either json or xml (default).
+        database : str
+            Evaluate against the named content database instead of the default
+            content database associated with the REST API instance.
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request timeout for this call. Unset uses the client's
+            configured timeout; None disables every HTTP timeout; a number sets
+            all four components to that many seconds; an httpx.Timeout overrides
+            them. It is an execution option, never sent as a request parameter.
+
+        Returns
+        -------
+        Response
+            An HTTP response with the transaction status
+
+        Raises
+        ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
+        """
         call = TransactionGetCall(
             txid=txid,
             data_format=data_format,
@@ -192,7 +271,36 @@ class AsyncTransactionsApi:
         database: str | None = None,
         timeout=UNSET,
     ) -> Response:
-        """Commit or roll back the specified transaction."""
+        """Commit or roll back the specified transaction.
+
+        Documentation: https://docs.marklogic.com/REST/POST/v1/transactions/[txid]
+
+        Parameters
+        ----------
+        txid : str
+            A transaction identifier.
+        result : str
+            The disposition of the transaction. Can be either commit or rollback.
+        database : str
+            Evaluate against the named content database instead of the default
+            content database associated with the REST API instance.
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request timeout for this call. Unset uses the client's
+            configured timeout; None disables every HTTP timeout; a number sets
+            all four components to that many seconds; an httpx.Timeout overrides
+            them. It is an execution option, never sent as a request parameter.
+
+        Returns
+        -------
+        Response
+            An HTTP response
+
+        Raises
+        ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
+        """
         call = TransactionPostCall(
             txid=txid,
             result=result,

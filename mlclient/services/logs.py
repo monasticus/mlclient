@@ -100,6 +100,9 @@ class LogsService:
 
         Raises
         ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
         MarkLogicError
             If MarkLogic returns an error
         """
@@ -146,6 +149,9 @@ class LogsService:
 
         Raises
         ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
         MarkLogicError
             If MarkLogic returns an error
         """
@@ -289,7 +295,41 @@ class AsyncLogsService(LogsService):
         host: str | None = None,
         timeout=UNSET,
     ) -> Iterator[dict]:
-        """Return logs from a MarkLogic server."""
+        """Return logs from a MarkLogic server.
+
+        Parameters
+        ----------
+        app_server : int | str | None, default None
+            An app server (port) with logs to retrieve
+        log_type : LogType | str, default LogType.ERROR
+            A log type (enum or string: "error", "access", "request", "audit")
+        start_time : str | None, default None
+            A start time to search error logs
+        end_time : str | None, default None
+            An end time to search error logs
+        regex : str | None, default None
+            A regex to search error logs
+        host : str | None, default None
+            A host name with logs to retrieve
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request HTTP timeout for this call. Unset uses the client's
+            configured timeout; None disables every HTTP timeout; a number sets
+            all four components to that many seconds; an httpx.Timeout overrides
+            them.
+
+        Returns
+        -------
+        Iterator[dict]
+            A log details generator.
+
+        Raises
+        ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
+        MarkLogicError
+            If MarkLogic returns an error
+        """
         if isinstance(log_type, str):
             log_type = LogType.get(log_type)
         call = self._get_call(
@@ -314,7 +354,31 @@ class AsyncLogsService(LogsService):
         *,
         timeout=UNSET,
     ) -> dict:
-        """Return a logs list from a MarkLogic server."""
+        """Return a logs list from a MarkLogic server.
+
+        Parameters
+        ----------
+        host : str | None, default None
+            A host name with log files to retrieve
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request HTTP timeout for this call. Unset uses the client's
+            configured timeout; None disables every HTTP timeout; a number sets
+            all four components to that many seconds; an httpx.Timeout overrides
+            them.
+
+        Returns
+        -------
+        dict
+            A parsed list of log files in the MarkLogic server
+
+        Raises
+        ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
+        MarkLogicError
+            If MarkLogic returns an error
+        """
         call = self._get_call(host=host)
 
         resp = await self._api.call(call, timeout=timeout)

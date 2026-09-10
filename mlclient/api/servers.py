@@ -73,6 +73,12 @@ class ServersApi:
         -------
         Response
             An HTTP response with the servers summary
+
+        Raises
+        ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
         """
         call = ServersGetCall(
             data_format=data_format,
@@ -118,6 +124,12 @@ class ServersApi:
         -------
         Response
             An HTTP response
+
+        Raises
+        ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
         """
         call = ServersPostCall(body=body, group_id=group_id, server_type=server_type)
         return self._api.call(call, timeout=timeout)
@@ -178,6 +190,12 @@ class ServersApi:
         -------
         Response
             An HTTP response with the server details
+
+        Raises
+        ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
         """
         call = ServerGetCall(
             server=server,
@@ -218,6 +236,12 @@ class ServersApi:
         -------
         Response
             An HTTP response
+
+        Raises
+        ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
         """
         call = ServerDeleteCall(server=server, group_id=group_id)
         return self._api.call(call, timeout=timeout)
@@ -254,6 +278,12 @@ class ServersApi:
         -------
         Response
             An HTTP response with the server properties
+
+        Raises
+        ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
         """
         call = ServerPropertiesGetCall(
             server=server,
@@ -293,6 +323,12 @@ class ServersApi:
         -------
         Response
             An HTTP response
+
+        Raises
+        ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
         """
         call = ServerPropertiesPutCall(server=server, group_id=group_id, body=body)
         return self._api.call(call, timeout=timeout)
@@ -313,7 +349,45 @@ class AsyncServersApi:
         full_refs: bool | None = None,
         timeout=UNSET,
     ) -> Response:
-        """Retrieve data about the App Servers in the cluster."""
+        """Retrieve data about the App Servers in the cluster.
+
+        The data returned depends on the setting of the view request parameter.
+        The default view provides a summary of the servers.
+
+        Documentation: https://docs.marklogic.com/REST/GET/manage/v2/servers
+
+        Parameters
+        ----------
+        data_format : str
+            The format of the returned data. Can be either html, json, or xml (default).
+        group_id : str
+            Specifies to return only the servers in the specified group.
+            The group can be identified either by id or name.
+            If not specified, the response includes information about all App Servers.
+        view : str
+            A specific view of the returned data.
+            Can be schema, properties-schema, metrics, package, describe, or default.
+        full_refs : bool
+            If set to true, full detail is returned for all relationship references.
+            A value of false (the default) indicates to return detail only for first
+            references. This parameter is not meaningful with view=package.
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request timeout for this call. Unset uses the client's
+            configured timeout; None disables every HTTP timeout; a number sets
+            all four components to that many seconds; an httpx.Timeout overrides
+            them. It is an execution option, never sent as a request parameter.
+
+        Returns
+        -------
+        Response
+            An HTTP response with the servers summary
+
+        Raises
+        ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
+        """
         call = ServersGetCall(
             data_format=data_format,
             group_id=group_id,
@@ -330,7 +404,41 @@ class AsyncServersApi:
         server_type: str | None = None,
         timeout=UNSET,
     ) -> Response:
-        """Create a new App Server in the specified group."""
+        """Create a new App Server in the specified group.
+
+        Documentation: https://docs.marklogic.com/REST/POST/manage/v2/servers
+
+        Parameters
+        ----------
+        body : str | dict
+            A server properties in XML or JSON format.
+        group_id : str
+            The id or name of the group to which the App Server belongs.
+            The group must be specified by this parameter or by the group-name property
+            in the request payload. If it is specified in both places, the values
+            must be the same.
+        server_type : str
+            The type of App Server to create.
+            The App Server type must be specified by this parameter or in the request
+            payload. If it is specified in both places, the values must be the same.
+            The valid types are: http, odbc, xdbc, or webdav.
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request timeout for this call. Unset uses the client's
+            configured timeout; None disables every HTTP timeout; a number sets
+            all four components to that many seconds; an httpx.Timeout overrides
+            them. It is an execution option, never sent as a request parameter.
+
+        Returns
+        -------
+        Response
+            An HTTP response
+
+        Raises
+        ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
+        """
         call = ServersPostCall(body=body, group_id=group_id, server_type=server_type)
         return await self._api.call(call, timeout=timeout)
 
@@ -346,7 +454,57 @@ class AsyncServersApi:
         modules: bool | None = None,
         timeout=UNSET,
     ) -> Response:
-        """Retrieve data about a specific App Server."""
+        """Retrieve data about a specific App Server.
+
+        The server can be identified either by ID or name. The data returned
+        depends on the value of the view request parameter. The default view
+        is a summary with links to additional data.
+
+        Documentation: https://docs.marklogic.com/REST/GET/manage/v2/servers/[id-or-name]
+
+        Parameters
+        ----------
+        server : str
+            A server identifier. The server can be identified either by ID or name.
+        group_id : str
+            The id or name of the group to which the App Server belongs.
+            This parameter is required.
+        data_format : str
+            The format of the returned data. Can be either html, json, or xml (default).
+        view : str
+            A specific view of the returned data.
+            Can be properties-schema, config, edit, package, describe, status,
+            xdmp:server-status or default.
+        host_id : str
+            Meaningful only when view=status. Specifies to return the status for
+            the server in the specified host. The host can be identified either by id
+            or name.
+        full_refs : bool
+            If set to true, full detail is returned for all relationship references.
+            A value of false (the default) indicates to return detail only for
+            first references. This parameter is not meaningful with view=package.
+        modules : bool
+            Meaningful only with view=package. Whether to include a manifest
+            of the modules database for the App Server in the results, if one exists.
+            It is an error to request a modules database manifest for an App Server
+            that uses the filesystem for modules. Default: false.
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request timeout for this call. Unset uses the client's
+            configured timeout; None disables every HTTP timeout; a number sets
+            all four components to that many seconds; an httpx.Timeout overrides
+            them. It is an execution option, never sent as a request parameter.
+
+        Returns
+        -------
+        Response
+            An HTTP response with the server details
+
+        Raises
+        ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
+        """
         call = ServerGetCall(
             server=server,
             group_id=group_id,
@@ -365,7 +523,34 @@ class AsyncServersApi:
         *,
         timeout=UNSET,
     ) -> Response:
-        """Delete the specified App Server from the specified group."""
+        """Delete the specified App Server from the specified group.
+
+        Documentation: https://docs.marklogic.com/REST/DELETE/manage/v2/servers/[id-or-name]
+
+        Parameters
+        ----------
+        server : str
+            A server identifier. The server can be identified either by ID or name.
+        group_id : str
+            The id or name of the group to which the App Server belongs.
+            This parameter is required.
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request timeout for this call. Unset uses the client's
+            configured timeout; None disables every HTTP timeout; a number sets
+            all four components to that many seconds; an httpx.Timeout overrides
+            them. It is an execution option, never sent as a request parameter.
+
+        Returns
+        -------
+        Response
+            An HTTP response
+
+        Raises
+        ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
+        """
         call = ServerDeleteCall(server=server, group_id=group_id)
         return await self._api.call(call, timeout=timeout)
 
@@ -377,7 +562,37 @@ class AsyncServersApi:
         data_format: str | None = None,
         timeout=UNSET,
     ) -> Response:
-        """Retrieve the modifiable properties of the specified App Server."""
+        """Retrieve the modifiable properties of the specified App Server.
+
+        Documentation: https://docs.marklogic.com/REST/GET/manage/v2/servers/[id-or-name]/properties
+
+        Parameters
+        ----------
+        server : str
+            A server identifier. The server can be identified either by ID or name.
+        group_id : str
+            The id or name of the group to which the App Server belongs.
+            This parameter is required.
+        data_format : str
+            The format of the returned data. Can be either json or xml (default).
+            This parameter overrides the Accept header if both are present.
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request timeout for this call. Unset uses the client's
+            configured timeout; None disables every HTTP timeout; a number sets
+            all four components to that many seconds; an httpx.Timeout overrides
+            them. It is an execution option, never sent as a request parameter.
+
+        Returns
+        -------
+        Response
+            An HTTP response with the server properties
+
+        Raises
+        ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
+        """
         call = ServerPropertiesGetCall(
             server=server,
             group_id=group_id,
@@ -393,6 +608,35 @@ class AsyncServersApi:
         *,
         timeout=UNSET,
     ) -> Response:
-        """Modify the properties of the specified App Server."""
+        """Modify the properties of the specified App Server.
+
+        Documentation: https://docs.marklogic.com/REST/PUT/manage/v2/servers/[id-or-name]/properties
+
+        Parameters
+        ----------
+        server : str
+            A server identifier. The server can be identified either by ID or name.
+        group_id : str
+            The id or name of the group to which the App Server belongs.
+            This parameter is required.
+        body : str | dict
+            A server properties in XML or JSON format.
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request timeout for this call. Unset uses the client's
+            configured timeout; None disables every HTTP timeout; a number sets
+            all four components to that many seconds; an httpx.Timeout overrides
+            them. It is an execution option, never sent as a request parameter.
+
+        Returns
+        -------
+        Response
+            An HTTP response
+
+        Raises
+        ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
+        """
         call = ServerPropertiesPutCall(server=server, group_id=group_id, body=body)
         return await self._api.call(call, timeout=timeout)

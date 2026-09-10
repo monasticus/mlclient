@@ -88,6 +88,12 @@ class DocumentsApi:
         -------
         Response
             An HTTP response with document content and/or metadata
+
+        Raises
+        ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
         """
         call = DocumentsGetCall(
             uri=uri,
@@ -155,6 +161,12 @@ class DocumentsApi:
         Response
             An HTTP response with ``application/json`` body containing
             the write results
+
+        Raises
+        ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
         """
         call = DocumentsPostCall(
             body_parts=body_parts,
@@ -225,6 +237,12 @@ class DocumentsApi:
         -------
         Response
             An HTTP response
+
+        Raises
+        ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
         """
         call = DocumentsDeleteCall(
             uri=uri,
@@ -257,7 +275,64 @@ class AsyncDocumentsApi:
         txid: str | None = None,
         timeout=UNSET,
     ) -> Response:
-        """Retrieve document content and/or metadata from the database."""
+        """Retrieve document content and/or metadata from the database.
+
+        Documentation: https://docs.marklogic.com/REST/GET/v1/documents
+
+        Parameters
+        ----------
+        uri : str | list
+            One or more URIs for documents in the database.
+            If you specify multiple URIs, the Accept header must be multipart/mixed.
+        database : str
+            Perform this operation on the named content database instead
+            of the default content database associated with the REST API instance.
+            Using an alternative database requires the "eval-in" privilege.
+        category : str | list
+            The category of data to fetch about the requested document.
+            Category can be specified multiple times to retrieve any combination
+            of content and metadata. Valid categories: content (default), metadata,
+            metadata-values, collections, permissions, properties, and quality.
+            Use metadata to request all categories except content.
+        data_format : str
+            The expected format of metadata returned in the response.
+            Accepted values: xml or json.
+            This parameter does not affect document content.
+            For metadata, this parameter overrides the MIME type in the Accept header,
+            except when the Accept header is multipart/mixed.
+        timestamp : str
+            A timestamp returned in the ML-Effective-Timestamp header of a previous
+            request. Use this parameter to fetch documents based on the contents
+            of the database at a fixed point-in-time.
+        transform : str
+            Names a content transformation previously installed via
+            the /config/transforms service. The service applies the transformation
+            to all documents prior to constructing the response.
+        transform_params : dict
+            A transform parameter names and values. For example, { "myparam": 1 }.
+            Transform parameters are passed to the transform named in the transform
+            parameter.
+        txid : str
+            The transaction identifier of the multi-statement transaction in which
+            to service this request. Use the /transactions service to create and manage
+            multi-statement transactions.
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request timeout for this call. Unset uses the client's
+            configured timeout; None disables every HTTP timeout; a number sets
+            all four components to that many seconds; an httpx.Timeout overrides
+            them. It is an execution option, never sent as a request parameter.
+
+        Returns
+        -------
+        Response
+            An HTTP response with document content and/or metadata
+
+        Raises
+        ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
+        """
         call = DocumentsGetCall(
             uri=uri,
             database=database,
@@ -282,7 +357,55 @@ class AsyncDocumentsApi:
         system_time: str | None = None,
         timeout=UNSET,
     ) -> Response:
-        """Insert or update content and/or metadata for multiple documents."""
+        """Insert or update content and/or metadata for multiple documents.
+
+        Documentation: https://docs.marklogic.com/REST/POST/v1/documents
+
+        Parameters
+        ----------
+        body_parts : list[BodyPart]
+            A list of multipart request body parts
+        database : str
+            Perform this operation on the named content database instead
+            of the default content database associated with the REST API instance.
+            Using an alternative database requires the "eval-in" privilege.
+        transform : str
+            Names a content transformation previously installed via
+            the /config/transforms service. The service applies the transformation
+            to all documents prior to constructing the response.
+        transform_params : dict
+            A transform parameter names and values. For example, { "myparam": 1 }.
+            Transform parameters are passed to the transform named in the transform
+            parameter.
+        txid : str
+            The transaction identifier of the multi-statement transaction in which
+            to service this request. Use the /transactions service to create and manage
+            multi-statement transactions.
+        temporal_collection : str
+            Specify the name of a temporal collection into which the documents are
+            to be inserted.
+        system_time : str
+            Set the system start time for the insertion or update.
+            This time will override the system time set by MarkLogic.
+            Ignored if temporal-collection is not included in the request.
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request timeout for this call. Unset uses the client's
+            configured timeout; None disables every HTTP timeout; a number sets
+            all four components to that many seconds; an httpx.Timeout overrides
+            them. It is an execution option, never sent as a request parameter.
+
+        Returns
+        -------
+        Response
+            An HTTP response with ``application/json`` body containing
+            the write results
+
+        Raises
+        ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
+        """
         call = DocumentsPostCall(
             body_parts=body_parts,
             database=database,
@@ -306,7 +429,59 @@ class AsyncDocumentsApi:
         wipe_temporal: bool | None = None,
         timeout=UNSET,
     ) -> Response:
-        """Remove documents, or reset document metadata."""
+        """Remove documents, or reset document metadata.
+
+        Documentation: https://docs.marklogic.com/REST/DELETE/v1/documents
+
+        Parameters
+        ----------
+        uri : str | list
+            The URI of a document to delete or for which to remove metadata.
+            You can specify multiple documents.
+        database : str
+            Perform this operation on the named content database instead
+            of the default content database associated with the REST API instance.
+            Using an alternative database requires the "eval-in" privilege.
+        category : str | list
+            The category of data to remove/reset.
+            Category may be specified multiple times to remove or reset
+            any combination of content and metadata.
+            Valid categories: content (default), metadata, metadata-values,
+            collections, permissions, properties, and quality.
+            Use metadata to reset all metadata.
+        txid : str
+            The transaction identifier of the multi-statement transaction in which
+            to service this request. Use the /transactions service to create and manage
+            multi-statement transactions.
+        temporal_collection : str
+            Specify the name of a temporal collection that contains the document(s)
+            to be deleted. Applies to all documents when deleting more than one.
+        system_time : str
+            Set the system start time for the insertion or update.
+            This time will override the system time set by MarkLogic.
+            Ignored if temporal-collection is not included in the request.
+            Applies to all documents when deleting more than one.
+        wipe_temporal : bool
+            Remove all versions of a temporal document rather than performing
+            a temporal delete. You can only use this parameter when you also specify
+            a temporal-collection parameter.
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request timeout for this call. Unset uses the client's
+            configured timeout; None disables every HTTP timeout; a number sets
+            all four components to that many seconds; an httpx.Timeout overrides
+            them. It is an execution option, never sent as a request parameter.
+
+        Returns
+        -------
+        Response
+            An HTTP response
+
+        Raises
+        ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
+        """
         call = DocumentsDeleteCall(
             uri=uri,
             database=database,

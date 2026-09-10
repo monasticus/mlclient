@@ -19,6 +19,7 @@ connection and auth functions together by hand.
 from __future__ import annotations
 
 import ssl
+from copy import copy
 
 import httpx
 from httpx_retries import Retry
@@ -50,25 +51,20 @@ DEFAULT_TIMEOUT = httpx.Timeout(
 
 HEALTH_TIMEOUT = httpx.Timeout(5.0)
 
+NO_RETRY_STRATEGY = Retry(total=0)
+
 
 def _normalize_timeout(timeout):
     """Turn a timeout argument into UNSET or a comparable httpx.Timeout.
 
     UNSET stays UNSET (no explicit value). None disables every HTTP timeout.
     A number sets all four components to that many seconds. An httpx.Timeout is
-    kept as-is. Normalizing an already-normalized value is idempotent, so
-    clone() can pass a stored value straight back through resolve().
+    copied, isolating the configuration from caller-owned mutable settings.
+    clone() preserves values without sharing the timeout object.
     """
     if timeout is UNSET:
         return UNSET
-    if isinstance(timeout, httpx.Timeout):
-        return timeout
     return httpx.Timeout(timeout)
-
-
-def _timeout_components(timeout: httpx.Timeout) -> tuple:
-    """Return a timeout's four components for unambiguous comparison."""
-    return (timeout.connect, timeout.read, timeout.write, timeout.pool)
 
 
 class HTTPConfig:
@@ -109,7 +105,7 @@ class HTTPConfig:
         self._username = username
         self._password = password
         self._retry = retry
-        self._limits = limits
+        self._limits = copy(limits)
         self._timeout = _normalize_timeout(timeout)
 
     @classmethod
@@ -256,9 +252,10 @@ class HTTPConfig:
         """Whether two configurations can safely use the same HTTP session.
 
         Compare connection and credential values, and require the same retry
-        strategy and pool-limits objects and, for custom authentication, the
-        same handler. Custom strategies and handlers may carry behavior beyond
-        their fields. Timeout is compared by its effective connect/read/write/
+        strategy object and, for custom authentication, the same handler.
+        Custom strategies and handlers may carry behavior beyond their fields.
+        Explicit pool limits are compared by value. Timeout is compared by its
+        effective connect/read/write/
         pool components, so equivalent values share a session even when built
         separately, while any component difference (including disabled versus
         bounded) blocks sharing.
@@ -276,8 +273,8 @@ class HTTPConfig:
             and self.password == other.password
             and same_auth
             and self.retry is other.retry
-            and self.limits is other.limits
-            and _timeout_components(self.timeout) == _timeout_components(other.timeout)
+            and self.limits == other.limits
+            and self.timeout == other.timeout
         )
 
     @property
@@ -292,23 +289,49 @@ class HTTPConfig:
 
     @property
     def limits(self) -> httpx.Limits | None:
-        """The connection-pool limits, or None to defer to httpx's default."""
-        return self._limits
+        """A copy of the pool limits, or None to defer to httpx's default.
+
+        Use clone(limits=...) to change settings; mutating this copy has no
+        effect on the configuration or an existing session.
+        """
+        return copy(self._limits)
 
     @property
     def timeout(self) -> httpx.Timeout:
-        """The effective request timeout, defaulting to DEFAULT_TIMEOUT.
+        """A copy of the effective timeout, defaulting to DEFAULT_TIMEOUT.
 
         A timeout of ``httpx.Timeout(None)`` (all components None) means every
         HTTP timeout is disabled; it is still an explicit value, distinct from
-        the unset case that resolves to DEFAULT_TIMEOUT.
+        the unset case that resolves to DEFAULT_TIMEOUT. Use clone(timeout=...)
+        to change settings; mutating this copy does not affect the configuration.
         """
-        return self._timeout if self._timeout is not UNSET else DEFAULT_TIMEOUT
+        timeout = self._timeout if self._timeout is not UNSET else DEFAULT_TIMEOUT
+        return httpx.Timeout(timeout)
 
     @property
     def has_explicit_timeout(self) -> bool:
         """Whether a timeout was supplied rather than left to the default."""
         return self._timeout is not UNSET
+
+    def with_health_defaults(self) -> HTTPConfig:
+        """Fill unspecified retry and timeout settings for a HealthCheck client.
+
+        Retry defaults to NO_RETRY_STRATEGY and timeout to HEALTH_TIMEOUT.
+        Each setting is resolved independently. Explicit values, including
+        timeout=None, are preserved; host, auth, TLS and limits are unchanged.
+
+        Returns
+        -------
+        HTTPConfig
+            A cloned configuration if a default needs applying, otherwise this
+            configuration. The source is not modified and no session is opened.
+        """
+        overrides = {}
+        if not self.has_explicit_retry:
+            overrides["retry"] = NO_RETRY_STRATEGY
+        if not self.has_explicit_timeout:
+            overrides["timeout"] = HEALTH_TIMEOUT
+        return self.clone(**overrides) if overrides else self
 
     def transport_verify(self) -> ssl.SSLContext | bool:
         """Return the SSL verification setting for transport creation."""
@@ -322,7 +345,7 @@ class HTTPConfig:
         """
         options = {"verify": self.transport_verify()}
         if self._limits is not None:
-            options["limits"] = self._limits
+            options["limits"] = self.limits
         return options
 
     def build_url(self, endpoint: str) -> str:

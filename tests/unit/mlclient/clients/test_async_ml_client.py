@@ -769,18 +769,30 @@ async def test_cached_auxiliary_uses_ad_hoc_session_after_context_exception(mock
 async def test_matching_injected_config_reuses_primary_session(mocker, tier, call):
     opened = mocker.spy(http_client_module, "AsyncClient")
     closed = mocker.spy(httpx.AsyncClient, "aclose")
-    config = HTTPConfig.resolve(port=9002, auth="basic")
+    config = HTTPConfig.resolve(
+        port=9002,
+        auth="basic",
+        limits=httpx.Limits(max_connections=5),
+        timeout=30,
+    )
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url("http://localhost:9002" + call.endpoint)
     ml_mocker.with_response_code(200)
     ml_mocker.with_empty_response_body()
     ml_mocker.mock_get()
 
-    async with AsyncMLClient(config=config, **{f"{tier}_config": config.clone()}) as ml:
+    async with AsyncMLClient(
+        config=config,
+        **{
+            f"{tier}_config": config.clone(
+                limits=httpx.Limits(max_connections=5),
+                timeout=httpx.Timeout(30),
+            ),
+        },
+    ) as ml:
         await getattr(ml, tier).call(call)
         assert opened.call_count == 1
     assert closed.call_count == 1
-
 
 
 @pytest.mark.asyncio

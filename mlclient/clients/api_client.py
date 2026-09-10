@@ -38,6 +38,12 @@ class ApiClient:
         -------
         Response
             An HTTP response
+
+        Raises
+        ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
         """
         return self._http.request(
             method=call_.method,
@@ -73,6 +79,12 @@ class AsyncApiClient:
         -------
         Response
             An HTTP response
+
+        Raises
+        ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
         """
         return await self._http.request(
             method=call_.method,

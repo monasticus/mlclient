@@ -237,7 +237,7 @@ class MLClient:
             admin_config or self._http.config.clone(port=MARKLOGIC_ADMIN_PORT),
         )
         self._health_http = self._secondary_http(
-            _resolve_health_config(health_config)
+            health_config.with_health_defaults()
             if health_config
             else self._http.config.clone(
                 port=MARKLOGIC_HEALTHCHECK_PORT,
@@ -301,6 +301,9 @@ class MLClient:
 
         Raises
         ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
         httpx.HTTPStatusError
             If the server answered with a 4xx status, which signals a
             misdirected request (the HealthCheck server takes no auth) rather
@@ -406,6 +409,12 @@ class MLClient:
         server-side lifetime of the transaction. Subsequent operations
         (status/commit/rollback and content ops run with ``**txn``) accept their
         own ``timeout``.
+
+        Raises
+        ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
         """
         return open_transaction(
             ApiClient(self._http),
@@ -595,7 +604,7 @@ class AsyncMLClient:
             admin_config or self._http.config.clone(port=MARKLOGIC_ADMIN_PORT),
         )
         self._health_http = self._secondary_http(
-            _resolve_health_config(health_config)
+            health_config.with_health_defaults()
             if health_config
             else self._http.config.clone(
                 port=MARKLOGIC_HEALTHCHECK_PORT,
@@ -665,6 +674,9 @@ class AsyncMLClient:
 
         Raises
         ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
         httpx.HTTPStatusError
             If the server answered with a 4xx status, which signals a
             misdirected request (the HealthCheck server takes no auth) rather
@@ -757,11 +769,10 @@ class AsyncMLClient:
     ) -> AsyncTransactionService:
         """Open a multi-statement transaction and return a service scoped to it.
 
-        Use as an async context manager to commit on a clean exit and roll back
-        on error:
+        Use as a context manager to commit on a clean exit and roll back on error:
 
-        >>> async with await ml.transaction(database="my-db") as txn:  # doctest: +SKIP
-        ...     await ml.eval.xquery("...", **txn)
+        >>> with ml.transaction(database="my-db") as txn:  # doctest: +SKIP
+        ...     ml.eval.xquery("...", **txn)
 
         ``timeout`` bounds only the HTTP request that opens the transaction:
         unset uses the client's configured timeout, None disables every HTTP
@@ -770,6 +781,12 @@ class AsyncMLClient:
         server-side lifetime of the transaction. Subsequent operations
         (status/commit/rollback and content ops run with ``**txn``) accept their
         own ``timeout``.
+
+        Raises
+        ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
         """
         return await async_open_transaction(
             AsyncApiClient(self._http),
@@ -855,21 +872,6 @@ def _admin_config_version(server_config: str) -> str | None:
         If the response is not well-formed XML
     """
     return ElementTree.fromstring(server_config).findtext("{*}version")
-
-
-def _resolve_health_config(config: HTTPConfig) -> HTTPConfig:
-    """Default an injected health config's unset retry and timeout independently.
-
-    An unspecified retry falls back to NO_RETRY_STRATEGY and an unspecified
-    timeout to HEALTH_TIMEOUT. An explicit value for either - including a
-    timeout of None to disable it - is preserved.
-    """
-    overrides = {}
-    if not config.has_explicit_retry:
-        overrides["retry"] = NO_RETRY_STRATEGY
-    if not config.has_explicit_timeout:
-        overrides["timeout"] = HEALTH_TIMEOUT
-    return config.clone(**overrides) if overrides else config
 
 
 def _healthy_or_raise(response: Response) -> bool:

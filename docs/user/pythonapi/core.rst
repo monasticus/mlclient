@@ -55,7 +55,7 @@ Connection-pool limits can be customized the same way via a ``limits`` argument
 (an ``httpx.Limits``). Unlike ``retry``, there is no library default: when
 omitted, ``limits`` is left unset and ``httpx`` applies its own default.
 
-The ``timeout`` bounds a single HTTP request at the client. It is a Python HTTP
+The ``timeout`` controls how long individual HTTP phases may wait. It is a Python HTTP
 setting, never an environment YAML value. Set it on the client (or its
 ``HTTPConfig``) as a default, and override it per request with the keyword-only
 ``timeout`` accepted by every operation - ``ml.eval.xquery(code, timeout=2)``,
@@ -67,8 +67,8 @@ HTTP timeout. When omitted it falls back to the client default, ultimately
 ``DEFAULT_TIMEOUT`` (``connect=5``, ``read=60``, ``write=60``, ``pool=5``); the
 health probe defaults to ``HEALTH_TIMEOUT`` (5 seconds). This client timeout is
 distinct from any MarkLogic server-side execution limit, and with retries
-enabled it applies per attempt, so the real wall-clock time of a call is
-roughly the timeout times the number of attempts. See
+enabled it applies per attempt. It is not a total deadline: streaming,
+multiple HTTP phases, retries and backoff can extend the wall-clock duration. See
 :doc:`../setup` for the full precedence and examples.
 
 ``HttpClient`` also exposes the standard MarkLogic endpoint ports as public constants:
@@ -181,10 +181,13 @@ client's lifecycle, requests use short-lived sessions.
 An auxiliary API reuses the primary session when its complete configuration
 matches, including injected configurations on custom ports. Matching includes
 host, connection mode, credentials, authentication, retry strategy, pool limits
-and timeout. For custom auth handlers, retry strategies, limits and timeouts,
-sharing requires the same object; separately constructed values remain separate
-even if their fields match.
-This avoids combining custom behavior by comparing only a port or URL.
+and timeout. Custom auth handlers and retry strategies must be the same object.
+Explicit limits and effective timeouts are compared by value, so independently
+constructed settings with equal components can share a session. Unset limits
+continue to defer to HTTPX defaults.
+Timeout and limits properties return copies. Change settings with
+``config.clone(timeout=..., limits=...)``; mutating a returned object does not
+change the configuration, its clones, presets or an already-open session.
 
 .. code-block:: python
 

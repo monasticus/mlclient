@@ -200,7 +200,7 @@ both ``ml.http`` and ``ml.manage``. Neither the YAML file nor subsequent calls
 are modified by per-call overrides.
 
 Configuring HTTP retry, limits and timeout in Python
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 ``retry``, ``limits`` and ``timeout`` are HTTP client options, **not
 environment settings**: none can be configured in the environment YAML.
@@ -233,8 +233,8 @@ They differ in their defaults. Without an explicit retry strategy, the manager
 uses ``NO_RETRY_STRATEGY`` for ``health`` and ``DEFAULT_RETRY_STRATEGY`` for
 other servers; passing ``retry=None`` per call restores that server's default
 even when the manager specifies a strategy. ``timeout`` defaults to
-``DEFAULT_TIMEOUT`` (``connect=5``, ``read=60``, ``write=60``, ``pool=5``
-seconds) when left unset. ``limits`` has no library default: when unset it is
+``HEALTH_TIMEOUT`` for health and ``DEFAULT_TIMEOUT`` for other servers
+when left unset. ``limits`` has no library default: when unset it is
 not passed to the transport and ``httpx`` applies its own default
 (``max_connections=100``, ``max_keepalive_connections=20``).
 
@@ -244,7 +244,7 @@ not passed to the transport and ``httpx`` applies its own default
    ...     healthy = ml.healthcheck()  # No retries despite the manager's setting.
 
 Timeout: values, inheritance and per-request overrides
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 ``timeout`` is a Python HTTP client setting, never an environment YAML value.
 It resolves through four levels, each overriding the one below it: the
@@ -252,10 +252,10 @@ per-server-kind default, the manager's explicit value, the factory-call value,
 and the per-request value passed to an individual operation. Every level
 accepts the same forms:
 
-- unset (the default) - inherit the level below, ending at ``DEFAULT_TIMEOUT``;
+- unset (the default) - inherit the level below, ending at the selected server's default;
 - a number - set all four components to that many seconds;
 - an ``httpx.Timeout`` - set the four components independently, no merge;
-- ``None`` - **disable** every HTTP timeout (an unbounded request), which is
+- ``None`` - **disable** every HTTP timeout, which is
   not the same as leaving it unset.
 
 An ``httpx.Timeout`` has four independent components: ``connect`` (waiting for
@@ -266,8 +266,8 @@ for a free connection from the pool). A bare number sets all four.
 Without an explicit value, the ``health`` server uses ``HEALTH_TIMEOUT``
 (5 seconds on all components) and every other server uses ``DEFAULT_TIMEOUT``
 (``connect=5``, ``read=60``, ``write=60``, ``pool=5``). A ``MLClient`` created
-directly always probes health with ``HEALTH_TIMEOUT`` regardless of its main
-timeout; a manager's explicit ``timeout`` applies to every server including
+directly derives health with ``HEALTH_TIMEOUT`` regardless of its main timeout,
+unless an explicit ``health_config`` timeout or per-request override is supplied; a manager's explicit ``timeout`` applies to every server including
 health.
 
 Every operation accepts a keyword-only ``timeout`` that overrides the client
@@ -278,7 +278,7 @@ default for that one request without mutating shared configuration:
    >>> import httpx
    >>> with MLClientManager("local").get_client("content") as ml:
    ...     ml.eval.xquery("1 + 1", timeout=2)                 # 2s on all four components
-   ...     ml.eval.xquery("1 + 1", timeout=httpx.Timeout(read=120.0))  # slow read only
+   ...     ml.eval.xquery("1 + 1", timeout=httpx.Timeout(5.0, read=120.0))  # slow read only
    ...     ml.documents.read("/doc.xml", timeout=None)        # no timeout
    ...     ml.healthcheck(timeout=2)                          # override the 5s health probe
 
@@ -297,15 +297,15 @@ a query variable. To pass a query variable that happens to be named
 
 Three separate limits are easy to confuse:
 
-- the **HTTP timeout** described here bounds a single HTTP request at the
-  client;
+- the **HTTP timeout** limits waiting in the connect, read, write and pool
+  phases; read and write limits apply between chunks, not to the whole body;
 - a **server-side execution limit** (for example a transaction's
   ``time_limit``, or a request's server ``time-limit``) bounds work inside
   MarkLogic and is unrelated to this setting;
-- the **total wall-clock time** of an operation is not bounded by either: with
-  retries enabled, a request that times out is retried, so the real time a call
-  can take is roughly the per-request timeout multiplied by the number of
-  attempts, plus backoff. The timeout applies per attempt, not cumulatively.
+- the **total wall-clock time** of an operation is not an HTTP timeout.
+  Streaming, multiple requests, eligible retries and backoff can all extend
+  an operation beyond its configured timeout. Not every timed-out request is
+  retried: the configured retry policy determines which failures qualify.
 
 Session sharing compares the effective timeout by its four components, so
 separately built but equal timeouts still share a session; a disabled timeout

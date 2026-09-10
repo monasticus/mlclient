@@ -9,13 +9,12 @@ It exports the following class:
 from __future__ import annotations
 
 from mlclient.clients import AsyncHttpClient, AsyncMLClient, HttpClient, MLClient
-from mlclient.clients.http_client import NO_RETRY_STRATEGY
 from mlclient.connection import UNSET
 from mlclient.exceptions import (
     NoRestServerConfiguredError,
     NoSuchAppServerError,
 )
-from mlclient.http_config import HEALTH_TIMEOUT, HTTPConfig
+from mlclient.http_config import HTTPConfig
 from mlclient.ml_environment import MLEnvironment
 
 
@@ -142,8 +141,8 @@ class MLClientManager:
             username, password, ssl, cloud, retry, limits and timeout. Values
             override manager defaults, which override environment settings.
             Cloud retains its gateway port even when a port override is
-            supplied. Retry is a Python-only HTTP option, not an environment
-            YAML setting.
+            supplied. Retry, limits and timeout are Python-only HTTP options,
+            not environment YAML settings.
 
         Returns
         -------
@@ -171,7 +170,7 @@ class MLClientManager:
         if overrides:
             config = config.clone(**overrides)
         if app_server_id == "health":
-            config = _apply_health_defaults(config)
+            config = config.with_health_defaults()
         return config
 
     def get_client(self, app_server_id: str | None = None, **overrides) -> MLClient:
@@ -187,6 +186,12 @@ class MLClientManager:
         servers use DEFAULT_RETRY_STRATEGY. Passing retry=None in this call
         restores the selected server's default, overriding a manager strategy.
 
+        Retry and timeout resolve independently. Without an explicit timeout,
+        health uses HEALTH_TIMEOUT and other servers use DEFAULT_TIMEOUT. A
+        manager timeout applies to every server including health; timeout=None
+        at any level disables every HTTP timeout, while timeout=UNSET in this
+        call inherits the manager value rather than clearing it.
+
         Parameters
         ----------
         app_server_id : str | None, default None
@@ -198,8 +203,8 @@ class MLClientManager:
             username, password, ssl, cloud, retry, limits and timeout. Values
             override manager defaults, which override environment settings.
             Cloud retains its gateway port even when a port override is
-            supplied. Retry is a Python-only HTTP option, not an environment
-            YAML setting.
+            supplied. Retry, limits and timeout are Python-only HTTP options,
+            not environment YAML settings.
 
         Returns
         -------
@@ -244,6 +249,12 @@ class MLClientManager:
         servers use DEFAULT_RETRY_STRATEGY. Passing retry=None in this call
         restores the selected server's default, overriding a manager strategy.
 
+        Retry and timeout resolve independently. Without an explicit timeout,
+        health uses HEALTH_TIMEOUT and other servers use DEFAULT_TIMEOUT. A
+        manager timeout applies to every server including health; timeout=None
+        at any level disables every HTTP timeout, while timeout=UNSET in this
+        call inherits the manager value rather than clearing it.
+
         Parameters
         ----------
         app_server_id : str | None, default None
@@ -255,8 +266,8 @@ class MLClientManager:
             username, password, ssl, cloud, retry, limits and timeout. Values
             override manager defaults, which override environment settings.
             Cloud retains its gateway port even when a port override is
-            supplied. Retry is a Python-only HTTP option, not an environment
-            YAML setting.
+            supplied. Retry, limits and timeout are Python-only HTTP options,
+            not environment YAML settings.
 
         Returns
         -------
@@ -299,6 +310,12 @@ class MLClientManager:
         servers use DEFAULT_RETRY_STRATEGY. Passing retry=None in this call
         restores the selected server's default, overriding a manager strategy.
 
+        Retry and timeout resolve independently. Without an explicit timeout,
+        health uses HEALTH_TIMEOUT and other servers use DEFAULT_TIMEOUT. A
+        manager timeout applies to every server including health; timeout=None
+        at any level disables every HTTP timeout, while timeout=UNSET in this
+        call inherits the manager value rather than clearing it.
+
         Parameters
         ----------
         app_server_id : str
@@ -309,8 +326,8 @@ class MLClientManager:
             username, password, ssl, cloud, retry, limits and timeout. Values
             override manager defaults, which override environment settings.
             Cloud retains its gateway port even when a port override is
-            supplied. Retry is a Python-only HTTP option, not an environment
-            YAML setting.
+            supplied. Retry, limits and timeout are Python-only HTTP options,
+            not environment YAML settings.
 
         Returns
         -------
@@ -347,6 +364,12 @@ class MLClientManager:
         servers use DEFAULT_RETRY_STRATEGY. Passing retry=None in this call
         restores the selected server's default, overriding a manager strategy.
 
+        Retry and timeout resolve independently. Without an explicit timeout,
+        health uses HEALTH_TIMEOUT and other servers use DEFAULT_TIMEOUT. A
+        manager timeout applies to every server including health; timeout=None
+        at any level disables every HTTP timeout, while timeout=UNSET in this
+        call inherits the manager value rather than clearing it.
+
         Parameters
         ----------
         app_server_id : str
@@ -357,8 +380,8 @@ class MLClientManager:
             username, password, ssl, cloud, retry, limits and timeout. Values
             override manager defaults, which override environment settings.
             Cloud retains its gateway port even when a port override is
-            supplied. Retry is a Python-only HTTP option, not an environment
-            YAML setting.
+            supplied. Retry, limits and timeout are Python-only HTTP options,
+            not environment YAML settings.
 
         Returns
         -------
@@ -401,6 +424,12 @@ class MLClientManager:
         servers use DEFAULT_RETRY_STRATEGY. Passing retry=None in this call
         restores the selected server's default, overriding a manager strategy.
 
+        Retry and timeout resolve independently. Without an explicit timeout,
+        health uses HEALTH_TIMEOUT and other servers use DEFAULT_TIMEOUT. A
+        manager timeout applies to every server including health; timeout=None
+        at any level disables every HTTP timeout, while timeout=UNSET in this
+        call inherits the manager value rather than clearing it.
+
         Parameters
         ----------
         app_server_id : str | None
@@ -412,8 +441,8 @@ class MLClientManager:
             username, password, ssl, cloud, retry, limits and timeout. Values
             override manager defaults, which override environment settings.
             Cloud retains its gateway port even when a port override is
-            supplied. Retry is a Python-only HTTP option, not an environment
-            YAML setting.
+            supplied. Retry, limits and timeout are Python-only HTTP options,
+            not environment YAML settings.
 
         Returns
         -------
@@ -484,15 +513,18 @@ class MLClientManager:
 
 
 def _without_unset(overrides: dict) -> dict:
-    """Drop UNSET-valued overrides so a per-call UNSET inherits the manager value."""
+    """Filter omitted settings before merging manager and per-call overrides.
+
+    Parameters
+    ----------
+    overrides : dict
+        HTTP configuration keyword arguments. UNSET denotes omission; None
+        remains explicit and must survive (for example, to disable timeouts).
+
+    Returns
+    -------
+    dict
+        A new mapping without UNSET-valued entries. The input is unchanged.
+        Removing omitted entries lets the lower configuration level apply.
+    """
     return {key: value for key, value in overrides.items() if value is not UNSET}
-
-
-def _apply_health_defaults(config: HTTPConfig) -> HTTPConfig:
-    """Default health's unset retry and timeout independently of one another."""
-    overrides = {}
-    if not config.has_explicit_retry:
-        overrides["retry"] = NO_RETRY_STRATEGY
-    if not config.has_explicit_timeout:
-        overrides["timeout"] = HEALTH_TIMEOUT
-    return config.clone(**overrides) if overrides else config

@@ -14,6 +14,7 @@ from httpx import AsyncClient, AsyncHTTPTransport, Client, HTTPTransport, Respon
 from httpx_retries import Retry, RetryTransport
 
 from mlclient import constants as const
+from mlclient import http_config
 from mlclient.auth import AuthParam
 from mlclient.connection import UNSET, CloudConfig, SSLConfig
 from mlclient.http_config import HTTPConfig
@@ -29,7 +30,7 @@ MARKLOGIC_ADMIN_PORT = 8001
 MARKLOGIC_MANAGE_PORT = 8002
 MARKLOGIC_HEALTHCHECK_PORT = 7997
 
-NO_RETRY_STRATEGY = Retry(total=0)
+NO_RETRY_STRATEGY = http_config.NO_RETRY_STRATEGY
 
 RESTART_RETRY_STRATEGY = Retry(
     total=12,
@@ -332,6 +333,12 @@ class HttpClient(HttpClientBase):
         -------
         Response
             An HTTP response
+
+        Raises
+        ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
         """
         return self.request(
             "GET",
@@ -369,6 +376,12 @@ class HttpClient(HttpClientBase):
         -------
         Response
             An HTTP response
+
+        Raises
+        ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
         """
         return self.request(
             "HEAD",
@@ -409,6 +422,12 @@ class HttpClient(HttpClientBase):
         -------
         Response
             An HTTP response
+
+        Raises
+        ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
         """
         return self.request(
             "POST",
@@ -450,6 +469,12 @@ class HttpClient(HttpClientBase):
         -------
         Response
             An HTTP response
+
+        Raises
+        ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
         """
         return self.request(
             "PUT",
@@ -488,6 +513,12 @@ class HttpClient(HttpClientBase):
         -------
         Response
             An HTTP response
+
+        Raises
+        ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
         """
         return self.request(
             "DELETE",
@@ -531,6 +562,12 @@ class HttpClient(HttpClientBase):
         -------
         Response
             An HTTP response
+
+        Raises
+        ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
         """
         request = self._prepare_request(params, headers, body)
         if timeout is not UNSET:
@@ -685,6 +722,12 @@ class AsyncHttpClient(HttpClientBase):
         -------
         Response
             An HTTP response
+
+        Raises
+        ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
         """
         return await self.request(
             "GET",
@@ -722,6 +765,12 @@ class AsyncHttpClient(HttpClientBase):
         -------
         Response
             An HTTP response
+
+        Raises
+        ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
         """
         return await self.request(
             "HEAD",
@@ -762,6 +811,12 @@ class AsyncHttpClient(HttpClientBase):
         -------
         Response
             An HTTP response
+
+        Raises
+        ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
         """
         return await self.request(
             "POST",
@@ -803,6 +858,12 @@ class AsyncHttpClient(HttpClientBase):
         -------
         Response
             An HTTP response
+
+        Raises
+        ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
         """
         return await self.request(
             "PUT",
@@ -841,6 +902,12 @@ class AsyncHttpClient(HttpClientBase):
         -------
         Response
             An HTTP response
+
+        Raises
+        ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
         """
         return await self.request(
             "DELETE",
@@ -884,6 +951,12 @@ class AsyncHttpClient(HttpClientBase):
         -------
         Response
             An HTTP response
+
+        Raises
+        ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
         """
         request = self._prepare_request(params, headers, body)
         if timeout is not UNSET:

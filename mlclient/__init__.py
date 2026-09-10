@@ -44,9 +44,11 @@ from . import utils
 from .auth import AuthConfig, MarkLogicCloudAuth, OAuthBearerAuth
 from .clients import (
     DEFAULT_RETRY_STRATEGY,
-    MARKLOGIC_ADMIN_API_PORT,
-    MARKLOGIC_MANAGE_API_PORT,
-    MARKLOGIC_REST_API_PORT,
+    MARKLOGIC_ADMIN_PORT,
+    MARKLOGIC_APP_SERVICES_PORT,
+    MARKLOGIC_HEALTHCHECK_PORT,
+    MARKLOGIC_MANAGE_PORT,
+    NO_RETRY_STRATEGY,
     RESTART_RETRY_STRATEGY,
     ApiClient,
     AsyncApiClient,
@@ -75,9 +77,11 @@ def setup_logger():
 __version__ = "0.4.1"
 __all__ = [
     "DEFAULT_RETRY_STRATEGY",
-    "MARKLOGIC_ADMIN_API_PORT",
-    "MARKLOGIC_MANAGE_API_PORT",
-    "MARKLOGIC_REST_API_PORT",
+    "MARKLOGIC_ADMIN_PORT",
+    "MARKLOGIC_APP_SERVICES_PORT",
+    "MARKLOGIC_HEALTHCHECK_PORT",
+    "MARKLOGIC_MANAGE_PORT",
+    "NO_RETRY_STRATEGY",
     "RESTART_RETRY_STRATEGY",
     "ApiClient",
     "AsyncApiClient",

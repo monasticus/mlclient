@@ -137,14 +137,121 @@ This code will work in every subdirectory of the ``migration-app`` project as it
 MLClientManager class
 ---------------------
 
-To make it easier, ``mlclient`` lib provides you a ``MLClientManager`` class with the highest-level API.
-The same logic as in the above example we will achieve in fewer steps::
+``MLClientManager`` loads a named ML Client Environment and creates clients
+with its connection settings. For example, ``"local"`` selects
+``.mlclient/mlclient-local.yaml`` using the directory lookup described above.
+
+Basic manager usage
+^^^^^^^^^^^^^^^^^^^
+
+Select a configured App Server and use the client as a context manager:
+
+.. code-block:: python
 
    >>> from mlclient import MLClientManager
    >>> mgr = MLClientManager("local")
    >>> with mgr.get_client("content") as ml:
    ...     result = ml.eval.xquery("xdmp:database() => xdmp:database-name()")
-   ...
 
-.. note::
-   ``MLClientManager`` is accessible only using ML Client Environments.
+Omit the identifier to select the first configured REST server:
+
+.. code-block:: python
+
+   >>> with mgr.get_client() as ml:
+   ...     result = ml.eval.xquery("1 + 1")
+
+An explicit identifier can select any configured server, including ``health``,
+``manage`` and ``admin``; it does not need to be marked as a REST server:
+
+.. code-block:: python
+
+   >>> with mgr.get_client("health") as ml:
+   ...     healthy = ml.healthcheck()
+   >>> with mgr.get_client("manage") as ml:
+   ...     response = ml.manage.databases.get_list()
+
+The selected server becomes the primary HTTP endpoint. Its corresponding API
+reuses that session, including custom ports and credentials. Other APIs retain
+their own environment settings. Entering the context opens only the primary
+session; auxiliary sessions open on their first request. Context exit closes
+all opened sessions.
+
+Overriding environment settings in Python
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Settings such as ``host``, ``port`` and ``username`` can come from the
+environment file. To change them for a particular use without editing YAML,
+pass overrides to the manager or its client factory:
+
+.. code-block:: python
+
+   >>> mgr = MLClientManager("local", host="gateway.example.com")
+   >>> with mgr.get_client("content", port=9100) as ml:
+   ...     result = ml.eval.xquery("1 + 1")
+
+Here every server uses ``gateway.example.com``, while only ``content`` uses
+port ``9100``. Manage, Admin and Health retain their configured ports.
+
+For settings present in the environment, precedence is: environment, manager
+overrides, then per-call overrides. Manager overrides apply to every server;
+per-call overrides apply only to the selected server and its corresponding
+API. For example, ``get_client("manage", port=9002)`` uses port ``9002`` for
+both ``ml.http`` and ``ml.manage``. Neither the YAML file nor subsequent calls
+are modified by per-call overrides.
+
+Configuring HTTP retry in Python
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+``retry`` is an HTTP client option, **not an environment setting**: it cannot
+be configured in the environment YAML. Set it on ``MLClient`` or ``HTTPConfig``
+when creating a client directly, or through the manager and its factories:
+
+.. code-block:: python
+
+   >>> from httpx_retries import Retry
+   >>> from mlclient.clients.http_client import NO_RETRY_STRATEGY
+   >>> mgr = MLClientManager("local", retry=Retry(total=2))
+   >>> with mgr.get_client("content") as ml:
+   ...     result = ml.eval.xquery("1 + 1")
+   >>> with mgr.get_client("health", retry=NO_RETRY_STRATEGY) as ml:
+   ...     healthy = ml.healthcheck()
+
+The manager's explicit retry strategy applies to every server, including
+Health. The per-call strategy overrides it for the selected server. There is
+no YAML retry value underneath these two levels.
+
+Without an explicit retry strategy, the manager uses ``NO_RETRY_STRATEGY`` for
+``health`` and ``DEFAULT_RETRY_STRATEGY`` for other servers. Passing
+``retry=None`` per call restores that server's default, even when the manager
+specifies a strategy:
+
+.. code-block:: python
+
+   >>> with mgr.get_client("health", retry=None) as ml:
+   ...     healthy = ml.healthcheck()  # No retries despite the manager's setting.
+
+Async clients, raw HTTP and resolved configuration
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The same selection and override rules apply to ``get_async_client()``,
+``get_http_client()`` and ``get_async_http_client()``. Raw HTTP factories
+require a server identifier:
+
+.. code-block:: python
+
+   >>> mgr = MLClientManager("local")
+   >>> async with mgr.get_async_client("health") as ml:
+   ...     healthy = await ml.healthcheck()
+   >>> with mgr.get_http_client("health") as http:
+   ...     response = http.head("/")
+
+Use ``get_config()`` to obtain a resolved ``HTTPConfig`` without creating a
+client or opening a session:
+
+.. code-block:: python
+
+   >>> config = mgr.get_config("content", port=9100, retry=NO_RETRY_STRATEGY)
+
+Overrides accept the parameters of ``HTTPConfig.clone()``; unknown names raise
+``TypeError``. ``get_config()`` applies the same manager defaults and per-call
+overrides as the client factories.

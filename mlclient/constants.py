@@ -4,6 +4,7 @@ from __future__ import annotations
 
 # REQUEST METHODS
 METHOD_GET = "GET"
+METHOD_HEAD = "HEAD"
 METHOD_POST = "POST"
 METHOD_PUT = "PUT"
 METHOD_DELETE = "DELETE"
@@ -70,6 +71,7 @@ __all__ = [
     "MANAGE_PORT",
     "METHOD_DELETE",
     "METHOD_GET",
+    "METHOD_HEAD",
     "METHOD_POST",
     "METHOD_PUT",
     "ML_CLIENT_DIR",

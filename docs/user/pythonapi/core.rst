@@ -53,14 +53,16 @@ the client.
 
 ``HttpClient`` also exposes the standard MarkLogic endpoint ports as public constants:
 
-- ``MARKLOGIC_REST_API_PORT`` = ``8000``
-- ``MARKLOGIC_ADMIN_API_PORT`` = ``8001``
-- ``MARKLOGIC_MANAGE_API_PORT`` = ``8002``
+- ``MARKLOGIC_APP_SERVICES_PORT`` = ``8000``
+- ``MARKLOGIC_ADMIN_PORT`` = ``8001``
+- ``MARKLOGIC_MANAGE_PORT`` = ``8002``
+- ``MARKLOGIC_HEALTHCHECK_PORT`` = ``7997``
 
-Two retry presets are also exported:
+Three retry presets are also exported:
 
 - ``DEFAULT_RETRY_STRATEGY`` for normal requests
 - ``RESTART_RETRY_STRATEGY`` for Admin timestamp polling during restart windows
+- ``NO_RETRY_STRATEGY`` to send a request once with no retries (used by the health probe)
 
 Connection
 ^^^^^^^^^^
@@ -147,20 +149,27 @@ them to port 8002.
       +- .parser     -> MLResponseParser
       +- .documents, .eval, .logs -> high-level services
 
-Port routing is automatic. When the main ``port`` differs from 8002 or 8001,
-separate connections to ports 8002 and 8001 are lazily created on first access
-to ``.manage`` or ``.admin``. If the main port happens to be 8002 (or 8001),
-that connection is reused directly. By default every secondary connection
-shares the same ``protocol``, ``host``, ``auth``, ``username``, ``password``,
-``ssl``, and ``cloud`` as the main client, differing only in port (see
-`Manage or Admin on a different host or credentials`_ to override this). They
-are also managed by the ``connect()`` / ``disconnect()`` lifecycle.
+Port routing is automatic: Manage defaults to 8002 and Admin to 8001.
+Their configurations inherit the primary settings except for the port (see
+`Manage or Admin on a different host or credentials`_ to override this).
+``connect()`` and entering a context open only the primary HTTP session.
+Auxiliary sessions open on their first request, not when accessing an API
+property. ``disconnect()`` and context exit close every opened session.
+Cached API objects can be reused after reconnecting. Outside a connected
+client's lifecycle, requests use short-lived sessions.
+
+An auxiliary API reuses the primary session when its complete configuration
+matches, including injected configurations on custom ports. Matching includes
+host, connection mode, credentials, authentication and retry strategy. For
+custom auth handlers and retry strategies, sharing requires the same object;
+separately constructed strategies remain separate even if their fields match.
+This avoids combining custom behavior by comparing only a port or URL.
 
 .. code-block:: python
 
     >>> from mlclient import MLClient
 
-    # Default port is 8000 - .manage creates a connection to 8002, .admin to 8001
+    # Default port is 8000 - Manage requests use 8002, Admin requests use 8001
     >>> with MLClient() as ml:
     ...     resp = ml.manage.databases.get_list()
     ...     ts = ml.admin.get_timestamp()
@@ -1200,8 +1209,10 @@ MarkLogic Cloud   ``cloud=CloudConfig(api_key=..., base_path=...)``             
 ================  ==============================================================  ==================
 
 A client certificate implies HTTPS, so the protocol is inferred. MarkLogic Cloud
-forces HTTPS on port 443 and routes every API tier through a single connection
-using the configured ``base_path``; passing a conflicting ``protocol`` or
+forces HTTPS on port 443 and routes every API tier through the same gateway
+using the configured ``base_path``. HTTP sessions are shared only when their
+complete configurations match; health checks normally use a separate session
+because their retry strategy differs. Passing a conflicting ``protocol`` or
 ``port`` raises :class:`~mlclient.exceptions.ConfigError`.
 
 .. code-block:: python
@@ -1444,3 +1455,57 @@ restart windows:
 
 For multi-host restart responses, the method waits for all affected hosts
 before it returns.
+
+
+Health check
+------------
+
+:meth:`~mlclient.MLClient.healthcheck` reports whether MarkLogic's HealthCheck
+app server answers. That server is unauthenticated by design and returns
+``200 OK`` only while the node is healthy - load balancers treat any other
+status as unhealthy.
+
+.. code-block:: python
+
+    >>> from mlclient import MLClient
+
+    >>> with MLClient() as ml:
+    ...     ml.healthcheck()
+    True
+
+The probe maps the response to a verdict:
+
+- ``2xx`` -> ``True`` (healthy)
+- ``5xx`` -> ``False`` (server up but not ready)
+- ``4xx`` -> raises :class:`httpx.HTTPStatusError`; a client error means the
+  request was misdirected (for example, aimed at an authenticated server), not
+  that the node is unhealthy
+
+By default, health checks use a configuration derived from the primary
+configuration, overriding the port to ``7997``, authentication to none, and
+retry to ``NO_RETRY_STRATEGY``. These defaults also apply when the primary
+already targets ``7997``; an identical effective configuration reuses its session. Cloud connections retain their gateway port and
+Cloud authentication, while health requests still default to no retries.
+
+Pass a resolved :class:`~mlclient.http_config.HTTPConfig` as ``health_config``
+to supply the health connection explicitly. Its host, port, authentication
+and TLS settings are preserved. When ``retry`` was omitted or passed as
+``None``, health requests use ``NO_RETRY_STRATEGY``. An explicitly supplied
+strategy is preserved, including ``DEFAULT_RETRY_STRATEGY`` itself.
+``HTTPConfig.clone()`` retains whether retry was explicitly configured;
+``has_explicit_retry`` exposes that distinction without changing the normal
+``HTTPConfig.retry`` default for other requests.
+
+.. code-block:: python
+
+    >>> from mlclient import MLClient
+    >>> from mlclient.http_config import HTTPConfig
+
+    >>> health_config = HTTPConfig.resolve(
+    ...     host="healthcheck.example.com",
+    ...     port=7997,
+    ...     auth=None,
+    ... )
+    >>> with MLClient(host="ml.example.com", health_config=health_config) as ml:
+    ...     ml.healthcheck()
+    True

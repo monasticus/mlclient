@@ -114,6 +114,28 @@ def test_cloud_routes_manage_and_admin_through_the_single_connection():
         assert request_url.port is None
 
 
+def test_cloud_routes_healthcheck_through_the_single_connection():
+    base = "https://x.marklogic.cloud:443"
+    with respx.mock:
+        respx.post(f"{base}/token").mock(
+            return_value=httpx.Response(200, json={"access_token": "tok-1"}),
+        )
+        health = respx.head(f"{base}/ml/example/manage/").mock(
+            return_value=httpx.Response(200),
+        )
+
+        with MLClient(
+            host="x.marklogic.cloud",
+            cloud=CloudConfig(api_key="mk-1", base_path="/ml/example/manage"),
+        ) as ml:
+            assert ml.healthcheck() is True
+
+    request_url = health.calls.last.request.url
+    assert request_url.host == "x.marklogic.cloud"
+    assert request_url.scheme == "https"
+    assert request_url.port is None
+
+
 def test_oauth_auth_config():
     ml = MLClient(auth=AuthConfig(method="oauth", token="jwt-token"))
     request = _probe_request(ml)

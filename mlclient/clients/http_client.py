@@ -24,9 +24,12 @@ from .restart_waiter import RestartWaiter
 
 logger = logging.getLogger(__name__)
 
-MARKLOGIC_REST_API_PORT = 8000
-MARKLOGIC_ADMIN_API_PORT = 8001
-MARKLOGIC_MANAGE_API_PORT = 8002
+MARKLOGIC_APP_SERVICES_PORT = 8000
+MARKLOGIC_ADMIN_PORT = 8001
+MARKLOGIC_MANAGE_PORT = 8002
+MARKLOGIC_HEALTHCHECK_PORT = 7997
+
+NO_RETRY_STRATEGY = Retry(total=0)
 
 RESTART_RETRY_STRATEGY = Retry(
     total=12,
@@ -73,6 +76,7 @@ class HttpClientBase:
         cloud: CloudConfig | None = None,
         retry: Retry | None = None,
         config: HTTPConfig | None = None,
+        session_owner: HttpClient | AsyncHttpClient | None = None,
     ):
         """Initialize HttpClientBase instance.
 
@@ -98,12 +102,15 @@ class HttpClientBase:
             MarkLogic Cloud configuration
         retry : Retry | None, default Retry(total=5, backoff_factor=0.5)
             A retry strategy
+        session_owner : HttpClient | AsyncHttpClient | None, default None
+            Keep a lazily opened session while this owner is connected. The
+            owner must disconnect its children when its lifecycle ends.
         config : HTTPConfig | None, default None
             An already-resolved configuration. When given, the connection
             parameters above are ignored and this configuration is used as-is;
-            derive it through :meth:`HTTPConfig.clone` so its httpx.Auth handler
-            is not shared with another client.
+            :meth:`HTTPConfig.clone` can derive a variant before injection.
         """
+        self._session_owner = session_owner
         self._config = config or HTTPConfig.resolve(
             protocol=protocol,
             host=host,
@@ -149,7 +156,8 @@ class HttpClientBase:
                 request["content"] = body
 
         logger.debug(
-            "Request details: %s",
+            "Request details: base_url [%s] %s",
+            self.base_url,
             " ".join(
                 f"{k} [{v if k != 'auth' else v.__class__.__name__}]"
                 for k, v in request.items()
@@ -249,7 +257,9 @@ class HttpClient(HttpClientBase):
         self.disconnect()
 
     def connect(self):
-        """Start an HTTP session."""
+        """Start an HTTP session unless already connected."""
+        if self.is_connected():
+            return
         logger.debug("Initiating a connection with %s", self.base_url)
         transport = HTTPTransport(verify=self.config.transport_verify())
         self._client = Client(
@@ -297,6 +307,31 @@ class HttpClient(HttpClientBase):
             An HTTP response
         """
         return self.request("GET", endpoint, params=params, headers=headers)
+
+    def head(
+        self,
+        endpoint: str,
+        *,
+        params: dict | None = None,
+        headers: dict | None = None,
+    ) -> Response:
+        """Send a HEAD request.
+
+        Parameters
+        ----------
+        endpoint : str
+            A REST endpoint to call
+        params : dict | None
+            Request parameters
+        headers : dict | None
+            Request headers
+
+        Returns
+        -------
+        Response
+            An HTTP response
+        """
+        return self.request("HEAD", endpoint, params=params, headers=headers)
 
     def post(
         self,
@@ -423,6 +458,8 @@ class HttpClient(HttpClientBase):
         logger.info("Sending a request... %s %s", method.upper(), endpoint)
 
         url = self._build_url(endpoint)
+        if self._session_owner is not None and self._session_owner.is_connected():
+            self.connect()
         if self.is_connected():
             return self._client.request(method, url, **request)
 
@@ -493,7 +530,9 @@ class AsyncHttpClient(HttpClientBase):
         await self.disconnect()
 
     async def connect(self):
-        """Start an async HTTP session."""
+        """Start an async HTTP session unless already connected."""
+        if self.is_connected():
+            return
         logger.debug("Initiating a connection with %s", self.base_url)
         transport = AsyncHTTPTransport(verify=self.config.transport_verify())
         self._client = AsyncClient(
@@ -541,6 +580,31 @@ class AsyncHttpClient(HttpClientBase):
             An HTTP response
         """
         return await self.request("GET", endpoint, params=params, headers=headers)
+
+    async def head(
+        self,
+        endpoint: str,
+        *,
+        params: dict | None = None,
+        headers: dict | None = None,
+    ) -> Response:
+        """Send an async HEAD request.
+
+        Parameters
+        ----------
+        endpoint : str
+            A REST endpoint to call
+        params : dict | None
+            Request parameters
+        headers : dict | None
+            Request headers
+
+        Returns
+        -------
+        Response
+            An HTTP response
+        """
+        return await self.request("HEAD", endpoint, params=params, headers=headers)
 
     async def post(
         self,
@@ -679,6 +743,8 @@ class AsyncHttpClient(HttpClientBase):
         logger.info("Sending a request... %s %s", method.upper(), endpoint)
 
         url = self._build_url(endpoint)
+        if self._session_owner is not None and self._session_owner.is_connected():
+            await self.connect()
         if self.is_connected():
             return await self._client.request(method, url, **request)
 

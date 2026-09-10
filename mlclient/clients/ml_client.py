@@ -6,6 +6,7 @@ using a layered composition architecture:
     - .rest     -> RestApi / AsyncRestApi (/v1/* on main port)
     - .manage   -> ManageApi / AsyncManageApi (/manage/v2/*, always port 8002)
     - .admin    -> AdminApi / AsyncAdminApi (/admin/v1/* on port 8001)
+    - .healthcheck() -> HEAD / on the HealthCheck server (port 7997)
     - .parser   -> MLResponseParser
     - .documents, .eval, .logs -> high-level services
     - .transaction() -> open a scoped transaction (context manager)
@@ -39,8 +40,10 @@ from mlclient.services.transactions import (
 
 from .api_client import ApiClient, AsyncApiClient
 from .http_client import (
-    MARKLOGIC_ADMIN_API_PORT,
-    MARKLOGIC_MANAGE_API_PORT,
+    MARKLOGIC_ADMIN_PORT,
+    MARKLOGIC_HEALTHCHECK_PORT,
+    MARKLOGIC_MANAGE_PORT,
+    NO_RETRY_STRATEGY,
     RESTART_RETRY_STRATEGY,
     AsyncHttpClient,
     HttpClient,
@@ -59,6 +62,7 @@ class MLClient:
     - ``ml.rest.eval.post(xquery="...")`` -- mid-level REST API (``/v1/*``)
     - ``ml.manage.databases.get_list()`` -- mid-level Management API (``/manage/v2/*``)
     - ``ml.admin.get_timestamp()`` -- mid-level Admin API (``/admin/v1/*``)
+    - ``ml.healthcheck()`` -- HEAD ``/`` on the HealthCheck server (port 7997)
     - ``ml.rest.call(SomeApiCall())`` -- advanced: custom Call objects
     - ``ml.parser.parse(resp)`` -- manual parsing of raw responses
     - ``ml.documents.read("/doc.json")`` -- high-level, parsed results
@@ -145,13 +149,15 @@ class MLClient:
         config: HTTPConfig | None = None,
         manage_config: HTTPConfig | None = None,
         admin_config: HTTPConfig | None = None,
+        health_config: HTTPConfig | None = None,
     ):
         """Initialize MLClient instance.
 
         The connection parameters describe the primary connection. The Manage
-        (8002) and Admin (8001) connections are derived from it by default; pass
-        ``manage_config`` / ``admin_config`` only to point them at a different
-        host, credentials or port.
+        (8002), Admin (8001) and HealthCheck (7997) connections are derived from it
+        by default; pass ``manage_config`` / ``admin_config`` / ``health_config``
+        only to point them at a different host, credentials or port. The derived
+        HealthCheck connection targets port 7997 with no authentication.
 
         Parameters
         ----------
@@ -186,6 +192,11 @@ class MLClient:
         admin_config : HTTPConfig | None, default None
             An already-resolved Admin configuration; when given, it is used
             instead of deriving the Admin connection from the primary
+        health_config : HTTPConfig | None, default None
+            An already-resolved HealthCheck configuration; when given, it is used
+            instead of deriving the HealthCheck connection (port 7997, no auth,
+            no retries) from the primary. Unspecified retries default to no
+            retries; an explicitly supplied retry strategy is preserved
         """
         self._http = HttpClient(
             protocol=protocol,
@@ -199,8 +210,21 @@ class MLClient:
             retry=retry,
             config=config,
         )
-        self._manage_http = HttpClient(config=manage_config) if manage_config else None
-        self._admin_http = HttpClient(config=admin_config) if admin_config else None
+        self._manage_http = self._secondary_http(
+            manage_config or self._http.config.clone(port=MARKLOGIC_MANAGE_PORT),
+        )
+        self._admin_http = self._secondary_http(
+            admin_config or self._http.config.clone(port=MARKLOGIC_ADMIN_PORT),
+        )
+        self._health_http = self._secondary_http(
+            _resolve_health_config(health_config)
+            if health_config
+            else self._http.config.clone(
+                port=MARKLOGIC_HEALTHCHECK_PORT,
+                auth=None,
+                retry=NO_RETRY_STRATEGY,
+            ),
+        )
 
     def __enter__(self):
         """Connect and return self for use as a context manager."""
@@ -229,12 +253,31 @@ class MLClient:
     @cached_property
     def manage(self) -> ManageApi:
         """Management API (``/manage/v2/*``) - requires Manage server."""
-        return ManageApi(ApiClient(self._get_manage_http()))
+        return ManageApi(ApiClient(self._manage_http))
 
     @cached_property
     def admin(self) -> AdminApi:
         """Admin API (``/admin/v1/*``) - requires Admin server (port 8001)."""
-        return AdminApi(ApiClient(self._get_admin_http()))
+        return AdminApi(ApiClient(self._admin_http))
+
+    def healthcheck(self) -> bool:
+        """Report whether the HealthCheck app server (port 7997) is healthy.
+
+        Sends a HEAD request to ``/`` on the HealthCheck connection.
+
+        Returns
+        -------
+        bool
+            True when the server answered 2xx, False when it answered 5xx
+
+        Raises
+        ------
+        httpx.HTTPStatusError
+            If the server answered with a 4xx status, which signals a
+            misdirected request (the HealthCheck server takes no auth) rather
+            than an unhealthy server
+        """
+        return _healthy_or_raise(self._health_http.head("/"))
 
     @property
     def parser(self) -> type[MLResponseParser]:
@@ -254,7 +297,7 @@ class MLClient:
     @cached_property
     def logs(self) -> LogsService:
         """High-level logs service."""
-        return LogsService(ApiClient(self._get_manage_http()))
+        return LogsService(ApiClient(self._manage_http))
 
     def transaction(
         self,
@@ -278,20 +321,18 @@ class MLClient:
         )
 
     def connect(self):
-        """Start an HTTP session."""
+        """Start the primary session; auxiliary sessions open on first request."""
         self._http.connect()
-        if self._manage_http is not None:
-            self._manage_http.connect()
-        if self._admin_http is not None:
-            self._admin_http.connect()
 
     def disconnect(self):
-        """Close an HTTP session."""
-        self._http.disconnect()
-        if self._manage_http is not None:
-            self._manage_http.disconnect()
-        if self._admin_http is not None:
-            self._admin_http.disconnect()
+        """Close all sessions owned by this client."""
+        for http in {
+            self._http,
+            self._manage_http,
+            self._admin_http,
+            self._health_http,
+        }:
+            http.disconnect()
 
     def is_connected(self) -> bool:
         """Return a connection status.
@@ -335,46 +376,11 @@ class MLClient:
     def _get_restart_waiter(self) -> RestartWaiter:
         return RestartWaiter(self._http.config)
 
-    def _get_manage_http(self) -> HttpClient:
-        """Return HttpClient for manage API (always port 8002).
-
-        The Management API is only available on the fixed Manage server
-        port (8002). An injected Manage configuration is used as-is; otherwise
-        the main client is reused when it already targets port 8002 or runs on
-        Cloud (every API routes through the single port-443 connection), and a
-        separate HttpClient is lazily created in the remaining case.
-        """
-        if self._manage_http is not None:
-            return self._manage_http
-        config = self._http.config
-        if config.cloud is not None or config.port == MARKLOGIC_MANAGE_API_PORT:
+    def _secondary_http(self, config: HTTPConfig) -> HttpClient:
+        """Reuse the primary session when its complete configuration matches."""
+        if self._http.config.can_share_session(config):
             return self._http
-        self._manage_http = self._create_secondary_http(MARKLOGIC_MANAGE_API_PORT)
-        return self._manage_http
-
-    def _get_admin_http(self) -> HttpClient:
-        """Return HttpClient for admin API (always port 8001).
-
-        The Admin API is only available on the fixed Admin server port (8001).
-        An injected Admin configuration is used as-is; otherwise the main client
-        is reused when it already targets port 8001 or runs on Cloud (every API
-        routes through the single port-443 connection), and a separate
-        HttpClient is lazily created in the remaining case.
-        """
-        if self._admin_http is not None:
-            return self._admin_http
-        config = self._http.config
-        if config.cloud is not None or config.port == MARKLOGIC_ADMIN_API_PORT:
-            return self._http
-        self._admin_http = self._create_secondary_http(MARKLOGIC_ADMIN_API_PORT)
-        return self._admin_http
-
-    def _create_secondary_http(self, port: int) -> HttpClient:
-        """Create and optionally connect a secondary HttpClient."""
-        http = HttpClient(config=self._http.config.clone(port=port))
-        if self.is_connected():
-            http.connect()
-        return http
+        return HttpClient(config=config, session_owner=self._http)
 
 
 class AsyncMLClient:
@@ -386,6 +392,7 @@ class AsyncMLClient:
     - ``ml.rest.eval.post(xquery="...")`` -- mid-level REST API (``/v1/*``)
     - ``ml.manage.databases.get_list()`` -- mid-level Management API
     - ``ml.admin.get_timestamp()`` -- mid-level Admin API (``/admin/v1/*``)
+    - ``ml.healthcheck()`` -- HEAD ``/`` on the HealthCheck server (port 7997)
     - ``ml.rest.call(SomeApiCall())`` -- advanced: custom Call objects
     - ``ml.parser.parse(resp)`` -- manual parsing of raw responses
     - ``ml.documents.read("/doc.json")`` -- high-level, parsed results
@@ -409,13 +416,15 @@ class AsyncMLClient:
         config: HTTPConfig | None = None,
         manage_config: HTTPConfig | None = None,
         admin_config: HTTPConfig | None = None,
+        health_config: HTTPConfig | None = None,
     ):
         """Initialize AsyncMLClient instance.
 
         The connection parameters describe the primary connection. The Manage
-        (8002) and Admin (8001) connections are derived from it by default; pass
-        ``manage_config`` / ``admin_config`` only to point them at a different
-        host, credentials or port.
+        (8002), Admin (8001) and HealthCheck (7997) connections are derived from it
+        by default; pass ``manage_config`` / ``admin_config`` / ``health_config``
+        only to point them at a different host, credentials or port. The derived
+        HealthCheck connection targets port 7997 with no authentication.
 
         Parameters
         ----------
@@ -450,6 +459,11 @@ class AsyncMLClient:
         admin_config : HTTPConfig | None, default None
             An already-resolved Admin configuration; when given, it is used
             instead of deriving the Admin connection from the primary
+        health_config : HTTPConfig | None, default None
+            An already-resolved HealthCheck configuration; when given, it is used
+            instead of deriving the HealthCheck connection (port 7997, no auth,
+            no retries) from the primary. Unspecified retries default to no
+            retries; an explicitly supplied retry strategy is preserved
         """
         self._http = AsyncHttpClient(
             protocol=protocol,
@@ -463,31 +477,27 @@ class AsyncMLClient:
             retry=retry,
             config=config,
         )
-        self._manage_http = (
-            AsyncHttpClient(config=manage_config)
-            if manage_config
-            else self._create_secondary_async_http(MARKLOGIC_MANAGE_API_PORT)
+        self._manage_http = self._secondary_http(
+            manage_config or self._http.config.clone(port=MARKLOGIC_MANAGE_PORT),
         )
-        self._admin_http = (
-            AsyncHttpClient(config=admin_config)
-            if admin_config
-            else self._create_secondary_async_http(MARKLOGIC_ADMIN_API_PORT)
+        self._admin_http = self._secondary_http(
+            admin_config or self._http.config.clone(port=MARKLOGIC_ADMIN_PORT),
+        )
+        self._health_http = self._secondary_http(
+            _resolve_health_config(health_config)
+            if health_config
+            else self._http.config.clone(
+                port=MARKLOGIC_HEALTHCHECK_PORT,
+                auth=None,
+                retry=NO_RETRY_STRATEGY,
+            ),
         )
 
-    def _create_secondary_async_http(
-        self,
-        port: int,
-    ) -> AsyncHttpClient:
-        """Return a fixed-port client, reusing the main one when it fits.
-
-        Cloud connections route every API through the single port-443
-        connection via base_path, so the main client is reused. The main client
-        is also reused when it already targets the requested fixed port.
-        """
-        config = self._http.config
-        if config.cloud is not None or config.port == port:
+    def _secondary_http(self, config: HTTPConfig) -> AsyncHttpClient:
+        """Reuse the primary session when its complete configuration matches."""
+        if self._http.config.can_share_session(config):
             return self._http
-        return AsyncHttpClient(config=config.clone(port=port))
+        return AsyncHttpClient(config=config, session_owner=self._http)
 
     async def __aenter__(self):
         """Connect and return self for use as an async context manager."""
@@ -522,6 +532,25 @@ class AsyncMLClient:
     def admin(self) -> AsyncAdminApi:
         """Admin API (``/admin/v1/*``) - requires Admin server (port 8001)."""
         return AsyncAdminApi(AsyncApiClient(self._admin_http))
+
+    async def healthcheck(self) -> bool:
+        """Report whether the HealthCheck app server (port 7997) is healthy.
+
+        Sends a HEAD request to ``/`` on the HealthCheck connection.
+
+        Returns
+        -------
+        bool
+            True when the server answered 2xx, False when it answered 5xx
+
+        Raises
+        ------
+        httpx.HTTPStatusError
+            If the server answered with a 4xx status, which signals a
+            misdirected request (the HealthCheck server takes no auth) rather
+            than an unhealthy server
+        """
+        return _healthy_or_raise(await self._health_http.head("/"))
 
     @property
     def parser(self) -> type[MLResponseParser]:
@@ -566,20 +595,18 @@ class AsyncMLClient:
         )
 
     async def connect(self):
-        """Start an HTTP session."""
+        """Start the primary session; auxiliary sessions open on first request."""
         await self._http.connect()
-        if self._manage_http is not self._http:
-            await self._manage_http.connect()
-        if self._admin_http is not self._http:
-            await self._admin_http.connect()
 
     async def disconnect(self):
-        """Close an HTTP session."""
-        await self._http.disconnect()
-        if self._manage_http is not self._http:
-            await self._manage_http.disconnect()
-        if self._admin_http is not self._http:
-            await self._admin_http.disconnect()
+        """Close all sessions owned by this client."""
+        for http in {
+            self._http,
+            self._manage_http,
+            self._admin_http,
+            self._health_http,
+        }:
+            await http.disconnect()
 
     def is_connected(self) -> bool:
         """Return a connection status.
@@ -622,3 +649,22 @@ class AsyncMLClient:
 
     def _get_restart_waiter(self) -> RestartWaiter:
         return RestartWaiter(self._http.config)
+
+
+def _resolve_health_config(config: HTTPConfig) -> HTTPConfig:
+    """Preserve an injected config, defaulting only unspecified health retries."""
+    if config.has_explicit_retry:
+        return config
+    return config.clone(retry=NO_RETRY_STRATEGY)
+
+
+def _healthy_or_raise(response: Response) -> bool:
+    """Turn a HealthCheck response into a healthy/unhealthy verdict.
+
+    The HealthCheck server is unauthenticated and answers 200 when healthy; a
+    5xx means it is up but not ready. A 4xx is never an unhealthy verdict but a
+    misdirected request, so it is raised rather than silently read as False.
+    """
+    if response.is_client_error:
+        response.raise_for_status()
+    return response.is_success

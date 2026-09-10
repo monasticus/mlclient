@@ -1209,8 +1209,10 @@ MarkLogic Cloud   ``cloud=CloudConfig(api_key=..., base_path=...)``             
 ================  ==============================================================  ==================
 
 A client certificate implies HTTPS, so the protocol is inferred. MarkLogic Cloud
-forces HTTPS on port 443 and routes every API tier through a single connection
-using the configured ``base_path``; passing a conflicting ``protocol`` or
+forces HTTPS on port 443 and routes every API tier through the same gateway
+using the configured ``base_path``. HTTP sessions are shared only when their
+complete configurations match; health checks normally use a separate session
+because their retry strategy differs. Passing a conflicting ``protocol`` or
 ``port`` raises :class:`~mlclient.exceptions.ConfigError`.
 
 .. code-block:: python

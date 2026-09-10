@@ -326,9 +326,12 @@ class MLClient:
 
     def disconnect(self):
         """Close all sessions owned by this client."""
-        for http in dict.fromkeys(
-            (self._http, self._manage_http, self._admin_http, self._health_http),
-        ):
+        for http in {
+            self._http,
+            self._manage_http,
+            self._admin_http,
+            self._health_http,
+        }:
             http.disconnect()
 
     def is_connected(self) -> bool:
@@ -597,9 +600,12 @@ class AsyncMLClient:
 
     async def disconnect(self):
         """Close all sessions owned by this client."""
-        for http in dict.fromkeys(
-            (self._http, self._manage_http, self._admin_http, self._health_http),
-        ):
+        for http in {
+            self._http,
+            self._manage_http,
+            self._admin_http,
+            self._health_http,
+        }:
             await http.disconnect()
 
     def is_connected(self) -> bool:

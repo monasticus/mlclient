@@ -30,39 +30,68 @@ class MLClientManager:
         env_name: str,
         **overrides,
     ):
-        """Initialize MLClientManager instance.
+        """Load an environment and store HTTP defaults for clients created from it.
+
+        The environment is loaded immediately. Overrides are applied and validated
+        when a configuration or client is requested; constructing the manager does
+        not open HTTP sessions.
 
         Parameters
         ----------
-        env_name :  str
-            An environment name.
+        env_name : str
+            Environment name selecting .mlclient/mlclient-<env_name>.yaml.
+            The .mlclient directory is located by searching from the current
+            working directory through its parents.
         **overrides
-            HTTPConfig.clone parameters applied to every server. Per-call
-            overrides take precedence. Environment configuration is unchanged.
+            HTTPConfig.clone keyword arguments: protocol, host, port, auth,
+            username, password, ssl, cloud and retry. Applied to every server;
+            per-call overrides take precedence. Retry is configured only in
+            Python and an explicit strategy also applies to health. These
+            defaults do not modify the environment file.
 
         Raises
         ------
         MLClientDirectoryNotFoundError
-            If .mlclient directory has not been found
+            If no .mlclient directory is found.
         MLClientEnvironmentNotFoundError
-            If there's no .mlclient/mlclient-<env_name>.yaml file
+            If the named environment file is missing.
+        OSError
+            If the environment file cannot be read.
+        yaml.YAMLError
+            If the environment file contains invalid YAML.
+        pydantic.ValidationError
+            If the environment data fails model validation.
         """
-        self._overrides = overrides
         self._env_name = env_name
+        self._overrides = overrides
         self.config = MLEnvironment.load(env_name)
 
     @property
     def env_name(
         self,
     ) -> str:
-        """An environment name."""
+        """Return the name used to load this manager's environment.
+
+        Returns
+        -------
+        str
+            The original environment name. Replacing config does not change it.
+        """
         return self._env_name
 
     @property
     def config(
         self,
     ) -> MLEnvironment:
-        """A MarkLogic configuration environment."""
+        """Return a deep copy of the current environment configuration.
+
+        Returns
+        -------
+        MLEnvironment
+            An independent copy of the environment model. Mutating it does not
+            change the manager unless it is assigned back through this property.
+            Manager HTTP overrides, including retry, are not part of this model.
+        """
         return self._config.model_copy(deep=True)
 
     @config.setter
@@ -70,16 +99,62 @@ class MLClientManager:
         self,
         ml_configuration: MLEnvironment,
     ):
-        """Set a MarkLogic configuration environment."""
+        """Replace the environment used for subsequent configuration requests.
+
+        Parameters
+        ----------
+        ml_configuration : MLEnvironment
+            The environment model to store. The supplied object is retained,
+            not copied. This assignment does not change env_name, manager HTTP
+            overrides, existing clients or the environment file.
+
+        Returns
+        -------
+        None
+            No value is returned.
+        """
         self._config = ml_configuration
 
     def get_config(self, app_server_id: str, **overrides) -> HTTPConfig:
-        """Resolve a server's HTTP settings without creating a client.
+        """Resolve HTTP settings for one server without creating a client.
 
-        Precedence: environment, manager overrides, then per-call overrides.
-        Accepts HTTPConfig.clone parameters, including retry. An unspecified
-        retry (None) uses no retries for health and the ordinary default for
-        other servers. Unknown parameters raise TypeError.
+        An explicit retry strategy from the manager or this call is preserved.
+        If no strategy is supplied, health uses NO_RETRY_STRATEGY and other
+        servers use DEFAULT_RETRY_STRATEGY. Passing retry=None in this call
+        restores the selected server's default, overriding a manager strategy.
+
+        Parameters
+        ----------
+        app_server_id : str
+            A configured App Server identifier, including health, manage or admin.
+            The identifier is required; the server need not be marked as REST.
+        **overrides
+            HTTPConfig.clone keyword arguments: protocol, host, port, auth,
+            username, password, ssl, cloud and retry. Values override manager
+            defaults, which override environment settings. Cloud retains its
+            gateway port even when a port override is supplied. Retry is a
+            Python-only HTTP option, not an environment YAML setting.
+
+        Returns
+        -------
+        HTTPConfig
+            The resolved server configuration, including the effective retry
+            strategy. No HTTP session is opened; the environment and defaults
+            used by later calls are unchanged.
+
+        Raises
+        ------
+        NoSuchAppServerError
+            If the App Server identifier is not configured.
+        ConfigError
+            If connection and authentication settings are incompatible.
+        TypeError
+            If an override name or authentication descriptor type is unsupported.
+        ValueError
+            If configuration values or authentication parameters are invalid.
+        ImportError
+            If the selected authentication method requires an unavailable
+            optional dependency.
         """
         config = self._config.provide_config(app_server_id)
         overrides = {**self._overrides, **overrides}
@@ -90,27 +165,52 @@ class MLClientManager:
         return config
 
     def get_client(self, app_server_id: str | None = None, **overrides) -> MLClient:
-        """Initialize a client for any named App Server.
+        """Create a synchronous MarkLogic client for a configured App Server.
+
+        The selected server is the primary HTTP endpoint. Selecting health,
+        manage or admin makes its corresponding API share the primary settings
+        and session. Per-call overrides affect only that server; auxiliary APIs
+        for other servers retain their own environment and manager settings.
+
+        An explicit retry strategy from the manager or this call is preserved.
+        If no strategy is supplied, health uses NO_RETRY_STRATEGY and other
+        servers use DEFAULT_RETRY_STRATEGY. Passing retry=None in this call
+        restores the selected server's default, overriding a manager strategy.
 
         Parameters
         ----------
         app_server_id : str | None, default None
-            An App Server identifier, including health, manage or admin.
-            Omit to select the first REST server in the environment.
+            A configured App Server identifier, including health, manage or admin.
+            None selects the first REST server in environment order. An explicit
+            identifier does not require the server to be marked as REST.
         **overrides
-            HTTPConfig.clone parameters for the selected server only. When
-            selecting manage, admin or health, its corresponding API uses the
-            same settings and HTTP session. Other APIs retain manager defaults.
+            HTTPConfig.clone keyword arguments: protocol, host, port, auth,
+            username, password, ssl, cloud and retry. Values override manager
+            defaults, which override environment settings. Cloud retains its
+            gateway port even when a port override is supplied. Retry is a
+            Python-only HTTP option, not an environment YAML setting.
 
         Returns
         -------
         MLClient
-            A disconnected client; use it as a context manager for session reuse.
+            A new, disconnected client. Use with to manage its lifecycle:
+            entering opens the primary session, auxiliary sessions open on first
+            request, and exiting closes all opened sessions. Creating the client
+            leaves the environment and later calls unchanged.
 
         Raises
         ------
         NoSuchAppServerError
-            If the identifier is not configured.
+            If the App Server identifier is not configured.
+        ConfigError
+            If connection and authentication settings are incompatible.
+        TypeError
+            If an override name or authentication descriptor type is unsupported.
+        ValueError
+            If configuration values or authentication parameters are invalid.
+        ImportError
+            If the selected authentication method requires an unavailable
+            optional dependency.
         NoRestServerConfiguredError
             If no identifier is supplied and no REST server is configured.
         """
@@ -121,7 +221,55 @@ class MLClientManager:
         app_server_id: str | None = None,
         **overrides,
     ) -> AsyncMLClient:
-        """Async counterpart of get_client, with identical configuration rules."""
+        """Create an asynchronous MarkLogic client for a configured App Server.
+
+        The selected server is the primary HTTP endpoint. Selecting health,
+        manage or admin makes its corresponding API share the primary settings
+        and session. Per-call overrides affect only that server; auxiliary APIs
+        for other servers retain their own environment and manager settings.
+
+        An explicit retry strategy from the manager or this call is preserved.
+        If no strategy is supplied, health uses NO_RETRY_STRATEGY and other
+        servers use DEFAULT_RETRY_STRATEGY. Passing retry=None in this call
+        restores the selected server's default, overriding a manager strategy.
+
+        Parameters
+        ----------
+        app_server_id : str | None, default None
+            A configured App Server identifier, including health, manage or admin.
+            None selects the first REST server in environment order. An explicit
+            identifier does not require the server to be marked as REST.
+        **overrides
+            HTTPConfig.clone keyword arguments: protocol, host, port, auth,
+            username, password, ssl, cloud and retry. Values override manager
+            defaults, which override environment settings. Cloud retains its
+            gateway port even when a port override is supplied. Retry is a
+            Python-only HTTP option, not an environment YAML setting.
+
+        Returns
+        -------
+        AsyncMLClient
+            A new, disconnected client. Use async with to manage its lifecycle:
+            entering opens the primary session, auxiliary sessions open on first
+            request, and exiting closes all opened sessions. Creating the client
+            leaves the environment and later calls unchanged.
+
+        Raises
+        ------
+        NoSuchAppServerError
+            If the App Server identifier is not configured.
+        ConfigError
+            If connection and authentication settings are incompatible.
+        TypeError
+            If an override name or authentication descriptor type is unsupported.
+        ValueError
+            If configuration values or authentication parameters are invalid.
+        ImportError
+            If the selected authentication method requires an unavailable
+            optional dependency.
+        NoRestServerConfiguredError
+            If no identifier is supplied and no REST server is configured.
+        """
         return AsyncMLClient(**self._client_configs(app_server_id, **overrides))
 
     def get_async_http_client(
@@ -129,11 +277,97 @@ class MLClientManager:
         app_server_id: str,
         **overrides,
     ) -> AsyncHttpClient:
-        """Create a raw async client using get_config's defaults and overrides."""
+        """Create a raw asynchronous HTTP client for one configured server.
+
+        All requests target the selected server; no auxiliary API clients are
+        created. Overrides affect this returned client only.
+
+        An explicit retry strategy from the manager or this call is preserved.
+        If no strategy is supplied, health uses NO_RETRY_STRATEGY and other
+        servers use DEFAULT_RETRY_STRATEGY. Passing retry=None in this call
+        restores the selected server's default, overriding a manager strategy.
+
+        Parameters
+        ----------
+        app_server_id : str
+            A configured App Server identifier, including health, manage or admin.
+            The identifier is required; the server need not be marked as REST.
+        **overrides
+            HTTPConfig.clone keyword arguments: protocol, host, port, auth,
+            username, password, ssl, cloud and retry. Values override manager
+            defaults, which override environment settings. Cloud retains its
+            gateway port even when a port override is supplied. Retry is a
+            Python-only HTTP option, not an environment YAML setting.
+
+        Returns
+        -------
+        AsyncHttpClient
+            A new, disconnected HTTP client. Use async with to open a reusable
+            session and close it on exit. Requests outside a connected lifecycle
+            use short-lived sessions. The environment and subsequent calls are
+            unchanged.
+
+        Raises
+        ------
+        NoSuchAppServerError
+            If the App Server identifier is not configured.
+        ConfigError
+            If connection and authentication settings are incompatible.
+        TypeError
+            If an override name or authentication descriptor type is unsupported.
+        ValueError
+            If configuration values or authentication parameters are invalid.
+        ImportError
+            If the selected authentication method requires an unavailable
+            optional dependency.
+        """
         return AsyncHttpClient(config=self.get_config(app_server_id, **overrides))
 
     def get_http_client(self, app_server_id: str, **overrides) -> HttpClient:
-        """Create a raw client using get_config's defaults and overrides."""
+        """Create a raw synchronous HTTP client for one configured server.
+
+        All requests target the selected server; no auxiliary API clients are
+        created. Overrides affect this returned client only.
+
+        An explicit retry strategy from the manager or this call is preserved.
+        If no strategy is supplied, health uses NO_RETRY_STRATEGY and other
+        servers use DEFAULT_RETRY_STRATEGY. Passing retry=None in this call
+        restores the selected server's default, overriding a manager strategy.
+
+        Parameters
+        ----------
+        app_server_id : str
+            A configured App Server identifier, including health, manage or admin.
+            The identifier is required; the server need not be marked as REST.
+        **overrides
+            HTTPConfig.clone keyword arguments: protocol, host, port, auth,
+            username, password, ssl, cloud and retry. Values override manager
+            defaults, which override environment settings. Cloud retains its
+            gateway port even when a port override is supplied. Retry is a
+            Python-only HTTP option, not an environment YAML setting.
+
+        Returns
+        -------
+        HttpClient
+            A new, disconnected HTTP client. Use with to open a reusable
+            session and close it on exit. Requests outside a connected lifecycle
+            use short-lived sessions. The environment and subsequent calls are
+            unchanged.
+
+        Raises
+        ------
+        NoSuchAppServerError
+            If the App Server identifier is not configured.
+        ConfigError
+            If connection and authentication settings are incompatible.
+        TypeError
+            If an override name or authentication descriptor type is unsupported.
+        ValueError
+            If configuration values or authentication parameters are invalid.
+        ImportError
+            If the selected authentication method requires an unavailable
+            optional dependency.
+        """
         return HttpClient(config=self.get_config(app_server_id, **overrides))
 
     def _client_configs(
@@ -141,6 +375,54 @@ class MLClientManager:
         app_server_id: str | None,
         **overrides,
     ) -> dict[str, HTTPConfig]:
+        """Build primary and auxiliary HTTP configurations for a MarkLogic client.
+
+        Resolve the selected server once. If it is manage, admin or health,
+        reuse that same configuration object for its auxiliary entry. Resolve
+        the remaining auxiliary servers with manager defaults and without the
+        selected server's per-call overrides. No HTTP sessions are opened.
+
+        An explicit retry strategy from the manager or this call is preserved.
+        If no strategy is supplied, health uses NO_RETRY_STRATEGY and other
+        servers use DEFAULT_RETRY_STRATEGY. Passing retry=None in this call
+        restores the selected server's default, overriding a manager strategy.
+
+        Parameters
+        ----------
+        app_server_id : str | None
+            A configured App Server identifier, including health, manage or admin.
+            None selects the first REST server in environment order. An explicit
+            identifier does not require the server to be marked as REST.
+        **overrides
+            HTTPConfig.clone keyword arguments: protocol, host, port, auth,
+            username, password, ssl, cloud and retry. Values override manager
+            defaults, which override environment settings. Cloud retains its
+            gateway port even when a port override is supplied. Retry is a
+            Python-only HTTP option, not an environment YAML setting.
+
+        Returns
+        -------
+        dict[str, HTTPConfig]
+            Constructor arguments named config, manage_config, admin_config and
+            health_config. Matching primary and auxiliary entries refer to the
+            same configuration, allowing the client to reuse their HTTP session.
+
+        Raises
+        ------
+        NoSuchAppServerError
+            If the App Server identifier is not configured.
+        ConfigError
+            If connection and authentication settings are incompatible.
+        TypeError
+            If an override name or authentication descriptor type is unsupported.
+        ValueError
+            If configuration values or authentication parameters are invalid.
+        ImportError
+            If the selected authentication method requires an unavailable
+            optional dependency.
+        NoRestServerConfiguredError
+            If no identifier is supplied and no REST server is configured.
+        """
         app_server_id = self._get_app_server_id(app_server_id)
         primary = self.get_config(app_server_id, **overrides)
         configs = {"config": primary}
@@ -151,6 +433,29 @@ class MLClientManager:
         return configs
 
     def _get_app_server_id(self, app_server_id: str | None) -> str:
+        """Validate an explicit server identifier or select the first REST server.
+
+        Parameters
+        ----------
+        app_server_id : str | None
+            A configured App Server identifier, including health, manage or admin.
+            None selects the first REST server in environment order. An explicit
+            identifier does not require the server to be marked as REST.
+
+        Returns
+        -------
+        str
+            The explicit identifier if it exists, otherwise the first configured
+            REST server identifier. Does not resolve HTTP settings or open a
+            session.
+
+        Raises
+        ------
+        NoSuchAppServerError
+            If an explicit identifier is not configured.
+        NoRestServerConfiguredError
+            If no identifier is supplied and no REST server is configured.
+        """
         if app_server_id is None:
             if not self._config.rest_servers:
                 env = self.env_name

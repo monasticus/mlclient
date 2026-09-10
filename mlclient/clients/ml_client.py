@@ -15,6 +15,7 @@ using a layered composition architecture:
 from __future__ import annotations
 
 import logging
+import re
 from functools import cached_property
 from types import TracebackType
 
@@ -26,6 +27,7 @@ from mlclient.api.manage_api import AsyncManageApi, ManageApi
 from mlclient.api.rest_api import AsyncRestApi, RestApi
 from mlclient.auth import AuthParam
 from mlclient.connection import UNSET, CloudConfig, SSLConfig
+from mlclient.exceptions import MarkLogicError
 from mlclient.http_config import HTTPConfig
 from mlclient.ml_response_parser import MLResponseParser
 from mlclient.services.documents import AsyncDocumentsService, DocumentsService
@@ -68,6 +70,7 @@ class MLClient:
     - ``ml.documents.read("/doc.json")`` -- high-level, parsed results
     - ``ml.eval.xquery("1+1")`` -- high-level, parsed results
     - ``ml.logs.get(log_type=...)`` -- high-level, parsed results
+    - ``ml.version`` -- MarkLogic version as a ``(major, minor, patch)`` tuple
     - ``ml.transaction(database=...)`` -- open a scoped transaction (context manager)
 
     Examples
@@ -299,6 +302,48 @@ class MLClient:
         """High-level logs service."""
         return LogsService(ApiClient(self._manage_http))
 
+    @cached_property
+    def version(self) -> tuple[int, int, int]:
+        """MarkLogic version as a ``(major, minor, patch)`` tuple.
+
+        Resolved from ``xdmp:version()``. When the connecting user lacks the
+        eval privilege the query fails; the Manage and Admin server-config
+        endpoints are then tried in turn. If every source fails the eval error
+        is re-raised. A connection error propagates from the eval attempt --
+        nothing else on this client would work either.
+
+        Returns
+        -------
+        tuple[int, int, int]
+            The MarkLogic version, e.g. ``(12, 0, 1)`` for 12.0.1
+
+        Raises
+        ------
+        MarkLogicError
+            If MarkLogic returns an error and no fallback source succeeds
+        """
+        try:
+            return _parse_version(self.eval.xquery(_VERSION_QUERY))
+        except MarkLogicError:
+            version = self._version_from_secondaries()
+            if version is not None:
+                return version
+            raise
+
+    def _version_from_secondaries(self) -> tuple[int, int, int] | None:
+        """Read the version from the Manage then the Admin server, best effort."""
+        manage = self._manage_http.get(
+            _MANAGE_PROPERTIES_ENDPOINT,
+            headers={"Accept": "application/json"},
+        )
+        if manage.is_success:
+            return _parse_version(manage.json()["version"])
+        admin = self._admin_http.get(_ADMIN_SERVER_CONFIG_ENDPOINT)
+        admin_version = _admin_config_version(admin.text) if admin.is_success else None
+        if admin_version is not None:
+            return _parse_version(admin_version)
+        return None
+
     def transaction(
         self,
         *,
@@ -398,6 +443,7 @@ class AsyncMLClient:
     - ``ml.documents.read("/doc.json")`` -- high-level, parsed results
     - ``ml.eval.xquery("1+1")`` -- high-level, parsed results
     - ``ml.logs.get(log_type=...)`` -- high-level, parsed results
+    - ``await ml.version()`` -- MarkLogic version as a ``(major, minor, patch)`` tuple
     - ``ml.transaction(database=...)`` -- open a scoped transaction (context manager)
     """
 
@@ -572,6 +618,35 @@ class AsyncMLClient:
         """High-level logs service."""
         return AsyncLogsService(AsyncApiClient(self._manage_http))
 
+    async def version(self) -> tuple[int, int, int]:
+        """MarkLogic version as a ``(major, minor, patch)`` tuple.
+
+        Resolved from ``xdmp:version()``, falling back to the Manage and Admin
+        server-config endpoints when the connecting user lacks the eval
+        privilege; re-raises the eval error if every source fails.
+        """
+        try:
+            return _parse_version(await self.eval.xquery(_VERSION_QUERY))
+        except MarkLogicError:
+            version = await self._version_from_secondaries()
+            if version is not None:
+                return version
+            raise
+
+    async def _version_from_secondaries(self) -> tuple[int, int, int] | None:
+        """Read the version from the Manage then the Admin server, best effort."""
+        manage = await self._manage_http.get(
+            _MANAGE_PROPERTIES_ENDPOINT,
+            headers={"Accept": "application/json"},
+        )
+        if manage.is_success:
+            return _parse_version(manage.json()["version"])
+        admin = await self._admin_http.get(_ADMIN_SERVER_CONFIG_ENDPOINT)
+        admin_version = _admin_config_version(admin.text) if admin.is_success else None
+        if admin_version is not None:
+            return _parse_version(admin_version)
+        return None
+
     async def transaction(
         self,
         *,
@@ -649,6 +724,23 @@ class AsyncMLClient:
 
     def _get_restart_waiter(self) -> RestartWaiter:
         return RestartWaiter(self._http.config)
+
+
+_VERSION_QUERY = "xdmp:version()"
+_MANAGE_PROPERTIES_ENDPOINT = "/manage/v2/properties"
+_ADMIN_SERVER_CONFIG_ENDPOINT = "/admin/v1/server-config"
+
+
+def _parse_version(raw: str) -> tuple[int, int, int]:
+    """Split a MarkLogic version string like ``12.0.1`` into ``(12, 0, 1)``."""
+    major, minor, patch = (int(part) for part in re.findall(r"\d+", raw)[:3])
+    return major, minor, patch
+
+
+def _admin_config_version(server_config: str) -> str | None:
+    """Extract the version element text from an Admin server-config document."""
+    match = re.search(r"<version>([^<]+)</version>", server_config)
+    return match.group(1) if match else None
 
 
 def _resolve_health_config(config: HTTPConfig) -> HTTPConfig:

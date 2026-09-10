@@ -1509,3 +1509,39 @@ strategy is preserved, including ``DEFAULT_RETRY_STRATEGY`` itself.
     >>> with MLClient(host="ml.example.com", health_config=health_config) as ml:
     ...     ml.healthcheck()
     True
+
+
+Server version
+--------------
+
+:attr:`~mlclient.MLClient.version` reports the MarkLogic version as a
+``(major, minor, patch)`` tuple. It is resolved from ``xdmp:version()`` and
+cached after the first access.
+
+.. code-block:: python
+
+    >>> from mlclient import MLClient
+
+    >>> with MLClient() as ml:
+    ...     ml.version
+    (12, 0, 1)
+
+When the connecting user lacks the eval privilege, the query fails and the
+Manage (``/manage/v2/properties``) then Admin (``/admin/v1/server-config``)
+endpoints are tried in turn. If none succeeds, the eval
+:class:`~mlclient.exceptions.MarkLogicError` is re-raised. A connection error
+propagates from the eval attempt, since nothing else on the client would work.
+
+On :class:`~mlclient.AsyncMLClient` the version is an awaitable method rather
+than a cached property, because resolving it performs I/O:
+
+.. code-block:: python
+
+    >>> import asyncio
+    >>> from mlclient import AsyncMLClient
+
+    >>> async def get_version():
+    ...     async with AsyncMLClient() as ml:
+    ...         return await ml.version()
+    >>> asyncio.run(get_version())
+    (12, 0, 1)

@@ -12,6 +12,7 @@ from mlclient.clients import http_client as http_client_module
 from mlclient.clients import ml_client as ml_client_module
 from mlclient.clients.ml_client import AsyncMLClient
 from mlclient.connection import CloudConfig
+from mlclient.exceptions import MarkLogicError
 from mlclient.http_config import DEFAULT_RETRY_STRATEGY, HTTPConfig
 from mlclient.ml_response_parser import MLResponseParser
 from mlclient.services.documents import AsyncDocumentsService
@@ -268,6 +269,92 @@ async def test_both_manage_and_admin_configs_given():
 
     assert manage_resp.status_code == 200
     assert admin_resp.status_code == 200
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_version_from_eval():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8000/v1/eval")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body_part("string", "12.0.1")
+    ml_mocker.mock_post()
+
+    async with AsyncMLClient() as ml:
+        assert await ml.version() == (12, 0, 1)
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_version_falls_back_to_manage_when_eval_forbidden():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8000/v1/eval")
+    ml_mocker.with_response_code(400)
+    ml_mocker.with_response_content_type("application/json")
+    ml_mocker.with_response_body({"errorResponse": {"messageCode": "SEC-PRIV"}})
+    ml_mocker.mock_post()
+
+    ml_mocker.with_url("http://localhost:8002/manage/v2/properties")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("application/json")
+    ml_mocker.with_response_body({"version": "12.0.1"})
+    ml_mocker.mock_get()
+
+    async with AsyncMLClient() as ml:
+        assert await ml.version() == (12, 0, 1)
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_version_falls_back_to_admin_when_manage_forbidden():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8000/v1/eval")
+    ml_mocker.with_response_code(400)
+    ml_mocker.with_response_content_type("application/json")
+    ml_mocker.with_response_body({"errorResponse": {"messageCode": "SEC-PRIV"}})
+    ml_mocker.mock_post()
+
+    ml_mocker.with_url("http://localhost:8002/manage/v2/properties")
+    ml_mocker.with_response_code(403)
+    ml_mocker.with_empty_response_body()
+    ml_mocker.mock_get()
+
+    ml_mocker.with_url("http://localhost:8001/admin/v1/server-config")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("application/xml")
+    ml_mocker.with_response_body(
+        '<host xmlns="http://marklogic.com/manage">'
+        "<version>12.0.1</version></host>",
+    )
+    ml_mocker.mock_get()
+
+    async with AsyncMLClient() as ml:
+        assert await ml.version() == (12, 0, 1)
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_version_reraises_eval_error_when_all_sources_fail():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8000/v1/eval")
+    ml_mocker.with_response_code(400)
+    ml_mocker.with_response_content_type("application/json")
+    ml_mocker.with_response_body({"errorResponse": {"messageCode": "SEC-PRIV"}})
+    ml_mocker.mock_post()
+
+    ml_mocker.with_url("http://localhost:8002/manage/v2/properties")
+    ml_mocker.with_response_code(403)
+    ml_mocker.with_empty_response_body()
+    ml_mocker.mock_get()
+
+    ml_mocker.with_url("http://localhost:8001/admin/v1/server-config")
+    ml_mocker.with_response_code(403)
+    ml_mocker.with_empty_response_body()
+    ml_mocker.mock_get()
+
+    async with AsyncMLClient() as ml:
+        with pytest.raises(MarkLogicError):
+            await ml.version()
 
 
 @pytest.mark.asyncio

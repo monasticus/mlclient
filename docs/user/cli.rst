@@ -23,6 +23,7 @@ MLClient provides you a nice command line interface using `cleo <https://github.
       health     Reports whether a MarkLogic environment's HealthCheck server is up
       help       Displays help for a command.
       list       Lists commands.
+      version    Reports the MarkLogic version of an environment
 
      call
       call eval  Sends a GET request to the /v1/eval endpoint
@@ -40,6 +41,7 @@ MLClient provides you a nice command line interface using `cleo <https://github.
    :hidden:
 
    cli/health
+   cli/version
    cli/call
    cli/env
 

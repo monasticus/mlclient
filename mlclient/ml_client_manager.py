@@ -8,17 +8,14 @@ It exports the following class:
 
 from __future__ import annotations
 
-import logging
-
 from mlclient.clients import AsyncHttpClient, AsyncMLClient, HttpClient, MLClient
+from mlclient.clients.http_client import NO_RETRY_STRATEGY
 from mlclient.exceptions import (
     NoRestServerConfiguredError,
     NoSuchAppServerError,
-    NotARestServerError,
 )
+from mlclient.http_config import HTTPConfig
 from mlclient.ml_environment import MLEnvironment
-
-logger = logging.getLogger(__name__)
 
 
 class MLClientManager:
@@ -31,6 +28,7 @@ class MLClientManager:
     def __init__(
         self,
         env_name: str,
+        **overrides,
     ):
         """Initialize MLClientManager instance.
 
@@ -38,6 +36,9 @@ class MLClientManager:
         ----------
         env_name :  str
             An environment name.
+        **overrides
+            HTTPConfig.clone parameters applied to every server. Per-call
+            overrides take precedence. Environment configuration is unchanged.
 
         Raises
         ------
@@ -46,6 +47,7 @@ class MLClientManager:
         MLClientEnvironmentNotFoundError
             If there's no .mlclient/mlclient-<env_name>.yaml file
         """
+        self._overrides = overrides
         self._env_name = env_name
         self.config = MLEnvironment.load(env_name)
 
@@ -71,158 +73,91 @@ class MLClientManager:
         """Set a MarkLogic configuration environment."""
         self._config = ml_configuration
 
-    def get_client(
-        self,
-        rest_server_id: str | None = None,
-    ) -> MLClient:
-        """Initialize an MLClient instance for a specific App Server.
+    def get_config(self, app_server_id: str, **overrides) -> HTTPConfig:
+        """Resolve a server's HTTP settings without creating a client.
 
-        If no identifier is provided, returns a client for the first configured
-        REST server within the environment.
+        Precedence: environment, manager overrides, then per-call overrides.
+        Accepts HTTPConfig.clone parameters, including retry. An unspecified
+        retry (None) uses no retries for health and the ordinary default for
+        other servers. Unknown parameters raise TypeError.
+        """
+        config = self._config.provide_config(app_server_id)
+        overrides = {**self._overrides, **overrides}
+        if overrides:
+            config = config.clone(**overrides)
+        if app_server_id == "health" and not config.has_explicit_retry:
+            return config.clone(retry=NO_RETRY_STRATEGY)
+        return config
+
+    def get_client(self, app_server_id: str | None = None, **overrides) -> MLClient:
+        """Initialize a client for any named App Server.
 
         Parameters
         ----------
-        rest_server_id : str | None, default None
-            A REST App Server identifier
+        app_server_id : str | None, default None
+            An App Server identifier, including health, manage or admin.
+            Omit to select the first REST server in the environment.
+        **overrides
+            HTTPConfig.clone parameters for the selected server only. When
+            selecting manage, admin or health, its corresponding API uses the
+            same settings and HTTP session. Other APIs retain manager defaults.
 
         Returns
         -------
         MLClient
-            An MLClient instance
-
-        Raises
-        ------
-        NotARestServerError
-            If the App-Server identifier does not point to a REST server
-            (only when rest_server_id is not None and is not a REST server)
-        NoRestServerConfiguredError
-            If an identifier has not been provided and there's no REST servers
-            configured for the environment
-        """
-        rest_server_id = self._get_rest_server_id(rest_server_id)
-        return MLClient(
-            config=self.config.provide_config(rest_server_id),
-            manage_config=self.config.provide_config("manage"),
-            admin_config=self.config.provide_config("admin"),
-            health_config=self.config.provide_config("health"),
-        )
-
-    def get_async_client(
-        self,
-        rest_server_id: str | None = None,
-    ) -> AsyncMLClient:
-        """Initialize an AsyncMLClient instance for a specific App Server.
-
-        If no identifier is provided, returns a client for the first configured
-        REST server within the environment.
-
-        Parameters
-        ----------
-        rest_server_id : str | None, default None
-            A REST App Server identifier
-
-        Returns
-        -------
-        AsyncMLClient
-            An AsyncMLClient instance
-
-        Raises
-        ------
-        NotARestServerError
-            If the App-Server identifier does not point to a REST server
-            (only when rest_server_id is not None and is not a REST server)
-        NoRestServerConfiguredError
-            If an identifier has not been provided and there's no REST servers
-            configured for the environment
-        """
-        rest_server_id = self._get_rest_server_id(rest_server_id)
-        return AsyncMLClient(
-            config=self.config.provide_config(rest_server_id),
-            manage_config=self.config.provide_config("manage"),
-            admin_config=self.config.provide_config("admin"),
-            health_config=self.config.provide_config("health"),
-        )
-
-    def get_async_http_client(
-        self,
-        app_server_id: str,
-    ) -> AsyncHttpClient:
-        """Initialize an AsyncHttpClient instance for a specific App Server.
-
-        Parameters
-        ----------
-        app_server_id : str
-            An App Server identifier
-
-        Returns
-        -------
-        AsyncHttpClient
-            An AsyncHttpClient instance
-        """
-        return AsyncHttpClient(config=self.config.provide_config(app_server_id))
-
-    def get_http_client(
-        self,
-        app_server_id: str,
-    ) -> HttpClient:
-        """Initialize an HttpClient instance for a specific App Server.
-
-        Parameters
-        ----------
-        app_server_id : str
-            An App Server identifier
-
-        Returns
-        -------
-        HttpClient
-            An HttpClient instance
-        """
-        return HttpClient(config=self.config.provide_config(app_server_id))
-
-    def _get_rest_server_id(
-        self,
-        rest_server_id: str | None = None,
-    ) -> str:
-        """Return verified REST Server identifier.
-
-        Parameters
-        ----------
-        rest_server_id : str | None, default None
-            A REST App Server identifier
-
-        Returns
-        -------
-        str
-            A REST server identifier
+            A disconnected client; use it as a context manager for session reuse.
 
         Raises
         ------
         NoSuchAppServerError
-            If no App-Server is configured under the given identifier
-        NotARestServerError
-            If the App-Server identifier does not point to a REST server
+            If the identifier is not configured.
         NoRestServerConfiguredError
-            If an identifier has not been provided and there's no REST servers
-            configured for the environment
+            If no identifier is supplied and no REST server is configured.
         """
-        logger.debug("Verifying the app server id [%s]", rest_server_id or "")
-        if rest_server_id is None:
-            logger.debug("No id provided - trying to identify any REST app server")
-            if len(self.config.rest_servers) == 0:
+        return MLClient(**self._client_configs(app_server_id, **overrides))
+
+    def get_async_client(
+        self,
+        app_server_id: str | None = None,
+        **overrides,
+    ) -> AsyncMLClient:
+        """Async counterpart of get_client, with identical configuration rules."""
+        return AsyncMLClient(**self._client_configs(app_server_id, **overrides))
+
+    def get_async_http_client(
+        self,
+        app_server_id: str,
+        **overrides,
+    ) -> AsyncHttpClient:
+        """Create a raw async client using get_config's defaults and overrides."""
+        return AsyncHttpClient(config=self.get_config(app_server_id, **overrides))
+
+    def get_http_client(self, app_server_id: str, **overrides) -> HttpClient:
+        """Create a raw client using get_config's defaults and overrides."""
+        return HttpClient(config=self.get_config(app_server_id, **overrides))
+
+    def _client_configs(
+        self,
+        app_server_id: str | None,
+        **overrides,
+    ) -> dict[str, HTTPConfig]:
+        app_server_id = self._get_app_server_id(app_server_id)
+        primary = self.get_config(app_server_id, **overrides)
+        configs = {"config": primary}
+        for server_id in ("manage", "admin", "health"):
+            configs[f"{server_id}_config"] = (
+                primary if server_id == app_server_id else self.get_config(server_id)
+            )
+        return configs
+
+    def _get_app_server_id(self, app_server_id: str | None) -> str:
+        if app_server_id is None:
+            if not self._config.rest_servers:
                 env = self.env_name
                 msg = f"No REST server is configured for the [{env}] environment."
                 raise NoRestServerConfiguredError(msg)
-            rest_server_id = self.config.rest_servers[0]
-            logger.debug("Identified REST app server id: [%s]", rest_server_id)
-            return rest_server_id
-        if rest_server_id not in self.config.app_server_ids:
-            msg = f"There's no [{rest_server_id}] app server configuration!"
+            return self._config.rest_servers[0]
+        if app_server_id not in self._config.app_server_ids:
+            msg = f"There's no [{app_server_id}] app server configuration!"
             raise NoSuchAppServerError(msg)
-        if rest_server_id not in self.config.rest_servers:
-            msg = f"[{rest_server_id}] App-Server is not configured as a REST one."
-            raise NotARestServerError(msg)
-        logger.debug(
-            "The [%s] app server has been verified as a REST one.",
-            rest_server_id,
-        )
-        return rest_server_id
+        return app_server_id

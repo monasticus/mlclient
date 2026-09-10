@@ -109,8 +109,7 @@ class HealthCommand(Command):
     ) -> int:
         """Execute the command."""
         manager = MLClientManager(self.option("environment"))
-        config = manager.config.provide_config("health")
-        with MLClient(config=config, health_config=config) as ml:
+        with manager.get_client("health") as ml:
             if self.option("watch"):
                 return self._watch(ml)
             healthy = ml.healthcheck()

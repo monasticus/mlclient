@@ -8,6 +8,7 @@ from pytest_mock import MockerFixture
 
 from mlclient.api.rest_api import AsyncRestApi
 from mlclient.calls import DatabasesGetCall, TimestampGetCall
+from mlclient.clients import http_client as http_client_module
 from mlclient.clients import ml_client as ml_client_module
 from mlclient.clients.ml_client import AsyncMLClient
 from mlclient.connection import CloudConfig
@@ -397,7 +398,10 @@ async def test_healthcheck_derived_config_overrides_auth_and_retry(port):
     route = ml_mocker.mock_head()
 
     async with AsyncMLClient(
-        protocol="https", port=port, auth="basic", retry=Retry(total=2),
+        protocol="https",
+        port=port,
+        auth="basic",
+        retry=Retry(total=2),
     ) as ml:
         assert await ml.healthcheck() is False
 
@@ -467,11 +471,93 @@ async def test_healthcheck_cloud_uses_no_retry_and_preserves_gateway(injected):
     )
 
     async with AsyncMLClient(
-        config=config, health_config=config if injected else None,
+        config=config,
+        health_config=config if injected else None,
     ) as ml:
         assert await ml.healthcheck() is False
 
     assert route.call_count == 1
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_sessions_open_on_requests_and_reopen_with_cached_apis(mocker):
+    opened = mocker.spy(http_client_module, "AsyncClient")
+    closed = mocker.spy(httpx.AsyncClient, "aclose")
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/manage/v2/databases")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_empty_response_body()
+    ml_mocker.mock_get()
+    ml_mocker.with_url("http://localhost:8001/admin/v1/timestamp")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_empty_response_body()
+    ml_mocker.mock_get()
+    ml_mocker.with_url("http://localhost:7997/")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_empty_response_body()
+    ml_mocker.mock_head()
+    ml = AsyncMLClient()
+    manage, admin = ml.manage, ml.admin
+    assert opened.call_count == 0
+
+    for cycle in range(2):
+        async with ml:
+            await ml.connect()
+            assert opened.call_count == cycle * 4 + 1
+            await manage.call(DatabasesGetCall())
+            assert opened.call_count == cycle * 4 + 2
+            await admin.call(TimestampGetCall())
+            assert opened.call_count == cycle * 4 + 3
+            assert await ml.healthcheck()
+            assert await ml.healthcheck()
+            assert opened.call_count == cycle * 4 + 4
+        assert closed.call_count == (cycle + 1) * 4
+        assert not ml.is_connected()
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_cached_auxiliary_uses_ad_hoc_session_after_context_exception(mocker):
+    opened = mocker.spy(http_client_module, "AsyncClient")
+    closed = mocker.spy(httpx.AsyncClient, "aclose")
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8001/admin/v1/timestamp")
+    ml_mocker.with_get_side_effect([ValueError("failure"), httpx.Response(200)])
+    ml = AsyncMLClient()
+    admin = ml.admin
+
+    with pytest.raises(ValueError, match="failure"):
+        async with ml:
+            await admin.call(TimestampGetCall())
+    assert opened.call_count == closed.call_count == 2
+    assert not ml.is_connected()
+    await admin.call(TimestampGetCall())
+    assert opened.call_count == 3
+    assert opened.spy_return.is_closed
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    ("tier", "call"),
+    [("manage", DatabasesGetCall()), ("admin", TimestampGetCall())],
+)
+@respx.mock
+async def test_matching_injected_config_reuses_primary_session(mocker, tier, call):
+    opened = mocker.spy(http_client_module, "AsyncClient")
+    closed = mocker.spy(httpx.AsyncClient, "aclose")
+    config = HTTPConfig.resolve(port=9002, auth="basic")
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:9002" + call.endpoint)
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_empty_response_body()
+    ml_mocker.mock_get()
+
+    async with AsyncMLClient(config=config, **{f"{tier}_config": config.clone()}) as ml:
+        await getattr(ml, tier).call(call)
+        assert opened.call_count == 1
+    assert closed.call_count == 1
+
 
 
 @pytest.mark.asyncio

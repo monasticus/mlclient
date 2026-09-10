@@ -105,3 +105,38 @@ def test_cloud_clone_applies_retry_without_changing_gateway():
     assert sibling.retry is retry
     assert sibling.has_explicit_retry is True
     assert config.has_explicit_retry is False
+
+
+@pytest.mark.parametrize(
+    "overrides",
+    [
+        {"host": "other.example.com"},
+        {"port": 9999},
+        {"protocol": "https"},
+        {"auth": None},
+        {"username": "other"},
+        {"password": "other"},
+        {"ssl": SSLConfig(verify=False), "protocol": "https"},
+        {"retry": Retry(total=0)},
+    ],
+)
+def test_session_sharing_rejects_different_settings(overrides):
+    config = HTTPConfig.resolve()
+    assert not config.can_share_session(config.clone(**overrides))
+
+
+def test_session_sharing_matches_resolved_values():
+    config = HTTPConfig.resolve(auth="basic")
+    assert config.can_share_session(HTTPConfig.resolve(auth="basic"))
+    assert config.can_share_session(config.clone())
+
+
+def test_session_sharing_requires_same_custom_auth_and_retry():
+    auth = httpx.BasicAuth("user", "pass")
+    retry = Retry(total=2)
+    config = HTTPConfig.resolve(auth=auth, retry=retry)
+    assert config.can_share_session(config.clone())
+    assert not config.can_share_session(
+        config.clone(auth=httpx.BasicAuth("user", "pass")),
+    )
+    assert not config.can_share_session(config.clone(retry=Retry(total=2)))

@@ -148,3 +148,35 @@ The same logic as in the above example we will achieve in fewer steps::
 
 .. note::
    ``MLClientManager`` is accessible only using ML Client Environments.
+
+``get_client()`` and ``get_async_client()`` select the first REST server when
+called without an identifier. With an identifier they accept any configured
+server, including ``health``, ``manage`` and ``admin``. The selected server is
+the primary HTTP endpoint; selecting ``health`` also makes ``healthcheck()``
+reuse that session, including a custom port or credentials from the environment.
+Selecting ``manage`` or ``admin`` works the same way for its API.
+
+HTTP settings can be overridden without editing the environment file:
+
+.. code-block:: python
+
+   >>> from mlclient.clients.http_client import NO_RETRY_STRATEGY
+   >>> from httpx_retries import Retry
+   >>> mgr = MLClientManager("local", retry=Retry(total=2))
+   >>> with mgr.get_client("health", retry=NO_RETRY_STRATEGY) as ml:
+   ...     ml.healthcheck()
+   ...
+   >>> config = mgr.get_config("content", port=8100)
+
+Precedence is environment settings, then manager overrides, then per-call
+overrides. Manager overrides apply to every server; per-call overrides apply
+only to the selected server and its corresponding API. Other API endpoints
+keep the manager settings. All four client factories accept these overrides;
+``get_config()`` returns the resolved ``HTTPConfig`` without creating a client.
+Overrides accept the parameters of ``HTTPConfig.clone()``; unknown names raise
+``TypeError``. Neither the environment nor later calls are modified.
+
+With retry omitted or set to ``None``, ``health`` uses ``NO_RETRY_STRATEGY``;
+other servers use ``DEFAULT_RETRY_STRATEGY``. An explicit strategy at either
+override level is honored, including for health. Passing ``retry=None`` per
+call restores the server's default, even if the manager specifies a strategy.

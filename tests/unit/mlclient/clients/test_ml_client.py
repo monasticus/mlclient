@@ -9,6 +9,7 @@ from pytest_mock import MockerFixture
 from mlclient import MLClient
 from mlclient.api.rest_api import RestApi
 from mlclient.calls import DatabasesGetCall, TimestampGetCall
+from mlclient.clients import http_client as http_client_module
 from mlclient.clients import ml_client as ml_client_module
 from mlclient.connection import CloudConfig
 from mlclient.http_config import DEFAULT_RETRY_STRATEGY, HTTPConfig
@@ -371,7 +372,10 @@ def test_healthcheck_derived_config_overrides_auth_and_retry(port):
     route = ml_mocker.mock_head()
 
     with MLClient(
-        protocol="https", port=port, auth="basic", retry=Retry(total=2),
+        protocol="https",
+        port=port,
+        auth="basic",
+        retry=Retry(total=2),
     ) as ml:
         assert ml.healthcheck() is False
 
@@ -441,6 +445,83 @@ def test_healthcheck_cloud_uses_no_retry_and_preserves_gateway(injected):
         assert ml.healthcheck() is False
 
     assert route.call_count == 1
+
+
+@respx.mock
+def test_sessions_open_on_requests_and_reopen_with_cached_apis(mocker):
+    opened = mocker.spy(http_client_module, "Client")
+    closed = mocker.spy(httpx.Client, "close")
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/manage/v2/databases")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_empty_response_body()
+    ml_mocker.mock_get()
+    ml_mocker.with_url("http://localhost:8001/admin/v1/timestamp")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_empty_response_body()
+    ml_mocker.mock_get()
+    ml_mocker.with_url("http://localhost:7997/")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_empty_response_body()
+    ml_mocker.mock_head()
+    ml = MLClient()
+    manage, admin = ml.manage, ml.admin
+    assert opened.call_count == 0
+
+    for cycle in range(2):
+        with ml:
+            ml.connect()
+            assert opened.call_count == cycle * 4 + 1
+            manage.call(DatabasesGetCall())
+            assert opened.call_count == cycle * 4 + 2
+            admin.call(TimestampGetCall())
+            assert opened.call_count == cycle * 4 + 3
+            assert ml.healthcheck()
+            assert ml.healthcheck()
+            assert opened.call_count == cycle * 4 + 4
+        assert closed.call_count == (cycle + 1) * 4
+        assert not ml.is_connected()
+
+
+@respx.mock
+def test_cached_auxiliary_uses_ad_hoc_session_after_context_exception(mocker):
+    opened = mocker.spy(http_client_module, "Client")
+    closed = mocker.spy(httpx.Client, "close")
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8001/admin/v1/timestamp")
+    ml_mocker.with_get_side_effect([ValueError("failure"), httpx.Response(200)])
+    ml = MLClient()
+    admin = ml.admin
+
+    with pytest.raises(ValueError, match="failure"), ml:
+        admin.call(TimestampGetCall())
+    assert opened.call_count == closed.call_count == 2
+    assert not ml.is_connected()
+    admin.call(TimestampGetCall())
+    assert opened.call_count == 3
+    assert opened.spy_return.is_closed
+
+
+@pytest.mark.parametrize(
+    ("tier", "call"),
+    [("manage", DatabasesGetCall()), ("admin", TimestampGetCall())],
+)
+@respx.mock
+def test_matching_injected_config_reuses_primary_session(mocker, tier, call):
+    opened = mocker.spy(http_client_module, "Client")
+    closed = mocker.spy(httpx.Client, "close")
+    config = HTTPConfig.resolve(port=9002, auth="basic")
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:9002" + call.endpoint)
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_empty_response_body()
+    ml_mocker.mock_get()
+
+    with MLClient(config=config, **{f"{tier}_config": config.clone()}) as ml:
+        getattr(ml, tier).call(call)
+        assert opened.call_count == 1
+    assert closed.call_count == 1
+
 
 
 @respx.mock

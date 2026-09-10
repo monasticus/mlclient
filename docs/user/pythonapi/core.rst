@@ -149,20 +149,27 @@ them to port 8002.
       +- .parser     -> MLResponseParser
       +- .documents, .eval, .logs -> high-level services
 
-Port routing is automatic. When the main ``port`` differs from 8002 or 8001,
-separate connections to ports 8002 and 8001 are lazily created on first access
-to ``.manage`` or ``.admin``. If the main port happens to be 8002 (or 8001),
-that connection is reused directly. By default every secondary connection
-shares the same ``protocol``, ``host``, ``auth``, ``username``, ``password``,
-``ssl``, and ``cloud`` as the main client, differing only in port (see
-`Manage or Admin on a different host or credentials`_ to override this). They
-are also managed by the ``connect()`` / ``disconnect()`` lifecycle.
+Port routing is automatic: Manage defaults to 8002 and Admin to 8001.
+Their configurations inherit the primary settings except for the port (see
+`Manage or Admin on a different host or credentials`_ to override this).
+``connect()`` and entering a context open only the primary HTTP session.
+Auxiliary sessions open on their first request, not when accessing an API
+property. ``disconnect()`` and context exit close every opened session.
+Cached API objects can be reused after reconnecting. Outside a connected
+client's lifecycle, requests use short-lived sessions.
+
+An auxiliary API reuses the primary session when its complete configuration
+matches, including injected configurations on custom ports. Matching includes
+host, connection mode, credentials, authentication and retry strategy. For
+custom auth handlers and retry strategies, sharing requires the same object;
+separately constructed strategies remain separate even if their fields match.
+This avoids combining custom behavior by comparing only a port or URL.
 
 .. code-block:: python
 
     >>> from mlclient import MLClient
 
-    # Default port is 8000 - .manage creates a connection to 8002, .admin to 8001
+    # Default port is 8000 - Manage requests use 8002, Admin requests use 8001
     >>> with MLClient() as ml:
     ...     resp = ml.manage.databases.get_list()
     ...     ts = ml.admin.get_timestamp()
@@ -1472,10 +1479,10 @@ The probe maps the response to a verdict:
   request was misdirected (for example, aimed at an authenticated server), not
   that the node is unhealthy
 
-By default, health checks use a separate connection derived from the primary
+By default, health checks use a configuration derived from the primary
 configuration, overriding the port to ``7997``, authentication to none, and
-retry to ``NO_RETRY_STRATEGY``. This also applies when the primary connection
-already targets ``7997``. Cloud connections retain their gateway port and
+retry to ``NO_RETRY_STRATEGY``. These defaults also apply when the primary
+already targets ``7997``; an identical effective configuration reuses its session. Cloud connections retain their gateway port and
 Cloud authentication, while health requests still default to no retries.
 
 Pass a resolved :class:`~mlclient.http_config.HTTPConfig` as ``health_config``

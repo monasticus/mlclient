@@ -1,13 +1,16 @@
 import httpx
 import pytest
 import respx
+from httpx_retries import Retry
 
 from mlclient import AsyncMLClient, MLClient, MLClientManager, MLEnvironment
 from mlclient.clients import AsyncHttpClient, HttpClient
+from mlclient.clients import http_client as http_client_module
+from mlclient.clients.http_client import NO_RETRY_STRATEGY
+from mlclient.http_config import DEFAULT_RETRY_STRATEGY
 from mlclient.exceptions import (
     NoRestServerConfiguredError,
     NoSuchAppServerError,
-    NotARestServerError,
 )
 from tests.utils.ml_mockers import MLRespXMocker
 
@@ -122,6 +125,48 @@ def test_properties():
     assert mgr.config.model_dump() == expected_config.model_dump()
 
 
+@pytest.mark.parametrize(
+    "factory",
+    ["get_client", "get_async_client", "get_http_client", "get_async_http_client"],
+)
+def test_health_defaults_and_overrides_apply_to_every_factory(factory):
+    manager = MLClientManager("test-no-rest")
+    client = getattr(manager, factory)("health")
+    http = client if isinstance(client, (HttpClient, AsyncHttpClient)) else client.http
+    assert http.config.retry is NO_RETRY_STRATEGY
+    assert http.config.auth is None
+    assert http.config.port == 7997
+
+    customized = getattr(manager, factory)("health", retry=DEFAULT_RETRY_STRATEGY)
+    http = (
+        customized
+        if isinstance(customized, (HttpClient, AsyncHttpClient))
+        else customized.http
+    )
+    assert http.config.retry is DEFAULT_RETRY_STRATEGY
+
+
+def test_config_override_precedence_and_environment_isolation():
+    retry = Retry(total=2)
+    manager = MLClientManager("test", host="gateway.example.com", retry=retry)
+    original = manager.config
+    config = manager.get_config("content", port=9100, username="custom")
+    assert config.host == "gateway.example.com"
+    assert config.port == 9100
+    assert config.username == "custom"
+    assert config.retry is retry
+    assert manager.get_config("health").retry is retry
+    assert manager.get_config("health", retry=None).retry is NO_RETRY_STRATEGY
+    assert manager.get_config("content", retry=None).retry is DEFAULT_RETRY_STRATEGY
+    assert manager.get_config("content").port == 8100
+    assert manager.config == original
+
+
+def test_unknown_config_override_is_rejected():
+    with pytest.raises(TypeError, match="unexpected keyword argument 'rety'"):
+        MLClientManager("test").get_client("health", rety=Retry(total=0))
+
+
 def test_get_client_with_app_server_id():
     mgr = MLClientManager("test")
     with mgr.get_client("content") as ml:
@@ -231,6 +276,29 @@ async def test_get_async_client_wires_env_manage_admin_and_health_servers():
         assert await ml.healthcheck() is True
 
 
+@respx.mock
+def test_health_shares_session_and_preserves_other_endpoints(mocker):
+    opened = mocker.spy(http_client_module, "Client")
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("https://localhost:9997/")
+    ml_mocker.with_response_code(503)
+    ml_mocker.with_empty_response_body()
+    health_route = ml_mocker.mock_head()
+    ml_mocker.with_url("https://localhost:8002/manage/v2/databases")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_empty_response_body()
+    ml_mocker.mock_get()
+    manager = MLClientManager("test")
+
+    with manager.get_client("health", port=9997) as ml:
+        assert (ml.http.head("/")).status_code == 503
+        assert ml.healthcheck() is False
+        assert health_route.call_count == 2
+        assert opened.call_count == 1
+        ml.manage.databases.get_list()
+        assert opened.call_count == 2
+
+
 def test_get_client_default_no_rest_servers_configured():
     with pytest.raises(NoRestServerConfiguredError) as err:
         MLClientManager("test-no-rest").get_client()
@@ -239,13 +307,9 @@ def test_get_client_default_no_rest_servers_configured():
     )
 
 
-def test_get_client_not_a_rest_server():
-    mgr = MLClientManager("test")
-    with pytest.raises(NotARestServerError) as err:
-        mgr.get_client("modules")
-    assert err.value.args[0] == (
-        "[modules] App-Server is not configured as a REST one."
-    )
+def test_get_client_non_rest_server():
+    ml = MLClientManager("test").get_client("modules")
+    assert ml.http.config.port == 8101
 
 
 def test_get_client_unknown_app_server():
@@ -297,6 +361,30 @@ async def test_get_async_client_default():
     assert not ml.is_connected()
 
 
+@pytest.mark.asyncio
+@respx.mock
+async def test_async_health_shares_session_and_preserves_other_endpoints(mocker):
+    opened = mocker.spy(http_client_module, "AsyncClient")
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("https://localhost:9997/")
+    ml_mocker.with_response_code(503)
+    ml_mocker.with_empty_response_body()
+    health_route = ml_mocker.mock_head()
+    ml_mocker.with_url("https://localhost:8002/manage/v2/databases")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_empty_response_body()
+    ml_mocker.mock_get()
+    manager = MLClientManager("test")
+
+    async with manager.get_async_client("health", port=9997) as ml:
+        assert (await ml.http.head("/")).status_code == 503
+        assert await ml.healthcheck() is False
+        assert health_route.call_count == 2
+        assert opened.call_count == 1
+        await ml.manage.databases.get_list()
+        assert opened.call_count == 2
+
+
 def test_get_async_client_default_no_rest_servers_configured():
     with pytest.raises(NoRestServerConfiguredError) as err:
         MLClientManager("test-no-rest").get_async_client()
@@ -305,13 +393,9 @@ def test_get_async_client_default_no_rest_servers_configured():
     )
 
 
-def test_get_async_client_not_a_rest_server():
-    mgr = MLClientManager("test")
-    with pytest.raises(NotARestServerError) as err:
-        mgr.get_async_client("modules")
-    assert err.value.args[0] == (
-        "[modules] App-Server is not configured as a REST one."
-    )
+def test_get_async_client_non_rest_server():
+    ml = MLClientManager("test").get_async_client("modules")
+    assert ml.http.config.port == 8101
 
 
 def test_get_async_client_unknown_app_server():

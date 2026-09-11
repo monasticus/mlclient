@@ -282,19 +282,6 @@ default for that one request without mutating shared configuration:
    ...     ml.documents.read("/doc.xml", timeout=None)        # no timeout
    ...     ml.healthcheck(timeout=2)                          # override the 5s health probe
 
-For ``eval`` the ``timeout`` bounds the HTTP request only; it is never sent as
-a query variable. To pass a query variable that happens to be named
-``timeout``, put it in ``variables`` - the two are independent:
-
-.. code-block:: python
-
-   >>> with MLClientManager("local").get_client("content") as ml:
-   ...     ml.eval.xquery(
-   ...         "declare variable $timeout external; $timeout",
-   ...         variables={"timeout": 30},  # the query variable
-   ...         timeout=2,                   # the HTTP request timeout
-   ...     )
-
 Three separate limits are easy to confuse:
 
 - the **HTTP timeout** limits waiting in the connect, read, write and pool

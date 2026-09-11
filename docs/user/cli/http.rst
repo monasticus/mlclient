@@ -10,8 +10,8 @@ http
       http [options] [--] <method> <endpoint> [<params>...]
 
     Arguments:
-      method                         The HTTP method (e.g. GET, HEAD, POST, PUT, DELETE, PATCH)
-      endpoint                       The REST endpoint to call (e.g. /manage/v2/hosts)
+      method                         The HTTP method (e.g. get, head, post, put, delete, patch)
+      endpoint                       The REST endpoint to call (e.g. /v1/documents)
       params                         Query params (key=value) and headers (key:value)
 
     Options:
@@ -33,16 +33,16 @@ http
 A ``key=value`` token is sent as a query parameter, a ``key:value`` token as a request header.
 ``--body`` accepts a raw string, a file path, or ``@file-path`` (both path forms read the file).
 By default only the response body is printed. ``--include`` prepends the status line and
-response headers (the same protocol-like representation the client logs); a HEAD request has
+response headers (the same protocol-like representation the client logs); a head request has
 no body, so it always prints that representation.
 
 
-GET an endpoint
+get an endpoint
 ---------------
 
 .. code-block:: bash
 
-    ml http -e local -s manage GET /manage/v2/hosts view=status format=json Accept:application/json
+    ml http get /v1/documents uri=/doc.xml
 
 
 Include status and headers
@@ -50,35 +50,35 @@ Include status and headers
 
 .. code-block:: bash
 
-    ml http -e local -s manage -i GET /manage/v2/hosts
+    ml http -i get /v1/documents uri=/doc.xml
 
 
-HEAD an endpoint
+head an endpoint
 ----------------
 
 .. code-block:: bash
 
-    ml http -e local -s manage HEAD /manage/v2/hosts
+    ml http head /v1/documents uri=/doc.xml
 
 
-POST or PUT a body
+post or put a body
 ------------------
 
 .. code-block:: bash
 
-    ml http -e local POST /v1/documents uri=/doc.xml Content-Type:application/xml -b '<doc/>'
+    ml http post /v1/documents uri=/doc.xml Content-Type:application/xml -b '<doc/>'
 
 .. code-block:: bash
 
-    ml http -e local PUT /v1/documents uri=/doc.xml Content-Type:application/xml -b @./doc.xml
+    ml http put /v1/documents uri=/doc.xml Content-Type:application/xml -b @./doc.xml
 
 
-DELETE a document
+delete a document
 -----------------
 
 .. code-block:: bash
 
-    ml http -e local DELETE /v1/documents uri=/doc.xml
+    ml http delete /v1/documents uri=/doc.xml
 
 
 Request and response handling
@@ -92,8 +92,9 @@ send all values. Header names are case-insensitive; the last value wins.
 
 .. code-block:: bash
 
-    ml http -e local GET /v1/documents uri=/one.xml uri=/two.xml
-    ml http -e local -p GET /v1/documents uri=/doc.json Accept:application/json
+    ml http -s manage get /manage/v2/hosts view=status format=json
+    ml http get /v1/documents uri=/one.xml uri=/two.xml
+    ml http -p get /v1/documents uri=/doc.json Accept:application/json
 
 Body text is sent literally, including JSON. Files are read as bytes, preserving
 binary data and line endings. An explicit ``@path`` must exist and be readable;

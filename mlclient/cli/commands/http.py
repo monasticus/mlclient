@@ -33,9 +33,9 @@ class HttpCommand(Command):
 
     Arguments:
       method
-            The HTTP method (e.g. GET, HEAD, POST, PUT, DELETE, PATCH)
+            The HTTP method (e.g. get, head, post, put, delete, patch)
       endpoint
-            The REST endpoint to call (e.g. /manage/v2/hosts)
+            The REST endpoint to call (e.g. /v1/documents)
       params
             Query params (key=value) and headers (key:value)
 
@@ -57,11 +57,11 @@ class HttpCommand(Command):
     arguments: list[Argument] = [
         argument(
             "method",
-            "The HTTP method (e.g. GET, HEAD, POST, PUT, DELETE, PATCH)",
+            "The HTTP method (e.g. get, head, post, put, delete, patch)",
         ),
         argument(
             "endpoint",
-            "The REST endpoint to call (e.g. /manage/v2/hosts)",
+            "The REST endpoint to call (e.g. /v1/documents)",
         ),
         argument(
             "params",

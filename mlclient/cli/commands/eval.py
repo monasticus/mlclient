@@ -1,7 +1,7 @@
-"""The Call Eval Command module.
+"""The Eval Command module.
 
-It exports an implementation for 'call eval' command:
-    * CallEvalCommand
+It exports an implementation for 'eval' command:
+    * EvalCommand
         Sends a POST request to the /v1/eval endpoint.
 """
 
@@ -17,11 +17,11 @@ from mlclient import MLClientManager
 from mlclient.exceptions import WrongParametersError
 
 
-class CallEvalCommand(Command):
+class EvalCommand(Command):
     """Sends a POST request to the /v1/eval endpoint.
 
     Usage:
-      call eval [options] [--] <code>
+      eval [options] [--] <code>
 
     Arguments:
       code
@@ -44,7 +44,7 @@ class CallEvalCommand(Command):
             The transaction identifier of the multi-statement transaction
     """
 
-    name: str = "call eval"
+    name: str = "eval"
     description: str = "Sends a POST request to the /v1/eval endpoint"
     arguments: list[Argument] = [
         argument(

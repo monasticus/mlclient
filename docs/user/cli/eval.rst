@@ -1,5 +1,5 @@
-call eval
-=========
+eval
+====
 
 .. code-block:: none
 
@@ -7,7 +7,7 @@ call eval
       Sends a GET request to the /v1/eval endpoint
 
     Usage:
-      call eval [options] [--] <code>
+      eval [options] [--] <code>
 
     Arguments:
       code                           The code to evaluate (a file path or raw xqy/js code)
@@ -35,11 +35,11 @@ Evaluate code from a file
 
 .. code-block:: bash
 
-    ml call eval -s app-services ./xqy-code-to-eval.xqy
+    ml eval -s app-services ./xqy-code-to-eval.xqy
 
 .. code-block:: bash
 
-    ml call eval -s app-services ./js-code-to-eval.js
+    ml eval -s app-services ./js-code-to-eval.js
 
 
 Evaluate raw xquery code
@@ -47,7 +47,7 @@ Evaluate raw xquery code
 
 .. code-block:: bash
 
-    ml call eval -s app-services -x 'fn:current-dateTime()'
+    ml eval -s app-services -x 'fn:current-dateTime()'
 
 
 Evaluate raw javascript code
@@ -55,7 +55,7 @@ Evaluate raw javascript code
 
 .. code-block:: bash
 
-    ml call eval -s app-services -j 'fn.currentDateTime()'
+    ml eval -s app-services -j 'fn.currentDateTime()'
 
 
 Evaluate code with variables
@@ -63,11 +63,11 @@ Evaluate code with variables
 
 .. code-block:: bash
 
-    ml call eval -s app-services -var DAYS=5 ./xqy-code-to-eval.xqy
+    ml eval -s app-services -var DAYS=5 ./xqy-code-to-eval.xqy
 
 .. code-block:: bash
 
-    ml call eval -s app-services -x --var DAYS=5 '
+    ml eval -s app-services -x --var DAYS=5 '
     > declare variable $DAYS external;
     >
     > fn:current-dateTime() - xs:dayTimeDuration("P" || $DAYS || "D")'
@@ -75,7 +75,7 @@ Evaluate code with variables
 
 .. code-block:: bash
 
-    ml call eval -s app-services -j --var days=5 '
+    ml eval -s app-services -j --var days=5 '
     > fn.currentDateTime().subtract(xs.dayTimeDuration(`P${days}D`))'
 
 
@@ -84,7 +84,7 @@ Evaluate code with variables within a namespace
 
 .. code-block:: bash
 
-    ml call eval \
+    ml eval \
     > -s app-services \
     > -x \
     > --var {http://www.w3.org/2005/xquery-local-functions}DAYS=5 '
@@ -98,4 +98,4 @@ Evaluate code on a custom database
 
 .. code-block:: bash
 
-    ml call eval -s app-services -d Security ./xqy-code-to-eval.xqy
+    ml eval -s app-services -d Security ./xqy-code-to-eval.xqy

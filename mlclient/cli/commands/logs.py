@@ -1,7 +1,7 @@
-"""The Call Logs Command module.
+"""The Logs Command module.
 
-It exports an implementation for 'call logs' command:
-    * CallLogsCommand
+It exports an implementation for 'logs' command:
+    * LogsCommand
         Sends a GET request to the /manage/v2/logs endpoint.
 """
 
@@ -19,11 +19,11 @@ from mlclient import MLClientManager
 from mlclient.services import LogType
 
 
-class CallLogsCommand(Command):
+class LogsCommand(Command):
     """Sends a GET request to the /manage/v2/logs endpoint.
 
     Usage:
-      call logs [options]
+      logs [options]
 
     Options:
       -e, --environment=ENVIRONMENT
@@ -44,7 +44,7 @@ class CallLogsCommand(Command):
             If set, no filename will be passed to the Logs REST API
     """
 
-    name: str = "call logs"
+    name: str = "logs"
     description: str = "Sends a GET request to the /manage/v2/logs endpoint"
     options: list[Option] = [
         option(

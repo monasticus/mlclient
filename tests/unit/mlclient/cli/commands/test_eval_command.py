@@ -44,7 +44,7 @@ def _setup(mocker, ml_config):
 
 
 @respx.mock
-def test_command_call_eval_basic():
+def test_command_eval_basic():
     code = 'xquery version "1.0"; ""'
 
     ml_mocker = MLRespXMocker(use_router=False)
@@ -56,7 +56,7 @@ def test_command_call_eval_basic():
     ml_mocker.mock_post()
 
     file_path = resources_utils.get_test_resource_path(__file__, "xquery-code.xqy")
-    tester = _get_tester("call eval")
+    tester = _get_tester("eval")
     tester.execute(f"-e test {file_path}")
 
     assert tester.command.argument("code") == file_path
@@ -70,7 +70,7 @@ def test_command_call_eval_basic():
 
 
 @respx.mock
-def test_command_call_eval_custom_rest_server():
+def test_command_eval_custom_rest_server():
     code = 'xquery version "1.0"; ""'
 
     ml_mocker = MLRespXMocker(use_router=False)
@@ -82,7 +82,7 @@ def test_command_call_eval_custom_rest_server():
     ml_mocker.mock_post()
 
     file_path = resources_utils.get_test_resource_path(__file__, "xquery-code.xqy")
-    tester = _get_tester("call eval")
+    tester = _get_tester("eval")
     tester.execute(f"-e test -s manage {file_path}")
 
     assert tester.command.argument("code") == file_path
@@ -96,7 +96,7 @@ def test_command_call_eval_custom_rest_server():
 
 
 @respx.mock
-def test_command_call_eval_with_vars():
+def test_command_eval_with_vars():
     code = 'xquery version "1.0"; ""'
 
     ml_mocker = MLRespXMocker(use_router=False)
@@ -113,7 +113,7 @@ def test_command_call_eval_with_vars():
     ml_mocker.mock_post()
 
     file_path = resources_utils.get_test_resource_path(__file__, "xquery-code.xqy")
-    tester = _get_tester("call eval")
+    tester = _get_tester("eval")
     tester.execute(f"-e test {file_path} --var VARIABLE_1=X --var VARIABLE_2=Y")
 
     assert tester.command.argument("code") == file_path
@@ -127,7 +127,7 @@ def test_command_call_eval_with_vars():
 
 
 @respx.mock
-def test_command_call_eval_xquery_flag():
+def test_command_eval_xquery_flag():
     code = 'xquery version "1.0"; ""'
 
     ml_mocker = MLRespXMocker(use_router=False)
@@ -138,7 +138,7 @@ def test_command_call_eval_xquery_flag():
     ml_mocker.with_response_body_part("string", "")
     ml_mocker.mock_post()
 
-    tester = _get_tester("call eval")
+    tester = _get_tester("eval")
     tester.execute(f"-e test -x '{code}'")
 
     assert tester.command.argument("code") == code
@@ -152,7 +152,7 @@ def test_command_call_eval_xquery_flag():
 
 
 @respx.mock
-def test_command_call_eval_javascript_flag():
+def test_command_eval_javascript_flag():
     code = '"use strict"; ""'
 
     ml_mocker = MLRespXMocker(use_router=False)
@@ -163,7 +163,7 @@ def test_command_call_eval_javascript_flag():
     ml_mocker.with_response_body_part("string", "")
     ml_mocker.mock_post()
 
-    tester = _get_tester("call eval")
+    tester = _get_tester("eval")
     tester.execute(f"-e test -j '{code}'")
 
     assert tester.command.argument("code") == code
@@ -176,10 +176,10 @@ def test_command_call_eval_javascript_flag():
     assert tester.command.option("txid") is None
 
 
-def test_command_call_eval_mixed_xquery_and_javascript():
+def test_command_eval_mixed_xquery_and_javascript():
     code = 'xquery version "1.0"; ""'
 
-    tester = _get_tester("call eval")
+    tester = _get_tester("eval")
     with pytest.raises(WrongParametersError) as err:
         tester.execute(f"-e test -x -j '{code}'")
 
@@ -188,7 +188,7 @@ def test_command_call_eval_mixed_xquery_and_javascript():
 
 
 @respx.mock
-def test_command_call_eval_custom_database():
+def test_command_eval_custom_database():
     code = 'xquery version "1.0"; ""'
 
     ml_mocker = MLRespXMocker(use_router=False)
@@ -201,7 +201,7 @@ def test_command_call_eval_custom_database():
     ml_mocker.mock_post()
 
     file_path = resources_utils.get_test_resource_path(__file__, "xquery-code.xqy")
-    tester = _get_tester("call eval")
+    tester = _get_tester("eval")
     tester.execute(f"-e test -d custom-db {file_path}")
 
     assert tester.command.argument("code") == file_path
@@ -215,7 +215,7 @@ def test_command_call_eval_custom_database():
 
 
 @respx.mock
-def test_command_call_eval_custom_txid():
+def test_command_eval_custom_txid():
     code = 'xquery version "1.0"; ""'
 
     ml_mocker = MLRespXMocker(use_router=False)
@@ -228,7 +228,7 @@ def test_command_call_eval_custom_txid():
     ml_mocker.mock_post()
 
     file_path = resources_utils.get_test_resource_path(__file__, "xquery-code.xqy")
-    tester = _get_tester("call eval")
+    tester = _get_tester("eval")
     tester.execute(f"-e test -t transaction-id {file_path}")
 
     assert tester.command.argument("code") == file_path
@@ -242,7 +242,7 @@ def test_command_call_eval_custom_txid():
 
 
 @respx.mock
-def test_command_call_eval_output():
+def test_command_eval_output():
     code = (
         'xquery version "1.0"; '
         "("
@@ -266,7 +266,7 @@ def test_command_call_eval_output():
     ml_mocker.with_response_body_part("map", '{"key": "value"}')
     ml_mocker.mock_post()
 
-    tester = _get_tester("call eval")
+    tester = _get_tester("eval")
     tester.execute(f"-e test -x '{code}'")
     command_output = tester.io.fetch_output()
 

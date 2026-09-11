@@ -150,8 +150,8 @@ CLI
 
 .. code-block:: sh
 
-    ml call eval -e local -x "xdmp:database() => xdmp:database-name()"
-    ml call logs -e local -a 8002 --regex "XDMP-.*"
+    ml eval -e local -x "xdmp:database() => xdmp:database-name()"
+    ml logs -e local -a 8002 --regex "XDMP-.*"
 
 See :doc:`user/cli` for the full CLI reference.
 

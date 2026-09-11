@@ -91,7 +91,7 @@ def _setup(mocker, ml_config_single_node, ml_config_cluster):
 
 
 @respx.mock
-def test_command_call_logs_basic():
+def test_command_logs_basic():
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url(f"http://localhost:8002{ENDPOINT}")
     ml_mocker.with_request_param("format", "json")
@@ -101,7 +101,7 @@ def test_command_call_logs_basic():
     ml_mocker.with_response_body(ml_mocker.error_logs_body([]))
     ml_mocker.mock_get()
 
-    tester = _get_tester("call logs")
+    tester = _get_tester("logs")
     tester.execute("-e test -s 8002")
 
     assert tester.command.option("environment") == "test"
@@ -115,7 +115,7 @@ def test_command_call_logs_basic():
 
 
 @respx.mock
-def test_command_call_logs_basic_without_app_server():
+def test_command_logs_basic_without_app_server():
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url(f"http://localhost:8002{ENDPOINT}")
     ml_mocker.with_request_param("format", "json")
@@ -125,7 +125,7 @@ def test_command_call_logs_basic_without_app_server():
     ml_mocker.with_response_body(ml_mocker.error_logs_body([]))
     ml_mocker.mock_get()
 
-    tester = _get_tester("call logs")
+    tester = _get_tester("logs")
     tester.execute("-e test")
 
     assert tester.command.option("environment") == "test"
@@ -139,7 +139,7 @@ def test_command_call_logs_basic_without_app_server():
 
 
 @respx.mock
-def test_command_call_logs_basic_using_named_app_server():
+def test_command_logs_basic_using_named_app_server():
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url(f"http://localhost:8002{ENDPOINT}")
     ml_mocker.with_request_param("format", "json")
@@ -149,7 +149,7 @@ def test_command_call_logs_basic_using_named_app_server():
     ml_mocker.with_response_body(ml_mocker.error_logs_body([]))
     ml_mocker.mock_get()
 
-    tester = _get_tester("call logs")
+    tester = _get_tester("logs")
     tester.execute("-e test -s content")
 
     assert tester.command.option("environment") == "test"
@@ -163,7 +163,7 @@ def test_command_call_logs_basic_using_named_app_server():
 
 
 @respx.mock
-def test_command_call_logs_custom_log_type_error():
+def test_command_logs_custom_log_type_error():
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url(f"http://localhost:8002{ENDPOINT}")
     ml_mocker.with_request_param("format", "json")
@@ -173,7 +173,7 @@ def test_command_call_logs_custom_log_type_error():
     ml_mocker.with_response_body(ml_mocker.error_logs_body([]))
     ml_mocker.mock_get()
 
-    tester = _get_tester("call logs")
+    tester = _get_tester("logs")
     tester.execute("-e test -s 8002 -l error")
 
     assert tester.command.option("environment") == "test"
@@ -187,7 +187,7 @@ def test_command_call_logs_custom_log_type_error():
 
 
 @respx.mock
-def test_command_call_logs_custom_log_type_access():
+def test_command_logs_custom_log_type_access():
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url(f"http://localhost:8002{ENDPOINT}")
     ml_mocker.with_request_param("format", "json")
@@ -197,7 +197,7 @@ def test_command_call_logs_custom_log_type_access():
     ml_mocker.with_response_body(ml_mocker.non_error_logs_body([]))
     ml_mocker.mock_get()
 
-    tester = _get_tester("call logs")
+    tester = _get_tester("logs")
     tester.execute("-e test -s 8002 -l access")
 
     assert tester.command.option("environment") == "test"
@@ -211,7 +211,7 @@ def test_command_call_logs_custom_log_type_access():
 
 
 @respx.mock
-def test_command_call_logs_custom_log_type_request():
+def test_command_logs_custom_log_type_request():
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url(f"http://localhost:8002{ENDPOINT}")
     ml_mocker.with_request_param("format", "json")
@@ -221,7 +221,7 @@ def test_command_call_logs_custom_log_type_request():
     ml_mocker.with_response_body(ml_mocker.non_error_logs_body([]))
     ml_mocker.mock_get()
 
-    tester = _get_tester("call logs")
+    tester = _get_tester("logs")
     tester.execute("-e test -s 8002 -l request")
 
     assert tester.command.option("environment") == "test"
@@ -234,8 +234,8 @@ def test_command_call_logs_custom_log_type_request():
     assert tester.command.option("list") is False
 
 
-def test_command_call_logs_custom_log_type_invalid():
-    tester = _get_tester("call logs")
+def test_command_logs_custom_log_type_invalid():
+    tester = _get_tester("logs")
     with pytest.raises(InvalidLogTypeError) as err:
         tester.execute("-e test -s 8002 -l invalid")
 
@@ -244,7 +244,7 @@ def test_command_call_logs_custom_log_type_invalid():
 
 
 @respx.mock
-def test_command_call_logs_from():
+def test_command_logs_from():
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url(f"http://localhost:8002{ENDPOINT}")
     ml_mocker.with_request_param("format", "json")
@@ -255,7 +255,7 @@ def test_command_call_logs_from():
     ml_mocker.with_response_body(ml_mocker.error_logs_body([]))
     ml_mocker.mock_get()
 
-    tester = _get_tester("call logs")
+    tester = _get_tester("logs")
     tester.execute("-e test -s 8002 -f 1970-01-01")
 
     assert tester.command.option("environment") == "test"
@@ -269,7 +269,7 @@ def test_command_call_logs_from():
 
 
 @respx.mock
-def test_command_call_logs_to():
+def test_command_logs_to():
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url(f"http://localhost:8002{ENDPOINT}")
     ml_mocker.with_request_param("format", "json")
@@ -280,7 +280,7 @@ def test_command_call_logs_to():
     ml_mocker.with_response_body(ml_mocker.error_logs_body([]))
     ml_mocker.mock_get()
 
-    tester = _get_tester("call logs")
+    tester = _get_tester("logs")
     tester.execute("-e test -s 8002 -t 1984-01-01")
 
     assert tester.command.option("environment") == "test"
@@ -294,7 +294,7 @@ def test_command_call_logs_to():
 
 
 @respx.mock
-def test_command_call_logs_regex():
+def test_command_logs_regex():
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url(f"http://localhost:8002{ENDPOINT}")
     ml_mocker.with_request_param("format", "json")
@@ -305,7 +305,7 @@ def test_command_call_logs_regex():
     ml_mocker.with_response_body(ml_mocker.error_logs_body([]))
     ml_mocker.mock_get()
 
-    tester = _get_tester("call logs")
+    tester = _get_tester("logs")
     tester.execute("-e test -s 8002 -r you-will-not-find-it")
 
     assert tester.command.option("environment") == "test"
@@ -319,7 +319,7 @@ def test_command_call_logs_regex():
 
 
 @respx.mock
-def test_command_call_logs_host():
+def test_command_logs_host():
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url(f"http://localhost:8002{ENDPOINT}")
     ml_mocker.with_request_param("format", "json")
@@ -330,7 +330,7 @@ def test_command_call_logs_host():
     ml_mocker.with_response_body(ml_mocker.error_logs_body([]))
     ml_mocker.mock_get()
 
-    tester = _get_tester("call logs")
+    tester = _get_tester("logs")
     tester.execute("-e test -s 8002 -H some-host")
 
     assert tester.command.option("environment") == "test"
@@ -344,7 +344,7 @@ def test_command_call_logs_host():
 
 
 @respx.mock
-def test_command_call_logs_list():
+def test_command_logs_list():
     response_body_json = resources_utils.get_test_resource_json(
         __file__,
         "logs-list-response-single-node.json",
@@ -357,7 +357,7 @@ def test_command_call_logs_list():
     ml_mocker.with_response_body(response_body_json)
     ml_mocker.mock_get()
 
-    tester = _get_tester("call logs")
+    tester = _get_tester("logs")
     tester.execute("-e test --list")
 
     assert tester.command.option("environment") == "test"
@@ -371,7 +371,7 @@ def test_command_call_logs_list():
 
 
 @respx.mock
-def test_command_call_logs_output_for_error_logs():
+def test_command_logs_output_for_error_logs():
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url(f"http://localhost:8002{ENDPOINT}")
     ml_mocker.with_request_param("format", "json")
@@ -389,7 +389,7 @@ def test_command_call_logs_output_for_error_logs():
     )
     ml_mocker.mock_get()
 
-    tester = _get_tester("call logs")
+    tester = _get_tester("logs")
     tester.execute("-e test -s 8002")
     command_output = tester.io.fetch_output()
 
@@ -407,7 +407,7 @@ def test_command_call_logs_output_for_error_logs():
 
 
 @respx.mock
-def test_command_call_logs_output_for_access_logs():
+def test_command_logs_output_for_access_logs():
     logs = [
         (
             "172.17.0.1 - admin [01/Sep/2023:03:54:16 +0000] "
@@ -429,7 +429,7 @@ def test_command_call_logs_output_for_access_logs():
     ml_mocker.with_response_body(ml_mocker.non_error_logs_body(logs))
     ml_mocker.mock_get()
 
-    tester = _get_tester("call logs")
+    tester = _get_tester("logs")
     tester.execute("-e test -s 8002 -l access")
     command_output = tester.io.fetch_output()
 
@@ -445,7 +445,7 @@ def test_command_call_logs_output_for_access_logs():
 
 
 @respx.mock
-def test_command_call_logs_output_for_request_logs():
+def test_command_logs_output_for_request_logs():
     logs = [
         (
             "{"
@@ -500,7 +500,7 @@ def test_command_call_logs_output_for_request_logs():
     ml_mocker.with_response_body(ml_mocker.non_error_logs_body(logs))
     ml_mocker.mock_get()
 
-    tester = _get_tester("call logs")
+    tester = _get_tester("logs")
     tester.execute("-e test -s 8002 -l request")
     command_output = tester.io.fetch_output()
 
@@ -516,7 +516,7 @@ def test_command_call_logs_output_for_request_logs():
 
 
 @respx.mock
-def test_command_call_logs_output_for_audit_logs():
+def test_command_logs_output_for_audit_logs():
     logs = [
         (
             "2023-09-04 01:01:01.111 event=server-restart; "
@@ -537,7 +537,7 @@ def test_command_call_logs_output_for_audit_logs():
     ml_mocker.with_response_body(ml_mocker.non_error_logs_body(logs))
     ml_mocker.mock_get()
 
-    tester = _get_tester("call logs")
+    tester = _get_tester("logs")
     tester.execute("-e test -l audit")
     command_output = tester.io.fetch_output()
 
@@ -552,7 +552,7 @@ def test_command_call_logs_output_for_audit_logs():
 
 
 @respx.mock
-def test_command_call_logs_output_for_error_logs_without_app_port():
+def test_command_logs_output_for_error_logs_without_app_port():
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url(f"http://localhost:8002{ENDPOINT}")
     ml_mocker.with_request_param("format", "json")
@@ -570,7 +570,7 @@ def test_command_call_logs_output_for_error_logs_without_app_port():
     )
     ml_mocker.mock_get()
 
-    tester = _get_tester("call logs")
+    tester = _get_tester("logs")
     tester.execute("-e test")
     command_output = tester.io.fetch_output()
 
@@ -588,7 +588,7 @@ def test_command_call_logs_output_for_error_logs_without_app_port():
 
 
 @respx.mock
-def test_command_call_logs_output_for_xml_logs():
+def test_command_logs_output_for_xml_logs():
     xml_log_lines = [
         (
             "<error:error "
@@ -652,7 +652,7 @@ def test_command_call_logs_output_for_xml_logs():
     )
     ml_mocker.mock_get()
 
-    tester = _get_tester("call logs")
+    tester = _get_tester("logs")
     tester.execute("-e test -s 8002")
     command_output = tester.io.fetch_output()
 
@@ -753,7 +753,7 @@ def test_command_call_output_of_logs_list(args, host, response_path, output_path
     ml_mocker.with_response_body(logs_list_response)
     ml_mocker.mock_get()
 
-    tester = _get_tester("call logs")
+    tester = _get_tester("logs")
     tester.execute(args)
     command_output = tester.io.fetch_output()
 

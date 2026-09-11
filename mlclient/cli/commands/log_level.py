@@ -14,6 +14,7 @@ from cleo.io.inputs.argument import Argument
 from cleo.io.inputs.option import Option
 
 from mlclient import MLClientManager
+from mlclient.cli.connection import get_client
 from mlclient.exceptions import MarkLogicError, WrongParametersError
 from mlclient.services import LogLevelService
 
@@ -44,7 +45,7 @@ class LogLevelCommand(Command):
     only when that user lacks the privileges, falls back to the Management REST
     API.
 
-    The REST App-Server the command connects to (``-s``) is distinct from the
+    The REST App-Server the command connects to (``-c``) is distinct from the
     App Server whose log level is shown or set (``--server``).
 
     Usage:
@@ -57,13 +58,13 @@ class LogLevelCommand(Command):
     Options:
       -e, --environment=ENVIRONMENT
             The ML Client environment name [default: "local"]
-      -s, --rest-server=REST-SERVER
-            The ML REST Server environmental id
+      -c, --connection=CONNECTION
+            Connection identifier from the environment or TCP port
           --type=TYPE
             The log type: file or system [default: "file"]
           --group=GROUP
             The group to target [default: "Default"]
-          --server=SERVER
+      -s, --server=SERVER
             The App Server to target (file log level only)
     """
 
@@ -85,9 +86,9 @@ class LogLevelCommand(Command):
             default="local",
         ),
         option(
-            "rest-server",
-            "s",
-            description="The ML REST Server environmental id",
+            "connection",
+            "c",
+            description="Connection identifier from the environment or TCP port",
             flag=False,
         ),
         option(
@@ -104,6 +105,7 @@ class LogLevelCommand(Command):
         ),
         option(
             "server",
+            "s",
             description="The App Server to target (file log level only)",
             flag=False,
         ),
@@ -117,7 +119,7 @@ class LogLevelCommand(Command):
         server = self.option("server")
 
         manager = MLClientManager(self.option("environment"))
-        with manager.get_client(self.option("rest-server")) as ml:
+        with get_client(manager, self.option("connection")) as ml:
             service = LogLevelService(ml.rest, ml.manage)
             try:
                 if level is None:

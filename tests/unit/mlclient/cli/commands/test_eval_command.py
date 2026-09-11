@@ -61,7 +61,7 @@ def test_command_eval_basic():
 
     assert tester.command.argument("code") == file_path
     assert tester.command.option("environment") == "test"
-    assert tester.command.option("rest-server") is None
+    assert tester.command.option("connection") is None
     assert tester.command.option("var") == []
     assert tester.command.option("xquery") is False
     assert tester.command.option("javascript") is False
@@ -83,11 +83,11 @@ def test_command_eval_custom_rest_server():
 
     file_path = resources_utils.get_test_resource_path(__file__, "xquery-code.xqy")
     tester = _get_tester("eval")
-    tester.execute(f"-e test -s manage {file_path}")
+    tester.execute(f"-e test -c manage {file_path}")
 
     assert tester.command.argument("code") == file_path
     assert tester.command.option("environment") == "test"
-    assert tester.command.option("rest-server") == "manage"
+    assert tester.command.option("connection") == "manage"
     assert tester.command.option("var") == []
     assert tester.command.option("xquery") is False
     assert tester.command.option("javascript") is False
@@ -118,7 +118,7 @@ def test_command_eval_with_vars():
 
     assert tester.command.argument("code") == file_path
     assert tester.command.option("environment") == "test"
-    assert tester.command.option("rest-server") is None
+    assert tester.command.option("connection") is None
     assert tester.command.option("var") == ["VARIABLE_1=X", "VARIABLE_2=Y"]
     assert tester.command.option("xquery") is False
     assert tester.command.option("javascript") is False
@@ -143,7 +143,7 @@ def test_command_eval_xquery_flag():
 
     assert tester.command.argument("code") == code
     assert tester.command.option("environment") == "test"
-    assert tester.command.option("rest-server") is None
+    assert tester.command.option("connection") is None
     assert tester.command.option("var") == []
     assert tester.command.option("xquery") is True
     assert tester.command.option("javascript") is False
@@ -168,7 +168,7 @@ def test_command_eval_javascript_flag():
 
     assert tester.command.argument("code") == code
     assert tester.command.option("environment") == "test"
-    assert tester.command.option("rest-server") is None
+    assert tester.command.option("connection") is None
     assert tester.command.option("var") == []
     assert tester.command.option("xquery") is False
     assert tester.command.option("javascript") is True
@@ -206,7 +206,7 @@ def test_command_eval_custom_database():
 
     assert tester.command.argument("code") == file_path
     assert tester.command.option("environment") == "test"
-    assert tester.command.option("rest-server") is None
+    assert tester.command.option("connection") is None
     assert tester.command.option("var") == []
     assert tester.command.option("xquery") is False
     assert tester.command.option("javascript") is False
@@ -233,7 +233,7 @@ def test_command_eval_custom_txid():
 
     assert tester.command.argument("code") == file_path
     assert tester.command.option("environment") == "test"
-    assert tester.command.option("rest-server") is None
+    assert tester.command.option("connection") is None
     assert tester.command.option("var") == []
     assert tester.command.option("xquery") is False
     assert tester.command.option("javascript") is False

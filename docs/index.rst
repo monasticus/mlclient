@@ -155,6 +155,7 @@ Create a local environment configuration, then run commands against it:
     ml env init local
     ml env show local
     ml health
+    ml log-level
     ml version
     ml eval -x "xdmp:database() => xdmp:database-name()"
     ml http get /v1/documents uri=/doc.xml
@@ -167,8 +168,11 @@ The HTTP example reads an existing document. Run ``ml <command> --help`` for
 available options.
 
 For ``ml logs``, ``-s 8002`` selects the App Server port whose logs you want to read.
-For ``ml http``, ``ml eval``, and ``ml version``, ``-s rest`` instead selects a server
-identifier from the environment configuration.
+For ``ml http``, ``ml eval``, ``ml version``, and ``ml log-level``, ``-c rest`` instead selects a server
+identifier from the environment configuration or a TCP port.
+
+``logs -s`` also accepts an identifier from the environment configuration.
+``log-level -s`` takes the actual App Server name in MarkLogic.
 
 See :doc:`user/cli` for the full CLI reference.
 

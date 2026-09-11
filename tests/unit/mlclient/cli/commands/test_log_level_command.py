@@ -69,16 +69,17 @@ def test_command_log_level_shows_group_system_level():
     assert tester.io.fetch_output() == "Group: Analyzer\nSystem Log Level: debug\n"
 
 
+@pytest.mark.parametrize("connection", ["content", "8100"])
 @respx.mock
-def test_command_log_level_shows_app_server_line_when_server_targeted():
+def test_command_log_level_shows_app_server_line_when_server_targeted(connection):
     ml_mocker = MLRespXMocker(use_router=False)
-    ml_mocker.with_url("http://localhost:8002/v1/eval")
+    ml_mocker.with_url("http://localhost:8100/v1/eval")
     ml_mocker.with_response_code(200)
     ml_mocker.with_response_body_part("string", "warning")
     ml_mocker.mock_post()
 
     tester = _get_tester()
-    status = tester.execute("-e test --server App-Services")
+    status = tester.execute(f"-e test -c {connection} -s App-Services")
 
     assert status == 0
     assert tester.io.fetch_output() == (

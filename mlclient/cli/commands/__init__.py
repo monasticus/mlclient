@@ -52,6 +52,7 @@ __all__ = [
     "EvalCommand",
     "HealthCommand",
     "HttpCommand",
+    "LogLevelCommand",
     "LogsCommand",
     "LogLevelCommand",
     "VersionCommand",

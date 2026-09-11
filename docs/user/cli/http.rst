@@ -16,7 +16,7 @@ http
 
     Options:
       -e, --environment=ENVIRONMENT  The ML Client environment name [default: "local"]
-      -s, --rest-server=REST-SERVER  The ML REST Server environmental id
+      -c, --connection=CONNECTION  Connection identifier from the environment or TCP port
       -b, --body=BODY                Request body: a raw string, a file path, or @file-path
       -i, --include                  Include the status line and response headers in the output
       -p, --pretty                   Pretty-print an XML or JSON body with a 2-space indent
@@ -84,7 +84,7 @@ delete a document
 Request and response handling
 -----------------------------
 
-``-s`` selects an App Server identifier from the environment, including
+``-c`` selects an App Server identifier from the environment, including
 ``manage`` or ``admin``. Without it, the default REST App Server is used;
 endpoint paths do not automatically select a port. Paths may include a query
 string; additional ``key=value`` tokens are appended. Repeat a query key to
@@ -92,7 +92,7 @@ send all values. Header names are case-insensitive; the last value wins.
 
 .. code-block:: bash
 
-    ml http -s manage get /manage/v2/hosts view=status format=json
+    ml http -c manage get /manage/v2/hosts view=status format=json
     ml http get /v1/documents uri=/one.xml uri=/two.xml
     ml http -p get /v1/documents uri=/doc.json Accept:application/json
 
@@ -106,3 +106,7 @@ response text. The status line reflects the actual HTTP protocol version.
 Responses are printed before reporting a 4xx/5xx error with a nonzero exit code.
 Redirect responses are displayed without following them and do not count as
 HTTP errors.
+
+``-c / --connection`` accepts an environment connection identifier or a TCP
+port (1-65535). A port overrides the default REST connection port, retaining
+its other settings. Omit it to use the default REST connection.

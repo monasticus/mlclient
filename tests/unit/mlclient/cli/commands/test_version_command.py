@@ -54,7 +54,7 @@ def test_command_version_prints_complete_version(version):
     assert status == 0
     assert tester.io.fetch_output() == f"{version}\n"
     assert tester.command.option("environment") == "test"
-    assert tester.command.option("rest-server") is None
+    assert tester.command.option("connection") is None
 
 
 @respx.mock
@@ -73,8 +73,9 @@ def test_command_version_defaults_to_local_environment():
     assert tester.io.fetch_output() == "12.0.1\n"
 
 
+@pytest.mark.parametrize("connection", ["content", "8100"])
 @respx.mock
-def test_command_version_uses_custom_rest_server():
+def test_command_version_uses_custom_rest_server(connection):
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url("http://localhost:8100/v1/eval")
     ml_mocker.with_response_code(200)
@@ -82,10 +83,10 @@ def test_command_version_uses_custom_rest_server():
     ml_mocker.mock_post()
 
     tester = _get_tester()
-    status = tester.execute("-e test -s content")
+    status = tester.execute(f"-e test -c {connection}")
 
     assert status == 0
-    assert tester.command.option("rest-server") == "content"
+    assert tester.command.option("connection") == connection
     assert tester.io.fetch_output() == "12.0.1\n"
 
 

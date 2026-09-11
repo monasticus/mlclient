@@ -14,6 +14,7 @@ from cleo.io.inputs.option import Option
 from cleo.io.outputs.output import Type
 
 from mlclient import MLClientManager
+from mlclient.cli.connection import get_client
 from mlclient.exceptions import WrongParametersError
 
 
@@ -30,8 +31,8 @@ class EvalCommand(Command):
     Options:
       -e, --environment=ENVIRONMENT
             The ML Client environment name [default: "local"]
-      -s, --rest-server=REST-SERVER
-            The ML REST Server environmental id
+      -c, --connection=CONNECTION
+            Connection identifier from the environment or TCP port
           --var=VAR
             A variable to be used in the code (multiple values allowed)
       -x, --xquery
@@ -61,9 +62,9 @@ class EvalCommand(Command):
             default="local",
         ),
         option(
-            "rest-server",
-            "s",
-            description="The ML REST Server environmental id",
+            "connection",
+            "c",
+            description="Connection identifier from the environment or TCP port",
             flag=False,
         ),
         option(
@@ -145,9 +146,9 @@ class EvalCommand(Command):
     ):
         """Evaluate the code and get results."""
         env = self.option("environment")
-        rest_server = self.option("rest-server")
+        rest_server = self.option("connection")
 
         mgr = MLClientManager(env)
-        with mgr.get_client(rest_server) as ml:
+        with get_client(mgr, rest_server) as ml:
             self.info(f"Evaluating code using REST App-Server {ml.http.base_url}")
             return ml.eval.execute(**eval_params)

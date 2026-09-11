@@ -14,7 +14,7 @@ eval
 
     Options:
       -e, --environment=ENVIRONMENT  The ML Client environment name [default: "local"]
-      -s, --rest-server=REST-SERVER  The ML REST Server environmental id
+      -c, --connection=CONNECTION  Connection identifier from the environment or TCP port
           --var=VAR                  A variable to be used in the code (multiple values allowed)
       -x, --xquery                   If set, the code will be treated as raw xquery
       -j, --javascript               If set, the code will be treated as raw javascript
@@ -35,11 +35,11 @@ Evaluate code from a file
 
 .. code-block:: bash
 
-    ml eval -s app-services ./xqy-code-to-eval.xqy
+    ml eval -c app-services ./xqy-code-to-eval.xqy
 
 .. code-block:: bash
 
-    ml eval -s app-services ./js-code-to-eval.js
+    ml eval -c app-services ./js-code-to-eval.js
 
 
 Evaluate raw xquery code
@@ -47,7 +47,7 @@ Evaluate raw xquery code
 
 .. code-block:: bash
 
-    ml eval -s app-services -x 'fn:current-dateTime()'
+    ml eval -c app-services -x 'fn:current-dateTime()'
 
 
 Evaluate raw javascript code
@@ -55,7 +55,7 @@ Evaluate raw javascript code
 
 .. code-block:: bash
 
-    ml eval -s app-services -j 'fn.currentDateTime()'
+    ml eval -c app-services -j 'fn.currentDateTime()'
 
 
 Evaluate code with variables
@@ -63,11 +63,11 @@ Evaluate code with variables
 
 .. code-block:: bash
 
-    ml eval -s app-services -var DAYS=5 ./xqy-code-to-eval.xqy
+    ml eval -c app-services -var DAYS=5 ./xqy-code-to-eval.xqy
 
 .. code-block:: bash
 
-    ml eval -s app-services -x --var DAYS=5 '
+    ml eval -c app-services -x --var DAYS=5 '
     > declare variable $DAYS external;
     >
     > fn:current-dateTime() - xs:dayTimeDuration("P" || $DAYS || "D")'
@@ -75,7 +75,7 @@ Evaluate code with variables
 
 .. code-block:: bash
 
-    ml eval -s app-services -j --var days=5 '
+    ml eval -c app-services -j --var days=5 '
     > fn.currentDateTime().subtract(xs.dayTimeDuration(`P${days}D`))'
 
 
@@ -85,7 +85,7 @@ Evaluate code with variables within a namespace
 .. code-block:: bash
 
     ml eval \
-    > -s app-services \
+    > -c app-services \
     > -x \
     > --var {http://www.w3.org/2005/xquery-local-functions}DAYS=5 '
     > declare variable $local:DAYS external;
@@ -98,4 +98,8 @@ Evaluate code on a custom database
 
 .. code-block:: bash
 
-    ml eval -s app-services -d Security ./xqy-code-to-eval.xqy
+    ml eval -c app-services -d Security ./xqy-code-to-eval.xqy
+
+``-c / --connection`` accepts an environment connection identifier or a TCP
+port (1-65535). A port overrides the default REST connection port, retaining
+its other settings. Omit it to use the default REST connection.

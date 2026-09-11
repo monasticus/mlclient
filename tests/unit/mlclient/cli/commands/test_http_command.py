@@ -64,7 +64,7 @@ def test_command_http_get_writes_response_body():
     assert tester.command.argument("endpoint") == "/manage/v2/hosts"
     assert tester.command.argument("params") == []
     assert tester.command.option("environment") == "test"
-    assert tester.command.option("rest-server") is None
+    assert tester.command.option("connection") is None
     assert command_output == '{"host-default-list": {}}\n'
 
 
@@ -132,9 +132,9 @@ def test_command_http_custom_rest_server():
     ml_mocker.mock_get()
 
     tester = _get_tester()
-    tester.execute("-e test -s manage GET /manage/v2/hosts")
+    tester.execute("-e test -c manage GET /manage/v2/hosts")
 
-    assert tester.command.option("rest-server") == "manage"
+    assert tester.command.option("connection") == "manage"
 
 
 @respx.mock

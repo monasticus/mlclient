@@ -28,8 +28,8 @@ class LogsCommand(Command):
     Options:
       -e, --environment=ENVIRONMENT
             The ML Client environment name [default: "local"]
-      -s, --app-server=APP-PORT
-            The App-Server (port) to get logs of
+      -s, --server=APP-PORT
+            App Server identifier from the environment or port to read logs for
       -l, --log-type=LOG-TYPE
             MarkLogic log type (error, access or request) [default: "error"]
       -f, --from=FROM
@@ -55,9 +55,9 @@ class LogsCommand(Command):
             default="local",
         ),
         option(
-            "app-server",
+            "server",
             "s",
-            description="The App-Server (port) to get logs of",
+            description="App Server identifier from the environment or port",
             flag=False,
         ),
         option(
@@ -273,21 +273,12 @@ class LogsCommand(Command):
     ) -> int | str:
         """Identify app port to be used."""
         env = self.option("environment")
-        app_port = self.option("app-server")
+        app_port = self.option("server")
         mgr = MLClientManager(env)
-        if app_port == "0":
+        if app_port in {"0", "TaskServer"}:
             app_port = "TaskServer"
         elif app_port is not None and not app_port.isnumeric():
-            named_app_port = next(
-                (
-                    app_server.port
-                    for app_server in mgr.config.app_servers
-                    if app_server.identifier == app_port
-                ),
-                None,
-            )
-            if named_app_port is not None:
-                app_port = named_app_port
+            app_port = mgr.get_config(app_port).port
         return app_port
 
 

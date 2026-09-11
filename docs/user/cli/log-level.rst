@@ -14,10 +14,10 @@ log-level
 
     Options:
       -e, --environment=ENVIRONMENT  The ML Client environment name [default: "local"]
-      -s, --rest-server=REST-SERVER  The ML REST Server environmental id
+      -c, --connection=CONNECTION  Connection identifier from the environment or TCP port
           --type=TYPE                The log type: file or system [default: "file"]
           --group=GROUP              The group to target [default: "Default"]
-          --server=SERVER            The App Server to target (file log level only)
+      -s, --server=SERVER            The App Server to target (file log level only)
 
       -h, --help                     Display help for the given command. When no command is given display help for the list command.
       -q, --quiet                    Do not output any message.
@@ -41,7 +41,7 @@ without retrying through Management REST.
 
 .. caution::
 
-    The REST App-Server the command connects to (``-s``, ``--rest-server``) is
+    The REST App-Server the command connects to (``-c``, ``--connection``) is
     distinct from the App Server whose log level is shown or set
     (``--server``). App Servers have no system log level, so ``--server`` may
     only be combined with ``--type file``.
@@ -54,7 +54,7 @@ The group file log level is shown by default:
 
 .. code-block:: bash
 
-    ml log-level -e local
+    ml log-level
 
 .. code-block:: none
 
@@ -65,8 +65,8 @@ Target a group's system log level, or a specific App Server's file log level:
 
 .. code-block:: bash
 
-    ml log-level -e local --type system --group Analyzer
-    ml log-level -e local --server App-Services
+    ml log-level --type system --group Analyzer
+    ml log-level --server App-Services
 
 
 Set a log level
@@ -76,9 +76,13 @@ Pass the new level as the argument:
 
 .. code-block:: bash
 
-    ml log-level -e local debug
-    ml log-level -e local --server App-Services warning
+    ml log-level debug
+    ml log-level --server App-Services warning
 
 The supported levels are: ``finest``, ``finer``, ``fine``, ``debug``,
 ``config``, ``info``, ``notice``, ``warning``, ``error``, ``critical``,
 ``alert``, ``emergency``.
+
+``-c / --connection`` accepts an environment connection identifier or a TCP
+port (1-65535). A port overrides the default REST connection port, retaining
+its other settings. Omit it to use the default REST connection.

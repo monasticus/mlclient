@@ -11,7 +11,7 @@ logs
 
     Options:
       -e, --environment=ENVIRONMENT  The ML Client environment name [default: "local"]
-      -s, --app-server=APP-SERVER    The App-Server (port) to get logs of
+      -s, --server=APP-SERVER    The App-Server (port) to get logs of
       -l, --log-type=LOG-TYPE        MarkLogic log type (error, access or request) [default: "error"]
       -f, --from=FROM                A start time to search error logs
       -t, --to=TO                    n end time to search error logs
@@ -131,3 +131,8 @@ RegEx
 .. code-block:: bash
 
     ml logs -s 8002 -f 2024-02-01 -t 2024-02-03 -r 'Memory [^1]{1,2}%'
+
+``-s / --server`` accepts an App Server identifier from the environment
+configuration or a port. Identifiers resolve to their configured port; unknown
+identifiers are rejected. ``0`` and ``TaskServer`` select Task Server logs.
+This selects the logs to read, not the connection used for the request.

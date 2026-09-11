@@ -19,6 +19,7 @@ if TYPE_CHECKING:
 
 from .databases import AsyncDatabasesApi, DatabasesApi
 from .forests import AsyncForestsApi, ForestsApi
+from .groups import AsyncGroupsApi, GroupsApi
 from .logs import AsyncLogsApi, LogsApi
 from .roles import AsyncRolesApi, RolesApi
 from .servers import AsyncServersApi, ServersApi
@@ -69,6 +70,11 @@ class ManageApi:
     def forests(self) -> ForestsApi:
         """Return the forests API group."""
         return ForestsApi(self._api)
+
+    @cached_property
+    def groups(self) -> GroupsApi:
+        """Return the groups API group."""
+        return GroupsApi(self._api)
 
     @cached_property
     def logs(self) -> LogsApi:
@@ -132,6 +138,11 @@ class AsyncManageApi:
     def forests(self) -> AsyncForestsApi:
         """Return the forests API group."""
         return AsyncForestsApi(self._api)
+
+    @cached_property
+    def groups(self) -> AsyncGroupsApi:
+        """Return the groups API group."""
+        return AsyncGroupsApi(self._api)
 
     @cached_property
     def logs(self) -> AsyncLogsApi:

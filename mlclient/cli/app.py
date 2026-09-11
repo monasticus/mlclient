@@ -30,6 +30,7 @@ from mlclient.cli.commands import (
     HealthCommand,
     HttpCommand,
     LogsCommand,
+    LogLevelCommand,
     VersionCommand,
 )
 
@@ -52,6 +53,7 @@ class MLCLIentApplication(Application):
         self.add(EnvInitCommand())
         self.add(EnvShowCommand())
         self.add(HealthCommand())
+        self.add(LogLevelCommand())
         self.add(VersionCommand())
 
     def create_io(

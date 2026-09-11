@@ -26,6 +26,7 @@ MLClient provides you a nice command line interface using `cleo <https://github.
       http       Sends a raw HTTP request to any REST endpoint
       list       Lists commands.
       logs       Sends a GET request to the /manage/v2/logs endpoint
+      log-level  Shows or sets a MarkLogic file/system log level
       version    Reports the MarkLogic version of an environment
 
      env
@@ -46,6 +47,7 @@ The former ``call eval`` and ``call logs`` commands are now ``eval`` and
    cli/logs
    cli/http
    cli/health
+   cli/log-level
    cli/version
    cli/env
 

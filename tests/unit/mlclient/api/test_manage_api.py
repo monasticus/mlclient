@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import httpx
+import pytest
 import respx
 
 from mlclient import MLClient
@@ -349,6 +350,99 @@ def test_put_server_properties():
 
     assert resp.status_code == httpx.codes.NOT_FOUND
     assert resp.json()["errorResponse"]["messageCode"] == "XDMP-NOSUCHGROUP"
+
+
+@respx.mock
+def test_get_group_properties():
+    response_body_path = resources_utils.get_test_resource_path(
+        __file__,
+        "test-get-group-properties.json",
+    )
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(
+        "http://localhost:8002/manage/v2/groups/Default/properties",
+    )
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body(Path(response_body_path).read_bytes())
+    ml_mocker.mock_get()
+
+    with MLClient() as ml:
+        resp = ml.manage.groups.get_properties("Default", data_format="json")
+
+    assert resp.status_code == httpx.codes.OK
+    assert resp.json()["group-name"] == "Default"
+
+
+@pytest.mark.parametrize("timeout", [None, 2, httpx.Timeout(5, read=7)])
+@respx.mock
+def test_get_group_properties_forwards_timeout(timeout):
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/manage/v2/groups/Default/properties")
+    ml_mocker.with_request_param("format", "xml")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body("<group-properties/>")
+    route = ml_mocker.mock_get()
+
+    with MLClient() as ml:
+        ml.manage.groups.get_properties("Default", timeout=timeout)
+
+    assert (
+        route.calls.last.request.extensions["timeout"]
+        == httpx.Timeout(timeout).as_dict()
+    )
+
+
+@respx.mock
+def test_put_group_properties():
+    response_body_path = resources_utils.get_test_resource_path(
+        __file__,
+        "test-put-group-properties.json",
+    )
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(
+        "http://localhost:8002/manage/v2/groups/non-existing-group/properties",
+    )
+    ml_mocker.with_request_content_type("application/json")
+    ml_mocker.with_request_body({"file-log-level": "debug"})
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_response_code(404)
+    ml_mocker.with_response_body(Path(response_body_path).read_bytes())
+    ml_mocker.mock_put()
+
+    with MLClient() as ml:
+        resp = ml.manage.groups.put_properties(
+            "non-existing-group",
+            {"file-log-level": "debug"},
+        )
+
+    assert resp.status_code == httpx.codes.NOT_FOUND
+    assert resp.json()["errorResponse"]["messageCode"] == "XDMP-NOSUCHGROUP"
+
+
+@pytest.mark.parametrize("timeout", [None, 2, httpx.Timeout(5, read=7)])
+@respx.mock
+def test_put_group_properties_forwards_timeout(timeout):
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/manage/v2/groups/Default/properties")
+    ml_mocker.with_request_content_type("application/json")
+    ml_mocker.with_request_body({"file-log-level": "info"})
+    ml_mocker.with_response_code(204)
+    ml_mocker.with_empty_response_body()
+    route = ml_mocker.mock_put()
+
+    with MLClient() as ml:
+        ml.manage.groups.put_properties(
+            "Default",
+            {"file-log-level": "info"},
+            timeout=timeout,
+        )
+
+    assert (
+        route.calls.last.request.extensions["timeout"]
+        == httpx.Timeout(timeout).as_dict()
+    )
 
 
 @respx.mock

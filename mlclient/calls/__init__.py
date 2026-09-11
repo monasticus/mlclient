@@ -20,6 +20,8 @@ This package exports the following modules:
         The ML Eval Api Call module.
     * forests
         The ML Forest Api Calls module.
+    * groups
+        The ML Group Api Calls module.
     * logs
         The ML Logs Api Call module.
     * roles
@@ -76,6 +78,10 @@ This package exports the following classes:
         A POST request to create a new forest.
     * ForestsPutCall
         A PUT request to perform an operation on forests.
+    * GroupPropertiesGetCall
+        A GET request to get group properties.
+    * GroupPropertiesPutCall
+        A PUT request to modify group properties.
     * LogsCall
         A GET request to retrieve logs.
     * RoleGetCall
@@ -149,6 +155,7 @@ from .forests import (
     ForestsPostCall,
     ForestsPutCall,
 )
+from .groups import GroupPropertiesGetCall, GroupPropertiesPutCall
 from .logs import LogsCall
 from .roles import (
     RoleDeleteCall,
@@ -201,6 +208,8 @@ __all__ = [
     "ForestsGetCall",
     "ForestsPostCall",
     "ForestsPutCall",
+    "GroupPropertiesGetCall",
+    "GroupPropertiesPutCall",
     "LogsCall",
     "RoleDeleteCall",
     "RoleGetCall",

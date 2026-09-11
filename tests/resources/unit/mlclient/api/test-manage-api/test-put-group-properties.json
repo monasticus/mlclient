@@ -1,0 +1,1 @@
+{"errorResponse":{"statusCode":"404", "status":"Not Found", "messageCode":"XDMP-NOSUCHGROUP", "message":"XDMP-NOSUCHGROUP: xdmp:group(\"non-existing-group\") -- No such group non-existing-group"}}

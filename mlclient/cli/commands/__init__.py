@@ -13,6 +13,8 @@ It contains all CLI commands modules:
         The Env Show Command module.
     * health
         The Health Command module.
+    * log_level
+        The Log Level Command module.
     * version
         The Version Command module.
 
@@ -29,6 +31,8 @@ It exports the following commands:
         Lists MLClient environments, or renders one environment's settings.
     * HealthCommand
         Reports whether a MarkLogic environment's HealthCheck server is up.
+    * LogLevelCommand
+        Shows or sets a MarkLogic file/system log level.
     * VersionCommand
         Reports the MarkLogic version of an environment.
 """
@@ -39,6 +43,7 @@ from .eval import EvalCommand
 from .health import HealthCommand
 from .http import HttpCommand
 from .logs import LogsCommand
+from .log_level import LogLevelCommand
 from .version import VersionCommand
 
 __all__ = [
@@ -48,5 +53,6 @@ __all__ = [
     "HealthCommand",
     "HttpCommand",
     "LogsCommand",
+    "LogLevelCommand",
     "VersionCommand",
 ]

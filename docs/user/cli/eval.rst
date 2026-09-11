@@ -4,7 +4,7 @@ eval
 .. code-block:: none
 
     Description:
-      Sends a GET request to the /v1/eval endpoint
+      Sends a POST request to the /v1/eval endpoint
 
     Usage:
       eval [options] [--] <code>

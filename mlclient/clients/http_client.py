@@ -150,7 +150,7 @@ class HttpClientBase:
         self,
         params: dict | None = None,
         headers: dict | None = None,
-        body: str | dict | None = None,
+        body: str | bytes | dict | None = None,
     ) -> dict:
         """Prepare request details."""
         request = {
@@ -159,9 +159,9 @@ class HttpClientBase:
             "auth": self.config.auth,
         }
         if body is not None:
-            content_type = (headers or {}).get(const.HEADER_NAME_CONTENT_TYPE)
+            content_type = httpx.Headers(headers).get(const.HEADER_NAME_CONTENT_TYPE)
             doc_type = Mimetypes.get_doc_type(content_type) if content_type else None
-            if doc_type == DocumentType.JSON:
+            if doc_type == DocumentType.JSON and not isinstance(body, (str, bytes)):
                 request["json"] = body
             elif isinstance(body, Mapping):
                 request["data"] = body
@@ -187,7 +187,7 @@ class HttpClientBase:
     ):
         """Log response details and restart warning, if applicable."""
         logger.debug("Response retrieved")
-        logger.fine(cls._format_http_response(response))
+        logger.fine(cls.format_http_response(response))
 
         if RestartWaiter.is_restart_response(response):
             logger.warning(
@@ -200,15 +200,31 @@ class HttpClientBase:
             )
 
     @staticmethod
-    def _format_http_response(
+    def format_http_response(
         response: Response,
+        body: str | None = None,
     ) -> str:
-        """Format an HTTP response in a protocol-like representation."""
-        reason_phrase = httpx.codes.get_reason_phrase(response.status_code)
-        start_line = f"HTTP/1.1 {response.status_code} {reason_phrase}"
+        """Format the actual status line, headers and optional response text.
+
+        Parameters
+        ----------
+        response : Response
+            HTTP response whose protocol version and reason phrase are preserved
+        body : str | None
+            Replacement body text; None uses the response's decoded text
+
+        Returns
+        -------
+        str
+            Status line and headers, followed by a nonempty body
+        """
+        body = response.text if body is None else body
+        start_line = (
+            f"{response.http_version} {response.status_code} {response.reason_phrase}"
+        )
         headers = "\n".join(f"{name}: {val}" for name, val in response.headers.items())
-        if response.text:
-            return f"{start_line}\n{headers}\n\n{response.text}"
+        if body:
+            return f"{start_line}\n{headers}\n\n{body}"
         return f"{start_line}\n{headers}"
 
     def _build_url(self, endpoint: str) -> str:
@@ -394,7 +410,7 @@ class HttpClient(HttpClientBase):
     def post(
         self,
         endpoint: str,
-        body: str | dict | None = None,
+        body: str | bytes | dict | None = None,
         *,
         params: dict | None = None,
         headers: dict | None = None,
@@ -406,7 +422,7 @@ class HttpClient(HttpClientBase):
         ----------
         endpoint : str
             A REST endpoint to call
-        body : str | dict | None
+        body : str | bytes | dict | None
             A request body
         params : dict | None
             Request parameters
@@ -441,7 +457,7 @@ class HttpClient(HttpClientBase):
     def put(
         self,
         endpoint: str,
-        body: str | dict | None = None,
+        body: str | bytes | dict | None = None,
         *,
         params: dict | None = None,
         headers: dict | None = None,
@@ -453,7 +469,7 @@ class HttpClient(HttpClientBase):
         ----------
         endpoint : str
             A REST endpoint to call
-        body : str | dict | None
+        body : str | bytes | dict | None
             A request body
         params : dict | None
             Request parameters
@@ -532,7 +548,7 @@ class HttpClient(HttpClientBase):
         self,
         method: str,
         endpoint: str,
-        body: str | dict | None = None,
+        body: str | bytes | dict | None = None,
         *,
         params: dict | None = None,
         headers: dict | None = None,
@@ -546,7 +562,7 @@ class HttpClient(HttpClientBase):
             An HTTP request method
         endpoint : str
             A REST endpoint to call
-        body : str | dict | None
+        body : str | bytes | dict | None
             A request body
         params : dict | None
             Request parameters
@@ -783,7 +799,7 @@ class AsyncHttpClient(HttpClientBase):
     async def post(
         self,
         endpoint: str,
-        body: str | dict | None = None,
+        body: str | bytes | dict | None = None,
         *,
         params: dict | None = None,
         headers: dict | None = None,
@@ -795,7 +811,7 @@ class AsyncHttpClient(HttpClientBase):
         ----------
         endpoint : str
             A REST endpoint to call
-        body : str | dict | None
+        body : str | bytes | dict | None
             A request body
         params : dict | None
             Request parameters
@@ -830,7 +846,7 @@ class AsyncHttpClient(HttpClientBase):
     async def put(
         self,
         endpoint: str,
-        body: str | dict | None = None,
+        body: str | bytes | dict | None = None,
         *,
         params: dict | None = None,
         headers: dict | None = None,
@@ -842,7 +858,7 @@ class AsyncHttpClient(HttpClientBase):
         ----------
         endpoint : str
             A REST endpoint to call
-        body : str | dict | None
+        body : str | bytes | dict | None
             A request body
         params : dict | None
             Request parameters
@@ -921,7 +937,7 @@ class AsyncHttpClient(HttpClientBase):
         self,
         method: str,
         endpoint: str,
-        body: str | dict | None = None,
+        body: str | bytes | dict | None = None,
         *,
         params: dict | None = None,
         headers: dict | None = None,
@@ -935,7 +951,7 @@ class AsyncHttpClient(HttpClientBase):
             An HTTP request method
         endpoint : str
             A REST endpoint to call
-        body : str | dict | None
+        body : str | bytes | dict | None
             A request body
         params : dict | None
             Request parameters

@@ -20,9 +20,10 @@ MLClient provides you a nice command line interface using `cleo <https://github.
       -v|vv|vvv, --verbose  Increase the verbosity of messages: 1 for normal output, 2 for more verbose output and 3 for debug.
 
     Available commands:
-      eval       Sends a GET request to the /v1/eval endpoint
+      eval       Sends a POST request to the /v1/eval endpoint
       health     Reports whether a MarkLogic environment's HealthCheck server is up
       help       Displays help for a command.
+      http       Sends a raw HTTP request to any REST endpoint
       list       Lists commands.
       logs       Sends a GET request to the /manage/v2/logs endpoint
       version    Reports the MarkLogic version of an environment
@@ -30,6 +31,9 @@ MLClient provides you a nice command line interface using `cleo <https://github.
      env
       env init   Scaffolds an MLClient environment configuration file
       env show   Lists MLClient environments, or renders one environment's settings
+
+The former ``call eval`` and ``call logs`` commands are now ``eval`` and
+``logs``. Use ``http`` for raw requests to other REST endpoints.
 
 .. caution::
 
@@ -40,6 +44,7 @@ MLClient provides you a nice command line interface using `cleo <https://github.
 
    cli/eval
    cli/logs
+   cli/http
    cli/health
    cli/version
    cli/env

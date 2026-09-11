@@ -194,6 +194,25 @@ def test_post_with_customized_params_and_headers_and_json_body():
     assert resp.headers.get("Content-Type") == "application/json; charset=UTF-8"
 
 
+@pytest.mark.parametrize("body", ['{"value": 1}', b'{"value": 1}'])
+@respx.mock
+def test_post_preserves_raw_json_body(body):
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8000/v1/documents")
+    ml_mocker.with_request_body(b'{"value": 1}')
+    ml_mocker.with_response_code(204)
+    ml_mocker.with_empty_response_body()
+    ml_mocker.mock_post()
+
+    with HttpClient() as client:
+        response = client.post(
+            "/v1/documents", body=body,
+            headers={"content-type": "application/json"},
+        )
+    assert response.status_code == 204
+
+
+
 @respx.mock
 def test_post_does_not_follow_created_resource_redirect():
     ml_mocker = MLRespXMocker(use_router=False)
@@ -628,3 +647,16 @@ def test_unset_per_request_uses_config_default():
         "write": 60.0,
         "pool": 5.0,
     }
+
+
+def test_format_http_response_preserves_protocol_and_reason():
+    response = httpx.Response(
+        200,
+        content=b"body",
+        extensions={"http_version": b"HTTP/2", "reason_phrase": b"Custom reason"},
+    )
+
+    formatted = HttpClient.format_http_response(response)
+
+    assert formatted.startswith("HTTP/2 200 Custom reason\n")
+    assert formatted.endswith("\n\nbody")

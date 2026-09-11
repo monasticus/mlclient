@@ -1596,3 +1596,12 @@ Numeric components have no universal major/minor/patch/hotfix labels because
 MarkLogic's versioning scheme changed between releases. Textual suffixes are
 preserved by ``str(version)`` and excluded from ``parts``. An invalid eval
 version raises ``ValueError``.
+
+
+Raw HTTP request bodies
+-----------------------
+
+For ``ml.http.request`` and its convenience methods (also on the asynchronous
+client), strings and bytes are sent as raw content even with a JSON content
+type. Dictionaries are JSON-encoded when the content type is JSON; otherwise
+they are submitted as form data. Header names are case-insensitive.

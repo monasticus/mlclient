@@ -28,6 +28,7 @@ from mlclient.cli.commands import (
     EnvShowCommand,
     EvalCommand,
     HealthCommand,
+    HttpCommand,
     LogsCommand,
     VersionCommand,
 )
@@ -47,6 +48,7 @@ class MLCLIentApplication(Application):
         self.set_display_name(self._DISPLAY_NAME)
         self.add(LogsCommand())
         self.add(EvalCommand())
+        self.add(HttpCommand())
         self.add(EnvInitCommand())
         self.add(EnvShowCommand())
         self.add(HealthCommand())

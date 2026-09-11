@@ -227,6 +227,26 @@ async def test_post_with_customized_params_and_headers_and_json_body():
 
 
 @pytest.mark.asyncio
+@pytest.mark.parametrize("body", ['{"value": 1}', b'{"value": 1}'])
+@respx.mock
+async def test_post_preserves_raw_json_body(body):
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8000/v1/documents")
+    ml_mocker.with_request_body(b'{"value": 1}')
+    ml_mocker.with_response_code(204)
+    ml_mocker.with_empty_response_body()
+    ml_mocker.mock_post()
+
+    async with AsyncHttpClient() as client:
+        response = await client.post(
+            "/v1/documents", body=body,
+            headers={"content-type": "application/json"},
+        )
+    assert response.status_code == 204
+
+
+
+@pytest.mark.asyncio
 @respx.mock
 async def test_put():
     ml_mocker = MLRespXMocker(use_router=False)

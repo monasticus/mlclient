@@ -1,5 +1,5 @@
-call logs
-=========
+logs
+====
 
 .. code-block:: none
 
@@ -7,7 +7,7 @@ call logs
       Sends a GET request to the /manage/v2/logs endpoint
 
     Usage:
-      call logs [options]
+      logs [options]
 
     Options:
       -e, --environment=ENVIRONMENT  The ML Client environment name [default: "local"]
@@ -33,7 +33,7 @@ List log file names
 
 .. code-block:: bash
 
-    ml call logs --list
+    ml logs --list
 
 
 Get all logs
@@ -43,43 +43,43 @@ Get all logs
 
 .. code-block:: bash
 
-    ml call logs -s 8002
+    ml logs -s 8002
 
 *8002_ErrorLog.txt*
 
 .. code-block:: bash
 
-    ml call logs -s 8002 -l error
+    ml logs -s 8002 -l error
 
 *8002_AccessLog.txt*
 
 .. code-block:: bash
 
-    ml call logs -s 8002 -l access
+    ml logs -s 8002 -l access
 
 *8002_RequestLog.txt*
 
 .. code-block:: bash
 
-    ml call logs -s 8002 -l request
+    ml logs -s 8002 -l request
 
 *ErrorLog.txt*
 
 .. code-block:: bash
 
-    ml call logs
+    ml logs
 
 *TaskServer_ErrorLog.txt*
 
 .. code-block:: bash
 
-    ml call logs -s TaskServer
+    ml logs -s TaskServer
 
 *TaskServer_ErrorLog.txt*
 
 .. code-block:: bash
 
-    ml call logs -s 0
+    ml logs -s 0
 
 
 Get limited logs
@@ -94,23 +94,23 @@ Time frames
 
 .. code-block:: bash
 
-    ml call logs -s 8002 -f 10:00
+    ml logs -s 8002 -f 10:00
 
 .. code-block:: bash
 
-    ml call logs -s 8002 -t 12:00
+    ml logs -s 8002 -t 12:00
 
 .. code-block:: bash
 
-    ml call logs -s 8002 -f 10:00 -t 12:00
+    ml logs -s 8002 -f 10:00 -t 12:00
 
 .. code-block:: bash
 
-    ml call logs -s 8002 -f 2024-02-01 -t 2024-02-03
+    ml logs -s 8002 -f 2024-02-01 -t 2024-02-03
 
 .. code-block:: bash
 
-    ml call logs -s 8002 -f '2024-02-01 10:00' -t 2024-02-03
+    ml logs -s 8002 -f '2024-02-01 10:00' -t 2024-02-03
 
 
 RegEx
@@ -118,16 +118,16 @@ RegEx
 
 .. code-block:: bash
 
-    ml call logs -s 8002 -r 'Forest Meters'
+    ml logs -s 8002 -r 'Forest Meters'
 
 .. code-block:: bash
 
-    ml call logs -s 8002 -r 'Forest M.*'
+    ml logs -s 8002 -r 'Forest M.*'
 
 .. code-block:: bash
 
-    ml call logs -s 8002 -r 'Memory [^1]{1,2}%'
+    ml logs -s 8002 -r 'Memory [^1]{1,2}%'
 
 .. code-block:: bash
 
-    ml call logs -s 8002 -f 2024-02-01 -t 2024-02-03 -r 'Memory [^1]{1,2}%'
+    ml logs -s 8002 -f 2024-02-01 -t 2024-02-03 -r 'Memory [^1]{1,2}%'

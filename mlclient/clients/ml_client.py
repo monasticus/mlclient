@@ -769,10 +769,11 @@ class AsyncMLClient:
     ) -> AsyncTransactionService:
         """Open a multi-statement transaction and return a service scoped to it.
 
-        Use as a context manager to commit on a clean exit and roll back on error:
+        Use as an async context manager to commit on a clean exit and roll back
+        on error:
 
-        >>> with ml.transaction(database="my-db") as txn:  # doctest: +SKIP
-        ...     ml.eval.xquery("...", **txn)
+        >>> async with await ml.transaction(database="my-db") as txn:  # doctest: +SKIP
+        ...     await ml.eval.xquery("...", **txn)
 
         ``timeout`` bounds only the HTTP request that opens the transaction:
         unset uses the client's configured timeout, None disables every HTTP

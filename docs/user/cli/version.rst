@@ -26,7 +26,8 @@ server (see :doc:`../setup`) and prints it in dotted form, e.g. ``12.0.1``.
 
 The version comes from ``xdmp:version()``. When the connecting user lacks the
 eval privilege, the Manage and Admin server-config endpoints are tried in turn;
-if none succeeds the eval error is raised.
+unavailable endpoints and malformed fallback responses are skipped. If none
+succeeds the original eval error is raised.
 
 
 Report the version
@@ -42,3 +43,7 @@ environment instead of the default:
 .. code-block:: bash
 
     ml version -e local -s content
+
+Versions such as ``10.0-9.5`` are printed as ``10.0.9``. Build and hotfix
+suffixes are excluded; a missing patch defaults to zero. An invalid eval
+version makes the command fail with an error.

@@ -48,9 +48,7 @@ class VersionCommand(Command):
         ),
     ]
 
-    def handle(
-        self,
-    ) -> int:
+    def handle(self) -> int:
         """Execute the command."""
         manager = MLClientManager(self.option("environment"))
         with manager.get_client(self.option("rest-server")) as ml:

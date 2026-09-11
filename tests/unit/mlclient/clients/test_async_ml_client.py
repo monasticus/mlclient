@@ -323,8 +323,7 @@ async def test_version_falls_back_to_admin_when_manage_forbidden():
     ml_mocker.with_response_code(200)
     ml_mocker.with_response_content_type("application/xml")
     ml_mocker.with_response_body(
-        '<host xmlns="http://marklogic.com/manage">'
-        "<version>12.0.1</version></host>",
+        '<host xmlns="http://marklogic.com/manage"><version>12.0.1</version></host>',
     )
     ml_mocker.mock_get()
 
@@ -355,6 +354,105 @@ async def test_version_reraises_eval_error_when_all_sources_fail():
     async with AsyncMLClient() as ml:
         with pytest.raises(MarkLogicError):
             await ml.version()
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    ("raw", "expected"),
+    [
+        ("12.0.1", (12, 0, 1)),
+        ("10.0-9.5", (10, 0, 9)),
+        ("12.0", (12, 0, 0)),
+        (" 12.0.1 ", (12, 0, 1)),
+    ],
+)
+@respx.mock
+async def test_version_normalizes_release_formats(raw, expected):
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8000/v1/eval")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body_part("string", raw)
+    ml_mocker.mock_post()
+
+    async with AsyncMLClient(retry=Retry(total=0)) as ml:
+        assert await ml.version() == expected
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("raw", ["unknown", "error 12.0.1", "12", ""])
+@respx.mock
+async def test_version_rejects_invalid_eval_result(raw):
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8000/v1/eval")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body_part("string", raw)
+    ml_mocker.mock_post()
+
+    async with AsyncMLClient(retry=Retry(total=0)) as ml:
+        with pytest.raises(ValueError, match="Invalid MarkLogic version"):
+            _ = await ml.version()
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "manage_body",
+    ["not json", "{}", "[]", '{"version": null}', '{"version": "unknown"}'],
+)
+@respx.mock
+async def test_version_skips_invalid_manage_response(manage_body):
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8000/v1/eval")
+    ml_mocker.with_response_code(400)
+    ml_mocker.with_response_content_type("application/json")
+    ml_mocker.with_response_body({"errorResponse": {"messageCode": "SEC-PRIV"}})
+    ml_mocker.mock_post()
+
+    ml_mocker.with_url("http://localhost:8002/manage/v2/properties")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body(manage_body)
+    ml_mocker.mock_get()
+
+    ml_mocker.with_url("http://localhost:8001/admin/v1/server-config")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body(
+        '<m:host xmlns:m="http://marklogic.com/manage"><m:version>12.0</m:version></m:host>',
+    )
+    ml_mocker.mock_get()
+
+    async with AsyncMLClient(retry=Retry(total=0)) as ml:
+        assert await ml.version() == (12, 0, 0)
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "admin_body",
+    [
+        "not xml",
+        "<host/>",
+        "<host><version/></host>",
+        "<host><version>unknown</version></host>",
+    ],
+)
+@respx.mock
+async def test_version_preserves_eval_error_when_fallbacks_unusable(admin_body):
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8000/v1/eval")
+    ml_mocker.with_response_code(400)
+    ml_mocker.with_response_content_type("application/json")
+    ml_mocker.with_response_body({"errorResponse": {"messageCode": "SEC-PRIV"}})
+    ml_mocker.mock_post()
+
+    ml_mocker.with_url("http://localhost:8002/manage/v2/properties")
+    ml_mocker.with_get_side_effect(httpx.ConnectError("Manage unavailable"))
+
+    ml_mocker.with_url("http://localhost:8001/admin/v1/server-config")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body(admin_body)
+    ml_mocker.mock_get()
+
+    async with AsyncMLClient(retry=Retry(total=0)) as ml:
+        with pytest.raises(MarkLogicError):
+            _ = await ml.version()
 
 
 @pytest.mark.asyncio

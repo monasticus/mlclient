@@ -16,10 +16,12 @@ from __future__ import annotations
 
 import logging
 import re
+from contextlib import suppress
 from functools import cached_property
 from types import TracebackType
+from xml.etree import ElementTree
 
-from httpx import Response
+from httpx import RequestError, Response
 from httpx_retries import Retry
 
 from mlclient.api.admin_api import AdminApi, AsyncAdminApi
@@ -310,7 +312,8 @@ class MLClient:
         eval privilege the query fails; the Manage and Admin server-config
         endpoints are then tried in turn. If every source fails the eval error
         is re-raised. A connection error propagates from the eval attempt --
-        nothing else on this client would work either.
+        auxiliary servers are not queried for eval transport failures.
+        Unavailable or malformed fallback responses are skipped.
 
         Returns
         -------
@@ -321,6 +324,10 @@ class MLClient:
         ------
         MarkLogicError
             If MarkLogic returns an error and no fallback source succeeds
+        RequestError
+            If the eval request fails at the HTTP transport level
+        ValueError
+            If the eval result is not a recognizable version string
         """
         try:
             return _parse_version(self.eval.xquery(_VERSION_QUERY))
@@ -331,17 +338,25 @@ class MLClient:
             raise
 
     def _version_from_secondaries(self) -> tuple[int, int, int] | None:
-        """Read the version from the Manage then the Admin server, best effort."""
-        manage = self._manage_http.get(
-            _MANAGE_PROPERTIES_ENDPOINT,
-            headers={"Accept": "application/json"},
-        )
-        if manage.is_success:
-            return _parse_version(manage.json()["version"])
-        admin = self._admin_http.get(_ADMIN_SERVER_CONFIG_ENDPOINT)
-        admin_version = _admin_config_version(admin.text) if admin.is_success else None
-        if admin_version is not None:
-            return _parse_version(admin_version)
+        """Read the version from the Manage then the Admin server.
+
+        Returns
+        -------
+        tuple[int, int, int] | None
+            The first usable version, or None when both endpoints fail.
+            HTTP errors, transport failures and malformed responses are skipped.
+        """
+        with suppress(RequestError, ValueError, KeyError, TypeError):
+            manage = self._manage_http.get(
+                _MANAGE_PROPERTIES_ENDPOINT,
+                headers={"Accept": "application/json"},
+            )
+            if manage.is_success:
+                return _parse_version(manage.json()["version"])
+        with suppress(RequestError, ValueError, ElementTree.ParseError):
+            admin = self.admin.get_server_config()
+            if admin.is_success:
+                return _parse_version(_admin_config_version(admin.text))
         return None
 
     def transaction(
@@ -621,9 +636,26 @@ class AsyncMLClient:
     async def version(self) -> tuple[int, int, int]:
         """MarkLogic version as a ``(major, minor, patch)`` tuple.
 
-        Resolved from ``xdmp:version()``, falling back to the Manage and Admin
-        server-config endpoints when the connecting user lacks the eval
-        privilege; re-raises the eval error if every source fails.
+        Resolved from ``xdmp:version()``. When the connecting user lacks the
+        eval privilege the query fails; the Manage and Admin server-config
+        endpoints are then tried in turn. If every source fails the eval error
+        is re-raised. A connection error propagates from the eval attempt --
+        auxiliary servers are not queried for eval transport failures.
+        Unavailable or malformed fallback responses are skipped.
+
+        Returns
+        -------
+        tuple[int, int, int]
+            The MarkLogic version, e.g. ``(12, 0, 1)`` for 12.0.1
+
+        Raises
+        ------
+        MarkLogicError
+            If MarkLogic returns an error and no fallback source succeeds
+        RequestError
+            If the eval request fails at the HTTP transport level
+        ValueError
+            If the eval result is not a recognizable version string
         """
         try:
             return _parse_version(await self.eval.xquery(_VERSION_QUERY))
@@ -634,17 +666,25 @@ class AsyncMLClient:
             raise
 
     async def _version_from_secondaries(self) -> tuple[int, int, int] | None:
-        """Read the version from the Manage then the Admin server, best effort."""
-        manage = await self._manage_http.get(
-            _MANAGE_PROPERTIES_ENDPOINT,
-            headers={"Accept": "application/json"},
-        )
-        if manage.is_success:
-            return _parse_version(manage.json()["version"])
-        admin = await self._admin_http.get(_ADMIN_SERVER_CONFIG_ENDPOINT)
-        admin_version = _admin_config_version(admin.text) if admin.is_success else None
-        if admin_version is not None:
-            return _parse_version(admin_version)
+        """Read the version from the Manage then the Admin server.
+
+        Returns
+        -------
+        tuple[int, int, int] | None
+            The first usable version, or None when both endpoints fail.
+            HTTP errors, transport failures and malformed responses are skipped.
+        """
+        with suppress(RequestError, ValueError, KeyError, TypeError):
+            manage = await self._manage_http.get(
+                _MANAGE_PROPERTIES_ENDPOINT,
+                headers={"Accept": "application/json"},
+            )
+            if manage.is_success:
+                return _parse_version(manage.json()["version"])
+        with suppress(RequestError, ValueError, ElementTree.ParseError):
+            admin = await self.admin.get_server_config()
+            if admin.is_success:
+                return _parse_version(_admin_config_version(admin.text))
         return None
 
     async def transaction(
@@ -728,19 +768,57 @@ class AsyncMLClient:
 
 _VERSION_QUERY = "xdmp:version()"
 _MANAGE_PROPERTIES_ENDPOINT = "/manage/v2/properties"
-_ADMIN_SERVER_CONFIG_ENDPOINT = "/admin/v1/server-config"
 
 
-def _parse_version(raw: str) -> tuple[int, int, int]:
-    """Split a MarkLogic version string like ``12.0.1`` into ``(12, 0, 1)``."""
-    major, minor, patch = (int(part) for part in re.findall(r"\d+", raw)[:3])
-    return major, minor, patch
+def _parse_version(raw: str | None) -> tuple[int, int, int]:
+    """Normalize a dotted or legacy hyphenated server version.
+
+    Parameters
+    ----------
+    raw : str | None
+        Server version, e.g. ``12.0.1``, ``10.0-9.5`` or ``12.0``
+
+    Returns
+    -------
+    tuple[int, int, int]
+        Major, minor and patch; omitted patch defaults to zero. Build and
+        hotfix suffixes are excluded.
+
+    Raises
+    ------
+    ValueError
+        If the value is not a recognizable version string
+    """
+    match = re.fullmatch(
+        r"(\d+)\.(\d+)(?:[.-](\d+))?(?:[.-][A-Za-z0-9]+)*",
+        raw.strip() if isinstance(raw, str) else "",
+    )
+    if match is None:
+        msg = f"Invalid MarkLogic version: {raw!r}"
+        raise ValueError(msg)
+    major, minor, patch = match.groups(default="0")
+    return int(major), int(minor), int(patch)
 
 
 def _admin_config_version(server_config: str) -> str | None:
-    """Extract the version element text from an Admin server-config document."""
-    match = re.search(r"<version>([^<]+)</version>", server_config)
-    return match.group(1) if match else None
+    """Extract the host version from an Admin server-config XML document.
+
+    Parameters
+    ----------
+    server_config : str
+        XML returned by the Admin server-config endpoint
+
+    Returns
+    -------
+    str | None
+        Version text, or None if the host version element is absent or empty
+
+    Raises
+    ------
+    ElementTree.ParseError
+        If the response is not well-formed XML
+    """
+    return ElementTree.fromstring(server_config).findtext("{*}version")
 
 
 def _resolve_health_config(config: HTTPConfig) -> HTTPConfig:

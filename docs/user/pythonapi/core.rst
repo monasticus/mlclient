@@ -1530,7 +1530,8 @@ When the connecting user lacks the eval privilege, the query fails and the
 Manage (``/manage/v2/properties``) then Admin (``/admin/v1/server-config``)
 endpoints are tried in turn. If none succeeds, the eval
 :class:`~mlclient.exceptions.MarkLogicError` is re-raised. A connection error
-propagates from the eval attempt, since nothing else on the client would work.
+propagates from the eval attempt without trying auxiliary servers. Unavailable
+endpoints and malformed fallback responses are skipped.
 
 On :class:`~mlclient.AsyncMLClient` the version is an awaitable method rather
 than a cached property, because resolving it performs I/O:
@@ -1545,3 +1546,6 @@ than a cached property, because resolving it performs I/O:
     ...         return await ml.version()
     >>> asyncio.run(get_version())
     (12, 0, 1)
+
+Versions such as ``10.0-9.5`` are normalized to ``(10, 0, 9)``. Build and hotfix suffixes are excluded; a missing patch defaults
+to zero. An invalid eval version raises ``ValueError``.

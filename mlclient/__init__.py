@@ -65,6 +65,7 @@ from .ml_environment import (
     find_mlclient_environment,
 )
 from .ml_response_parser import MLResponseParser
+from .models.version import MarkLogicVersion
 
 
 def setup_logger():
@@ -95,6 +96,7 @@ __all__ = [
     "MLEnvironment",
     "MLResponseParser",
     "MarkLogicCloudAuth",
+    "MarkLogicVersion",
     "OAuthBearerAuth",
     "SSLConfig",
     "__version__",

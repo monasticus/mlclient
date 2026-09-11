@@ -1509,3 +1509,61 @@ strategy is preserved, including ``DEFAULT_RETRY_STRATEGY`` itself.
     >>> with MLClient(host="ml.example.com", health_config=health_config) as ml:
     ...     ml.healthcheck()
     True
+
+
+Server version
+--------------
+
+:attr:`~mlclient.MLClient.version` returns an immutable
+:class:`~mlclient.models.MarkLogicVersion`, resolved from ``xdmp:version()``
+and cached after the first access. ``str(version)`` preserves the complete
+server version. ``parts`` is always a four-element tuple of numeric components
+in their original order, padded with ``None`` for missing components.
+Unpacking yields those same four values.
+
+.. code-block:: python
+
+    >>> from mlclient import MLClient
+
+    >>> with MLClient() as ml:
+    ...     version = ml.version
+    >>> str(version)
+    '12.0.1'
+    >>> version.parts
+    (12, 0, 1, None)
+    >>> first, second, third, fourth = version
+    >>> fourth is None
+    True
+
+    >>> from mlclient import MarkLogicVersion
+    >>> version = MarkLogicVersion("10.0-9.5")
+    >>> str(version)
+    '10.0-9.5'
+    >>> version.parts
+    (10, 0, 9, 5)
+
+When the connecting user lacks the eval privilege, the query fails and the
+Manage (``/manage/v2/properties``) then Admin (``/admin/v1/server-config``)
+endpoints are tried in turn. If none succeeds, the eval
+:class:`~mlclient.exceptions.MarkLogicError` is re-raised. A connection error
+propagates from the eval attempt without trying auxiliary servers. Unavailable
+endpoints and malformed fallback responses are skipped.
+
+On :class:`~mlclient.AsyncMLClient` the version is an awaitable method rather
+than a cached property, because resolving it performs I/O:
+
+.. code-block:: python
+
+    >>> import asyncio
+    >>> from mlclient import AsyncMLClient
+
+    >>> async def get_version():
+    ...     async with AsyncMLClient() as ml:
+    ...         return (await ml.version()).parts
+    >>> asyncio.run(get_version())
+    (12, 0, 1, None)
+
+Numeric components have no universal major/minor/patch/hotfix labels because
+MarkLogic's versioning scheme changed between releases. Textual suffixes are
+preserved by ``str(version)`` and excluded from ``parts``. An invalid eval
+version raises ``ValueError``.

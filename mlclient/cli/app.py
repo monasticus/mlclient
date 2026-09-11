@@ -29,6 +29,7 @@ from mlclient.cli.commands import (
     EnvInitCommand,
     EnvShowCommand,
     HealthCommand,
+    VersionCommand,
 )
 
 
@@ -49,6 +50,7 @@ class MLCLIentApplication(Application):
         self.add(EnvInitCommand())
         self.add(EnvShowCommand())
         self.add(HealthCommand())
+        self.add(VersionCommand())
 
     def create_io(
         self,

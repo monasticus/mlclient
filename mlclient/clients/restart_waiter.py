@@ -380,9 +380,10 @@ class RestartWaiter:
         """Return MarkLogic host names keyed by host id."""
         async with AsyncClient(
             transport=RetryTransport(
-                transport=AsyncHTTPTransport(verify=self._config.transport_verify()),
+                transport=AsyncHTTPTransport(**self._config.transport_options()),
                 retry=self._config.retry,
             ),
+            timeout=self._config.timeout,
         ) as client:
             response = await client.get(
                 f"{self._config.protocol}://{self._config.host}:{_MARKLOGIC_MANAGE_PORT}"
@@ -412,7 +413,7 @@ class RestartWaiter:
     ) -> None:
         """Wait for a single host to report readiness via the timestamp endpoint."""
         async with AsyncClient(
-            transport=AsyncHTTPTransport(verify=self._config.transport_verify()),
+            transport=AsyncHTTPTransport(**self._config.transport_options()),
             headers={"Connection": "close"},
             timeout=self._probe_timeout,
         ) as client:

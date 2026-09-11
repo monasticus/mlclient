@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING
 from httpx import Response
 
 from mlclient.calls import LogsCall
+from mlclient.connection import UNSET
 
 # Avoid circular import: ApiClient -> api classes -> ApiClient
 if TYPE_CHECKING:
@@ -33,6 +34,7 @@ class LogsApi:
         start_time: str | None = None,
         end_time: str | None = None,
         regex: str | None = None,
+        timeout=UNSET,
     ) -> Response:
         """Retrieve the contents of a log file.
 
@@ -53,11 +55,22 @@ class LogsApi:
             The end time for the log data.
         regex : str
             Filters the log data, based on a regular expression.
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request timeout for this call. Unset uses the client's
+            configured timeout; None disables every HTTP timeout; a number sets
+            all four components to that many seconds; an httpx.Timeout overrides
+            them. It is an execution option, never sent as a request parameter.
 
         Returns
         -------
         Response
             An HTTP response containing the log data
+
+        Raises
+        ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
         """
         call = LogsCall(
             filename=filename,
@@ -67,7 +80,7 @@ class LogsApi:
             end_time=end_time,
             regex=regex,
         )
-        return self._api.call(call)
+        return self._api.call(call, timeout=timeout)
 
 
 class AsyncLogsApi:
@@ -85,8 +98,44 @@ class AsyncLogsApi:
         start_time: str | None = None,
         end_time: str | None = None,
         regex: str | None = None,
+        timeout=UNSET,
     ) -> Response:
-        """Retrieve the contents of a log file."""
+        """Retrieve the contents of a log file.
+
+        Documentation: https://docs.marklogic.com/REST/GET/manage/v2/logs
+
+        Parameters
+        ----------
+        filename : str
+            The log file to be returned.
+        data_format : str
+            The format of the data in the log file. The supported formats are xml, json
+            or html.
+        host : str
+            The host from which to return the log data.
+        start_time : str
+            The start time for the log data.
+        end_time : str
+            The end time for the log data.
+        regex : str
+            Filters the log data, based on a regular expression.
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request timeout for this call. Unset uses the client's
+            configured timeout; None disables every HTTP timeout; a number sets
+            all four components to that many seconds; an httpx.Timeout overrides
+            them. It is an execution option, never sent as a request parameter.
+
+        Returns
+        -------
+        Response
+            An HTTP response containing the log data
+
+        Raises
+        ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
+        """
         call = LogsCall(
             filename=filename,
             data_format=data_format,
@@ -95,4 +144,4 @@ class AsyncLogsApi:
             end_time=end_time,
             regex=regex,
         )
-        return await self._api.call(call)
+        return await self._api.call(call, timeout=timeout)

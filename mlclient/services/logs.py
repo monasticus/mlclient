@@ -12,6 +12,7 @@ from typing import TYPE_CHECKING
 
 from mlclient.calls import LogsCall
 from mlclient.clients.api_client import ApiClient
+from mlclient.connection import UNSET
 from mlclient.exceptions import InvalidLogTypeError, MarkLogicError
 
 if TYPE_CHECKING:
@@ -68,6 +69,7 @@ class LogsService:
         end_time: str | None = None,
         regex: str | None = None,
         host: str | None = None,
+        timeout=UNSET,
     ) -> Iterator[dict]:
         """Return logs from a MarkLogic server.
 
@@ -85,6 +87,11 @@ class LogsService:
             A regex to search error logs
         host : str | None, default None
             A host name with logs to retrieve
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request HTTP timeout for this call. Unset uses the client's
+            configured timeout; None disables every HTTP timeout; a number sets
+            all four components to that many seconds; an httpx.Timeout overrides
+            them.
 
         Returns
         -------
@@ -93,6 +100,9 @@ class LogsService:
 
         Raises
         ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
         MarkLogicError
             If MarkLogic returns an error
         """
@@ -107,7 +117,7 @@ class LogsService:
             host=host,
         )
 
-        resp = self._api.call(call)
+        resp = self._api.call(call, timeout=timeout)
         resp_body = resp.json()
         if not resp.is_success:
             raise MarkLogicError(resp_body["errorResponse"])
@@ -117,6 +127,8 @@ class LogsService:
     def list(
         self,
         host: str | None = None,
+        *,
+        timeout=UNSET,
     ) -> dict:
         """Return a logs list from a MarkLogic server.
 
@@ -124,6 +136,11 @@ class LogsService:
         ----------
         host : str | None, default None
             A host name with log files to retrieve
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request HTTP timeout for this call. Unset uses the client's
+            configured timeout; None disables every HTTP timeout; a number sets
+            all four components to that many seconds; an httpx.Timeout overrides
+            them.
 
         Returns
         -------
@@ -132,12 +149,15 @@ class LogsService:
 
         Raises
         ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
         MarkLogicError
             If MarkLogic returns an error
         """
         call = self._get_call(host=host)
 
-        resp = self._api.call(call)
+        resp = self._api.call(call, timeout=timeout)
         resp_body = resp.json()
         if "errorResponse" in resp_body:
             raise MarkLogicError(resp_body["errorResponse"])
@@ -273,8 +293,43 @@ class AsyncLogsService(LogsService):
         end_time: str | None = None,
         regex: str | None = None,
         host: str | None = None,
+        timeout=UNSET,
     ) -> Iterator[dict]:
-        """Return logs from a MarkLogic server."""
+        """Return logs from a MarkLogic server.
+
+        Parameters
+        ----------
+        app_server : int | str | None, default None
+            An app server (port) with logs to retrieve
+        log_type : LogType | str, default LogType.ERROR
+            A log type (enum or string: "error", "access", "request", "audit")
+        start_time : str | None, default None
+            A start time to search error logs
+        end_time : str | None, default None
+            An end time to search error logs
+        regex : str | None, default None
+            A regex to search error logs
+        host : str | None, default None
+            A host name with logs to retrieve
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request HTTP timeout for this call. Unset uses the client's
+            configured timeout; None disables every HTTP timeout; a number sets
+            all four components to that many seconds; an httpx.Timeout overrides
+            them.
+
+        Returns
+        -------
+        Iterator[dict]
+            A log details generator.
+
+        Raises
+        ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
+        MarkLogicError
+            If MarkLogic returns an error
+        """
         if isinstance(log_type, str):
             log_type = LogType.get(log_type)
         call = self._get_call(
@@ -286,7 +341,7 @@ class AsyncLogsService(LogsService):
             host=host,
         )
 
-        resp = await self._api.call(call)
+        resp = await self._api.call(call, timeout=timeout)
         resp_body = resp.json()
         if not resp.is_success:
             raise MarkLogicError(resp_body["errorResponse"])
@@ -296,11 +351,37 @@ class AsyncLogsService(LogsService):
     async def list(  # type: ignore[override]
         self,
         host: str | None = None,
+        *,
+        timeout=UNSET,
     ) -> dict:
-        """Return a logs list from a MarkLogic server."""
+        """Return a logs list from a MarkLogic server.
+
+        Parameters
+        ----------
+        host : str | None, default None
+            A host name with log files to retrieve
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request HTTP timeout for this call. Unset uses the client's
+            configured timeout; None disables every HTTP timeout; a number sets
+            all four components to that many seconds; an httpx.Timeout overrides
+            them.
+
+        Returns
+        -------
+        dict
+            A parsed list of log files in the MarkLogic server
+
+        Raises
+        ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
+        MarkLogicError
+            If MarkLogic returns an error
+        """
         call = self._get_call(host=host)
 
-        resp = await self._api.call(call)
+        resp = await self._api.call(call, timeout=timeout)
         resp_body = resp.json()
         if "errorResponse" in resp_body:
             raise MarkLogicError(resp_body["errorResponse"])

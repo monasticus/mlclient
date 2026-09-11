@@ -4,6 +4,7 @@ import xml.etree.ElementTree as ElemTree
 import zlib
 from pathlib import Path
 
+import httpx
 import pytest
 import respx
 
@@ -1728,6 +1729,24 @@ def test_delete_multiple_documents(ml):
         ml.documents.delete(uris)
     except MarkLogicError as err:
         pytest.fail(str(err))
+
+
+@respx.mock
+def test_delete_batches_preserve_request_timeout(ml):
+    uris = [f"/{index}-" + "x" * 1024 for index in range(60)]
+    mocker = MLRespXMocker(use_router=False)
+    mocker.with_url("http://localhost:8000/v1/documents")
+    mocker.with_response_code(204)
+    mocker.with_empty_response_body()
+    route = mocker.mock_delete()
+
+    ml.documents.delete(uris, timeout=2)
+
+    assert route.call_count > 1
+    assert all(
+        call.request.extensions["timeout"] == httpx.Timeout(2).as_dict()
+        for call in route.calls
+    )
 
 
 @respx.mock

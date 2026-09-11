@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING
 from httpx import Response
 
 from mlclient.calls import EvalCall
+from mlclient.connection import UNSET
 
 # Avoid circular import: ApiClient -> api classes -> ApiClient
 if TYPE_CHECKING:
@@ -30,6 +31,7 @@ class EvalApi:
         variables: dict | None = None,
         database: str | None = None,
         txid: str | None = None,
+        timeout=UNSET,
     ) -> Response:
         """Evaluate an ad-hoc query expressed using XQuery or server-side JavaScript.
 
@@ -54,12 +56,23 @@ class EvalApi:
         txid : str
             The transaction identifier of the multi-statement transaction
             in which to service this request.
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request timeout for this call. Unset uses the client's
+            configured timeout; None disables every HTTP timeout; a number sets
+            all four components to that many seconds; an httpx.Timeout overrides
+            them. It is an execution option, never sent as a request parameter.
 
         Returns
         -------
         Response
             An HTTP response with ``multipart/mixed`` body containing
             the evaluation results
+
+        Raises
+        ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
         """
         call = EvalCall(
             xquery=xquery,
@@ -68,7 +81,7 @@ class EvalApi:
             database=database,
             txid=txid,
         )
-        return self._api.call(call)
+        return self._api.call(call, timeout=timeout)
 
 
 class AsyncEvalApi:
@@ -85,8 +98,49 @@ class AsyncEvalApi:
         variables: dict | None = None,
         database: str | None = None,
         txid: str | None = None,
+        timeout=UNSET,
     ) -> Response:
-        """Evaluate an ad-hoc query expressed using XQuery or server-side JavaScript."""
+        """Evaluate an ad-hoc query expressed using XQuery or server-side JavaScript.
+
+        Documentation: https://docs.marklogic.com/REST/POST/v1/eval
+
+        Parameters
+        ----------
+        xquery : str
+            The query to evaluate, expressed using XQuery.
+            You must include either this parameter or the javascript parameter,
+            but not both.
+        javascript : str
+            The query to evaluate, expressed using server-side JavaScript.
+            You must include either this parameter or the xquery parameter,
+            but not both.
+        variables : dict
+            External variables to pass to the query during evaluation
+        database : str
+            Perform this operation on the named content database
+            instead of the default content database associated with the REST API
+            instance. The database can be identified by name or by database id.
+        txid : str
+            The transaction identifier of the multi-statement transaction
+            in which to service this request.
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request timeout for this call. Unset uses the client's
+            configured timeout; None disables every HTTP timeout; a number sets
+            all four components to that many seconds; an httpx.Timeout overrides
+            them. It is an execution option, never sent as a request parameter.
+
+        Returns
+        -------
+        Response
+            An HTTP response with ``multipart/mixed`` body containing
+            the evaluation results
+
+        Raises
+        ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
+        """
         call = EvalCall(
             xquery=xquery,
             javascript=javascript,
@@ -94,4 +148,4 @@ class AsyncEvalApi:
             database=database,
             txid=txid,
         )
-        return await self._api.call(call)
+        return await self._api.call(call, timeout=timeout)

@@ -1,12 +1,16 @@
 from __future__ import annotations
 
+import asyncio
+
 import httpx
 import pytest
 import respx
+from httpx_retries import Retry
 from pytest_mock import MockerFixture
 
 from mlclient.clients import http_client as http_client_module
 from mlclient.clients.http_client import AsyncHttpClient
+from mlclient.connection import UNSET
 from mlclient.http_config import HTTPConfig
 from tests.utils import resources as resources_utils
 from tests.utils.ml_mockers import MLRespXMocker
@@ -459,3 +463,224 @@ def test_prebuilt_config_supersedes_connection_kwargs():
 
     assert client.config is config
     assert client.base_url == "http://resolved.example.com:8002"
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("method", ["get", "head", "post", "put", "delete"])
+@pytest.mark.parametrize("connected", [False, True])
+@respx.mock
+async def test_each_http_method_forwards_timeout_in_every_session_mode(
+    method,
+    connected,
+):
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8000/x")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_empty_response_body()
+    route = getattr(ml_mocker, "mock_" + method)()
+    client = AsyncHttpClient(timeout=30)
+    if connected:
+        await client.connect()
+    try:
+        await getattr(client, method)("/x", timeout=None)
+        assert (
+            route.calls.last.request.extensions["timeout"]
+            == httpx.Timeout(None).as_dict()
+        )
+        await getattr(client, method)("/x")
+        assert (
+            route.calls.last.request.extensions["timeout"]
+            == httpx.Timeout(30).as_dict()
+        )
+    finally:
+        await client.disconnect()
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_retry_preserves_request_timeout():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8000/x")
+    route = ml_mocker.with_get_side_effect([httpx.Response(503), httpx.Response(200)])
+    timeout = httpx.Timeout(1, read=2)
+    async with AsyncHttpClient(retry=Retry(total=1, backoff_factor=0)) as client:
+        response = await client.get("/x", timeout=timeout)
+
+    assert response.status_code == 200
+    assert route.call_count == 2
+    assert all(
+        call.request.extensions["timeout"] == timeout.as_dict() for call in route.calls
+    )
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_config_default_timeout_reaches_transport():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/x")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body("ok")
+    route = ml_mocker.mock_get()
+    async with AsyncHttpClient(port=8002) as client:
+        await client.get("/x")
+    assert route.calls.last.request.extensions["timeout"] == {
+        "connect": 5.0,
+        "read": 60.0,
+        "write": 60.0,
+        "pool": 5.0,
+    }
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_explicit_config_timeout_reaches_transport():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/x")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body("ok")
+    route = ml_mocker.mock_get()
+    config = HTTPConfig.resolve(port=8002, timeout=httpx.Timeout(1.0))
+    async with AsyncHttpClient(config=config) as client:
+        await client.get("/x")
+    assert route.calls.last.request.extensions["timeout"] == {
+        "connect": 1.0,
+        "read": 1.0,
+        "write": 1.0,
+        "pool": 1.0,
+    }
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_per_request_number_timeout_sets_all_components():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/x")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body("ok")
+    route = ml_mocker.mock_get()
+    async with AsyncHttpClient(port=8002) as client:
+        await client.get("/x", timeout=2.5)
+    assert route.calls.last.request.extensions["timeout"] == {
+        "connect": 2.5,
+        "read": 2.5,
+        "write": 2.5,
+        "pool": 2.5,
+    }
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_per_request_none_disables_timeout():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/x")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body("ok")
+    route = ml_mocker.mock_get()
+    async with AsyncHttpClient(port=8002) as client:
+        await client.get("/x", timeout=None)
+    assert route.calls.last.request.extensions["timeout"] == {
+        "connect": None,
+        "read": None,
+        "write": None,
+        "pool": None,
+    }
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_per_request_httpx_timeout_reaches_transport():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/x")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body("ok")
+    route = ml_mocker.mock_get()
+    async with AsyncHttpClient(port=8002) as client:
+        await client.get(
+            "/x",
+            timeout=httpx.Timeout(connect=1.0, read=2.0, write=3.0, pool=4.0),
+        )
+    assert route.calls.last.request.extensions["timeout"] == {
+        "connect": 1.0,
+        "read": 2.0,
+        "write": 3.0,
+        "pool": 4.0,
+    }
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_concurrent_requests_keep_independent_timeouts():
+    first_started = asyncio.Event()
+    second_started = asyncio.Event()
+
+    async def respond(request):
+        if request.url.path == "/first":
+            first_started.set()
+            await second_started.wait()
+        else:
+            await first_started.wait()
+            second_started.set()
+        return httpx.Response(200)
+
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8000/first")
+    first = ml_mocker.with_get_side_effect(respond)
+    ml_mocker.with_url("http://localhost:8000/second")
+    second = ml_mocker.with_get_side_effect(respond)
+    async with AsyncHttpClient(timeout=30) as client:
+        await asyncio.wait_for(
+            asyncio.gather(
+                client.get("/first", timeout=1),
+                client.get("/second", timeout=None),
+            ),
+            timeout=2,
+        )
+        assert (
+            first.calls.last.request.extensions["timeout"] == httpx.Timeout(1).as_dict()
+        )
+        assert (
+            second.calls.last.request.extensions["timeout"]
+            == httpx.Timeout(None).as_dict()
+        )
+        await client.get("/first")
+        assert (
+            first.calls.last.request.extensions["timeout"]
+            == httpx.Timeout(30).as_dict()
+        )
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_per_request_timeout_does_not_mutate_shared_default():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/x")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body("ok")
+    route = ml_mocker.mock_get()
+    async with AsyncHttpClient(port=8002) as client:
+        await client.get("/x", timeout=2.5)
+        await client.get("/x")
+    assert route.calls.last.request.extensions["timeout"] == {
+        "connect": 5.0,
+        "read": 60.0,
+        "write": 60.0,
+        "pool": 5.0,
+    }
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_unset_per_request_uses_config_default():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/x")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body("ok")
+    route = ml_mocker.mock_get()
+    async with AsyncHttpClient(port=8002) as client:
+        await client.get("/x", timeout=UNSET)
+    assert route.calls.last.request.extensions["timeout"] == {
+        "connect": 5.0,
+        "read": 60.0,
+        "write": 60.0,
+        "pool": 5.0,
+    }

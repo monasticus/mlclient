@@ -11,6 +11,7 @@ from typing import TYPE_CHECKING
 from httpx import Response
 
 from mlclient.calls import ApiCall
+from mlclient.connection import UNSET
 
 # Avoid circular import: ApiClient -> api classes -> ApiClient
 if TYPE_CHECKING:
@@ -33,20 +34,31 @@ class ManageApi:
     def __init__(self, api: ApiClient):
         self._api = api
 
-    def call(self, call_: ApiCall) -> Response:
+    def call(self, call_: ApiCall, *, timeout=UNSET) -> Response:
         """Send a custom ApiCall.
 
         Parameters
         ----------
         call_ : ApiCall
             A specific endpoint call implementation
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request timeout for this call. Unset uses the client's
+            configured timeout; None disables every HTTP timeout; a number sets
+            all four components to that many seconds; an httpx.Timeout overrides
+            them. It is an execution option, never sent as a request parameter.
 
         Returns
         -------
         Response
             An HTTP response
+
+        Raises
+        ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
         """
-        return self._api.call(call_)
+        return self._api.call(call_, timeout=timeout)
 
     @cached_property
     def databases(self) -> DatabasesApi:
@@ -85,9 +97,31 @@ class AsyncManageApi:
     def __init__(self, api: AsyncApiClient):
         self._api = api
 
-    async def call(self, call_: ApiCall) -> Response:
-        """Send a custom ApiCall."""
-        return await self._api.call(call_)
+    async def call(self, call_: ApiCall, *, timeout=UNSET) -> Response:
+        """Send a custom ApiCall.
+
+        Parameters
+        ----------
+        call_ : ApiCall
+            A specific endpoint call implementation
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request timeout for this call. Unset uses the client's
+            configured timeout; None disables every HTTP timeout; a number sets
+            all four components to that many seconds; an httpx.Timeout overrides
+            them. It is an execution option, never sent as a request parameter.
+
+        Returns
+        -------
+        Response
+            An HTTP response
+
+        Raises
+        ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
+        """
+        return await self._api.call(call_, timeout=timeout)
 
     @cached_property
     def databases(self) -> AsyncDatabasesApi:

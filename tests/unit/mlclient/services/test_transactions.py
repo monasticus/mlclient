@@ -41,6 +41,38 @@ def test_transaction_opens_eagerly(ml):
 
 
 @respx.mock
+def test_open_and_commit_timeouts_reach_transport(ml):
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8000/v1/transactions")
+    ml_mocker.with_response_code(303)
+    ml_mocker.with_response_header("Location", "/v1/transactions/12345")
+    ml_mocker.with_empty_response_body()
+    open_route = ml_mocker.mock_post()
+
+    ml_mocker.with_url("http://localhost:8000/v1/transactions/12345")
+    ml_mocker.with_request_param("result", "commit")
+    ml_mocker.with_response_code(204)
+    ml_mocker.with_empty_response_body()
+    commit_route = ml_mocker.mock_post()
+
+    txn = ml.transaction(timeout=2)
+    txn.commit(timeout=3)
+
+    assert open_route.calls.last.request.extensions["timeout"] == {
+        "connect": 2.0,
+        "read": 2.0,
+        "write": 2.0,
+        "pool": 2.0,
+    }
+    assert commit_route.calls.last.request.extensions["timeout"] == {
+        "connect": 3.0,
+        "read": 3.0,
+        "write": 3.0,
+        "pool": 3.0,
+    }
+
+
+@respx.mock
 def test_transaction_raises_on_open_error(ml):
     error = {
         "errorResponse": {

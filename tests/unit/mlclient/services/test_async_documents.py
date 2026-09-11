@@ -3,6 +3,7 @@ from __future__ import annotations
 import xml.etree.ElementTree as ElemTree
 import zlib
 
+import httpx
 import pytest
 import pytest_asyncio
 import respx
@@ -464,6 +465,25 @@ async def test_delete_multiple_documents(svc):
         await svc.delete(uris)
     except MarkLogicError as err:
         pytest.fail(str(err))
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_delete_batches_preserve_request_timeout(svc):
+    uris = [f"/{index}-" + "x" * 1024 for index in range(60)]
+    mocker = MLRespXMocker(use_router=False)
+    mocker.with_url("http://localhost:8000/v1/documents")
+    mocker.with_response_code(204)
+    mocker.with_empty_response_body()
+    route = mocker.mock_delete()
+
+    await svc.delete(uris, timeout=2)
+
+    assert route.call_count > 1
+    assert all(
+        call.request.extensions["timeout"] == httpx.Timeout(2).as_dict()
+        for call in route.calls
+    )
 
 
 @pytest.mark.asyncio

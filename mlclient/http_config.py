@@ -19,6 +19,7 @@ connection and auth functions together by hand.
 from __future__ import annotations
 
 import ssl
+from copy import copy
 
 import httpx
 from httpx_retries import Retry
@@ -40,6 +41,30 @@ DEFAULT_RETRY_STRATEGY = Retry(
     total=5,
     backoff_factor=0.5,
 )
+
+DEFAULT_TIMEOUT = httpx.Timeout(
+    connect=5.0,
+    read=60.0,
+    write=60.0,
+    pool=5.0,
+)
+
+HEALTH_TIMEOUT = httpx.Timeout(5.0)
+
+NO_RETRY_STRATEGY = Retry(total=0)
+
+
+def _normalize_timeout(timeout):
+    """Turn a timeout argument into UNSET or a comparable httpx.Timeout.
+
+    UNSET stays UNSET (no explicit value). None disables every HTTP timeout.
+    A number sets all four components to that many seconds. An httpx.Timeout is
+    copied, isolating the configuration from caller-owned mutable settings.
+    clone() preserves values without sharing the timeout object.
+    """
+    if timeout is UNSET:
+        return UNSET
+    return httpx.Timeout(timeout)
 
 
 class HTTPConfig:
@@ -65,6 +90,8 @@ class HTTPConfig:
         username: str,
         password: str,
         retry: Retry | None,
+        limits: httpx.Limits | None,
+        timeout,
     ):
         """Initialize HTTPConfig from already-resolved parts.
 
@@ -78,6 +105,8 @@ class HTTPConfig:
         self._username = username
         self._password = password
         self._retry = retry
+        self._limits = copy(limits)
+        self._timeout = _normalize_timeout(timeout)
 
     @classmethod
     def resolve(
@@ -92,6 +121,8 @@ class HTTPConfig:
         ssl: SSLConfig | None = None,
         cloud: CloudConfig | None = None,
         retry: Retry | None = None,
+        limits: httpx.Limits | None = None,
+        timeout=UNSET,
     ) -> HTTPConfig:
         """Resolve connection and auth parameters into an HTTPConfig.
 
@@ -120,6 +151,14 @@ class HTTPConfig:
         retry : Retry | None, default DEFAULT_RETRY_STRATEGY
             The retry strategy for transport creation. None leaves the strategy
             unspecified, using DEFAULT_RETRY_STRATEGY for ordinary requests.
+        limits : httpx.Limits | None, default None
+            The connection-pool limits for transport creation. None leaves the
+            limits unset, deferring to httpx's own default.
+        timeout : httpx.Timeout | float | None | UNSET, default UNSET
+            The request timeout. UNSET leaves it unspecified, using
+            DEFAULT_TIMEOUT. None disables every HTTP timeout. A number sets all
+            four components (connect, read, write, pool) to that many seconds.
+            An httpx.Timeout fully overrides the timeout without merging.
 
         Returns
         -------
@@ -145,6 +184,8 @@ class HTTPConfig:
             username,
             password,
             retry,
+            limits,
+            timeout,
         )
 
     @property
@@ -210,9 +251,14 @@ class HTTPConfig:
     def can_share_session(self, other: HTTPConfig) -> bool:
         """Whether two configurations can safely use the same HTTP session.
 
-        Compare connection and credential values, but require the same retry
+        Compare connection and credential values, and require the same retry
         strategy object and, for custom authentication, the same handler.
         Custom strategies and handlers may carry behavior beyond their fields.
+        Explicit pool limits are compared by value. Timeout is compared by its
+        effective connect/read/write/
+        pool components, so equivalent values share a session even when built
+        separately, while any component difference (including disabled versus
+        bounded) blocks sharing.
         """
         same_auth = (
             self.auth_method is other.auth_method
@@ -227,6 +273,8 @@ class HTTPConfig:
             and self.password == other.password
             and same_auth
             and self.retry is other.retry
+            and self.limits == other.limits
+            and self.timeout == other.timeout
         )
 
     @property
@@ -239,9 +287,66 @@ class HTTPConfig:
         """Whether a retry strategy was supplied rather than left to the default."""
         return self._retry is not None
 
+    @property
+    def limits(self) -> httpx.Limits | None:
+        """A copy of the pool limits, or None to defer to httpx's default.
+
+        Use clone(limits=...) to change settings; mutating this copy has no
+        effect on the configuration or an existing session.
+        """
+        return copy(self._limits)
+
+    @property
+    def timeout(self) -> httpx.Timeout:
+        """A copy of the effective timeout, defaulting to DEFAULT_TIMEOUT.
+
+        A timeout of ``httpx.Timeout(None)`` (all components None) means every
+        HTTP timeout is disabled; it is still an explicit value, distinct from
+        the unset case that resolves to DEFAULT_TIMEOUT. Use clone(timeout=...)
+        to change settings; mutating this copy does not affect the configuration.
+        """
+        timeout = self._timeout if self._timeout is not UNSET else DEFAULT_TIMEOUT
+        return httpx.Timeout(timeout)
+
+    @property
+    def has_explicit_timeout(self) -> bool:
+        """Whether a timeout was supplied rather than left to the default."""
+        return self._timeout is not UNSET
+
+    def with_health_defaults(self) -> HTTPConfig:
+        """Fill unspecified retry and timeout settings for a HealthCheck client.
+
+        Retry defaults to NO_RETRY_STRATEGY and timeout to HEALTH_TIMEOUT.
+        Each setting is resolved independently. Explicit values, including
+        timeout=None, are preserved; host, auth, TLS and limits are unchanged.
+
+        Returns
+        -------
+        HTTPConfig
+            A cloned configuration if a default needs applying, otherwise this
+            configuration. The source is not modified and no session is opened.
+        """
+        overrides = {}
+        if not self.has_explicit_retry:
+            overrides["retry"] = NO_RETRY_STRATEGY
+        if not self.has_explicit_timeout:
+            overrides["timeout"] = HEALTH_TIMEOUT
+        return self.clone(**overrides) if overrides else self
+
     def transport_verify(self) -> ssl.SSLContext | bool:
         """Return the SSL verification setting for transport creation."""
         return transport_verify(self._connection)
+
+    def transport_options(self) -> dict:
+        """Keyword arguments for an httpx transport.
+
+        Always carries ``verify``; carries ``limits`` only when explicitly set,
+        so an unset value defers to httpx's own default.
+        """
+        options = {"verify": self.transport_verify()}
+        if self._limits is not None:
+            options["limits"] = self.limits
+        return options
 
     def build_url(self, endpoint: str) -> str:
         """Build a full request URL, applying the Cloud base path if present."""
@@ -277,6 +382,8 @@ class HTTPConfig:
             "ssl": self._connection.ssl,
             "cloud": self._connection.cloud,
             "retry": self._retry,
+            "limits": self._limits,
+            "timeout": self._timeout,
         }
         return self.resolve(**{**base, **overrides})
 

@@ -13,6 +13,7 @@ from typing import TYPE_CHECKING
 import httpx
 
 from mlclient.api.transactions import AsyncTransactionsApi, TransactionsApi
+from mlclient.connection import UNSET
 from mlclient.exceptions import MarkLogicError
 from mlclient.ml_response_parser import MLResponseParser
 
@@ -63,13 +64,19 @@ class TransactionService:
         else:
             self.rollback()
 
-    def status(self, *, data_format: str = "json"):
+    def status(self, *, data_format: str = "json", timeout=UNSET):
         """Return the status of the transaction.
 
         Parameters
         ----------
         data_format : str, default "json"
             The format of the returned status; either json or xml
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request HTTP timeout for the status request. Unset uses the
+            client's configured timeout; None disables every HTTP timeout; a
+            number sets all four components to that many seconds; an
+            httpx.Timeout overrides them. This bounds the HTTP request only and
+            is unrelated to the transaction's server-side time_limit.
 
         Returns
         -------
@@ -77,6 +84,9 @@ class TransactionService:
 
         Raises
         ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
         MarkLogicError
             If MarkLogic returns an error
         """
@@ -84,34 +94,64 @@ class TransactionService:
             self._txid,
             data_format=data_format,
             database=self._database,
+            timeout=timeout,
         )
         parsed_resp = MLResponseParser.parse(resp)
         if not resp.is_success:
             raise MarkLogicError(parsed_resp["errorResponse"])
         return parsed_resp
 
-    def commit(self) -> None:
+    def commit(self, *, timeout=UNSET) -> None:
         """Commit the transaction.
 
+        Parameters
+        ----------
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request HTTP timeout for the commit request. Unset uses the
+            client's configured timeout; None disables every HTTP timeout; a
+            number sets all four components to that many seconds; an
+            httpx.Timeout overrides them. This bounds the HTTP request only and
+            is unrelated to the transaction's server-side time_limit.
+
         Raises
         ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
         MarkLogicError
             If MarkLogic returns an error
         """
-        self._finish("commit")
+        self._finish("commit", timeout=timeout)
 
-    def rollback(self) -> None:
+    def rollback(self, *, timeout=UNSET) -> None:
         """Roll back the transaction.
 
+        Parameters
+        ----------
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request HTTP timeout for the rollback request. Unset uses the
+            client's configured timeout; None disables every HTTP timeout; a
+            number sets all four components to that many seconds; an
+            httpx.Timeout overrides them. This bounds the HTTP request only and
+            is unrelated to the transaction's server-side time_limit.
+
         Raises
         ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
         MarkLogicError
             If MarkLogic returns an error
         """
-        self._finish("rollback")
+        self._finish("rollback", timeout=timeout)
 
-    def _finish(self, result: str) -> None:
-        resp = self._api.post(self._txid, result=result, database=self._database)
+    def _finish(self, result: str, *, timeout=UNSET) -> None:
+        resp = self._api.post(
+            self._txid,
+            result=result,
+            database=self._database,
+            timeout=timeout,
+        )
         if not resp.is_success:
             resp_body = MLResponseParser.parse(resp)
             raise MarkLogicError(resp_body["errorResponse"])
@@ -137,6 +177,7 @@ def open_transaction(
     name: str | None = None,
     time_limit: int | None = None,
     database: str | None = None,
+    timeout=UNSET,
 ) -> TransactionService:
     """Open a multi-statement transaction and return a service scoped to it.
 
@@ -150,6 +191,13 @@ def open_transaction(
         The maximum number of seconds for the transaction to remain open
     database : str | None, default None
         Content database name or id to open the transaction against
+    timeout : httpx.Timeout | float | None, default unset
+        A per-request HTTP timeout for the open request only. Unset uses the
+        client's configured timeout; None disables every HTTP timeout; a number
+        sets all four components to that many seconds; an httpx.Timeout
+        overrides them. This bounds the HTTP request that opens the transaction
+        and is unrelated to time_limit, the server-side lifetime of the
+        transaction itself.
 
     Returns
     -------
@@ -158,11 +206,19 @@ def open_transaction(
 
     Raises
     ------
+    httpx.TimeoutException
+        If an HTTP connect, read, write or pool timeout expires after any
+        configured retries are exhausted.
     MarkLogicError
         If MarkLogic returns an error
     """
     transactions = TransactionsApi(api)
-    resp = transactions.create(name=name, time_limit=time_limit, database=database)
+    resp = transactions.create(
+        name=name,
+        time_limit=time_limit,
+        database=database,
+        timeout=timeout,
+    )
     txid = _txid_or_raise(resp)
     return TransactionService(transactions, txid, database)
 
@@ -206,31 +262,93 @@ class AsyncTransactionService:
         else:
             await self.rollback()
 
-    async def status(self, *, data_format: str = "json"):
-        """Return the status of the transaction."""
+    async def status(self, *, data_format: str = "json", timeout=UNSET):
+        """Return the status of the transaction.
+
+        Parameters
+        ----------
+        data_format : str, default "json"
+            The format of the returned status; either json or xml
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request HTTP timeout for the status request. Unset uses the
+            client's configured timeout; None disables every HTTP timeout; a
+            number sets all four components to that many seconds; an
+            httpx.Timeout overrides them. This bounds the HTTP request only and
+            is unrelated to the transaction's server-side time_limit.
+
+        Returns
+        -------
+        The parsed transaction status
+
+        Raises
+        ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
+        MarkLogicError
+            If MarkLogic returns an error
+        """
         resp = await self._api.get(
             self._txid,
             data_format=data_format,
             database=self._database,
+            timeout=timeout,
         )
         parsed_resp = MLResponseParser.parse(resp)
         if not resp.is_success:
             raise MarkLogicError(parsed_resp["errorResponse"])
         return parsed_resp
 
-    async def commit(self) -> None:
-        """Commit the transaction."""
-        await self._finish("commit")
+    async def commit(self, *, timeout=UNSET) -> None:
+        """Commit the transaction.
 
-    async def rollback(self) -> None:
-        """Roll back the transaction."""
-        await self._finish("rollback")
+        Parameters
+        ----------
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request HTTP timeout for the commit request. Unset uses the
+            client's configured timeout; None disables every HTTP timeout; a
+            number sets all four components to that many seconds; an
+            httpx.Timeout overrides them. This bounds the HTTP request only and
+            is unrelated to the transaction's server-side time_limit.
 
-    async def _finish(self, result: str) -> None:
+        Raises
+        ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
+        MarkLogicError
+            If MarkLogic returns an error
+        """
+        await self._finish("commit", timeout=timeout)
+
+    async def rollback(self, *, timeout=UNSET) -> None:
+        """Roll back the transaction.
+
+        Parameters
+        ----------
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request HTTP timeout for the rollback request. Unset uses the
+            client's configured timeout; None disables every HTTP timeout; a
+            number sets all four components to that many seconds; an
+            httpx.Timeout overrides them. This bounds the HTTP request only and
+            is unrelated to the transaction's server-side time_limit.
+
+        Raises
+        ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
+        MarkLogicError
+            If MarkLogic returns an error
+        """
+        await self._finish("rollback", timeout=timeout)
+
+    async def _finish(self, result: str, *, timeout=UNSET) -> None:
         resp = await self._api.post(
             self._txid,
             result=result,
             database=self._database,
+            timeout=timeout,
         )
         if not resp.is_success:
             resp_body = MLResponseParser.parse(resp)
@@ -257,13 +375,47 @@ async def async_open_transaction(
     name: str | None = None,
     time_limit: int | None = None,
     database: str | None = None,
+    timeout=UNSET,
 ) -> AsyncTransactionService:
-    """Open a multi-statement transaction and return a service scoped to it."""
+    """Open a multi-statement transaction and return a service scoped to it.
+
+    Parameters
+    ----------
+    api : ApiClient
+        The client used both to open the transaction and by the returned service
+    name : str | None, default None
+        A name to assign to the transaction
+    time_limit : int | None, default None
+        The maximum number of seconds for the transaction to remain open
+    database : str | None, default None
+        Content database name or id to open the transaction against
+    timeout : httpx.Timeout | float | None, default unset
+        A per-request HTTP timeout for the open request only. Unset uses the
+        client's configured timeout; None disables every HTTP timeout; a number
+        sets all four components to that many seconds; an httpx.Timeout
+        overrides them. This bounds the HTTP request that opens the transaction
+        and is unrelated to time_limit, the server-side lifetime of the
+        transaction itself.
+
+    Returns
+    -------
+    AsyncTransactionService
+        A service scoped to the newly opened transaction
+
+    Raises
+    ------
+    httpx.TimeoutException
+        If an HTTP connect, read, write or pool timeout expires after any
+        configured retries are exhausted.
+    MarkLogicError
+        If MarkLogic returns an error
+    """
     transactions = AsyncTransactionsApi(api)
     resp = await transactions.create(
         name=name,
         time_limit=time_limit,
         database=database,
+        timeout=timeout,
     )
     txid = _txid_or_raise(resp)
     return AsyncTransactionService(transactions, txid, database)

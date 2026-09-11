@@ -13,6 +13,7 @@ from httpx import Response
 from mlclient import constants
 from mlclient.calls import DocumentsDeleteCall, DocumentsGetCall, DocumentsPostCall
 from mlclient.clients.api_client import ApiClient
+from mlclient.connection import UNSET
 from mlclient.exceptions import MarkLogicError
 
 if TYPE_CHECKING:
@@ -103,6 +104,7 @@ class DocumentsService:
         database: str | None = None,
         temporal_collection: str | None = None,
         txid: str | None = None,
+        timeout=UNSET,
     ) -> dict:
         """Write (create or update) document(s) content or metadata.
 
@@ -116,6 +118,12 @@ class DocumentsService:
             Temporal collection name.
         txid : str | None, default None
             Perform this operation within the named multi-statement transaction.
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request HTTP timeout. Unset uses the client's configured
+            timeout; None disables every HTTP timeout; a number sets all four
+            components to that many seconds; an httpx.Timeout overrides them.
+            When the operation issues several requests it applies to each of
+            them independently, not as a shared budget, and is not persisted.
 
         Returns
         -------
@@ -124,6 +132,9 @@ class DocumentsService:
 
         Raises
         ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
         MarkLogicError
             If MarkLogic returns an error
         """
@@ -134,7 +145,7 @@ class DocumentsService:
             temporal_collection=temporal_collection,
             txid=txid,
         )
-        resp = self._api.call(call)
+        resp = self._api.call(call, timeout=timeout)
         if not resp.is_success:
             resp_body = MLResponseParser.parse(resp)
             raise MarkLogicError(resp_body["errorResponse"])
@@ -147,6 +158,7 @@ class DocumentsService:
         category: Category | str | list[Category | str] | None = None,
         database: str | None = None,
         txid: str | None = None,
+        timeout=UNSET,
     ) -> Document | dict[str, Document]:
         """Return document(s) content or metadata from a MarkLogic database.
 
@@ -163,6 +175,12 @@ class DocumentsService:
             Perform this operation on the named content database.
         txid : str | None, default None
             Perform this operation within the named multi-statement transaction.
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request HTTP timeout. Unset uses the client's configured
+            timeout; None disables every HTTP timeout; a number sets all four
+            components to that many seconds; an httpx.Timeout overrides them.
+            When the operation issues several requests it applies to each of
+            them independently, not as a shared budget, and is not persisted.
 
         Returns
         -------
@@ -171,6 +189,9 @@ class DocumentsService:
 
         Raises
         ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
         MarkLogicError
             If MarkLogic returns an error
         """
@@ -179,6 +200,7 @@ class DocumentsService:
             category=category,
             database=database,
             txid=txid,
+            timeout=timeout,
         )
         return next(docs) if isinstance(uris, str) else {doc.uri: doc for doc in docs}
 
@@ -189,6 +211,7 @@ class DocumentsService:
         category: Category | str | list[Category | str] | None = None,
         database: str | None = None,
         txid: str | None = None,
+        timeout=UNSET,
     ) -> Iterator[Document]:
         """Return document(s) as an iterator, suitable for batch processing.
 
@@ -206,6 +229,12 @@ class DocumentsService:
             Perform this operation on the named content database.
         txid : str | None, default None
             Perform this operation within the named multi-statement transaction.
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request HTTP timeout. Unset uses the client's configured
+            timeout; None disables every HTTP timeout; a number sets all four
+            components to that many seconds; an httpx.Timeout overrides them.
+            When the operation issues several requests it applies to each of
+            them independently, not as a shared budget, and is not persisted.
 
         Returns
         -------
@@ -214,6 +243,9 @@ class DocumentsService:
 
         Raises
         ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
         MarkLogicError
             If MarkLogic returns an error
         """
@@ -226,7 +258,7 @@ class DocumentsService:
                 data_format="json",
                 txid=txid,
             )
-            resp = self._api.call(call)
+            resp = self._api.call(call, timeout=timeout)
             if not resp.is_success:
                 resp_body = MLResponseParser.parse(resp)
                 raise MarkLogicError(resp_body["errorResponse"])
@@ -241,6 +273,7 @@ class DocumentsService:
         temporal_collection: str | None = None,
         wipe_temporal: bool | None = None,
         txid: str | None = None,
+        timeout=UNSET,
     ):
         """Delete document(s) content or metadata in a MarkLogic database.
 
@@ -262,9 +295,18 @@ class DocumentsService:
             Remove all versions of a temporal document.
         txid : str | None, default None
             Perform this operation within the named multi-statement transaction.
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request HTTP timeout. Unset uses the client's configured
+            timeout; None disables every HTTP timeout; a number sets all four
+            components to that many seconds; an httpx.Timeout overrides them.
+            When the operation issues several requests it applies to each of
+            them independently, not as a shared budget, and is not persisted.
 
         Raises
         ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
         MarkLogicError
             If MarkLogic returns an error
         """
@@ -278,7 +320,7 @@ class DocumentsService:
                 wipe_temporal=wipe_temporal,
                 txid=txid,
             )
-            resp = self._api.call(call)
+            resp = self._api.call(call, timeout=timeout)
             if not resp.is_success:
                 resp_body = MLResponseParser.parse(resp)
                 raise MarkLogicError(resp_body["errorResponse"])
@@ -544,8 +586,40 @@ class AsyncDocumentsService:
         database: str | None = None,
         temporal_collection: str | None = None,
         txid: str | None = None,
+        timeout=UNSET,
     ) -> dict:
-        """Write documents to MarkLogic."""
+        """Write (create or update) document(s) content or metadata.
+
+        Parameters
+        ----------
+        data : Document | Metadata | list[Document | Metadata]
+            One or more document or default metadata.
+        database : str | None, default None
+            Perform this operation on the named content database.
+        temporal_collection : str | None, default None
+            Temporal collection name.
+        txid : str | None, default None
+            Perform this operation within the named multi-statement transaction.
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request HTTP timeout. Unset uses the client's configured
+            timeout; None disables every HTTP timeout; a number sets all four
+            components to that many seconds; an httpx.Timeout overrides them.
+            When the operation issues several requests it applies to each of
+            them independently, not as a shared budget, and is not persisted.
+
+        Returns
+        -------
+        dict
+            An origin response from a MarkLogic server.
+
+        Raises
+        ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
+        MarkLogicError
+            If MarkLogic returns an error
+        """
         body_parts = DocumentsSender.parse(data)
         call = DocumentsPostCall(
             body_parts=body_parts,
@@ -553,7 +627,7 @@ class AsyncDocumentsService:
             temporal_collection=temporal_collection,
             txid=txid,
         )
-        resp = await self._api.call(call)
+        resp = await self._api.call(call, timeout=timeout)
         if not resp.is_success:
             resp_body = MLResponseParser.parse(resp)
             raise MarkLogicError(resp_body["errorResponse"])
@@ -566,13 +640,49 @@ class AsyncDocumentsService:
         category: Category | str | list[Category | str] | None = None,
         database: str | None = None,
         txid: str | None = None,
+        timeout=UNSET,
     ) -> Document | dict[str, Document]:
-        """Read documents from MarkLogic."""
+        """Return document(s) content or metadata from a MarkLogic database.
+
+        When uris is a string it returns a single Document instance. Otherwise,
+        result is a dict mapping URI to Document.
+
+        Parameters
+        ----------
+        uris : str | list[str] | tuple[str] | set[str]
+            One or more URIs for documents in the database.
+        category : Category | str | list[Category | str] | None, default None
+            The category of data to fetch about the requested document.
+        database : str | None, default None
+            Perform this operation on the named content database.
+        txid : str | None, default None
+            Perform this operation within the named multi-statement transaction.
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request HTTP timeout. Unset uses the client's configured
+            timeout; None disables every HTTP timeout; a number sets all four
+            components to that many seconds; an httpx.Timeout overrides them.
+            When the operation issues several requests it applies to each of
+            them independently, not as a shared budget, and is not persisted.
+
+        Returns
+        -------
+        Document | dict[str, Document]
+            A single document when uris is a string, otherwise a dict keyed by URI.
+
+        Raises
+        ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
+        MarkLogicError
+            If MarkLogic returns an error
+        """
         stream = self.read_stream(
             uris,
             category=category,
             database=database,
             txid=txid,
+            timeout=timeout,
         )
         if isinstance(uris, str):
             return await stream.__anext__()
@@ -585,12 +695,43 @@ class AsyncDocumentsService:
         category: Category | str | list[Category | str] | None = None,
         database: str | None = None,
         txid: str | None = None,
+        timeout=UNSET,
     ) -> AsyncIterator[Document]:
-        """Read documents from MarkLogic as a stream.
+        """Return document(s) as an iterator, suitable for batch processing.
 
-        URIs are transparently split into batches whose combined query string
-        stays below the httpx URL length limit; each batch is awaited
-        separately so iteration remains lazy.
+        Unlike read(), does not materialize results into a dict. URIs are
+        transparently split into batches whose combined query string stays below
+        the httpx URL length limit; each batch is a separate HTTP request.
+
+        Parameters
+        ----------
+        uris : str | list[str] | tuple[str] | set[str]
+            One or more URIs for documents in the database.
+        category : Category | str | list[Category | str] | None, default None
+            The category of data to fetch about the requested document.
+        database : str | None, default None
+            Perform this operation on the named content database.
+        txid : str | None, default None
+            Perform this operation within the named multi-statement transaction.
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request HTTP timeout. Unset uses the client's configured
+            timeout; None disables every HTTP timeout; a number sets all four
+            components to that many seconds; an httpx.Timeout overrides them.
+            When the operation issues several requests it applies to each of
+            them independently, not as a shared budget, and is not persisted.
+
+        Returns
+        -------
+        AsyncIterator[Document]
+            Documents from the database.
+
+        Raises
+        ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
+        MarkLogicError
+            If MarkLogic returns an error
         """
         category = _normalize_category(category)
         for batch in _batched_uris(uris):
@@ -601,7 +742,7 @@ class AsyncDocumentsService:
                 data_format="json",
                 txid=txid,
             )
-            resp = await self._api.call(call)
+            resp = await self._api.call(call, timeout=timeout)
             if not resp.is_success:
                 resp_body = MLResponseParser.parse(resp)
                 raise MarkLogicError(resp_body["errorResponse"])
@@ -617,8 +758,43 @@ class AsyncDocumentsService:
         temporal_collection: str | None = None,
         wipe_temporal: bool | None = None,
         txid: str | None = None,
+        timeout=UNSET,
     ):
-        """Delete documents from MarkLogic."""
+        """Delete document(s) content or metadata in a MarkLogic database.
+
+        URIs are transparently split into batches whose combined query string
+        stays below the httpx URL length limit; each batch is a separate
+        HTTP request.
+
+        Parameters
+        ----------
+        uris : str | list[str] | tuple[str] | set[str]
+            The URI of a document to delete.
+        category : Category | str | list[Category | str] | None, default None
+            The category of data to remove/reset.
+        database : str | None, default None
+            Perform this operation on the named content database.
+        temporal_collection : str | None, default None
+            Temporal collection name.
+        wipe_temporal : bool | None, default None
+            Remove all versions of a temporal document.
+        txid : str | None, default None
+            Perform this operation within the named multi-statement transaction.
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request HTTP timeout. Unset uses the client's configured
+            timeout; None disables every HTTP timeout; a number sets all four
+            components to that many seconds; an httpx.Timeout overrides them.
+            When the operation issues several requests it applies to each of
+            them independently, not as a shared budget, and is not persisted.
+
+        Raises
+        ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
+        MarkLogicError
+            If MarkLogic returns an error
+        """
         category = _normalize_category(category)
         for batch in _batched_uris(uris):
             call = DocumentsDeleteCall(
@@ -629,7 +805,7 @@ class AsyncDocumentsService:
                 wipe_temporal=wipe_temporal,
                 txid=txid,
             )
-            resp = await self._api.call(call)
+            resp = await self._api.call(call, timeout=timeout)
             if not resp.is_success:
                 resp_body = MLResponseParser.parse(resp)
                 raise MarkLogicError(resp_body["errorResponse"])

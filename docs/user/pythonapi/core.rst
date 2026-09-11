@@ -51,6 +51,26 @@ conservative: transport-level retries are enabled for idempotent methods only.
 If you need a different policy, pass a custom ``retry`` strategy when initializing
 the client.
 
+Connection-pool limits can be customized the same way via a ``limits`` argument
+(an ``httpx.Limits``). Unlike ``retry``, there is no library default: when
+omitted, ``limits`` is left unset and ``httpx`` applies its own default.
+
+The ``timeout`` controls how long individual HTTP phases may wait. It is a Python HTTP
+setting, never an environment YAML value. Set it on the client (or its
+``HTTPConfig``) as a default, and override it per request with the keyword-only
+``timeout`` accepted by every operation - ``ml.eval.xquery(code, timeout=2)``,
+``ml.healthcheck(timeout=2)`` and so on - without mutating the shared client
+configuration. It accepts a number (all four ``httpx.Timeout`` components -
+``connect``, ``read``, ``write``, ``pool`` - set to that many seconds), a full
+``httpx.Timeout`` (components set independently), or ``None`` to disable every
+HTTP timeout. When omitted it falls back to the client default, ultimately
+``DEFAULT_TIMEOUT`` (``connect=5``, ``read=60``, ``write=60``, ``pool=5``); the
+health probe defaults to ``HEALTH_TIMEOUT`` (5 seconds). This client timeout is
+distinct from any MarkLogic server-side execution limit, and with retries
+enabled it applies per attempt. It is not a total deadline: streaming,
+multiple HTTP phases, retries and backoff can extend the wall-clock duration. See
+:doc:`../setup` for the full precedence and examples.
+
 ``HttpClient`` also exposes the standard MarkLogic endpoint ports as public constants:
 
 - ``MARKLOGIC_APP_SERVICES_PORT`` = ``8000``
@@ -160,10 +180,14 @@ client's lifecycle, requests use short-lived sessions.
 
 An auxiliary API reuses the primary session when its complete configuration
 matches, including injected configurations on custom ports. Matching includes
-host, connection mode, credentials, authentication and retry strategy. For
-custom auth handlers and retry strategies, sharing requires the same object;
-separately constructed strategies remain separate even if their fields match.
-This avoids combining custom behavior by comparing only a port or URL.
+host, connection mode, credentials, authentication, retry strategy, pool limits
+and timeout. Custom auth handlers and retry strategies must be the same object.
+Explicit limits and effective timeouts are compared by value, so independently
+constructed settings with equal components can share a session. Unset limits
+continue to defer to HTTPX defaults.
+Timeout and limits properties return copies. Change settings with
+``config.clone(timeout=..., limits=...)``; mutating a returned object does not
+change the configuration, its clones, presets or an already-open session.
 
 .. code-block:: python
 
@@ -1482,19 +1506,24 @@ The probe maps the response to a verdict:
   that the node is unhealthy
 
 By default, health checks use a configuration derived from the primary
-configuration, overriding the port to ``7997``, authentication to none, and
-retry to ``NO_RETRY_STRATEGY``. These defaults also apply when the primary
-already targets ``7997``; an identical effective configuration reuses its session. Cloud connections retain their gateway port and
-Cloud authentication, while health requests still default to no retries.
+configuration, overriding the port to ``7997``, authentication to none, retry
+to ``NO_RETRY_STRATEGY`` and timeout to ``HEALTH_TIMEOUT`` (5 seconds) - the
+health probe uses ``HEALTH_TIMEOUT`` regardless of the primary client's
+timeout. These defaults also apply when the primary already targets ``7997``;
+an identical effective configuration reuses its session. Cloud connections
+retain their gateway port and Cloud authentication, while health requests still
+default to no retries. :meth:`~mlclient.MLClient.healthcheck` accepts a
+keyword-only ``timeout`` to override the probe's default for a single call.
 
 Pass a resolved :class:`~mlclient.http_config.HTTPConfig` as ``health_config``
 to supply the health connection explicitly. Its host, port, authentication
-and TLS settings are preserved. When ``retry`` was omitted or passed as
-``None``, health requests use ``NO_RETRY_STRATEGY``. An explicitly supplied
-strategy is preserved, including ``DEFAULT_RETRY_STRATEGY`` itself.
-``HTTPConfig.clone()`` retains whether retry was explicitly configured;
-``has_explicit_retry`` exposes that distinction without changing the normal
-``HTTPConfig.retry`` default for other requests.
+and TLS settings are preserved. Retry and timeout resolve independently: when
+``retry`` was omitted, health requests use ``NO_RETRY_STRATEGY``, and when
+``timeout`` was omitted they use ``HEALTH_TIMEOUT``; an explicitly supplied
+strategy or timeout is preserved, including ``None`` (which disables every HTTP
+timeout). ``HTTPConfig.clone()`` retains whether each was explicitly
+configured; ``has_explicit_retry`` and ``has_explicit_timeout`` expose that
+distinction without changing the normal defaults for other requests.
 
 .. code-block:: python
 

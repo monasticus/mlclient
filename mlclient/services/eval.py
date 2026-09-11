@@ -13,6 +13,7 @@ import aiofiles
 
 from mlclient.calls import EvalCall
 from mlclient.clients.api_client import ApiClient
+from mlclient.connection import UNSET
 
 if TYPE_CHECKING:
     from mlclient.clients.api_client import AsyncApiClient
@@ -49,6 +50,7 @@ class EvalService:
         database: str | None = None,
         txid: str | None = None,
         output_type: type | None = None,
+        timeout=UNSET,
         **kwargs,
     ) -> (
         bytes
@@ -75,12 +77,25 @@ class EvalService:
             Transaction identifier
         output_type : type | None, default None
             A raw output type (supported: str, bytes)
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request HTTP timeout for this evaluation. Unset uses the
+            client's configured timeout; None disables every HTTP timeout; a
+            number sets all four components to that many seconds; an
+            httpx.Timeout overrides them. It bounds the HTTP request only and is
+            never sent as a query variable - to pass a query variable literally
+            named "timeout" use variables={"timeout": ...}.
         kwargs : dict
             Key value arguments used as variables
 
         Returns
         -------
         Parsed evaluation result
+
+        Raises
+        ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
         """
         return self._eval(
             xq=code,
@@ -88,6 +103,7 @@ class EvalService:
             database=database,
             txid=txid,
             output_type=output_type,
+            timeout=timeout,
             **kwargs,
         )
 
@@ -99,6 +115,7 @@ class EvalService:
         database: str | None = None,
         txid: str | None = None,
         output_type: type | None = None,
+        timeout=UNSET,
         **kwargs,
     ) -> (
         bytes
@@ -125,12 +142,25 @@ class EvalService:
             Transaction identifier
         output_type : type | None, default None
             A raw output type (supported: str, bytes)
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request HTTP timeout for this evaluation. Unset uses the
+            client's configured timeout; None disables every HTTP timeout; a
+            number sets all four components to that many seconds; an
+            httpx.Timeout overrides them. It bounds the HTTP request only and is
+            never sent as a query variable - to pass a query variable literally
+            named "timeout" use variables={"timeout": ...}.
         kwargs : dict
             Key value arguments used as variables
 
         Returns
         -------
         Parsed evaluation result
+
+        Raises
+        ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
         """
         return self._eval(
             js=code,
@@ -138,6 +168,7 @@ class EvalService:
             database=database,
             txid=txid,
             output_type=output_type,
+            timeout=timeout,
             **kwargs,
         )
 
@@ -149,6 +180,7 @@ class EvalService:
         database: str | None = None,
         txid: str | None = None,
         output_type: type | None = None,
+        timeout=UNSET,
         **kwargs,
     ) -> (
         bytes
@@ -161,13 +193,47 @@ class EvalService:
         | ElemTree.Element
         | list
     ):
-        """Evaluate XQuery code. Alias for :meth:`xquery`."""
+        """Evaluate XQuery code in MarkLogic.
+
+        Parameters
+        ----------
+        code : str
+            Raw XQuery code to evaluate
+        variables : dict | None, default None
+            External variables
+        database : str | None, default None
+            Content database name or id
+        txid : str | None, default None
+            Transaction identifier
+        output_type : type | None, default None
+            A raw output type (supported: str, bytes)
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request HTTP timeout for this evaluation. Unset uses the
+            client's configured timeout; None disables every HTTP timeout; a
+            number sets all four components to that many seconds; an
+            httpx.Timeout overrides them. It bounds the HTTP request only and is
+            never sent as a query variable - to pass a query variable literally
+            named "timeout" use variables={"timeout": ...}.
+        kwargs : dict
+            Key value arguments used as variables
+
+        Returns
+        -------
+        Parsed evaluation result
+
+        Raises
+        ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
+        """
         return self.xquery(
             code,
             variables=variables,
             database=database,
             txid=txid,
             output_type=output_type,
+            timeout=timeout,
             **kwargs,
         )
 
@@ -179,6 +245,7 @@ class EvalService:
         database: str | None = None,
         txid: str | None = None,
         output_type: type | None = None,
+        timeout=UNSET,
         **kwargs,
     ) -> (
         bytes
@@ -191,13 +258,47 @@ class EvalService:
         | ElemTree.Element
         | list
     ):
-        """Evaluate JavaScript code. Alias for :meth:`javascript`."""
+        """Evaluate JavaScript code in MarkLogic.
+
+        Parameters
+        ----------
+        code : str
+            Raw JavaScript code to evaluate
+        variables : dict | None, default None
+            External variables
+        database : str | None, default None
+            Content database name or id
+        txid : str | None, default None
+            Transaction identifier
+        output_type : type | None, default None
+            A raw output type (supported: str, bytes)
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request HTTP timeout for this evaluation. Unset uses the
+            client's configured timeout; None disables every HTTP timeout; a
+            number sets all four components to that many seconds; an
+            httpx.Timeout overrides them. It bounds the HTTP request only and is
+            never sent as a query variable - to pass a query variable literally
+            named "timeout" use variables={"timeout": ...}.
+        kwargs : dict
+            Key value arguments used as variables
+
+        Returns
+        -------
+        Parsed evaluation result
+
+        Raises
+        ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
+        """
         return self.javascript(
             code,
             variables=variables,
             database=database,
             txid=txid,
             output_type=output_type,
+            timeout=timeout,
             **kwargs,
         )
 
@@ -209,6 +310,7 @@ class EvalService:
         database: str | None = None,
         txid: str | None = None,
         output_type: type | None = None,
+        timeout=UNSET,
         **kwargs,
     ) -> (
         bytes
@@ -235,12 +337,25 @@ class EvalService:
             Transaction identifier
         output_type : type | None, default None
             A raw output type (supported: str, bytes)
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request HTTP timeout for this evaluation. Unset uses the
+            client's configured timeout; None disables every HTTP timeout; a
+            number sets all four components to that many seconds; an
+            httpx.Timeout overrides them. It bounds the HTTP request only and is
+            never sent as a query variable - to pass a query variable literally
+            named "timeout" use variables={"timeout": ...}.
         kwargs : dict
             Key value arguments used as variables
 
         Returns
         -------
         Parsed evaluation result
+
+        Raises
+        ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
         """
         return self._eval(
             file=path,
@@ -248,6 +363,7 @@ class EvalService:
             database=database,
             txid=txid,
             output_type=output_type,
+            timeout=timeout,
             **kwargs,
         )
 
@@ -261,6 +377,7 @@ class EvalService:
         database: str | None = None,
         txid: str | None = None,
         output_type: type | None = None,
+        timeout=UNSET,
         **kwargs,
     ):
         """Evaluate code in a MarkLogic server (general-purpose).
@@ -284,6 +401,13 @@ class EvalService:
             Transaction identifier
         output_type : type | None, default None
             A raw output type (supported: str, bytes)
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request HTTP timeout for this evaluation. Unset uses the
+            client's configured timeout; None disables every HTTP timeout; a
+            number sets all four components to that many seconds; an
+            httpx.Timeout overrides them. It bounds the HTTP request only and is
+            never sent as a query variable - to pass a query variable literally
+            named "timeout" use variables={"timeout": ...}.
         kwargs : dict
             Key value arguments used as variables
 
@@ -293,6 +417,9 @@ class EvalService:
 
         Raises
         ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
         MarkLogicError
             If MarkLogic returns an error
         """
@@ -304,6 +431,7 @@ class EvalService:
             database=database,
             txid=txid,
             output_type=output_type,
+            timeout=timeout,
             **kwargs,
         )
 
@@ -316,6 +444,7 @@ class EvalService:
         database: str | None = None,
         txid: str | None = None,
         output_type: type | None = None,
+        timeout=UNSET,
         **kwargs,
     ):
         """Execute eval and return parsed result."""
@@ -329,7 +458,7 @@ class EvalService:
             txid=txid,
             **kwargs,
         )
-        resp = self._api.call(call)
+        resp = self._api.call(call, timeout=timeout)
         parsed_resp = MLResponseParser.parse(resp, output_type=output_type)
         if not resp.is_success:
             raise MarkLogicError(parsed_resp)
@@ -442,6 +571,7 @@ class AsyncEvalService:
         database: str | None = None,
         txid: str | None = None,
         output_type: type | None = None,
+        timeout=UNSET,
         **kwargs,
     ) -> (
         bytes
@@ -454,13 +584,47 @@ class AsyncEvalService:
         | ElemTree.Element
         | list
     ):
-        """Evaluate XQuery code in MarkLogic."""
+        """Evaluate XQuery code in MarkLogic.
+
+        Parameters
+        ----------
+        code : str
+            Raw XQuery code to evaluate
+        variables : dict | None, default None
+            External variables
+        database : str | None, default None
+            Content database name or id
+        txid : str | None, default None
+            Transaction identifier
+        output_type : type | None, default None
+            A raw output type (supported: str, bytes)
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request HTTP timeout for this evaluation. Unset uses the
+            client's configured timeout; None disables every HTTP timeout; a
+            number sets all four components to that many seconds; an
+            httpx.Timeout overrides them. It bounds the HTTP request only and is
+            never sent as a query variable - to pass a query variable literally
+            named "timeout" use variables={"timeout": ...}.
+        kwargs : dict
+            Key value arguments used as variables
+
+        Returns
+        -------
+        Parsed evaluation result
+
+        Raises
+        ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
+        """
         return await self._eval(
             xq=code,
             variables=variables,
             database=database,
             txid=txid,
             output_type=output_type,
+            timeout=timeout,
             **kwargs,
         )
 
@@ -472,6 +636,7 @@ class AsyncEvalService:
         database: str | None = None,
         txid: str | None = None,
         output_type: type | None = None,
+        timeout=UNSET,
         **kwargs,
     ) -> (
         bytes
@@ -484,13 +649,47 @@ class AsyncEvalService:
         | ElemTree.Element
         | list
     ):
-        """Evaluate JavaScript code in MarkLogic."""
+        """Evaluate JavaScript code in MarkLogic.
+
+        Parameters
+        ----------
+        code : str
+            Raw JavaScript code to evaluate
+        variables : dict | None, default None
+            External variables
+        database : str | None, default None
+            Content database name or id
+        txid : str | None, default None
+            Transaction identifier
+        output_type : type | None, default None
+            A raw output type (supported: str, bytes)
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request HTTP timeout for this evaluation. Unset uses the
+            client's configured timeout; None disables every HTTP timeout; a
+            number sets all four components to that many seconds; an
+            httpx.Timeout overrides them. It bounds the HTTP request only and is
+            never sent as a query variable - to pass a query variable literally
+            named "timeout" use variables={"timeout": ...}.
+        kwargs : dict
+            Key value arguments used as variables
+
+        Returns
+        -------
+        Parsed evaluation result
+
+        Raises
+        ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
+        """
         return await self._eval(
             js=code,
             variables=variables,
             database=database,
             txid=txid,
             output_type=output_type,
+            timeout=timeout,
             **kwargs,
         )
 
@@ -502,6 +701,7 @@ class AsyncEvalService:
         database: str | None = None,
         txid: str | None = None,
         output_type: type | None = None,
+        timeout=UNSET,
         **kwargs,
     ) -> (
         bytes
@@ -514,13 +714,47 @@ class AsyncEvalService:
         | ElemTree.Element
         | list
     ):
-        """Evaluate XQuery code. Alias for :meth:`xquery`."""
+        """Evaluate XQuery code in MarkLogic.
+
+        Parameters
+        ----------
+        code : str
+            Raw XQuery code to evaluate
+        variables : dict | None, default None
+            External variables
+        database : str | None, default None
+            Content database name or id
+        txid : str | None, default None
+            Transaction identifier
+        output_type : type | None, default None
+            A raw output type (supported: str, bytes)
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request HTTP timeout for this evaluation. Unset uses the
+            client's configured timeout; None disables every HTTP timeout; a
+            number sets all four components to that many seconds; an
+            httpx.Timeout overrides them. It bounds the HTTP request only and is
+            never sent as a query variable - to pass a query variable literally
+            named "timeout" use variables={"timeout": ...}.
+        kwargs : dict
+            Key value arguments used as variables
+
+        Returns
+        -------
+        Parsed evaluation result
+
+        Raises
+        ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
+        """
         return await self.xquery(
             code,
             variables=variables,
             database=database,
             txid=txid,
             output_type=output_type,
+            timeout=timeout,
             **kwargs,
         )
 
@@ -532,6 +766,7 @@ class AsyncEvalService:
         database: str | None = None,
         txid: str | None = None,
         output_type: type | None = None,
+        timeout=UNSET,
         **kwargs,
     ) -> (
         bytes
@@ -544,13 +779,47 @@ class AsyncEvalService:
         | ElemTree.Element
         | list
     ):
-        """Evaluate JavaScript code. Alias for :meth:`javascript`."""
+        """Evaluate JavaScript code in MarkLogic.
+
+        Parameters
+        ----------
+        code : str
+            Raw JavaScript code to evaluate
+        variables : dict | None, default None
+            External variables
+        database : str | None, default None
+            Content database name or id
+        txid : str | None, default None
+            Transaction identifier
+        output_type : type | None, default None
+            A raw output type (supported: str, bytes)
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request HTTP timeout for this evaluation. Unset uses the
+            client's configured timeout; None disables every HTTP timeout; a
+            number sets all four components to that many seconds; an
+            httpx.Timeout overrides them. It bounds the HTTP request only and is
+            never sent as a query variable - to pass a query variable literally
+            named "timeout" use variables={"timeout": ...}.
+        kwargs : dict
+            Key value arguments used as variables
+
+        Returns
+        -------
+        Parsed evaluation result
+
+        Raises
+        ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
+        """
         return await self.javascript(
             code,
             variables=variables,
             database=database,
             txid=txid,
             output_type=output_type,
+            timeout=timeout,
             **kwargs,
         )
 
@@ -562,6 +831,7 @@ class AsyncEvalService:
         database: str | None = None,
         txid: str | None = None,
         output_type: type | None = None,
+        timeout=UNSET,
         **kwargs,
     ) -> (
         bytes
@@ -574,13 +844,47 @@ class AsyncEvalService:
         | ElemTree.Element
         | list
     ):
-        """Evaluate code from a file in MarkLogic (auto-detect language)."""
+        """Evaluate code from a file in MarkLogic (auto-detect language).
+
+        Parameters
+        ----------
+        path : str
+            File path to the code to evaluate
+        variables : dict | None, default None
+            External variables
+        database : str | None, default None
+            Content database name or id
+        txid : str | None, default None
+            Transaction identifier
+        output_type : type | None, default None
+            A raw output type (supported: str, bytes)
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request HTTP timeout for this evaluation. Unset uses the
+            client's configured timeout; None disables every HTTP timeout; a
+            number sets all four components to that many seconds; an
+            httpx.Timeout overrides them. It bounds the HTTP request only and is
+            never sent as a query variable - to pass a query variable literally
+            named "timeout" use variables={"timeout": ...}.
+        kwargs : dict
+            Key value arguments used as variables
+
+        Returns
+        -------
+        Parsed evaluation result
+
+        Raises
+        ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
+        """
         return await self._eval(
             file=path,
             variables=variables,
             database=database,
             txid=txid,
             output_type=output_type,
+            timeout=timeout,
             **kwargs,
         )
 
@@ -594,9 +898,52 @@ class AsyncEvalService:
         database: str | None = None,
         txid: str | None = None,
         output_type: type | None = None,
+        timeout=UNSET,
         **kwargs,
     ):
-        """Evaluate code in a MarkLogic server (general-purpose)."""
+        """Evaluate code in a MarkLogic server (general-purpose).
+
+        Dynamically resolves the code type from the provided parameters.
+        For explicit, typed calls prefer xquery(), javascript(), or file().
+
+        Parameters
+        ----------
+        file : str | None, default None
+            A file path of a code to evaluate
+        xq : str | None, default None
+            A raw XQuery code to evaluate
+        js : str | None, default None
+            A raw JavaScript code to evaluate
+        variables : dict | None, default None
+            External variables to pass to the query during evaluation
+        database : str | None, default None
+            Content database name or id
+        txid : str | None, default None
+            Transaction identifier
+        output_type : type | None, default None
+            A raw output type (supported: str, bytes)
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request HTTP timeout for this evaluation. Unset uses the
+            client's configured timeout; None disables every HTTP timeout; a
+            number sets all four components to that many seconds; an
+            httpx.Timeout overrides them. It bounds the HTTP request only and is
+            never sent as a query variable - to pass a query variable literally
+            named "timeout" use variables={"timeout": ...}.
+        kwargs : dict
+            Key value arguments used as variables
+
+        Returns
+        -------
+        Parsed evaluation result
+
+        Raises
+        ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
+        MarkLogicError
+            If MarkLogic returns an error
+        """
         return await self._eval(
             file=file,
             xq=xq,
@@ -605,6 +952,7 @@ class AsyncEvalService:
             database=database,
             txid=txid,
             output_type=output_type,
+            timeout=timeout,
             **kwargs,
         )
 
@@ -617,6 +965,7 @@ class AsyncEvalService:
         database: str | None = None,
         txid: str | None = None,
         output_type: type | None = None,
+        timeout=UNSET,
         **kwargs,
     ):
         """Execute eval and return parsed result."""
@@ -630,7 +979,7 @@ class AsyncEvalService:
             txid=txid,
             **kwargs,
         )
-        resp = await self._api.call(call)
+        resp = await self._api.call(call, timeout=timeout)
         parsed_resp = MLResponseParser.parse(resp, output_type=output_type)
         if not resp.is_success:
             raise MarkLogicError(parsed_resp)

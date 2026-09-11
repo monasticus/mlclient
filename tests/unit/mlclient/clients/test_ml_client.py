@@ -484,6 +484,42 @@ def test_healthcheck_returns_false_on_unhealthy_status():
 
 
 @respx.mock
+def test_healthcheck_defaults_to_health_timeout():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:7997/")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_empty_response_body()
+    route = ml_mocker.mock_head()
+
+    with MLClient(port=8000) as ml:
+        ml.healthcheck()
+    assert route.calls.last.request.extensions["timeout"] == {
+        "connect": 5.0,
+        "read": 5.0,
+        "write": 5.0,
+        "pool": 5.0,
+    }
+
+
+@respx.mock
+def test_healthcheck_per_call_timeout_reaches_transport():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:7997/")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_empty_response_body()
+    route = ml_mocker.mock_head()
+
+    with MLClient(port=8000) as ml:
+        ml.healthcheck(timeout=2)
+    assert route.calls.last.request.extensions["timeout"] == {
+        "connect": 2.0,
+        "read": 2.0,
+        "write": 2.0,
+        "pool": 2.0,
+    }
+
+
+@respx.mock
 def test_healthcheck_uses_injected_health_config():
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url("http://health.example.com:9997/")
@@ -702,18 +738,30 @@ def test_cached_auxiliary_uses_ad_hoc_session_after_context_exception(mocker):
 def test_matching_injected_config_reuses_primary_session(mocker, tier, call):
     opened = mocker.spy(http_client_module, "Client")
     closed = mocker.spy(httpx.Client, "close")
-    config = HTTPConfig.resolve(port=9002, auth="basic")
+    config = HTTPConfig.resolve(
+        port=9002,
+        auth="basic",
+        limits=httpx.Limits(max_connections=5),
+        timeout=30,
+    )
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url("http://localhost:9002" + call.endpoint)
     ml_mocker.with_response_code(200)
     ml_mocker.with_empty_response_body()
     ml_mocker.mock_get()
 
-    with MLClient(config=config, **{f"{tier}_config": config.clone()}) as ml:
+    with MLClient(
+        config=config,
+        **{
+            f"{tier}_config": config.clone(
+                limits=httpx.Limits(max_connections=5),
+                timeout=httpx.Timeout(30),
+            ),
+        },
+    ) as ml:
         getattr(ml, tier).call(call)
         assert opened.call_count == 1
     assert closed.call_count == 1
-
 
 
 @respx.mock

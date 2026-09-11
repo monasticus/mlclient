@@ -6,8 +6,9 @@ from httpx_retries import Retry
 from mlclient import AsyncMLClient, MLClient, MLClientManager, MLEnvironment
 from mlclient.clients import AsyncHttpClient, HttpClient
 from mlclient.clients import http_client as http_client_module
+from mlclient.connection import UNSET
 from mlclient.clients.http_client import NO_RETRY_STRATEGY
-from mlclient.http_config import DEFAULT_RETRY_STRATEGY
+from mlclient.http_config import DEFAULT_RETRY_STRATEGY, DEFAULT_TIMEOUT, HEALTH_TIMEOUT
 from mlclient.exceptions import (
     NoRestServerConfiguredError,
     NoSuchAppServerError,
@@ -160,6 +161,38 @@ def test_config_override_precedence_and_environment_isolation():
     assert manager.get_config("content", retry=None).retry is DEFAULT_RETRY_STRATEGY
     assert manager.get_config("content").port == 8100
     assert manager.config == original
+
+
+def test_timeout_defaults_per_server_kind_without_manager_override():
+    manager = MLClientManager("test")
+
+    assert manager.get_config("content").timeout == DEFAULT_TIMEOUT
+    assert not manager.get_config("content").has_explicit_timeout
+    assert manager.get_config("health").timeout == HEALTH_TIMEOUT
+
+
+def test_manager_timeout_applies_to_every_server_including_health():
+    manager = MLClientManager("test", timeout=30)
+
+    assert manager.get_config("content").timeout == httpx.Timeout(30.0)
+    assert manager.get_config("health").timeout == httpx.Timeout(30.0)
+    assert manager.get_config("health").has_explicit_timeout
+
+
+def test_factory_call_timeout_overrides_manager_and_unset_inherits_it():
+    manager = MLClientManager("test", timeout=30)
+
+    assert manager.get_config("content", timeout=5).timeout == httpx.Timeout(5.0)
+    assert manager.get_config("content", timeout=UNSET).timeout == httpx.Timeout(30.0)
+
+
+def test_timeout_none_disables_at_manager_and_call_level():
+    disabled_manager = MLClientManager("test", timeout=None)
+    assert disabled_manager.get_config("content").timeout == httpx.Timeout(None)
+    assert disabled_manager.get_config("health").timeout == httpx.Timeout(None)
+
+    manager = MLClientManager("test", timeout=30)
+    assert manager.get_config("content", timeout=None).timeout == httpx.Timeout(None)
 
 
 def test_unknown_config_override_is_rejected():

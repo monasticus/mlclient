@@ -42,8 +42,8 @@ from .env_show import EnvShowCommand
 from .eval import EvalCommand
 from .health import HealthCommand
 from .http import HttpCommand
-from .logs import LogsCommand
 from .log_level import LogLevelCommand
+from .logs import LogsCommand
 from .version import VersionCommand
 
 __all__ = [
@@ -54,6 +54,5 @@ __all__ = [
     "HttpCommand",
     "LogLevelCommand",
     "LogsCommand",
-    "LogLevelCommand",
     "VersionCommand",
 ]

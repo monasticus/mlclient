@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import logging
 from urllib.parse import parse_qs
 
 import httpx
@@ -150,7 +151,8 @@ def test_set_server_level_uses_appserver_eval(ml):
 
 
 @respx.mock
-def test_get_group_falls_back_to_manage_on_privilege_error(ml):
+def test_get_group_falls_back_to_manage_on_privilege_error(ml, caplog):
+    caplog.set_level(logging.DEBUG, logger="mlclient.services.log_level")
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url(EVAL_URL)
     ml_mocker.with_response_code(403)
@@ -166,6 +168,19 @@ def test_get_group_falls_back_to_manage_on_privilege_error(ml):
     ml_mocker.mock_get()
 
     assert _service(ml).get() == "notice"
+
+    messages = caplog.messages
+    attempt = next(
+        i for i, message in enumerate(messages) if "attempting eval" in message
+    )
+    fallback = next(
+        i for i, message in enumerate(messages) if "falling back to Manage" in message
+    )
+    manage = next(
+        i for i, message in enumerate(messages) if "attempting Manage" in message
+    )
+    assert attempt < fallback < manage
+    assert "Log-level Manage succeeded" in messages
 
 
 @pytest.mark.parametrize("server", [None, "App-Services"])
@@ -234,7 +249,8 @@ def test_get_server_falls_back_to_manage_servers_on_privilege_error(ml):
 
 
 @respx.mock
-def test_set_group_falls_back_to_manage_put_on_privilege_error(ml):
+def test_set_group_falls_back_to_manage_put_on_privilege_error(ml, caplog):
+    caplog.set_level(logging.DEBUG, logger="mlclient.services.log_level")
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url(EVAL_URL)
     ml_mocker.with_response_code(403)
@@ -250,6 +266,19 @@ def test_set_group_falls_back_to_manage_put_on_privilege_error(ml):
     ml_mocker.mock_put()
 
     assert _service(ml).set("error") == "error"
+
+    messages = caplog.messages
+    attempt = next(
+        i for i, message in enumerate(messages) if "attempting eval" in message
+    )
+    fallback = next(
+        i for i, message in enumerate(messages) if "falling back to Manage" in message
+    )
+    manage = next(
+        i for i, message in enumerate(messages) if "attempting Manage" in message
+    )
+    assert attempt < fallback < manage
+    assert "Log-level Manage succeeded" in messages
 
 
 @pytest.mark.parametrize("server", [None, "App-Services"])
@@ -344,6 +373,31 @@ def test_eval_timeout_propagates_without_manage_fallback(operation):
         args = () if operation == "get" else ("info",)
         with pytest.raises(httpx.ReadTimeout, match="read timed out"):
             call(*args, timeout=0.1)
+
+
+@pytest.mark.parametrize("operation", ["get", "set"])
+@respx.mock
+def test_manage_timeout_is_logged_and_propagated(operation, caplog):
+    caplog.set_level(logging.DEBUG, logger="mlclient.services.log_level")
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(EVAL_URL)
+    ml_mocker.with_response_code(403)
+    ml_mocker.with_response_body("Forbidden")
+    ml_mocker.mock_post()
+    route = respx.route(
+        method="GET" if operation == "get" else "PUT", url=GROUP_PROPS_URL,
+    )
+    route.mock(side_effect=httpx.ReadTimeout("manage timed out"))
+    with MLClient(retry=Retry(total=0)) as client:
+        service = LogLevelService(client.rest, client.manage)
+        call = getattr(service, operation)
+        args = () if operation == "get" else ("info",)
+        with pytest.raises(httpx.ReadTimeout, match="manage timed out"):
+            call(*args)
+    assert any(
+        "Manage transport failure" in message and "manage timed out" in message
+        for message in caplog.messages
+    )
 
 
 @respx.mock

@@ -29,8 +29,8 @@ from mlclient.cli.commands import (
     EvalCommand,
     HealthCommand,
     HttpCommand,
-    LogsCommand,
     LogLevelCommand,
+    LogsCommand,
     VersionCommand,
 )
 

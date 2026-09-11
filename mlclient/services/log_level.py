@@ -8,8 +8,11 @@ the equivalent Management REST resource.
 
 from __future__ import annotations
 
+import logging
 from typing import TYPE_CHECKING
 from xml.etree.ElementTree import ParseError
+
+from httpx import RequestError
 
 from mlclient.connection import UNSET
 from mlclient.exceptions import MarkLogicError, WrongParametersError
@@ -20,6 +23,8 @@ if TYPE_CHECKING:
 
     from mlclient.api.manage_api import ManageApi
     from mlclient.api.rest_api import RestApi
+
+logger = logging.getLogger(__name__)
 
 SUPPORTED_LEVELS = (
     "finest",
@@ -106,12 +111,18 @@ class LogLevelService:
             If HTTP transport fails; transport errors do not trigger fallback
         """
         self._validate(server, log_type, level=None)
-        resp = self._rest.eval.post(
-            xquery=self._get_code(server, log_type),
-            variables=self._vars(group, server),
-            timeout=timeout,
-        )
+        logger.debug("Log-level get: attempting eval using the Admin module")
+        try:
+            resp = self._rest.eval.post(
+                xquery=self._get_code(server, log_type),
+                variables=self._vars(group, server),
+                timeout=timeout,
+            )
+        except RequestError as exc:
+            logger.debug("Log-level eval transport failure; no fallback: %s", exc)
+            raise
         if resp.is_success:
+            logger.debug("Log-level eval succeeded")
             return MLResponseParser.parse(resp)
         _raise_unless_privilege_error(resp)
         return self._manage_get(group, server, log_type, timeout=timeout)
@@ -158,12 +169,18 @@ class LogLevelService:
             If HTTP transport fails; transport errors do not trigger fallback
         """
         self._validate(server, log_type, level=level)
-        resp = self._rest.eval.post(
-            xquery=self._set_code(server, log_type),
-            variables=self._vars(group, server, level),
-            timeout=timeout,
-        )
+        logger.debug("Log-level set: attempting eval using the Admin module")
+        try:
+            resp = self._rest.eval.post(
+                xquery=self._set_code(server, log_type),
+                variables=self._vars(group, server, level),
+                timeout=timeout,
+            )
+        except RequestError as exc:
+            logger.debug("Log-level eval transport failure; no fallback: %s", exc)
+            raise
         if resp.is_success:
+            logger.debug("Log-level eval succeeded")
             return level
         _raise_unless_privilege_error(resp)
         return self._manage_set(group, server, log_type, level, timeout=timeout)
@@ -204,19 +221,29 @@ class LogLevelService:
         RequestError
             If HTTP transport fails
         """
-        if server is None:
-            resp = self._manage.groups.get_properties(
-                group, data_format="json", timeout=timeout,
+        logger.debug("Log-level get: attempting Manage REST")
+        try:
+            if server is None:
+                resp = self._manage.groups.get_properties(
+                    group,
+                    data_format="json",
+                    timeout=timeout,
+                )
+            else:
+                resp = self._manage.servers.get_properties(
+                    server,
+                    group,
+                    data_format="json",
+                    timeout=timeout,
+                )
+        except RequestError as exc:
+            logger.debug(
+                "Log-level Manage transport failure; no further fallback: %s", exc,
             )
-        else:
-            resp = self._manage.servers.get_properties(
-                server,
-                group,
-                data_format="json",
-                timeout=timeout,
-            )
+            raise
         _raise_if_manage_failed(
-            resp, role="manage-admin" if server is None else "manage-user",
+            resp,
+            role="manage-admin" if server is None else "manage-user",
         )
         return resp.json()[f"{log_type}-log-level"]
 
@@ -260,12 +287,24 @@ class LogLevelService:
             If HTTP transport fails
         """
         body = {f"{log_type}-log-level": level}
-        if server is None:
-            resp = self._manage.groups.put_properties(group, body=body, timeout=timeout)
-        else:
-            resp = self._manage.servers.put_properties(
-                server, group, body=body, timeout=timeout,
+        logger.debug("Log-level set: attempting Manage REST")
+        try:
+            if server is None:
+                resp = self._manage.groups.put_properties(
+                    group, body=body, timeout=timeout,
+                )
+            else:
+                resp = self._manage.servers.put_properties(
+                    server,
+                    group,
+                    body=body,
+                    timeout=timeout,
+                )
+        except RequestError as exc:
+            logger.debug(
+                "Log-level Manage transport failure; no further fallback: %s", exc,
             )
+            raise
         _raise_if_manage_failed(resp, role="manage-admin")
         return level
 
@@ -460,8 +499,7 @@ def _is_privilege_error(resp: Response, error: dict | str) -> bool:
         Whether the response indicates missing authentication or privileges
     """
     return resp.status_code in _PRIVILEGE_STATUS_CODES or (
-        isinstance(error, dict)
-        and error.get("messageCode") in _PRIVILEGE_MESSAGE_CODES
+        isinstance(error, dict) and error.get("messageCode") in _PRIVILEGE_MESSAGE_CODES
     )
 
 
@@ -480,7 +518,15 @@ def _raise_unless_privilege_error(resp: Response) -> None:
     """
     error = _error_body(resp)
     if not _is_privilege_error(resp, error):
+        logger.debug(
+            "Log-level eval failed (HTTP %s); no fallback: %s", resp.status_code, error,
+        )
         raise MarkLogicError(error)
+    logger.debug(
+        "Log-level eval authorization failure (HTTP %s); falling back to Manage: %s",
+        resp.status_code,
+        error,
+    )
 
 
 def _raise_if_manage_failed(resp: Response, *, role: str) -> None:
@@ -499,8 +545,14 @@ def _raise_if_manage_failed(resp: Response, *, role: str) -> None:
         If Manage failed, including its original error and any role hint
     """
     if resp.is_success:
+        logger.debug("Log-level Manage succeeded")
         return
     error = _error_body(resp)
+    logger.debug(
+        "Log-level Manage failed (HTTP %s); no further fallback: %s",
+        resp.status_code,
+        error,
+    )
     if _is_privilege_error(resp, error):
         msg = (
             f"Log-level access denied. The Manage fallback requires '{role}' "

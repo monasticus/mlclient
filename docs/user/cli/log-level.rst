@@ -86,3 +86,8 @@ The supported levels are: ``finest``, ``finer``, ``fine``, ``debug``,
 ``-c / --connection`` accepts an environment connection identifier or a TCP
 port (1-65535). A port overrides the default REST connection port, retaining
 its other settings. Omit it to use the default REST connection.
+
+Log-level diagnostics are available with ``ml log-level -vv``. Debug messages
+show the eval attempt (which runs the Admin module), authorization failures
+that trigger Manage REST fallback, and the result or reason for failure.
+There is no separate Admin REST fallback.

@@ -264,7 +264,7 @@ def test_version_from_eval():
     ml_mocker.mock_post()
 
     with MLClient() as ml:
-        assert ml.version == (12, 0, 1)
+        assert ml.version.parts == (12, 0, 1, None)
 
 
 @respx.mock
@@ -276,8 +276,8 @@ def test_version_is_cached_after_first_resolution():
     route = ml_mocker.mock_post()
 
     with MLClient() as ml:
-        assert ml.version == (12, 0, 1)
-        assert ml.version == (12, 0, 1)
+        assert ml.version.parts == (12, 0, 1, None)
+        assert ml.version.parts == (12, 0, 1, None)
 
     assert route.call_count == 1
 
@@ -298,7 +298,7 @@ def test_version_falls_back_to_manage_when_eval_forbidden():
     ml_mocker.mock_get()
 
     with MLClient() as ml:
-        assert ml.version == (12, 0, 1)
+        assert ml.version.parts == (12, 0, 1, None)
 
 
 @respx.mock
@@ -324,7 +324,7 @@ def test_version_falls_back_to_admin_when_manage_forbidden():
     ml_mocker.mock_get()
 
     with MLClient() as ml:
-        assert ml.version == (12, 0, 1)
+        assert ml.version.parts == (12, 0, 1, None)
 
 
 @respx.mock
@@ -353,10 +353,10 @@ def test_version_reraises_eval_error_when_all_sources_fail():
 @pytest.mark.parametrize(
     ("raw", "expected"),
     [
-        ("12.0.1", (12, 0, 1)),
-        ("10.0-9.5", (10, 0, 9)),
-        ("12.0", (12, 0, 0)),
-        (" 12.0.1 ", (12, 0, 1)),
+        ("12.0.1", (12, 0, 1, None)),
+        ("10.0-9.5", (10, 0, 9, 5)),
+        ("12.0", (12, 0, None, None)),
+        (" 12.0.1 ", (12, 0, 1, None)),
     ],
 )
 @respx.mock
@@ -368,7 +368,7 @@ def test_version_normalizes_release_formats(raw, expected):
     ml_mocker.mock_post()
 
     with MLClient(retry=Retry(total=0)) as ml:
-        assert ml.version == expected
+        assert ml.version.parts == expected
 
 
 @pytest.mark.parametrize("raw", ["unknown", "error 12.0.1", "12", ""])
@@ -413,7 +413,7 @@ def test_version_skips_invalid_manage_response(manage_body):
     ml_mocker.mock_get()
 
     with MLClient(retry=Retry(total=0)) as ml:
-        assert ml.version == (12, 0, 0)
+        assert ml.version.parts == (12, 0, None, None)
 
 
 @pytest.mark.parametrize(

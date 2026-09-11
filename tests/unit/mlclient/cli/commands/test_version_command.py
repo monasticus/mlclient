@@ -39,19 +39,20 @@ def _setup(mocker, ml_config):
     mocker.patch("mlclient.ml_environment.MLEnvironment.load", return_value=ml_config)
 
 
+@pytest.mark.parametrize("version", ["12.0.1", "10.0-9.5", "12.0"])
 @respx.mock
-def test_command_version_prints_dotted():
+def test_command_version_prints_complete_version(version):
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url("http://localhost:8002/v1/eval")
     ml_mocker.with_response_code(200)
-    ml_mocker.with_response_body_part("string", "12.0.1")
+    ml_mocker.with_response_body_part("string", version)
     ml_mocker.mock_post()
 
     tester = _get_tester()
     status = tester.execute("-e test")
 
     assert status == 0
-    assert tester.io.fetch_output() == "12.0.1\n"
+    assert tester.io.fetch_output() == f"{version}\n"
     assert tester.command.option("environment") == "test"
     assert tester.command.option("rest-server") is None
 

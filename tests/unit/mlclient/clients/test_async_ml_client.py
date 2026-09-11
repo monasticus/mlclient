@@ -281,7 +281,7 @@ async def test_version_from_eval():
     ml_mocker.mock_post()
 
     async with AsyncMLClient() as ml:
-        assert await ml.version() == (12, 0, 1)
+        assert (await ml.version()).parts == (12, 0, 1, None)
 
 
 @pytest.mark.asyncio
@@ -301,7 +301,7 @@ async def test_version_falls_back_to_manage_when_eval_forbidden():
     ml_mocker.mock_get()
 
     async with AsyncMLClient() as ml:
-        assert await ml.version() == (12, 0, 1)
+        assert (await ml.version()).parts == (12, 0, 1, None)
 
 
 @pytest.mark.asyncio
@@ -328,7 +328,7 @@ async def test_version_falls_back_to_admin_when_manage_forbidden():
     ml_mocker.mock_get()
 
     async with AsyncMLClient() as ml:
-        assert await ml.version() == (12, 0, 1)
+        assert (await ml.version()).parts == (12, 0, 1, None)
 
 
 @pytest.mark.asyncio
@@ -360,10 +360,10 @@ async def test_version_reraises_eval_error_when_all_sources_fail():
 @pytest.mark.parametrize(
     ("raw", "expected"),
     [
-        ("12.0.1", (12, 0, 1)),
-        ("10.0-9.5", (10, 0, 9)),
-        ("12.0", (12, 0, 0)),
-        (" 12.0.1 ", (12, 0, 1)),
+        ("12.0.1", (12, 0, 1, None)),
+        ("10.0-9.5", (10, 0, 9, 5)),
+        ("12.0", (12, 0, None, None)),
+        (" 12.0.1 ", (12, 0, 1, None)),
     ],
 )
 @respx.mock
@@ -375,7 +375,7 @@ async def test_version_normalizes_release_formats(raw, expected):
     ml_mocker.mock_post()
 
     async with AsyncMLClient(retry=Retry(total=0)) as ml:
-        assert await ml.version() == expected
+        assert (await ml.version()).parts == expected
 
 
 @pytest.mark.asyncio
@@ -420,7 +420,7 @@ async def test_version_skips_invalid_manage_response(manage_body):
     ml_mocker.mock_get()
 
     async with AsyncMLClient(retry=Retry(total=0)) as ml:
-        assert await ml.version() == (12, 0, 0)
+        assert (await ml.version()).parts == (12, 0, None, None)
 
 
 @pytest.mark.asyncio

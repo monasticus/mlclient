@@ -22,7 +22,8 @@ version
       -v|vv|vvv, --verbose           Increase the verbosity of messages: 1 for normal output, 2 for more verbose output and 3 for debug.
 
 The command resolves the MarkLogic version through the environment's REST
-server (see :doc:`../setup`) and prints it in dotted form, e.g. ``12.0.1``.
+server (see :doc:`../setup`) and prints the complete original version,
+e.g. ``12.0.1`` or ``10.0-9.5``.
 
 The version comes from ``xdmp:version()``. When the connecting user lacks the
 eval privilege, the Manage and Admin server-config endpoints are tried in turn;
@@ -44,6 +45,5 @@ environment instead of the default:
 
     ml version -e local -s content
 
-Versions such as ``10.0-9.5`` are printed as ``10.0.9``. Build and hotfix
-suffixes are excluded; a missing patch defaults to zero. An invalid eval
+All version components, separators and suffixes are preserved. An invalid eval
 version makes the command fail with an error.

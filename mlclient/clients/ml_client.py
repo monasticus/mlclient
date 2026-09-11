@@ -15,7 +15,6 @@ using a layered composition architecture:
 from __future__ import annotations
 
 import logging
-import re
 from contextlib import suppress
 from functools import cached_property
 from types import TracebackType
@@ -32,6 +31,7 @@ from mlclient.connection import UNSET, CloudConfig, SSLConfig
 from mlclient.exceptions import MarkLogicError
 from mlclient.http_config import HTTPConfig
 from mlclient.ml_response_parser import MLResponseParser
+from mlclient.models.version import MarkLogicVersion
 from mlclient.services.documents import AsyncDocumentsService, DocumentsService
 from mlclient.services.eval import AsyncEvalService, EvalService
 from mlclient.services.logs import AsyncLogsService, LogsService
@@ -72,7 +72,7 @@ class MLClient:
     - ``ml.documents.read("/doc.json")`` -- high-level, parsed results
     - ``ml.eval.xquery("1+1")`` -- high-level, parsed results
     - ``ml.logs.get(log_type=...)`` -- high-level, parsed results
-    - ``ml.version`` -- MarkLogic version as a ``(major, minor, patch)`` tuple
+    - ``ml.version`` -- complete MarkLogic version with four numeric parts
     - ``ml.transaction(database=...)`` -- open a scoped transaction (context manager)
 
     Examples
@@ -305,8 +305,8 @@ class MLClient:
         return LogsService(ApiClient(self._manage_http))
 
     @cached_property
-    def version(self) -> tuple[int, int, int]:
-        """MarkLogic version as a ``(major, minor, patch)`` tuple.
+    def version(self) -> MarkLogicVersion:
+        """Complete MarkLogic version with four unpackable numeric parts.
 
         Resolved from ``xdmp:version()``. When the connecting user lacks the
         eval privilege the query fails; the Manage and Admin server-config
@@ -317,8 +317,9 @@ class MLClient:
 
         Returns
         -------
-        tuple[int, int, int]
-            The MarkLogic version, e.g. ``(12, 0, 1)`` for 12.0.1
+        MarkLogicVersion
+            The full server version. ``parts`` always contains four components,
+            with None for missing components; ``str()`` preserves the full version.
 
         Raises
         ------
@@ -330,33 +331,33 @@ class MLClient:
             If the eval result is not a recognizable version string
         """
         try:
-            return _parse_version(self.eval.xquery(_VERSION_QUERY))
+            return MarkLogicVersion(self.eval.xquery("xdmp:version()"))
         except MarkLogicError:
             version = self._version_from_secondaries()
             if version is not None:
                 return version
             raise
 
-    def _version_from_secondaries(self) -> tuple[int, int, int] | None:
+    def _version_from_secondaries(self) -> MarkLogicVersion | None:
         """Read the version from the Manage then the Admin server.
 
         Returns
         -------
-        tuple[int, int, int] | None
+        MarkLogicVersion | None
             The first usable version, or None when both endpoints fail.
             HTTP errors, transport failures and malformed responses are skipped.
         """
         with suppress(RequestError, ValueError, KeyError, TypeError):
             manage = self._manage_http.get(
-                _MANAGE_PROPERTIES_ENDPOINT,
+                "/manage/v2/properties",
                 headers={"Accept": "application/json"},
             )
             if manage.is_success:
-                return _parse_version(manage.json()["version"])
+                return MarkLogicVersion(manage.json()["version"])
         with suppress(RequestError, ValueError, ElementTree.ParseError):
             admin = self.admin.get_server_config()
             if admin.is_success:
-                return _parse_version(_admin_config_version(admin.text))
+                return MarkLogicVersion(_admin_config_version(admin.text))
         return None
 
     def transaction(
@@ -458,7 +459,7 @@ class AsyncMLClient:
     - ``ml.documents.read("/doc.json")`` -- high-level, parsed results
     - ``ml.eval.xquery("1+1")`` -- high-level, parsed results
     - ``ml.logs.get(log_type=...)`` -- high-level, parsed results
-    - ``await ml.version()`` -- MarkLogic version as a ``(major, minor, patch)`` tuple
+    - ``await ml.version()`` -- complete MarkLogic version with four numeric parts
     - ``ml.transaction(database=...)`` -- open a scoped transaction (context manager)
     """
 
@@ -633,8 +634,8 @@ class AsyncMLClient:
         """High-level logs service."""
         return AsyncLogsService(AsyncApiClient(self._manage_http))
 
-    async def version(self) -> tuple[int, int, int]:
-        """MarkLogic version as a ``(major, minor, patch)`` tuple.
+    async def version(self) -> MarkLogicVersion:
+        """Complete MarkLogic version with four unpackable numeric parts.
 
         Resolved from ``xdmp:version()``. When the connecting user lacks the
         eval privilege the query fails; the Manage and Admin server-config
@@ -645,8 +646,9 @@ class AsyncMLClient:
 
         Returns
         -------
-        tuple[int, int, int]
-            The MarkLogic version, e.g. ``(12, 0, 1)`` for 12.0.1
+        MarkLogicVersion
+            The full server version. ``parts`` always contains four components,
+            with None for missing components; ``str()`` preserves the full version.
 
         Raises
         ------
@@ -658,33 +660,33 @@ class AsyncMLClient:
             If the eval result is not a recognizable version string
         """
         try:
-            return _parse_version(await self.eval.xquery(_VERSION_QUERY))
+            return MarkLogicVersion(await self.eval.xquery("xdmp:version()"))
         except MarkLogicError:
             version = await self._version_from_secondaries()
             if version is not None:
                 return version
             raise
 
-    async def _version_from_secondaries(self) -> tuple[int, int, int] | None:
+    async def _version_from_secondaries(self) -> MarkLogicVersion | None:
         """Read the version from the Manage then the Admin server.
 
         Returns
         -------
-        tuple[int, int, int] | None
+        MarkLogicVersion | None
             The first usable version, or None when both endpoints fail.
             HTTP errors, transport failures and malformed responses are skipped.
         """
         with suppress(RequestError, ValueError, KeyError, TypeError):
             manage = await self._manage_http.get(
-                _MANAGE_PROPERTIES_ENDPOINT,
+                "/manage/v2/properties",
                 headers={"Accept": "application/json"},
             )
             if manage.is_success:
-                return _parse_version(manage.json()["version"])
+                return MarkLogicVersion(manage.json()["version"])
         with suppress(RequestError, ValueError, ElementTree.ParseError):
             admin = await self.admin.get_server_config()
             if admin.is_success:
-                return _parse_version(_admin_config_version(admin.text))
+                return MarkLogicVersion(_admin_config_version(admin.text))
         return None
 
     async def transaction(
@@ -764,40 +766,6 @@ class AsyncMLClient:
 
     def _get_restart_waiter(self) -> RestartWaiter:
         return RestartWaiter(self._http.config)
-
-
-_VERSION_QUERY = "xdmp:version()"
-_MANAGE_PROPERTIES_ENDPOINT = "/manage/v2/properties"
-
-
-def _parse_version(raw: str | None) -> tuple[int, int, int]:
-    """Normalize a dotted or legacy hyphenated server version.
-
-    Parameters
-    ----------
-    raw : str | None
-        Server version, e.g. ``12.0.1``, ``10.0-9.5`` or ``12.0``
-
-    Returns
-    -------
-    tuple[int, int, int]
-        Major, minor and patch; omitted patch defaults to zero. Build and
-        hotfix suffixes are excluded.
-
-    Raises
-    ------
-    ValueError
-        If the value is not a recognizable version string
-    """
-    match = re.fullmatch(
-        r"(\d+)\.(\d+)(?:[.-](\d+))?(?:[.-][A-Za-z0-9]+)*",
-        raw.strip() if isinstance(raw, str) else "",
-    )
-    if match is None:
-        msg = f"Invalid MarkLogic version: {raw!r}"
-        raise ValueError(msg)
-    major, minor, patch = match.groups(default="0")
-    return int(major), int(minor), int(patch)
 
 
 def _admin_config_version(server_config: str) -> str | None:

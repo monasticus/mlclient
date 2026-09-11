@@ -18,7 +18,7 @@ class VersionCommand(Command):
     """Reports the MarkLogic version of an environment.
 
     Resolves the version through the environment's REST App-Server and prints
-    it in dotted form, e.g. ``12.0.1``.
+    its complete original value, e.g. ``12.0.1`` or ``10.0-9.5``.
 
     Usage:
       version [options]
@@ -53,5 +53,5 @@ class VersionCommand(Command):
         manager = MLClientManager(self.option("environment"))
         with manager.get_client(self.option("rest-server")) as ml:
             version = ml.version
-        self.line(".".join(str(part) for part in version))
+        self.line(str(version))
         return 0

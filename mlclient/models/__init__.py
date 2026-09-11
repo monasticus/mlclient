@@ -26,6 +26,8 @@ This package exports the following classes:
         A class representing MarkLogic's document metadata.
     * Permission:
         A class representing MarkLogic's document permission.
+    * MarkLogicVersion
+        An immutable server version with four numeric parts.
     * Mimetype
         A class representing mime type
 
@@ -45,12 +47,14 @@ from .documents import (
     XMLDocument,
 )
 from .types import DocumentType, Mimetype
+from .version import MarkLogicVersion
 
 __all__ = [
     "BinaryDocument",
     "Document",
     "DocumentType",
     "JSONDocument",
+    "MarkLogicVersion",
     "Metadata",
     "MetadataDocument",
     "Mimetype",

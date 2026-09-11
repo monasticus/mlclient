@@ -148,10 +148,27 @@ Async
 CLI
 ---
 
+Create a local environment configuration, then run commands against it:
+
 .. code-block:: sh
 
-    ml eval -e local -x "xdmp:database() => xdmp:database-name()"
-    ml logs -e local -a 8002 --regex "XDMP-.*"
+    ml env init local
+    ml env show local
+    ml health
+    ml version
+    ml eval -x "xdmp:database() => xdmp:database-name()"
+    ml http get /v1/documents uri=/doc.xml
+    ml logs --regex "XDMP-.*"
+
+
+Server commands use ``local`` by default; use ``-e <name>`` to select another
+environment. The ``env`` commands take the environment name as an argument.
+The HTTP example reads an existing document. Run ``ml <command> --help`` for
+available options.
+
+For ``ml logs``, ``-s 8002`` selects the App Server port whose logs you want to read.
+For ``ml http``, ``ml eval``, and ``ml version``, ``-s rest`` instead selects a server
+identifier from the environment configuration.
 
 See :doc:`user/cli` for the full CLI reference.
 

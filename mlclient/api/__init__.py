@@ -9,7 +9,7 @@ It exports 3 top-level API group classes:
         Admin API (/admin/v1/* endpoints).
 
 It also exports resource-level API classes used by RestApi and ManageApi:
-    * DatabasesApi, DocumentsApi, EvalApi, ForestsApi, LogsApi,
+    * DatabasesApi, DocumentsApi, EvalApi, ForestsApi, GroupsApi, LogsApi,
       RolesApi, ServersApi, TransactionsApi, UsersApi
 
 Each resource-level API wraps ApiCall objects and returns raw httpx.Response objects.
@@ -20,6 +20,7 @@ from .databases import AsyncDatabasesApi, DatabasesApi
 from .documents import AsyncDocumentsApi, DocumentsApi
 from .eval import AsyncEvalApi, EvalApi
 from .forests import AsyncForestsApi, ForestsApi
+from .groups import AsyncGroupsApi, GroupsApi
 from .logs import AsyncLogsApi, LogsApi
 from .manage_api import AsyncManageApi, ManageApi
 from .rest_api import AsyncRestApi, RestApi
@@ -35,6 +36,7 @@ __all__ = [
     "AsyncDocumentsApi",
     "AsyncEvalApi",
     "AsyncForestsApi",
+    "AsyncGroupsApi",
     "AsyncLogsApi",
     "AsyncManageApi",
     "AsyncRestApi",
@@ -46,6 +48,7 @@ __all__ = [
     "DocumentsApi",
     "EvalApi",
     "ForestsApi",
+    "GroupsApi",
     "LogsApi",
     "ManageApi",
     "RestApi",

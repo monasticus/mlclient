@@ -5,6 +5,7 @@ High-level services providing parsed results from MarkLogic operations.
 
 from .documents import AsyncDocumentsService, DocumentsService
 from .eval import LOCAL_NS, AsyncEvalService, EvalService
+from .log_level import LogLevelService
 from .logs import AsyncLogsService, LogsService, LogType
 from .transactions import (
     AsyncTransactionService,
@@ -21,6 +22,7 @@ __all__ = [
     "AsyncTransactionService",
     "DocumentsService",
     "EvalService",
+    "LogLevelService",
     "LogType",
     "LogsService",
     "TransactionService",

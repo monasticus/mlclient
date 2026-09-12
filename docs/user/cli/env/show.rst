@@ -7,25 +7,25 @@ env show
       Lists MLClient environments, or renders one environment's settings
 
     Usage:
-      env show [options] [--] [<name>] [<setting>]
+      env show [options] [--] [<name> [<setting>]]
 
     Arguments:
-      name                 The environment name. Omit to list the available environments.
-      setting              A root setting name (host, protocol, ...) or an app server id.
+      name                  The environment name. Omit to list the available environments.
+      setting               A root setting name (host, protocol, ...) or an app server id.
 
     Options:
-      -g, --global         Read from the home directory instead of the current directory
-          --raw            Print the raw configuration file instead of a rendered table
-      -s, --secrets        Reveal secret values instead of masking them
-      -c, --copy           Copy a simple setting value to the clipboard, including secrets
+      -g, --global          Read from the home directory instead of the current directory
+          --raw             Print the raw configuration file instead of a rendered table
+      -s, --secrets         Reveal secret values instead of masking them
+      -c, --copy            Copy a simple setting value to the clipboard, including secrets
+      -h, --help            Display help for the given command. When no command is given display help for the list command.
+      -q, --quiet           Do not output any message.
+      -V, --version         Display this application version.
+          --ansi            Force ANSI output.
+          --no-ansi         Disable ANSI output.
+      -n, --no-interaction  Do not ask any interactive question.
+      -v|vv|vvv, --verbose  Increase the verbosity of messages: 1 for normal output, 2 for more verbose output and 3 for debug.
 
-      -h, --help           Display help for the given command. When no command is given display help for the list command.
-      -q, --quiet          Do not output any message.
-      -V, --version        Display this application version.
-          --ansi           Force ANSI output.
-          --no-ansi        Disable ANSI output.
-      -n, --no-interaction Do not ask any interactive question.
-      -v|vv|vvv, --verbose Increase the verbosity of messages: 1 for normal output, 2 for more verbose output and 3 for debug.
 
 The command reads the nearest ``.mlclient`` directory - the current directory
 or the closest ancestor that has one - or your home directory's with

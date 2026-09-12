@@ -1605,3 +1605,45 @@ For ``ml.http.request`` and its convenience methods (also on the asynchronous
 client), strings and bytes are sent as raw content even with a JSON content
 type. Dictionaries are JSON-encoded when the content type is JSON; otherwise
 they are submitted as form data. Header names are case-insensitive.
+
+
+Log-level configuration
+-----------------------
+
+The synchronous :class:`~mlclient.services.LogLevelService` supports the
+``log-level`` CLI command and can also be constructed with a client's API handles:
+
+.. code-block:: python
+
+    >>> from mlclient import MLClient
+    >>> from mlclient.services import LogLevelService
+    >>> with MLClient(username="admin", password="admin") as ml:
+    ...     levels = LogLevelService(ml.rest, ml.manage)
+    ...     current = levels.get(group="Default", log_type="file")
+    ...     levels.set(current, group="Default", log_type="file")
+
+Omit ``server`` to target a group, or supply an App Server name for its file
+log level. App Servers have no system log level. Names and levels are sent as
+external variables. Evaluation through the REST server is attempted first;
+only authorization failures trigger Management REST fallback. Transport and
+other server errors propagate. See :doc:`../cli/log-level` for supported levels
+and Management permissions.
+
+Both ``get`` and ``set`` accept a keyword-only ``timeout``:
+
+.. code-block:: python
+
+    >>> with MLClient(timeout=10) as ml:
+    ...     levels = LogLevelService(ml.rest, ml.manage)
+    ...     current = levels.get(timeout=2)
+    ...     levels.set(current, timeout=None)
+
+Omitting ``timeout`` uses the configuration of whichever client sends the
+request (REST or Manage). An explicit number, ``httpx.Timeout`` or ``None``
+is forwarded to both eval and any Management fallback. Each request has its
+own timeout; this is not a total deadline across both requests. Overrides do
+not change subsequent calls. A transport timeout propagates without triggering
+Management fallback.
+
+The group API wrappers also accept ``timeout`` on ``get_properties`` and
+``put_properties``, for both ``ml.manage.groups`` and the asynchronous client.

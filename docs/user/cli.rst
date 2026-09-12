@@ -25,6 +25,7 @@ MLClient provides you a nice command line interface using `cleo <https://github.
       help       Displays help for a command.
       http       Sends a raw HTTP request to any REST endpoint
       list       Lists commands.
+      log-level  Shows or sets a MarkLogic file/system log level
       logs       Sends a GET request to the /manage/v2/logs endpoint
       version    Reports the MarkLogic version of an environment
 
@@ -34,6 +35,21 @@ MLClient provides you a nice command line interface using `cleo <https://github.
 
 The former ``call eval`` and ``call logs`` commands are now ``eval`` and
 ``logs``. Use ``http`` for raw requests to other REST endpoints.
+
+Connection and target selection
+-------------------------------
+
+``http``, ``eval``, ``version`` and ``log-level`` use ``-c / --connection``
+to select a configured connection identifier or a TCP port. A numeric port
+changes the default REST connection's port and retains its other settings.
+
+``logs -s / --server`` selects whose logs to read by an environment identifier
+or port. ``log-level -s / --server`` instead takes the actual App Server name
+in MarkLogic. It does not select the connection used for the request.
+
+Server commands default to the ``local`` environment; ``-e / --environment``
+selects another environment. These connection options replace the former
+``-s / --rest-server``; ``logs --server`` replaces ``--app-server``.
 
 .. caution::
 
@@ -46,6 +62,12 @@ The former ``call eval`` and ``call logs`` commands are now ``eval`` and
    cli/logs
    cli/http
    cli/health
+   cli/log-level
    cli/version
    cli/env
 
+
+Log-level diagnostics are available with ``ml log-level -vv``. Debug messages
+show the eval attempt (which runs the Admin module), authorization failures
+that trigger Manage REST fallback, and the result or reason for failure.
+There is no separate Admin REST fallback.

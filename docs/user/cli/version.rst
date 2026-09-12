@@ -11,8 +11,7 @@ version
 
     Options:
       -e, --environment=ENVIRONMENT  The ML Client environment name [default: "local"]
-      -s, --rest-server=REST-SERVER  The ML REST Server environmental id
-
+      -c, --connection=CONNECTION    Connection identifier from the environment or TCP port
       -h, --help                     Display help for the given command. When no command is given display help for the list command.
       -q, --quiet                    Do not output any message.
       -V, --version                  Display this application version.
@@ -20,6 +19,7 @@ version
           --no-ansi                  Disable ANSI output.
       -n, --no-interaction           Do not ask any interactive question.
       -v|vv|vvv, --verbose           Increase the verbosity of messages: 1 for normal output, 2 for more verbose output and 3 for debug.
+
 
 The command resolves the MarkLogic version through the environment's REST
 server (see :doc:`../setup`) and prints the complete original version,
@@ -36,14 +36,18 @@ Report the version
 
 .. code-block:: bash
 
-    ml version -e local
+    ml version
 
-Pass ``--rest-server`` (``-s``) to select a specific REST App-Server id from the
+Pass ``--connection`` (``-c``) to select a specific REST App-Server id from the
 environment instead of the default:
 
 .. code-block:: bash
 
-    ml version -e local -s content
+    ml version -c content
 
 All version components, separators and suffixes are preserved. An invalid eval
 version makes the command fail with an error.
+
+``-c / --connection`` accepts an environment connection identifier or a TCP
+port (1-65535). A port overrides the default REST connection port, retaining
+its other settings. Omit it to use the default REST connection.

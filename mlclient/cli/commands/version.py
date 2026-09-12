@@ -12,6 +12,7 @@ from cleo.helpers import option
 from cleo.io.inputs.option import Option
 
 from mlclient import MLClientManager
+from mlclient.cli.connection import get_client
 
 
 class VersionCommand(Command):
@@ -26,8 +27,8 @@ class VersionCommand(Command):
     Options:
       -e, --environment=ENVIRONMENT
             The ML Client environment name [default: "local"]
-      -s, --rest-server=REST-SERVER
-            The ML REST Server environmental id
+      -c, --connection=CONNECTION
+            Connection identifier from the environment or TCP port
     """
 
     name: str = "version"
@@ -41,9 +42,9 @@ class VersionCommand(Command):
             default="local",
         ),
         option(
-            "rest-server",
-            "s",
-            description="The ML REST Server environmental id",
+            "connection",
+            "c",
+            description="Connection identifier from the environment or TCP port",
             flag=False,
         ),
     ]
@@ -51,7 +52,7 @@ class VersionCommand(Command):
     def handle(self) -> int:
         """Execute the command."""
         manager = MLClientManager(self.option("environment"))
-        with manager.get_client(self.option("rest-server")) as ml:
+        with get_client(manager, self.option("connection")) as ml:
             version = ml.version
         self.line(str(version))
         return 0

@@ -21,6 +21,7 @@ from cleo.io.outputs.output import Type
 from httpx import Headers, Response
 
 from mlclient import MLClientManager
+from mlclient.cli.connection import get_client
 from mlclient.clients import HttpClient
 from mlclient.exceptions import WrongParametersError
 
@@ -42,8 +43,8 @@ class HttpCommand(Command):
     Options:
       -e, --environment=ENVIRONMENT
             The ML Client environment name [default: "local"]
-      -s, --rest-server=REST-SERVER
-            The ML REST Server environmental id
+      -c, --connection=CONNECTION
+            Connection identifier from the environment or TCP port
       -b, --body=BODY
             Request body: a raw string, a file path, or @file-path
       -i, --include
@@ -79,9 +80,9 @@ class HttpCommand(Command):
             default="local",
         ),
         option(
-            "rest-server",
-            "s",
-            description="The ML REST Server environmental id",
+            "connection",
+            "c",
+            description="Connection identifier from the environment or TCP port",
             flag=False,
         ),
         option(
@@ -109,7 +110,7 @@ class HttpCommand(Command):
         if endpoint.scheme or endpoint.netloc or endpoint.fragment:
             msg = (
                 "Use an endpoint path without a host or fragment; "
-                "select its server with -s."
+                "select its connection with -c."
             )
             raise WrongParametersError(msg)
         params, headers = _parse_params(self.argument("params"))
@@ -119,7 +120,7 @@ class HttpCommand(Command):
         body = _read_body(self.option("body"))
 
         mgr = MLClientManager(self.option("environment"))
-        with mgr.get_client(self.option("rest-server")) as ml:
+        with get_client(mgr, self.option("connection")) as ml:
             response = ml.http.request(
                 method,
                 "/" + endpoint.path.lstrip("/"),

@@ -1,0 +1,1352 @@
+# Python API
+
+## Clients
+
+### Overview
+
+MLClient offers a layered architecture to access a MarkLogic Server: high-level services, mid-level API clients, and a low-level HTTP client. High-level services are designed for specific endpoints, such as `/v1/documents`. They provide a simple and intuitive API that covers all the functionality of each endpoint. The mid-level layer provides three API clients that mirror MarkLogic's API tiers: [RestApi][mlclient.api.RestApi] for `/v1/*` endpoints, [ManageApi][mlclient.api.ManageApi] for `/manage/v2/*` (port 8002), and [AdminApi][mlclient.api.AdminApi] for `/admin/v1/*` (port 8001). Each uses [ApiCall][mlclient.calls.ApiCall] objects to represent the parameters of any endpoint. The low-level [HttpClient][mlclient.HttpClient] lets you send raw HTTP requests to the server. You can learn more about services and clients in the following sections.
+
+Every layer is also available asynchronously through [AsyncMLClient][mlclient.AsyncMLClient], which mirrors [MLClient][mlclient.MLClient] 1:1. All methods become coroutines - just use `async with AsyncMLClient() as ml:` and `await` on each call. The same applies to the mid-level clients: [AsyncRestApi][mlclient.api.AsyncRestApi], [AsyncManageApi][mlclient.api.AsyncManageApi], [AsyncAdminApi][mlclient.api.AsyncAdminApi], and to the low-level [AsyncHttpClient][mlclient.AsyncHttpClient].
+
+### MLClient
+
+[MLClient][mlclient.MLClient] is the main entry point that provides layered access to MarkLogic through `.http`, `.rest`, `.manage`, `.admin`, and service properties.
+
+| Layer | Description |
+|----|----|
+| [MLClient][mlclient.MLClient] | Main entry point with layered access (`.http`, `.rest`, `.manage`, `.admin`, `.documents`, `.eval`, `.logs`) |
+| [AsyncMLClient][mlclient.AsyncMLClient] | Async variant of `MLClient` - same API, all methods are coroutines |
+| [HttpClient][mlclient.HttpClient] | Low-level HTTP client that accepts ML configuration and sends raw HTTP requests |
+| [AsyncHttpClient][mlclient.AsyncHttpClient] | Async variant of `HttpClient` |
+| [ApiClient][mlclient.ApiClient] | Mid-level client providing [call][mlclient.ApiClient.call] for [ApiCall][mlclient.calls.ApiCall] objects |
+| [AsyncApiClient][mlclient.AsyncApiClient] | Async variant of `ApiClient` |
+
+Internally, the underlying `HttpClient` uses `httpx`. Its default retry strategy is intentionally conservative: transport-level retries are enabled for idempotent methods only. If you need a different policy, pass a custom `retry` strategy when initializing the client.
+
+Connection-pool limits can be customized the same way via a `limits` argument (an `httpx.Limits`). Unlike `retry`, there is no library default: when omitted, `limits` is left unset and `httpx` applies its own default.
+
+The `timeout` controls how long individual HTTP phases may wait. It is a Python HTTP setting, never an environment YAML value. Set it on the client (or its `HTTPConfig`) as a default, and override it per request with the keyword-only `timeout` accepted by every operation - `ml.eval.xquery(code, timeout=2)`, `ml.healthcheck(timeout=2)` and so on - without mutating the shared client configuration. It accepts a number (all four `httpx.Timeout` components - `connect`, `read`, `write`, `pool` - set to that many seconds), a full `httpx.Timeout` (components set independently), or `None` to disable every HTTP timeout. When omitted it falls back to the client default, ultimately `DEFAULT_TIMEOUT` (`connect=5`, `read=60`, `write=60`, `pool=5`); the health probe defaults to `HEALTH_TIMEOUT` (5 seconds). This client timeout is distinct from any MarkLogic server-side execution limit, and with retries enabled it applies per attempt. It is not a total deadline: streaming, multiple HTTP phases, retries and backoff can extend the wall-clock duration. See [setup](setup.md) for the full precedence and examples.
+
+`HttpClient` also exposes the standard MarkLogic endpoint ports as public constants:
+
+- `MARKLOGIC_APP_SERVICES_PORT` = `8000`
+- `MARKLOGIC_ADMIN_PORT` = `8001`
+- `MARKLOGIC_MANAGE_PORT` = `8002`
+- `MARKLOGIC_HEALTHCHECK_PORT` = `7997`
+
+Three retry presets are also exported:
+
+- `DEFAULT_RETRY_STRATEGY` for normal requests
+- `RESTART_RETRY_STRATEGY` for Admin timestamp polling during restart windows
+- `NO_RETRY_STRATEGY` to send a request once with no retries (used by the health probe)
+
+#### Connection
+
+The easiest way to start a connection is to initialize [MLClient][mlclient.MLClient] as a context manager:
+
+```python
+>>> from mlclient import MLClient
+
+>>> with MLClient() as ml:
+...     resp = ml.http.get("/manage/v2/servers")
+```
+
+If you would like to explicitly connect and disconnect a client, however, you can do it as below:
+
+```python
+>>> from mlclient import MLClient
+
+>>> ml = MLClient()
+>>> ml.connect()
+>>> resp = ml.http.get("/manage/v2/servers")
+>>> ml.disconnect()
+```
+
+##### Async connection
+
+[AsyncMLClient][mlclient.AsyncMLClient] follows the same pattern with `async with`:
+
+```python
+>>> from mlclient import AsyncMLClient
+
+>>> async with AsyncMLClient() as ml:
+...     resp = await ml.http.get("/manage/v2/servers")
+```
+
+To check if a client is connected you can use [is_connected][mlclient.MLClient.is_connected] method:
+
+```python
+>>> from mlclient import MLClient
+
+>>> ml = MLClient()
+>>> ml.connect()
+>>> ml.is_connected()
+True
+>>> ml.disconnect()
+>>> ml.is_connected()
+False
+```
+
+#### API tiers and port routing
+
+MarkLogic exposes three separate HTTP API tiers, each bound to a fixed port:
+
+| Tier              | Port        | Endpoints      |
+|-------------------|-------------|----------------|
+| Client (REST) API | 8000/custom | `/v1/*`        |
+| Admin API         | 8001        | `/admin/v1/*`  |
+| Management API    | 8002        | `/manage/v2/*` |
+
+Port 8000 is the default App-Services REST server. Custom REST app servers (created via the Management API) also serve `/v1/*` on their configured port. Neither custom HTTP nor custom REST app servers serve `/manage/v2/*` or `/admin/v1/*` endpoints - those are only available on the fixed ports shown above. Port 8000 appears to accept `/manage/v2/*` requests, but it silently redirects them to port 8002.
+
+`MLClient` reflects this topology through three API properties:
+
+```text
+MLClient (main entry point)
+  +- .http       -> HttpClient   (raw HTTP on the main port)
+  +- .rest       -> RestApi      (/v1/* on the main port)
+  +- .manage     -> ManageApi    (/manage/v2/* on port 8002)
+  +- .admin      -> AdminApi     (/admin/v1/* on port 8001)
+  +- .parser     -> MLResponseParser
+  +- .documents, .eval, .logs -> high-level services
+```
+
+Port routing is automatic: Manage defaults to 8002 and Admin to 8001. Their configurations inherit the primary settings except for the port (see [Manage or Admin on a different host or credentials](#manage-or-admin-on-a-different-host-or-credentials) to override this). `connect()` and entering a context open only the primary HTTP session. Auxiliary sessions open on their first request, not when accessing an API property. `disconnect()` and context exit close every opened session. Cached API objects can be reused after reconnecting. Outside a connected client's lifecycle, requests use short-lived sessions.
+
+An auxiliary API reuses the primary session when its complete configuration matches, including injected configurations on custom ports. Matching includes host, connection mode, credentials, authentication, retry strategy, pool limits and timeout. Custom auth handlers and retry strategies must be the same object. Explicit limits and effective timeouts are compared by value, so independently constructed settings with equal components can share a session. Unset limits continue to defer to HTTPX defaults. Timeout and limits properties return copies. Change settings with `config.clone(timeout=..., limits=...)`; mutating a returned object does not change the configuration, its clones, presets or an already-open session.
+
+```python
+>>> from mlclient import MLClient
+
+# Default port is 8000 - Manage requests use 8002, Admin requests use 8001
+>>> with MLClient() as ml:
+...     resp = ml.manage.databases.get_list()
+...     ts = ml.admin.get_timestamp()
+
+# Custom REST server on port 8040 - .rest uses 8040, .manage/admin use 8002/8001
+>>> with MLClient(port=8040) as ml:
+...     resp = ml.rest.eval.post(xquery="1")
+...     dbs = ml.manage.databases.get_list()
+```
+
+##### Manage or Admin on a different host or credentials
+
+Derivation only changes the port; it keeps the primary host, protocol, and credentials. When the Manage or Admin tier lives on a different host, needs different credentials, or listens on a non-standard port (for example behind a reverse proxy), pass a fully resolved [HTTPConfig][mlclient.http_config.HTTPConfig] as `manage_config` or `admin_config`. That tier then uses the given configuration as-is instead of deriving one from the primary connection; the other tier keeps deriving as usual.
+
+```python
+>>> from mlclient import MLClient
+>>> from mlclient.http_config import HTTPConfig
+
+# Manage lives behind a proxy on a different host and port;
+# .admin is still derived from the primary connection (localhost:8001)
+>>> manage_config = HTTPConfig.resolve(
+...     host="manage-proxy.example.com",
+...     port=9002,
+...     username="manage-user",
+...     password="manage-password",
+... )
+>>> with MLClient(host="ml.example.com", manage_config=manage_config) as ml:
+...     dbs = ml.manage.databases.get_list()
+...     ts = ml.admin.get_timestamp()
+```
+
+### High-level services
+
+High-level services are designed for specific endpoints of MarkLogic Server and database. They allow you to manage configuration or documents in MarkLogic with ease. Each service ensures that you can perform all the operations in the corresponding area. For example, some of the high-level services are:
+
+| Service            | Endpoint           |
+|--------------------|--------------------|
+| `ml.documents`     | `/v1/documents`    |
+| `ml.eval`          | `/v1/eval`         |
+| `ml.logs`          | `/manage/v2/logs`  |
+| `ml.transaction()` | `/v1/transactions` |
+
+#### DocumentsService
+
+##### READ
+
+**Read a document**
+
+```python
+>>> from mlclient import MLClientManager
+
+>>> mgr = MLClientManager("local")
+>>> with mgr.get_client("app-services") as ml:
+...    doc = ml.documents.read("/doc-1.xml")
+
+>>> doc.uri
+'/doc-1.xml'
+
+>>> doc.doc_type
+<DocumentType.XML: 'xml'>
+
+>>> doc.content_string
+'''<?xml version="1.0" encoding="UTF-8"?>
+<SomeEntity>
+    <ChildNode1>00001</ChildNode1>
+    <ChildNode2>888e2050-7148-42c4-b33a-b3dd3505b87b</ChildNode2>
+</SomeEntity>'''
+```
+
+**Read a document as string or bytes**
+
+```python
+>>> from mlclient import MLClientManager
+
+>>> mgr = MLClientManager("local")
+>>> with mgr.get_client("app-services") as ml:
+...     doc = ml.documents.read("/doc-1.xml")
+
+>>> doc.doc_type
+<DocumentType.XML: 'xml'>
+
+>>> doc.content_string
+'''<?xml version="1.0" encoding="UTF-8"?>
+<SomeEntity>
+    <ChildNode1>00001</ChildNode1>
+    <ChildNode2>888e2050-7148-42c4-b33a-b3dd3505b87b</ChildNode2>
+</SomeEntity>'''
+
+>>> doc.content_bytes
+b'''<?xml version="1.0" encoding="UTF-8"?>
+<SomeEntity>
+    <ChildNode1>00001</ChildNode1>
+    <ChildNode2>888e2050-7148-42c4-b33a-b3dd3505b87b</ChildNode2>
+</SomeEntity>'''
+```
+
+**Read a document with metadata**
+
+```python
+>>> from mlclient import MLClientManager
+
+>>> mgr = MLClientManager("local")
+>>> with mgr.get_client("app-services") as ml:
+...     doc = ml.documents.read("/doc-1.xml", category=["content", "metadata"])
+
+>>> doc.metadata.to_json()
+{'collections': [], 'permissions': [], 'properties': {}, 'quality': 0, 'metadataValues': {}}
+
+>>> doc.metadata.to_xml_string(indent=4)
+'''<?xml version=\'1.0\' encoding=\'utf-8\'?>
+<?xml version="1.0" encoding="utf-8"?>
+<rapi:metadata xmlns:rapi="http://marklogic.com/rest-api">
+    <rapi:collections/>
+    <rapi:permissions/>
+    <prop:properties xmlns:prop="http://marklogic.com/xdmp/property"/>
+    <rapi:quality>0</rapi:quality>
+    <rapi:metadata-values/>
+</rapi:metadata>
+'''
+```
+
+**Read multiple documents**
+
+```python
+>>> from mlclient import MLClientManager
+
+>>> mgr = MLClientManager("local")
+>>> with mgr.get_client("app-services") as ml:
+...     docs = ml.documents.read(
+...         ["/doc-1.xml", "/doc-2.json", "/doc-3.xqy", "/doc-4.zip"]
+...     )
+
+>>> len(docs)
+4
+
+>>> docs["/doc-1.xml"]
+<mlclient.models.documents.XMLDocument object at 0x7f9200920a00>
+
+>>> docs["/doc-2.json"]
+<mlclient.models.documents.JSONDocument object at 0x7f9200920430>
+
+>>> docs["/doc-3.xqy"]
+<mlclient.models.documents.TextDocument object at 0x7f9200920e20>
+
+>>> docs["/doc-4.zip"]
+<mlclient.models.documents.BinaryDocument object at 0x7f9200920970>
+```
+
+**Stream documents one at a time**
+
+`read_stream` yields each document as it arrives instead of building the whole result in memory - preferable for large URI lists:
+
+```python
+>>> from mlclient import MLClientManager
+
+>>> mgr = MLClientManager("local")
+>>> with mgr.get_client("app-services") as ml:
+...     for doc in ml.documents.read_stream(["/doc-1.xml", "/doc-2.json"]):
+...         print(doc.uri)
+```
+
+**Read documents from a custom database**
+
+```python
+>>> from mlclient import MLClientManager
+
+>>> mgr = MLClientManager("local")
+>>> with mgr.get_client("app-services") as ml:
+...     doc = ml.documents.read("/doc-1.xml", database="App-Services")
+```
+
+##### WRITE (create / update)
+
+**Put a document**
+
+```python
+>>> from mlclient import MLClientManager
+>>> from mlclient.models import Document
+
+>>> doc = Document.create("/doc-1.xml", "<root><child>data</child></root>")
+>>> mgr = MLClientManager("local")
+>>> with mgr.get_client("app-services") as ml:
+...     ml.documents.write(doc)
+```
+
+**Put a document with metadata**
+
+```python
+>>> from mlclient import MLClientManager
+>>> from mlclient.models import Document, Metadata
+
+>>> metadata = Metadata(collections=["some-collection"])
+>>> doc = Document.create(
+...     "/doc-2.json",
+...     {"root": {"child": "data"}},
+...     metadata=metadata,
+... )
+
+>>> mgr = MLClientManager("local")
+>>> with mgr.get_client("app-services") as ml:
+...     ml.documents.write(doc)
+```
+
+**Put a document with raw bytes metadata**
+
+```python
+>>> from mlclient import MLClientManager
+>>> from mlclient.models import Document
+
+>>> doc = Document.create(
+...     "/doc-1.xml",
+...     "<root><child>data</child></root>",
+...     metadata=b'{"collections": ["some-collection"]}',
+... )
+
+>>> mgr = MLClientManager("local")
+>>> with mgr.get_client("app-services") as ml:
+...     ml.documents.write(doc)
+```
+
+**Put a document to a custom database**
+
+```python
+>>> from mlclient import MLClientManager
+>>> from mlclient.models import Document
+
+>>> doc = Document.create("/doc-2.json", {"root": {"child": "data"}})
+>>> doc
+<mlclient.models.documents.JSONDocument object at 0x7f9200920f70>
+
+>>> mgr = MLClientManager("local")
+>>> with mgr.get_client("app-services") as ml:
+...     ml.documents.write(doc, database="Documents")
+```
+
+**Update document's metadata**
+
+```python
+>>> from mlclient import MLClientManager
+>>> from mlclient.models import Document, Metadata
+
+>>> metadata = Metadata(collections=["some-collection"])
+>>> doc = Document.metadata_update("/doc-2.json", metadata)
+>>> doc
+<mlclient.models.documents.MetadataDocument object at 0x7f9200929e20>
+
+>>> mgr = MLClientManager("local")
+>>> with mgr.get_client("app-services") as ml:
+...     ml.documents.write(doc)
+```
+
+**Put multiple documents**
+
+```python
+>>> from mlclient import MLClientManager
+>>> from mlclient.models import Document
+
+>>> doc_1 = Document.create("/doc-1.xml", "<root><child>data</child></root>")
+>>> doc_2 = Document.create("/doc-2.json", {"root": {"child": "data"}})
+
+>>> mgr = MLClientManager("local")
+>>> with mgr.get_client("app-services") as ml:
+...     ml.documents.write([doc_1, doc_2])
+```
+
+**Put documents with default metadata**
+
+```python
+>>> from mlclient import MLClientManager
+>>> from mlclient.models import Document, Metadata
+
+>>> default_metadata = Metadata(collections=["some-collection"])
+>>> doc_1 = Document.create("/doc-1.xml", "<root><child>data</child></root>")
+>>> doc_2 = Document.create("/doc-2.json", {"root": {"child": "data"}})
+
+>>> mgr = MLClientManager("local")
+>>> with mgr.get_client("app-services") as ml:
+...     ml.documents.write([default_metadata, doc_1, doc_2])
+```
+
+##### DELETE
+
+**Delete a document**
+
+```python
+>>> from mlclient import MLClientManager
+
+>>> mgr = MLClientManager("local")
+>>> with mgr.get_client("app-services") as ml:
+...     ml.documents.delete("/doc-1.xml")
+```
+
+**Delete multiple documents**
+
+```python
+>>> from mlclient import MLClientManager
+
+>>> mgr = MLClientManager("local")
+>>> with mgr.get_client("app-services") as ml:
+...     ml.documents.delete(
+...         ["/doc-1.xml", "/doc-2.json", "/doc-3.xqy", "/doc-4.zip"]
+...     )
+```
+
+**Delete a document from a custom database**
+
+```python
+>>> from mlclient import MLClientManager
+
+>>> mgr = MLClientManager("local")
+>>> with mgr.get_client("app-services") as ml:
+...     ml.documents.delete("/doc-1.xml", database="Documents")
+```
+
+**Delete document's metadata**
+
+```python
+>>> from mlclient import MLClientManager
+
+>>> mgr = MLClientManager("local")
+>>> with mgr.get_client("app-services") as ml:
+...     ml.documents.delete("/doc-1.xml", category=["properties", "collections"])
+```
+
+**Delete a temporal document**
+
+```python
+>>> from mlclient import MLClientManager
+
+>>> mgr = MLClientManager("local")
+>>> with mgr.get_client("app-services") as ml:
+...     ml.documents.delete("/doc-1.xml", temporal_collection="temporal-collection")
+```
+
+**Wipe a temporal document**
+
+```python
+>>> from mlclient import MLClientManager
+
+>>> mgr = MLClientManager("local")
+>>> with mgr.get_client("app-services") as ml:
+...     ml.documents.delete(
+...        "/doc-1.xml",
+...        temporal_collection="temporal-collection",
+...        wipe_temporal=True,
+... )
+```
+
+##### WITHIN A TRANSACTION
+
+`read`, `write` and `delete` accept a `txid` to run inside an open multi-statement transaction. Pass the id explicitly, or spread a `TransactionService` with `**` to carry both the `txid` and the transaction's database. See [TransactionService](#transactionservice) for the full transaction lifecycle.
+
+```python
+>>> from mlclient import MLClientManager
+>>> from mlclient.models import Document
+
+>>> doc = Document.create("/doc-1.xml", "<root><child>data</child></root>")
+>>> mgr = MLClientManager("local")
+>>> with mgr.get_client("app-services") as ml:
+...     with ml.transaction() as txn:
+...         ml.documents.write(doc, **txn)
+...         ml.documents.read("/doc-1.xml", txid=txn.id)
+```
+
+#### EvalService
+
+**Evaluate code from a file**
+
+```python
+>>> from mlclient import MLClientManager
+
+>>> mgr = MLClientManager("local")
+>>> with mgr.get_client() as ml:
+...     result1 = ml.eval.file("./xqy-code-to-eval.xqy")
+...     result2 = ml.eval.file("./js-code-to-eval.js")
+```
+
+**Evaluate raw xquery code**
+
+```python
+>>> from mlclient import MLClientManager
+
+>>> with MLClientManager("local").get_client() as ml:
+...     result = ml.eval.xquery("fn:current-dateTime()")
+>>> result
+datetime.datetime(2024, 2, 22, 11, 38, 32, 709484, tzinfo=datetime.timezone.utc)
+```
+
+**Evaluate raw javascript code**
+
+```python
+>>> from mlclient import MLClientManager
+
+>>> with MLClientManager("local").get_client() as ml:
+...     result = ml.eval.javascript("fn.currentDateTime()")
+>>> result
+datetime.datetime(2024, 2, 22, 11, 39, 22, 264102, tzinfo=datetime.timezone.utc)
+```
+
+**Evaluate code with variables**
+
+```python
+>>> from mlclient import MLClientManager
+
+>>> xq = '''
+... declare variable $DAYS external;
+...
+... fn:current-dateTime() - xs:dayTimeDuration("P" || $DAYS || "D")'''
+
+>>> with MLClientManager("local").get_client() as ml:
+...     result = ml.eval.xquery(
+...         xq,
+...         variables={"DAYS": 5},
+...     )
+>>> result
+datetime.datetime(2024, 2, 17, 12, 17, 49, 556376, tzinfo=datetime.timezone.utc)
+```
+
+```python
+>>> from mlclient import MLClientManager
+
+>>> xq = '''
+... declare variable $DAYS external;
+...
+... fn:current-dateTime() - xs:dayTimeDuration("P" || $DAYS || "D")'''
+
+>>> with MLClientManager("local").get_client() as ml:
+...     result = ml.eval.xquery(
+...         xq,
+...         DAYS=5,
+...     )
+>>> result
+datetime.datetime(2024, 2, 17, 12, 19, 45, 225135, tzinfo=datetime.timezone.utc)
+```
+
+**Evaluate code with variables within a namespace**
+
+```python
+>>> from mlclient import MLClientManager
+
+>>> xq = '''
+... declare variable $local:DAYS external;
+...
+... fn:current-dateTime() - xs:dayTimeDuration("P" || $local:DAYS || "D")'''
+
+>>> with MLClientManager("local").get_client() as ml:
+...     result = ml.eval.xquery(
+...         xq,
+...         variables={
+...             "{http://www.w3.org/2005/xquery-local-functions}DAYS": 5,
+...         },
+...     )
+>>> result
+datetime.datetime(2024, 2, 17, 12, 21, 28, 547853, tzinfo=datetime.timezone.utc)
+```
+
+**Evaluate code on a custom database**
+
+```python
+>>> from mlclient import MLClientManager
+
+>>> with MLClientManager("local").get_client() as ml:
+...     result = ml.eval.xquery(
+...         "xdmp:database() => xdmp:database-name()",
+...         database="Documents",
+...     )
+>>> result
+'Documents'
+```
+
+**Evaluate code and get raw data**
+
+```python
+>>> from mlclient import MLClientManager
+
+>>> with MLClientManager("local").get_client() as ml:
+...     result = ml.eval.xquery("fn:current-dateTime()", output_type=str)
+>>> result
+'2024-02-22T12:24:40.362014Z'
+```
+
+```python
+>>> from mlclient import MLClientManager
+
+>>> with MLClientManager("local").get_client() as ml:
+...     result = ml.eval.xquery("fn:current-dateTime()", output_type=bytes)
+>>> result
+b'2024-02-22T12:24:53.677793Z'
+```
+
+#### LogsService
+
+##### Get all logs
+
+*8002_ErrorLog.txt*
+
+```python
+>>> from mlclient import MLClientManager
+
+>>> with MLClientManager("local").get_client() as ml:
+...     logs = ml.logs.get(8002)
+>>> list(logs)[0]
+{'timestamp': '2024-01-09T13:30:51.187Z', 'level': 'error', 'message': 'Test Log 1'}
+```
+
+```python
+>>> from mlclient import MLClientManager
+>>> from mlclient.services import LogType
+
+>>> with MLClientManager("local").get_client() as ml:
+...     logs = ml.logs.get(8002, LogType.ERROR)
+>>> list(logs)[0]
+{'timestamp': '2024-01-09T13:30:51.187Z', 'level': 'error', 'message': 'Test Log 1'}
+```
+
+```python
+>>> from mlclient import MLClientManager
+>>> from mlclient.services import LogType
+
+>>> with MLClientManager("local").get_client() as ml:
+...     logs = ml.logs.get(8002, "error")
+>>> list(logs)[0]
+{'timestamp': '2024-01-09T13:30:51.187Z', 'level': 'error', 'message': 'Test Log 1'}
+```
+
+*8002_AccessLog.txt*
+
+```python
+>>> from mlclient import MLClientManager
+>>> from mlclient.services import LogType
+
+>>> with MLClientManager("local").get_client() as ml:
+...     logs = ml.logs.get(8002, LogType.ACCESS)
+>>> list(logs)[0]
+{'message': '172.17.0.1 - - [22/Feb/2024:12:13:18 +0000] "POST /v1/eval HTTP/1.1" 401 209 - "python-httpx/0.27.0"'}
+```
+
+```python
+>>> from mlclient import MLClientManager
+>>> from mlclient.services import LogType
+
+>>> with MLClientManager("local").get_client() as ml:
+...     logs = ml.logs.get(8002, "access")
+>>> list(logs)[0]
+{'message': '172.17.0.1 - - [22/Feb/2024:12:13:18 +0000] "POST /v1/eval HTTP/1.1" 401 209 - "python-httpx/0.27.0"'}
+```
+
+*8002_RequestLog.txt*
+
+```python
+>>> from mlclient import MLClientManager
+>>> from mlclient.services import LogType
+
+>>> with MLClientManager("local").get_client() as ml:
+...     logs = ml.logs.get(8002, LogType.REQUEST)
+>>> list(logs)[0]
+{'message': '{"time":"2024-02-22T12:38:27Z", "url":"/manage/v2/logs?format=json", "user":"admin", "elapsedTime":1.801654, "requests":1, "valueCacheHits":5743, "valueCacheMisses":349701, "regexpCacheHits":5278, "regexpCacheMisses":10, "fsProgramCacheMisses":1, "fsMainModuleSequenceCacheMisses":1, "fsLibraryModuleCacheMisses":226, "compileTime":0.757087, "runTime":1.043248}'}
+```
+
+```python
+>>> from mlclient import MLClientManager
+>>> from mlclient.services import LogType
+
+>>> with MLClientManager("local").get_client() as ml:
+...     logs = ml.logs.get(8002, "request")
+>>> list(logs)[0]
+{'message': '{"time":"2024-02-22T12:38:27Z", "url":"/manage/v2/logs?format=json", "user":"admin", "elapsedTime":1.801654, "requests":1, "valueCacheHits":5743, "valueCacheMisses":349701, "regexpCacheHits":5278, "regexpCacheMisses":10, "fsProgramCacheMisses":1, "fsMainModuleSequenceCacheMisses":1, "fsLibraryModuleCacheMisses":226, "compileTime":0.757087, "runTime":1.043248}'}
+```
+
+*ErrorLog.txt*
+
+```python
+>>> from mlclient import MLClientManager
+
+>>> with MLClientManager("local").get_client() as ml:
+...     logs = ml.logs.get()
+```
+
+*TaskServer_ErrorLog.txt*
+
+```python
+>>> from mlclient import MLClientManager
+
+>>> with MLClientManager("local").get_client() as ml:
+...     logs = ml.logs.get("TaskServer")
+```
+
+```python
+>>> from mlclient import MLClientManager
+
+>>> with MLClientManager("local").get_client() as ml:
+...     logs = ml.logs.get(0)
+```
+
+##### Get limited logs
+
+**Time frames**
+
+!!! note
+    `start_time`, `end_time` and `regex` arguments work only for error logs
+
+```python
+>>> from mlclient import MLClientManager
+
+>>> with MLClientManager("local").get_client() as ml:
+...     logs = ml.logs.get(8002, start_time="10:00")
+```
+
+```python
+>>> from mlclient import MLClientManager
+
+>>> with MLClientManager("local").get_client() as ml:
+...     logs = ml.logs.get(8002, end_time="12:00")
+```
+
+```python
+>>> from mlclient import MLClientManager
+
+>>> with MLClientManager("local").get_client() as ml:
+...     logs = ml.logs.get(
+...         8002,
+...         start_time="10:00",
+...         end_time="12:00",
+...     )
+```
+
+```python
+>>> from mlclient import MLClientManager
+
+>>> with MLClientManager("local").get_client() as ml:
+...     logs = ml.logs.get(
+...         8002,
+...         start_time="2024-02-01",
+...         end_time="2024-02-03",
+...     )
+```
+
+```python
+>>> from mlclient import MLClientManager
+
+>>> with MLClientManager("local").get_client() as ml:
+...     logs = ml.logs.get(
+...         8002,
+...         start_time="2024-02-01 10:00",
+...         end_time="2024-02-03",
+...     )
+```
+
+**RegEx**
+
+```python
+>>> from mlclient import MLClientManager
+
+>>> with MLClientManager("local").get_client() as ml:
+...     logs = ml.logs.get(8002, regex="Forest Meters")
+```
+
+```python
+>>> from mlclient import MLClientManager
+
+>>> with MLClientManager("local").get_client() as ml:
+...     logs = ml.logs.get(8002, regex="Forest M.*")
+```
+
+```python
+>>> from mlclient import MLClientManager
+
+>>> with MLClientManager("local").get_client() as ml:
+...     logs = ml.logs.get(8002, regex="Memory [^1]{1,2}%")
+```
+
+```python
+>>> from mlclient import MLClientManager
+
+>>> with MLClientManager("local").get_client() as ml:
+...     logs = ml.logs.get(
+...         8002,
+...         start_time="2024-02-01",
+...         end_time="2024-02-03",
+...         regex="Memory [^1]{1,2}%",
+...     )
+```
+
+#### TransactionService
+
+A multi-statement transaction groups several document or eval operations so they commit or roll back as a unit. Open one with `ml.transaction()`; the returned `TransactionService` is a context manager that commits on a clean exit and rolls back if the block raises.
+
+Spread it with `**` into any content operation to run that operation inside the transaction - it unpacks to `txid` (and `database`, when the transaction was opened against one).
+
+##### Commit on clean exit
+
+```python
+>>> from mlclient import MLClientManager
+>>> from mlclient.models import Document
+
+>>> doc_1 = Document.create("/doc-1.xml", "<root>1</root>")
+>>> doc_2 = Document.create("/doc-2.xml", "<root>2</root>")
+
+>>> mgr = MLClientManager("local")
+>>> with mgr.get_client("app-services") as ml:
+...     with ml.transaction() as txn:
+...         ml.documents.write([doc_1, doc_2], **txn)
+...         ml.eval.xquery('xdmp:document-insert("/doc-3.xml", <root>3</root>)', **txn)
+...     # all three inserts commit together here, on the clean exit
+```
+
+Opened against a specific database, `**txn` carries the database too:
+
+```python
+>>> with mgr.get_client("app-services") as ml:
+...     with ml.transaction(database="Documents") as txn:
+...         ml.documents.write(doc_1, **txn)
+...         ml.documents.read("/doc-1.xml", **txn)
+```
+
+##### Roll back on error
+
+If anything in the block raises, the transaction rolls back on the way out - even an operation that already succeeded never becomes visible:
+
+```python
+>>> with mgr.get_client("app-services") as ml:
+...     with ml.transaction() as txn:
+...         ml.documents.write(doc_1, **txn)
+...         ml.documents.read("/missing.xml", **txn)   # raises RESTAPI-NODOCUMENT
+...     # the read raised, so the block exits with an error and rolls back:
+...     # doc_1 was never written
+```
+
+##### Read transaction details
+
+```python
+>>> with mgr.get_client("app-services") as ml:
+...     with ml.transaction(database="Documents") as txn:
+...         txn.id           # the server-assigned transaction id
+...         txn.database     # the database it was opened against, or None
+...         txn.status()     # {'transaction-status': {...}}
+```
+
+##### Manual commit and rollback
+
+Without a `with` block you own the lifecycle - commit or roll back yourself:
+
+```python
+>>> with mgr.get_client("app-services") as ml:
+...     txn = ml.transaction()
+...     try:
+...         ml.documents.write(doc_1, **txn)
+...         txn.commit()
+...     except Exception:
+...         txn.rollback()
+...         raise
+```
+
+### Mid-level API clients
+
+Below the high-level services, MLClient exposes three mid-level API clients that correspond to MarkLogic's API tiers. They work with [ApiCall][mlclient.calls.ApiCall] objects, which are python representations of MarkLogic endpoint calls. You can use these clients to send customized requests that are not supported by the high-level service API, or to handle the responses yourself.
+
+#### RestApi
+
+[RestApi][mlclient.api.RestApi] provides access to `/v1/*` endpoints on the main port.
+
+```python
+>>> from mlclient import MLClient
+
+>>> with MLClient() as ml:
+...     resp = ml.rest.eval.post(
+...         xquery="xdmp:database() => xdmp:database-name()",
+...     )
+...     parsed = ml.parser.parse(resp)
+...     print(parsed)
+...
+App-Services
+```
+
+##### Transactions
+
+`ml.rest.transactions` has no context manager: create the transaction, thread its id through each call, and drive commit or rollback yourself. The id is the last path segment of the `Location` header on the `303` create response:
+
+```python
+>>> from mlclient import MLClient
+>>> from mlclient.models import Document
+
+>>> doc = Document.create("/doc-1.xml", "<root>data</root>")
+>>> with MLClient() as ml:
+...     location = ml.rest.transactions.create().headers["Location"]
+...     txid = location.rsplit("/", 1)[-1]
+...     try:
+...         ml.documents.write(doc, txid=txid)
+...         ml.rest.transactions.post(txid, result="commit")
+...     except Exception:
+...         ml.rest.transactions.post(txid, result="rollback")
+...         raise
+```
+
+#### ManageApi
+
+[ManageApi][mlclient.api.ManageApi] provides access to `/manage/v2/*` endpoints on port 8002.
+
+```python
+>>> from mlclient import MLClient
+
+>>> with MLClient() as ml:
+...     resp = ml.manage.databases.get_properties(
+...         "Documents", data_format="json",
+...     )
+...     print(resp.json()["database-name"])
+...
+Documents
+```
+
+#### AdminApi
+
+[AdminApi][mlclient.api.AdminApi] provides access to `/admin/v1/*` endpoints on port 8001.
+
+```python
+>>> from mlclient import MLClient
+
+>>> with MLClient() as ml:
+...     resp = ml.admin.get_timestamp()
+...     print(resp.text)
+...
+2024-06-21T14:08:32.130813Z
+```
+
+### Low-level HTTP
+
+The low-level [HttpClient][mlclient.HttpClient] lets you send raw HTTP requests. It is accessible via `ml.http`.
+
+#### GET request
+
+*A simple GET request*
+
+```python
+>>> from mlclient import MLClient
+
+>>> with MLClient() as ml:
+...     resp = ml.http.get("/manage/v2/servers")
+```
+
+*Custom parameters and headers*
+
+```python
+>>> from mlclient import MLClient
+
+>>> with MLClient() as ml:
+...     resp = ml.http.get(
+...         "/manage/v2/servers",
+...         params={"format": "json"},
+...         headers={"custom-header": "custom-value"},
+...     )
+```
+
+#### POST request
+
+*A simple POST request*
+
+```python
+>>> from mlclient import MLClient
+
+>>> with MLClient() as ml:
+...     resp = ml.http.post(
+...         "/manage/v2/databases",
+...         {"database-name": "CustomDatabase"},
+...     )
+```
+
+*Custom parameters and headers*
+
+```python
+>>> from mlclient import MLClient
+
+>>> with MLClient() as ml:
+...     resp = ml.http.post(
+...         "/v1/eval",
+...         {"xquery": "fn:current-dateTime()"},
+...         params={"database": "Documents"},
+...         headers={"Content-Type": "application/x-www-form-urlencoded"},
+...     )
+```
+
+#### PUT request
+
+```python
+>>> from mlclient import MLClient
+
+>>> with MLClient() as ml:
+...     resp = ml.http.put(
+...         "/manage/v2/databases/CustomDatabase/properties",
+...         {"enabled": False},
+...         headers={"Content-Type": "application/json"}
+...     )
+```
+
+#### DELETE request
+
+```python
+>>> from mlclient import MLClient
+
+>>> with MLClient() as ml:
+...     resp = ml.http.delete(
+...         "/manage/v2/databases/CustomDatabase",
+...         params={"forest-delete": "configuration"}
+...     )
+```
+
+### Connection and authentication
+
+MLClient models two independent concerns separately:
+
+- **Connection** -- the transport: HTTP, HTTPS, mutual TLS, or MarkLogic Cloud. Chosen from `protocol`, `ssl` ([SSLConfig][mlclient.connection.SSLConfig] ), and `cloud` ([CloudConfig][mlclient.connection.CloudConfig] ).
+- **Authentication** -- how the client proves its identity, chosen from `auth` with credentials supplied via `username` / `password`.
+
+Both are validated when the client is constructed, so an unsupported combination raises [ConfigError][mlclient.exceptions.ConfigError] immediately rather than failing on the first request.
+
+#### Connection modes
+
+| Mode | How to select it | Protocol / port |
+|----|----|----|
+| HTTP | default | `http` / `8000` |
+| HTTPS | `protocol="https"` | `https` |
+| Mutual TLS | `ssl=SSLConfig(cert_file=..., key_file=...)` | `https` |
+| MarkLogic Cloud | `cloud=CloudConfig(api_key=..., base_path=...)` | `https` / `443` |
+
+A client certificate implies HTTPS, so the protocol is inferred. MarkLogic Cloud forces HTTPS on port 443 and routes every API tier through the same gateway using the configured `base_path`. HTTP sessions are shared only when their complete configurations match; health checks normally use a separate session because their retry strategy differs. Passing a conflicting `protocol` or `port` raises [ConfigError][mlclient.exceptions.ConfigError].
+
+```python
+>>> from mlclient import MLClient
+>>> from mlclient.connection import SSLConfig, CloudConfig
+
+# Plain HTTP (default)
+>>> ml = MLClient(host="ml.example.com", port=8000)
+
+# HTTPS with server-certificate verification
+>>> ml = MLClient(protocol="https", host="ml.example.com", port=8443)
+
+# HTTPS verified against a custom CA bundle
+>>> ml = MLClient(
+...     protocol="https",
+...     host="ml.example.com",
+...     port=8443,
+...     ssl=SSLConfig(verify="/etc/ssl/corp-ca.pem"),
+... )
+
+# Mutual TLS - the client certificate forces HTTPS
+>>> ml = MLClient(
+...     host="ml.example.com",
+...     port=8443,
+...     ssl=SSLConfig(cert_file="/client.pem", key_file="/client-key.pem"),
+... )
+
+# Mutual TLS with an encrypted client key - key_password decrypts it
+>>> ml = MLClient(
+...     host="ml.example.com",
+...     port=8443,
+...     ssl=SSLConfig(
+...         cert_file="/client.pem",
+...         key_file="/client-key.pem",
+...         key_password="my-key-passphrase",
+...     ),
+... )
+
+# MarkLogic Cloud
+>>> ml = MLClient(
+...     host="my-org.marklogic.cloud",
+...     cloud=CloudConfig(api_key="my-api-key", base_path="/ml/my-instance"),
+... )
+```
+
+#### Authentication methods
+
+The `auth` parameter accepts a string shortcut, an [AuthConfig][mlclient.auth.AuthConfig] for methods that need more than a username and password, a custom [Auth](https://www.python-httpx.org/advanced/authentication/), or `None` for application-level auth. Credentials always come from `username` / `password` -- never from `AuthConfig`.
+
+| `auth` value | Method | Credentials |
+|----|----|----|
+| `"digest"` (default) | HTTP digest | `username` / `password` |
+| `"basic"` | HTTP basic | `username` / `password` |
+| `"digestbasic"` | HTTP digest | `username` / `password` |
+| `"certificate"` | Client certificate | `ssl` client cert |
+| `"kerberos"` | Kerberos / SPNEGO | ambient ticket cache |
+| `AuthConfig(method="oauth", token=...)` | OAuth 2.0 Bearer | pre-acquired token |
+| `AuthConfig(method="kerberos", ...)` | Kerberos / SPNEGO | ambient ticket cache, custom SPN |
+| `None` | application-level | none |
+| a custom [Auth](https://www.python-httpx.org/advanced/authentication/) instance | custom | supplied by the handler |
+
+`"certificate"` and `"kerberos"` are accepted as plain strings because they need no extra data: certificate identity comes from the `ssl` client cert, and Kerberos defaults to the `HTTP` service on the request host. Use `AuthConfig` only to override the Kerberos SPN (`service` / `hostname`), or for OAuth, which has no default token.
+
+With mutual TLS, `auth` defaults to `"certificate"`, so it need not be set explicitly. Kerberos relies on the optional `pyspnego` dependency (`pip install mlclient[kerberos]`); the import is verified at client creation so a missing dependency fails early.
+
+```python
+>>> from mlclient import MLClient
+>>> from mlclient.auth import AuthConfig
+>>> from mlclient.connection import SSLConfig
+
+# Digest (default) - explicit here for clarity
+>>> ml = MLClient(auth="digest", username="my-user", password="my-password")
+
+# Basic auth
+>>> ml = MLClient(auth="basic", username="my-user", password="my-password")
+
+# Client certificate - the cert is the identity, and forces HTTPS;
+# auth defaults to "certificate", so setting it explicitly is optional
+>>> ml = MLClient(
+...     host="ml.example.com",
+...     port=8443,
+...     ssl=SSLConfig(cert_file="/client.pem", key_file="/client-key.pem"),
+... )
+
+# Double auth - the client cert sets up mutual TLS as transport, but the
+# user identity comes from a digest credential. Set auth explicitly to keep
+# it instead of letting mutual TLS default it to "certificate".
+>>> ml = MLClient(
+...     host="ml.example.com",
+...     port=8443,
+...     auth="digest",
+...     username="my-user",
+...     password="my-password",
+...     ssl=SSLConfig(cert_file="/client.pem", key_file="/client-key.pem"),
+... )
+
+# OAuth 2.0 Bearer token
+>>> ml = MLClient(auth=AuthConfig(method="oauth", token="jwt-token"))
+
+# Kerberos / SPNEGO - credentials come from the ambient ticket cache
+>>> ml = MLClient(protocol="https", auth="kerberos")
+
+# Kerberos with a custom SPN - AuthConfig overrides service / hostname
+>>> ml = MLClient(
+...     protocol="https",
+...     auth=AuthConfig(method="kerberos", service="HTTP", hostname="ml.example.com"),
+... )
+
+# Application-level auth - no HTTP auth header is added
+>>> ml = MLClient(auth=None)
+
+# A custom httpx.Auth handler is passed through unchanged
+>>> import httpx
+>>> ml = MLClient(auth=httpx.BasicAuth("my-user", "my-password"))
+```
+
+#### Valid and rejected combinations
+
+Validation rejects combinations MarkLogic cannot serve, and warns on ones that are valid but risky (basic auth over plain HTTP logs a cleartext-credentials warning rather than raising).
+
+| Combination | Result | Reason |
+|----|----|----|
+| HTTP + digest / basic | valid | default credential auth |
+| HTTPS + digest / basic / oauth / kerberos | valid | credential or token auth over TLS |
+| Mutual TLS + certificate | valid | client certificate proves identity |
+| Mutual TLS + explicit `auth="digest"` | valid | double auth: certificate plus digest header |
+| Cloud + `auth=None` | valid | Cloud authenticates via its API key |
+| `certificate` without a client cert | rejected | certificate auth requires a client cert over HTTPS |
+| client cert + `protocol="http"` | rejected | mutual TLS requires HTTPS |
+| Cloud + any explicit `auth` | rejected | Cloud handles authentication internally |
+| Cloud + `protocol="http"` or custom `port` | rejected | Cloud forces HTTPS on port 443 |
+
+A client certificate plays one of two roles. On its own it *is* the identity: mutual TLS defaults `auth` to `"certificate"` and no auth header is sent. Set `auth` to a credential method explicitly and the certificate drops to being just the transport - mutual TLS sets up the TLS channel while a digest or basic header carries the MarkLogic user identity. That second arrangement is *double auth*.
+
+```python
+>>> from mlclient import MLClient
+>>> from mlclient.auth import AuthConfig
+>>> from mlclient.connection import SSLConfig, CloudConfig
+>>> from mlclient.exceptions import ConfigError
+
+# Certificate auth without a client certificate
+>>> try:
+...     MLClient(auth=AuthConfig(method="certificate"))
+... except ConfigError as exc:
+...     print("rejected")
+rejected
+
+# A client certificate cannot be used over plain HTTP
+>>> try:
+...     MLClient(
+...         protocol="http",
+...         ssl=SSLConfig(cert_file="/client.pem", key_file="/client-key.pem"),
+...     )
+... except ConfigError as exc:
+...     print("rejected")
+rejected
+
+# A Cloud connection rejects an explicit auth method
+>>> try:
+...     MLClient(
+...         host="my-org.marklogic.cloud",
+...         cloud=CloudConfig(api_key="my-api-key", base_path="/ml/x"),
+...         auth="digest",
+...     )
+... except ConfigError as exc:
+...     print("rejected")
+rejected
+```
+
+### Restart readiness
+
+Some Management and Admin API operations return `202 Accepted` together with `Location: /admin/v1/timestamp` and a `restart` payload body. That payload contains one or more `last-startup` entries keyed by `host-id`. This indicates that MarkLogic accepted the request and that callers should verify readiness through the Admin timestamp endpoint on port `8001` before issuing follow-up administrative requests.
+
+The timestamp endpoint is host-specific, not cluster-wide. MarkLogic documentation explicitly notes that if an operation restarts multiple hosts, the caller must iterate through the returned `host-id` and timestamp pairs and check each host separately. `MLClient.wait_for_restart()` does that internally: for multi-host restart responses it resolves host ids through `GET /manage/v2/hosts` and waits for all affected hosts in parallel. The current client host is probed immediately while the host mapping request is in flight, and the remaining host probes are started as soon as the mapping is available. If the current client host is one of the affected hosts, the method still waits for a timestamp newer than that host's own `last-startup` value before it returns.
+
+Use [wait_for_restart][mlclient.MLClient.wait_for_restart] for this check:
+
+```python
+>>> from mlclient import MLClient
+
+>>> with MLClient() as ml:
+...     resp = ml.http.delete(
+...         "/manage/v2/servers/TestServer",
+...         params={"group-id": "Default"},
+...     )
+...     ml.wait_for_restart(resp)
+```
+
+If you call [wait_for_restart][mlclient.MLClient.wait_for_restart] without a response, it performs a single readiness probe using a retry policy tuned for restart windows:
+
+```python
+>>> from mlclient import MLClient
+
+>>> with MLClient() as ml:
+...     ml.wait_for_restart()
+```
+
+For multi-host restart responses, the method waits for all affected hosts before it returns.
+
+### Health check
+
+[healthcheck][mlclient.MLClient.healthcheck] reports whether MarkLogic's HealthCheck app server answers. That server is unauthenticated by design and returns `200 OK` only while the node is healthy - load balancers treat any other status as unhealthy.
+
+```python
+>>> from mlclient import MLClient
+
+>>> with MLClient() as ml:
+...     ml.healthcheck()
+True
+```
+
+The probe maps the response to a verdict:
+
+- `2xx` -\> `True` (healthy)
+- `5xx` -\> `False` (server up but not ready)
+- `4xx` -\> raises [HTTPStatusError](https://www.python-httpx.org/exceptions/); a client error means the request was misdirected (for example, aimed at an authenticated server), not that the node is unhealthy
+
+By default, health checks use a configuration derived from the primary configuration, overriding the port to `7997`, authentication to none, retry to `NO_RETRY_STRATEGY` and timeout to `HEALTH_TIMEOUT` (5 seconds) - the health probe uses `HEALTH_TIMEOUT` regardless of the primary client's timeout. These defaults also apply when the primary already targets `7997`; an identical effective configuration reuses its session. Cloud connections retain their gateway port and Cloud authentication, while health requests still default to no retries. [healthcheck][mlclient.MLClient.healthcheck] accepts a keyword-only `timeout` to override the probe's default for a single call.
+
+Pass a resolved [HTTPConfig][mlclient.http_config.HTTPConfig] as `health_config` to supply the health connection explicitly. Its host, port, authentication and TLS settings are preserved. Retry and timeout resolve independently: when `retry` was omitted, health requests use `NO_RETRY_STRATEGY`, and when `timeout` was omitted they use `HEALTH_TIMEOUT`; an explicitly supplied strategy or timeout is preserved, including `None` (which disables every HTTP timeout). `HTTPConfig.clone()` retains whether each was explicitly configured; `has_explicit_retry` and `has_explicit_timeout` expose that distinction without changing the normal defaults for other requests.
+
+```python
+>>> from mlclient import MLClient
+>>> from mlclient.http_config import HTTPConfig
+
+>>> health_config = HTTPConfig.resolve(
+...     host="healthcheck.example.com",
+...     port=7997,
+...     auth=None,
+... )
+>>> with MLClient(host="ml.example.com", health_config=health_config) as ml:
+...     ml.healthcheck()
+True
+```
+
+### Server version
+
+[version][mlclient.MLClient.version] returns an immutable [MarkLogicVersion][mlclient.models.MarkLogicVersion], resolved from `xdmp:version()` and cached after the first access. `str(version)` preserves the complete server version. `parts` is always a four-element tuple of numeric components in their original order, padded with `None` for missing components. Unpacking yields those same four values.
+
+```python
+>>> from mlclient import MLClient
+
+>>> with MLClient() as ml:
+...     version = ml.version
+>>> str(version)
+'12.0.1'
+>>> version.parts
+(12, 0, 1, None)
+>>> first, second, third, fourth = version
+>>> fourth is None
+True
+
+>>> from mlclient import MarkLogicVersion
+>>> version = MarkLogicVersion("10.0-9.5")
+>>> str(version)
+'10.0-9.5'
+>>> version.parts
+(10, 0, 9, 5)
+```
+
+When the connecting user lacks the eval privilege, the query fails and the Manage (`/manage/v2/properties`) then Admin (`/admin/v1/server-config`) endpoints are tried in turn. If none succeeds, the eval [MarkLogicError][mlclient.exceptions.MarkLogicError] is re-raised. A connection error propagates from the eval attempt without trying auxiliary servers. Unavailable endpoints and malformed fallback responses are skipped.
+
+On [AsyncMLClient][mlclient.AsyncMLClient] the version is an awaitable method rather than a cached property, because resolving it performs I/O:
+
+```python
+>>> import asyncio
+>>> from mlclient import AsyncMLClient
+
+>>> async def get_version():
+...     async with AsyncMLClient() as ml:
+...         return (await ml.version()).parts
+>>> asyncio.run(get_version())
+(12, 0, 1, None)
+```
+
+Numeric components have no universal major/minor/patch/hotfix labels because MarkLogic's versioning scheme changed between releases. Textual suffixes are preserved by `str(version)` and excluded from `parts`. An invalid eval version raises `ValueError`.
+
+### Raw HTTP request bodies
+
+For `ml.http.request` and its convenience methods (also on the asynchronous client), strings and bytes are sent as raw content even with a JSON content type. Dictionaries are JSON-encoded when the content type is JSON; otherwise they are submitted as form data. Header names are case-insensitive.
+
+### Log-level configuration
+
+The synchronous [LogLevelService][mlclient.services.LogLevelService] supports the `log-level` CLI command and can also be constructed with a client's API handles:
+
+```python
+>>> from mlclient import MLClient
+>>> from mlclient.services import LogLevelService
+>>> with MLClient(username="admin", password="admin") as ml:
+...     levels = LogLevelService(ml.rest, ml.manage)
+...     current = levels.get(group="Default", log_type="file")
+...     levels.set(current, group="Default", log_type="file")
+```
+
+Omit `server` to target a group, or supply an App Server name for its file log level. App Servers have no system log level. Names and levels are sent as external variables. Evaluation through the REST server is attempted first; only authorization failures trigger Management REST fallback. Transport and other server errors propagate. See [log-level](cli/log-level.md) for supported levels and Management permissions.
+
+Both `get` and `set` accept a keyword-only `timeout`:
+
+```python
+>>> with MLClient(timeout=10) as ml:
+...     levels = LogLevelService(ml.rest, ml.manage)
+...     current = levels.get(timeout=2)
+...     levels.set(current, timeout=None)
+```
+
+Omitting `timeout` uses the configuration of whichever client sends the request (REST or Manage). An explicit number, `httpx.Timeout` or `None` is forwarded to both eval and any Management fallback. Each request has its own timeout; this is not a total deadline across both requests. Overrides do not change subsequent calls. A transport timeout propagates without triggering Management fallback.
+
+The group API wrappers also accept `timeout` on `get_properties` and `put_properties`, for both `ml.manage.groups` and the asynchronous client.

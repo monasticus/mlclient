@@ -42,3 +42,19 @@ publish:
 
 branches:
 	@git branch | grep -E -v "(main)|(bump.*)" | xargs git branch -D
+
+.PHONY: docs-install docs-serve docs-build docs-deploy-dev
+
+docs-install:
+	@poetry install --only main,docs
+
+docs-serve:
+	@poetry run mkdocs serve
+
+docs-build:
+	@poetry run mkdocs build --strict
+	@poetry run python scripts/check_docs.py
+
+# Publishing remains a CI-only operation. Requires authenticated GitHub CLI.
+docs-deploy-dev:
+	@gh workflow run docs.yml --ref main

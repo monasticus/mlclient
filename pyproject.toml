@@ -10,7 +10,7 @@ authors = ["Tomasz Aniołowski <tomasz.maciej.aniolowski@gmail.com>"]
 license = "MIT"
 readme = "README.md"
 repository = "https://github.com/monasticus/mlclient"
-documentation = "https://mlclient.readthedocs.io/en/0.4.1"
+documentation = "https://monasticus.github.io/mlclient/"
 keywords = ["MarkLogic", "marklogic", "database", "client", "data", "xml", "json", "NoSQL", "nosql"]
 classifiers = [
     "License :: OSI Approved :: MIT License",
@@ -46,7 +46,7 @@ pydantic = "^2.8.2"
 pyyaml = "^6.0.2"
 cleo = "^2.1.0"
 xmltodict = "^0.13.0"
-hagis = "^0.8.7"
+haggis = "^0.14.1"
 aiofiles = "^24.1.0"
 httpx-retries = "^0.4.5"
 pyspnego = { version = "^0.12.1", extras = ["kerberos"], optional = true }
@@ -74,9 +74,15 @@ pyjwt = "^2.13.0"
 optional = true
 
 [tool.poetry.group.docs.dependencies]
-sphinx = "^7.1.2"
-sphinx-rtd-theme = "^1.3.0"
-autodoc-pydantic = "^2.0.1"
+mkdocs = "^1.6"
+mkdocs-material = "^9.5"
+mkdocstrings = { extras = ["python"], version = ">=0.26,<1.0" }
+mkdocs-gen-files = "^0.5"
+mkdocs-literate-nav = "0.6.2"
+mkdocs-section-index = "0.3.9"
+griffe-pydantic = "^1.0"
+mike = "^2.1"
+ruff = "*"  # Signature formatting must match local and CI builds.
 
 [tool.poetry.group.sub.dependencies]
 cryptography = "^50.0.0"
@@ -87,7 +93,6 @@ aiohttp = "^3.14.3"
 ml = "mlclient.cli:main"
 
 [tool.poetry_bumpversion.file."mlclient/__init__.py"]
-[tool.poetry_bumpversion.file."docs/conf.py"]
 [tool.poetry_bumpversion.file."pyproject.toml"]
 [tool.poetry_bumpversion.file."README.md"]
 

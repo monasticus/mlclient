@@ -1,0 +1,79 @@
+name: Documentation
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+    tags: ['[0-9]+.[0-9]+.[0-9]+']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Each publication rewrites the complete version catalog. Never race deployments.
+concurrency:
+  group: docs-${{ github.event_name == 'pull_request' && github.ref || 'publish' }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install poetry==2.2.0
+      - run: make docs-install
+      - run: make docs-build
+
+  deploy:
+    needs: build
+    if: github.event_name != 'pull_request' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/'))
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install poetry==2.2.0
+      - run: make docs-install
+      - name: Configure deployment author
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+      - name: Publish version into gh-pages
+        env:
+          DOCS_REF: ${{ github.ref }}
+          DOCS_VERSION: ${{ github.ref_name }}
+        run: |
+          if [[ "$DOCS_REF" == refs/tags/* ]]; then
+            [[ "$DOCS_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]
+            poetry run mike deploy --push --alias-type copy --update-aliases "$DOCS_VERSION" latest
+            poetry run mike set-default --push latest
+          else
+            poetry run mike deploy --push dev
+            if ! git cat-file -e gh-pages:index.html 2>/dev/null; then
+              poetry run mike set-default --push dev
+            fi
+          fi
+      - name: Export all published versions
+        run: |
+          mkdir pages-site
+          git archive gh-pages | tar -x -C pages-site
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: pages-site
+      - name: Deploy GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

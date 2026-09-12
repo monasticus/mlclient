@@ -1,0 +1,105 @@
+strict: true
+exclude_docs: |
+  gen_ref_pages.py
+  griffe_extensions.py
+site_name: MLClient
+site_description: A Python client for MarkLogic Server — three API layers, async, CLI included.
+site_url: https://monasticus.github.io/mlclient/
+repo_url: https://github.com/monasticus/mlclient
+repo_name: monasticus/mlclient
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.indexes
+    - navigation.top
+    - content.code.copy
+    - search.suggest
+    - search.highlight
+    - toc.follow
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
+plugins:
+  - search
+  - gen-files:
+      scripts:
+        - docs/gen_ref_pages.py
+  - literate-nav:
+      nav_file: SUMMARY.md
+  - section-index
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: ["."]
+          options:
+            docstring_style: numpy
+            show_root_heading: true
+            show_source: true
+            show_signature_annotations: true
+            separate_signature: true
+            merge_init_into_class: true
+            docstring_section_style: table
+            filters: ["!^_"]
+            extensions:
+              - docs/griffe_extensions.py:LegacyDocstrings
+              - griffe_pydantic:
+                  schema: true
+
+markdown_extensions:
+  - tables
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.inlinehilite
+  - pymdownx.snippets:
+      base_path: [docs]
+      check_paths: true
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - toc:
+      permalink: true
+
+nav:
+  - Home: index.md
+  - User Guide:
+      - Setup: user/setup.md
+      - CLI:
+          - Overview: user/cli.md
+          - Environment: user/cli/env.md
+          - Initialize environment: user/cli/env/init.md
+          - Show environment: user/cli/env/show.md
+          - Eval: user/cli/eval.md
+          - HTTP: user/cli/http.md
+          - Logs: user/cli/logs.md
+          - Log level: user/cli/log-level.md
+          - Health: user/cli/health.md
+          - Version: user/cli/version.md
+      - Python API: user/pythonapi.md
+  - API Reference: reference/
+  - Contributing:
+      - Documentation: documentation.md
+
+extra:
+  version:
+    provider: mike
+    alias: true
+    default: latest
+
+validation:
+  links:
+    not_found: warn
+    anchors: warn
+    unrecognized_links: warn

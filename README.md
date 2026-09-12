@@ -1,7 +1,7 @@
 [![License](https://img.shields.io/github/license/monasticus/mlclient?label=License&style=plastic)](https://github.com/monasticus/mlclient/blob/main/LICENSE)
 [![Version](https://img.shields.io/pypi/v/mlclient?color=blue&label=PyPI&style=plastic)](https://pypi.org/project/mlclient/)
 [![Python](https://img.shields.io/pypi/pyversions/mlclient?logo=python&label=Python&style=plastic)](https://www.python.org/)
-[![Read the Docs](https://img.shields.io/readthedocs/mlclient/0.4.1?style=plastic&logo=readthedocs)](https://mlclient.readthedocs.io/en/0.4.1)
+[![Documentation](https://img.shields.io/badge/docs-Material-blue)](https://monasticus.github.io/mlclient/)
 [![Build](https://img.shields.io/github/actions/workflow/status/monasticus/mlclient/unit-test.yml?label=Test%20MLClient&style=plastic)](https://github.com/monasticus/mlclient/actions/workflows/unit-test.yml?query=branch%3Amain)
 [![Code Coverage](https://img.shields.io/badge/Code%20Coverage-100%25-brightgreen?style=plastic)](https://github.com/monasticus/mlclient/actions/workflows/coverage-badge.yml?query=branch%3Amain)
 
@@ -9,7 +9,7 @@
 
 A Python client for MarkLogic Server. Three API layers, async out of the box, CLI included.
 
-Read the full documentation at [Read the Docs](https://mlclient.readthedocs.io).
+Read the full documentation at [documentation](https://monasticus.github.io/mlclient/).
 
 ## Installation
 
@@ -140,7 +140,7 @@ Supported authentication methods (`auth=`):
 | `None`                                | application-level    | none (Cloud handles its own) |
 | any `httpx.Auth`                      | custom               | your handler |
 
-See the [Connection & authentication guide](https://mlclient.readthedocs.io)
+See the [Connection & authentication guide](https://monasticus.github.io/mlclient/latest/user/pythonapi/)
 for initialization examples per method and the full matrix of valid and rejected
 combinations.
 
@@ -173,4 +173,15 @@ identifier from the environment configuration or a TCP port.
 
 ---
 
-Full documentation at [Read the Docs](https://mlclient.readthedocs.io).
+Full documentation at [documentation](https://monasticus.github.io/mlclient/).
+
+## Building the documentation
+
+```sh
+make docs-install
+make docs-serve
+make docs-build
+```
+
+The build uses the same Poetry lockfile as CI. See the
+[documentation maintenance guide](docs/documentation.md) for versioning and rollout.

@@ -20,3 +20,6 @@ docs/_build/
 /.mlclient
 tmp
 main.py
+# Documentation build output
+site/
+docs/.cache/

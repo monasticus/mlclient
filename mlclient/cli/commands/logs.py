@@ -35,7 +35,7 @@ class LogsCommand(Command):
       -f, --from=FROM
             A start time to search error logs
       -t, --to=TO
-            An end time to search error logs
+            AAn end time to search error logs
       -r, --regex=REGEX
             A regex to search error logs
       -H, --host=HOST
@@ -76,7 +76,7 @@ class LogsCommand(Command):
         option(
             "to",
             "t",
-            description="n end time to search error logs",
+            description="An end time to search error logs",
             flag=False,
         ),
         option(

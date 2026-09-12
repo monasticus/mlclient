@@ -16,11 +16,10 @@ http
 
     Options:
       -e, --environment=ENVIRONMENT  The ML Client environment name [default: "local"]
-      -c, --connection=CONNECTION  Connection identifier from the environment or TCP port
+      -c, --connection=CONNECTION    Connection identifier from the environment or TCP port
       -b, --body=BODY                Request body: a raw string, a file path, or @file-path
       -i, --include                  Include the status line and response headers in the output
       -p, --pretty                   Pretty-print an XML or JSON body with a 2-space indent
-
       -h, --help                     Display help for the given command. When no command is given display help for the list command.
       -q, --quiet                    Do not output any message.
       -V, --version                  Display this application version.

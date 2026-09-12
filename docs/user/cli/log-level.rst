@@ -7,18 +7,17 @@ log-level
       Shows or sets a MarkLogic file/system log level
 
     Usage:
-      log-level [options] [<level>]
+      log-level [options] [--] [<level>]
 
     Arguments:
       level                          The log level to set. Omit to show the current level.
 
     Options:
       -e, --environment=ENVIRONMENT  The ML Client environment name [default: "local"]
-      -c, --connection=CONNECTION  Connection identifier from the environment or TCP port
-          --type=TYPE                The log type: file or system [default: "file"]
-          --group=GROUP              The group to target [default: "Default"]
+      -c, --connection=CONNECTION    Connection identifier from the environment or TCP port
+      -t, --type=TYPE                The log type: file or system [default: "file"]
+      -g, --group=GROUP              The group to target [default: "Default"]
       -s, --server=SERVER            The App Server to target (file log level only)
-
       -h, --help                     Display help for the given command. When no command is given display help for the list command.
       -q, --quiet                    Do not output any message.
       -V, --version                  Display this application version.
@@ -26,6 +25,7 @@ log-level
           --no-ansi                  Disable ANSI output.
       -n, --no-interaction           Do not ask any interactive question.
       -v|vv|vvv, --verbose           Increase the verbosity of messages: 1 for normal output, 2 for more verbose output and 3 for debug.
+
 
 With a ``level`` argument the command sets the level; without one it shows the
 current level. The output block is identical either way.

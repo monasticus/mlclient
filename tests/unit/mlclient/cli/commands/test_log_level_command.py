@@ -54,8 +54,11 @@ def test_command_log_level_shows_group_file_level_by_default():
     assert tester.io.fetch_output() == "Group: Default\nFile Log Level: info\n"
 
 
+@pytest.mark.parametrize(
+    "options", ["--type system --group Analyzer", "-t system -g Analyzer"],
+)
 @respx.mock
-def test_command_log_level_shows_group_system_level():
+def test_command_log_level_shows_group_system_level(options):
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url("http://localhost:8002/v1/eval")
     ml_mocker.with_response_code(200)
@@ -63,7 +66,7 @@ def test_command_log_level_shows_group_system_level():
     ml_mocker.mock_post()
 
     tester = _get_tester()
-    status = tester.execute("-e test --type system --group Analyzer")
+    status = tester.execute(f"-e test {options}")
 
     assert status == 0
     assert tester.io.fetch_output() == "Group: Analyzer\nSystem Log Level: debug\n"

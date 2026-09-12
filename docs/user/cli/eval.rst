@@ -14,13 +14,12 @@ eval
 
     Options:
       -e, --environment=ENVIRONMENT  The ML Client environment name [default: "local"]
-      -c, --connection=CONNECTION  Connection identifier from the environment or TCP port
+      -c, --connection=CONNECTION    Connection identifier from the environment or TCP port
           --var=VAR                  A variable to be used in the code (multiple values allowed)
       -x, --xquery                   If set, the code will be treated as raw xquery
       -j, --javascript               If set, the code will be treated as raw javascript
       -d, --database=DATABASE        Evaluate the code on the named content database
       -t, --txid=TXID                The transaction identifier of the multi-statement transaction
-
       -h, --help                     Display help for the given command. When no command is given display help for the list command.
       -q, --quiet                    Do not output any message.
       -V, --version                  Display this application version.

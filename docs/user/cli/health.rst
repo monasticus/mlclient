@@ -15,7 +15,6 @@ health
       -i, --interval=INTERVAL        Seconds between polls in --watch mode [default: "5"]
       -o, --overwrite                Repaint poll output in place instead of scrolling
       -l, --lines=LINES              Statuses to keep on screen in --overwrite mode [default: "3"]
-
       -h, --help                     Display help for the given command. When no command is given display help for the list command.
       -q, --quiet                    Do not output any message.
       -V, --version                  Display this application version.
@@ -23,6 +22,7 @@ health
           --no-ansi                  Disable ANSI output.
       -n, --no-interaction           Do not ask any interactive question.
       -v|vv|vvv, --verbose           Increase the verbosity of messages: 1 for normal output, 2 for more verbose output and 3 for debug.
+
 
 The command sends a ``HEAD /`` request to the environment's HealthCheck server
 (see :doc:`../setup`) and prints a coloured status:

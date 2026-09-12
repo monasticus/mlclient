@@ -60,9 +60,9 @@ class LogLevelCommand(Command):
             The ML Client environment name [default: "local"]
       -c, --connection=CONNECTION
             Connection identifier from the environment or TCP port
-          --type=TYPE
+      -t, --type=TYPE
             The log type: file or system [default: "file"]
-          --group=GROUP
+      -g, --group=GROUP
             The group to target [default: "Default"]
       -s, --server=SERVER
             The App Server to target (file log level only)
@@ -93,12 +93,14 @@ class LogLevelCommand(Command):
         ),
         option(
             "type",
+            "t",
             description="The log type: file or system",
             flag=False,
             default="file",
         ),
         option(
             "group",
+            "g",
             description="The group to target",
             flag=False,
             default="Default",

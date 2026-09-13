@@ -37,6 +37,9 @@ logger = logging.getLogger(__name__)
 class WriteDocumentsJob:
     """An async job writing documents into a MarkLogic database.
 
+    Experimental API: jobs and their reports are outside the stable API contract
+    and may change in minor releases. Prefer the documents service for stable use.
+
     Uses asyncio with a concurrency-limited semaphore to send document batches
     in parallel via AsyncMLClient.
 
@@ -59,6 +62,10 @@ class WriteDocumentsJob:
         batch_size : int, default 100
             A number of documents in a single batch
         """
+        logger.warning(
+            "WriteDocumentsJob is experimental; its API may change in minor "
+            "releases. Use the documents service for stable document operations.",
+        )
         self._concurrency: int = concurrency or 8
         self._batch_size: int = batch_size
         self._config: dict = {}
@@ -135,6 +142,9 @@ class WriteDocumentsJob:
 class ReadDocumentsJob:
     """An async job reading documents from a MarkLogic database.
 
+    Experimental API: jobs and their reports are outside the stable API contract
+    and may change in minor releases. Prefer the documents service for stable use.
+
     Uses asyncio with a concurrency-limited semaphore to send URI batches
     in parallel via AsyncMLClient.
 
@@ -159,6 +169,10 @@ class ReadDocumentsJob:
         batch_size : int, default 400
             A number of URIs in a single batch
         """
+        logger.warning(
+            "ReadDocumentsJob is experimental; its API may change in minor "
+            "releases. Use the documents service for stable document operations.",
+        )
         self._concurrency: int = concurrency or 16
         self._batch_size: int = batch_size
         self._config: dict = {}

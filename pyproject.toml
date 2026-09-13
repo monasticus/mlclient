@@ -1,19 +1,18 @@
 [build-system]
-requires = ["poetry-core"]
+requires = ["poetry-core>=2.2,<3.0"]
 build-backend = "poetry.core.masonry.api"
 
-[tool.poetry]
+[project]
 name = "mlclient"
 version = "0.4.1"
-description = "A python client managing your MarkLogic instance"
-authors = ["Tomasz Aniołowski <tomasz.maciej.aniolowski@gmail.com>"]
+description = "A Python client and CLI for MarkLogic Server with sync and async APIs"
+authors = [{name = "Tomasz Aniołowski", email = "tomasz.maciej.aniolowski@gmail.com"}]
 license = "MIT"
+license-files = ["LICENSE"]
+requires-python = ">=3.10,<4.0"
 readme = "README.md"
-repository = "https://github.com/monasticus/mlclient"
-documentation = "https://mlclient.readthedocs.io/en/0.4.1"
 keywords = ["MarkLogic", "marklogic", "database", "client", "data", "xml", "json", "NoSQL", "nosql"]
 classifiers = [
-    "License :: OSI Approved :: MIT License",
     "Development Status :: 3 - Alpha",
     "Environment :: Console",
     "Intended Audience :: Developers",
@@ -23,7 +22,8 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
-    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Topic :: Database",
     "Topic :: Database :: Database Engines/Servers",
     "Topic :: Software Development",
@@ -31,28 +31,32 @@ classifiers = [
     "Topic :: Software Development :: Libraries :: Python Modules",
     "Topic :: Utilities",
 ]
-packages = [
-    { include = "mlclient" }
-]
-include = [
-    "mlclient/resources/*"
+dependencies = [
+    "httpx>=0.27.0,<0.28.0",
+    "python-dateutil>=2.9.0.post0,<3.0.0",
+    "pydantic>=2.8.2,<3.0.0",
+    "pyyaml>=6.0.2,<7.0.0",
+    "cleo>=2.1.0,<3.0.0",
+    "xmltodict>=0.13.0,<0.14.0",
+    "aiofiles>=24.1.0,<25.0.0",
+    "httpx-retries>=0.4.5,<0.5.0",
 ]
 
-[tool.poetry.dependencies]
-python = ">=3.10,<4.0"
-httpx = "^0.27.0"
-python-dateutil = "^2.9.0.post0"
-pydantic = "^2.8.2"
-pyyaml = "^6.0.2"
-cleo = "^2.1.0"
-xmltodict = "^0.13.0"
-hagis = "^0.8.7"
-aiofiles = "^24.1.0"
-httpx-retries = "^0.4.5"
-pyspnego = { version = "^0.12.1", extras = ["kerberos"], optional = true }
+[project.optional-dependencies]
+kerberos = ["pyspnego[kerberos]>=0.12.1,<0.13.0"]
 
-[tool.poetry.extras]
-kerberos = ["pyspnego"]
+[project.urls]
+Repository = "https://github.com/monasticus/mlclient"
+Documentation = "https://monasticus.github.io/mlclient/"
+Issues = "https://github.com/monasticus/mlclient/issues"
+Changelog = "https://github.com/monasticus/mlclient/releases"
+
+[project.scripts]
+ml = "mlclient.cli:main"
+
+[tool.poetry]
+packages = [{include = "mlclient"}]
+include = ["mlclient/resources/*"]
 
 [tool.poetry.group.dev.dependencies]
 ruff = "*"
@@ -62,34 +66,32 @@ pytest-cov = "^6.0.0"
 pytest-mock = "^3.14.0"
 pytest-benchmark = {extras = ["histogram"], version = "^5.1.0"}
 pytest-asyncio = "^1.0.0"
-poetry-bumpversion = "^0.3.3"
 respx = "^0.21.1"
 requests = "^2.33.0"
 responses = "^0.23.3"
 deepdiff = "^8.6.2"
-mimeograph = "^1.1.0"
 pyjwt = "^2.13.0"
+cryptography = "^50.0.0"
+packaging = ">=24,<27"
 
 [tool.poetry.group.docs]
 optional = true
 
 [tool.poetry.group.docs.dependencies]
-sphinx = "^7.1.2"
-sphinx-rtd-theme = "^1.3.0"
-autodoc-pydantic = "^2.0.1"
+mkdocs = "^1.6"
+mkdocs-material = "^9.5"
+mkdocstrings = { extras = ["python"], version = ">=0.26,<1.0" }
+mkdocs-gen-files = "^0.5"
+mkdocs-literate-nav = "0.6.2"
+mkdocs-section-index = "0.3.9"
+griffe-pydantic = "^1.0"
+mike = "^2.1"
+ruff = "*"  # Signature formatting must match local and CI builds.
 
-[tool.poetry.group.sub.dependencies]
-cryptography = "^50.0.0"
-pandas = "^2.1.2"
-aiohttp = "^3.14.3"
-
-[tool.poetry.scripts]
-ml = "mlclient.cli:main"
+[tool.poetry.requires-plugins]
+poetry-bumpversion = "==0.3.3"
 
 [tool.poetry_bumpversion.file."mlclient/__init__.py"]
-[tool.poetry_bumpversion.file."docs/conf.py"]
-[tool.poetry_bumpversion.file."pyproject.toml"]
-[tool.poetry_bumpversion.file."README.md"]
 
 [tool.pytest.ini_options]
 pythonpath = ["."]

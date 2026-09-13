@@ -38,9 +38,9 @@ Examples
 import logging.config
 
 import yaml
-from haggis.logs import add_logging_level
 
 from . import utils
+from ._logging import register_fine_logging as _register_fine_logging
 from .auth import AuthConfig, MarkLogicCloudAuth, OAuthBearerAuth
 from .clients import (
     DEFAULT_RETRY_STRATEGY,
@@ -105,4 +105,4 @@ __all__ = [
     "setup_logger",
 ]
 
-add_logging_level("FINE", logging.DEBUG - 1)
+_register_fine_logging()

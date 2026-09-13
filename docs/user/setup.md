@@ -1,4 +1,4 @@
-# Setup
+# Environments and runtime settings
 
 When using **ML Client** in your application it can be helpful to setup **ML Client**'s environment. It will make it easier to use `mlclient` lib without explicit use of ML configuration parameters. Using a YAML file, you're able to easily get a configuration for a MLClient instance.
 
@@ -23,7 +23,7 @@ YAML file:
 
 ## Root-level defaults and per-server overrides
 
-Connection and authentication settings declared at the top level of the file (`protocol`, `host`, `username`, `password`, `auth`, `ssl`, `cloud`) act as defaults for every app server. Any of `auth`, `username`, `password`, or `ssl` may be overridden per server; an unset field inherits the root value. `auth`, `username` and `password` replace the root value wholesale, while `ssl` merges field by field: a server declaring only a client certificate keeps the root's server verification (see below). This mirrors the [MLClient][mlclient.MLClient] connection model - see [core](pythonapi.md) for the full matrix of connection modes and auth methods. For example, an HTTPS environment with a mutual-TLS app server:
+Connection and authentication settings declared at the top level of the file (`protocol`, `host`, `username`, `password`, `auth`, `ssl`, `cloud`) act as defaults for every app server. Any of `auth`, `username`, `password`, or `ssl` may be overridden per server; an unset field inherits the root value. `auth`, `username` and `password` replace the root value wholesale, while `ssl` merges field by field: a server declaring only a client certificate keeps the root's server verification (see below). This mirrors the [MLClient][mlclient.MLClient] connection model - see [connection and authentication](python/connections.md) for the full matrix of connection modes and auth methods. For example, an HTTPS environment with a mutual-TLS app server:
 
 > ```yaml
 > app-name: migration-app

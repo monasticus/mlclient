@@ -1,6 +1,10 @@
 """The ML Jobs package.
 
-This package contains Python API to perform various operations.
+This package is experimental, including job configuration and report models.
+Its API may change in minor releases and is excluded from the 1.x stability
+contract. Constructing a job emits a warning through Python logging; importing
+the package does not. Prefer MLClient.documents or AsyncMLClient.documents for
+stable document operations.
 It contains the following modules
 
     * documents_jobs

@@ -23,6 +23,13 @@ ml_mocker = MLRespXMocker(router_base_url="http://localhost:8000/v1/documents")
 ml_mocker.with_get_side_effect(side_effect=ml_doc_mocker.get_documents_side_effect)
 
 
+def test_job_is_explicitly_experimental(caplog):
+    ReadDocumentsJob()
+    assert len(caplog.records) == 1
+    assert "ReadDocumentsJob is experimental" in caplog.text
+    assert "minor releases" in caplog.text
+
+
 @ml_mocker.router
 def test_basic_job_with_documents_output():
     with ml_doc_mocker.scoped():

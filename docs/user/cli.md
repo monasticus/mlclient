@@ -1,6 +1,50 @@
-# Command Line Interface
+# Command line guide
 
-MLClient provides you a nice command line interface using [cleo](https://github.com/python-poetry/cleo) library.
+Use `ml` to inspect an environment, evaluate code, work with logs or send a raw
+HTTP request. Every command has `--help`; use `-vv` for diagnostic logs.
+
+## Connect a project
+
+For a new project, run `ml env init` and review the generated connection settings.
+For an ml-gradle project, import the properties already present:
+
+```sh
+ml env init --from-gradle=dev
+ml version -e dev
+```
+
+This merges `gradle.properties` and `gradle-dev.properties`. It reads configuration;
+it does not run Gradle or deploy the project.
+
+For a running server, discovery can populate connections from its App Servers:
+
+```sh
+ml env init local --from-host=localhost:8002 --interactive
+ml env show local
+```
+
+Supply the host's credentials when prompted. Discovery uses the Manage API and
+needs permission to read server configuration. One environment can contain many
+App Server entries; review the discovered identifiers before using them.
+See [env init](cli/env/init.md) for discovery filters and configuration details.
+
+## Run everyday commands
+
+```sh
+ml eval -x '1 + 1'
+ml http get /v1/documents uri=/example.json
+ml logs -s 8002
+ml log-level
+ml health
+ml version -c app-services
+```
+
+The `local` environment is the default. Use `-e dev` for another environment.
+A connection selector chooses where the request is sent; an operation target
+chooses what the server acts on. The distinction is explained below and on each
+command page.
+
+## Command reference
 
 ```text
 MLCLIent (version 0.4.0)

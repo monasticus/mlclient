@@ -23,3 +23,8 @@ for path in sorted((root / "mlclient").rglob("*.py")):
 
 with mkdocs_gen_files.open("reference/SUMMARY.md", "w") as output:
     output.writelines(nav.build_literate_nav())
+
+# Publish the repository contribution guide without maintaining a second copy.
+with mkdocs_gen_files.open("contributing.md", "w") as output:
+    output.write((root / "CONTRIBUTING.md").read_text())
+mkdocs_gen_files.set_edit_path("contributing.md", "../CONTRIBUTING.md")

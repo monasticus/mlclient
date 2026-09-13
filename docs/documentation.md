@@ -26,6 +26,10 @@ commit it. Material supplies light/dark themes, search and the version selector.
 
 ## Content and API reference
 
+The repository-level `CONTRIBUTING.md` is the source of the website contribution
+guide. The existing generation script publishes it as `contributing.md`; edit
+the root file rather than creating a second copy under `docs/`.
+
 Write guides in Markdown under `docs/` and register them in `mkdocs.yml`.
 Keep README examples in sync with `docs/index.md`. Command help and examples
 must match the CLI on the branch being documented. Use fenced code blocks,
@@ -46,27 +50,20 @@ narrow rather than silencing all parser or reference warnings.
 ## Versioned publishing
 
 Only `.github/workflows/docs.yml` writes the production `gh-pages` branch.
+PRs run a strict build; `main` publishes `dev`. The release workflow calls this
+workflow after successful package publication: stable tags publish their version
+and update `latest`, while prerelease tags publish a numbered entry only.
+See [Releasing MLClient](releasing.md) for gates, tag preparation and OIDC setup.
 
-- Pull requests run a strict build without publishing.
-- Pushes to `main` publish `dev`.
-- Release tags `X.Y.Z` publish that version from the tag's source and move
-  `latest` to it. Until the first release, the root redirects to `dev`; after a
-  release it redirects to `latest`.
-- `make docs-deploy-dev` requests a CI run from `main` using an authenticated
-  GitHub CLI; it does not push local documentation. A manual workflow run from
-  `main` republishes `dev`. Re-run a release workflow
-  against its tag to retry that release. Publishing an older tag also moves
-  `latest`, so do this only when intentionally changing the default release.
+`make docs-deploy-dev` requests a CI run from `main` using authenticated GitHub
+CLI. It does not push local docs. A failed release documentation job can be
+retried through the release workflow. Republishing an older stable tag also
+moves `latest`; do this only when intentionally changing the default release.
 
-The `mike` version catalog and all generated releases live in `gh-pages`.
-The workflow exports the entire catalog, uploads a Pages artifact and deploys
-it using GitHub's official Pages actions. Aliases use copies, so the artifact
-contains no symlinks. Deployment runs share a concurrency group to avoid
-competing writes; check Actions if several releases are requested together.
-
-This differs from branch-triggered Pages publishing: pushes with
-`GITHUB_TOKEN` do not trigger a branch Pages build. The Actions workflow needs
-`contents: write`, `pages: write`, and `id-token: write`; PR builds remain read-only.
+The complete mike catalog is stored on `gh-pages` and deployed as a GitHub Pages
+artifact. Alias copies avoid symlinks in that artifact. Publication is serialized
+so versions do not race while updating the catalog. Plain local MkDocs preview
+has no version catalog; use a versioned mike preview to test its selector.
 
 ## One-time rollout
 
@@ -78,7 +75,7 @@ This differs from branch-triggered Pages publishing: pushes with
    deployment if Pages was not configured yet).
 4. Verify the home page, all guides, API models, search and version selector at
    <https://monasticus.github.io/mlclient/>. Initially the only version is `dev`.
-5. Publish a new release tag containing the migration; verify `latest`, its
+5. Complete the release setup, then publish a release containing the migration; verify `latest`, its
    numbered release, and `dev` in the selector. Confirm older URLs still work.
 6. Decommission Read the Docs only after the replacement has been checked.
 

@@ -1,0 +1,117 @@
+name: Release
+
+on:
+  push:
+    tags: ['[0-9]+.[0-9]+.[0-9]+*']
+  # Dispatch against an existing release tag to exercise TestPyPI only.
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}-${{ github.event_name }}
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install poetry==2.2.0
+      - run: poetry install --only main,dev
+      - name: Verify tag, source version and ancestry
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+          RELEASE_REF: ${{ github.ref }}
+        run: |
+          [[ "$RELEASE_REF" == refs/tags/* ]]
+          poetry run python scripts/release.py verify "$RELEASE_TAG"
+
+  unit:
+    needs: validate
+    uses: ./.github/workflows/unit-test.yml
+
+  lint:
+    needs: validate
+    uses: ./.github/workflows/lint.yml
+
+  integration:
+    needs: validate
+    uses: ./.github/workflows/integration-test.yml
+
+  build:
+    needs: [unit, lint, integration]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install poetry==2.2.0
+      - run: poetry install --with docs
+      - run: make docs-build
+      - run: poetry build
+      - name: Install built wheel without development dependencies
+        run: |
+          python -m venv /tmp/mlclient-wheel
+          /tmp/mlclient-wheel/bin/pip install dist/*.whl
+          cd /tmp
+          /tmp/mlclient-wheel/bin/python -c 'import mlclient; from importlib.metadata import version; assert mlclient.__version__ == version("mlclient")'
+          /tmp/mlclient-wheel/bin/ml --help
+          /tmp/mlclient-wheel/bin/pip check
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/*
+          if-no-files-found: error
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    environment: ${{ github.event_name == 'workflow_dispatch' && 'testpypi' || 'pypi' }}
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+      - uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: ${{ github.event_name == 'workflow_dispatch' && 'https://test.pypi.org/legacy/' || 'https://upload.pypi.org/legacy/' }}
+
+  github-release:
+    if: github.event_name == 'push'
+    needs: publish
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+      - name: Create release with distributions and generated notes
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          flags=()
+          [[ "$RELEASE_TAG" =~ (a|b|rc)[0-9]+$ ]] && flags+=(--prerelease)
+          gh release create "$RELEASE_TAG" dist/* --verify-tag \
+            --title "$RELEASE_TAG" --generate-notes "${flags[@]}" \
+            --repo "$GITHUB_REPOSITORY"
+
+  documentation:
+    needs: github-release
+    uses: ./.github/workflows/docs.yml
+    permissions:
+      contents: write
+      pages: write
+      id-token: write

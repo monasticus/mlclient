@@ -74,22 +74,38 @@ markdown_extensions:
 
 nav:
   - Home: index.md
-  - User Guide:
-      - Setup: user/setup.md
-      - CLI:
-          - Overview: user/cli.md
-          - Environment: user/cli/env.md
-          - Initialize environment: user/cli/env/init.md
-          - Show environment: user/cli/env/show.md
-          - Eval: user/cli/eval.md
-          - HTTP: user/cli/http.md
-          - Logs: user/cli/logs.md
-          - Log level: user/cli/log-level.md
-          - Health: user/cli/health.md
-          - Version: user/cli/version.md
-      - Python API: user/pythonapi.md
+  - Quickstart: quickstart.md
+  - Python Guide:
+      - Overview: user/pythonapi.md
+      - Documents: user/python/documents.md
+      - Evaluate code: user/python/eval.md
+      - Transactions: user/python/transactions.md
+      - Read logs: user/python/logs.md
+      - Health and administration: user/python/operations.md
+      - Connection and authentication: user/python/connections.md
+      - Environments and runtime settings: user/setup.md
+      - API layers: user/python/api-layers.md
+      - Custom application APIs: user/python/custom-api.md
+      - Recipes: recipes.md
+  - CLI:
+      - Overview: user/cli.md
+      - Environment: user/cli/env.md
+      - Initialize environment: user/cli/env/init.md
+      - Show environment: user/cli/env/show.md
+      - Eval: user/cli/eval.md
+      - HTTP: user/cli/http.md
+      - Logs: user/cli/logs.md
+      - Log level: user/cli/log-level.md
+      - Health: user/cli/health.md
+      - Version: user/cli/version.md
   - API Reference: reference/
+  - Project:
+      - Background: about.md
+      - AI agents: agents.md
+      - Stability: stability.md
+      - Releases: releasing.md
   - Contributing:
+      - Contribution guide: contributing.md
       - Documentation: documentation.md
 
 extra:

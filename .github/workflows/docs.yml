@@ -1,10 +1,10 @@
 name: Documentation
 
 on:
+  workflow_call:
   pull_request:
   push:
     branches: [main]
-    tags: ['[0-9]+.[0-9]+.[0-9]+']
   workflow_dispatch:
 
 permissions:
@@ -57,9 +57,13 @@ jobs:
           DOCS_VERSION: ${{ github.ref_name }}
         run: |
           if [[ "$DOCS_REF" == refs/tags/* ]]; then
-            [[ "$DOCS_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]
-            poetry run mike deploy --push --alias-type copy --update-aliases "$DOCS_VERSION" latest
-            poetry run mike set-default --push latest
+            [[ "$DOCS_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+((a|b|rc)[0-9]+)?$ ]]
+            if [[ "$DOCS_VERSION" =~ (a|b|rc)[0-9]+$ ]]; then
+              poetry run mike deploy --push "$DOCS_VERSION"
+            else
+              poetry run mike deploy --push --alias-type copy --update-aliases "$DOCS_VERSION" latest
+              poetry run mike set-default --push latest
+            fi
           else
             poetry run mike deploy --push dev
             if ! git cat-file -e gh-pages:index.html 2>/dev/null; then

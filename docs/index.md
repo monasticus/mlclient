@@ -1,149 +1,62 @@
-# MLClient - MarkLogic instance in your hands
+# MLClient
 
-[![Tag Badge](https://img.shields.io/badge/GitHub-monasticus%2Fmlclient-white?style=plastic&logo=github&color=white)](https://github.com/monasticus/mlclient)
+A Python client and CLI for MarkLogic Server. Start with a query or a document
+operation, then choose how much control your application needs.
 
-[![License Badge](https://img.shields.io/github/license/monasticus/mlclient?label=License&style=plastic)](https://github.com/monasticus/mlclient/blob/main/LICENSE)
-
-[![Python Version Support Badge](https://img.shields.io/pypi/pyversions/mlclient?label=Python&style=plastic)](https://www.python.org/)
-
-A Python client for MarkLogic Server. Three API layers, async out of the box, CLI included.
+## Start here
 
 ```sh
-pip install mlclient
+python -m pip install mlclient
 ```
 
-By default MLClient connects to `localhost:8000` over HTTP with digest auth (`admin`/`admin`). Pass `host`, `port`, `username`, `password`, or `auth` to override:
-
 ```python
-config = {
-    "host": "ml.example.com",
-    "port": 8040,
-    "username": "my-user",
-    "password": "my-password",
-    "auth": "digest",
-}
-ml = MLClient(**config)
-```
-
-------------------------------------------------------------------------
-
-## Quickstart
-
-Evaluate XQuery and get a parsed Python object back - not raw multipart HTTP, not strings:
-
-```python
+from getpass import getpass
 from mlclient import MLClient
 
-with MLClient() as ml:
-    db_name = ml.eval.xquery("xdmp:database() => xdmp:database-name()")
-    print(db_name)          # "Documents"
-    print(type(db_name))    # <class 'str'>
-
-    timestamp = ml.eval.xquery("fn:current-dateTime()")
-    print(timestamp)        # 2024-06-21 14:08:32.130813+00:00
-    print(type(timestamp))  # <class 'datetime.datetime'>
+with MLClient(username="my-user", password=getpass("MarkLogic password: ")) as ml:
+    print(ml.eval.xquery("1 + 1"))  # 2
 ```
 
-Read and write documents:
+This connects to an existing REST App Server at `localhost:8000` using your
+credentials. The [quickstart](quickstart.md) explains prerequisites, different
+hosts, async usage and CLI setup.
 
-```python
-from mlclient import MLClient
-from mlclient.models import Document
+## One library, several ways to work
 
-with MLClient() as ml:
-    doc = ml.documents.read("/patient/record-1.json")
-    print(doc.uri)       # /patient/record-1.json
-    print(doc.content)   # {"name": "Smith", "id": "001"}
+| Interface | Start with | Go further |
+| --- | --- | --- |
+| Python | Parsed documents and query results | Sync/async clients, transactions, raw API wrappers and custom endpoints |
+| CLI | `ml env init`, `ml eval`, `ml logs` | Import Gradle settings, discover App Servers and select multiple connections |
+| AI agents | The same Python and CLI interfaces | MCP/skill adapters are planned; they are not bundled in the current package |
 
-    xml_doc = Document.create("/patient/record-2.xml", "<patient><name>Jones</name></patient>")
-    ml.documents.write(xml_doc)
+[The Python guide](user/pythonapi.md) helps choose between `ml.documents`,
+`ml.rest.documents` and `ml.http`. [The CLI guide](user/cli.md) gets a project
+connected without writing Python. [Recipes](recipes.md) show metadata cleanup,
+concurrent reads and a custom application API.
 
-    json_doc = Document.create("/patient/record-3.json", {"name": "Brown", "id": "003"})
-    ml.documents.write(json_doc)
-```
+## From simple usage to application-specific control
 
-Available high-level services:
+Use [environments](user/setup.md) to share connection settings across scripts and
+commands. Configure [authentication and TLS](user/python/connections.md), then
+add HTTP retry, timeout and pool limits where the application needs them.
+Manage, Admin and Health can have independent connection settings.
 
-| Service            | Endpoint           | Description                         |
-|--------------------|--------------------|-------------------------------------|
-| `ml.documents`     | `/v1/documents`    | Read, write, delete documents       |
-| `ml.eval`          | `/v1/eval`         | Evaluate XQuery and JavaScript      |
-| `ml.logs`          | `/manage/v2/logs`  | Retrieve and filter server logs     |
-| `ml.transaction()` | `/v1/transactions` | Group operations into a transaction |
+For your own application routes, [extend the client](user/python/custom-api.md)
+with a Call, an API wrapper and a high-level method. The
+[API reference](reference/mlclient/index.md) is generated from the implementation
+and describes all available modules and public signatures.
 
-## More control
+## An independent alternative
 
-Need the raw `httpx.Response`? Drop down to the mid-level API clients. Use the built-in response parser when you want parsed results:
+MLClient began roughly eight months before the MarkLogic Python Client and
+continued as an independent project after a development break. Its focus includes
+async usage, composable client layers and command-line workflows. The
+[background page](about.md) explains the motivation and links to the MarkLogic
+client as another option.
 
-```python
-with MLClient() as ml:
-    resp = ml.rest.eval.post(xquery="xdmp:database() => xdmp:database-name()")
-    print(resp.status_code)         # 200
-    parsed = ml.parser.parse(resp)  # "Documents"
-```
+From 1.0.0, stable public APIs and commands follow [SemVer](stability.md).
+Jobs remain experimental. Broader REST coverage, project-management CLI workflows
+and dedicated agent adapters are future directions, not current completeness
+claims.
 
-Three mid-level API clients cover all of MarkLogic's API tiers:
-
-- `ml.rest` -- REST Client API (`/v1/*`)
-- `ml.manage` -- Management API (`/manage/v2/*`, port 8002)
-- `ml.admin` -- Admin API (`/admin/v1/*`, port 8001)
-
-```python
-with MLClient() as ml:
-    resp = ml.manage.databases.get_properties("Documents", data_format="json")
-    print(resp.json()["database-name"])  # Documents
-
-    resp = ml.admin.get_timestamp()
-    print(resp.text)  # 2024-06-21T14:08:32.130813Z
-```
-
-Port routing is automatic. Manage and Admin requests always go to ports 8002 and 8001 regardless of the main client port.
-
-## Full control
-
-Send any HTTP request directly:
-
-```python
-with MLClient() as ml:
-    resp = ml.http.post(
-        "/v1/eval",
-        body={"xquery": "xdmp:database() => xdmp:database-name()"},
-    )
-    print(resp.text)  # raw multipart/mixed response
-```
-
-## Async
-
-`AsyncMLClient` mirrors `MLClient` 1:1 - every method is a coroutine:
-
-```python
-from mlclient import AsyncMLClient
-
-async with AsyncMLClient() as ml:
-    db_name = await ml.eval.xquery("xdmp:database() => xdmp:database-name()")
-    doc = await ml.documents.read("/patient/record-1.xml")
-    resp = await ml.http.get("/manage/v2/servers")
-```
-
-## CLI
-
-Create a local environment configuration, then run commands against it:
-
-```sh
-ml env init local
-ml env show local
-ml health
-ml log-level
-ml version
-ml eval -x "xdmp:database() => xdmp:database-name()"
-ml http get /v1/documents uri=/doc.xml
-ml logs --regex "XDMP-.*"
-```
-
-Server commands use `local` by default; use `-e <name>` to select another environment. The `env` commands take the environment name as an argument. The HTTP example reads an existing document. Run `ml <command> --help` for available options.
-
-For `ml logs`, `-s 8002` selects the App Server port whose logs you want to read. For `ml http`, `ml eval`, `ml version`, and `ml log-level`, `-c rest` instead selects a server identifier from the environment configuration or a TCP port.
-
-`logs -s` also accepts an identifier from the environment configuration. `log-level -s` takes the actual App Server name in MarkLogic.
-
-See [cli](user/cli.md) for the full CLI reference.
+To help improve the project, read the [contribution guide](contributing.md).

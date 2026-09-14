@@ -15,7 +15,7 @@ import responses
 from requests import PreparedRequest, Response
 from responses import matchers
 
-from mlclient.constants import (
+from mlclient._constants import (
     HEADER_JSON,
     HEADER_MULTIPART_MIXED,
     HEADER_NAME_CONTENT_DISP,
@@ -23,7 +23,7 @@ from mlclient.constants import (
     HEADER_NAME_PRIMITIVE,
     HEADER_X_WWW_FORM_URLENCODED,
 )
-from mlclient.models.http.documents import BodyPart
+from mlclient.models import DocumentsBodyPart
 from mlclient.multipart import (
     MultipartPart,
     decode_multipart_mixed,
@@ -142,7 +142,7 @@ class MLResponseBuilder:
 
     def with_response_documents_body_part(
         self,
-        body_part: BodyPart,
+        body_part: DocumentsBodyPart,
     ):
         if not self._multipart_mixed_response:
             func = "MLResponseBuilder.with_response_body_multipart_mixed()"
@@ -221,7 +221,7 @@ class MLResponseBuilder:
 
     def build_with_docs_callback(
         self,
-        docs_body_parts: Iterable[BodyPart],
+        docs_body_parts: Iterable[DocumentsBodyPart],
     ):
         def request_callback(
             request: PreparedRequest,
@@ -281,7 +281,7 @@ class MLResponseBuilder:
 
         def _find_body_part(
             uri: str,
-        ) -> BodyPart | None:
+        ) -> DocumentsBodyPart | None:
             return next(
                 (part for part in docs_body_parts if part.disposition.filename == uri),
                 None,
@@ -650,7 +650,7 @@ class MLResponseBuilder:
                 }
                 response_body_line = (
                     "builder.with_response_documents_body_part("
-                    f"BodyPart(**{doc_body_part}"
+                    f"DocumentsBodyPart(**{doc_body_part}"
                     "))"
                 )
             else:

@@ -8,16 +8,16 @@ jobs:
       pull-requests: write
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Set up Python 3.11
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
       - name: Install MLClient with poetry
         run: |
-          pip install poetry
+          pip install poetry==2.2.0
           poetry install
 
       - name: Create test reports

@@ -14,15 +14,15 @@ from xml.etree.ElementTree import ParseError
 
 from httpx import RequestError
 
-from mlclient.connection import UNSET
+from mlclient._options import UNSET
 from mlclient.exceptions import MarkLogicError, WrongParametersError
-from mlclient.ml_response_parser import MLResponseParser
+from mlclient.responses import MLResponseParser
 
 if TYPE_CHECKING:
     from httpx import Response
 
-    from mlclient.api.manage_api import ManageApi
-    from mlclient.api.rest_api import RestApi
+    from mlclient.api.manage import ManageApi
+    from mlclient.api.rest import RestApi
 
 logger = logging.getLogger(__name__)
 
@@ -238,7 +238,8 @@ class LogLevelService:
                 )
         except RequestError as exc:
             logger.debug(
-                "Log-level Manage transport failure; no further fallback: %s", exc,
+                "Log-level Manage transport failure; no further fallback: %s",
+                exc,
             )
             raise
         _raise_if_manage_failed(
@@ -291,7 +292,9 @@ class LogLevelService:
         try:
             if server is None:
                 resp = self._manage.groups.put_properties(
-                    group, body=body, timeout=timeout,
+                    group,
+                    body=body,
+                    timeout=timeout,
                 )
             else:
                 resp = self._manage.servers.put_properties(
@@ -302,7 +305,8 @@ class LogLevelService:
                 )
         except RequestError as exc:
             logger.debug(
-                "Log-level Manage transport failure; no further fallback: %s", exc,
+                "Log-level Manage transport failure; no further fallback: %s",
+                exc,
             )
             raise
         _raise_if_manage_failed(resp, role="manage-admin")
@@ -519,7 +523,9 @@ def _raise_unless_privilege_error(resp: Response) -> None:
     error = _error_body(resp)
     if not _is_privilege_error(resp, error):
         logger.debug(
-            "Log-level eval failed (HTTP %s); no fallback: %s", resp.status_code, error,
+            "Log-level eval failed (HTTP %s); no fallback: %s",
+            resp.status_code,
+            error,
         )
         raise MarkLogicError(error)
     logger.debug(

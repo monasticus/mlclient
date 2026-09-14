@@ -15,8 +15,10 @@ from __future__ import annotations
 
 from typing import ClassVar
 
-from mlclient import constants, exceptions, utils
-from mlclient.calls.api_call import ApiCall
+from mlclient import _constants as constants
+from mlclient import _utils as utils
+from mlclient import exceptions
+from mlclient.calls.base import ApiCall
 
 
 class TransactionsPostCall(ApiCall):

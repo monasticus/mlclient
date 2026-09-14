@@ -1,0 +1,663 @@
+from __future__ import annotations
+
+import httpx
+import pytest
+import respx
+from httpx_retries import Retry
+from pytest_mock import MockerFixture
+
+from mlclient._options import UNSET
+from mlclient.clients import HttpClient
+from mlclient.clients import http as http_client_module
+from mlclient.connection import CloudConfig
+from mlclient.http import HTTPConfig
+from tests.utils import resources as resources_utils
+from tests.utils.ml_mockers import MLRespXMocker
+
+RESOURCES = resources_utils.get_test_resources(__file__)
+
+
+def test_connection():
+    client = HttpClient()
+    assert not client.is_connected()
+
+    client.connect()
+    assert client.is_connected()
+
+    client.disconnect()
+    assert not client.is_connected()
+
+
+def test_context_mng():
+    with HttpClient() as client:
+        assert client.is_connected()
+
+    assert not client.is_connected()
+
+
+@respx.mock
+def test_request_when_disconnected():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/manage/v2/servers")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body(RESOURCES["test-get-response.xml"]["bytes"])
+    ml_mocker.with_response_content_type("application/xml; charset=UTF-8")
+    ml_mocker.mock_get()
+
+    client = HttpClient(port=8002)
+
+    assert not client.is_connected()
+    resp = client.get("/manage/v2/servers")
+    assert not client.is_connected()
+    assert resp.status_code == httpx.codes.OK
+    assert resp.content == RESOURCES["test-get-response.xml"]["bytes"]
+    assert resp.headers.get("Content-Type") == "application/xml; charset=UTF-8"
+
+
+@respx.mock
+def test_get():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/manage/v2/servers")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body(RESOURCES["test-get-response.xml"]["bytes"])
+    ml_mocker.with_response_content_type("application/xml; charset=UTF-8")
+    ml_mocker.mock_get()
+
+    with HttpClient(port=8002) as client:
+        resp = client.get("/manage/v2/servers")
+    assert resp.status_code == httpx.codes.OK
+    assert resp.content == RESOURCES["test-get-response.xml"]["bytes"]
+    assert resp.headers.get("Content-Type") == "application/xml; charset=UTF-8"
+
+
+@respx.mock
+def test_get_with_customized_params_and_headers():
+    response_body_json = RESOURCES["test-get-with-customized-params-response.json"][
+        "json"
+    ]
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/manage/v2/servers")
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_header("custom-header", "custom-value")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body(response_body_json)
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.mock_get()
+
+    with HttpClient(port=8002) as client:
+        resp = client.get(
+            "/manage/v2/servers",
+            params={"format": "json"},
+            headers={"custom-header": "custom-value"},
+        )
+    assert resp.status_code == httpx.codes.OK
+    assert resp.json() == response_body_json
+    assert resp.headers.get("Content-Type") == "application/json; charset=UTF-8"
+
+
+@respx.mock
+def test_head():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/manage/v2/servers")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_empty_response_body()
+    ml_mocker.with_response_content_type("application/xml; charset=UTF-8")
+    ml_mocker.mock_head()
+
+    with HttpClient(port=8002) as client:
+        resp = client.head("/manage/v2/servers")
+    assert resp.status_code == httpx.codes.OK
+    assert resp.content == b""
+    assert resp.headers.get("Content-Type") == "application/xml; charset=UTF-8"
+
+
+@respx.mock
+def test_head_with_customized_params_and_headers():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/manage/v2/servers")
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_header("custom-header", "custom-value")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_empty_response_body()
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.mock_head()
+
+    with HttpClient(port=8002) as client:
+        resp = client.head(
+            "/manage/v2/servers",
+            params={"format": "json"},
+            headers={"custom-header": "custom-value"},
+        )
+    assert resp.status_code == httpx.codes.OK
+    assert resp.content == b""
+    assert resp.headers.get("Content-Type") == "application/json; charset=UTF-8"
+
+
+@respx.mock
+def test_post():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/manage/v2/databases/Documents")
+    ml_mocker.with_response_code(400)
+    ml_mocker.with_response_body(RESOURCES["test-post-response.xml"]["bytes"])
+    ml_mocker.with_response_content_type("application/xml; charset=UTF-8")
+    ml_mocker.mock_post()
+
+    with HttpClient(port=8002) as client:
+        resp = client.post("/manage/v2/databases/Documents")
+    assert resp.status_code == httpx.codes.BAD_REQUEST
+    assert resp.content == RESOURCES["test-post-response.xml"]["bytes"]
+    assert resp.headers.get("Content-Type") == "application/xml; charset=UTF-8"
+
+
+@respx.mock
+def test_post_with_customized_params_and_headers_and_body_different_than_json():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8000/v1/eval")
+    ml_mocker.with_request_param("database", "Documents")
+    ml_mocker.with_request_content_type("application/x-www-form-urlencoded")
+    ml_mocker.with_request_body({"xquery": "()"})
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_empty_response_body()
+    ml_mocker.mock_post()
+
+    with HttpClient() as client:
+        resp = client.post(
+            "/v1/eval",
+            body={"xquery": "()"},
+            params={"database": "Documents"},
+            headers={"Content-Type": "application/x-www-form-urlencoded"},
+        )
+    assert resp.status_code == httpx.codes.OK
+    assert resp.content == b""
+
+
+@respx.mock
+def test_post_with_customized_params_and_headers_and_json_body():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/manage/v2/databases/Documents")
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_content_type("application/json")
+    ml_mocker.with_request_body({"operation": "clear-database"})
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_empty_response_body()
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.mock_post()
+
+    with HttpClient(port=8002) as client:
+        resp = client.post(
+            "/manage/v2/databases/Documents",
+            body={"operation": "clear-database"},
+            params={"format": "json"},
+            headers={"Content-Type": "application/json"},
+        )
+    assert resp.status_code == httpx.codes.OK
+    assert resp.content == b""
+    assert resp.headers.get("Content-Type") == "application/json; charset=UTF-8"
+
+
+@pytest.mark.parametrize("body", ['{"value": 1}', b'{"value": 1}'])
+@respx.mock
+def test_post_preserves_raw_json_body(body):
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8000/v1/documents")
+    ml_mocker.with_request_body(b'{"value": 1}')
+    ml_mocker.with_response_code(204)
+    ml_mocker.with_empty_response_body()
+    ml_mocker.mock_post()
+
+    with HttpClient() as client:
+        response = client.post(
+            "/v1/documents",
+            body=body,
+            headers={"content-type": "application/json"},
+        )
+    assert response.status_code == 204
+
+
+@respx.mock
+def test_post_does_not_follow_created_resource_redirect():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8000/v1/transactions")
+    ml_mocker.with_response_code(303)
+    ml_mocker.with_response_header("Location", "/v1/transactions/12345")
+    ml_mocker.with_empty_response_body()
+    ml_mocker.mock_post()
+
+    with HttpClient() as client:
+        resp = client.post(
+            "/v1/transactions",
+            headers={"Content-Type": "text/plain"},
+        )
+
+    assert resp.status_code == httpx.codes.SEE_OTHER
+    assert resp.headers.get("Location") == "/v1/transactions/12345"
+
+
+@respx.mock
+def test_put():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8000/v1/documents")
+    ml_mocker.with_response_code(400)
+    ml_mocker.with_response_body(RESOURCES["test-put-response.xml"]["bytes"])
+    ml_mocker.with_response_content_type("application/xml; charset=UTF-8")
+    ml_mocker.mock_put()
+
+    with HttpClient() as client:
+        resp = client.put("/v1/documents")
+    assert resp.status_code == httpx.codes.BAD_REQUEST
+    assert resp.content == RESOURCES["test-put-response.xml"]["bytes"]
+    assert resp.headers.get("Content-Type") == "application/xml; charset=UTF-8"
+
+
+@respx.mock
+def test_put_with_customized_params_and_headers_and_body_different_than_json():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8000/v1/documents")
+    ml_mocker.with_request_param("database", "Documents")
+    ml_mocker.with_request_param("uri", "/doc.xml")
+    ml_mocker.with_request_content_type("application/xml")
+    ml_mocker.with_request_body("<document/>")
+    ml_mocker.with_response_code(201)
+    ml_mocker.with_empty_response_body()
+    ml_mocker.mock_put()
+
+    with HttpClient() as client:
+        resp = client.put(
+            "/v1/documents",
+            body="<document/>",
+            params={"database": "Documents", "uri": "/doc.xml"},
+            headers={"Content-Type": "application/xml"},
+        )
+    assert resp.status_code == httpx.codes.CREATED
+    assert resp.content == b""
+
+
+@respx.mock
+def test_put_with_customized_params_and_headers_and_json_body():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8000/v1/documents")
+    ml_mocker.with_request_param("database", "Documents")
+    ml_mocker.with_request_param("uri", "/doc.json")
+    ml_mocker.with_request_content_type("application/json")
+    ml_mocker.with_request_body({"document": {}})
+    ml_mocker.with_response_code(201)
+    ml_mocker.with_empty_response_body()
+    ml_mocker.mock_put()
+
+    with HttpClient() as client:
+        resp = client.put(
+            "/v1/documents",
+            body={"document": {}},
+            params={"database": "Documents", "uri": "/doc.json"},
+            headers={"Content-Type": "application/json"},
+        )
+    assert resp.status_code == httpx.codes.CREATED
+    assert resp.content == b""
+
+
+@respx.mock
+def test_delete():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/manage/v2/databases/custom-db")
+    ml_mocker.with_response_code(204)
+    ml_mocker.with_empty_response_body()
+    ml_mocker.mock_delete()
+
+    with HttpClient(port=8002) as client:
+        resp = client.delete("/manage/v2/databases/custom-db")
+    assert resp.status_code == httpx.codes.NO_CONTENT
+    assert resp.content == b""
+
+
+@respx.mock
+def test_delete_with_customized_params_and_headers():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/manage/v2/databases/custom-db")
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_header("custom-header", "custom-value")
+    ml_mocker.with_response_code(204)
+    ml_mocker.with_empty_response_body()
+    ml_mocker.mock_delete()
+
+    with HttpClient(port=8002) as client:
+        resp = client.delete(
+            "/manage/v2/databases/custom-db",
+            params={"format": "json"},
+            headers={"custom-header": "custom-value"},
+        )
+    assert resp.status_code == httpx.codes.NO_CONTENT
+    assert resp.content == b""
+
+
+@respx.mock
+def test_request_logs_warning_for_restart_location(mocker: MockerFixture):
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(
+        "http://localhost:8002/manage/v2/servers/TestServer/properties",
+    )
+    ml_mocker.with_request_param("group-id", "Default")
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_content_type("application/json")
+    ml_mocker.with_request_body({"port": 8111})
+    ml_mocker.with_response_code(202)
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_response_header("Location", "/admin/v1/timestamp")
+    ml_mocker.with_response_body(RESOURCES["restart-response.json"]["json"])
+    ml_mocker.mock_put()
+    logger_warning = mocker.patch.object(http_client_module.logger, "warning")
+
+    with HttpClient(port=8002) as client:
+        resp = client.put(
+            "/manage/v2/servers/TestServer/properties",
+            body={"port": 8111},
+            params={"group-id": "Default", "format": "json"},
+            headers={"Content-Type": "application/json"},
+        )
+
+    assert resp.status_code == httpx.codes.ACCEPTED
+    logger_warning.assert_any_call(
+        "MarkLogic accepted %s %s and initiated a restart; "
+        "Location [%s]. Wait for restart completion before "
+        "sending follow-up requests",
+        "PUT",
+        "/manage/v2/servers/TestServer/properties",
+        "/admin/v1/timestamp",
+    )
+
+
+@respx.mock
+def test_request_does_not_log_warning_for_non_restart_202(
+    mocker: MockerFixture,
+):
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/manage/v2/forests")
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_content_type("application/json")
+    ml_mocker.with_request_body({"operation": "attach"})
+    ml_mocker.with_response_code(202)
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_response_header("Location", "/manage/v2/tickets/123")
+    ml_mocker.with_response_body(
+        RESOURCES["non-restart-accepted-response.json"]["json"],
+    )
+    ml_mocker.mock_put()
+    logger_warning = mocker.patch.object(http_client_module.logger, "warning")
+
+    with HttpClient(port=8002) as client:
+        resp = client.put(
+            "/manage/v2/forests",
+            body={"operation": "attach"},
+            params={"format": "json"},
+            headers={"Content-Type": "application/json"},
+        )
+
+    assert resp.status_code == httpx.codes.ACCEPTED
+    logger_warning.assert_not_called()
+
+
+@respx.mock
+def test_request_logs_debug_response_retrieved(mocker: MockerFixture):
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/manage/v2/servers")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_content_type("text/plain")
+    ml_mocker.with_response_body("ok")
+    ml_mocker.mock_get()
+    logger_debug = mocker.patch.object(http_client_module.logger, "debug")
+
+    with HttpClient(port=8002) as client:
+        client.get("/manage/v2/servers")
+
+    debug_messages = [call.args[0] for call in logger_debug.call_args_list]
+    assert "Response retrieved" in debug_messages
+
+
+@respx.mock
+def test_request_logs_debug_response_retrieved_no_body(mocker: MockerFixture):
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/manage/v2/databases/custom-db")
+    ml_mocker.with_response_code(204)
+    ml_mocker.with_response_header("X-Test", "1")
+    ml_mocker.with_empty_response_body()
+    ml_mocker.mock_delete()
+    logger_debug = mocker.patch.object(http_client_module.logger, "debug")
+
+    with HttpClient(port=8002) as client:
+        client.delete("/manage/v2/databases/custom-db")
+
+    debug_messages = [call.args[0] for call in logger_debug.call_args_list]
+    assert "Response retrieved" in debug_messages
+
+
+@respx.mock
+def test_cloud_request_applies_base_path():
+    base_url = "https://example.marklogic.cloud:443"
+    respx.post(f"{base_url}/token").mock(
+        return_value=httpx.Response(200, json={"access_token": "tok-1"}),
+    )
+    endpoint_route = respx.get(
+        f"{base_url}/ml/example/manage/manage/v2/servers",
+    ).mock(return_value=httpx.Response(200, text="ok"))
+
+    with HttpClient(
+        host="example.marklogic.cloud",
+        cloud=CloudConfig(api_key="mk-1", base_path="/ml/example/manage"),
+    ) as client:
+        resp = client.get("/manage/v2/servers")
+
+    assert resp.status_code == httpx.codes.OK
+    assert endpoint_route.called
+
+
+def test_properties():
+    client = HttpClient(
+        protocol="https",
+        host="ml.example.com",
+        port=8123,
+        auth="digest",
+        username="user",
+        password="pass",
+    )
+    assert client.config.protocol == "https"
+    assert client.config.host == "ml.example.com"
+    assert client.config.port == 8123
+    assert isinstance(client.config.auth, httpx.DigestAuth)
+    assert client.config.username == "user"
+    assert client.config.password == "pass"
+    assert client.base_url == "https://ml.example.com:8123"
+
+
+def test_config_is_read_only():
+    client = HttpClient(host="ml.example.com")
+
+    with pytest.raises(AttributeError):
+        client.config = HTTPConfig.resolve(host="other.example.com")
+
+
+def test_prebuilt_config_supersedes_connection_kwargs():
+    config = HTTPConfig.resolve(host="resolved.example.com", port=8002)
+
+    client = HttpClient(host="ignored.example.com", port=9999, config=config)
+
+    assert client.config is config
+    assert client.base_url == "http://resolved.example.com:8002"
+
+
+@pytest.mark.parametrize("method", ["get", "head", "post", "put", "delete"])
+@pytest.mark.parametrize("connected", [False, True])
+@respx.mock
+def test_each_http_method_forwards_timeout_in_every_session_mode(method, connected):
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8000/x")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_empty_response_body()
+    route = getattr(ml_mocker, "mock_" + method)()
+    client = HttpClient(timeout=30)
+    if connected:
+        client.connect()
+    try:
+        getattr(client, method)("/x", timeout=None)
+        assert (
+            route.calls.last.request.extensions["timeout"]
+            == httpx.Timeout(None).as_dict()
+        )
+        getattr(client, method)("/x")
+        assert (
+            route.calls.last.request.extensions["timeout"]
+            == httpx.Timeout(30).as_dict()
+        )
+    finally:
+        client.disconnect()
+
+
+@respx.mock
+def test_retry_preserves_request_timeout():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8000/x")
+    route = ml_mocker.with_get_side_effect([httpx.Response(503), httpx.Response(200)])
+    timeout = httpx.Timeout(1, read=2)
+    with HttpClient(retry=Retry(total=1, backoff_factor=0)) as client:
+        response = client.get("/x", timeout=timeout)
+
+    assert response.status_code == 200
+    assert route.call_count == 2
+    assert all(
+        call.request.extensions["timeout"] == timeout.as_dict() for call in route.calls
+    )
+
+
+@respx.mock
+def test_config_default_timeout_reaches_transport():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/x")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body("ok")
+    route = ml_mocker.mock_get()
+    with HttpClient(port=8002) as client:
+        client.get("/x")
+    assert route.calls.last.request.extensions["timeout"] == {
+        "connect": 5.0,
+        "read": 60.0,
+        "write": 60.0,
+        "pool": 5.0,
+    }
+
+
+@respx.mock
+def test_explicit_config_timeout_reaches_transport():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/x")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body("ok")
+    route = ml_mocker.mock_get()
+    config = HTTPConfig.resolve(port=8002, timeout=httpx.Timeout(1.0))
+    with HttpClient(config=config) as client:
+        client.get("/x")
+    assert route.calls.last.request.extensions["timeout"] == {
+        "connect": 1.0,
+        "read": 1.0,
+        "write": 1.0,
+        "pool": 1.0,
+    }
+
+
+@respx.mock
+def test_per_request_number_timeout_sets_all_components():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/x")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body("ok")
+    route = ml_mocker.mock_get()
+    with HttpClient(port=8002) as client:
+        client.get("/x", timeout=2.5)
+    assert route.calls.last.request.extensions["timeout"] == {
+        "connect": 2.5,
+        "read": 2.5,
+        "write": 2.5,
+        "pool": 2.5,
+    }
+
+
+@respx.mock
+def test_per_request_none_disables_timeout():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/x")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body("ok")
+    route = ml_mocker.mock_get()
+    with HttpClient(port=8002) as client:
+        client.get("/x", timeout=None)
+    assert route.calls.last.request.extensions["timeout"] == {
+        "connect": None,
+        "read": None,
+        "write": None,
+        "pool": None,
+    }
+
+
+@respx.mock
+def test_per_request_httpx_timeout_reaches_transport():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/x")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body("ok")
+    route = ml_mocker.mock_get()
+    with HttpClient(port=8002) as client:
+        client.get(
+            "/x",
+            timeout=httpx.Timeout(connect=1.0, read=2.0, write=3.0, pool=4.0),
+        )
+    assert route.calls.last.request.extensions["timeout"] == {
+        "connect": 1.0,
+        "read": 2.0,
+        "write": 3.0,
+        "pool": 4.0,
+    }
+
+
+@respx.mock
+def test_per_request_timeout_does_not_mutate_shared_default():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/x")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body("ok")
+    route = ml_mocker.mock_get()
+    with HttpClient(port=8002) as client:
+        client.get("/x", timeout=2.5)
+        client.get("/x")
+    assert route.calls.last.request.extensions["timeout"] == {
+        "connect": 5.0,
+        "read": 60.0,
+        "write": 60.0,
+        "pool": 5.0,
+    }
+
+
+@respx.mock
+def test_unset_per_request_uses_config_default():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/x")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body("ok")
+    route = ml_mocker.mock_get()
+    with HttpClient(port=8002) as client:
+        client.get("/x", timeout=UNSET)
+    assert route.calls.last.request.extensions["timeout"] == {
+        "connect": 5.0,
+        "read": 60.0,
+        "write": 60.0,
+        "pool": 5.0,
+    }
+
+
+def test_format_http_response_preserves_protocol_and_reason():
+    response = httpx.Response(
+        200,
+        content=b"body",
+        extensions={"http_version": b"HTTP/2", "reason_phrase": b"Custom reason"},
+    )
+
+    formatted = HttpClient.format_http_response(response)
+
+    assert formatted.startswith("HTTP/2 200 Custom reason\n")
+    assert formatted.endswith("\n\nbody")

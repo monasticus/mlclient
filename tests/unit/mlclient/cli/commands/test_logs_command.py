@@ -7,8 +7,8 @@ import pytest
 import respx
 from cleo.testers.command_tester import CommandTester
 
-from mlclient import MLEnvironment
 from mlclient.cli import MLCLIentApplication
+from mlclient.env import MLEnvironment
 from mlclient.exceptions import InvalidLogTypeError
 from tests.utils import resources as resources_utils
 from tests.utils.ml_mockers import MLRespXMocker
@@ -86,7 +86,7 @@ def _setup(mocker, ml_config_single_node, ml_config_cluster):
             return ml_config_cluster
         return original_method(env_name)
 
-    target = "mlclient.ml_environment.MLEnvironment.load"
+    target = "mlclient.env.MLEnvironment.load"
     mocker.patch(target, side_effect=load_env)
 
 

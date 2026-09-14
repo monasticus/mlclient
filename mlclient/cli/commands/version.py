@@ -11,7 +11,7 @@ from cleo.commands.command import Command
 from cleo.helpers import option
 from cleo.io.inputs.option import Option
 
-from mlclient import MLClientManager
+from mlclient._manager import MLClientManager
 from mlclient.cli.connection import get_client
 
 

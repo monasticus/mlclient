@@ -116,3 +116,6 @@ def _extract_boundary(content_type: str) -> str:
             return param.split("=", 1)[1].strip().strip('"')
     msg = f"No boundary found in Content-Type: {content_type}"
     raise ValueError(msg)
+
+
+__all__ = ["MultipartPart", "decode_multipart_mixed", "encode_multipart_mixed"]

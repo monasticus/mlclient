@@ -1,28 +1,26 @@
-"""The ML Jobs package.
+"""Experimental document jobs and their progress reports.
 
-This package contains Python API to perform various operations.
-It contains the following modules
-
-    * documents_jobs
-        The ML Documents Jobs module.
-
-This package exports the following classes:
-    * WriteDocumentsJob
-        An async job writing documents into a MarkLogic database.
-    * ReadDocumentsJob
-        An async job reading documents from a MarkLogic database.
-    * DocumentJobReport
-        A class representing a documents job report.
-
-Examples
---------
->>> from mlclient.jobs import WriteDocumentsJob
+Use the documents service for stable document operations.
 """
 
-from .documents_jobs import DocumentJobReport, ReadDocumentsJob, WriteDocumentsJob
+from mlclient._experimental import EXPERIMENTAL_NOTICE as _EXPERIMENTAL_NOTICE
+
+from mlclient.jobs.documents import (
+    DocumentJobReport,
+    DocumentReport,
+    DocumentStatus,
+    DocumentStatusDetails,
+    ReadDocumentsJob,
+    WriteDocumentsJob,
+)
+
+__experimental__ = _EXPERIMENTAL_NOTICE
 
 __all__ = [
     "DocumentJobReport",
+    "DocumentReport",
+    "DocumentStatus",
+    "DocumentStatusDetails",
     "ReadDocumentsJob",
     "WriteDocumentsJob",
 ]

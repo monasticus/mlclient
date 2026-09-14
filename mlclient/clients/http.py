@@ -1,0 +1,1003 @@
+"""The HTTP Client module (HttpClient / AsyncHttpClient).
+
+Exports sync and async HTTP clients for raw communication with MarkLogic.
+"""
+
+from __future__ import annotations
+
+import logging
+from collections.abc import Mapping
+from types import TracebackType
+
+import httpx
+from httpx import AsyncClient, AsyncHTTPTransport, Client, HTTPTransport, Response
+from httpx_retries import Retry, RetryTransport
+
+from mlclient import _constants as const
+from mlclient._options import UNSET
+from mlclient.auth import AuthParam
+from mlclient.clients._restart import _RestartWaiter
+from mlclient.connection import CloudConfig, SSLConfig
+from mlclient.http import HTTPConfig
+from mlclient.models.mimetypes import Mimetypes
+from mlclient.models.types import DocumentType
+
+logger = logging.getLogger(__name__)
+
+
+_RESTART_RETRY_STRATEGY = Retry(
+    total=12,
+    allowed_methods=["GET"],
+    status_forcelist=[
+        httpx.codes.BAD_GATEWAY,
+        httpx.codes.SERVICE_UNAVAILABLE,
+        httpx.codes.GATEWAY_TIMEOUT,
+    ],
+    retry_on_exceptions=[
+        httpx.TimeoutException,
+        httpx.NetworkError,
+        httpx.RemoteProtocolError,
+    ],
+    backoff_factor=1.0,
+)
+
+
+class _HttpClientBase:
+    """Shared base for sync and async HTTP clients.
+
+    All connection and authentication details live in a single resolved
+    :class:`~mlclient.http.HTTPConfig`, exposed as ``config``. Callers
+    read connection details through ``config`` rather than rebuilding the base
+    URL, auth handler or verification setting by hand.
+
+    Attributes
+    ----------
+    config : HTTPConfig
+        the resolved connection and authentication configuration
+    base_url : str
+        a base url built based on the protocol, the host name and the port
+    """
+
+    def __init__(
+        self,
+        protocol=UNSET,
+        host: str = "localhost",
+        port=UNSET,
+        auth: AuthParam = UNSET,
+        username: str = "admin",
+        password: str = "admin",
+        ssl: SSLConfig | None = None,
+        cloud: CloudConfig | None = None,
+        retry: Retry | None = None,
+        limits: httpx.Limits | None = None,
+        timeout=UNSET,
+        config: HTTPConfig | None = None,
+        session_owner: HttpClient | AsyncHttpClient | None = None,
+    ):
+        """Initialize _HttpClientBase instance.
+
+        Parameters
+        ----------
+        protocol : str, default "http"
+            A protocol used for HTTP requests (http / https)
+        host : str, default "localhost"
+            A host name
+        port : int, default 8000
+            An App Service port
+        auth : str | httpx.Auth | AuthConfig | None, default "digest"
+            An authentication method: a string shortcut ("basic", "digest",
+            "digestbasic", "certificate", "kerberos"), an AuthConfig, a custom
+            httpx.Auth, or None
+        username : str, default "admin"
+            A username
+        password : str, default "admin"
+            A password
+        ssl : SSLConfig | None, default None
+            SSL/TLS configuration
+        cloud : CloudConfig | None, default None
+            MarkLogic Cloud configuration
+        retry : Retry | None, default Retry(total=5, backoff_factor=0.5)
+            A retry strategy
+        limits : httpx.Limits | None, default None
+            Connection-pool limits; None defers to httpx's own default
+        timeout : httpx.Timeout | float | None, default unset
+            A request timeout. Unset uses DEFAULT_TIMEOUT (connect=5, read=60,
+            write=60, pool=5 seconds). None disables every HTTP timeout. A
+            number sets all four components to that many seconds. An
+            httpx.Timeout fully overrides the timeout. The config argument, when
+            given, takes precedence over this argument.
+        session_owner : HttpClient | AsyncHttpClient | None, default None
+            Keep a lazily opened session while this owner is connected. The
+            owner must disconnect its children when its lifecycle ends.
+        config : HTTPConfig | None, default None
+            An already-resolved configuration. When given, the connection
+            parameters above are ignored and this configuration is used as-is;
+            :meth:`HTTPConfig.clone` can derive a variant before injection.
+        """
+        self._session_owner = session_owner
+        self._config = config or HTTPConfig.resolve(
+            protocol=protocol,
+            host=host,
+            port=port,
+            auth=auth,
+            username=username,
+            password=password,
+            ssl=ssl,
+            cloud=cloud,
+            retry=retry,
+            limits=limits,
+            timeout=timeout,
+        )
+
+    @property
+    def config(self) -> HTTPConfig:
+        """The resolved connection and authentication configuration."""
+        return self._config
+
+    @property
+    def base_url(self) -> str:
+        """A base url built from the protocol, the host name and the port."""
+        return self.config.base_url
+
+    def _prepare_request(
+        self,
+        params: dict | None = None,
+        headers: dict | None = None,
+        body: str | bytes | dict | None = None,
+    ) -> dict:
+        """Prepare request details."""
+        request = {
+            "params": params or {},
+            "headers": headers or {},
+            "auth": self.config.auth,
+        }
+        if body is not None:
+            content_type = httpx.Headers(headers).get(const.HEADER_NAME_CONTENT_TYPE)
+            doc_type = Mimetypes.get_doc_type(content_type) if content_type else None
+            if doc_type == DocumentType.JSON and not isinstance(body, (str, bytes)):
+                request["json"] = body
+            elif isinstance(body, Mapping):
+                request["data"] = body
+            else:
+                request["content"] = body
+
+        logger.debug(
+            "Request details: base_url [%s] %s",
+            self.base_url,
+            " ".join(
+                f"{k} [{v if k != 'auth' else v.__class__.__name__}]"
+                for k, v in request.items()
+            ),
+        )
+        return request
+
+    @classmethod
+    def _log_response(
+        cls,
+        method: str,
+        endpoint: str,
+        response: Response,
+    ):
+        """Log response details and restart warning, if applicable."""
+        logger.debug("Response retrieved")
+        logger.fine(cls.format_http_response(response))
+
+        if _RestartWaiter.is_restart_response(response):
+            logger.warning(
+                "MarkLogic accepted %s %s and initiated a restart; "
+                "Location [%s]. Wait for restart completion before "
+                "sending follow-up requests",
+                method,
+                endpoint,
+                response.headers.get("Location"),
+            )
+
+    @staticmethod
+    def format_http_response(
+        response: Response,
+        body: str | None = None,
+    ) -> str:
+        """Format the actual status line, headers and optional response text.
+
+        Parameters
+        ----------
+        response : Response
+            HTTP response whose protocol version and reason phrase are preserved
+        body : str | None
+            Replacement body text; None uses the response's decoded text
+
+        Returns
+        -------
+        str
+            Status line and headers, followed by a nonempty body
+        """
+        body = response.text if body is None else body
+        start_line = (
+            f"{response.http_version} {response.status_code} {response.reason_phrase}"
+        )
+        headers = "\n".join(f"{name}: {val}" for name, val in response.headers.items())
+        if body:
+            return f"{start_line}\n{headers}\n\n{body}"
+        return f"{start_line}\n{headers}"
+
+    def _build_url(self, endpoint: str) -> str:
+        """Build a full request URL, applying the Cloud base path if present."""
+        return self.config.build_url(endpoint)
+
+
+class HttpClient(_HttpClientBase):
+    """A low-level class used to send HTTP requests to a MarkLogic instance.
+
+    Attributes
+    ----------
+    config : HTTPConfig
+        the resolved connection and authentication configuration
+    base_url : str
+        a base url built based on the protocol, the host name and the port
+    """
+
+    _client: Client | None = None
+
+    def __init__(self, **kwargs):
+        """Initialize HttpClient instance.
+
+        Parameters
+        ----------
+        protocol : str, default "http"
+            A protocol used for HTTP requests (http / https)
+        host : str, default "localhost"
+            A host name
+        port : int, default 8000
+            An App Service port
+        auth : str | httpx.Auth | AuthConfig | None, default "digest"
+            An authentication method
+        username : str, default "admin"
+            A username
+        password : str, default "admin"
+            A password
+        ssl : SSLConfig | None, default None
+            SSL/TLS configuration
+        cloud : CloudConfig | None, default None
+            MarkLogic Cloud configuration
+        retry : Retry | None, default Retry(total=5, backoff_factor=0.5)
+            A retry strategy
+        limits : httpx.Limits | None, default None
+            Connection-pool limits; None defers to httpx's own default
+        timeout : httpx.Timeout | float | None, default unset
+            A request timeout. Unset uses DEFAULT_TIMEOUT (connect=5, read=60,
+            write=60, pool=5 seconds). None disables every HTTP timeout. A
+            number sets all four components to that many seconds. An
+            httpx.Timeout fully overrides the timeout. The config argument, when
+            given, takes precedence over this argument.
+        """
+        super().__init__(**kwargs)
+
+    def __enter__(self):
+        """Connect and return self for use as a context manager."""
+        self.connect()
+        return self
+
+    def __exit__(
+        self,
+        exc_type: type,
+        exc_val: BaseException,
+        exc_tb: TracebackType,
+    ):
+        """Disconnect on context manager exit."""
+        self.disconnect()
+
+    def connect(self):
+        """Start an HTTP session unless already connected."""
+        if self.is_connected():
+            return
+        logger.debug("Initiating a connection with %s", self.base_url)
+        transport = HTTPTransport(**self.config.transport_options())
+        self._client = Client(
+            transport=RetryTransport(transport=transport, retry=self.config.retry),
+            timeout=self.config.timeout,
+        )
+
+    def disconnect(self):
+        """Close an HTTP session."""
+        if self._client:
+            logger.debug("Closing a connection")
+            self._client.close()
+            self._client = None
+
+    def is_connected(self) -> bool:
+        """Return a connection status.
+
+        Returns
+        -------
+        bool
+            True if the client has started a connection; otherwise False
+        """
+        return self._client is not None
+
+    def get(
+        self,
+        endpoint: str,
+        *,
+        params: dict | None = None,
+        headers: dict | None = None,
+        timeout=UNSET,
+    ) -> Response:
+        """Send a GET request.
+
+        Parameters
+        ----------
+        endpoint : str
+            A REST endpoint to call
+        params : dict | None
+            Request parameters
+        headers : dict | None
+            Request headers
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request timeout. Unset uses the client's configured timeout.
+            None disables every HTTP timeout; a number sets all four components
+            to that many seconds; an httpx.Timeout overrides them. It applies
+            only to this request and does not change the client's configuration.
+
+        Returns
+        -------
+        Response
+            An HTTP response
+
+        Raises
+        ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
+        """
+        return self.request(
+            "GET",
+            endpoint,
+            params=params,
+            headers=headers,
+            timeout=timeout,
+        )
+
+    def head(
+        self,
+        endpoint: str,
+        *,
+        params: dict | None = None,
+        headers: dict | None = None,
+        timeout=UNSET,
+    ) -> Response:
+        """Send a HEAD request.
+
+        Parameters
+        ----------
+        endpoint : str
+            A REST endpoint to call
+        params : dict | None
+            Request parameters
+        headers : dict | None
+            Request headers
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request timeout. Unset uses the client's configured timeout.
+            None disables every HTTP timeout; a number sets all four components
+            to that many seconds; an httpx.Timeout overrides them. It applies
+            only to this request and does not change the client's configuration.
+
+        Returns
+        -------
+        Response
+            An HTTP response
+
+        Raises
+        ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
+        """
+        return self.request(
+            "HEAD",
+            endpoint,
+            params=params,
+            headers=headers,
+            timeout=timeout,
+        )
+
+    def post(
+        self,
+        endpoint: str,
+        body: str | bytes | dict | None = None,
+        *,
+        params: dict | None = None,
+        headers: dict | None = None,
+        timeout=UNSET,
+    ) -> Response:
+        """Send a POST request.
+
+        Parameters
+        ----------
+        endpoint : str
+            A REST endpoint to call
+        body : str | bytes | dict | None
+            A request body
+        params : dict | None
+            Request parameters
+        headers : dict | None
+            Request headers
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request timeout. Unset uses the client's configured timeout.
+            None disables every HTTP timeout; a number sets all four components
+            to that many seconds; an httpx.Timeout overrides them. It applies
+            only to this request and does not change the client's configuration.
+
+        Returns
+        -------
+        Response
+            An HTTP response
+
+        Raises
+        ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
+        """
+        return self.request(
+            "POST",
+            endpoint,
+            body,
+            params=params,
+            headers=headers,
+            timeout=timeout,
+        )
+
+    def put(
+        self,
+        endpoint: str,
+        body: str | bytes | dict | None = None,
+        *,
+        params: dict | None = None,
+        headers: dict | None = None,
+        timeout=UNSET,
+    ) -> Response:
+        """Send a PUT request.
+
+        Parameters
+        ----------
+        endpoint : str
+            A REST endpoint to call
+        body : str | bytes | dict | None
+            A request body
+        params : dict | None
+            Request parameters
+        headers : dict | None
+            Request headers
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request timeout. Unset uses the client's configured timeout.
+            None disables every HTTP timeout; a number sets all four components
+            to that many seconds; an httpx.Timeout overrides them. It applies
+            only to this request and does not change the client's configuration.
+
+        Returns
+        -------
+        Response
+            An HTTP response
+
+        Raises
+        ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
+        """
+        return self.request(
+            "PUT",
+            endpoint,
+            body,
+            params=params,
+            headers=headers,
+            timeout=timeout,
+        )
+
+    def delete(
+        self,
+        endpoint: str,
+        *,
+        params: dict | None = None,
+        headers: dict | None = None,
+        timeout=UNSET,
+    ) -> Response:
+        """Send a DELETE request.
+
+        Parameters
+        ----------
+        endpoint : str
+            A REST endpoint to call
+        params : dict | None
+            Request parameters
+        headers : dict | None
+            Request headers
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request timeout. Unset uses the client's configured timeout.
+            None disables every HTTP timeout; a number sets all four components
+            to that many seconds; an httpx.Timeout overrides them. It applies
+            only to this request and does not change the client's configuration.
+
+        Returns
+        -------
+        Response
+            An HTTP response
+
+        Raises
+        ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
+        """
+        return self.request(
+            "DELETE",
+            endpoint,
+            params=params,
+            headers=headers,
+            timeout=timeout,
+        )
+
+    def request(
+        self,
+        method: str,
+        endpoint: str,
+        body: str | bytes | dict | None = None,
+        *,
+        params: dict | None = None,
+        headers: dict | None = None,
+        timeout=UNSET,
+    ) -> Response:
+        """Send an HTTP request.
+
+        Parameters
+        ----------
+        method : str
+            An HTTP request method
+        endpoint : str
+            A REST endpoint to call
+        body : str | bytes | dict | None
+            A request body
+        params : dict | None
+            Request parameters
+        headers : dict | None
+            Request headers
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request timeout. Unset uses the client's configured timeout.
+            None disables every HTTP timeout; a number sets all four components
+            to that many seconds; an httpx.Timeout overrides them. It applies
+            only to this request and does not change the client's configuration.
+
+        Returns
+        -------
+        Response
+            An HTTP response
+
+        Raises
+        ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
+        """
+        request = self._prepare_request(params, headers, body)
+        if timeout is not UNSET:
+            request["timeout"] = timeout
+        resp = self._send_request(method, endpoint, request)
+        self._log_response(method, endpoint, resp)
+        return resp
+
+    def _send_request(
+        self,
+        method: str,
+        endpoint: str,
+        request: dict,
+    ) -> Response:
+        """Send a request."""
+        logger.info("Sending a request... %s %s", method.upper(), endpoint)
+
+        url = self._build_url(endpoint)
+        if self._session_owner is not None and self._session_owner.is_connected():
+            self.connect()
+        if self.is_connected():
+            return self._client.request(method, url, **request)
+
+        logger.warning(
+            "HttpClient is not connected -- "
+            "A request will be sent in an ad-hoc initialized session (%s %s)",
+            method.upper(),
+            endpoint,
+        )
+        transport = HTTPTransport(**self.config.transport_options())
+        with Client(
+            transport=RetryTransport(transport=transport, retry=self.config.retry),
+            timeout=self.config.timeout,
+        ) as client:
+            return client.request(method, url, **request)
+
+
+class AsyncHttpClient(_HttpClientBase):
+    """An async low-level class used to send HTTP requests to a MarkLogic instance.
+
+    Attributes
+    ----------
+    config : HTTPConfig
+        the resolved connection and authentication configuration
+    base_url : str
+        a base url built based on the protocol, the host name and the port
+    """
+
+    _client: AsyncClient | None = None
+
+    def __init__(self, **kwargs):
+        """Initialize AsyncHttpClient instance.
+
+        Parameters
+        ----------
+        protocol : str, default "http"
+            A protocol used for HTTP requests (http / https)
+        host : str, default "localhost"
+            A host name
+        port : int, default 8000
+            An App Service port
+        auth : str | httpx.Auth | AuthConfig | None, default "digest"
+            An authentication method
+        username : str, default "admin"
+            A username
+        password : str, default "admin"
+            A password
+        ssl : SSLConfig | None, default None
+            SSL/TLS configuration
+        cloud : CloudConfig | None, default None
+            MarkLogic Cloud configuration
+        retry : Retry | None, default Retry(total=5, backoff_factor=0.5)
+            A retry strategy
+        limits : httpx.Limits | None, default None
+            Connection-pool limits; None defers to httpx's own default
+        timeout : httpx.Timeout | float | None, default unset
+            A request timeout. Unset uses DEFAULT_TIMEOUT (connect=5, read=60,
+            write=60, pool=5 seconds). None disables every HTTP timeout. A
+            number sets all four components to that many seconds. An
+            httpx.Timeout fully overrides the timeout. The config argument, when
+            given, takes precedence over this argument.
+        """
+        super().__init__(**kwargs)
+
+    async def __aenter__(self):
+        """Connect and return self for use as an async context manager."""
+        await self.connect()
+        return self
+
+    async def __aexit__(
+        self,
+        exc_type: type,
+        exc_val: BaseException,
+        exc_tb: TracebackType,
+    ):
+        """Disconnect on async context manager exit."""
+        await self.disconnect()
+
+    async def connect(self):
+        """Start an async HTTP session unless already connected."""
+        if self.is_connected():
+            return
+        logger.debug("Initiating a connection with %s", self.base_url)
+        transport = AsyncHTTPTransport(**self.config.transport_options())
+        self._client = AsyncClient(
+            transport=RetryTransport(transport=transport, retry=self.config.retry),
+            timeout=self.config.timeout,
+        )
+
+    async def disconnect(self):
+        """Close an async HTTP session."""
+        if self._client:
+            logger.debug("Closing a connection")
+            await self._client.aclose()
+            self._client = None
+
+    def is_connected(self) -> bool:
+        """Return a connection status.
+
+        Returns
+        -------
+        bool
+            True if the client has started a connection; otherwise False
+        """
+        return self._client is not None
+
+    async def get(
+        self,
+        endpoint: str,
+        *,
+        params: dict | None = None,
+        headers: dict | None = None,
+        timeout=UNSET,
+    ) -> Response:
+        """Send an async GET request.
+
+        Parameters
+        ----------
+        endpoint : str
+            A REST endpoint to call
+        params : dict | None
+            Request parameters
+        headers : dict | None
+            Request headers
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request timeout. Unset uses the client's configured timeout.
+            None disables every HTTP timeout; a number sets all four components
+            to that many seconds; an httpx.Timeout overrides them. It applies
+            only to this request and does not change the client's configuration.
+
+        Returns
+        -------
+        Response
+            An HTTP response
+
+        Raises
+        ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
+        """
+        return await self.request(
+            "GET",
+            endpoint,
+            params=params,
+            headers=headers,
+            timeout=timeout,
+        )
+
+    async def head(
+        self,
+        endpoint: str,
+        *,
+        params: dict | None = None,
+        headers: dict | None = None,
+        timeout=UNSET,
+    ) -> Response:
+        """Send an async HEAD request.
+
+        Parameters
+        ----------
+        endpoint : str
+            A REST endpoint to call
+        params : dict | None
+            Request parameters
+        headers : dict | None
+            Request headers
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request timeout. Unset uses the client's configured timeout.
+            None disables every HTTP timeout; a number sets all four components
+            to that many seconds; an httpx.Timeout overrides them. It applies
+            only to this request and does not change the client's configuration.
+
+        Returns
+        -------
+        Response
+            An HTTP response
+
+        Raises
+        ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
+        """
+        return await self.request(
+            "HEAD",
+            endpoint,
+            params=params,
+            headers=headers,
+            timeout=timeout,
+        )
+
+    async def post(
+        self,
+        endpoint: str,
+        body: str | bytes | dict | None = None,
+        *,
+        params: dict | None = None,
+        headers: dict | None = None,
+        timeout=UNSET,
+    ) -> Response:
+        """Send an async POST request.
+
+        Parameters
+        ----------
+        endpoint : str
+            A REST endpoint to call
+        body : str | bytes | dict | None
+            A request body
+        params : dict | None
+            Request parameters
+        headers : dict | None
+            Request headers
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request timeout. Unset uses the client's configured timeout.
+            None disables every HTTP timeout; a number sets all four components
+            to that many seconds; an httpx.Timeout overrides them. It applies
+            only to this request and does not change the client's configuration.
+
+        Returns
+        -------
+        Response
+            An HTTP response
+
+        Raises
+        ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
+        """
+        return await self.request(
+            "POST",
+            endpoint,
+            body,
+            params=params,
+            headers=headers,
+            timeout=timeout,
+        )
+
+    async def put(
+        self,
+        endpoint: str,
+        body: str | bytes | dict | None = None,
+        *,
+        params: dict | None = None,
+        headers: dict | None = None,
+        timeout=UNSET,
+    ) -> Response:
+        """Send an async PUT request.
+
+        Parameters
+        ----------
+        endpoint : str
+            A REST endpoint to call
+        body : str | bytes | dict | None
+            A request body
+        params : dict | None
+            Request parameters
+        headers : dict | None
+            Request headers
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request timeout. Unset uses the client's configured timeout.
+            None disables every HTTP timeout; a number sets all four components
+            to that many seconds; an httpx.Timeout overrides them. It applies
+            only to this request and does not change the client's configuration.
+
+        Returns
+        -------
+        Response
+            An HTTP response
+
+        Raises
+        ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
+        """
+        return await self.request(
+            "PUT",
+            endpoint,
+            body,
+            params=params,
+            headers=headers,
+            timeout=timeout,
+        )
+
+    async def delete(
+        self,
+        endpoint: str,
+        *,
+        params: dict | None = None,
+        headers: dict | None = None,
+        timeout=UNSET,
+    ) -> Response:
+        """Send an async DELETE request.
+
+        Parameters
+        ----------
+        endpoint : str
+            A REST endpoint to call
+        params : dict | None
+            Request parameters
+        headers : dict | None
+            Request headers
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request timeout. Unset uses the client's configured timeout.
+            None disables every HTTP timeout; a number sets all four components
+            to that many seconds; an httpx.Timeout overrides them. It applies
+            only to this request and does not change the client's configuration.
+
+        Returns
+        -------
+        Response
+            An HTTP response
+
+        Raises
+        ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
+        """
+        return await self.request(
+            "DELETE",
+            endpoint,
+            params=params,
+            headers=headers,
+            timeout=timeout,
+        )
+
+    async def request(
+        self,
+        method: str,
+        endpoint: str,
+        body: str | bytes | dict | None = None,
+        *,
+        params: dict | None = None,
+        headers: dict | None = None,
+        timeout=UNSET,
+    ) -> Response:
+        """Send an async HTTP request.
+
+        Parameters
+        ----------
+        method : str
+            An HTTP request method
+        endpoint : str
+            A REST endpoint to call
+        body : str | bytes | dict | None
+            A request body
+        params : dict | None
+            Request parameters
+        headers : dict | None
+            Request headers
+        timeout : httpx.Timeout | float | None, default unset
+            A per-request timeout. Unset uses the client's configured timeout.
+            None disables every HTTP timeout; a number sets all four components
+            to that many seconds; an httpx.Timeout overrides them. It applies
+            only to this request and does not change the client's configuration.
+
+        Returns
+        -------
+        Response
+            An HTTP response
+
+        Raises
+        ------
+        httpx.TimeoutException
+            If an HTTP connect, read, write or pool timeout expires after any
+            configured retries are exhausted.
+        """
+        request = self._prepare_request(params, headers, body)
+        if timeout is not UNSET:
+            request["timeout"] = timeout
+        resp = await self._send_request(method, endpoint, request)
+        self._log_response(method, endpoint, resp)
+        return resp
+
+    async def _send_request(
+        self,
+        method: str,
+        endpoint: str,
+        request: dict,
+    ) -> Response:
+        """Send a request asynchronously."""
+        logger.info("Sending a request... %s %s", method.upper(), endpoint)
+
+        url = self._build_url(endpoint)
+        if self._session_owner is not None and self._session_owner.is_connected():
+            await self.connect()
+        if self.is_connected():
+            return await self._client.request(method, url, **request)
+
+        logger.warning(
+            "AsyncHttpClient is not connected -- "
+            "A request will be sent in an ad-hoc initialized session (%s %s)",
+            method.upper(),
+            endpoint,
+        )
+        transport = AsyncHTTPTransport(**self.config.transport_options())
+        async with AsyncClient(
+            transport=RetryTransport(transport=transport, retry=self.config.retry),
+            timeout=self.config.timeout,
+        ) as client:
+            return await client.request(method, url, **request)

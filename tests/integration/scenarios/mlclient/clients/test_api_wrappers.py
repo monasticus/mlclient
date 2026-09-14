@@ -8,15 +8,16 @@ import httpx
 import pytest
 from httpx import Response
 
-from mlclient import MLClient, MLResponseParser
-from mlclient.clients.http_client import MARKLOGIC_MANAGE_PORT
-from mlclient.http_config import HTTPConfig
-from mlclient.models.http import DocumentsBodyPart as BodyPart
+from mlclient import MLClient
+from mlclient.connection import MARKLOGIC_MANAGE_PORT
+from mlclient.http import HTTPConfig
+from mlclient.models import DocumentsBodyPart
+from mlclient.responses import MLResponseParser
 
 EVAL_XQUERY = (
     "xquery version '1.0-ml';\n\n"
-    "declare variable $element as element() external;\n\n"
-    "<new-parent>{$element/child::element()}</new-parent>"
+    "declare variable $element external;\n\n"
+    "<new-parent>{xdmp:unquote($element)/parent/child}</new-parent>"
 )
 
 
@@ -47,9 +48,12 @@ class TestHealthCheckEndpoint:
     @pytest.mark.ml_access
     def test_healthcheck_raises_when_probing_an_authenticated_server(self):
         authenticated = HTTPConfig.resolve(port=MARKLOGIC_MANAGE_PORT, auth=None)
-        with MLClient(health_config=authenticated) as ml, pytest.raises(
-            httpx.HTTPStatusError,
-        ) as exc:
+        with (
+            MLClient(health_config=authenticated) as ml,
+            pytest.raises(
+                httpx.HTTPStatusError,
+            ) as exc,
+        ):
             ml.healthcheck()
 
         assert exc.value.response.status_code == httpx.codes.UNAUTHORIZED
@@ -1101,7 +1105,7 @@ class TestUsersManagement:
 
 
 class TestDocumentsManagement:
-    DOCUMENT_BODY_PART_1 = BodyPart(
+    DOCUMENT_BODY_PART_1 = DocumentsBodyPart(
         **{
             "content-type": "application/json",
             "content-disposition": {
@@ -1111,7 +1115,7 @@ class TestDocumentsManagement:
             "content": b'{"root": {"child": "data"}}',
         },
     )
-    DOCUMENT_BODY_PART_2 = BodyPart(
+    DOCUMENT_BODY_PART_2 = DocumentsBodyPart(
         **{
             "content-type": "application/json",
             "content-disposition": {

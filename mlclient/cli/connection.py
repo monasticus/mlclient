@@ -2,11 +2,12 @@
 
 from __future__ import annotations
 
-from mlclient import MLClient, MLClientManager
+from mlclient._client import MLClient
+from mlclient._manager import MLClientManager
 from mlclient.exceptions import WrongParametersError
 
-
 _MAX_PORT = 65535
+
 
 def get_client(manager: MLClientManager, connection: str | None) -> MLClient:
     """Create a client for a configured identifier or a numeric port.

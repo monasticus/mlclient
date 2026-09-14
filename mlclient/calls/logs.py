@@ -9,8 +9,9 @@ from __future__ import annotations
 
 from dateutil import parser
 
-from mlclient import exceptions, utils
-from mlclient.calls.api_call import ApiCall
+from mlclient import _utils as utils
+from mlclient import exceptions
+from mlclient.calls.base import ApiCall
 
 
 class LogsCall(ApiCall):

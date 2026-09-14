@@ -10,7 +10,7 @@ requirements.txt
 /**/.coverage
 .benchmarks
 
-# Sphinx
+# Legacy documentation output
 docs/_build/
 
 # PyCharm
@@ -20,3 +20,9 @@ docs/_build/
 /.mlclient
 tmp
 main.py
+# Documentation build output
+site/
+docs/.cache/
+
+# Project-local Poetry plugin cache
+/.poetry/

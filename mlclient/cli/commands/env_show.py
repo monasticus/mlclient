@@ -20,7 +20,9 @@ from cleo.io.inputs.argument import Argument
 from cleo.io.inputs.option import Option
 from cleo.ui.table import Table
 
-from mlclient import constants, find_mlclient_directory
+from mlclient import _constants as constants
+from mlclient.connection import MARKLOGIC_APP_SERVICES_PORT
+from mlclient.env import _DEFAULT_APP_SERVER_SETTINGS, find_mlclient_directory
 from mlclient.exceptions import MLClientDirectoryNotFoundError, WrongParametersError
 
 _FILE_PREFIX = "mlclient-"
@@ -30,10 +32,10 @@ _APP_SERVERS_KEY = "app-servers"
 _PREDEFINED_SERVERS = {
     server["id"]: {
         "id": server["id"],
-        "port": constants.APP_SERVICES_PORT,
+        "port": MARKLOGIC_APP_SERVICES_PORT,
         **server,
     }
-    for server in constants.DEFAULT_APP_SERVERS
+    for server in _DEFAULT_APP_SERVER_SETTINGS
 }
 
 

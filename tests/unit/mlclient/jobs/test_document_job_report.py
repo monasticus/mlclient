@@ -1,7 +1,6 @@
 from copy import copy
 
-from mlclient.jobs import DocumentJobReport
-from mlclient.jobs.documents_jobs import DocumentReport, DocumentStatus
+from mlclient.jobs import DocumentJobReport, DocumentReport, DocumentStatus
 
 
 def test_add_doc_report():

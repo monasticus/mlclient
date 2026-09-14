@@ -1,5 +1,4 @@
-from mlclient.calls import ApiCall
-from mlclient.calls.admin import TimestampGetCall
+from mlclient.calls import ApiCall, TimestampGetCall
 
 
 def test_is_api_call():

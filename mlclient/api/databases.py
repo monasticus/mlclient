@@ -6,7 +6,8 @@ from typing import TYPE_CHECKING
 
 from httpx import Response
 
-from mlclient.calls import (
+from mlclient._options import UNSET
+from mlclient.calls.databases import (
     DatabaseDeleteCall,
     DatabaseGetCall,
     DatabasePostCall,
@@ -15,11 +16,9 @@ from mlclient.calls import (
     DatabasesGetCall,
     DatabasesPostCall,
 )
-from mlclient.connection import UNSET
 
-# Avoid circular import: ApiClient -> api classes -> ApiClient
 if TYPE_CHECKING:
-    from mlclient.clients.api_client import ApiClient, AsyncApiClient
+    from mlclient.clients.api import ApiClient, AsyncApiClient
 
 
 class DatabasesApi:

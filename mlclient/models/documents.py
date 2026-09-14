@@ -38,7 +38,7 @@ from xml.dom import minidom
 import xmltodict
 
 from mlclient.exceptions import InvalidMetadataError
-from mlclient.mimetypes import Mimetypes
+from mlclient.models.mimetypes import Mimetypes
 from mlclient.models.types import DocumentType
 
 logger = logging.getLogger(__name__)

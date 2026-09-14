@@ -11,6 +11,6 @@ It exports a single function and a single class:
         An ML Client Command Line Cleo Application.
 """
 
-from .app import MLCLIentApplication, main
+from mlclient.cli.app import MLCLIentApplication, main
 
 __all__ = ["MLCLIentApplication", "main"]

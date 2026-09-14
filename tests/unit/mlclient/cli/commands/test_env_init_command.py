@@ -10,9 +10,9 @@ import respx
 import yaml
 from cleo.testers.command_tester import CommandTester
 
-from mlclient import MLEnvironment
 from mlclient.cli import MLCLIentApplication
 from mlclient.cli.commands.env_init import _TEMPLATE
+from mlclient.env import MLEnvironment
 from mlclient.exceptions import EnvironmentFileExistsError, WrongParametersError
 from tests.utils.ml_mockers import MLRespXMocker
 

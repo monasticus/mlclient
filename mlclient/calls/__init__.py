@@ -1,191 +1,35 @@
-"""The ML Calls package.
+"""Public calls for MLClient."""
 
-It contains modules dealing with MarkLogic API endpoints at the lowest level
-of HTTP requests. Additionally, it exports the following package:
-
-    * model
-        The ML Calls Model package.
-
-This package exports the following modules:
-
-    * api_call
-        An abstract class representing a single request to a MarkLogic API endpoint.
-    * admin
-        The ML Admin API Calls module.
-    * databases
-        The ML Database Api Calls module.
-    * documents
-        The ML Documents Api Calls module.
-    * eval
-        The ML Eval Api Call module.
-    * forests
-        The ML Forest Api Calls module.
-    * groups
-        The ML Group Api Calls module.
-    * logs
-        The ML Logs Api Call module.
-    * roles
-        The ML Role Api Calls module.
-    * servers
-        The ML Server Api Calls module.
-    * transactions
-        The ML Transaction Api Calls module.
-    * users
-        The ML User Api Calls module.
-
-This package exports the following classes:
-    * ApiCall
-        An abstract class representing a single request to a MarkLogic API endpoint.
-    * TimestampGetCall
-        A GET request to get the Admin server timestamp.
-    * ServerConfigGetCall
-        A GET request to get the Admin server configuration.
-    * DatabaseGetCall
-        A GET request to get database details.
-    * DatabasePostCall
-        A POST request to manage a database.
-    * DatabaseDeleteCall
-        A DELETE request to remove a database from a cluster.
-    * DatabasePropertiesGetCall
-        A GET request to get a database properties.
-    * DatabasePropertiesPutCall
-        A PUT request to modify database properties.
-    * DatabasesGetCall
-        A GET request to get databases summary.
-    * DatabasesPostCall
-        A POST request to create a new database.
-    * DocumentsGetCall
-        A GET request to retrieve documents' content or metadata.
-    * DocumentsDeleteCall
-        A DELETE request to remove documents, or reset document metadata.
-    * DocumentsPostCall
-        A POST request to insert or update documents' content or metadata.
-    * EvalCall
-        A POST request to evaluate an ad-hoc query.
-    * ForestGetCall
-        A GET request to get a forest details.
-    * ForestPostCall
-        A POST request to change a forest's state.
-    * ForestDeleteCall
-        A DELETE request to remove a forest.
-    * ForestPropertiesGetCall
-        A GET request to get forest properties.
-    * ForestPropertiesPutCall
-        A PUT request to modify forest properties.
-    * ForestsGetCall
-        A GET request to get forests summary.
-    * ForestsPostCall
-        A POST request to create a new forest.
-    * ForestsPutCall
-        A PUT request to perform an operation on forests.
-    * GroupPropertiesGetCall
-        A GET request to get group properties.
-    * GroupPropertiesPutCall
-        A PUT request to modify group properties.
-    * LogsCall
-        A GET request to retrieve logs.
-    * RoleGetCall
-        A GET request to get a role details.
-    * RoleDeleteCall
-        A DELETE request to remove a role.
-    * RolePropertiesGetCall
-        A GET request to get role properties.
-    * RolePropertiesPutCall
-        A PUT request to modify role properties.
-    * RolesGetCall
-        A GET request to get roles summary.
-    * RolesPostCall
-        A POST request to create a new role.
-    * ServerGetCall
-        A GET request to get app server details.
-    * ServerDeleteCall
-        A DELETE request to remove an app server.
-    * ServerPropertiesGetCall
-        A GET request to get app server properties.
-    * ServerPropertiesPutCall
-        A PUT request to modify app server properties.
-    * ServersGetCall
-        A GET request to get app servers summary.
-    * ServersPostCall
-        A POST request to create a new app server.
-    * TransactionsPostCall
-        A POST request to create a multi-statement transaction.
-    * TransactionGetCall
-        A GET request to get a transaction status.
-    * TransactionPostCall
-        A POST request to commit or roll back a transaction.
-    * UserGetCall
-        A GET request to get user details.
-    * UserDeleteCall
-        A DELETE request to remove a user.
-    * UserPropertiesGetCall
-        A GET request to get user properties.
-    * UserPropertiesPutCall
-        A PUT request to modify user properties.
-    * UsersGetCall
-        A GET request to get users summary.
-    * UsersPostCall
-        A POST request to create a new user.
-
-Examples
---------
->>> from mlclient.calls import DatabaseGetCall, EvalCall
-"""
-
-from .admin import ServerConfigGetCall, TimestampGetCall
-from .api_call import ApiCall
-from .databases import (
-    DatabaseDeleteCall,
-    DatabaseGetCall,
-    DatabasePostCall,
-    DatabasePropertiesGetCall,
-    DatabasePropertiesPutCall,
-    DatabasesGetCall,
-    DatabasesPostCall,
-)
-from .documents import DocumentsDeleteCall, DocumentsGetCall, DocumentsPostCall
-from .eval import EvalCall
-from .forests import (
-    ForestDeleteCall,
-    ForestGetCall,
-    ForestPostCall,
-    ForestPropertiesGetCall,
-    ForestPropertiesPutCall,
-    ForestsGetCall,
-    ForestsPostCall,
-    ForestsPutCall,
-)
-from .groups import GroupPropertiesGetCall, GroupPropertiesPutCall
-from .logs import LogsCall
-from .roles import (
-    RoleDeleteCall,
-    RoleGetCall,
-    RolePropertiesGetCall,
-    RolePropertiesPutCall,
-    RolesGetCall,
-    RolesPostCall,
-)
-from .servers import (
-    ServerDeleteCall,
-    ServerGetCall,
-    ServerPropertiesGetCall,
-    ServerPropertiesPutCall,
-    ServersGetCall,
-    ServersPostCall,
-)
-from .transactions import (
-    TransactionGetCall,
-    TransactionPostCall,
-    TransactionsPostCall,
-)
-from .users import (
-    UserDeleteCall,
-    UserGetCall,
-    UserPropertiesGetCall,
-    UserPropertiesPutCall,
-    UsersGetCall,
-    UsersPostCall,
-)
+from mlclient.calls.admin import ServerConfigGetCall, TimestampGetCall
+from mlclient.calls.base import ApiCall
+from mlclient.calls.databases import (DatabaseDeleteCall, DatabaseGetCall,
+                                      DatabasePostCall,
+                                      DatabasePropertiesGetCall,
+                                      DatabasePropertiesPutCall,
+                                      DatabasesGetCall, DatabasesPostCall)
+from mlclient.calls.documents import (DocumentsDeleteCall, DocumentsGetCall,
+                                      DocumentsPostCall)
+from mlclient.calls.eval import EvalCall
+from mlclient.calls.forests import (ForestDeleteCall, ForestGetCall,
+                                    ForestPostCall, ForestPropertiesGetCall,
+                                    ForestPropertiesPutCall, ForestsGetCall,
+                                    ForestsPostCall, ForestsPutCall)
+from mlclient.calls.groups import (GroupPropertiesGetCall,
+                                   GroupPropertiesPutCall)
+from mlclient.calls.logs import LogsCall
+from mlclient.calls.roles import (RoleDeleteCall, RoleGetCall,
+                                  RolePropertiesGetCall, RolePropertiesPutCall,
+                                  RolesGetCall, RolesPostCall)
+from mlclient.calls.servers import (ServerDeleteCall, ServerGetCall,
+                                    ServerPropertiesGetCall,
+                                    ServerPropertiesPutCall, ServersGetCall,
+                                    ServersPostCall)
+from mlclient.calls.transactions import (TransactionGetCall,
+                                         TransactionPostCall,
+                                         TransactionsPostCall)
+from mlclient.calls.users import (UserDeleteCall, UserGetCall,
+                                  UserPropertiesGetCall, UserPropertiesPutCall,
+                                  UsersGetCall, UsersPostCall)
 
 __all__ = [
     "ApiCall",

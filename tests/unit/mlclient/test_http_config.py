@@ -4,11 +4,12 @@ import httpx
 import pytest
 from httpx_retries import Retry
 
-from mlclient.connection import UNSET, CloudConfig, SSLConfig
-from mlclient.http_config import (
+from mlclient._options import UNSET
+from mlclient.connection import CloudConfig, SSLConfig
+from mlclient.http import (
+    _HEALTH_TIMEOUT,
     DEFAULT_RETRY_STRATEGY,
     DEFAULT_TIMEOUT,
-    HEALTH_TIMEOUT,
     NO_RETRY_STRATEGY,
     HTTPConfig,
 )
@@ -113,6 +114,27 @@ def test_cloud_clone_applies_retry_without_changing_gateway():
     assert config.has_explicit_retry is False
 
 
+@pytest.mark.parametrize("retry", [3, Retry(total=3)])
+def test_number_sets_retry_total(retry):
+    config = HTTPConfig.resolve(retry=retry)
+
+    assert config.has_explicit_retry
+    assert config.retry.total == 3
+
+
+def test_retry_zero_is_explicit_and_disables_retries():
+    config = HTTPConfig.resolve(retry=0)
+
+    assert config.has_explicit_retry
+    assert config.retry.total == 0
+
+
+def test_clone_carries_scalar_retry():
+    config = HTTPConfig.resolve(retry=2)
+
+    assert config.clone(port=8002).retry.total == 2
+
+
 def test_clone_carries_limits():
     limits = httpx.Limits(max_connections=5)
     config = HTTPConfig.resolve(host="ml.example.com", limits=limits)
@@ -141,6 +163,14 @@ def test_clone_can_restore_unspecified_limits():
 
     assert sibling.limits is None
     assert config.limits is not None
+
+
+@pytest.mark.parametrize("limits", [10, httpx.Limits(max_connections=10)])
+def test_number_sets_limits_max_connections(limits):
+    config = HTTPConfig.resolve(limits=limits)
+
+    assert config.limits == httpx.Limits(max_connections=10)
+    assert config.transport_options()["limits"] == httpx.Limits(max_connections=10)
 
 
 def test_cloud_clone_applies_limits_without_changing_gateway():
@@ -237,12 +267,12 @@ def test_health_defaults_resolve_retry_and_timeout_independently(timeout, retry)
 
     assert health.retry is (NO_RETRY_STRATEGY if retry is None else retry)
     assert health.timeout == (
-        HEALTH_TIMEOUT if timeout is UNSET else httpx.Timeout(timeout)
+        _HEALTH_TIMEOUT if timeout is UNSET else httpx.Timeout(timeout)
     )
     assert config.has_explicit_timeout is (timeout is not UNSET)
     assert config.has_explicit_retry is (retry is not None)
     health.timeout.read = 100
-    assert httpx.Timeout(5) == HEALTH_TIMEOUT
+    assert httpx.Timeout(5) == _HEALTH_TIMEOUT
 
 
 @pytest.mark.parametrize(

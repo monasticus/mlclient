@@ -10,7 +10,7 @@ from mlclient.exceptions import (
     UnsupportedFileExtensionError,
     WrongParametersError,
 )
-from mlclient.services.eval import LOCAL_NS
+from mlclient.services.eval import _LOCAL_NS
 from tests.utils import resources as resources_utils
 from tests.utils.ml_mockers import MLRespXMocker
 
@@ -298,14 +298,14 @@ async def test_eval_variables_using_namespace(svc):
     ml_mocker.with_request_body(
         {
             "xquery": code,
-            "vars": f'{{"{{{LOCAL_NS}}}VARIABLE": "X"}}',
+            "vars": f'{{"{{{_LOCAL_NS}}}VARIABLE": "X"}}',
         },
     )
     ml_mocker.with_response_code(200)
     ml_mocker.with_response_body_part("string", "X")
     ml_mocker.mock_post()
 
-    resp = await svc.xquery(code, variables={f"{{{LOCAL_NS}}}VARIABLE": "X"})
+    resp = await svc.xquery(code, variables={f"{{{_LOCAL_NS}}}VARIABLE": "X"})
 
     assert resp == "X"
 

@@ -1,4 +1,4 @@
-"""High-level Logs service (LogsService / AsyncLogsService).
+"""Higher-level Logs service (LogsService / AsyncLogsService).
 
 Provides parsed log retrieval from MarkLogic.
 """
@@ -7,58 +7,24 @@ from __future__ import annotations
 
 import re
 from collections.abc import Iterator
-from enum import Enum
 from typing import TYPE_CHECKING
 
-from mlclient.calls import LogsCall
-from mlclient.clients.api_client import ApiClient
-from mlclient.connection import UNSET
-from mlclient.exceptions import InvalidLogTypeError, MarkLogicError
+from mlclient._options import UNSET
+from mlclient.exceptions import MarkLogicError
+from mlclient.models.types import LogType
 
 if TYPE_CHECKING:
-    from mlclient.clients.api_client import AsyncApiClient
-
-
-class LogType(Enum):
-    """An enumeration class representing MarkLogic log types."""
-
-    ERROR = "ErrorLog"
-    ACCESS = "AccessLog"
-    REQUEST = "RequestLog"
-    AUDIT = "AuditLog"
-
-    @staticmethod
-    def get(
-        logs_type: str,
-    ) -> LogType:
-        """Get a specific LogType enum for a string value."""
-        if logs_type.lower() == "error":
-            return LogType.ERROR
-        if logs_type.lower() == "access":
-            return LogType.ACCESS
-        if logs_type.lower() == "request":
-            return LogType.REQUEST
-        if logs_type.lower() == "audit":
-            return LogType.AUDIT
-        msg = "Invalid log type! Allowed values are: error, access, request."
-        raise InvalidLogTypeError(msg)
-
-    def __lt__(
-        self,
-        other: LogType,
-    ):
-        """Compare LogTypes with LT operator."""
-        return self.value < other.value
+    from mlclient.api.manage import AsyncManageApi, ManageApi
 
 
 class LogsService:
-    """High-level service for /manage/v2/logs endpoint."""
+    """Higher-level service for /manage/v2/logs endpoint."""
 
     _LOG_TYPES_RE = "|".join(t.value[:-3] for t in LogType)
     _FILENAME_RE = re.compile(rf"((.+)_)?({_LOG_TYPES_RE})Log(_([1-6]))?\.txt")
 
-    def __init__(self, api: ApiClient):
-        self._api = api
+    def __init__(self, manage: ManageApi):
+        self._manage = manage
 
     def get(
         self,
@@ -108,16 +74,16 @@ class LogsService:
         """
         if isinstance(log_type, str):
             log_type = LogType.get(log_type)
-        call = self._get_call(
-            app_server=app_server,
-            log_type=log_type,
-            start_time=start_time,
-            end_time=end_time,
-            regex=regex,
+        is_error = log_type == LogType.ERROR
+        resp = self._manage.logs.get(
+            self._filename(app_server, log_type),
+            data_format="json",
             host=host,
+            start_time=start_time if is_error else None,
+            end_time=end_time if is_error else None,
+            regex=regex if is_error else None,
+            timeout=timeout,
         )
-
-        resp = self._api.call(call, timeout=timeout)
         resp_body = resp.json()
         if not resp.is_success:
             raise MarkLogicError(resp_body["errorResponse"])
@@ -155,9 +121,12 @@ class LogsService:
         MarkLogicError
             If MarkLogic returns an error
         """
-        call = self._get_call(host=host)
-
-        resp = self._api.call(call, timeout=timeout)
+        resp = self._manage.logs.get(
+            filename=None,
+            data_format="json",
+            host=host,
+            timeout=timeout,
+        )
         resp_body = resp.json()
         if "errorResponse" in resp_body:
             raise MarkLogicError(resp_body["errorResponse"])
@@ -165,38 +134,16 @@ class LogsService:
         return self._parse_logs_list(resp_body)
 
     @staticmethod
-    def _get_call(
-        app_server: int | str | None = None,
-        log_type: LogType | None = None,
-        start_time: str | None = None,
-        end_time: str | None = None,
-        regex: str | None = None,
-        host: str | None = None,
-    ) -> LogsCall:
-        """Prepare a LogsCall instance."""
+    def _filename(
+        app_server: int | str | None,
+        log_type: LogType,
+    ) -> str:
+        """Build the log file name from an app server and log type."""
         if app_server in [0, "0"]:
             app_server = "TaskServer"
-        if log_type is None:
-            file_name = None
-        elif app_server is None:
-            file_name = f"{log_type.value}.txt"
-        else:
-            file_name = f"{app_server}_{log_type.value}.txt"
-        params = {
-            "filename": file_name,
-            "data_format": "json",
-            "host": host,
-        }
-        if log_type == LogType.ERROR:
-            params.update(
-                {
-                    "start_time": start_time,
-                    "end_time": end_time,
-                    "regex": regex,
-                },
-            )
-
-        return LogsCall(**params)
+        if app_server is None:
+            return f"{log_type.value}.txt"
+        return f"{app_server}_{log_type.value}.txt"
 
     @staticmethod
     def _parse_logs(
@@ -279,10 +226,10 @@ class LogsService:
 
 
 class AsyncLogsService(LogsService):
-    """Async high-level service for /manage/v2/logs endpoint."""
+    """Async higher-level service for /manage/v2/logs endpoint."""
 
-    def __init__(self, api: AsyncApiClient):
-        self._api = api
+    def __init__(self, manage: AsyncManageApi):
+        self._manage = manage
 
     async def get(  # type: ignore[override]
         self,
@@ -332,16 +279,16 @@ class AsyncLogsService(LogsService):
         """
         if isinstance(log_type, str):
             log_type = LogType.get(log_type)
-        call = self._get_call(
-            app_server=app_server,
-            log_type=log_type,
-            start_time=start_time,
-            end_time=end_time,
-            regex=regex,
+        is_error = log_type == LogType.ERROR
+        resp = await self._manage.logs.get(
+            self._filename(app_server, log_type),
+            data_format="json",
             host=host,
+            start_time=start_time if is_error else None,
+            end_time=end_time if is_error else None,
+            regex=regex if is_error else None,
+            timeout=timeout,
         )
-
-        resp = await self._api.call(call, timeout=timeout)
         resp_body = resp.json()
         if not resp.is_success:
             raise MarkLogicError(resp_body["errorResponse"])
@@ -379,9 +326,12 @@ class AsyncLogsService(LogsService):
         MarkLogicError
             If MarkLogic returns an error
         """
-        call = self._get_call(host=host)
-
-        resp = await self._api.call(call, timeout=timeout)
+        resp = await self._manage.logs.get(
+            filename=None,
+            data_format="json",
+            host=host,
+            timeout=timeout,
+        )
         resp_body = resp.json()
         if "errorResponse" in resp_body:
             raise MarkLogicError(resp_body["errorResponse"])

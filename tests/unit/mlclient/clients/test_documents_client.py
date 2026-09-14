@@ -12,6 +12,7 @@ from mlclient import MLClient
 from mlclient.exceptions import MarkLogicError
 from mlclient.models import (
     BinaryDocument,
+    Category,
     DocumentType,
     JSONDocument,
     Metadata,
@@ -19,7 +20,6 @@ from mlclient.models import (
     TextDocument,
     XMLDocument,
 )
-from mlclient.models.http import Category
 from tests.utils import data as test_data
 from tests.utils import resources as resources_utils
 from tests.utils.data import MetadataSpec

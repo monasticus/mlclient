@@ -5,7 +5,7 @@ import pytest
 import respx
 
 from mlclient import MLClient
-from mlclient.models.http import DocumentsBodyPart as BodyPart
+from mlclient.models import DocumentsBodyPart
 from tests.utils import resources as resources_utils
 from tests.utils.ml_mockers import MLRespXMocker
 
@@ -14,7 +14,7 @@ from tests.utils.ml_mockers import MLRespXMocker
 def xquery():
     return """xquery version '1.0-ml';
 
-    declare variable $element as element() external;
+    declare variable $element() external;
 
     <new-parent>{$element/child::element()}</new-parent>
     """
@@ -28,7 +28,7 @@ def test_eval(xquery):
     ml_mocker.with_request_body(
         {
             "xquery": "xquery version '1.0-ml';"
-            " declare variable $element as element() external;"
+            " declare variable $element() external;"
             " <new-parent>{$element/child::element()}</new-parent>",
             "vars": '{"element": "<parent><child/></parent>"}',
         },
@@ -92,7 +92,7 @@ def test_post_documents():
     ml_mocker.mock_post()
 
     with MLClient() as ml:
-        resp = ml.rest.documents.post([BodyPart(**body_part)])
+        resp = ml.rest.documents.post([DocumentsBodyPart(**body_part)])
 
     assert resp.status_code == httpx.codes.INTERNAL_SERVER_ERROR
     assert resp.json() == {

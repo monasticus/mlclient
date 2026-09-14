@@ -7,8 +7,9 @@ import pytest
 import respx
 from cleo.testers.command_tester import CommandTester
 
-from mlclient import MLClient, MLEnvironment
+from mlclient import MLClient
 from mlclient.cli import MLCLIentApplication
+from mlclient.env import MLEnvironment
 from mlclient.exceptions import WrongParametersError
 from tests.utils.ml_mockers import MLRespXMocker
 
@@ -38,7 +39,7 @@ def ml_config() -> MLEnvironment:
 
 @pytest.fixture(autouse=True)
 def _setup(mocker, ml_config):
-    mocker.patch("mlclient.ml_environment.MLEnvironment.load", return_value=ml_config)
+    mocker.patch("mlclient.env.MLEnvironment.load", return_value=ml_config)
 
 
 @respx.mock
@@ -68,7 +69,7 @@ def test_command_health_uses_health_config_without_a_rest_server(mocker):
             ],
         },
     )
-    mocker.patch("mlclient.ml_environment.MLEnvironment.load", return_value=config)
+    mocker.patch("mlclient.env.MLEnvironment.load", return_value=config)
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url("http://localhost:9997/")
     ml_mocker.with_response_code(200)

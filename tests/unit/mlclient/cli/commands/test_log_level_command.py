@@ -4,8 +4,8 @@ import pytest
 import respx
 from cleo.testers.command_tester import CommandTester
 
-from mlclient import MLEnvironment
 from mlclient.cli import MLCLIentApplication
+from mlclient.env import MLEnvironment
 from tests.utils.ml_mockers import MLRespXMocker
 
 
@@ -36,7 +36,7 @@ def ml_config() -> MLEnvironment:
 
 @pytest.fixture(autouse=True)
 def _setup(mocker, ml_config):
-    mocker.patch("mlclient.ml_environment.MLEnvironment.load", return_value=ml_config)
+    mocker.patch("mlclient.env.MLEnvironment.load", return_value=ml_config)
 
 
 @respx.mock
@@ -55,7 +55,8 @@ def test_command_log_level_shows_group_file_level_by_default():
 
 
 @pytest.mark.parametrize(
-    "options", ["--type system --group Analyzer", "-t system -g Analyzer"],
+    "options",
+    ["--type system --group Analyzer", "-t system -g Analyzer"],
 )
 @respx.mock
 def test_command_log_level_shows_group_system_level(options):

@@ -5,7 +5,7 @@ import zlib
 from dataclasses import dataclass
 from typing import Any
 
-from mlclient.models.http import DocumentsBodyPart as BodyPart
+from mlclient.models import DocumentsBodyPart
 
 
 @dataclass(frozen=True)
@@ -110,8 +110,8 @@ def doc_content_body_part(
     uri: str,
     content_type: str,
     content: bytes,
-) -> BodyPart:
-    return BodyPart(
+) -> DocumentsBodyPart:
+    return DocumentsBodyPart(
         **{
             "content-type": content_type,
             "content-disposition": "attachment; "
@@ -128,7 +128,7 @@ def doc_full_metadata_body_part(
     metadata: MetadataSpec,
     *,
     metadata_category: bool = False,
-) -> BodyPart:
+) -> DocumentsBodyPart:
     return doc_metadata_body_part(
         uri,
         metadata.with_full_defaults(),
@@ -141,12 +141,12 @@ def doc_metadata_body_part(
     metadata: MetadataSpec,
     *,
     metadata_category: bool = False,
-) -> BodyPart:
+) -> DocumentsBodyPart:
     payload = metadata.to_payload()
     content = json.dumps(payload).encode("utf-8")
     category_part = _category_part(payload, metadata_category=metadata_category)
 
-    return BodyPart(
+    return DocumentsBodyPart(
         **{
             "content-type": "application/json",
             "content-disposition": "attachment; "

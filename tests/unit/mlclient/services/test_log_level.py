@@ -10,9 +10,9 @@ import respx
 from httpx_retries import Retry
 
 from mlclient import MLClient
-from mlclient.connection import UNSET
+from mlclient._options import UNSET
 from mlclient.exceptions import MarkLogicError, WrongParametersError
-from mlclient.http_config import HTTPConfig
+from mlclient.http import HTTPConfig
 from mlclient.services import LogLevelService
 from tests.utils.ml_mockers import MLRespXMocker
 
@@ -385,7 +385,8 @@ def test_manage_timeout_is_logged_and_propagated(operation, caplog):
     ml_mocker.with_response_body("Forbidden")
     ml_mocker.mock_post()
     route = respx.route(
-        method="GET" if operation == "get" else "PUT", url=GROUP_PROPS_URL,
+        method="GET" if operation == "get" else "PUT",
+        url=GROUP_PROPS_URL,
     )
     route.mock(side_effect=httpx.ReadTimeout("manage timed out"))
     with MLClient(retry=Retry(total=0)) as client:

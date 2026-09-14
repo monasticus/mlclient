@@ -3,13 +3,14 @@ from __future__ import annotations
 import httpx
 import pytest
 
-from mlclient import MLClient, MLResponseParser
+from mlclient import MLClient
 from mlclient.calls import EvalCall
+from mlclient.responses import MLResponseParser
 
 EVAL_XQUERY = (
     "xquery version '1.0-ml';\n\n"
-    "declare variable $element as element() external;\n\n"
-    "<new-parent>{$element/child::element()}</new-parent>"
+    "declare variable $element external;\n\n"
+    "<new-parent>{xdmp:unquote($element)/parent/child}</new-parent>"
 )
 
 

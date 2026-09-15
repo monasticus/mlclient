@@ -12,6 +12,14 @@ permissions:
 jobs:
   integration-tests:
     runs-on: ubuntu-latest
+    name: integration-tests (${{ matrix.marklogic-image }})
+    strategy:
+      fail-fast: false
+      matrix:
+        marklogic-image:
+          - progressofficial/marklogic-db:10.0-11.1-ubi-2.2.4
+          - progressofficial/marklogic-db:11.3.7-ubi-2.3.0
+          - progressofficial/marklogic-db:12.1.0-ubi-2.3.0
 
     steps:
       - uses: actions/checkout@v5
@@ -30,6 +38,8 @@ jobs:
           poetry install --extras kerberos
 
       - name: Start MarkLogic and provision the connection matrix
+        env:
+          MARKLOGIC_IMAGE: ${{ matrix.marklogic-image }}
         run: docker compose -f tests/integration/docker-compose.yaml up -d --build
 
       - name: Wait for provisioning to complete

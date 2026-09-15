@@ -44,10 +44,9 @@ configuration controls where that warning is displayed. Prefer
 ## Supported and tested versions
 
 The unit-test CI matrix covers Python 3.10, 3.11, 3.12, 3.13 and 3.14. The live
-integration setup currently uses MarkLogic 11.2.0. Coverage on that server does
-not establish that every endpoint and authentication combination works on every
-MarkLogic release; check the server's endpoint documentation for version-specific
-requirements.
+integration matrix runs against MarkLogic 10, 11 and 12, one image per major
+line. MarkLogic 9 is not covered because it has no official Docker image and is
+end-of-life.
 
 ## Release candidates
 

@@ -244,6 +244,30 @@ async def test_get_servers():
 
 @pytest.mark.asyncio
 @respx.mock
+async def test_get_hosts():
+    response_body = resources_utils.read_test_resource_bytes(
+        __file__,
+        "test-get-hosts.json",
+    )
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/manage/v2/hosts")
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_param("view", "default")
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body(response_body)
+    ml_mocker.mock_get()
+
+    async with AsyncMLClient() as ml:
+        resp = await ml.manage.hosts.get_list(data_format="json")
+
+    expected_uri = "/manage/v2/hosts?view=default"
+    assert resp.status_code == httpx.codes.OK
+    assert resp.json()["host-default-list"]["meta"]["uri"] == expected_uri
+
+
+@pytest.mark.asyncio
+@respx.mock
 async def test_post_servers():
     response_body = resources_utils.read_test_resource_bytes(
         __file__,
@@ -958,3 +982,35 @@ async def test_put_user_properties():
 
     assert resp.status_code == httpx.codes.NOT_FOUND
     assert resp.json()["errorResponse"]["messageCode"] == "SEC-USERDNE"
+
+
+@pytest.mark.parametrize("timeout", [None, 2, httpx.Timeout(5, read=7)])
+@respx.mock
+@pytest.mark.asyncio
+async def test_get_hosts_forwards_parameters_and_timeout(timeout):
+    route = respx.get(
+        "http://localhost:8002/manage/v2/hosts",
+        params={"format": "json", "group-id": "Default", "view": "status"},
+        headers={"Accept": "application/json"},
+    ).respond(200, json={})
+    async with AsyncMLClient() as ml:
+        response = await ml.manage.hosts.get_list(
+            data_format="json", group_id="Default", view="status", timeout=timeout,
+        )
+    assert response.status_code == 200
+    assert (
+        route.calls.last.request.extensions["timeout"]
+        == httpx.Timeout(timeout).as_dict()
+    )
+
+
+@respx.mock
+@pytest.mark.asyncio
+async def test_get_hosts_returns_raw_error_response():
+    respx.get("http://localhost:8002/manage/v2/hosts").respond(
+        403, json={"errorResponse": {"message": "Forbidden"}},
+    )
+    async with AsyncMLClient() as ml:
+        response = await ml.manage.hosts.get_list()
+    assert response.status_code == 403
+    assert response.json() == {"errorResponse": {"message": "Forbidden"}}

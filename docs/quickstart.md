@@ -102,6 +102,7 @@ See [async support](user/python/async.md) for client reuse and concurrent reques
 ml env init
 ml eval -x '"Hello World!"'
 ml logs
+ml logs --all-hosts --regex 'Forest M.*'
 ml version
 ```
 

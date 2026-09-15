@@ -185,4 +185,4 @@ Cannot be called from within a running event loop (asyncio limitation).
 ## Old Implementation Reference
 
 The last commit containing the sync (ThreadPoolExecutor) implementation is `544d832`.
-To view the old code: `git show 544d832:mlclient/jobs/documents_jobs.py`
+To view the old code: `git show 544d832:mlclient/jobs/documents.py`

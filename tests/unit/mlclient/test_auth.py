@@ -13,65 +13,65 @@ from mlclient.auth import (
     AuthConfig,
     KerberosAuth,
     OAuthBearerAuth,
-    auth_method_name,
-    build_auth,
+    _auth_method_name,
+    _build_auth,
 )
 
 
 def test_build_auth_digest():
-    auth = build_auth("digest", "user", "pass")
+    auth = _build_auth("digest", "user", "pass")
     assert isinstance(auth, httpx.DigestAuth)
 
 
 def test_build_auth_basic():
-    auth = build_auth("basic", "user", "pass")
+    auth = _build_auth("basic", "user", "pass")
     assert isinstance(auth, httpx.BasicAuth)
 
 
 def test_build_auth_digestbasic():
-    auth = build_auth("digestbasic", "user", "pass")
+    auth = _build_auth("digestbasic", "user", "pass")
     assert isinstance(auth, httpx.DigestAuth)
 
 
 def test_build_auth_none():
-    assert build_auth(None, "user", "pass") is None
+    assert _build_auth(None, "user", "pass") is None
 
 
 def test_build_auth_passthrough():
     custom = httpx.BasicAuth("user", "pass")
-    assert build_auth(custom, "ignored", "ignored") is custom
+    assert _build_auth(custom, "ignored", "ignored") is custom
 
 
 def test_build_auth_certificate_returns_none():
-    auth = build_auth(AuthConfig(method="certificate"), "user", "pass")
+    auth = _build_auth(AuthConfig(method="certificate"), "user", "pass")
     assert auth is None
 
 
 def test_build_auth_oauth():
-    auth = build_auth(AuthConfig(method="oauth", token="abc"), "user", "pass")
+    auth = _build_auth(AuthConfig(method="oauth", token="abc"), "user", "pass")
     assert isinstance(auth, OAuthBearerAuth)
 
 
 def test_build_auth_unknown_shortcut():
     with pytest.raises(ValueError, match="Unknown auth shortcut"):
-        build_auth("cloud", "user", "pass")
+        _build_auth("cloud", "user", "pass")
 
 
 def test_build_auth_certificate_string_returns_none():
-    auth = build_auth("certificate", "user", "pass")
+    auth = _build_auth("certificate", "user", "pass")
     assert auth is None
 
 
 def test_build_auth_kerberos_string_builds_auth(monkeypatch):
     monkeypatch.setitem(sys.modules, "spnego", _FakeSpnego())
-    auth = build_auth("kerberos", "user", "pass")
+    auth = _build_auth("kerberos", "user", "pass")
     assert isinstance(auth, KerberosAuth)
 
 
 def test_build_auth_kerberos_string_uses_default_spn(monkeypatch):
     spnego = _FakeSpnego()
     monkeypatch.setitem(sys.modules, "spnego", spnego)
-    auth = build_auth("kerberos", "user", "pass")
+    auth = _build_auth("kerberos", "user", "pass")
 
     request = httpx.Request("GET", "http://ml.example.com:8000/")
     flow = auth.auth_flow(request)
@@ -88,19 +88,19 @@ def test_build_auth_kerberos_string_uses_default_spn(monkeypatch):
 
 def test_build_auth_unknown_config_method():
     with pytest.raises(ValueError, match="Unknown auth method"):
-        build_auth(AuthConfig(method="saml"), "user", "pass")
+        _build_auth(AuthConfig(method="saml"), "user", "pass")
 
 
 def test_build_auth_wrong_type():
     with pytest.raises(TypeError, match="Unsupported auth type"):
-        build_auth(42, "user", "pass")
+        _build_auth(42, "user", "pass")
 
 
 def test_auth_method_name():
-    assert auth_method_name(None) == "none"
-    assert auth_method_name("digest") == "digest"
-    assert auth_method_name(AuthConfig(method="certificate")) == "certificate"
-    assert auth_method_name(httpx.BasicAuth("u", "p")) == "custom"
+    assert _auth_method_name(None) == "none"
+    assert _auth_method_name("digest") == "digest"
+    assert _auth_method_name(AuthConfig(method="certificate")) == "certificate"
+    assert _auth_method_name(httpx.BasicAuth("u", "p")) == "custom"
 
 
 def test_oauth_bearer_sets_header():
@@ -114,13 +114,13 @@ def test_oauth_bearer_sets_header():
 def test_kerberos_without_dependency_raises_install_hint(monkeypatch):
     monkeypatch.setitem(sys.modules, "spnego", None)
     with pytest.raises(ImportError, match=r"mlclient\[kerberos\]"):
-        build_auth(AuthConfig(method="kerberos"), "user", "pass")
+        _build_auth(AuthConfig(method="kerberos"), "user", "pass")
 
 
 def test_kerberos_with_dependency_builds_auth(monkeypatch):
     monkeypatch.setitem(sys.modules, "spnego", _FakeSpnego())
     config = AuthConfig(method="kerberos", hostname="ml.example.com")
-    auth = build_auth(config, "user", "pass")
+    auth = _build_auth(config, "user", "pass")
     assert isinstance(auth, KerberosAuth)
 
 

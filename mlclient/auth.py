@@ -14,14 +14,6 @@ Classes:
     * MarkLogicCloudAuth
         MarkLogic Cloud API key exchanged for a Bearer token, with refresh.
 
-Functions:
-
-    * build_auth
-        Resolve an auth parameter to an httpx.Auth instance.
-    * auth_method_name
-        The canonical method name for an auth parameter, used by the connection
-        layer to validate connection and auth combinations.
-
 ``username`` / ``password`` model the MarkLogic user identity. That identity is
 shared across the credential methods and independent of the wire mechanism - the
 same user can be presented as basic or digest by flipping ``auth`` without
@@ -55,9 +47,9 @@ _TokenVerify = Union[bool, str, ssl.SSLContext]
 
 logger = logging.getLogger(__name__)
 
-CREDENTIAL_AUTH_SHORTCUTS = ("basic", "digest", "digestbasic")
-DEFAULTED_AUTH_SHORTCUTS = ("certificate", "kerberos")
-AUTH_SHORTCUTS = CREDENTIAL_AUTH_SHORTCUTS + DEFAULTED_AUTH_SHORTCUTS
+_CREDENTIAL_AUTH_SHORTCUTS = ("basic", "digest", "digestbasic")
+_DEFAULTED_AUTH_SHORTCUTS = ("certificate", "kerberos")
+_AUTH_SHORTCUTS = _CREDENTIAL_AUTH_SHORTCUTS + _DEFAULTED_AUTH_SHORTCUTS
 
 AuthParam = Union[str, httpx.Auth, "AuthConfig", None]
 
@@ -329,7 +321,7 @@ class MarkLogicCloudAuth(httpx.Auth):
         return response.json()["access_token"]
 
 
-def build_auth(
+def _build_auth(
     auth: AuthParam,
     username: str,
     password: str,
@@ -371,7 +363,7 @@ def build_auth(
     raise TypeError(msg)
 
 
-def auth_method_name(
+def _auth_method_name(
     auth: AuthParam,
 ) -> str:
     """Return the canonical auth method name for an auth parameter.
@@ -411,11 +403,11 @@ def _build_from_shortcut(
         return httpx.BasicAuth(username, password)
     if auth in ("digest", "digestbasic"):
         return httpx.DigestAuth(username, password)
-    if auth in DEFAULTED_AUTH_SHORTCUTS:
+    if auth in _DEFAULTED_AUTH_SHORTCUTS:
         return _build_from_config(AuthConfig(method=auth))
     msg = (
         f"Unknown auth shortcut: {auth!r}. "
-        f"Only {', '.join(repr(s) for s in AUTH_SHORTCUTS)} "
+        f"Only {', '.join(repr(s) for s in _AUTH_SHORTCUTS)} "
         f"are valid as strings."
     )
     raise ValueError(msg)
@@ -458,3 +450,12 @@ def _import_spnego():
         )
         raise ImportError(msg) from exc
     return spnego
+
+
+__all__ = [
+    "AuthConfig",
+    "AuthParam",
+    "KerberosAuth",
+    "MarkLogicCloudAuth",
+    "OAuthBearerAuth",
+]

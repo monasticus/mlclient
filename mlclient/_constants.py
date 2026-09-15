@@ -1,0 +1,36 @@
+"""The ML Client Constants module."""
+
+from __future__ import annotations
+
+# REQUEST METHODS
+METHOD_GET = "GET"
+METHOD_HEAD = "HEAD"
+METHOD_POST = "POST"
+METHOD_PUT = "PUT"
+METHOD_DELETE = "DELETE"
+
+# HEADERS
+HEADER_NAME_ACCEPT = "Accept"
+HEADER_NAME_CONTENT_LENGTH = "Content-Length"
+HEADER_NAME_CONTENT_TYPE = "Content-Type"
+HEADER_NAME_CONTENT_DISP = "Content-Disposition"
+HEADER_NAME_PRIMITIVE = "X-Primitive"
+HEADER_NAME_ML_DOCUMENT_FORMAT = "vnd.marklogic.document-format"
+
+HEADER_MULTIPART_MIXED = "multipart/mixed"
+HEADER_XML = "application/xml"
+HEADER_JSON = "application/json"
+HEADER_X_WWW_FORM_URLENCODED = "application/x-www-form-urlencoded"
+HEADER_HTML = "text/html"
+HEADER_PLAIN_TEXT = "text/plain"
+
+HEADER_PRIMITIVE_STRING = "string"
+HEADER_PRIMITIVE_INTEGER = "integer"
+HEADER_PRIMITIVE_DECIMAL = "decimal"
+HEADER_PRIMITIVE_BOOLEAN = "boolean"
+HEADER_PRIMITIVE_DATE = "date"
+HEADER_PRIMITIVE_DATE_TIME = "dateTime"
+HEADER_PRIMITIVE_DOCUMENT_NODE = "document-node()"
+
+# PATHS
+ML_CLIENT_DIR = ".mlclient"

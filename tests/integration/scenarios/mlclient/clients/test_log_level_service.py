@@ -33,7 +33,10 @@ class TestLogLevelService:
     @pytest.mark.ml_access
     @pytest.mark.parametrize("target", TARGETS)
     def test_eval_round_trip(
-        self, ml_client: MLClient, denied_client: MLClient, target: dict,
+        self,
+        ml_client: MLClient,
+        denied_client: MLClient,
+        target: dict,
     ):
         levels = LogLevelService(ml_client.rest, denied_client.manage)
         reader = LogLevelService(ml_client.rest, ml_client.manage)
@@ -42,7 +45,10 @@ class TestLogLevelService:
     @pytest.mark.ml_access
     @pytest.mark.parametrize("target", TARGETS)
     def test_manage_fallback_round_trip(
-        self, ml_client: MLClient, denied_client: MLClient, target: dict,
+        self,
+        ml_client: MLClient,
+        denied_client: MLClient,
+        target: dict,
     ):
         denied = denied_client.rest.eval.post(xquery="1")
         assert denied.status_code == 401
@@ -52,7 +58,10 @@ class TestLogLevelService:
 
     @classmethod
     def _assert_round_trip(
-        cls, service: LogLevelService, reader: LogLevelService, target: dict,
+        cls,
+        service: LogLevelService,
+        reader: LogLevelService,
+        target: dict,
     ):
         """Change a level, verify persistence, and restore it even on failure."""
         original = reader.get(**target)

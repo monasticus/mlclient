@@ -21,18 +21,16 @@ from cleo.io.inputs.input import Input
 from cleo.io.io import IO
 from cleo.io.outputs.output import Output, Verbosity
 
-from mlclient import __version__ as ml_client_version
-from mlclient import setup_logger
-from mlclient.cli.commands import (
-    EnvInitCommand,
-    EnvShowCommand,
-    EvalCommand,
-    HealthCommand,
-    HttpCommand,
-    LogLevelCommand,
-    LogsCommand,
-    VersionCommand,
-)
+from mlclient._version import __version__ as ml_client_version
+from mlclient.cli.commands.env_init import EnvInitCommand
+from mlclient.cli.commands.env_show import EnvShowCommand
+from mlclient.cli.commands.eval import EvalCommand
+from mlclient.cli.commands.health import HealthCommand
+from mlclient.cli.commands.http import HttpCommand
+from mlclient.cli.commands.log_level import LogLevelCommand
+from mlclient.cli.commands.logs import LogsCommand
+from mlclient.cli.commands.version import VersionCommand
+from mlclient.logging import setup_logger
 
 
 class MLCLIentApplication(Application):

@@ -2,7 +2,7 @@ from dataclasses import FrozenInstanceError
 
 import pytest
 
-from mlclient import MarkLogicVersion
+from mlclient.models import MarkLogicVersion
 
 
 @pytest.mark.parametrize(

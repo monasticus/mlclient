@@ -8,8 +8,8 @@ import respx
 from cleo.testers.command_tester import CommandTester
 from httpx import HTTPStatusError
 
-from mlclient import MLEnvironment
 from mlclient.cli import MLCLIentApplication
+from mlclient.env import MLEnvironment
 from mlclient.exceptions import WrongParametersError
 from tests.utils import resources as resources_utils
 from tests.utils.ml_mockers import MLRespXMocker
@@ -44,7 +44,7 @@ def ml_config() -> MLEnvironment:
 
 @pytest.fixture(autouse=True)
 def _setup(mocker, ml_config):
-    target = "mlclient.ml_environment.MLEnvironment.load"
+    target = "mlclient.env.MLEnvironment.load"
     mocker.patch(target, return_value=ml_config)
 
 
@@ -118,9 +118,13 @@ def test_command_http_preserves_repeated_and_embedded_query_parameters():
     ml_mocker.mock_get()
 
     tester = _get_tester()
-    assert tester.execute(
-        "GET /v1/documents?uri=/one.xml uri=/two.xml uri=/three.xml category=content",
-    ) == 0
+    assert (
+        tester.execute(
+            "GET /v1/documents?uri=/one.xml "
+            "uri=/two.xml uri=/three.xml category=content",
+        )
+        == 0
+    )
 
 
 @respx.mock
@@ -331,13 +335,23 @@ def test_command_http_sends_literal_json_without_encoding_it_again(header):
     ml_mocker.mock_post()
 
     tester = _get_tester()
-    assert tester.execute(
-        f"POST /v1/documents {header}:application/json -b '{body}'",
-    ) == 0
+    assert (
+        tester.execute(
+            f"POST /v1/documents {header}:application/json -b '{body}'",
+        )
+        == 0
+    )
 
 
+@pytest.mark.parametrize("stat_fails", [False, True])
 @respx.mock
-def test_command_http_accepts_body_longer_than_a_file_name():
+def test_command_http_accepts_body_longer_than_a_file_name(monkeypatch, stat_fails):
+    if stat_fails:
+
+        def fail_stat(_self):
+            raise OSError(errno.ENAMETOOLONG, "File name too long")
+
+        monkeypatch.setattr(Path, "is_file", fail_stat)
     body = "x" * 1024
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url("http://localhost:8002/v1/documents")

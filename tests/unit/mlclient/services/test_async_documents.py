@@ -12,6 +12,7 @@ from mlclient import AsyncMLClient
 from mlclient.exceptions import MarkLogicError
 from mlclient.models import (
     BinaryDocument,
+    Category,
     DocumentType,
     JSONDocument,
     Metadata,
@@ -19,8 +20,7 @@ from mlclient.models import (
     TextDocument,
     XMLDocument,
 )
-from mlclient.models.http import Category
-from mlclient.services.documents import DocumentsSender
+from mlclient.services.documents import _DocumentsSender
 from tests.utils import data as test_data
 from tests.utils import resources as resources_utils
 from tests.utils.data import MetadataSpec
@@ -685,12 +685,12 @@ async def test_delete_many_uris_are_batched(svc):
     assert ml_mocker.router.calls.call_count > 1
 
 
-# --- DocumentsSender unit tests ---
+# --- _DocumentsSender unit tests ---
 
 
 def test_documents_sender_metadata_document_with_raw_bytes_metadata():
     doc = MetadataDocument("/x.xml", b'{"collections": ["c1"]}')
-    parts = DocumentsSender.parse(doc)
+    parts = _DocumentsSender.parse(doc)
 
     assert len(parts) == 1
     assert parts[0].content == '{"collections": ["c1"]}'
@@ -698,7 +698,7 @@ def test_documents_sender_metadata_document_with_raw_bytes_metadata():
 
 def test_documents_sender_metadata_document_with_raw_str_metadata():
     doc = MetadataDocument("/x.xml", '{"collections": ["c1"]}')
-    parts = DocumentsSender.parse(doc)
+    parts = _DocumentsSender.parse(doc)
 
     assert len(parts) == 1
     assert parts[0].content == '{"collections": ["c1"]}'
@@ -706,7 +706,7 @@ def test_documents_sender_metadata_document_with_raw_str_metadata():
 
 def test_documents_sender_metadata_document_with_metadata_object():
     doc = MetadataDocument("/x.xml", Metadata(collections=["c1"]))
-    parts = DocumentsSender.parse(doc)
+    parts = _DocumentsSender.parse(doc)
 
     assert len(parts) == 1
     assert '"collections"' in parts[0].content

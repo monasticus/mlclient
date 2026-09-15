@@ -1,4 +1,4 @@
-"""High-level Eval service (EvalService / AsyncEvalService).
+"""Higher-level Eval service (EvalService / AsyncEvalService).
 
 Provides parsed code evaluation on MarkLogic.
 """
@@ -11,21 +11,19 @@ from typing import TYPE_CHECKING
 
 import aiofiles
 
-from mlclient.calls import EvalCall
-from mlclient.clients.api_client import ApiClient
-from mlclient.connection import UNSET
+from mlclient._options import UNSET
 
 if TYPE_CHECKING:
-    from mlclient.clients.api_client import AsyncApiClient
+    from mlclient.api.rest import AsyncRestApi, RestApi
 
 from mlclient.exceptions import (
     MarkLogicError,
     UnsupportedFileExtensionError,
     WrongParametersError,
 )
-from mlclient.ml_response_parser import MLResponseParser
+from mlclient.responses import MLResponseParser
 
-LOCAL_NS = "http://www.w3.org/2005/xquery-local-functions"
+_LOCAL_NS = "http://www.w3.org/2005/xquery-local-functions"
 
 _XQUERY_FILE_EXT = ("xq", "xql", "xqm", "xqu", "xquery", "xqy")
 _JAVASCRIPT_FILE_EXT = ("js", "sjs")
@@ -37,10 +35,10 @@ _SUPPORTED_FILE_EXT = tuple(
 
 
 class EvalService:
-    """High-level service for /v1/eval endpoint."""
+    """Higher-level service for /v1/eval endpoint."""
 
-    def __init__(self, api: ApiClient):
-        self._api = api
+    def __init__(self, rest: RestApi):
+        self._rest = rest
 
     def xquery(
         self,
@@ -449,7 +447,7 @@ class EvalService:
     ):
         """Execute eval and return parsed result."""
         _validate_params(file, xq, js)
-        call = _get_call(
+        params = _get_eval_params(
             file=file,
             xq=xq,
             js=js,
@@ -458,7 +456,7 @@ class EvalService:
             txid=txid,
             **kwargs,
         )
-        resp = self._api.call(call, timeout=timeout)
+        resp = self._rest.eval.post(**params, timeout=timeout)
         parsed_resp = MLResponseParser.parse(resp, output_type=output_type)
         if not resp.is_success:
             raise MarkLogicError(parsed_resp)
@@ -479,7 +477,7 @@ def _validate_params(
         raise WrongParametersError(msg)
 
 
-def _get_call(
+def _get_eval_params(
     file: str | None,
     xq: str | None,
     js: str | None,
@@ -487,8 +485,8 @@ def _get_call(
     database: str | None,
     txid: str | None,
     **kwargs,
-) -> EvalCall:
-    """Prepare an EvalCall instance."""
+) -> dict:
+    """Prepare keyword arguments for EvalApi.post."""
     params = {
         "xquery": xq,
         "javascript": js,
@@ -498,21 +496,13 @@ def _get_call(
     }
 
     if file:
-        if file.endswith(_XQUERY_FILE_EXT):
-            lang = "xquery"
-        elif file.endswith(_JAVASCRIPT_FILE_EXT):
-            lang = "javascript"
-        else:
-            extensions = ", ".join(_SUPPORTED_FILE_EXT)
-            msg = f"Unknown file extension! Supported extensions are: {extensions}"
-            raise UnsupportedFileExtensionError(msg)
-
+        lang = _file_language(file)
         params[lang] = Path(file).read_text()
 
-    return EvalCall(**params)
+    return params
 
 
-async def _async_get_call(
+async def _async_get_eval_params(
     file: str | None,
     xq: str | None,
     js: str | None,
@@ -520,8 +510,8 @@ async def _async_get_call(
     database: str | None,
     txid: str | None,
     **kwargs,
-) -> EvalCall:
-    """Prepare an EvalCall instance, reading files asynchronously."""
+) -> dict:
+    """Prepare keyword arguments for AsyncEvalApi.post, reading files asynchronously."""
     params = {
         "xquery": xq,
         "javascript": js,
@@ -531,19 +521,22 @@ async def _async_get_call(
     }
 
     if file:
-        if file.endswith(_XQUERY_FILE_EXT):
-            lang = "xquery"
-        elif file.endswith(_JAVASCRIPT_FILE_EXT):
-            lang = "javascript"
-        else:
-            extensions = ", ".join(_SUPPORTED_FILE_EXT)
-            msg = f"Unknown file extension! Supported extensions are: {extensions}"
-            raise UnsupportedFileExtensionError(msg)
-
+        lang = _file_language(file)
         async with aiofiles.open(file) as f:
             params[lang] = await f.read()
 
-    return EvalCall(**params)
+    return params
+
+
+def _file_language(file: str) -> str:
+    """Resolve xquery/javascript from a code file's extension."""
+    if file.endswith(_XQUERY_FILE_EXT):
+        return "xquery"
+    if file.endswith(_JAVASCRIPT_FILE_EXT):
+        return "javascript"
+    extensions = ", ".join(_SUPPORTED_FILE_EXT)
+    msg = f"Unknown file extension! Supported extensions are: {extensions}"
+    raise UnsupportedFileExtensionError(msg)
 
 
 def _get_variables(
@@ -558,10 +551,10 @@ def _get_variables(
 
 
 class AsyncEvalService:
-    """Async high-level service for /v1/eval endpoint."""
+    """Async higher-level service for /v1/eval endpoint."""
 
-    def __init__(self, api: AsyncApiClient):
-        self._api = api
+    def __init__(self, rest: AsyncRestApi):
+        self._rest = rest
 
     async def xquery(
         self,
@@ -970,7 +963,7 @@ class AsyncEvalService:
     ):
         """Execute eval and return parsed result."""
         _validate_params(file, xq, js)
-        call = await _async_get_call(
+        params = await _async_get_eval_params(
             file=file,
             xq=xq,
             js=js,
@@ -979,7 +972,7 @@ class AsyncEvalService:
             txid=txid,
             **kwargs,
         )
-        resp = await self._api.call(call, timeout=timeout)
+        resp = await self._rest.eval.post(**params, timeout=timeout)
         parsed_resp = MLResponseParser.parse(resp, output_type=output_type)
         if not resp.is_success:
             raise MarkLogicError(parsed_resp)

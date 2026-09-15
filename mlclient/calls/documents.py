@@ -14,10 +14,11 @@ from __future__ import annotations
 import json
 from typing import ClassVar
 
-from mlclient import constants, exceptions, utils
-from mlclient.calls.api_call import ApiCall
-from mlclient.models.http import Category
-from mlclient.models.http import DocumentsBodyPart as BodyPart
+from mlclient import _constants as constants
+from mlclient import _utils as utils
+from mlclient import exceptions
+from mlclient.calls.base import ApiCall
+from mlclient.models.document_parts import Category, DocumentsBodyPart
 from mlclient.multipart import MultipartPart, encode_multipart_mixed
 
 
@@ -192,7 +193,7 @@ class DocumentsPostCall(ApiCall):
 
     def __init__(
         self,
-        body_parts: list[BodyPart],
+        body_parts: list[DocumentsBodyPart],
         database: str | None = None,
         transform: str | None = None,
         transform_params: dict | None = None,
@@ -204,7 +205,7 @@ class DocumentsPostCall(ApiCall):
 
         Parameters
         ----------
-        body_parts : list[BodyPart]
+        body_parts : list[DocumentsBodyPart]
             A list of multipart request body parts
         database : str
             Perform this operation on the named content database instead
@@ -263,7 +264,7 @@ class DocumentsPostCall(ApiCall):
     @classmethod
     def _validate_params(
         cls,
-        body: list[BodyPart] | None,
+        body: list[DocumentsBodyPart] | None,
     ):
         if body is None or len(body) == 0:
             msg = "No request body provided for POST /v1/documents!"
@@ -272,14 +273,14 @@ class DocumentsPostCall(ApiCall):
     @classmethod
     def _build_body(
         cls,
-        body_parts: list[BodyPart],
+        body_parts: list[DocumentsBodyPart],
     ) -> tuple[bytes, str]:
         parts = [cls._build_multipart_part(body_part) for body_part in body_parts]
         return encode_multipart_mixed(parts)
 
     @staticmethod
     def _build_multipart_part(
-        body_part: BodyPart,
+        body_part: DocumentsBodyPart,
     ) -> MultipartPart:
         data = body_part.content
         if isinstance(data, dict):

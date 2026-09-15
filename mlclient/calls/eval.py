@@ -10,8 +10,9 @@ from __future__ import annotations
 import re
 from json import dumps
 
-from mlclient import constants, exceptions
-from mlclient.calls.api_call import ApiCall
+from mlclient import _constants as constants
+from mlclient import exceptions
+from mlclient.calls.base import ApiCall
 
 
 class EvalCall(ApiCall):

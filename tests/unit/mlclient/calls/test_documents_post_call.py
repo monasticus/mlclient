@@ -2,7 +2,7 @@ import pytest
 
 from mlclient import exceptions
 from mlclient.calls import DocumentsPostCall
-from mlclient.models.http import DocumentsBodyPart as BodyPart
+from mlclient.models import DocumentsBodyPart
 
 
 @pytest.fixture
@@ -14,7 +14,7 @@ def default_body_part():
         },
         "content": '{"root": "data"}',
     }
-    return BodyPart(**body_part)
+    return DocumentsBodyPart(**body_part)
 
 
 @pytest.fixture
@@ -78,7 +78,7 @@ def test_body_with_dict_content():
         },
         "content": {"root": "data"},
     }
-    call = DocumentsPostCall(body_parts=[BodyPart(**body_part)])
+    call = DocumentsPostCall(body_parts=[DocumentsBodyPart(**body_part)])
     boundary = call.headers["Content-Type"].replace("multipart/mixed; boundary=", "")
     expected_body = f"--{boundary}\r\n"
     expected_body += 'Content-Disposition: attachment; filename="/filepath.json"\r\n'

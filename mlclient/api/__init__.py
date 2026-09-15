@@ -1,33 +1,18 @@
-"""The ML API package.
+"""Synchronous and asynchronous wrappers for MarkLogic REST endpoints."""
 
-It exports 3 top-level API group classes:
-    * RestApi
-        REST Client API (/v1/* endpoints).
-    * ManageApi
-        Management API (/manage/v2/* endpoints).
-    * AdminApi
-        Admin API (/admin/v1/* endpoints).
-
-It also exports resource-level API classes used by RestApi and ManageApi:
-    * DatabasesApi, DocumentsApi, EvalApi, ForestsApi, GroupsApi, LogsApi,
-      RolesApi, ServersApi, TransactionsApi, UsersApi
-
-Each resource-level API wraps ApiCall objects and returns raw httpx.Response objects.
-"""
-
-from .admin_api import AdminApi, AsyncAdminApi
-from .databases import AsyncDatabasesApi, DatabasesApi
-from .documents import AsyncDocumentsApi, DocumentsApi
-from .eval import AsyncEvalApi, EvalApi
-from .forests import AsyncForestsApi, ForestsApi
-from .groups import AsyncGroupsApi, GroupsApi
-from .logs import AsyncLogsApi, LogsApi
-from .manage_api import AsyncManageApi, ManageApi
-from .rest_api import AsyncRestApi, RestApi
-from .roles import AsyncRolesApi, RolesApi
-from .servers import AsyncServersApi, ServersApi
-from .transactions import AsyncTransactionsApi, TransactionsApi
-from .users import AsyncUsersApi, UsersApi
+from mlclient.api.admin import AdminApi, AsyncAdminApi
+from mlclient.api.databases import AsyncDatabasesApi, DatabasesApi
+from mlclient.api.documents import AsyncDocumentsApi, DocumentsApi
+from mlclient.api.eval import AsyncEvalApi, EvalApi
+from mlclient.api.forests import AsyncForestsApi, ForestsApi
+from mlclient.api.groups import AsyncGroupsApi, GroupsApi
+from mlclient.api.logs import AsyncLogsApi, LogsApi
+from mlclient.api.manage import AsyncManageApi, ManageApi
+from mlclient.api.rest import AsyncRestApi, RestApi
+from mlclient.api.roles import AsyncRolesApi, RolesApi
+from mlclient.api.servers import AsyncServersApi, ServersApi
+from mlclient.api.transactions import AsyncTransactionsApi, TransactionsApi
+from mlclient.api.users import AsyncUsersApi, UsersApi
 
 __all__ = [
     "AdminApi",

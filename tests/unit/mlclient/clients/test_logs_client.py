@@ -7,7 +7,8 @@ import respx
 
 from mlclient import MLClient
 from mlclient.exceptions import MarkLogicError
-from mlclient.services.logs import LogType
+from mlclient.models.types import LogType
+from mlclient.services import LogsService
 from tests.utils import resources as resources_utils
 from tests.utils.ml_mockers import MLRespXMocker
 
@@ -28,8 +29,13 @@ def _setup_and_teardown(ml):
     ml.disconnect()
 
 
+@pytest.fixture
+def logs(ml) -> LogsService:
+    return LogsService(ml.manage)
+
+
 @respx.mock
-def test_get_logs_no_such_host(ml):
+def test_get_logs_no_such_host(logs):
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url(f"http://localhost:8002{ENDPOINT}")
     ml_mocker.with_request_param("format", "json")
@@ -51,7 +57,7 @@ def test_get_logs_no_such_host(ml):
     ml_mocker.mock_get()
 
     with pytest.raises(MarkLogicError) as err:
-        ml.logs.get(8002, host="non-existing-host")
+        logs.get(8002, host="non-existing-host")
 
     expected_error = (
         "[404 Not Found] (XDMP-NOSUCHHOST) "
@@ -62,7 +68,7 @@ def test_get_logs_no_such_host(ml):
 
 
 @respx.mock
-def test_get_logs_unauthorized(ml):
+def test_get_logs_unauthorized(logs):
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url(f"http://localhost:8002{ENDPOINT}")
     ml_mocker.with_request_param("format", "json")
@@ -81,14 +87,14 @@ def test_get_logs_unauthorized(ml):
     ml_mocker.mock_get()
 
     with pytest.raises(MarkLogicError) as err:
-        ml.logs.get()
+        logs.get()
 
     expected_error = "[401 Unauthorized] 401 Unauthorized"
     assert err.value.args[0] == expected_error
 
 
 @respx.mock
-def test_get_logs_empty(ml):
+def test_get_logs_empty(logs):
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url(f"http://localhost:8002{ENDPOINT}")
     ml_mocker.with_request_param("format", "json")
@@ -98,13 +104,13 @@ def test_get_logs_empty(ml):
     ml_mocker.with_response_body(ml_mocker.error_logs_body([]))
     ml_mocker.mock_get()
 
-    logs = ml.logs.get(8002)
+    logs = logs.get(8002)
 
     assert next(logs, None) is None
 
 
 @respx.mock
-def test_get_logs_without_port(ml):
+def test_get_logs_without_port(logs):
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url(f"http://localhost:8002{ENDPOINT}")
     ml_mocker.with_request_param("format", "json")
@@ -122,7 +128,7 @@ def test_get_logs_without_port(ml):
     )
     ml_mocker.mock_get()
 
-    logs = ml.logs.get()
+    logs = logs.get()
     logs = list(logs)
 
     assert len(logs) == 3
@@ -144,7 +150,7 @@ def test_get_logs_without_port(ml):
 
 
 @respx.mock
-def test_get_logs_using_string_port(ml):
+def test_get_logs_using_string_port(logs):
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url(f"http://localhost:8002{ENDPOINT}")
     ml_mocker.with_request_param("format", "json")
@@ -162,7 +168,7 @@ def test_get_logs_using_string_port(ml):
     )
     ml_mocker.mock_get()
 
-    logs = ml.logs.get("8002")
+    logs = logs.get("8002")
     logs = list(logs)
 
     assert len(logs) == 3
@@ -184,7 +190,7 @@ def test_get_logs_using_string_port(ml):
 
 
 @respx.mock
-def test_get_task_server_logs(ml):
+def test_get_task_server_logs(logs):
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url(f"http://localhost:8002{ENDPOINT}")
     ml_mocker.with_request_param("format", "json")
@@ -202,7 +208,7 @@ def test_get_task_server_logs(ml):
     )
     ml_mocker.mock_get()
 
-    logs = ml.logs.get("TaskServer")
+    logs = logs.get("TaskServer")
     logs = list(logs)
 
     assert len(logs) == 3
@@ -224,7 +230,7 @@ def test_get_task_server_logs(ml):
 
 
 @respx.mock
-def test_get_task_server_logs_using_int_port(ml):
+def test_get_task_server_logs_using_int_port(logs):
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url(f"http://localhost:8002{ENDPOINT}")
     ml_mocker.with_request_param("format", "json")
@@ -242,7 +248,7 @@ def test_get_task_server_logs_using_int_port(ml):
     )
     ml_mocker.mock_get()
 
-    logs = ml.logs.get(0)
+    logs = logs.get(0)
     logs = list(logs)
 
     assert len(logs) == 3
@@ -264,7 +270,7 @@ def test_get_task_server_logs_using_int_port(ml):
 
 
 @respx.mock
-def test_get_error_logs(ml):
+def test_get_error_logs(logs):
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url(f"http://localhost:8002{ENDPOINT}")
     ml_mocker.with_request_param("format", "json")
@@ -282,7 +288,7 @@ def test_get_error_logs(ml):
     )
     ml_mocker.mock_get()
 
-    logs = ml.logs.get(8002)
+    logs = logs.get(8002)
     logs = list(logs)
 
     assert len(logs) == 3
@@ -304,7 +310,7 @@ def test_get_error_logs(ml):
 
 
 @respx.mock
-def test_get_error_logs_with_search_params(ml):
+def test_get_error_logs_with_search_params(logs):
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url(f"http://localhost:8002{ENDPOINT}")
     ml_mocker.with_request_param("format", "json")
@@ -325,7 +331,7 @@ def test_get_error_logs_with_search_params(ml):
     )
     ml_mocker.mock_get()
 
-    logs = ml.logs.get(
+    logs = logs.get(
         8002,
         start_time="2023-09-01 00:00",
         end_time="2023-09-01 23:59",
@@ -352,7 +358,7 @@ def test_get_error_logs_with_search_params(ml):
 
 
 @respx.mock
-def test_get_error_logs_fully_customized(ml):
+def test_get_error_logs_fully_customized(logs):
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url(f"http://localhost:8002{ENDPOINT}")
     ml_mocker.with_request_param("format", "json")
@@ -374,7 +380,7 @@ def test_get_error_logs_fully_customized(ml):
     )
     ml_mocker.mock_get()
 
-    logs = ml.logs.get(
+    logs = logs.get(
         8002,
         start_time="2023-09-01 00:00",
         end_time="2023-09-01 23:59",
@@ -402,7 +408,7 @@ def test_get_error_logs_fully_customized(ml):
 
 
 @respx.mock
-def test_get_error_logs_empty(ml):
+def test_get_error_logs_empty(logs):
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url(f"http://localhost:8002{ENDPOINT}")
     ml_mocker.with_request_param("format", "json")
@@ -412,14 +418,14 @@ def test_get_error_logs_empty(ml):
     ml_mocker.with_response_body(ml_mocker.error_logs_body([]))
     ml_mocker.mock_get()
 
-    logs = ml.logs.get(8002)
+    logs = logs.get(8002)
     logs = list(logs)
 
     assert len(logs) == 0
 
 
 @respx.mock
-def test_get_access_logs(ml):
+def test_get_access_logs(logs):
     raw_logs = [
         (
             "172.17.0.1 - admin [01/Sep/2023:03:54:16 +0000] "
@@ -441,7 +447,7 @@ def test_get_access_logs(ml):
     ml_mocker.with_response_body(ml_mocker.non_error_logs_body(raw_logs))
     ml_mocker.mock_get()
 
-    logs = ml.logs.get(8002, LogType.ACCESS)
+    logs = logs.get(8002, LogType.ACCESS)
     logs = list(logs)
 
     assert len(logs) == 2
@@ -454,7 +460,7 @@ def test_get_access_logs(ml):
 
 
 @respx.mock
-def test_get_access_logs_with_str_log_type(ml):
+def test_get_access_logs_with_str_log_type(logs):
     raw_logs = [
         (
             "172.17.0.1 - admin [01/Sep/2023:03:54:16 +0000] "
@@ -471,7 +477,7 @@ def test_get_access_logs_with_str_log_type(ml):
     ml_mocker.with_response_body(ml_mocker.non_error_logs_body(raw_logs))
     ml_mocker.mock_get()
 
-    logs = ml.logs.get(8002, "access")
+    logs = logs.get(8002, "access")
     logs = list(logs)
 
     assert len(logs) == 1
@@ -481,7 +487,7 @@ def test_get_access_logs_with_str_log_type(ml):
 
 
 @respx.mock
-def test_get_access_logs_with_search_params(ml):
+def test_get_access_logs_with_search_params(logs):
     raw_logs = [
         (
             "172.17.0.1 - admin [01/Sep/2023:03:54:16 +0000] "
@@ -503,7 +509,7 @@ def test_get_access_logs_with_search_params(ml):
     ml_mocker.with_response_body(ml_mocker.non_error_logs_body(raw_logs))
     ml_mocker.mock_get()
 
-    logs = ml.logs.get(
+    logs = logs.get(
         8002,
         LogType.ACCESS,
         start_time="00:00",
@@ -522,7 +528,7 @@ def test_get_access_logs_with_search_params(ml):
 
 
 @respx.mock
-def test_get_access_logs_empty(ml):
+def test_get_access_logs_empty(logs):
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url(f"http://localhost:8002{ENDPOINT}")
     ml_mocker.with_request_param("format", "json")
@@ -532,14 +538,14 @@ def test_get_access_logs_empty(ml):
     ml_mocker.with_response_body(ml_mocker.non_error_logs_body([]))
     ml_mocker.mock_get()
 
-    logs = ml.logs.get(8002, LogType.ACCESS)
+    logs = logs.get(8002, LogType.ACCESS)
     logs = list(logs)
 
     assert len(logs) == 0
 
 
 @respx.mock
-def test_get_request_logs(ml):
+def test_get_request_logs(logs):
     raw_logs = [
         (
             "{"
@@ -594,7 +600,7 @@ def test_get_request_logs(ml):
     ml_mocker.with_response_body(ml_mocker.non_error_logs_body(raw_logs))
     ml_mocker.mock_get()
 
-    logs = ml.logs.get(8002, LogType.REQUEST)
+    logs = logs.get(8002, LogType.REQUEST)
     logs = list(logs)
 
     assert len(logs) == 2
@@ -607,7 +613,7 @@ def test_get_request_logs(ml):
 
 
 @respx.mock
-def test_get_request_logs_with_search_params(ml):
+def test_get_request_logs_with_search_params(logs):
     raw_logs = [
         (
             "{"
@@ -662,7 +668,7 @@ def test_get_request_logs_with_search_params(ml):
     ml_mocker.with_response_body(ml_mocker.non_error_logs_body(raw_logs))
     ml_mocker.mock_get()
 
-    logs = ml.logs.get(
+    logs = logs.get(
         8002,
         LogType.REQUEST,
         start_time="00:00",
@@ -681,7 +687,7 @@ def test_get_request_logs_with_search_params(ml):
 
 
 @respx.mock
-def test_get_request_logs_empty(ml):
+def test_get_request_logs_empty(logs):
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url(f"http://localhost:8002{ENDPOINT}")
     ml_mocker.with_request_param("format", "json")
@@ -691,14 +697,14 @@ def test_get_request_logs_empty(ml):
     ml_mocker.with_response_body(ml_mocker.non_error_logs_body([]))
     ml_mocker.mock_get()
 
-    logs = ml.logs.get(8002, LogType.REQUEST)
+    logs = logs.get(8002, LogType.REQUEST)
     logs = list(logs)
 
     assert len(logs) == 0
 
 
 @respx.mock
-def test_get_audit_logs(ml):
+def test_get_audit_logs(logs):
     raw_logs = [
         (
             "2023-09-04 01:01:01.111 event=server-restart; "
@@ -719,7 +725,7 @@ def test_get_audit_logs(ml):
     ml_mocker.with_response_body(ml_mocker.non_error_logs_body(raw_logs))
     ml_mocker.mock_get()
 
-    logs = ml.logs.get(log_type=LogType.AUDIT)
+    logs = logs.get(log_type=LogType.AUDIT)
     logs = list(logs)
 
     assert len(logs) == 3
@@ -735,7 +741,7 @@ def test_get_audit_logs(ml):
 
 
 @respx.mock
-def test_get_audit_logs_with_search_params(ml):
+def test_get_audit_logs_with_search_params(logs):
     raw_logs = [
         (
             "2023-09-04 01:01:01.111 event=server-restart; "
@@ -756,7 +762,7 @@ def test_get_audit_logs_with_search_params(ml):
     ml_mocker.with_response_body(ml_mocker.non_error_logs_body(raw_logs))
     ml_mocker.mock_get()
 
-    logs = ml.logs.get(
+    logs = logs.get(
         log_type=LogType.AUDIT,
         start_time="00:00",
         end_time="23:59:59",
@@ -777,7 +783,7 @@ def test_get_audit_logs_with_search_params(ml):
 
 
 @respx.mock
-def test_get_audit_logs_empty(ml):
+def test_get_audit_logs_empty(logs):
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url(f"http://localhost:8002{ENDPOINT}")
     ml_mocker.with_request_param("format", "json")
@@ -787,14 +793,14 @@ def test_get_audit_logs_empty(ml):
     ml_mocker.with_response_body(ml_mocker.non_error_logs_body([]))
     ml_mocker.mock_get()
 
-    logs = ml.logs.get(log_type=LogType.AUDIT)
+    logs = logs.get(log_type=LogType.AUDIT)
     logs = list(logs)
 
     assert len(logs) == 0
 
 
 @respx.mock
-def test_get_logs_list_unauthorized(ml):
+def test_get_logs_list_unauthorized(logs):
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url(f"http://localhost:8002{ENDPOINT}")
     ml_mocker.with_request_param("format", "json")
@@ -813,14 +819,14 @@ def test_get_logs_list_unauthorized(ml):
     ml_mocker.mock_get()
 
     with pytest.raises(MarkLogicError) as err:
-        ml.logs.list()
+        logs.list()
 
     expected_error = "[401 Unauthorized] 401 Unauthorized"
     assert err.value.args[0] == expected_error
 
 
 @respx.mock
-def test_get_logs_list_no_such_host(ml):
+def test_get_logs_list_no_such_host(logs):
     response_body_path = resources_utils.get_test_resource_path(
         __file__,
         "no-such-host.json",
@@ -835,7 +841,7 @@ def test_get_logs_list_no_such_host(ml):
     ml_mocker.with_response_body(Path(response_body_path).read_bytes())
     ml_mocker.mock_get()
     with pytest.raises(MarkLogicError) as err:
-        ml.logs.list(host="non-existing-host")
+        logs.list(host="non-existing-host")
 
     expected_error = (
         "[404 Not Found] (XDMP-NOSUCHHOST) XDMP-NOSUCHHOST: "
@@ -845,7 +851,7 @@ def test_get_logs_list_no_such_host(ml):
 
 
 @respx.mock
-def test_get_logs_list_empty(ml):
+def test_get_logs_list_empty(logs):
     response_body_json = resources_utils.get_test_resource_json(
         __file__,
         "logs-list-response-no-logs.json",
@@ -858,7 +864,7 @@ def test_get_logs_list_empty(ml):
     ml_mocker.with_response_body(response_body_json)
     ml_mocker.mock_get()
 
-    logs_list = ml.logs.list()
+    logs_list = logs.list()
 
     assert logs_list == {
         "source": [],
@@ -868,7 +874,7 @@ def test_get_logs_list_empty(ml):
 
 
 @respx.mock
-def test_get_logs_list_from_single_node_cluster(ml):
+def test_get_logs_list_from_single_node_cluster(logs):
     response_body_json = resources_utils.get_test_resource_json(
         __file__,
         "logs-list-response-single-node.json",
@@ -883,7 +889,7 @@ def test_get_logs_list_from_single_node_cluster(ml):
     ml_mocker.with_response_body(response_body_json)
     ml_mocker.mock_get()
 
-    logs_list = ml.logs.list()
+    logs_list = logs.list()
     assert isinstance(logs_list, dict)
 
     source = logs_list["source"]
@@ -1108,7 +1114,7 @@ def test_get_logs_list_from_single_node_cluster(ml):
 
 
 @respx.mock
-def test_get_logs_list_from_multiple_nodes_cluster(ml):
+def test_get_logs_list_from_multiple_nodes_cluster(logs):
     response_body_json = resources_utils.get_test_resource_json(
         __file__,
         "logs-list-response-cluster.json",
@@ -1123,7 +1129,7 @@ def test_get_logs_list_from_multiple_nodes_cluster(ml):
     ml_mocker.with_response_body(response_body_json)
     ml_mocker.mock_get()
 
-    logs_list = ml.logs.list()
+    logs_list = logs.list()
     assert isinstance(logs_list, dict)
 
     source = logs_list["source"]
@@ -1364,7 +1370,7 @@ def test_get_logs_list_from_multiple_nodes_cluster(ml):
 
 
 @respx.mock
-def test_get_logs_list_from_multiple_nodes_cluster_for_single_host(ml):
+def test_get_logs_list_from_multiple_nodes_cluster_for_single_host(logs):
     response_body_json = resources_utils.get_test_resource_json(
         __file__,
         "logs-list-response-cluster-one-node-only.json",
@@ -1380,7 +1386,7 @@ def test_get_logs_list_from_multiple_nodes_cluster_for_single_host(ml):
     ml_mocker.with_response_body(response_body_json)
     ml_mocker.mock_get()
 
-    logs_list = ml.logs.list(host="ml_cluster_node3")
+    logs_list = logs.list(host="ml_cluster_node3")
     assert isinstance(logs_list, dict)
 
     source = logs_list["source"]

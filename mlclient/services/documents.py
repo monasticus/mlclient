@@ -1,4 +1,4 @@
-"""High-level Documents service (DocumentsService / AsyncDocumentsService).
+"""Higher-level Documents service (DocumentsService / AsyncDocumentsService).
 
 Provides parsed document operations on MarkLogic.
 """
@@ -10,21 +10,21 @@ from typing import TYPE_CHECKING, Any
 
 from httpx import Response
 
-from mlclient import constants
-from mlclient.calls import DocumentsDeleteCall, DocumentsGetCall, DocumentsPostCall
-from mlclient.clients.api_client import ApiClient
-from mlclient.connection import UNSET
+from mlclient import _constants as constants
+from mlclient._options import UNSET
 from mlclient.exceptions import MarkLogicError
 
 if TYPE_CHECKING:
-    from mlclient.clients.api_client import AsyncApiClient
+    from mlclient.api.rest import AsyncRestApi, RestApi
 
-from mlclient.mimetypes import Mimetypes
-from mlclient.ml_response_parser import MLResponseParser
-from mlclient.models import Document, Metadata, MetadataDocument
-from mlclient.models.http import Category
-from mlclient.models.http import DocumentsBodyPart as BodyPart
-from mlclient.models.http import DocumentsDisposition as Disposition
+from mlclient.models.document_parts import (
+    Category,
+    DocumentsBodyPart,
+    DocumentsDisposition,
+)
+from mlclient.models.documents import Document, Metadata, MetadataDocument
+from mlclient.models.mimetypes import Mimetypes
+from mlclient.responses import MLResponseParser
 
 _MAX_QUERY_BYTES = 48 * 1024
 """Soft limit on the total size of ``uri=...`` query parameters per request.
@@ -82,7 +82,7 @@ def _batched_uris(
 
 
 class DocumentsService:
-    """High-level service for /v1/documents CRUD operations.
+    """Higher-level service for /v1/documents CRUD operations.
 
     Notes
     -----
@@ -94,8 +94,8 @@ class DocumentsService:
     each port.
     """
 
-    def __init__(self, api: ApiClient):
-        self._api = api
+    def __init__(self, rest: RestApi):
+        self._rest = rest
 
     def write(
         self,
@@ -138,14 +138,14 @@ class DocumentsService:
         MarkLogicError
             If MarkLogic returns an error
         """
-        body_parts = DocumentsSender.parse(data)
-        call = DocumentsPostCall(
-            body_parts=body_parts,
+        body_parts = _DocumentsSender.parse(data)
+        resp = self._rest.documents.post(
+            body_parts,
             database=database,
             temporal_collection=temporal_collection,
             txid=txid,
+            timeout=timeout,
         )
-        resp = self._api.call(call, timeout=timeout)
         if not resp.is_success:
             resp_body = MLResponseParser.parse(resp)
             raise MarkLogicError(resp_body["errorResponse"])
@@ -251,18 +251,18 @@ class DocumentsService:
         """
         category = _normalize_category(category)
         for batch in _batched_uris(uris):
-            call = DocumentsGetCall(
-                uri=batch,
+            resp = self._rest.documents.get(
+                batch,
                 category=category,
                 database=database,
                 data_format="json",
                 txid=txid,
+                timeout=timeout,
             )
-            resp = self._api.call(call, timeout=timeout)
             if not resp.is_success:
                 resp_body = MLResponseParser.parse(resp)
                 raise MarkLogicError(resp_body["errorResponse"])
-            yield from DocumentsReader.parse(resp, batch, category)
+            yield from _DocumentsReader.parse(resp, batch, category)
 
     def delete(
         self,
@@ -312,29 +312,29 @@ class DocumentsService:
         """
         category = _normalize_category(category)
         for batch in _batched_uris(uris):
-            call = DocumentsDeleteCall(
-                uri=batch,
+            resp = self._rest.documents.delete(
+                batch,
                 category=category,
                 database=database,
                 temporal_collection=temporal_collection,
                 wipe_temporal=wipe_temporal,
                 txid=txid,
+                timeout=timeout,
             )
-            resp = self._api.call(call, timeout=timeout)
             if not resp.is_success:
                 resp_body = MLResponseParser.parse(resp)
                 raise MarkLogicError(resp_body["errorResponse"])
 
 
-class DocumentsSender:
-    """A class parsing Document or Metadata instance(s) to BodyPart's list."""
+class _DocumentsSender:
+    """A class parsing Document or Metadata instance(s) to DocumentsBodyPart's list."""
 
     @classmethod
     def parse(
         cls,
         data: Document | Metadata | list[Document | Metadata],
-    ) -> list[BodyPart]:
-        """Parse Document or Metadata instance(s) to BodyPart's list."""
+    ) -> list[DocumentsBodyPart]:
+        """Parse Document or Metadata instance(s) to DocumentsBodyPart's list."""
         if not isinstance(data, list):
             data = [data]
         body_parts = []
@@ -358,9 +358,9 @@ class DocumentsSender:
     def _get_doc_content_body_part(
         cls,
         document: Document,
-    ) -> BodyPart:
-        """Instantiate BodyPart with Document's content."""
-        return BodyPart(
+    ) -> DocumentsBodyPart:
+        """Instantiate DocumentsBodyPart with Document's content."""
+        return DocumentsBodyPart(
             **{
                 "content-type": Mimetypes.get_mimetype(document.uri),
                 "content-disposition": {
@@ -376,9 +376,9 @@ class DocumentsSender:
     def _get_doc_metadata_body_part(
         cls,
         document: Document,
-    ) -> BodyPart:
-        """Instantiate BodyPart with Document's metadata."""
-        return BodyPart(
+    ) -> DocumentsBodyPart:
+        """Instantiate DocumentsBodyPart with Document's metadata."""
+        return DocumentsBodyPart(
             **{
                 "content-type": constants.HEADER_JSON,
                 "content-disposition": {
@@ -394,9 +394,9 @@ class DocumentsSender:
     def _get_default_metadata_body_part(
         cls,
         metadata: Metadata,
-    ) -> BodyPart:
-        """Instantiate BodyPart with default metadata."""
-        return BodyPart(
+    ) -> DocumentsBodyPart:
+        """Instantiate DocumentsBodyPart with default metadata."""
+        return DocumentsBodyPart(
             **{
                 "content-type": constants.HEADER_JSON,
                 "content-disposition": {
@@ -408,7 +408,7 @@ class DocumentsSender:
         )
 
 
-class DocumentsReader:
+class _DocumentsReader:
     """A class parsing raw MarkLogic response to Document instance(s)."""
 
     @classmethod
@@ -463,7 +463,7 @@ class DocumentsReader:
         pre_formatted_data = {}
         for headers, parse_resp_body in parsed_resp:
             raw_content_disp = headers.get(constants.HEADER_NAME_CONTENT_DISP)
-            content_disp = Disposition.from_header(raw_content_disp)
+            content_disp = DocumentsDisposition.from_header(raw_content_disp)
             partial_data = cls._get_partial_data(content_disp, parse_resp_body)
 
             if not (expect_content and expect_metadata):
@@ -525,7 +525,7 @@ class DocumentsReader:
     @classmethod
     def _get_partial_data(
         cls,
-        content_disp: Disposition,
+        content_disp: DocumentsDisposition,
         parsed_resp_body: Any,
     ) -> dict:
         """Return pre-formatted partial data."""
@@ -574,10 +574,10 @@ class DocumentsReader:
 
 
 class AsyncDocumentsService:
-    """Async high-level service for /v1/documents CRUD operations."""
+    """Async higher-level service for /v1/documents CRUD operations."""
 
-    def __init__(self, api: AsyncApiClient):
-        self._api = api
+    def __init__(self, rest: AsyncRestApi):
+        self._rest = rest
 
     async def write(
         self,
@@ -620,14 +620,14 @@ class AsyncDocumentsService:
         MarkLogicError
             If MarkLogic returns an error
         """
-        body_parts = DocumentsSender.parse(data)
-        call = DocumentsPostCall(
-            body_parts=body_parts,
+        body_parts = _DocumentsSender.parse(data)
+        resp = await self._rest.documents.post(
+            body_parts,
             database=database,
             temporal_collection=temporal_collection,
             txid=txid,
+            timeout=timeout,
         )
-        resp = await self._api.call(call, timeout=timeout)
         if not resp.is_success:
             resp_body = MLResponseParser.parse(resp)
             raise MarkLogicError(resp_body["errorResponse"])
@@ -735,18 +735,18 @@ class AsyncDocumentsService:
         """
         category = _normalize_category(category)
         for batch in _batched_uris(uris):
-            call = DocumentsGetCall(
-                uri=batch,
+            resp = await self._rest.documents.get(
+                batch,
                 category=category,
                 database=database,
                 data_format="json",
                 txid=txid,
+                timeout=timeout,
             )
-            resp = await self._api.call(call, timeout=timeout)
             if not resp.is_success:
                 resp_body = MLResponseParser.parse(resp)
                 raise MarkLogicError(resp_body["errorResponse"])
-            for doc in DocumentsReader.parse(resp, batch, category):
+            for doc in _DocumentsReader.parse(resp, batch, category):
                 yield doc
 
     async def delete(
@@ -797,15 +797,15 @@ class AsyncDocumentsService:
         """
         category = _normalize_category(category)
         for batch in _batched_uris(uris):
-            call = DocumentsDeleteCall(
-                uri=batch,
+            resp = await self._rest.documents.delete(
+                batch,
                 category=category,
                 database=database,
                 temporal_collection=temporal_collection,
                 wipe_temporal=wipe_temporal,
                 txid=txid,
+                timeout=timeout,
             )
-            resp = await self._api.call(call, timeout=timeout)
             if not resp.is_success:
                 resp_body = MLResponseParser.parse(resp)
                 raise MarkLogicError(resp_body["errorResponse"])

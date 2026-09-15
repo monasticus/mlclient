@@ -9,7 +9,7 @@ It exports 2 classes:
 
 from __future__ import annotations
 
-from mlclient.calls.api_call import ApiCall
+from mlclient.calls.base import ApiCall
 
 
 class TimestampGetCall(ApiCall):

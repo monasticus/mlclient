@@ -474,7 +474,9 @@ def test_copy_warning_is_dim_yellow_and_follows_output(
         write_error(*args, **kwargs)
 
     mocker.patch.object(
-        tester.io.error_output, "write_line", side_effect=record_warning,
+        tester.io.error_output,
+        "write_line",
+        side_effect=record_warning,
     )
 
     tester.execute(arguments, decorated=True)
@@ -686,7 +688,8 @@ def test_setting_renders_predefined_app_server_absent_from_file(
 
 @pytest.mark.parametrize("server", ["app-services", "rest"])
 def test_setting_ignores_copy_for_app_server(
-    server: str, clipboard_process: Mock,
+    server: str,
+    clipboard_process: Mock,
 ) -> None:
     _write_env("dev", {"app-servers": [{"id": "rest", "port": 8010}]})
     tester = _get_tester()

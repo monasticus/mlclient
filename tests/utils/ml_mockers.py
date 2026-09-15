@@ -12,10 +12,8 @@ import respx
 from httpx import Headers, Request, Response
 from respx import MockRouter, Route
 
-from mlclient.constants import HEADER_X_WWW_FORM_URLENCODED
-from mlclient.models.http import Category
-from mlclient.models.http import DocumentsBodyPart as BodyPart
-from mlclient.models.http import DocumentsDisposition as Disposition
+from mlclient._constants import HEADER_X_WWW_FORM_URLENCODED
+from mlclient.models import Category, DocumentsBodyPart, DocumentsDisposition
 from mlclient.multipart import (
     MultipartPart,
     decode_multipart_mixed,
@@ -78,7 +76,7 @@ class MLMocker(metaclass=ABCMeta):
     @abstractmethod
     def with_response_documents_body_part(
         self,
-        body_part: BodyPart,
+        body_part: DocumentsBodyPart,
     ):
         raise NotImplementedError
 
@@ -295,7 +293,7 @@ class MLRespXMocker(MLMocker):
 
     def with_response_documents_body_part(
         self,
-        body_part: BodyPart,
+        body_part: DocumentsBodyPart,
     ):
         if not self._resp_mock.response.body_parts:
             self._resp_mock.response.body_parts = []
@@ -398,7 +396,7 @@ class MLDocumentsMocker:
 
     def __init__(
         self,
-        docs: Iterable[BodyPart] | None = None,
+        docs: Iterable[DocumentsBodyPart] | None = None,
     ):
         self._doc_body_parts = [] if docs is None else list(docs)
 
@@ -418,13 +416,13 @@ class MLDocumentsMocker:
 
     def mock_documents(
         self,
-        docs: Iterable[BodyPart],
+        docs: Iterable[DocumentsBodyPart],
     ):
         self.mock_document(*docs)
 
     def mock_document(
         self,
-        *docs: BodyPart,
+        *docs: DocumentsBodyPart,
     ):
         self._doc_body_parts.extend(docs)
 
@@ -496,7 +494,7 @@ class MLDocumentsMocker:
 
     @staticmethod
     def _build_multipart_part(
-        body_part: BodyPart,
+        body_part: DocumentsBodyPart,
     ) -> MultipartPart:
         data = body_part.content
         if isinstance(data, dict):
@@ -516,7 +514,7 @@ class MLDocumentsMocker:
         self,
         uri: str,
         category: list[str],
-    ) -> Iterable[BodyPart]:
+    ) -> Iterable[DocumentsBodyPart]:
         return (
             part
             for part in self._doc_body_parts
@@ -528,7 +526,7 @@ class MLDocumentsMocker:
         cls,
         uri: str,
         category: list[str],
-        body_part: BodyPart,
+        body_part: DocumentsBodyPart,
     ) -> bool:
         if not cls._filename_matches_uri(body_part, uri):
             return False
@@ -543,14 +541,14 @@ class MLDocumentsMocker:
 
     @staticmethod
     def _filename_matches_uri(
-        body_part: BodyPart,
+        body_part: DocumentsBodyPart,
         uri: str,
     ) -> bool:
         return body_part.disposition.filename == uri
 
     @staticmethod
     def _get_body_part_category(
-        body_part: BodyPart,
+        body_part: DocumentsBodyPart,
     ) -> list[str]:
         body_part_category = body_part.disposition.category or Category.CONTENT
         if isinstance(body_part_category, Category):
@@ -623,8 +621,8 @@ class MLDocumentsMocker:
     @staticmethod
     def _get_disposition(
         body_part: MultipartPart,
-    ) -> Disposition:
-        return Disposition.from_header(
+    ) -> DocumentsDisposition:
+        return DocumentsDisposition.from_header(
             body_part.headers.get("Content-Disposition"),
         )
 
@@ -677,7 +675,7 @@ class MLDocumentsMocker:
 
     @staticmethod
     def _build_successful_single_part_get_response(
-        body_part: BodyPart,
+        body_part: DocumentsBodyPart,
     ) -> Response:
         content_type = f"{body_part.content_type}; charset=utf-8"
         doc_format = body_part.disposition.format_.value

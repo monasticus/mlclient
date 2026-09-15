@@ -1,49 +1,6 @@
-"""The ML Clients package.
+"""HTTP transport and execution of MarkLogic API calls."""
 
-This package contains the client hierarchy for MarkLogic interaction.
+from .api import ApiClient, AsyncApiClient
+from .http import AsyncHttpClient, HttpClient
 
-Exports:
-    * MLClient - main entry point (composition with .http, .rest, etc.)
-    * AsyncMLClient - async variant of MLClient
-    * HttpClient - raw HTTP client
-    * AsyncHttpClient - async variant of HttpClient
-    * ApiClient - mid-level API client with call()
-    * AsyncApiClient - async variant of ApiClient
-
-Examples
---------
->>> from mlclient.clients import MLClient
->>> with MLClient() as ml:
-...     resp = ml.manage.databases.get_list()
-"""
-
-from .api_client import ApiClient, AsyncApiClient
-from mlclient.http_config import DEFAULT_RETRY_STRATEGY
-
-from .http_client import (
-    MARKLOGIC_ADMIN_PORT,
-    MARKLOGIC_APP_SERVICES_PORT,
-    MARKLOGIC_HEALTHCHECK_PORT,
-    MARKLOGIC_MANAGE_PORT,
-    NO_RETRY_STRATEGY,
-    RESTART_RETRY_STRATEGY,
-    AsyncHttpClient,
-    HttpClient,
-)
-from .ml_client import AsyncMLClient, MLClient
-
-__all__ = [
-    "DEFAULT_RETRY_STRATEGY",
-    "MARKLOGIC_ADMIN_PORT",
-    "MARKLOGIC_APP_SERVICES_PORT",
-    "MARKLOGIC_HEALTHCHECK_PORT",
-    "MARKLOGIC_MANAGE_PORT",
-    "NO_RETRY_STRATEGY",
-    "RESTART_RETRY_STRATEGY",
-    "ApiClient",
-    "AsyncApiClient",
-    "AsyncHttpClient",
-    "AsyncMLClient",
-    "HttpClient",
-    "MLClient",
-]
+__all__ = ["ApiClient", "AsyncApiClient", "AsyncHttpClient", "HttpClient"]

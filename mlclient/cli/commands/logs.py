@@ -15,8 +15,9 @@ from cleo.helpers import option
 from cleo.io.inputs.option import Option
 from cleo.io.outputs.output import Type
 
-from mlclient import MLClientManager
-from mlclient.services import LogType
+from mlclient._manager import MLClientManager
+from mlclient.models.types import LogType
+from mlclient.services.logs import LogsService
 
 
 class LogsCommand(Command):
@@ -35,7 +36,7 @@ class LogsCommand(Command):
       -f, --from=FROM
             A start time to search error logs
       -t, --to=TO
-            AAn end time to search error logs
+            An end time to search error logs
       -r, --regex=REGEX
             A regex to search error logs
       -H, --host=HOST
@@ -128,7 +129,7 @@ class LogsCommand(Command):
         host = self.option("host")
         with _get_cached_client(self.option("environment")) as ml:
             self.info(f"Getting logs list using REST App-Server {ml.http.base_url}")
-            return ml.logs.list(host)
+            return LogsService(ml.manage).list(host)
 
     def _get_log_files_rows(
         self,
@@ -244,7 +245,7 @@ class LogsCommand(Command):
             self.info(
                 f"Getting {file_name} logs using REST App-Server {ml.http.base_url}",
             )
-            return ml.logs.get(
+            return LogsService(ml.manage).get(
                 app_port,
                 log_type,
                 start_time=start_time,

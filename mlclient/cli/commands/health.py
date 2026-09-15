@@ -18,7 +18,8 @@ from cleo.helpers import option
 from cleo.io.inputs.option import Option
 from httpx import TransportError
 
-from mlclient import MLClient, MLClientManager
+from mlclient._client import MLClient
+from mlclient._manager import MLClientManager
 from mlclient.exceptions import WrongParametersError
 
 _HEALTHY = "HEALTHY"

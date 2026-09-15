@@ -11,7 +11,7 @@ from tests.utils.ml_mockers import MLRespXMocker
 def xquery():
     return """xquery version '1.0-ml';
 
-    declare variable $element as element() external;
+    declare variable $element() external;
 
     <new-parent>{$element/child::element()}</new-parent>
     """
@@ -26,7 +26,7 @@ async def test_call(xquery):
     ml_mocker.with_request_body(
         {
             "xquery": "xquery version '1.0-ml';"
-            " declare variable $element as element() external;"
+            " declare variable $element() external;"
             " <new-parent>{$element/child::element()}</new-parent>",
             "vars": '{"element": "<parent><child/></parent>"}',
         },

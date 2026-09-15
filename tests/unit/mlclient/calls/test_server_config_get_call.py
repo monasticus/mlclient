@@ -1,5 +1,4 @@
-from mlclient.calls import ApiCall
-from mlclient.calls.admin import ServerConfigGetCall
+from mlclient.calls import ApiCall, ServerConfigGetCall
 
 
 def test_is_api_call():

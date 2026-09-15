@@ -9,9 +9,9 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+from urllib.parse import parse_qs, urlsplit
 from xml.dom import minidom
 from xml.parsers.expat import ExpatError
-from urllib.parse import parse_qs, urlsplit
 
 from cleo.commands.command import Command
 from cleo.helpers import argument, option
@@ -20,9 +20,9 @@ from cleo.io.inputs.option import Option
 from cleo.io.outputs.output import Type
 from httpx import Headers, Response
 
-from mlclient import MLClientManager
+from mlclient._manager import MLClientManager
 from mlclient.cli.connection import get_client
-from mlclient.clients import HttpClient
+from mlclient.clients.http import HttpClient
 from mlclient.exceptions import WrongParametersError
 
 

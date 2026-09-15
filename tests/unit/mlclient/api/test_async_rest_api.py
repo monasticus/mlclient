@@ -4,7 +4,7 @@ import respx
 
 from mlclient import AsyncMLClient
 from mlclient.calls import EvalCall
-from mlclient.models.http import DocumentsBodyPart as BodyPart
+from mlclient.models import DocumentsBodyPart
 from tests.utils import resources as resources_utils
 from tests.utils.ml_mockers import MLRespXMocker
 
@@ -30,7 +30,7 @@ async def test_custom_call():
 def xquery():
     return """xquery version '1.0-ml';
 
-    declare variable $element as element() external;
+    declare variable $element() external;
 
     <new-parent>{$element/child::element()}</new-parent>
     """
@@ -45,7 +45,7 @@ async def test_eval(xquery):
     ml_mocker.with_request_body(
         {
             "xquery": "xquery version '1.0-ml';"
-            " declare variable $element as element() external;"
+            " declare variable $element() external;"
             " <new-parent>{$element/child::element()}</new-parent>",
             "vars": '{"element": "<parent><child/></parent>"}',
         },
@@ -111,7 +111,7 @@ async def test_post_documents():
     ml_mocker.mock_post()
 
     async with AsyncMLClient() as ml:
-        resp = await ml.rest.documents.post([BodyPart(**body_part)])
+        resp = await ml.rest.documents.post([DocumentsBodyPart(**body_part)])
 
     assert resp.status_code == httpx.codes.INTERNAL_SERVER_ERROR
     assert resp.json() == {

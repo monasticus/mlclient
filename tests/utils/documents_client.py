@@ -1,14 +1,13 @@
 from __future__ import annotations
 
+from pathlib import Path
 from xml.etree import ElementTree as ElemTree
 
 import pytest
-from mimeo import MimeoConfig, MimeoConfigFactory, Mimeograph
 
 from mlclient import MLClient
 from mlclient.exceptions import MarkLogicError
-from mlclient.mimetypes import Mimetypes
-from mlclient.models import Document, DocumentType, Metadata, XMLDocument
+from mlclient.models import Document, DocumentType, Metadata, Mimetypes, XMLDocument
 
 
 def assert_document_does_not_exist(
@@ -125,15 +124,12 @@ def generate_docs(
         )
 
 
-def generate_docs_with_mimeo(
-    docs_configs: list[tuple[str, str, int]],
-):
-    mimeo_configs = (_get_mimeo_config(*docs_config) for docs_config in docs_configs)
-
-    with Mimeograph() as mimeo:
-        for mimeo_config in mimeo_configs:
-            config_id = f"config-{mimeo_config.templates[0].count}"
-            mimeo.submit((config_id, mimeo_config))
+def generate_document_files(output_path: str, count: int):
+    """Write deterministic XML fixtures using the shared document generator."""
+    directory = Path(output_path)
+    directory.mkdir(parents=True, exist_ok=True)
+    for index, document in enumerate(generate_docs(count), start=1):
+        (directory / f"doc-{index}.xml").write_bytes(document.content_bytes)
 
 
 def _assert_content_equal(
@@ -148,15 +144,3 @@ def _assert_content_equal(
         )
     else:
         assert actual.content_bytes == expected.content_bytes
-
-
-def _get_mimeo_config(
-    mimeo_config_path: str,
-    output_path: str,
-    count: int = -1,
-) -> MimeoConfig:
-    mimeo_config = MimeoConfigFactory.parse(mimeo_config_path)
-    mimeo_config.output.directory_path = output_path
-    if count > 0:
-        mimeo_config.templates[0].count = count
-    return mimeo_config

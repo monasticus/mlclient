@@ -13,7 +13,7 @@ from cleo.io.inputs.argument import Argument
 from cleo.io.inputs.option import Option
 from cleo.io.outputs.output import Type
 
-from mlclient import MLClientManager
+from mlclient._manager import MLClientManager
 from mlclient.cli.connection import get_client
 from mlclient.exceptions import WrongParametersError
 

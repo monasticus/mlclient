@@ -1,24 +1,8 @@
-"""The Connection module.
+"""Connection settings and standard MarkLogic server ports.
 
-This module models the transport layer of a MarkLogic connection, separately
-from authentication. It exports:
-
-    * SSLConfig
-        SSL/TLS settings: server certificate verification and an optional
-        client certificate for mutual TLS.
-    * CloudConfig
-        MarkLogic Cloud settings: API key, base path and token duration.
-    * ConnectionMode
-        The resolved transport mode (HTTP, HTTPS, mutual TLS or Cloud).
-    * resolve_connection
-        Determine the connection mode from the supplied parameters.
-    * build_connection_auth
-        Build the httpx.Auth handler for a resolved connection, owning the
-        Cloud-versus-credential branch on behalf of the clients.
-    * transport_verify
-        Resolve a connection's SSL configuration into an httpx verify setting.
-    * get_ssl_context
-        A cached SSL context factory shared across all clients.
+Use SSLConfig for TLS and client certificates, or CloudConfig for a MarkLogic
+Cloud gateway. HTTPConfig combines these settings with authentication and
+request defaults. Connection normalization is an implementation detail.
 """
 
 from __future__ import annotations
@@ -30,7 +14,8 @@ from typing import TYPE_CHECKING, Optional, Union
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from mlclient.auth import MarkLogicCloudAuth, auth_method_name, build_auth
+from mlclient._options import UNSET, _Unset
+from mlclient.auth import MarkLogicCloudAuth, _auth_method_name, _build_auth
 from mlclient.exceptions import ConfigError
 
 if TYPE_CHECKING:
@@ -40,27 +25,15 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
+MARKLOGIC_APP_SERVICES_PORT = 8000
+MARKLOGIC_ADMIN_PORT = 8001
+MARKLOGIC_MANAGE_PORT = 8002
+MARKLOGIC_HEALTHCHECK_PORT = 7997
+
 CLOUD_PROTOCOL = "https"
 CLOUD_PORT = 443
 DEFAULT_PROTOCOL = "http"
-DEFAULT_PORT = 8000
-
-
-class _Unset:
-    """Sentinel marking an unset argument.
-
-    For ``auth`` it distinguishes "the caller did not choose a method" (so
-    connection defaults apply) from an explicit ``auth="digest"`` (which keeps
-    digest even alongside a client certificate, yielding double auth). For
-    ``protocol`` and ``port`` it distinguishes an omitted value (auto-resolved
-    for Cloud or mutual TLS) from an explicit one that conflicts and must error.
-    """
-
-    def __repr__(self) -> str:
-        return "UNSET"
-
-
-UNSET = _Unset()
+DEFAULT_PORT = MARKLOGIC_APP_SERVICES_PORT
 
 
 class SSLConfig(BaseModel):
@@ -87,7 +60,7 @@ class CloudConfig(BaseModel):
     token_duration: int = Field(alias="token-duration", default=0)
 
 
-class ConnectionMode(BaseModel):
+class _ConnectionMode(BaseModel):
     """A resolved transport mode for a MarkLogic connection."""
 
     protocol: str
@@ -111,12 +84,12 @@ class ConnectionMode(BaseModel):
         return self.protocol == "https"
 
 
-def resolve_connection(
+def _resolve_connection(
     protocol,
     port,
     ssl: SSLConfig | None,
     cloud: CloudConfig | None,
-) -> ConnectionMode:
+) -> _ConnectionMode:
     """Determine the connection mode from the supplied parameters.
 
     Cloud forces HTTPS on port 443. A client certificate forces HTTPS. A plain
@@ -137,7 +110,7 @@ def resolve_connection(
 
     Returns
     -------
-    ConnectionMode
+    _ConnectionMode
         The resolved transport mode.
 
     Raises
@@ -151,14 +124,14 @@ def resolve_connection(
         if protocol == "http":
             msg = "Mutual TLS requires HTTPS; remove protocol='http'."
             raise ConfigError(msg)
-        return ConnectionMode(protocol="https", port=_concrete_port(port), ssl=ssl)
+        return _ConnectionMode(protocol="https", port=_concrete_port(port), ssl=ssl)
     if protocol == "https":
-        return ConnectionMode(
+        return _ConnectionMode(
             protocol="https",
             port=_concrete_port(port),
             ssl=ssl or SSLConfig(),
         )
-    return ConnectionMode(protocol=DEFAULT_PROTOCOL, port=_concrete_port(port))
+    return _ConnectionMode(protocol=DEFAULT_PROTOCOL, port=_concrete_port(port))
 
 
 def _resolve_cloud_connection(
@@ -166,7 +139,7 @@ def _resolve_cloud_connection(
     port,
     ssl: SSLConfig | None,
     cloud: CloudConfig,
-) -> ConnectionMode:
+) -> _ConnectionMode:
     """Resolve a Cloud connection, rejecting conflicting protocol/port."""
     if protocol not in (UNSET, CLOUD_PROTOCOL):
         msg = f"Cloud connection requires HTTPS; remove protocol={protocol!r}."
@@ -174,7 +147,7 @@ def _resolve_cloud_connection(
     if port not in (UNSET, CLOUD_PORT):
         msg = f"Cloud connection requires port {CLOUD_PORT}; remove port={port!r}."
         raise ConfigError(msg)
-    return ConnectionMode(
+    return _ConnectionMode(
         protocol=CLOUD_PROTOCOL,
         port=CLOUD_PORT,
         ssl=ssl,
@@ -187,9 +160,9 @@ def _concrete_port(port) -> int:
     return DEFAULT_PORT if isinstance(port, _Unset) else port
 
 
-def default_auth(
+def _default_auth(
     auth: AuthParam | _Unset,
-    connection: ConnectionMode,
+    connection: _ConnectionMode,
 ) -> AuthParam:
     """Resolve the default auth method for a connection when none was chosen.
 
@@ -201,7 +174,7 @@ def default_auth(
     ----------
     auth : str | httpx.Auth | AuthConfig | None | UNSET
         The chosen auth, or UNSET when the caller did not choose one.
-    connection : ConnectionMode
+    connection : _ConnectionMode
         The resolved transport mode.
 
     Returns
@@ -218,8 +191,8 @@ def default_auth(
     return "digest"
 
 
-def validate_config(
-    connection: ConnectionMode,
+def _validate_config(
+    connection: _ConnectionMode,
     auth: AuthParam,
 ) -> None:
     """Reject invalid connection and authentication combinations.
@@ -230,7 +203,7 @@ def validate_config(
 
     Parameters
     ----------
-    connection : ConnectionMode
+    connection : _ConnectionMode
         The resolved transport mode.
     auth : str | httpx.Auth | AuthConfig | None
         The auth parameter being validated.
@@ -240,7 +213,7 @@ def validate_config(
     ConfigError
         If the combination is one MarkLogic cannot support.
     """
-    method = auth_method_name(auth)
+    method = _auth_method_name(auth)
 
     if connection.is_cloud:
         _validate_cloud_connection(connection, auth)
@@ -261,7 +234,7 @@ def validate_config(
 
 
 def _validate_cloud_connection(
-    connection: ConnectionMode,
+    connection: _ConnectionMode,
     auth: AuthParam,
 ) -> None:
     """Reject invalid configuration for a MarkLogic Cloud connection."""
@@ -276,8 +249,8 @@ def _validate_cloud_connection(
         raise ConfigError(msg)
 
 
-def build_connection_auth(
-    connection: ConnectionMode,
+def _build_connection_auth(
+    connection: _ConnectionMode,
     auth: AuthParam,
     username: str,
     password: str,
@@ -294,7 +267,7 @@ def build_connection_auth(
 
     Parameters
     ----------
-    connection : ConnectionMode
+    connection : _ConnectionMode
         The resolved transport mode.
     auth : str | httpx.Auth | AuthConfig | None
         The effective auth parameter, after defaults have been applied.
@@ -316,12 +289,12 @@ def build_connection_auth(
             base_url=base_url,
             api_key=connection.cloud.api_key,
             token_duration=connection.cloud.token_duration,
-            verify=transport_verify(connection),
+            verify=_transport_verify(connection),
         )
-    return build_auth(auth, username, password)
+    return _build_auth(auth, username, password)
 
 
-def transport_verify(connection: ConnectionMode) -> ssl.SSLContext | bool:
+def _transport_verify(connection: _ConnectionMode) -> ssl.SSLContext | bool:
     """Resolve a connection's SSL configuration into an httpx verify setting.
 
     Returns a shared SSL context, or ``False`` when verification is explicitly
@@ -329,7 +302,7 @@ def transport_verify(connection: ConnectionMode) -> ssl.SSLContext | bool:
 
     Parameters
     ----------
-    connection : ConnectionMode
+    connection : _ConnectionMode
         The resolved transport mode.
 
     Returns
@@ -337,11 +310,11 @@ def transport_verify(connection: ConnectionMode) -> ssl.SSLContext | bool:
     ssl.SSLContext | bool
         A shared SSL context, or False when verification is disabled.
     """
-    context = get_ssl_context(connection.ssl or SSLConfig())
+    context = _get_ssl_context(connection.ssl or SSLConfig())
     return context if context is not None else False
 
 
-def get_ssl_context(ssl_config: SSLConfig) -> ssl.SSLContext | None:
+def _get_ssl_context(ssl_config: SSLConfig) -> ssl.SSLContext | None:
     """Return a cached SSL context for the given SSL configuration.
 
     Returns ``None`` when verification is disabled, deferring to httpx's own
@@ -378,7 +351,7 @@ def _build_ssl_context(
 ) -> ssl.SSLContext:
     """Build an SSL context, cached by its hashable arguments.
 
-    Kept separate from get_ssl_context because lru_cache requires hashable
+    Kept separate from _get_ssl_context because lru_cache requires hashable
     arguments and SSLConfig (a pydantic model) is not hashable.
     """
     if isinstance(verify, str):
@@ -388,3 +361,13 @@ def _build_ssl_context(
     if cert_file:
         context.load_cert_chain(cert_file, key_file, key_password)
     return context
+
+
+__all__ = [
+    "MARKLOGIC_ADMIN_PORT",
+    "MARKLOGIC_APP_SERVICES_PORT",
+    "MARKLOGIC_HEALTHCHECK_PORT",
+    "MARKLOGIC_MANAGE_PORT",
+    "CloudConfig",
+    "SSLConfig",
+]

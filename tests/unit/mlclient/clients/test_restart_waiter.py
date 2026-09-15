@@ -9,13 +9,10 @@ import respx
 from httpx_retries import Retry
 from pytest_mock import MockerFixture
 
-from mlclient import (
-    MARKLOGIC_ADMIN_PORT,
-    MARKLOGIC_MANAGE_PORT,
-    RESTART_RETRY_STRATEGY,
-)
-from mlclient.clients.restart_waiter import RestartWaiter
-from mlclient.http_config import HTTPConfig
+from mlclient.clients._restart import _RestartWaiter
+from mlclient.clients.http import _RESTART_RETRY_STRATEGY
+from mlclient.connection import MARKLOGIC_ADMIN_PORT, MARKLOGIC_MANAGE_PORT
+from mlclient.http import HTTPConfig
 from tests.utils import resources as resources_utils
 from tests.utils.ml_mockers import MLRespXMocker
 
@@ -104,8 +101,8 @@ def _waiter_config() -> HTTPConfig:
 
 
 @pytest.fixture
-def waiter() -> RestartWaiter:
-    return RestartWaiter(_waiter_config())
+def waiter() -> _RestartWaiter:
+    return _RestartWaiter(_waiter_config())
 
 
 @pytest.fixture
@@ -171,7 +168,7 @@ def mocker_factory():
 
 @respx.mock
 def test_wait_for_restart_completion_without_restart_response(
-    waiter: RestartWaiter,
+    waiter: _RestartWaiter,
     ml_mocker: MLRespXMocker,
 ):
     admin_route = _mock_timestamp_route(ml_mocker, _timestamp_response(READY_TS))
@@ -180,7 +177,7 @@ def test_wait_for_restart_completion_without_restart_response(
         response=None,
         timeout=FAST_TIMEOUT,
         poll_interval=FAST_POLL_INTERVAL,
-        retry=RESTART_RETRY_STRATEGY,
+        retry=_RESTART_RETRY_STRATEGY,
     )
 
     assert admin_route.call_count == 1
@@ -189,7 +186,7 @@ def test_wait_for_restart_completion_without_restart_response(
 @respx.mock
 def test_wait_for_restart_completion_waits_for_new_timestamp(
     mocker: MockerFixture,
-    waiter: RestartWaiter,
+    waiter: _RestartWaiter,
     json_restart_response_factory,
     ml_mocker: MLRespXMocker,
 ):
@@ -205,7 +202,7 @@ def test_wait_for_restart_completion_waits_for_new_timestamp(
         _timestamp_response(READY_TS),
     )
     sleep = mocker.patch(
-        "mlclient.clients.restart_waiter.asyncio.sleep",
+        "mlclient.clients._restart.asyncio.sleep",
         new=mocker.AsyncMock(),
     )
 
@@ -213,7 +210,7 @@ def test_wait_for_restart_completion_waits_for_new_timestamp(
         restart_response,
         timeout=MULTIHOST_TIMEOUT,
         poll_interval=FAST_POLL_INTERVAL,
-        retry=RESTART_RETRY_STRATEGY,
+        retry=_RESTART_RETRY_STRATEGY,
     )
 
     assert admin_route.call_count == 2
@@ -222,7 +219,7 @@ def test_wait_for_restart_completion_waits_for_new_timestamp(
 
 @respx.mock
 def test_wait_for_restart_completion_single_host_does_not_call_hosts_endpoint(
-    waiter: RestartWaiter,
+    waiter: _RestartWaiter,
     json_restart_response_factory,
     ml_mocker: MLRespXMocker,
     mocker_factory,
@@ -245,7 +242,7 @@ def test_wait_for_restart_completion_single_host_does_not_call_hosts_endpoint(
         restart_response,
         timeout=MULTIHOST_TIMEOUT,
         poll_interval=FAST_POLL_INTERVAL,
-        retry=RESTART_RETRY_STRATEGY,
+        retry=_RESTART_RETRY_STRATEGY,
     )
 
     assert hosts_route.call_count == 0
@@ -254,7 +251,7 @@ def test_wait_for_restart_completion_single_host_does_not_call_hosts_endpoint(
 
 @respx.mock
 def test_wait_for_restart_completion_falls_back_to_current_host_when_resolution_fails(
-    waiter: RestartWaiter,
+    waiter: _RestartWaiter,
     json_restart_response_factory,
     ml_mocker: MLRespXMocker,
     mocker_factory,
@@ -277,7 +274,7 @@ def test_wait_for_restart_completion_falls_back_to_current_host_when_resolution_
         restart_response,
         timeout=MULTIHOST_TIMEOUT,
         poll_interval=FAST_POLL_INTERVAL,
-        retry=RESTART_RETRY_STRATEGY,
+        retry=_RESTART_RETRY_STRATEGY,
     )
 
     assert admin_route.call_count == 1
@@ -286,7 +283,7 @@ def test_wait_for_restart_completion_falls_back_to_current_host_when_resolution_
 @respx.mock
 def test_wait_for_restart_completion_waits_for_current_host_baseline_in_multihost_case(
     mocker: MockerFixture,
-    waiter: RestartWaiter,
+    waiter: _RestartWaiter,
     json_restart_response_factory,
     mocker_factory,
 ):
@@ -323,7 +320,7 @@ def test_wait_for_restart_completion_waits_for_current_host_baseline_in_multihos
         host="node-b",
     )
     sleep = mocker.patch(
-        "mlclient.clients.restart_waiter.asyncio.sleep",
+        "mlclient.clients._restart.asyncio.sleep",
         new=mocker.AsyncMock(),
     )
 
@@ -331,7 +328,7 @@ def test_wait_for_restart_completion_waits_for_current_host_baseline_in_multihos
         restart_response,
         timeout=MULTIHOST_TIMEOUT,
         poll_interval=FAST_POLL_INTERVAL,
-        retry=RESTART_RETRY_STRATEGY,
+        retry=_RESTART_RETRY_STRATEGY,
     )
 
     assert current_host_route.call_count == 2
@@ -342,7 +339,7 @@ def test_wait_for_restart_completion_waits_for_current_host_baseline_in_multihos
 @respx.mock
 def test_wait_for_restart_completion_waits_for_all_restart_hosts_in_parallel(
     mocker: MockerFixture,
-    waiter: RestartWaiter,
+    waiter: _RestartWaiter,
     json_restart_response_factory,
     mocker_factory,
 ):
@@ -384,7 +381,7 @@ def test_wait_for_restart_completion_waits_for_all_restart_hosts_in_parallel(
         _timestamp_response("2026-03-16T11:06:50.000000+01:00"),
     )
     sleep = mocker.patch(
-        "mlclient.clients.restart_waiter.asyncio.sleep",
+        "mlclient.clients._restart.asyncio.sleep",
         new=mocker.AsyncMock(),
     )
 
@@ -392,7 +389,7 @@ def test_wait_for_restart_completion_waits_for_all_restart_hosts_in_parallel(
         restart_response,
         timeout=MULTIHOST_TIMEOUT,
         poll_interval=FAST_POLL_INTERVAL,
-        retry=RESTART_RETRY_STRATEGY,
+        retry=_RESTART_RETRY_STRATEGY,
     )
 
     assert current_host_route.call_count == 1
@@ -402,7 +399,7 @@ def test_wait_for_restart_completion_waits_for_all_restart_hosts_in_parallel(
 
 
 def test_wait_for_restart_completion_raises_inside_running_loop(
-    waiter: RestartWaiter,
+    waiter: _RestartWaiter,
 ):
     async def run():
         with pytest.raises(
@@ -413,7 +410,7 @@ def test_wait_for_restart_completion_raises_inside_running_loop(
                 response=None,
                 timeout=FAST_TIMEOUT,
                 poll_interval=FAST_POLL_INTERVAL,
-                retry=RESTART_RETRY_STRATEGY,
+                retry=_RESTART_RETRY_STRATEGY,
             )
 
     asyncio.run(run())
@@ -421,7 +418,7 @@ def test_wait_for_restart_completion_raises_inside_running_loop(
 
 @respx.mock
 def test_wait_for_restart_completion_falls_back_when_hosts_endpoint_unavailable(
-    waiter: RestartWaiter,
+    waiter: _RestartWaiter,
     json_restart_response_factory,
     ml_mocker: MLRespXMocker,
     mocker_factory,
@@ -448,7 +445,7 @@ def test_wait_for_restart_completion_falls_back_when_hosts_endpoint_unavailable(
         restart_response,
         timeout=MULTIHOST_TIMEOUT,
         poll_interval=FAST_POLL_INTERVAL,
-        retry=RESTART_RETRY_STRATEGY,
+        retry=_RESTART_RETRY_STRATEGY,
     )
 
     assert admin_route.call_count == 1
@@ -456,7 +453,7 @@ def test_wait_for_restart_completion_falls_back_when_hosts_endpoint_unavailable(
 
 @respx.mock
 def test_wait_for_restart_completion_raises_on_non_retryable_admin_status(
-    waiter: RestartWaiter,
+    waiter: _RestartWaiter,
     ml_mocker: MLRespXMocker,
 ):
     ml_mocker.with_url(_admin_timestamp_url())
@@ -469,13 +466,13 @@ def test_wait_for_restart_completion_raises_on_non_retryable_admin_status(
             response=None,
             timeout=FAST_TIMEOUT,
             poll_interval=FAST_POLL_INTERVAL,
-            retry=RESTART_RETRY_STRATEGY,
+            retry=_RESTART_RETRY_STRATEGY,
         )
 
 
 @respx.mock
 def test_wait_for_restart_completion_times_out_after_retryable_exception(
-    waiter: RestartWaiter,
+    waiter: _RestartWaiter,
     ml_mocker: MLRespXMocker,
 ):
     ml_mocker.with_url(_admin_timestamp_url())
@@ -486,7 +483,7 @@ def test_wait_for_restart_completion_times_out_after_retryable_exception(
             response=None,
             timeout=0.0,
             poll_interval=FAST_POLL_INTERVAL,
-            retry=RESTART_RETRY_STRATEGY,
+            retry=_RESTART_RETRY_STRATEGY,
         )
     assert isinstance(exc_info.value.__cause__, httpx.ReadTimeout)
 
@@ -494,7 +491,7 @@ def test_wait_for_restart_completion_times_out_after_retryable_exception(
 @respx.mock
 def test_wait_for_restart_completion_retries_after_retryable_exception(
     mocker: MockerFixture,
-    waiter: RestartWaiter,
+    waiter: _RestartWaiter,
     ml_mocker: MLRespXMocker,
 ):
     admin_route = _mock_timestamp_route(
@@ -503,7 +500,7 @@ def test_wait_for_restart_completion_retries_after_retryable_exception(
         _timestamp_response(READY_TS),
     )
     sleep = mocker.patch(
-        "mlclient.clients.restart_waiter.asyncio.sleep",
+        "mlclient.clients._restart.asyncio.sleep",
         new=mocker.AsyncMock(),
     )
 
@@ -511,7 +508,7 @@ def test_wait_for_restart_completion_retries_after_retryable_exception(
         response=None,
         timeout=FAST_TIMEOUT,
         poll_interval=FAST_POLL_INTERVAL,
-        retry=RESTART_RETRY_STRATEGY,
+        retry=_RESTART_RETRY_STRATEGY,
     )
 
     assert admin_route.call_count == 2
@@ -521,7 +518,7 @@ def test_wait_for_restart_completion_retries_after_retryable_exception(
 @respx.mock
 def test_wait_for_restart_completion_retries_after_retryable_status(
     mocker: MockerFixture,
-    waiter: RestartWaiter,
+    waiter: _RestartWaiter,
     ml_mocker: MLRespXMocker,
 ):
     admin_route = _mock_timestamp_route(
@@ -530,7 +527,7 @@ def test_wait_for_restart_completion_retries_after_retryable_status(
         _timestamp_response(READY_TS),
     )
     sleep = mocker.patch(
-        "mlclient.clients.restart_waiter.asyncio.sleep",
+        "mlclient.clients._restart.asyncio.sleep",
         new=mocker.AsyncMock(),
     )
 
@@ -538,7 +535,7 @@ def test_wait_for_restart_completion_retries_after_retryable_status(
         response=None,
         timeout=FAST_TIMEOUT,
         poll_interval=FAST_POLL_INTERVAL,
-        retry=RESTART_RETRY_STRATEGY,
+        retry=_RESTART_RETRY_STRATEGY,
     )
 
     assert admin_route.call_count == 2
@@ -547,7 +544,7 @@ def test_wait_for_restart_completion_retries_after_retryable_status(
 
 @respx.mock
 def test_wait_for_restart_completion_times_out_after_stale_timestamp(
-    waiter: RestartWaiter,
+    waiter: _RestartWaiter,
     json_restart_response_factory,
     ml_mocker: MLRespXMocker,
 ):
@@ -564,7 +561,7 @@ def test_wait_for_restart_completion_times_out_after_stale_timestamp(
             restart_response,
             timeout=0.0,
             poll_interval=FAST_POLL_INTERVAL,
-            retry=RESTART_RETRY_STRATEGY,
+            retry=_RESTART_RETRY_STRATEGY,
         )
 
 
@@ -595,7 +592,7 @@ def test_wait_for_restart_completion_times_out_after_stale_timestamp(
     ],
 )
 def test_is_restart_response(response, expected_is_restart_response):
-    assert RestartWaiter.is_restart_response(response) is expected_is_restart_response
+    assert _RestartWaiter.is_restart_response(response) is expected_is_restart_response
 
 
 @pytest.mark.parametrize(
@@ -662,7 +659,7 @@ def test_is_restart_response(response, expected_is_restart_response):
 )
 @respx.mock
 def test_wait_for_restart_treats_invalid_payloads_as_single_host_probe(
-    waiter: RestartWaiter,
+    waiter: _RestartWaiter,
     ml_mocker: MLRespXMocker,
     response,
 ):
@@ -672,7 +669,7 @@ def test_wait_for_restart_treats_invalid_payloads_as_single_host_probe(
         response,
         timeout=FAST_TIMEOUT,
         poll_interval=FAST_POLL_INTERVAL,
-        retry=RESTART_RETRY_STRATEGY,
+        retry=_RESTART_RETRY_STRATEGY,
     )
 
     assert admin_route.call_count == 1
@@ -680,7 +677,7 @@ def test_wait_for_restart_treats_invalid_payloads_as_single_host_probe(
 
 @respx.mock
 def test_wait_for_restart_completion_parses_valid_xml_restart_payload(
-    waiter: RestartWaiter,
+    waiter: _RestartWaiter,
     xml_restart_response_factory,
     mocker: MockerFixture,
     mocker_factory,
@@ -720,7 +717,7 @@ def test_wait_for_restart_completion_parses_valid_xml_restart_payload(
         host="node-b",
     )
     sleep = mocker.patch(
-        "mlclient.clients.restart_waiter.asyncio.sleep",
+        "mlclient.clients._restart.asyncio.sleep",
         new=mocker.AsyncMock(),
     )
 
@@ -728,7 +725,7 @@ def test_wait_for_restart_completion_parses_valid_xml_restart_payload(
         restart_response,
         timeout=FAST_TIMEOUT,
         poll_interval=FAST_POLL_INTERVAL,
-        retry=RESTART_RETRY_STRATEGY,
+        retry=_RESTART_RETRY_STRATEGY,
     )
 
     assert current_host_route.call_count == 1
@@ -739,7 +736,7 @@ def test_wait_for_restart_completion_parses_valid_xml_restart_payload(
 
 @respx.mock
 def test_wait_for_host_ready_returns_before_next_request_when_baseline_resolves(
-    waiter: RestartWaiter,
+    waiter: _RestartWaiter,
     json_restart_response_factory,
     ml_mocker: MLRespXMocker,
 ):
@@ -760,7 +757,7 @@ def test_wait_for_host_ready_returns_before_next_request_when_baseline_resolves(
         restart_response,
         timeout=FAST_TIMEOUT,
         poll_interval=FAST_POLL_INTERVAL,
-        retry=RESTART_RETRY_STRATEGY,
+        retry=_RESTART_RETRY_STRATEGY,
     )
 
     assert admin_route.call_count == 1
@@ -769,7 +766,7 @@ def test_wait_for_host_ready_returns_before_next_request_when_baseline_resolves(
 @respx.mock
 def test_wait_for_host_ready_returns_from_cached_timestamp_before_next_request(
     mocker: MockerFixture,
-    waiter: RestartWaiter,
+    waiter: _RestartWaiter,
     json_restart_response_factory,
     ml_mocker: MLRespXMocker,
     mocker_factory,
@@ -798,7 +795,7 @@ def test_wait_for_host_ready_returns_from_cached_timestamp_before_next_request(
         )
 
     sleep = mocker.patch(
-        "mlclient.clients.restart_waiter.asyncio.sleep",
+        "mlclient.clients._restart.asyncio.sleep",
         new=mocker.AsyncMock(),
     )
     hosts_mocker = mocker_factory()
@@ -825,7 +822,7 @@ def test_wait_for_host_ready_returns_from_cached_timestamp_before_next_request(
         restart_response,
         timeout=FAST_TIMEOUT,
         poll_interval=FAST_POLL_INTERVAL,
-        retry=RESTART_RETRY_STRATEGY,
+        retry=_RESTART_RETRY_STRATEGY,
     )
 
     assert admin_route.call_count == 1
@@ -836,7 +833,7 @@ def test_wait_for_host_ready_returns_from_cached_timestamp_before_next_request(
 
 @respx.mock
 def test_wait_for_restart_completion_times_out_while_current_host_baseline_is_pending(
-    waiter: RestartWaiter,
+    waiter: _RestartWaiter,
     json_restart_response_factory,
     mocker_factory,
 ):
@@ -871,7 +868,7 @@ def test_wait_for_restart_completion_times_out_while_current_host_baseline_is_pe
             restart_response,
             timeout=0.0,
             poll_interval=FAST_POLL_INTERVAL,
-            retry=RESTART_RETRY_STRATEGY,
+            retry=_RESTART_RETRY_STRATEGY,
         )
 
     assert current_host_route.call_count == 1
@@ -880,7 +877,7 @@ def test_wait_for_restart_completion_times_out_while_current_host_baseline_is_pe
 @pytest.mark.asyncio
 @respx.mock
 async def test_async_wait_for_restart_completion_without_restart_response(
-    waiter: RestartWaiter,
+    waiter: _RestartWaiter,
 ):
     ml_mocker = MLRespXMocker(use_router=False)
     admin_route = _mock_timestamp_route(ml_mocker, _timestamp_response(READY_TS))
@@ -889,7 +886,7 @@ async def test_async_wait_for_restart_completion_without_restart_response(
         response=None,
         timeout=FAST_TIMEOUT,
         poll_interval=FAST_POLL_INTERVAL,
-        retry=RESTART_RETRY_STRATEGY,
+        retry=_RESTART_RETRY_STRATEGY,
     )
 
     assert admin_route.call_count == 1
@@ -899,7 +896,7 @@ async def test_async_wait_for_restart_completion_without_restart_response(
 @respx.mock
 async def test_async_wait_for_restart_completion_waits_for_new_timestamp(
     mocker: MockerFixture,
-    waiter: RestartWaiter,
+    waiter: _RestartWaiter,
     json_restart_response_factory,
 ):
     ml_mocker = MLRespXMocker(use_router=False)
@@ -915,7 +912,7 @@ async def test_async_wait_for_restart_completion_waits_for_new_timestamp(
         _timestamp_response(READY_TS),
     )
     sleep = mocker.patch(
-        "mlclient.clients.restart_waiter.asyncio.sleep",
+        "mlclient.clients._restart.asyncio.sleep",
         new=mocker.AsyncMock(),
     )
 
@@ -923,7 +920,7 @@ async def test_async_wait_for_restart_completion_waits_for_new_timestamp(
         restart_response,
         timeout=MULTIHOST_TIMEOUT,
         poll_interval=FAST_POLL_INTERVAL,
-        retry=RESTART_RETRY_STRATEGY,
+        retry=_RESTART_RETRY_STRATEGY,
     )
 
     assert admin_route.call_count == 2
@@ -936,13 +933,13 @@ def test_wait_for_restart_completion_uses_custom_probe_timeout(
     ml_mocker: MLRespXMocker,
 ):
     custom_timeout = 42.0
-    waiter = RestartWaiter(
+    waiter = _RestartWaiter(
         _waiter_config(),
         probe_timeout=custom_timeout,
     )
     _mock_timestamp_route(ml_mocker, _timestamp_response(READY_TS))
     async_client_cls = mocker.patch(
-        "mlclient.clients.restart_waiter.AsyncClient",
+        "mlclient.clients._restart.AsyncClient",
         wraps=httpx.AsyncClient,
     )
 
@@ -950,7 +947,7 @@ def test_wait_for_restart_completion_uses_custom_probe_timeout(
         response=None,
         timeout=FAST_TIMEOUT,
         poll_interval=FAST_POLL_INTERVAL,
-        retry=RESTART_RETRY_STRATEGY,
+        retry=_RESTART_RETRY_STRATEGY,
     )
 
     async_client_cls.assert_called_once_with(

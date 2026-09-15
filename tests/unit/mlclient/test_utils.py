@@ -1,8 +1,9 @@
 import pytest
 
-from mlclient import exceptions, utils
+from mlclient import _utils as utils
+from mlclient import exceptions
+from mlclient._utils import _BiDict
 from mlclient.exceptions import ResourceNotFoundError
-from mlclient.utils import BiDict
 
 
 def test_get_accept_header_for_xml_format():
@@ -71,20 +72,20 @@ def test_get_resource_non_existing():
 
 
 def test_bidict_forward():
-    bi_dict = BiDict({"a": 1})
+    bi_dict = _BiDict({"a": 1})
     assert bi_dict.get("a") == 1
 
 
 def test_bidict_inverse():
-    bi_dict = BiDict({"a": 1})
+    bi_dict = _BiDict({"a": 1})
     assert bi_dict.get(1) == "a"
 
 
 def test_bidict_default_none():
-    bi_dict = BiDict({"a": 1})
+    bi_dict = _BiDict({"a": 1})
     assert bi_dict.get("b") is None
 
 
 def test_bidict_default_custom():
-    bi_dict = BiDict({"a": 1})
+    bi_dict = _BiDict({"a": 1})
     assert bi_dict.get("b", 2) == 2

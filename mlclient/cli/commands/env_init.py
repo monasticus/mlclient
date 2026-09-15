@@ -24,16 +24,18 @@ from cleo.ui.question import Question
 from httpx import HTTPError
 from pydantic import ValidationError
 
-from mlclient import AsyncMLClient, MLEnvironment, constants
-from mlclient.connection import SSLConfig
-from mlclient.constants import (
-    ADMIN_PORT,
-    APP_SERVICES_PORT,
-    HEALTH_PORT,
-    MANAGE_PORT,
+from mlclient import _constants as constants
+from mlclient._client import AsyncMLClient
+from mlclient.connection import (
+    MARKLOGIC_ADMIN_PORT,
+    MARKLOGIC_APP_SERVICES_PORT,
+    MARKLOGIC_HEALTHCHECK_PORT,
+    MARKLOGIC_MANAGE_PORT,
+    SSLConfig,
 )
+from mlclient.env import MLEnvironment
 from mlclient.exceptions import EnvironmentFileExistsError, WrongParametersError
-from mlclient.http_config import HTTPConfig
+from mlclient.http import HTTPConfig
 
 logger = logging.getLogger(__name__)
 
@@ -43,10 +45,10 @@ _CLIENT_AUTH_METHODS = ("basic", "digest", "digestbasic")
 _PROTOCOLS = ("http", "https")
 
 _DEFAULT_SERVERS_BY_NAME = {
-    "App-Services": ("app-services", APP_SERVICES_PORT, True),
-    "Manage": ("manage", MANAGE_PORT, False),
-    "Admin": ("admin", ADMIN_PORT, False),
-    "HealthCheck": ("health", HEALTH_PORT, False),
+    "App-Services": ("app-services", MARKLOGIC_APP_SERVICES_PORT, True),
+    "Manage": ("manage", MARKLOGIC_MANAGE_PORT, False),
+    "Admin": ("admin", MARKLOGIC_ADMIN_PORT, False),
+    "HealthCheck": ("health", MARKLOGIC_HEALTHCHECK_PORT, False),
 }
 
 _COMMENTED_APP_NAME = "# app-name: <optional; scopes discovery when set>\n"
@@ -345,7 +347,7 @@ class EnvInitCommand(Command):
                 name=name,
                 protocol=protocol or "http",
                 host=host or "localhost",
-                port=port or MANAGE_PORT,
+                port=port or MARKLOGIC_MANAGE_PORT,
                 username=username if username is not None else "admin",
                 password=password if password is not None else "admin",
                 auth=self._resolve_auth(),
@@ -565,7 +567,9 @@ class EnvInitCommand(Command):
         self,
     ) -> int:
         """Prompt for a port, re-asking until it is a valid port number."""
-        question = Question("Port [<comment>8002</comment>]:", str(MANAGE_PORT))
+        question = Question(
+            "Port [<comment>8002</comment>]:", str(MARKLOGIC_MANAGE_PORT),
+        )
         question.set_validator(_require_valid_port)
         question.set_max_attempts(5)
         return int(self.ask(question))
@@ -673,7 +677,7 @@ def _default_server_entry(
     if not (port_diverges or rest_diverges or protocol_diverges or auth_diverges):
         return None
     entry = {"id": server_id}
-    if server["port"] != APP_SERVICES_PORT:
+    if server["port"] != MARKLOGIC_APP_SERVICES_PORT:
         entry["port"] = server["port"]
     if server["rest"] or rest_diverges:
         entry["rest"] = server["rest"]
@@ -910,9 +914,9 @@ def _app_servers(
         _apply_server_protocol(server, props, "mlRest", root_protocol)
         servers.append(server)
     defaults = (
-        ("app-services", "mlAppServices", APP_SERVICES_PORT),
-        ("manage", "mlManage", MANAGE_PORT),
-        ("admin", "mlAdmin", ADMIN_PORT),
+        ("app-services", "mlAppServices", MARKLOGIC_APP_SERVICES_PORT),
+        ("manage", "mlManage", MARKLOGIC_MANAGE_PORT),
+        ("admin", "mlAdmin", MARKLOGIC_ADMIN_PORT),
     )
     for server_id, prefix, standard_port in defaults:
         keys = {
@@ -951,7 +955,7 @@ def _default_gradle_entry(
     if not diverges:
         return None
     entry = {"id": server["id"]}
-    if port is not None and port != APP_SERVICES_PORT:
+    if port is not None and port != MARKLOGIC_APP_SERVICES_PORT:
         entry["port"] = port
     if "protocol" in server:
         entry["protocol"] = server["protocol"]

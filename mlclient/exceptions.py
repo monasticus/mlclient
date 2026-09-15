@@ -187,3 +187,21 @@ class EnvironmentFileExistsError(Exception):
             f"Configuration file already exists: [{file_path}]. Use --force to "
             f"overwrite.",
         )
+
+
+__all__ = [
+    "ConfigError",
+    "EnvironmentFileExistsError",
+    "InvalidLogTypeError",
+    "InvalidMetadataError",
+    "MLClientDirectoryNotFoundError",
+    "MLClientEnvironmentNotFoundError",
+    "MarkLogicError",
+    "NoRestServerConfiguredError",
+    "NoSuchAppServerError",
+    "NotARestServerError",
+    "ResourceNotFoundError",
+    "UnsupportedFileExtensionError",
+    "UnsupportedFormatError",
+    "WrongParametersError",
+]

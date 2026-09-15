@@ -16,15 +16,8 @@ NUMBER_OF_DOCS = 1000
 @pytest.fixture(scope="module", autouse=True)
 def _setup_and_teardown():
     # Setup
-    mimeo_config_path = resources_utils.get_test_resource_path(
-        __file__,
-        "mimeo-config.json",
-    )
     output_path = f"{TEST_RESOURCES_PATH}/output"
-    docs_configs = [
-        (mimeo_config_path, output_path, NUMBER_OF_DOCS),
-    ]
-    docs_client_utils.generate_docs_with_mimeo(docs_configs)
+    docs_client_utils.generate_document_files(output_path, NUMBER_OF_DOCS)
 
     yield
 

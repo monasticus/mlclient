@@ -18,7 +18,8 @@ import jwt
 import pytest
 import respx
 
-from mlclient import AuthConfig, MLClient
+from mlclient import MLClient
+from mlclient.auth import AuthConfig
 from mlclient.connection import CloudConfig, SSLConfig
 
 CERT_USER = "mlclient-cert-user"

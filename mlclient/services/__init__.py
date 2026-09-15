@@ -1,13 +1,10 @@
-"""The ML Services package.
+"""Public services for MLClient."""
 
-High-level services providing parsed results from MarkLogic operations.
-"""
-
-from .documents import AsyncDocumentsService, DocumentsService
-from .eval import LOCAL_NS, AsyncEvalService, EvalService
-from .log_level import LogLevelService
-from .logs import AsyncLogsService, LogsService, LogType
-from .transactions import (
+from mlclient.services.documents import AsyncDocumentsService, DocumentsService
+from mlclient.services.eval import AsyncEvalService, EvalService
+from mlclient.services.log_level import LogLevelService
+from mlclient.services.logs import AsyncLogsService, LogsService
+from mlclient.services.transactions import (
     AsyncTransactionService,
     TransactionService,
     async_open_transaction,
@@ -15,7 +12,6 @@ from .transactions import (
 )
 
 __all__ = [
-    "LOCAL_NS",
     "AsyncDocumentsService",
     "AsyncEvalService",
     "AsyncLogsService",
@@ -23,7 +19,6 @@ __all__ = [
     "DocumentsService",
     "EvalService",
     "LogLevelService",
-    "LogType",
     "LogsService",
     "TransactionService",
     "async_open_transaction",

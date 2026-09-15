@@ -4,8 +4,8 @@ import pytest
 import respx
 from cleo.testers.command_tester import CommandTester
 
-from mlclient import MLEnvironment
 from mlclient.cli import MLCLIentApplication
+from mlclient.env import MLEnvironment
 from mlclient.exceptions import WrongParametersError
 from tests.utils import resources as resources_utils
 from tests.utils.ml_mockers import MLRespXMocker
@@ -39,7 +39,7 @@ def ml_config() -> MLEnvironment:
 @pytest.fixture(autouse=True)
 def _setup(mocker, ml_config):
     # Setup
-    target = "mlclient.ml_environment.MLEnvironment.load"
+    target = "mlclient.env.MLEnvironment.load"
     mocker.patch(target, return_value=ml_config)
 
 

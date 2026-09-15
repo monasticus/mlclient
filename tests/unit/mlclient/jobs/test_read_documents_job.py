@@ -11,9 +11,13 @@ import respx
 
 from mlclient.exceptions import MarkLogicError
 from mlclient.jobs import ReadDocumentsJob
-from mlclient.models import Document, DocumentType, XMLDocument
-from mlclient.models.http import Category
-from mlclient.models.http import DocumentsBodyPart as BodyPart
+from mlclient.models import (
+    Category,
+    Document,
+    DocumentsBodyPart,
+    DocumentType,
+    XMLDocument,
+)
 from tests.utils import filesystem as fs_utils
 from tests.utils.ml_mockers import MLDocumentsMocker, MLRespXMocker
 
@@ -21,6 +25,13 @@ ml_doc_mocker = MLDocumentsMocker()
 
 ml_mocker = MLRespXMocker(router_base_url="http://localhost:8000/v1/documents")
 ml_mocker.with_get_side_effect(side_effect=ml_doc_mocker.get_documents_side_effect)
+
+
+def test_job_is_explicitly_experimental(caplog):
+    ReadDocumentsJob()
+    assert len(caplog.records) == 1
+    assert "ReadDocumentsJob is experimental" in caplog.text
+    assert "minor releases" in caplog.text
 
 
 @ml_mocker.router
@@ -420,7 +431,7 @@ def _get_test_document_body_parts(
     *,
     start: int = 1,
     metadata: list[str] | None = None,
-) -> Iterable[BodyPart]:
+) -> Iterable[DocumentsBodyPart]:
     range_start = start - 1
     range_end = start + count
     for i in range(range_start, range_end):
@@ -430,8 +441,8 @@ def _get_test_document_body_parts(
 def _get_test_document_body_part(
     num: int,
     metadata: list[str] | None = None,
-) -> Iterable[BodyPart]:
-    yield BodyPart(
+) -> Iterable[DocumentsBodyPart]:
+    yield DocumentsBodyPart(
         **{
             "content-type": "application/xml",
             "content-disposition": "attachment; "
@@ -455,7 +466,7 @@ def _get_test_document_body_part(
             content["properties"] = {}
         if "metadata" in metadata or "metadataValues" in metadata:
             content["metadataValues"] = {}
-        yield BodyPart(
+        yield DocumentsBodyPart(
             **{
                 "content-type": "application/json",
                 "content-disposition": "attachment; "

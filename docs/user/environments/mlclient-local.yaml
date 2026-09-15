@@ -1,0 +1,10 @@
+app-name: my-app
+host: localhost
+protocol: http
+username: admin
+password: admin
+auth: digest
+app-servers:
+  - id: content
+    port: 8100
+    rest: true

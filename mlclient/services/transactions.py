@@ -12,16 +12,16 @@ from typing import TYPE_CHECKING
 
 import httpx
 
+from mlclient._options import UNSET
 from mlclient.api.transactions import AsyncTransactionsApi, TransactionsApi
-from mlclient.connection import UNSET
 from mlclient.exceptions import MarkLogicError
-from mlclient.ml_response_parser import MLResponseParser
+from mlclient.responses import MLResponseParser
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
     from types import TracebackType
 
-    from mlclient.clients.api_client import ApiClient, AsyncApiClient
+    from mlclient.clients.api import ApiClient, AsyncApiClient
 
 
 class TransactionService:
@@ -381,7 +381,7 @@ async def async_open_transaction(
 
     Parameters
     ----------
-    api : ApiClient
+    api : AsyncApiClient
         The client used both to open the transaction and by the returned service
     name : str | None, default None
         A name to assign to the transaction

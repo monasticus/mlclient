@@ -6,13 +6,16 @@ from typing import TYPE_CHECKING
 
 from httpx import Response
 
-from mlclient.calls import DocumentsDeleteCall, DocumentsGetCall, DocumentsPostCall
-from mlclient.connection import UNSET
-from mlclient.models.http import DocumentsBodyPart as BodyPart
+from mlclient._options import UNSET
+from mlclient.calls.documents import (
+    DocumentsDeleteCall,
+    DocumentsGetCall,
+    DocumentsPostCall,
+)
+from mlclient.models.document_parts import DocumentsBodyPart
 
-# Avoid circular import: ApiClient -> api classes -> ApiClient
 if TYPE_CHECKING:
-    from mlclient.clients.api_client import ApiClient, AsyncApiClient
+    from mlclient.clients.api import ApiClient, AsyncApiClient
 
 
 class DocumentsApi:
@@ -109,7 +112,7 @@ class DocumentsApi:
 
     def post(
         self,
-        body_parts: list[BodyPart],
+        body_parts: list[DocumentsBodyPart],
         *,
         database: str | None = None,
         transform: str | None = None,
@@ -125,7 +128,7 @@ class DocumentsApi:
 
         Parameters
         ----------
-        body_parts : list[BodyPart]
+        body_parts : list[DocumentsBodyPart]
             A list of multipart request body parts
         database : str
             Perform this operation on the named content database instead
@@ -347,7 +350,7 @@ class AsyncDocumentsApi:
 
     async def post(
         self,
-        body_parts: list[BodyPart],
+        body_parts: list[DocumentsBodyPart],
         *,
         database: str | None = None,
         transform: str | None = None,
@@ -363,7 +366,7 @@ class AsyncDocumentsApi:
 
         Parameters
         ----------
-        body_parts : list[BodyPart]
+        body_parts : list[DocumentsBodyPart]
             A list of multipart request body parts
         database : str
             Perform this operation on the named content database instead

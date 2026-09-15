@@ -37,14 +37,14 @@ It exports the following commands:
         Reports the MarkLogic version of an environment.
 """
 
-from .env_init import EnvInitCommand
-from .env_show import EnvShowCommand
-from .eval import EvalCommand
-from .health import HealthCommand
-from .http import HttpCommand
-from .log_level import LogLevelCommand
-from .logs import LogsCommand
-from .version import VersionCommand
+from mlclient.cli.commands.env_init import EnvInitCommand
+from mlclient.cli.commands.env_show import EnvShowCommand
+from mlclient.cli.commands.eval import EvalCommand
+from mlclient.cli.commands.health import HealthCommand
+from mlclient.cli.commands.http import HttpCommand
+from mlclient.cli.commands.log_level import LogLevelCommand
+from mlclient.cli.commands.logs import LogsCommand
+from mlclient.cli.commands.version import VersionCommand
 
 __all__ = [
     "EnvInitCommand",

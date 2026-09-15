@@ -9,6 +9,8 @@ import re
 from collections.abc import Iterator
 from typing import TYPE_CHECKING
 
+from dateutil.parser import isoparse
+
 from mlclient._options import UNSET
 from mlclient.exceptions import MarkLogicError
 from mlclient.models.types import LogType
@@ -154,7 +156,12 @@ class LogsService:
         logfile = resp_body["logfile"]
         if log_type == LogType.ERROR:
             logs = logfile.get("log", ())
-            return iter(sorted(logs, key=lambda log: log["timestamp"]))
+            return iter(
+                sorted(
+                    logs,
+                    key=lambda log: isoparse(log["timestamp"]),
+                ),
+            )
         if "message" not in logfile:
             return iter([])
         return ({"message": log} for log in logfile["message"].split("\n"))

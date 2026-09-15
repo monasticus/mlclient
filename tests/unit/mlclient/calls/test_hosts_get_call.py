@@ -24,7 +24,7 @@ def test_validation_view_param():
 
     expected_msg = (
         "The supported views are: "
-        "default, status, metrics, properties-schema, describe"
+        "default, status, metrics, schema, properties-schema, describe"
     )
     assert err.value.args[0] == expected_msg
 
@@ -98,3 +98,7 @@ def test_fully_parametrized_call():
         "view": "status",
     }
     assert call.body is None
+
+
+def test_schema_view():
+    assert HostsGetCall(view="schema").params["view"] == "schema"

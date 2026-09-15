@@ -100,6 +100,24 @@ class TestTransactionsEndpoint:
             ml.rest.transactions.post(txid, result="rollback")
 
 
+class TestHostsEndpoint:
+    @pytest.mark.ml_access
+    @pytest.mark.parametrize(
+        "view",
+        ["default", "status", "metrics", "schema", "properties-schema", "describe"],
+    )
+    def test_supported_host_views(self, ml_client: MLClient, view: str):
+        response = ml_client.manage.hosts.get_list(view=view)
+        assert response.status_code == httpx.codes.OK
+        assert "xml" in response.headers["content-type"]
+
+    @pytest.mark.ml_access
+    def test_schema_view_rejects_json(self, ml_client: MLClient):
+        response = ml_client.manage.hosts.get_list(view="schema", data_format="json")
+        assert response.status_code == httpx.codes.BAD_REQUEST
+        assert response.json()["errorResponse"]["messageCode"] == "MANAGE-INVALIDPARAM"
+
+
 class TestLogsEndpoint:
     TEST_LOGS_COUNT = 10
 

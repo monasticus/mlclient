@@ -1,15 +1,23 @@
 from __future__ import annotations
 
+import asyncio
 import re
 from pathlib import Path
 
+import httpx
 import pytest
 import respx
 from cleo.testers.command_tester import CommandTester
 
+from mlclient import AsyncMLClient
 from mlclient.cli import MLCLIentApplication
 from mlclient.env import MLEnvironment
-from mlclient.exceptions import InvalidLogTypeError, WrongParametersError
+from mlclient.http import NO_RETRY_STRATEGY
+from mlclient.exceptions import (
+    InvalidLogTypeError,
+    MarkLogicError,
+    WrongParametersError,
+)
 from tests.utils import resources as resources_utils
 from tests.utils.ml_mockers import MLRespXMocker
 
@@ -845,6 +853,157 @@ def test_command_logs_all_hosts_rejects_non_error_log_type():
 
     expected_msg = "The --all-hosts option supports the error log type only"
     assert err.value.args[0] == expected_msg
+
+
+@pytest.mark.parametrize("option", ["--host node1", "--list"])
+@respx.mock
+def test_command_logs_all_hosts_rejects_conflicting_options(option):
+    tester = _get_tester("logs")
+    with pytest.raises(WrongParametersError, match="cannot be combined"):
+        tester.execute(f"-e test-cluster --all-hosts {option}")
+    assert not respx.calls
+
+
+@respx.mock
+def test_command_logs_all_hosts_reports_host_discovery_error():
+    respx.get("http://ml_cluster_node1:8002/manage/v2/hosts").respond(
+        403,
+        json={
+            "errorResponse": {
+                "statusCode": 403,
+                "status": "Forbidden",
+                "messageCode": "SEC-PRIV",
+                "message": "Insufficient privileges",
+            },
+        },
+    )
+    with pytest.raises(MarkLogicError, match="Insufficient privileges"):
+        _get_tester("logs").execute("-e test-cluster --all-hosts")
+
+
+@respx.mock
+def test_command_logs_all_hosts_handles_empty_host_list():
+    respx.get("http://ml_cluster_node1:8002/manage/v2/hosts").respond(
+        200,
+        json={"host-default-list": {"list-items": {"list-count": {"value": 0}}}},
+    )
+    tester = _get_tester("logs")
+    tester.execute("-e test-cluster --all-hosts")
+    assert tester.status_code == 0
+    assert tester.io.fetch_error() == ""
+
+
+@respx.mock
+def test_command_logs_all_hosts_orders_instants_and_preserves_messages():
+    respx.get("http://ml_cluster_node1:8002/manage/v2/hosts").respond(
+        200,
+        json=_hosts_body(["ml_cluster_node1", "ml_cluster_node2"]),
+    )
+    _mock_host_error_logs(
+        "ml_cluster_node1",
+        [
+            ("2023-09-01T00:00:00.1Z", "info", "third"),
+            ("2023-09-01T00:00:00Z", "info", "<info>second</info>"),
+        ],
+    )
+    _mock_host_error_logs(
+        "ml_cluster_node2",
+        [
+            ("2023-09-01T01:00:00.2+01:00", "info", "fourth"),
+            ("2023-09-01T00:30:00+01:00", "info", "first"),
+        ],
+    )
+    tester = _get_tester("logs")
+    tester.execute("-e test-cluster --all-hosts")
+    messages = [
+        line.rsplit(": ", 1)[1]
+        for line in tester.io.fetch_output().splitlines()
+        if "<log-level>" in line
+    ]
+    assert messages == ["first", "<info>second</info>", "third", "fourth"]
+
+
+@pytest.mark.parametrize(
+    ("server", "filename"),
+    [
+        ("content", "8100_ErrorLog.txt"),
+        ("8002", "8002_ErrorLog.txt"),
+        ("0", "TaskServer_ErrorLog.txt"),
+    ],
+)
+@respx.mock
+def test_command_logs_all_hosts_forwards_filters_and_server(server, filename):
+    respx.get("http://ml_cluster_node1:8002/manage/v2/hosts").respond(
+        200,
+        json=_hosts_body(["ml_cluster_node1", "ml_cluster_node2"]),
+    )
+    routes = [
+        respx.get(
+            "http://ml_cluster_node1:8002/manage/v2/logs",
+            params={
+                "host": host,
+                "filename": filename,
+                "format": "json",
+                "start": "2023-09-01T00:00:00",
+                "end": "2023-09-02T00:00:00",
+                "regex": "needle",
+            },
+        ).respond(200, json={"logfile": {}})
+        for host in ("ml_cluster_node1", "ml_cluster_node2")
+    ]
+    tester = _get_tester("logs")
+    tester.execute(
+        f"-e test-cluster --all-hosts -s {server} "
+        "--from 2023-09-01 --to 2023-09-02 --regex needle",
+    )
+    assert all(route.call_count == 1 for route in routes)
+    assert tester.io.fetch_error() == ""
+
+
+@respx.mock
+def test_command_logs_all_hosts_propagates_host_timeout(mocker):
+    mocker.patch("mlclient.http.DEFAULT_RETRY_STRATEGY", NO_RETRY_STRATEGY)
+    respx.get("http://ml_cluster_node1:8002/manage/v2/hosts").respond(
+        200,
+        json=_hosts_body(["ml_cluster_node1"]),
+    )
+    respx.get("http://ml_cluster_node1:8002/manage/v2/logs").mock(
+        side_effect=httpx.ReadTimeout("Host unavailable"),
+    )
+    with pytest.raises(httpx.ReadTimeout):
+        _get_tester("logs").execute("-e test-cluster --all-hosts")
+
+
+@respx.mock
+def test_command_logs_all_hosts_cancels_reads_before_disconnect(mocker):
+    started = asyncio.Event()
+    events = []
+    disconnect = AsyncMLClient.disconnect
+
+    async def record_disconnect(client):
+        events.append("disconnect")
+        await disconnect(client)
+
+    async def read_logs(request):
+        if request.url.params["host"] == "ml_cluster_node1":
+            await started.wait()
+            return httpx.Response(403, json={"errorResponse": {"message": "Denied"}})
+        started.set()
+        try:
+            await asyncio.Future()
+        finally:
+            events.append("cancelled")
+
+    mocker.patch.object(AsyncMLClient, "disconnect", record_disconnect)
+    respx.get("http://ml_cluster_node1:8002/manage/v2/hosts").respond(
+        200, json=_hosts_body(["ml_cluster_node1", "ml_cluster_node2"]),
+    )
+    respx.get("http://ml_cluster_node1:8002/manage/v2/logs").mock(side_effect=read_logs)
+    tester = _get_tester("logs")
+    with pytest.raises(MarkLogicError, match="Denied"):
+        tester.execute("-e test-cluster --all-hosts")
+    assert events == ["cancelled", "disconnect"]
+    assert "<log-level>" not in tester.io.fetch_output()
 
 
 def _mock_two_node_error_logs():

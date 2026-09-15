@@ -55,15 +55,15 @@ an ongoing goal.
 ## Use the CLI
 
 ```sh
-ml env init                            # Create and review project configuration
-ml env show                            # Inspect environments
-ml eval -x '"Hello World!"'                      # Evaluate code
-ml http get /v1/documents uri=/doc.json # Send a raw request
-ml logs -s 8002                        # Read a server's logs
-ml logs --all-hosts --regex 'Forest M.*' # Merge error logs across the cluster
-ml log-level                          # Inspect the group log level
-ml health                             # Check HealthCheck readiness
-ml version                            # Read the server version
+ml env init                               # Create and review project configuration
+ml env show                               # Inspect environments
+ml eval -x '"Hello World!"'               # Evaluate code
+ml http get /v1/documents uri=/doc.json   # Send a raw request
+ml logs -s 8002                           # Read a server's logs
+ml logs --all-hosts --regex 'Forest M.*'  # Merge error logs across the cluster
+ml log-level                              # Inspect the group log level
+ml health                                 # Check HealthCheck readiness
+ml version                                # Read the server version
 ```
 
 You can import an ml-gradle configuration or discover App Servers from a host.

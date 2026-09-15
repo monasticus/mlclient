@@ -982,3 +982,35 @@ async def test_put_user_properties():
 
     assert resp.status_code == httpx.codes.NOT_FOUND
     assert resp.json()["errorResponse"]["messageCode"] == "SEC-USERDNE"
+
+
+@pytest.mark.parametrize("timeout", [None, 2, httpx.Timeout(5, read=7)])
+@respx.mock
+@pytest.mark.asyncio
+async def test_get_hosts_forwards_parameters_and_timeout(timeout):
+    route = respx.get(
+        "http://localhost:8002/manage/v2/hosts",
+        params={"format": "json", "group-id": "Default", "view": "status"},
+        headers={"Accept": "application/json"},
+    ).respond(200, json={})
+    async with AsyncMLClient() as ml:
+        response = await ml.manage.hosts.get_list(
+            data_format="json", group_id="Default", view="status", timeout=timeout,
+        )
+    assert response.status_code == 200
+    assert (
+        route.calls.last.request.extensions["timeout"]
+        == httpx.Timeout(timeout).as_dict()
+    )
+
+
+@respx.mock
+@pytest.mark.asyncio
+async def test_get_hosts_returns_raw_error_response():
+    respx.get("http://localhost:8002/manage/v2/hosts").respond(
+        403, json={"errorResponse": {"message": "Forbidden"}},
+    )
+    async with AsyncMLClient() as ml:
+        response = await ml.manage.hosts.get_list()
+    assert response.status_code == 403
+    assert response.json() == {"errorResponse": {"message": "Forbidden"}}

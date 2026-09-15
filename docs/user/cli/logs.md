@@ -71,8 +71,9 @@ server operation; it does not replace the environment's connection hostname.
 Read error logs from every host in the cluster at once, merged into a single
 timeline by timestamp. The host is shown in parentheses between the log level
 and the message. The host list comes from `/manage/v2/hosts`, and each host is
-queried concurrently. Error logs only: `--all-hosts` with any other log type is
-rejected.
+queried concurrently. If host discovery or any host read fails, the command
+fails without printing a partial timeline. Error logs only: `--all-hosts` with
+any other log type is rejected. `--all-hosts` cannot be combined with `--host` or `--list`.
 
 Reading unfiltered error logs from every host can return a large volume and may
 time out, so a multi-host read with no `--from`, `--to` or `--regex` prints a

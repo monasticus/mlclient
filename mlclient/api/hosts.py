@@ -22,6 +22,13 @@ class HostsApi:
     """
 
     def __init__(self, api: ApiClient):
+        """Bind host operations to a synchronous API client.
+
+        Parameters
+        ----------
+        api : ApiClient
+            The transport used to send requests.
+        """
         self._api = api
 
     def get_list(
@@ -49,7 +56,8 @@ class HostsApi:
             If not specified, the response includes information about all hosts.
         view : str
             A specific view of the returned data.
-            Can be status, metrics, properties-schema, describe, or default.
+            Can be default, status, metrics, schema, properties-schema, or describe.
+            The schema view requires XML format.
         timeout : httpx.Timeout | float | None, default unset
             A per-request timeout for this call. Unset uses the client's
             configured timeout; None disables every HTTP timeout; a number sets
@@ -75,6 +83,13 @@ class AsyncHostsApi:
     """Async mid-level API for ``/manage/v2/hosts`` endpoint."""
 
     def __init__(self, api: AsyncApiClient):
+        """Bind host operations to an asynchronous API client.
+
+        Parameters
+        ----------
+        api : AsyncApiClient
+            The transport used to send requests.
+        """
         self._api = api
 
     async def get_list(
@@ -102,7 +117,8 @@ class AsyncHostsApi:
             If not specified, the response includes information about all hosts.
         view : str
             A specific view of the returned data.
-            Can be status, metrics, properties-schema, describe, or default.
+            Can be default, status, metrics, schema, properties-schema, or describe.
+            The schema view requires XML format.
         timeout : httpx.Timeout | float | None, default unset
             A per-request timeout for this call. Unset uses the client's
             configured timeout; None disables every HTTP timeout; a number sets

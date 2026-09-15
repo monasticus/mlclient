@@ -41,6 +41,7 @@ class HostsGetCall(ApiCall):
         "default",
         "status",
         "metrics",
+        "schema",
         "properties-schema",
         "describe",
     ]
@@ -63,7 +64,8 @@ class HostsGetCall(ApiCall):
             If not specified, the response includes information about all hosts.
         view : str
             A specific view of the returned data.
-            Can be status, metrics, properties-schema, describe, or default.
+            Can be default, status, metrics, schema, properties-schema, or describe.
+            The schema view requires XML format.
         """
         data_format = data_format if data_format is not None else "xml"
         view = view if view is not None else "default"
@@ -96,6 +98,20 @@ class HostsGetCall(ApiCall):
         data_format: str,
         view: str,
     ):
+        """Validate the response format and host-list view.
+
+        Parameters
+        ----------
+        data_format : str
+            Requested response format.
+        view : str
+            Requested host-list view.
+
+        Raises
+        ------
+        WrongParametersError
+            If the format or view is unsupported.
+        """
         if data_format not in cls._SUPPORTED_FORMATS:
             joined_supported_formats = ", ".join(cls._SUPPORTED_FORMATS)
             msg = f"The supported formats are: {joined_supported_formats}"

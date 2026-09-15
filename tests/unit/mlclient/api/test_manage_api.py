@@ -216,6 +216,29 @@ def test_get_servers():
 
 
 @respx.mock
+def test_get_hosts():
+    response_body_path = resources_utils.get_test_resource_path(
+        __file__,
+        "test-get-hosts.json",
+    )
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/manage/v2/hosts")
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_param("view", "default")
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body(Path(response_body_path).read_bytes())
+    ml_mocker.mock_get()
+
+    with MLClient() as ml:
+        resp = ml.manage.hosts.get_list(data_format="json")
+
+    expected_uri = "/manage/v2/hosts?view=default"
+    assert resp.status_code == httpx.codes.OK
+    assert resp.json()["host-default-list"]["meta"]["uri"] == expected_uri
+
+
+@respx.mock
 def test_post_servers():
     response_body_path = resources_utils.get_test_resource_path(
         __file__,

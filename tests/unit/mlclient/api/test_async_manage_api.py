@@ -244,6 +244,30 @@ async def test_get_servers():
 
 @pytest.mark.asyncio
 @respx.mock
+async def test_get_hosts():
+    response_body = resources_utils.read_test_resource_bytes(
+        __file__,
+        "test-get-hosts.json",
+    )
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/manage/v2/hosts")
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_param("view", "default")
+    ml_mocker.with_response_content_type("application/json; charset=UTF-8")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body(response_body)
+    ml_mocker.mock_get()
+
+    async with AsyncMLClient() as ml:
+        resp = await ml.manage.hosts.get_list(data_format="json")
+
+    expected_uri = "/manage/v2/hosts?view=default"
+    assert resp.status_code == httpx.codes.OK
+    assert resp.json()["host-default-list"]["meta"]["uri"] == expected_uri
+
+
+@pytest.mark.asyncio
+@respx.mock
 async def test_post_servers():
     response_body = resources_utils.read_test_resource_bytes(
         __file__,

@@ -7,8 +7,11 @@ It exports an implementation for 'logs' command:
 
 from __future__ import annotations
 
+import asyncio
+import heapq
 from collections.abc import Generator, Iterator
 from functools import lru_cache
+from typing import ClassVar
 
 from cleo.commands.command import Command
 from cleo.helpers import option
@@ -16,8 +19,9 @@ from cleo.io.inputs.option import Option
 from cleo.io.outputs.output import Type
 
 from mlclient._manager import MLClientManager
+from mlclient.exceptions import WrongParametersError
 from mlclient.models.types import LogType
-from mlclient.services.logs import LogsService
+from mlclient.services.logs import AsyncLogsService, LogsService
 
 
 class LogsCommand(Command):
@@ -43,6 +47,9 @@ class LogsCommand(Command):
             The host from which to return the log data.
           --list
             If set, no filename will be passed to the Logs REST API
+          --all-hosts
+            Aggregate error logs from every cluster host, merged by timestamp
+            (error log type only)
     """
 
     name: str = "logs"
@@ -96,9 +103,23 @@ class LogsCommand(Command):
             "list",
             description="If set, no filename will be passed to the Logs REST API",
         ),
+        option(
+            "all-hosts",
+            description="Aggregate error logs from every cluster host, "
+            "merged by timestamp (error log type only)",
+        ),
     ]
 
     _NONE_SERVER_KEY: str = "AAA"
+
+    # ANSI-256 codes (all >= 16, so disjoint from the app's named styles),
+    # ordered for maximum contrast between adjacent hosts. Cycled when a
+    # cluster has more hosts than colors.
+    _HOST_COLORS: ClassVar[tuple[int, ...]] = (
+        208, 38, 205, 149, 99, 214, 75, 211, 79, 135,
+        166, 105, 178, 43, 213, 69, 202, 115, 177, 137,
+        174, 141, 101, 209, 172,
+    )
 
     def handle(
         self,
@@ -106,6 +127,8 @@ class LogsCommand(Command):
         """Execute the command."""
         if self.option("list") is True:
             self._print_log_files()
+        elif self.option("all-hosts") is True:
+            self._print_logs_all_hosts()
         else:
             self._print_logs()
         return 0
@@ -268,6 +291,166 @@ class LogsCommand(Command):
                 level = log_dict["level"].upper()
                 msg = log_dict["message"]
                 yield f"<time>{timestamp}</> <log-level>{level}</>: ", msg
+
+    def _print_logs_all_hosts(
+        self,
+    ):
+        """Print error logs from every cluster host, merged by timestamp.
+
+        Each host is shown in parentheses between the log level and the
+        message, colored by host on a decorated output. Restricted to the
+        error log type: access, request and audit logs are served as a single
+        opaque message stream that carries no timestamp to merge on.
+
+        Raises
+        ------
+        WrongParametersError
+            If the requested log type is not error.
+        """
+        if self.option("log-type").lower() != "error":
+            msg = "The --all-hosts option supports the error log type only"
+            raise WrongParametersError(msg)
+        colors, per_host_logs = asyncio.run(self._collect_all_hosts_logs())
+        self.line("")
+        for log_dict in heapq.merge(*per_host_logs, key=lambda log: log["timestamp"]):
+            timestamp = log_dict["timestamp"]
+            level = log_dict["level"].upper()
+            host = self._format_host(log_dict["host"], colors[log_dict["host"]])
+            info = f"<time>{timestamp}</> <log-level>{level}</> {host}: "
+            self._io.write(info)
+            self._io.write(log_dict["message"], new_line=True, type=Type.RAW)
+
+    def _format_host(
+        self,
+        host: str,
+        color: int,
+    ) -> str:
+        """Render the parenthesized host tag, colored on a decorated output.
+
+        The parentheses take the host color; the host name itself is italic to
+        sit quietly beside the message. On a non-decorated output (a pipe, a
+        file or a test) the raw escapes would survive as literal text -- cleo
+        strips its own tags but not arbitrary escapes -- so a plain ``(host)``
+        is returned instead.
+
+        Parameters
+        ----------
+        host : str
+            The host name to render.
+        color : int
+            An ANSI-256 foreground color code.
+
+        Returns
+        -------
+        str
+            The parenthesized host tag, colored when the output is decorated.
+        """
+        if not self._io.output.is_decorated():
+            return f"({host})"
+        return f"\x1b[38;5;{color}m(\x1b[3m{host}\x1b[23m)\x1b[39m"
+
+    async def _collect_all_hosts_logs(
+        self,
+    ) -> tuple[dict[str, int], list[Iterator[dict]]]:
+        """Fetch error logs from every cluster host concurrently.
+
+        Returns
+        -------
+        tuple[dict[str, int], list[Iterator[dict]]]
+            A host-to-color mapping and one per-host generator of error logs,
+            each already sorted by timestamp and tagged with its host name.
+        """
+        env = self.option("environment")
+        async with MLClientManager(env).get_async_client("manage") as ml:
+            self.info(
+                f"Getting error logs from every host using "
+                f"REST App-Server {ml.http.base_url}",
+            )
+            hosts = await self._get_hosts(ml)
+            self._warn_if_unfiltered(hosts)
+            colors = {
+                host: self._HOST_COLORS[index % len(self._HOST_COLORS)]
+                for index, host in enumerate(hosts)
+            }
+            per_host_logs = await asyncio.gather(
+                *(self._fetch_host_logs(ml, host) for host in hosts),
+            )
+            return colors, per_host_logs
+
+    def _warn_if_unfiltered(
+        self,
+        hosts: list[str],
+    ):
+        """Warn when reading unfiltered error logs from more than one host.
+
+        An unfiltered read fetches every error entry from every host, which can
+        be a large volume and may time out. A single host is left alone -- it is
+        the same load as a plain ``logs`` call.
+
+        Parameters
+        ----------
+        hosts : list[str]
+            The cluster host names about to be queried.
+        """
+        has_filter = any(
+            self.option(name) is not None for name in ("from", "to", "regex")
+        )
+        if len(hosts) > 1 and not has_filter:
+            self.line_error(
+                f"Reading unfiltered error logs from {len(hosts)} hosts may "
+                "return a large volume and can time out. Consider narrowing "
+                "with --from, --to or --regex.",
+                style="fg=yellow;options=dark",
+            )
+
+    @staticmethod
+    async def _get_hosts(
+        ml,
+    ) -> list[str]:
+        """Return every host name in the cluster.
+
+        Parameters
+        ----------
+        ml : AsyncMLClient
+            A connected async client targeting the manage App Server.
+
+        Returns
+        -------
+        list[str]
+            Host names as reported by /manage/v2/hosts.
+        """
+        resp = await ml.manage.hosts.get_list(data_format="json")
+        list_items = resp.json()["host-default-list"]["list-items"]["list-item"]
+        return [item["nameref"] for item in list_items]
+
+    async def _fetch_host_logs(
+        self,
+        ml,
+        host: str,
+    ) -> Iterator[dict]:
+        """Fetch error logs from a single host, tagged with the host name.
+
+        Parameters
+        ----------
+        ml : AsyncMLClient
+            A connected async client targeting the manage App Server.
+        host : str
+            The host to read error logs from.
+
+        Returns
+        -------
+        Iterator[dict]
+            Error logs sorted by timestamp, each carrying a ``host`` key.
+        """
+        logs = await AsyncLogsService(ml.manage).get(
+            self._get_app_port(),
+            LogType.ERROR,
+            start_time=self.option("from"),
+            end_time=self.option("to"),
+            regex=self.option("regex"),
+            host=host,
+        )
+        return ({**log, "host": host} for log in logs)
 
     def _get_app_port(
         self,

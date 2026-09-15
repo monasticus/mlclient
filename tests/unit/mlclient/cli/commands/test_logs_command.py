@@ -9,7 +9,7 @@ from cleo.testers.command_tester import CommandTester
 
 from mlclient.cli import MLCLIentApplication
 from mlclient.env import MLEnvironment
-from mlclient.exceptions import InvalidLogTypeError
+from mlclient.exceptions import InvalidLogTypeError, WrongParametersError
 from tests.utils import resources as resources_utils
 from tests.utils.ml_mockers import MLRespXMocker
 
@@ -760,6 +760,145 @@ def test_command_call_output_of_logs_list(args, host, response_path, output_path
     expected_output_path = resources_utils.get_test_resource_path(__file__, output_path)
     expected_output = Path(expected_output_path).read_text()
     assert command_output == expected_output
+
+
+@respx.mock
+def test_command_logs_all_hosts():
+    _mock_two_node_error_logs()
+
+    tester = _get_tester("logs")
+    tester.execute("-e test-cluster --all-hosts")
+    command_output = tester.io.fetch_output()
+
+    assert tester.command.option("environment") == "test-cluster"
+    assert tester.command.option("log-type") == "error"
+    assert tester.command.option("all-hosts") is True
+
+    expected_output_lines = [
+        "Getting error logs from every host using "
+        "REST App-Server http://ml_cluster_node1:8002\n",
+        "<time>2023-09-01T00:00:00Z <log-level>INFO (ml_cluster_node1): "
+        "node1 message A",
+        "<time>2023-09-01T00:00:01Z <log-level>INFO (ml_cluster_node2): "
+        "node2 message A",
+        "<time>2023-09-01T00:00:02Z <log-level>WARNING (ml_cluster_node1): "
+        "node1 message B",
+        "<time>2023-09-01T00:00:03Z <log-level>ERROR (ml_cluster_node2): "
+        "node2 message B",
+    ]
+    assert command_output == "\n".join(expected_output_lines) + "\n"
+
+
+@respx.mock
+def test_command_logs_all_hosts_colors_hosts_on_decorated_output():
+    _mock_two_node_error_logs()
+
+    tester = _get_tester("logs")
+    tester.execute("-e test-cluster --all-hosts", decorated=True)
+    command_output = tester.io.fetch_output()
+
+    # First two palette entries, assigned by host order: colored parens
+    # around an italic host name.
+    assert "\x1b[38;5;208m(\x1b[3mml_cluster_node1\x1b[23m)\x1b[39m" in command_output
+    assert "\x1b[38;5;38m(\x1b[3mml_cluster_node2\x1b[23m)\x1b[39m" in command_output
+
+
+@respx.mock
+def test_command_logs_all_hosts_omits_ansi_on_undecorated_output():
+    _mock_two_node_error_logs()
+
+    tester = _get_tester("logs")
+    tester.execute("-e test-cluster --all-hosts", decorated=False)
+    command_output = tester.io.fetch_output()
+
+    assert "\x1b[" not in command_output
+    assert "(ml_cluster_node1)" in command_output
+    assert "(ml_cluster_node2)" in command_output
+
+
+@respx.mock
+def test_command_logs_all_hosts_warns_when_unfiltered_across_hosts():
+    _mock_two_node_error_logs()
+
+    tester = _get_tester("logs")
+    tester.execute("-e test-cluster --all-hosts")
+
+    error_output = tester.io.fetch_error()
+    assert "unfiltered error logs from 2 hosts" in error_output
+    assert "--from, --to or --regex" in error_output
+
+
+@respx.mock
+def test_command_logs_all_hosts_no_warning_when_filtered():
+    _mock_two_node_error_logs()
+
+    tester = _get_tester("logs")
+    tester.execute("-e test-cluster --all-hosts --regex node")
+
+    assert "may return a large volume" not in tester.io.fetch_error()
+
+
+def test_command_logs_all_hosts_rejects_non_error_log_type():
+    tester = _get_tester("logs")
+    with pytest.raises(WrongParametersError) as err:
+        tester.execute("-e test-cluster --all-hosts -l access")
+
+    expected_msg = "The --all-hosts option supports the error log type only"
+    assert err.value.args[0] == expected_msg
+
+
+def _mock_two_node_error_logs():
+    hosts_mocker = MLRespXMocker(use_router=False)
+    hosts_mocker.with_url("http://ml_cluster_node1:8002/manage/v2/hosts")
+    hosts_mocker.with_request_param("format", "json")
+    hosts_mocker.with_response_code(200)
+    hosts_mocker.with_response_content_type("application/json; charset=UTF-8")
+    hosts_mocker.with_response_body(
+        _hosts_body(["ml_cluster_node1", "ml_cluster_node2"]),
+    )
+    hosts_mocker.mock_get()
+
+    _mock_host_error_logs(
+        "ml_cluster_node1",
+        [
+            ("2023-09-01T00:00:00Z", "info", "node1 message A"),
+            ("2023-09-01T00:00:02Z", "warning", "node1 message B"),
+        ],
+    )
+    _mock_host_error_logs(
+        "ml_cluster_node2",
+        [
+            ("2023-09-01T00:00:01Z", "info", "node2 message A"),
+            ("2023-09-01T00:00:03Z", "error", "node2 message B"),
+        ],
+    )
+
+
+def _mock_host_error_logs(
+    host: str,
+    logs: list[tuple],
+):
+    mocker = MLRespXMocker(use_router=False)
+    mocker.with_url(f"http://ml_cluster_node1:8002{ENDPOINT}")
+    mocker.with_request_param("format", "json")
+    mocker.with_request_param("filename", "ErrorLog.txt")
+    mocker.with_request_param("host", host)
+    mocker.with_response_code(200)
+    mocker.with_response_content_type("application/json; charset=UTF-8")
+    mocker.with_response_body(mocker.error_logs_body(logs))
+    mocker.mock_get()
+
+
+def _hosts_body(
+    hosts: list[str],
+) -> dict:
+    return {
+        "host-default-list": {
+            "list-items": {
+                "list-item": [{"nameref": host} for host in hosts],
+            },
+        },
+    }
 
 
 def _get_tester(

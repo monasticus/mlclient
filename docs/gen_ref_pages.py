@@ -18,6 +18,7 @@ namespaces = (
     "mlclient.models",
     "mlclient.api",
     "mlclient.calls",
+    "mlclient.functions",
     "mlclient.services",
     "mlclient.responses",
     "mlclient.multipart",

@@ -23,6 +23,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import sys
 import time
 from dataclasses import dataclass
@@ -37,6 +38,9 @@ TEMPLATE_NAME = "mlclient-it"
 CONTENT_DATABASE = "Documents"
 MODULES_DATABASE = "Modules"
 
+# sec:oauth-server, which backs the JWT external-security setup, only exists
+# from MarkLogic 11 onward, so the OAuth row is skipped on earlier releases.
+OAUTH_MIN_MAJOR = 11
 OAUTH_PORT = 8011
 OAUTH_EXTERNAL_SECURITY = "mlclient-it-oauth"
 OAUTH_ROLE = "mlclient-it-oauth-role"
@@ -145,6 +149,8 @@ def main() -> int:
         args.health_port,
     ) as session:
         session.wait_until_ready()
+        oauth_supported = session.server_major_version() >= OAUTH_MIN_MAJOR
+        specs = _applicable_specs(oauth_supported=oauth_supported)
 
         bundle = build_certificate_bundle(
             server_host=args.host,
@@ -155,29 +161,37 @@ def main() -> int:
         session.ensure_cert_user(CERT_USER)
         session.ensure_certificate_template(TEMPLATE_NAME)
         session.install_host_certificate(TEMPLATE_NAME, bundle)
-        session.ensure_oauth_external_security()
+        if oauth_supported:
+            session.ensure_oauth_external_security()
         session.ensure_kerberos_external_security(args.kerberos_principal)
 
-        for spec in SERVER_SPECS:
+        for spec in specs:
             session.create_rest_server(spec)
             session.configure_server(spec, TEMPLATE_NAME)
 
-        session.bind_client_certificate_authority(bundle, _mtls_server_names())
-        for spec in _external_security_specs():
+        session.bind_client_certificate_authority(bundle, _mtls_server_names(specs))
+        for spec in _external_security_specs(specs):
             session.bind_external_security(spec)
-        write_oauth_config(Path(args.certs_dir))
+        if oauth_supported:
+            write_oauth_config(Path(args.certs_dir))
         write_kerberos_config(Path(args.certs_dir), args.kerberos_principal)
         session.wait_until_stable(args.admin_port)
     print("Provisioning complete.")
     return 0
 
 
-def _mtls_server_names() -> list[str]:
-    return [spec.name for spec in SERVER_SPECS if spec.require_client_cert]
+def _applicable_specs(*, oauth_supported: bool) -> tuple[ServerSpec, ...]:
+    if oauth_supported:
+        return SERVER_SPECS
+    return tuple(spec for spec in SERVER_SPECS if spec.authentication != "oauth")
 
 
-def _external_security_specs() -> list[ServerSpec]:
-    return [spec for spec in SERVER_SPECS if spec.external_security]
+def _mtls_server_names(specs: tuple[ServerSpec, ...]) -> list[str]:
+    return [spec.name for spec in specs if spec.require_client_cert]
+
+
+def _external_security_specs(specs: tuple[ServerSpec, ...]) -> list[ServerSpec]:
+    return [spec for spec in specs if spec.external_security]
 
 
 def write_oauth_config(target_dir: Path) -> Path:
@@ -188,6 +202,7 @@ def write_oauth_config(target_dir: Path) -> Path:
         json.dumps(
             {
                 "port": OAUTH_PORT,
+                "client_id": OAUTH_EXTERNAL_SECURITY,
                 "issuer": OAUTH_ISSUER,
                 "key_id": OAUTH_KEY_ID,
                 "secret": OAUTH_SECRET,
@@ -235,7 +250,10 @@ class ManagementSession:
         )
         self._rest = f"http://{host}:{DEFAULT_REST_PORT}"
         self._manage = f"http://{host}:{DEFAULT_MANAGE_PORT}"
-        self._health_url = f"http://{host}:{health_port}/LATEST/healthcheck"
+        # The HealthCheck server's root reports readiness on every supported
+        # release; the /LATEST/healthcheck REST path only exists from MarkLogic
+        # 11 onward, so probing it would hang provisioning on MarkLogic 10.
+        self._health_url = f"http://{host}:{health_port}/"
 
     def __enter__(self) -> ManagementSession:
         return self
@@ -446,6 +464,19 @@ class ManagementSession:
         if response.status_code != httpx.codes.OK:
             return None
         return response.text.strip()
+
+    def server_major_version(self) -> int:
+        response = self._request(
+            "POST",
+            f"{self._rest}/v1/eval",
+            data={"xquery": "xdmp:version()"},
+        )
+        _expect(response, httpx.codes.OK)
+        match = re.search(r"(\d+)\.\d", response.text)
+        if match is None:
+            msg = f"Could not parse MarkLogic version: {response.text[:200]}"
+            raise RuntimeError(msg)
+        return int(match.group(1))
 
     def _eval(self, xquery: str, variables: dict[str, str]) -> None:
         response = self._request(

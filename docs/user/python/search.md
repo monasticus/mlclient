@@ -13,6 +13,14 @@ can be arguments to other expressions **or the root of an evaluation**. The
 `fn`, `xdmp` and `xs` namespaces demonstrate this composition; they do not use
 separate compilers or execution paths. Builders perform no I/O.
 
+The `cts` namespace exposes 191 non-deprecated MarkLogic 12 functions. This
+includes query constructors, references, orders, geospatial and temporal value
+constructors, search and estimate, lexicon operations, aggregates, text
+processing, query registration, classification and triples. Accessors that only
+decompose an existing query or opaque CTS value are intentionally omitted. For
+example, use `cts.element_range_query(...)`, but retain its inputs in your
+application instead of calling `cts:element-range-query-value` through this API.
+
 ## Build, compose and execute
 
 ```python
@@ -167,11 +175,11 @@ async def count_items():
 ## Server versions
 
 Builders do not guess the server version or maintain a runtime feature registry.
-The server reports unsupported functions through `MarkLogicError`.
-`cts.document_root_query` requires MarkLogic 11 or later; the other builders in
-this initial catalog are available in MarkLogic 10. Particular options and
-index configurations can have additional version requirements. Consult the
-[native function reference](https://docs.marklogic.com/cts:document-root-query).
+The catalog follows the MarkLogic 12 function reference. The server reports a
+function unavailable in an older release through `MarkLogicError`; particular
+options and index configurations can also have version requirements. For
+example, `cts.document_root_query` requires MarkLogic 11 or later. Consult the
+[native CTS reference](https://docs.marklogic.com/cts) for the function you use.
 
 ## Migrating from the POC
 
@@ -197,4 +205,5 @@ Use native names converted to Python underscores and document version limits.
 
 Test the actual request bindings and a nested/root evaluation on MarkLogic.
 Only add a service convenience when it adds a useful result contract; any new
-builder already executes through `ml.eval.expression`. This revision adds no native functions.
+builder already executes through `ml.eval.expression`. Accessors and deprecated
+functions remain outside the catalog unless a concrete use case justifies them.

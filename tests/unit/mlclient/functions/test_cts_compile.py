@@ -90,7 +90,8 @@ def test_sequence_snapshot_and_nested_casts():
 
 
 @pytest.mark.parametrize(
-    "options", ["unstemmed", ["unstemmed"], ("unstemmed",), xs.string("unstemmed")],
+    "options",
+    ["unstemmed", ["unstemmed"], ("unstemmed",), xs.string("unstemmed")],
 )
 def test_options_never_split_strings_into_characters(options):
     _, variables = cts.word_query("needle", options=options).compile()
@@ -99,11 +100,50 @@ def test_options_never_split_strings_into_characters(options):
 
 def test_qname_sequences_and_namespaced_nested_arguments():
     expr = cts.element_value_query(
-        ["a", xs.qname(xs.string("b"), uri=xs.string("urn:x"))], ["one", "two"],
+        ["a", xs.qname(xs.string("b"), uri=xs.string("urn:x"))],
+        ["one", "two"],
     )
     code, variables = expr.compile()
     assert "(xs:QName($v0), fn:QName(xs:string($v1), xs:string($v2)))" in code
     assert list(variables.values()) == ["a", "urn:x", "b", "one", "two"]
+
+
+def test_point_uses_wkt_as_text_and_numeric_coordinates_as_floats():
+    wkt_code, wkt_variables = cts.point("POINT (20 10)").compile()
+    point_code, point_variables = cts.point(10, 20).compile()
+
+    assert wkt_code.endswith("cts:point($v0)")
+    assert wkt_variables == {"v0": "POINT (20 10)"}
+    assert point_code.endswith(
+        "cts:point(xs:float(xs:integer($v0)), xs:float(xs:integer($v1)))",
+    )
+    assert point_variables == {"v0": "10", "v1": "20"}
+
+
+def test_point_accepts_composable_coordinate_expressions():
+    code, _ = cts.point(xs.double(10), xs.double(20)).compile()
+
+    assert code.endswith(
+        "cts:point(xs:double(xs:integer($v0)), xs:double(xs:integer($v1)))",
+    )
+
+
+def test_double_sequences_are_not_cast_as_singletons():
+    code, variables = cts.percentile([1, 2], [0.25, 0.75]).compile()
+
+    assert code.endswith(
+        "cts:percentile((xs:integer($v0), xs:integer($v1)), "
+        "(xs:double($v2), xs:double($v3)))",
+    )
+    assert list(variables.values()) == ["1", "2", "0.25", "0.75"]
+
+
+def test_optional_range_operator_is_validated_when_present():
+    with pytest.raises(ValueError, match="unsupported range operator"):
+        cts.triple_range_query(None, None, "x", operator="contains")
+
+    code, _ = cts.column_range_query("s", "v", "c", 1, operator=">=").compile()
+    assert "xs:string($v4)" in code
 
 
 def test_omitted_optional_slots_are_distinct_from_empty_sequences():

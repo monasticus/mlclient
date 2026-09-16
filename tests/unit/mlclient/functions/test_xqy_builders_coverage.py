@@ -1,102 +1,98 @@
 from __future__ import annotations
 
-import datetime
-
 import pytest
 
-from mlclient.functions import cts, fn, xs
-
-_TRUE = cts.true_query()
-_FALSE = cts.false_query()
+from mlclient.functions import cts, fn, xpath, xs
 
 
 @pytest.mark.parametrize(
-    ("expr", "expected"),
+    ("expr", "native", "bindings"),
     [
-        (cts.or_query((_TRUE, _FALSE)),
-         "cts:or-query((cts:true-query(), cts:false-query()))"),
-        (cts.not_query(_TRUE), "cts:not-query(cts:true-query())"),
-        (cts.document_query("/x"), "cts:document-query(($v0))"),
-        (cts.collection_query("c"), "cts:collection-query(($v0))"),
-        (cts.false_query(), "cts:false-query()"),
-        (cts.uri_reference(), "cts:uri-reference()"),
-        (cts.collection_reference(), "cts:collection-reference()"),
-        (cts.uris(), "cts:uris(())"),
-        (cts.estimate(_TRUE), "cts:estimate(cts:true-query())"),
-        (fn.exists(_TRUE), "fn:exists(cts:true-query())"),
-        (fn.empty(_TRUE), "fn:empty(cts:true-query())"),
+        (cts.directory_query("/x/"), "cts:directory-query", ["/x/", "1"]),
+        (cts.and_query([], options="ordered"), "cts:and-query", ["ordered"]),
+        (cts.or_query([], options="synonym"), "cts:or-query", ["synonym"]),
+        (cts.not_query(cts.false_query()), "cts:not-query", []),
+        (
+            cts.near_query([], distance=2, distance_weight=0.5),
+            "cts:near-query",
+            ["2", "0.5"],
+        ),
+        (
+            cts.directory_query("/x/", xs.string("infinity")),
+            "cts:directory-query",
+            ["/x/", "infinity"],
+        ),
+        (cts.document_query("/x"), "cts:document-query", ["/x"]),
+        (cts.collection_query("x"), "cts:collection-query", ["x"]),
+        (cts.document_root_query("x"), "cts:document-root-query", ["x"]),
+        (cts.element_value_query("x"), "cts:element-value-query", ["x"]),
+        (
+            cts.element_word_query(["a", "b"], "x"),
+            "cts:element-word-query",
+            ["a", "b", "x"],
+        ),
+        (
+            cts.element_range_query("a", xs.string(">"), 3),
+            "cts:element-range-query",
+            ["a", ">", "3"],
+        ),
+        (cts.path_range_query("/a", "=", 3), "cts:path-range-query", ["/a", "=", "3"]),
+        (
+            cts.json_property_value_query("x", True),
+            "cts:json-property-value-query",
+            ["x", True],
+        ),
+        (
+            cts.path_reference("/p:x", namespaces=xpath("map:map()")),
+            "cts:path-reference",
+            ["/p:x"],
+        ),
+        (cts.json_property_reference("x"), "cts:json-property-reference", ["x"]),
+        (cts.field_reference("x"), "cts:field-reference", ["x"]),
+        (cts.collection_reference(), "cts:collection-reference", []),
+        (cts.uri_reference(), "cts:uri-reference", []),
+        (cts.search(quality_weight=0, forest_ids=[123]), "cts:search", ["0", "123"]),
+        (
+            cts.uris(start="a", quality_weight=0, forest_ids=[123]),
+            "cts:uris",
+            ["a", "0", "123"],
+        ),
+        (
+            cts.values(
+                cts.uri_reference(),
+                start="a",
+                quality_weight=0,
+                forest_ids=[123],
+            ),
+            "cts:values",
+            ["a", "0", "123"],
+        ),
+        (
+            cts.estimate(maximum=20, quality_weight=0, forest_ids=[123]),
+            "cts:estimate",
+            ["0", "123", "20"],
+        ),
+        (fn.count([1], maximum=1), "fn:count", ["1", "1"]),
+        (fn.exists([]), "fn:exists", []),
+        (fn.empty([]), "fn:empty", []),
+        (xs.integer("1"), "xs:integer", ["1"]),
+        (xs.date("2026-01-01"), "xs:date", ["2026-01-01"]),
+        (xs.date_time("2026-01-01T00:00:00"), "xs:dateTime", ["2026-01-01T00:00:00"]),
     ],
 )
-def test_builder_compiles_to_expected_call(expr, expected):
-    code, _ = expr.compile()
-    assert expected in code
+def test_existing_builders_preserve_native_arguments(expr, native, bindings):
+    code, variables = expr.compile()
+    assert native + "(" in code
+    assert list(variables.values()) == bindings
 
 
-@pytest.mark.parametrize(
-    ("expr", "fragment"),
-    [
-        (cts.near_query((_TRUE, _FALSE), distance=5), "cts:near-query(("),
-        (cts.element_value_query(xs.qname("n"), "t"), "cts:element-value-query("),
-        (cts.element_word_query(xs.qname("n"), "t"), "cts:element-word-query("),
-        (cts.path_range_query("/p", ">=", 1), "cts:path-range-query("),
-        (cts.json_property_value_query("name", "t"),
-         "cts:json-property-value-query("),
-        (cts.path_reference("/p"), "cts:path-reference("),
-        (cts.json_property_reference("n"), "cts:json-property-reference("),
-        (cts.field_reference("f"), "cts:field-reference("),
-    ],
-)
-def test_builder_emits_its_function_name(expr, fragment):
-    code, _ = expr.compile()
-    assert fragment in code
-
-
-@pytest.mark.parametrize(
-    ("expr", "fragment"),
-    [
-        (xs.double(1.5), "xs:double($v0)"),
-        (xs.decimal(3), "xs:decimal($v0)"),
-        (xs.date_time("2020-01-01T00:00:00"), "xs:dateTime($v0)"),
-        (xs.date("2020-01-01"), "xs:date($v0)"),
-        (xs.string("x"), "xs:string($v0)"),
-    ],
-)
-def test_xs_constructor_wraps_value_in_its_type(expr, fragment):
-    code, _ = expr.compile()
-    assert fragment in code
-
-
-def test_and_query_ordered_flag_inlines_the_keyword():
-    assert cts.and_query((_TRUE,), ordered=True).compile()[0].endswith('), "ordered")')
-    assert (
-        cts.and_query((_TRUE,), ordered=False).compile()[0].endswith('), "unordered")')
+def test_late_arguments_keep_native_position():
+    assert str(cts.estimate(maximum=5)).endswith(
+        "cts:estimate((), (), (), (), xs:double(xs:integer($v0)))",
     )
-
-
-def test_directory_query_rejects_an_unknown_depth():
-    with pytest.raises(ValueError, match="directory depth"):
-        cts.directory_query("/x", "2")
-
-
-def test_search_without_a_query_is_rejected():
-    with pytest.raises(ValueError, match="requires a query"):
-        cts.search("/x")
-
-
-def test_search_path_allows_doubled_quotes_inside_a_string_literal():
-    code, _ = cts.search("/a[@x = 'it''s']", _TRUE).compile()
-    assert code == "cts:search((/a[@x = 'it''s']), cts:true-query())"
-
-
-def test_str_renders_the_compiled_body():
-    assert str(_TRUE) == "cts:true-query()"
-
-
-def test_inferred_casts_cover_every_scalar_type():
-    code, _ = cts.element_range_query(
-        xs.qname("n"), "=", (True, 1, 1.5, datetime.date(2020, 1, 1)),
-    ).compile()
-    assert "xs:boolean($v1)" in code
-    assert "xs:integer($v2)" in code
-    assert "xs:double($v3)" in code
-    assert "xs:date($v4)" in code
+    assert str(cts.near_query([], distance_weight=1.5)).endswith(
+        "cts:near-query((), (), (), xs:double($v0))",
+    )
+    assert str(cts.path_reference("/x", namespaces=xpath("map:map()"))).endswith(
+        "cts:path-reference($v0, (), (map:map()))",
+    )

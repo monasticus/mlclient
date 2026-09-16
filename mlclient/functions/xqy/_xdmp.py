@@ -1,8 +1,6 @@
 """``xdmp:`` builders returning expression trees.
 
-``Xdmp`` is a pure builder namespace: every method returns an ``Expr`` and never
-touches a client. ``XdmpService`` inherits it and overrides the executing
-functions to evaluate.
+Builders compose expressions; services execute through the common evaluator.
 """
 
 from __future__ import annotations
@@ -19,12 +17,15 @@ class Xdmp:
     def exists(searchable) -> Expr:
         """Build ``xdmp:exists``.
 
-        ``searchable`` is an ``Expr`` (e.g. a ``cts:search`` call) or a bare
-        absolute XPath string. Unlike ``fn:exists`` it resolves from indexes
-        without materialising nodes, so it is the preferred database-wide
-        existence check.
+        Parameters
+        ----------
+        searchable : Expr
+            Partially searchable path or cts:search expression; wrap trusted
+            source in xpath.
+
+        Returns
+        -------
+        Expr
+            Immutable expression; no request is sent until it is evaluated.
         """
-        argument = (
-            search_path(searchable) if isinstance(searchable, str) else searchable
-        )
-        return _FunctionCall("xdmp:exists", [argument])
+        return _FunctionCall("xdmp:exists", [search_path(searchable)])

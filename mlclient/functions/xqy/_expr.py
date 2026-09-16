@@ -1,195 +1,220 @@
-"""Expression tree and compiler for XQuery function builders.
-
-Every builder (cts, xs, fn) produces an ``Expr``. Compiling an ``Expr`` yields
-an XQuery snippet plus a variables mapping: structure and MarkLogic keywords are
-inlined, while every runtime value travels as an external variable so no
-user-supplied value is ever interpolated into the source.
-"""
+"""Immutable XQuery expressions with externally bound runtime values."""
 
 from __future__ import annotations
 
 import datetime
 import decimal
+import math
 from abc import ABC, abstractmethod
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 from mlclient._experimental import experimental
 
 
 class _CompileContext:
-    """Allocates ``$vN`` external variables and collects their bound values."""
+    """Allocate external variables for one compilation."""
 
     def __init__(self):
         self.variables: dict = {}
-        self.requirements: list[tuple[str, int]] = []
 
     def bind(self, value) -> str:
-        """Bind a runtime value to a fresh external variable and return its ref."""
+        """Bind a JSON-compatible value and return its variable reference."""
         name = f"v{len(self.variables)}"
         self.variables[name] = value
         return f"${name}"
 
-    def require(self, fn: str, since: int | None) -> None:
-        """Record that ``fn`` needs MarkLogic major version ``since`` or later."""
-        if since is not None:
-            self.requirements.append((fn, since))
-
 
 @experimental()
 class Expr(ABC):
-    """A node in an XQuery expression tree."""
+    """An XQuery expression, reusable in builders or ``eval.expression``."""
 
     @abstractmethod
     def render(self, ctx: _CompileContext) -> str:
-        """Render this node to XQuery, binding runtime values via ``ctx``."""
+        """Render this node, binding values through the compilation context."""
 
     def compile(self) -> tuple[str, dict]:
-        """Return the runnable XQuery and its external variable bindings."""
+        """Return XQuery 1.0-ml source and JSON-compatible external bindings."""
         ctx = _CompileContext()
         body = self.render(ctx)
-        prolog = "".join(
+        prolog = 'xquery version "1.0-ml";\n' + "".join(
             f"declare variable ${name} external;\n" for name in ctx.variables
         )
         return prolog + body, ctx.variables
 
-    def version_requirements(self) -> list[tuple[str, int]]:
-        """Return ``(function, since-major)`` pairs for every version-gated call."""
-        ctx = _CompileContext()
-        self.render(ctx)
-        return ctx.requirements
+    def window(self, lo: int, hi: int) -> Expr:
+        """Select inclusive, one-based positions ``lo`` through ``hi``.
+
+        Parameters
+        ----------
+        lo : int
+            First position, at least one. Booleans are not positions.
+        hi : int
+            Last position, at least ``lo``.
+
+        Returns
+        -------
+        Expr
+            A composable positional predicate, evaluated by MarkLogic.
+        """
+        return _Window(self, lo, hi)
 
     def __str__(self) -> str:
         return self.compile()[0]
 
 
-@dataclass
+@dataclass(frozen=True)
 class Atom(Expr):
-    """A runtime value bound as an external variable.
+    """An immutable scalar represented by a JSON-safe lexical value."""
 
-    ``cast`` wraps the variable in a type constructor (e.g. ``xs:string``). When
-    omitted it is inferred from the Python type, so ``1`` compiles as
-    ``xs:integer`` without an explicit ``xs:`` wrapper. Strings stay untyped
-    (``xs:untypedAtomic``), which coerces freely in text and range contexts.
-    """
-
-    value: object
+    value: str | bool
     cast: str | None = None
 
     def render(self, ctx: _CompileContext) -> str:
-        """Bind the value and wrap it in its (given or inferred) type."""
+        """Bind the scalar and restore its XQuery type."""
         ref = ctx.bind(self.value)
-        cast = self.cast or _infer_cast(self.value)
-        return f"{cast}({ref})" if cast else ref
+        return f"{self.cast}({ref})" if self.cast else ref
 
 
-_INFERRED_CASTS = (
-    (bool, "xs:boolean"),
-    (int, "xs:integer"),
-    (float, "xs:double"),
-    (decimal.Decimal, "xs:decimal"),
-    (datetime.datetime, "xs:dateTime"),
-    (datetime.date, "xs:date"),
-)
-
-
-def _infer_cast(value) -> str | None:
-    for python_type, cast in _INFERRED_CASTS:
-        if isinstance(value, python_type):
-            return cast
-    return None
-
-
-@dataclass
+@dataclass(frozen=True)
 class _Raw(Expr):
-    """Verbatim XQuery. Trusted, developer-supplied source - never a value."""
+    """Trusted source; never constructed implicitly from a runtime value."""
 
     source: str
 
     def render(self, _ctx: _CompileContext) -> str:
-        """Return the trusted source unchanged; binds no runtime value."""
+        """Return trusted source unchanged."""
         return self.source
 
 
-@dataclass
+@dataclass(frozen=True)
 class _Window(Expr):
-    """A ``(inner)[lo to hi]`` positional slice over ``inner``'s result sequence.
-
-    Bounds are inlined literals, not bound variables: they are structural
-    positions (validated integers, so injection-safe), and a literal range lets
-    MarkLogic evaluate ``cts:search`` lazily instead of materialising every hit.
-    """
+    """A lazy, inclusive positional predicate."""
 
     inner: Expr
     lo: int
     hi: int
 
+    def __post_init__(self):
+        if type(self.lo) is not int or type(self.hi) is not int:
+            message = "window bounds must be integers, not booleans"
+            raise TypeError(message)
+        if self.lo < 1 or self.hi < self.lo:
+            message = "window bounds must satisfy 1 <= lo <= hi"
+            raise ValueError(message)
+
     def render(self, ctx: _CompileContext) -> str:
-        """Render the inner expression wrapped in a ``[lo to hi]`` predicate."""
+        """Render the inner expression with a positional predicate."""
         return f"({self.inner.render(ctx)})[{self.lo} to {self.hi}]"
 
 
-@dataclass
-class _FunctionCall(Expr):
-    """A namespaced ``prefix:name(...)`` call. Trailing empty optionals are dropped."""
+@dataclass(frozen=True)
+class _Sequence(Expr):
+    """A snapshot of an XQuery sequence's child expressions."""
 
-    fn: str
-    args: list
-    optionals: list = field(default_factory=list)
-    since: int | None = None
+    items: tuple[Expr, ...]
 
     def render(self, ctx: _CompileContext) -> str:
-        """Render the call, omitting trailing empty optional arguments."""
-        ctx.require(self.fn, self.since)
-        parts = [arg.render(ctx) for arg in self.args]
+        """Render a sequence, including the empty sequence."""
+        return "(" + ", ".join(item.render(ctx) for item in self.items) + ")"
+
+
+@dataclass(frozen=True)
+class _FunctionCall(Expr):
+    """A function call; ``None`` optional slots mean omitted arguments."""
+
+    fn: str
+    args: tuple = ()
+    optionals: tuple = ()
+
+    def __post_init__(self):
+        object.__setattr__(self, "args", tuple(as_expr(arg) for arg in self.args))
+        object.__setattr__(
+            self,
+            "optionals",
+            tuple(None if arg is None else as_expr(arg) for arg in self.optionals),
+        )
+
+    def render(self, ctx: _CompileContext) -> str:
+        """Trim omitted trailing slots; retain empty interior slots."""
         optionals = list(self.optionals)
         while optionals and optionals[-1] is None:
             optionals.pop()
-        parts += [o.render(ctx) if o is not None else "()" for o in optionals]
+        parts = [arg.render(ctx) for arg in self.args]
+        parts += [arg.render(ctx) if arg is not None else "()" for arg in optionals]
         return f"{self.fn}({', '.join(parts)})"
 
 
-def search_path(path: str) -> _Raw:
-    """Wrap a searchable path expression, rejecting any attempt to break out.
+def xpath(source: str) -> Expr:
+    """Embed trusted XPath/XQuery source, without parsing or sanitizing it.
 
-    The argument is a node expression, not a value, so it is inlined rather than
-    bound. Any XPath is allowed as long as its parentheses stay balanced with the
-    nesting depth never going negative (respecting string literals) - a stray
-    ``)`` is the only way to escape the enclosing call, and a legitimate XPath
-    never has one. The result is parenthesised, so top-level commas form a
-    sequence rather than extra call arguments.
+    Parameters
+    ----------
+    source : str
+        Developer-controlled source. Never pass user input here. Prefer builders
+        with externally bound values for dynamic data. EQNames such as
+        ``/Q{urn:example}item`` avoid relying on namespace declarations.
+
+    Returns
+    -------
+    Expr
+        A parenthesized source expression, suitable for ``cts.search`` and
+        ``xdmp.exists`` as well as general expression composition.
     """
-    depth = 0
-    quote = None
-    index = 0
-    while index < len(path):
-        char = path[index]
-        if quote is not None:
-            if char == quote:
-                if path[index + 1:index + 2] == quote:
-                    index += 2
-                    continue
-                quote = None
-        elif char in "\"'":
-            quote = char
-        elif char == "(":
-            depth += 1
-        elif char == ")":
-            depth -= 1
-            if depth < 0:
-                break
-        index += 1
-    if quote is not None or depth != 0:
-        message = f"unbalanced search path expression: {path!r}"
+    if not isinstance(source, str):
+        message = "xpath source must be a string"
+        raise TypeError(message)
+    if not source.strip():
+        message = "xpath source must not be empty"
         raise ValueError(message)
-    return _Raw(f"({path})")
+    return _Raw(f"({source})")
+
+
+def search_path(expression: Expr) -> Expr:
+    """Require explicit source ownership at the searchable-expression boundary."""
+    if not isinstance(expression, Expr):
+        message = "searchable expressions require an Expr; use xpath for trusted source"
+        raise TypeError(message)
+    return expression
 
 
 def as_expr(value, *, cast: str | None = None) -> Expr:
-    """Wrap a plain Python value as an ``Atom``, passing ``Expr`` through."""
-    return value if isinstance(value, Expr) else Atom(value, cast)
+    """Snapshot supported values as expressions; lists/tuples are sequences."""
+    if isinstance(value, Expr):
+        expr = value
+    elif value is None:
+        expr = _Sequence(())
+    elif isinstance(value, (list, tuple)):
+        expr = _Sequence(tuple(as_expr(item) for item in value))
+    else:
+        expr = _scalar(value)
+    if isinstance(expr, Atom) and expr.cast == cast:
+        return expr
+    return _FunctionCall(cast, (expr,)) if cast else expr
 
 
-def write_sequence(items, ctx: _CompileContext, *, cast: str | None = None) -> str:
-    """Render a comma-separated XQuery sequence, binding each runtime value."""
-    rendered = ", ".join(as_expr(item, cast=cast).render(ctx) for item in items)
-    return f"({rendered})"
+def _scalar(value) -> Atom:  # noqa: PLR0911 - one explicit conversion per supported type
+    """Encode scalars without losing precision in the JSON transport."""
+    if isinstance(value, bool):
+        return Atom(value, "xs:boolean")
+    if isinstance(value, int):
+        return Atom(str(value), "xs:integer")
+    if isinstance(value, float):
+        lexical = (
+            ("NaN" if math.isnan(value) else "INF" if value > 0 else "-INF")
+            if not math.isfinite(value)
+            else repr(value)
+        )
+        return Atom(lexical, "xs:double")
+    if isinstance(value, decimal.Decimal):
+        if not value.is_finite():
+            message = "xs:decimal requires a finite Decimal"
+            raise ValueError(message)
+        return Atom(format(value, "f"), "xs:decimal")
+    if isinstance(value, datetime.datetime):
+        return Atom(value.isoformat(), "xs:dateTime")
+    if isinstance(value, datetime.date):
+        return Atom(value.isoformat(), "xs:date")
+    if isinstance(value, str):
+        return Atom(value)
+    message = f"unsupported XQuery value type: {type(value).__name__}"
+    raise TypeError(message)

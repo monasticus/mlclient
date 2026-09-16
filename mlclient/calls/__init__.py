@@ -16,6 +16,7 @@ from mlclient.calls.forests import (ForestDeleteCall, ForestGetCall,
                                     ForestsPostCall, ForestsPutCall)
 from mlclient.calls.groups import (GroupPropertiesGetCall,
                                    GroupPropertiesPutCall)
+from mlclient.calls.hosts import HostsGetCall
 from mlclient.calls.logs import LogsCall
 from mlclient.calls.roles import (RoleDeleteCall, RoleGetCall,
                                   RolePropertiesGetCall, RolePropertiesPutCall,
@@ -54,6 +55,7 @@ __all__ = [
     "ForestsPutCall",
     "GroupPropertiesGetCall",
     "GroupPropertiesPutCall",
+    "HostsGetCall",
     "LogsCall",
     "RoleDeleteCall",
     "RoleGetCall",

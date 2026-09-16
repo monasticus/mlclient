@@ -19,6 +19,7 @@ if TYPE_CHECKING:
 from mlclient.api.databases import AsyncDatabasesApi, DatabasesApi
 from mlclient.api.forests import AsyncForestsApi, ForestsApi
 from mlclient.api.groups import AsyncGroupsApi, GroupsApi
+from mlclient.api.hosts import AsyncHostsApi, HostsApi
 from mlclient.api.logs import AsyncLogsApi, LogsApi
 from mlclient.api.roles import AsyncRolesApi, RolesApi
 from mlclient.api.servers import AsyncServersApi, ServersApi
@@ -104,6 +105,21 @@ class ManageApi:
             The endpoint wrapper bound to this group's configured connection.
         """
         return GroupsApi(self._api)
+
+    @cached_property
+    def hosts(self) -> HostsApi:
+        """Access hosts operations through this API group's connection.
+
+        Created once on first access and reused by this group. Reading the
+        property sends no request; calling an endpoint method performs I/O
+        and returns a raw HTTP response. Responses are not cached.
+
+        Returns
+        -------
+        HostsApi
+            The endpoint wrapper bound to this group's configured connection.
+        """
+        return HostsApi(self._api)
 
     @cached_property
     def logs(self) -> LogsApi:
@@ -242,6 +258,21 @@ class AsyncManageApi:
             The endpoint wrapper bound to this group's configured connection.
         """
         return AsyncGroupsApi(self._api)
+
+    @cached_property
+    def hosts(self) -> AsyncHostsApi:
+        """Access hosts operations through this API group's connection.
+
+        Created once on first access and reused by this group. Reading the
+        property sends no request; calling an endpoint method performs I/O
+        and returns a raw HTTP response. Responses are not cached.
+
+        Returns
+        -------
+        AsyncHostsApi
+            The endpoint wrapper bound to this group's configured connection.
+        """
+        return AsyncHostsApi(self._api)
 
     @cached_property
     def logs(self) -> AsyncLogsApi:

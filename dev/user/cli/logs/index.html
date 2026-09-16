@@ -1409,6 +1409,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#-all-hosts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        --all-hosts
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#-list" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3199,6 +3210,10 @@
       
         
       
+        
+      
+        
+      
     
     
     
@@ -3422,6 +3437,34 @@
     
   
     AsyncGroupsApi
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/mlclient/api/AsyncHostsApi/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AsyncHostsApi
   
 
     
@@ -3778,6 +3821,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../../reference/mlclient/api/HostsApi/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    HostsApi
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../../reference/mlclient/api/LogsApi/" class="md-nav__link">
         
   
@@ -3983,6 +4054,8 @@
   
     
     
+      
+        
       
         
       
@@ -4719,6 +4792,34 @@
     
   
     GroupPropertiesPutCall
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/mlclient/calls/HostsGetCall/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    HostsGetCall
   
 
     
@@ -7299,6 +7400,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#-all-hosts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        --all-hosts
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#-list" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -7384,6 +7496,19 @@ shell from interpreting it. <code>--from</code>, <code>--to</code> and <code>--r
 <h3 id="-host-h"><code>--host</code>, <code>-H</code><a class="headerlink" href="#-host-h" title="Permanent link">&para;</a></h3>
 <p>MarkLogic host from which to retrieve log data. This selects a host within the
 server operation; it does not replace the environment's connection hostname.</p>
+<h3 id="-all-hosts"><code>--all-hosts</code><a class="headerlink" href="#-all-hosts" title="Permanent link">&para;</a></h3>
+<p>Read error logs from every host in the cluster at once, merged into a single
+timeline by timestamp. The host is shown in parentheses between the log level
+and the message. The host list comes from <code>/manage/v2/hosts</code>, and each host is
+queried concurrently. If host discovery or any host read fails, the command
+fails without printing a partial timeline. Error logs only: <code>--all-hosts</code> with
+any other log type is rejected. <code>--all-hosts</code> cannot be combined with <code>--host</code> or <code>--list</code>.</p>
+<p>Reading unfiltered error logs from every host can return a large volume and may
+time out, so a multi-host read with no <code>--from</code>, <code>--to</code> or <code>--regex</code> prints a
+warning suggesting you narrow it.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>ml<span class="w"> </span>logs<span class="w"> </span>-e<span class="w"> </span>dev<span class="w"> </span>--all-hosts
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>ml<span class="w"> </span>logs<span class="w"> </span>-e<span class="w"> </span>dev<span class="w"> </span>--all-hosts<span class="w"> </span>--from<span class="w"> </span><span class="s1">&#39;2026-09-01 10:00&#39;</span><span class="w"> </span>--regex<span class="w"> </span><span class="s1">&#39;Forest M.*&#39;</span>
+</code></pre></div>
 <h3 id="-list"><code>--list</code><a class="headerlink" href="#-list" title="Permanent link">&para;</a></h3>
 <p>List available log files instead of reading entries. Combine with <code>--server</code>
 or <code>--host</code> to narrow the list.</p>

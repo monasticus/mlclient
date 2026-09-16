@@ -5,16 +5,25 @@ MLClient models two independent concerns separately:
 - **Connection** -- the transport: HTTP, HTTPS, mutual TLS, or MarkLogic Cloud. Chosen from `protocol`, `ssl` ([SSLConfig][mlclient.connection.SSLConfig] ), and `cloud` ([CloudConfig][mlclient.connection.CloudConfig] ).
 - **Authentication** -- how the client proves its identity, chosen from `auth` with credentials supplied via `username` / `password`.
 
-Both are validated when the client is constructed, so an unsupported combination raises [ConfigError][mlclient.exceptions.ConfigError] immediately rather than failing on the first request.
+Local configuration is validated when the client is constructed: conflicting
+transport/auth settings raise [ConfigError][mlclient.exceptions.ConfigError].
+MLClient does not contact the server to discover its version or reject an auth
+method based on that version. The target App Server must support and be configured
+for the selected method; server authentication errors propagate normally.
 
 ## Connection modes
 
-| Mode | How to select it | Protocol / port |
-|----|----|----|
-| HTTP | default | `http` / `8000` |
-| HTTPS | `protocol="https"` | `https` |
-| Mutual TLS | `ssl=SSLConfig(cert_file=..., key_file=...)` | `https` |
-| MarkLogic Cloud | `cloud=CloudConfig(api_key=..., base_path=...)` | `https` / `443` |
+| Mode | How to select it | Protocol / port | Server availability |
+|----|----|----|----|
+| HTTP | default | `http` / `8000` | MarkLogic 10, 11, 12 |
+| HTTPS | `protocol="https"` | `https` | MarkLogic 10, 11, 12; server certificate configured |
+| Mutual TLS | `ssl=SSLConfig(cert_file=..., key_file=...)` | `https` | MarkLogic 10, 11, 12; trusted client CA configured |
+| MarkLogic Cloud | `cloud=CloudConfig(api_key=..., base_path=...)` | `https` / `443` | Managed Cloud gateway; not selected by server major version |
+
+These tables describe availability within the MarkLogic 10–12 range covered by
+MLClient's [integration matrix](../../stability.md#supported-and-tested-versions),
+not the release in which each older transport/auth method first appeared. TLS
+versions and cipher support depend on the server release and configuration.
 
 A client certificate implies HTTPS, so the protocol is inferred. MarkLogic Cloud forces HTTPS on port 443 and routes every API tier through the same gateway using the configured `base_path`. HTTP sessions are shared only when their complete configurations match; health checks normally use a separate session because their retry strategy differs. Passing a conflicting `protocol` or `port` raises [ConfigError][mlclient.exceptions.ConfigError].
 
@@ -65,17 +74,25 @@ A client certificate implies HTTPS, so the protocol is inferred. MarkLogic Cloud
 
 The `auth` parameter accepts a string shortcut, an [AuthConfig][mlclient.auth.AuthConfig] for methods that need more than a username and password, a custom [Auth](https://www.python-httpx.org/advanced/authentication/), or `None` for application-level auth. Credentials always come from `username` / `password` -- never from `AuthConfig`.
 
-| `auth` value | Method | Credentials |
-|----|----|----|
-| `"digest"` (default) | HTTP digest | `username` / `password` |
-| `"basic"` | HTTP basic | `username` / `password` |
-| `"digestbasic"` | HTTP digest | `username` / `password` |
-| `"certificate"` | Client certificate | `ssl` client cert |
-| `"kerberos"` | Kerberos / SPNEGO | ambient ticket cache |
-| `AuthConfig(method="oauth", token=...)` | OAuth 2.0 Bearer | pre-acquired token |
-| `AuthConfig(method="kerberos", ...)` | Kerberos / SPNEGO | ambient ticket cache, custom SPN |
-| `None` | application-level | none |
-| a custom [Auth](https://www.python-httpx.org/advanced/authentication/) instance | custom | supplied by the handler |
+| `auth` value | Method | Credentials | Server availability |
+|----|----|----|----|
+| `"digest"` (default) | HTTP digest | `username` / `password` | MarkLogic 10, 11, 12 |
+| `"basic"` | HTTP basic | `username` / `password` | MarkLogic 10, 11, 12 |
+| `"digestbasic"` | HTTP digest | `username` / `password` | MarkLogic 10, 11, 12 |
+| `"certificate"` | Client certificate | `ssl` client cert | MarkLogic 10, 11, 12 |
+| `"kerberos"` | Kerberos / SPNEGO | ambient ticket cache | MarkLogic 10, 11, 12 |
+| `AuthConfig(method="oauth", token=...)` | OAuth 2.0 Bearer | pre-acquired token | JWT Resource Server: **11.2+**; unavailable on 10 |
+| `AuthConfig(method="kerberos", ...)` | Kerberos / SPNEGO | ambient ticket cache, custom SPN | MarkLogic 10, 11, 12 |
+| `None` | application-level | none | MarkLogic 10, 11, 12 |
+| a custom [Auth](https://www.python-httpx.org/advanced/authentication/) instance | custom | supplied by the handler | Depends on the target server or gateway |
+
+MarkLogic 10's [App Server authentication settings](https://docs.marklogic.com/10.0/admin:appserver-set-authentication)
+include the credential, certificate and Kerberos methods above, but not OAuth.
+The JWT Resource Server flow used by the integration tests requires MarkLogic
+11.2 or later. Earlier 11.x OAuth flows and the `sec:oauth-server` signature
+differ; see the OAuth changes in the [MarkLogic 11 release notes](https://docs.marklogic.com/11.0/guide/release-notes.pdf).
+MLClient only sends the supplied Bearer token; it does not configure external
+security, acquire OAuth tokens, or maintain a server-version compatibility gate.
 
 `"certificate"` and `"kerberos"` are accepted as plain strings because they need no extra data: certificate identity comes from the `ssl` client cert, and Kerberos defaults to the `HTTP` service on the request host. Use `AuthConfig` only to override the Kerberos SPN (`service` / `hostname`), or for OAuth, which has no default token.
 
@@ -134,7 +151,10 @@ With mutual TLS, `auth` defaults to `"certificate"`, so it need not be set expli
 
 ## Valid and rejected combinations
 
-Validation rejects combinations MarkLogic cannot serve, and warns on ones that are valid but risky (basic auth over plain HTTP logs a cleartext-credentials warning rather than raising).
+Validation rejects locally inconsistent combinations and warns on ones that are
+valid but risky (basic auth over plain HTTP logs a cleartext-credentials warning
+rather than raising). A valid configuration still requires the server support
+and setup listed above, including MarkLogic 11.2+ for JWT Resource Server auth.
 
 | Combination | Result | Reason |
 |----|----|----|

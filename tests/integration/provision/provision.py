@@ -38,9 +38,8 @@ TEMPLATE_NAME = "mlclient-it"
 CONTENT_DATABASE = "Documents"
 MODULES_DATABASE = "Modules"
 
-# sec:oauth-server, which backs the JWT external-security setup, only exists
-# from MarkLogic 11 onward, so the OAuth row is skipped on earlier releases.
-OAUTH_MIN_MAJOR = 11
+# The JWT Resource Server flow and this sec:oauth-server signature require 11.2+.
+OAUTH_MIN_VERSION = (11, 2)
 OAUTH_PORT = 8011
 OAUTH_EXTERNAL_SECURITY = "mlclient-it-oauth"
 OAUTH_ROLE = "mlclient-it-oauth-role"
@@ -149,7 +148,7 @@ def main() -> int:
         args.health_port,
     ) as session:
         session.wait_until_ready()
-        oauth_supported = session.server_major_version() >= OAUTH_MIN_MAJOR
+        oauth_supported = session.server_version() >= OAUTH_MIN_VERSION
         specs = _applicable_specs(oauth_supported=oauth_supported)
 
         bundle = build_certificate_bundle(
@@ -172,8 +171,7 @@ def main() -> int:
         session.bind_client_certificate_authority(bundle, _mtls_server_names(specs))
         for spec in _external_security_specs(specs):
             session.bind_external_security(spec)
-        if oauth_supported:
-            write_oauth_config(Path(args.certs_dir))
+        write_oauth_config(Path(args.certs_dir), supported=oauth_supported)
         write_kerberos_config(Path(args.certs_dir), args.kerberos_principal)
         session.wait_until_stable(args.admin_port)
     print("Provisioning complete.")
@@ -194,13 +192,14 @@ def _external_security_specs(specs: tuple[ServerSpec, ...]) -> list[ServerSpec]:
     return [spec for spec in specs if spec.external_security]
 
 
-def write_oauth_config(target_dir: Path) -> Path:
-    """Write the OAuth parameters the test suite needs to mint a JWT."""
+def write_oauth_config(target_dir: Path, *, supported: bool) -> Path:
+    """Record JWT support, replacing any config left by a previous server version."""
     target_dir.mkdir(parents=True, exist_ok=True)
     path = target_dir / OAUTH_CONFIG_FILE
     path.write_text(
         json.dumps(
             {
+                "supported": True,
                 "port": OAUTH_PORT,
                 "client_id": OAUTH_EXTERNAL_SECURITY,
                 "issuer": OAUTH_ISSUER,
@@ -211,7 +210,7 @@ def write_oauth_config(target_dir: Path) -> Path:
                 "role_claim": OAUTH_ROLE_CLAIM,
                 "username": OAUTH_USER,
                 "role": OAUTH_ROLE,
-            },
+            } if supported else {"supported": False},
         ),
     )
     return path
@@ -250,9 +249,6 @@ class ManagementSession:
         )
         self._rest = f"http://{host}:{DEFAULT_REST_PORT}"
         self._manage = f"http://{host}:{DEFAULT_MANAGE_PORT}"
-        # The HealthCheck server's root reports readiness on every supported
-        # release; the /LATEST/healthcheck REST path only exists from MarkLogic
-        # 11 onward, so probing it would hang provisioning on MarkLogic 10.
         self._health_url = f"http://{host}:{health_port}/"
 
     def __enter__(self) -> ManagementSession:
@@ -465,18 +461,25 @@ class ManagementSession:
             return None
         return response.text.strip()
 
-    def server_major_version(self) -> int:
+    def server_version(self) -> tuple[int, int]:
+        """Read the major/minor version from the eval response's scalar body.
+
+        Match a complete version line, not version-like text in MIME headers.
+        Raise RuntimeError if the server does not return a recognizable version.
+        """
         response = self._request(
             "POST",
             f"{self._rest}/v1/eval",
             data={"xquery": "xdmp:version()"},
         )
         _expect(response, httpx.codes.OK)
-        match = re.search(r"(\d+)\.\d", response.text)
+        match = re.search(
+            r"(?m)^(\d+)\.(\d+)(?:[.-][\w.-]+)?\r?$", response.text,
+        )
         if match is None:
             msg = f"Could not parse MarkLogic version: {response.text[:200]}"
             raise RuntimeError(msg)
-        return int(match.group(1))
+        return int(match.group(1)), int(match.group(2))
 
     def _eval(self, xquery: str, variables: dict[str, str]) -> None:
         response = self._request(

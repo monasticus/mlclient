@@ -5,7 +5,7 @@ ready-to-use ``cts``, ``fn``, ``xdmp`` and ``xs`` namespaces from there.
 """
 
 from mlclient.functions.xqy._cts import Cts
-from mlclient.functions.xqy._expr import Expr
+from mlclient.functions.xqy._expr import Expr, xpath
 from mlclient.functions.xqy._fn import Fn
 from mlclient.functions.xqy._xdmp import Xdmp
 from mlclient.functions.xqy._xs import Xs
@@ -15,4 +15,4 @@ fn = Fn()
 xdmp = Xdmp()
 xs = Xs()
 
-__all__ = ["Cts", "Expr", "Fn", "Xdmp", "Xs", "cts", "fn", "xdmp", "xs"]
+__all__ = ["Cts", "Expr", "Fn", "Xdmp", "Xs", "cts", "fn", "xdmp", "xpath", "xs"]

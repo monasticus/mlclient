@@ -1,97 +1,200 @@
 # Search
 
 !!! warning "Experimental API"
-    The search builders and their services are experimental and outside the
-    stable API contract. They may change incompatibly in minor releases. The
-    surface is complete enough for real use - this notice is about stability,
-    not readiness.
+    The builders and namespace services are experimental. This revision changes
+    some POC signatures and result shapes; see the migration notes below.
 
-I wanted a way to search from this library. MarkLogic exposes a REST search
-endpoint, but in day-to-day development what has always worked best for me is
-building queries out of `cts:` functions directly. And since I consider this
-library a good fit for both simple lookups and more involved queries, I decided
-to mirror that `cts:` API in Python rather than wrap the search endpoint.
+The API mirrors MarkLogic's `cts:` functions: familiar names and arguments cover
+both simple searches and nested queries without introducing a second query
+language. Python methods use underscores where XQuery uses hyphens.
 
-Two things fall out of that choice. You do not have to learn another query API -
-if you know `cts:and-query` and `cts:element-range-query`, you already know
-this. And you never mix strings of inline XQuery into your Python: a query is an
-object graph, so there are no quoting rules to get wrong and nothing to
-concatenate by hand.
+Every builder returns an immutable [Expr][mlclient.functions.Expr]. Expressions
+can be arguments to other expressions **or the root of an evaluation**. The
+`fn`, `xdmp` and `xs` namespaces demonstrate this composition; they do not use
+separate compilers or execution paths. Builders perform no I/O.
 
-## Building a query
-
-Import the namespaces you need. Each mirrors an XQuery prefix: `cts`, `fn`,
-`xdmp` and `xs`.
+## Build, compose and execute
 
 ```python
-from mlclient.functions import cts, xs
+from decimal import Decimal
 
-query = cts.and_query((
-    cts.directory_query("/reactions/", "infinity"),
-    cts.element_range_query(xs.qname("yield"), ">=", 80),
-))
+from mlclient import MLClient
+from mlclient.functions import cts, fn, xpath, xs
+
+query = cts.and_query([
+    cts.collection_query("products"),
+    cts.element_range_query("price", ">=", Decimal("19.95")),
+])
+hits = cts.search(xpath("/product"), query)
+
+with MLClient() as ml:
+    page = ml.eval.expression(hits.window(1, 10))  # always a list
+    count = ml.eval.expression(fn.count(hits))   # [number_of_hits]
+    text = ml.eval.expression(xs.string(fn.count(hits)))  # ["..."]
 ```
 
-A builder returns an expression tree; it performs no I/O. Nest builders exactly
-as you would nest `cts:` calls in XQuery. Values you pass - a directory URI, a
-yield threshold - are never interpolated into the query text: they travel to
-MarkLogic as external variables, so a value like `'); xdmp:document-delete("`
-is just a string, never executable.
+The example requires an element range index for decimal `price`. MarkLogic
+validates index availability, argument types and searchable paths. For example,
+`cts.search` requires a fully searchable node expression; `xdmp.exists` accepts
+partially searchable expressions. Use `fn.exists` for arbitrary sequences.
+[Search reference](https://docs.marklogic.com/cts:search),
+[existence reference](https://docs.marklogic.com/xdmp:exists).
 
-`xs` constructors give a value an explicit type. Plain Python values are typed
-by inference (`int` becomes `xs:integer`, a `datetime.date` becomes `xs:date`),
-so reach for `xs` only when you need to override that - for example forcing a
-whole number to `xs:double`.
+`window(lo, hi)` selects inclusive, one-based positions. Both bounds must be
+integers (not booleans), with `1 <= lo <= hi`. The positional predicate executes
+on the server and can benefit from MarkLogic's lazy search evaluation. It does
+not change filtered search into unfiltered search or guarantee a particular
+query plan.
 
-## Running it
+## Values, sequences and source
 
-A builder namespace on its own does not touch the server. To execute, use the
-matching service, which inherits the exact same builder API and adds the
-executing calls - `search`, `uris`, `values`, `estimate`:
+| Python input | XQuery representation |
+| --- | --- |
+| `Expr` | Nested expression |
+| `None`, `[]`, `()` in a value position | Empty sequence |
+| List or tuple | Sequence; nested sequences flatten on the server |
+| String | One bound `xs:untypedAtomic` value, never characters or source |
+| `bool`, `int`, `float` | `xs:boolean`, `xs:integer`, `xs:double` |
+| `Decimal` | Exact `xs:decimal`; nonfinite decimals are rejected |
+| `date`, `datetime` | ISO value cast to `xs:date` or `xs:dateTime` |
+
+MarkLogic still enforces its native numeric ranges (for example, an integer
+outside its supported range raises a server cast error). Numeric and temporal
+values use JSON-safe bindings; large integers and decimals
+are sent as lexical strings to avoid JSON numeric precision loss. Floating-point
+NaN and infinities use XML Schema lexical forms. Lists are copied into immutable
+expression children, so changing an input list later cannot change a query.
+Dictionaries, generators, sets and arbitrary Python objects are rejected.
+A Python list means an XQuery sequence, **not** a JSON array node.
+
+`xs` constructors also accept expressions: `xs.double(fn.count(hits))` casts the
+result on the server. QName arguments accept `xs.qname("price", "urn:products")`;
+sequence-valued element-query arguments also accept lists of names.
+
+For optional arguments, `None` means omission; `[]` or `()` explicitly passes an
+empty sequence. Omitted trailing arguments are removed. An omitted slot before
+a supplied later argument becomes `()`, preserving the native argument order.
+Options accept a single string, a list/tuple, or an expression. Search options
+may also contain expressions producing native `cts:order` values.
+
+### Trusted XPath
+
+`cts.search()` searches the root expression `/` by default. A custom path must
+be an expression, such as `xpath("/Q{urn:products}product")`.
+
+[xpath][mlclient.functions.xpath] embeds **trusted developer-controlled source**.
+It does not parse or sanitize XQuery and is not a sandbox. Never wrap user input
+in it. Dynamic text, URIs and comparison values belong in builder arguments,
+where they are external variables and cannot become executable source.
+
+Use EQNames (`Q{namespace-uri}local-name`) for namespaced paths. For
+`cts.path_reference`, `namespaces` accepts an expression returning a native
+`map:map`; it does not accept a Python dictionary. This keeps native objects
+composable without inventing a second object serialization scheme.
+
+Compilation uses `xquery version "1.0-ml";`. Source, including whitespace inside
+literals and comments, is preserved by the eval transport.
+
+## Results and execution options
+
+[EvalService.expression][mlclient.services.EvalService.expression] and its async
+counterpart compile once and send one `/v1/eval` request. They return one Python
+list entry per server result item:
+
+| Server sequence | Python result |
+| --- | --- |
+| Empty | `[]` |
+| One integer | `[42]` |
+| Two strings | `["a", "b"]` |
+| One JSON array node | `[[1, 2]]` |
+
+Integers become `int`, decimals become `Decimal`, floating-point values become
+`float`, and dates/timestamps become `date`/`datetime`. XML documents become
+`ElementTree`, XML elements become `Element`, and JSON nodes are decoded as
+JSON. Unsupported primitives, including QName and serialized query/reference
+objects, remain bytes. Use `output_type=str` or `output_type=bytes` for raw
+per-item output.
+
+Python temporal limits apply: dates discard an XQuery timezone, datetimes retain
+it, fractional seconds have microsecond precision, and years must fit Python's
+supported range. Parsing errors are propagated instead of silently returning a
+value of an unrelated type.
+
+Allowed execution keywords are `database`, `txid`, `output_type` and `timeout`.
+Unknown keywords, including `variables` and names such as `v0`, are rejected;
+they cannot override compiler bindings. The HTTP timeout inherits the client's
+setting when omitted and does not impose a server query time limit.
+
+Raw `ml.eval.xquery(...)` and `javascript(...)` keep their existing result
+contract (singleton collapsing and decimal-to-float conversion). Use
+`expression(...)` for the stable outer sequence and precise decimal conversion.
+Raw eval source is now sent verbatim rather than having newlines removed.
+
+## Convenience services
 
 ```python
 from mlclient import MLClient
-from mlclient.functions import cts, xs
-from mlclient.services import CtsService
+from mlclient.functions import cts, xpath
+from mlclient.services import CtsService, FnService, XdmpService
 
 with MLClient() as ml:
+    query = cts.collection_query("products")
     search = CtsService(ml.rest)
-    query = cts.element_range_query(xs.qname("yield"), ">=", 80)
-    hits = search.search("/reaction", query, range=10)
+    page = search.search(xpath("/product"), query, range=(11, 20))
+    uris = search.uris(query)  # requires the URI lexicon
+    count = FnService(ml.rest).count(cts.search(query=query))  # int
+    present = XdmpService(ml.rest).exists(cts.search(query=query))  # bool
 ```
 
-The service compiles the tree once and evaluates it through `/v1/eval`. `range`
-is optional and slices the result lazily in XQuery style: `10` returns the first
-ten hits, `(11, 20)` the next ten. Because the slice is a `[lo to hi]` predicate,
-MarkLogic stops early instead of materialising every match.
+Services delegate to the common expression evaluator; they do not inherit the
+builder namespaces. `search`, `uris` and `values` always return lists.
+`estimate` and `count` return one integer; `exists` and `empty` return one boolean.
+An unexpected aggregate cardinality raises an error. The list operations accept
+`range=N` (positions 1 through N) or `range=(lo, hi)`.
 
-[CtsService][mlclient.services.CtsService] targets MarkLogic 12 by default and
-verifies version-gated functions before evaluating - passing `version="11.0"`
-rejects, for instance, `cts:document-root-query` on a server too old to have it.
-
-## Composing across namespaces
-
-Because every builder returns the same expression type, one namespace nests
-inside another. Wrap a `cts:` query in `fn:count` to size a result set, or in
-`xdmp:exists` for an index-resolved existence check, in a single round-trip:
+`AsyncCtsService`, `AsyncFnService`, `AsyncXdmpService` and
+`AsyncEvalService.expression` have the same contracts, with calls awaited:
 
 ```python
-from mlclient import MLClient
-from mlclient.functions import cts
-from mlclient.services import FnService, XdmpService
+from mlclient import AsyncMLClient
+from mlclient.functions import fn
 
-with MLClient() as ml:
-    matches = FnService(ml.rest).count(cts.values(cts.element_reference("mf")))
-    present = XdmpService(ml.rest).exists(cts.search("/reaction", cts.true_query()))
+async def count_items():
+    async with AsyncMLClient() as ml:
+        return await ml.eval.expression(fn.count([1, 2]))  # [2]
 ```
 
-[FnService][mlclient.services.FnService] and
-[XdmpService][mlclient.services.XdmpService] follow the same pattern as
-`CtsService`: they inherit the builder namespace and execute what you nest.
+## Server versions
 
-## Async
+Builders do not guess the server version or maintain a runtime feature registry.
+The server reports unsupported functions through `MarkLogicError`.
+`cts.document_root_query` requires MarkLogic 11 or later; the other builders in
+this initial catalog are available in MarkLogic 10. Particular options and
+index configurations can have additional version requirements. Consult the
+[native function reference](https://docs.marklogic.com/cts:document-root-query).
 
-Every service has an async twin - [AsyncCtsService][mlclient.services.AsyncCtsService],
-[AsyncFnService][mlclient.services.AsyncFnService] and
-[AsyncXdmpService][mlclient.services.AsyncXdmpService] - with the same methods
-awaited. See [Async support](async.md).
+## Migrating from the POC
+
+- Replace path strings with explicit `xpath(...)` in `search` and `xdmp.exists`.
+- Replace `cts.document_root(...)` with `cts.document_root_query(...)`.
+- Replace `and_query(..., ordered=True)` with `options="ordered"` (or
+  `"unordered"` for false). `or_query` also accepts native options.
+- Replace `near_query(..., weight=...)` with `distance_weight=...`.
+- `json_property_value_query` calls its second argument `value`, including when
+  passing a keyword; it accepts booleans and numbers as well as strings.
+- Create queries through `cts`, `fn`, `xdmp`, `xs`; service instances execute
+  their documented conveniences and no longer expose inherited builders.
+- Remove service `version=...` arguments. Account for lists from sequence
+  operations and exact `Decimal` results from expression execution.
+
+## Extending the catalog
+
+For another native function, verify its XQuery signature for supported servers,
+then add one pure builder returning the existing function-call expression.
+Keep native parameter order, cardinality and omitted optional slots. Reuse the
+shared value conversion; do not add another compiler, eval call or version gate.
+Use native names converted to Python underscores and document version limits.
+
+Test the actual request bindings and a nested/root evaluation on MarkLogic.
+Only add a service convenience when it adds a useful result contract; any new
+builder already executes through `ml.eval.expression`. This revision adds no native functions.

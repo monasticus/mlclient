@@ -351,7 +351,7 @@ async def test_eval_using_txid_param(svc):
 @pytest.mark.asyncio
 @respx.mock
 async def test_eval_file_xquery(svc):
-    code = 'xquery version "1.0-ml"; ()'
+    code = resources_utils.get_test_resources(__file__)["xquery-code.xqy"]["str"]
 
     ml_mocker = MLRespXMocker(use_router=False)
     for ext in ["xq", "xql", "xqm", "xqu", "xquery", "xqy"]:
@@ -374,7 +374,7 @@ async def test_eval_file_xquery(svc):
 @pytest.mark.asyncio
 @respx.mock
 async def test_eval_file_javascript(svc):
-    code = "'use strict'; Sequence.from([]);"
+    code = resources_utils.get_test_resources(__file__)["javascript-code.js"]["str"]
 
     ml_mocker = MLRespXMocker(use_router=False)
     for ext in ["js", "sjs"]:

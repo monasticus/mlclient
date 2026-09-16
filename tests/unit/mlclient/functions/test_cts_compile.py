@@ -1,158 +1,147 @@
 from __future__ import annotations
 
+import json
+from dataclasses import FrozenInstanceError
+from datetime import date, datetime, timezone
+from decimal import Decimal
+
 import pytest
 
-from mlclient.functions import cts, xs
-from mlclient.functions.xqy._cts import _keyword
-from mlclient.models.version import MarkLogicVersion
-from mlclient.services import CtsService
+from mlclient.calls import EvalCall
+from mlclient.functions import cts, fn, xpath, xs
 
 
-def test_nested_query_parameterizes_every_value():
-    query = cts.and_query(
-        (cts.directory_query("/some/", "infinity"), cts.document_root("some")),
-    )
-    code, variables = query.compile()
-
-    assert code == (
-        "declare variable $v0 external;\n"
-        "declare variable $v1 external;\n"
-        'cts:and-query((cts:directory-query(($v0), "infinity"), '
-        "cts:document-root-query(xs:QName($v1))))"
-    )
-    assert variables == {"v0": "/some/", "v1": "some"}
-
-
-def test_no_user_value_is_interpolated_into_source():
-    code, variables = cts.word_query('"); xdmp:document-delete("/x"').compile()
-
-    assert '"); xdmp:document-delete' not in code
-    assert variables == {"v0": '"); xdmp:document-delete("/x"'}
-
-
-def test_typed_value_wrappers_carry_their_type():
-    query = cts.element_range_query(xs.qname("price"), ">=", xs.integer(100))
-    code, _ = query.compile()
-
-    assert 'cts:element-range-query(xs:QName($v0), ">=", (xs:integer($v1)))' in code
-
-
-def test_qname_with_namespace_uses_fn_qname():
-    code, variables = cts.document_root(xs.qname("s", uri="urn:x")).compile()
-
-    assert "fn:QName($v0, $v1)" in code
-    assert variables == {"v0": "urn:x", "v1": "s"}
-
-
-def test_invalid_range_operator_is_rejected():
-    with pytest.raises(ValueError, match="range operator"):
-        cts.element_range_query(xs.qname("p"), "=<", 1)
-
-
-def test_trailing_empty_optionals_are_dropped():
-    code, _ = cts.word_query("foo").compile()
-
-    assert code.endswith("cts:word-query(($v0))")
-
-
-def test_options_are_bound_as_strings():
-    code, variables = cts.word_query("foo", options=["unstemmed"]).compile()
-
-    assert "(xs:string($v1))" in code
-    assert variables["v1"] == "unstemmed"
-
-
-def test_keyword_rejects_embedded_quote():
-    with pytest.raises(ValueError, match="must not contain a quote"):
-        _keyword('x") or true(("')
-
-
-def test_search_defaults_to_root_and_accepts_query_keyword():
-    code, _ = cts.search(query=cts.true_query()).compile()
-
-    assert code == "cts:search((/), cts:true-query())"
-
-
-def test_search_rejects_paren_breakout_but_keeps_the_query_bound():
-    breakout = '/, cts:false-query()), "unfiltered", ('
-    with pytest.raises(ValueError, match="unbalanced search path"):
-        cts.search(breakout, cts.true_query())
-
-
-def test_search_allows_balanced_xpath_with_predicates_and_strings():
-    code, _ = cts.search("/a/b[@id = 'x(1)']", cts.true_query()).compile()
-
-    assert code == "cts:search((/a/b[@id = 'x(1)']), cts:true-query())"
-
-
-def test_unwrapped_python_values_infer_their_type():
-    code, variables = cts.element_range_query(xs.qname("n"), ">=", 100).compile()
-
+def test_values_are_json_safe_and_keep_precision():
+    values = [
+        True,
+        2**80,
+        Decimal("1.234567890123456789"),
+        date(2026, 1, 2),
+        datetime(2026, 1, 2, tzinfo=timezone.utc),
+        float("inf"),
+        float("-inf"),
+        float("nan"),
+        1.25,
+    ]
+    expr = fn.count(values)
+    code, variables = expr.compile()
+    body = EvalCall(xquery=code, variables=variables).body
+    assert json.loads(body["vars"]) == {
+        "v0": True,
+        "v1": str(2**80),
+        "v2": "1.234567890123456789",
+        "v3": "2026-01-02",
+        "v4": "2026-01-02T00:00:00+00:00",
+        "v5": "INF",
+        "v6": "-INF",
+        "v7": "NaN",
+        "v8": "1.25",
+    }
+    assert code.startswith('xquery version "1.0-ml";\n')
     assert "xs:integer($v1)" in code
-    assert variables["v1"] == 100
+    assert "xs:decimal($v2)" in code
+    assert "xs:date($v3)" in code
+    assert "xs:dateTime($v4)" in code
 
 
-def test_service_shares_builder_api_and_evaluates_compiled_code():
-    service = _fake_service()
-
-    result = service.search("/", service.document_root("substance"))
-
-    assert result == "ok"
-    code = service._eval.calls[-1]
-    assert "cts:search((/), cts:document-root-query(xs:QName($v0)))" in code["code"]
-    assert code["variables"] == {"v0": "substance"}
+@pytest.mark.parametrize("value", [Decimal("NaN"), Decimal("Infinity")])
+def test_nonfinite_decimals_are_rejected(value):
+    with pytest.raises(ValueError, match="finite"):
+        xs.decimal(value)
 
 
-def test_search_range_wraps_result_in_a_positional_predicate():
-    service = _fake_service()
-
-    service.search(query=service.true_query(), range=(11, 20))
-
-    code = service._eval.calls[-1]["code"]
-    assert code.endswith("(cts:search((/), cts:true-query()))[11 to 20]")
+@pytest.mark.parametrize("value", [{}, {1}, iter([1]), object()])
+def test_unsupported_values_are_rejected_when_building(value):
+    with pytest.raises(TypeError, match="unsupported XQuery value"):
+        fn.count(value)
 
 
-def test_search_range_integer_is_shorthand_for_the_first_n():
-    service = _fake_service()
-
-    service.search(query=service.true_query(), range=10)
-
-    assert service._eval.calls[-1]["code"].endswith("[1 to 10]")
-
-
-def test_search_range_with_invalid_bounds_is_rejected():
-    service = _fake_service()
-
-    with pytest.raises(ValueError, match="range bounds"):
-        service.search(query=service.true_query(), range=(0, 5))
+def test_values_and_source_have_separate_trust_boundaries():
+    attack = "(: (( :) /), cts:false-query()), 424242, (( (: )) :)"
+    with pytest.raises(TypeError, match="xpath"):
+        cts.search(attack, cts.true_query())
+    code, variables = cts.word_query(attack).compile()
+    assert attack not in code
+    assert variables == {"v0": attack}
+    source = "/Q{urn:example}item (: a valid ) comment :)"
+    assert source in cts.search(xpath(source)).compile()[0]
 
 
-def test_service_rejects_functions_newer_than_its_version():
-    service = _fake_service(version="10.0")
-
-    with pytest.raises(ValueError, match="document-root-query requires MarkLogic 11"):
-        service.search(query=service.document_root("substance"))
-
-    assert service._eval.calls == []
+@pytest.mark.parametrize(("source", "error"), [(1, TypeError), ("  ", ValueError)])
+def test_xpath_rejects_invalid_source_inputs(source, error):
+    with pytest.raises(error):
+        xpath(source)
 
 
-def test_service_allows_functions_available_in_its_version():
-    service = _fake_service(version="10.0")
+def test_sequence_snapshot_and_nested_casts():
+    values = ["first", [1, 2]]
+    expr = xs.string(fn.count(values))
+    original = expr.compile()
+    values[1].append(3)
+    values.append("last")
+    assert expr.compile() == original
+    assert (
+        "xs:string(fn:count(($v0, (xs:integer($v1), xs:integer($v2)))))" in original[0]
+    )
+    with pytest.raises(FrozenInstanceError):
+        expr.fn = "fn:empty"
+    original[1]["v0"] = "changed"
+    assert expr.compile()[1]["v0"] == "first"
 
-    assert service.search(query=service.word_query("benzene")) == "ok"
+
+@pytest.mark.parametrize(
+    "options", ["unstemmed", ["unstemmed"], ("unstemmed",), xs.string("unstemmed")],
+)
+def test_options_never_split_strings_into_characters(options):
+    _, variables = cts.word_query("needle", options=options).compile()
+    assert list(variables.values()) == ["needle", "unstemmed"]
 
 
-class _FakeEval:
-    def __init__(self):
-        self.calls = []
+def test_qname_sequences_and_namespaced_nested_arguments():
+    expr = cts.element_value_query(
+        ["a", xs.qname(xs.string("b"), uri=xs.string("urn:x"))], ["one", "two"],
+    )
+    code, variables = expr.compile()
+    assert "(xs:QName($v0), fn:QName(xs:string($v1), xs:string($v2)))" in code
+    assert list(variables.values()) == ["a", "urn:x", "b", "one", "two"]
 
-    def xquery(self, code, *, variables):
-        self.calls.append({"code": code, "variables": variables})
-        return "ok"
+
+def test_omitted_optional_slots_are_distinct_from_empty_sequences():
+    assert str(cts.uris()).endswith("cts:uris()")
+    assert str(cts.word_query("x")).endswith("cts:word-query($v0)")
+    assert str(cts.word_query("x", options=[])).endswith("cts:word-query($v0, ())")
+    assert str(cts.word_query("x", weight=xs.double(2))).endswith(
+        "cts:word-query($v0, (), xs:double(xs:double(xs:integer($v1))))",
+    )
 
 
-def _fake_service(*, version="12.0"):
-    service = CtsService.__new__(CtsService)
-    service._eval = _FakeEval()
-    service._version = MarkLogicVersion(version)
-    return service
+@pytest.mark.parametrize(
+    ("lo", "hi", "error"),
+    [
+        (True, 2, TypeError),
+        (1, False, TypeError),
+        (1.5, 2, TypeError),
+        (1, "2", TypeError),
+        (0, 1, ValueError),
+        (3, 2, ValueError),
+    ],
+)
+def test_window_rejects_invalid_positions(lo, hi, error):
+    with pytest.raises(error):
+        cts.search().window(lo, hi)
+
+
+def test_window_composes_inside_count_and_root_defaults_to_database():
+    expr = fn.count(cts.search(query=cts.false_query()).window(2, 5))
+    assert str(expr).endswith("fn:count((cts:search((/), cts:false-query()))[2 to 5])")
+
+
+@pytest.mark.parametrize("operator", ["=<", "bad"])
+def test_invalid_range_operators(operator):
+    with pytest.raises(ValueError, match="range operator"):
+        cts.element_range_query("price", operator, 1)
+
+
+def test_invalid_directory_depth():
+    with pytest.raises(ValueError, match="directory depth"):
+        cts.directory_query("/test/", "2")

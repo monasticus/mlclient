@@ -7,7 +7,6 @@ It exports 1 class:
 
 from __future__ import annotations
 
-import re
 from json import dumps
 
 from mlclient import _constants as constants
@@ -110,15 +109,8 @@ class EvalCall(ApiCall):
         variables: dict,
     ):
         code_lang = cls._XQ_PARAM if xquery else cls._JS_PARAM
-        code_to_eval = cls._normalize_code(xquery or javascript)
+        code_to_eval = xquery or javascript
         body = {code_lang: code_to_eval}
         if variables:
             body[cls._VARS_PARAM] = dumps(variables)
         return body
-
-    @staticmethod
-    def _normalize_code(
-        code: str,
-    ):
-        code = re.sub(r"\s*\n\s*", " ", code)
-        return code.strip()

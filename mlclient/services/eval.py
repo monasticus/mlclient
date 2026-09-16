@@ -21,6 +21,7 @@ from mlclient.exceptions import (
     UnsupportedFileExtensionError,
     WrongParametersError,
 )
+from mlclient.functions.xqy._expr import Expr
 from mlclient.responses import MLResponseParser
 
 _LOCAL_NS = "http://www.w3.org/2005/xquery-local-functions"
@@ -39,6 +40,63 @@ class EvalService:
 
     def __init__(self, rest: RestApi):
         self._rest = rest
+
+    def expression(
+        self,
+        expr: Expr,
+        *,
+        database: str | None = None,
+        txid: str | None = None,
+        output_type: type | None = None,
+        timeout=UNSET,
+    ) -> list:
+        """Compile and execute an expression as the root of one eval request.
+
+        Parameters
+        ----------
+        expr : Expr
+            A builder expression, including nested calls or a positional window.
+        database : str | None, default None
+            Content database name or id.
+        txid : str | None, default None
+            Existing multi-statement transaction identifier.
+        output_type : type | None, default None
+            Per-item raw conversion (``str`` or ``bytes``), or typed conversion.
+        timeout : httpx.Timeout | float | None, default unset
+            Per-request HTTP timeout; unset inherits the client configuration.
+
+        Returns
+        -------
+        list
+            Zero, one or many result items. Decimal results are ``Decimal``;
+            date/time results use Python types. A JSON array stays a single item.
+
+        Raises
+        ------
+        TypeError
+            If the root is not an expression or an unknown keyword is supplied.
+        ValueError
+            If output_type is not None, str or bytes.
+        MarkLogicError
+            If the server rejects the expression, including unavailable functions.
+        """
+        if not isinstance(expr, Expr):
+            message = "expression requires an Expr"
+            raise TypeError(message)
+        if output_type not in (None, str, bytes):
+            message = "output_type must be None, str or bytes"
+            raise ValueError(message)
+        code, variables = expr.compile()
+        response = self._rest.eval.post(
+            xquery=code,
+            variables=variables,
+            database=database,
+            txid=txid,
+            timeout=timeout,
+        )
+        if not response.is_success:
+            raise MarkLogicError(MLResponseParser.parse(response))
+        return MLResponseParser.parse_sequence(response, output_type)
 
     def xquery(
         self,
@@ -555,6 +613,63 @@ class AsyncEvalService:
 
     def __init__(self, rest: AsyncRestApi):
         self._rest = rest
+
+    async def expression(
+        self,
+        expr: Expr,
+        *,
+        database: str | None = None,
+        txid: str | None = None,
+        output_type: type | None = None,
+        timeout=UNSET,
+    ) -> list:
+        """Compile and execute an expression as the root of one eval request.
+
+        Parameters
+        ----------
+        expr : Expr
+            A builder expression, including nested calls or a positional window.
+        database : str | None, default None
+            Content database name or id.
+        txid : str | None, default None
+            Existing multi-statement transaction identifier.
+        output_type : type | None, default None
+            Per-item raw conversion (``str`` or ``bytes``), or typed conversion.
+        timeout : httpx.Timeout | float | None, default unset
+            Per-request HTTP timeout; unset inherits the client configuration.
+
+        Returns
+        -------
+        list
+            Zero, one or many result items. Decimal results are ``Decimal``;
+            date/time results use Python types. A JSON array stays a single item.
+
+        Raises
+        ------
+        TypeError
+            If the root is not an expression or an unknown keyword is supplied.
+        ValueError
+            If output_type is not None, str or bytes.
+        MarkLogicError
+            If the server rejects the expression, including unavailable functions.
+        """
+        if not isinstance(expr, Expr):
+            message = "expression requires an Expr"
+            raise TypeError(message)
+        if output_type not in (None, str, bytes):
+            message = "output_type must be None, str or bytes"
+            raise ValueError(message)
+        code, variables = expr.compile()
+        response = await self._rest.eval.post(
+            xquery=code,
+            variables=variables,
+            database=database,
+            txid=txid,
+            timeout=timeout,
+        )
+        if not response.is_success:
+            raise MarkLogicError(MLResponseParser.parse(response))
+        return MLResponseParser.parse_sequence(response, output_type)
 
     async def xquery(
         self,

@@ -73,6 +73,18 @@ class MLResponseParser:
 
     _SEQUENCE_TEXT_PARSERS: ClassVar[dict] = {
         **_PLAIN_TEXT_PARSERS,
+        "byte": int,
+        "short": int,
+        "int": int,
+        "long": int,
+        "nonPositiveInteger": int,
+        "negativeInteger": int,
+        "nonNegativeInteger": int,
+        "positiveInteger": int,
+        "unsignedByte": int,
+        "unsignedShort": int,
+        "unsignedInt": int,
+        "unsignedLong": int,
         "decimal": Decimal,
         "double": float,
         "float": float,
@@ -83,7 +95,9 @@ class MLResponseParser:
 
     @classmethod
     def parse_sequence(
-        cls, response: Response, output_type: type | None = None,
+        cls,
+        response: Response,
+        output_type: type | None = None,
     ) -> list:
         """Parse a successful eval response without collapsing its outer sequence.
 

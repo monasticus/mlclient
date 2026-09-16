@@ -184,7 +184,9 @@ def test_search_lexicons_ranges_and_namespace_composition(expression_database):
     assert (
         service.estimate(
             cts.path_range_query(
-                "/Q{urn:cts-test}item/Q{urn:cts-test}price", ">", Decimal(2),
+                "/Q{urn:cts-test}item/Q{urn:cts-test}price",
+                ">",
+                Decimal(2),
             ),
             database=database,
         )
@@ -210,6 +212,47 @@ def test_native_version_support_is_reported_by_server(expression_database):
             ml.eval.expression(expr, database=database)
     else:
         assert len(ml.eval.expression(expr, database=database)) == 2
+
+
+def test_extended_cts_catalog_executes_through_the_common_evaluator(
+    expression_database,
+):
+    ml, database, _ = expression_database
+    query = cts.collection_query("cts-test")
+    price = cts.element_reference(xs.qname("price", "urn:cts-test"))
+
+    assert ml.eval.expression(cts.contains(xpath("<p>alpha</p>"), query)) == [False]
+    assert ml.eval.expression(cts.collections(query=query), database=database) == [
+        "cts-test",
+    ]
+    assert ml.eval.expression(
+        cts.collection_match("cts-*", query=query),
+        database=database,
+    ) == ["cts-test"]
+    assert ml.eval.expression(
+        cts.uri_match("/cts-test/*.xml", query=query),
+        database=database,
+    ) == ["/cts-test/a.xml", "/cts-test/b.xml"]
+    assert ml.eval.expression(cts.min(price, query=query), database=database) == [
+        Decimal("1.25"),
+    ]
+    assert ml.eval.expression(cts.max(price, query=query), database=database) == [
+        Decimal("2.50"),
+    ]
+    assert ml.eval.expression(
+        cts.count_aggregate(price, query=query),
+        database=database,
+    ) == [2]
+
+    query_id = ml.eval.expression(cts.register(query), database=database)[0]
+    try:
+        assert isinstance(query_id, int)
+        assert ml.eval.expression(
+            cts.estimate(cts.registered_query(query_id)),
+            database=database,
+        ) == [3]
+    finally:
+        ml.eval.expression(cts.deregister(query_id), database=database)
 
 
 @pytest.mark.asyncio

@@ -182,6 +182,7 @@ EXPECTED_EXPORTS = {
         "cts",
         "fn",
         "xdmp",
+        "xpath",
         "xs",
     ],
     "mlclient.io": ["DocumentsLoader", "DocumentsWriter"],

@@ -359,7 +359,9 @@ def test_eval_using_txid_param(ml):
 
 @respx.mock
 def test_eval_file_xquery(ml):
-    code = 'xquery version "1.0-ml"; ()'
+    code = Path(
+        resources_utils.get_test_resource_path(__file__, "xquery-code.xqy"),
+    ).read_text()
 
     ml_mocker = MLRespXMocker(use_router=False)
     for ext in ["xq", "xql", "xqm", "xqu", "xquery", "xqy"]:
@@ -381,7 +383,9 @@ def test_eval_file_xquery(ml):
 
 @respx.mock
 def test_eval_file_javascript(ml):
-    code = "'use strict'; Sequence.from([]);"
+    code = Path(
+        resources_utils.get_test_resource_path(__file__, "javascript-code.js"),
+    ).read_text()
 
     ml_mocker = MLRespXMocker(use_router=False)
     for ext in ["js", "sjs"]:

@@ -88,6 +88,8 @@ def decode_multipart_mixed(
         The parsed parts
     """
     boundary = _extract_boundary(content_type)
+    if content.strip() == f"--{boundary}--".encode():
+        return []
     delimiter = f"\r\n--{boundary}".encode()
     pieces = content.split(delimiter)
     first = f"--{boundary}\r\n".encode()

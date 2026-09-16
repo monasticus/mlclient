@@ -1,14 +1,12 @@
 """``fn:`` builders returning expression trees.
 
-``Fn`` is a pure builder namespace: every method returns an ``Expr`` that wraps
-another expression (typically a ``cts:`` call) and never touches a client.
-``FnService`` inherits it and overrides the aggregating functions to evaluate.
+Builders compose expressions; services execute through the common evaluator.
 """
 
 from __future__ import annotations
 
 from mlclient._experimental import experimental
-from mlclient.functions.xqy._expr import Expr, _FunctionCall, as_expr
+from mlclient.functions.xqy._expr import Expr, _FunctionCall
 
 
 @experimental()
@@ -16,16 +14,58 @@ class Fn:
     """Pure ``fn:`` builders returning expression trees."""
 
     @staticmethod
-    def count(sequence) -> Expr:
-        """Build ``fn:count`` over a sequence expression."""
-        return _FunctionCall("fn:count", [as_expr(sequence)])
+    def count(sequence, *, maximum=None) -> Expr:
+        """Build ``fn:count`` over a sequence expression.
+
+        Parameters
+        ----------
+        sequence : object
+            Expression or supported Python values; lists/tuples become XQuery
+            sequences.
+        maximum : int | float | Expr | None
+            Native maximum count; None leaves the count uncapped.
+
+        Returns
+        -------
+        Expr
+            Immutable expression; no request is sent until it is evaluated.
+        """
+        return _FunctionCall(
+            "fn:count",
+            [sequence],
+            [maximum],
+        )
 
     @staticmethod
     def exists(sequence) -> Expr:
-        """Build ``fn:exists`` over a sequence expression."""
-        return _FunctionCall("fn:exists", [as_expr(sequence)])
+        """Build ``fn:exists`` over a sequence expression.
+
+        Parameters
+        ----------
+        sequence : object
+            Expression or supported Python values; lists/tuples become XQuery
+            sequences.
+
+        Returns
+        -------
+        Expr
+            Immutable expression; no request is sent until it is evaluated.
+        """
+        return _FunctionCall("fn:exists", [sequence])
 
     @staticmethod
     def empty(sequence) -> Expr:
-        """Build ``fn:empty`` over a sequence expression."""
-        return _FunctionCall("fn:empty", [as_expr(sequence)])
+        """Build ``fn:empty`` over a sequence expression.
+
+        Parameters
+        ----------
+        sequence : object
+            Expression or supported Python values; lists/tuples become XQuery
+            sequences.
+
+        Returns
+        -------
+        Expr
+            Immutable expression; no request is sent until it is evaluated.
+        """
+        return _FunctionCall("fn:empty", [sequence])

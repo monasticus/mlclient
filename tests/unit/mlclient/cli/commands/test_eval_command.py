@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from pathlib import Path
+
 import pytest
 import respx
 from cleo.testers.command_tester import CommandTester
@@ -45,7 +47,9 @@ def _setup(mocker, ml_config):
 
 @respx.mock
 def test_command_eval_basic():
-    code = 'xquery version "1.0"; ""'
+    code = Path(
+        resources_utils.get_test_resource_path(__file__, "xquery-code.xqy"),
+    ).read_text()
 
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url("http://localhost:8002/v1/eval")
@@ -71,7 +75,9 @@ def test_command_eval_basic():
 
 @respx.mock
 def test_command_eval_custom_rest_server():
-    code = 'xquery version "1.0"; ""'
+    code = Path(
+        resources_utils.get_test_resource_path(__file__, "xquery-code.xqy"),
+    ).read_text()
 
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url("http://localhost:8002/v1/eval")
@@ -97,7 +103,9 @@ def test_command_eval_custom_rest_server():
 
 @respx.mock
 def test_command_eval_with_vars():
-    code = 'xquery version "1.0"; ""'
+    code = Path(
+        resources_utils.get_test_resource_path(__file__, "xquery-code.xqy"),
+    ).read_text()
 
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url("http://localhost:8002/v1/eval")
@@ -189,7 +197,9 @@ def test_command_eval_mixed_xquery_and_javascript():
 
 @respx.mock
 def test_command_eval_custom_database():
-    code = 'xquery version "1.0"; ""'
+    code = Path(
+        resources_utils.get_test_resource_path(__file__, "xquery-code.xqy"),
+    ).read_text()
 
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url("http://localhost:8002/v1/eval")
@@ -216,7 +226,9 @@ def test_command_eval_custom_database():
 
 @respx.mock
 def test_command_eval_custom_txid():
-    code = 'xquery version "1.0"; ""'
+    code = Path(
+        resources_utils.get_test_resource_path(__file__, "xquery-code.xqy"),
+    ).read_text()
 
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url("http://localhost:8002/v1/eval")

@@ -30,6 +30,17 @@ def expression_database():
                 "database-name": name,
                 "uri-lexicon": True,
                 "collection-lexicon": True,
+                "geospatial-element-index": [
+                    {
+                        "namespace-uri": "urn:cts-test",
+                        "localname": name,
+                        "coordinate-system": "wgs84",
+                        "point-format": "point",
+                        "range-value-positions": False,
+                        "invalid-values": "reject",
+                    }
+                    for name in ("origin", "destination")
+                ],
                 "path-namespace": [{"prefix": "t", "namespace-uri": "urn:cts-test"}],
                 "range-path-index": [
                     {
@@ -66,7 +77,8 @@ def expression_database():
                 """
                 xdmp:document-insert("/cts-test/a.xml",
                     <item xmlns="urn:cts-test"><price>1.25</price>
-                        <day>2026-01-01</day><label>alpha</label></item>,
+                        <day>2026-01-01</day><label>alpha</label>
+                        <origin>10,20</origin><destination>30,40</destination></item>,
                     (), "cts-test"),
                 xdmp:document-insert("/cts-test/b.xml",
                     <item xmlns="urn:cts-test"><price>2.50</price>
@@ -153,6 +165,8 @@ def test_search_lexicons_ranges_and_namespace_composition(expression_database):
     ]
     assert service.estimate(query, database=database) == 2
     assert service.estimate(query, maximum=1, database=database) == 1
+    assert service.estimate(database=database) == 3
+    assert ml.eval.expression(cts.estimate(), database=database) == [3]
     assert service.search(
         query=cts.json_property_value_query("active", True),
         database=database,
@@ -212,6 +226,50 @@ def test_native_version_support_is_reported_by_server(expression_database):
             ml.eval.expression(expr, database=database)
     else:
         assert len(ml.eval.expression(expr, database=database)) == 2
+    for native in (
+        cts.document_format_query("xml"),
+        cts.document_permission_query("admin", "read"),
+        cts.iri_reference(),
+    ):
+        if major < 11:
+            with pytest.raises(MarkLogicError, match="XDMP-UNDFUN"):
+                ml.eval.expression(native, database=database)
+        else:
+            assert ml.eval.expression(fn.count(native), database=database) == [1]
+
+
+def test_geospatial_and_triple_native_contracts(expression_database):
+    ml, database, _ = expression_database
+    pairs = cts.geospatial_co_occurrences(
+        xs.qname("origin", "urn:cts-test"),
+        xs.qname("destination", "urn:cts-test"),
+    )
+    result = ml.eval.expression(pairs, database=database)
+    assert len(result) == 1
+    assert result[0].tag == "{http://marklogic.com/cts}co-occurrence"
+    assert ml.eval.expression(fn.count(pairs), database=database) == [1]
+    for operator in ("sameTerm", ["=", "=", "<"], []):
+        query = cts.triple_range_query([], [], 1, operator=operator)
+        assert ml.eval.expression(fn.count(query), database=database) == [1]
+
+
+def test_text_callbacks_and_native_maps(expression_database):
+    ml, database, _ = expression_database
+    node = xpath("<p>alpha beta</p>")
+    query = cts.parse("alpha")
+    result = ml.eval.expression(
+        cts.highlight(node, query, xpath("<b>{$cts:text}</b>")),
+        database=database,
+    )
+    assert result[0].find("b").text == "alpha"
+    assert ml.eval.expression(
+        cts.walk(node, query, xpath("$cts:text")),
+        database=database,
+    ) == ["alpha"]
+    assert ml.eval.expression(
+        cts.contains(node, cts.parse("alpha", bindings=xpath("map:map()"))),
+        database=database,
+    ) == [True]
 
 
 def test_extended_cts_catalog_executes_through_the_common_evaluator(

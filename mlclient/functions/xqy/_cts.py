@@ -1,4 +1,4 @@
-# ruff: noqa: A002, PLR0913
+# Native signatures retain their parameter names and argument counts.
 """Builders for supported MarkLogic ``cts:`` functions.
 
 The namespace mirrors query constructors, supporting value constructors and
@@ -91,7 +91,7 @@ class Cts:
         )
 
     @staticmethod
-    def aggregate(
+    def aggregate(  # noqa: PLR0913
         native_plugin,
         aggregate_name,
         range_indexes,
@@ -491,7 +491,7 @@ class Cts:
         )
 
     @staticmethod
-    def column_range_query(
+    def column_range_query(  # noqa: PLR0913
         schema,
         view,
         column,
@@ -778,7 +778,7 @@ class Cts:
         )
 
     @staticmethod
-    def deregister(id) -> Expr:
+    def deregister(id) -> Expr:  # noqa: A002
         """Build a composable ``cts:deregister`` call.
 
         Deregister a registered query, explicitly releasing the associated
@@ -850,7 +850,7 @@ class Cts:
         )
 
     @staticmethod
-    def document_format_query(format) -> Expr:
+    def document_format_query(format) -> Expr:  # noqa: A002
         """Build a composable ``cts:document-format-query`` call.
 
         Returns a query matching documents of a given format.
@@ -864,6 +864,11 @@ class Cts:
         -------
         Expr
             Composable call to ``cts:document-format-query``.
+
+        Notes
+        -----
+        Requires MarkLogic 11 or later. Availability is checked by the server
+        when the expression is evaluated, including in nested expressions.
         """
         return _FunctionCall(
             "cts:document-format-query",
@@ -932,6 +937,11 @@ class Cts:
         -------
         Expr
             Composable call to ``cts:document-permission-query``.
+
+        Notes
+        -----
+        Requires MarkLogic 11 or later. Availability is checked by the server
+        when the expression is evaluated, including in nested expressions.
         """
         return _FunctionCall(
             "cts:document-permission-query",
@@ -974,6 +984,11 @@ class Cts:
         -------
         Expr
             Composable call to ``cts:document-root-query``.
+
+        Notes
+        -----
+        Requires MarkLogic 11 or later. Availability is checked by the server
+        when the expression is evaluated, including in nested expressions.
         """
         return _FunctionCall(
             "cts:document-root-query",
@@ -981,7 +996,7 @@ class Cts:
         )
 
     @staticmethod
-    def element_attribute_pair_geospatial_boxes(
+    def element_attribute_pair_geospatial_boxes(  # noqa: PLR0913
         parent_element_names,
         latitude_names,
         longitude_names,
@@ -1041,7 +1056,7 @@ class Cts:
         )
 
     @staticmethod
-    def element_attribute_pair_geospatial_query(
+    def element_attribute_pair_geospatial_query(  # noqa: PLR0913
         element_name,
         latitude_attribute_names,
         longitude_attribute_names,
@@ -1089,7 +1104,7 @@ class Cts:
         )
 
     @staticmethod
-    def element_attribute_pair_geospatial_value_match(
+    def element_attribute_pair_geospatial_value_match(  # noqa: PLR0913
         element_names,
         latitude_names,
         longitude_names,
@@ -1141,7 +1156,7 @@ class Cts:
         )
 
     @staticmethod
-    def element_attribute_pair_geospatial_values(
+    def element_attribute_pair_geospatial_values(  # noqa: PLR0913
         element_names,
         latitude_names,
         longitude_names,
@@ -1188,7 +1203,7 @@ class Cts:
         )
 
     @staticmethod
-    def element_attribute_range_query(
+    def element_attribute_range_query(  # noqa: PLR0913
         element_name,
         attribute_name,
         operator,
@@ -1256,7 +1271,7 @@ class Cts:
         )
 
     @staticmethod
-    def element_attribute_value_co_occurrences(
+    def element_attribute_value_co_occurrences(  # noqa: PLR0913
         element_name_1,
         attribute_name_1,
         element_name_2,
@@ -1308,7 +1323,7 @@ class Cts:
         )
 
     @staticmethod
-    def element_attribute_value_geospatial_co_occurrences(
+    def element_attribute_value_geospatial_co_occurrences(  # noqa: PLR0913
         element_name_1,
         attribute_name_1,
         geo_element_name,
@@ -1370,7 +1385,7 @@ class Cts:
         )
 
     @staticmethod
-    def element_attribute_value_match(
+    def element_attribute_value_match(  # noqa: PLR0913
         element_names,
         attribute_names,
         pattern,
@@ -1452,7 +1467,7 @@ class Cts:
         )
 
     @staticmethod
-    def element_attribute_value_ranges(
+    def element_attribute_value_ranges(  # noqa: PLR0913
         element_names,
         attribute_names,
         *,
@@ -1496,7 +1511,7 @@ class Cts:
         )
 
     @staticmethod
-    def element_attribute_values(
+    def element_attribute_values(  # noqa: PLR0913
         element_names,
         attribute_names,
         *,
@@ -1539,7 +1554,7 @@ class Cts:
         )
 
     @staticmethod
-    def element_attribute_word_match(
+    def element_attribute_word_match(  # noqa: PLR0913
         element_names,
         attribute_names,
         pattern,
@@ -1621,7 +1636,7 @@ class Cts:
         )
 
     @staticmethod
-    def element_attribute_words(
+    def element_attribute_words(  # noqa: PLR0913
         element_names,
         attribute_names,
         *,
@@ -1664,7 +1679,7 @@ class Cts:
         )
 
     @staticmethod
-    def element_child_geospatial_boxes(
+    def element_child_geospatial_boxes(  # noqa: PLR0913
         parent_element_names,
         child_element_names,
         *,
@@ -1757,7 +1772,7 @@ class Cts:
         )
 
     @staticmethod
-    def element_child_geospatial_value_match(
+    def element_child_geospatial_value_match(  # noqa: PLR0913
         element_names,
         child_names,
         pattern,
@@ -1801,7 +1816,7 @@ class Cts:
         )
 
     @staticmethod
-    def element_child_geospatial_values(
+    def element_child_geospatial_values(  # noqa: PLR0913
         element_names,
         child_names,
         *,
@@ -1845,7 +1860,7 @@ class Cts:
         )
 
     @staticmethod
-    def element_geospatial_boxes(
+    def element_geospatial_boxes(  # noqa: PLR0913
         element_names,
         *,
         latitude_bounds=None,
@@ -1931,7 +1946,7 @@ class Cts:
         )
 
     @staticmethod
-    def element_geospatial_value_match(
+    def element_geospatial_value_match(  # noqa: PLR0913
         element_names,
         pattern,
         *,
@@ -1972,7 +1987,7 @@ class Cts:
         )
 
     @staticmethod
-    def element_geospatial_values(
+    def element_geospatial_values(  # noqa: PLR0913
         element_names,
         *,
         start=None,
@@ -2012,7 +2027,7 @@ class Cts:
         )
 
     @staticmethod
-    def element_pair_geospatial_boxes(
+    def element_pair_geospatial_boxes(  # noqa: PLR0913
         parent_element_names,
         latitude_names,
         longitude_names,
@@ -2072,7 +2087,7 @@ class Cts:
         )
 
     @staticmethod
-    def element_pair_geospatial_query(
+    def element_pair_geospatial_query(  # noqa: PLR0913
         element_name,
         latitude_element_names,
         longitude_element_names,
@@ -2120,7 +2135,7 @@ class Cts:
         )
 
     @staticmethod
-    def element_pair_geospatial_value_match(
+    def element_pair_geospatial_value_match(  # noqa: PLR0913
         element_names,
         latitude_names,
         longitude_names,
@@ -2172,7 +2187,7 @@ class Cts:
         )
 
     @staticmethod
-    def element_pair_geospatial_values(
+    def element_pair_geospatial_values(  # noqa: PLR0913
         element_names,
         latitude_names,
         longitude_names,
@@ -2307,7 +2322,7 @@ class Cts:
         )
 
     @staticmethod
-    def element_value_co_occurrences(
+    def element_value_co_occurrences(  # noqa: PLR0913
         element_name_1,
         element_name_2,
         *,
@@ -2349,7 +2364,7 @@ class Cts:
         )
 
     @staticmethod
-    def element_value_geospatial_co_occurrences(
+    def element_value_geospatial_co_occurrences(  # noqa: PLR0913
         element_name_1,
         geo_element_name,
         *,
@@ -2403,7 +2418,7 @@ class Cts:
         )
 
     @staticmethod
-    def element_value_match(
+    def element_value_match(  # noqa: PLR0913
         element_names,
         pattern,
         *,
@@ -2479,7 +2494,7 @@ class Cts:
         )
 
     @staticmethod
-    def element_value_ranges(
+    def element_value_ranges(  # noqa: PLR0913
         element_names,
         *,
         bounds=None,
@@ -2519,7 +2534,7 @@ class Cts:
         )
 
     @staticmethod
-    def element_values(
+    def element_values(  # noqa: PLR0913
         element_names,
         *,
         start=None,
@@ -2585,7 +2600,7 @@ class Cts:
         )
 
     @staticmethod
-    def element_word_match(
+    def element_word_match(  # noqa: PLR0913
         element_names,
         pattern,
         *,
@@ -2655,7 +2670,7 @@ class Cts:
         )
 
     @staticmethod
-    def element_words(
+    def element_words(  # noqa: PLR0913
         element_names,
         *,
         start=None,
@@ -2695,7 +2710,7 @@ class Cts:
         )
 
     @staticmethod
-    def entity(id, normalized_text, text, type) -> Expr:
+    def entity(id, normalized_text, text, type) -> Expr:  # noqa: A002
         """Build a composable ``cts:entity`` call.
 
         Returns a cts:entity object.
@@ -2792,7 +2807,7 @@ class Cts:
         )
 
     @staticmethod
-    def entity_highlight(node, expr, *, dict=None) -> Expr:
+    def entity_highlight(node, expr, *, dict=None) -> Expr:  # noqa: A002
         """Build a composable ``cts:entity-highlight`` call.
 
         Returns a copy of the node, replacing any entities found with the
@@ -2819,7 +2834,7 @@ class Cts:
         )
 
     @staticmethod
-    def entity_walk(node, expr, *, dict=None) -> Expr:
+    def entity_walk(node, expr, *, dict=None) -> Expr:  # noqa: A002
         """Build a composable ``cts:entity-walk`` call.
 
         Walk an XML document or element node, evaluating an expression against
@@ -2861,7 +2876,7 @@ class Cts:
         Parameters
         ----------
         query : cts:query?
-            Value for native ``$query`` parameter.
+            Query to estimate. None supplies the required empty query slot.
         options : (cts:order|xs:string)*
             Value for native ``$options`` parameter.
         quality_weight : xs:double?
@@ -2878,8 +2893,8 @@ class Cts:
         """
         return _FunctionCall(
             "cts:estimate",
-            (),
-            (query, options, _weight(quality_weight), forest_ids, _weight(maximum)),
+            (query,),
+            (options, _weight(quality_weight), forest_ids, _weight(maximum)),
         )
 
     @staticmethod
@@ -2962,7 +2977,7 @@ class Cts:
         )
 
     @staticmethod
-    def field_value_co_occurrences(
+    def field_value_co_occurrences(  # noqa: PLR0913
         field_name_1,
         field_name_2,
         *,
@@ -3003,7 +3018,7 @@ class Cts:
         )
 
     @staticmethod
-    def field_value_match(
+    def field_value_match(  # noqa: PLR0913
         field_names,
         pattern,
         *,
@@ -3073,7 +3088,7 @@ class Cts:
         )
 
     @staticmethod
-    def field_value_ranges(
+    def field_value_ranges(  # noqa: PLR0913
         field_names,
         *,
         bounds=None,
@@ -3113,7 +3128,7 @@ class Cts:
         )
 
     @staticmethod
-    def field_values(
+    def field_values(  # noqa: PLR0913
         field_names,
         *,
         start=None,
@@ -3153,7 +3168,7 @@ class Cts:
         )
 
     @staticmethod
-    def field_word_match(
+    def field_word_match(  # noqa: PLR0913
         field_names,
         pattern,
         *,
@@ -3223,7 +3238,7 @@ class Cts:
         )
 
     @staticmethod
-    def field_words(
+    def field_words(  # noqa: PLR0913
         field_names,
         *,
         start=None,
@@ -3367,7 +3382,7 @@ class Cts:
         )
 
     @staticmethod
-    def geospatial_boxes(
+    def geospatial_boxes(  # noqa: PLR0913
         geo_indexes,
         *,
         latitude_bounds=None,
@@ -3417,7 +3432,7 @@ class Cts:
         )
 
     @staticmethod
-    def geospatial_co_occurrences(
+    def geospatial_co_occurrences(  # noqa: PLR0913
         geo_element_name_1,
         geo_element_name_2,
         *,
@@ -3464,10 +3479,13 @@ class Cts:
         """
         return _FunctionCall(
             "cts:geospatial-co-occurrences",
-            (_qname(geo_element_name_1), _qname(geo_element_name_2)),
             (
-                _qname(child_1_name_1) if child_1_name_1 is not None else None,
-                _qname(child_1_name_2) if child_1_name_2 is not None else None,
+                _qname(geo_element_name_1),
+                _qname(child_1_name_1),
+                _qname(child_1_name_2),
+                _qname(geo_element_name_2),
+            ),
+            (
                 _qname(child_2_name_1) if child_2_name_1 is not None else None,
                 _qname(child_2_name_2) if child_2_name_2 is not None else None,
                 options,
@@ -3560,7 +3578,7 @@ class Cts:
 
     @staticmethod
     def geospatial_json_property_child_reference(
-        property,
+        property,  # noqa: A002
         child,
         *,
         options=None,
@@ -3592,7 +3610,7 @@ class Cts:
 
     @staticmethod
     def geospatial_json_property_pair_reference(
-        property,
+        property,  # noqa: A002
         lat,
         long,
         *,
@@ -3626,7 +3644,7 @@ class Cts:
         )
 
     @staticmethod
-    def geospatial_json_property_reference(property, *, options=None) -> Expr:
+    def geospatial_json_property_reference(property, *, options=None) -> Expr:  # noqa: A002
         """Build a composable ``cts:geospatial-json-property-reference`` call.
 
         Creates a reference to a geospatial json property range index, for use
@@ -3651,7 +3669,7 @@ class Cts:
         )
 
     @staticmethod
-    def geospatial_path_reference(path_expression, *, options=None, map=None) -> Expr:
+    def geospatial_path_reference(path_expression, *, options=None, map=None) -> Expr:  # noqa: A002
         """Build a composable ``cts:geospatial-path-reference`` call.
 
         Creates a reference to a geospatial path range index, for use as a
@@ -3678,7 +3696,7 @@ class Cts:
         )
 
     @staticmethod
-    def geospatial_region_path_reference(
+    def geospatial_region_path_reference(  # noqa: PLR0913
         path_expression,
         *,
         options=None,
@@ -3819,6 +3837,11 @@ class Cts:
         -------
         Expr
             Composable call to ``cts:iri-reference``.
+
+        Notes
+        -----
+        Requires MarkLogic 11 or later. Availability is checked by the server
+        when the expression is evaluated, including in nested expressions.
         """
         return _FunctionCall(
             "cts:iri-reference",
@@ -3902,7 +3925,7 @@ class Cts:
         )
 
     @staticmethod
-    def json_property_pair_geospatial_query(
+    def json_property_pair_geospatial_query(  # noqa: PLR0913
         property_name,
         latitude_property_names,
         longitude_property_names,
@@ -3983,7 +4006,7 @@ class Cts:
         )
 
     @staticmethod
-    def json_property_reference(property, *, options=None) -> Expr:
+    def json_property_reference(property, *, options=None) -> Expr:  # noqa: A002
         """Build a composable ``cts:json-property-reference`` call.
 
         Creates a reference to a JSON property value lexicon, for use as a
@@ -4067,7 +4090,7 @@ class Cts:
         )
 
     @staticmethod
-    def json_property_word_match(
+    def json_property_word_match(  # noqa: PLR0913
         property_names,
         pattern,
         *,
@@ -4143,7 +4166,7 @@ class Cts:
         )
 
     @staticmethod
-    def json_property_words(
+    def json_property_words(  # noqa: PLR0913
         property_names,
         *,
         start=None,
@@ -4289,7 +4312,7 @@ class Cts:
         )
 
     @staticmethod
-    def match_regions(
+    def match_regions(  # noqa: PLR0913
         range_indexes,
         operation,
         regions,
@@ -5457,10 +5480,10 @@ class Cts:
         )
 
     @staticmethod
-    def triple_range_query(
+    def triple_range_query(  # noqa: PLR0913
         subject,
         predicate,
-        object,
+        object,  # noqa: A002
         *,
         operator=None,
         options=None,
@@ -5480,7 +5503,9 @@ class Cts:
         object : xs:anyAtomicType*
             Value for native ``$object`` parameter.
         operator : xs:string*
-            Value for native ``$operator`` parameter.
+            One object operator or three subject/predicate/object operators.
+            Includes sameTerm; empty sequences use the native default.
+            MarkLogic validates these operators when the query is evaluated.
         options : xs:string*
             Value for native ``$options`` parameter.
         weight : xs:double?
@@ -5495,7 +5520,7 @@ class Cts:
             "cts:triple-range-query",
             (subject, predicate, object),
             (
-                _operator(operator) if operator is not None else None,
+                operator,
                 options,
                 _weight(weight),
             ),
@@ -5526,11 +5551,11 @@ class Cts:
         )
 
     @staticmethod
-    def triples(
+    def triples(  # noqa: PLR0913
         *,
         subject=None,
         predicate=None,
-        object=None,
+        object=None,  # noqa: A002
         operator=None,
         options=None,
         query=None,
@@ -5693,7 +5718,7 @@ class Cts:
         )
 
     @staticmethod
-    def valid_document_patch_path(string, *, map=None) -> Expr:
+    def valid_document_patch_path(string, *, map=None) -> Expr:  # noqa: A002
         """Build a composable ``cts:valid-document-patch-path`` call.
 
         Parses path expressions and resolves namespaces using the $map
@@ -5718,7 +5743,7 @@ class Cts:
         )
 
     @staticmethod
-    def valid_extract_path(string, *, map=None) -> Expr:
+    def valid_extract_path(string, *, map=None) -> Expr:  # noqa: A002
         """Build a composable ``cts:valid-extract-path`` call.
 
         Parses path expressions and resolves namespaces using the $map
@@ -5767,7 +5792,7 @@ class Cts:
         )
 
     @staticmethod
-    def valid_optic_path(string, *, map=None) -> Expr:
+    def valid_optic_path(string, *, map=None) -> Expr:  # noqa: A002
         """Build a composable ``cts:valid-optic-path`` call.
 
         Parses path expressions and resolves namespaces using the $map
@@ -5792,7 +5817,7 @@ class Cts:
         )
 
     @staticmethod
-    def valid_tde_context(string, *, map=None) -> Expr:
+    def valid_tde_context(string, *, map=None) -> Expr:  # noqa: A002
         """Build a composable ``cts:valid-tde-context`` call.
 
         Parses path expressions and resolves namespaces using the $map
@@ -5817,7 +5842,7 @@ class Cts:
         )
 
     @staticmethod
-    def value_co_occurrences(
+    def value_co_occurrences(  # noqa: PLR0913
         range_index_1,
         range_index_2,
         *,
@@ -5858,7 +5883,7 @@ class Cts:
         )
 
     @staticmethod
-    def value_match(
+    def value_match(  # noqa: PLR0913
         range_indexes,
         pattern,
         *,
@@ -5899,7 +5924,7 @@ class Cts:
         )
 
     @staticmethod
-    def value_ranges(
+    def value_ranges(  # noqa: PLR0913
         range_indexes,
         *,
         bounds=None,
@@ -5977,7 +6002,7 @@ class Cts:
         )
 
     @staticmethod
-    def values(
+    def values(  # noqa: PLR0913
         range_indexes,
         query=None,
         *,

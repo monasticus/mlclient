@@ -140,13 +140,34 @@ def test_double_sequences_are_not_cast_as_singletons():
 
 def test_optional_range_operator_is_validated_when_present():
     with pytest.raises(ValueError, match="unsupported range operator"):
-        cts.triple_range_query(None, None, "x", operator="contains")
+        cts.column_range_query("s", "v", "c", 1, operator="contains")
 
     code, _ = cts.column_range_query("s", "v", "c", 1, operator=">=").compile()
     assert "xs:string($v4)" in code
 
 
+@pytest.mark.parametrize("operator", ["sameTerm", ["=", "=", "<"], (), []])
+def test_triple_operators_preserve_native_sequences(operator):
+    expr = cts.triple_range_query([], [], 1, operator=operator)
+    code, variables = expr.compile()
+    assert list(variables.values()) == [
+        "1",
+        *([operator] if isinstance(operator, str) else operator),
+    ]
+    assert "cts:triple-range-query((), (), xs:integer($v0), " in code
+
+
+def test_geospatial_co_occurrences_keeps_required_native_slots():
+    code, variables = cts.geospatial_co_occurrences("first", "second").compile()
+    assert code.endswith(
+        "cts:geospatial-co-occurrences(xs:QName($v0), xs:QName(()), "
+        "xs:QName(()), xs:QName($v1))",
+    )
+    assert list(variables.values()) == ["first", "second"]
+
+
 def test_omitted_optional_slots_are_distinct_from_empty_sequences():
+    assert str(cts.estimate()).endswith("cts:estimate(())")
     assert str(cts.uris()).endswith("cts:uris()")
     assert str(cts.word_query("x")).endswith("cts:word-query($v0)")
     assert str(cts.word_query("x", options=[])).endswith("cts:word-query($v0, ())")

@@ -181,6 +181,44 @@ options and index configurations can also have version requirements. For
 example, `cts.document_root_query` requires MarkLogic 11 or later. Consult the
 [native CTS reference](https://docs.marklogic.com/cts) for the function you use.
 
+| Builder | MarkLogic 10 | MarkLogic 11 | MarkLogic 12 |
+| --- | --- | --- | --- |
+| `document_root_query` | Unavailable | Available | Available |
+| `document_format_query` | Unavailable | Available | Available |
+| `document_permission_query` | Unavailable | Available | Available |
+| `iri_reference` | Unavailable | Available | Available |
+
+These are the four supported names added between the versioned CTS references
+for [10](https://docs.marklogic.com/10.0/cts) and
+[11](https://docs.marklogic.com/11.0/cts); the 12 reference adds no further names
+in this catalog. Availability of a name does not guarantee every option on
+every minor release, or the presence of required indexes and permissions.
+
+One `Cts` namespace serves all versions. Building an expression has no target
+server, so it emits no version warning and does not hide methods. The same
+expression can be reused with different clients. Execution propagates the
+server's error (for example `XDMP-UNDFUN` on ML10), including when an unavailable
+function is nested. Applications supporting multiple releases should choose
+queries from their deployment requirements; the library does not silently
+rewrite queries to approximate older-server behavior.
+
+## Native objects and callback expressions
+
+Use an `Expr` returning XML or a native map for parameters such as
+`cts.parse(..., bindings=xpath("map:map()"))`. A Python dictionary is not a
+MarkLogic map. `highlight` and `walk` accept trusted expressions referencing
+MarkLogic's callback variables, for example
+`cts.highlight(xpath("<p>alpha</p>"), cts.word_query("alpha"),
+xpath("<b>{$cts:text}</b>"))`. The callback runs on MarkLogic, not in Python;
+the same trusted-source rules apply as for any `xpath(...)` input.
+
+`triple_range_query` accepts a single operator (including `"sameTerm"`) or three
+operators for subject, predicate and object. An empty sequence uses the native
+default. Unlike scalar range comparisons, these arguments are validated by
+MarkLogic. `geospatial_co_occurrences(first, second, ...)` takes both required
+lexicon names first in Python and places the optional child names in their
+native XQuery positions when compiling.
+
 ## Migrating from the POC
 
 - Replace path strings with explicit `xpath(...)` in `search` and `xdmp.exists`.

@@ -3,8 +3,9 @@
 from __future__ import annotations
 
 import inspect
+import re
 
-from mlclient.functions import Cts, xpath
+from mlclient.functions import Cts, fn, xpath
 
 
 # Generated once from the MarkLogic 12 cts function reference. Keeping this
@@ -722,19 +723,42 @@ def test_cts_catalog_matches_supported_reference_scope():
     assert public == set(CTS_SIGNATURES)
 
 
-def test_every_supported_cts_function_compiles_minimum_and_late_optional():
-    placeholder = xpath("()")
+def test_catalog_preserves_native_argument_order_and_every_optional_slot():
     for method_name, (native, required, optional) in CTS_SIGNATURES.items():
         method = getattr(Cts, method_name)
-        signature = inspect.signature(method)
-        assert tuple(signature.parameters) == required + optional
-        expr = method(*(placeholder for _ in required))
-        assert native + "(" in expr.compile()[0]
-        if optional:
-            expr = method(
-                *(placeholder for _ in required),
-                **{optional[-1]: placeholder},
+        assert tuple(inspect.signature(method).parameters) == required + optional
+        order = required + optional
+        if method_name == "geospatial_co_occurrences":
+            order = (required[0], *optional[:2], required[1], *optional[2:])
+        elif method_name in {"uris", "values"}:
+            order = (
+                *required,
+                "start",
+                "options",
+                "query",
+                "quality_weight",
+                "forest_ids",
             )
-            code, _ = expr.compile()
-            assert native + "(" in code
-            assert "()" in code or len(optional) == 1
+
+        # Distinct expressions make swaps, lost arguments and wrong arity visible.
+        markers = {name: xpath(f"$arg_{name}") for name in order}
+        for supplied in [required, order, *((*required, name) for name in optional)]:
+            expr = method(**{name: markers[name] for name in supplied})
+            code = expr.compile()[0].splitlines()[-1]
+            assert code.startswith(native + "("), method_name
+            body = code[len(native) + 1 : -1]
+            arguments = body.split(", ") if body else []
+            last = max((order.index(name) for name in supplied), default=-1)
+            if method_name in {"search", "directory_query"}:
+                last = max(last, 1)
+            elif method_name == "estimate":
+                last = max(last, 0)
+            assert len(arguments) == last + 1, (method_name, supplied, code)
+            for name, argument in zip(order, arguments):
+                expected = [f"$arg_{name}"] if name in supplied else []
+                assert re.findall(r"\$arg_\w+", argument) == expected, (
+                    method_name,
+                    name,
+                    code,
+                )
+            assert fn.count(expr).compile()[0].endswith(f"fn:count({code})")

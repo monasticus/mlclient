@@ -191,6 +191,10 @@ def _mint_jwt(oauth_config: dict) -> str:
     now = datetime.datetime.now(tz=datetime.timezone.utc)
     payload = {
         "iss": oauth_config["issuer"],
+        # MarkLogic rejects a token whose aud/client_id is absent or does not
+        # match the configured client id, and casts aud as a scalar, so this
+        # must be the client-id string, not a list.
+        "aud": oauth_config["client_id"],
         oauth_config["username_claim"]: oauth_config["username"],
         oauth_config["role_claim"]: [oauth_config["role"]],
         # MarkLogic treats a token with no expiry as already expired, so a

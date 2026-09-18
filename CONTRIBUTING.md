@@ -157,17 +157,33 @@ poetry install --with docs --extras kerberos
 docker compose -f tests/integration/docker-compose.yaml up -d --build
 ```
 
+To test another server release, set `MARKLOGIC_IMAGE` for the build, for example:
+
+```sh
+MARKLOGIC_IMAGE=progressofficial/marklogic-db:10.0-11.1-ubi-2.2.4 \
+  docker compose -f tests/integration/docker-compose.yaml up -d --build
+```
+
+The [version matrix](https://github.com/monasticus/mlclient/blob/main/docs/stability.md#supported-and-tested-versions) lists the
+images used in CI. Rebuild the rig after changing its provisioning code or image;
+the provisioner replaces the OAuth configuration with the current server's support
+status, including an explicit unsupported status before MarkLogic 11.2.
+
 Wait until `mlclient_integration` reports `healthy`. The health check confirms
 provisioning, not just an open port:
 
 ```sh
 docker inspect --format '{{.State.Health.Status}}' mlclient_integration
-MLCLIENT_IT_CERTS_DIR=tests/integration/.certs poetry run pytest tests/integration -ra
+MLCLIENT_IT_REQUIRED=1 MLCLIENT_IT_CERTS_DIR=tests/integration/.certs \
+  poetry run pytest tests/integration -ra
 ```
 
-Review skips: missing certificates, OAuth configuration or Kerberos tooling can
-skip authentication scenarios. Record what ran and what was unavailable in the
-PR. See `.github/workflows/integration-test.yml` for the CI provisioning flow.
+`MLCLIENT_IT_REQUIRED=1`, also set in CI, makes missing certificates or Kerberos
+tooling fail instead of skipping. Without it, tests requiring an unavailable
+local rig may skip. Missing or malformed auth configuration in a provisioned rig
+is always an error; only explicitly unsupported JWT OAuth (before 11.2) skips its
+scenario. Review the `-ra` skip summary and record what ran in the PR.
+See `.github/workflows/integration-test.yml` for the CI provisioning flow.
 When finished, stop the test containers:
 
 ```sh

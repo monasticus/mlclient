@@ -12,6 +12,15 @@ permissions:
 jobs:
   integration-tests:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
+    name: integration-tests (${{ matrix.marklogic-image }})
+    strategy:
+      fail-fast: false
+      matrix:
+        marklogic-image:
+          - progressofficial/marklogic-db:10.0-11.1-ubi-2.2.4
+          - progressofficial/marklogic-db:11.3.7-ubi-2.3.0
+          - progressofficial/marklogic-db:12.1.0-ubi-2.3.0
 
     steps:
       - uses: actions/checkout@v5
@@ -30,6 +39,8 @@ jobs:
           poetry install --extras kerberos
 
       - name: Start MarkLogic and provision the connection matrix
+        env:
+          MARKLOGIC_IMAGE: ${{ matrix.marklogic-image }}
         run: docker compose -f tests/integration/docker-compose.yaml up -d --build
 
       - name: Wait for provisioning to complete
@@ -39,8 +50,8 @@ jobs:
             state=$(docker inspect --format '{{.State.Status}}' mlclient_integration)
             echo "MarkLogic state: ${state}, health: ${health}"
             [ "${health}" = "healthy" ] && exit 0
-            if [ "${state}" = "exited" ]; then
-              echo "MarkLogic container exited before becoming healthy" >&2
+            if [ "${state}" = "exited" ] || [ "${state}" = "dead" ] || [ "${health}" = "unhealthy" ]; then
+              echo "MarkLogic failed before becoming healthy" >&2
               docker logs mlclient_integration
               exit 1
             fi
@@ -53,8 +64,9 @@ jobs:
       - name: Test code with pytest
         env:
           MLCLIENT_IT_CERTS_DIR: tests/integration/.certs
-        run: poetry run pytest tests/integration/
+          MLCLIENT_IT_REQUIRED: "1"
+        run: poetry run pytest -ra tests/integration/
 
-      - name: Dump MarkLogic logs on failure
+      - name: Dump integration service logs on failure
         if: failure()
-        run: docker logs mlclient_integration
+        run: docker compose -f tests/integration/docker-compose.yaml logs --no-color

@@ -16,7 +16,7 @@
         <link rel="prev" href="../LogLevelService/">
       
       
-        <link rel="next" href="../TransactionService/">
+        <link rel="next" href="../TraceEvents/">
       
       
         
@@ -991,6 +991,8 @@
       
         
       
+        
+      
     
     
     
@@ -1305,6 +1307,34 @@
     
   
     log-level
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../user/cli/trace-events/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    trace-events
   
 
     
@@ -5383,6 +5413,10 @@
       
         
       
+        
+      
+        
+      
     
     
     
@@ -5724,6 +5758,62 @@
   
 </nav>
       
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../TraceEvents/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    TraceEvents
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../TraceEventsService/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    TraceEventsService
+  
+
+    
+  </span>
+  
+  
+
+      </a>
     </li>
   
 
@@ -7332,9 +7422,9 @@
 
                   <details class="mkdocstrings-source">
                     <summary>Source code in <code>mlclient/services/logs.py</code></summary>
-                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-28">28</a></span>
-<span class="normal"><a href="#__codelineno-0-29">29</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-28" name="__codelineno-0-28"></a><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">manage</span><span class="p">:</span> <span class="n">ManageApi</span><span class="p">):</span>
-<a id="__codelineno-0-29" name="__codelineno-0-29"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_manage</span> <span class="o">=</span> <span class="n">manage</span>
+                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-29">29</a></span>
+<span class="normal"><a href="#__codelineno-0-30">30</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-29" name="__codelineno-0-29"></a><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">manage</span><span class="p">:</span> <span class="n">ManageApi</span><span class="p">):</span>
+<a id="__codelineno-0-30" name="__codelineno-0-30"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_manage</span> <span class="o">=</span> <span class="n">manage</span>
 </code></pre></div></td></tr></table></div>
                   </details>
 
@@ -7565,8 +7655,7 @@ configured retries are exhausted.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>mlclient/services/logs.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-31">31</a></span>
-<span class="normal"><a href="#__codelineno-0-32">32</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-32">32</a></span>
 <span class="normal"><a href="#__codelineno-0-33">33</a></span>
 <span class="normal"><a href="#__codelineno-0-34">34</a></span>
 <span class="normal"><a href="#__codelineno-0-35">35</a></span>
@@ -7625,71 +7714,66 @@ configured retries are exhausted.</p>
 <span class="normal"><a href="#__codelineno-0-88">88</a></span>
 <span class="normal"><a href="#__codelineno-0-89">89</a></span>
 <span class="normal"><a href="#__codelineno-0-90">90</a></span>
-<span class="normal"><a href="#__codelineno-0-91">91</a></span>
-<span class="normal"><a href="#__codelineno-0-92">92</a></span>
-<span class="normal"><a href="#__codelineno-0-93">93</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-31" name="__codelineno-0-31"></a><span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span>
-<a id="__codelineno-0-32" name="__codelineno-0-32"></a>    <span class="bp">self</span><span class="p">,</span>
-<a id="__codelineno-0-33" name="__codelineno-0-33"></a>    <span class="n">app_server</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-34" name="__codelineno-0-34"></a>    <span class="n">log_type</span><span class="p">:</span> <span class="n">LogType</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">LogType</span><span class="o">.</span><span class="n">ERROR</span><span class="p">,</span>
-<a id="__codelineno-0-35" name="__codelineno-0-35"></a>    <span class="o">*</span><span class="p">,</span>
-<a id="__codelineno-0-36" name="__codelineno-0-36"></a>    <span class="n">start_time</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-37" name="__codelineno-0-37"></a>    <span class="n">end_time</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-38" name="__codelineno-0-38"></a>    <span class="n">regex</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-39" name="__codelineno-0-39"></a>    <span class="n">host</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-40" name="__codelineno-0-40"></a>    <span class="n">timeout</span><span class="o">=</span><span class="n">UNSET</span><span class="p">,</span>
-<a id="__codelineno-0-41" name="__codelineno-0-41"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="nb">dict</span><span class="p">]:</span>
-<a id="__codelineno-0-42" name="__codelineno-0-42"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Return logs from a MarkLogic server.</span>
-<a id="__codelineno-0-43" name="__codelineno-0-43"></a>
-<a id="__codelineno-0-44" name="__codelineno-0-44"></a><span class="sd">    Parameters</span>
-<a id="__codelineno-0-45" name="__codelineno-0-45"></a><span class="sd">    ----------</span>
-<a id="__codelineno-0-46" name="__codelineno-0-46"></a><span class="sd">    app_server : int | str | None, default None</span>
-<a id="__codelineno-0-47" name="__codelineno-0-47"></a><span class="sd">        An app server (port) with logs to retrieve</span>
-<a id="__codelineno-0-48" name="__codelineno-0-48"></a><span class="sd">    log_type : LogType | str, default LogType.ERROR</span>
-<a id="__codelineno-0-49" name="__codelineno-0-49"></a><span class="sd">        A log type (enum or string: &quot;error&quot;, &quot;access&quot;, &quot;request&quot;, &quot;audit&quot;)</span>
-<a id="__codelineno-0-50" name="__codelineno-0-50"></a><span class="sd">    start_time : str | None, default None</span>
-<a id="__codelineno-0-51" name="__codelineno-0-51"></a><span class="sd">        A start time to search error logs</span>
-<a id="__codelineno-0-52" name="__codelineno-0-52"></a><span class="sd">    end_time : str | None, default None</span>
-<a id="__codelineno-0-53" name="__codelineno-0-53"></a><span class="sd">        An end time to search error logs</span>
-<a id="__codelineno-0-54" name="__codelineno-0-54"></a><span class="sd">    regex : str | None, default None</span>
-<a id="__codelineno-0-55" name="__codelineno-0-55"></a><span class="sd">        A regex to search error logs</span>
-<a id="__codelineno-0-56" name="__codelineno-0-56"></a><span class="sd">    host : str | None, default None</span>
-<a id="__codelineno-0-57" name="__codelineno-0-57"></a><span class="sd">        A host name with logs to retrieve</span>
-<a id="__codelineno-0-58" name="__codelineno-0-58"></a><span class="sd">    timeout : httpx.Timeout | float | None, default unset</span>
-<a id="__codelineno-0-59" name="__codelineno-0-59"></a><span class="sd">        A per-request HTTP timeout for this call. Unset uses the client&#39;s</span>
-<a id="__codelineno-0-60" name="__codelineno-0-60"></a><span class="sd">        configured timeout; None disables every HTTP timeout; a number sets</span>
-<a id="__codelineno-0-61" name="__codelineno-0-61"></a><span class="sd">        all four components to that many seconds; an httpx.Timeout overrides</span>
-<a id="__codelineno-0-62" name="__codelineno-0-62"></a><span class="sd">        them.</span>
-<a id="__codelineno-0-63" name="__codelineno-0-63"></a>
-<a id="__codelineno-0-64" name="__codelineno-0-64"></a><span class="sd">    Returns</span>
-<a id="__codelineno-0-65" name="__codelineno-0-65"></a><span class="sd">    -------</span>
-<a id="__codelineno-0-66" name="__codelineno-0-66"></a><span class="sd">    Iterator[dict]</span>
-<a id="__codelineno-0-67" name="__codelineno-0-67"></a><span class="sd">        A log details generator.</span>
-<a id="__codelineno-0-68" name="__codelineno-0-68"></a>
-<a id="__codelineno-0-69" name="__codelineno-0-69"></a><span class="sd">    Raises</span>
-<a id="__codelineno-0-70" name="__codelineno-0-70"></a><span class="sd">    ------</span>
-<a id="__codelineno-0-71" name="__codelineno-0-71"></a><span class="sd">    httpx.TimeoutException</span>
-<a id="__codelineno-0-72" name="__codelineno-0-72"></a><span class="sd">        If an HTTP connect, read, write or pool timeout expires after any</span>
-<a id="__codelineno-0-73" name="__codelineno-0-73"></a><span class="sd">        configured retries are exhausted.</span>
-<a id="__codelineno-0-74" name="__codelineno-0-74"></a><span class="sd">    MarkLogicError</span>
-<a id="__codelineno-0-75" name="__codelineno-0-75"></a><span class="sd">        If MarkLogic returns an error</span>
-<a id="__codelineno-0-76" name="__codelineno-0-76"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-77" name="__codelineno-0-77"></a>    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">log_type</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-<a id="__codelineno-0-78" name="__codelineno-0-78"></a>        <span class="n">log_type</span> <span class="o">=</span> <span class="n">LogType</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">log_type</span><span class="p">)</span>
-<a id="__codelineno-0-79" name="__codelineno-0-79"></a>    <span class="n">is_error</span> <span class="o">=</span> <span class="n">log_type</span> <span class="o">==</span> <span class="n">LogType</span><span class="o">.</span><span class="n">ERROR</span>
-<a id="__codelineno-0-80" name="__codelineno-0-80"></a>    <span class="n">resp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_manage</span><span class="o">.</span><span class="n">logs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
-<a id="__codelineno-0-81" name="__codelineno-0-81"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_filename</span><span class="p">(</span><span class="n">app_server</span><span class="p">,</span> <span class="n">log_type</span><span class="p">),</span>
-<a id="__codelineno-0-82" name="__codelineno-0-82"></a>        <span class="n">data_format</span><span class="o">=</span><span class="s2">&quot;json&quot;</span><span class="p">,</span>
-<a id="__codelineno-0-83" name="__codelineno-0-83"></a>        <span class="n">host</span><span class="o">=</span><span class="n">host</span><span class="p">,</span>
-<a id="__codelineno-0-84" name="__codelineno-0-84"></a>        <span class="n">start_time</span><span class="o">=</span><span class="n">start_time</span> <span class="k">if</span> <span class="n">is_error</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-85" name="__codelineno-0-85"></a>        <span class="n">end_time</span><span class="o">=</span><span class="n">end_time</span> <span class="k">if</span> <span class="n">is_error</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-86" name="__codelineno-0-86"></a>        <span class="n">regex</span><span class="o">=</span><span class="n">regex</span> <span class="k">if</span> <span class="n">is_error</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-87" name="__codelineno-0-87"></a>        <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span>
-<a id="__codelineno-0-88" name="__codelineno-0-88"></a>    <span class="p">)</span>
-<a id="__codelineno-0-89" name="__codelineno-0-89"></a>    <span class="n">resp_body</span> <span class="o">=</span> <span class="n">resp</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
-<a id="__codelineno-0-90" name="__codelineno-0-90"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="n">resp</span><span class="o">.</span><span class="n">is_success</span><span class="p">:</span>
-<a id="__codelineno-0-91" name="__codelineno-0-91"></a>        <span class="k">raise</span> <span class="n">MarkLogicError</span><span class="p">(</span><span class="n">resp_body</span><span class="p">[</span><span class="s2">&quot;errorResponse&quot;</span><span class="p">])</span>
-<a id="__codelineno-0-92" name="__codelineno-0-92"></a>
-<a id="__codelineno-0-93" name="__codelineno-0-93"></a>    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parse_logs</span><span class="p">(</span><span class="n">log_type</span><span class="p">,</span> <span class="n">resp_body</span><span class="p">)</span>
+<span class="normal"><a href="#__codelineno-0-91">91</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-32" name="__codelineno-0-32"></a><span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span>
+<a id="__codelineno-0-33" name="__codelineno-0-33"></a>    <span class="bp">self</span><span class="p">,</span>
+<a id="__codelineno-0-34" name="__codelineno-0-34"></a>    <span class="n">app_server</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-35" name="__codelineno-0-35"></a>    <span class="n">log_type</span><span class="p">:</span> <span class="n">LogType</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">LogType</span><span class="o">.</span><span class="n">ERROR</span><span class="p">,</span>
+<a id="__codelineno-0-36" name="__codelineno-0-36"></a>    <span class="o">*</span><span class="p">,</span>
+<a id="__codelineno-0-37" name="__codelineno-0-37"></a>    <span class="n">start_time</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-38" name="__codelineno-0-38"></a>    <span class="n">end_time</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-39" name="__codelineno-0-39"></a>    <span class="n">regex</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-40" name="__codelineno-0-40"></a>    <span class="n">host</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-41" name="__codelineno-0-41"></a>    <span class="n">timeout</span><span class="o">=</span><span class="n">UNSET</span><span class="p">,</span>
+<a id="__codelineno-0-42" name="__codelineno-0-42"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="nb">dict</span><span class="p">]:</span>
+<a id="__codelineno-0-43" name="__codelineno-0-43"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Return logs from a MarkLogic server.</span>
+<a id="__codelineno-0-44" name="__codelineno-0-44"></a>
+<a id="__codelineno-0-45" name="__codelineno-0-45"></a><span class="sd">    Parameters</span>
+<a id="__codelineno-0-46" name="__codelineno-0-46"></a><span class="sd">    ----------</span>
+<a id="__codelineno-0-47" name="__codelineno-0-47"></a><span class="sd">    app_server : int | str | None, default None</span>
+<a id="__codelineno-0-48" name="__codelineno-0-48"></a><span class="sd">        An app server (port) with logs to retrieve</span>
+<a id="__codelineno-0-49" name="__codelineno-0-49"></a><span class="sd">    log_type : LogType | str, default LogType.ERROR</span>
+<a id="__codelineno-0-50" name="__codelineno-0-50"></a><span class="sd">        A log type (enum or string: &quot;error&quot;, &quot;access&quot;, &quot;request&quot;, &quot;audit&quot;)</span>
+<a id="__codelineno-0-51" name="__codelineno-0-51"></a><span class="sd">    start_time : str | None, default None</span>
+<a id="__codelineno-0-52" name="__codelineno-0-52"></a><span class="sd">        A start time to search error logs</span>
+<a id="__codelineno-0-53" name="__codelineno-0-53"></a><span class="sd">    end_time : str | None, default None</span>
+<a id="__codelineno-0-54" name="__codelineno-0-54"></a><span class="sd">        An end time to search error logs</span>
+<a id="__codelineno-0-55" name="__codelineno-0-55"></a><span class="sd">    regex : str | None, default None</span>
+<a id="__codelineno-0-56" name="__codelineno-0-56"></a><span class="sd">        A regex to search error logs</span>
+<a id="__codelineno-0-57" name="__codelineno-0-57"></a><span class="sd">    host : str | None, default None</span>
+<a id="__codelineno-0-58" name="__codelineno-0-58"></a><span class="sd">        A host name with logs to retrieve</span>
+<a id="__codelineno-0-59" name="__codelineno-0-59"></a><span class="sd">    timeout : httpx.Timeout | float | None, default unset</span>
+<a id="__codelineno-0-60" name="__codelineno-0-60"></a><span class="sd">        A per-request HTTP timeout for this call. Unset uses the client&#39;s</span>
+<a id="__codelineno-0-61" name="__codelineno-0-61"></a><span class="sd">        configured timeout; None disables every HTTP timeout; a number sets</span>
+<a id="__codelineno-0-62" name="__codelineno-0-62"></a><span class="sd">        all four components to that many seconds; an httpx.Timeout overrides</span>
+<a id="__codelineno-0-63" name="__codelineno-0-63"></a><span class="sd">        them.</span>
+<a id="__codelineno-0-64" name="__codelineno-0-64"></a>
+<a id="__codelineno-0-65" name="__codelineno-0-65"></a><span class="sd">    Returns</span>
+<a id="__codelineno-0-66" name="__codelineno-0-66"></a><span class="sd">    -------</span>
+<a id="__codelineno-0-67" name="__codelineno-0-67"></a><span class="sd">    Iterator[dict]</span>
+<a id="__codelineno-0-68" name="__codelineno-0-68"></a><span class="sd">        A log details generator.</span>
+<a id="__codelineno-0-69" name="__codelineno-0-69"></a>
+<a id="__codelineno-0-70" name="__codelineno-0-70"></a><span class="sd">    Raises</span>
+<a id="__codelineno-0-71" name="__codelineno-0-71"></a><span class="sd">    ------</span>
+<a id="__codelineno-0-72" name="__codelineno-0-72"></a><span class="sd">    httpx.TimeoutException</span>
+<a id="__codelineno-0-73" name="__codelineno-0-73"></a><span class="sd">        If an HTTP connect, read, write or pool timeout expires after any</span>
+<a id="__codelineno-0-74" name="__codelineno-0-74"></a><span class="sd">        configured retries are exhausted.</span>
+<a id="__codelineno-0-75" name="__codelineno-0-75"></a><span class="sd">    MarkLogicError</span>
+<a id="__codelineno-0-76" name="__codelineno-0-76"></a><span class="sd">        If MarkLogic returns an error</span>
+<a id="__codelineno-0-77" name="__codelineno-0-77"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-78" name="__codelineno-0-78"></a>    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">log_type</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+<a id="__codelineno-0-79" name="__codelineno-0-79"></a>        <span class="n">log_type</span> <span class="o">=</span> <span class="n">LogType</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">log_type</span><span class="p">)</span>
+<a id="__codelineno-0-80" name="__codelineno-0-80"></a>    <span class="n">is_error</span> <span class="o">=</span> <span class="n">log_type</span> <span class="o">==</span> <span class="n">LogType</span><span class="o">.</span><span class="n">ERROR</span>
+<a id="__codelineno-0-81" name="__codelineno-0-81"></a>    <span class="n">resp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_manage</span><span class="o">.</span><span class="n">logs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+<a id="__codelineno-0-82" name="__codelineno-0-82"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_filename</span><span class="p">(</span><span class="n">app_server</span><span class="p">,</span> <span class="n">log_type</span><span class="p">),</span>
+<a id="__codelineno-0-83" name="__codelineno-0-83"></a>        <span class="n">data_format</span><span class="o">=</span><span class="s2">&quot;json&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-84" name="__codelineno-0-84"></a>        <span class="n">host</span><span class="o">=</span><span class="n">host</span><span class="p">,</span>
+<a id="__codelineno-0-85" name="__codelineno-0-85"></a>        <span class="n">start_time</span><span class="o">=</span><span class="n">start_time</span> <span class="k">if</span> <span class="n">is_error</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-86" name="__codelineno-0-86"></a>        <span class="n">end_time</span><span class="o">=</span><span class="n">end_time</span> <span class="k">if</span> <span class="n">is_error</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-87" name="__codelineno-0-87"></a>        <span class="n">regex</span><span class="o">=</span><span class="n">regex</span> <span class="k">if</span> <span class="n">is_error</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-88" name="__codelineno-0-88"></a>        <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span>
+<a id="__codelineno-0-89" name="__codelineno-0-89"></a>    <span class="p">)</span>
+<a id="__codelineno-0-90" name="__codelineno-0-90"></a>    <span class="n">MLResponseParser</span><span class="o">.</span><span class="n">raise_for_status</span><span class="p">(</span><span class="n">resp</span><span class="p">)</span>
+<a id="__codelineno-0-91" name="__codelineno-0-91"></a>    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parse_logs</span><span class="p">(</span><span class="n">log_type</span><span class="p">,</span> <span class="n">resp</span><span class="o">.</span><span class="n">json</span><span class="p">())</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -7821,7 +7905,9 @@ configured retries are exhausted.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>mlclient/services/logs.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-95"> 95</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-93"> 93</a></span>
+<span class="normal"><a href="#__codelineno-0-94"> 94</a></span>
+<span class="normal"><a href="#__codelineno-0-95"> 95</a></span>
 <span class="normal"><a href="#__codelineno-0-96"> 96</a></span>
 <span class="normal"><a href="#__codelineno-0-97"> 97</a></span>
 <span class="normal"><a href="#__codelineno-0-98"> 98</a></span>
@@ -7860,50 +7946,48 @@ configured retries are exhausted.</p>
 <span class="normal"><a href="#__codelineno-0-131">131</a></span>
 <span class="normal"><a href="#__codelineno-0-132">132</a></span>
 <span class="normal"><a href="#__codelineno-0-133">133</a></span>
-<span class="normal"><a href="#__codelineno-0-134">134</a></span>
-<span class="normal"><a href="#__codelineno-0-135">135</a></span>
-<span class="normal"><a href="#__codelineno-0-136">136</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-95" name="__codelineno-0-95"></a><span class="k">def</span><span class="w"> </span><span class="nf">list</span><span class="p">(</span>
-<a id="__codelineno-0-96" name="__codelineno-0-96"></a>    <span class="bp">self</span><span class="p">,</span>
-<a id="__codelineno-0-97" name="__codelineno-0-97"></a>    <span class="n">host</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-98" name="__codelineno-0-98"></a>    <span class="o">*</span><span class="p">,</span>
-<a id="__codelineno-0-99" name="__codelineno-0-99"></a>    <span class="n">timeout</span><span class="o">=</span><span class="n">UNSET</span><span class="p">,</span>
-<a id="__codelineno-0-100" name="__codelineno-0-100"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-<a id="__codelineno-0-101" name="__codelineno-0-101"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Return a logs list from a MarkLogic server.</span>
-<a id="__codelineno-0-102" name="__codelineno-0-102"></a>
-<a id="__codelineno-0-103" name="__codelineno-0-103"></a><span class="sd">    Parameters</span>
-<a id="__codelineno-0-104" name="__codelineno-0-104"></a><span class="sd">    ----------</span>
-<a id="__codelineno-0-105" name="__codelineno-0-105"></a><span class="sd">    host : str | None, default None</span>
-<a id="__codelineno-0-106" name="__codelineno-0-106"></a><span class="sd">        A host name with log files to retrieve</span>
-<a id="__codelineno-0-107" name="__codelineno-0-107"></a><span class="sd">    timeout : httpx.Timeout | float | None, default unset</span>
-<a id="__codelineno-0-108" name="__codelineno-0-108"></a><span class="sd">        A per-request HTTP timeout for this call. Unset uses the client&#39;s</span>
-<a id="__codelineno-0-109" name="__codelineno-0-109"></a><span class="sd">        configured timeout; None disables every HTTP timeout; a number sets</span>
-<a id="__codelineno-0-110" name="__codelineno-0-110"></a><span class="sd">        all four components to that many seconds; an httpx.Timeout overrides</span>
-<a id="__codelineno-0-111" name="__codelineno-0-111"></a><span class="sd">        them.</span>
-<a id="__codelineno-0-112" name="__codelineno-0-112"></a>
-<a id="__codelineno-0-113" name="__codelineno-0-113"></a><span class="sd">    Returns</span>
-<a id="__codelineno-0-114" name="__codelineno-0-114"></a><span class="sd">    -------</span>
-<a id="__codelineno-0-115" name="__codelineno-0-115"></a><span class="sd">    dict</span>
-<a id="__codelineno-0-116" name="__codelineno-0-116"></a><span class="sd">        A parsed list of log files in the MarkLogic server</span>
-<a id="__codelineno-0-117" name="__codelineno-0-117"></a>
-<a id="__codelineno-0-118" name="__codelineno-0-118"></a><span class="sd">    Raises</span>
-<a id="__codelineno-0-119" name="__codelineno-0-119"></a><span class="sd">    ------</span>
-<a id="__codelineno-0-120" name="__codelineno-0-120"></a><span class="sd">    httpx.TimeoutException</span>
-<a id="__codelineno-0-121" name="__codelineno-0-121"></a><span class="sd">        If an HTTP connect, read, write or pool timeout expires after any</span>
-<a id="__codelineno-0-122" name="__codelineno-0-122"></a><span class="sd">        configured retries are exhausted.</span>
-<a id="__codelineno-0-123" name="__codelineno-0-123"></a><span class="sd">    MarkLogicError</span>
-<a id="__codelineno-0-124" name="__codelineno-0-124"></a><span class="sd">        If MarkLogic returns an error</span>
-<a id="__codelineno-0-125" name="__codelineno-0-125"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-126" name="__codelineno-0-126"></a>    <span class="n">resp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_manage</span><span class="o">.</span><span class="n">logs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
-<a id="__codelineno-0-127" name="__codelineno-0-127"></a>        <span class="n">filename</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-128" name="__codelineno-0-128"></a>        <span class="n">data_format</span><span class="o">=</span><span class="s2">&quot;json&quot;</span><span class="p">,</span>
-<a id="__codelineno-0-129" name="__codelineno-0-129"></a>        <span class="n">host</span><span class="o">=</span><span class="n">host</span><span class="p">,</span>
-<a id="__codelineno-0-130" name="__codelineno-0-130"></a>        <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span>
-<a id="__codelineno-0-131" name="__codelineno-0-131"></a>    <span class="p">)</span>
-<a id="__codelineno-0-132" name="__codelineno-0-132"></a>    <span class="n">resp_body</span> <span class="o">=</span> <span class="n">resp</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
-<a id="__codelineno-0-133" name="__codelineno-0-133"></a>    <span class="k">if</span> <span class="s2">&quot;errorResponse&quot;</span> <span class="ow">in</span> <span class="n">resp_body</span><span class="p">:</span>
-<a id="__codelineno-0-134" name="__codelineno-0-134"></a>        <span class="k">raise</span> <span class="n">MarkLogicError</span><span class="p">(</span><span class="n">resp_body</span><span class="p">[</span><span class="s2">&quot;errorResponse&quot;</span><span class="p">])</span>
-<a id="__codelineno-0-135" name="__codelineno-0-135"></a>
-<a id="__codelineno-0-136" name="__codelineno-0-136"></a>    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parse_logs_list</span><span class="p">(</span><span class="n">resp_body</span><span class="p">)</span>
+<span class="normal"><a href="#__codelineno-0-134">134</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-93" name="__codelineno-0-93"></a><span class="k">def</span><span class="w"> </span><span class="nf">list</span><span class="p">(</span>
+<a id="__codelineno-0-94" name="__codelineno-0-94"></a>    <span class="bp">self</span><span class="p">,</span>
+<a id="__codelineno-0-95" name="__codelineno-0-95"></a>    <span class="n">host</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-96" name="__codelineno-0-96"></a>    <span class="o">*</span><span class="p">,</span>
+<a id="__codelineno-0-97" name="__codelineno-0-97"></a>    <span class="n">timeout</span><span class="o">=</span><span class="n">UNSET</span><span class="p">,</span>
+<a id="__codelineno-0-98" name="__codelineno-0-98"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<a id="__codelineno-0-99" name="__codelineno-0-99"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Return a logs list from a MarkLogic server.</span>
+<a id="__codelineno-0-100" name="__codelineno-0-100"></a>
+<a id="__codelineno-0-101" name="__codelineno-0-101"></a><span class="sd">    Parameters</span>
+<a id="__codelineno-0-102" name="__codelineno-0-102"></a><span class="sd">    ----------</span>
+<a id="__codelineno-0-103" name="__codelineno-0-103"></a><span class="sd">    host : str | None, default None</span>
+<a id="__codelineno-0-104" name="__codelineno-0-104"></a><span class="sd">        A host name with log files to retrieve</span>
+<a id="__codelineno-0-105" name="__codelineno-0-105"></a><span class="sd">    timeout : httpx.Timeout | float | None, default unset</span>
+<a id="__codelineno-0-106" name="__codelineno-0-106"></a><span class="sd">        A per-request HTTP timeout for this call. Unset uses the client&#39;s</span>
+<a id="__codelineno-0-107" name="__codelineno-0-107"></a><span class="sd">        configured timeout; None disables every HTTP timeout; a number sets</span>
+<a id="__codelineno-0-108" name="__codelineno-0-108"></a><span class="sd">        all four components to that many seconds; an httpx.Timeout overrides</span>
+<a id="__codelineno-0-109" name="__codelineno-0-109"></a><span class="sd">        them.</span>
+<a id="__codelineno-0-110" name="__codelineno-0-110"></a>
+<a id="__codelineno-0-111" name="__codelineno-0-111"></a><span class="sd">    Returns</span>
+<a id="__codelineno-0-112" name="__codelineno-0-112"></a><span class="sd">    -------</span>
+<a id="__codelineno-0-113" name="__codelineno-0-113"></a><span class="sd">    dict</span>
+<a id="__codelineno-0-114" name="__codelineno-0-114"></a><span class="sd">        A parsed list of log files in the MarkLogic server</span>
+<a id="__codelineno-0-115" name="__codelineno-0-115"></a>
+<a id="__codelineno-0-116" name="__codelineno-0-116"></a><span class="sd">    Raises</span>
+<a id="__codelineno-0-117" name="__codelineno-0-117"></a><span class="sd">    ------</span>
+<a id="__codelineno-0-118" name="__codelineno-0-118"></a><span class="sd">    httpx.TimeoutException</span>
+<a id="__codelineno-0-119" name="__codelineno-0-119"></a><span class="sd">        If an HTTP connect, read, write or pool timeout expires after any</span>
+<a id="__codelineno-0-120" name="__codelineno-0-120"></a><span class="sd">        configured retries are exhausted.</span>
+<a id="__codelineno-0-121" name="__codelineno-0-121"></a><span class="sd">    MarkLogicError</span>
+<a id="__codelineno-0-122" name="__codelineno-0-122"></a><span class="sd">        If MarkLogic returns an error</span>
+<a id="__codelineno-0-123" name="__codelineno-0-123"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-124" name="__codelineno-0-124"></a>    <span class="n">resp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_manage</span><span class="o">.</span><span class="n">logs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+<a id="__codelineno-0-125" name="__codelineno-0-125"></a>        <span class="n">filename</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-126" name="__codelineno-0-126"></a>        <span class="n">data_format</span><span class="o">=</span><span class="s2">&quot;json&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-127" name="__codelineno-0-127"></a>        <span class="n">host</span><span class="o">=</span><span class="n">host</span><span class="p">,</span>
+<a id="__codelineno-0-128" name="__codelineno-0-128"></a>        <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span>
+<a id="__codelineno-0-129" name="__codelineno-0-129"></a>    <span class="p">)</span>
+<a id="__codelineno-0-130" name="__codelineno-0-130"></a>    <span class="n">resp_body</span> <span class="o">=</span> <span class="n">resp</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+<a id="__codelineno-0-131" name="__codelineno-0-131"></a>    <span class="k">if</span> <span class="s2">&quot;errorResponse&quot;</span> <span class="ow">in</span> <span class="n">resp_body</span><span class="p">:</span>
+<a id="__codelineno-0-132" name="__codelineno-0-132"></a>        <span class="k">raise</span> <span class="n">MarkLogicError</span><span class="p">(</span><span class="n">resp_body</span><span class="p">[</span><span class="s2">&quot;errorResponse&quot;</span><span class="p">])</span>
+<a id="__codelineno-0-133" name="__codelineno-0-133"></a>
+<a id="__codelineno-0-134" name="__codelineno-0-134"></a>    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parse_logs_list</span><span class="p">(</span><span class="n">resp_body</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>

@@ -78,6 +78,7 @@ def test_get_returns_activation_and_events(ml):
     code = _sent_xquery(route)
     assert "admin:group-get-trace-events-activated" in code
     assert "admin:group-get-trace-events" in code
+    assert "fn:string(*:event-id)" in code
 
 
 @respx.mock

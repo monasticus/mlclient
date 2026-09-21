@@ -262,7 +262,7 @@ class TraceEventsService:
             "return object-node { "
             '"activated": admin:group-get-trace-events-activated($cfg, $gid), '
             '"events": array-node { '
-            "admin:group-get-trace-events($cfg, $gid) ! fn:string(.) } }"
+            "admin:group-get-trace-events($cfg, $gid) ! fn:string(*:event-id) } }"
         )
 
     @staticmethod

@@ -7,6 +7,7 @@ It exports an implementation for 'trace-events' command:
 
 from __future__ import annotations
 
+import httpx
 import questionary
 from cleo.commands.command import Command
 from cleo.formatters.formatter import Formatter
@@ -122,7 +123,7 @@ class TraceEventsCommand(Command):
                 if interactive:
                     return self._interactive(service, group)
                 result = self._run(service, group, event, enabled)
-            except (MarkLogicError, WrongParametersError) as exc:
+            except (MarkLogicError, WrongParametersError, httpx.HTTPError) as exc:
                 self.line_error(Formatter.escape(str(exc)))
                 return 1
 

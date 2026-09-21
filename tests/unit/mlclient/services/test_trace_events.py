@@ -3,14 +3,33 @@ from __future__ import annotations
 import json
 from urllib.parse import parse_qs
 
+import httpx
 import pytest
 import respx
 
 from mlclient import MLClient
+from mlclient.exceptions import MarkLogicError
 from mlclient.services import TraceEvents, TraceEventsService
 from tests.utils.ml_mockers import MLRespXMocker
 
 EVAL_URL = "http://localhost:8000/v1/eval"
+
+GATEWAY_503_BODY = (
+    "<html>\r\n"
+    "<head><title>503 Service Temporarily Unavailable</title></head>\r\n"
+    "<body>\r\n"
+    "<center><h1>503 Service Temporarily Unavailable</h1></center>\r\n"
+    "</body>\r\n"
+    "</html>\r\n"
+)
+
+MARKLOGIC_500_BODY = (
+    '<html xmlns="http://www.w3.org/1999/xhtml">'
+    "<head><title>500 Internal Server Error</title></head>"
+    '<body><span class="error"><h1>500 Internal Server Error</h1><dl>'
+    "<dt>XDMP-NOSUCHGROUP: No such group Nope</dt><dd></dd>"
+    "</dl></span></body></html>"
+)
 
 
 @pytest.fixture(autouse=True)
@@ -120,3 +139,28 @@ def test_set_event_disabled_deletes_the_event(ml):
 
     assert result.events == ()
     assert "admin:group-delete-trace-event" in _xquery_of(route, 0)
+
+
+def _mock_raw(status_code: int, content_type: str, body: str) -> MLRespXMocker:
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url(EVAL_URL)
+    ml_mocker.with_response_code(status_code)
+    ml_mocker.with_response_content_type(content_type)
+    ml_mocker.with_response_body(body)
+    return ml_mocker
+
+
+@respx.mock
+def test_get_raises_http_status_error_on_a_gateway_error(ml):
+    _mock_raw(503, "text/html", GATEWAY_503_BODY).mock_post()
+
+    with pytest.raises(httpx.HTTPStatusError, match="503"):
+        _service(ml).get()
+
+
+@respx.mock
+def test_get_raises_marklogic_error_on_a_server_error(ml):
+    _mock_raw(500, "text/html; charset=utf-8", MARKLOGIC_500_BODY).mock_post()
+
+    with pytest.raises(MarkLogicError, match="XDMP-NOSUCHGROUP"):
+        _service(ml).get()

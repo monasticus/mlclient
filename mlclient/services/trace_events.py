@@ -13,9 +13,12 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from mlclient._options import UNSET
+from mlclient.exceptions import MarkLogicError
 from mlclient.responses import MLResponseParser
 
 if TYPE_CHECKING:
+    from httpx import Response
+
     from mlclient.api.rest import RestApi
 
 logger = logging.getLogger(__name__)
@@ -86,11 +89,7 @@ class TraceEventsService:
         RequestError
             If HTTP transport fails
         """
-        resp = self._rest.eval.post(
-            xquery=self._get_code(),
-            variables={"group": group},
-            timeout=timeout,
-        )
+        resp = self._eval(self._get_code(), {"group": group}, timeout)
         state = MLResponseParser.parse(resp)
         return TraceEvents(
             activated=state["activated"],
@@ -202,8 +201,48 @@ class TraceEventsService:
         RequestError
             If HTTP transport fails
         """
-        self._rest.eval.post(xquery=xquery, variables=variables, timeout=timeout)
+        self._eval(xquery, variables, timeout)
         return self.get(group=group, timeout=timeout)
+
+    def _eval(
+        self,
+        xquery: str,
+        variables: dict,
+        timeout,
+    ) -> Response:
+        """Evaluate a query and fail loudly when the server does not answer OK.
+
+        Parameters
+        ----------
+        xquery : str
+            The query to evaluate.
+        variables : dict
+            External variables the query requires.
+        timeout : httpx.Timeout | float | None
+            Per-request HTTP timeout.
+
+        Returns
+        -------
+        Response
+            The successful HTTP response.
+
+        Raises
+        ------
+        MarkLogicError
+            If MarkLogic answered with an error it described.
+        HTTPStatusError
+            If a non-success status carried no MarkLogic error body, as when a
+            gateway answers because the server is down or unreachable.
+        RequestError
+            If HTTP transport fails.
+        """
+        resp = self._rest.eval.post(xquery=xquery, variables=variables, timeout=timeout)
+        if not resp.is_success:
+            error = MLResponseParser.parse(resp)
+            if error:
+                raise MarkLogicError(error)
+            resp.raise_for_status()
+        return resp
 
     @staticmethod
     def _get_code() -> str:

@@ -13,7 +13,6 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from mlclient._options import UNSET
-from mlclient.exceptions import MarkLogicError
 from mlclient.responses import MLResponseParser
 
 if TYPE_CHECKING:
@@ -237,11 +236,7 @@ class TraceEventsService:
             If HTTP transport fails.
         """
         resp = self._rest.eval.post(xquery=xquery, variables=variables, timeout=timeout)
-        if not resp.is_success:
-            error = MLResponseParser.parse(resp)
-            if error:
-                raise MarkLogicError(error)
-            resp.raise_for_status()
+        MLResponseParser.raise_for_status(resp)
         return resp
 
     @staticmethod

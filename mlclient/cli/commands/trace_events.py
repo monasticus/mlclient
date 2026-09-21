@@ -26,6 +26,21 @@ _FALSE_TOKENS = frozenset({"false", "off", "0", "no"})
 # Sentinel checkbox value marking the activation toggle apart from event names.
 _ACTIVATION_TOGGLE = object()
 
+# Colours mirror the command's cleo output: green for an enabled selection, red
+# tones muted, cyan for the cursor, grey for chrome.
+_PROMPT_STYLE = questionary.Style(
+    [
+        ("qmark", "fg:#00d787 bold"),
+        ("question", "bold"),
+        ("instruction", "fg:#808080"),
+        ("pointer", "fg:#00afff bold"),
+        ("highlighted", "fg:#00afff bold"),
+        ("selected", "fg:#00d787 bold"),
+        ("separator", "fg:#5f5f5f"),
+        ("disabled", "fg:#5f5f5f italic"),
+    ],
+)
+
 
 class TraceEventsCommand(Command):
     """Shows or sets a MarkLogic group's diagnostic trace events.
@@ -164,9 +179,19 @@ class TraceEventsCommand(Command):
                 value=_ACTIVATION_TOGGLE,
                 checked=current.activated,
             ),
-            *(questionary.Choice(event, checked=True) for event in current.events),
         ]
-        selected = questionary.checkbox("Trace events", choices=choices).ask()
+        if current.events:
+            choices.append(questionary.Separator("Enabled events"))
+            choices.extend(
+                questionary.Choice(event, checked=True) for event in current.events
+            )
+        selected = questionary.checkbox(
+            "Trace events",
+            choices=choices,
+            style=_PROMPT_STYLE,
+            pointer="❯",  # noqa: RUF001
+            instruction="(space toggles, enter confirms)",
+        ).ask()
         if selected is None:
             self.line_error("Cancelled.")
             return 1

@@ -2,9 +2,11 @@ import xml.etree.ElementTree as ElemTree
 import zlib
 from datetime import date, datetime
 
+import httpx
 import pytest
 
 from mlclient import MLClient
+from mlclient.exceptions import MarkLogicError
 from mlclient.models import DocumentsBodyPart
 from mlclient.responses import MLResponseParser
 from tests.utils import resources as resources_utils
@@ -2355,3 +2357,26 @@ def test_parse_bytes_non_marklogic_error_response_yields_empty(ml):
     parsed_resp = MLResponseParser.parse(resp, output_type=bytes)
 
     assert parsed_resp == b""
+
+
+@ml_mock
+def test_raise_for_status_passes_through_a_success_response(ml):
+    resp = ml.rest.eval.post(xquery="'plain text'")
+
+    assert MLResponseParser.raise_for_status(resp) is None
+
+
+@ml_mock
+def test_raise_for_status_raises_marklogic_error_for_a_described_error(ml):
+    resp = ml.rest.eval.post(xquery="'missing-quote")
+
+    with pytest.raises(MarkLogicError, match="XDMP-BADCHAR"):
+        MLResponseParser.raise_for_status(resp)
+
+
+@ml_mock
+def test_raise_for_status_defers_to_http_status_error_without_a_body(ml):
+    resp = ml.rest.eval.post(xquery="gateway-down")
+
+    with pytest.raises(httpx.HTTPStatusError, match="503"):
+        MLResponseParser.raise_for_status(resp)

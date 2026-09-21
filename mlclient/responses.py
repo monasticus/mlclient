@@ -16,6 +16,7 @@ from typing import ClassVar
 from httpx import Headers, Response
 
 from mlclient import _constants as const
+from mlclient.exceptions import MarkLogicError
 from mlclient.models.mimetypes import Mimetypes
 from mlclient.models.types import DocumentType
 from mlclient.multipart import MultipartPart, decode_multipart_mixed
@@ -145,6 +146,37 @@ class MLResponseParser:
             return cls._parse_bytes(response, with_headers=True)
 
         return cls._parse(response, with_headers=True)
+
+    @classmethod
+    def raise_for_status(
+        cls,
+        response: Response,
+    ) -> None:
+        """Raise a MarkLogic error when a response reports failure.
+
+        A success response returns without parsing the body. A non-success
+        response is parsed: when MarkLogic described the error a MarkLogicError
+        is raised, otherwise the call defers to httpx so a bodyless gateway
+        failure still surfaces as an HTTPStatusError.
+
+        Parameters
+        ----------
+        response : Response
+            An HTTP response taken from MarkLogic instance
+
+        Raises
+        ------
+        MarkLogicError
+            If MarkLogic answered a non-success status with an error it described
+        HTTPStatusError
+            If a non-success status carried no MarkLogic error body
+        """
+        if response.is_success:
+            return
+        error = cls._parse(response)
+        if error:
+            raise MarkLogicError(error)
+        response.raise_for_status()
 
     @classmethod
     def _parse(

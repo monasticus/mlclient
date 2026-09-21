@@ -12,7 +12,6 @@ from httpx import Response
 
 from mlclient import _constants as constants
 from mlclient._options import UNSET
-from mlclient.exceptions import MarkLogicError
 
 if TYPE_CHECKING:
     from mlclient.api.rest import AsyncRestApi, RestApi
@@ -146,9 +145,7 @@ class DocumentsService:
             txid=txid,
             timeout=timeout,
         )
-        if not resp.is_success:
-            resp_body = MLResponseParser.parse(resp)
-            raise MarkLogicError(resp_body["errorResponse"])
+        MLResponseParser.raise_for_status(resp)
         return MLResponseParser.parse(resp)
 
     def read(
@@ -259,9 +256,7 @@ class DocumentsService:
                 txid=txid,
                 timeout=timeout,
             )
-            if not resp.is_success:
-                resp_body = MLResponseParser.parse(resp)
-                raise MarkLogicError(resp_body["errorResponse"])
+            MLResponseParser.raise_for_status(resp)
             yield from _DocumentsReader.parse(resp, batch, category)
 
     def delete(
@@ -321,9 +316,7 @@ class DocumentsService:
                 txid=txid,
                 timeout=timeout,
             )
-            if not resp.is_success:
-                resp_body = MLResponseParser.parse(resp)
-                raise MarkLogicError(resp_body["errorResponse"])
+            MLResponseParser.raise_for_status(resp)
 
 
 class _DocumentsSender:
@@ -628,9 +621,7 @@ class AsyncDocumentsService:
             txid=txid,
             timeout=timeout,
         )
-        if not resp.is_success:
-            resp_body = MLResponseParser.parse(resp)
-            raise MarkLogicError(resp_body["errorResponse"])
+        MLResponseParser.raise_for_status(resp)
         return MLResponseParser.parse(resp)
 
     async def read(
@@ -743,9 +734,7 @@ class AsyncDocumentsService:
                 txid=txid,
                 timeout=timeout,
             )
-            if not resp.is_success:
-                resp_body = MLResponseParser.parse(resp)
-                raise MarkLogicError(resp_body["errorResponse"])
+            MLResponseParser.raise_for_status(resp)
             for doc in _DocumentsReader.parse(resp, batch, category):
                 yield doc
 
@@ -806,6 +795,4 @@ class AsyncDocumentsService:
                 txid=txid,
                 timeout=timeout,
             )
-            if not resp.is_success:
-                resp_body = MLResponseParser.parse(resp)
-                raise MarkLogicError(resp_body["errorResponse"])
+            MLResponseParser.raise_for_status(resp)

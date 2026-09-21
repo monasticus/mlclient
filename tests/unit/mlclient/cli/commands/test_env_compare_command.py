@@ -9,8 +9,8 @@ from cleo.testers.command_tester import CommandTester
 from mlclient.cli import MLCLIentApplication
 from mlclient.cli.commands.env_compare import (
     _compare_cell,
+    _declared_servers,
     _is_identical,
-    _servers_by_id,
     _union_keys,
 )
 from mlclient.exceptions import WrongParametersError
@@ -41,11 +41,13 @@ def _write_env(name: str, config: dict, *, directory: Path | None = None) -> Pat
 # --- comparison logic ---
 
 
-def test_marks_identical_values_green() -> None:
+def test_marks_identical_explicit_values_green() -> None:
     configs = {"dev": {"protocol": "https"}, "test": {"protocol": "https"}}
 
     assert _is_identical("protocol", ["dev", "test"], configs) is True
-    cell = _compare_cell("protocol", configs["dev"], reveal=False, identical=True)
+    cell = _compare_cell(
+        "protocol", configs["dev"], default=False, reveal=False, identical=True,
+    )
     assert cell == "<fg=green>https</>"
 
 
@@ -53,17 +55,26 @@ def test_marks_differing_values_yellow() -> None:
     configs = {"dev": {"host": "dev.example.com"}, "test": {"host": "test.example.com"}}
 
     assert _is_identical("host", ["dev", "test"], configs) is False
-    cell = _compare_cell("host", configs["dev"], reveal=False, identical=False)
+    cell = _compare_cell(
+        "host", configs["dev"], default=False, reveal=False, identical=False,
+    )
     assert cell == "<fg=yellow>dev.example.com</>"
+
+
+def test_marks_default_values_blue() -> None:
+    cell = _compare_cell(
+        "username", {"username": "admin"}, default=True, reveal=False, identical=True,
+    )
+    assert cell == "<fg=blue>admin</>"
 
 
 def test_missing_setting_is_not_identical_and_renders_dash() -> None:
     configs = {"dev": {"host": "dev.example.com"}, "test": {}}
 
     assert _is_identical("host", ["dev", "test"], configs) is False
-    assert _compare_cell("host", configs["test"], reveal=False, identical=False) == (
-        "<fg=blue>-</>"
-    )
+    assert _compare_cell(
+        "host", configs["test"], default=True, reveal=False, identical=False,
+    ) == "<fg=default;options=dark>-</>"
 
 
 def test_union_keeps_first_seen_order() -> None:
@@ -72,17 +83,12 @@ def test_union_keeps_first_seen_order() -> None:
     assert _union_keys(["dev", "test"], configs) == ["host", "auth", "port"]
 
 
-def test_servers_by_id_maps_every_env_filling_missing_with_empty() -> None:
-    configs = {
-        "dev": {"app-servers": [{"id": "manage", "port": 8002}, {"id": "content"}]},
-        "test": {"app-servers": [{"id": "manage", "port": 8102}]},
-    }
+def test_declared_servers_maps_ids_to_user_fields() -> None:
+    raw = {"app-servers": [{"id": "manage", "port": 8002}, {"id": "content"}]}
 
-    grouped = _servers_by_id(["dev", "test"], configs)
+    declared = _declared_servers(raw)
 
-    assert list(grouped) == ["manage", "content"]
-    assert grouped["manage"] == {"dev": {"port": 8002}, "test": {"port": 8102}}
-    assert grouped["content"] == {"dev": {}, "test": {}}
+    assert declared == {"manage": {"port": 8002}, "content": {}}
 
 
 # --- rendering ---
@@ -160,6 +166,42 @@ def test_renders_a_table_per_app_server() -> None:
     assert "8002" in output
     assert "8102" in output
     assert "8010" in output
+
+
+def test_fills_in_default_root_settings_an_environment_leaves_unset() -> None:
+    _write_env("dev", {"host": "dev.example.com", "username": "super"})
+    _write_env("test", {"host": "test.example.com"})
+
+    tester = _get_tester()
+    tester.execute("dev test")
+
+    output = tester.io.fetch_output()
+    assert "super" in output
+    assert "admin" in output
+
+
+def test_renders_the_always_present_default_app_servers() -> None:
+    _write_env("dev", {"host": "dev.example.com"})
+    _write_env("test", {"host": "test.example.com"})
+
+    tester = _get_tester()
+    tester.execute("dev test")
+
+    output = tester.io.fetch_output()
+    for server_id in ("app-services", "manage", "admin", "health"):
+        assert server_id in output
+
+
+def test_server_present_in_one_environment_only_renders_dash_for_the_other() -> None:
+    _write_env("dev", {"app-servers": [{"id": "search", "port": 9000}]})
+    _write_env("test", {"host": "test.example.com"})
+
+    tester = _get_tester()
+    tester.execute("dev test")
+
+    output = tester.io.fetch_output()
+    assert "search" in output
+    assert "9000" in output
 
 
 # --- directory resolution and errors ---

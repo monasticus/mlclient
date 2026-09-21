@@ -289,7 +289,11 @@ class TraceEventsService:
     def _set_event_code(
         enabled: bool,
     ) -> str:
-        """Build the Admin-module query adding or removing one trace event.
+        """Build the idempotent Admin-module query adding or removing one event.
+
+        Adding an event that already exists or deleting one that is absent makes
+        the query a no-op rather than a server error, so repeating a request is
+        safe.
 
         Parameters
         ----------
@@ -302,13 +306,19 @@ class TraceEventsService:
             XQuery using external ``group`` and ``event`` variables.
         """
         action = "add" if enabled else "delete"
+        act_when = "not($exists)" if enabled else "$exists"
         return (
             f"{_ADMIN_MODULE_IMPORT}"
             "declare variable $group external; "
             "declare variable $event external; "
             "let $cfg := admin:get-configuration() "
             "let $gid := admin:group-get-id($cfg, $group) "
-            f"return admin:group-{action}-trace-event("
+            "let $exists := "
+            "admin:group-get-trace-events($cfg, $gid) ! fn:string(*:event-id) "
+            "= $event "
+            f"return if ({act_when}) then "
+            f"admin:group-{action}-trace-event("
             "$cfg, $gid, admin:group-trace-event($event)) "
-            "=> admin:save-configuration()"
+            "=> admin:save-configuration() "
+            "else ()"
         )

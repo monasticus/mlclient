@@ -129,6 +129,7 @@ def test_set_event_enabled_adds_the_event(ml):
     assert "admin:group-add-trace-event" in mutation
     assert "admin:group-trace-event" in mutation
     assert "admin:save-configuration" in mutation
+    assert "if (not($exists))" in mutation
     assert _vars_of(route, 0)["event"] == "debug"
 
 
@@ -139,7 +140,9 @@ def test_set_event_disabled_deletes_the_event(ml):
     result = _service(ml).set_event("debug", enabled=False)
 
     assert result.events == ()
-    assert "admin:group-delete-trace-event" in _xquery_of(route, 0)
+    mutation = _xquery_of(route, 0)
+    assert "admin:group-delete-trace-event" in mutation
+    assert "if ($exists)" in mutation
 
 
 def _mock_raw(status_code: int, content_type: str, body: str) -> MLRespXMocker:

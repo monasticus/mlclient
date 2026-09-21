@@ -63,7 +63,7 @@ def test_shows_activation_and_every_enabled_event():
 
     assert status == 0
     assert tester.io.fetch_output() == (
-        "Group: Default\nTrace Events Activated: true\nA: on\nB: on\n"
+        "Group: Default\nTrace Events Activated: true\n\nA: on\nB: on\n"
     )
 
 
@@ -160,7 +160,7 @@ def test_interactive_toggles_activation_and_removes_unchecked_events(mocker):
     fake.set_activated.assert_called_once_with(value=False, group="Default")
     fake.set_event.assert_called_once_with("B", enabled=False, group="Default")
     assert tester.io.fetch_output() == (
-        "Group: Default\nTrace Events Activated: false\nA: on\n"
+        "Group: Default\nTrace Events Activated: false\n\nA: on\n"
     )
 
 
@@ -176,7 +176,7 @@ def test_interactive_applies_no_changes_when_selection_matches(mocker):
     fake.set_activated.assert_not_called()
     fake.set_event.assert_not_called()
     assert tester.io.fetch_output() == (
-        "Group: Default\nTrace Events Activated: true\nA: on\n"
+        "Group: Default\nTrace Events Activated: true\n\nA: on\n"
     )
 
 

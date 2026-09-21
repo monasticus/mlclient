@@ -239,7 +239,8 @@ class TraceEventsCommand(Command):
         if event is not None:
             status = _styled_status(event in result.events)
             self.line(f"{Formatter.escape(event)}: {status}")
-        elif list_all:
+        elif list_all and result.events:
+            self.line("")
             for enabled_event in result.events:
                 self.line(f"{Formatter.escape(enabled_event)}: {_styled_status(True)}")
 

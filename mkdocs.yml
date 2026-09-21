@@ -102,6 +102,7 @@ nav:
       - http: user/cli/http.md
       - logs: user/cli/logs.md
       - log-level: user/cli/log-level.md
+      - trace-events: user/cli/trace-events.md
       - health: user/cli/health.md
       - version: user/cli/version.md
   - API reference: reference/

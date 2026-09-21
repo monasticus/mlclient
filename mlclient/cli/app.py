@@ -29,6 +29,7 @@ from mlclient.cli.commands.health import HealthCommand
 from mlclient.cli.commands.http import HttpCommand
 from mlclient.cli.commands.log_level import LogLevelCommand
 from mlclient.cli.commands.logs import LogsCommand
+from mlclient.cli.commands.trace_events import TraceEventsCommand
 from mlclient.cli.commands.version import VersionCommand
 from mlclient.logging import setup_logger
 
@@ -52,6 +53,7 @@ class MLCLIentApplication(Application):
         self.add(EnvShowCommand())
         self.add(HealthCommand())
         self.add(LogLevelCommand())
+        self.add(TraceEventsCommand())
         self.add(VersionCommand())
 
     def create_io(

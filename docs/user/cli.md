@@ -53,6 +53,7 @@ command page.
 | Send an HTTP request | [`ml http`](cli/http.md) |
 | Read server logs | [`ml logs`](cli/logs.md) |
 | Inspect or change a log level | [`ml log-level`](cli/log-level.md) |
+| Inspect or change diagnostic trace events | [`ml trace-events`](cli/trace-events.md) |
 | Check server health, once or continuously | [`ml health`](cli/health.md) |
 | Read the MarkLogic version | [`ml version`](cli/version.md) |
 

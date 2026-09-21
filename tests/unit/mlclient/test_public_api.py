@@ -160,6 +160,8 @@ EXPECTED_EXPORTS = {
         "EvalService",
         "LogLevelService",
         "LogsService",
+        "TraceEvents",
+        "TraceEventsService",
         "TransactionService",
         "async_open_transaction",
         "open_transaction",

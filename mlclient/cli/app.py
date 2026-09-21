@@ -26,6 +26,7 @@ from mlclient._version import __version__ as ml_client_version
 from mlclient.cli.commands.env_copy import EnvCopyCommand
 from mlclient.cli.commands.env_edit import EnvEditCommand
 from mlclient.cli.commands.env_init import EnvInitCommand
+from mlclient.cli.commands.env_remove import EnvRemoveCommand
 from mlclient.cli.commands.env_show import EnvShowCommand
 from mlclient.cli.commands.eval import EvalCommand
 from mlclient.cli.commands.health import HealthCommand
@@ -56,6 +57,7 @@ class MLCLIentApplication(Application):
         self.add(EnvShowCommand())
         self.add(EnvEditCommand())
         self.add(EnvCopyCommand())
+        self.add(EnvRemoveCommand())
         self.add(HealthCommand())
         self.add(LogLevelCommand())
         self.add(TraceEventsCommand())

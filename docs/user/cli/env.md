@@ -10,6 +10,7 @@ create databases or deploy a MarkLogic application.
 | [`ml env show`](env/show.md) | List environments, inspect a configuration or copy a simple setting |
 | [`ml env edit`](env/edit.md) | Open a configuration file in your editor |
 | [`ml env copy`](env/copy.md) | Clone a configuration under a new name, optionally editing it |
+| [`ml env remove`](env/remove.md) | Delete a configuration file, with confirmation |
 
 ## Create and inspect a configuration
 

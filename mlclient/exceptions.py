@@ -114,6 +114,7 @@ class MarkLogicError(Exception):
             An error response object or a raw error message
         """
         if isinstance(error, dict):
+            error = error.get("errorResponse", error)
             status_code = error.get("statusCode")
             status = error.get("status")
             msg_code = error.get("messageCode")

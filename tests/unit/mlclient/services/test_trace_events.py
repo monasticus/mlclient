@@ -164,3 +164,24 @@ def test_get_raises_marklogic_error_on_a_server_error(ml):
 
     with pytest.raises(MarkLogicError, match="XDMP-NOSUCHGROUP"):
         _service(ml).get()
+
+
+@respx.mock
+def test_get_raises_marklogic_error_on_a_json_error_response(ml):
+    body = json.dumps(
+        {
+            "errorResponse": {
+                "statusCode": 500,
+                "status": "Internal Server Error",
+                "messageCode": "ADMIN-DUPLICATENAME",
+                "message": "ADMIN-DUPLICATENAME: Trace Event already exists",
+            },
+        },
+    )
+    _mock_raw(500, "application/json", body).mock_post()
+
+    with pytest.raises(
+        MarkLogicError,
+        match=r"\[500 Internal Server Error\] \(ADMIN-DUPLICATENAME\)",
+    ):
+        _service(ml).get()

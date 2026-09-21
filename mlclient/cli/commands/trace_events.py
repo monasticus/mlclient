@@ -113,7 +113,7 @@ class TraceEventsCommand(Command):
             try:
                 enabled = _parse_bool(value) if value is not None else None
             except WrongParametersError as exc:
-                self.line_error(Formatter.escape(str(exc)))
+                self.line_error(f"<error>{Formatter.escape(str(exc))}</error>")
                 return 1
 
         manager = MLClientManager(self.option("environment"))
@@ -124,7 +124,7 @@ class TraceEventsCommand(Command):
                     return self._interactive(service, group)
                 result = self._run(service, group, event, enabled)
             except (MarkLogicError, WrongParametersError, httpx.HTTPError) as exc:
-                self.line_error(Formatter.escape(str(exc)))
+                self.line_error(f"<error>{Formatter.escape(str(exc))}</error>")
                 return 1
 
         self._print(group, event, result, list_all=value is None and event is None)

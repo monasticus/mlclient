@@ -200,7 +200,9 @@ def test_reports_a_marklogic_error(mocker):
     fake.get.side_effect = MarkLogicError("Insufficient privileges")
 
     tester = _get_tester()
-    status = tester.execute("-e test")
+    status = tester.execute("-e test", decorated=True)
 
     assert status == 1
-    assert "Insufficient privileges" in tester.io.fetch_error()
+    error = tester.io.fetch_error()
+    assert "Insufficient privileges" in error
+    assert "\x1b[31" in error

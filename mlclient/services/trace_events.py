@@ -39,7 +39,7 @@ class TraceEvents:
     activated : bool
         Whether the group's master trace-events switch is on.
     events : tuple[str, ...]
-        The names of the enabled trace events, in the order the server reports.
+        The names of the enabled trace events, sorted alphabetically.
     """
 
     activated: bool
@@ -93,7 +93,7 @@ class TraceEventsService:
         state = MLResponseParser.parse(resp)
         return TraceEvents(
             activated=state["activated"],
-            events=tuple(state["events"]),
+            events=tuple(sorted(state["events"])),
         )
 
     def set_activated(

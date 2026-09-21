@@ -68,13 +68,13 @@ def _mock_state(activated: bool, events: list[str]) -> MLRespXMocker:
 
 
 @respx.mock
-def test_get_returns_activation_and_events(ml):
-    route = _mock_state(activated=True, events=["A", "B"]).mock_post()
+def test_get_returns_activation_and_events_sorted(ml):
+    route = _mock_state(activated=True, events=["B", "A", "C"]).mock_post()
 
     result = _service(ml).get()
 
     assert result.activated is True
-    assert result.events == ("A", "B")
+    assert result.events == ("A", "B", "C")
     code = _sent_xquery(route)
     assert "admin:group-get-trace-events-activated" in code
     assert "admin:group-get-trace-events" in code

@@ -16,6 +16,7 @@ import logging
 from typing import ClassVar
 
 from cleo.application import Application
+from cleo.formatters.formatter import Formatter
 from cleo.formatters.style import Style
 from cleo.io.inputs.input import Input
 from cleo.io.io import IO
@@ -119,7 +120,7 @@ class CleoAppHandler(logging.Handler):
         """Emit a LogRecord."""
         verbosity = self._LEVELS[record.levelno]["verbosity"]
         style = self._LEVELS[record.levelno]["style"]
-        styled_text = f"<{style}>{self.format(record)}</>"
+        styled_text = f"<{style}>{Formatter.escape(self.format(record))}</>"
         self.io.write_line(styled_text, verbosity=verbosity)
 
     @classmethod

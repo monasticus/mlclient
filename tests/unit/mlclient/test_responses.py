@@ -2317,3 +2317,41 @@ def test_parse_bytes_with_headers_multiple_responses(ml):
         "Content-Type": "text/plain",
         "X-Primitive": "string",
     }
+
+
+ml_mocker.with_name("gateway-error")
+ml_mocker.with_url("/v1/eval")
+ml_mocker.with_request_content_type("application/x-www-form-urlencoded")
+ml_mocker.with_request_body({"xquery": "gateway-down"})
+ml_mocker.with_response_code(503)
+ml_mocker.with_response_content_type("text/html")
+ml_mocker.with_response_body(
+    "<html><head><title>503 Service Temporarily Unavailable</title></head>"
+    "<body><center><h1>503 Service Temporarily Unavailable</h1></center></body>"
+    "</html>",
+)
+ml_mocker.mock_post()
+
+
+@ml_mock
+def test_parse_non_marklogic_error_response_yields_empty(ml):
+    resp = ml.rest.eval.post(xquery="gateway-down")
+    parsed_resp = MLResponseParser.parse(resp)
+
+    assert parsed_resp == ""
+
+
+@ml_mock
+def test_parse_text_non_marklogic_error_response_yields_empty(ml):
+    resp = ml.rest.eval.post(xquery="gateway-down")
+    parsed_resp = MLResponseParser.parse(resp, output_type=str)
+
+    assert parsed_resp == ""
+
+
+@ml_mock
+def test_parse_bytes_non_marklogic_error_response_yields_empty(ml):
+    resp = ml.rest.eval.post(xquery="gateway-down")
+    parsed_resp = MLResponseParser.parse(resp, output_type=bytes)
+
+    assert parsed_resp == b""

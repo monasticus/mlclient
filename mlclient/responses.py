@@ -185,7 +185,8 @@ class MLResponseParser:
                 error = cls._parse_xml_error(response)
             else:
                 error = cls._parse_html_error(response)
-            logger.warning("MarkLogic error occurred [%s]", error)
+            if error:
+                logger.debug("MarkLogic error occurred [%s]", error)
             if with_headers:
                 return response.headers, error
             return error
@@ -233,7 +234,8 @@ class MLResponseParser:
                 error = json.dumps(json_error)
             else:
                 error = cls._parse_html_error(response)
-            logger.warning("MarkLogic error occurred [%s]", error)
+            if error:
+                logger.debug("MarkLogic error occurred [%s]", error)
             if with_headers:
                 return response.headers, error
             return error
@@ -281,7 +283,8 @@ class MLResponseParser:
                 error = json.dumps(json_error).encode("utf-8")
             else:
                 error = cls._parse_html_error(response).encode("utf-8")
-            logger.warning("MarkLogic error occurred [%s]", error)
+            if error:
+                logger.debug("MarkLogic error occurred [%s]", error)
             if with_headers:
                 return response.headers, error
             return error

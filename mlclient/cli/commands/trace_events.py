@@ -23,6 +23,9 @@ from mlclient.services.trace_events import TraceEvents, TraceEventsService
 _TRUE_TOKENS = frozenset({"true", "on", "1", "yes"})
 _FALSE_TOKENS = frozenset({"false", "off", "0", "no"})
 
+# Sentinel checkbox value marking the activation toggle apart from event names.
+_ACTIVATION_TOGGLE = object()
+
 
 class TraceEventsCommand(Command):
     """Shows or sets a MarkLogic group's diagnostic trace events.
@@ -137,9 +140,10 @@ class TraceEventsCommand(Command):
     ) -> int:
         """Prompt for the activation switch and enabled events, then apply changes.
 
-        The event prompt offers the currently enabled events, all pre-selected;
-        unselecting one removes it. The activation switch and each unselected
-        event are saved only when they differ from the current state.
+        A single checkbox lists the activation toggle first, then every
+        currently enabled event, all pre-checked. Unchecking the toggle
+        deactivates trace events; unchecking an event removes it. Changes are
+        saved only where the selection differs from the current state.
 
         Parameters
         ----------
@@ -151,26 +155,28 @@ class TraceEventsCommand(Command):
         Returns
         -------
         int
-            0 on success, 1 when a prompt is cancelled
+            0 on success, 1 when the prompt is cancelled
         """
         current = service.get(group=group)
-        activated = questionary.confirm(
-            "Activate trace events?",
-            default=current.activated,
-        ).ask()
-        kept = questionary.checkbox(
-            "Enabled trace events",
-            choices=[questionary.Choice(e, checked=True) for e in current.events],
-        ).ask()
-        if activated is None or kept is None:
+        choices = [
+            questionary.Choice(
+                "Trace Events Activated",
+                value=_ACTIVATION_TOGGLE,
+                checked=current.activated,
+            ),
+            *(questionary.Choice(event, checked=True) for event in current.events),
+        ]
+        selected = questionary.checkbox("Trace events", choices=choices).ask()
+        if selected is None:
             self.line_error("Cancelled.")
             return 1
 
+        activated = _ACTIVATION_TOGGLE in selected
         result = current
         if activated != current.activated:
             result = service.set_activated(value=activated, group=group)
         for event in current.events:
-            if event not in kept:
+            if event not in selected:
                 result = service.set_event(event, enabled=False, group=group)
 
         self._print(group, None, result, list_all=True)

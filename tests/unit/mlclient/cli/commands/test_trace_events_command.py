@@ -8,6 +8,7 @@ import respx
 from cleo.testers.command_tester import CommandTester
 
 from mlclient.cli import MLCLIentApplication
+from mlclient.cli.commands.trace_events import _ACTIVATION_TOGGLE
 from mlclient.env import MLEnvironment
 from mlclient.exceptions import MarkLogicError
 from mlclient.services import TraceEvents
@@ -136,11 +137,10 @@ def _fake_service(mocker, get, set_activated=None, set_event=None):
     return fake
 
 
-def _answers(mocker, activated, kept):
-    confirm = mocker.patch("questionary.confirm")
-    confirm.return_value.ask.return_value = activated
+def _select(mocker, selected):
     checkbox = mocker.patch("questionary.checkbox")
-    checkbox.return_value.ask.return_value = kept
+    checkbox.return_value.ask.return_value = selected
+    return checkbox
 
 
 @respx.mock
@@ -151,7 +151,7 @@ def test_interactive_toggles_activation_and_removes_unchecked_events(mocker):
         set_activated=TraceEvents(activated=False, events=("A", "B")),
         set_event=TraceEvents(activated=False, events=("A",)),
     )
-    _answers(mocker, activated=False, kept=["A"])
+    _select(mocker, ["A"])
 
     tester = _get_tester()
     status = tester.execute("-e test -i")
@@ -167,7 +167,7 @@ def test_interactive_toggles_activation_and_removes_unchecked_events(mocker):
 @respx.mock
 def test_interactive_applies_no_changes_when_selection_matches(mocker):
     fake = _fake_service(mocker, get=TraceEvents(activated=True, events=("A",)))
-    _answers(mocker, activated=True, kept=["A"])
+    _select(mocker, [_ACTIVATION_TOGGLE, "A"])
 
     tester = _get_tester()
     status = tester.execute("-e test -i")
@@ -181,9 +181,40 @@ def test_interactive_applies_no_changes_when_selection_matches(mocker):
 
 
 @respx.mock
+def test_interactive_activation_toggle_leads_the_checkbox(mocker):
+    _fake_service(mocker, get=TraceEvents(activated=False, events=()))
+    checkbox = _select(mocker, [])
+
+    tester = _get_tester()
+    status = tester.execute("-e test -i")
+
+    assert status == 0
+    choices = checkbox.call_args.kwargs["choices"]
+    assert choices[0].value is _ACTIVATION_TOGGLE
+    assert choices[0].checked is False
+
+
+@respx.mock
+def test_interactive_activates_without_events(mocker):
+    fake = _fake_service(
+        mocker,
+        get=TraceEvents(activated=False, events=()),
+        set_activated=TraceEvents(activated=True, events=()),
+    )
+    _select(mocker, [_ACTIVATION_TOGGLE])
+
+    tester = _get_tester()
+    status = tester.execute("-e test -i")
+
+    assert status == 0
+    fake.set_activated.assert_called_once_with(value=True, group="Default")
+    fake.set_event.assert_not_called()
+
+
+@respx.mock
 def test_interactive_cancels_without_changes(mocker):
     fake = _fake_service(mocker, get=TraceEvents(activated=True, events=("A",)))
-    _answers(mocker, activated=None, kept=None)
+    _select(mocker, None)
 
     tester = _get_tester()
     status = tester.execute("-e test -i")

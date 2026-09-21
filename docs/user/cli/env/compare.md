@@ -10,17 +10,17 @@ ml env compare dev-full test-full --secrets
 
 The twin of [`env show`](show.md): it resolves the `.mlclient` directory and
 masks secrets the same way, but renders a table whose columns are environments
-and whose rows are settings. Each cell holds the environment's effective value,
-so a setting an environment leaves to its default -- the `admin` credentials,
-the always-present platform app servers -- still appears, shown blue to flag
-that the environment did not set it. An explicit value identical across every
-environment is green; an explicit value that differs is yellow. Comparison uses
-the real values, so two differing passwords read as differing even while both
-are masked.
+and whose rows are settings. A value shared by every environment is green even
+where a default supplies it; a default that differs from what another
+environment set -- the `admin` credentials, a platform app server's port -- is
+blue; an explicit value that differs is yellow. A value an environment left to
+its default is tagged with an italic `(default)`. Comparison uses the real
+values, so two differing passwords read as differing even while both are masked.
 
-Each app server is rendered in its own table, matched by id across the
-environments; a server present in only some environments leaves the others
-blank.
+A setting left to its default in every environment carries no comparison and is
+dropped; pass `--defaults` to keep it. Each app server is rendered in its own
+table, matched by id across the environments; a server present in only some
+environments leaves the others blank.
 
 ## Arguments
 
@@ -36,9 +36,19 @@ exist fails, listing the available names.
 
 Read `.mlclient` in your home directory instead of searching the project.
 
+### `--exclude`, `-e`
+
+Leave an environment out of the comparison. Repeatable, and most useful without
+`names`: `ml env compare -e local` compares every environment except `local`.
+
 ### `--secrets`, `-s`
 
 Reveal secrets in the table. Without this option, passwords and API keys are
 masked, including values inside mappings.
+
+### `--defaults`, `-d`
+
+Keep a setting even when every environment leaves it to the same default, and
+render the always-present platform app servers.
 
 See also [global options](../../cli.md#global-options).

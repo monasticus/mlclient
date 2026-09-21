@@ -7,7 +7,7 @@ It exports an implementation for 'env compare' command:
 
 from __future__ import annotations
 
-from pathlib import Path
+from typing import TYPE_CHECKING
 
 from cleo.commands.command import Command
 from cleo.helpers import argument, option
@@ -15,38 +15,42 @@ from cleo.io.inputs.argument import Argument
 from cleo.io.inputs.option import Option
 from cleo.ui.table import Table
 
-from mlclient import _constants as constants
-from mlclient.cli.commands.env_show import (
-    _APP_SERVERS_KEY,
-    _display_value,
-    _env_names,
-    _header,
-    _key,
-    _read_config,
-    _title,
-    _unknown_env_message,
+from mlclient.cli.commands._env_common import (
+    APP_SERVERS_KEY,
+    FILE_PREFIX,
+    FILE_SUFFIX,
+    announce_source,
+    display_value,
+    effective_config,
+    env_names,
+    header,
+    key,
+    read_config,
+    resolve_env_dir,
+    title,
+    unknown_env_message,
 )
-from mlclient.env import MLEnvironment, find_mlclient_directory
-from mlclient.exceptions import MLClientDirectoryNotFoundError, WrongParametersError
+from mlclient.exceptions import WrongParametersError
 
-_FILE_PREFIX = "mlclient-"
-_FILE_SUFFIX = ".yaml"
+if TYPE_CHECKING:
+    from pathlib import Path
 
 
 class EnvCompareCommand(Command):
     """Compares settings across MLClient environments side by side.
 
     The twin of ``env show``: it resolves and masks the same way, but renders a
-    table whose columns are environments and whose rows are settings. Each cell
-    holds the environment's effective value, so a setting an environment leaves
-    to its default (the ``admin`` credentials, the platform app servers) still
-    appears, shown blue to flag that the environment did not set it. An
-    explicit value identical across every environment is green; one that
-    differs is yellow. Secrets are masked unless ``--secrets`` is passed;
-    comparison still uses the real values, so differing secrets show as
-    differing even while masked. With no names every environment in the
-    directory is compared. Each app server gets its own table, matched by id
-    across environments.
+    table whose columns are environments and whose rows are settings. A value
+    shared by every environment is green even where a default supplies it; a
+    default that differs from what another environment set is blue; an explicit
+    value that differs is yellow. A value an environment left to its default is
+    tagged with an italic ``(default)``. A setting left to its default
+    everywhere is dropped unless ``--defaults`` asks for it. Secrets are masked
+    unless ``--secrets`` is passed; comparison still uses the real values, so
+    differing secrets show as differing even while masked. With no names every
+    environment in the directory is compared; ``--exclude`` drops named
+    environments from that set. Each app server gets its own table, matched by
+    id across environments.
 
     Usage:
       env compare [options] [--] [<names>...]
@@ -60,6 +64,10 @@ class EnvCompareCommand(Command):
             Read from the home directory instead of the current directory
       -s, --secrets
             Reveal secret values instead of masking them
+      -d, --defaults
+            Keep settings left to their default in every environment
+      -e, --exclude
+            Environment to leave out of the comparison
     """
 
     name: str = "env compare"
@@ -85,20 +93,34 @@ class EnvCompareCommand(Command):
             "s",
             description="Reveal secret values instead of masking them",
         ),
+        option(
+            "defaults",
+            "d",
+            description="Keep settings left to their default in every environment",
+        ),
+        option(
+            "exclude",
+            "e",
+            description="Environment to leave out of the comparison",
+            flag=False,
+            multiple=True,
+        ),
     ]
 
     def handle(
         self,
     ) -> int:
         """Execute the command."""
-        directory = self._env_dir()
-        names = self.argument("names") or _env_names(directory)
+        directory = resolve_env_dir(self)
+        names = self.argument("names") or env_names(directory)
+        excluded = set(self.option("exclude"))
+        names = [name for name in names if name not in excluded]
         if not names:
             self.line(f"No environments found in <info>{directory}</info>")
             return 0
         views = self._load(directory, names)
-        self._announce_source(directory)
-        self._render(names, views)
+        announce_source(self, directory, directory)
+        self._render(names, views, show_defaults=self.option("defaults"))
         return 0
 
     def _load(
@@ -109,9 +131,9 @@ class EnvCompareCommand(Command):
         """Resolve each named environment, failing on the first one missing."""
         views = {}
         for name in names:
-            path = directory / f"{_FILE_PREFIX}{name}{_FILE_SUFFIX}"
+            path = directory / f"{FILE_PREFIX}{name}{FILE_SUFFIX}"
             if not path.is_file():
-                raise WrongParametersError(_unknown_env_message(name, directory))
+                raise WrongParametersError(unknown_env_message(name, directory))
             views[name] = _env_view(path)
         return views
 
@@ -119,35 +141,50 @@ class EnvCompareCommand(Command):
         self,
         names: list[str],
         views: dict[str, _EnvView],
+        *,
+        show_defaults: bool,
     ) -> None:
         """Render the root settings, then one table per app server matched by id."""
         reveal = self.option("secrets")
         roots = {name: views[name].root for name in names}
         root_explicit = {name: views[name].root_explicit for name in names}
         self._render_table(
-            _title("Environments"), names, roots, root_explicit, reveal=reveal,
+            title("Environments"), roots, root_explicit,
+            reveal=reveal, show_defaults=show_defaults,
         )
         for server_id in _server_ids(names, views):
             values = {name: views[name].server_values(server_id) for name in names}
             explicit = {name: views[name].server_explicit(server_id) for name in names}
             self._render_table(
-                _title(server_id), names, values, explicit, reveal=reveal,
+                title(server_id), values, explicit,
+                reveal=reveal, show_defaults=show_defaults,
             )
 
     def _render_table(
         self,
-        title: str,
-        names: list[str],
+        table_title: str,
         values: dict[str, dict],
         explicit: dict[str, set[str]],
         *,
         reveal: bool,
+        show_defaults: bool,
     ) -> None:
-        """Render one row per setting, one column per environment."""
+        """Render one row per setting, one column per environment.
+
+        A setting left to its default in every environment carries no
+        comparison and is dropped unless kept by ``show_defaults``; a table with
+        no rows left is not rendered.
+        """
+        names = list(values)
+        settings = _visible_settings(
+            names, values, explicit, show_defaults=show_defaults,
+        )
+        if not settings:
+            return
         table = Table(self.io, style="box")
-        table.set_header_title(title)
-        table.set_headers([_header("Setting"), *(_header(name) for name in names)])
-        for setting in _union_keys(names, values):
+        table.set_header_title(table_title)
+        table.set_headers([header("Setting"), *(header(name) for name in names)])
+        for setting in settings:
             identical = _is_identical(setting, names, values)
             cells = [
                 _compare_cell(
@@ -159,32 +196,8 @@ class EnvCompareCommand(Command):
                 )
                 for name in names
             ]
-            table.add_row([_key(setting), *cells])
+            table.add_row([key(setting), *cells])
         table.render()
-
-    def _env_dir(
-        self,
-    ) -> Path:
-        """Locate the .mlclient directory: home when --global, else nearest ancestor."""
-        if self.option("global"):
-            return Path.home() / constants.ML_CLIENT_DIR
-        try:
-            return find_mlclient_directory(Path.cwd())
-        except MLClientDirectoryNotFoundError:
-            return Path.cwd() / constants.ML_CLIENT_DIR
-
-    def _announce_source(
-        self,
-        directory: Path,
-    ) -> None:
-        """Name the directory read, flagging an implicit fall-through to global."""
-        source = directory
-        if self.option("global") or source == Path.cwd() / constants.ML_CLIENT_DIR:
-            return
-        scope = " (global)" if source == Path.home() / constants.ML_CLIENT_DIR else ""
-        self.line(
-            f"<options=italic>Reading <fg=green;options=italic>{source}</>{scope}</>\n",
-        )
 
 
 class _EnvView:
@@ -239,21 +252,15 @@ def _env_view(
     path: Path,
 ) -> _EnvView:
     """Resolve an environment to effective values, tracking which the user set."""
-    raw = _read_config(path)
-    environment = MLEnvironment.load_file(str(path))
-    root = environment.model_dump(
-        mode="json", by_alias=True, exclude_none=True, exclude={"app_servers"},
-    )
-    root_explicit = {key for key in raw if key != _APP_SERVERS_KEY}
+    raw = read_config(path)
+    root, resolved_servers = effective_config(path)
+    root_explicit = {field for field in raw if field != APP_SERVERS_KEY}
     declared = _declared_servers(raw)
     servers = {}
-    for server in environment.app_servers:
-        values = server.model_dump(
-            mode="json", by_alias=True, exclude_none=True, exclude={"identifier"},
-        )
-        servers[server.identifier] = _ServerView(
-            values, set(declared.get(server.identifier, {})),
-        )
+    for server in resolved_servers:
+        server_id = server["id"]
+        values = {field: value for field, value in server.items() if field != "id"}
+        servers[server_id] = _ServerView(values, set(declared.get(server_id, {})))
     return _EnvView(root, root_explicit, servers)
 
 
@@ -262,7 +269,7 @@ def _declared_servers(
 ) -> dict[str, dict]:
     """Map each app server id the user wrote to the raw fields given to it."""
     declared = {}
-    for server in raw.get(_APP_SERVERS_KEY) or []:
+    for server in raw.get(APP_SERVERS_KEY) or []:
         declared[server["id"]] = {k: v for k, v in server.items() if k != "id"}
     return declared
 
@@ -280,6 +287,24 @@ def _server_ids(
     return ids
 
 
+def _visible_settings(
+    names: list[str],
+    values: dict[str, dict],
+    explicit: dict[str, set[str]],
+    *,
+    show_defaults: bool,
+) -> list[str]:
+    """List the settings worth a row: those set somewhere, or all when asked."""
+    settings = _union_keys(names, values)
+    if show_defaults:
+        return settings
+    return [
+        setting
+        for setting in settings
+        if any(setting in explicit[name] for name in names)
+    ]
+
+
 def _union_keys(
     names: list[str],
     values: dict[str, dict],
@@ -287,9 +312,9 @@ def _union_keys(
     """Collect every setting across the environments, keeping first-seen order."""
     keys: list[str] = []
     for name in names:
-        for key in values[name]:
-            if key not in keys:
-                keys.append(key)
+        for field in values[name]:
+            if field not in keys:
+                keys.append(field)
     return keys
 
 
@@ -313,18 +338,24 @@ def _compare_cell(
     reveal: bool,
     identical: bool,
 ) -> str:
-    """Render one environment's value: dim when absent, blue when left to a default.
+    """Render one environment's value, coloured to place it in the comparison.
 
-    An explicit value shared by every environment is green; an explicit value
-    that differs is yellow.
+    A value shared by every environment is green even where a default supplies
+    it; a default that differs from what another environment set is blue; an
+    explicit value that differs is yellow; an absent setting is a dim dash. A
+    value an environment left to its default is tagged with an italic
+    ``(default)``.
     """
     if setting not in values:
         return "<fg=default;options=dark>-</>"
-    text = _display_value(setting, values[setting], reveal=reveal)
-    if default:
-        color = "blue"
-    elif identical:
+    text = display_value(setting, values[setting], reveal=reveal)
+    if identical:
         color = "green"
+    elif default:
+        color = "blue"
     else:
         color = "yellow"
-    return f"<fg={color}>{text}</>"
+    cell = f"<fg={color}>{text}</>"
+    if default:
+        cell += " <options=italic>(default)</>"
+    return cell

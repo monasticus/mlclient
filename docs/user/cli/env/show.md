@@ -52,6 +52,11 @@ ml env show local --raw
 Reveal secrets in formatted output. Without this option, passwords and API keys
 are masked, including values inside mappings and lists.
 
+### `--defaults`, `-d`
+
+Fill in settings inherited from the defaults and the always-present platform app
+servers, rather than showing only what the file sets.
+
 ### `--copy`, `-c`
 
 Copy a simple setting while also printing it:

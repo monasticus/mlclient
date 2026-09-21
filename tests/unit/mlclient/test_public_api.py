@@ -17,6 +17,7 @@ EXPECTED_EXPORTS = {
         "AsyncApiClient",
     ],
     "mlclient.env": [
+        "DEFAULT_APP_SERVER_SETTINGS",
         "MLEnvironment",
         "MLServerConfig",
         "find_mlclient_directory",

@@ -14,6 +14,12 @@ It exports the following functions:
         Locate a named environment's configuration file in the nearest .mlclient.
     * find_mlclient_directory
         Locate the nearest .mlclient directory at a path or in an ancestor.
+
+It exports the following values:
+
+    * DEFAULT_APP_SERVER_SETTINGS
+        The App Services, Manage, Admin and Health servers present in every
+        environment.
 """
 
 from __future__ import annotations
@@ -96,7 +102,7 @@ class MLServerConfig(BaseModel):
     )
 
 
-_DEFAULT_APP_SERVER_SETTINGS = (
+DEFAULT_APP_SERVER_SETTINGS = (
     {"id": "app-services", "rest": True},
     {"id": "manage", "port": MARKLOGIC_MANAGE_PORT},
     {"id": "admin", "port": MARKLOGIC_ADMIN_PORT},
@@ -105,7 +111,7 @@ _DEFAULT_APP_SERVER_SETTINGS = (
 
 
 _DEFAULT_APP_SERVERS = [
-    MLServerConfig(**server) for server in _DEFAULT_APP_SERVER_SETTINGS
+    MLServerConfig(**server) for server in DEFAULT_APP_SERVER_SETTINGS
 ]
 
 
@@ -429,6 +435,7 @@ def find_mlclient_directory(
 
 
 __all__ = [
+    "DEFAULT_APP_SERVER_SETTINGS",
     "MLEnvironment",
     "MLServerConfig",
     "find_mlclient_directory",

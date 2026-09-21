@@ -725,3 +725,29 @@ def test_reports_unknown_setting() -> None:
         tester.execute("dev nope")
 
     assert "nope" in str(error.value)
+
+
+def test_shows_only_written_settings_without_defaults() -> None:
+    _write_env("dev", {"host": "dev.example.com"})
+    tester = _get_tester()
+
+    tester.execute("dev")
+
+    output = tester.io.fetch_output()
+    assert "dev.example.com" in output
+    assert "username" not in output
+    assert "manage" not in output
+
+
+def test_defaults_fills_in_inherited_settings_and_platform_servers() -> None:
+    _write_env("dev", {"host": "dev.example.com"})
+    tester = _get_tester()
+
+    tester.execute("dev --defaults")
+
+    output = tester.io.fetch_output()
+    assert tester.status_code == 0
+    assert "username" in output
+    assert "admin" in output
+    for server_id in ("app-services", "manage", "health"):
+        assert server_id in output

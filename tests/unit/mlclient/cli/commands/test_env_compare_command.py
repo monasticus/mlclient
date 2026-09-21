@@ -61,11 +61,18 @@ def test_marks_differing_values_yellow() -> None:
     assert cell == "<fg=yellow>dev.example.com</>"
 
 
-def test_marks_default_values_blue() -> None:
+def test_marks_a_differing_default_blue_and_tags_it() -> None:
+    cell = _compare_cell(
+        "port", {"port": 8002}, default=True, reveal=False, identical=False,
+    )
+    assert cell == "<fg=blue>8002</> <options=italic>(default)</>"
+
+
+def test_matching_default_stays_green_and_is_tagged() -> None:
     cell = _compare_cell(
         "username", {"username": "admin"}, default=True, reveal=False, identical=True,
     )
-    assert cell == "<fg=blue>admin</>"
+    assert cell == "<fg=green>admin</> <options=italic>(default)</>"
 
 
 def test_missing_setting_is_not_identical_and_renders_dash() -> None:
@@ -115,6 +122,20 @@ def test_compares_all_environments_by_default() -> None:
     tester.execute("")
 
     output = tester.io.fetch_output()
+    assert "dev.example.com" in output
+    assert "test.example.com" in output
+
+
+def test_excludes_named_environments_from_the_default_set() -> None:
+    _write_env("local", {"host": "local.example.com"})
+    _write_env("dev", {"host": "dev.example.com"})
+    _write_env("test", {"host": "test.example.com"})
+
+    tester = _get_tester()
+    tester.execute("--exclude local")
+
+    output = tester.io.fetch_output()
+    assert "local.example.com" not in output
     assert "dev.example.com" in output
     assert "test.example.com" in output
 
@@ -180,7 +201,7 @@ def test_fills_in_default_root_settings_an_environment_leaves_unset() -> None:
     assert "admin" in output
 
 
-def test_renders_the_always_present_default_app_servers() -> None:
+def test_omits_settings_left_to_their_default_in_every_environment() -> None:
     _write_env("dev", {"host": "dev.example.com"})
     _write_env("test", {"host": "test.example.com"})
 
@@ -188,8 +209,35 @@ def test_renders_the_always_present_default_app_servers() -> None:
     tester.execute("dev test")
 
     output = tester.io.fetch_output()
+    assert "host" in output
+    for shared_default in ("username", "manage", "admin", "app-services", "health"):
+        assert shared_default not in output
+
+
+def test_defaults_flag_keeps_settings_default_across_every_environment() -> None:
+    _write_env("dev", {"host": "dev.example.com"})
+    _write_env("test", {"host": "test.example.com"})
+
+    tester = _get_tester()
+    tester.execute("dev test --defaults")
+
+    output = tester.io.fetch_output()
+    assert "username" in output
     for server_id in ("app-services", "manage", "admin", "health"):
         assert server_id in output
+
+
+def test_platform_server_overridden_in_one_env_shows_default_for_others() -> None:
+    _write_env("dev", {"app-servers": [{"id": "manage", "port": 9002}]})
+    _write_env("test", {"host": "test.example.com"})
+
+    tester = _get_tester()
+    tester.execute("dev test")
+
+    output = tester.io.fetch_output()
+    assert "manage" in output
+    assert "9002" in output
+    assert "8002" in output
 
 
 def test_server_present_in_one_environment_only_renders_dash_for_the_other() -> None:

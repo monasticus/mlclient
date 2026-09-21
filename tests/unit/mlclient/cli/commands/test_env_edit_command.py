@@ -142,3 +142,12 @@ def test_errors_when_environment_missing(editor_call: Mock) -> None:
     assert "No environment [nope]" in str(error.value)
     assert "Available: local" in str(error.value)
     editor_call.assert_not_called()
+
+
+def test_errors_when_no_mlclient_directory(editor_call: Mock) -> None:
+    tester = _get_tester()
+    with pytest.raises(WrongParametersError) as error:
+        tester.execute("local")
+
+    assert "No environment [local]" in str(error.value)
+    editor_call.assert_not_called()

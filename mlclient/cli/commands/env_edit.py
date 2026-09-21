@@ -69,9 +69,7 @@ class EnvEditCommand(Command):
         path = directory / f"{_FILE_PREFIX}{name}{_FILE_SUFFIX}"
         if not path.is_file():
             raise WrongParametersError(_unknown_env_message(name, directory))
-        editor = _editor()
-        self.line(f"Opening <info>{path}</info> in <info>{editor}</info>...")
-        return subprocess.call([editor, str(path)])
+        return open_in_editor(self, path)
 
     def _env_dir(
         self,
@@ -83,6 +81,17 @@ class EnvEditCommand(Command):
             return find_mlclient_directory(Path.cwd())
         except MLClientDirectoryNotFoundError:
             return Path.cwd() / constants.ML_CLIENT_DIR
+
+
+def open_in_editor(command: Command, path: Path) -> int:
+    """Launch the user's editor on a file, returning the editor's exit status.
+
+    The editor takes over the terminal; the command resumes when it exits. Shared
+    with ``env copy --edit`` so both open a file the same way.
+    """
+    editor = _editor()
+    command.line(f"Opening <info>{path}</info> in <info>{editor}</info>...")
+    return subprocess.call([editor, str(path)])
 
 
 def _editor() -> str:

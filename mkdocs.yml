@@ -99,6 +99,7 @@ nav:
           - init: user/cli/env/init.md
           - show: user/cli/env/show.md
           - edit: user/cli/env/edit.md
+          - copy: user/cli/env/copy.md
       - eval: user/cli/eval.md
       - http: user/cli/http.md
       - logs: user/cli/logs.md

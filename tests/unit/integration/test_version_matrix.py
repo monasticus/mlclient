@@ -48,7 +48,8 @@ def test_server_version_selects_only_supported_auth_rows(version, supported):
 def test_server_version_does_not_parse_mime_header_as_version():
     respx.post("http://localhost:8000/v1/eval").mock(
         return_value=httpx.Response(
-            200, text="MIME-Version: 1.0\r\n\r\nnot a version\r\n",
+            200,
+            text="MIME-Version: 1.0\r\n\r\nnot a version\r\n",
         ),
     )
     with (
@@ -95,17 +96,21 @@ def test_broken_oauth_config_is_not_an_unsupported_server(tmp_path):
 
 @pytest.mark.parametrize("required", [False, True])
 def test_missing_certificates_fail_required_rig_and_skip_optional_rig(
-    tmp_path, monkeypatch, required,
+    tmp_path,
+    monkeypatch,
+    required,
 ):
     monkeypatch.setenv(fixtures.CERTS_DIR_ENV, str(tmp_path))
-    monkeypatch.setenv("MLCLIENT_IT_REQUIRED", "1" if required else "0")
+    monkeypatch.setenv(
+        "MLCLIENT_IT_FAIL_ON_MISSING_PREREQUISITES", "1" if required else "0",
+    )
     error = pytest.fail.Exception if required else pytest.skip.Exception
     with pytest.raises(error, match="No provisioned certificates"):
         fixtures.certs_dir.__wrapped__()
 
 
 def test_missing_kerberos_tooling_fails_required_rig(monkeypatch):
-    monkeypatch.setenv("MLCLIENT_IT_REQUIRED", "1")
+    monkeypatch.setenv("MLCLIENT_IT_FAIL_ON_MISSING_PREREQUISITES", "1")
     monkeypatch.setattr(fixtures.shutil, "which", lambda _: None)
     ticket = fixtures.kerberos_ticket.__wrapped__({"principal": "test@LOCAL"})
     with pytest.raises(pytest.fail.Exception, match="kinit or client keytab"):

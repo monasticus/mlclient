@@ -21,7 +21,7 @@ _CLIENT_KEYTAB = _KRB_DIR / "client.keytab"
 
 def _missing_prerequisite(message: str) -> None:
     """Fail an explicitly required CI rig; skip an unavailable optional local rig."""
-    if os.environ.get("MLCLIENT_IT_REQUIRED") == "1":
+    if os.environ.get("MLCLIENT_IT_FAIL_ON_MISSING_PREREQUISITES") == "1":
         pytest.fail(message)
     pytest.skip(message)
 

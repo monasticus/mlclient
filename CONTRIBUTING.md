@@ -174,11 +174,11 @@ provisioning, not just an open port:
 
 ```sh
 docker inspect --format '{{.State.Health.Status}}' mlclient_integration
-MLCLIENT_IT_REQUIRED=1 MLCLIENT_IT_CERTS_DIR=tests/integration/.certs \
+MLCLIENT_IT_FAIL_ON_MISSING_PREREQUISITES=1 MLCLIENT_IT_CERTS_DIR=tests/integration/.certs \
   poetry run pytest tests/integration -ra
 ```
 
-`MLCLIENT_IT_REQUIRED=1`, also set in CI, makes missing certificates or Kerberos
+`MLCLIENT_IT_FAIL_ON_MISSING_PREREQUISITES=1`, also set in CI, makes missing certificates or Kerberos
 tooling fail instead of skipping. Without it, tests requiring an unavailable
 local rig may skip. Missing or malformed auth configuration in a provisioned rig
 is always an error; only explicitly unsupported JWT OAuth (before 11.2) skips its

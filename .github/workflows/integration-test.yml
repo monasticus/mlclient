@@ -64,7 +64,7 @@ jobs:
       - name: Test code with pytest
         env:
           MLCLIENT_IT_CERTS_DIR: tests/integration/.certs
-          MLCLIENT_IT_REQUIRED: "1"
+          MLCLIENT_IT_FAIL_ON_MISSING_PREREQUISITES: "1"
         run: poetry run pytest -ra tests/integration/
 
       - name: Dump integration service logs on failure

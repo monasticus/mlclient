@@ -16,6 +16,12 @@ The editor is taken from `$VISUAL`, then `$EDITOR`, falling back to `vi` when
 neither is set. The editor inherits the terminal, so full-screen editors work as
 usual.
 
+Editor settings may include arguments, for example `VISUAL='code --wait'` or
+`EDITOR='nano -w'`. Quote a path containing spaces inside the setting. Arguments
+use shell-style quoting, but the command does not run a shell: expansions, pipes
+and redirects are not evaluated. GUI editors need their wait option if editing
+should finish before `ml` returns.
+
 ## Arguments
 
 ### `name`

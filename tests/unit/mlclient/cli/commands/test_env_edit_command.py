@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import shlex
+import sys
 from pathlib import Path
 from unittest.mock import Mock
 
@@ -26,7 +28,7 @@ def editor_call(mocker: MockerFixture, monkeypatch: pytest.MonkeyPatch) -> Mock:
     monkeypatch.delenv("VISUAL", raising=False)
     monkeypatch.delenv("EDITOR", raising=False)
     return mocker.patch(
-        "mlclient.cli.commands.env_edit.subprocess.call",
+        "mlclient.cli.commands._env_editor.subprocess.call",
         return_value=0,
     )
 
@@ -68,7 +70,7 @@ def test_prefers_visual_over_editor(
     tester = _get_tester()
     tester.execute("local")
 
-    editor_call.assert_called_once_with(["code -w", str(path)])
+    editor_call.assert_called_once_with(["code", "-w", str(path)])
 
 
 def test_falls_back_to_editor_when_no_visual(
@@ -150,4 +152,33 @@ def test_errors_when_no_mlclient_directory(editor_call: Mock) -> None:
         tester.execute("local")
 
     assert "No environment [local]" in str(error.value)
+    editor_call.assert_not_called()
+
+
+def test_editor_arguments_and_quoted_script_path(monkeypatch: pytest.MonkeyPatch):
+    path = _write_env("local", {"host": "localhost"})
+    script = Path.cwd() / "editor with spaces.py"
+    script.write_text(
+        "import sys\nfrom pathlib import Path\n"
+        "assert sys.argv[1] == '--wait'\n"
+        "Path(sys.argv[2]).write_text('host: edited.example.com\\n')\n"
+        "sys.exit(3)\n",
+    )
+    monkeypatch.setenv("VISUAL", shlex.join([sys.executable, str(script), "--wait"]))
+    tester = _get_tester()
+
+    tester.execute("local")
+
+    assert tester.status_code == 3
+    assert path.read_text() == "host: edited.example.com\n"
+
+
+@pytest.mark.parametrize("editor", ["   ", '"unterminated'])
+def test_rejects_invalid_editor_command(editor, monkeypatch, editor_call):
+    _write_env("local", {})
+    monkeypatch.setenv("VISUAL", editor)
+
+    with pytest.raises(WrongParametersError, match="VISUAL or EDITOR"):
+        _get_tester().execute("local")
+
     editor_call.assert_not_called()

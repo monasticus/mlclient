@@ -7,19 +7,19 @@ It exports an implementation for 'env remove' command:
 
 from __future__ import annotations
 
-from pathlib import Path
-
 from cleo.commands.command import Command
+from cleo.formatters.formatter import Formatter
 from cleo.helpers import argument, option
 from cleo.io.inputs.argument import Argument
 from cleo.io.inputs.option import Option
 
-from mlclient import _constants as constants
-from mlclient.env import find_mlclient_directory
-from mlclient.exceptions import MLClientDirectoryNotFoundError, WrongParametersError
-
-_FILE_PREFIX = "mlclient-"
-_FILE_SUFFIX = ".yaml"
+from mlclient.cli.commands._env_common import (
+    FILE_PREFIX,
+    FILE_SUFFIX,
+    resolve_env_dir,
+    unknown_env_message,
+)
+from mlclient.exceptions import WrongParametersError
 
 
 class EnvRemoveCommand(Command):
@@ -70,47 +70,17 @@ class EnvRemoveCommand(Command):
     ) -> int:
         """Execute the command."""
         name = self.argument("name")
-        directory = self._env_dir()
-        path = directory / f"{_FILE_PREFIX}{name}{_FILE_SUFFIX}"
+        directory = resolve_env_dir(self)
+        path = directory / f"{FILE_PREFIX}{name}{FILE_SUFFIX}"
         if not path.is_file():
-            raise WrongParametersError(_unknown_env_message(name, directory))
+            raise WrongParametersError(unknown_env_message(name, directory))
         if not self.option("force") and not self.confirm(
-            f"Remove environment <info>{name}</info> at <info>{path}</info>?",
+            f"Remove environment <info>{Formatter.escape(name)}</info> "
+            f"at <info>{Formatter.escape(str(path))}</info>?",
             default=False,
         ):
             self.line("Aborted.")
             return 0
         path.unlink()
-        self.line(f"Removed <info>{path}</info>")
+        self.line(f"Removed <info>{Formatter.escape(str(path))}</info>")
         return 0
-
-    def _env_dir(
-        self,
-    ) -> Path:
-        """Locate the .mlclient directory: home when --global, else nearest ancestor."""
-        if self.option("global"):
-            return Path.home() / constants.ML_CLIENT_DIR
-        try:
-            return find_mlclient_directory(Path.cwd())
-        except MLClientDirectoryNotFoundError:
-            return Path.cwd() / constants.ML_CLIENT_DIR
-
-
-def _env_names(
-    directory: Path,
-) -> list[str]:
-    """List environment names from the .mlclient directory's config files."""
-    return sorted(
-        path.name.removeprefix(_FILE_PREFIX).removesuffix(_FILE_SUFFIX)
-        for path in directory.glob(f"{_FILE_PREFIX}*{_FILE_SUFFIX}")
-    )
-
-
-def _unknown_env_message(
-    name: str,
-    directory: Path,
-) -> str:
-    """Report the unknown environment, listing the ones that do exist."""
-    names = _env_names(directory)
-    available = f" Available: {', '.join(names)}." if names else ""
-    return f"No environment [{name}] in {directory}.{available}"

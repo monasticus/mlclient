@@ -148,11 +148,12 @@ class EnvShowCommand(Command):
         directory = resolve_env_dir(self)
         names = env_names(directory)
         if not names:
-            self.line(f"No environments found in <info>{directory}</info>")
+            directory_name = Formatter.escape(str(directory))
+            self.line(f"No environments found in <info>{directory_name}</info>")
             return 0
         announce_source(self, directory, directory)
         for name in names:
-            self.line(name)
+            self.line(Formatter.escape(name))
         return 0
 
     def _show(
@@ -168,10 +169,10 @@ class EnvShowCommand(Command):
             self.line(Formatter.escape(path.read_text().rstrip("\n")))
             return 0
         announce_source(self, directory, path)
+        config = read_config(path)
         if self.option("defaults"):
-            config, servers = effective_config(path)
+            config, servers = effective_config(path, config)
         else:
-            config = read_config(path)
             servers = config.pop(APP_SERVERS_KEY, None) or []
         reveal = self.option("secrets")
         setting = self.argument("setting")
@@ -204,7 +205,7 @@ class EnvShowCommand(Command):
             )
             self._copy_setting(setting, server)
             return 0
-        message = f"No setting [{setting}]."
+        message = Formatter.escape(f"No setting [{setting}].")
         raise WrongParametersError(message)
 
     def _copy_setting(self, setting: str, value: object) -> None:
@@ -324,7 +325,7 @@ def _styled_value(
     reveal: bool = False,
 ) -> str:
     """Colour a setting value by its meaning, masking secrets."""
-    text = display_value(setting, value, reveal=reveal)
+    text = Formatter.escape(display_value(setting, value, reveal=reveal))
     if is_secret(setting) and value is not None:
         return f"<fg=red>{text}</>"
     if value is None:

@@ -7,9 +7,11 @@ It exports an implementation for 'env compare' command:
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from cleo.commands.command import Command
+from cleo.formatters.formatter import Formatter
 from cleo.helpers import argument, option
 from cleo.io.inputs.argument import Argument
 from cleo.io.inputs.option import Option
@@ -45,8 +47,8 @@ class EnvCompareCommand(Command):
     default that differs from what another environment set is blue; an explicit
     value that differs is yellow. A value an environment left to its default is
     tagged with an italic ``(default)``. A setting left to its default
-    everywhere is dropped unless ``--defaults`` asks for it. Secrets are masked
-    unless ``--secrets`` is passed; comparison still uses the real values, so
+    everywhere is dropped when equal unless ``--defaults`` asks for it. Secrets
+    are masked unless ``--secrets`` is passed; comparison uses the real values, so
     differing secrets show as differing even while masked. With no names every
     environment in the directory is compared; ``--exclude`` drops named
     environments from that set. Each app server gets its own table, matched by
@@ -71,9 +73,7 @@ class EnvCompareCommand(Command):
     """
 
     name: str = "env compare"
-    description: str = (
-        "Compares settings across MLClient environments side by side"
-    )
+    description: str = "Compares settings across MLClient environments side by side"
     arguments: list[Argument] = [
         argument(
             "names",
@@ -116,7 +116,8 @@ class EnvCompareCommand(Command):
         excluded = set(self.option("exclude"))
         names = [name for name in names if name not in excluded]
         if not names:
-            self.line(f"No environments found in <info>{directory}</info>")
+            directory_name = Formatter.escape(str(directory))
+            self.line(f"No environments found in <info>{directory_name}</info>")
             return 0
         views = self._load(directory, names)
         announce_source(self, directory, directory)
@@ -149,15 +150,21 @@ class EnvCompareCommand(Command):
         roots = {name: views[name].root for name in names}
         root_explicit = {name: views[name].root_explicit for name in names}
         self._render_table(
-            title("Environments"), roots, root_explicit,
-            reveal=reveal, show_defaults=show_defaults,
+            title("Environments"),
+            roots,
+            root_explicit,
+            reveal=reveal,
+            show_defaults=show_defaults,
         )
         for server_id in _server_ids(names, views):
             values = {name: views[name].server_values(server_id) for name in names}
             explicit = {name: views[name].server_explicit(server_id) for name in names}
             self._render_table(
-                title(server_id), values, explicit,
-                reveal=reveal, show_defaults=show_defaults,
+                title(server_id),
+                values,
+                explicit,
+                reveal=reveal,
+                show_defaults=show_defaults,
             )
 
     def _render_table(
@@ -171,13 +178,16 @@ class EnvCompareCommand(Command):
     ) -> None:
         """Render one row per setting, one column per environment.
 
-        A setting left to its default in every environment carries no
-        comparison and is dropped unless kept by ``show_defaults``; a table with
-        no rows left is not rendered.
+        Equal settings left to defaults in every environment are dropped unless
+        kept by ``show_defaults``. Differing inherited values and missing servers
+        remain visible. A table with no rows left is not rendered.
         """
         names = list(values)
         settings = _visible_settings(
-            names, values, explicit, show_defaults=show_defaults,
+            names,
+            values,
+            explicit,
+            show_defaults=show_defaults,
         )
         if not settings:
             return
@@ -200,6 +210,7 @@ class EnvCompareCommand(Command):
         table.render()
 
 
+@dataclass
 class _EnvView:
     """An environment's effective settings and which ones the user set explicitly.
 
@@ -209,15 +220,9 @@ class _EnvView:
     value the user actually wrote.
     """
 
-    def __init__(
-        self,
-        root: dict,
-        root_explicit: set[str],
-        servers: dict[str, _ServerView],
-    ) -> None:
-        self.root = root
-        self.root_explicit = root_explicit
-        self.servers = servers
+    root: dict
+    root_explicit: set[str]
+    servers: dict[str, _ServerView]
 
     def server_values(
         self,
@@ -236,16 +241,12 @@ class _EnvView:
         return server.explicit if server else set()
 
 
+@dataclass
 class _ServerView:
     """One app server's effective settings and the settings the user set."""
 
-    def __init__(
-        self,
-        values: dict,
-        explicit: set[str],
-    ) -> None:
-        self.values = values
-        self.explicit = explicit
+    values: dict
+    explicit: set[str]
 
 
 def _env_view(
@@ -253,7 +254,7 @@ def _env_view(
 ) -> _EnvView:
     """Resolve an environment to effective values, tracking which the user set."""
     raw = read_config(path)
-    root, resolved_servers = effective_config(path)
+    root, resolved_servers = effective_config(path, raw)
     root_explicit = {field for field in raw if field != APP_SERVERS_KEY}
     declared = _declared_servers(raw)
     servers = {}
@@ -279,12 +280,9 @@ def _server_ids(
     views: dict[str, _EnvView],
 ) -> list[str]:
     """Collect every app server id across the environments, keeping first-seen order."""
-    ids: list[str] = []
-    for name in names:
-        for server_id in views[name].servers:
-            if server_id not in ids:
-                ids.append(server_id)
-    return ids
+    return list(
+        dict.fromkeys(server_id for name in names for server_id in views[name].servers),
+    )
 
 
 def _visible_settings(
@@ -294,7 +292,7 @@ def _visible_settings(
     *,
     show_defaults: bool,
 ) -> list[str]:
-    """List the settings worth a row: those set somewhere, or all when asked."""
+    """Keep explicit or differing settings, and all defaults when requested."""
     settings = _union_keys(names, values)
     if show_defaults:
         return settings
@@ -302,6 +300,7 @@ def _visible_settings(
         setting
         for setting in settings
         if any(setting in explicit[name] for name in names)
+        or not _is_identical(setting, names, values)
     ]
 
 
@@ -310,12 +309,7 @@ def _union_keys(
     values: dict[str, dict],
 ) -> list[str]:
     """Collect every setting across the environments, keeping first-seen order."""
-    keys: list[str] = []
-    for name in names:
-        for field in values[name]:
-            if field not in keys:
-                keys.append(field)
-    return keys
+    return list(dict.fromkeys(field for name in names for field in values[name]))
 
 
 def _is_identical(
@@ -348,7 +342,7 @@ def _compare_cell(
     """
     if setting not in values:
         return "<fg=default;options=dark>-</>"
-    text = display_value(setting, values[setting], reveal=reveal)
+    text = Formatter.escape(display_value(setting, values[setting], reveal=reveal))
     if identical:
         color = "green"
     elif default:

@@ -538,3 +538,48 @@ def test_no_root_auth_defaults_to_digest():
         **{"app-name": "app", "app-servers": [{"id": "content", "port": 8100}]},
     )
     assert isinstance(config.provide_config("content").auth, httpx.DigestAuth)
+
+
+@pytest.mark.parametrize(
+    "settings",
+    [
+        {},
+        {"auth": "app"},
+        {"protocol": "https", "ssl": {"verify": False}},
+        {"username": "alice", "app-servers": [{"id": "content", "username": "bob"}]},
+    ],
+)
+def test_provide_config_dict_match_client_configuration(settings):
+    environment = MLEnvironment.model_validate(
+        {
+            "app-servers": [{"id": "content"}],
+            **settings,
+        },
+    )
+
+    inherited = environment.provide_config_dict("content")
+    resolved = environment.provide_config("content")
+
+    for field in ("host", "port", "protocol", "username", "password", "ssl", "cloud"):
+        assert inherited[field] == getattr(resolved, field)
+    assert inherited["auth"] == resolved.auth_method
+
+
+def test_provide_config_dict_are_independent_of_environment():
+    environment = MLEnvironment.model_validate(
+        {
+            "protocol": "https",
+            "ssl": {"verify": "root-ca.pem"},
+            "auth": {"method": "oauth", "token": "original-token"},
+        },
+    )
+
+    inherited = environment.provide_config_dict("app-services")
+    inherited["ssl"].verify = False
+    inherited["auth"].token = "replacement-token"
+    inherited["host"] = "other.example.com"
+
+    later = environment.provide_config_dict("app-services")
+    assert later["ssl"].verify == "root-ca.pem"
+    assert later["auth"].token == "original-token"
+    assert later["host"] == "localhost"

@@ -7,21 +7,19 @@ It exports an implementation for 'env edit' command:
 
 from __future__ import annotations
 
-import os
-import subprocess
-from pathlib import Path
-
 from cleo.commands.command import Command
 from cleo.helpers import argument, option
 from cleo.io.inputs.argument import Argument
 from cleo.io.inputs.option import Option
 
-from mlclient import _constants as constants
-from mlclient.env import find_mlclient_directory
-from mlclient.exceptions import MLClientDirectoryNotFoundError, WrongParametersError
-
-_FILE_PREFIX = "mlclient-"
-_FILE_SUFFIX = ".yaml"
+from mlclient.cli.commands._env_common import (
+    FILE_PREFIX,
+    FILE_SUFFIX,
+    resolve_env_dir,
+    unknown_env_message,
+)
+from mlclient.cli.commands._env_editor import open_in_editor
+from mlclient.exceptions import WrongParametersError
 
 
 class EnvEditCommand(Command):
@@ -65,55 +63,8 @@ class EnvEditCommand(Command):
     ) -> int:
         """Execute the command."""
         name = self.argument("name")
-        directory = self._env_dir()
-        path = directory / f"{_FILE_PREFIX}{name}{_FILE_SUFFIX}"
+        directory = resolve_env_dir(self)
+        path = directory / f"{FILE_PREFIX}{name}{FILE_SUFFIX}"
         if not path.is_file():
-            raise WrongParametersError(_unknown_env_message(name, directory))
+            raise WrongParametersError(unknown_env_message(name, directory))
         return open_in_editor(self, path)
-
-    def _env_dir(
-        self,
-    ) -> Path:
-        """Locate the .mlclient directory: home when --global, else nearest ancestor."""
-        if self.option("global"):
-            return Path.home() / constants.ML_CLIENT_DIR
-        try:
-            return find_mlclient_directory(Path.cwd())
-        except MLClientDirectoryNotFoundError:
-            return Path.cwd() / constants.ML_CLIENT_DIR
-
-
-def open_in_editor(command: Command, path: Path) -> int:
-    """Launch the user's editor on a file, returning the editor's exit status.
-
-    The editor takes over the terminal; the command resumes when it exits. Shared
-    with ``env copy --edit`` so both open a file the same way.
-    """
-    editor = _editor()
-    command.line(f"Opening <info>{path}</info> in <info>{editor}</info>...")
-    return subprocess.call([editor, str(path)])
-
-
-def _editor() -> str:
-    """Pick the editor from $VISUAL, then $EDITOR, falling back to vi."""
-    return os.environ.get("VISUAL") or os.environ.get("EDITOR") or "vi"
-
-
-def _env_names(
-    directory: Path,
-) -> list[str]:
-    """List environment names from the .mlclient directory's config files."""
-    return sorted(
-        path.name.removeprefix(_FILE_PREFIX).removesuffix(_FILE_SUFFIX)
-        for path in directory.glob(f"{_FILE_PREFIX}*{_FILE_SUFFIX}")
-    )
-
-
-def _unknown_env_message(
-    name: str,
-    directory: Path,
-) -> str:
-    """Report the unknown environment, listing the ones that do exist."""
-    names = _env_names(directory)
-    available = f" Available: {', '.join(names)}." if names else ""
-    return f"No environment [{name}] in {directory}.{available}"

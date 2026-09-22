@@ -337,6 +337,15 @@ env = MLEnvironment.load_file("path/to/mlclient-local.yaml")
 config = env.provide_config("app-services")
 ```
 
+For inspection before constructing authentication handlers, use
+`env.provide_config_dict("app-services")`. This returns the inherited keyword
+arguments for `HTTPConfig.resolve`, including default ports and merged SSL
+settings. The mapping and its nested models are independent copies. It preserves
+explicit `auth=None` and does not need Kerberos tooling
+or local certificate files. The mapping contains unmasked credentials and model
+objects such as `SSLConfig`; it is not a redacted display or a YAML serialization.
+Transport/authentication compatibility is checked by `provide_config()`.
+
 `provide_config()` resolves one server's YAML configuration. To also apply
 manager/factory overrides and server-kind HTTP defaults without opening a
 connection, use `manager.get_config("app-services", timeout=10)`.

@@ -49,13 +49,24 @@ ml env show local --raw
 
 ### `--secrets`, `-s`
 
-Reveal secrets in formatted output. Without this option, passwords and API keys
-are masked, including values inside mappings and lists.
+Reveal secrets in formatted output. Without this option, passwords, OAuth tokens,
+API keys and TLS key passwords are masked, including values inside mappings and
+lists.
 
 ### `--defaults`, `-d`
 
-Fill in settings inherited from the defaults and the always-present platform app
-servers, rather than showing only what the file sets.
+Fill in root defaults and resolve server inheritance, including default ports,
+fieldwise SSL settings and the always-present platform app servers. Explicit
+`auth: null` and `auth: app` display as `app`.
+
+```sh
+ml env show local content --defaults
+```
+
+This inspects configuration without connecting, loading certificate files or
+requiring Kerberos tooling. Transport/authentication compatibility is validated
+when creating a client. Without `--defaults`, the command keeps showing the raw
+fields, including incomplete configurations and unknown keys.
 
 ### `--copy`, `-c`
 
@@ -87,3 +98,7 @@ See also [global options](../../cli.md#global-options).
 An empty file renders as an empty environment. Otherwise, YAML must contain a
 mapping. `app-servers` may be omitted, null or a list of mappings with non-empty
 `id` values. Errors name the file without printing its contents.
+
+With `--defaults`, empty or null YAML uses the environment defaults, and null
+`app-servers` is treated as an empty list. Typed fields are validated; errors
+identify their locations without printing input values, including at `-vvv`.

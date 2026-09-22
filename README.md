@@ -57,6 +57,10 @@ an ongoing goal.
 ```sh
 ml env init                               # Create and review project configuration
 ml env show                               # Inspect environments
+ml env copy local dev                     # Copy a configuration
+ml env edit dev                           # Edit it locally
+ml env compare local dev                  # Compare inherited settings
+ml env remove dev                         # Remove it after confirmation
 ml eval -x '"Hello World!"'               # Evaluate code
 ml http get /v1/documents uri=/doc.json   # Send a raw request
 ml logs -s 8002                           # Read a server's logs

@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import subprocess
+import sys
 from pathlib import Path
 
 import pytest
@@ -46,7 +48,11 @@ def test_marks_identical_explicit_values_green() -> None:
 
     assert _is_identical("protocol", ["dev", "test"], configs) is True
     cell = _compare_cell(
-        "protocol", configs["dev"], default=False, reveal=False, identical=True,
+        "protocol",
+        configs["dev"],
+        default=False,
+        reveal=False,
+        identical=True,
     )
     assert cell == "<fg=green>https</>"
 
@@ -56,21 +62,33 @@ def test_marks_differing_values_yellow() -> None:
 
     assert _is_identical("host", ["dev", "test"], configs) is False
     cell = _compare_cell(
-        "host", configs["dev"], default=False, reveal=False, identical=False,
+        "host",
+        configs["dev"],
+        default=False,
+        reveal=False,
+        identical=False,
     )
     assert cell == "<fg=yellow>dev.example.com</>"
 
 
 def test_marks_a_differing_default_blue_and_tags_it() -> None:
     cell = _compare_cell(
-        "port", {"port": 8002}, default=True, reveal=False, identical=False,
+        "port",
+        {"port": 8002},
+        default=True,
+        reveal=False,
+        identical=False,
     )
     assert cell == "<fg=blue>8002</> <options=italic>(default)</>"
 
 
 def test_matching_default_stays_green_and_is_tagged() -> None:
     cell = _compare_cell(
-        "username", {"username": "admin"}, default=True, reveal=False, identical=True,
+        "username",
+        {"username": "admin"},
+        default=True,
+        reveal=False,
+        identical=True,
     )
     assert cell == "<fg=green>admin</> <options=italic>(default)</>"
 
@@ -79,9 +97,16 @@ def test_missing_setting_is_not_identical_and_renders_dash() -> None:
     configs = {"dev": {"host": "dev.example.com"}, "test": {}}
 
     assert _is_identical("host", ["dev", "test"], configs) is False
-    assert _compare_cell(
-        "host", configs["test"], default=True, reveal=False, identical=False,
-    ) == "<fg=default;options=dark>-</>"
+    assert (
+        _compare_cell(
+            "host",
+            configs["test"],
+            default=True,
+            reveal=False,
+            identical=False,
+        )
+        == "<fg=default;options=dark>-</>"
+    )
 
 
 def test_union_keeps_first_seen_order() -> None:
@@ -202,8 +227,8 @@ def test_fills_in_default_root_settings_an_environment_leaves_unset() -> None:
 
 
 def test_omits_settings_left_to_their_default_in_every_environment() -> None:
-    _write_env("dev", {"host": "dev.example.com"})
-    _write_env("test", {"host": "test.example.com"})
+    _write_env("dev", {"host": "shared.example.com"})
+    _write_env("test", {"host": "shared.example.com"})
 
     tester = _get_tester()
     tester.execute("dev test")
@@ -305,3 +330,241 @@ def test_reports_no_environments_when_directory_empty() -> None:
 
     assert tester.status_code == 0
     assert "No environments found" in tester.io.fetch_output()
+
+
+# --- secrets and literal output ---
+
+
+@pytest.mark.parametrize("flag", ["", "-s", "--secrets"])
+@pytest.mark.parametrize("server", [False, True])
+def test_masks_supported_secrets(flag, server):
+    settings = {
+        "password": "private-password",
+        "auth": {"method": "oauth", "token": "private-token"},
+        "ssl": {"key_password": "private-key-password"},
+    }
+    config = {"app-servers": [{"id": "content", **settings}]} if server else settings
+    _write_env("dev", config)
+
+    tester = _get_tester()
+    tester.execute(f"dev {flag}")
+
+    assert tester.status_code == 0
+    output = tester.io.fetch_output()
+
+    for secret in ("private-password", "private-token", "private-key-password"):
+        assert (secret in output) is bool(flag)
+
+
+@pytest.mark.parametrize("flag", ["", "--secrets"])
+def test_masks_cloud_api_key(flag):
+    _write_env(
+        "dev", {"cloud": {"api-key": "private-api-key", "base-path": "/endpoint"}},
+    )
+
+    tester = _get_tester()
+    tester.execute(f"dev {flag}")
+
+    assert tester.status_code == 0
+    output = tester.io.fetch_output()
+
+    assert ("private-api-key" in output) is bool(flag)
+
+
+@pytest.mark.parametrize("decorated", [False, True])
+def test_preserves_literal_markup(decorated):
+    _write_env(
+        "<info>dev",
+        {
+            "host": "<info>literal.example.com</info>",
+            "app-servers": [
+                {"id": "<info>content</info>", "username": "<error>alice</error>"},
+            ],
+        },
+    )
+
+    tester = _get_tester()
+    tester.execute("'<info>dev'", decorated=decorated)
+
+    assert tester.status_code == 0
+    output = tester.io.fetch_output()
+
+    assert "<info>dev" in output
+    assert "<info>content</info>" in output
+    assert "<info>literal.example.com</info>" in output
+    assert "<error>alice</error>" in output
+
+
+@pytest.mark.parametrize(
+    ("other_token", "color"),
+    [("first-token", "32"), ("second-token", "33")],
+)
+def test_comparison_colors_secrets_using_real_values(other_token, color):
+    _write_env("dev", {"auth": {"method": "oauth", "token": "first-token"}})
+    _write_env("other", {"auth": {"method": "oauth", "token": other_token}})
+
+    tester = _get_tester()
+    tester.execute("dev other", decorated=True)
+
+    assert tester.status_code == 0
+    output = tester.io.fetch_output()
+
+    assert "first-token" not in output
+    assert "second-token" not in output
+    assert output.count(f"\x1b[{color}mmethod=oauth, token=****, service=HTTP") == 2
+
+
+# --- defaults and inheritance ---
+
+
+@pytest.mark.parametrize("content", ["", "# Empty\n", "null\n", "app-servers: null\n"])
+def test_empty_environment_resolves_defaults(content):
+    path = _write_env("dev", {})
+    path.write_text(content)
+
+    tester = _get_tester()
+    tester.execute("dev --defaults")
+
+    assert tester.status_code == 0
+    output = tester.io.fetch_output()
+
+    assert "localhost" in output
+    assert "app-services" in output
+    assert "8002" in output
+
+
+def test_comparison_reads_each_environment_once(mocker):
+    path = _write_env("dev", {"host": "dev.example.com"})
+    read = mocker.spy(Path, "open")
+
+    tester = _get_tester()
+    tester.execute("dev")
+
+    assert tester.status_code == 0
+
+    reads = [call for call in read.call_args_list if call.args[0] == path]
+    assert len(reads) == 1
+
+
+def test_comparison_matches_inherited_values_to_explicit_values():
+    _write_env("dev", {"username": "alice", "app-servers": [{"id": "content"}]})
+    _write_env(
+        "other",
+        {
+            "username": "alice",
+            "app-servers": [{"id": "content", "port": 8000, "username": "alice"}],
+        },
+    )
+
+    tester = _get_tester()
+    tester.execute("dev other", decorated=True)
+
+    assert tester.status_code == 0
+    output = tester.io.fetch_output()
+    content = output[output.index("content") :]
+
+    assert content.count("\x1b[32malice\x1b[39m") == 2
+    assert content.count("\x1b[32m8000\x1b[39m") == 2
+    assert "(default)" in content
+
+
+def test_compare_distinguishes_no_auth_from_inherited_auth():
+    _write_env("dev", {"app-servers": [{"id": "content", "auth": "app"}]})
+    _write_env("other", {"app-servers": [{"id": "content"}]})
+
+    tester = _get_tester()
+    tester.execute("dev other", decorated=True)
+
+    assert tester.status_code == 0
+    output = tester.io.fetch_output()
+
+    assert "\x1b[33mapp\x1b[39m" in output
+    assert "\x1b[34mdigest\x1b[39m" in output
+
+
+def test_comparison_keeps_differing_inherited_settings():
+    _write_env("dev", {"username": "alice", "app-servers": [{"id": "content"}]})
+    _write_env("other", {"username": "bob", "app-servers": [{"id": "content"}]})
+
+    tester = _get_tester()
+    tester.execute("dev other", decorated=True)
+
+    assert tester.status_code == 0
+    output = tester.io.fetch_output()
+    content = output[output.index("content") :]
+
+    assert "\x1b[34malice\x1b[39m" in content
+    assert "\x1b[34mbob\x1b[39m" in content
+
+
+def test_comparison_keeps_server_present_only_as_an_id():
+    _write_env("dev", {"app-servers": [{"id": "content"}]})
+    _write_env("other", {})
+
+    tester = _get_tester()
+    tester.execute("dev other")
+
+    assert tester.status_code == 0
+    output = tester.io.fetch_output()
+
+    assert "content" in output
+    assert "8000 (default)" in output
+
+
+# --- safe error reporting ---
+
+
+@pytest.mark.parametrize("verbosity", ["", "-vvv"])
+def test_invalid_config_errors_do_not_disclose_input(verbosity):
+    path = _write_env(
+        "dev",
+        {
+            "auth": {"method": "oauth", "token": "private-token", "hostname": []},
+        },
+    )
+    arguments = ["env", "compare", "dev", "--no-ansi"]
+    if verbosity:
+        arguments.append(verbosity)
+
+    result = subprocess.run(
+        [sys.executable, "-c", "from mlclient.cli import main; main()", *arguments],
+        capture_output=True,
+        text=True,
+        check=False,
+        timeout=10,
+    )
+
+    output = result.stdout + result.stderr
+    assert result.returncode != 0
+    assert path.name in output
+    assert "hostname" in output
+    assert "private-token" not in output
+    assert "input_value" not in output
+
+
+def test_invalid_yaml_errors_do_not_disclose_input_at_debug_verbosity():
+    path = _write_env("dev", {})
+    path.write_text("password: [private-password")
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-c",
+            "from mlclient.cli import main; main()",
+            "env",
+            "compare",
+            "dev",
+            "--no-ansi",
+            "-vvv",
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+        timeout=10,
+    )
+
+    output = result.stdout + result.stderr
+    assert result.returncode != 0
+    assert path.name in output
+    assert "Invalid YAML" in output
+    assert "private-password" not in output

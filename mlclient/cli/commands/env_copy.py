@@ -7,24 +7,25 @@ It exports an implementation for 'env copy' command:
 
 from __future__ import annotations
 
+import shutil
+import stat
+import tempfile
 from pathlib import Path
 
 from cleo.commands.command import Command
+from cleo.formatters.formatter import Formatter
 from cleo.helpers import argument, option
 from cleo.io.inputs.argument import Argument
 from cleo.io.inputs.option import Option
 
-from mlclient import _constants as constants
-from mlclient.cli.commands.env_edit import open_in_editor
-from mlclient.env import find_mlclient_directory
-from mlclient.exceptions import (
-    EnvironmentFileExistsError,
-    MLClientDirectoryNotFoundError,
-    WrongParametersError,
+from mlclient.cli.commands._env_common import (
+    FILE_PREFIX,
+    FILE_SUFFIX,
+    resolve_env_dir,
+    unknown_env_message,
 )
-
-_FILE_PREFIX = "mlclient-"
-_FILE_SUFFIX = ".yaml"
+from mlclient.cli.commands._env_editor import open_in_editor
+from mlclient.exceptions import EnvironmentFileExistsError, WrongParametersError
 
 
 class EnvCopyCommand(Command):
@@ -86,48 +87,57 @@ class EnvCopyCommand(Command):
         """Execute the command."""
         source = self.argument("source")
         target = self.argument("target")
-        directory = self._env_dir()
-        source_path = directory / f"{_FILE_PREFIX}{source}{_FILE_SUFFIX}"
+        directory = resolve_env_dir(self)
+        source_path = directory / f"{FILE_PREFIX}{source}{FILE_SUFFIX}"
         if not source_path.is_file():
-            raise WrongParametersError(_unknown_env_message(source, directory))
-        target_path = directory / f"{_FILE_PREFIX}{target}{_FILE_SUFFIX}"
-        if target_path.exists() and not self.option("force"):
-            raise EnvironmentFileExistsError(target_path.as_posix())
-        target_path.write_text(source_path.read_text())
+            raise WrongParametersError(unknown_env_message(source, directory))
+        target_path = directory / f"{FILE_PREFIX}{target}{FILE_SUFFIX}"
+        _copy_environment(source_path, target_path, force=self.option("force"))
         self.line(
-            f"Copied <info>{source}</info> to <info>{target_path.as_posix()}</info>",
+            f"Copied <info>{Formatter.escape(source)}</info> "
+            f"to <info>{Formatter.escape(target_path.as_posix())}</info>",
         )
         if self.option("edit"):
             return open_in_editor(self, target_path)
         return 0
 
-    def _env_dir(
-        self,
-    ) -> Path:
-        """Locate the .mlclient directory: home when --global, else nearest ancestor."""
-        if self.option("global"):
-            return Path.home() / constants.ML_CLIENT_DIR
-        try:
-            return find_mlclient_directory(Path.cwd())
-        except MLClientDirectoryNotFoundError:
-            return Path.cwd() / constants.ML_CLIENT_DIR
 
+def _copy_environment(source: Path, target: Path, *, force: bool) -> None:
+    """Publish a complete byte-for-byte copy without broadening permissions.
 
-def _env_names(
-    directory: Path,
-) -> list[str]:
-    """List environment names from the .mlclient directory's config files."""
-    return sorted(
-        path.name.removeprefix(_FILE_PREFIX).removesuffix(_FILE_SUFFIX)
-        for path in directory.glob(f"{_FILE_PREFIX}*{_FILE_SUFFIX}")
-    )
+    Parameters
+    ----------
+    source : Path
+        Existing configuration to copy.
+    target : Path
+        Destination in the same environment directory.
+    force : bool
+        Replace an existing target atomically. Its permissions are retained
+        when stricter than the source permissions.
 
-
-def _unknown_env_message(
-    name: str,
-    directory: Path,
-) -> str:
-    """Report the unknown environment, listing the ones that do exist."""
-    names = _env_names(directory)
-    available = f" Available: {', '.join(names)}." if names else ""
-    return f"No environment [{name}] in {directory}.{available}"
+    Raises
+    ------
+    EnvironmentFileExistsError
+        If a target already exists and force is false.
+    OSError
+        If reading, writing or publishing fails. An existing target is preserved.
+    """
+    mode = stat.S_IMODE(source.stat().st_mode)
+    if force and target.exists():
+        mode &= stat.S_IMODE(target.stat().st_mode)
+    with tempfile.TemporaryDirectory(
+        dir=target.parent,
+        prefix=".mlclient-copy-",
+    ) as scratch:
+        pending = Path(scratch) / target.name
+        shutil.copyfile(source, pending)
+        pending.chmod(mode)
+        if force:
+            pending.replace(target)
+        else:
+            try:
+                target.hardlink_to(pending)
+            except FileExistsError:
+                raise EnvironmentFileExistsError(
+                    Formatter.escape(target.as_posix()),
+                ) from None

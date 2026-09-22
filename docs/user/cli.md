@@ -28,6 +28,18 @@ needs permission to read server configuration. One environment can contain many
 App Server entries; review the discovered identifiers before using them.
 See [env init](cli/env/init.md) for discovery filters and configuration details.
 
+Manage the configuration files with the [env commands](cli/env.md):
+
+```sh
+ml env copy local dev
+ml env edit dev
+ml env compare local dev
+ml env remove dev
+```
+
+These commands work on local files; they do not deploy or change a MarkLogic
+server. Removal asks for confirmation.
+
 ## Run everyday commands
 
 ```sh

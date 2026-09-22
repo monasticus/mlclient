@@ -78,6 +78,16 @@ def test_force_removes_without_prompt() -> None:
     assert "Removed" in tester.io.fetch_output()
 
 
+def test_noninteractive_remove_without_force_keeps_file() -> None:
+    path = _write_env("dev", {"host": "dev.example.com"})
+    tester = _get_tester()
+
+    tester.execute("dev", interactive=False)
+
+    assert path.exists()
+    assert "Aborted." in tester.io.fetch_output()
+
+
 # --- directory resolution (consistent with env show) ---
 
 

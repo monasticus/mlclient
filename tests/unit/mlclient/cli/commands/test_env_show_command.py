@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import subprocess
+import sys
 from pathlib import Path
 from unittest.mock import Mock
 
@@ -10,6 +11,7 @@ from cleo.testers.command_tester import CommandTester
 from pytest_mock import MockerFixture
 
 from mlclient.cli import MLCLIentApplication
+from mlclient.env import MLEnvironment
 from mlclient.exceptions import WrongParametersError
 
 
@@ -34,10 +36,12 @@ def _get_tester() -> CommandTester:
     return CommandTester(app.find("env show"))
 
 
-def _write_env(name: str, config: dict) -> None:
+def _write_env(name: str, config: dict) -> Path:
     directory = Path.cwd() / ".mlclient"
     directory.mkdir(exist_ok=True)
-    (directory / f"mlclient-{name}.yaml").write_text(yaml.safe_dump(config))
+    path = directory / f"mlclient-{name}.yaml"
+    path.write_text(yaml.safe_dump(config))
+    return path
 
 
 def test_lists_environments_when_no_name() -> None:
@@ -751,3 +755,234 @@ def test_defaults_fills_in_inherited_settings_and_platform_servers() -> None:
     assert "admin" in output
     for server_id in ("app-services", "manage", "health"):
         assert server_id in output
+
+
+# --- secrets and literal output ---
+
+
+@pytest.mark.parametrize("flag", ["", "-s", "--secrets"])
+@pytest.mark.parametrize("server", [False, True])
+def test_masks_supported_secrets(flag, server):
+    settings = {
+        "password": "private-password",
+        "auth": {"method": "oauth", "token": "private-token"},
+        "ssl": {"key_password": "private-key-password"},
+    }
+    config = {"app-servers": [{"id": "content", **settings}]} if server else settings
+    _write_env("dev", config)
+
+    tester = _get_tester()
+    tester.execute(f"dev {flag}")
+
+    assert tester.status_code == 0
+    output = tester.io.fetch_output()
+
+    for secret in ("private-password", "private-token", "private-key-password"):
+        assert (secret in output) is bool(flag)
+
+
+@pytest.mark.parametrize("flag", ["", "--secrets"])
+def test_masks_cloud_api_key(flag):
+    _write_env(
+        "dev", {"cloud": {"api-key": "private-api-key", "base-path": "/endpoint"}},
+    )
+
+    tester = _get_tester()
+    tester.execute(f"dev {flag}")
+
+    assert tester.status_code == 0
+    output = tester.io.fetch_output()
+
+    assert ("private-api-key" in output) is bool(flag)
+
+
+@pytest.mark.parametrize("decorated", [False, True])
+def test_preserves_literal_markup(decorated):
+    _write_env(
+        "<info>dev",
+        {
+            "host": "<info>literal.example.com</info>",
+            "app-servers": [
+                {"id": "<info>content</info>", "username": "<error>alice</error>"},
+            ],
+        },
+    )
+
+    tester = _get_tester()
+    tester.execute("'<info>dev'", decorated=decorated)
+
+    assert tester.status_code == 0
+    output = tester.io.fetch_output()
+
+    assert "<info>dev" in output
+    assert "<info>content</info>" in output
+    assert "<info>literal.example.com</info>" in output
+    assert "<error>alice</error>" in output
+
+
+def test_show_copies_original_markup_without_escape_characters(mocker):
+    _write_env("dev", {"host": "<info>literal</info>"})
+    copy = mocker.patch("mlclient.cli.commands.env_show._copy_to_clipboard")
+
+    tester = _get_tester()
+    tester.execute("dev host --copy")
+
+    assert tester.status_code == 0
+    output = tester.io.fetch_output()
+
+    assert output.startswith("<info>literal</info>\n")
+    copy.assert_called_once_with("<info>literal</info>")
+
+
+# --- defaults and inheritance ---
+
+
+@pytest.mark.parametrize("content", ["", "# Empty\n", "null\n", "app-servers: null\n"])
+def test_empty_environment_resolves_defaults(content):
+    path = _write_env("dev", {})
+    path.write_text(content)
+
+    tester = _get_tester()
+    tester.execute("dev --defaults")
+
+    assert tester.status_code == 0
+    output = tester.io.fetch_output()
+
+    assert "localhost" in output
+    assert "app-services" in output
+    assert "8002" in output
+
+
+def test_show_defaults_resolves_server_inheritance():
+    config = {"username": "alice", "app-servers": [{"id": "content"}]}
+    _write_env("dev", config)
+    resolved = MLEnvironment.model_validate(config).provide_config("content")
+
+    tester = _get_tester()
+    tester.execute("dev content --defaults")
+
+    assert tester.status_code == 0
+    output = tester.io.fetch_output()
+
+    assert resolved.username in output
+    assert str(resolved.port) in output
+
+
+@pytest.mark.parametrize("auth", [None, "app"])
+def test_show_defaults_preserves_explicit_no_auth(auth):
+    _write_env("dev", {"auth": auth})
+
+    tester = _get_tester()
+    tester.execute("dev auth --defaults")
+
+    assert tester.status_code == 0
+    output = tester.io.fetch_output()
+    assert output == "app\n"
+
+
+def test_show_defaults_merges_ssl_fields_without_loading_certificates():
+    _write_env(
+        "dev",
+        {
+            "protocol": "https",
+            "ssl": {"verify": "root-ca.pem"},
+            "app-servers": [{"id": "content", "ssl": {"cert_file": "client.pem"}}],
+        },
+    )
+
+    tester = _get_tester()
+    tester.execute("dev content --defaults")
+
+    assert tester.status_code == 0
+    output = tester.io.fetch_output()
+
+    assert "verify=root-ca.pem" in output
+    assert "cert_file=client.pem" in output
+
+
+def test_show_defaults_does_not_require_kerberos_tooling(mocker):
+    mocker.patch("mlclient.auth._import_spnego", side_effect=AssertionError)
+    _write_env("dev", {"auth": "kerberos", "app-servers": [{"id": "content"}]})
+
+    tester = _get_tester()
+    tester.execute("dev content --defaults")
+
+    assert tester.status_code == 0
+    output = tester.io.fetch_output()
+
+    assert "kerberos" in output
+
+
+def test_show_defaults_displays_cloud_gateway_defaults():
+    _write_env(
+        "dev", {"cloud": {"api-key": "private-api-key", "base-path": "/endpoint"}},
+    )
+
+    tester = _get_tester()
+    tester.execute("dev app-services --defaults")
+
+    assert tester.status_code == 0
+    output = tester.io.fetch_output()
+
+    assert "https" in output
+    assert "443" in output
+    assert "private-api-key" not in output
+
+
+# --- safe error reporting ---
+
+
+@pytest.mark.parametrize("verbosity", ["", "-vvv"])
+def test_invalid_config_errors_do_not_disclose_input(verbosity):
+    path = _write_env(
+        "dev",
+        {
+            "auth": {"method": "oauth", "token": "private-token", "hostname": []},
+        },
+    )
+    arguments = ["env", "show", "dev", "--no-ansi", "--defaults"]
+    if verbosity:
+        arguments.append(verbosity)
+
+    result = subprocess.run(
+        [sys.executable, "-c", "from mlclient.cli import main; main()", *arguments],
+        capture_output=True,
+        text=True,
+        check=False,
+        timeout=10,
+    )
+
+    output = result.stdout + result.stderr
+    assert result.returncode != 0
+    assert path.name in output
+    assert "hostname" in output
+    assert "private-token" not in output
+    assert "input_value" not in output
+
+
+def test_invalid_yaml_errors_do_not_disclose_input_at_debug_verbosity():
+    path = _write_env("dev", {})
+    path.write_text("password: [private-password")
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-c",
+            "from mlclient.cli import main; main()",
+            "env",
+            "show",
+            "dev",
+            "--no-ansi",
+            "-vvv",
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+        timeout=10,
+    )
+
+    output = result.stdout + result.stderr
+    assert result.returncode != 0
+    assert path.name in output
+    assert "Invalid YAML" in output
+    assert "private-password" not in output

@@ -13,6 +13,12 @@ or the home directory with `--global`. It writes the source file verbatim -
 comments included - to `mlclient-<target>.yaml` beside it, then leaves both files
 in place for you to tweak the copy.
 
+Copying preserves bytes, including line endings, and source file permissions.
+When replacing a target, permissions are restricted to those allowed by both
+files. The completed copy is published atomically; a failed copy leaves an
+existing target unchanged. `--force` replaces a target symlink itself rather
+than writing through it.
+
 ## Arguments
 
 ### `source`

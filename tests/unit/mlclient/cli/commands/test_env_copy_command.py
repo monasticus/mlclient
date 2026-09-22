@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import os
+import stat
 from pathlib import Path
 from unittest.mock import Mock
 
@@ -26,7 +28,7 @@ def editor_call(mocker: MockerFixture, monkeypatch: pytest.MonkeyPatch) -> Mock:
     monkeypatch.delenv("VISUAL", raising=False)
     monkeypatch.delenv("EDITOR", raising=False)
     return mocker.patch(
-        "mlclient.cli.commands.env_edit.subprocess.call",
+        "mlclient.cli.commands._env_editor.subprocess.call",
         return_value=0,
     )
 
@@ -188,3 +190,69 @@ def test_without_edit_flag_does_not_open_editor(editor_call: Mock) -> None:
     tester.execute("prod prod-test")
 
     editor_call.assert_not_called()
+
+
+def test_copy_preserves_bytes():
+    source = _write_env("prod", {})
+    content = b"# Windows line endings\r\npassword: private-value\r\n"
+    source.write_bytes(content)
+
+    _get_tester().execute("prod copy")
+
+    assert source.with_name("mlclient-copy.yaml").read_bytes() == content
+
+
+@pytest.mark.skipif(os.name == "nt", reason="POSIX file permissions")
+@pytest.mark.parametrize(
+    ("source_mode", "target_mode"),
+    [(0o600, None), (0o600, 0o644), (0o644, 0o600)],
+)
+def test_copy_does_not_broaden_permissions(source_mode, target_mode):
+    source = _write_env("prod", {"password": "private-value"})
+    source.chmod(source_mode)
+    target = source.with_name("mlclient-copy.yaml")
+    if target_mode is not None:
+        target.write_text("old")
+        target.chmod(target_mode)
+    previous = os.umask(0o022)
+    try:
+        _get_tester().execute(
+            "prod copy" + (" --force" if target_mode is not None else ""),
+        )
+    finally:
+        os.umask(previous)
+
+    expected = source_mode if target_mode is None else source_mode & target_mode
+    assert stat.S_IMODE(target.stat().st_mode) == expected
+    assert target.read_bytes() == source.read_bytes()
+
+
+def test_failed_copy_keeps_existing_target_and_cleans_temporary_files(mocker):
+    _write_env("prod", {"host": "prod.example.com"})
+    target = _write_env("copy", {"host": "old.example.com"})
+    mocker.patch(
+        "mlclient.cli.commands.env_copy.shutil.copyfile",
+        side_effect=OSError("disk full"),
+    )
+
+    with pytest.raises(OSError, match="disk full"):
+        _get_tester().execute("prod copy --force")
+
+    assert "old.example.com" in target.read_text()
+    assert sorted(path.name for path in target.parent.iterdir()) == [
+        "mlclient-copy.yaml",
+        "mlclient-prod.yaml",
+    ]
+
+
+def test_copy_rejects_dangling_target_symlink():
+    source = _write_env("prod", {})
+    target = source.with_name("mlclient-copy.yaml")
+    destination = Path.cwd() / "outside.yaml"
+    target.symlink_to(destination)
+
+    with pytest.raises(EnvironmentFileExistsError):
+        _get_tester().execute("prod copy")
+
+    assert target.is_symlink()
+    assert not destination.exists()

@@ -44,10 +44,24 @@ configuration controls where that warning is displayed. Prefer
 ## Supported and tested versions
 
 The unit-test CI matrix covers Python 3.10, 3.11, 3.12, 3.13 and 3.14. The live
-integration setup currently uses MarkLogic 11.2.0. Coverage on that server does
-not establish that every endpoint and authentication combination works on every
-MarkLogic release; check the server's endpoint documentation for version-specific
-requirements.
+integration matrix runs against one pinned image per MarkLogic major line:
+
+| MarkLogic | Docker image tag | Authentication coverage |
+| --- | --- | --- |
+| 10.0-11.1 | `10.0-11.1-ubi-2.2.4` | Credential, application-level, TLS, client certificate and Kerberos; JWT OAuth skipped |
+| 11.3.7 | `11.3.7-ubi-2.3.0` | The same scenarios plus JWT OAuth |
+| 12.1.0 | `12.1.0-ubi-2.3.0` | The same scenarios plus JWT OAuth |
+
+All images use the `progressofficial/marklogic-db` repository. JWT Resource Server
+authentication requires **11.2+**; see [Connection and authentication](user/python/connections.md).
+The Cloud token flow is tested with mocked HTTP responses, not a live Cloud
+deployment. CI requires the provisioned certificates and Kerberos tooling;
+missing prerequisites fail the job instead of silently skipping those scenarios.
+
+These runs validate the integration scenarios on the listed releases. They do
+not establish support for every endpoint, patch release or server configuration.
+MarkLogic 9 is not covered. MLClient does not perform server-version checks when
+constructing a client; configure the server for the transport and auth you use.
 
 ## Release candidates
 

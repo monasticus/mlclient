@@ -7775,16 +7775,28 @@ can change server state. Do not point these tests at production.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>poetry<span class="w"> </span>install<span class="w"> </span>--with<span class="w"> </span>docs<span class="w"> </span>--extras<span class="w"> </span>kerberos
 <a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>docker<span class="w"> </span>compose<span class="w"> </span>-f<span class="w"> </span>tests/integration/docker-compose.yaml<span class="w"> </span>up<span class="w"> </span>-d<span class="w"> </span>--build
 </code></pre></div>
+<p>To test another server release, set <code>MARKLOGIC_IMAGE</code> for the build, for example:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="nv">MARKLOGIC_IMAGE</span><span class="o">=</span>progressofficial/marklogic-db:10.0-11.1-ubi-2.2.4<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">  </span>docker<span class="w"> </span>compose<span class="w"> </span>-f<span class="w"> </span>tests/integration/docker-compose.yaml<span class="w"> </span>up<span class="w"> </span>-d<span class="w"> </span>--build
+</code></pre></div>
+<p>The <a href="https://github.com/monasticus/mlclient/blob/main/docs/stability.md#supported-and-tested-versions">version matrix</a> lists the
+images used in CI. Rebuild the rig after changing its provisioning code or image;
+the provisioner replaces the OAuth configuration with the current server's support
+status, including an explicit unsupported status before MarkLogic 11.2.</p>
 <p>Wait until <code>mlclient_integration</code> reports <code>healthy</code>. The health check confirms
 provisioning, not just an open port:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>docker<span class="w"> </span>inspect<span class="w"> </span>--format<span class="w"> </span><span class="s1">&#39;{{.State.Health.Status}}&#39;</span><span class="w"> </span>mlclient_integration
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="nv">MLCLIENT_IT_CERTS_DIR</span><span class="o">=</span>tests/integration/.certs<span class="w"> </span>poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>tests/integration<span class="w"> </span>-ra
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>docker<span class="w"> </span>inspect<span class="w"> </span>--format<span class="w"> </span><span class="s1">&#39;{{.State.Health.Status}}&#39;</span><span class="w"> </span>mlclient_integration
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="nv">MLCLIENT_IT_FAIL_ON_MISSING_PREREQUISITES</span><span class="o">=</span><span class="m">1</span><span class="w"> </span><span class="nv">MLCLIENT_IT_CERTS_DIR</span><span class="o">=</span>tests/integration/.certs<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">  </span>poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>tests/integration<span class="w"> </span>-ra
 </code></pre></div>
-<p>Review skips: missing certificates, OAuth configuration or Kerberos tooling can
-skip authentication scenarios. Record what ran and what was unavailable in the
-PR. See <code>.github/workflows/integration-test.yml</code> for the CI provisioning flow.
+<p><code>MLCLIENT_IT_FAIL_ON_MISSING_PREREQUISITES=1</code>, also set in CI, makes missing certificates or Kerberos
+tooling fail instead of skipping. Without it, tests requiring an unavailable
+local rig may skip. Missing or malformed auth configuration in a provisioned rig
+is always an error; only explicitly unsupported JWT OAuth (before 11.2) skips its
+scenario. Review the <code>-ra</code> skip summary and record what ran in the PR.
+See <code>.github/workflows/integration-test.yml</code> for the CI provisioning flow.
 When finished, stop the test containers:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>docker<span class="w"> </span>compose<span class="w"> </span>-f<span class="w"> </span>tests/integration/docker-compose.yaml<span class="w"> </span>down
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>docker<span class="w"> </span>compose<span class="w"> </span>-f<span class="w"> </span>tests/integration/docker-compose.yaml<span class="w"> </span>down
 </code></pre></div>
 <p>Live tests must restore changed settings and delete test data in <code>finally</code>
 blocks. Use generic names and dedicated test resources. Add live scenarios when
@@ -7851,8 +7863,8 @@ under <code>docs/user/python/</code>, and the command
 pages under <code>docs/user/cli/</code>. Keep README examples aligned with Home. Register
 new guide pages in <code>mkdocs.yml</code>; API pages are generated from canonical public exports
 and NumPy docstrings, including Pydantic fields and schemas.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>make<span class="w"> </span>docs-serve
-<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>make<span class="w"> </span>docs-build
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>make<span class="w"> </span>docs-serve
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>make<span class="w"> </span>docs-build
 </code></pre></div>
 <p><code>make docs-build</code> runs a strict MkDocs build and checks generated pages, links,
 anchors and representative API rendering. Do not commit <code>site/</code> or generated

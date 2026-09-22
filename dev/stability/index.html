@@ -7386,10 +7386,42 @@ configuration controls where that warning is displayed. Prefer
 <code>MLClient.documents</code> or <code>AsyncMLClient.documents</code> for stable document operations.</p>
 <h2 id="supported-and-tested-versions">Supported and tested versions<a class="headerlink" href="#supported-and-tested-versions" title="Permanent link">&para;</a></h2>
 <p>The unit-test CI matrix covers Python 3.10, 3.11, 3.12, 3.13 and 3.14. The live
-integration setup currently uses MarkLogic 11.2.0. Coverage on that server does
-not establish that every endpoint and authentication combination works on every
-MarkLogic release; check the server's endpoint documentation for version-specific
-requirements.</p>
+integration matrix runs against one pinned image per MarkLogic major line:</p>
+<table>
+<thead>
+<tr>
+<th>MarkLogic</th>
+<th>Docker image tag</th>
+<th>Authentication coverage</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>10.0-11.1</td>
+<td><code>10.0-11.1-ubi-2.2.4</code></td>
+<td>Credential, application-level, TLS, client certificate and Kerberos; JWT OAuth skipped</td>
+</tr>
+<tr>
+<td>11.3.7</td>
+<td><code>11.3.7-ubi-2.3.0</code></td>
+<td>The same scenarios plus JWT OAuth</td>
+</tr>
+<tr>
+<td>12.1.0</td>
+<td><code>12.1.0-ubi-2.3.0</code></td>
+<td>The same scenarios plus JWT OAuth</td>
+</tr>
+</tbody>
+</table>
+<p>All images use the <code>progressofficial/marklogic-db</code> repository. JWT Resource Server
+authentication requires <strong>11.2+</strong>; see <a href="../user/python/connections/">Connection and authentication</a>.
+The Cloud token flow is tested with mocked HTTP responses, not a live Cloud
+deployment. CI requires the provisioned certificates and Kerberos tooling;
+missing prerequisites fail the job instead of silently skipping those scenarios.</p>
+<p>These runs validate the integration scenarios on the listed releases. They do
+not establish support for every endpoint, patch release or server configuration.
+MarkLogic 9 is not covered. MLClient does not perform server-version checks when
+constructing a client; configure the server for the transport and auth you use.</p>
 <h2 id="release-candidates">Release candidates<a class="headerlink" href="#release-candidates" title="Permanent link">&para;</a></h2>
 <p>Versions use bare numeric tags, such as <code>1.0.0</code>, without a <code>v</code> prefix. Candidates
 use PEP 440 suffixes such as <code>1.0.0rc1</code> or <code>1.0.0b1</code>:</p>

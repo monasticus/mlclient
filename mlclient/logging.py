@@ -1,5 +1,7 @@
 """Opt-in logging configuration for MLClient applications."""
 
+from __future__ import annotations
+
 import logging.config
 
 import yaml

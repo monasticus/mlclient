@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import httpx
 import pytest
 import pytest_asyncio
 import respx
@@ -19,6 +20,22 @@ from tests.utils.ml_mockers import MLRespXMocker
 async def svc():
     async with AsyncMLClient() as ml:
         yield ml.eval
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_eval_preserves_bodyless_http_failure(svc):
+    route = respx.post(
+        "http://localhost:8000/v1/eval",
+        data={"xquery": "1"},
+    ).respond(403)
+
+    with pytest.raises(httpx.HTTPStatusError) as raised:
+        await svc.xquery("1")
+
+    assert route.call_count == 1
+    assert raised.value.response.url == route.calls.last.request.url
+    assert raised.value.response.status_code == 403
 
 
 @pytest.mark.asyncio

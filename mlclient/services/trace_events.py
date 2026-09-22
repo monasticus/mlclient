@@ -8,7 +8,6 @@ connected REST App-Server.
 
 from __future__ import annotations
 
-import logging
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
@@ -19,8 +18,6 @@ if TYPE_CHECKING:
     from httpx import Response
 
     from mlclient.api.rest import RestApi
-
-logger = logging.getLogger(__name__)
 
 _ADMIN_MODULE_IMPORT = (
     'xquery version "1.0-ml"; '
@@ -46,7 +43,7 @@ class TraceEvents:
 
 
 class TraceEventsService:
-    """Read the trace-event state of a group by evaluating the Admin module."""
+    """Read or change a group's trace events through the Admin module."""
 
     def __init__(
         self,
@@ -87,6 +84,10 @@ class TraceEventsService:
         ------
         RequestError
             If HTTP transport fails
+        MarkLogicError
+            If MarkLogic rejects the query or configuration change
+        HTTPStatusError
+            If HTTP fails without a recognized MarkLogic error
         """
         resp = self._eval(self._get_code(), {"group": group}, timeout)
         state = MLResponseParser.parse(resp)
@@ -125,6 +126,10 @@ class TraceEventsService:
         ------
         RequestError
             If HTTP transport fails
+        MarkLogicError
+            If MarkLogic rejects the query or configuration change
+        HTTPStatusError
+            If HTTP fails without a recognized MarkLogic error
         """
         variables = {"group": group, "value": "true" if value else "false"}
         return self._mutate(self._set_activated_code(), variables, group, timeout)
@@ -162,6 +167,10 @@ class TraceEventsService:
         ------
         RequestError
             If HTTP transport fails
+        MarkLogicError
+            If MarkLogic rejects the query or configuration change
+        HTTPStatusError
+            If HTTP fails without a recognized MarkLogic error
         """
         variables = {"group": group, "event": event}
         return self._mutate(self._set_event_code(enabled), variables, group, timeout)
@@ -199,6 +208,10 @@ class TraceEventsService:
         ------
         RequestError
             If HTTP transport fails
+        MarkLogicError
+            If MarkLogic rejects either query
+        HTTPStatusError
+            If either request fails without a recognized MarkLogic error
         """
         self._eval(xquery, variables, timeout)
         return self.get(group=group, timeout=timeout)

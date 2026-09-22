@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import httpx
 import pytest
 import respx
 
@@ -32,6 +33,21 @@ def _setup_and_teardown(ml):
 @pytest.fixture
 def logs(ml) -> LogsService:
     return LogsService(ml.manage)
+
+
+@respx.mock
+def test_get_logs_preserves_bodyless_http_failure(logs):
+    route = respx.get(
+        "http://localhost:8002/manage/v2/logs",
+        params={"format": "json", "filename": "ErrorLog.txt"},
+    ).respond(403)
+
+    with pytest.raises(httpx.HTTPStatusError) as raised:
+        logs.get()
+
+    assert route.call_count == 1
+    assert raised.value.response.url == route.calls.last.request.url
+    assert raised.value.response.status_code == 403
 
 
 @respx.mock

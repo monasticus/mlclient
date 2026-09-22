@@ -91,6 +91,38 @@ level; App Servers have no system log level. Both `get` and `set` accept a
 keyword-only `timeout`. Use the [log-level command](../cli/log-level.md) for
 supported levels and the Management permissions each path needs.
 
+### Trace events
+
+[TraceEventsService][mlclient.services.TraceEventsService] reads and changes
+group diagnostics through the REST server's Admin-module evaluation:
+
+```python
+from mlclient import MLClient
+from mlclient.services import TraceEventsService
+
+with MLClient() as ml:
+    traces = TraceEventsService(ml.rest)
+    state = traces.get(group="Default")
+    print(state.activated, state.events)
+```
+
+The immutable [TraceEvents][mlclient.services.TraceEvents] result contains the
+master `activated` flag and an alphabetically sorted tuple of configured event
+names. `set_event("XDMP Deadlock", enabled=True)` adds an event without changing
+activation; `set_activated(value=True)` changes the master switch without changing
+event membership. Both return the state read after saving. Repeated additions and
+removals are idempotent.
+
+This service is synchronous and needs only `ml.rest`; it does not fall back to
+Manage. All three operations accept keyword-only `group` and `timeout`. A timeout
+override applies independently to the mutation and follow-up read, not to their
+total duration. Omitting it inherits the client timeout; `None` disables it.
+
+Recognized server errors raise `MarkLogicError`; other HTTP failures raise
+`httpx.HTTPStatusError`, and transport errors propagate. A failed read-back does
+not roll back a successful save. See [trace-events](../cli/trace-events.md) for
+permissions and the corresponding CLI workflow.
+
 ## Building your own
 
 To wrap an endpoint no service covers, see

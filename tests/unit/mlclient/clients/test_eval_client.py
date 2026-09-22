@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import httpx
 import pytest
 import respx
 
@@ -28,6 +29,21 @@ def _setup_and_teardown(ml):
     yield
 
     ml.disconnect()
+
+
+@respx.mock
+def test_eval_preserves_bodyless_http_failure(ml):
+    route = respx.post(
+        "http://localhost:8000/v1/eval",
+        data={"xquery": "1"},
+    ).respond(403)
+
+    with pytest.raises(httpx.HTTPStatusError) as raised:
+        ml.eval.xquery("1")
+
+    assert route.call_count == 1
+    assert raised.value.response.url == route.calls.last.request.url
+    assert raised.value.response.status_code == 403
 
 
 @respx.mock

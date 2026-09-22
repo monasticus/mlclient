@@ -26,8 +26,6 @@ _FALSE_TOKENS = frozenset({"false", "off", "0", "no"})
 # Sentinel checkbox value marking the activation toggle apart from event names.
 _ACTIVATION_TOGGLE = object()
 
-# Colours mirror the command's cleo output: green for an enabled selection, red
-# tones muted, cyan for the cursor, grey for chrome.
 _PROMPT_STYLE = questionary.Style(
     [
         ("qmark", "fg:#00d787 bold"),
@@ -69,7 +67,7 @@ class TraceEventsCommand(Command):
             Connection identifier from the environment or TCP port
       -g, --group=GROUP
             The group to target [default: "Default"]
-      --event=EVENT
+      -E, --event=EVENT
             A single trace event to show or, with a value, add or remove
       -i, --interactive
             Choose the activation switch and enabled events at prompts
@@ -110,6 +108,7 @@ class TraceEventsCommand(Command):
         ),
         option(
             "event",
+            "E",
             description="A single trace event to show or, with a value, add or remove",
             flag=False,
         ),
@@ -121,32 +120,88 @@ class TraceEventsCommand(Command):
     ]
 
     def handle(self) -> int:
-        """Execute the command."""
+        """Validate command inputs, then execute the requested operation."""
+        try:
+            enabled = self._parse_value()
+        except WrongParametersError as exc:
+            self.line_error(f"<error>{Formatter.escape(str(exc))}</error>")
+            return 1
+
+        return self._execute(enabled)
+
+    def _parse_value(self) -> bool | None:
+        """Validate interactive inputs and parse the optional boolean argument.
+
+        Returns
+        -------
+        bool | None
+            The requested state, or None when no value was supplied.
+
+        Raises
+        ------
+        WrongParametersError
+            If the value is invalid or interactive inputs are incompatible.
+        """
+        value = self.argument("value")
+        if self.option("interactive"):
+            self._validate_interactive(value, self.option("event"))
+        return _parse_bool(value) if value is not None else None
+
+    def _execute(self, enabled: bool | None) -> int:
+        """Connect, dispatch the operation and report its result.
+
+        Parameters
+        ----------
+        enabled : bool | None
+            The validated boolean argument, or None for a read or prompt.
+
+        Returns
+        -------
+        int
+            0 on success, 1 on cancellation or an operation error.
+
+        Notes
+        -----
+        Connection setup errors propagate to the application. Service errors
+        are reported on stderr without printing a successful result.
+        """
         group = self.option("group")
         event = self.option("event")
-        value = self.argument("value")
-        interactive = self.option("interactive")
-        enabled = None
-        if not interactive:
-            try:
-                enabled = _parse_bool(value) if value is not None else None
-            except WrongParametersError as exc:
-                self.line_error(f"<error>{Formatter.escape(str(exc))}</error>")
-                return 1
-
         manager = MLClientManager(self.option("environment"))
         with get_client(manager, self.option("connection")) as ml:
             service = TraceEventsService(ml.rest)
             try:
-                if interactive:
+                if self.option("interactive"):
                     return self._interactive(service, group)
                 result = self._run(service, group, event, enabled)
             except (MarkLogicError, WrongParametersError, httpx.HTTPError) as exc:
                 self.line_error(f"<error>{Formatter.escape(str(exc))}</error>")
                 return 1
 
-        self._print(group, event, result, list_all=value is None and event is None)
+        self._print(group, event, result, list_all=enabled is None and event is None)
         return 0
+
+    def _validate_interactive(self, value: str | None, event: str | None) -> None:
+        """Reject incompatible interactive inputs before any network requests.
+
+        Parameters
+        ----------
+        value : str | None
+            The optional boolean argument.
+        event : str | None
+            The optional single-event selector.
+
+        Raises
+        ------
+        WrongParametersError
+            If explicit inputs conflict with the prompt or interaction is disabled.
+        """
+        if value is not None or event is not None:
+            msg = "--interactive cannot be combined with a value or --event."
+            raise WrongParametersError(msg)
+        if not self.io.is_interactive():
+            msg = "--interactive requires an interactive terminal (without -n)."
+            raise WrongParametersError(msg)
 
     def _interactive(
         self,
@@ -173,6 +228,39 @@ class TraceEventsCommand(Command):
             0 on success, 1 when the prompt is cancelled
         """
         current = service.get(group=group)
+        selected = self._ask_selection(current)
+        if selected is None:
+            self.line_error("Cancelled.")
+            return 1
+
+        selected = set(selected)
+        activated = _ACTIVATION_TOGGLE in selected
+        result = current
+        if current.activated and not activated:
+            result = service.set_activated(value=False, group=group)
+        for event in current.events:
+            if event not in selected:
+                result = service.set_event(event, enabled=False, group=group)
+        if activated and not current.activated:
+            result = service.set_activated(value=True, group=group)
+
+        self._print(group, None, result, list_all=True)
+        return 0
+
+    @staticmethod
+    def _ask_selection(current: TraceEvents) -> list[object] | None:
+        """Ask which activation state and currently enabled events to retain.
+
+        Parameters
+        ----------
+        current : TraceEvents
+            Current state used to preselect the activation toggle and events.
+
+        Returns
+        -------
+        list[object] | None
+            Selected event names and activation sentinel, or None on cancellation.
+        """
         choices = [
             questionary.Choice(
                 "Trace Events Activated",
@@ -185,27 +273,13 @@ class TraceEventsCommand(Command):
             choices.extend(
                 questionary.Choice(event, checked=True) for event in current.events
             )
-        selected = questionary.checkbox(
+        return questionary.checkbox(
             "Trace events",
             choices=choices,
             style=_PROMPT_STYLE,
             pointer="❯",  # noqa: RUF001
             instruction="(space toggles, enter confirms)",
         ).ask()
-        if selected is None:
-            self.line_error("Cancelled.")
-            return 1
-
-        activated = _ACTIVATION_TOGGLE in selected
-        result = current
-        if activated != current.activated:
-            result = service.set_activated(value=activated, group=group)
-        for event in current.events:
-            if event not in selected:
-                result = service.set_event(event, enabled=False, group=group)
-
-        self._print(group, None, result, list_all=True)
-        return 0
 
     @staticmethod
     def _run(

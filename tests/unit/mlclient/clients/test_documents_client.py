@@ -1692,6 +1692,21 @@ def test_create_document_with_temporal_collection(ml):
 
 
 @respx.mock
+def test_delete_preserves_bodyless_http_failure(ml):
+    route = respx.delete(
+        "http://localhost:8000/v1/documents",
+        params={"uri": "/example.json"},
+    ).respond(403)
+
+    with pytest.raises(httpx.HTTPStatusError) as raised:
+        ml.documents.delete("/example.json")
+
+    assert route.call_count == 1
+    assert raised.value.response.url == route.calls.last.request.url
+    assert raised.value.response.status_code == 403
+
+
+@respx.mock
 def test_delete_single_document(ml):
     uri = "/some/dir/doc1.xml"
 

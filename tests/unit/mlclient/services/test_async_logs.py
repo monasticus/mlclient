@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import httpx
 import pytest
 import pytest_asyncio
 import respx
@@ -18,6 +19,22 @@ ENDPOINT = "/manage/v2/logs"
 async def svc():
     async with AsyncMLClient() as ml:
         yield AsyncLogsService(ml.manage)
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_get_logs_preserves_bodyless_http_failure(svc):
+    route = respx.get(
+        "http://localhost:8002/manage/v2/logs",
+        params={"format": "json", "filename": "ErrorLog.txt"},
+    ).respond(403)
+
+    with pytest.raises(httpx.HTTPStatusError) as raised:
+        await svc.get()
+
+    assert route.call_count == 1
+    assert raised.value.response.url == route.calls.last.request.url
+    assert raised.value.response.status_code == 403
 
 
 @pytest.mark.asyncio

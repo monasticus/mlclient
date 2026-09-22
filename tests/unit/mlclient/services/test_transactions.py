@@ -2,11 +2,13 @@ from __future__ import annotations
 
 import json
 
+import httpx
 import pytest
 import respx
 
 from mlclient import MLClient
 from mlclient.exceptions import MarkLogicError
+from mlclient.services import TransactionService
 from tests.utils.ml_mockers import MLRespXMocker
 
 
@@ -142,6 +144,22 @@ def test_getitem_rejects_unknown_key(ml):
 
 
 @respx.mock
+def test_status_preserves_bodyless_http_failure(ml):
+    route = respx.get(
+        "http://localhost:8000/v1/transactions/123",
+        params={"format": "json"},
+    ).respond(403)
+    transaction = TransactionService(ml.rest.transactions, "123")
+
+    with pytest.raises(httpx.HTTPStatusError) as raised:
+        transaction.status()
+
+    assert route.call_count == 1
+    assert raised.value.response.url == route.calls.last.request.url
+    assert raised.value.response.status_code == 403
+
+
+@respx.mock
 def test_status_returns_parsed(ml):
     body = {"transaction-status": {"transaction-id": "12345"}}
 
@@ -196,6 +214,22 @@ def test_status_raises_on_error(ml):
         txn.status()
 
     assert err.value.args[0] == "[404 Not Found] (XDMP-NOTXN) no such transaction"
+
+
+@respx.mock
+def test_commit_preserves_bodyless_http_failure(ml):
+    route = respx.post(
+        "http://localhost:8000/v1/transactions/123",
+        params={"result": "commit"},
+    ).respond(403)
+    transaction = TransactionService(ml.rest.transactions, "123")
+
+    with pytest.raises(httpx.HTTPStatusError) as raised:
+        transaction.commit()
+
+    assert route.call_count == 1
+    assert raised.value.response.url == route.calls.last.request.url
+    assert raised.value.response.status_code == 403
 
 
 @respx.mock

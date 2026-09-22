@@ -1,5 +1,7 @@
 """Sentinel for options inherited from configuration."""
 
+from __future__ import annotations
+
 
 class _Unset:
     """Sentinel marking an unset argument.

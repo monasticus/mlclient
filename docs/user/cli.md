@@ -62,7 +62,7 @@ for its arguments. The pages above explain workflows, defaults and examples.
 
 ## Connection and target selection
 
-`http`, `eval`, `version` and `log-level` use `-c / --connection` to select a configured connection identifier or a TCP port. A numeric port changes the default REST connection's port and retains its other settings.
+`http`, `eval`, `version`, `log-level` and `trace-events` use `-c / --connection` to select a configured connection identifier or a TCP port. A numeric port changes the default REST connection's port and retains its other settings.
 
 `logs -s / --server` selects whose logs to read by an environment identifier or port. `log-level -s / --server` instead takes the actual App Server name in MarkLogic. It does not select the connection used for the request.
 

@@ -119,9 +119,31 @@ class LogsCommand(Command):
     # ordered for maximum contrast between adjacent hosts. Cycled when a
     # cluster has more hosts than colors.
     _HOST_COLORS: ClassVar[tuple[int, ...]] = (
-        208, 38, 205, 149, 99, 214, 75, 211, 79, 135,
-        166, 105, 178, 43, 213, 69, 202, 115, 177, 137,
-        174, 141, 101, 209, 172,
+        208,
+        38,
+        205,
+        149,
+        99,
+        214,
+        75,
+        211,
+        79,
+        135,
+        166,
+        105,
+        178,
+        43,
+        213,
+        69,
+        202,
+        115,
+        177,
+        137,
+        174,
+        141,
+        101,
+        209,
+        172,
     )
 
     def handle(

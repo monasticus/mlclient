@@ -156,8 +156,8 @@ class MLResponseParser:
 
         A success response returns without parsing the body. A non-success
         response is parsed: when MarkLogic described the error a MarkLogicError
-        is raised, otherwise the call defers to httpx so a bodyless gateway
-        failure still surfaces as an HTTPStatusError.
+        is raised. Empty, malformed and unrecognized error bodies defer to
+        httpx, preserving the original response in HTTPStatusError.
 
         Parameters
         ----------
@@ -173,7 +173,22 @@ class MLResponseParser:
         """
         if response.is_success:
             return
-        error = cls._parse(response)
+        try:
+            error = cls._parse(response)
+        except (ValueError, TypeError, AttributeError, ElemTree.ParseError):
+            # Invalid error payloads must not hide the original HTTP failure.
+            error = None
+        if isinstance(error, dict):
+            error = error.get("errorResponse", error)
+            if not isinstance(error, dict) or not any(
+                isinstance(error.get(key), str) and error[key]
+                for key in ("messageCode", "message")
+            ):
+                error = None
+        elif response.headers.get(const.HEADER_NAME_CONTENT_TYPE, "").startswith(
+            const.HEADER_JSON,
+        ):
+            error = None
         if error:
             raise MarkLogicError(error)
         response.raise_for_status()
@@ -209,7 +224,7 @@ class MLResponseParser:
         list | tuple
             A parsed response body
         """
-        content_type = response.headers.get(const.HEADER_NAME_CONTENT_TYPE)
+        content_type = response.headers.get(const.HEADER_NAME_CONTENT_TYPE, "")
         if not response.is_success:
             if content_type.startswith(const.HEADER_JSON):
                 error = response.json()

@@ -37,7 +37,9 @@ def experimental(*, log_on_init: bool = False):
             def initialize(self, *args, **kwargs):
                 """Warn about experimental use and invoke the original constructor."""
                 logging.getLogger(cls.__module__).warning(
-                    "%s is experimental; %s", cls.__name__, EXPERIMENTAL_NOTICE,
+                    "%s is experimental; %s",
+                    cls.__name__,
+                    EXPERIMENTAL_NOTICE,
                 )
                 init(self, *args, **kwargs)
 

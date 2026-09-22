@@ -991,8 +991,6 @@
       
         
       
-        
-      
     
     
     
@@ -1307,34 +1305,6 @@
     
   
     log-level
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../../user/cli/trace-events/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    trace-events
   
 
     
@@ -5411,10 +5381,6 @@
       
         
       
-        
-      
-        
-      
     
     
     
@@ -5666,62 +5632,6 @@
     
   
     LogsService
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../services/TraceEvents/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    TraceEvents
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../services/TraceEventsService/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    TraceEventsService
   
 
     
@@ -7404,7 +7314,8 @@ an existing file without the force flag.</p>
 
                   <details class="mkdocstrings-source">
                     <summary>Source code in <code>mlclient/exceptions.py</code></summary>
-                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-174">174</a></span>
+                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-173">173</a></span>
+<span class="normal"><a href="#__codelineno-0-174">174</a></span>
 <span class="normal"><a href="#__codelineno-0-175">175</a></span>
 <span class="normal"><a href="#__codelineno-0-176">176</a></span>
 <span class="normal"><a href="#__codelineno-0-177">177</a></span>
@@ -7419,24 +7330,23 @@ an existing file without the force flag.</p>
 <span class="normal"><a href="#__codelineno-0-186">186</a></span>
 <span class="normal"><a href="#__codelineno-0-187">187</a></span>
 <span class="normal"><a href="#__codelineno-0-188">188</a></span>
-<span class="normal"><a href="#__codelineno-0-189">189</a></span>
-<span class="normal"><a href="#__codelineno-0-190">190</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-174" name="__codelineno-0-174"></a><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
-<a id="__codelineno-0-175" name="__codelineno-0-175"></a>    <span class="bp">self</span><span class="p">,</span>
-<a id="__codelineno-0-176" name="__codelineno-0-176"></a>    <span class="n">file_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-<a id="__codelineno-0-177" name="__codelineno-0-177"></a><span class="p">):</span>
-<a id="__codelineno-0-178" name="__codelineno-0-178"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize EnvironmentFileExistsError exception with details.</span>
-<a id="__codelineno-0-179" name="__codelineno-0-179"></a>
-<a id="__codelineno-0-180" name="__codelineno-0-180"></a><span class="sd">    Extends Exception constructor with a custom message.</span>
-<a id="__codelineno-0-181" name="__codelineno-0-181"></a>
-<a id="__codelineno-0-182" name="__codelineno-0-182"></a><span class="sd">    Parameters</span>
-<a id="__codelineno-0-183" name="__codelineno-0-183"></a><span class="sd">    ----------</span>
-<a id="__codelineno-0-184" name="__codelineno-0-184"></a><span class="sd">    file_path : str</span>
-<a id="__codelineno-0-185" name="__codelineno-0-185"></a><span class="sd">        A path of the existing configuration file</span>
-<a id="__codelineno-0-186" name="__codelineno-0-186"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-187" name="__codelineno-0-187"></a>    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
-<a id="__codelineno-0-188" name="__codelineno-0-188"></a>        <span class="sa">f</span><span class="s2">&quot;Configuration file already exists: [</span><span class="si">{</span><span class="n">file_path</span><span class="si">}</span><span class="s2">]. Use --force to &quot;</span>
-<a id="__codelineno-0-189" name="__codelineno-0-189"></a>        <span class="sa">f</span><span class="s2">&quot;overwrite.&quot;</span><span class="p">,</span>
-<a id="__codelineno-0-190" name="__codelineno-0-190"></a>    <span class="p">)</span>
+<span class="normal"><a href="#__codelineno-0-189">189</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-173" name="__codelineno-0-173"></a><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<a id="__codelineno-0-174" name="__codelineno-0-174"></a>    <span class="bp">self</span><span class="p">,</span>
+<a id="__codelineno-0-175" name="__codelineno-0-175"></a>    <span class="n">file_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+<a id="__codelineno-0-176" name="__codelineno-0-176"></a><span class="p">):</span>
+<a id="__codelineno-0-177" name="__codelineno-0-177"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize EnvironmentFileExistsError exception with details.</span>
+<a id="__codelineno-0-178" name="__codelineno-0-178"></a>
+<a id="__codelineno-0-179" name="__codelineno-0-179"></a><span class="sd">    Extends Exception constructor with a custom message.</span>
+<a id="__codelineno-0-180" name="__codelineno-0-180"></a>
+<a id="__codelineno-0-181" name="__codelineno-0-181"></a><span class="sd">    Parameters</span>
+<a id="__codelineno-0-182" name="__codelineno-0-182"></a><span class="sd">    ----------</span>
+<a id="__codelineno-0-183" name="__codelineno-0-183"></a><span class="sd">    file_path : str</span>
+<a id="__codelineno-0-184" name="__codelineno-0-184"></a><span class="sd">        A path of the existing configuration file</span>
+<a id="__codelineno-0-185" name="__codelineno-0-185"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-186" name="__codelineno-0-186"></a>    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+<a id="__codelineno-0-187" name="__codelineno-0-187"></a>        <span class="sa">f</span><span class="s2">&quot;Configuration file already exists: [</span><span class="si">{</span><span class="n">file_path</span><span class="si">}</span><span class="s2">]. Use --force to &quot;</span>
+<a id="__codelineno-0-188" name="__codelineno-0-188"></a>        <span class="sa">f</span><span class="s2">&quot;overwrite.&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-189" name="__codelineno-0-189"></a>    <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
                   </details>
 

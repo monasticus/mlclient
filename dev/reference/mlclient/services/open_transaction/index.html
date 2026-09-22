@@ -991,8 +991,6 @@
       
         
       
-        
-      
     
     
     
@@ -1307,34 +1305,6 @@
     
   
     log-level
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../../user/cli/trace-events/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    trace-events
   
 
     
@@ -5413,10 +5383,6 @@
       
         
       
-        
-      
-        
-      
     
     
     
@@ -5668,62 +5634,6 @@
     
   
     LogsService
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../TraceEvents/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    TraceEvents
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../TraceEventsService/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    TraceEventsService
   
 
     
@@ -7521,11 +7431,7 @@ configured retries are exhausted.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>mlclient/services/transactions.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-170">170</a></span>
-<span class="normal"><a href="#__codelineno-0-171">171</a></span>
-<span class="normal"><a href="#__codelineno-0-172">172</a></span>
-<span class="normal"><a href="#__codelineno-0-173">173</a></span>
-<span class="normal"><a href="#__codelineno-0-174">174</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-174">174</a></span>
 <span class="normal"><a href="#__codelineno-0-175">175</a></span>
 <span class="normal"><a href="#__codelineno-0-176">176</a></span>
 <span class="normal"><a href="#__codelineno-0-177">177</a></span>
@@ -7570,56 +7476,60 @@ configured retries are exhausted.</p>
 <span class="normal"><a href="#__codelineno-0-216">216</a></span>
 <span class="normal"><a href="#__codelineno-0-217">217</a></span>
 <span class="normal"><a href="#__codelineno-0-218">218</a></span>
-<span class="normal"><a href="#__codelineno-0-219">219</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-170" name="__codelineno-0-170"></a><span class="k">def</span><span class="w"> </span><span class="nf">open_transaction</span><span class="p">(</span>
-<a id="__codelineno-0-171" name="__codelineno-0-171"></a>    <span class="n">api</span><span class="p">:</span> <span class="n">ApiClient</span><span class="p">,</span>
-<a id="__codelineno-0-172" name="__codelineno-0-172"></a>    <span class="o">*</span><span class="p">,</span>
-<a id="__codelineno-0-173" name="__codelineno-0-173"></a>    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-174" name="__codelineno-0-174"></a>    <span class="n">time_limit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-175" name="__codelineno-0-175"></a>    <span class="n">database</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-176" name="__codelineno-0-176"></a>    <span class="n">timeout</span><span class="o">=</span><span class="n">UNSET</span><span class="p">,</span>
-<a id="__codelineno-0-177" name="__codelineno-0-177"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TransactionService</span><span class="p">:</span>
-<a id="__codelineno-0-178" name="__codelineno-0-178"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Open a multi-statement transaction and return a service scoped to it.</span>
-<a id="__codelineno-0-179" name="__codelineno-0-179"></a>
-<a id="__codelineno-0-180" name="__codelineno-0-180"></a><span class="sd">    Parameters</span>
-<a id="__codelineno-0-181" name="__codelineno-0-181"></a><span class="sd">    ----------</span>
-<a id="__codelineno-0-182" name="__codelineno-0-182"></a><span class="sd">    api : ApiClient</span>
-<a id="__codelineno-0-183" name="__codelineno-0-183"></a><span class="sd">        The client used both to open the transaction and by the returned service</span>
-<a id="__codelineno-0-184" name="__codelineno-0-184"></a><span class="sd">    name : str | None, default None</span>
-<a id="__codelineno-0-185" name="__codelineno-0-185"></a><span class="sd">        A name to assign to the transaction</span>
-<a id="__codelineno-0-186" name="__codelineno-0-186"></a><span class="sd">    time_limit : int | None, default None</span>
-<a id="__codelineno-0-187" name="__codelineno-0-187"></a><span class="sd">        The maximum number of seconds for the transaction to remain open</span>
-<a id="__codelineno-0-188" name="__codelineno-0-188"></a><span class="sd">    database : str | None, default None</span>
-<a id="__codelineno-0-189" name="__codelineno-0-189"></a><span class="sd">        Content database name or id to open the transaction against</span>
-<a id="__codelineno-0-190" name="__codelineno-0-190"></a><span class="sd">    timeout : httpx.Timeout | float | None, default unset</span>
-<a id="__codelineno-0-191" name="__codelineno-0-191"></a><span class="sd">        A per-request HTTP timeout for the open request only. Unset uses the</span>
-<a id="__codelineno-0-192" name="__codelineno-0-192"></a><span class="sd">        client&#39;s configured timeout; None disables every HTTP timeout; a number</span>
-<a id="__codelineno-0-193" name="__codelineno-0-193"></a><span class="sd">        sets all four components to that many seconds; an httpx.Timeout</span>
-<a id="__codelineno-0-194" name="__codelineno-0-194"></a><span class="sd">        overrides them. This bounds the HTTP request that opens the transaction</span>
-<a id="__codelineno-0-195" name="__codelineno-0-195"></a><span class="sd">        and is unrelated to time_limit, the server-side lifetime of the</span>
-<a id="__codelineno-0-196" name="__codelineno-0-196"></a><span class="sd">        transaction itself.</span>
-<a id="__codelineno-0-197" name="__codelineno-0-197"></a>
-<a id="__codelineno-0-198" name="__codelineno-0-198"></a><span class="sd">    Returns</span>
-<a id="__codelineno-0-199" name="__codelineno-0-199"></a><span class="sd">    -------</span>
-<a id="__codelineno-0-200" name="__codelineno-0-200"></a><span class="sd">    TransactionService</span>
-<a id="__codelineno-0-201" name="__codelineno-0-201"></a><span class="sd">        A service scoped to the newly opened transaction</span>
-<a id="__codelineno-0-202" name="__codelineno-0-202"></a>
-<a id="__codelineno-0-203" name="__codelineno-0-203"></a><span class="sd">    Raises</span>
-<a id="__codelineno-0-204" name="__codelineno-0-204"></a><span class="sd">    ------</span>
-<a id="__codelineno-0-205" name="__codelineno-0-205"></a><span class="sd">    httpx.TimeoutException</span>
-<a id="__codelineno-0-206" name="__codelineno-0-206"></a><span class="sd">        If an HTTP connect, read, write or pool timeout expires after any</span>
-<a id="__codelineno-0-207" name="__codelineno-0-207"></a><span class="sd">        configured retries are exhausted.</span>
-<a id="__codelineno-0-208" name="__codelineno-0-208"></a><span class="sd">    MarkLogicError</span>
-<a id="__codelineno-0-209" name="__codelineno-0-209"></a><span class="sd">        If MarkLogic returns an error</span>
-<a id="__codelineno-0-210" name="__codelineno-0-210"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-211" name="__codelineno-0-211"></a>    <span class="n">transactions</span> <span class="o">=</span> <span class="n">TransactionsApi</span><span class="p">(</span><span class="n">api</span><span class="p">)</span>
-<a id="__codelineno-0-212" name="__codelineno-0-212"></a>    <span class="n">resp</span> <span class="o">=</span> <span class="n">transactions</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
-<a id="__codelineno-0-213" name="__codelineno-0-213"></a>        <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
-<a id="__codelineno-0-214" name="__codelineno-0-214"></a>        <span class="n">time_limit</span><span class="o">=</span><span class="n">time_limit</span><span class="p">,</span>
-<a id="__codelineno-0-215" name="__codelineno-0-215"></a>        <span class="n">database</span><span class="o">=</span><span class="n">database</span><span class="p">,</span>
-<a id="__codelineno-0-216" name="__codelineno-0-216"></a>        <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span>
-<a id="__codelineno-0-217" name="__codelineno-0-217"></a>    <span class="p">)</span>
-<a id="__codelineno-0-218" name="__codelineno-0-218"></a>    <span class="n">txid</span> <span class="o">=</span> <span class="n">_txid_or_raise</span><span class="p">(</span><span class="n">resp</span><span class="p">)</span>
-<a id="__codelineno-0-219" name="__codelineno-0-219"></a>    <span class="k">return</span> <span class="n">TransactionService</span><span class="p">(</span><span class="n">transactions</span><span class="p">,</span> <span class="n">txid</span><span class="p">,</span> <span class="n">database</span><span class="p">)</span>
+<span class="normal"><a href="#__codelineno-0-219">219</a></span>
+<span class="normal"><a href="#__codelineno-0-220">220</a></span>
+<span class="normal"><a href="#__codelineno-0-221">221</a></span>
+<span class="normal"><a href="#__codelineno-0-222">222</a></span>
+<span class="normal"><a href="#__codelineno-0-223">223</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-174" name="__codelineno-0-174"></a><span class="k">def</span><span class="w"> </span><span class="nf">open_transaction</span><span class="p">(</span>
+<a id="__codelineno-0-175" name="__codelineno-0-175"></a>    <span class="n">api</span><span class="p">:</span> <span class="n">ApiClient</span><span class="p">,</span>
+<a id="__codelineno-0-176" name="__codelineno-0-176"></a>    <span class="o">*</span><span class="p">,</span>
+<a id="__codelineno-0-177" name="__codelineno-0-177"></a>    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-178" name="__codelineno-0-178"></a>    <span class="n">time_limit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-179" name="__codelineno-0-179"></a>    <span class="n">database</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-180" name="__codelineno-0-180"></a>    <span class="n">timeout</span><span class="o">=</span><span class="n">UNSET</span><span class="p">,</span>
+<a id="__codelineno-0-181" name="__codelineno-0-181"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TransactionService</span><span class="p">:</span>
+<a id="__codelineno-0-182" name="__codelineno-0-182"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Open a multi-statement transaction and return a service scoped to it.</span>
+<a id="__codelineno-0-183" name="__codelineno-0-183"></a>
+<a id="__codelineno-0-184" name="__codelineno-0-184"></a><span class="sd">    Parameters</span>
+<a id="__codelineno-0-185" name="__codelineno-0-185"></a><span class="sd">    ----------</span>
+<a id="__codelineno-0-186" name="__codelineno-0-186"></a><span class="sd">    api : ApiClient</span>
+<a id="__codelineno-0-187" name="__codelineno-0-187"></a><span class="sd">        The client used both to open the transaction and by the returned service</span>
+<a id="__codelineno-0-188" name="__codelineno-0-188"></a><span class="sd">    name : str | None, default None</span>
+<a id="__codelineno-0-189" name="__codelineno-0-189"></a><span class="sd">        A name to assign to the transaction</span>
+<a id="__codelineno-0-190" name="__codelineno-0-190"></a><span class="sd">    time_limit : int | None, default None</span>
+<a id="__codelineno-0-191" name="__codelineno-0-191"></a><span class="sd">        The maximum number of seconds for the transaction to remain open</span>
+<a id="__codelineno-0-192" name="__codelineno-0-192"></a><span class="sd">    database : str | None, default None</span>
+<a id="__codelineno-0-193" name="__codelineno-0-193"></a><span class="sd">        Content database name or id to open the transaction against</span>
+<a id="__codelineno-0-194" name="__codelineno-0-194"></a><span class="sd">    timeout : httpx.Timeout | float | None, default unset</span>
+<a id="__codelineno-0-195" name="__codelineno-0-195"></a><span class="sd">        A per-request HTTP timeout for the open request only. Unset uses the</span>
+<a id="__codelineno-0-196" name="__codelineno-0-196"></a><span class="sd">        client&#39;s configured timeout; None disables every HTTP timeout; a number</span>
+<a id="__codelineno-0-197" name="__codelineno-0-197"></a><span class="sd">        sets all four components to that many seconds; an httpx.Timeout</span>
+<a id="__codelineno-0-198" name="__codelineno-0-198"></a><span class="sd">        overrides them. This bounds the HTTP request that opens the transaction</span>
+<a id="__codelineno-0-199" name="__codelineno-0-199"></a><span class="sd">        and is unrelated to time_limit, the server-side lifetime of the</span>
+<a id="__codelineno-0-200" name="__codelineno-0-200"></a><span class="sd">        transaction itself.</span>
+<a id="__codelineno-0-201" name="__codelineno-0-201"></a>
+<a id="__codelineno-0-202" name="__codelineno-0-202"></a><span class="sd">    Returns</span>
+<a id="__codelineno-0-203" name="__codelineno-0-203"></a><span class="sd">    -------</span>
+<a id="__codelineno-0-204" name="__codelineno-0-204"></a><span class="sd">    TransactionService</span>
+<a id="__codelineno-0-205" name="__codelineno-0-205"></a><span class="sd">        A service scoped to the newly opened transaction</span>
+<a id="__codelineno-0-206" name="__codelineno-0-206"></a>
+<a id="__codelineno-0-207" name="__codelineno-0-207"></a><span class="sd">    Raises</span>
+<a id="__codelineno-0-208" name="__codelineno-0-208"></a><span class="sd">    ------</span>
+<a id="__codelineno-0-209" name="__codelineno-0-209"></a><span class="sd">    httpx.TimeoutException</span>
+<a id="__codelineno-0-210" name="__codelineno-0-210"></a><span class="sd">        If an HTTP connect, read, write or pool timeout expires after any</span>
+<a id="__codelineno-0-211" name="__codelineno-0-211"></a><span class="sd">        configured retries are exhausted.</span>
+<a id="__codelineno-0-212" name="__codelineno-0-212"></a><span class="sd">    MarkLogicError</span>
+<a id="__codelineno-0-213" name="__codelineno-0-213"></a><span class="sd">        If MarkLogic returns an error</span>
+<a id="__codelineno-0-214" name="__codelineno-0-214"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-215" name="__codelineno-0-215"></a>    <span class="n">transactions</span> <span class="o">=</span> <span class="n">TransactionsApi</span><span class="p">(</span><span class="n">api</span><span class="p">)</span>
+<a id="__codelineno-0-216" name="__codelineno-0-216"></a>    <span class="n">resp</span> <span class="o">=</span> <span class="n">transactions</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
+<a id="__codelineno-0-217" name="__codelineno-0-217"></a>        <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+<a id="__codelineno-0-218" name="__codelineno-0-218"></a>        <span class="n">time_limit</span><span class="o">=</span><span class="n">time_limit</span><span class="p">,</span>
+<a id="__codelineno-0-219" name="__codelineno-0-219"></a>        <span class="n">database</span><span class="o">=</span><span class="n">database</span><span class="p">,</span>
+<a id="__codelineno-0-220" name="__codelineno-0-220"></a>        <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span>
+<a id="__codelineno-0-221" name="__codelineno-0-221"></a>    <span class="p">)</span>
+<a id="__codelineno-0-222" name="__codelineno-0-222"></a>    <span class="n">txid</span> <span class="o">=</span> <span class="n">_txid_or_raise</span><span class="p">(</span><span class="n">resp</span><span class="p">)</span>
+<a id="__codelineno-0-223" name="__codelineno-0-223"></a>    <span class="k">return</span> <span class="n">TransactionService</span><span class="p">(</span><span class="n">transactions</span><span class="p">,</span> <span class="n">txid</span><span class="p">,</span> <span class="n">database</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>

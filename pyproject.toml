@@ -145,6 +145,7 @@ convention = "numpy"
 max-complexity = 10
 
 [tool.ruff.lint.per-file-ignores]
+"mlclient/services/cts.py" = ["A002"]  # public range parameter
 "mlclient/functions/xqy/_fn.py" = ["A002"]  # native parameter names
 "mlclient/functions/xqy/_cts.py" = [
     "PLR0913", # preserve native XQuery argument counts

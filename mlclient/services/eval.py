@@ -35,23 +35,36 @@ class EvalService:
     """Higher-level service for /v1/eval endpoint."""
 
     def __init__(self, rest: RestApi):
+        """Create an evaluator using the provided REST transport.
+
+        Parameters
+        ----------
+        rest : RestApi | AsyncRestApi
+            REST transport used by this evaluator.
+        """
         self._rest = rest
 
     def expression(
         self,
         expr: Expr,
         *,
+        namespaces: dict[str, str] | None = None,
         database: str | None = None,
         txid: str | None = None,
         output_type: type | None = None,
         timeout=UNSET,
-    ) -> list:
+    ) -> object:
         """Compile and execute an expression as the root of one eval request.
 
         Parameters
         ----------
         expr : Expr
-            A builder expression, including nested calls or a positional window.
+            A builder expression, including nested calls or a positional range.
+        namespaces : dict[str, str] | None
+            Prefix-to-URI bindings for this invocation only.
+            They become XQuery namespace declarations,
+            shared by validation and execution. The empty prefix sets the default
+            element namespace.
         database : str | None, default None
             Content database name or id.
         txid : str | None, default None
@@ -63,9 +76,10 @@ class EvalService:
 
         Returns
         -------
-        list
-            Zero, one or many result items. Decimal results are ``Decimal``;
-            date/time results use Python types. A JSON array stays a single item.
+        object | list
+            Empty sequences return []; a singleton returns its item; multiple
+            items return a list. Decimal results retain precision. A singleton
+            JSON array returns that array without an extra outer list.
 
         Raises
         ------
@@ -82,7 +96,7 @@ class EvalService:
         if output_type not in (None, str, bytes):
             message = "output_type must be None, str or bytes"
             raise ValueError(message)
-        code, variables = expr.compile()
+        code, variables = expr.compile(namespaces=namespaces)
         response = self._rest.eval.post(
             xquery=code,
             variables=variables,
@@ -92,7 +106,8 @@ class EvalService:
         )
         if not response.is_success:
             raise MarkLogicError(MLResponseParser.parse(response))
-        return MLResponseParser.parse_sequence(response, output_type)
+        items = MLResponseParser.parse_sequence(response, output_type)
+        return items[0] if len(items) == 1 else items
 
     def xquery(
         self,
@@ -606,23 +621,36 @@ class AsyncEvalService:
     """Async higher-level service for /v1/eval endpoint."""
 
     def __init__(self, rest: AsyncRestApi):
+        """Create an evaluator using the provided REST transport.
+
+        Parameters
+        ----------
+        rest : RestApi | AsyncRestApi
+            REST transport used by this evaluator.
+        """
         self._rest = rest
 
     async def expression(
         self,
         expr: Expr,
         *,
+        namespaces: dict[str, str] | None = None,
         database: str | None = None,
         txid: str | None = None,
         output_type: type | None = None,
         timeout=UNSET,
-    ) -> list:
+    ) -> object:
         """Compile and execute an expression as the root of one eval request.
 
         Parameters
         ----------
         expr : Expr
-            A builder expression, including nested calls or a positional window.
+            A builder expression, including nested calls or a positional range.
+        namespaces : dict[str, str] | None
+            Prefix-to-URI bindings for this invocation only.
+            They become XQuery namespace declarations,
+            shared by validation and execution. The empty prefix sets the default
+            element namespace.
         database : str | None, default None
             Content database name or id.
         txid : str | None, default None
@@ -634,9 +662,10 @@ class AsyncEvalService:
 
         Returns
         -------
-        list
-            Zero, one or many result items. Decimal results are ``Decimal``;
-            date/time results use Python types. A JSON array stays a single item.
+        object | list
+            Empty sequences return []; a singleton returns its item; multiple
+            items return a list. Decimal results retain precision. A singleton
+            JSON array returns that array without an extra outer list.
 
         Raises
         ------
@@ -653,7 +682,7 @@ class AsyncEvalService:
         if output_type not in (None, str, bytes):
             message = "output_type must be None, str or bytes"
             raise ValueError(message)
-        code, variables = expr.compile()
+        code, variables = expr.compile(namespaces=namespaces)
         response = await self._rest.eval.post(
             xquery=code,
             variables=variables,
@@ -663,7 +692,8 @@ class AsyncEvalService:
         )
         if not response.is_success:
             raise MarkLogicError(MLResponseParser.parse(response))
-        return MLResponseParser.parse_sequence(response, output_type)
+        items = MLResponseParser.parse_sequence(response, output_type)
+        return items[0] if len(items) == 1 else items
 
     async def xquery(
         self,

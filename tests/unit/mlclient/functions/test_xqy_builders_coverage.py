@@ -2,7 +2,8 @@ from __future__ import annotations
 
 import pytest
 
-from mlclient.functions import cts, fn, xpath, xs
+from mlclient.functions.xqy import cts, fn, xpath, xs
+from mlclient.functions.xqy._expr import _CompileContext
 
 
 @pytest.mark.parametrize(
@@ -81,7 +82,9 @@ from mlclient.functions import cts, fn, xpath, xs
     ],
 )
 def test_existing_builders_preserve_native_arguments(expr, native, bindings):
-    code, variables = expr.compile()
+    context = _CompileContext()
+    code = expr.render(context)
+    variables = context.variables
     assert native + "(" in code
     assert list(variables.values()) == bindings
 
@@ -93,6 +96,8 @@ def test_late_arguments_keep_native_position():
     assert str(cts.near_query([], distance_weight=1.5)).endswith(
         "cts:near-query((), (), (), xs:double($v0))",
     )
-    assert str(cts.path_reference("/x", namespaces=xpath("map:map()"))).endswith(
+    assert cts.path_reference("/x", namespaces=xpath("map:map()")).render(
+        _CompileContext(),
+    ).endswith(
         "cts:path-reference($v0, (), (map:map()))",
     )

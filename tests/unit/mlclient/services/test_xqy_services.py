@@ -11,16 +11,12 @@ import respx
 
 from mlclient import AsyncMLClient, MLClient
 from mlclient.exceptions import MarkLogicError
-from mlclient.functions import Expr, cts, fn, xpath, xs
+from mlclient.functions.xqy import Expr, cts, fn, xdmp, xpath, xs
 from mlclient.multipart import MultipartPart, encode_multipart_mixed
 from mlclient.responses import MLResponseParser
 from mlclient.services import (
     AsyncCtsService,
-    AsyncFnService,
-    AsyncXdmpService,
     CtsService,
-    FnService,
-    XdmpService,
 )
 
 
@@ -34,22 +30,36 @@ def _response(*items):
 
 
 @pytest.mark.parametrize(
-    "items",
+    ("items", "expected"),
     [
-        [],
-        [("array-node", "application/json", "[1,2]")],
-        [("integer", "text/plain", "1"), ("integer", "text/plain", "2")],
+        ([], []),
+        ([("integer", "text/plain", "0")], 0),
+        ([("boolean", "text/plain", "false")], False),
+        ([("string", "text/plain", "")], ""),
+        ([("array-node", "application/json", "[]")], []),
+        ([("array-node", "application/json", "[1,2]")], [1, 2]),
+        ([("array-node", "application/json", "[[1]]")], [[1]]),
+        (
+            [("integer", "text/plain", "1"), ("integer", "text/plain", "2")],
+            [1, 2],
+        ),
     ],
 )
+@pytest.mark.asyncio
 @respx.mock
-def test_eval_preserves_outer_sequence(items):
+async def test_eval_collapses_only_the_outer_singleton(items, expected):
     route = respx.post("http://localhost:8000/v1/eval").mock(
         return_value=_response(*items),
     )
     with MLClient() as ml:
         result = ml.eval.expression(fn.count([]))
-    assert result == ([] if not items else [[1, 2]] if len(items) == 1 else [1, 2])
-    assert route.call_count == 1
+    async with AsyncMLClient() as ml:
+        async_result = await ml.eval.expression(fn.count([]))
+    assert result == expected
+    assert type(result) is type(expected)
+    assert async_result == expected
+    assert type(async_result) is type(expected)
+    assert route.call_count == 2
 
 
 @respx.mock
@@ -116,7 +126,7 @@ def test_xml_json_and_nonmultipart_results():
                 headers={"Content-Type": "text/plain", "X-Primitive": "integer"},
             ),
         )
-        assert ml.eval.expression(fn.count([])) == [7]
+        assert ml.eval.expression(fn.count([])) == 7
         route.mock(return_value=httpx.Response(200, content=b""))
         assert ml.eval.expression(fn.count([])) == []
 
@@ -137,9 +147,9 @@ def test_wire_parameters_timeout_and_single_compilation():
     )
     expr = _CountedExpr()
     with MLClient() as ml:
-        assert ml.eval.expression(expr, database="test", txid="123", timeout=2) == [
-            Decimal("1.234567890123456789"),
-        ]
+        assert ml.eval.expression(
+            expr, database="test", txid="123", timeout=2,
+        ) == Decimal("1.234567890123456789")
     request = route.calls.last.request
     body = parse_qs(request.content.decode())
     assert json.loads(body["vars"][0]) == {"v0": "1.234567890123456789"}
@@ -156,42 +166,42 @@ async def test_async_expression_and_all_conveniences_share_execution_contract():
         return_value=_response(("integer", "text/plain", "1")),
     )
     async with AsyncMLClient() as ml:
-        assert await ml.eval.expression(xs.integer(1)) == [1]
+        assert await ml.eval.expression(xs.integer(1)) == 1
         service = AsyncCtsService(ml.rest)
-        assert await service.search(query=cts.true_query(), range=1) == [1]
-        assert await service.uris(range=(1, 2)) == [1]
-        assert await service.values(cts.uri_reference(), range=1) == [1]
+        assert await service.search(query=cts.true_query(), range=1) == 1
+        assert await service.uris(range=[1, 2]) == 1
+        assert await service.values(cts.uri_reference(), range=1) == 1
         assert await service.estimate(maximum=1) == 1
-        assert await AsyncFnService(ml.rest).count([1], maximum=1) == 1
+        assert await ml.eval.expression(fn.count([1], maximum=1)) == 1
         route.mock(return_value=_response(("boolean", "text/plain", "true")))
-        assert await AsyncFnService(ml.rest).exists([1]) is True
-        assert await AsyncFnService(ml.rest).empty([]) is True
-        assert await AsyncXdmpService(ml.rest).exists(xpath("/")) is True
+        assert await ml.eval.expression(fn.exists([1])) is True
+        assert await ml.eval.expression(fn.empty([])) is True
+        assert await ml.eval.expression(xdmp.exists(xpath("/"))) is True
 
 
 @respx.mock
-def test_sync_conveniences_return_lists_or_single_aggregates():
+def test_sync_conveniences_share_result_cardinality():
     route = respx.post("http://localhost:8000/v1/eval").mock(
         return_value=_response(("integer", "text/plain", "1")),
     )
     with MLClient() as ml:
         service = CtsService(ml.rest)
-        assert not hasattr(service, "word_query")
-        assert service.search(range=1) == [1]
-        assert service.uris(range=(1, 2)) == [1]
-        assert service.values(cts.uri_reference()) == [1]
+        assert service.word_query("cat").compile() == cts.word_query("cat").compile()
+        assert service.search(range=1) == 1
+        assert service.uris(range=[1, 2]) == 1
+        assert service.values(cts.uri_reference()) == 1
         assert service.estimate() == 1
-        assert FnService(ml.rest).count([1]) == 1
+        assert ml.eval.expression(fn.count([1])) == 1
         route.mock(return_value=_response(("boolean", "text/plain", "true")))
-        assert FnService(ml.rest).exists([1]) is True
-        assert FnService(ml.rest).empty([]) is True
-        assert XdmpService(ml.rest).exists(xpath("/")) is True
+        assert ml.eval.expression(fn.exists([1])) is True
+        assert ml.eval.expression(fn.empty([])) is True
+        assert ml.eval.expression(xdmp.exists(xpath("/"))) is True
         route.mock(return_value=_response())
-        with pytest.raises(ValueError, match="exactly one"):
-            FnService(ml.rest).count([])
+        with pytest.raises(TypeError, match="exactly one"):
+            service.estimate()
 
 
-@pytest.mark.parametrize("value", [True, 1.5, (1,), (1, 2, 3), [1, 2]])
+@pytest.mark.parametrize("value", [True, 1.5, (1,), (1, 2, 3), [1], [1, 2, 3]])
 @respx.mock
 def test_service_range_validation_happens_before_io(value):
     with MLClient() as ml, pytest.raises(TypeError, match="range"):
@@ -218,7 +228,7 @@ async def test_invalid_execution_arguments_fail_before_io_sync_and_async():
         with pytest.raises(ValueError, match="output_type"):
             await ml.eval.expression(fn.count([]), output_type=int)
         with pytest.raises(TypeError):
-            await AsyncFnService(ml.rest).count([], v0="override")
+            await ml.eval.expression(fn.count([]), v0="override")
     assert not respx.calls
 
 
@@ -242,3 +252,33 @@ async def test_server_errors_propagate_without_local_version_gates():
     async with AsyncMLClient() as ml:
         with pytest.raises(MarkLogicError, match="XDMP-UNDFUN"):
             await ml.eval.expression(expr)
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_eval_namespaces_belong_only_to_the_expression_invocation():
+    route = respx.post("http://localhost:8000/v1/eval").mock(
+        return_value=_response(("integer", "text/plain", "1")),
+    )
+    with MLClient() as ml:
+        ml.eval.expression(fn.count([1]), namespaces={"p": "urn:test"})
+        assert 'declare namespace p = "urn:test";' in parse_qs(
+            route.calls.last.request.content.decode(),
+        )["xquery"][0]
+        ml.eval.expression(fn.count([1]))
+        assert "declare namespace p" not in parse_qs(
+            route.calls.last.request.content.decode(),
+        )["xquery"][0]
+        with pytest.raises(TypeError, match="namespaces"):
+            type(ml.eval)(ml.rest, namespaces={"p": "urn:test"})
+    async with AsyncMLClient() as ml:
+        await ml.eval.expression(fn.count([1]), namespaces={"p": "urn:test"})
+        assert 'declare namespace p = "urn:test";' in parse_qs(
+            route.calls.last.request.content.decode(),
+        )["xquery"][0]
+        await ml.eval.expression(fn.count([1]))
+        assert "declare namespace p" not in parse_qs(
+            route.calls.last.request.content.decode(),
+        )["xquery"][0]
+        with pytest.raises(TypeError, match="namespaces"):
+            type(ml.eval)(ml.rest, namespaces={"p": "urn:test"})

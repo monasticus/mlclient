@@ -1,9 +1,10 @@
-"""XQuery function builders (``cts:``, ``xs:``, ``fn:``, ``xdmp:``).
+"""Public XQuery function builders and ready-to-use namespace singletons.
 
-Implementation for the ``mlclient.functions`` public namespace; import the
-ready-to-use ``cts``, ``fn``, ``xdmp`` and ``xs`` namespaces from there.
+Import cts, fn, xdmp and xs from this namespace and execute composed
+expressions with ml.eval.expression.
 """
 
+from mlclient._experimental import EXPERIMENTAL_NOTICE
 from mlclient.functions.xqy._cts import Cts
 from mlclient.functions.xqy._expr import Expr, xpath
 from mlclient.functions.xqy._fn import Fn
@@ -14,5 +15,7 @@ cts = Cts()
 fn = Fn()
 xdmp = Xdmp()
 xs = Xs()
+
+__experimental__ = EXPERIMENTAL_NOTICE
 
 __all__ = ["Cts", "Expr", "Fn", "Xdmp", "Xs", "cts", "fn", "xdmp", "xpath", "xs"]

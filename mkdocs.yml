@@ -78,6 +78,7 @@ nav:
       - Environments: user/environments.md
       - Documents: user/python/documents.md
       - Evaluate code: user/python/eval.md
+      - Search: user/python/search.md
       - Transactions: user/python/transactions.md
       - Async support: user/python/async.md
       - Logging to MarkLogic: user/python/logging.md
@@ -85,7 +86,6 @@ nav:
       - Recipes: recipes.md
   - Advanced:
       - Services: user/python/services.md
-      - Search: user/python/search.md
       - More on environments: user/python/more-on-environments.md
       - Connections and authentication: user/python/connections.md
       - HTTP configuration:

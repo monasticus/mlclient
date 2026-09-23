@@ -5,7 +5,7 @@ from __future__ import annotations
 import inspect
 import re
 
-from mlclient.functions import Cts, fn, xpath
+from mlclient.functions.xqy import Cts, fn, xpath, xs
 
 
 # Generated once from the MarkLogic 12 cts function reference. Keeping this
@@ -742,6 +742,8 @@ def test_catalog_preserves_native_argument_order_and_every_optional_slot():
 
         # Distinct expressions make swaps, lost arguments and wrong arity visible.
         markers = {name: xpath(f"$arg_{name}") for name in order}
+        if method_name == "search":
+            markers["expression"] = xs.string(markers["expression"])
         for supplied in [required, order, *((*required, name) for name in optional)]:
             expr = method(**{name: markers[name] for name in supplied})
             code = expr.compile()[0].splitlines()[-1]

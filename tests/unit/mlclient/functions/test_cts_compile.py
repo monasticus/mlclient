@@ -8,7 +8,20 @@ from decimal import Decimal
 import pytest
 
 from mlclient.calls import EvalCall
-from mlclient.functions import cts, fn, xpath, xs
+from mlclient.functions.xqy import cts, fn, xpath, xs
+from mlclient.functions.xqy._expr import _CompileContext
+
+
+def test_compiler_bindings_are_read_only_snapshots():
+    context = _CompileContext()
+    assert context.bind("original") == "$v0"
+    snapshot = context.variables
+    snapshot["v0"] = "changed"
+    snapshot["v1"] = "injected"
+    assert context.variables == {"v0": "original"}
+    with pytest.raises(AttributeError):
+        context.variables = {}
+    assert context.bind("next") == "$v1"
 
 
 def test_values_are_json_safe_and_keep_precision():
@@ -58,13 +71,15 @@ def test_unsupported_values_are_rejected_when_building(value):
 
 def test_values_and_source_have_separate_trust_boundaries():
     attack = "(: (( :) /), cts:false-query()), 424242, (( (: )) :)"
-    with pytest.raises(TypeError, match="xpath"):
-        cts.search(attack, cts.true_query())
+    code, variables = cts.search(attack, cts.true_query()).compile()
+    assert attack not in code
+    assert attack in variables.values()
+    assert "cts:valid-extract-path" in code
     code, variables = cts.word_query(attack).compile()
     assert attack not in code
     assert variables == {"v0": attack}
     source = "/Q{urn:example}item (: a valid ) comment :)"
-    assert source in cts.search(xpath(source)).compile()[0]
+    assert source in cts.search(xpath(source)).compile()[1].values()
 
 
 @pytest.mark.parametrize(("source", "error"), [(1, TypeError), ("  ", ValueError)])
@@ -177,7 +192,7 @@ def test_omitted_optional_slots_are_distinct_from_empty_sequences():
 
 
 @pytest.mark.parametrize(
-    ("lo", "hi", "error"),
+    ("start", "end", "error"),
     [
         (True, 2, TypeError),
         (1, False, TypeError),
@@ -187,13 +202,13 @@ def test_omitted_optional_slots_are_distinct_from_empty_sequences():
         (3, 2, ValueError),
     ],
 )
-def test_window_rejects_invalid_positions(lo, hi, error):
+def test_range_rejects_invalid_positions(start, end, error):
     with pytest.raises(error):
-        cts.search().window(lo, hi)
+        cts.search().range(start, end)
 
 
-def test_window_composes_inside_count_and_root_defaults_to_database():
-    expr = fn.count(cts.search(query=cts.false_query()).window(2, 5))
+def test_range_composes_inside_count_and_root_defaults_to_database():
+    expr = fn.count(cts.search(query=cts.false_query()).range(2, 5))
     assert str(expr).endswith("fn:count((cts:search((/), cts:false-query()))[2 to 5])")
 
 

@@ -439,29 +439,31 @@ def as_expr(value, *, cast: str | None = None) -> Expr:
     return _FunctionCall(cast, (expr,)) if cast else expr
 
 
-def _scalar(value) -> Atom:  # noqa: PLR0911 - one explicit conversion per supported type
+def _scalar(value) -> Atom:
     """Encode scalars without losing precision in the JSON transport."""
     if isinstance(value, bool):
-        return Atom(value, "xs:boolean")
-    if isinstance(value, int):
-        return Atom(str(value), "xs:integer")
-    if isinstance(value, float):
+        atom = Atom(value, "xs:boolean")
+    elif isinstance(value, int):
+        atom = Atom(str(value), "xs:integer")
+    elif isinstance(value, float):
         lexical = (
             ("NaN" if math.isnan(value) else "INF" if value > 0 else "-INF")
             if not math.isfinite(value)
             else repr(value)
         )
-        return Atom(lexical, "xs:double")
-    if isinstance(value, decimal.Decimal):
+        atom = Atom(lexical, "xs:double")
+    elif isinstance(value, decimal.Decimal):
         if not value.is_finite():
             message = "xs:decimal requires a finite Decimal"
             raise ValueError(message)
-        return Atom(format(value, "f"), "xs:decimal")
-    if isinstance(value, datetime.datetime):
-        return Atom(value.isoformat(), "xs:dateTime")
-    if isinstance(value, datetime.date):
-        return Atom(value.isoformat(), "xs:date")
-    if isinstance(value, str):
-        return Atom(value)
-    message = f"unsupported XQuery value type: {type(value).__name__}"
-    raise TypeError(message)
+        atom = Atom(format(value, "f"), "xs:decimal")
+    elif isinstance(value, datetime.datetime):
+        atom = Atom(value.isoformat(), "xs:dateTime")
+    elif isinstance(value, datetime.date):
+        atom = Atom(value.isoformat(), "xs:date")
+    elif isinstance(value, str):
+        atom = Atom(value)
+    else:
+        message = f"unsupported XQuery value type: {type(value).__name__}"
+        raise TypeError(message)
+    return atom

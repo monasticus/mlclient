@@ -123,14 +123,14 @@ def test_qname_sequences_and_namespaced_nested_arguments():
     assert list(variables.values()) == ["a", "urn:x", "b", "one", "two"]
 
 
-def test_point_uses_wkt_as_text_and_numeric_coordinates_as_floats():
+def test_point_preserves_wkt_and_uses_typed_numeric_coordinates():
     wkt_code, wkt_variables = cts.point("POINT (20 10)").compile()
     point_code, point_variables = cts.point(10, 20).compile()
 
     assert wkt_code.endswith("cts:point($v0)")
     assert wkt_variables == {"v0": "POINT (20 10)"}
     assert point_code.endswith(
-        "cts:point(xs:float($v0), xs:float($v1))",
+        "cts:point($v0, $v1)",
     )
     assert point_variables == {"v0": "10", "v1": "20"}
 

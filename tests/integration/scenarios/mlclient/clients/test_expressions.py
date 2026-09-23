@@ -104,7 +104,7 @@ def test_scalar_roundtrips_and_sequence_composition(expression_database):
     assert evaluate(fn.exists([])) is False
     assert evaluate(fn.empty(None)) is True
     assert evaluate(xs.integer(2**60 + 1)) == 2**60 + 1
-    with pytest.raises(MarkLogicError, match="XDMP-CAST"):
+    with pytest.raises(MarkLogicError, match="XDMP-AS"):
         evaluate(xs.integer(2**80))
     assert evaluate(xs.decimal(Decimal("1.234567890123456789"))) == Decimal(
         "1.234567890123456789",
@@ -127,12 +127,12 @@ def test_search_lexicons_ranges_and_namespace_composition(expression_database):
         [
             cts.collection_query("cts-test"),
             cts.element_range_query(
-                xs.qname("price", "urn:cts-test"),
+                fn.qname("urn:cts-test", "price"),
                 ">=",
                 Decimal("1.25"),
             ),
             cts.element_range_query(
-                xs.qname("day", "urn:cts-test"),
+                fn.qname("urn:cts-test", "day"),
                 ">=",
                 date(2026, 1, 1),
             ),
@@ -162,7 +162,7 @@ def test_search_lexicons_ranges_and_namespace_composition(expression_database):
         service.uris(query, start="/cts-test/b.xml", database=database)
         == "/cts-test/b.xml"
     )
-    ref = cts.element_reference(xs.qname("price", "urn:cts-test"))
+    ref = cts.element_reference(fn.qname("urn:cts-test", "price"))
     values = cts.values(ref)
     assert ml.eval.expression(fn.count(values), database=database) == 2
     assert ml.eval.expression(fn.exists(values), database=database) is True
@@ -233,7 +233,7 @@ def test_search_lexicons_ranges_and_namespace_composition(expression_database):
 def test_native_version_support_is_reported_by_server(expression_database):
     ml, database, _ = expression_database
     major = int(ml.eval.xquery("xdmp:version()").split(".")[0])
-    expr = cts.search(query=cts.document_root_query(xs.qname("item", "urn:cts-test")))
+    expr = cts.search(query=cts.document_root_query(fn.qname("urn:cts-test", "item")))
     if major < 11:
         with pytest.raises(MarkLogicError, match="XDMP-UNDFUN"):
             ml.eval.expression(expr, database=database)
@@ -254,8 +254,8 @@ def test_native_version_support_is_reported_by_server(expression_database):
 def test_geospatial_and_triple_native_contracts(expression_database):
     ml, database, _ = expression_database
     pairs = cts.geospatial_co_occurrences(
-        xs.qname("origin", "urn:cts-test"),
-        xs.qname("destination", "urn:cts-test"),
+        fn.qname("urn:cts-test", "origin"),
+        fn.qname("urn:cts-test", "destination"),
     )
     result = ml.eval.expression(pairs, database=database)
     assert result.tag == "{http://marklogic.com/cts}co-occurrence"
@@ -295,7 +295,7 @@ def test_extended_cts_catalog_executes_through_the_common_evaluator(
 ):
     ml, database, _ = expression_database
     query = cts.collection_query("cts-test")
-    price = cts.element_reference(xs.qname("price", "urn:cts-test"))
+    price = cts.element_reference(fn.qname("urn:cts-test", "price"))
 
     assert ml.eval.expression(cts.contains(xpath("<p>alpha</p>"), query)) is False
     assert (
@@ -348,6 +348,10 @@ async def test_async_execution_uses_the_same_composable_expressions(
     _, database, port = expression_database
     async with AsyncMLClient(port=port) as ml:
         query = cts.collection_query("cts-test")
+        service = AsyncCtsService(ml.rest)
+        uris = await service.uris(query, database=database)
+        assert await service.uris(query, index=fn.last(), database=database) == uris[-1]
+        assert await service.uris(query, index=100, database=database) == []
         assert (
             await ml.eval.expression(
                 fn.count(cts.search(query=query)),
@@ -460,3 +464,37 @@ async def test_async_namespace_defaults_overrides_and_guard(expression_database)
         ) == 2
         with pytest.raises(MarkLogicError, match="MLCLIENT-INVALID-PATH"):
             await service.search("/absent:item", database=database)
+
+
+def test_position_context_and_service_index(expression_database):
+    ml, database, _ = expression_database
+    expression = xpath("(10, 20, 30)")
+    for position, expected in [(1, 10), (fn.last(), 30), (4, [])]:
+        assert ml.eval.expression(expression.index(position)) == expected
+    assert ml.eval.expression(expression.range(2, fn.last())) == [20, 30]
+    assert ml.eval.expression(expression.range(fn.last(), fn.last())) == 30
+    assert ml.eval.expression(expression.range(4, fn.last())) == []
+    service = CtsService(ml.rest)
+    uris = service.uris(database=database)
+    assert service.uris(index=1, database=database) == uris[0]
+    assert service.uris(index=fn.last(), database=database) == uris[-1]
+    assert service.uris(index=100, database=database) == []
+    assert service.uris(range=[2, fn.last()], database=database) == uris[1:]
+
+
+def test_decimal_parsing_and_qname_constructors(expression_database):
+    ml, database, _ = expression_database
+    expected = Decimal("0.1234567890123456789")
+    assert ml.eval.xquery('xs:decimal("0.1234567890123456789")') == expected
+    assert ml.eval.expression(xs.decimal(expected)) == expected
+    names = {"p": "urn:cts-test"}
+    assert ml.eval.expression(
+        xs.string(xs.qname("p:item")), namespaces=names,
+    ) == "p:item"
+    assert ml.eval.expression(xs.string(fn.qname("urn:cts-test", "p:item"))) == "p:item"
+    assert ml.eval.expression(
+        fn.count(cts.search(
+            query=cts.element_query(xs.qname("item"), cts.true_query()),
+        )),
+        namespaces={"": "urn:cts-test"}, database=database,
+    ) == 2

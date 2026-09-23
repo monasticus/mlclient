@@ -1,13 +1,13 @@
 """XML Schema type constructors as expression builders (``xs:`` namespace).
 
-Each wraps a runtime value so it reaches MarkLogic with an explicit type rather
-than the default ``xs:untypedAtomic`` an undeclared external variable carries.
+Python scalars use typed external variables. These constructors explicitly
+convert scalar values or composed expressions to the requested XQuery type.
 """
 
 from __future__ import annotations
 
 from mlclient._experimental import experimental
-from mlclient.functions.xqy._expr import Expr, _FunctionCall, as_expr
+from mlclient.functions.xqy._expr import Expr, as_expr
 
 
 @experimental()
@@ -15,26 +15,25 @@ class Xs:
     """Pure ``xs:`` type constructors returning expression trees."""
 
     @staticmethod
-    def qname(local: str | Expr, uri: str | Expr | None = None) -> Expr:
-        """Build a qualified name; with ``uri`` uses ``fn:QName`` for both parts.
+    def qname(lexical: str | Expr) -> Expr:
+        """Construct an xs:QName using the expression's namespace declarations.
 
         Parameters
         ----------
-        local : str | Expr
-            Lexical QName, optionally including a prefix.
-        uri : str | Expr | None
-            Namespace URI; when supplied, construct the name with fn:QName.
+        lexical : str | Expr
+            Lexical QName, optionally prefixed. The prefix must be declared
+            through the expression's namespaces argument.
 
         Returns
         -------
         Expr
-            Immutable expression; no request is sent until it is evaluated.
+            Native xs:QName constructor. Use fn.qname for an explicit URI.
+
+        Notes
+        -----
+        Native reference: https://docs.marklogic.com/xs:QName
         """
-        return (
-            _FunctionCall("fn:QName", (uri, local))
-            if uri is not None
-            else as_expr(local, cast="xs:QName")
-        )
+        return as_expr(lexical, cast="xs:QName")
 
     @staticmethod
     def integer(value) -> Expr:

@@ -106,8 +106,7 @@ class EvalService:
         )
         if not response.is_success:
             raise MarkLogicError(MLResponseParser.parse(response))
-        items = MLResponseParser.parse_sequence(response, output_type)
-        return items[0] if len(items) == 1 else items
+        return MLResponseParser.parse(response, output_type)
 
     def xquery(
         self,
@@ -692,8 +691,7 @@ class AsyncEvalService:
         )
         if not response.is_success:
             raise MarkLogicError(MLResponseParser.parse(response))
-        items = MLResponseParser.parse_sequence(response, output_type)
-        return items[0] if len(items) == 1 else items
+        return MLResponseParser.parse(response, output_type)
 
     async def xquery(
         self,

@@ -39,8 +39,28 @@ def _qname(value) -> Expr:
     return value if isinstance(value, Expr) else xs.qname(value)
 
 
-def _operator(value) -> Expr:
-    """Validate a literal range comparison operator; expressions stay composable."""
+def _operator(value, *, required: bool = True) -> Expr | None:
+    """Validate a range comparison operator, preserving expression composition.
+
+    Parameters
+    ----------
+    value : str | Expr | None
+        Literal comparison operator or an expression evaluated by MarkLogic.
+    required : bool, default True
+        Whether None is invalid. False preserves None as an omitted argument.
+
+    Returns
+    -------
+    Expr | None
+        Validated operator expression, or None for an omitted optional operator.
+
+    Raises
+    ------
+    ValueError
+        For an unsupported literal or a missing required operator.
+    """
+    if value is None and not required:
+        return None
     if isinstance(value, Expr):
         return value
     if value not in _RANGE_OPERATORS:
@@ -1021,7 +1041,7 @@ class Cts:
             "cts:column-range-query",
             (schema, view, column, value),
             (
-                _operator(operator) if operator is not None else None,
+                _operator(operator, required=False),
                 options,
                 _double(weight),
             ),

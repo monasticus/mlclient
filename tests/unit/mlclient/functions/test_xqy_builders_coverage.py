@@ -91,10 +91,10 @@ def test_existing_builders_preserve_native_arguments(expr, native, bindings):
 
 def test_late_arguments_keep_native_position():
     assert str(cts.estimate(maximum=5)).endswith(
-        "cts:estimate((), (), (), (), xs:double(xs:integer($v0)))",
+        "cts:estimate((), (), (), (), xs:double($v0))",
     )
     assert str(cts.near_query([], distance_weight=1.5)).endswith(
-        "cts:near-query((), (), (), xs:double($v0))",
+        "cts:near-query((), (), (), $v0)",
     )
     assert cts.path_reference("/x", namespaces=xpath("map:map()")).render(
         _CompileContext(),

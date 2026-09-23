@@ -59,77 +59,28 @@ class MLResponseParser:
     _PLAIN_TEXT_PARSERS: ClassVar[dict] = {
         const.HEADER_PRIMITIVE_STRING: lambda data: data,
         const.HEADER_PRIMITIVE_INTEGER: int,
-        const.HEADER_PRIMITIVE_DECIMAL: float,
-        const.HEADER_PRIMITIVE_BOOLEAN: lambda data: data.lower() == "true",
-        const.HEADER_PRIMITIVE_DATE: lambda data: datetime.strptime(
-            data,
-            "%Y-%m-%d%z",
-        ).date(),
-        const.HEADER_PRIMITIVE_DATE_TIME: lambda data: datetime.strptime(
-            data,
-            "%Y-%m-%dT%H:%M:%S.%f%z",
-        ),
         None: lambda data: data,
+        const.HEADER_PRIMITIVE_BYTE: int,
+        const.HEADER_PRIMITIVE_SHORT: int,
+        const.HEADER_PRIMITIVE_INT: int,
+        const.HEADER_PRIMITIVE_LONG: int,
+        const.HEADER_PRIMITIVE_NON_POSITIVE_INTEGER: int,
+        const.HEADER_PRIMITIVE_NEGATIVE_INTEGER: int,
+        const.HEADER_PRIMITIVE_NON_NEGATIVE_INTEGER: int,
+        const.HEADER_PRIMITIVE_POSITIVE_INTEGER: int,
+        const.HEADER_PRIMITIVE_UNSIGNED_BYTE: int,
+        const.HEADER_PRIMITIVE_UNSIGNED_SHORT: int,
+        const.HEADER_PRIMITIVE_UNSIGNED_INT: int,
+        const.HEADER_PRIMITIVE_UNSIGNED_LONG: int,
+        const.HEADER_PRIMITIVE_DECIMAL: Decimal,
+        const.HEADER_PRIMITIVE_DOUBLE: float,
+        const.HEADER_PRIMITIVE_FLOAT: float,
+        const.HEADER_PRIMITIVE_BOOLEAN: lambda data: data in ("true", "1"),
+        const.HEADER_PRIMITIVE_DATE: lambda data: date.fromisoformat(data[:10]),
+        const.HEADER_PRIMITIVE_DATE_TIME: lambda data: datetime.fromisoformat(
+            data.replace("Z", "+00:00"),
+        ),
     }
-
-    _SEQUENCE_TEXT_PARSERS: ClassVar[dict] = {
-        **_PLAIN_TEXT_PARSERS,
-        "byte": int,
-        "short": int,
-        "int": int,
-        "long": int,
-        "nonPositiveInteger": int,
-        "negativeInteger": int,
-        "nonNegativeInteger": int,
-        "positiveInteger": int,
-        "unsignedByte": int,
-        "unsignedShort": int,
-        "unsignedInt": int,
-        "unsignedLong": int,
-        "decimal": Decimal,
-        "double": float,
-        "float": float,
-        "boolean": lambda data: data in ("true", "1"),
-        "date": lambda data: date.fromisoformat(data[:10]),
-        "dateTime": lambda data: datetime.fromisoformat(data.replace("Z", "+00:00")),
-    }
-
-    @classmethod
-    def parse_sequence(
-        cls,
-        response: Response,
-        output_type: type | None = None,
-    ) -> list:
-        """Parse a successful eval response without collapsing its outer sequence.
-
-        Parameters
-        ----------
-        response : Response
-            Successful HTTP eval response; errors must be handled by the caller.
-        output_type : type | None, default None
-            ``str`` or ``bytes`` overrides item conversion. Otherwise decimals
-            retain precision and date/time values accept optional zones/fractions.
-
-        Returns
-        -------
-        list
-            One entry per result item. A single JSON array remains one item.
-            XML nodes use the normal parser; unsupported primitives remain bytes.
-            Python dates omit timezone information; datetimes preserve it.
-        """
-        response.raise_for_status()
-        if output_type not in (None, str, bytes):
-            message = "output_type must be None, str or bytes"
-            raise ValueError(message)
-        if not response.content:
-            return []
-        content_type = response.headers.get(const.HEADER_NAME_CONTENT_TYPE, "")
-        parts = (
-            decode_multipart_mixed(response.content, content_type)
-            if content_type.startswith(const.HEADER_MULTIPART_MIXED)
-            else [response]
-        )
-        return [cls._parse_part(part, output_type, precise=True) for part in parts]
 
     @classmethod
     def parse(
@@ -141,6 +92,7 @@ class MLResponseParser:
         | str
         | int
         | float
+        | Decimal
         | bool
         | dict
         | ElemTree.ElementTree
@@ -158,13 +110,15 @@ class MLResponseParser:
 
         Returns
         -------
-        bytes | str | int | float | bool | dict |
+        bytes | str | int | float | Decimal | bool | dict |
         ElemTree.ElementTree | ElemTree.Element |
         list
-            A parsed response body
+            A parsed response body. xs:decimal retains precision as Decimal;
+            xs:float and xs:double become float. Empty results return [],
+            singletons return their item, and multiple items return a list.
         """
         logger.debug("Attempt to parse a response")
-        if response.is_success and int(response.headers.get("Content-Length", -1)) == 0:
+        if response.is_success and not response.content:
             logger.fine("No content to parse")
             return []
 
@@ -196,7 +150,7 @@ class MLResponseParser:
             A parsed response body with headers
         """
         logger.debug("Attempt to parse a response")
-        if response.is_success and int(response.headers.get("Content-Length", -1)) == 0:
+        if response.is_success and not response.content:
             logger.fine("No content to parse")
             return response.headers, []
 
@@ -263,6 +217,7 @@ class MLResponseParser:
         | str
         | int
         | float
+        | Decimal
         | bool
         | dict
         | ElemTree.ElementTree
@@ -279,10 +234,12 @@ class MLResponseParser:
 
         Returns
         -------
-        bytes | str | int | float | bool | dict |
+        bytes | str | int | float | Decimal | bool | dict |
         ElemTree.ElementTree | ElemTree.Element |
         list | tuple
-            A parsed response body
+            A parsed response body. xs:decimal retains precision as Decimal;
+            xs:float and xs:double become float. Empty results return [],
+            singletons return their item, and multiple items return a list.
         """
         content_type = response.headers.get(const.HEADER_NAME_CONTENT_TYPE, "")
         if not response.is_success:
@@ -474,13 +431,12 @@ class MLResponseParser:
         body_part: MultipartPart | Response,
         output_type: type | None = None,
         with_headers: bool = False,
-        *,
-        precise: bool = False,
     ) -> (
         bytes
         | str
         | int
         | float
+        | Decimal
         | bool
         | dict
         | ElemTree.ElementTree
@@ -499,7 +455,7 @@ class MLResponseParser:
 
         Returns
         -------
-        bytes | str | int | float | bool | dict |
+        bytes | str | int | float | Decimal | bool | dict |
         ElemTree.ElementTree | ElemTree.Element |
         list | tuple
             A parsed response body or body part
@@ -517,7 +473,7 @@ class MLResponseParser:
             parsed = body_part.text
             logger.fine("Response part parsed to text value: [%s]", parsed)
         else:
-            parsed = cls._parse_type_specific(body_part, headers, precise=precise)
+            parsed = cls._parse_type_specific(body_part, headers)
             logger.fine("Response part parsed value: [%s]", parsed)
 
         if not with_headers:
@@ -529,13 +485,12 @@ class MLResponseParser:
         cls,
         body_part: MultipartPart | Response,
         headers: Headers,
-        *,
-        precise: bool = False,
     ) -> (
         bytes
         | str
         | int
         | float
+        | Decimal
         | bool
         | dict
         | ElemTree.ElementTree
@@ -554,7 +509,7 @@ class MLResponseParser:
 
         Returns
         -------
-        bytes | str | int | float | bool | dict |
+        bytes | str | int | float | Decimal | bool | dict |
         ElemTree.ElementTree | ElemTree.Element |
         list | tuple
             A parsed response body or body part
@@ -562,7 +517,7 @@ class MLResponseParser:
         content_type = headers.get(const.HEADER_NAME_CONTENT_TYPE)
         primitive_type = headers.get(const.HEADER_NAME_PRIMITIVE)
         doc_type = Mimetypes.get_doc_type(content_type)
-        parsers = cls._SEQUENCE_TEXT_PARSERS if precise else cls._PLAIN_TEXT_PARSERS
+        parsers = cls._PLAIN_TEXT_PARSERS
         if doc_type == DocumentType.TEXT and primitive_type in parsers:
             return parsers[primitive_type](body_part.text)
         if doc_type == DocumentType.JSON:

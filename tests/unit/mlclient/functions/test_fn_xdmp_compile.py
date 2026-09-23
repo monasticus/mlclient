@@ -30,7 +30,7 @@ def test_composed_namespaces_keep_the_entire_tree():
         ([], "fn:count(())"),
         ((), "fn:count(())"),
         ("abc", "fn:count($v0)"),
-        ([1, 2], "fn:count((xs:integer($v0), xs:integer($v1)))"),
+        ([1, 2], "fn:count(($v0, $v1))"),
     ],
 )
 def test_uniform_sequence_semantics(value, suffix):

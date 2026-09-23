@@ -79,13 +79,6 @@ def _depth(value) -> Expr:
     return as_expr(value, cast="xs:string")
 
 
-def _point_coordinate(value) -> Expr:
-    """Keep WKT strings intact and cast numeric point coordinates to float."""
-    if isinstance(value, (str, Expr)):
-        return as_expr(value)
-    return as_expr(value, cast="xs:float")
-
-
 @experimental()
 class Cts:
     """Pure builders for supported non-deprecated ``cts:`` functions."""
@@ -13119,8 +13112,8 @@ class Cts:
         """
         return _FunctionCall(
             "cts:point",
-            (_point_coordinate(latitude_or_wkt),),
-            (_point_coordinate(longitude) if longitude is not None else None,),
+            (latitude_or_wkt,),
+            (longitude,),
         )
 
     @staticmethod

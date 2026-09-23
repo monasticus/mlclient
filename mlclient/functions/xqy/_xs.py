@@ -12,7 +12,16 @@ from mlclient.functions.xqy._expr import Expr, as_expr
 
 @experimental()
 class Xs:
-    """Pure ``xs:`` type constructors returning expression trees."""
+    """Build native XML Schema atomic type constructors.
+
+    Each constructor accepts zero or one atomic value after atomization. Empty
+    input returns an empty sequence; invalid lexical forms and unsupported
+    conversions raise an error when MarkLogic evaluates the expression.
+
+    Notes
+    -----
+    Constructor contract: https://www.w3.org/TR/xpath-functions/#constructor-functions
+    """
 
     @staticmethod
     def qname(lexical: str | Expr) -> Expr:
@@ -31,7 +40,7 @@ class Xs:
 
         Notes
         -----
-        Native reference: https://docs.marklogic.com/xs:QName
+        Constructor contract: https://www.w3.org/TR/xpath-functions/#constructor-functions
         """
         return as_expr(lexical, cast="xs:QName")
 
@@ -49,6 +58,11 @@ class Xs:
         -------
         Expr
             Immutable expression; no request is sent until it is evaluated.
+
+        Notes
+        -----
+        Native signature: xs:integer($arg as xs:anyAtomicType?) as xs:integer?
+        Constructor contract: https://www.w3.org/TR/xpath-functions/#constructor-functions
         """
         return as_expr(value, cast="xs:integer")
 
@@ -66,6 +80,11 @@ class Xs:
         -------
         Expr
             Immutable expression; no request is sent until it is evaluated.
+
+        Notes
+        -----
+        Native signature: xs:double($arg as xs:anyAtomicType?) as xs:double?
+        Constructor contract: https://www.w3.org/TR/xpath-functions/#constructor-functions
         """
         return as_expr(value, cast="xs:double")
 
@@ -83,6 +102,11 @@ class Xs:
         -------
         Expr
             Immutable expression; no request is sent until it is evaluated.
+
+        Notes
+        -----
+        Native signature: xs:decimal($arg as xs:anyAtomicType?) as xs:decimal?
+        Constructor contract: https://www.w3.org/TR/xpath-functions/#constructor-functions
         """
         return as_expr(value, cast="xs:decimal")
 
@@ -100,6 +124,11 @@ class Xs:
         -------
         Expr
             Immutable expression; no request is sent until it is evaluated.
+
+        Notes
+        -----
+        Native signature: xs:dateTime($arg as xs:anyAtomicType?) as xs:dateTime?
+        Constructor contract: https://www.w3.org/TR/xpath-functions/#constructor-functions
         """
         return as_expr(value, cast="xs:dateTime")
 
@@ -117,6 +146,11 @@ class Xs:
         -------
         Expr
             Immutable expression; no request is sent until it is evaluated.
+
+        Notes
+        -----
+        Native signature: xs:date($arg as xs:anyAtomicType?) as xs:date?
+        Constructor contract: https://www.w3.org/TR/xpath-functions/#constructor-functions
         """
         return as_expr(value, cast="xs:date")
 
@@ -134,5 +168,10 @@ class Xs:
         -------
         Expr
             Immutable expression; no request is sent until it is evaluated.
+
+        Notes
+        -----
+        Native signature: xs:string($arg as xs:anyAtomicType?) as xs:string?
+        Constructor contract: https://www.w3.org/TR/xpath-functions/#constructor-functions
         """
         return as_expr(value, cast="xs:string")

@@ -498,3 +498,54 @@ def test_decimal_parsing_and_qname_constructors(expression_database):
         )),
         namespaces={"": "urn:cts-test"}, database=database,
     ) == 2
+
+
+def test_invalid_paths_cover_all_native_path_argument_families(expression_database):
+    ml, database, _ = expression_database
+    paths = [f"/unknown:path{number}" for number in range(5)]
+    expression = fn.count([
+        cts.geospatial_path_reference(paths[0]),
+        cts.geospatial_region_path_reference(paths[1]),
+        cts.path_geospatial_query(paths[2], cts.point(10, 20)),
+        cts.path_range_query(paths[3], "=", 1),
+        cts.path_reference(paths[4]),
+        xpath('fn:error(fn:QName("", "SHOULD-NOT-RUN"))'),
+    ])
+    with pytest.raises(MarkLogicError, match="MLCLIENT-INVALID-PATH") as error:
+        ml.eval.expression(expression, database=database)
+    for path in paths:
+        assert path in str(error.value)
+    assert "SHOULD-NOT-RUN" not in str(error.value)
+
+
+def test_fn_catalog_representative_native_execution(expression_database):
+    ml, database, _ = expression_database
+    assert ml.eval.expression(fn.concat("a", None, "b", "c")) == "abc"
+    assert ml.eval.expression(fn.substring("MarkLogic", 5, length=5)) == "Logic"
+    assert ml.eval.expression(fn.tokenize("a,b,c", ",")) == ["a", "b", "c"]
+    total = ml.eval.expression(fn.sum([Decimal("0.1"), Decimal("0.2")]))
+    assert total == Decimal("0.3")
+    assert ml.eval.expression(fn.subsequence([10, 20, 30, 40], 2, length=2)) == [20, 30]
+    assert ml.eval.expression(fn.head([])) == []
+    assert ml.eval.expression(fn.tail([1, 2, 3])) == [2, 3]
+    assert ml.eval.expression(fn.string(None)) == ""
+    assert ml.eval.expression(fn.count(fn.collection()), database=database) == 3
+    assert ml.eval.expression(fn.collection(None), database=database) == []
+    upper = fn.function_lookup(
+        fn.qname("http://www.w3.org/2005/xpath-functions", "upper-case"), 1,
+    )
+    assert ml.eval.expression(fn.function_arity(upper)) == 1
+    assert ml.eval.expression(fn.map(upper, ["a", "b"])) == ["A", "B"]
+    assert ml.eval.expression(fn.filter(
+        xpath("function($x) { $x gt 1 }"), [1, 2, 3],
+    )) == [2, 3]
+    assert ml.eval.expression(fn.fold_left(
+        xpath("function($sum, $x) { $sum + $x }"), 0, [1, 2, 3],
+    )) == 6
+    assert ml.eval.expression(fn.adjust_date_to_timezone(
+        xpath('xs:date("2026-01-02+02:00")'), timezone=None,
+    ), output_type=str) == "2026-01-02"
+    with pytest.raises(MarkLogicError, match="FN-TEST"):
+        ml.eval.expression(fn.error(
+            fn.qname("", "FN-TEST"), description="expected test error",
+        ))

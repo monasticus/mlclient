@@ -207,3 +207,32 @@ function. The server reports an unavailable function through `MarkLogicError`.
 Consult the [Cts reference][mlclient.functions.xqy.Cts] for supported functions
 and the [native MarkLogic reference](https://docs.marklogic.com/cts) for
 version-specific options.
+
+## FN composition
+
+The `fn` namespace mirrors all 148 functions in the MarkLogic function reference,
+including functions restricted to XSLT or the legacy `0.9-ml` dialect. Each method
+retains the native restrictions in its documentation. Expressions compile as
+`1.0-ml`; a legacy-only function does not become available in that dialect simply
+because it has a Python builder. Context functions such as `fn.last()` belong
+inside a predicate; XSLT grouping functions require the corresponding XSLT context.
+
+Python names use snake case: `fn.function_lookup`, `fn.date_time`, and `fn.qname`.
+Python keywords have a trailing underscore, for example `fn.not_` and the `in_`
+argument to `fn.analyze_string`. Optional arguments can be omitted; explicit
+`None` means an empty XQuery sequence. For example, `fn.collection()` uses the
+native default collection, while `fn.collection(None)` passes `()`.
+
+Higher-order functions such as `fn.map` and `fn.filter` accept XQuery function
+expressions, not Python callables:
+
+```python
+from mlclient import MLClient
+from mlclient.functions.xqy import fn
+
+with MLClient() as ml:
+    upper = fn.function_lookup(
+        fn.qname("http://www.w3.org/2005/xpath-functions", "upper-case"), 1,
+    )
+    result = ml.eval.expression(fn.map(upper, ["red", "blue"]))
+```

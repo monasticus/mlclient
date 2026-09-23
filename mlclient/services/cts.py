@@ -95,7 +95,7 @@ class CtsService(Cts):
         options=None,
         quality_weight=None,
         forest_ids=None,
-        range: Range | None = None,  # noqa: A002
+        range: Range | None = None,
         index: int | Expr | None = None,
         **kwargs,
     ) -> object:
@@ -162,7 +162,7 @@ class CtsService(Cts):
         options=None,
         quality_weight=None,
         forest_ids=None,
-        range: Range | None = None,  # noqa: A002
+        range: Range | None = None,
         index: int | Expr | None = None,
         **kwargs,
     ) -> object:
@@ -229,7 +229,7 @@ class CtsService(Cts):
         options=None,
         quality_weight=None,
         forest_ids=None,
-        range: Range | None = None,  # noqa: A002
+        range: Range | None = None,
         index: int | Expr | None = None,
         **kwargs,
     ) -> object:
@@ -372,7 +372,7 @@ class AsyncCtsService(Cts):
         options=None,
         quality_weight=None,
         forest_ids=None,
-        range: Range | None = None,  # noqa: A002
+        range: Range | None = None,
         index: int | Expr | None = None,
         **kwargs,
     ) -> object:
@@ -439,7 +439,7 @@ class AsyncCtsService(Cts):
         options=None,
         quality_weight=None,
         forest_ids=None,
-        range: Range | None = None,  # noqa: A002
+        range: Range | None = None,
         index: int | Expr | None = None,
         **kwargs,
     ) -> object:
@@ -506,7 +506,7 @@ class AsyncCtsService(Cts):
         options=None,
         quality_weight=None,
         forest_ids=None,
-        range: Range | None = None,  # noqa: A002
+        range: Range | None = None,
         index: int | Expr | None = None,
         **kwargs,
     ) -> object:

@@ -156,24 +156,21 @@ EXPECTED_EXPORTS = {
         "AsyncCtsService",
         "AsyncDocumentsService",
         "AsyncEvalService",
-        "AsyncFnService",
         "AsyncLogsService",
         "AsyncTransactionService",
-        "AsyncXdmpService",
         "CtsService",
         "DocumentsService",
         "EvalService",
-        "FnService",
         "LogLevelService",
         "LogsService",
         "TraceEvents",
         "TraceEventsService",
         "TransactionService",
-        "XdmpService",
         "async_open_transaction",
         "open_transaction",
     ],
-    "mlclient.functions": [
+    "mlclient.functions": [],
+    "mlclient.functions.xqy": [
         "Cts",
         "Expr",
         "Fn",
@@ -224,6 +221,8 @@ def test_canonical_exports(namespace, names):
 def test_imports_in_a_fresh_interpreter():
     imports = "\n".join(
         f"from {namespace} import {', '.join(names)}"
+        if names
+        else f"import {namespace}"
         for namespace, names in reversed(EXPECTED_EXPORTS.items())
     )
     subprocess.run([sys.executable, "-c", imports], check=True)

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pytest
 
-from mlclient.functions import cts, fn, xdmp, xpath, xs
+from mlclient.functions.xqy import cts, fn, xdmp, xs
 
 
 def test_composed_namespaces_keep_the_entire_tree():
@@ -16,11 +16,11 @@ def test_composed_namespaces_keep_the_entire_tree():
     assert str(xdmp.exists(cts.search(query=cts.true_query()))).endswith(
         "xdmp:exists(cts:search((/), cts:true-query()))",
     )
-    assert str(xdmp.exists(xpath("/Q{urn:x}item"))).endswith(
-        "xdmp:exists((/Q{urn:x}item))",
-    )
-    with pytest.raises(TypeError, match="xpath"):
-        xdmp.exists("/item")
+    code, bindings = xdmp.exists("/Q{urn:x}item").compile()
+    assert "cts:valid-extract-path" in code
+    assert "/Q{urn:x}item" in bindings.values()
+    with pytest.raises(TypeError, match="path string"):
+        xdmp.exists(42)
 
 
 @pytest.mark.parametrize(

@@ -30,17 +30,27 @@ class _CompileContext:
     def __init__(self):
         self._variables: dict[str, str | bool] = {}
         self._paths: list[tuple[str, str, str | None]] = []
+        self._types: dict[str, str] = {}
 
     @property
     def variables(self) -> dict[str, str | bool]:
         """Return a copy of scalar bindings without exposing compiler state."""
         return self._variables.copy()
 
-    def bind(self, value) -> str:
+    def bind(self, value, atomic_type: str = "xs:string") -> str:
         """Bind a JSON-compatible value and return its variable reference."""
         name = f"v{len(self._variables)}"
         self._variables[name] = value
+        self._types[name] = atomic_type
         return f"${name}"
+
+    @property
+    def declarations(self) -> str:
+        """Return typed declarations without exposing mutable compiler state."""
+        return "".join(
+            f"declare variable ${name} as {atomic_type} external;\n"
+            for name, atomic_type in self._types.items()
+        )
 
     def path(self, source: str, kind: str, namespaces: str | None = None) -> str:
         """Register a path binding for validation before executing the whole tree."""
@@ -178,20 +188,18 @@ class Expr(ABC):
         variables = ctx.variables
         prolog = 'xquery version "1.0-ml";\n'
         prolog += _namespace_declarations(bindings)
-        prolog += "".join(
-            f"declare variable ${name} external;\n" for name in variables
-        )
+        prolog += ctx.declarations
         return prolog + body, variables
 
-    def range(self, start: int, end: int) -> Expr:
+    def range(self, start: int | Expr, end: int | Expr) -> Expr:
         """Select inclusive, one-based positions ``start`` through ``end``.
 
         Parameters
         ----------
-        start : int
-            First position, at least one. Booleans are not positions.
-        end : int
-            Last position, at least ``start``.
+        start : int | Expr
+            Positive integer or fn.last(). Booleans are not positions.
+        end : int | Expr
+            Positive integer or fn.last(); literal bounds must be ordered.
 
         Returns
         -------
@@ -199,6 +207,22 @@ class Expr(ABC):
             A composable positional predicate, evaluated by MarkLogic.
         """
         return _Range(self, start, end)
+
+    def index(self, position: int | Expr) -> Expr:
+        """Select one item by its one-based position.
+
+        Parameters
+        ----------
+        position : int | Expr
+            Positive integer or fn.last(), evaluated inside the predicate.
+
+        Returns
+        -------
+        Expr
+            Selected item, or an empty sequence if the position does not exist.
+        """
+        _validate_position(position)
+        return _Index(self, position)
 
     def __str__(self) -> str:
         return self.compile()[0]
@@ -213,8 +237,7 @@ class Atom(Expr):
 
     def render(self, ctx: _CompileContext) -> str:
         """Bind the scalar and restore its XQuery type."""
-        ref = ctx.bind(self.value)
-        return f"{self.cast}({ref})" if self.cast else ref
+        return ctx.bind(self.value, self.cast or "xs:string")
 
 
 @dataclass(frozen=True)
@@ -228,25 +251,60 @@ class _Raw(Expr):
         return self.source
 
 
+def _validate_position(value: int | Expr) -> None:
+    """Require a positive integer or the native zero-argument fn:last call."""
+    if type(value) is int:
+        if value < 1:
+            message = "index/range positions must be positive"
+            raise ValueError(message)
+    elif not (
+        isinstance(value, _FunctionCall)
+        and value.fn == "fn:last"
+        and not value.args
+        and not value.optionals
+    ):
+        message = "index/range positions must be integers or fn.last()"
+        raise TypeError(message)
+
+
+@dataclass(frozen=True)
+class _Index(Expr):
+    """A single positional predicate."""
+
+    inner: Expr
+    position: int | Expr
+
+    def render(self, ctx: _CompileContext) -> str:
+        """Keep fn:last inside the selected sequence's predicate context."""
+        position = as_expr(self.position).render(ctx)
+        return f"({self.inner.render(ctx)})[{position}]"
+
+
 @dataclass(frozen=True)
 class _Range(Expr):
     """A lazy, inclusive positional predicate."""
 
     inner: Expr
-    start: int
-    end: int
+    start: int | Expr
+    end: int | Expr
 
     def __post_init__(self):
-        if type(self.start) is not int or type(self.end) is not int:
-            message = "range bounds must be integers, not booleans"
-            raise TypeError(message)
-        if self.start < 1 or self.end < self.start:
+        _validate_position(self.start)
+        _validate_position(self.end)
+        if (
+            type(self.start) is int
+            and type(self.end) is int
+            and self.end < self.start
+        ):
             message = "range bounds must satisfy 1 <= start <= end"
             raise ValueError(message)
 
     def render(self, ctx: _CompileContext) -> str:
-        """Render the inner expression with a positional predicate."""
-        return f"({self.inner.render(ctx)})[{self.start} to {self.end}]"
+        """Render bounds inside the predicate to preserve their context."""
+        inner = self.inner.render(ctx)
+        start = as_expr(self.start).render(ctx)
+        end = as_expr(self.end).render(ctx)
+        return f"({inner})[fn:position() = ({start} to {end})]"
 
 
 @dataclass(frozen=True)
@@ -375,6 +433,8 @@ def as_expr(value, *, cast: str | None = None) -> Expr:
     else:
         expr = _scalar(value)
     if isinstance(expr, Atom) and expr.cast == cast:
+        return expr
+    if isinstance(expr, _FunctionCall) and expr.fn == cast:
         return expr
     return _FunctionCall(cast, (expr,)) if cast else expr
 

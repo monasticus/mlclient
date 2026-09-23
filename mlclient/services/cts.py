@@ -15,11 +15,17 @@ from mlclient.services.eval import AsyncEvalService, EvalService
 if TYPE_CHECKING:
     from mlclient.api.rest import AsyncRestApi, RestApi
 
-Range = int | list[int] | tuple[int, int]
+Range = int | list[int | Expr] | tuple[int | Expr, int | Expr]
 _RANGE_BOUND_COUNT = 2
 
 
-def _ranged(expr: Expr, value: Range | None) -> Expr:
+def _ranged(expr: Expr, value: Range | None, index: int | Expr | None) -> Expr:
+    """Apply mutually exclusive server-side index or inclusive range."""
+    if index is not None:
+        if value is not None:
+            message = "index and range are mutually exclusive"
+            raise ValueError(message)
+        return expr.index(index)
     if value is None:
         return expr
     if type(value) is int:
@@ -90,6 +96,7 @@ class CtsService(Cts):
         quality_weight=None,
         forest_ids=None,
         range: Range | None = None,  # noqa: A002
+        index: int | Expr | None = None,
         **kwargs,
     ) -> object:
         """Run ``cts:search`` and return the parsed nodes.
@@ -97,8 +104,8 @@ class CtsService(Cts):
         Parameters
         ----------
         expression : str | Expr | None
-            Searchable node expression; None uses /. Wrap trusted source in
-            xpath.
+            Searchable path string or composed expression; None uses /.
+            Literal paths are validated before execution.
         query : Expr | str | None
             Native query expression; None supplies an empty query slot.
         options : str | Expr | list | tuple | None
@@ -108,9 +115,11 @@ class CtsService(Cts):
         forest_ids : int | Expr | list | tuple | None
             Native forest IDs; empty or omitted means all forests in the
             database.
-        range : int | list[int] | tuple[int, int] | None
-            One-based inclusive range: N means (1, N). None leaves the result
-            unsliced.
+        range : int | list | tuple | None
+            Inclusive [start, end]; bounds accept positive integers or fn.last().
+            N means [1, N]. Cannot be combined with index.
+        index : int | Expr | None
+            One-based positive position or fn.last(). Returns item or [].
         kwargs : dict
             Execution options: database, txid, output_type, timeout and namespaces.
             Unknown names fail.
@@ -125,6 +134,8 @@ class CtsService(Cts):
         ------
         TypeError
             For an unknown execution keyword or invalid input type.
+        ValueError
+            For invalid positions or simultaneous index and range.
         MarkLogicError
             For a server error, including missing indexes or unsupported functions.
         """
@@ -137,6 +148,7 @@ class CtsService(Cts):
                 forest_ids=forest_ids,
             ),
             range,
+            index,
         )
         return self._eval.expression(
             expr, **_execution_options(self._namespaces, kwargs),
@@ -151,6 +163,7 @@ class CtsService(Cts):
         quality_weight=None,
         forest_ids=None,
         range: Range | None = None,  # noqa: A002
+        index: int | Expr | None = None,
         **kwargs,
     ) -> object:
         """Run ``cts:uris`` and return the matching URIs; ``range`` slices lazily.
@@ -168,9 +181,11 @@ class CtsService(Cts):
         forest_ids : int | Expr | list | tuple | None
             Native forest IDs; empty or omitted means all forests in the
             database.
-        range : int | list[int] | tuple[int, int] | None
-            One-based inclusive range: N means (1, N). None leaves the result
-            unsliced.
+        range : int | list | tuple | None
+            Inclusive [start, end]; bounds accept positive integers or fn.last().
+            N means [1, N]. Cannot be combined with index.
+        index : int | Expr | None
+            One-based positive position or fn.last(). Returns item or [].
         kwargs : dict
             Execution options: database, txid, output_type, timeout and namespaces.
             Unknown names fail.
@@ -185,6 +200,8 @@ class CtsService(Cts):
         ------
         TypeError
             For an unknown execution keyword or invalid input type.
+        ValueError
+            For invalid positions or simultaneous index and range.
         MarkLogicError
             For a server error, including missing indexes or unsupported functions.
         """
@@ -197,6 +214,7 @@ class CtsService(Cts):
                 forest_ids=forest_ids,
             ),
             range,
+            index,
         )
         return self._eval.expression(
             expr, **_execution_options(self._namespaces, kwargs),
@@ -212,6 +230,7 @@ class CtsService(Cts):
         quality_weight=None,
         forest_ids=None,
         range: Range | None = None,  # noqa: A002
+        index: int | Expr | None = None,
         **kwargs,
     ) -> object:
         """Run ``cts:values`` and return the lexicon values.
@@ -231,9 +250,11 @@ class CtsService(Cts):
         forest_ids : int | Expr | list | tuple | None
             Native forest IDs; empty or omitted means all forests in the
             database.
-        range : int | list[int] | tuple[int, int] | None
-            One-based inclusive range: N means (1, N). None leaves the result
-            unsliced.
+        range : int | list | tuple | None
+            Inclusive [start, end]; bounds accept positive integers or fn.last().
+            N means [1, N]. Cannot be combined with index.
+        index : int | Expr | None
+            One-based positive position or fn.last(). Returns item or [].
         kwargs : dict
             Execution options: database, txid, output_type, timeout and namespaces.
             Unknown names fail.
@@ -248,6 +269,8 @@ class CtsService(Cts):
         ------
         TypeError
             For an unknown execution keyword or invalid input type.
+        ValueError
+            For invalid positions or simultaneous index and range.
         MarkLogicError
             For a server error, including missing indexes or unsupported functions.
         """
@@ -261,6 +284,7 @@ class CtsService(Cts):
                 forest_ids=forest_ids,
             ),
             range,
+            index,
         )
         return self._eval.expression(
             expr, **_execution_options(self._namespaces, kwargs),
@@ -349,6 +373,7 @@ class AsyncCtsService(Cts):
         quality_weight=None,
         forest_ids=None,
         range: Range | None = None,  # noqa: A002
+        index: int | Expr | None = None,
         **kwargs,
     ) -> object:
         """Run ``cts:search`` and return the parsed nodes.
@@ -356,8 +381,8 @@ class AsyncCtsService(Cts):
         Parameters
         ----------
         expression : str | Expr | None
-            Searchable node expression; None uses /. Wrap trusted source in
-            xpath.
+            Searchable path string or composed expression; None uses /.
+            Literal paths are validated before execution.
         query : Expr | str | None
             Native query expression; None supplies an empty query slot.
         options : str | Expr | list | tuple | None
@@ -367,9 +392,11 @@ class AsyncCtsService(Cts):
         forest_ids : int | Expr | list | tuple | None
             Native forest IDs; empty or omitted means all forests in the
             database.
-        range : int | list[int] | tuple[int, int] | None
-            One-based inclusive range: N means (1, N). None leaves the result
-            unsliced.
+        range : int | list | tuple | None
+            Inclusive [start, end]; bounds accept positive integers or fn.last().
+            N means [1, N]. Cannot be combined with index.
+        index : int | Expr | None
+            One-based positive position or fn.last(). Returns item or [].
         kwargs : dict
             Execution options: database, txid, output_type, timeout and namespaces.
             Unknown names fail.
@@ -384,6 +411,8 @@ class AsyncCtsService(Cts):
         ------
         TypeError
             For an unknown execution keyword or invalid input type.
+        ValueError
+            For invalid positions or simultaneous index and range.
         MarkLogicError
             For a server error, including missing indexes or unsupported functions.
         """
@@ -396,6 +425,7 @@ class AsyncCtsService(Cts):
                 forest_ids=forest_ids,
             ),
             range,
+            index,
         )
         return await self._eval.expression(
             expr, **_execution_options(self._namespaces, kwargs),
@@ -410,6 +440,7 @@ class AsyncCtsService(Cts):
         quality_weight=None,
         forest_ids=None,
         range: Range | None = None,  # noqa: A002
+        index: int | Expr | None = None,
         **kwargs,
     ) -> object:
         """Run ``cts:uris`` and return the matching URIs; ``range`` slices lazily.
@@ -427,9 +458,11 @@ class AsyncCtsService(Cts):
         forest_ids : int | Expr | list | tuple | None
             Native forest IDs; empty or omitted means all forests in the
             database.
-        range : int | list[int] | tuple[int, int] | None
-            One-based inclusive range: N means (1, N). None leaves the result
-            unsliced.
+        range : int | list | tuple | None
+            Inclusive [start, end]; bounds accept positive integers or fn.last().
+            N means [1, N]. Cannot be combined with index.
+        index : int | Expr | None
+            One-based positive position or fn.last(). Returns item or [].
         kwargs : dict
             Execution options: database, txid, output_type, timeout and namespaces.
             Unknown names fail.
@@ -444,6 +477,8 @@ class AsyncCtsService(Cts):
         ------
         TypeError
             For an unknown execution keyword or invalid input type.
+        ValueError
+            For invalid positions or simultaneous index and range.
         MarkLogicError
             For a server error, including missing indexes or unsupported functions.
         """
@@ -456,6 +491,7 @@ class AsyncCtsService(Cts):
                 forest_ids=forest_ids,
             ),
             range,
+            index,
         )
         return await self._eval.expression(
             expr, **_execution_options(self._namespaces, kwargs),
@@ -471,6 +507,7 @@ class AsyncCtsService(Cts):
         quality_weight=None,
         forest_ids=None,
         range: Range | None = None,  # noqa: A002
+        index: int | Expr | None = None,
         **kwargs,
     ) -> object:
         """Run ``cts:values`` and return the lexicon values.
@@ -490,9 +527,11 @@ class AsyncCtsService(Cts):
         forest_ids : int | Expr | list | tuple | None
             Native forest IDs; empty or omitted means all forests in the
             database.
-        range : int | list[int] | tuple[int, int] | None
-            One-based inclusive range: N means (1, N). None leaves the result
-            unsliced.
+        range : int | list | tuple | None
+            Inclusive [start, end]; bounds accept positive integers or fn.last().
+            N means [1, N]. Cannot be combined with index.
+        index : int | Expr | None
+            One-based positive position or fn.last(). Returns item or [].
         kwargs : dict
             Execution options: database, txid, output_type, timeout and namespaces.
             Unknown names fail.
@@ -507,6 +546,8 @@ class AsyncCtsService(Cts):
         ------
         TypeError
             For an unknown execution keyword or invalid input type.
+        ValueError
+            For invalid positions or simultaneous index and range.
         MarkLogicError
             For a server error, including missing indexes or unsupported functions.
         """
@@ -520,6 +561,7 @@ class AsyncCtsService(Cts):
                 forest_ids=forest_ids,
             ),
             range,
+            index,
         )
         return await self._eval.expression(
             expr, **_execution_options(self._namespaces, kwargs),

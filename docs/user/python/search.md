@@ -56,6 +56,34 @@ on the server. Empty results return `[]`, a single result returns the item,
 and multiple results return a list. `estimate` returns one integer. The methods also accept evaluation options such as `database`
 and `timeout`.
 
+## Select one result
+
+```python
+from mlclient import MLClient
+from mlclient.functions.xqy import fn
+from mlclient.services import CtsService
+
+with MLClient() as ml:
+    cts = CtsService(ml.rest)
+    first = cts.search(query=cts.collection_query("products"), index=1)
+    last_uri = cts.uris(cts.collection_query("products"), index=fn.last())
+    remaining = cts.uris(
+        cts.collection_query("products"), range=[2, fn.last()],
+    )
+```
+
+`index` and range bounds accept positive integers or `fn.last()`. Using both
+`index` and `range` raises `ValueError`. A missing position returns `[]`.
+`fn.last()` uses the size of the sequence being selected and may require counting
+all results. Builders also support `.index(...)` and `.range(start, end)`.
+
+Python scalar values are bound as typed external variables. For QNames, use
+`xs.qname("p:item")` with a declared prefix, or `fn.qname("urn:products", "p:item")`
+to supply the namespace URI explicitly.
+
+Both `ml.eval.expression` and `ml.eval.xquery` preserve `xs:decimal` values as
+Python `Decimal`. `xs:float` and `xs:double` return Python `float`.
+
 ## Compose CTS under another function
 
 When CTS is part of a larger expression, use the XQuery namespace singletons

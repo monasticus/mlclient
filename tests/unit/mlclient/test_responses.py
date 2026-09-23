@@ -1,6 +1,7 @@
 import xml.etree.ElementTree as ElemTree
 import zlib
 from datetime import date, datetime
+from decimal import Decimal
 
 import httpx
 import pytest
@@ -1330,8 +1331,8 @@ def test_parse_single_plain_text_decimal_response(ml):
     resp = ml.rest.eval.post(xquery="1.1")
     parsed_resp = MLResponseParser.parse(resp)
 
-    assert isinstance(parsed_resp, float)
-    assert parsed_resp == 1.1
+    assert isinstance(parsed_resp, Decimal)
+    assert parsed_resp == Decimal("1.1")
 
 
 @ml_mock
@@ -1357,8 +1358,8 @@ def test_parse_with_headers_single_plain_text_decimal_response(ml):
     resp = ml.rest.eval.post(xquery="1.1")
     headers, parsed_resp = MLResponseParser.parse_with_headers(resp)
 
-    assert isinstance(parsed_resp, float)
-    assert parsed_resp == 1.1
+    assert isinstance(parsed_resp, Decimal)
+    assert parsed_resp == Decimal("1.1")
     assert headers == {
         "Content-Type": "text/plain",
         "X-Primitive": "decimal",

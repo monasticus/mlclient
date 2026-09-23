@@ -51,10 +51,10 @@ def test_values_are_json_safe_and_keep_precision():
         "v8": "1.25",
     }
     assert code.startswith('xquery version "1.0-ml";\n')
-    assert "xs:integer($v1)" in code
-    assert "xs:decimal($v2)" in code
-    assert "xs:date($v3)" in code
-    assert "xs:dateTime($v4)" in code
+    assert "declare variable $v1 as xs:integer external;" in code
+    assert "declare variable $v2 as xs:decimal external;" in code
+    assert "declare variable $v3 as xs:date external;" in code
+    assert "declare variable $v4 as xs:dateTime external;" in code
 
 
 @pytest.mark.parametrize("value", [Decimal("NaN"), Decimal("Infinity")])
@@ -96,7 +96,7 @@ def test_sequence_snapshot_and_nested_casts():
     values.append("last")
     assert expr.compile() == original
     assert (
-        "xs:string(fn:count(($v0, (xs:integer($v1), xs:integer($v2)))))" in original[0]
+        "xs:string(fn:count(($v0, ($v1, $v2))))" in original[0]
     )
     with pytest.raises(FrozenInstanceError):
         expr.fn = "fn:empty"
@@ -115,7 +115,7 @@ def test_options_never_split_strings_into_characters(options):
 
 def test_qname_sequences_and_namespaced_nested_arguments():
     expr = cts.element_value_query(
-        ["a", xs.qname(xs.string("b"), uri=xs.string("urn:x"))],
+        ["a", fn.qname(xs.string("urn:x"), xs.string("b"))],
         ["one", "two"],
     )
     code, variables = expr.compile()
@@ -130,7 +130,7 @@ def test_point_uses_wkt_as_text_and_numeric_coordinates_as_floats():
     assert wkt_code.endswith("cts:point($v0)")
     assert wkt_variables == {"v0": "POINT (20 10)"}
     assert point_code.endswith(
-        "cts:point(xs:float(xs:integer($v0)), xs:float(xs:integer($v1)))",
+        "cts:point(xs:float($v0), xs:float($v1))",
     )
     assert point_variables == {"v0": "10", "v1": "20"}
 
@@ -139,7 +139,7 @@ def test_point_accepts_composable_coordinate_expressions():
     code, _ = cts.point(xs.double(10), xs.double(20)).compile()
 
     assert code.endswith(
-        "cts:point(xs:double(xs:integer($v0)), xs:double(xs:integer($v1)))",
+        "cts:point(xs:double($v0), xs:double($v1))",
     )
 
 
@@ -147,8 +147,8 @@ def test_double_sequences_are_not_cast_as_singletons():
     code, variables = cts.percentile([1, 2], [0.25, 0.75]).compile()
 
     assert code.endswith(
-        "cts:percentile((xs:integer($v0), xs:integer($v1)), "
-        "(xs:double($v2), xs:double($v3)))",
+        "cts:percentile(($v0, $v1), "
+        "($v2, $v3))",
     )
     assert list(variables.values()) == ["1", "2", "0.25", "0.75"]
 
@@ -161,6 +161,23 @@ def test_optional_range_operator_is_validated_when_present():
     assert "xs:string($v4)" in code
 
 
+def test_optional_operator_none_preserves_native_argument_slots():
+    omitted = cts.column_range_query("s", "v", "c", 1)
+    explicit = cts.column_range_query("s", "v", "c", 1, operator=None)
+    assert explicit.compile() == omitted.compile()
+    assert str(explicit).endswith("cts:column-range-query($v0, $v1, $v2, $v3)")
+    code, variables = cts.column_range_query(
+        "s", "v", "c", 1, operator=None, options="cached",
+    ).compile()
+    assert code.endswith("cts:column-range-query($v0, $v1, $v2, $v3, (), $v4)")
+    assert variables["v4"] == "cached"
+
+
+def test_required_operator_none_is_rejected():
+    with pytest.raises(ValueError, match="unsupported range operator: None"):
+        cts.path_range_query("/price", None, 10)
+
+
 @pytest.mark.parametrize("operator", ["sameTerm", ["=", "=", "<"], (), []])
 def test_triple_operators_preserve_native_sequences(operator):
     expr = cts.triple_range_query([], [], 1, operator=operator)
@@ -169,7 +186,7 @@ def test_triple_operators_preserve_native_sequences(operator):
         "1",
         *([operator] if isinstance(operator, str) else operator),
     ]
-    assert "cts:triple-range-query((), (), xs:integer($v0), " in code
+    assert "cts:triple-range-query((), (), $v0, " in code
 
 
 def test_geospatial_co_occurrences_keeps_required_native_slots():
@@ -187,7 +204,7 @@ def test_omitted_optional_slots_are_distinct_from_empty_sequences():
     assert str(cts.word_query("x")).endswith("cts:word-query($v0)")
     assert str(cts.word_query("x", options=[])).endswith("cts:word-query($v0, ())")
     assert str(cts.word_query("x", weight=xs.double(2))).endswith(
-        "cts:word-query($v0, (), xs:double(xs:double(xs:integer($v1))))",
+        "cts:word-query($v0, (), xs:double($v1))",
     )
 
 
@@ -209,7 +226,9 @@ def test_range_rejects_invalid_positions(start, end, error):
 
 def test_range_composes_inside_count_and_root_defaults_to_database():
     expr = fn.count(cts.search(query=cts.false_query()).range(2, 5))
-    assert str(expr).endswith("fn:count((cts:search((/), cts:false-query()))[2 to 5])")
+    code, variables = expr.compile()
+    assert "[fn:position() = ($v0 to $v1)]" in code
+    assert variables == {"v0": "2", "v1": "5"}
 
 
 @pytest.mark.parametrize("operator", ["=<", "bad"])
@@ -221,3 +240,19 @@ def test_invalid_range_operators(operator):
 def test_invalid_directory_depth():
     with pytest.raises(ValueError, match="directory depth"):
         cts.directory_query("/test/", "2")
+
+
+@pytest.mark.parametrize("position", [True, 1.5, "1", fn.count([])])
+def test_index_rejects_non_positions(position):
+    with pytest.raises(TypeError, match="positions"):
+        cts.uris().index(position)
+
+
+def test_last_stays_inside_position_predicates():
+    assert str(cts.uris().index(fn.last())).endswith("(cts:uris())[fn:last()]")
+    assert "to fn:last())]" in str(cts.uris().range(1, fn.last()))
+    assert "(fn:last() to fn:last())]" in str(
+        cts.uris().range(fn.last(), fn.last()),
+    )
+    with pytest.raises(ValueError, match="positive"):
+        cts.uris().index(0)

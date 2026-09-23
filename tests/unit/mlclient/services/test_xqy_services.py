@@ -63,7 +63,7 @@ async def test_eval_collapses_only_the_outer_singleton(items, expected):
 
 
 @respx.mock
-def test_typed_items_and_raw_overrides_preserve_legacy_eval_behavior():
+def test_typed_items_and_raw_overrides_share_parser():
     items = [
         ("decimal", "text/plain", "1.234567890123456789"),
         ("double", "text/plain", "1.25"),
@@ -98,10 +98,7 @@ def test_typed_items_and_raw_overrides_preserve_legacy_eval_behavior():
         ]
     response = _response(items[0])
     response.request = httpx.Request("POST", "http://localhost/v1/eval")
-    assert isinstance(MLResponseParser.parse(response), float)
-    assert MLResponseParser.parse_sequence(response) == [Decimal(items[0][2])]
-    with pytest.raises(ValueError, match="output_type"):
-        MLResponseParser.parse_sequence(response, int)
+    assert MLResponseParser.parse(response) == Decimal(items[0][2])
 
 
 @respx.mock
@@ -171,6 +168,11 @@ async def test_async_expression_and_all_conveniences_share_execution_contract():
         assert await service.search(query=cts.true_query(), range=1) == 1
         assert await service.uris(range=[1, 2]) == 1
         assert await service.values(cts.uri_reference(), range=1) == 1
+        assert await service.search(index=1) == 1
+        assert await service.uris(index=fn.last()) == 1
+        assert await service.values(cts.uri_reference(), index=1) == 1
+        with pytest.raises(ValueError, match="mutually exclusive"):
+            await service.search(index=1, range=[1, 2])
         assert await service.estimate(maximum=1) == 1
         assert await ml.eval.expression(fn.count([1], maximum=1)) == 1
         route.mock(return_value=_response(("boolean", "text/plain", "true")))
@@ -190,6 +192,11 @@ def test_sync_conveniences_share_result_cardinality():
         assert service.search(range=1) == 1
         assert service.uris(range=[1, 2]) == 1
         assert service.values(cts.uri_reference()) == 1
+        assert service.search(index=1) == 1
+        assert service.uris(index=fn.last()) == 1
+        assert service.values(cts.uri_reference(), index=1) == 1
+        with pytest.raises(ValueError, match="mutually exclusive"):
+            service.uris(index=1, range=[1, 2])
         assert service.estimate() == 1
         assert ml.eval.expression(fn.count([1])) == 1
         route.mock(return_value=_response(("boolean", "text/plain", "true")))

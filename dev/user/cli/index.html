@@ -993,6 +993,8 @@
       
         
       
+        
+      
     
     
     
@@ -1481,6 +1483,34 @@
     
   
     log-level
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="trace-events/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    trace-events
   
 
     
@@ -5555,6 +5585,10 @@
       
         
       
+        
+      
+        
+      
     
     
     
@@ -5806,6 +5840,62 @@
     
   
     LogsService
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/mlclient/services/TraceEvents/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    TraceEvents
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/mlclient/services/TraceEventsService/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    TraceEventsService
   
 
     
@@ -7540,6 +7630,10 @@ command page.</p>
 <td><a href="log-level/"><code>ml log-level</code></a></td>
 </tr>
 <tr>
+<td>Inspect or change diagnostic trace events</td>
+<td><a href="trace-events/"><code>ml trace-events</code></a></td>
+</tr>
+<tr>
 <td>Check server health, once or continuously</td>
 <td><a href="health/"><code>ml health</code></a></td>
 </tr>
@@ -7552,7 +7646,7 @@ command page.</p>
 <p>Use <code>ml --help</code> for global options and <code>ml env init --help</code> (or another command)
 for its arguments. The pages above explain workflows, defaults and examples.</p>
 <h2 id="connection-and-target-selection">Connection and target selection<a class="headerlink" href="#connection-and-target-selection" title="Permanent link">&para;</a></h2>
-<p><code>http</code>, <code>eval</code>, <code>version</code> and <code>log-level</code> use <code>-c / --connection</code> to select a configured connection identifier or a TCP port. A numeric port changes the default REST connection's port and retains its other settings.</p>
+<p><code>http</code>, <code>eval</code>, <code>version</code>, <code>log-level</code> and <code>trace-events</code> use <code>-c / --connection</code> to select a configured connection identifier or a TCP port. A numeric port changes the default REST connection's port and retains its other settings.</p>
 <p><code>logs -s / --server</code> selects whose logs to read by an environment identifier or port. <code>log-level -s / --server</code> instead takes the actual App Server name in MarkLogic. It does not select the connection used for the request.</p>
 <p>Server commands default to the <code>local</code> environment; <code>-e / --environment</code> selects another environment.</p>
 <h2 id="global-options">Global options<a class="headerlink" href="#global-options" title="Permanent link">&para;</a></h2>

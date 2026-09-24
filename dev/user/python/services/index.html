@@ -783,6 +783,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#trace-events" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Trace events
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1084,6 +1095,8 @@
   
     
     
+      
+        
       
         
       
@@ -1415,6 +1428,34 @@
     
   
     log-level
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../cli/trace-events/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    trace-events
   
 
     
@@ -5489,6 +5530,10 @@
       
         
       
+        
+      
+        
+      
     
     
     
@@ -5740,6 +5785,62 @@
     
   
     LogsService
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/mlclient/services/TraceEvents/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    TraceEvents
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/mlclient/services/TraceEventsService/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    TraceEventsService
   
 
     
@@ -7311,6 +7412,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#trace-events" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Trace events
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -7439,6 +7551,36 @@ API only when the connecting user lacks the eval privilege - so it needs both
 level; App Servers have no system log level. Both <code>get</code> and <code>set</code> accept a
 keyword-only <code>timeout</code>. Use the <a href="../../cli/log-level/">log-level command</a> for
 supported levels and the Management permissions each path needs.</p>
+<h3 id="trace-events">Trace events<a class="headerlink" href="#trace-events" title="Permanent link">&para;</a></h3>
+<p><a class="autorefs autorefs-internal" title="mlclient.services.TraceEventsService" href="../../../reference/mlclient/services/TraceEventsService/#mlclient.services.TraceEventsService">TraceEventsService</a> reads and changes
+group diagnostics through the REST server's Admin-module evaluation:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">mlclient</span><span class="w"> </span><span class="kn">import</span> <span class="n">MLClient</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">mlclient.services</span><span class="w"> </span><span class="kn">import</span> <span class="n">TraceEventsService</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="k">with</span> <span class="n">MLClient</span><span class="p">()</span> <span class="k">as</span> <span class="n">ml</span><span class="p">:</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>    <span class="n">traces</span> <span class="o">=</span> <span class="n">TraceEventsService</span><span class="p">(</span><span class="n">ml</span><span class="o">.</span><span class="n">rest</span><span class="p">)</span>
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>    <span class="n">state</span> <span class="o">=</span> <span class="n">traces</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">group</span><span class="o">=</span><span class="s2">&quot;Default&quot;</span><span class="p">)</span>
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">activated</span><span class="p">,</span> <span class="n">state</span><span class="o">.</span><span class="n">events</span><span class="p">)</span>
+</code></pre></div>
+<p>The immutable <a class="autorefs autorefs-internal" title="mlclient.services.TraceEvents
+
+
+  
+      dataclass
+  " href="../../../reference/mlclient/services/TraceEvents/#mlclient.services.TraceEvents">TraceEvents</a> result contains the
+master <code>activated</code> flag and an alphabetically sorted tuple of configured event
+names. <code>set_event("XDMP Deadlock", enabled=True)</code> adds an event without changing
+activation; <code>set_activated(value=True)</code> changes the master switch without changing
+event membership. Both return the state read after saving. Repeated additions and
+removals are idempotent.</p>
+<p>This service is synchronous and needs only <code>ml.rest</code>; it does not fall back to
+Manage. All three operations accept keyword-only <code>group</code> and <code>timeout</code>. A timeout
+override applies independently to the mutation and follow-up read, not to their
+total duration. Omitting it inherits the client timeout; <code>None</code> disables it.</p>
+<p>Recognized server errors raise <code>MarkLogicError</code>; other HTTP failures raise
+<code>httpx.HTTPStatusError</code>, and transport errors propagate. A failed read-back does
+not roll back a successful save. See <a href="../../cli/trace-events/">trace-events</a> for
+permissions and the corresponding CLI workflow.</p>
 <h2 id="building-your-own">Building your own<a class="headerlink" href="#building-your-own" title="Permanent link">&para;</a></h2>
 <p>To wrap an endpoint no service covers, see
 <a href="../custom-api/">Custom application APIs</a>, which adds an endpoint wrapper to your

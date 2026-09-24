@@ -1224,6 +1224,14 @@
       
         
       
+        
+      
+        
+      
+        
+      
+        
+      
     
     
     
@@ -1335,6 +1343,118 @@
     
   
     show
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../cli/env/edit/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    edit
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../cli/env/copy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    copy
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../cli/env/remove/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    remove
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../cli/env/compare/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    compare
   
 
     
@@ -7995,6 +8115,14 @@ and <a href="../limits/">resource limits</a>.</p>
 <a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="n">env</span> <span class="o">=</span> <span class="n">MLEnvironment</span><span class="o">.</span><span class="n">load_file</span><span class="p">(</span><span class="s2">&quot;path/to/mlclient-local.yaml&quot;</span><span class="p">)</span>
 <a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="n">config</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">provide_config</span><span class="p">(</span><span class="s2">&quot;app-services&quot;</span><span class="p">)</span>
 </code></pre></div>
+<p>For inspection before constructing authentication handlers, use
+<code>env.provide_config_dict("app-services")</code>. This returns the inherited keyword
+arguments for <code>HTTPConfig.resolve</code>, including default ports and merged SSL
+settings. The mapping and its nested models are independent copies. It preserves
+explicit <code>auth=None</code> and does not need Kerberos tooling
+or local certificate files. The mapping contains unmasked credentials and model
+objects such as <code>SSLConfig</code>; it is not a redacted display or a YAML serialization.
+Transport/authentication compatibility is checked by <code>provide_config()</code>.</p>
 <p><code>provide_config()</code> resolves one server's YAML configuration. To also apply
 manager/factory overrides and server-kind HTTP defaults without opening a
 connection, use <code>manager.get_config("app-services", timeout=10)</code>.</p>

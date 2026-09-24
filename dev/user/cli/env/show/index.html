@@ -16,7 +16,7 @@
         <link rel="prev" href="../init/">
       
       
-        <link rel="next" href="../../eval/">
+        <link rel="next" href="../edit/">
       
       
         
@@ -1080,6 +1080,14 @@
       
         
       
+        
+      
+        
+      
+        
+      
+        
+      
     
     
     
@@ -1327,6 +1335,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#-defaults-d" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        --defaults, -d
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#-copy-c" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1357,6 +1376,118 @@
   
 </nav>
       
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../edit/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    edit
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../copy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    copy
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../remove/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    remove
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../compare/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    compare
+  
+
+    
+  </span>
+  
+  
+
+      </a>
     </li>
   
 
@@ -7493,6 +7624,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#-defaults-d" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        --defaults, -d
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#-copy-c" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -7569,12 +7711,23 @@ masking or YAML validation is applied.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>ml<span class="w"> </span>env<span class="w"> </span>show<span class="w"> </span><span class="nb">local</span><span class="w"> </span>--raw
 </code></pre></div>
 <h3 id="-secrets-s"><code>--secrets</code>, <code>-s</code><a class="headerlink" href="#-secrets-s" title="Permanent link">&para;</a></h3>
-<p>Reveal secrets in formatted output. Without this option, passwords and API keys
-are masked, including values inside mappings and lists.</p>
+<p>Reveal secrets in formatted output. Without this option, passwords, OAuth tokens,
+API keys and TLS key passwords are masked, including values inside mappings and
+lists.</p>
+<h3 id="-defaults-d"><code>--defaults</code>, <code>-d</code><a class="headerlink" href="#-defaults-d" title="Permanent link">&para;</a></h3>
+<p>Fill in root defaults and resolve server inheritance, including default ports,
+fieldwise SSL settings and the always-present platform app servers. Explicit
+<code>auth: null</code> and <code>auth: app</code> display as <code>app</code>.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>ml<span class="w"> </span>env<span class="w"> </span>show<span class="w"> </span><span class="nb">local</span><span class="w"> </span>content<span class="w"> </span>--defaults
+</code></pre></div>
+<p>This inspects configuration without connecting, loading certificate files or
+requiring Kerberos tooling. Transport/authentication compatibility is validated
+when creating a client. Without <code>--defaults</code>, the command keeps showing the raw
+fields, including incomplete configurations and unknown keys.</p>
 <h3 id="-copy-c"><code>--copy</code>, <code>-c</code><a class="headerlink" href="#-copy-c" title="Permanent link">&para;</a></h3>
 <p>Copy a simple setting while also printing it:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>ml<span class="w"> </span>env<span class="w"> </span>show<span class="w"> </span><span class="nb">local</span><span class="w"> </span>host<span class="w"> </span>--copy
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>ml<span class="w"> </span>env<span class="w"> </span>show<span class="w"> </span><span class="nb">local</span><span class="w"> </span>password<span class="w"> </span>-c
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>ml<span class="w"> </span>env<span class="w"> </span>show<span class="w"> </span><span class="nb">local</span><span class="w"> </span>host<span class="w"> </span>--copy
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>ml<span class="w"> </span>env<span class="w"> </span>show<span class="w"> </span><span class="nb">local</span><span class="w"> </span>password<span class="w"> </span>-c
 </code></pre></div>
 <p>Text, numbers and booleans are supported. The clipboard receives the original
 value, <strong>including an unmasked password even without <code>--secrets</code></strong>. Terminal
@@ -7592,6 +7745,9 @@ macOS or <code>clip</code> on Windows.</p>
 <p>An empty file renders as an empty environment. Otherwise, YAML must contain a
 mapping. <code>app-servers</code> may be omitted, null or a list of mappings with non-empty
 <code>id</code> values. Errors name the file without printing its contents.</p>
+<p>With <code>--defaults</code>, empty or null YAML uses the environment defaults, and null
+<code>app-servers</code> is treated as an empty list. Typed fields are validated; errors
+identify their locations without printing input values, including at <code>-vvv</code>.</p>
 
 
 

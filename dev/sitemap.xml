@@ -765,7 +765,23 @@
          <lastmod>2026-09-24</lastmod>
     </url>
     <url>
+         <loc>https://monasticus.github.io/mlclient/dev/user/cli/env/compare/</loc>
+         <lastmod>2026-09-24</lastmod>
+    </url>
+    <url>
+         <loc>https://monasticus.github.io/mlclient/dev/user/cli/env/copy/</loc>
+         <lastmod>2026-09-24</lastmod>
+    </url>
+    <url>
+         <loc>https://monasticus.github.io/mlclient/dev/user/cli/env/edit/</loc>
+         <lastmod>2026-09-24</lastmod>
+    </url>
+    <url>
          <loc>https://monasticus.github.io/mlclient/dev/user/cli/env/init/</loc>
+         <lastmod>2026-09-24</lastmod>
+    </url>
+    <url>
+         <loc>https://monasticus.github.io/mlclient/dev/user/cli/env/remove/</loc>
          <lastmod>2026-09-24</lastmod>
     </url>
     <url>

@@ -1076,6 +1076,14 @@
       
         
       
+        
+      
+        
+      
+        
+      
+        
+      
     
     
     
@@ -1187,6 +1195,118 @@
     
   
     show
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../user/cli/env/edit/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    edit
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../user/cli/env/copy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    copy
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../user/cli/env/remove/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    remove
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../user/cli/env/compare/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    compare
   
 
     
@@ -2112,6 +2232,17 @@
     <span class="md-ellipsis">
       
         provide_config
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mlclient.env.MLEnvironment.provide_config_dict" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        provide_config_dict
       
     </span>
   </a>
@@ -7628,6 +7759,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#mlclient.env.MLEnvironment.provide_config_dict" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        provide_config_dict
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -8507,73 +8649,73 @@ to be recognized: mlclient-<env-name>.yaml.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>mlclient/env.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-280">280</a></span>
-<span class="normal"><a href="#__codelineno-0-281">281</a></span>
-<span class="normal"><a href="#__codelineno-0-282">282</a></span>
-<span class="normal"><a href="#__codelineno-0-283">283</a></span>
-<span class="normal"><a href="#__codelineno-0-284">284</a></span>
-<span class="normal"><a href="#__codelineno-0-285">285</a></span>
-<span class="normal"><a href="#__codelineno-0-286">286</a></span>
-<span class="normal"><a href="#__codelineno-0-287">287</a></span>
-<span class="normal"><a href="#__codelineno-0-288">288</a></span>
-<span class="normal"><a href="#__codelineno-0-289">289</a></span>
-<span class="normal"><a href="#__codelineno-0-290">290</a></span>
-<span class="normal"><a href="#__codelineno-0-291">291</a></span>
-<span class="normal"><a href="#__codelineno-0-292">292</a></span>
-<span class="normal"><a href="#__codelineno-0-293">293</a></span>
-<span class="normal"><a href="#__codelineno-0-294">294</a></span>
-<span class="normal"><a href="#__codelineno-0-295">295</a></span>
-<span class="normal"><a href="#__codelineno-0-296">296</a></span>
-<span class="normal"><a href="#__codelineno-0-297">297</a></span>
-<span class="normal"><a href="#__codelineno-0-298">298</a></span>
-<span class="normal"><a href="#__codelineno-0-299">299</a></span>
-<span class="normal"><a href="#__codelineno-0-300">300</a></span>
-<span class="normal"><a href="#__codelineno-0-301">301</a></span>
-<span class="normal"><a href="#__codelineno-0-302">302</a></span>
-<span class="normal"><a href="#__codelineno-0-303">303</a></span>
-<span class="normal"><a href="#__codelineno-0-304">304</a></span>
-<span class="normal"><a href="#__codelineno-0-305">305</a></span>
-<span class="normal"><a href="#__codelineno-0-306">306</a></span>
-<span class="normal"><a href="#__codelineno-0-307">307</a></span>
-<span class="normal"><a href="#__codelineno-0-308">308</a></span>
-<span class="normal"><a href="#__codelineno-0-309">309</a></span>
-<span class="normal"><a href="#__codelineno-0-310">310</a></span>
-<span class="normal"><a href="#__codelineno-0-311">311</a></span>
-<span class="normal"><a href="#__codelineno-0-312">312</a></span>
-<span class="normal"><a href="#__codelineno-0-313">313</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-280" name="__codelineno-0-280"></a><span class="nd">@classmethod</span>
-<a id="__codelineno-0-281" name="__codelineno-0-281"></a><span class="k">def</span><span class="w"> </span><span class="nf">load</span><span class="p">(</span>
-<a id="__codelineno-0-282" name="__codelineno-0-282"></a>    <span class="bp">cls</span><span class="p">,</span>
-<a id="__codelineno-0-283" name="__codelineno-0-283"></a>    <span class="n">env_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-<a id="__codelineno-0-284" name="__codelineno-0-284"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MLEnvironment</span><span class="p">:</span>
-<a id="__codelineno-0-285" name="__codelineno-0-285"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Instantiate MLEnvironment from a named environment.</span>
-<a id="__codelineno-0-286" name="__codelineno-0-286"></a>
-<a id="__codelineno-0-287" name="__codelineno-0-287"></a><span class="sd">    This method looks for a configuration file in the .mlclient directory.</span>
-<a id="__codelineno-0-288" name="__codelineno-0-288"></a><span class="sd">    An environment configuration needs to match a file name pattern</span>
-<a id="__codelineno-0-289" name="__codelineno-0-289"></a><span class="sd">    to be recognized: mlclient-&lt;env-name&gt;.yaml.</span>
-<a id="__codelineno-0-290" name="__codelineno-0-290"></a>
-<a id="__codelineno-0-291" name="__codelineno-0-291"></a><span class="sd">    Parameters</span>
-<a id="__codelineno-0-292" name="__codelineno-0-292"></a><span class="sd">    ----------</span>
-<a id="__codelineno-0-293" name="__codelineno-0-293"></a><span class="sd">    env_name : str</span>
-<a id="__codelineno-0-294" name="__codelineno-0-294"></a><span class="sd">        An environment name</span>
-<a id="__codelineno-0-295" name="__codelineno-0-295"></a>
-<a id="__codelineno-0-296" name="__codelineno-0-296"></a><span class="sd">    Returns</span>
-<a id="__codelineno-0-297" name="__codelineno-0-297"></a><span class="sd">    -------</span>
-<a id="__codelineno-0-298" name="__codelineno-0-298"></a><span class="sd">    MLEnvironment</span>
-<a id="__codelineno-0-299" name="__codelineno-0-299"></a><span class="sd">        An MLEnvironment instance</span>
-<a id="__codelineno-0-300" name="__codelineno-0-300"></a>
-<a id="__codelineno-0-301" name="__codelineno-0-301"></a><span class="sd">    Raises</span>
-<a id="__codelineno-0-302" name="__codelineno-0-302"></a><span class="sd">    ------</span>
-<a id="__codelineno-0-303" name="__codelineno-0-303"></a><span class="sd">    MLClientDirectoryNotFoundError</span>
-<a id="__codelineno-0-304" name="__codelineno-0-304"></a><span class="sd">        If .mlclient directory has not been found</span>
-<a id="__codelineno-0-305" name="__codelineno-0-305"></a><span class="sd">    MLClientEnvironmentNotFoundError</span>
-<a id="__codelineno-0-306" name="__codelineno-0-306"></a><span class="sd">        If there&#39;s no .mlclient/mlclient-&lt;env_name&gt;.yaml file</span>
-<a id="__codelineno-0-307" name="__codelineno-0-307"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-308" name="__codelineno-0-308"></a>    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
-<a id="__codelineno-0-309" name="__codelineno-0-309"></a>        <span class="s2">&quot;Loading MLClient configuration for the environment: [</span><span class="si">%s</span><span class="s2">]&quot;</span><span class="p">,</span>
-<a id="__codelineno-0-310" name="__codelineno-0-310"></a>        <span class="n">env_name</span><span class="p">,</span>
-<a id="__codelineno-0-311" name="__codelineno-0-311"></a>    <span class="p">)</span>
-<a id="__codelineno-0-312" name="__codelineno-0-312"></a>    <span class="n">env_file_path</span> <span class="o">=</span> <span class="n">find_mlclient_environment</span><span class="p">(</span><span class="n">env_name</span><span class="p">)</span>
-<a id="__codelineno-0-313" name="__codelineno-0-313"></a>    <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">load_file</span><span class="p">(</span><span class="n">env_file_path</span><span class="o">.</span><span class="n">as_posix</span><span class="p">())</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-326">326</a></span>
+<span class="normal"><a href="#__codelineno-0-327">327</a></span>
+<span class="normal"><a href="#__codelineno-0-328">328</a></span>
+<span class="normal"><a href="#__codelineno-0-329">329</a></span>
+<span class="normal"><a href="#__codelineno-0-330">330</a></span>
+<span class="normal"><a href="#__codelineno-0-331">331</a></span>
+<span class="normal"><a href="#__codelineno-0-332">332</a></span>
+<span class="normal"><a href="#__codelineno-0-333">333</a></span>
+<span class="normal"><a href="#__codelineno-0-334">334</a></span>
+<span class="normal"><a href="#__codelineno-0-335">335</a></span>
+<span class="normal"><a href="#__codelineno-0-336">336</a></span>
+<span class="normal"><a href="#__codelineno-0-337">337</a></span>
+<span class="normal"><a href="#__codelineno-0-338">338</a></span>
+<span class="normal"><a href="#__codelineno-0-339">339</a></span>
+<span class="normal"><a href="#__codelineno-0-340">340</a></span>
+<span class="normal"><a href="#__codelineno-0-341">341</a></span>
+<span class="normal"><a href="#__codelineno-0-342">342</a></span>
+<span class="normal"><a href="#__codelineno-0-343">343</a></span>
+<span class="normal"><a href="#__codelineno-0-344">344</a></span>
+<span class="normal"><a href="#__codelineno-0-345">345</a></span>
+<span class="normal"><a href="#__codelineno-0-346">346</a></span>
+<span class="normal"><a href="#__codelineno-0-347">347</a></span>
+<span class="normal"><a href="#__codelineno-0-348">348</a></span>
+<span class="normal"><a href="#__codelineno-0-349">349</a></span>
+<span class="normal"><a href="#__codelineno-0-350">350</a></span>
+<span class="normal"><a href="#__codelineno-0-351">351</a></span>
+<span class="normal"><a href="#__codelineno-0-352">352</a></span>
+<span class="normal"><a href="#__codelineno-0-353">353</a></span>
+<span class="normal"><a href="#__codelineno-0-354">354</a></span>
+<span class="normal"><a href="#__codelineno-0-355">355</a></span>
+<span class="normal"><a href="#__codelineno-0-356">356</a></span>
+<span class="normal"><a href="#__codelineno-0-357">357</a></span>
+<span class="normal"><a href="#__codelineno-0-358">358</a></span>
+<span class="normal"><a href="#__codelineno-0-359">359</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-326" name="__codelineno-0-326"></a><span class="nd">@classmethod</span>
+<a id="__codelineno-0-327" name="__codelineno-0-327"></a><span class="k">def</span><span class="w"> </span><span class="nf">load</span><span class="p">(</span>
+<a id="__codelineno-0-328" name="__codelineno-0-328"></a>    <span class="bp">cls</span><span class="p">,</span>
+<a id="__codelineno-0-329" name="__codelineno-0-329"></a>    <span class="n">env_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+<a id="__codelineno-0-330" name="__codelineno-0-330"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MLEnvironment</span><span class="p">:</span>
+<a id="__codelineno-0-331" name="__codelineno-0-331"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Instantiate MLEnvironment from a named environment.</span>
+<a id="__codelineno-0-332" name="__codelineno-0-332"></a>
+<a id="__codelineno-0-333" name="__codelineno-0-333"></a><span class="sd">    This method looks for a configuration file in the .mlclient directory.</span>
+<a id="__codelineno-0-334" name="__codelineno-0-334"></a><span class="sd">    An environment configuration needs to match a file name pattern</span>
+<a id="__codelineno-0-335" name="__codelineno-0-335"></a><span class="sd">    to be recognized: mlclient-&lt;env-name&gt;.yaml.</span>
+<a id="__codelineno-0-336" name="__codelineno-0-336"></a>
+<a id="__codelineno-0-337" name="__codelineno-0-337"></a><span class="sd">    Parameters</span>
+<a id="__codelineno-0-338" name="__codelineno-0-338"></a><span class="sd">    ----------</span>
+<a id="__codelineno-0-339" name="__codelineno-0-339"></a><span class="sd">    env_name : str</span>
+<a id="__codelineno-0-340" name="__codelineno-0-340"></a><span class="sd">        An environment name</span>
+<a id="__codelineno-0-341" name="__codelineno-0-341"></a>
+<a id="__codelineno-0-342" name="__codelineno-0-342"></a><span class="sd">    Returns</span>
+<a id="__codelineno-0-343" name="__codelineno-0-343"></a><span class="sd">    -------</span>
+<a id="__codelineno-0-344" name="__codelineno-0-344"></a><span class="sd">    MLEnvironment</span>
+<a id="__codelineno-0-345" name="__codelineno-0-345"></a><span class="sd">        An MLEnvironment instance</span>
+<a id="__codelineno-0-346" name="__codelineno-0-346"></a>
+<a id="__codelineno-0-347" name="__codelineno-0-347"></a><span class="sd">    Raises</span>
+<a id="__codelineno-0-348" name="__codelineno-0-348"></a><span class="sd">    ------</span>
+<a id="__codelineno-0-349" name="__codelineno-0-349"></a><span class="sd">    MLClientDirectoryNotFoundError</span>
+<a id="__codelineno-0-350" name="__codelineno-0-350"></a><span class="sd">        If .mlclient directory has not been found</span>
+<a id="__codelineno-0-351" name="__codelineno-0-351"></a><span class="sd">    MLClientEnvironmentNotFoundError</span>
+<a id="__codelineno-0-352" name="__codelineno-0-352"></a><span class="sd">        If there&#39;s no .mlclient/mlclient-&lt;env_name&gt;.yaml file</span>
+<a id="__codelineno-0-353" name="__codelineno-0-353"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-354" name="__codelineno-0-354"></a>    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+<a id="__codelineno-0-355" name="__codelineno-0-355"></a>        <span class="s2">&quot;Loading MLClient configuration for the environment: [</span><span class="si">%s</span><span class="s2">]&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-356" name="__codelineno-0-356"></a>        <span class="n">env_name</span><span class="p">,</span>
+<a id="__codelineno-0-357" name="__codelineno-0-357"></a>    <span class="p">)</span>
+<a id="__codelineno-0-358" name="__codelineno-0-358"></a>    <span class="n">env_file_path</span> <span class="o">=</span> <span class="n">find_mlclient_environment</span><span class="p">(</span><span class="n">env_name</span><span class="p">)</span>
+<a id="__codelineno-0-359" name="__codelineno-0-359"></a>    <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">load_file</span><span class="p">(</span><span class="n">env_file_path</span><span class="o">.</span><span class="n">as_posix</span><span class="p">())</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -8661,45 +8803,45 @@ to be recognized: mlclient-<env-name>.yaml.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>mlclient/env.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-315">315</a></span>
-<span class="normal"><a href="#__codelineno-0-316">316</a></span>
-<span class="normal"><a href="#__codelineno-0-317">317</a></span>
-<span class="normal"><a href="#__codelineno-0-318">318</a></span>
-<span class="normal"><a href="#__codelineno-0-319">319</a></span>
-<span class="normal"><a href="#__codelineno-0-320">320</a></span>
-<span class="normal"><a href="#__codelineno-0-321">321</a></span>
-<span class="normal"><a href="#__codelineno-0-322">322</a></span>
-<span class="normal"><a href="#__codelineno-0-323">323</a></span>
-<span class="normal"><a href="#__codelineno-0-324">324</a></span>
-<span class="normal"><a href="#__codelineno-0-325">325</a></span>
-<span class="normal"><a href="#__codelineno-0-326">326</a></span>
-<span class="normal"><a href="#__codelineno-0-327">327</a></span>
-<span class="normal"><a href="#__codelineno-0-328">328</a></span>
-<span class="normal"><a href="#__codelineno-0-329">329</a></span>
-<span class="normal"><a href="#__codelineno-0-330">330</a></span>
-<span class="normal"><a href="#__codelineno-0-331">331</a></span>
-<span class="normal"><a href="#__codelineno-0-332">332</a></span>
-<span class="normal"><a href="#__codelineno-0-333">333</a></span>
-<span class="normal"><a href="#__codelineno-0-334">334</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-315" name="__codelineno-0-315"></a><span class="nd">@classmethod</span>
-<a id="__codelineno-0-316" name="__codelineno-0-316"></a><span class="k">def</span><span class="w"> </span><span class="nf">load_file</span><span class="p">(</span>
-<a id="__codelineno-0-317" name="__codelineno-0-317"></a>    <span class="bp">cls</span><span class="p">,</span>
-<a id="__codelineno-0-318" name="__codelineno-0-318"></a>    <span class="n">file_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-<a id="__codelineno-0-319" name="__codelineno-0-319"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MLEnvironment</span><span class="p">:</span>
-<a id="__codelineno-0-320" name="__codelineno-0-320"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Instantiate MLEnvironment from a file.</span>
-<a id="__codelineno-0-321" name="__codelineno-0-321"></a>
-<a id="__codelineno-0-322" name="__codelineno-0-322"></a><span class="sd">    Parameters</span>
-<a id="__codelineno-0-323" name="__codelineno-0-323"></a><span class="sd">    ----------</span>
-<a id="__codelineno-0-324" name="__codelineno-0-324"></a><span class="sd">    file_path : str</span>
-<a id="__codelineno-0-325" name="__codelineno-0-325"></a><span class="sd">        A source configuration file</span>
-<a id="__codelineno-0-326" name="__codelineno-0-326"></a>
-<a id="__codelineno-0-327" name="__codelineno-0-327"></a><span class="sd">    Returns</span>
-<a id="__codelineno-0-328" name="__codelineno-0-328"></a><span class="sd">    -------</span>
-<a id="__codelineno-0-329" name="__codelineno-0-329"></a><span class="sd">    MLEnvironment</span>
-<a id="__codelineno-0-330" name="__codelineno-0-330"></a><span class="sd">        An MLEnvironment instance</span>
-<a id="__codelineno-0-331" name="__codelineno-0-331"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-332" name="__codelineno-0-332"></a>    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Loading MLClient configuration from the file: [</span><span class="si">%s</span><span class="s2">]&quot;</span><span class="p">,</span> <span class="n">file_path</span><span class="p">)</span>
-<a id="__codelineno-0-333" name="__codelineno-0-333"></a>    <span class="n">source_config</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_get_source_config</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
-<a id="__codelineno-0-334" name="__codelineno-0-334"></a>    <span class="k">return</span> <span class="n">MLEnvironment</span><span class="p">(</span><span class="o">**</span><span class="n">source_config</span><span class="p">)</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-361">361</a></span>
+<span class="normal"><a href="#__codelineno-0-362">362</a></span>
+<span class="normal"><a href="#__codelineno-0-363">363</a></span>
+<span class="normal"><a href="#__codelineno-0-364">364</a></span>
+<span class="normal"><a href="#__codelineno-0-365">365</a></span>
+<span class="normal"><a href="#__codelineno-0-366">366</a></span>
+<span class="normal"><a href="#__codelineno-0-367">367</a></span>
+<span class="normal"><a href="#__codelineno-0-368">368</a></span>
+<span class="normal"><a href="#__codelineno-0-369">369</a></span>
+<span class="normal"><a href="#__codelineno-0-370">370</a></span>
+<span class="normal"><a href="#__codelineno-0-371">371</a></span>
+<span class="normal"><a href="#__codelineno-0-372">372</a></span>
+<span class="normal"><a href="#__codelineno-0-373">373</a></span>
+<span class="normal"><a href="#__codelineno-0-374">374</a></span>
+<span class="normal"><a href="#__codelineno-0-375">375</a></span>
+<span class="normal"><a href="#__codelineno-0-376">376</a></span>
+<span class="normal"><a href="#__codelineno-0-377">377</a></span>
+<span class="normal"><a href="#__codelineno-0-378">378</a></span>
+<span class="normal"><a href="#__codelineno-0-379">379</a></span>
+<span class="normal"><a href="#__codelineno-0-380">380</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-361" name="__codelineno-0-361"></a><span class="nd">@classmethod</span>
+<a id="__codelineno-0-362" name="__codelineno-0-362"></a><span class="k">def</span><span class="w"> </span><span class="nf">load_file</span><span class="p">(</span>
+<a id="__codelineno-0-363" name="__codelineno-0-363"></a>    <span class="bp">cls</span><span class="p">,</span>
+<a id="__codelineno-0-364" name="__codelineno-0-364"></a>    <span class="n">file_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+<a id="__codelineno-0-365" name="__codelineno-0-365"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MLEnvironment</span><span class="p">:</span>
+<a id="__codelineno-0-366" name="__codelineno-0-366"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Instantiate MLEnvironment from a file.</span>
+<a id="__codelineno-0-367" name="__codelineno-0-367"></a>
+<a id="__codelineno-0-368" name="__codelineno-0-368"></a><span class="sd">    Parameters</span>
+<a id="__codelineno-0-369" name="__codelineno-0-369"></a><span class="sd">    ----------</span>
+<a id="__codelineno-0-370" name="__codelineno-0-370"></a><span class="sd">    file_path : str</span>
+<a id="__codelineno-0-371" name="__codelineno-0-371"></a><span class="sd">        A source configuration file</span>
+<a id="__codelineno-0-372" name="__codelineno-0-372"></a>
+<a id="__codelineno-0-373" name="__codelineno-0-373"></a><span class="sd">    Returns</span>
+<a id="__codelineno-0-374" name="__codelineno-0-374"></a><span class="sd">    -------</span>
+<a id="__codelineno-0-375" name="__codelineno-0-375"></a><span class="sd">    MLEnvironment</span>
+<a id="__codelineno-0-376" name="__codelineno-0-376"></a><span class="sd">        An MLEnvironment instance</span>
+<a id="__codelineno-0-377" name="__codelineno-0-377"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-378" name="__codelineno-0-378"></a>    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Loading MLClient configuration from the file: [</span><span class="si">%s</span><span class="s2">]&quot;</span><span class="p">,</span> <span class="n">file_path</span><span class="p">)</span>
+<a id="__codelineno-0-379" name="__codelineno-0-379"></a>    <span class="n">source_config</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_get_source_config</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
+<a id="__codelineno-0-380" name="__codelineno-0-380"></a>    <span class="k">return</span> <span class="n">MLEnvironment</span><span class="p">(</span><span class="o">**</span><span class="n">source_config</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -8719,7 +8861,7 @@ to be recognized: mlclient-<env-name>.yaml.</p>
 
     <div class="doc doc-contents ">
 
-        <p>Provide a resolved connection configuration for an App Server.</p>
+        <p>Provide an App Server's inherited connection settings as an HTTPConfig.</p>
 <p>The root-level connection and auth defaults are merged with the app
 server's overrides and resolved into an HTTPConfig ready to hand to a
 client via its <code>config</code> parameter.</p>
@@ -8781,17 +8923,7 @@ client via its <code>config</code> parameter.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>mlclient/env.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-175">175</a></span>
-<span class="normal"><a href="#__codelineno-0-176">176</a></span>
-<span class="normal"><a href="#__codelineno-0-177">177</a></span>
-<span class="normal"><a href="#__codelineno-0-178">178</a></span>
-<span class="normal"><a href="#__codelineno-0-179">179</a></span>
-<span class="normal"><a href="#__codelineno-0-180">180</a></span>
-<span class="normal"><a href="#__codelineno-0-181">181</a></span>
-<span class="normal"><a href="#__codelineno-0-182">182</a></span>
-<span class="normal"><a href="#__codelineno-0-183">183</a></span>
-<span class="normal"><a href="#__codelineno-0-184">184</a></span>
-<span class="normal"><a href="#__codelineno-0-185">185</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-185">185</a></span>
 <span class="normal"><a href="#__codelineno-0-186">186</a></span>
 <span class="normal"><a href="#__codelineno-0-187">187</a></span>
 <span class="normal"><a href="#__codelineno-0-188">188</a></span>
@@ -8808,34 +8940,224 @@ client via its <code>config</code> parameter.</p>
 <span class="normal"><a href="#__codelineno-0-199">199</a></span>
 <span class="normal"><a href="#__codelineno-0-200">200</a></span>
 <span class="normal"><a href="#__codelineno-0-201">201</a></span>
-<span class="normal"><a href="#__codelineno-0-202">202</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-175" name="__codelineno-0-175"></a><span class="k">def</span><span class="w"> </span><span class="nf">provide_config</span><span class="p">(</span>
-<a id="__codelineno-0-176" name="__codelineno-0-176"></a>    <span class="bp">self</span><span class="p">,</span>
-<a id="__codelineno-0-177" name="__codelineno-0-177"></a>    <span class="n">app_server_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-<a id="__codelineno-0-178" name="__codelineno-0-178"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">HTTPConfig</span><span class="p">:</span>
-<a id="__codelineno-0-179" name="__codelineno-0-179"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Provide a resolved connection configuration for an App Server.</span>
-<a id="__codelineno-0-180" name="__codelineno-0-180"></a>
-<a id="__codelineno-0-181" name="__codelineno-0-181"></a><span class="sd">    The root-level connection and auth defaults are merged with the app</span>
-<a id="__codelineno-0-182" name="__codelineno-0-182"></a><span class="sd">    server&#39;s overrides and resolved into an HTTPConfig ready to hand to a</span>
-<a id="__codelineno-0-183" name="__codelineno-0-183"></a><span class="sd">    client via its ``config`` parameter.</span>
-<a id="__codelineno-0-184" name="__codelineno-0-184"></a>
-<a id="__codelineno-0-185" name="__codelineno-0-185"></a><span class="sd">    Parameters</span>
-<a id="__codelineno-0-186" name="__codelineno-0-186"></a><span class="sd">    ----------</span>
-<a id="__codelineno-0-187" name="__codelineno-0-187"></a><span class="sd">    app_server_id : str</span>
-<a id="__codelineno-0-188" name="__codelineno-0-188"></a><span class="sd">        A unique identifier of the App Server</span>
-<a id="__codelineno-0-189" name="__codelineno-0-189"></a>
-<a id="__codelineno-0-190" name="__codelineno-0-190"></a><span class="sd">    Returns</span>
-<a id="__codelineno-0-191" name="__codelineno-0-191"></a><span class="sd">    -------</span>
-<a id="__codelineno-0-192" name="__codelineno-0-192"></a><span class="sd">    HTTPConfig</span>
-<a id="__codelineno-0-193" name="__codelineno-0-193"></a><span class="sd">        A resolved configuration for a client initialization</span>
-<a id="__codelineno-0-194" name="__codelineno-0-194"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-195" name="__codelineno-0-195"></a>    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Getting configuration for the [</span><span class="si">%s</span><span class="s2">] app server&quot;</span><span class="p">,</span> <span class="n">app_server_id</span><span class="p">)</span>
-<a id="__codelineno-0-196" name="__codelineno-0-196"></a>    <span class="n">ml_config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_root_config</span><span class="p">()</span>
-<a id="__codelineno-0-197" name="__codelineno-0-197"></a>    <span class="n">app_server</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_find_app_server</span><span class="p">(</span><span class="n">app_server_id</span><span class="p">)</span>
-<a id="__codelineno-0-198" name="__codelineno-0-198"></a>    <span class="n">app_server_config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_app_server_overrides</span><span class="p">(</span><span class="n">app_server</span><span class="p">)</span>
-<a id="__codelineno-0-199" name="__codelineno-0-199"></a>    <span class="n">merged</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="n">ml_config</span><span class="p">,</span> <span class="o">**</span><span class="n">app_server_config</span><span class="p">}</span>
-<a id="__codelineno-0-200" name="__codelineno-0-200"></a>    <span class="k">if</span> <span class="n">app_server</span><span class="o">.</span><span class="n">ssl</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-<a id="__codelineno-0-201" name="__codelineno-0-201"></a>        <span class="n">merged</span><span class="p">[</span><span class="s2">&quot;ssl&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_merge_ssl</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ssl</span><span class="p">,</span> <span class="n">app_server</span><span class="o">.</span><span class="n">ssl</span><span class="p">)</span>
-<a id="__codelineno-0-202" name="__codelineno-0-202"></a>    <span class="k">return</span> <span class="n">HTTPConfig</span><span class="o">.</span><span class="n">resolve</span><span class="p">(</span><span class="o">**</span><span class="n">merged</span><span class="p">)</span>
+<span class="normal"><a href="#__codelineno-0-202">202</a></span>
+<span class="normal"><a href="#__codelineno-0-203">203</a></span>
+<span class="normal"><a href="#__codelineno-0-204">204</a></span>
+<span class="normal"><a href="#__codelineno-0-205">205</a></span>
+<span class="normal"><a href="#__codelineno-0-206">206</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-185" name="__codelineno-0-185"></a><span class="k">def</span><span class="w"> </span><span class="nf">provide_config</span><span class="p">(</span>
+<a id="__codelineno-0-186" name="__codelineno-0-186"></a>    <span class="bp">self</span><span class="p">,</span>
+<a id="__codelineno-0-187" name="__codelineno-0-187"></a>    <span class="n">app_server_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+<a id="__codelineno-0-188" name="__codelineno-0-188"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">HTTPConfig</span><span class="p">:</span>
+<a id="__codelineno-0-189" name="__codelineno-0-189"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Provide an App Server&#39;s inherited connection settings as an HTTPConfig.</span>
+<a id="__codelineno-0-190" name="__codelineno-0-190"></a>
+<a id="__codelineno-0-191" name="__codelineno-0-191"></a><span class="sd">    The root-level connection and auth defaults are merged with the app</span>
+<a id="__codelineno-0-192" name="__codelineno-0-192"></a><span class="sd">    server&#39;s overrides and resolved into an HTTPConfig ready to hand to a</span>
+<a id="__codelineno-0-193" name="__codelineno-0-193"></a><span class="sd">    client via its ``config`` parameter.</span>
+<a id="__codelineno-0-194" name="__codelineno-0-194"></a>
+<a id="__codelineno-0-195" name="__codelineno-0-195"></a><span class="sd">    Parameters</span>
+<a id="__codelineno-0-196" name="__codelineno-0-196"></a><span class="sd">    ----------</span>
+<a id="__codelineno-0-197" name="__codelineno-0-197"></a><span class="sd">    app_server_id : str</span>
+<a id="__codelineno-0-198" name="__codelineno-0-198"></a><span class="sd">        A unique identifier of the App Server</span>
+<a id="__codelineno-0-199" name="__codelineno-0-199"></a>
+<a id="__codelineno-0-200" name="__codelineno-0-200"></a><span class="sd">    Returns</span>
+<a id="__codelineno-0-201" name="__codelineno-0-201"></a><span class="sd">    -------</span>
+<a id="__codelineno-0-202" name="__codelineno-0-202"></a><span class="sd">    HTTPConfig</span>
+<a id="__codelineno-0-203" name="__codelineno-0-203"></a><span class="sd">        A resolved configuration for a client initialization</span>
+<a id="__codelineno-0-204" name="__codelineno-0-204"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-205" name="__codelineno-0-205"></a>    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Getting configuration for the [</span><span class="si">%s</span><span class="s2">] app server&quot;</span><span class="p">,</span> <span class="n">app_server_id</span><span class="p">)</span>
+<a id="__codelineno-0-206" name="__codelineno-0-206"></a>    <span class="k">return</span> <span class="n">HTTPConfig</span><span class="o">.</span><span class="n">resolve</span><span class="p">(</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">provide_config_dict</span><span class="p">(</span><span class="n">app_server_id</span><span class="p">))</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="mlclient.env.MLEnvironment.provide_config_dict" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">provide_config_dict</span>
+
+
+<a href="#mlclient.env.MLEnvironment.provide_config_dict" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">provide_config_dict</span><span class="p">(</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n">app_server_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Provide an App Server's inherited connection settings as a dictionary.</p>
+<p>Merge root settings with server overrides, including fieldwise SSL
+inheritance and default ports. Unlike <code>provide_config</code>, this method
+does not construct authentication handlers or validate transport/auth
+combinations. It can inspect Kerberos and certificate settings without
+optional dependencies or locally installed certificates.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>app_server_id</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The environment's App Server identifier.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="dict">dict</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Independent keyword arguments for <code>HTTPConfig.resolve</code>, including
+copies of nested models. Explicit <code>auth=None</code> is preserved.
+Invalid transport combinations remain inspectable and
+are rejected when <code>provide_config</code> constructs the configuration.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="mlclient.exceptions.NoSuchAppServerError" href="../../exceptions/NoSuchAppServerError/#mlclient.exceptions.NoSuchAppServerError">NoSuchAppServerError</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If the environment does not contain this identifier.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>mlclient/env.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-208">208</a></span>
+<span class="normal"><a href="#__codelineno-0-209">209</a></span>
+<span class="normal"><a href="#__codelineno-0-210">210</a></span>
+<span class="normal"><a href="#__codelineno-0-211">211</a></span>
+<span class="normal"><a href="#__codelineno-0-212">212</a></span>
+<span class="normal"><a href="#__codelineno-0-213">213</a></span>
+<span class="normal"><a href="#__codelineno-0-214">214</a></span>
+<span class="normal"><a href="#__codelineno-0-215">215</a></span>
+<span class="normal"><a href="#__codelineno-0-216">216</a></span>
+<span class="normal"><a href="#__codelineno-0-217">217</a></span>
+<span class="normal"><a href="#__codelineno-0-218">218</a></span>
+<span class="normal"><a href="#__codelineno-0-219">219</a></span>
+<span class="normal"><a href="#__codelineno-0-220">220</a></span>
+<span class="normal"><a href="#__codelineno-0-221">221</a></span>
+<span class="normal"><a href="#__codelineno-0-222">222</a></span>
+<span class="normal"><a href="#__codelineno-0-223">223</a></span>
+<span class="normal"><a href="#__codelineno-0-224">224</a></span>
+<span class="normal"><a href="#__codelineno-0-225">225</a></span>
+<span class="normal"><a href="#__codelineno-0-226">226</a></span>
+<span class="normal"><a href="#__codelineno-0-227">227</a></span>
+<span class="normal"><a href="#__codelineno-0-228">228</a></span>
+<span class="normal"><a href="#__codelineno-0-229">229</a></span>
+<span class="normal"><a href="#__codelineno-0-230">230</a></span>
+<span class="normal"><a href="#__codelineno-0-231">231</a></span>
+<span class="normal"><a href="#__codelineno-0-232">232</a></span>
+<span class="normal"><a href="#__codelineno-0-233">233</a></span>
+<span class="normal"><a href="#__codelineno-0-234">234</a></span>
+<span class="normal"><a href="#__codelineno-0-235">235</a></span>
+<span class="normal"><a href="#__codelineno-0-236">236</a></span>
+<span class="normal"><a href="#__codelineno-0-237">237</a></span>
+<span class="normal"><a href="#__codelineno-0-238">238</a></span>
+<span class="normal"><a href="#__codelineno-0-239">239</a></span>
+<span class="normal"><a href="#__codelineno-0-240">240</a></span>
+<span class="normal"><a href="#__codelineno-0-241">241</a></span>
+<span class="normal"><a href="#__codelineno-0-242">242</a></span>
+<span class="normal"><a href="#__codelineno-0-243">243</a></span>
+<span class="normal"><a href="#__codelineno-0-244">244</a></span>
+<span class="normal"><a href="#__codelineno-0-245">245</a></span>
+<span class="normal"><a href="#__codelineno-0-246">246</a></span>
+<span class="normal"><a href="#__codelineno-0-247">247</a></span>
+<span class="normal"><a href="#__codelineno-0-248">248</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-208" name="__codelineno-0-208"></a><span class="k">def</span><span class="w"> </span><span class="nf">provide_config_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">app_server_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]:</span>
+<a id="__codelineno-0-209" name="__codelineno-0-209"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Provide an App Server&#39;s inherited connection settings as a dictionary.</span>
+<a id="__codelineno-0-210" name="__codelineno-0-210"></a>
+<a id="__codelineno-0-211" name="__codelineno-0-211"></a><span class="sd">    Merge root settings with server overrides, including fieldwise SSL</span>
+<a id="__codelineno-0-212" name="__codelineno-0-212"></a><span class="sd">    inheritance and default ports. Unlike ``provide_config``, this method</span>
+<a id="__codelineno-0-213" name="__codelineno-0-213"></a><span class="sd">    does not construct authentication handlers or validate transport/auth</span>
+<a id="__codelineno-0-214" name="__codelineno-0-214"></a><span class="sd">    combinations. It can inspect Kerberos and certificate settings without</span>
+<a id="__codelineno-0-215" name="__codelineno-0-215"></a><span class="sd">    optional dependencies or locally installed certificates.</span>
+<a id="__codelineno-0-216" name="__codelineno-0-216"></a>
+<a id="__codelineno-0-217" name="__codelineno-0-217"></a><span class="sd">    Parameters</span>
+<a id="__codelineno-0-218" name="__codelineno-0-218"></a><span class="sd">    ----------</span>
+<a id="__codelineno-0-219" name="__codelineno-0-219"></a><span class="sd">    app_server_id : str</span>
+<a id="__codelineno-0-220" name="__codelineno-0-220"></a><span class="sd">        The environment&#39;s App Server identifier.</span>
+<a id="__codelineno-0-221" name="__codelineno-0-221"></a>
+<a id="__codelineno-0-222" name="__codelineno-0-222"></a><span class="sd">    Returns</span>
+<a id="__codelineno-0-223" name="__codelineno-0-223"></a><span class="sd">    -------</span>
+<a id="__codelineno-0-224" name="__codelineno-0-224"></a><span class="sd">    dict</span>
+<a id="__codelineno-0-225" name="__codelineno-0-225"></a><span class="sd">        Independent keyword arguments for ``HTTPConfig.resolve``, including</span>
+<a id="__codelineno-0-226" name="__codelineno-0-226"></a><span class="sd">        copies of nested models. Explicit ``auth=None`` is preserved.</span>
+<a id="__codelineno-0-227" name="__codelineno-0-227"></a><span class="sd">        Invalid transport combinations remain inspectable and</span>
+<a id="__codelineno-0-228" name="__codelineno-0-228"></a><span class="sd">        are rejected when ``provide_config`` constructs the configuration.</span>
+<a id="__codelineno-0-229" name="__codelineno-0-229"></a>
+<a id="__codelineno-0-230" name="__codelineno-0-230"></a><span class="sd">    Raises</span>
+<a id="__codelineno-0-231" name="__codelineno-0-231"></a><span class="sd">    ------</span>
+<a id="__codelineno-0-232" name="__codelineno-0-232"></a><span class="sd">    NoSuchAppServerError</span>
+<a id="__codelineno-0-233" name="__codelineno-0-233"></a><span class="sd">        If the environment does not contain this identifier.</span>
+<a id="__codelineno-0-234" name="__codelineno-0-234"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-235" name="__codelineno-0-235"></a>    <span class="n">ml_config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_root_config</span><span class="p">()</span>
+<a id="__codelineno-0-236" name="__codelineno-0-236"></a>    <span class="n">app_server</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_find_app_server</span><span class="p">(</span><span class="n">app_server_id</span><span class="p">)</span>
+<a id="__codelineno-0-237" name="__codelineno-0-237"></a>    <span class="n">app_server_config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_app_server_overrides</span><span class="p">(</span><span class="n">app_server</span><span class="p">)</span>
+<a id="__codelineno-0-238" name="__codelineno-0-238"></a>    <span class="n">merged</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="n">ml_config</span><span class="p">,</span> <span class="o">**</span><span class="n">app_server_config</span><span class="p">}</span>
+<a id="__codelineno-0-239" name="__codelineno-0-239"></a>    <span class="k">if</span> <span class="n">app_server</span><span class="o">.</span><span class="n">ssl</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-240" name="__codelineno-0-240"></a>        <span class="n">merged</span><span class="p">[</span><span class="s2">&quot;ssl&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_merge_ssl</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ssl</span><span class="p">,</span> <span class="n">app_server</span><span class="o">.</span><span class="n">ssl</span><span class="p">)</span>
+<a id="__codelineno-0-241" name="__codelineno-0-241"></a>    <span class="n">merged</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span>
+<a id="__codelineno-0-242" name="__codelineno-0-242"></a>        <span class="s2">&quot;port&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-243" name="__codelineno-0-243"></a>        <span class="n">CLOUD_PORT</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cloud</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">DEFAULT_PORT</span><span class="p">,</span>
+<a id="__codelineno-0-244" name="__codelineno-0-244"></a>    <span class="p">)</span>
+<a id="__codelineno-0-245" name="__codelineno-0-245"></a>    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cloud</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-246" name="__codelineno-0-246"></a>        <span class="n">merged</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">&quot;protocol&quot;</span><span class="p">,</span> <span class="n">CLOUD_PROTOCOL</span><span class="p">)</span>
+<a id="__codelineno-0-247" name="__codelineno-0-247"></a>        <span class="n">merged</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">&quot;auth&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+<a id="__codelineno-0-248" name="__codelineno-0-248"></a>    <span class="k">return</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">merged</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>

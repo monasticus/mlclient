@@ -10,9 +10,7 @@ from __future__ import annotations
 import os
 import subprocess
 import sys
-from pathlib import Path
 
-import yaml
 from cleo.commands.command import Command
 from cleo.formatters.formatter import Formatter
 from cleo.helpers import argument, option
@@ -20,22 +18,33 @@ from cleo.io.inputs.argument import Argument
 from cleo.io.inputs.option import Option
 from cleo.ui.table import Table
 
-from mlclient import _constants as constants
+from mlclient.cli.commands._env_common import (
+    APP_SERVERS_KEY,
+    FILE_PREFIX,
+    FILE_SUFFIX,
+    announce_source,
+    display_value,
+    effective_config,
+    env_names,
+    header,
+    is_secret,
+    key,
+    read_config,
+    resolve_env_dir,
+    title,
+    unknown_env_message,
+)
 from mlclient.connection import MARKLOGIC_APP_SERVICES_PORT
-from mlclient.env import _DEFAULT_APP_SERVER_SETTINGS, find_mlclient_directory
-from mlclient.exceptions import MLClientDirectoryNotFoundError, WrongParametersError
+from mlclient.env import DEFAULT_APP_SERVER_SETTINGS
+from mlclient.exceptions import WrongParametersError
 
-_FILE_PREFIX = "mlclient-"
-_FILE_SUFFIX = ".yaml"
-_SECRET_MASK = "****"
-_APP_SERVERS_KEY = "app-servers"
 _PREDEFINED_SERVERS = {
     server["id"]: {
         "id": server["id"],
         "port": MARKLOGIC_APP_SERVICES_PORT,
         **server,
     }
-    for server in _DEFAULT_APP_SERVER_SETTINGS
+    for server in DEFAULT_APP_SERVER_SETTINGS
 }
 
 
@@ -65,6 +74,8 @@ class EnvShowCommand(Command):
             Print the raw configuration file instead of a rendered table
       -s, --secrets
             Reveal secret values instead of masking them
+      -d, --defaults
+            Fill in inherited defaults and the always-present app servers
       -c, --copy
             Copy a simple setting value to the clipboard, including secrets
     """
@@ -101,6 +112,13 @@ class EnvShowCommand(Command):
             description="Reveal secret values instead of masking them",
         ),
         option(
+            "defaults",
+            "d",
+            description=(
+                "Fill in inherited defaults and the always-present app servers"
+            ),
+        ),
+        option(
             "copy",
             "c",
             description=(
@@ -127,14 +145,15 @@ class EnvShowCommand(Command):
         self,
     ) -> int:
         """Print the environment names found in the .mlclient directory."""
-        directory = self._env_dir()
-        names = _env_names(directory)
+        directory = resolve_env_dir(self)
+        names = env_names(directory)
         if not names:
-            self.line(f"No environments found in <info>{directory}</info>")
+            directory_name = Formatter.escape(str(directory))
+            self.line(f"No environments found in <info>{directory_name}</info>")
             return 0
-        self._announce_source(directory, directory)
+        announce_source(self, directory, directory)
         for name in names:
-            self.line(name)
+            self.line(Formatter.escape(name))
         return 0
 
     def _show(
@@ -142,16 +161,19 @@ class EnvShowCommand(Command):
         name: str,
     ) -> int:
         """Render one environment's settings, masking secrets."""
-        directory = self._env_dir()
-        path = directory / f"{_FILE_PREFIX}{name}{_FILE_SUFFIX}"
+        directory = resolve_env_dir(self)
+        path = directory / f"{FILE_PREFIX}{name}{FILE_SUFFIX}"
         if not path.is_file():
-            raise WrongParametersError(_unknown_env_message(name, directory))
+            raise WrongParametersError(unknown_env_message(name, directory))
         if self.option("raw"):
             self.line(Formatter.escape(path.read_text().rstrip("\n")))
             return 0
-        self._announce_source(directory, path)
-        config = _read_config(path)
-        servers = config.pop(_APP_SERVERS_KEY, None) or []
+        announce_source(self, directory, path)
+        config = read_config(path)
+        if self.option("defaults"):
+            config, servers = effective_config(path, config)
+        else:
+            servers = config.pop(APP_SERVERS_KEY, None) or []
         reveal = self.option("secrets")
         setting = self.argument("setting")
         if setting:
@@ -183,7 +205,7 @@ class EnvShowCommand(Command):
             )
             self._copy_setting(setting, server)
             return 0
-        message = f"No setting [{setting}]."
+        message = Formatter.escape(f"No setting [{setting}].")
         raise WrongParametersError(message)
 
     def _copy_setting(self, setting: str, value: object) -> None:
@@ -198,7 +220,7 @@ class EnvShowCommand(Command):
             )
             return
         try:
-            _copy_to_clipboard(_display_value(setting, value, reveal=True))
+            _copy_to_clipboard(display_value(setting, value, reveal=True))
         except (OSError, subprocess.SubprocessError):
             self.line_error(
                 "Could not copy to clipboard. Check that a clipboard "
@@ -217,10 +239,10 @@ class EnvShowCommand(Command):
     ) -> None:
         """Render the environment-level settings as a key/value table."""
         table = Table(self.io, style="box")
-        table.set_header_title(_title(name))
-        table.set_headers([_header("Setting"), _header("Value")])
-        for key, value in config.items():
-            table.add_row([_key(key), _styled_value(key, value, reveal=reveal)])
+        table.set_header_title(title(name))
+        table.set_headers([header("Setting"), header("Value")])
+        for field, value in config.items():
+            table.add_row([key(field), _styled_value(field, value, reveal=reveal)])
         table.render()
 
     def _render_servers(
@@ -232,8 +254,8 @@ class EnvShowCommand(Command):
         """Render the app servers as a table, one row per server."""
         columns = _server_columns(servers)
         table = Table(self.io, style="box")
-        table.set_header_title(_title("App Servers"))
-        table.set_headers([_header(column) for column in columns])
+        table.set_header_title(title("App Servers"))
+        table.set_headers([header(column) for column in columns])
         for server in servers:
             table.add_row(
                 [
@@ -242,36 +264,6 @@ class EnvShowCommand(Command):
                 ],
             )
         table.render()
-
-    def _env_dir(
-        self,
-    ) -> Path:
-        """Locate the .mlclient directory: home when --global, else nearest ancestor."""
-        if self.option("global"):
-            return Path.home() / constants.ML_CLIENT_DIR
-        try:
-            return find_mlclient_directory(Path.cwd())
-        except MLClientDirectoryNotFoundError:
-            return Path.cwd() / constants.ML_CLIENT_DIR
-
-    def _announce_source(
-        self,
-        directory: Path,
-        source: Path,
-    ) -> None:
-        """Name what is being read, flagging an implicit fall-through to global.
-
-        Stays silent when the directory is the current one's default or was asked
-        for explicitly with --global; only a surprising source is worth naming.
-        """
-        if self.option("global") or directory == Path.cwd() / constants.ML_CLIENT_DIR:
-            return
-        scope = (
-            " (global)" if directory == Path.home() / constants.ML_CLIENT_DIR else ""
-        )
-        self.line(
-            f"<options=italic>Reading <fg=green;options=italic>{source}</>{scope}</>\n",
-        )
 
 
 def _copy_to_clipboard(text: str) -> None:
@@ -296,58 +288,6 @@ def _copy_to_clipboard(text: str) -> None:
     )
 
 
-def _read_config(path: Path) -> dict:
-    """Read YAML and validate the structure needed to render an environment."""
-    try:
-        config = yaml.safe_load(path.read_text())
-    except yaml.YAMLError:
-        message = f"Invalid YAML in {path}."
-        raise WrongParametersError(message) from None
-    if config is None:
-        return {}
-    if not isinstance(config, dict):
-        message = f"Environment in {path} must be a mapping."
-        raise WrongParametersError(message)
-    servers = config.get(_APP_SERVERS_KEY)
-    if servers is None:
-        return config
-    if not isinstance(servers, list):
-        message = f"In {path}, app-servers must be a list."
-        raise WrongParametersError(message)
-    for server in servers:
-        if (
-            not isinstance(server, dict)
-            or not isinstance(server.get("id"), str)
-            or not server["id"].strip()
-        ):
-            message = (
-                f"In {path}, each app server must be a mapping "
-                "with a non-empty string id."
-            )
-            raise WrongParametersError(message)
-    return config
-
-
-def _env_names(
-    directory: Path,
-) -> list[str]:
-    """List environment names from the .mlclient directory's config files."""
-    return sorted(
-        path.name.removeprefix(_FILE_PREFIX).removesuffix(_FILE_SUFFIX)
-        for path in directory.glob(f"{_FILE_PREFIX}*{_FILE_SUFFIX}")
-    )
-
-
-def _unknown_env_message(
-    name: str,
-    directory: Path,
-) -> str:
-    """Report the unknown environment, listing the ones that do exist."""
-    names = _env_names(directory)
-    available = f" Available: {', '.join(names)}." if names else ""
-    return f"No environment [{name}] in {directory}.{available}"
-
-
 def _find_server(
     setting: str,
     servers: list[dict],
@@ -363,19 +303,7 @@ def _server_columns(
     servers: list[dict],
 ) -> list[str]:
     """Collect the union of server keys, keeping first-seen order."""
-    return list(dict.fromkeys(key for server in servers for key in server))
-
-
-def _title(text: str) -> str:
-    return f"<fg=magenta;options=bold>{text}</>"
-
-
-def _header(text: str) -> str:
-    return f"<fg=cyan;options=bold>{text}</>"
-
-
-def _key(text: str) -> str:
-    return f"<fg=cyan>{text}</>"
+    return list(dict.fromkeys(field for server in servers for field in server))
 
 
 def _styled_server_cell(
@@ -386,52 +314,22 @@ def _styled_server_cell(
 ) -> str:
     """Colour an app server's name; other columns follow value semantics."""
     if column == "id":
-        return _key(str(value))
+        return key(str(value))
     return _styled_value(column, value, reveal=reveal)
 
 
 def _styled_value(
-    key: str,
+    setting: str,
     value: object,
     *,
     reveal: bool = False,
 ) -> str:
     """Colour a setting value by its meaning, masking secrets."""
-    text = _display_value(key, value, reveal=reveal)
-    if _is_secret(key) and value is not None:
+    text = Formatter.escape(display_value(setting, value, reveal=reveal))
+    if is_secret(setting) and value is not None:
         return f"<fg=red>{text}</>"
     if value is None:
         return f"<fg=blue>{text}</>"
     if isinstance(value, bool):
         return f"<fg=green>{text}</>" if value else f"<fg=yellow>{text}</>"
     return text
-
-
-def _display_value(
-    key: str,
-    value: object,
-    *,
-    reveal: bool = False,
-) -> str:
-    """Render a setting value for the table, masking secrets."""
-    if value is None:
-        return "-"
-    if _is_secret(key) and not reveal:
-        return _SECRET_MASK
-    if isinstance(value, dict):
-        return ", ".join(
-            f"{k}={_display_value(k, v, reveal=reveal)}" for k, v in value.items()
-        )
-    if isinstance(value, bool):
-        return "true" if value else "false"
-    if isinstance(value, list):
-        return ", ".join(_display_value(key, item, reveal=reveal) for item in value)
-    return str(value)
-
-
-def _is_secret(
-    key: str,
-) -> bool:
-    """Tell whether a key holds a secret that must be masked."""
-    normalized = key.lower().replace("-", "_")
-    return "password" in normalized or normalized == "api_key"

@@ -14,11 +14,18 @@ It exports the following functions:
         Locate a named environment's configuration file in the nearest .mlclient.
     * find_mlclient_directory
         Locate the nearest .mlclient directory at a path or in an ancestor.
+
+It exports the following values:
+
+    * DEFAULT_APP_SERVER_SETTINGS
+        The App Services, Manage, Admin and Health servers present in every
+        environment.
 """
 
 from __future__ import annotations
 
 import logging
+from copy import deepcopy
 from pathlib import Path
 from typing import Annotated, Optional, Union
 
@@ -28,6 +35,9 @@ from pydantic import BaseModel, BeforeValidator, Field, model_validator
 from mlclient import _constants as constants
 from mlclient.auth import AuthConfig
 from mlclient.connection import (
+    CLOUD_PORT,
+    CLOUD_PROTOCOL,
+    DEFAULT_PORT,
     MARKLOGIC_ADMIN_PORT,
     MARKLOGIC_HEALTHCHECK_PORT,
     MARKLOGIC_MANAGE_PORT,
@@ -96,7 +106,7 @@ class MLServerConfig(BaseModel):
     )
 
 
-_DEFAULT_APP_SERVER_SETTINGS = (
+DEFAULT_APP_SERVER_SETTINGS = (
     {"id": "app-services", "rest": True},
     {"id": "manage", "port": MARKLOGIC_MANAGE_PORT},
     {"id": "admin", "port": MARKLOGIC_ADMIN_PORT},
@@ -105,7 +115,7 @@ _DEFAULT_APP_SERVER_SETTINGS = (
 
 
 _DEFAULT_APP_SERVERS = [
-    MLServerConfig(**server) for server in _DEFAULT_APP_SERVER_SETTINGS
+    MLServerConfig(**server) for server in DEFAULT_APP_SERVER_SETTINGS
 ]
 
 
@@ -176,7 +186,7 @@ class MLEnvironment(BaseModel):
         self,
         app_server_id: str,
     ) -> HTTPConfig:
-        """Provide a resolved connection configuration for an App Server.
+        """Provide an App Server's inherited connection settings as an HTTPConfig.
 
         The root-level connection and auth defaults are merged with the app
         server's overrides and resolved into an HTTPConfig ready to hand to a
@@ -193,13 +203,49 @@ class MLEnvironment(BaseModel):
             A resolved configuration for a client initialization
         """
         logger.debug("Getting configuration for the [%s] app server", app_server_id)
+        return HTTPConfig.resolve(**self.provide_config_dict(app_server_id))
+
+    def provide_config_dict(self, app_server_id: str) -> dict[str, object]:
+        """Provide an App Server's inherited connection settings as a dictionary.
+
+        Merge root settings with server overrides, including fieldwise SSL
+        inheritance and default ports. Unlike ``provide_config``, this method
+        does not construct authentication handlers or validate transport/auth
+        combinations. It can inspect Kerberos and certificate settings without
+        optional dependencies or locally installed certificates.
+
+        Parameters
+        ----------
+        app_server_id : str
+            The environment's App Server identifier.
+
+        Returns
+        -------
+        dict
+            Independent keyword arguments for ``HTTPConfig.resolve``, including
+            copies of nested models. Explicit ``auth=None`` is preserved.
+            Invalid transport combinations remain inspectable and
+            are rejected when ``provide_config`` constructs the configuration.
+
+        Raises
+        ------
+        NoSuchAppServerError
+            If the environment does not contain this identifier.
+        """
         ml_config = self._root_config()
         app_server = self._find_app_server(app_server_id)
         app_server_config = self._app_server_overrides(app_server)
         merged = {**ml_config, **app_server_config}
         if app_server.ssl is not None:
             merged["ssl"] = self._merge_ssl(self.ssl, app_server.ssl)
-        return HTTPConfig.resolve(**merged)
+        merged.setdefault(
+            "port",
+            CLOUD_PORT if self.cloud is not None else DEFAULT_PORT,
+        )
+        if self.cloud is not None:
+            merged.setdefault("protocol", CLOUD_PROTOCOL)
+            merged.setdefault("auth", None)
+        return deepcopy(merged)
 
     def _root_config(self) -> dict:
         """Return root-level connection and auth defaults.
@@ -429,6 +475,7 @@ def find_mlclient_directory(
 
 
 __all__ = [
+    "DEFAULT_APP_SERVER_SETTINGS",
     "MLEnvironment",
     "MLServerConfig",
     "find_mlclient_directory",

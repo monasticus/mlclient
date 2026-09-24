@@ -11,6 +11,14 @@ It contains all CLI commands modules:
         The Env Init Command module.
     * env_show
         The Env Show Command module.
+    * env_edit
+        The Env Edit Command module.
+    * env_copy
+        The Env Copy Command module.
+    * env_remove
+        The Env Remove Command module.
+    * env_compare
+        The Env Compare Command module.
     * health
         The Health Command module.
     * log_level
@@ -29,6 +37,14 @@ It exports the following commands:
         Scaffolds an MLClient environment configuration file.
     * EnvShowCommand
         Lists MLClient environments, or renders one environment's settings.
+    * EnvEditCommand
+        Opens an MLClient environment file in the user's editor.
+    * EnvCopyCommand
+        Clones an MLClient environment file under a new name.
+    * EnvRemoveCommand
+        Deletes an MLClient environment file.
+    * EnvCompareCommand
+        Compares settings across MLClient environments side by side.
     * HealthCommand
         Reports whether a MarkLogic environment's HealthCheck server is up.
     * LogLevelCommand
@@ -37,7 +53,11 @@ It exports the following commands:
         Reports the MarkLogic version of an environment.
 """
 
+from mlclient.cli.commands.env_compare import EnvCompareCommand
+from mlclient.cli.commands.env_copy import EnvCopyCommand
+from mlclient.cli.commands.env_edit import EnvEditCommand
 from mlclient.cli.commands.env_init import EnvInitCommand
+from mlclient.cli.commands.env_remove import EnvRemoveCommand
 from mlclient.cli.commands.env_show import EnvShowCommand
 from mlclient.cli.commands.eval import EvalCommand
 from mlclient.cli.commands.health import HealthCommand
@@ -47,7 +67,11 @@ from mlclient.cli.commands.logs import LogsCommand
 from mlclient.cli.commands.version import VersionCommand
 
 __all__ = [
+    "EnvCompareCommand",
+    "EnvCopyCommand",
+    "EnvEditCommand",
     "EnvInitCommand",
+    "EnvRemoveCommand",
     "EnvShowCommand",
     "EvalCommand",
     "HealthCommand",

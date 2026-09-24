@@ -21,8 +21,9 @@ from cleo.io.outputs.output import Type
 from dateutil.parser import isoparse
 
 from mlclient._manager import MLClientManager
-from mlclient.exceptions import MarkLogicError, WrongParametersError
+from mlclient.exceptions import WrongParametersError
 from mlclient.models.types import LogType
+from mlclient.responses import MLResponseParser
 from mlclient.services.logs import AsyncLogsService, LogsService
 
 
@@ -118,9 +119,31 @@ class LogsCommand(Command):
     # ordered for maximum contrast between adjacent hosts. Cycled when a
     # cluster has more hosts than colors.
     _HOST_COLORS: ClassVar[tuple[int, ...]] = (
-        208, 38, 205, 149, 99, 214, 75, 211, 79, 135,
-        166, 105, 178, 43, 213, 69, 202, 115, 177, 137,
-        174, 141, 101, 209, 172,
+        208,
+        38,
+        205,
+        149,
+        99,
+        214,
+        75,
+        211,
+        79,
+        135,
+        166,
+        105,
+        178,
+        43,
+        213,
+        69,
+        202,
+        115,
+        177,
+        137,
+        174,
+        141,
+        101,
+        209,
+        172,
     )
 
     def handle(
@@ -333,9 +356,8 @@ class LogsCommand(Command):
             If MarkLogic rejects host discovery.
         """
         resp = await ml.manage.hosts.get_list(data_format="json")
+        MLResponseParser.raise_for_status(resp)
         body = resp.json()
-        if not resp.is_success:
-            raise MarkLogicError(body["errorResponse"])
         list_items = body["host-default-list"]["list-items"].get("list-item", [])
         return [item["nameref"] for item in list_items]
 

@@ -162,10 +162,15 @@ def test_command_log_level_colours_extended_palette_level():
 
 def test_command_log_level_rejects_system_level_for_app_server():
     tester = _get_tester()
-    status = tester.execute("-e test --type system --server App-Services")
+    status = tester.execute(
+        "-e test --type system --server App-Services",
+        decorated=True,
+    )
 
     assert status == 1
-    assert "system log level" in tester.io.fetch_error()
+    error = tester.io.fetch_error()
+    assert "system log level" in error
+    assert "\x1b[31" in error
 
 
 def _get_tester() -> CommandTester:

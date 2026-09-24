@@ -16,6 +16,7 @@ from typing import ClassVar
 from httpx import Headers, Response
 
 from mlclient import _constants as const
+from mlclient.exceptions import MarkLogicError
 from mlclient.models.mimetypes import Mimetypes
 from mlclient.models.types import DocumentType
 from mlclient.multipart import MultipartPart, decode_multipart_mixed
@@ -147,6 +148,52 @@ class MLResponseParser:
         return cls._parse(response, with_headers=True)
 
     @classmethod
+    def raise_for_status(
+        cls,
+        response: Response,
+    ) -> None:
+        """Raise a MarkLogic error when a response reports failure.
+
+        A success response returns without parsing the body. A non-success
+        response is parsed: when MarkLogic described the error a MarkLogicError
+        is raised. Empty, malformed and unrecognized error bodies defer to
+        httpx, preserving the original response in HTTPStatusError.
+
+        Parameters
+        ----------
+        response : Response
+            An HTTP response taken from MarkLogic instance
+
+        Raises
+        ------
+        MarkLogicError
+            If MarkLogic answered a non-success status with an error it described
+        HTTPStatusError
+            If a non-success status carried no MarkLogic error body
+        """
+        if response.is_success:
+            return
+        try:
+            error = cls._parse(response)
+        except (ValueError, TypeError, AttributeError, ElemTree.ParseError):
+            # Invalid error payloads must not hide the original HTTP failure.
+            error = None
+        if isinstance(error, dict):
+            error = error.get("errorResponse", error)
+            if not isinstance(error, dict) or not any(
+                isinstance(error.get(key), str) and error[key]
+                for key in ("messageCode", "message")
+            ):
+                error = None
+        elif response.headers.get(const.HEADER_NAME_CONTENT_TYPE, "").startswith(
+            const.HEADER_JSON,
+        ):
+            error = None
+        if error:
+            raise MarkLogicError(error)
+        response.raise_for_status()
+
+    @classmethod
     def _parse(
         cls,
         response: Response,
@@ -177,7 +224,7 @@ class MLResponseParser:
         list | tuple
             A parsed response body
         """
-        content_type = response.headers.get(const.HEADER_NAME_CONTENT_TYPE)
+        content_type = response.headers.get(const.HEADER_NAME_CONTENT_TYPE, "")
         if not response.is_success:
             if content_type.startswith(const.HEADER_JSON):
                 error = response.json()
@@ -185,7 +232,8 @@ class MLResponseParser:
                 error = cls._parse_xml_error(response)
             else:
                 error = cls._parse_html_error(response)
-            logger.warning("MarkLogic error occurred [%s]", error)
+            if error:
+                logger.debug("MarkLogic error occurred [%s]", error)
             if with_headers:
                 return response.headers, error
             return error
@@ -233,7 +281,8 @@ class MLResponseParser:
                 error = json.dumps(json_error)
             else:
                 error = cls._parse_html_error(response)
-            logger.warning("MarkLogic error occurred [%s]", error)
+            if error:
+                logger.debug("MarkLogic error occurred [%s]", error)
             if with_headers:
                 return response.headers, error
             return error
@@ -281,7 +330,8 @@ class MLResponseParser:
                 error = json.dumps(json_error).encode("utf-8")
             else:
                 error = cls._parse_html_error(response).encode("utf-8")
-            logger.warning("MarkLogic error occurred [%s]", error)
+            if error:
+                logger.debug("MarkLogic error occurred [%s]", error)
             if with_headers:
                 return response.headers, error
             return error

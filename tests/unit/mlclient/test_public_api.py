@@ -160,6 +160,8 @@ EXPECTED_EXPORTS = {
         "EvalService",
         "LogLevelService",
         "LogsService",
+        "TraceEvents",
+        "TraceEventsService",
         "TransactionService",
         "async_open_transaction",
         "open_transaction",
@@ -236,7 +238,8 @@ def test_low_level_modules_do_not_depend_on_composition():
                             ("mlclient", *source.relative_to(root).parts[:-1]),
                         )
                         module = importlib.util.resolve_name(
-                            "." * node.level + module, package,
+                            "." * node.level + module,
+                            package,
                         )
                     if module == "mlclient":
                         names = [alias.name for alias in node.names]

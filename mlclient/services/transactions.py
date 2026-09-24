@@ -96,10 +96,8 @@ class TransactionService:
             database=self._database,
             timeout=timeout,
         )
-        parsed_resp = MLResponseParser.parse(resp)
-        if not resp.is_success:
-            raise MarkLogicError(parsed_resp["errorResponse"])
-        return parsed_resp
+        MLResponseParser.raise_for_status(resp)
+        return MLResponseParser.parse(resp)
 
     def commit(self, *, timeout=UNSET) -> None:
         """Commit the transaction.
@@ -152,9 +150,7 @@ class TransactionService:
             database=self._database,
             timeout=timeout,
         )
-        if not resp.is_success:
-            resp_body = MLResponseParser.parse(resp)
-            raise MarkLogicError(resp_body["errorResponse"])
+        MLResponseParser.raise_for_status(resp)
 
     def keys(self) -> Iterable[str]:
         """Return the keys exposed for ``**`` unpacking (txid, database if set)."""
@@ -294,10 +290,8 @@ class AsyncTransactionService:
             database=self._database,
             timeout=timeout,
         )
-        parsed_resp = MLResponseParser.parse(resp)
-        if not resp.is_success:
-            raise MarkLogicError(parsed_resp["errorResponse"])
-        return parsed_resp
+        MLResponseParser.raise_for_status(resp)
+        return MLResponseParser.parse(resp)
 
     async def commit(self, *, timeout=UNSET) -> None:
         """Commit the transaction.
@@ -350,9 +344,7 @@ class AsyncTransactionService:
             database=self._database,
             timeout=timeout,
         )
-        if not resp.is_success:
-            resp_body = MLResponseParser.parse(resp)
-            raise MarkLogicError(resp_body["errorResponse"])
+        MLResponseParser.raise_for_status(resp)
 
     def keys(self) -> Iterable[str]:
         """Return the keys exposed for ``**`` unpacking (txid, database if set)."""

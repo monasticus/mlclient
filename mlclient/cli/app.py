@@ -16,6 +16,7 @@ import logging
 from typing import ClassVar
 
 from cleo.application import Application
+from cleo.formatters.formatter import Formatter
 from cleo.formatters.style import Style
 from cleo.io.inputs.input import Input
 from cleo.io.io import IO
@@ -29,6 +30,7 @@ from mlclient.cli.commands.health import HealthCommand
 from mlclient.cli.commands.http import HttpCommand
 from mlclient.cli.commands.log_level import LogLevelCommand
 from mlclient.cli.commands.logs import LogsCommand
+from mlclient.cli.commands.trace_events import TraceEventsCommand
 from mlclient.cli.commands.version import VersionCommand
 from mlclient.logging import setup_logger
 
@@ -52,6 +54,7 @@ class MLCLIentApplication(Application):
         self.add(EnvShowCommand())
         self.add(HealthCommand())
         self.add(LogLevelCommand())
+        self.add(TraceEventsCommand())
         self.add(VersionCommand())
 
     def create_io(
@@ -117,7 +120,7 @@ class CleoAppHandler(logging.Handler):
         """Emit a LogRecord."""
         verbosity = self._LEVELS[record.levelno]["verbosity"]
         style = self._LEVELS[record.levelno]["style"]
-        styled_text = f"<{style}>{self.format(record)}</>"
+        styled_text = f"<{style}>{Formatter.escape(self.format(record))}</>"
         self.io.write_line(styled_text, verbosity=verbosity)
 
     @classmethod

@@ -12,12 +12,12 @@ from cleo.testers.command_tester import CommandTester
 from mlclient import AsyncMLClient
 from mlclient.cli import MLCLIentApplication
 from mlclient.env import MLEnvironment
-from mlclient.http import NO_RETRY_STRATEGY
 from mlclient.exceptions import (
     InvalidLogTypeError,
     MarkLogicError,
     WrongParametersError,
 )
+from mlclient.http import NO_RETRY_STRATEGY
 from tests.utils import resources as resources_utils
 from tests.utils.ml_mockers import MLRespXMocker
 
@@ -996,7 +996,8 @@ def test_command_logs_all_hosts_cancels_reads_before_disconnect(mocker):
 
     mocker.patch.object(AsyncMLClient, "disconnect", record_disconnect)
     respx.get("http://ml_cluster_node1:8002/manage/v2/hosts").respond(
-        200, json=_hosts_body(["ml_cluster_node1", "ml_cluster_node2"]),
+        200,
+        json=_hosts_body(["ml_cluster_node1", "ml_cluster_node2"]),
     )
     respx.get("http://ml_cluster_node1:8002/manage/v2/logs").mock(side_effect=read_logs)
     tester = _get_tester("logs")

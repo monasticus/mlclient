@@ -53,6 +53,7 @@ command page.
 | Send an HTTP request | [`ml http`](cli/http.md) |
 | Read server logs | [`ml logs`](cli/logs.md) |
 | Inspect or change a log level | [`ml log-level`](cli/log-level.md) |
+| Inspect or change diagnostic trace events | [`ml trace-events`](cli/trace-events.md) |
 | Check server health, once or continuously | [`ml health`](cli/health.md) |
 | Read the MarkLogic version | [`ml version`](cli/version.md) |
 
@@ -61,7 +62,7 @@ for its arguments. The pages above explain workflows, defaults and examples.
 
 ## Connection and target selection
 
-`http`, `eval`, `version` and `log-level` use `-c / --connection` to select a configured connection identifier or a TCP port. A numeric port changes the default REST connection's port and retains its other settings.
+`http`, `eval`, `version`, `log-level` and `trace-events` use `-c / --connection` to select a configured connection identifier or a TCP port. A numeric port changes the default REST connection's port and retains its other settings.
 
 `logs -s / --server` selects whose logs to read by an environment identifier or port. `log-level -s / --server` instead takes the actual App Server name in MarkLogic. It does not select the connection used for the request.
 

@@ -16,11 +16,7 @@ from mlclient._options import UNSET
 if TYPE_CHECKING:
     from mlclient.api.rest import AsyncRestApi, RestApi
 
-from mlclient.exceptions import (
-    MarkLogicError,
-    UnsupportedFileExtensionError,
-    WrongParametersError,
-)
+from mlclient.exceptions import UnsupportedFileExtensionError, WrongParametersError
 from mlclient.responses import MLResponseParser
 
 _LOCAL_NS = "http://www.w3.org/2005/xquery-local-functions"
@@ -457,10 +453,8 @@ class EvalService:
             **kwargs,
         )
         resp = self._rest.eval.post(**params, timeout=timeout)
-        parsed_resp = MLResponseParser.parse(resp, output_type=output_type)
-        if not resp.is_success:
-            raise MarkLogicError(parsed_resp)
-        return parsed_resp
+        MLResponseParser.raise_for_status(resp)
+        return MLResponseParser.parse(resp, output_type=output_type)
 
 
 def _validate_params(
@@ -973,7 +967,5 @@ class AsyncEvalService:
             **kwargs,
         )
         resp = await self._rest.eval.post(**params, timeout=timeout)
-        parsed_resp = MLResponseParser.parse(resp, output_type=output_type)
-        if not resp.is_success:
-            raise MarkLogicError(parsed_resp)
-        return parsed_resp
+        MLResponseParser.raise_for_status(resp)
+        return MLResponseParser.parse(resp, output_type=output_type)

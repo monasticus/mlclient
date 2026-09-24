@@ -568,7 +568,8 @@ class EnvInitCommand(Command):
     ) -> int:
         """Prompt for a port, re-asking until it is a valid port number."""
         question = Question(
-            "Port [<comment>8002</comment>]:", str(MARKLOGIC_MANAGE_PORT),
+            "Port [<comment>8002</comment>]:",
+            str(MARKLOGIC_MANAGE_PORT),
         )
         question.set_validator(_require_valid_port)
         question.set_max_attempts(5)

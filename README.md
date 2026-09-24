@@ -62,6 +62,7 @@ ml http get /v1/documents uri=/doc.json   # Send a raw request
 ml logs -s 8002                           # Read a server's logs
 ml logs --all-hosts --regex 'Forest M.*'  # Merge error logs across the cluster
 ml log-level                              # Inspect the group log level
+ml trace-events                           # Inspect the group's trace events
 ml health                                 # Check HealthCheck readiness
 ml version                                # Read the server version
 ```

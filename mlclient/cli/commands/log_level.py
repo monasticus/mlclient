@@ -134,7 +134,7 @@ class LogLevelCommand(Command):
                         log_type=log_type,
                     )
             except (MarkLogicError, WrongParametersError) as exc:
-                self.line_error(Formatter.escape(str(exc)))
+                self.line_error(f"<error>{Formatter.escape(str(exc))}</error>")
                 return 1
 
         self._print_result(group, server, log_type, current)

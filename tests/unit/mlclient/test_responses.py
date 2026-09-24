@@ -2,9 +2,11 @@ import xml.etree.ElementTree as ElemTree
 import zlib
 from datetime import date, datetime
 
+import httpx
 import pytest
 
 from mlclient import MLClient
+from mlclient.exceptions import MarkLogicError
 from mlclient.models import DocumentsBodyPart
 from mlclient.responses import MLResponseParser
 from tests.utils import resources as resources_utils
@@ -2317,3 +2319,127 @@ def test_parse_bytes_with_headers_multiple_responses(ml):
         "Content-Type": "text/plain",
         "X-Primitive": "string",
     }
+
+
+ml_mocker.with_name("gateway-error")
+ml_mocker.with_url("/v1/eval")
+ml_mocker.with_request_content_type("application/x-www-form-urlencoded")
+ml_mocker.with_request_body({"xquery": "gateway-down"})
+ml_mocker.with_response_code(503)
+ml_mocker.with_response_content_type("text/html")
+ml_mocker.with_response_body(
+    "<html><head><title>503 Service Temporarily Unavailable</title></head>"
+    "<body><center><h1>503 Service Temporarily Unavailable</h1></center></body>"
+    "</html>",
+)
+ml_mocker.mock_post()
+
+
+@ml_mock
+def test_parse_non_marklogic_error_response_yields_empty(ml):
+    resp = ml.rest.eval.post(xquery="gateway-down")
+    parsed_resp = MLResponseParser.parse(resp)
+
+    assert parsed_resp == ""
+
+
+@ml_mock
+def test_parse_text_non_marklogic_error_response_yields_empty(ml):
+    resp = ml.rest.eval.post(xquery="gateway-down")
+    parsed_resp = MLResponseParser.parse(resp, output_type=str)
+
+    assert parsed_resp == ""
+
+
+@ml_mock
+def test_parse_bytes_non_marklogic_error_response_yields_empty(ml):
+    resp = ml.rest.eval.post(xquery="gateway-down")
+    parsed_resp = MLResponseParser.parse(resp, output_type=bytes)
+
+    assert parsed_resp == b""
+
+
+@ml_mock
+def test_raise_for_status_passes_through_a_success_response(ml):
+    resp = ml.rest.eval.post(xquery="'plain text'")
+
+    assert MLResponseParser.raise_for_status(resp) is None
+
+
+@ml_mock
+def test_raise_for_status_raises_marklogic_error_for_a_described_error(ml):
+    resp = ml.rest.eval.post(xquery="'missing-quote")
+
+    with pytest.raises(MarkLogicError, match="XDMP-BADCHAR"):
+        MLResponseParser.raise_for_status(resp)
+
+
+@ml_mock
+def test_raise_for_status_defers_to_http_status_error_without_a_body(ml):
+    resp = ml.rest.eval.post(xquery="gateway-down")
+
+    with pytest.raises(httpx.HTTPStatusError, match="503"):
+        MLResponseParser.raise_for_status(resp)
+
+
+@pytest.mark.parametrize(
+    ("content_type", "body"),
+    [
+        (None, b""),
+        ("text/plain", b"Unauthorized"),
+        ("text/html", b"<html><br>Unavailable"),
+        ("application/json", b""),
+        ("application/json", b"{broken"),
+        ("application/json", b'[{"message": "gateway"}]'),
+        ("application/json", b'"gateway"'),
+        ("application/json", b'{"errorResponse": null}'),
+        ("application/json", b'{"errorResponse": "gateway"}'),
+        ("application/json", b'{"detail": "gateway"}'),
+        ("application/json", b"null"),
+        ("application/json", b"{}"),
+        ("application/xml", b"<broken"),
+        ("application/xml", b"<error>gateway</error>"),
+    ],
+)
+def test_raise_for_status_preserves_unrecognized_http_errors(content_type, body):
+    headers = {"Content-Type": content_type} if content_type else {}
+    response = httpx.Response(
+        503,
+        headers=headers,
+        content=body,
+        request=httpx.Request("POST", "http://localhost:8000/v1/eval"),
+    )
+
+    with pytest.raises(httpx.HTTPStatusError) as raised:
+        MLResponseParser.raise_for_status(response)
+
+    assert raised.value.response is response
+    assert raised.value.request is response.request
+
+
+@pytest.mark.parametrize("status", [200, 204, 206])
+def test_raise_for_status_does_not_parse_success_bodies(status):
+    response = httpx.Response(status, content=b"not a structured body")
+    assert MLResponseParser.raise_for_status(response) is None
+
+
+@pytest.mark.parametrize(
+    ("content_type", "resource", "message"),
+    [
+        ("application/xml", "error-response.xml", "XDMP-NOSUCHDB"),
+        ("text/html", "error-response.html", "XDMP-BADCHAR"),
+    ],
+)
+def test_raise_for_status_preserves_structured_server_errors(
+    content_type,
+    resource,
+    message,
+):
+    response = httpx.Response(
+        500,
+        headers={"Content-Type": content_type},
+        content=RESOURCES[resource]["bytes"],
+        request=httpx.Request("POST", "http://localhost:8000/v1/eval"),
+    )
+    with pytest.raises(MarkLogicError, match=message):
+        MLResponseParser.raise_for_status(response)

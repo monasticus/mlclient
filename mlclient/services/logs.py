@@ -14,6 +14,7 @@ from dateutil.parser import isoparse
 from mlclient._options import UNSET
 from mlclient.exceptions import MarkLogicError
 from mlclient.models.types import LogType
+from mlclient.responses import MLResponseParser
 
 if TYPE_CHECKING:
     from mlclient.api.manage import AsyncManageApi, ManageApi
@@ -86,11 +87,8 @@ class LogsService:
             regex=regex if is_error else None,
             timeout=timeout,
         )
-        resp_body = resp.json()
-        if not resp.is_success:
-            raise MarkLogicError(resp_body["errorResponse"])
-
-        return self._parse_logs(log_type, resp_body)
+        MLResponseParser.raise_for_status(resp)
+        return self._parse_logs(log_type, resp.json())
 
     def list(
         self,
@@ -296,11 +294,8 @@ class AsyncLogsService(LogsService):
             regex=regex if is_error else None,
             timeout=timeout,
         )
-        resp_body = resp.json()
-        if not resp.is_success:
-            raise MarkLogicError(resp_body["errorResponse"])
-
-        return self._parse_logs(log_type, resp_body)
+        MLResponseParser.raise_for_status(resp)
+        return self._parse_logs(log_type, resp.json())
 
     async def list(  # type: ignore[override]
         self,

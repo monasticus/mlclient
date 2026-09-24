@@ -934,7 +934,10 @@ def test_get_hosts_forwards_parameters_and_timeout(timeout):
     ).respond(200, json={})
     with MLClient() as ml:
         response = ml.manage.hosts.get_list(
-            data_format="json", group_id="Default", view="status", timeout=timeout,
+            data_format="json",
+            group_id="Default",
+            view="status",
+            timeout=timeout,
         )
     assert response.status_code == 200
     assert (
@@ -946,7 +949,8 @@ def test_get_hosts_forwards_parameters_and_timeout(timeout):
 @respx.mock
 def test_get_hosts_returns_raw_error_response():
     respx.get("http://localhost:8002/manage/v2/hosts").respond(
-        403, json={"errorResponse": {"message": "Forbidden"}},
+        403,
+        json={"errorResponse": {"message": "Forbidden"}},
     )
     with MLClient() as ml:
         response = ml.manage.hosts.get_list()

@@ -995,7 +995,10 @@ async def test_get_hosts_forwards_parameters_and_timeout(timeout):
     ).respond(200, json={})
     async with AsyncMLClient() as ml:
         response = await ml.manage.hosts.get_list(
-            data_format="json", group_id="Default", view="status", timeout=timeout,
+            data_format="json",
+            group_id="Default",
+            view="status",
+            timeout=timeout,
         )
     assert response.status_code == 200
     assert (
@@ -1008,7 +1011,8 @@ async def test_get_hosts_forwards_parameters_and_timeout(timeout):
 @pytest.mark.asyncio
 async def test_get_hosts_returns_raw_error_response():
     respx.get("http://localhost:8002/manage/v2/hosts").respond(
-        403, json={"errorResponse": {"message": "Forbidden"}},
+        403,
+        json={"errorResponse": {"message": "Forbidden"}},
     )
     async with AsyncMLClient() as ml:
         response = await ml.manage.hosts.get_list()

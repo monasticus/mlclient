@@ -429,6 +429,22 @@ async def test_write_forwards_txid(svc):
 
 @pytest.mark.asyncio
 @respx.mock
+async def test_delete_preserves_bodyless_http_failure(svc):
+    route = respx.delete(
+        "http://localhost:8000/v1/documents",
+        params={"uri": "/example.json"},
+    ).respond(403)
+
+    with pytest.raises(httpx.HTTPStatusError) as raised:
+        await svc.delete("/example.json")
+
+    assert route.call_count == 1
+    assert raised.value.response.url == route.calls.last.request.url
+    assert raised.value.response.status_code == 403
+
+
+@pytest.mark.asyncio
+@respx.mock
 async def test_delete_single_document(svc):
     uri = "/some/dir/doc1.xml"
 

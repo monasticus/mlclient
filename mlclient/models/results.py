@@ -1,4 +1,4 @@
-"""Parsed CTS results with optional original payload snapshots."""
+"""Parsed CTS results with scores, frequencies and source locations."""
 
 from __future__ import annotations
 
@@ -14,23 +14,9 @@ class ResultContent:
     ----------
     content : object
         Parsed value, retained as-is: XML tree/element, JSON, scalar or bytes.
-    content_bytes : bytes | None
-        Optional original payload snapshot. CTS services always supply it.
-        Mutating content does not rewrite this snapshot.
-    encoding : str
-        Encoding for decoding the original textual payload, not for parsing it.
     """
 
     content: object
-    content_bytes: bytes | None = field(default=None, kw_only=True, repr=False)
-    encoding: str = field(default="utf-8", kw_only=True)
-
-    @property
-    def content_string(self) -> str | None:
-        """Decode original text, or return None for binary/unavailable bytes."""
-        if self.content_bytes is None or isinstance(self.content, bytes):
-            return None
-        return self.content_bytes.decode(self.encoding)
 
     def xpath(self, expr: str, **namespaces: str) -> list:
         """Call findall on the already parsed XML tree or element.
@@ -70,10 +56,6 @@ class SearchHit(ResultContent):
         Parsed node content supplied by MLResponseParser.
     score : int
         Native score captured before optional projection.
-    content_bytes : bytes | None
-        Original payload snapshot; supplied by CTS services without reserialization.
-    encoding : str
-        Original text encoding.
     source_uri : str | None
         Source URI when supplied by the server.
     source_path : str
@@ -86,19 +68,16 @@ class SearchHit(ResultContent):
 
 
 @dataclass
-class ValueHit(ResultContent):
+class ValueHit:
     """A parsed lexicon value and its native lookup frequency.
 
     Parameters
     ----------
-    content : object
+    value : object
         Parsed value supplied by MLResponseParser, without further conversion.
     frequency : int
         Native frequency; item/fragment-frequency options determine its meaning.
-    content_bytes : bytes | None
-        Original payload snapshot; supplied by CTS services without reserialization.
-    encoding : str
-        Original text encoding.
     """
 
+    value: object
     frequency: int = field(kw_only=True)

@@ -13,18 +13,13 @@ from mlclient.models import ResultContent, SearchHit, ValueHit
 def test_content_is_retained_as_is_without_parsing(content):
     result = ResultContent(content)
     assert result.content is content
-    assert result.content_bytes is None
-    assert result.content_string is None
 
 
-def test_original_bytes_are_an_independent_snapshot():
+def test_value_content_and_frequency():
     content = {"key": 1}
-    original = b'{ "key" : 1 }'
-    result = ValueHit(content, content_bytes=original, frequency=3)
+    result = ValueHit(content, frequency=3)
     content["key"] = 2
-    assert result.content == {"key": 2}
-    assert result.content_bytes is original
-    assert result.content_string == '{ "key" : 1 }'
+    assert result.value == {"key": 2}
     assert result.frequency == 3
 
 
@@ -46,22 +41,19 @@ def test_non_xml_xpath_fails_clearly(content):
         SearchHit(content, score=0).xpath("child")
 
 
-def test_text_decoding_and_explicit_provenance():
+def test_text_content_and_explicit_provenance():
     result = SearchHit(
         "café",
-        content_bytes=b"caf\xe9",
-        encoding="iso-8859-1",
         score=0,
         source_uri="/c.json",
         source_path='/text("a")',
     )
-    assert result.content_string == "café"
+    assert result.content == "café"
     assert result.source_uri == "/c.json"
     assert result.source_path == '/text("a")'
     assert result.score == 0
 
 
 def test_binary_never_decodes_implicitly():
-    result = SearchHit(b"\x00\xff", content_bytes=b"\x00\xff", score=0)
+    result = SearchHit(b"\x00\xff", score=0)
     assert result.content == b"\x00\xff"
-    assert result.content_string is None

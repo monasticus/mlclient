@@ -110,7 +110,7 @@ def expression_database():
 
 
 @pytest.mark.asyncio
-async def test_mixed_content_and_scalar_nodes_keep_bytes_and_scores(
+async def test_mixed_content_and_scalar_nodes_preserve_types_and_scores(
     expression_database,
 ):
     ml, database, port = expression_database
@@ -133,11 +133,8 @@ async def test_mixed_content_and_scalar_nodes_keep_bytes_and_scores(
         hits = cts.search(query=query, database=database)
         by_uri = {hit.source_uri: hit for hit in hits}
         assert all(isinstance(hit.score, int) for hit in hits)
-        assert by_uri[uris[0]].content_bytes == b"abcd"
         assert by_uri[uris[0]].content == "abcd"
-        assert by_uri[uris[1]].content_bytes == binary
         assert by_uri[uris[1]].content == binary
-        assert by_uri[uris[1]].content_string is None
         assert by_uri[uris[2]].content["a"] == "b"
         assert by_uri[uris[2]].source_path == "/"
         assert by_uri["/cts-test/a.xml"].content.getroot().tag == "{urn:cts-test}item"
@@ -163,7 +160,7 @@ async def test_mixed_content_and_scalar_nodes_keep_bytes_and_scores(
             hits = await cts.search(query=query, database=database)
             by_uri = {hit.source_uri: hit for hit in hits}
             assert by_uri[uris[0]].content == "abcd"
-            assert by_uri[uris[1]].content_bytes == binary
+            assert by_uri[uris[1]].content == binary
             assert by_uri[uris[2]].content["z"] is None
             text_hit = await cts.search(
                 query=Cts.document_query(uris[2]),
@@ -179,10 +176,18 @@ async def test_mixed_content_and_scalar_nodes_keep_bytes_and_scores(
 async def test_field_values_aggregates_and_map_boundary(expression_database):
     ml, database, port = expression_database
     cts = CtsService(ml.rest)
+    collection = cts.collections(database=database)
+    assert collection.value == "cts-test"
+    assert collection.frequency == 3
+    assert cts.collection_match("cts-*", database=database) == collection
+    assert cts.uri_match("/cts-test/*.xml", database=database) == [
+        "/cts-test/a.xml",
+        "/cts-test/b.xml",
+    ]
     values = cts.field_values("price", database=database)
-    assert [value.content for value in values] == [Decimal("1.25"), Decimal("2.50")]
+    assert [value.value for value in values] == [Decimal("1.25"), Decimal("2.50")]
     assert [value.frequency for value in values] == [1, 1]
-    assert cts.field_values("price", index=1, database=database).content == Decimal(
+    assert cts.field_values("price", index=1, database=database).value == Decimal(
         "1.25",
     )
     assert cts.field_values("price", query=Cts.false_query(), database=database) == []
@@ -201,7 +206,7 @@ async def test_field_values_aggregates_and_map_boundary(expression_database):
     async with AsyncMLClient(port=port) as async_ml:
         cts = AsyncCtsService(async_ml.rest)
         value = await cts.field_values("price", index=2, database=database)
-        assert value.content == Decimal("2.50")
+        assert value.value == Decimal("2.50")
         assert value.frequency == 1
         assert await cts.sum_aggregate(
             Cts.field_reference("price"),
@@ -345,19 +350,19 @@ def test_search_lexicons_ranges_and_namespace_composition(expression_database):
         cts.search(query=query, range=1, database=database).content.getroot().tag
         == "{urn:cts-test}item"
     )
-    assert [hit.content for hit in cts.uris(query=query, database=database)] == [
+    assert cts.uris(query=query, database=database) == [
         "/cts-test/a.xml",
         "/cts-test/b.xml",
     ]
     assert (
-        cts.uris(query=query, start="/cts-test/b.xml", database=database).content
+        cts.uris(query=query, start="/cts-test/b.xml", database=database)
         == "/cts-test/b.xml"
     )
     ref = Cts.element_reference(fn.qname("urn:cts-test", "price"))
     values = Cts.values(ref)
     assert ml.eval.expression(fn.count(values), database=database) == 2
     assert ml.eval.expression(fn.exists(values), database=database) is True
-    assert [hit.content for hit in cts.values(ref, query=query, database=database)] == [
+    assert [hit.value for hit in cts.values(ref, query=query, database=database)] == [
         Decimal("1.25"),
         Decimal("2.50"),
     ]
@@ -366,7 +371,7 @@ def test_search_lexicons_ranges_and_namespace_composition(expression_database):
         query=query,
         start=Decimal(2),
         database=database,
-    ).content == Decimal("2.50")
+    ).value == Decimal("2.50")
     assert cts.estimate(query, database=database) == 2
     assert cts.estimate(query, maximum=1, database=database) == 1
     assert cts.estimate(database=database) == 3
@@ -387,22 +392,19 @@ def test_search_lexicons_ranges_and_namespace_composition(expression_database):
         database=database,
     )
     forests = xpath("xdmp:database-forests(xdmp:database())")
-    assert [
-        hit.content
-        for hit in cts.uris(
-            query=query,
-            quality_weight=0,
-            forest_ids=forests,
-            database=database,
-        )
-    ] == ["/cts-test/a.xml", "/cts-test/b.xml"]
+    assert cts.uris(
+        query=query,
+        quality_weight=0,
+        forest_ids=forests,
+        database=database,
+    ) == ["/cts-test/a.xml", "/cts-test/b.xml"]
 
     path_ref = Cts.path_reference(
         "/p:item/p:price",
         namespaces=xpath('map:map() => map:with("p", "urn:cts-test")'),
     )
     assert [
-        hit.content for hit in cts.values(path_ref, query=query, database=database)
+        hit.value for hit in cts.values(path_ref, query=query, database=database)
     ] == [
         Decimal("1.25"),
         Decimal("2.50"),
@@ -557,7 +559,7 @@ async def test_async_execution_uses_the_same_composable_expressions(
                 index=fn.last(),
                 database=database,
             )
-        ).content == uris[-1].content
+        ) == uris[-1]
         assert await cts.uris(query=query, index=100, database=database) == []
         assert (
             await ml.eval.expression(
@@ -576,7 +578,7 @@ async def test_async_execution_uses_the_same_composable_expressions(
                 range=1,
                 database=database,
             )
-        ).content == "/cts-test/a.xml"
+        ) == "/cts-test/a.xml"
 
 
 def test_all_paths_are_guarded_with_shared_and_local_namespaces(expression_database):
@@ -653,7 +655,7 @@ def test_all_paths_are_guarded_with_shared_and_local_namespaces(expression_datab
     reference = Cts.path_reference("/p:item/p:price", namespaces=reference_bindings)
     reference_bindings["p"] = "urn:mutated"
     assert [
-        hit.content
+        hit.value
         for hit in cts.values(
             reference,
             namespaces={"p": "urn:absent"},
@@ -743,12 +745,10 @@ def test_position_context_and_service_index(expression_database):
     assert ml.eval.expression(expression.range(4, fn.last())) == []
     cts = CtsService(ml.rest)
     uris = cts.uris(database=database)
-    assert cts.uris(index=1, database=database).content == uris[0].content
-    assert cts.uris(index=fn.last(), database=database).content == uris[-1].content
+    assert cts.uris(index=1, database=database) == uris[0]
+    assert cts.uris(index=fn.last(), database=database) == uris[-1]
     assert cts.uris(index=100, database=database) == []
-    assert [
-        hit.content for hit in cts.uris(range=[2, fn.last()], database=database)
-    ] == [hit.content for hit in uris[1:]]
+    assert cts.uris(range=[2, fn.last()], database=database) == uris[1:]
 
 
 def test_decimal_parsing_and_qname_constructors(expression_database):

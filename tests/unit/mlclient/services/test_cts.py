@@ -165,7 +165,7 @@ async def test_result_operations_execute_once_sync_and_async(name):
     for actual in (result, async_result):
         assert not isinstance(actual, XqyExpression)
         if name in VALUE_OPERATIONS:
-            assert actual.content == 7
+            assert actual.value == 7
             assert actual.frequency == 3
         else:
             assert actual == 7
@@ -184,7 +184,7 @@ async def test_result_operations_execute_once_sync_and_async(name):
 
 
 @respx.mock
-def test_service_parses_once_before_return_and_retains_original_bytes(monkeypatch):
+def test_service_parses_response_once_before_return(monkeypatch):
     original = b'{ "a" : [1, 2] }'
     body, content_type = encode_multipart_mixed(
         [
@@ -209,24 +209,23 @@ def test_service_parses_once_before_return_and_retains_original_bytes(monkeypatc
             headers={"Content-Type": content_type},
         ),
     )
-    parser = MLResponseParser.parse_part
+    parser = MLResponseParser.parse_with_headers
     calls = []
 
     def counted_parse(part):
         calls.append(part)
         return parser(part)
 
-    monkeypatch.setattr(MLResponseParser, "parse_part", counted_parse)
+    monkeypatch.setattr(MLResponseParser, "parse_with_headers", counted_parse)
     with MLClient() as ml:
         hit = CtsService(ml.rest).search(index=1)
     assert len(calls) == 1
     assert hit.content == {"a": [1, 2]}
-    assert hit.content_bytes == original
-    assert hit.content_string == original.decode()
+    assert hit.score == 0
     assert hit.source_uri == "/a.json"
     assert hit.source_path == "/"
     hit.content["a"].append(3)
-    assert hit.content_bytes == original
+    assert hit.content == {"a": [1, 2, 3]}
     assert len(calls) == 1
     assert route.call_count == 1
 
@@ -414,8 +413,6 @@ VALUE_OPERATIONS = {
     "geospatial_boxes",
     "json_property_word_match",
     "json_property_words",
-    "uri_match",
-    "uris",
     "value_match",
     "values",
     "word_match",
@@ -423,6 +420,8 @@ VALUE_OPERATIONS = {
 }
 
 PLAIN_OPERATIONS = {
+    "uri_match",
+    "uris",
     "aggregate",
     "avg_aggregate",
     "classify",
@@ -492,7 +491,7 @@ PLAIN_OPERATIONS = {
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize("count", [0, 1, 2])
-@pytest.mark.parametrize("method", ["search", "uris"])
+@pytest.mark.parametrize("method", ["search", "collections"])
 @pytest.mark.parametrize("selection", [{}, {"index": 1}, {"range": 2}])
 @respx.mock
 async def test_result_cardinality_and_parsed_payloads(count, method, selection):
@@ -529,18 +528,27 @@ async def test_result_cardinality_and_parsed_payloads(count, method, selection):
             assert len(actual) == count
             items = actual
         for position, item in enumerate(items):
-            assert item.content_bytes == b"[1,2]"
-            assert item.content == [1, 2]
+            assert (item.content if method == "search" else item.value) == [1, 2]
             assert (item.score if method == "search" else item.frequency) == position
     assert route.call_count == 2
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("partner", [None, ("string", b"1"), ("integer", b"bad")])
+@pytest.mark.parametrize("partner", [None, ("integer", b"bad"), "incomplete"])
 @respx.mock
 async def test_malformed_pairs_are_not_silently_accepted(partner):
     parts = [MultipartPart({"Content-Type": "application/xml"}, b"<a/>")]
-    if partner is not None:
+    if partner == "incomplete":
+        parts.extend(
+            [
+                MultipartPart(
+                    {"Content-Type": "text/plain", "X-Primitive": "integer"},
+                    b"1",
+                ),
+                MultipartPart({"Content-Type": "application/xml"}, b"<b/>"),
+            ],
+        )
+    elif partner is not None:
         primitive, value = partner
         parts.append(
             MultipartPart(
@@ -561,6 +569,49 @@ async def test_malformed_pairs_are_not_silently_accepted(partner):
     async with AsyncMLClient() as ml:
         with pytest.raises(ValueError, match=r"partner|invalid literal"):
             await AsyncCtsService(ml.rest).search()
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("method", ["uris", "uri_match"])
+@pytest.mark.parametrize("count", [0, 1, 2])
+@pytest.mark.parametrize("selection", [{}, {"index": 1}, {"range": 2}])
+@respx.mock
+async def test_uri_lookups_return_strings_without_frequency(method, count, selection):
+    uris = [f"/{position}.xml" for position in range(count)]
+    body, content_type = encode_multipart_mixed(
+        [
+            MultipartPart(
+                {"Content-Type": "text/plain", "X-Primitive": "string"},
+                uri.encode(),
+            )
+            for uri in uris
+        ],
+    )
+    route = respx.post("http://localhost:8000/v1/eval").mock(
+        return_value=httpx.Response(
+            200,
+            content=body,
+            headers={"Content-Type": content_type},
+        ),
+    )
+    arguments = {"pattern": "/*.xml"} if method == "uri_match" else {}
+    expected = uris[0] if count == 1 else uris
+    with MLClient() as ml:
+        assert (
+            getattr(CtsService(ml.rest), method)(**arguments, **selection) == expected
+        )
+    async with AsyncMLClient() as ml:
+        assert (
+            await getattr(AsyncCtsService(ml.rest), method)(
+                **arguments,
+                **selection,
+            )
+            == expected
+        )
+    assert route.call_count == 2
+    for call in route.calls:
+        source = parse_qs(call.request.content.decode())["xquery"][0]
+        assert "cts:frequency(" not in source
 
 
 @pytest.mark.parametrize("selection", [{}, {"index": 2}, {"range": [2, 3]}])
@@ -689,11 +740,12 @@ async def test_async_expression_and_all_conveniences_share_execution_contract():
         route.mock(return_value=_response(*[("integer", "text/plain", "1")] * 2))
         cts = AsyncCtsService(ml.rest)
         assert (await cts.search(query=Cts.true_query(), range=1)).content == 1
-        assert (await cts.uris(range=[1, 2])).content == 1
-        assert (await cts.values(Cts.uri_reference(), range=1)).content == 1
+        assert (await cts.values(Cts.uri_reference(), range=1)).value == 1
         assert (await cts.search(index=1)).content == 1
-        assert (await cts.uris(index=fn.last())).content == 1
-        assert (await cts.values(Cts.uri_reference(), index=1)).content == 1
+        assert (await cts.values(Cts.uri_reference(), index=1)).value == 1
+        route.mock(return_value=_response(("string", "text/plain", "/a.xml")))
+        assert await cts.uris(range=[1, 2]) == "/a.xml"
+        assert await cts.uris(index=fn.last()) == "/a.xml"
         with pytest.raises(ValueError, match="mutually exclusive"):
             await cts.search(index=1, range=[1, 2])
         route.mock(return_value=_response(("integer", "text/plain", "1")))
@@ -714,11 +766,12 @@ def test_sync_conveniences_share_result_cardinality():
         cts = CtsService(ml.rest)
         assert cts.word_query("cat").compile() == Cts.word_query("cat").compile()
         assert cts.search(range=1).content == 1
-        assert cts.uris(range=[1, 2]).content == 1
-        assert cts.values(Cts.uri_reference()).content == 1
+        assert cts.values(Cts.uri_reference()).value == 1
         assert cts.search(index=1).content == 1
-        assert cts.uris(index=fn.last()).content == 1
-        assert cts.values(Cts.uri_reference(), index=1).content == 1
+        assert cts.values(Cts.uri_reference(), index=1).value == 1
+        route.mock(return_value=_response(("string", "text/plain", "/a.xml")))
+        assert cts.uris(range=[1, 2]) == "/a.xml"
+        assert cts.uris(index=fn.last()) == "/a.xml"
         with pytest.raises(ValueError, match="mutually exclusive"):
             cts.uris(index=1, range=[1, 2])
         route.mock(return_value=_response(("integer", "text/plain", "1")))

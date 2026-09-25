@@ -11,20 +11,6 @@ and execute searches through one `cts` object.
 !!! note "Experimental API"
     This API is experimental while its design is validated in real applications.
 
-The public expression type is
-`from mlclient.functions.xqy import XqyExpression`. It belongs to XQuery, not the
-language-neutral `mlclient.functions`: it compiles XQuery source and bindings,
-with XQuery namespaces, paths and positional semantics. A future SJS expression
-type need not share that implementation or inheritance hierarchy.
-
-`Cts`, `Fn`, `Xs` and `Xdmp` are public namespace-builder classes; their lowercase
-instances are the usual entry points. Custom expressions can subclass
-`XqyExpression` and implement `render(ctx: XqyCompilationContext) -> str`, importing
-both types from `mlclient.functions.xqy`. Use `ctx.bind(value, atomic_type)`
-for runtime data and `compile()` to obtain source plus bindings. Internal tree
-nodes are implementation details, not required imports. For validated
-projection compose `.project("p:title")` after `.index(...)` or `.range(...)`.
-
 ## Search with CtsService
 
 ```python
@@ -51,13 +37,31 @@ Query, reference, ordering, geometry and entity-dictionary constructors remain
 composable expressions. Use `Cts.method(...)` when nesting a result-producing
 operation inside another expression.
 
-### Parsed results and original bytes
+### Parsed results
 
 `search` returns [SearchHit][mlclient.models.SearchHit]. Individual lexicon values
-from `values`, `uris`, `field_values` and word/collection/geospatial lookups return
+from `values`, `field_values` and word/collection/geospatial lookups return
 [ValueHit][mlclient.models.ValueHit]. Empty results are `[]`, one result is one
 object (also with `index=1`), and multiple results form a list. Tuples,
 co-occurrences, ranges and scalar aggregates retain their native parsed structure.
+
+`uris` and `uri_match` return plain URI strings, not `ValueHit`: one URI is a
+`str`, multiple URIs are a `list[str]`, and no matches return `[]`. These methods
+do not extract frequencies. `ValueHit` exposes `.value` and `.frequency`;
+`SearchHit` exposes `.content`, `.score`, `.source_uri` and `.source_path`.
+Generic `values` keeps the same `ValueHit` contract for every index reference;
+use `uris` when you only need document identifiers.
+
+To iterate uniformly over search results, normalize a singleton explicitly:
+
+```python
+hits = products if isinstance(products, list) else [products]
+for hit in hits:
+    print(hit.source_uri, hit.score, hit.content)
+```
+
+An empty search naturally skips the loop. A JSON array stays inside a hit's
+`content`; it is not confused with the outer list of hits.
 
 ```python
 from mlclient import MLClient
@@ -69,40 +73,58 @@ with MLClient() as ml:
     hit = cts.search(query=cts.collection_query("products"), index=1)
     if hit != []:
         content = hit.content         # already parsed by MLResponseParser
-        original = hit.content_bytes  # exact bytes, not reserialized content
         score = hit.score
         uri, path = hit.source_uri, hit.source_path
 
     value = cts.field_values("price", index=1)
     if value != []:
-        price, frequency = value.content, value.frequency
+        price, frequency = value.value, value.frequency
 
     # Native eval does not inject score/frequency parts.
     plain = ml.eval.expression(Cts.search(), output_type=bytes)
 ```
 
-XML documents expose ElementTree, XML elements expose Element; JSON exposes
-dict/list/scalars, text exposes str, and binary exposes unchanged bytes. A JSON
-property received as text/plain + text() is a string, not JSON to parse. The
-common response parser performs conversion once; models do not implement a
-second parser or accept HTTP headers. Malformed XML/JSON fails during the call.
+Content is parsed before the call returns, including searches containing mixed
+types. Malformed XML/JSON fails during the call, not when accessing `content`.
 
-`content_string` decodes the original text snapshot; binary returns None.
-`content_bytes` remains the original snapshot even after a caller mutates the
-parsed dict/XML tree. There is no implicit reserialization or invalidate method.
+| Returned value | Parsed Python representation |
+| --- | --- |
+| XML document / element | `ElementTree` / `Element` |
+| JSON object / array | `dict` / `list` |
+| JSON number, boolean or null | Number, `bool` or `None` |
+| Text, JSON string property or XML attribute | `str` |
+| XML comment or processing instruction | Serialized text as `str` |
+| Binary | Unchanged `bytes` |
+| Atomic lexicon value | Native-type conversion, e.g. `int`, `Decimal`, `date` |
+| Unrecognized primitive | Unchanged `bytes` |
+
+The returned node determines the type, not its source URI. For example, selecting
+a string property from a JSON document returns `str`, not a JSON object.
+
+Search hits expose parsed `content` and lexicon hits expose parsed `value`, without
+raw byte/string alternatives or lazy parsing. Binary content itself remains bytes. Use native eval with
+`output_type=bytes` when original payloads are needed.
 
 The service captures score/frequency inside the same eval request and decodes
 paired parts internally. No extra round-trip or manual pairing is needed.
 Frequency follows native item/fragment-frequency options, not an assumed document
-count. Lexicon `map` output is not a value sequence: use
+count; see [cts:frequency](https://docs.marklogic.com/cts:frequency).
+Lexicon `map` output is not a value sequence: use
 `ml.eval.expression(Cts.values(..., options="map"))` for that native shape;
 frequency-bearing service methods report MLCLIENT-LEXICON-MAP.
 
-`source_uri` and `source_path` describe server provenance, not document metadata
-or write targets. Missing X-Path becomes `/` independently of node type.
+`source_uri` identifies the source document when supplied by the server; otherwise
+it is `None`. `source_path` locates the returned node and defaults to `/` when
+the server omits the path. That default does not guarantee a whole-document result.
+Neither field makes a partial result safe to write back as a whole document.
 `hit.xpath(".//p:title", p="urn:products")` performs local ElementTree.findall
 on already parsed XML, without another request. JSON, text and binary do not
 support local xpath.
+
+Lexicon lookups require the corresponding database configuration: for example,
+`uris` needs a URI lexicon, `values` needs the referenced range index, and
+`field_values("price")` needs a range field index. Missing indexes are reported
+as MarkLogic errors.
 
 ### Python argument conventions
 
@@ -354,3 +376,12 @@ with MLClient() as ml:
     )
     result = ml.eval.expression(fn.map(upper, ["red", "blue"]))
 ```
+
+## Custom XQuery expressions
+
+Import `XqyExpression` and `XqyCompilationContext` from `mlclient.functions.xqy`.
+Custom expressions subclass `XqyExpression` and implement
+`render(ctx: XqyCompilationContext) -> str`. Use `ctx.bind(value, atomic_type)`
+for runtime data and `compile()` to obtain XQuery source plus bindings.
+For validated projection, compose `.project("p:title")` after `.index(...)`
+or `.range(...)`. No private implementation imports are required.

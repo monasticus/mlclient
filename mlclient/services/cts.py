@@ -7,8 +7,6 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from httpx import Headers
-
 from mlclient._experimental import experimental
 from mlclient._options import UNSET
 from mlclient.functions.xqy import (
@@ -18,7 +16,6 @@ from mlclient.functions.xqy import (
     namespace_bindings,
 )
 from mlclient.models.results import SearchHit, ValueHit
-from mlclient.multipart import decode_multipart_mixed
 from mlclient.responses import MLResponseParser
 from mlclient.services.eval import AsyncEvalService, EvalService
 
@@ -105,7 +102,7 @@ def _result_pairs(response, model: type):
     Raises
     ------
     ValueError
-        If a payload lacks an integer score/frequency partner.
+        If a payload lacks a score/frequency partner or parsing fails.
     MarkLogicError
         If the response reports a recognized server failure.
     HTTPStatusError
@@ -114,31 +111,23 @@ def _result_pairs(response, model: type):
     MLResponseParser.raise_for_status(response)
     if not response.content:
         return []
-    parts = decode_multipart_mixed(response.content, response.headers["Content-Type"])
-    if len(parts) % 2:
+    parts = MLResponseParser.parse_with_headers(response)
+    if isinstance(parts, tuple) or len(parts) % 2:
         message = "CTS response is missing a score/frequency partner"
         raise ValueError(message)
     results = []
-    for payload, measure in zip(parts[::2], parts[1::2]):
-        if Headers(measure.headers).get("X-Primitive") != "integer":
-            message = "CTS score/frequency partner must be an integer"
-            raise ValueError(message)
-        content = MLResponseParser.parse_part(payload)
-        parameters = {"content_bytes": payload.content, "encoding": payload.encoding}
+    for (headers, content), (_, measure) in zip(parts[::2], parts[1::2]):
         if model is SearchHit:
-            headers = Headers(payload.headers)
             result = SearchHit(
                 content,
-                score=int(measure.text),
+                score=measure,
                 source_uri=headers.get("X-URI"),
                 source_path=headers.get("X-Path", "/"),
-                **parameters,
             )
         else:
             result = ValueHit(
                 content,
-                frequency=int(measure.text),
-                **parameters,
+                frequency=measure,
             )
         results.append(result)
     return results[0] if len(results) == 1 else results
@@ -355,7 +344,7 @@ class CtsService(Cts):
         index: int | XqyExpression | None = None,
         **kwargs,
     ) -> object:
-        """Run ``cts:uris`` and return parsed ValueHit objects.
+        """Run ``cts:uris`` and return URI strings.
 
         Parameters
         ----------
@@ -381,7 +370,7 @@ class CtsService(Cts):
 
         Returns
         -------
-        object | list
+        str | list[str]
             Empty sequences return []; a singleton returns its item; multiple
             items return a list.
 
@@ -405,9 +394,8 @@ class CtsService(Cts):
             range,
             index,
         )
-        return self._execute(
-            _ResultPairs(expr, ValueHit),
-            ValueHit,
+        return self._eval.expression(
+            expr,
             **_execution_options(self._namespaces, kwargs),
         )
 
@@ -5352,8 +5340,8 @@ class CtsService(Cts):
 
         Returns
         -------
-        ValueHit | list
-            Empty list, one parsed value, or a list of parsed values.
+        str | list[str]
+            Empty list, one URI string, or a list of URI strings.
 
         Raises
         ------
@@ -5377,10 +5365,9 @@ class CtsService(Cts):
             quality_weight=quality_weight,
             forest_ids=forest_ids,
         )
-        expr = _ResultPairs(_ranged(expr, range, index), ValueHit)
-        return self._execute(
+        expr = _ranged(expr, range, index)
+        return self._eval.expression(
             expr,
-            ValueHit,
             **_execution_options(self._namespaces, kwargs),
         )
 
@@ -10958,8 +10945,8 @@ class AsyncCtsService(Cts):
 
         Returns
         -------
-        ValueHit | list
-            Empty list, one parsed value, or a list of parsed values.
+        str | list[str]
+            Empty list, one URI string, or a list of URI strings.
 
         Raises
         ------
@@ -10983,10 +10970,9 @@ class AsyncCtsService(Cts):
             quality_weight=quality_weight,
             forest_ids=forest_ids,
         )
-        expr = _ResultPairs(_ranged(expr, range, index), ValueHit)
-        return await self._execute(
+        expr = _ranged(expr, range, index)
+        return await self._eval.expression(
             expr,
-            ValueHit,
             **_execution_options(self._namespaces, kwargs),
         )
 
@@ -11884,7 +11870,7 @@ class AsyncCtsService(Cts):
         index: int | XqyExpression | None = None,
         **kwargs,
     ) -> object:
-        """Run ``cts:uris`` and return parsed ValueHit objects.
+        """Run ``cts:uris`` and return URI strings.
 
         Parameters
         ----------
@@ -11910,7 +11896,7 @@ class AsyncCtsService(Cts):
 
         Returns
         -------
-        object | list
+        str | list[str]
             Empty sequences return []; a singleton returns its item; multiple
             items return a list.
 
@@ -11934,9 +11920,8 @@ class AsyncCtsService(Cts):
             range,
             index,
         )
-        return await self._execute(
-            _ResultPairs(expr, ValueHit),
-            ValueHit,
+        return await self._eval.expression(
+            expr,
             **_execution_options(self._namespaces, kwargs),
         )
 

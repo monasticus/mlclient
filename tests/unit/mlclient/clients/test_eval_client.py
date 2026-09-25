@@ -1,35 +1,36 @@
 from __future__ import annotations
 
 import json
+import xml.etree.ElementTree as ET
 from datetime import date, datetime, timezone
 from decimal import Decimal
-from pathlib import Path
 from urllib.parse import parse_qs
 
 import httpx
 import pytest
 import respx
 
-from mlclient import AsyncMLClient, MLClient
+from mlclient import MLClient
 from mlclient.exceptions import (
     MarkLogicError,
     UnsupportedFileExtensionError,
     WrongParametersError,
 )
 from mlclient.functions.xqy import XqyExpression, cts, fn, xs
-from mlclient.multipart import MultipartPart, encode_multipart_mixed
-from mlclient.responses import MLResponseParser
 from mlclient.services.eval import _LOCAL_NS
 from tests.utils import resources as resources_utils
+from tests.utils.expressions import StaticExpression
 from tests.utils.ml_mockers import MLRespXMocker
 
 
 @pytest.mark.parametrize("body", [b"", b"<html>Unavailable</html>"])
 @respx.mock
 def test_expression_preserves_unrecognized_http_errors(ml, body):
-    route = respx.post("http://localhost:8000/v1/eval").mock(
-        return_value=httpx.Response(503, content=body),
-    )
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8000/v1/eval")
+    ml_mocker.with_response_code(503)
+    ml_mocker.with_response_body(body)
+    route = ml_mocker.mock_post()
     with pytest.raises(httpx.HTTPStatusError) as raised:
         ml.eval.expression(fn.count([]))
     assert raised.value.response.status_code == 503
@@ -54,10 +55,13 @@ def _setup_and_teardown(ml):
 
 @respx.mock
 def test_eval_preserves_bodyless_http_failure(ml):
-    route = respx.post(
-        "http://localhost:8000/v1/eval",
-        data={"xquery": "1"},
-    ).respond(403)
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8000/v1/eval")
+    ml_mocker.with_request_content_type("application/x-www-form-urlencoded")
+    ml_mocker.with_request_body({"xquery": "1"})
+    ml_mocker.with_response_code(403)
+    ml_mocker.with_empty_response_body()
+    route = ml_mocker.mock_post()
 
     with pytest.raises(httpx.HTTPStatusError) as raised:
         ml.eval.xquery("1")
@@ -380,9 +384,7 @@ def test_eval_using_txid_param(ml):
 
 @respx.mock
 def test_eval_file_xquery(ml):
-    code = Path(
-        resources_utils.get_test_resource_path(__file__, "xquery-code.xqy"),
-    ).read_text()
+    code = resources_utils.read_test_resource_text(__file__, "xquery-code.xqy")
 
     ml_mocker = MLRespXMocker(use_router=False)
     for ext in ["xq", "xql", "xqm", "xqu", "xquery", "xqy"]:
@@ -404,9 +406,7 @@ def test_eval_file_xquery(ml):
 
 @respx.mock
 def test_eval_file_javascript(ml):
-    code = Path(
-        resources_utils.get_test_resource_path(__file__, "javascript-code.js"),
-    ).read_text()
+    code = resources_utils.read_test_resource_text(__file__, "javascript-code.js")
 
     ml_mocker = MLRespXMocker(use_router=False)
     for ext in ["js", "sjs"]:
@@ -428,7 +428,7 @@ def test_eval_file_javascript(ml):
 
 @respx.mock
 def test_eval_with_marklogic_error(ml):
-    error_path = resources_utils.get_test_resource_path(
+    error_body = resources_utils.read_test_resource_bytes(
         __file__,
         "marklogic-error.html",
     )
@@ -440,7 +440,7 @@ def test_eval_with_marklogic_error(ml):
     ml_mocker.with_request_body({"xquery": code})
     ml_mocker.with_response_code(400)
     ml_mocker.with_response_content_type("text/html; charset=utf-8")
-    ml_mocker.with_response_body(Path(error_path).read_bytes())
+    ml_mocker.with_response_body(error_body)
     ml_mocker.mock_post()
 
     with pytest.raises(MarkLogicError) as err:
@@ -518,112 +518,90 @@ def test_eval_with_bytes_output_type(ml):
     assert resp == b"<root/>"
 
 
-def _response(*items):
-    parts = [
-        MultipartPart({"Content-Type": mime, "X-Primitive": primitive}, value.encode())
-        for primitive, mime, value in items
-    ]
-    body, content_type = encode_multipart_mixed(parts)
-    return httpx.Response(200, content=body, headers={"Content-Type": content_type})
-
-
 @pytest.mark.parametrize(
-    ("items", "expected"),
+    ("source", "items", "expected"),
     [
-        ([], []),
-        ([("integer", "text/plain", "0")], 0),
-        ([("boolean", "text/plain", "false")], False),
-        ([("string", "text/plain", "")], ""),
-        ([("array-node", "application/json", "[]")], []),
-        ([("array-node", "application/json", "[1,2]")], [1, 2]),
-        ([("array-node", "application/json", "[[1]]")], [[1]]),
+        ("()", [], []),
+        ("fn:count(())", [("integer", "text/plain", "0")], 0),
+        ("fn:false()", [("boolean", "text/plain", "false")], False),
+        ('xs:string("")', [("string", "text/plain", "")], ""),
+        ("array-node {}", [("array-node", "application/json", "[]")], []),
+        ("array-node {1, 2}", [("array-node", "application/json", "[1,2]")], [1, 2]),
         (
+            "array-node {array-node {1}}",
+            [("array-node", "application/json", "[[1]]")],
+            [[1]],
+        ),
+        (
+            "(1, 2)",
             [("integer", "text/plain", "1"), ("integer", "text/plain", "2")],
             [1, 2],
         ),
     ],
 )
-@pytest.mark.asyncio
 @respx.mock
-async def test_eval_collapses_only_the_outer_singleton(items, expected):
-    route = respx.post("http://localhost:8000/v1/eval").mock(
-        return_value=_response(*items),
+def test_eval_collapses_only_the_outer_singleton(source, items, expected):
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8000/v1/eval")
+    ml_mocker.with_request_content_type("application/x-www-form-urlencoded")
+    ml_mocker.with_request_body(
+        {"xquery": 'xquery version "1.0-ml";\n(' + source + ")"},
     )
+    ml_mocker.with_response_code(200)
+    for primitive, mime, value in items:
+        ml_mocker.with_response_body_part(primitive, value, mime)
+    route = ml_mocker.mock_post()
     with MLClient() as ml:
-        result = ml.eval.expression(fn.count([]))
-    async with AsyncMLClient() as ml:
-        async_result = await ml.eval.expression(fn.count([]))
+        result = ml.eval.expression(StaticExpression(source))
     assert result == expected
     assert type(result) is type(expected)
-    assert async_result == expected
-    assert type(async_result) is type(expected)
-    assert route.call_count == 2
+    assert route.call_count == 1
 
 
-@respx.mock
-def test_typed_items_and_raw_overrides_share_parser():
-    items = [
-        ("decimal", "text/plain", "1.234567890123456789"),
-        ("double", "text/plain", "1.25"),
-        ("float", "text/plain", "INF"),
-        ("unsignedLong", "text/plain", "18446744073709551615"),
-        ("date", "text/plain", "2026-01-02"),
-        ("dateTime", "text/plain", "2026-01-02T03:04:05Z"),
-        ("dateTime", "text/plain", "2026-01-02T03:04:05.123"),
-        ("boolean", "text/plain", "1"),
-        ("boolean", "text/plain", "false"),
-        ("QName", "text/plain", "p:x"),
-    ]
-    respx.post("http://localhost:8000/v1/eval").mock(return_value=_response(*items))
-    with MLClient() as ml:
-        assert ml.eval.expression(xs.string("unused")) == [
-            Decimal("1.234567890123456789"),
-            1.25,
-            float("inf"),
-            18446744073709551615,
-            date(2026, 1, 2),
+@pytest.mark.parametrize(
+    ("primitive", "payload", "expected"),
+    [
+        ("decimal", "1.234567890123456789", Decimal("1.234567890123456789")),
+        ("double", "1.25", 1.25),
+        ("float", "INF", float("inf")),
+        ("unsignedLong", "18446744073709551615", 18446744073709551615),
+        ("date", "2026-01-02", date(2026, 1, 2)),
+        (
+            "dateTime",
+            "2026-01-02T03:04:05Z",
             datetime(2026, 1, 2, 3, 4, 5, tzinfo=timezone.utc),
-            datetime(2026, 1, 2, 3, 4, 5, 123000),
-            True,
-            False,
-            b"p:x",
-        ]
-        assert ml.eval.expression(fn.count([]), output_type=str) == [
-            i[2] for i in items
-        ]
-        assert ml.eval.expression(fn.count([]), output_type=bytes) == [
-            i[2].encode() for i in items
-        ]
-    response = _response(items[0])
-    response.request = httpx.Request("POST", "http://localhost/v1/eval")
-    assert MLResponseParser.parse(response) == Decimal(items[0][2])
-
-
+        ),
+        ("dateTime", "2026-01-02T03:04:05.123", datetime(2026, 1, 2, 3, 4, 5, 123000)),
+        ("boolean", "true", True),
+        ("boolean", "false", False),
+        ("QName", "x", b"x"),
+    ],
+)
+@pytest.mark.parametrize(
+    "output_type",
+    [None, str, bytes],
+    ids=["typed", "text", "bytes"],
+)
 @respx.mock
-def test_xml_json_and_nonmultipart_results():
-    route = respx.post("http://localhost:8000/v1/eval")
+def test_eval_expression_parses_item(primitive, payload, expected, output_type):
+    expression = StaticExpression(f'xs:{primitive}("{payload}")')
+    source = f'xquery version "1.0-ml";\n(xs:{primitive}("{payload}"))'
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8000/v1/eval")
+    ml_mocker.with_request_content_type("application/x-www-form-urlencoded")
+    ml_mocker.with_request_body({"xquery": source})
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body_part(primitive, payload, "text/plain")
+    route = ml_mocker.mock_post()
     with MLClient() as ml:
-        route.mock(
-            return_value=_response(
-                ("document-node()", "application/xml", "<a/>"),
-                ("element", "application/xml", "<b/>"),
-                ("object-node", "application/json", '{"a":1}'),
-            ),
-        )
-        a, b, c = ml.eval.expression(cts.search())
-        assert a.getroot().tag == "a"
-        assert b.tag == "b"
-        assert c == {"a": 1}
-        route.mock(
-            return_value=httpx.Response(
-                200,
-                content="7",
-                headers={"Content-Type": "text/plain", "X-Primitive": "integer"},
-            ),
-        )
-        assert ml.eval.expression(fn.count([])) == 7
-        route.mock(return_value=httpx.Response(200, content=b""))
-        assert ml.eval.expression(fn.count([])) == []
+        actual = ml.eval.expression(expression, output_type=output_type)
+    if output_type is str:
+        expected = payload
+    elif output_type is bytes:
+        expected = payload.encode()
+    assert actual == expected
+    assert type(actual) is type(expected)
+    assert route.call_count == 1
 
 
 class _CountedExpr(XqyExpression):
@@ -637,50 +615,49 @@ class _CountedExpr(XqyExpression):
 
 @respx.mock
 def test_wire_parameters_timeout_and_single_compilation():
-    route = respx.post("http://localhost:8000/v1/eval").mock(
-        return_value=_response(("decimal", "text/plain", "1.234567890123456789")),
-    )
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8000/v1/eval")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body_part("decimal", "1.234567890123456789", "text/plain")
+    route = ml_mocker.mock_post()
     expr = _CountedExpr()
     with MLClient() as ml:
         assert ml.eval.expression(
             expr,
-            database="test",
+            database="Documents",
             txid="123",
             timeout=2,
         ) == Decimal("1.234567890123456789")
     request = route.calls.last.request
     body = parse_qs(request.content.decode())
     assert json.loads(body["vars"][0]) == {"v0": "1.234567890123456789"}
-    assert "\n" in body["xquery"][0]
-    assert dict(request.url.params) == {"database": "test", "txid": "123"}
+    assert body["xquery"] == [
+        'xquery version "1.0-ml";\ndeclare variable $v0 as xs:decimal external;\n$v0',
+    ]
+    assert dict(request.url.params) == {"database": "Documents", "txid": "123"}
     assert request.extensions["timeout"]["read"] == 2
     assert expr.renders == 1
 
 
-@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    ("expression", "arguments", "error"),
+    [
+        (xs.string("original"), {"v0": "override"}, TypeError),
+        (xs.string("original"), {"variables": {}}, TypeError),
+        (xs.string("original"), {"databse": "typo"}, TypeError),
+        ("1", {}, TypeError),
+        (fn.count([]), {"output_type": int}, ValueError),
+    ],
+)
 @respx.mock
-async def test_invalid_execution_arguments_fail_before_io_sync_and_async():
-    with MLClient() as ml:
-        for kwargs in ({"v0": "override"}, {"variables": {}}, {"databse": "typo"}):
-            with pytest.raises(TypeError):
-                ml.eval.expression(xs.string("original"), **kwargs)
-        with pytest.raises(TypeError, match="XqyExpression"):
-            ml.eval.expression("1")
-        with pytest.raises(ValueError, match="output_type"):
-            ml.eval.expression(fn.count([]), output_type=int)
-    async with AsyncMLClient() as ml:
-        with pytest.raises(TypeError, match="XqyExpression"):
-            await ml.eval.expression("1")
-        with pytest.raises(ValueError, match="output_type"):
-            await ml.eval.expression(fn.count([]), output_type=int)
-        with pytest.raises(TypeError):
-            await ml.eval.expression(fn.count([]), v0="override")
+def test_invalid_execution_arguments_fail_before_io(expression, arguments, error):
+    with MLClient() as ml, pytest.raises(error):
+        ml.eval.expression(expression, **arguments)
     assert not respx.calls
 
 
-@pytest.mark.asyncio
 @respx.mock
-async def test_server_errors_propagate_without_local_version_gates():
+def test_server_errors_propagate_without_local_version_gates():
     error = {
         "errorResponse": {
             "statusCode": 400,
@@ -689,54 +666,81 @@ async def test_server_errors_propagate_without_local_version_gates():
             "message": "Undefined function cts:document-root-query",
         },
     }
-    respx.post("http://localhost:8000/v1/eval").mock(
-        return_value=httpx.Response(400, json=error["errorResponse"]),
-    )
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8000/v1/eval")
+    ml_mocker.with_response_code(400)
+    ml_mocker.with_response_content_type("application/json")
+    ml_mocker.with_response_body(error)
+    ml_mocker.mock_post()
     expr = cts.document_root_query("x")
     with MLClient() as ml, pytest.raises(MarkLogicError, match="XDMP-UNDFUN"):
         ml.eval.expression(expr)
-    async with AsyncMLClient() as ml:
-        with pytest.raises(MarkLogicError, match="XDMP-UNDFUN"):
-            await ml.eval.expression(expr)
 
 
-@pytest.mark.asyncio
 @respx.mock
-async def test_eval_namespaces_belong_only_to_the_expression_invocation():
-    route = respx.post("http://localhost:8000/v1/eval").mock(
-        return_value=_response(("integer", "text/plain", "1")),
-    )
+def test_eval_namespaces_belong_only_to_the_expression_invocation():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8000/v1/eval")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body_part("integer", "1", "text/plain")
+    route = ml_mocker.mock_post()
     with MLClient() as ml:
-        ml.eval.expression(fn.count([1]), namespaces={"p": "urn:test"})
+        ml.eval.expression(
+            fn.count([1]),
+            namespaces={"p": "https://monasticus.com/mlclient/examples/test"},
+        )
         assert (
-            'declare namespace p = "urn:test";'
-            in parse_qs(
-                route.calls.last.request.content.decode(),
-            )["xquery"][0]
+            'declare namespace p = "https://monasticus.com/mlclient/examples/test";'
+            in parse_qs(route.calls.last.request.content.decode())["xquery"][0]
         )
         ml.eval.expression(fn.count([1]))
         assert (
             "declare namespace p"
-            not in parse_qs(
-                route.calls.last.request.content.decode(),
-            )["xquery"][0]
+            not in parse_qs(route.calls.last.request.content.decode())["xquery"][0]
         )
-        with pytest.raises(TypeError, match="namespaces"):
-            type(ml.eval)(ml.rest, namespaces={"p": "urn:test"})
-    async with AsyncMLClient() as ml:
-        await ml.eval.expression(fn.count([1]), namespaces={"p": "urn:test"})
-        assert (
-            'declare namespace p = "urn:test";'
-            in parse_qs(
-                route.calls.last.request.content.decode(),
-            )["xquery"][0]
+
+
+def test_eval_constructor_rejects_namespaces():
+    with MLClient() as ml, pytest.raises(TypeError, match="namespaces"):
+        type(ml.eval)(
+            ml.rest,
+            namespaces={"p": "https://monasticus.com/mlclient/examples/test"},
         )
-        await ml.eval.expression(fn.count([1]))
-        assert (
-            "declare namespace p"
-            not in parse_qs(
-                route.calls.last.request.content.decode(),
-            )["xquery"][0]
-        )
-        with pytest.raises(TypeError, match="namespaces"):
-            type(ml.eval)(ml.rest, namespaces={"p": "urn:test"})
+
+
+@pytest.mark.parametrize(
+    ("source", "primitive", "node_type"),
+    [
+        ("document {<a/>}", "document-node()", ET.ElementTree),
+        ("<a/>", "element()", ET.Element),
+    ],
+)
+@respx.mock
+def test_expression_returns_xml_node(source, primitive, node_type):
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8000/v1/eval")
+    ml_mocker.with_request_content_type("application/x-www-form-urlencoded")
+    ml_mocker.with_request_body({"xquery": f'xquery version "1.0-ml";\n({source})'})
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body_part(primitive, "<a/>", "application/xml")
+    ml_mocker.mock_post()
+    with MLClient() as ml:
+        result = ml.eval.expression(StaticExpression(source))
+    assert isinstance(result, node_type)
+    root = result.getroot() if node_type is ET.ElementTree else result
+    assert root.tag == "a"
+
+
+@respx.mock
+def test_expression_returns_json_object():
+    source = 'object-node {"a": 1}'
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8000/v1/eval")
+    ml_mocker.with_request_content_type("application/x-www-form-urlencoded")
+    ml_mocker.with_request_body({"xquery": f'xquery version "1.0-ml";\n({source})'})
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body_part("object-node()", '{"a":1}', "application/json")
+    ml_mocker.mock_post()
+    with MLClient() as ml:
+        result = ml.eval.expression(StaticExpression(source))
+    assert result == {"a": 1}

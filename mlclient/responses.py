@@ -57,13 +57,14 @@ class MLResponseParser:
     """
 
     _PLAIN_TEXT_PARSERS: ClassVar[dict] = {
-        const.HEADER_PRIMITIVE_STRING: lambda data: data,
-        const.HEADER_PRIMITIVE_INTEGER: int,
         None: lambda data: data,
-        "text()": str,
-        "attribute()": str,
-        "comment()": str,
-        "processing-instruction()": str,
+        const.HEADER_PRIMITIVE_STRING: lambda data: data,
+        const.HEADER_PRIMITIVE_TEXT: str,
+        const.HEADER_PRIMITIVE_ATTRIBUTE: str,
+        const.HEADER_PRIMITIVE_COMMENT: str,
+        const.HEADER_PRIMITIVE_PROCESSING_INSTRUCTION: str,
+        const.HEADER_PRIMITIVE_BOOLEAN: lambda data: data in ("true", "1"),
+        const.HEADER_PRIMITIVE_INTEGER: int,
         const.HEADER_PRIMITIVE_BYTE: int,
         const.HEADER_PRIMITIVE_SHORT: int,
         const.HEADER_PRIMITIVE_INT: int,
@@ -79,7 +80,6 @@ class MLResponseParser:
         const.HEADER_PRIMITIVE_DECIMAL: Decimal,
         const.HEADER_PRIMITIVE_DOUBLE: float,
         const.HEADER_PRIMITIVE_FLOAT: float,
-        const.HEADER_PRIMITIVE_BOOLEAN: lambda data: data in ("true", "1"),
         const.HEADER_PRIMITIVE_DATE: lambda data: date.fromisoformat(data[:10]),
         const.HEADER_PRIMITIVE_DATE_TIME: lambda data: datetime.fromisoformat(
             data.replace("Z", "+00:00"),
@@ -268,7 +268,7 @@ class MLResponseParser:
             body_parts = [response]
 
         parsed_parts = [
-            cls.parse_part(body_part, None, with_headers) for body_part in body_parts
+            cls._parse_part(body_part, None, with_headers) for body_part in body_parts
         ]
         if len(parsed_parts) == 1:
             return parsed_parts[0]
@@ -317,7 +317,7 @@ class MLResponseParser:
             body_parts = [response]
 
         parsed_parts = [
-            cls.parse_part(body_part, str, with_headers) for body_part in body_parts
+            cls._parse_part(body_part, str, with_headers) for body_part in body_parts
         ]
         if len(parsed_parts) == 1:
             return parsed_parts[0]
@@ -366,7 +366,7 @@ class MLResponseParser:
             body_parts = [response]
 
         parsed_parts = [
-            cls.parse_part(body_part, bytes, with_headers) for body_part in body_parts
+            cls._parse_part(body_part, bytes, with_headers) for body_part in body_parts
         ]
         if len(parsed_parts) == 1:
             return parsed_parts[0]
@@ -430,7 +430,7 @@ class MLResponseParser:
         return "\n".join(term.text for term in terms)
 
     @classmethod
-    def parse_part(
+    def _parse_part(
         cls,
         body_part: MultipartPart | Response,
         output_type: type | None = None,
@@ -482,7 +482,7 @@ class MLResponseParser:
         if (
             output_type is bytes
             or doc_type is DocumentType.BINARY
-            or headers.get(const.HEADER_NAME_PRIMITIVE) == "binary()"
+            or headers.get(const.HEADER_NAME_PRIMITIVE) == const.HEADER_PRIMITIVE_BINARY
         ):
             parsed = body_part.content
             logger.fine("Returning binary response part value")
@@ -534,9 +534,8 @@ class MLResponseParser:
         content_type = headers.get(const.HEADER_NAME_CONTENT_TYPE, "")
         primitive_type = headers.get(const.HEADER_NAME_PRIMITIVE)
         doc_type = Mimetypes.get_doc_type(content_type)
-        parsers = cls._PLAIN_TEXT_PARSERS
-        if doc_type == DocumentType.TEXT and primitive_type in parsers:
-            return parsers[primitive_type](body_part.text)
+        if doc_type == DocumentType.TEXT and primitive_type in cls._PLAIN_TEXT_PARSERS:
+            return cls._PLAIN_TEXT_PARSERS[primitive_type](body_part.text)
         if doc_type == DocumentType.JSON:
             return json.loads(body_part.text)
         if doc_type == DocumentType.XML:

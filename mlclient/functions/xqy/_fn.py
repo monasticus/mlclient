@@ -48,7 +48,7 @@ class Fn:
 
         Parameters
         ----------
-        arg : numeric?
+        arg : object
             A numeric value.
 
         Returns
@@ -70,9 +70,9 @@ class Fn:
 
         Parameters
         ----------
-        arg : xs:date?
+        arg : object
             The date to adjust to the new timezone.
-        timezone : xs:dayTimeDuration?
+        timezone : object
             The new timezone for the date.
             Omit to use the native default; None explicitly passes ().
 
@@ -95,9 +95,9 @@ class Fn:
 
         Parameters
         ----------
-        arg : xs:dateTime?
+        arg : object
             The dateTime to adjust to the new timezone.
-        timezone : xs:dayTimeDuration?
+        timezone : object
             The new timezone for the dateTime.
             Omit to use the native default; None explicitly passes ().
 
@@ -120,9 +120,9 @@ class Fn:
 
         Parameters
         ----------
-        arg : xs:time?
+        arg : object
             The time to adjust to the new timezone.
-        timezone : xs:dayTimeDuration?
+        timezone : object
             The new timezone for the date.
             Omit to use the native default; None explicitly passes ().
 
@@ -147,11 +147,11 @@ class Fn:
 
         Parameters
         ----------
-        in_ : xs:string?
+        in_ : object
             The string to start with.
-        regex : xs:string
+        regex : object
             The regular expression pattern to match.
-        flags : xs:string
+        flags : object
             The flag representing how to interpret the regular expression. One of "s",
             "m", "i", or "x", as defined in http://www.w3.org/TR/xpath-functions/#flags
             .
@@ -177,7 +177,7 @@ class Fn:
 
         Parameters
         ----------
-        arg : xs:anyAtomicType*
+        arg : object
             The sequence of values to average.
 
         Returns
@@ -199,7 +199,7 @@ class Fn:
 
         Parameters
         ----------
-        arg : node()?
+        arg : object
             The node whose base-uri is to be returned.
             Omit to use the native default; None explicitly passes ().
 
@@ -222,9 +222,9 @@ class Fn:
 
         Parameters
         ----------
-        arg : item()*
+        arg : object
             A sequence of items.
-        collation : xs:string
+        collation : object
             The optional name of a valid collation URI. For information on the collation
             URI syntax, see the Search Developer's Guide .
             Omit to use the native default; None explicitly passes ().
@@ -236,27 +236,6 @@ class Fn:
 
         Notes
         -----
-        When using XQuery version "1.0-ml", this function implements the semantics from
-        May 2003.
-        If $arg is the empty sequence, fn:boolean returns false.
-        If $arg is a sequence whose first item is a node, fn:boolean returns true.
-        If $arg is a singleton value of type xs:boolean or a derived from xs:boolean,
-        fn:boolean returns $arg .
-        If $arg is a singleton value of type xs:string or a type derived from xs:string
-        or xs:untypedAtomic, fn:boolean returns false if the operand value has zero
-        length; otherwise it returns true.
-        If $arg is a singleton value of any numeric type or a type derived from a
-        numeric type, fn:boolean returns false if the operand value is NaN or is
-        numerically equal to zero; otherwise it returns true.
-        In all other cases, fn:boolean raises a type error [err:FORG0006] when run in
-        XQuery strict mode (1.0).
-        The static semantics of this function are described in Section 7.2.4 The
-        fn:boolean function[FS] .
-        Note:
-        The result of this function is not necessarily the same as " $arg cast as
-        xs:boolean ". For example, fn:boolean("false") returns the value "true" whereas
-        "false" cast as xs:boolean returns false.
-
         Native reference: https://docs.marklogic.com/fn:boolean
         """
         return _optional_call("fn:boolean", arg, collation)
@@ -270,7 +249,7 @@ class Fn:
 
         Parameters
         ----------
-        arg : numeric?
+        arg : object
             A numeric value.
 
         Returns
@@ -293,9 +272,9 @@ class Fn:
 
         Parameters
         ----------
-        comparand1 : xs:string?
+        comparand1 : object
             A string to be compared.
-        comparand2 : xs:string?
+        comparand2 : object
             A string to be compared.
 
         Returns
@@ -317,7 +296,7 @@ class Fn:
 
         Parameters
         ----------
-        arg : xs:integer*
+        arg : object
             A sequence of Unicode code points.
 
         Returns
@@ -339,7 +318,7 @@ class Fn:
 
         Parameters
         ----------
-        uri : xs:string*
+        uri : object
             The URI of the collection to retrieve. If you omit this parameter, returns
             all of the documents in the database. If you specify a list of URIs, returns
             all of the documents in all of the collections at the URIs specified in the
@@ -367,11 +346,11 @@ class Fn:
 
         Parameters
         ----------
-        comparand1 : xs:string?
+        comparand1 : object
             A string to be compared.
-        comparand2 : xs:string?
+        comparand2 : object
             A string to be compared.
-        collation : xs:string
+        collation : object
             The optional name of a valid collation URI. For information on the collation
             URI syntax, see the Search Developer's Guide .
             Omit to use the native default; None explicitly passes ().
@@ -396,9 +375,9 @@ class Fn:
 
         Parameters
         ----------
-        parameter1 : xs:anyAtomicType?
+        parameter1 : object
             A value.
-        parameters : xs:anyAtomicType?,...
+        parameters : tuple
             A value.
 
         Returns
@@ -421,11 +400,11 @@ class Fn:
 
         Parameters
         ----------
-        parameter1 : xs:string?
+        parameter1 : object
             The string from which to test.
-        parameter2 : xs:string?
+        parameter2 : object
             The string to test for existence in the first parameter.
-        collation : xs:string
+        collation : object
             The optional name of a valid collation URI. For information on the collation
             URI syntax, see the Search Developer's Guide .
             Omit to use the native default; None explicitly passes ().
@@ -449,9 +428,9 @@ class Fn:
 
         Parameters
         ----------
-        sequence : item()*
+        sequence : object
             The sequence of items to count.
-        maximum : xs:double?
+        maximum : object
             The maximum value of the count to return. MarkLogic Server will stop count
             when the $maximum value is reached and return the $maximum value. This is an
             extension to the W3C standard fn:count function.
@@ -499,11 +478,6 @@ class Fn:
 
         Notes
         -----
-        fn:current-date()
-        xs:date
-        fn:current-date()
-        2004-05-12+01:00
-
         Native reference: https://docs.marklogic.com/fn:current-date
         """
         return _FunctionCall("fn:current-date")
@@ -521,11 +495,6 @@ class Fn:
 
         Notes
         -----
-        fn:current-dateTime()
-        xs:dateTime
-        fn:current-dateTime()
-        2004-05-12T18:17:15.125Z
-
         Native reference: https://docs.marklogic.com/fn:current-dateTime
         """
         return _FunctionCall("fn:current-dateTime")
@@ -577,11 +546,6 @@ class Fn:
 
         Notes
         -----
-        fn:current-time()
-        xs:time
-        fn:current-time()
-        23:17:00.000-05:00
-
         Native reference: https://docs.marklogic.com/fn:current-time
         """
         return _FunctionCall("fn:current-time")
@@ -594,7 +558,7 @@ class Fn:
 
         Parameters
         ----------
-        arg : item()*
+        arg : object
             The items whose typed values are to be returned.
 
         Returns
@@ -616,9 +580,9 @@ class Fn:
 
         Parameters
         ----------
-        arg1 : xs:date
+        arg1 : object
             The date to be combined with the time argument.
-        arg2 : xs:time
+        arg2 : object
             The time to be combined with the date argument.
 
         Returns
@@ -641,7 +605,7 @@ class Fn:
 
         Parameters
         ----------
-        arg : xs:date?
+        arg : object
             The date whose day component will be returned.
 
         Returns
@@ -664,7 +628,7 @@ class Fn:
 
         Parameters
         ----------
-        arg : xs:dateTime?
+        arg : object
             The dateTime whose day component will be returned.
 
         Returns
@@ -687,7 +651,7 @@ class Fn:
 
         Parameters
         ----------
-        arg : xs:duration?
+        arg : object
             The duration whose day component will be returned.
 
         Returns
@@ -709,12 +673,12 @@ class Fn:
 
         Parameters
         ----------
-        parameter1 : item()*
+        parameter1 : object
             The first sequence of items, each item should be an atomic value or node.
-        parameter2 : item()*
+        parameter2 : object
             The sequence of items to compare to the first sequence of items, again each
             item should be an atomic value or node.
-        collation : xs:string
+        collation : object
             The optional name of a valid collation URI. For information on the collation
             URI syntax, see the Search Developer's Guide .
             Omit to use the native default; None explicitly passes ().
@@ -743,8 +707,6 @@ class Fn:
 
         Notes
         -----
-        Developer's Guide
-
         Native reference: https://docs.marklogic.com/fn:default-collation
         """
         return _FunctionCall("fn:default-collation")
@@ -759,7 +721,7 @@ class Fn:
 
         Parameters
         ----------
-        nodes : node()*
+        nodes : object
             A sequence of nodes from which to eliminate duplicate nodes (nodes with the
             same identity) so that only one node of each identity remains.
 
@@ -770,12 +732,6 @@ class Fn:
 
         Notes
         -----
-        Note that for a node to have the same identity as another node, it must be
-        exactly the same node (not an equivalent node). For example, for a node bound to
-        the variable $x to have the same identity as a node bound to the variable $y,
-        the following must return true:
-        $x is $y
-
         Native reference: https://docs.marklogic.com/fn:distinct-nodes
         """
         return _FunctionCall("fn:distinct-nodes", (nodes,))
@@ -789,9 +745,9 @@ class Fn:
 
         Parameters
         ----------
-        arg : item()*
+        arg : object
             A sequence of items.
-        collation : xs:string
+        collation : object
             The optional name of a valid collation URI. For information on the collation
             URI syntax, see the Search Developer's Guide .
             Omit to use the native default; None explicitly passes ().
@@ -815,7 +771,7 @@ class Fn:
 
         Parameters
         ----------
-        uri : xs:string*
+        uri : object
             The URI of the document to retrieve. If you omit this parameter, returns all
             of the documents in the database - this is only allowed if you're not using
             xquery version 1.0 strict. If you specify a list of URIs, returns all of the
@@ -829,13 +785,6 @@ class Fn:
 
         Notes
         -----
-        document-node()
-        element()
-        text()
-        object-node()
-        array-node()
-        binary()
-
         Native reference: https://docs.marklogic.com/fn:doc
         """
         return _optional_call("fn:doc", uri)
@@ -848,7 +797,7 @@ class Fn:
 
         Parameters
         ----------
-        uri : xs:string?
+        uri : object
             The URI of the document to check.
 
         Returns
@@ -870,7 +819,7 @@ class Fn:
 
         Parameters
         ----------
-        uris : item()*
+        uris : object
             The $uris is a sequence of the URI(s) of the document(s) to be retrieved.
             This parameter is mandatory. However you may pass a singleton sequence with
             an empty string in it. In that case it will return the stylesheet that
@@ -879,7 +828,7 @@ class Fn:
             you are not using version 1.0 strict. If any URI in this sequence is an
             absolute URI, then it is used as is. If it is a relative URI, it is resolved
             against a base URI specified in the second argument.
-        base_node : node()
+        base_node : object
             If $base-node is supplied, its base URI is used to resolve relative URIs in
             uri-sequence. If it is not supplied, the base URI of the node that contained
             the fn:document() call is used.
@@ -892,15 +841,6 @@ class Fn:
 
         Notes
         -----
-        If no second argument is specified, the URI resolves using the base-uri of the
-        calling module. This can cause surprising results if the URI you are resolving
-        is not rooted but the module from which you call it has a base-uri. When calling
-        fn:document from an xdmp:eval , the calling module is defined to have no base-
-        uri. When calling from an XQuery module or an XSLT stylesheet, the base-uri is
-        the URI of the module or stylesheet. For an example to demonstrate this , see
-        the second example below.
-        For the URI to be exactly what you enter, use fn:doc instead.
-
         Native reference: https://docs.marklogic.com/fn:document
         """
         return _optional_call("fn:document", uris, base_node)
@@ -913,7 +853,7 @@ class Fn:
 
         Parameters
         ----------
-        arg : node()?
+        arg : object
             The node whose document-uri is to be returned.
 
         Returns
@@ -923,10 +863,6 @@ class Fn:
 
         Notes
         -----
-        fn:document-uri
-        fn:base-uri
-        xdmp:node-uri
-
         Native reference: https://docs.marklogic.com/fn:document-uri
         """
         return _FunctionCall("fn:document-uri", (arg,))
@@ -939,7 +875,7 @@ class Fn:
 
         Parameters
         ----------
-        element_name : xs:string
+        element_name : object
             The name of the element to test.
 
         Returns
@@ -962,7 +898,7 @@ class Fn:
 
         Parameters
         ----------
-        sequence : item()*
+        sequence : object
             A sequence to test.
 
         Returns
@@ -985,7 +921,7 @@ class Fn:
 
         Parameters
         ----------
-        uri_part : xs:string
+        uri_part : object
             A string representing an unescaped URI.
 
         Returns
@@ -1008,11 +944,11 @@ class Fn:
 
         Parameters
         ----------
-        parameter1 : xs:string?
+        parameter1 : object
             The parameter from which to test.
-        parameter2 : xs:string?
+        parameter2 : object
             The string to test whether it is at the end of the first parameter.
-        collation : xs:string
+        collation : object
             The optional name of a valid collation URI. For information on the collation
             URI syntax, see the Search Developer's Guide .
             Omit to use the native default; None explicitly passes ().
@@ -1036,14 +972,14 @@ class Fn:
 
         Parameters
         ----------
-        error : xs:QName?
+        error : object
             Error code, as an xs:QName . Note that this parameter does not exist in
             0.9-ml.
             Omit to use the native default; None explicitly passes ().
-        description : xs:string
+        description : object
             String description to be printed with the error.
             Omit to use the native default; None explicitly passes ().
-        data : item()*
+        data : object
             Parameters to the error message.
             Omit to use the native default; None explicitly passes ().
 
@@ -1066,7 +1002,7 @@ class Fn:
 
         Parameters
         ----------
-        uri_part : xs:string
+        uri_part : object
             A string representing an unescaped URI.
 
         Returns
@@ -1090,9 +1026,9 @@ class Fn:
 
         Parameters
         ----------
-        uri_part : xs:string
+        uri_part : object
             A string representing an unescaped URI.
-        escape_reserved : xs:boolean
+        escape_reserved : object
             Specify a boolean value of true to return an escaped URI or a boolean value
             of false to return an unescaped URI.
 
@@ -1115,7 +1051,7 @@ class Fn:
 
         Parameters
         ----------
-        arg : item()*
+        arg : object
             The sequence of items.
 
         Returns
@@ -1138,7 +1074,7 @@ class Fn:
 
         Parameters
         ----------
-        sequence : item()*
+        sequence : object
             A sequence to test.
 
         Returns
@@ -1161,9 +1097,9 @@ class Fn:
 
         Parameters
         ----------
-        param_uri : xs:string?
+        param_uri : object
             A namespace URI, as a string.
-        param_local : xs:string
+        param_local : object
             A localname, as a string.
 
         Returns
@@ -1203,9 +1139,9 @@ class Fn:
 
         Parameters
         ----------
-        function : function(item()) as xs:boolean
+        function : object
             The function value.
-        seq : item()*
+        seq : object
             The function value.
 
         Returns
@@ -1215,7 +1151,6 @@ class Fn:
 
         Notes
         -----
-        Function arguments must be XQuery XqyExpression values, not Python callables.
         Native reference: https://docs.marklogic.com/fn:filter
         """
         return _FunctionCall("fn:filter", (function, seq))
@@ -1229,7 +1164,7 @@ class Fn:
 
         Parameters
         ----------
-        arg : numeric?
+        arg : object
             A numeric value.
 
         Returns
@@ -1253,11 +1188,11 @@ class Fn:
 
         Parameters
         ----------
-        function : function(item()*, item()) as item()*
+        function : object
             The fold function value.
-        zero : item()*
+        zero : object
             The zero argument.
-        seq : item()*
+        seq : object
             The sequence to fold
 
         Returns
@@ -1267,7 +1202,6 @@ class Fn:
 
         Notes
         -----
-        Function arguments must be XQuery XqyExpression values, not Python callables.
         Native reference: https://docs.marklogic.com/fn:fold-left
         """
         return _FunctionCall("fn:fold-left", (function, zero, seq))
@@ -1282,11 +1216,11 @@ class Fn:
 
         Parameters
         ----------
-        function : function(item(), item()*) as item()*
+        function : object
             The fold function value.
-        zero : item()*
+        zero : object
             The zero argument.
-        seq : item()*
+        seq : object
             The sequence to fold
 
         Returns
@@ -1296,7 +1230,6 @@ class Fn:
 
         Notes
         -----
-        Function arguments must be XQuery XqyExpression values, not Python callables.
         Native reference: https://docs.marklogic.com/fn:fold-right
         """
         return _FunctionCall("fn:fold-right", (function, zero, seq))
@@ -1316,22 +1249,22 @@ class Fn:
 
         Parameters
         ----------
-        value : xs:date
+        value : object
             The given date $value that needs to be formatted.
-        picture : xs:string
+        picture : object
             The desired string representation of the given date $value . The picture
             string is a sequence of characters, in which the characters represent
             variables such as, decimal-separator-sign, grouping-sign, zero-digit-sign,
             digit-sign, pattern-separator, percent sign and per-mille-sign. For details
             on the picture string, see http://www.w3.org/TR/xslt20/#date-picture-string
             .
-        language : xs:string
+        language : object
             The desired language for string representation of the date $value .
             Omit to use the native default; None explicitly passes ().
-        calendar : xs:string
+        calendar : object
             The only calendar supported at this point is "Gregorian" or "AD".
             Omit to use the native default; None explicitly passes ().
-        country : xs:string
+        country : object
             $country is used the specification to take into account country specific
             string representation.
             Omit to use the native default; None explicitly passes ().
@@ -1343,9 +1276,6 @@ class Fn:
 
         Notes
         -----
-        Dates before October 15, 1582 (the start of the Gregorian calendar) will not
-        return the correct date value.
-
         Native reference: https://docs.marklogic.com/fn:format-date
         """
         return _optional_call(
@@ -1372,22 +1302,22 @@ class Fn:
 
         Parameters
         ----------
-        value : xs:dateTime
+        value : object
             The given dateTime $value that needs to be formatted.
-        picture : xs:string
+        picture : object
             The desired string representation of the given dateTime $value . The picture
             string is a sequence of characters, in which the characters represent
             variables such as, decimal-separator-sign, grouping-sign, zero-digit-sign,
             digit-sign, pattern-separator, percent sign and per-mille-sign. For details
             on the picture string, see http://www.w3.org/TR/xslt20/#date-picture-string
             .
-        language : xs:string
+        language : object
             The desired language for string representation of the dateTime $value .
             Omit to use the native default; None explicitly passes ().
-        calendar : xs:string
+        calendar : object
             The only calendar supported at this point is "Gregorian" or "AD".
             Omit to use the native default; None explicitly passes ().
-        country : xs:string
+        country : object
             $country is used the specification to take into account country specific
             string representation.
             Omit to use the native default; None explicitly passes ().
@@ -1399,12 +1329,6 @@ class Fn:
 
         Notes
         -----
-        Dates before October 15, 1582 (the start of the Gregorian calendar) will not
-        return the correct dateTime value.
-        If the specified picture string includes a fractional second width that is seven
-        or more decimal places, then the fractional seconds are truncated (not rounded)
-        on the seventh and greater width.
-
         Native reference: https://docs.marklogic.com/fn:format-dateTime
         """
         return _optional_call(
@@ -1425,16 +1349,16 @@ class Fn:
 
         Parameters
         ----------
-        value : xs:double
+        value : object
             The given numeric $value that needs to be formatted.
-        picture : xs:string
+        picture : object
             The desired string representation of the given number $value . The picture
             string is a sequence of characters, in which the characters represent
             variables such as, decimal-separator-sign, grouping-sign, zero-digit-sign,
             digit-sign, pattern-separator, percent sign and per-mille-sign. For details
             on the format-number picture string, see
             http://www.w3.org/TR/xslt20/#function-format-number .
-        decimal_format_name : xs:string
+        decimal_format_name : object
             Represents a named <xsl:decimal-format> instruction. It is used to assign
             values to the variables mentioned above based on the picture string.
             Omit to use the native default; None explicitly passes ().
@@ -1465,22 +1389,22 @@ class Fn:
 
         Parameters
         ----------
-        value : xs:time
+        value : object
             The given time $value that needs to be formatted.
-        picture : xs:string
+        picture : object
             The desired string representation of the given time $value . The picture
             string is a sequence of characters, in which the characters represent
             variables such as, decimal-separator-sign, grouping-sign, zero-digit-sign,
             digit-sign, pattern-separator, percent sign and per-mille-sign. For details
             on the picture string, see http://www.w3.org/TR/xslt20/#date-picture-string
             .
-        language : xs:string
+        language : object
             The desired language for string representation of the time $value .
             Omit to use the native default; None explicitly passes ().
-        calendar : xs:string
+        calendar : object
             The only calendar supported at this point is "Gregorian" or "AD".
             Omit to use the native default; None explicitly passes ().
-        country : xs:string
+        country : object
             $country is used the specification to take into account country specific
             string representation.
             Omit to use the native default; None explicitly passes ().
@@ -1492,10 +1416,6 @@ class Fn:
 
         Notes
         -----
-        If the specified picture string includes a fractional second width that is seven
-        or more decimal places, then the fractional seconds are truncated (not rounded)
-        on the seventh and greater width.
-
         Native reference: https://docs.marklogic.com/fn:format-time
         """
         return _optional_call(
@@ -1515,7 +1435,7 @@ class Fn:
 
         Parameters
         ----------
-        function : function(*)
+        function : object
             The function value.
 
         Returns
@@ -1525,7 +1445,6 @@ class Fn:
 
         Notes
         -----
-        Function arguments must be XQuery XqyExpression values, not Python callables.
         Native reference: https://docs.marklogic.com/fn:function-arity
         """
         return _FunctionCall("fn:function-arity", (function,))
@@ -1540,14 +1459,14 @@ class Fn:
 
         Parameters
         ----------
-        function_name : xs:string
+        function_name : object
             The $function-name is a string containing a lexical QName. It may be a name
             of a builtin-type, type imported using xsl:import-schema, or an extension
             type. This parameter is mandatory. The lexical QName is expanded using the
             namespace declarations in scope for the expression. If the lexical QName is
             unprefixed, then the standard function namespace is used in the expanded
             QName.
-        arity : xs:integer
+        arity : object
             If $arity parameter is present, then the function returns true if and only
             if the function specified by the first argument has a signature that takes
             $arity number of arguments.
@@ -1573,9 +1492,9 @@ class Fn:
 
         Parameters
         ----------
-        name : xs:QName
+        name : object
             The QName of the function.
-        arity : xs:integer
+        arity : object
             The number of arguments the function takes.
 
         Returns
@@ -1585,7 +1504,6 @@ class Fn:
 
         Notes
         -----
-        Function arguments must be XQuery XqyExpression values, not Python callables.
         Native reference: https://docs.marklogic.com/fn:function-lookup
         """
         return _FunctionCall("fn:function-lookup", (name, arity))
@@ -1598,7 +1516,7 @@ class Fn:
 
         Parameters
         ----------
-        function : function(*)
+        function : object
             The function value.
             ---
 
@@ -1609,7 +1527,6 @@ class Fn:
 
         Notes
         -----
-        Function arguments must be XQuery XqyExpression values, not Python callables.
         Native reference: https://docs.marklogic.com/fn:function-name
         """
         return _FunctionCall("fn:function-name", (function,))
@@ -1622,7 +1539,7 @@ class Fn:
 
         Parameters
         ----------
-        node : node()?
+        node : object
             The node whose ID will be generated.
             Omit to use the native default; None explicitly passes ().
 
@@ -1645,7 +1562,7 @@ class Fn:
 
         Parameters
         ----------
-        seq : item()*
+        seq : object
             A sequence of items.
 
         Returns
@@ -1668,7 +1585,7 @@ class Fn:
 
         Parameters
         ----------
-        arg : xs:dateTime?
+        arg : object
             The dateTime whose hours component will be returned.
 
         Returns
@@ -1691,7 +1608,7 @@ class Fn:
 
         Parameters
         ----------
-        arg : xs:duration?
+        arg : object
             The duration whose hour component will be returned.
 
         Returns
@@ -1714,7 +1631,7 @@ class Fn:
 
         Parameters
         ----------
-        arg : xs:time?
+        arg : object
             The time whose hours component will be returned.
 
         Returns
@@ -1737,9 +1654,9 @@ class Fn:
 
         Parameters
         ----------
-        arg : xs:string*
+        arg : object
             The IDs of the elements to return.
-        node : node()
+        node : object
             The target node.
             Omit to use the native default; None explicitly passes ().
 
@@ -1750,57 +1667,6 @@ class Fn:
 
         Notes
         -----
-        The function returns a sequence, in document order with duplicates eliminated,
-        containing every element node E that satisfies all the following conditions:
-        E is in the target document. The target document is the document containing
-        $node, or the document containing the context node if the second argument is
-        omitted. An error is raised [err:FODC0001] if $node, or the context item if the
-        second argument is omitted, is a node in a tree whose root is not a document
-        node or if the second argument is omitted and there is no context item
-        [err:FONC0001], or if the context item is not a node [err:FOTY0011]. E has an ID
-        value equal to one of the candidate IDREF values, where: An element has an ID
-        value equal to V if either or both of the following conditions are true: The is-
-        id property (See Section 5.5 is-id AccessorDM.) of the element node is true, and
-        the typed value of the element node is equal to V under the rules of the eq
-        operator using the Unicode code point collation (http://www.w3.org/2005/xpath-
-        functions/collation/codepoint). The element has an attribute node whose is-id
-        property (See Section 5.5 is-id AccessorDM.) is true and whose typed value is
-        equal to V under the rules of the eq operator using the Unicode code point
-        collation (http://www.w3.org/2005/xpath-functions/collation/codepoint). Each
-        xs:string in $arg is parsed as if it were of type IDREFS, that is, each
-        xs:string in $arg is treated as a space-separated sequence of tokens, each
-        acting as an IDREF. These tokens are then included in the list of candidate
-        IDREFs. If any of the tokens is not a lexically valid IDREF (that is, if it is
-        not lexically an xs:NCName), it is ignored. Formally, The candidate IDREF values
-        are the strings in the sequence given by the expression: for $s in $arg return
-        fn:tokenize(fn:normalize-space($s), ' ') [. castable as xs:IDREF] If several
-        elements have the same ID value, then E is the one that is first in document
-        order.
-
-        Notes
-        -----
-        If the data model is constructed from an Infoset, an attribute will have the is-
-        id property if the corresponding attribute in the Infoset had an attribute type
-        of ID: typically this means the attribute was declared as an ID in a DTD.
-        If the data model is constructed from a PSVI, an element or attribute will have
-        the is-id property if its schema-defined type is xs:ID or a type derived by
-        restriction from xs:ID.
-        No error is raised in respect of a candidate IDREF value that does not match the
-        ID of any element in the document. If no candidate IDREF value matches the ID
-        value of any element, the function returns the empty sequence.
-        It is not necessary that the supplied argument should have type xs:IDREF or
-        xs:IDREFS, or that it should be derived from a node with the is-idrefs property.
-        An element may have more than one ID value. This can occur with synthetic data
-        models or with data models constructed from a PSVI where an the element and one
-        of its attributes are both typed as xs:ID.
-        If the source document is well-formed but not valid, it is possible for two or
-        more elements to have the same ID value. In this situation, the function will
-        select the first such element.
-        It is also possible in a well-formed but invalid document to have an element or
-        attribute that has the is-id property but whose value does not conform to the
-        lexical rules for the xs:ID type. Such a node will never be selected by this
-        function.
-
         Native reference: https://docs.marklogic.com/fn:id
         """
         return _optional_call("fn:id", arg, node)
@@ -1814,9 +1680,9 @@ class Fn:
 
         Parameters
         ----------
-        arg : xs:string*
+        arg : object
             The IDREFs of the elements and attributes to return.
-        node : node()
+        node : object
             The target node.
             Omit to use the native default; None explicitly passes ().
 
@@ -1827,45 +1693,6 @@ class Fn:
 
         Notes
         -----
-        The function returns a sequence, in document order with duplicates eliminated,
-        containing every element or attribute node $N that satisfies all the following
-        // conditions:
-        $N is in the target document. The target document is the document containing
-        $node, or the document containing the context node if the second argument is
-        omitted. An error is raised [err:FODC0001] if $node, or the context item if the
-        second argument is omitted, is a node in a tree whose root is not a document
-        node or if the second argument is omitted and there is no context item
-        [err:FONC0001], or if the context item is not a node [err:FOTY0011]. $N has an
-        IDREF value equal to one of the candidate ID values, where: A node $N has an
-        IDREF value equal to V if either or both of the following conditions are true:
-        The is-idrefs property (See Section 5.6 is-idref AccessorDM.) of $N is true. The
-        sequence fn:tokenize(fn:normalize-space($N), ' ') contains a string that is
-        equal to V under the rules of the eq operator using the Unicode code point
-        collation (http://www.w3.org/2005/xpath-functions/collation/codepoint). Each
-        xs:string in $arg is parsed as if it were of type xs:ID. These xs:strings are
-        then included in the list of candidate xs:IDs. If any of the xs:strings in $arg
-        is not a lexically valid xs:ID (that is, if it is not lexically an xs:NCName),
-        it is ignored. More formally, The candidate ID values are the strings in the
-        sequence $arg[. castable as xs:ID]
-
-        Notes
-        -----
-        An element or attribute typically acquires the is-idrefs property by being
-        validated against the schema type xs:IDREF or xs:IDREFS, or (for attributes
-        only) by being described as of type IDREF or IDREFS in a DTD.
-        No error is raised in respect of a candidate ID value that does not match the
-        IDREF value of any element or attribute in the document. If no candidate ID
-        value matches the IDREF value of any element or attribute, the function returns
-        the empty sequence.
-        It is possible for two or more nodes to have an IDREF value that matches a given
-        candidate ID value. In this situation, the function will return all such nodes.
-        However, each matching node will be returned at most once, regardless how many
-        candidate ID values it matches.
-        It is possible in a well-formed but invalid document to have a node whose is-
-        idrefs property is true but that does not conform to the lexical rules for the
-        xs:IDREF type. The effect of the above rules is that ill-formed candidate ID
-        values and ill-formed IDREF values are ignored
-
         Native reference: https://docs.marklogic.com/fn:idref
         """
         return _optional_call("fn:idref", arg, node)
@@ -1895,7 +1722,7 @@ class Fn:
 
         Parameters
         ----------
-        element : element()
+        element : object
             The element whose in-scope prefixes will be returned.
 
         Returns
@@ -1918,11 +1745,11 @@ class Fn:
 
         Parameters
         ----------
-        seq_param : xs:anyAtomicType*
+        seq_param : object
             A sequence of values.
-        srch_param : xs:anyAtomicType
+        srch_param : object
             A value to find on the list.
-        collation_literal : xs:string
+        collation_literal : object
             A collation identifier.
             Omit to use the native default; None explicitly passes ().
 
@@ -1946,11 +1773,11 @@ class Fn:
 
         Parameters
         ----------
-        target : item()*
+        target : object
             The sequence of items into which new items will be inserted.
-        position : xs:integer
+        position : object
             The position in the target sequence at which the new items will be added.
-        inserts : item()*
+        inserts : object
             The items to insert into the target sequence.
 
         Returns
@@ -1972,7 +1799,7 @@ class Fn:
 
         Parameters
         ----------
-        uri_part : xs:string
+        uri_part : object
             A string representing an unescaped URI.
 
         Returns
@@ -1994,11 +1821,11 @@ class Fn:
 
         Parameters
         ----------
-        key_name : xs:string
+        key_name : object
             The name of the key.
-        key_value : xs:string
+        key_value : object
             The value of the key.
-        top : node()
+        top : object
             The subtree to limit the results to.
             ---
             Omit to use the native default; None explicitly passes ().
@@ -2024,9 +1851,9 @@ class Fn:
 
         Parameters
         ----------
-        testlang : xs:string?
+        testlang : object
             The language against which to test the node.
-        node : node()
+        node : object
             The node to test.
             ---
             Omit to use the native default; None explicitly passes ().
@@ -2055,16 +1882,6 @@ class Fn:
 
         Notes
         -----
-        fn:last() returns the exact context position of the last item in the current
-        context, so it must count all the items to do this. It is as much work as
-        fn:count() . fn:last() is therefore best used to find the last item in a short
-        context sequence. For example, it is useful in a path expression predicate to
-        find the last child node of a particular element node in a particular document.
-        Using fn:last() in a predicate expression is not an efficient way to extract a
-        subsequence of large item sequence. Its use for this purpose is strongly
-        discouraged. It is much more efficient to use fn:tail() or fn:subsequence()
-        instead.
-
         Native reference: https://docs.marklogic.com/fn:last
         """
         return _FunctionCall("fn:last")
@@ -2078,7 +1895,7 @@ class Fn:
 
         Parameters
         ----------
-        arg : node()?
+        arg : object
             The node whose local name is to be returned.
             Omit to use the native default; None explicitly passes ().
 
@@ -2101,7 +1918,7 @@ class Fn:
 
         Parameters
         ----------
-        arg : xs:QName?
+        arg : object
             A qualified name.
 
         Returns
@@ -2124,7 +1941,7 @@ class Fn:
 
         Parameters
         ----------
-        string : xs:string?
+        string : object
             The string to convert.
 
         Returns
@@ -2147,9 +1964,9 @@ class Fn:
 
         Parameters
         ----------
-        function : function(item()) as item()*
+        function : object
             The function value.
-        seq : item()*
+        seq : object
             The function value.
 
         Returns
@@ -2159,7 +1976,6 @@ class Fn:
 
         Notes
         -----
-        Function arguments must be XQuery XqyExpression values, not Python callables.
         Native reference: https://docs.marklogic.com/fn:map
         """
         return _FunctionCall("fn:map", (function, seq))
@@ -2174,11 +1990,11 @@ class Fn:
 
         Parameters
         ----------
-        function : function(item(), item()) as item()*
+        function : object
             The map function value.
-        seq1 : item()*
+        seq1 : object
             The first sequence argument.
-        seq2 : item()*
+        seq2 : object
             The second sequence argument.
 
         Returns
@@ -2188,7 +2004,6 @@ class Fn:
 
         Notes
         -----
-        Function arguments must be XQuery XqyExpression values, not Python callables.
         Native reference: https://docs.marklogic.com/fn:map-pairs
         """
         return _FunctionCall("fn:map-pairs", (function, seq1, seq2))
@@ -2202,11 +2017,11 @@ class Fn:
 
         Parameters
         ----------
-        input : xs:string?
+        input : object
             The input from which to match.
-        pattern : xs:string
+        pattern : object
             The regular expression to match.
-        flags : xs:string
+        flags : object
             The flag representing how to interpret the regular expression. One of "s",
             "m", "i", or "x", as defined in http://www.w3.org/TR/xpath-functions/#flags
             .
@@ -2232,9 +2047,9 @@ class Fn:
 
         Parameters
         ----------
-        arg : xs:anyAtomicType*
+        arg : object
             The sequence of values whose maximum will be returned.
-        collation : xs:string
+        collation : object
             The optional name of a valid collation URI. For information on the collation
             URI syntax, see the Search Developer's Guide .
             Omit to use the native default; None explicitly passes ().
@@ -2259,9 +2074,9 @@ class Fn:
 
         Parameters
         ----------
-        arg : xs:anyAtomicType*
+        arg : object
             The sequence of values whose minimum will be returned.
-        collation : xs:string
+        collation : object
             The optional name of a valid collation URI. For information on the collation
             URI syntax, see the Search Developer's Guide .
             Omit to use the native default; None explicitly passes ().
@@ -2286,7 +2101,7 @@ class Fn:
 
         Parameters
         ----------
-        arg : xs:dateTime?
+        arg : object
             The dateTime whose minutes component will be returned.
 
         Returns
@@ -2309,7 +2124,7 @@ class Fn:
 
         Parameters
         ----------
-        arg : xs:duration?
+        arg : object
             The duration whose minute component will be returned.
 
         Returns
@@ -2332,7 +2147,7 @@ class Fn:
 
         Parameters
         ----------
-        arg : xs:time?
+        arg : object
             The time whose minutes component will be returned.
 
         Returns
@@ -2355,7 +2170,7 @@ class Fn:
 
         Parameters
         ----------
-        arg : xs:date?
+        arg : object
             The date whose month component will be returned.
 
         Returns
@@ -2378,7 +2193,7 @@ class Fn:
 
         Parameters
         ----------
-        arg : xs:dateTime?
+        arg : object
             The dateTime whose month component will be returned.
 
         Returns
@@ -2401,7 +2216,7 @@ class Fn:
 
         Parameters
         ----------
-        arg : xs:duration?
+        arg : object
             The duration whose month component will be returned.
 
         Returns
@@ -2424,7 +2239,7 @@ class Fn:
 
         Parameters
         ----------
-        arg : node()?
+        arg : object
             The node whose name is to be returned.
             Omit to use the native default; None explicitly passes ().
 
@@ -2447,7 +2262,7 @@ class Fn:
 
         Parameters
         ----------
-        arg : node()?
+        arg : object
             The node whose namespace URI is to be returned.
             Omit to use the native default; None explicitly passes ().
 
@@ -2471,9 +2286,9 @@ class Fn:
 
         Parameters
         ----------
-        prefix : xs:string?
+        prefix : object
             A namespace prefix to look up.
-        element : element()
+        element : object
             An element node providing namespace context.
 
         Returns
@@ -2495,7 +2310,7 @@ class Fn:
 
         Parameters
         ----------
-        arg : xs:QName?
+        arg : object
             A qualified name.
 
         Returns
@@ -2517,7 +2332,7 @@ class Fn:
 
         Parameters
         ----------
-        arg : node()?
+        arg : object
             The node to test for nilled status.
 
         Returns
@@ -2541,7 +2356,7 @@ class Fn:
 
         Parameters
         ----------
-        node : node()?
+        node : object
             The node whose kind is to be returned.
 
         Returns
@@ -2563,7 +2378,7 @@ class Fn:
 
         Parameters
         ----------
-        arg : node()?
+        arg : object
             The node whose name is to be returned.
 
         Returns
@@ -2587,7 +2402,7 @@ class Fn:
 
         Parameters
         ----------
-        input : xs:string?
+        input : object
             The string from which to normalize whitespace.
             Omit to use the native default; None explicitly passes ().
 
@@ -2611,9 +2426,9 @@ class Fn:
 
         Parameters
         ----------
-        arg : xs:string?
+        arg : object
             The string to normalize.
-        normalization_form : xs:string
+        normalization_form : object
             The form under which to normalize the specified string: NFC, NFD, NFKC, or
             NFKD.
             Omit to use the native default; None explicitly passes ().
@@ -2638,7 +2453,7 @@ class Fn:
 
         Parameters
         ----------
-        arg : item()*
+        arg : object
             The expression to negate.
 
         Returns
@@ -2661,7 +2476,7 @@ class Fn:
 
         Parameters
         ----------
-        arg : xs:anyAtomicType?
+        arg : object
             The value to be returned as an xs:double value.
             Omit to use the native default; None explicitly passes ().
 
@@ -2684,7 +2499,7 @@ class Fn:
 
         Parameters
         ----------
-        arg : item()*
+        arg : object
             The sequence of items.
 
         Returns
@@ -2723,7 +2538,7 @@ class Fn:
 
         Parameters
         ----------
-        arg : xs:QName?
+        arg : object
             A qualified name.
 
         Returns
@@ -2745,9 +2560,9 @@ class Fn:
 
         Parameters
         ----------
-        uri : xs:string?
+        uri : object
             A namespace URI, as a string.
-        lexical : xs:string
+        lexical : object
             A lexical qualified name (xs:QName), a string of the form "prefix:localname"
             or "localname".
 
@@ -2758,11 +2573,6 @@ class Fn:
 
         Notes
         -----
-        If $paramQName does not have the correct lexical form for xs:QName an error is
-        raised [err:FOCA0002].
-        Note that unlike xs:QName this function does not require an xs:string literal as
-        the argument.
-
         Native reference: https://docs.marklogic.com/fn:QName
         """
         return _FunctionCall("fn:QName", (uri, lexical))
@@ -2777,7 +2587,7 @@ class Fn:
 
         Parameters
         ----------
-        group_number : xs:integer
+        group_number : object
             The group number to return.
 
         Returns
@@ -2787,14 +2597,6 @@ class Fn:
 
         Notes
         -----
-        The function returns the zero-length string if there is no captured substring
-        with the relevant number. This can occur for a number of reasons:
-        The number is negative. The regular expression does not contain a parenthesized
-        sub-expression with the given number. The parenthesized sub-expression exists,
-        and did not match any part of the input string. The parenthesized sub-expression
-        exists, and matched a zero-length substring of the input string.
-        ---
-
         Native reference: https://docs.marklogic.com/fn:regex-group
         """
         return _FunctionCall("fn:regex-group", (group_number,))
@@ -2808,9 +2610,9 @@ class Fn:
 
         Parameters
         ----------
-        target : item()*
+        target : object
             The sequence of items from which items will be removed.
-        position : xs:integer
+        position : object
             The position in the target sequence from which the items will be removed.
 
         Returns
@@ -2833,16 +2635,16 @@ class Fn:
 
         Parameters
         ----------
-        input : xs:string?
+        input : object
             The string to start with.
-        pattern : xs:string
+        pattern : object
             The regular expression pattern to match. If the pattern does not match the
             $input string, the function will return the $input string unchanged.
-        replacement : xs:string
+        replacement : object
             The regular expression pattern to replace the $pattern with. It can also be
             a capture expression (for more details, see http://www.w3.org/TR/xpath-
             functions/#func-replace ).
-        flags : xs:string
+        flags : object
             The flag representing how to interpret the regular expression. One of "s",
             "m", "i", or "x", as defined in http://www.w3.org/TR/xpath-functions/#flags
             .
@@ -2870,9 +2672,9 @@ class Fn:
 
         Parameters
         ----------
-        qname : xs:string?
+        qname : object
             A string of the form "prefix:local-name".
-        element : element()
+        element : object
             An element providing the in-scope namespaces to use to resolve the qualified
             name.
 
@@ -2883,28 +2685,6 @@ class Fn:
 
         Notes
         -----
-        Sometimes the requirement is to construct an xs:QName without using the default
-        namespace. This can be achieved by writing:
-        if ( fn:contains($qname, ":") ) then ( fn:resolve-QName($qname, $element) ) else
-        ( fn:QName("", $qname) )
-        If the requirement is to construct an xs:QName using the namespaces in the
-        static context, then the xs:QName constructor should be used.
-        If $qname does not have the correct lexical form for xs:QName an error is raised
-        [err:FOCA0002].
-        If $qname is the empty sequence, returns the empty sequence.
-        More specifically, the function searches the namespace bindings of $element for
-        a binding whose name matches the prefix of $qname, or the zero-length string if
-        it has no prefix, and constructs an expanded QName whose local name is taken
-        from the supplied $qname, and whose namespace URI is taken from the string value
-        of the namespace binding.
-        If the $qname has a prefix and if there is no namespace binding for $element
-        that matches this prefix, then an error is raised [err:FONS0004].
-        If the $qname has no prefix, and there is no namespace binding for $element
-        corresponding to the default (unnamed) namespace, then the resulting expanded
-        QName has no namespace part.
-        The prefix (or absence of a prefix) in the supplied $qname argument is retained
-        in the returned expanded QName, as discussed in Section 2.1 Terminology[DM].
-
         Native reference: https://docs.marklogic.com/fn:resolve-QName
         """
         return _FunctionCall("fn:resolve-QName", (qname, element))
@@ -2917,9 +2697,9 @@ class Fn:
 
         Parameters
         ----------
-        relative : xs:string?
+        relative : object
             A URI reference to resolve against the base.
-        base : xs:string
+        base : object
             An absolute URI to use as the base of the resolution.
             Omit to use the native default; None explicitly passes ().
 
@@ -2930,18 +2710,6 @@ class Fn:
 
         Notes
         -----
-        If $base is specified, it is assumed to be an absolute URI and $relative is
-        assumed to be an absolute or a relative URI reference. If $relative is a
-        relative URI reference, it is resolved against $base, using an algorithm such as
-        the ones described in [ RFC 2396 ] or [ RFC 3986 ], and the resulting absolute
-        URI reference is returned.
-        If $relative is the zero-length string, fn:resolve-uri returns the value of
-        $base, or the base-uri property from the static context if there is no $base
-        value specified (if the base-uri property is not initialized in the static
-        context, an error is raised).
-        Resolving a URI does not dereference it. This is merely a syntactic operation on
-        two character strings.
-
         Native reference: https://docs.marklogic.com/fn:resolve-uri
         """
         return _optional_call("fn:resolve-uri", relative, base)
@@ -2954,7 +2722,7 @@ class Fn:
 
         Parameters
         ----------
-        target : item()*
+        target : object
             The sequence of items to be reversed.
 
         Returns
@@ -2976,7 +2744,7 @@ class Fn:
 
         Parameters
         ----------
-        arg : node()?
+        arg : object
             The node whose root node will be returned.
             Omit to use the native default; None explicitly passes ().
 
@@ -2999,7 +2767,7 @@ class Fn:
 
         Parameters
         ----------
-        arg : numeric?
+        arg : object
             A numeric value to round.
 
         Returns
@@ -3022,9 +2790,9 @@ class Fn:
 
         Parameters
         ----------
-        arg : numeric?
+        arg : object
             A numeric value to round.
-        precision : xs:integer
+        precision : object
             The precision to which to round the value.
             Omit to use the native default; None explicitly passes ().
 
@@ -3048,7 +2816,7 @@ class Fn:
 
         Parameters
         ----------
-        arg : xs:dateTime?
+        arg : object
             The dateTime whose seconds component will be returned.
 
         Returns
@@ -3071,7 +2839,7 @@ class Fn:
 
         Parameters
         ----------
-        arg : xs:duration?
+        arg : object
             The duration whose minute component will be returned.
 
         Returns
@@ -3094,7 +2862,7 @@ class Fn:
 
         Parameters
         ----------
-        arg : xs:time?
+        arg : object
             The time whose seconds component will be returned.
 
         Returns
@@ -3117,11 +2885,11 @@ class Fn:
 
         Parameters
         ----------
-        parameter1 : xs:string?
+        parameter1 : object
             The string from which to test.
-        parameter2 : xs:string?
+        parameter2 : object
             The string to test whether it is at the beginning of the first parameter.
-        collation : xs:string
+        collation : object
             The optional name of a valid collation URI. For information on the collation
             URI syntax, see the Search Developer's Guide .
             Omit to use the native default; None explicitly passes ().
@@ -3162,7 +2930,7 @@ class Fn:
 
         Parameters
         ----------
-        arg : item()?
+        arg : object
             The item to be rendered as a string.
             Omit to use the native default; None explicitly passes ().
 
@@ -3173,11 +2941,6 @@ class Fn:
 
         Notes
         -----
-        If $arg is the empty sequence, the zero-length string is returned.
-        If $arg is a node, the function returns the string-value of the node, as
-        obtained using the dm:string-value accessor.
-        $arg cast as xs:string
-
         Native reference: https://docs.marklogic.com/fn:string
         """
         return _optional_call("fn:string", arg)
@@ -3191,9 +2954,9 @@ class Fn:
 
         Parameters
         ----------
-        parameter1 : xs:string*
+        parameter1 : object
             A sequence of strings.
-        parameter2 : xs:string
+        parameter2 : object
             A separator string to concatenate between the items in $parameter1.
 
         Returns
@@ -3215,7 +2978,7 @@ class Fn:
 
         Parameters
         ----------
-        source_string : xs:string?
+        source_string : object
             The string to calculate the length.
             Omit to use the native default; None explicitly passes ().
 
@@ -3239,9 +3002,9 @@ class Fn:
 
         Parameters
         ----------
-        pad_string : xs:string?
+        pad_string : object
             The string to pad.
-        pad_count : xs:integer
+        pad_count : object
             The number of times to pad the string.
 
         Returns
@@ -3263,7 +3026,7 @@ class Fn:
 
         Parameters
         ----------
-        arg : xs:string
+        arg : object
             A string.
 
         Returns
@@ -3287,11 +3050,11 @@ class Fn:
 
         Parameters
         ----------
-        source_seq : item()*
+        source_seq : object
             The sequence of items from which a subsequence will be selected.
-        starting_loc : xs:double
+        starting_loc : object
             The starting position of the start of the subsequence.
-        length : xs:double
+        length : object
             The length of the subsequence.
             Omit to use the native default; None explicitly passes ().
 
@@ -3315,11 +3078,11 @@ class Fn:
 
         Parameters
         ----------
-        source_string : xs:string?
+        source_string : object
             The string from which to create a substring.
-        starting_loc : xs:double
+        starting_loc : object
             The number of characters from the start of the $sourceString.
-        length : xs:double
+        length : object
             The number of characters beyond the $startingLoc.
             Omit to use the native default; None explicitly passes ().
 
@@ -3343,11 +3106,11 @@ class Fn:
 
         Parameters
         ----------
-        input : xs:string?
+        input : object
             The string from which to create the substring.
-        after : xs:string?
+        after : object
             The string after which the substring is created.
-        collation : xs:string
+        collation : object
             The optional name of a valid collation URI. For information on the collation
             URI syntax, see the Search Developer's Guide .
             Omit to use the native default; None explicitly passes ().
@@ -3372,11 +3135,11 @@ class Fn:
 
         Parameters
         ----------
-        input : xs:string?
+        input : object
             The string from which to create the substring.
-        before : xs:string?
+        before : object
             The string before which the substring is created.
-        collation : xs:string
+        collation : object
             The optional name of a valid collation URI. For information on the collation
             URI syntax, see the Search Developer's Guide .
             Omit to use the native default; None explicitly passes ().
@@ -3405,9 +3168,9 @@ class Fn:
 
         Parameters
         ----------
-        srcval1 : xs:dateTime
+        srcval1 : object
             The second xs:dateTime value.
-        srcval2 : xs:dateTime
+        srcval2 : object
             The second xs:dateTime value.
 
         Returns
@@ -3437,9 +3200,9 @@ class Fn:
 
         Parameters
         ----------
-        srcval1 : xs:dateTime
+        srcval1 : object
             The second xs:dateTime value.
-        srcval2 : xs:dateTime
+        srcval2 : object
             The second xs:dateTime value.
 
         Returns
@@ -3464,9 +3227,9 @@ class Fn:
 
         Parameters
         ----------
-        arg : xs:anyAtomicType*
+        arg : object
             The sequence of values to be summed.
-        zero : xs:anyAtomicType?
+        zero : object
             The value to return as zero if the input sequence is the empty sequence.
             This parameter is not available in the 0.9-ml XQuery dialect.
             Omit to use the native default; None explicitly passes ().
@@ -3478,8 +3241,6 @@ class Fn:
 
         Notes
         -----
-        fn:sum
-
         Native reference: https://docs.marklogic.com/fn:sum
         """
         return _optional_call("fn:sum", arg, zero)
@@ -3493,7 +3254,7 @@ class Fn:
 
         Parameters
         ----------
-        property_name : xs:string
+        property_name : object
             The name of the property whose value is to be returned. Valid names are:
             xsl:version xsl:vendor xsl:vendor-url xsl:product-name xsl:product-version
             xsl:is-schema-aware xsl:supports-serialization xsl:supports-backwards-
@@ -3518,7 +3279,7 @@ class Fn:
 
         Parameters
         ----------
-        seq : item()*
+        seq : object
             The function value.
 
         Returns
@@ -3540,7 +3301,7 @@ class Fn:
 
         Parameters
         ----------
-        arg : xs:date?
+        arg : object
             The date whose timezone component will be returned.
 
         Returns
@@ -3562,7 +3323,7 @@ class Fn:
 
         Parameters
         ----------
-        arg : xs:dateTime?
+        arg : object
             The dateTime whose timezone component will be returned.
 
         Returns
@@ -3584,7 +3345,7 @@ class Fn:
 
         Parameters
         ----------
-        arg : xs:time?
+        arg : object
             The time whose timezone component will be returned.
 
         Returns
@@ -3607,11 +3368,11 @@ class Fn:
 
         Parameters
         ----------
-        input : xs:string?
+        input : object
             The string to tokenize.
-        pattern : xs:string
+        pattern : object
             The regular expression pattern from which to separate the tokens.
-        flags : xs:string
+        flags : object
             The flag representing how to interpret the regular expression. One of "s",
             "m", "i", or "x", as defined in http://www.w3.org/TR/xpath-functions/#flags
             .
@@ -3640,9 +3401,9 @@ class Fn:
 
         Parameters
         ----------
-        value : item()*
+        value : object
             The values to trace.
-        label : xs:string
+        label : object
             A string label for the trace output.
 
         Returns
@@ -3652,8 +3413,6 @@ class Fn:
 
         Notes
         -----
-        group_name
-
         Native reference: https://docs.marklogic.com/fn:trace
         """
         return _FunctionCall("fn:trace", (value, label))
@@ -3668,11 +3427,11 @@ class Fn:
 
         Parameters
         ----------
-        src : xs:string?
+        src : object
             The string to translate characters.
-        map_string : xs:string?
+        map_string : object
             The string representing characters to be translated.
-        trans_string : xs:string?
+        trans_string : object
             The string representing the characters to which the $mapString characters
             are translated.
 
@@ -3713,7 +3472,7 @@ class Fn:
 
         Parameters
         ----------
-        type_name : xs:string
+        type_name : object
             The $type-name is a string containing a lexical QName. It may be a name of a
             builtin-type, type imported using xsl:import-schema, or an extension type.
             This parameter is mandatory. The lexical QName is expanded using the
@@ -3739,7 +3498,7 @@ class Fn:
 
         Parameters
         ----------
-        source_seq : item()*
+        source_seq : object
             The sequence of items.
 
         Returns
@@ -3762,7 +3521,7 @@ class Fn:
 
         Parameters
         ----------
-        entity_name : xs:string
+        entity_name : object
             The entity name.
             ---
 
@@ -3785,7 +3544,7 @@ class Fn:
 
         Parameters
         ----------
-        entity_name : xs:string
+        entity_name : object
             The entity name.
             ---
 
@@ -3809,11 +3568,11 @@ class Fn:
 
         Parameters
         ----------
-        href : xs:string
+        href : object
             The $href is a string containing a URI reference. It must identify a
             resource that can be read as text. If the URI is a relative URI then it is
             resolved relative to the base URI from the static context.
-        encoding : xs:string
+        encoding : object
             If $encoding parameter is present and the URI points to a "text" file, the
             encoding is ignored since all the files are in UTF-8 in the database.
             However, if the URI points to a binary file, then an attempt is made to
@@ -3844,11 +3603,11 @@ class Fn:
 
         Parameters
         ----------
-        href : xs:string
+        href : object
             The $href is a string containing a URI reference. It must identify a
             resource that can be read as text. If the URI is a relative URI then it is
             resolved relative to the base URI from the static context.
-        encoding : xs:string
+        encoding : object
             If $encoding parameter is present and the URI points to a "text" file, the
             encoding is ignored since all the files are in UTF-8 in the database.
             However, if the URI points to a binary file, then an attempt will be made to
@@ -3878,7 +3637,7 @@ class Fn:
 
         Parameters
         ----------
-        string : xs:string?
+        string : object
             The string to upper-case.
 
         Returns
@@ -3901,7 +3660,7 @@ class Fn:
 
         Parameters
         ----------
-        arg : xs:date?
+        arg : object
             The date whose year component will be returned.
 
         Returns
@@ -3924,7 +3683,7 @@ class Fn:
 
         Parameters
         ----------
-        arg : xs:dateTime?
+        arg : object
             The dateTime whose year component will be returned.
 
         Returns
@@ -3947,7 +3706,7 @@ class Fn:
 
         Parameters
         ----------
-        arg : xs:duration?
+        arg : object
             The duration whose year component will be returned.
 
         Returns
@@ -3969,7 +3728,7 @@ class Fn:
 
         Parameters
         ----------
-        arg : item()*
+        arg : object
             The sequence of items.
 
         Returns

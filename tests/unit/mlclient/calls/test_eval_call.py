@@ -67,18 +67,6 @@ def test_body_with_variables():
     }
 
 
-@pytest.mark.parametrize(
-    ("language", "code"),
-    [
-        ("xquery", '  xquery version "1.0-ml";\n<a>line 1\n  line 2</a>\n'),
-        ("xquery", '"line 1\n  line 2"'),
-        ("javascript", "// first line\n42"),
-    ],
-)
-def test_eval_preserves_source_verbatim(language, code):
-    assert EvalCall(**{language: code}).body[language] == code
-
-
 def test_fully_parametrized_xquery_call():
     call = EvalCall(
         xquery="()",

@@ -65,7 +65,6 @@ EXPECTED_EXPORTS = {
     ],
     "mlclient.logging": ["MLLogHandler", "setup_logger", "setup_ml_logger"],
     "mlclient.models": [
-        "ResultContent",
         "SearchHit",
         "ValueHit",
         "BinaryDocument",
@@ -188,6 +187,7 @@ EXPECTED_EXPORTS = {
     ],
     "mlclient.functions": [],
     "mlclient.functions.xqy": [
+        "ModuleFunctionCall",
         "XqyCompilationContext",
         "Cts",
         "XqyExpression",

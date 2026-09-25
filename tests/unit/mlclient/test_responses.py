@@ -9,7 +9,7 @@ import pytest
 from mlclient import MLClient
 from mlclient.exceptions import MarkLogicError
 from mlclient.models import DocumentsBodyPart
-from mlclient.multipart import MultipartPart
+from mlclient.multipart import MultipartPart, encode_multipart_mixed
 from mlclient.responses import MLResponseParser
 from tests.utils import resources as resources_utils
 from tests.utils.ml_mockers import MLRespXMocker
@@ -37,14 +37,16 @@ ml_mock = ml_mocker.router
         ("text/plain; charset=iso-8859-1", "text()", b"caf\xe9", "café"),
     ],
 )
-def test_parse_part_supports_native_node_kinds_without_changing_bytes(
+def test_parse_supports_native_node_kinds(
     mime,
     primitive,
     payload,
     expected,
 ):
     part = MultipartPart({"content-type": mime, "x-primitive": primitive}, payload)
-    result = MLResponseParser.parse_part(part)
+    body, content_type = encode_multipart_mixed([part])
+    response = httpx.Response(200, content=body, headers={"Content-Type": content_type})
+    result = MLResponseParser.parse(response)
     assert result == expected
     assert type(result) is type(expected)
     assert part.content is payload

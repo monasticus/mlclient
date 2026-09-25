@@ -10,7 +10,7 @@ import decimal
 import math
 import re
 from abc import ABC, abstractmethod
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 
 from mlclient._experimental import experimental
@@ -37,7 +37,7 @@ class XqyCompilationContext:
     def __init__(self):
         """Create an empty context for one compilation."""
         self._variables: dict[str, str | bool] = {}
-        self._paths: list[tuple[str, str, str | None]] = []
+        self._paths: list[tuple[str, str]] = []
         self._types: dict[str, str] = {}
 
     @property
@@ -60,49 +60,41 @@ class XqyCompilationContext:
             for name, atomic_type in self._types.items()
         )
 
-    def path(self, source: str, kind: str, namespaces: str | None = None) -> str:
-        """Register a path binding for validation before executing the whole tree."""
+    def path(self, source: str, kind: str) -> str:
+        """Bind a code path and register its role for validation diagnostics."""
         ref = self.bind(source)
-        self._paths.append((ref, kind, namespaces))
-        return ref if kind == "index" else f"\0{ref}\0"
+        self._paths.append((ref, kind))
+        return f"\0{ref}\0"
 
     def guard(self, body: str) -> str:
-        """Validate every registered path before compiling the execution branch."""
+        """Validate code paths before compiling the complete execution source."""
         if not self._paths:
             return body
-        checks = []
-        for ref, kind, local_map in self._paths:
-            if kind == "index" and local_map is None:
-                check = f"cts:valid-index-path({ref}, fn:false())"
-            else:
-                arguments = ref if local_map is None else f"{ref}, {local_map}"
-                check = f"cts:valid-extract-path({arguments})"
-                if kind == "index":
-                    check = f"cts:valid-index-path({ref}, fn:true()) and {check}"
-            checks.append(
-                f"if (try {{ {check} }} catch ($e) {{ fn:false() }}) then () "
-                f'else <path kind="{kind}" binding="{ref[1:]}">{{{ref}}}</path>',
-            )
-        parts = re.split(r"\0(\$v[0-9]+)\0", body)
-        fragments = [
-            part if position % 2 else self.bind(part)
-            for position, part in enumerate(parts)
-        ]
-        source = (
-            fragments[0]
-            if len(fragments) == 1
-            else "fn:concat(" + ", ".join(fragments) + ")"
+        paths = ",\n    ".join(
+            f'<path kind="{kind}" binding="{ref[1:]}">{{{ref}}}</path>'
+            for ref, kind in self._paths
         )
-        invalid = ", ".join(checks)
+        body = re.sub(
+            r"\x00\$(v[0-9]+)\x00",
+            lambda match: self._variables[match[1]],
+            body,
+        )
+        source = self.bind(body)
         return (
-            f"let $_mlclient_invalid := ({invalid})\n"
-            "return if (fn:exists($_mlclient_invalid)) then\n"
-            'fn:error(fn:QName("", "MLCLIENT-INVALID-PATH"), '
-            'fn:concat("Invalid XPath(s): ", fn:string-join('
-            "for $p in $_mlclient_invalid return fn:concat("
-            '"[", fn:string($p/@kind), ":", fn:string($p/@binding), "] ", '
-            'fn:string($p)), "; ")), $_mlclient_invalid)\n'
-            f"else xdmp:value({source})"
+            f"let $invalid-paths := (\n    {paths}\n)[fn:not(\n"
+            "    try { cts:valid-extract-path(.) }\n"
+            "    catch ($error) { fn:false() }\n"
+            ")]\n"
+            "return if (fn:empty($invalid-paths)) then\n"
+            f"    xdmp:value({source})\n"
+            "else\n"
+            '    fn:error(fn:QName("", "MLCLIENT-INVALID-PATH"),\n'
+            '        fn:concat("Invalid XPath(s): ", fn:string-join(\n'
+            "            for $path in $invalid-paths\n"
+            '            return fn:concat("[", fn:string($path/@kind), ":",\n'
+            '                fn:string($path/@binding), "] ", fn:string($path)),\n'
+            '            "; ")),\n'
+            "        $invalid-paths)"
         )
 
 
@@ -166,6 +158,8 @@ def _namespace_code(namespaces, ctx: XqyCompilationContext) -> str:
         f"map:entry({ctx.bind(prefix)}, {ctx.bind(uri)})"
         for prefix, uri in namespaces.items()
     ]
+    if len(entries) == 1:
+        return entries[0]
     return "map:new((" + ", ".join(entries) + "))"
 
 
@@ -248,7 +242,7 @@ class XqyExpression(ABC):
         _validate_position(position)
         return _Index(self, position)
 
-    def project(self, path: str) -> XqyExpression:
+    def xpath(self, path: str) -> XqyExpression:
         """Extract a restricted XPath from each result item in sequence order.
 
         Parameters
@@ -261,7 +255,7 @@ class XqyExpression(ABC):
         -------
         XqyExpression
             A simple-map expression. Apply index/range before this method to
-            select hits rather than projected items.
+            select hits before applying this XPath.
 
         Raises
         ------
@@ -271,7 +265,7 @@ class XqyExpression(ABC):
             If path is empty or whitespace-only. Native syntax validation occurs
             during evaluation, before executing the composed expression.
         """
-        return _Projection(self, path)
+        return _ResultXPath(self, path)
 
     def __str__(self) -> str:
         """Return compiled XQuery source without the external bindings."""
@@ -290,15 +284,12 @@ class _AtomicValue(XqyExpression):
         return ctx.bind(self.value, self.cast or "xs:string")
 
 
-@dataclass(frozen=True)
-class _Raw(XqyExpression):
-    """Trusted source; never constructed implicitly from a runtime value."""
-
-    source: str
+class _DatabaseRoot(XqyExpression):
+    """The fixed document-node path used by default searches."""
 
     def render(self, _ctx: XqyCompilationContext) -> str:
-        """Return trusted source unchanged."""
-        return self.source
+        """Return the built-in database root; no user source is involved."""
+        return "/"
 
 
 def _validate_position(value: int | XqyExpression) -> None:
@@ -327,7 +318,13 @@ class _Index(XqyExpression):
     def render(self, ctx: XqyCompilationContext) -> str:
         """Keep fn:last inside the selected sequence's predicate context."""
         position = as_expr(self.position).render(ctx)
-        return f"({self.inner.render(ctx)})[{position}]"
+        inner = self.inner.render(ctx)
+        if not isinstance(
+            self.inner,
+            (_FunctionCall, ModuleFunctionCall, _Index, _Range),
+        ):
+            inner = f"({inner})"
+        return f"{inner}[{position}]"
 
 
 @dataclass(frozen=True)
@@ -348,20 +345,25 @@ class _Range(XqyExpression):
     def render(self, ctx: XqyCompilationContext) -> str:
         """Render bounds inside the predicate to preserve their context."""
         inner = self.inner.render(ctx)
+        if not isinstance(
+            self.inner,
+            (_FunctionCall, ModuleFunctionCall, _Index, _Range),
+        ):
+            inner = f"({inner})"
         start = as_expr(self.start).render(ctx)
         end = as_expr(self.end).render(ctx)
-        return f"({inner})[fn:position() = ({start} to {end})]"
+        return f"{inner}[{start} to {end}]"
 
 
 @dataclass(frozen=True)
-class _Projection(XqyExpression):
+class _ResultXPath(XqyExpression):
     """Apply a validated extraction path to each selected search hit in order."""
 
     inner: XqyExpression
     source: str
 
     def __post_init__(self):
-        """Validate projection input before sending a request.
+        """Validate result XPath input before sending a request.
 
         Raises
         ------
@@ -390,7 +392,10 @@ class _Projection(XqyExpression):
         str
             Simple-map expression preserving the inner sequence's hit order.
         """
-        return f"({self.inner.render(ctx)}) ! ({ctx.path(self.source, 'projection')})"
+        inner = self.inner.render(ctx)
+        if not isinstance(self.inner, (_FunctionCall, _Index, _Range)):
+            inner = f"({inner})"
+        return f"{inner} ! {ctx.path(self.source, 'xpath')}"
 
 
 @dataclass(frozen=True)
@@ -430,29 +435,119 @@ class _FunctionCall(XqyExpression):
         return f"{self.fn}({', '.join(parts)})"
 
 
+@experimental()
+class ModuleFunctionCall(XqyExpression):
+    """A composable call to a function in a deployed XQuery library module.
+
+    The module is resolved with xdmp:function and invoked with xdmp:apply.
+    No namespace declarations or module imports are added to the query prolog.
+    """
+
+    def __init__(
+        self,
+        name: str,
+        args: Sequence[object] = (),
+        optionals: Sequence[object] = (),
+        *,
+        namespace: str,
+        module_path: str,
+    ):
+        """Capture a module function and its arguments without performing I/O.
+
+        Parameters
+        ----------
+        name : str
+            Function local name (an XML NCName), without a namespace prefix.
+        args : Sequence[object], default ()
+            Positional arguments, including Python values or XqyExpression
+            instances. A nested list/tuple is one sequence-valued argument;
+            None is an explicit empty-sequence argument.
+        optionals : Sequence[object], default ()
+            Optional trailing slots. Trailing None slots are omitted; interior
+            None slots become empty sequences. Use args to pass a trailing
+            empty sequence explicitly. Both argument collections are snapshotted.
+        namespace : str
+            Non-empty module namespace URI. It need not be an HTTP URL.
+        module_path : str
+            Non-empty module location resolved by the App Server. The module
+            must already be deployed and accessible to the evaluating user.
+
+        Raises
+        ------
+        TypeError
+            If name, namespace or module_path is not a string, or an argument
+            cannot be represented as an XQuery expression.
+        ValueError
+            If an identifier is blank or the function name is not an NCName.
+
+        Notes
+        -----
+        Names, paths and argument values are bound as data, never interpolated
+        into XQuery source. Application code should choose the module and function;
+        binding them does not authorize executing an arbitrary library.
+        Missing modules/functions and arity/type errors are reported by MarkLogic
+        during evaluation, not during compilation.
+        """
+        for field, value in (
+            ("name", name),
+            ("namespace", namespace),
+            ("module_path", module_path),
+        ):
+            if not isinstance(value, str):
+                message = f"{field} must be a string"
+                raise TypeError(message)
+            if not value.strip():
+                message = f"{field} must not be blank"
+                raise ValueError(message)
+        if _NCNAME.fullmatch(name) is None:
+            message = "function name must be an XML NCName without a prefix"
+            raise ValueError(message)
+        function = _FunctionCall(
+            "xdmp:function",
+            (_FunctionCall("fn:QName", (namespace, name)), module_path),
+        )
+        self._call = _FunctionCall("xdmp:apply", (function, *args), optionals)
+
+    def render(self, ctx: XqyCompilationContext) -> str:
+        """Render native module invocation in the shared compilation context.
+
+        Parameters
+        ----------
+        ctx : XqyCompilationContext
+            Context shared with nested calls for typed bindings and path guards.
+
+        Returns
+        -------
+        str
+            An xdmp:apply expression using an explicitly namespaced function.
+        """
+        return self._call.render(ctx)
+
+
 def xpath(source: str) -> XqyExpression:
-    """Embed trusted XPath/XQuery source, without parsing or sanitizing it.
+    """Build a path validated before execution, including inside nested functions.
 
     Parameters
     ----------
     source : str
-        Developer-controlled source. Never pass user input here. Prefer builders
-        with externally bound values for dynamic data. EQNames such as
-        ``/Q{urn:example}item`` avoid relying on namespace declarations.
+        Non-empty extraction XPath, not arbitrary XQuery code. EQNames such as
+        ``/Q{https://monasticus.com/mlclient/examples/example}item`` avoid relying
+        on namespace declarations.
 
     Returns
     -------
     XqyExpression
-        A parenthesized source expression, suitable for ``cts.search`` and
-        ``xdmp.exists`` as well as general expression composition.
+        A path expression, validated by cts:valid-extract-path before evaluation.
+        Ordinary strings passed to builders remain externally bound values.
+
+    Raises
+    ------
+    TypeError
+        If source is not a string.
+    ValueError
+        If source is empty or whitespace-only.
     """
-    if not isinstance(source, str):
-        message = "xpath source must be a string"
-        raise TypeError(message)
-    if not source.strip():
-        message = "xpath source must not be empty"
-        raise ValueError(message)
-    return _Raw(f"({source})")
+    return _Path(source)
 
 
 @dataclass(frozen=True)
@@ -460,13 +555,28 @@ class _Path(XqyExpression):
     """A path string validated natively before any expression is executed."""
 
     source: str
-    kind: str = "search"
-    namespaces: XqyExpression | None = None
+    kind: str = "xpath"
+
+    def __post_init__(self):
+        """Require non-empty path text before registering server-side validation.
+
+        Raises
+        ------
+        TypeError
+            If source is not a string.
+        ValueError
+            If source is empty or whitespace-only.
+        """
+        if not isinstance(self.source, str):
+            message = "xpath source must be a string"
+            raise TypeError(message)
+        if not self.source.strip():
+            message = "xpath source must not be empty"
+            raise ValueError(message)
 
     def render(self, ctx: XqyCompilationContext) -> str:
-        """Register validation and return an inline placeholder or a string binding."""
-        bindings = None if self.namespaces is None else self.namespaces.render(ctx)
-        return ctx.path(self.source, self.kind, bindings)
+        """Register validation and return a placeholder in the execution source."""
+        return ctx.path(self.source, self.kind)
 
 
 @dataclass(frozen=True)
@@ -487,21 +597,10 @@ def namespace_map(value):
     return value
 
 
-def index_path(value, namespaces=None) -> XqyExpression:
-    """Register literal index paths, including every member of a path sequence."""
-    if isinstance(value, str):
-        return _Path(value, "index", namespaces)
-    if isinstance(value, (list, tuple)):
-        return _Sequence(tuple(index_path(item, namespaces) for item in value))
-    return as_expr(value)
-
-
 def search_path(expression: str | XqyExpression) -> XqyExpression:
     """Wrap path strings internally; existing composed expressions stay composable."""
     if isinstance(expression, str):
-        return _Path(expression)
-    if isinstance(expression, _Raw):
-        return _Path(expression.source[1:-1])
+        return _Path(expression, "search")
     if not isinstance(expression, XqyExpression):
         message = "searchable expressions require a path string or XqyExpression"
         raise TypeError(message)

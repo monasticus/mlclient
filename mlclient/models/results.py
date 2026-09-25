@@ -1,4 +1,4 @@
-"""Parsed CTS results with optional original payload snapshots."""
+"""Parsed CTS results with scores, frequencies and source locations."""
 
 from __future__ import annotations
 
@@ -7,30 +7,25 @@ from dataclasses import dataclass, field
 
 
 @dataclass
-class ResultContent:
-    """Content already converted by MLResponseParser, without another parser.
+class SearchHit:
+    """A parsed search result with its original hit score and source location.
 
     Parameters
     ----------
     content : object
         Parsed value, retained as-is: XML tree/element, JSON, scalar or bytes.
-    content_bytes : bytes | None
-        Optional original payload snapshot. CTS services always supply it.
-        Mutating content does not rewrite this snapshot.
-    encoding : str
-        Encoding for decoding the original textual payload, not for parsing it.
+    score : int
+        Native score captured before applying optional result XPath.
+    source_uri : str | None
+        Source URI when supplied by the server.
+    source_path : str
+        Source path; '/' is a fallback, not a document-node type assertion.
     """
 
     content: object
-    content_bytes: bytes | None = field(default=None, kw_only=True, repr=False)
-    encoding: str = field(default="utf-8", kw_only=True)
-
-    @property
-    def content_string(self) -> str | None:
-        """Decode original text, or return None for binary/unavailable bytes."""
-        if self.content_bytes is None or isinstance(self.content, bytes):
-            return None
-        return self.content_bytes.decode(self.encoding)
+    score: int = field(kw_only=True)
+    source_uri: str | None = field(default=None, kw_only=True)
+    source_path: str = field(default="/", kw_only=True)
 
     def xpath(self, expr: str, **namespaces: str) -> list:
         """Call findall on the already parsed XML tree or element.
@@ -61,44 +56,16 @@ class ResultContent:
 
 
 @dataclass
-class SearchHit(ResultContent):
-    """A parsed search result with its original hit score and source location.
-
-    Parameters
-    ----------
-    content : object
-        Parsed node content supplied by MLResponseParser.
-    score : int
-        Native score captured before optional projection.
-    content_bytes : bytes | None
-        Original payload snapshot; supplied by CTS services without reserialization.
-    encoding : str
-        Original text encoding.
-    source_uri : str | None
-        Source URI when supplied by the server.
-    source_path : str
-        Source path; '/' is a fallback, not a document-node type assertion.
-    """
-
-    score: int = field(kw_only=True)
-    source_uri: str | None = field(default=None, kw_only=True)
-    source_path: str = field(default="/", kw_only=True)
-
-
-@dataclass
-class ValueHit(ResultContent):
+class ValueHit:
     """A parsed lexicon value and its native lookup frequency.
 
     Parameters
     ----------
-    content : object
+    value : object
         Parsed value supplied by MLResponseParser, without further conversion.
     frequency : int
         Native frequency; item/fragment-frequency options determine its meaning.
-    content_bytes : bytes | None
-        Original payload snapshot; supplied by CTS services without reserialization.
-    encoding : str
-        Original text encoding.
     """
 
+    value: object
     frequency: int = field(kw_only=True)

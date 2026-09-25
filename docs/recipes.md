@@ -1,8 +1,8 @@
 # Recipes
 
-These examples use stable document and client APIs. Experimental jobs are not
-required. Start with a test database and credentials allowed to perform the
-operations shown.
+Start with a test database and credentials allowed to perform the operations
+shown. The custom expression recipe uses the experimental XQuery API; the other
+recipes use stable document and client APIs. Experimental jobs are not required.
 
 ## Replace a collection without rewriting content
 
@@ -88,10 +88,12 @@ Run one read-only probe on every host:
 import asyncio
 from cluster_hosts import eval_on_each_host
 
-names = asyncio.run(eval_on_each_host(
-    ["node-1.example", "node-2.example", "node-3.example"],
-    "xdmp:host-name()",
-))
+names = asyncio.run(
+    eval_on_each_host(
+        ["node-1.example", "node-2.example", "node-3.example"],
+        "xdmp:host-name()",
+    )
+)
 print(names)
 ```
 
@@ -107,3 +109,67 @@ name. The [custom API guide](user/python/custom-api.md) builds
 parsed Python on a shared connection, with sync and async versions. This keeps
 transport details out of application scripts while retaining access to the raw
 response when needed.
+
+## Call a custom XQuery module
+
+Suppose your application keeps label normalization in a server-side library.
+Deploy this module as `/ext/example/labels.xqy` in the connected App Server's
+**modules database**, or under its configured modules root when it uses the
+filesystem. Use your normal module deployment process; inserting it in the
+content database does not make it a library module. The calling user needs the
+appropriate module access and eval privileges.
+
+```xquery
+--8<-- "examples/labels.xqy"
+```
+
+Expose the module as a family of builders, just like `Fn` or `Cts`. Save this
+Python block as `custom_expression.py`:
+
+```python
+--8<-- "examples/custom_expression.py"
+```
+
+`Label.normalize()` only returns a
+[ModuleFunctionCall][mlclient.functions.xqy.ModuleFunctionCall]. The `label`
+singleton builds expressions; it does not execute requests. Each method supplies
+the local function name, arguments, namespace URI and module path. Add further
+static methods to expose the rest of your library.
+
+`Label.join()` has two required parameters and one optional keyword parameter.
+Its `optionals` tuple omits a trailing `None`, calling the two-argument XQuery
+overload, which supplies the default space. An explicit separator calls the
+three-argument overload; `separator=""` is passed unchanged, not omitted.
+
+The call handles native module loading and invocation internally, through
+[`xdmp:function`](https://docs.marklogic.com/xdmp:function) and `xdmp:apply`.
+You do not implement `render()`, construct XQuery strings, register imports or
+declare a prefix. Namespace URIs are bound explicitly: two families can use the
+same local function names without sharing prefix declarations in the prolog.
+This keeps module calls separate from native built-in function calls.
+The namespace URI identifies the library; it is not fetched over HTTP.
+
+Use it directly or inside another expression:
+
+```python
+from custom_expression import label
+from mlclient import MLClient
+from mlclient.functions.xqy import fn
+
+with MLClient() as ml:
+    normalized = ml.eval.expression(label.normalize("  coffee   beans  "))
+    print(normalized)  # COFFEE BEANS
+    length = ml.eval.expression(fn.string_length(label.normalize("  coffee  ")))
+    print(length)  # 6
+    print(ml.eval.expression(label.join("coffee", "beans")))  # coffee beans
+    print(ml.eval.expression(label.join("coffee", "beans", separator="-")))
+    # coffee-beans
+```
+
+Each evaluation is one request. Runtime text is bound automatically, including
+quotes or XQuery-looking input; it is never interpolated into executable source.
+The namespace and module path are fixed application code, not user input.
+To inspect the generated query without a connection, call
+`label.normalize("coffee").compile()` and inspect its source and variable mapping.
+See the [XQuery API guide](user/python/xquery-api.md#custom-xquery-expressions)
+for composition and native result conventions.

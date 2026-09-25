@@ -53,6 +53,13 @@ def read_test_resource_bytes(
     return Path(get_test_resource_path(test_path, resource)).read_bytes()
 
 
+def read_test_resource_text(
+    test_path: str,
+    resource: str,
+) -> str:
+    return Path(get_test_resource_path(test_path, resource)).read_text()
+
+
 def get_test_resource_path(
     test_path: str,
     resource: str,

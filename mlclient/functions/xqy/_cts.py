@@ -13,12 +13,11 @@ from mlclient._experimental import experimental
 from mlclient.functions.xqy._xs import Xs
 from mlclient.functions.xqy.expressions import (
     XqyExpression,
+    _DatabaseRoot,
     _FunctionCall,
     as_expr,
-    index_path,
     namespace_map,
     search_path,
-    xpath,
 )
 
 xs = Xs()
@@ -92,7 +91,7 @@ class Cts:
 
         Parameters
         ----------
-        timestamp : xs:unsignedLong
+        timestamp : object
             A commit timestamp. Database fragments committed after this timestamp are
             matched.
 
@@ -103,11 +102,6 @@ class Cts:
 
         Notes
         -----
-        Fragment commit timestamps change not only by application transactions, but also
-        by system transactions from the reindexer or the rebalancer. The query will also
-        match fragments whose timestamps have been changed because of reindexing and
-        rebalancing after the given timestamp.
-
         Native reference: https://docs.marklogic.com/cts:after-query
         """
         return _FunctionCall(
@@ -133,18 +127,18 @@ class Cts:
 
         Parameters
         ----------
-        native_plugin : xs:string
+        native_plugin : object
             The path to the native plugin library containing the implementation of the
             user-defined extension aggregate.
-        aggregate_name : xs:string
+        aggregate_name : object
             The name of an aggregate function in $native-plugin .
-        range_indexes : cts:reference*
+        range_indexes : object
             A sequence of references to range indexes. The first range index specified
             in this or any other aggregate function cannot be of type "nullable".
-        argument : item()*
+        argument : object
             A sequence containing the arguments for the aggregate function. A map can be
             used to pass in multiple sequences of arguments.
-        options : xs:string*
+        options : object
             options. The default is (). Options include: "any" Co-occurrences from any
             fragment should be included. "document" Co-occurrences from document
             fragments should be included. "properties" Co-occurrences from properties
@@ -169,7 +163,7 @@ class Cts:
             occurs. This is especially useful in cases where multiple lexicon calls
             occur in the same query (for example, resolving many facets in a single
             query).
-        query : cts:query?
+        query : object
             Only include co-occurrences in fragments selected by the cts:query , and
             compute frequencies from this set of included co-occurrences. The
             co-occurrences do not need to match the query, but they must occur in
@@ -177,7 +171,7 @@ class Cts:
             they match the query, but instead selected in the same manner as
             "unfiltered" cts:search operations. If a string is entered, the string is
             treated as a cts:word-query of the specified string.
-        forest_ids : xs:unsignedLong*
+        forest_ids : object
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
@@ -189,22 +183,6 @@ class Cts:
 
         Notes
         -----
-        Only one of "fragment-frequency" or "item-frequency" may be specified in the
-        options parameter. If neither "fragment-frequency" nor "item-frequency" is
-        specified, then the default is "fragment-frequency".
-
-        Only one of "any", "document", "properties", or "locks" may be specified in the
-        options parameter. If none of "any", "document", "properties", or "locks" are
-        specified and there is a $query parameter, then the default is "document". If
-        there is no $query parameter then the default is "any".
-
-        Only one of the "checked" or "unchecked" options may be specified in the options
-        parameter. If neither "checked" nor "unchecked" are specified, then the default
-        is "checked".
-
-        For details, see Using Aggregate User-Defined Functions in the Search
-        Developer's Guide .
-
         Native reference: https://docs.marklogic.com/cts:aggregate
         """
         return _FunctionCall(
@@ -222,9 +200,9 @@ class Cts:
 
         Parameters
         ----------
-        positive_query : cts:query
+        positive_query : object
             A positive query, specifying the search results filtered in.
-        negative_query : cts:query
+        negative_query : object
             A negative query, specifying the search results to filter out.
 
         Returns
@@ -234,14 +212,6 @@ class Cts:
 
         Notes
         -----
-        cts:and-not-query
-
-        cts:search
-
-        $negative-query
-
-        cts:and-not-query
-
         Native reference: https://docs.marklogic.com/cts:and-not-query
         """
         return _FunctionCall(
@@ -258,9 +228,9 @@ class Cts:
 
         Parameters
         ----------
-        queries : cts:query*
+        queries : object
             A sequence of sub-queries.
-        options : xs:string*
+        options : object
             Options to this query. The default is (). Options include: "ordered" An
             ordered and-query, which specifies that the sub-query matches must occur in
             the order of the specified sub-queries. For example, if the sub-queries are
@@ -276,18 +246,6 @@ class Cts:
 
         Notes
         -----
-        If the options parameter contains neither "ordered" nor "unordered", then the
-        default is "unordered".
-
-        If you specify the empty sequence for the queries parameter to cts:and-query ,
-        you will get a match for every document in the database. For example, the
-        following query always returns true:
-
-        cts:contains(collection(), cts:and-query(()))
-
-        In order to match a cts:and-query , the matches from each of the specified
-        sub-queries must all occur in the same fragment.
-
         Native reference: https://docs.marklogic.com/cts:and-query
         """
         return _FunctionCall(
@@ -310,13 +268,13 @@ class Cts:
 
         Parameters
         ----------
-        range_index : cts:reference
+        range_index : object
             Reference to a range index.
-        options : xs:string*
+        options : object
             Same as the "options" parameter in cts:aggregate .
-        query : cts:query?
+        query : object
             Same as the "query" parameter in cts:aggregate .
-        forest_ids : xs:unsignedLong*
+        forest_ids : object
             Same as the "forest-ids" parameter in cts:aggregate .
 
         Returns
@@ -343,7 +301,7 @@ class Cts:
 
         Parameters
         ----------
-        timestamp : xs:unsignedLong
+        timestamp : object
             A commit timestamp. Database fragments committed before this timestamp are
             matched.
 
@@ -354,11 +312,6 @@ class Cts:
 
         Notes
         -----
-        Fragment commit timestamps change not only by application transactions, but also
-        by system transactions from the reindexer or the rebalancer. The query will also
-        match fragments whose timestamps have been changed because of reindexing and
-        rebalancing before the given timestamp.
-
         Native reference: https://docs.marklogic.com/cts:before-query
         """
         return _FunctionCall(
@@ -376,9 +329,9 @@ class Cts:
 
         Parameters
         ----------
-        matching_query : cts:query
+        matching_query : object
             A sub-query that is used for match and scoring.
-        boosting_query : cts:query
+        boosting_query : object
             A sub-query that is used only for boosting score.
 
         Returns
@@ -388,13 +341,6 @@ class Cts:
 
         Notes
         -----
-        When used in a search, $boosting-query is not evaluated if there are no matches
-        to $matching-query .
-
-        When used in a search, all matches to $matching-query are included in the search
-        results. $boosting-query only contributes to search relevances scores. Scoring
-        is done the same way as for a cts:and-query .
-
         Native reference: https://docs.marklogic.com/cts:boost-query
         """
         return _FunctionCall(
@@ -410,13 +356,13 @@ class Cts:
 
         Parameters
         ----------
-        south : xs:float
+        south : object
             The southern boundary of the box.
-        west : xs:float
+        west : object
             The western boundary of the box.
-        north : xs:float
+        north : object
             The northern boundary of the box.
-        east : xs:float
+        east : object
             The eastern boundary of the box.
 
         Returns
@@ -446,10 +392,10 @@ class Cts:
 
         Parameters
         ----------
-        radius : xs:double
+        radius : object
             The radius of the circle. The units for the radius is determined at runtime
             by the query options (miles is currently the only option).
-        center : cts:point
+        center : object
             A point representing the center of the circle.
 
         Returns
@@ -480,13 +426,13 @@ class Cts:
 
         Parameters
         ----------
-        data_nodes : node()*
+        data_nodes : object
             The sequence of nodes to be classified.
-        classifier : element(cts:classifier)
+        classifier : object
             An element node containing the classifier specification. This is typically
             the output of cts:train , either run directly or saved in an XML document in
             the database.
-        options : (element()|map:map)?
+        options : object
             An options element . The options for classification are passed automatically
             from cts:train to the cts:classifier specification as part of the classifier
             element so that they are consistent with the parameters used in training.
@@ -499,7 +445,7 @@ class Cts:
             for which a per-class value is not specified. For example: <options
             xmlns="cts:classify"> <thresholds> <threshold>-1.0</threshold> <threshold
             class="Example 1">-2.42</threshold> </thresholds> </options>
-        training_nodes : node()*
+        training_nodes : object
             The sequence of training nodes used to train the classifier. Required if the
             supports form of the classifier is used; ignored if the weights form of the
             classifier is used.
@@ -511,32 +457,6 @@ class Cts:
 
         Notes
         -----
-        cts:classify classifies a sequence of nodes using the output from cts:train .
-        The $data-nodes and $classifier parameters are respectively the nodes to be
-        classified and the specification output from cts:train . cts:classify can use
-        either supports or weights forms of the $classifier output from cts:train (see
-        Output Formats ). If the supports form is used, the training nodes must be
-        passed as the 4th parameter. The $options parameter is an options element in the
-        cts:classify namespace.
-
-        The output is a sequence of label elements of the form:
-
-        <cts:label> <cts:class name="Example 1" val="-0.003"/> <cts:class name="Example
-        2" val="1.4556"/> ... </cts:label>
-
-        { "classes":[ { "name":"animal class", "val":-1 }, { "name":"fruit class",
-        "val":-0.875 }, { "name":"vegetable class", "val":-1 } ] },
-
-        Each label corresponds to the data node in the corresponding position in the
-        input sequence. There will be a <class> child for each class where the document
-        passed the class threshold. The val attribute gives the class membership value
-        for the data node in the given class. Values greater than zero indicate likely
-        class membership, values less than zero indicate likely non-membership.
-        Adjusting thresholds can give more or less selective classification. Increasing
-        the threshold leads to a more selective classification (that is, decreases the
-        likelihood of classification in the class). Decreasing the threshold gives less
-        selective classification.
-
         Native reference: https://docs.marklogic.com/cts:classify
         """
         return _FunctionCall(
@@ -553,9 +473,9 @@ class Cts:
 
         Parameters
         ----------
-        nodes : node()*
+        nodes : object
             The sequence of nodes to cluster.
-        options : (element()|map:map)?
+        options : object
             An XML representation of the options for defining the clustering parameters.
             The options node must be in the cts:cluster namespace. The following is a
             sample options node: <options xmlns="cts:cluster">
@@ -640,9 +560,9 @@ class Cts:
 
         Parameters
         ----------
-        pattern : xs:string
+        pattern : object
             Wildcard pattern to match.
-        options : xs:string*
+        options : object
             Options. The default is (). Options include: "case-sensitive" A
             case-sensitive match. "case-insensitive" A case-insensitive match.
             "diacritic-sensitive" A diacritic-sensitive match. "diacritic-insensitive" A
@@ -691,15 +611,15 @@ class Cts:
             is especially useful in cases where multiple lexicon calls occur in the same
             query (for example, resolving many facets in a single query). "map" Return
             results as a single map:map value instead of as an xs:string* sequence .
-        query : cts:query?
+        query : object
             Only include URIs from fragments selected by the cts:query , and compute
             frequencies from this set of included URIs. The fragments are not filtered
             to ensure they match the query, but instead selected in the same manner as
             "unfiltered" cts:search operations. If a string is entered, the string is
             treated as a cts:word-query of the specified string.
-        quality_weight : xs:double?
+        quality_weight : object
             A document quality weight to use when computing scores. The default is 1.0.
-        forest_ids : xs:unsignedLong*
+        forest_ids : object
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
@@ -711,62 +631,6 @@ class Cts:
 
         Notes
         -----
-        Only one of "frequency-order" or "item-order" may be specified in the options
-        parameter. If neither "frequency-order" nor "item-order" is specified, then the
-        default is "item-order".
-
-        Only one of "ascending" or "descending" may be specified in the options
-        parameter. If neither "ascending" nor "descending" is specified, then the
-        default is "ascending" if "item-order" is specified, and "descending" if
-        "frequency-order" is specified.
-
-        Only one of "eager" or "lazy" may be specified in the options parameter. If
-        neither "eager" nor "lazy" is specified, then the default is "lazy" if
-        "item-order" is specified, and "eager" if "frequency-order" is specified.
-
-        Only one of "any", "document", "properties", or "locks" may be specified in the
-        options parameter. If none of "any", "document", "properties", or "locks" are
-        specified and there is a $query parameter, then the default is "document". If
-        there is no $query parameter then the default is "any".
-
-        Only one of the "score-logtfidf", "score-logtf", "score-simple", "score-random",
-        or "score-zero" options may be specified in the options parameter. If none of
-        "score-logtfidf", "score-logtf", "score-simple", "score-random", or "score-zero"
-        are specified, then the default is "score-logtfidf".
-
-        Only one of the "checked" or "unchecked" options may be specified in the options
-        parameter. If neither "checked" nor "unchecked" are specified, then the default
-        is "checked".
-
-        If "sample= N " is not specified in the options parameter, then all included
-        URIs may be returned. If a $query parameter is not present, then "sample= N "
-        has no effect.
-
-        If "truncate= N " is not specified in the options parameter, then URIs from all
-        fragments selected by the $query parameter are included. If a $query parameter
-        is not present, then "truncate= N " has no effect.
-
-        To incrementally fetch a subset of the values returned by this function, use
-        fn:subsequence on the output, rather than the "skip" option. The "skip" option
-        is based on fragments matching the query parameter (if present), not on values.
-        A fragment matched by query might contain multiple values or no values. The
-        number of fragments skipped does not correspond to the number of values. Also,
-        the skip is applied to the relevance ordered query matches, not to the ordered
-        values list.
-
-        When using the "skip" option, use the "truncate" option rather than the "limit"
-        option to control the number of matching fragments from which to draw values.
-
-        If neither "case-sensitive" nor "case-insensitive" is present, $pattern is used
-        to determine case sensitivity. If $pattern contains no uppercase, it specifies
-        "case-insensitive". If $pattern contains uppercase, it specifies
-        "case-sensitive".
-
-        If neither "diacritic-sensitive" nor "diacritic-insensitive" is present,
-        $pattern is used to determine diacritic sensitivity. If $pattern contains no
-        diacritics, it specifies "diacritic-insensitive". If $pattern contains
-        diacritics, it specifies "diacritic-sensitive".
-
         Native reference: https://docs.marklogic.com/cts:collection-match
         """
         return _FunctionCall(
@@ -783,7 +647,7 @@ class Cts:
 
         Parameters
         ----------
-        uris : xs:string*
+        uris : object
             One or more collection URIs. A document matches the query if it is in at
             least one of these collections.
 
@@ -810,7 +674,7 @@ class Cts:
 
         Parameters
         ----------
-        options : xs:string*
+        options : object
             Options. The default is (). Options include: "nullable" Allow null values in
             tuples reported from cts:value-tuples when using this lexicon. "unchecked"
             Do not check the definition against the context database.
@@ -845,11 +709,11 @@ class Cts:
 
         Parameters
         ----------
-        start : xs:string?
+        start : object
             A starting value. Return only this value and following values. If the
             parameter is not in the lexicon, then it returns the values beginning with
             the next value.
-        options : xs:string*
+        options : object
             Options. The default is (). Options include: "ascending" URIs should be
             returned in ascending order. "descending" URIs should be returned in
             descending order. "any" URIs from any fragment should be included.
@@ -895,15 +759,15 @@ class Cts:
             is especially useful in cases where multiple lexicon calls occur in the same
             query (for example, resolving many facets in a single query). "map" Return
             results as a single map:map value instead of as an xs:string* sequence .
-        query : cts:query?
+        query : object
             Only include URIs from fragments selected by the cts:query , and compute
             frequencies from this set of included URIs. The fragments are not filtered
             to ensure they match the query, but instead selected in the same manner as
             "unfiltered" cts:search operations. If a string is entered, the string is
             treated as a cts:word-query of the specified string.
-        quality_weight : xs:double?
+        quality_weight : object
             A document quality weight to use when computing scores. The default is 1.0.
-        forest_ids : xs:unsignedLong*
+        forest_ids : object
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
@@ -915,52 +779,6 @@ class Cts:
 
         Notes
         -----
-        Only one of "frequency-order" or "item-order" may be specified in the options
-        parameter. If neither "frequency-order" nor "item-order" is specified, then the
-        default is "item-order".
-
-        Only one of "ascending" or "descending" may be specified in the options
-        parameter. If neither "ascending" nor "descending" is specified, then the
-        default is "ascending" if "item-order" is specified, and "descending" if
-        "frequency-order" is specified.
-
-        Only one of "eager" or "lazy" may be specified in the options parameter. If
-        neither "eager" nor "lazy" is specified, then the default is "lazy" if
-        "item-order" is specified, and "eager" if "frequency-order" is specified.
-
-        Only one of "any", "document", "properties", or "locks" may be specified in the
-        options parameter. If none of "any", "document", "properties", or "locks" are
-        specified and there is a $query parameter, then the default is "document". If
-        there is no $query parameter then the default is "any".
-
-        Only one of the "score-logtfidf", "score-logtf", "score-simple", "score-random",
-        or "score-zero" options may be specified in the options parameter. If none of
-        "score-logtfidf", "score-logtf", "score-simple", "score-random", or "score-zero"
-        are specified, then the default is "score-logtfidf".
-
-        Only one of the "checked" or "unchecked" options may be specified in the options
-        parameter. If neither "checked" nor "unchecked" are specified, then the default
-        is "checked".
-
-        If "sample= N " is not specified in the options parameter, then all included
-        words may be returned. If a $query parameter is not present, then "sample= N "
-        has no effect.
-
-        If "truncate= N " is not specified in the options parameter, then words from all
-        fragments selected by the $query parameter are included. If a $query parameter
-        is not present, then "truncate= N " has no effect.
-
-        To incrementally fetch a subset of the values returned by this function, use
-        fn:subsequence on the output, rather than the "skip" option. The "skip" option
-        is based on fragments matching the query parameter (if present), not on values.
-        A fragment matched by query might contain multiple values or no values. The
-        number of fragments skipped does not correspond to the number of values. Also,
-        the skip is applied to the relevance ordered query matches, not to the ordered
-        values list.
-
-        When using the "skip" option, use the "truncate" option rather than the "limit"
-        option to control the number of matching fragments from which to draw values.
-
         Native reference: https://docs.marklogic.com/cts:collections
         """
         return _FunctionCall(
@@ -987,22 +805,22 @@ class Cts:
 
         Parameters
         ----------
-        schema : xs:string
+        schema : object
             The TDE schema name.
-        view : xs:string
+        view : object
             The TDE view name.
-        column : xs:string
+        column : object
             The TDE column name.
-        value : xs:anyAtomicType*
+        value : object
             One or more values used for querying.
-        operator : xs:string?
+        operator : object
             Operator for the $value values. The default operator is "=". Operators
             include: "<" Match range index values less than $value. "<=" Match range
             index values less than or equal to $value. ">" Match range index values
             greater than $value. ">=" Match range index values greater than or equal to
             $value. "=" Match range index values equal to $value. "!=" Match range index
             values not equal to $value.
-        options : xs:string*
+        options : object
             Options to this query. The default is (). Options include: "cached" Cache
             the results of this query in the list cache. "uncached" Do not cache the
             results of this query in the list cache. "score-function= function " Use the
@@ -1014,7 +832,7 @@ class Cts:
             this range query. zero This range query does not contribute to the score.
             This is the default. "slope-factor= number " Apply the given number as a
             scaling factor to the slope of the scoring function. The default is 1.0.
-        weight : xs:double?
+        weight : object
             A weight for this query. The default is 1.0.
 
         Returns
@@ -1024,16 +842,6 @@ class Cts:
 
         Notes
         -----
-        This function returns a cts:triple-range-query, and all functions which takes
-        cts:triple-range-query as an input can be used (e.g.
-        cts:triple-range-query-subject).
-
-        This type of query may only be used in unfiltered search, i.e. cts:search with
-        'unfiltered' option, and index lookup, e.g. cts.uris .
-
-        The column parameter must be an indexed column, i.e. does not have the
-        virtual=true or belong to a view with viewVirtual=true
-
         Native reference: https://docs.marklogic.com/cts:column-range-query
         """
         return _FunctionCall(
@@ -1054,9 +862,9 @@ class Cts:
 
         Parameters
         ----------
-        outer : cts:polygon
+        outer : object
             The outer polygon.
-        inner : cts:polygon*
+        inner : object
             The inner (hole) polygons.
 
         Returns
@@ -1082,7 +890,7 @@ class Cts:
 
         Parameters
         ----------
-        node : node()
+        node : object
             A node. Typically this is an item in the result sequence of a cts:search
             operation.
 
@@ -1093,14 +901,6 @@ class Cts:
 
         Notes
         -----
-        Confidence is similar to score, except that it is bounded. It is similar to
-        fitness, except that it is influenced by term IDFs. It is an xs:float in the
-        range of 0.0 to 1.0. It does not include quality.
-
-        When using with any of the scoring methods, the confidence is calculated by
-        first bounding the score in the range of 0.0 to 1.0, then taking the square root
-        of that number.
-
         Native reference: https://docs.marklogic.com/cts:confidence
         """
         return _FunctionCall(
@@ -1118,7 +918,7 @@ class Cts:
 
         Parameters
         ----------
-        options : xs:string*
+        options : object
             Options. Options include: "descending" Results should be returned in
             descending order of confidence. "ascending" Results should be returned in
             ascending order of confidence.
@@ -1130,10 +930,6 @@ class Cts:
 
         Notes
         -----
-        Only one of "ascending" or "descending" may be specified in the options
-        parameter. If neither "ascending" nor "descending" is specified, then the
-        default is "ascending".
-
         Native reference: https://docs.marklogic.com/cts:confidence-order
         """
         return _FunctionCall(
@@ -1150,11 +946,11 @@ class Cts:
 
         Parameters
         ----------
-        nodes : item()*
+        nodes : object
             The nodes or atomic values to be checked for a match. Atomic values are
             converted to a text node before checking for a match, which may result in an
             error if the value cannot be converted.
-        query : cts:query
+        query : object
             A query to match against. If a string is entered, the string is treated as a
             cts:word-query of the specified string.
 
@@ -1187,15 +983,15 @@ class Cts:
 
         Parameters
         ----------
-        value1 : cts:reference
+        value1 : object
             Reference to a range index. The type of the range index must be numeric.
-        value2 : cts:reference
+        value2 : object
             Reference to a range index. The type of the range index must be numeric.
-        options : xs:string*
+        options : object
             Same as the "options" parameter in cts:aggregate .
-        query : cts:query?
+        query : object
             Same as the "query" parameter in cts:aggregate .
-        forest_ids : xs:unsignedLong*
+        forest_ids : object
             Same as the "forest-ids" parameter in cts:aggregate .
 
         Returns
@@ -1227,13 +1023,13 @@ class Cts:
 
         Parameters
         ----------
-        range_index : cts:reference
+        range_index : object
             Reference to a range index.
-        options : xs:string*
+        options : object
             Same as the "options" parameter in cts:aggregate .
-        query : cts:query?
+        query : object
             Same as the "query" parameter in cts:aggregate .
-        forest_ids : xs:unsignedLong*
+        forest_ids : object
             Same as the "forest-ids" parameter in cts:aggregate .
 
         Returns
@@ -1267,15 +1063,15 @@ class Cts:
 
         Parameters
         ----------
-        value1 : cts:reference
+        value1 : object
             Reference to a range index. The type of the range index must be numeric.
-        value2 : cts:reference
+        value2 : object
             Reference to a range index. The type of the range index must be numeric.
-        options : xs:string*
+        options : object
             Same as the "options" parameter in cts:aggregate .
-        query : cts:query?
+        query : object
             Same as the "query" parameter in cts:aggregate .
-        forest_ids : xs:unsignedLong*
+        forest_ids : object
             Same as the "forest-ids" parameter in cts:aggregate .
 
         Returns
@@ -1309,15 +1105,15 @@ class Cts:
 
         Parameters
         ----------
-        value1 : cts:reference
+        value1 : object
             Reference to a range index. The type of the range index must be numeric.
-        value2 : cts:reference
+        value2 : object
             Reference to a range index. The type of the range index must be numeric.
-        options : xs:string*
+        options : object
             Same as the "options" parameter in cts:aggregate .
-        query : cts:query?
+        query : object
             Same as the "query" parameter in cts:aggregate .
-        forest_ids : xs:unsignedLong*
+        forest_ids : object
             Same as the "forest-ids" parameter in cts:aggregate .
 
         Returns
@@ -1344,7 +1140,7 @@ class Cts:
 
         Parameters
         ----------
-        id : xs:unsignedLong
+        id : object
             A registered query identifier.
 
         Returns
@@ -1370,9 +1166,9 @@ class Cts:
 
         Parameters
         ----------
-        uris : xs:string*
+        uris : object
             One or more directory URIs.
-        depth : xs:string?
+        depth : object
             "1" for immediate children, "infinity" for all. If not supplied, depth is
             "1".
 
@@ -1383,8 +1179,6 @@ class Cts:
 
         Notes
         -----
-        The directory URI should always have a trailing slash.
-
         Native reference: https://docs.marklogic.com/cts:directory-query
         """
         return _FunctionCall(
@@ -1402,9 +1196,9 @@ class Cts:
 
         Parameters
         ----------
-        nodes : node()*
+        nodes : object
             Some model nodes.
-        options : element()?
+        options : object
             An XML representation of the options for defining which terms to generate
             and how to evaluate them. The options node must be in the
             cts:distinctive-terms namespace. The following is a sample options node:
@@ -1488,20 +1282,6 @@ class Cts:
 
         Notes
         -----
-        Output Format
-
-        cts:class element
-
-        a sequence
-
-        cts:term elements.
-
-        cts:train
-
-        cts:term element
-
-        cts:query
-
         Native reference: https://docs.marklogic.com/cts:distinctive-terms
         """
         return _FunctionCall(
@@ -1518,7 +1298,7 @@ class Cts:
 
         Parameters
         ----------
-        format : xs:string
+        format : object
             Case insensitve one of: "json","xml","text","binary". This will result in a
             XDMP-ARG exception in case of an invalid format.
 
@@ -1529,9 +1309,6 @@ class Cts:
 
         Notes
         -----
-        Requires MarkLogic 11 or later. Availability is checked by the server
-        when the expression is evaluated, including in nested expressions.
-
         Native reference: https://docs.marklogic.com/cts:document-format-query
         """
         return _FunctionCall(
@@ -1548,7 +1325,7 @@ class Cts:
 
         Parameters
         ----------
-        query : cts:query
+        query : object
             A query to be matched against any document fragment.
 
         Returns
@@ -1558,9 +1335,6 @@ class Cts:
 
         Notes
         -----
-        A document fragment query enables you to cross fragment boundaries in an AND
-        query, as shown in the second example below.
-
         Native reference: https://docs.marklogic.com/cts:document-fragment-query
         """
         return _FunctionCall(
@@ -1577,7 +1351,7 @@ class Cts:
 
         Parameters
         ----------
-        options : xs:string*
+        options : object
             Options. Options include: "descending" Results should be returned in
             descending order of document. "ascending" Results should be returned in
             ascending order of document.
@@ -1589,10 +1363,6 @@ class Cts:
 
         Notes
         -----
-        Only one of "ascending" or "descending" may be specified in the options
-        parameter. If neither "ascending" nor "descending" is specified, then the
-        default is "ascending".
-
         Native reference: https://docs.marklogic.com/cts:document-order
         """
         return _FunctionCall(
@@ -1609,9 +1379,9 @@ class Cts:
 
         Parameters
         ----------
-        role : xs:string
+        role : object
             The role of the permission
-        capability : xs:string
+        capability : object
             The capability of the permission (read, update, node-update, insert,
             execute)
 
@@ -1622,9 +1392,6 @@ class Cts:
 
         Notes
         -----
-        Requires MarkLogic 11 or later. Availability is checked by the server
-        when the expression is evaluated, including in nested expressions.
-
         Native reference: https://docs.marklogic.com/cts:document-permission-query
         """
         return _FunctionCall(
@@ -1640,7 +1407,7 @@ class Cts:
 
         Parameters
         ----------
-        uris : xs:string*
+        uris : object
             One or more document URIs.
 
         Returns
@@ -1665,7 +1432,7 @@ class Cts:
 
         Parameters
         ----------
-        root : xs:QName
+        root : object
             The root QName to query.
 
         Returns
@@ -1675,9 +1442,6 @@ class Cts:
 
         Notes
         -----
-        Requires MarkLogic 11 or later. Availability is checked by the server
-        when the expression is evaluated, including in nested expressions.
-
         Native reference: https://docs.marklogic.com/cts:document-root-query
         """
         return _FunctionCall(
@@ -1704,19 +1468,19 @@ class Cts:
 
         Parameters
         ----------
-        parent_element_names : xs:QName*
+        parent_element_names : object
             One or more element QNames.
-        latitude_names : xs:QName*
+        latitude_names : object
             One or more element QNames.
-        longitude_names : xs:QName*
+        longitude_names : object
             One or more element QNames.
-        latitude_bounds : xs:double*
+        latitude_bounds : object
             A sequence of latitude bounds. The values must be in strictly ascending
             order, otherwise an exception is thrown.
-        longitude_bounds : xs:double*
+        longitude_bounds : object
             A sequence of longitude bounds. The values must be in strictly ascending
             order, otherwise an exception is thrown.
-        options : xs:string*
+        options : object
             Options. The default is (). Options include: "ascending" Boxes should be
             returned in ascending order. "descending" Boxes should be returned in
             descending order. "gridded" For each side that a bucket is bounded, return
@@ -1778,15 +1542,15 @@ class Cts:
             is especially useful in cases where multiple lexicon calls occur in the same
             query (for example, resolving many facets in a single query). "map" Return
             results as a single map:map value instead of as a cts:box* sequence .
-        query : cts:query?
+        query : object
             Only include points in fragments selected by this query, and compute
             frequencies from this set of included points. The points do not need to
             match the query, but they must occur in fragments selected by the query. The
             fragments are not filtered to ensure they match the query, but instead
             selected in the same manner as "unfiltered" cts:search operations.
-        quality_weight : xs:double?
+        quality_weight : object
             A document quality weight to use when computing scores. The default is 1.0.
-        forest_ids : xs:unsignedLong*
+        forest_ids : object
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
@@ -1798,67 +1562,7 @@ class Cts:
 
         Notes
         -----
-        Only one of "frequency-order" or "item-order" may be specified in the options
-        parameter. If neither "frequency-order" nor "item-order" is specified, then the
-        default is "item-order".
-
-        Only one of "fragment-frequency" or "item-frequency" may be specified in the
-        options parameter. If neither "fragment-frequency" nor "item-frequency" is
-        specified, then the default is "fragment-frequency".
-
-        Only one of "ascending" or "descending" may be specified in the options
-        parameter. If neither "ascending" nor "descending" is specified, then the
-        default is "ascending" if "item-order" is specified, and "descending" if
-        "frequency-order" is specified.
-
-        Only one of "eager" or "lazy" may be specified in the options parameter. If
-        neither "eager" nor "lazy" is specified, then the default is "eager" if
-        "frequency-order" or "empties" is specified, otherwise "lazy".
-
-        Only one of "any", "document", "properties", or "locks" may be specified in the
-        options parameter. If none of "any", "document", "properties", or "locks" are
-        specified and there is a $query parameter, then the default is "document". If
-        there is no $query parameter then the default is "any".
-
-        Only one of the "score-logtfidf", "score-logtf", "score-simple", "score-random",
-        or "score-zero" options may be specified in the options parameter. If none of
-        "score-logtfidf", "score-logtf", "score-simple", "score-random", or "score-zero"
-        are specified, then the default is "score-logtfidf".
-
-        Only one of the "checked" or "unchecked" options may be specified in the options
-        parameter. If neither "checked" nor "unchecked" are specified, then the default
-        is "checked".
-
-        If "coordinate-system= name " is not specified in the options parameter, then
-        the default coordinate system is used. If a lexicon with that coordinate system
-        does not exist, an error is thrown.
-
-        The value of the precision option takes precedence over that implied by the
-        governing coordinate system name, including the value of the coordinate-system
-        option. For example, if the governing coordinate system is "wgs84/double" and
-        the precision option is "float", then the query uses single precision.
-
-        If "sample= N " is not specfied in the options parameter, then all boxes with
-        included points may be returned. If a $query parameter is not present, then
-        "sample= N " has no effect.
-
-        If "truncate= N " is not specfied in the options parameter, then points from all
-        fragments selected by the $query parameter are included. If a $query parameter
-        is not present, then "truncate= N " has no effect.
-
-        To incrementally fetch a subset of the values returned by this function, use
-        fn:subsequence on the output, rather than the "skip" option. The "skip" option
-        is based on fragments matching the query parameter (if present), not on values.
-        A fragment matched by the query might produce multiple boxes or no boxes. The
-        number of fragments skipped does not correspond to the number of boxes. Also,
-        the skip is applied to the relevance ordered query matches, not to the ordered
-        box list.
-
-        When using the "skip" option, use the "truncate" option rather than the "limit"
-        option to control the number of matching fragments from which to draw values.
-
         Native reference:
-        https://docs.marklogic.com/cts:element-attribute-pair-geospatial-boxes
         """
         return _FunctionCall(
             "cts:element-attribute-pair-geospatial-boxes",
@@ -1896,21 +1600,21 @@ class Cts:
 
         Parameters
         ----------
-        element_name : xs:QName*
+        element_name : object
             One or more parent element QNames to match. When multiple QNames are
             specified, the query matches if any QName matches.
-        latitude_attribute_names : xs:QName*
+        latitude_attribute_names : object
             One or more latitude attribute QNames to match. When multiple QNames are
             specified, the query matches if any QName matches; however, only the first
             matching latitude attribute in any point instance will be checked.
-        longitude_attribute_names : xs:QName*
+        longitude_attribute_names : object
             One or more longitude attribute QNames to match. When multiple QNames are
             specified, the query matches if any QName matches; however, only the first
             matching longitude attribute in any point instance will be checked.
-        regions : cts:region*
+        regions : object
             One or more geographic boxes, circles, polygons, or points. Where multiple
             regions are specified, the query matches if any region matches.
-        options : xs:string*
+        options : object
             Options to this query. The default is (). Options include:
             "coordinate-system= string " Use the given coordinate system. Valid values
             are: wgs84 The WGS84 coordinate system with degrees as the angular unit.
@@ -1952,7 +1656,7 @@ class Cts:
             scoring purposes. The result is that occurrences of more than one of the
             synonyms are scored as if there are more occurrence of the same term (as
             opposed to having a separate term that contributes to score).
-        weight : xs:double?
+        weight : object
             A weight for this query. The default is 1.0.
 
         Returns
@@ -1962,40 +1666,7 @@ class Cts:
 
         Notes
         -----
-        The point value is expressed as the numerical values in the textual content of
-        the named attributes.
-
-        The value of the precision option takes precedence over that implied by the
-        governing coordinate system name, including the value of the coordinate-system
-        option. For example, if the governing coordinate system is "wgs84/double" and
-        the precision option is "float", then the query uses single precision.
-
-        The point values and the boundary specifications are given in degrees relative
-        to the WGS84 coordinate system. Southern latitudes and Western longitudes take
-        negative values. Longitudes will be wrapped to the range (-180,+180) and
-        latitudes will be clipped to the range (-90,+90).
-
-        If the northern boundary of a box is south of the southern boundary, no points
-        will match. However, longitudes wrap around the globe, so that if the western
-        boundary is east of the eastern boundary (that is, if the value of 'w' is
-        greater than the value of 'e'), then the box crosses the anti-meridian.
-
-        Special handling occurs at the poles, as all longitudes exist at latitudes +90
-        and -90.
-
-        If neither "cached" nor "uncached" is present, it specifies "cached".
-
-        "score-function=linear" means that values that are further away from the bounds
-        will score higher. "score-function=reciprocal" means that values that are closer
-        to the bounds will score higher. The functions are scaled appropriately for
-        different types, so that in general the default slope factor will provide useful
-        results. Using a slope factor greater than 1 gives distinct scores over a
-        smaller range of values, and produces generally higher scores. Using a slope
-        factor less than 1 gives distinct scores over a wider range of values, and
-        produces generally lower scores.
-
         Native reference:
-        https://docs.marklogic.com/cts:element-attribute-pair-geospatial-query
         """
         return _FunctionCall(
             "cts:element-attribute-pair-geospatial-query",
@@ -2027,15 +1698,15 @@ class Cts:
 
         Parameters
         ----------
-        element_names : xs:QName*
+        element_names : object
             One or more element QNames.
-        latitude_names : xs:QName*
+        latitude_names : object
             One or more latitude element QNames.
-        longitude_names : xs:QName*
+        longitude_names : object
             One or more longitude element QNames.
-        pattern : xs:anyAtomicType
+        pattern : object
             A pattern to match. The parameter type must match the lexicon type.
-        options : xs:string*
+        options : object
             Options. The default is (). Options include: "ascending" Values should be
             returned in ascending order. "descending" Values should be returned in
             descending order. "any" Values from any fragment should be included.
@@ -2089,15 +1760,15 @@ class Cts:
             is especially useful in cases where multiple lexicon calls occur in the same
             query (for example, resolving many facets in a single query). "map" Return
             results as a single map:map value instead of as a cts:point* sequence .
-        query : cts:query?
+        query : object
             Only include values in fragments selected by this query, and compute
             frequencies from this set of included values. The values do not need to
             match the query, but they must occur in fragments selected by the query. The
             fragments are not filtered to ensure they match the query, but instead
             selected in the same manner as "unfiltered" cts:search operations.
-        quality_weight : xs:double?
+        quality_weight : object
             A document quality weight to use when computing scores. The default is 1.0.
-        forest_ids : xs:unsignedLong*
+        forest_ids : object
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
@@ -2109,69 +1780,7 @@ class Cts:
 
         Notes
         -----
-        Only one of "frequency-order" or "item-order" may be specified in the options
-        parameter. If neither "frequency-order" nor "item-order" is specified, then the
-        default is "item-order".
-
-        Only one of "fragment-frequency" or "item-frequency" may be specified in the
-        options parameter. If neither "fragment-frequency" nor "item-frequency" is
-        specified, then the default is "fragment-frequency".
-
-        Only one of "ascending" or "descending" may be specified in the options
-        parameter. If neither "ascending" nor "descending" is specified, then the
-        default is "ascending" if "item-order" is specified, and "descending" if
-        "frequency-order" is specified.
-
-        Only one of "eager" or "lazy" may be specified in the options parameter. If
-        neither "eager" nor "lazy" is specified, then the default is "lazy" if
-        "item-order" is specified, and "eager" if "frequency-order" is specified.
-
-        Only one of "any", "document", "properties", or "locks" may be specified in the
-        options parameter. If none of "any", "document", "properties", or "locks" are
-        specified and there is a $query parameter, then the default is "document". If
-        there is no $query parameter then the default is "any".
-
-        Only one of the "score-logtfidf", "score-logtf", "score-simple", "score-random",
-        or "score-zero" options may be specified in the options parameter. If none of
-        "score-logtfidf", "score-logtf", "score-simple", "score-random", or "score-zero"
-        are specified, then the default is "score-logtfidf".
-
-        Only one of the "checked" or "unchecked" options may be specified in the options
-        parameter. If neither "checked" nor "unchecked" are specified, then the default
-        is "checked".
-
-        If "coordinate-system= name " is not specified in the options parameter, then
-        the default coordinate system is used. If a lexicon with that coordinate system
-        does not exist, an error is thrown.
-
-        The value of the precision option takes precedence over that implied by the
-        governing coordinate system name, including the value of the coordinate-system
-        option. For example, if the governing coordinate system is "wgs84/double" and
-        the precision option is "float", then the query uses single precision.
-
-        If "sample= N " is not specfied in the options parameter, then all included
-        values may be returned. If a $query parameter is not present, then "sample= N "
-        has no effect.
-
-        If "truncate= N " is not specfied in the options parameter, then values from all
-        fragments selected by the $query parameter are included. If a $query parameter
-        is not present, then "truncate= N " has no effect.
-
-        To incrementally fetch a subset of the values returned by this function, use
-        fn:subsequence on the output, rather than the "skip" option. The "skip" option
-        is based on fragments matching the query parameter (if present), not on values.
-        A fragment matched by the query might produce multiple values or no values. The
-        number of fragments skipped does not correspond to the number of values. Also,
-        the skip is applied to the relevance ordered query matches, not to the ordered
-        value list.
-
-        When using the "skip" option, use the "truncate" option rather than the "limit"
-        option to control the number of matching fragments from which to draw values.
-
-        For finer control over the lexicon selection, use cts:value-match .
-
         Native reference:
-        https://docs.marklogic.com/cts:element-attribute-pair-geospatial-value-match
         """
         return _FunctionCall(
             "cts:element-attribute-pair-geospatial-value-match",
@@ -2203,16 +1812,16 @@ class Cts:
 
         Parameters
         ----------
-        element_names : xs:QName*
+        element_names : object
             One or more element QNames.
-        latitude_names : xs:QName*
+        latitude_names : object
             One or more latitude element QNames.
-        longitude_names : xs:QName*
+        longitude_names : object
             One or more longitude element QNames.
-        start : cts:point?
+        start : object
             A starting value. If the parameter value is not in the lexicon, then the
             values are returned beginning with the next value.
-        options : xs:string*
+        options : object
             Options. The default is (). Options include: "ascending" Values should be
             returned in ascending order. "descending" Values should be returned in
             descending order. "any" Values from any fragment should be included.
@@ -2266,15 +1875,15 @@ class Cts:
             is especially useful in cases where multiple lexicon calls occur in the same
             query (for example, resolving many facets in a single query). "map" Return
             results as a single map:map value instead of as a cts:point* sequence .
-        query : cts:query?
+        query : object
             Only include values in fragments selected by this query, and compute
             frequencies from this set of included values. The values do not need to
             match the query, but they must occur in fragments selected by the query. The
             fragments are not filtered to ensure they match the query, but instead
             selected in the same manner as "unfiltered" cts:search operations.
-        quality_weight : xs:double?
+        quality_weight : object
             A document quality weight to use when computing scores. The default is 1.0.
-        forest_ids : xs:unsignedLong*
+        forest_ids : object
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
@@ -2286,71 +1895,7 @@ class Cts:
 
         Notes
         -----
-        Only one of "frequency-order" or "item-order" may be specified in the options
-        parameter. If neither "frequency-order" nor "item-order" is specified, then the
-        default is "item-order".
-
-        Only one of "fragment-frequency" or "item-frequency" may be specified in the
-        options parameter. If neither "fragment-frequency" nor "item-frequency" is
-        specified, then the default is "fragment-frequency".
-
-        Only one of "ascending" or "descending" may be specified in the options
-        parameter. If neither "ascending" nor "descending" is specified, then the
-        default is "ascending" if "item-order" is specified, and "descending" if
-        "frequency-order" is specified.
-
-        Only one of "eager" or "lazy" may be specified in the options parameter. If
-        neither "eager" nor "lazy" is specified, then the default is "lazy" if
-        "item-order" is specified, and "eager" if "frequency-order" is specified.
-
-        Only one of "any", "document", "properties", or "locks" may be specified in the
-        options parameter. If none of "any", "document", "properties", or "locks" are
-        specified and there is a $query parameter, then the default is "document". If
-        there is no $query parameter then the default is "any".
-
-        Only one of the "score-logtfidf", "score-logtf", "score-simple", "score-random",
-        or "score-zero" options may be specified in the options parameter. If none of
-        "score-logtfidf", "score-logtf", "score-simple", "score-random", or "score-zero"
-        are specified, then the default is "score-logtfidf".
-
-        Only one of the "checked" or "unchecked" options may be specified in the options
-        parameter. If neither "checked" nor "unchecked" are specified, then the default
-        is "checked".
-
-        If "coordinate-system= name " is not specified in the options parameter, then
-        the default coordinate system is used. If a lexicon with that coordinate system
-        does not exist, an error is thrown.
-
-        The value of the precision option takes precedence over that implied by the
-        governing coordinate system name, including the value of the coordinate-system
-        option. For example, if the governing coordinate system is "wgs84/double" and
-        the precision option is "float", then the query uses single precision.
-
-        If "sample= N " is not specfied in the options parameter, then all included
-        values may be returned. If a $query parameter is not present, then "sample= N "
-        has no effect.
-
-        If "truncate= N " is not specfied in the options parameter, then values from all
-        fragments selected by the $query parameter are included. If a $query parameter
-        is not present, then "truncate= N " has no effect.
-
-        To incrementally fetch a subset of the values returned by this function, use
-        fn:subsequence on the output, rather than the "skip" option. The "skip" option
-        is based on fragments matching the query parameter (if present), not on values.
-        A fragment matched by the query might produce multiple values or no values. The
-        number of fragments skipped does not correspond to the number of values. Also,
-        the skip is applied to the relevance ordered query matches, not to the ordered
-        value list.
-
-        When using the "skip" option, use the "truncate" option rather than the "limit"
-        option to control the number of matching fragments from which to draw values.
-
-        When multiple element and/or child QNames are specified, then all possible
-        element/child QName combinations are used to select the matching values. For
-        finer control over the indexes, use cts:values .
-
         Native reference:
-        https://docs.marklogic.com/cts:element-attribute-pair-geospatial-values
         """
         return _FunctionCall(
             "cts:element-attribute-pair-geospatial-values",
@@ -2375,22 +1920,22 @@ class Cts:
 
         Parameters
         ----------
-        element_name : xs:QName*
+        element_name : object
             One or more element QNames to match. When multiple QNames are specified, the
             query matches if any QName matches.
-        attribute_name : xs:QName*
+        attribute_name : object
             One or more attribute QNames to match. When multiple QNames are specified,
             the query matches if any QName matches.
-        operator : xs:string
+        operator : object
             A comparison operator. Operators include: "<" Match range index values less
             than $value. "<=" Match range index values less than or equal to $value. ">"
             Match range index values greater than $value. ">=" Match range index values
             greater than or equal to $value. "=" Match range index values equal to
             $value. "!=" Match range index values not equal to $value.
-        value : xs:anyAtomicType*
+        value : object
             Some values to match. When multiple values are specified, the query matches
             if any value matches.
-        options : xs:string*
+        options : object
             Options to this query. The default is (). Options include: "collation= URI "
             Use the range index with the collation specified by URI . If not specified,
             then the default collation from the query is used. If a range index with the
@@ -2417,7 +1962,7 @@ class Cts:
             more than one of the synonyms are scored as if there are more occurrences of
             the same term (as opposed to having a separate term that contributes to
             score).
-        weight : xs:double?
+        weight : object
             A weight for this query. The default is 1.0.
 
         Returns
@@ -2427,43 +1972,6 @@ class Cts:
 
         Notes
         -----
-        To constrain on a range of values, combine multiple element attribute range
-        queries together using cts:and-query or another composable query constructor.
-
-        If neither "cached" nor "uncached" is present, it specifies "cached".
-
-        The "cached-incremental" option can improve performance if you repeatedly
-        perform range queries on date or dateTime values over a short range that does
-        not vary widely over short period of time. To benefit, the operator should
-        remain the same "direction" (<,<=, or >,>=) across calls, the bounding date or
-        dateTime changes slightly across calls, and the query runs very frequently
-        (multiple times per minute). Note that using this options creates significantly
-        more cached queries than the "cached" option.
-
-        The "cached-incremental" option has the following restrictions and interactions:
-        The "min-occurs" and "max-occurs" options will be ignored if you use
-        "cached-incremental" in unfiltered search. You can only use
-        "score-function=zero" with "cached-incremental". The "cached-incremental" option
-        behaves like "cached" if you are not querying date or dateTime values.
-
-        Negative "min-occurs" or "max-occurs" values will be treated as 0 and
-        non-integral values will be rounded down. An error will be raised if the
-        "min-occurs" value is greater than the "max-occurs" value.
-
-        "score-function=linear" means that values that are further away from the bounds
-        will score higher. "score-function=reciprocal" means that values that are closer
-        to the bounds will score higher. The functions are scaled appropriately for
-        different types, so that in general the default slope factor will provide useful
-        results. Using a slope factor greater than 1 gives distinct scores over a
-        smaller range of values, and produces generally higher scores. Using a slope
-        factor less than 1 gives distinct scores over a wider range of values, and
-        produces generally lower scores.
-
-        For queries against a dateTime index, when $value is an xs:dayTimeDuration or
-        xs:yearMonthDuration, the query is executed as an age query. $value is
-        subtracted from fn:current-dateTime() to create an xs:dateTime used in the
-        query. If there is more than one item in $value, they must all be the same type.
-
         Native reference: https://docs.marklogic.com/cts:element-attribute-range-query
         """
         return _FunctionCall(
@@ -2486,11 +1994,11 @@ class Cts:
 
         Parameters
         ----------
-        element : xs:QName
+        element : object
             An element QName.
-        attribute : xs:QName
+        attribute : object
             An attribute QName.
-        options : xs:string*
+        options : object
             Options. The default is (). Options include: "type= type " Use the lexicon
             with the type specified by type (int, unsignedInt, long, unsignedLong,
             float, double, decimal, dateTime, time, date, gYearMonth, gYear, gMonth,
@@ -2543,17 +2051,17 @@ class Cts:
 
         Parameters
         ----------
-        element_name_1 : xs:QName
+        element_name_1 : object
             An element QName.
-        attribute_name_1 : xs:QName?
+        attribute_name_1 : object
             An attribute QName or empty sequence. The empty sequence specifies an
             element lexicon.
-        element_name_2 : xs:QName
+        element_name_2 : object
             An element QName.
-        attribute_name_2 : xs:QName?
+        attribute_name_2 : object
             An attribute QName or empty sequence. The empty sequence specifies an
             element lexicon.
-        options : xs:string*
+        options : object
             Options. The default is (). Options include: "ascending" Co-occurrences
             should be returned in ascending order. "descending" Co-occurrences should be
             returned in descending order. "any" Co-occurrences from any fragment should
@@ -2633,7 +2141,7 @@ class Cts:
             float and double . Only applicable if the lexicon value type is point or
             long-lat-point . This value takes precedence over the precision implicit in
             the coordinate system name.
-        query : cts:query?
+        query : object
             Only include co-occurrences in fragments selected by the cts:query , and
             compute frequencies from this set of included co-occurrences. The
             co-occurrences do not need to match the query, but they must occur in
@@ -2641,9 +2149,9 @@ class Cts:
             they match the query, but instead selected in the same manner as
             "unfiltered" cts:search operations. If a string is entered, the string is
             treated as a cts:word-query of the specified string.
-        quality_weight : xs:double?
+        quality_weight : object
             A document quality weight to use when computing scores. The default is 1.0.
-        forest_ids : xs:unsignedLong*
+        forest_ids : object
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
@@ -2655,62 +2163,7 @@ class Cts:
 
         Notes
         -----
-        Only one of "frequency-order" or "item-order" may be specified in the options
-        parameter. If neither "frequency-order" nor "item-order" is specified, then the
-        default is "item-order".
-
-        Only one of "fragment-frequency" or "item-frequency" may be specified in the
-        options parameter. If neither "fragment-frequency" nor "item-frequency" is
-        specified, then the default is "fragment-frequency".
-
-        Only one of "ascending" or "descending" may be specified in the options
-        parameter. If neither "ascending" nor "descending" is specified, then the
-        default is "ascending" if "item-order" is specified, and "descending" if
-        "frequency-order" is specified.
-
-        Only one of "eager" or "lazy" may be specified in the options parameter. If
-        neither "eager" nor "lazy" is specified, then the default is "eager" if
-        "frequency-order" or "map" is specified, otherwise "lazy".
-
-        Only one of "any", "document", "properties", or "locks" may be specified in the
-        options parameter. If none of "any", "document", "properties", or "locks" are
-        specified and there is a $query parameter, then the default is "document". If
-        there is no $query parameter then the default is "any".
-
-        Only one of the "score-logtfidf", "score-logtf", "score-simple", "score-random",
-        or "score-zero" options may be specified in the options parameter. If none of
-        "score-logtfidf", "score-logtf", "score-simple", "score-random", or "score-zero"
-        are specified, then the default is "score-logtfidf".
-
-        Only one of the "checked" or "unchecked" options may be specified in the options
-        parameter. If neither "checked" nor "unchecked" are specified, then the default
-        is "checked".
-
-        If "collation= URI " is not specified in the options parameter, then the default
-        collation is used. If a lexicon with that collation does not exist, an error is
-        thrown.
-
-        If "sample= N " is not specified in the options parameter, then all included
-        co-occurrences may be returned. If a $query parameter is not present, then
-        "sample= N " has no effect.
-
-        If "truncate= N " is not specified in the options parameter, then co-occurrences
-        from all fragments selected by the $query parameter are included. If a $query
-        parameter is not present, then "truncate= N " has no effect.
-
-        To incrementally fetch a subset of the co-occurrences returned by this function,
-        use fn:subsequence on the output, rather than the "skip" option. The "skip"
-        option is based on fragments matching the query parameter (if present), not on
-        occurrences. A fragment matched by query might contain multiple occurrences or
-        no occurrences. The number of fragments skipped does not correspond to the
-        number of values. Also, the skip is applied to the relevance ordered query
-        matches, not to the ordered result list.
-
-        When using the "skip" option, use the "truncate" option rather than the "limit"
-        option to control the number of matching fragments from which to draw values.
-
         Native reference:
-        https://docs.marklogic.com/cts:element-attribute-value-co-occurrences
         """
         return _FunctionCall(
             "cts:element-attribute-value-co-occurrences",
@@ -2743,30 +2196,30 @@ class Cts:
 
         Parameters
         ----------
-        element_name_1 : xs:QName
+        element_name_1 : object
             A QName identifying the parent element of the first lexicon.
-        attribute_name_1 : xs:QName?
+        attribute_name_1 : object
             A QName identifying an attribute of element-name-1 .
-        geo_element_name : xs:QName
+        geo_element_name : object
             A QName identifying the second lexicon, which must reference a geospatial
             lexicon. If it is an element child or JSON property child geospatial
             lexicon, pass the child QName in the coord-child-name-1 parameter. For an
             element, element attribute, or JSON property child pair geospatial lexicon,
             pass the child QNames in coord-child-name-1 and coord-child-name-2 .
-        coord_child_name_1 : xs:QName?
+        coord_child_name_1 : object
             An element, element attribute QName or JSON property name identifying the
             child of geo-element-name that holds either the lat and longitude
             coordinates (element child geospatial lexicon) or the latitude coordinate
             (element/attribute/JSON property child pair geospatial lexicon). Use an
             empty sequence if geo-element-name identifies an element or JSON property
             geospatial lexicon.
-        coord_child_name_2 : xs:QName?
+        coord_child_name_2 : object
             An element, element attribute QName or JSON property name identifying the
             child of geo-element-name that holds the longitude coordinate when working
             with an element/attribute/JSON property child pair geospatial lexicon. Use
             empty sequence for an element or JSON property geospatial lexicon or element
             or JSON property child geospatial lexicon.
-        options : xs:string*
+        options : object
             Options. The default is (). The following options are available:
             "geospatial-format= format " Use the kind of geospatial lexicon specified by
             format (element, element-child, element-pair, or element-attribute-pair). If
@@ -2842,16 +2295,16 @@ class Cts:
             query (for example, resolving many facets in a single query). "map" Return
             results as a single map:map value instead of as a
             element(cts:co-occurrence)* sequence .
-        query : cts:query?
+        query : object
             Only include co-occurrences in fragments selected by this query, and compute
             frequencies from this set of included co-occurrences. The co-occurrences do
             not need to match the query, but they must occur in fragments selected by
             the query. The fragments are not filtered to ensure they match the query,
             but instead selected in the same manner as "unfiltered" cts:search
             operations.
-        quality_weight : xs:double?
+        quality_weight : object
             A document quality weight to use when computing scores. The default is 1.0.
-        forest_ids : xs:unsignedLong*
+        forest_ids : object
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
@@ -2864,66 +2317,7 @@ class Cts:
 
         Notes
         -----
-        Only one of "frequency-order" or "item-order" may be specified in the options
-        parameter. If neither "frequency-order" nor "item-order" is specified, then the
-        default is "item-order".
-
-        Only one of "fragment-frequency" or "item-frequency" may be specified in the
-        options parameter. If neither "fragment-frequency" nor "item-frequency" is
-        specified, then the default is "fragment-frequency".
-
-        Only one of "ascending" or "descending" may be specified in the options
-        parameter. If neither "ascending" nor "descending" is specified, then the
-        default is "ascending" if "item-order" is specified, and "descending" if
-        "frequency-order" is specified.
-
-        Only one of "eager" or "lazy" may be specified in the options parameter. If
-        neither "eager" nor "lazy" is specified, then the default is "eager" if
-        "frequency-order" or "map" is specified, otherwise "lazy".
-
-        Only one of "any", "document", "properties", or "locks" may be specified in the
-        options parameter. If none of "any", "document", "properties", or "locks" are
-        specified and there is a $query parameter, then the default is "document". If
-        there is no $query parameter then the default is "any".
-
-        Only one of the "score-logtfidf", "score-logtf", "score-simple", "score-random",
-        or "score-zero" options may be specified in the options parameter. If none of
-        "score-logtfidf", "score-logtf", "score-simple", "score-random", or "score-zero"
-        are specified, then the default is "score-logtfidf".
-
-        Only one of the "checked" or "unchecked" options may be specified in the options
-        parameter. If neither "checked" nor "unchecked" are specified, then the default
-        is "checked".
-
-        If "collation= URI " is not specified in the options parameter, then the default
-        collation is used. If a lexicon with that collation does not exist, an error is
-        thrown.
-
-        If "coordinate-system= name " is not specified in the options parameter, then
-        the default coordinate system is used. If a lexicon with that coordinate system
-        does not exist, an error is thrown.
-
-        If "sample= N " is not specfied in the options parameter, then all included
-        co-occurrences may be returned. If a $query parameter is not present, then
-        "sample= N " has no effect.
-
-        If "truncate= N " is not specfied in the options parameter, then co-occurrences
-        from all fragments selected by the $query parameter are included. If a $query
-        parameter is not present, then "truncate= N " has no effect.
-
-        To incrementally fetch a subset of the values returned by this function, use
-        fn:subsequence on the output, rather than the "skip" option. The "skip" option
-        is based on fragments matching the query parameter (if present), not on values.
-        A fragment matched by the query might produce multiple values or no values. The
-        number of fragments skipped does not correspond to the number of values. Also,
-        the skip is applied to the relevance ordered query matches, not to the ordered
-        value list.
-
-        When using the "skip" option, use the "truncate" option rather than the "limit"
-        option to control the number of matching fragments from which to draw values.
-
         Native reference:
-        https://docs.marklogic.com/cts:element-attribute-value-geospatial-co-occurrences
         """
         return _FunctionCall(
             "cts:element-attribute-value-geospatial-co-occurrences",
@@ -2960,14 +2354,14 @@ class Cts:
 
         Parameters
         ----------
-        element_names : xs:QName*
+        element_names : object
             One or more element QNames.
-        attribute_names : xs:QName*
+        attribute_names : object
             One or more attribute QNames.
-        pattern : xs:anyAtomicType
+        pattern : object
             A pattern to match. The parameter type must match the lexicon type. String
             parameters may include wildcard characters.
-        options : xs:string*
+        options : object
             Options. The default is (). Options include: "case-sensitive" A
             case-sensitive match. "case-insensitive" A case-insensitive match.
             "diacritic-sensitive" A diacritic-sensitive match. "diacritic-insensitive" A
@@ -3035,7 +2429,7 @@ class Cts:
             . Only applicable if the lexicon value type is point or long-lat-point .
             This value takes precedence over the precision implicit in the coordinate
             system name.
-        query : cts:query?
+        query : object
             Only include values in fragments selected by the cts:query , and compute
             frequencies from this set of included values. The values do not need to
             match the query, but they must occur in fragments selected by the query. The
@@ -3043,9 +2437,9 @@ class Cts:
             selected in the same manner as "unfiltered" cts:search operations. If a
             string is entered, the string is treated as a cts:word-query of the
             specified string.
-        quality_weight : xs:double?
+        quality_weight : object
             A document quality weight to use when computing scores. The default is 1.0.
-        forest_ids : xs:unsignedLong*
+        forest_ids : object
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
@@ -3057,73 +2451,6 @@ class Cts:
 
         Notes
         -----
-        Only one of "frequency-order" or "item-order" may be specified in the options
-        parameter. If neither "frequency-order" nor "item-order" is specified, then the
-        default is "item-order".
-
-        Only one of "fragment-frequency" or "item-frequency" may be specified in the
-        options parameter. If neither "fragment-frequency" nor "item-frequency" is
-        specified, then the default is "fragment-frequency".
-
-        Only one of "ascending" or "descending" may be specified in the options
-        parameter. If neither "ascending" nor "descending" is specified, then the
-        default is "ascending" if "item-order" is specified, and "descending" if
-        "frequency-order" is specified.
-
-        Only one of "eager" or "lazy" may be specified in the options parameter. If
-        neither "eager" nor "lazy" is specified, then the default is "lazy" if
-        "item-order" is specified, and "eager" if "frequency-order" is specified.
-
-        Only one of "any", "document", "properties", or "locks" may be specified in the
-        options parameter. If none of "any", "document", "properties", or "locks" are
-        specified and there is a $query parameter, then the default is "document". If
-        there is no $query parameter then the default is "any".
-
-        Only one of the "score-logtfidf", "score-logtf", "score-simple", "score-random",
-        or "score-zero" options may be specified in the options parameter. If none of
-        "score-logtfidf", "score-logtf", "score-simple", "score-random", or "score-zero"
-        are specified, then the default is "score-logtfidf".
-
-        Only one of the "checked" or "unchecked" options may be specified in the options
-        parameter. If neither "checked" nor "unchecked" are specified, then the default
-        is "checked".
-
-        If "collation= URI " is not specified in the options parameter, then the default
-        collation is used. If a range index with that collation does not exist, an error
-        is thrown.
-
-        If "sample= N " is not specified in the options parameter, then all included
-        values may be returned. If a $query parameter is not present, then "sample= N "
-        has no effect.
-
-        If "truncate= N " is not specified in the options parameter, then values from
-        all fragments selected by the $query parameter are included. If a $query
-        parameter is not present, then "truncate= N " has no effect.
-
-        To incrementally fetch a subset of the values returned by this function, use
-        fn:subsequence on the output, rather than the "skip" option. The "skip" option
-        is based on fragments matching the query parameter (if present), not on values.
-        A fragment matched by query might contain multiple values or no values. The
-        number of fragments skipped does not correspond to the number of values. Also,
-        the skip is applied to the relevance ordered query matches, not to the ordered
-        values list.
-
-        When using the "skip" option, use the "truncate" option rather than the "limit"
-        option to control the number of matching fragments from which to draw values.
-
-        If neither "case-sensitive" nor "case-insensitive" is present, $pattern is used
-        to determine case sensitivity. If $pattern contains no uppercase, it specifies
-        "case-insensitive". If $pattern contains uppercase, it specifies
-        "case-sensitive".
-
-        If neither "diacritic-sensitive" nor "diacritic-insensitive" is present,
-        $pattern is used to determine diacritic sensitivity. If $pattern contains no
-        diacritics, it specifies "diacritic-insensitive". If $pattern contains
-        diacritics, it specifies "diacritic-sensitive".
-
-        When multiple element and/or attribute QNames are specified, then all possible
-        element/attribute QName combinations are used to select the matching values.
-
         Native reference: https://docs.marklogic.com/cts:element-attribute-value-match
         """
         return _FunctionCall(
@@ -3148,16 +2475,16 @@ class Cts:
 
         Parameters
         ----------
-        element_name : xs:QName*
+        element_name : object
             One or more element QNames to match. When multiple QNames are specified, the
             query matches if any QName matches.
-        attribute_name : xs:QName*
+        attribute_name : object
             One or more attribute QNames to match. When multiple QNames are specified,
             the query matches if any QName matches.
-        text : xs:string*
+        text : object
             One or more attribute values to match. When multiple strings are specified,
             the query matches if any string matches.
-        options : xs:string*
+        options : object
             Options to this query. The default is (). Options include: "case-sensitive"
             A case-sensitive query. "case-insensitive" A case-insensitive query.
             "diacritic-sensitive" A diacritic-sensitive query. "diacritic-insensitive" A
@@ -3181,7 +2508,7 @@ class Cts:
             synonyms for scoring purposes. The result is that occurrences of more than
             one of the synonyms are scored as if there are more occurrences of the same
             term (as opposed to having a separate term that contributes to score).
-        weight : xs:double?
+        weight : object
             A weight for this query. Higher weights move search results up in the
             relevance order. The default is 1.0. The weight should be between 64 and
             -16. Weights greater than 64 will have the same effect as a weight of 64.
@@ -3195,47 +2522,6 @@ class Cts:
 
         Notes
         -----
-        If neither "case-sensitive" nor "case-insensitive" is present, $text is used to
-        determine case sensitivity. If $text contains no uppercase, it specifies
-        "case-insensitive". If $text contains uppercase, it specifies "case-sensitive".
-
-        If neither "diacritic-sensitive" nor "diacritic-insensitive" is present, $text
-        is used to determine diacritic sensitivity. If $text contains no diacritics, it
-        specifies "diacritic-insensitive". If $text contains diacritics, it specifies
-        "diacritic-sensitive".
-
-        If neither "punctuation-sensitive" nor "punctuation-insensitive" is present,
-        $text is used to determine punctuation sensitivity. If $text contains no
-        punctuation, it specifies "punctuation-insensitive". If $text contains
-        punctuation, it specifies "punctuation-sensitive".
-
-        If neither "whitespace-sensitive" nor "whitespace-insensitive" is present, the
-        query is "whitespace-insensitive".
-
-        If neither "wildcarded" nor "unwildcarded" is present, the database
-        configuration and $text determine wildcarding. If the database has any wildcard
-        indexes enabled ("three character searches", "two character searches", "one
-        character searches", or "trailing wildcard searches") and if $text contains
-        either of the wildcard characters '?' or '*', it specifies "wildcarded".
-        Otherwise it specifies "unwildcarded".
-
-        If neither "stemmed" nor "unstemmed" is present, the database configuration
-        determines stemming. If the database has "stemmed searches" enabled, it
-        specifies "stemmed". Otherwise it specifies "unstemmed". If the query is a
-        wildcarded query and also a phrase query (contains two or more terms), the
-        wildcard terms in the query are unstemmed.
-
-        When you use the "exact" option, you should also enable "fast case sensitive
-        searches" and "fast diacritic sensitive searches" in your database
-        configuration.
-
-        Negative "min-occurs" or "max-occurs" values will be treated as 0 and
-        non-integral values will be rounded down. An error will be raised if the
-        "min-occurs" value is greater than the "max-occurs" value.
-
-        When multiple element and/or attribute QNames are specified, then all possible
-        element/attribute QName combinations are used to select the matching values.
-
         Native reference: https://docs.marklogic.com/cts:element-attribute-value-query
         """
         return _FunctionCall(
@@ -3262,14 +2548,14 @@ class Cts:
 
         Parameters
         ----------
-        element_names : xs:QName*
+        element_names : object
             One or more element QNames.
-        attribute_names : xs:QName*
+        attribute_names : object
             One or more attribute QNames.
-        bounds : xs:anyAtomicType*
+        bounds : object
             A sequence of range bounds. The types must match the lexicon type. The
             values must be in strictly ascending order.
-        options : xs:string*
+        options : object
             Options. The default is (). Options include: "ascending" Ranges should be
             returned in ascending order. "descending" Ranges should be returned in
             descending order. "empties" Include fully-bounded ranges whose frequency is
@@ -3338,7 +2624,7 @@ class Cts:
             the specified precision. Allowed values: float and double . Only applicable
             if the lexicon value type is point or long-lat-point . This value takes
             precedence over the precision implicit in the coordinate system name.
-        query : cts:query?
+        query : object
             Only include values in fragments selected by the cts:query , and compute
             frequencies from this set of included values. The values do not need to
             match the query, but they must occur in fragments selected by the query. The
@@ -3346,9 +2632,9 @@ class Cts:
             selected in the same manner as "unfiltered" cts:search operations. If a
             string is entered, the string is treated as a cts:word-query of the
             specified string.
-        quality_weight : xs:double?
+        quality_weight : object
             A document quality weight to use when computing scores. The default is 1.0.
-        forest_ids : xs:unsignedLong*
+        forest_ids : object
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
@@ -3360,63 +2646,6 @@ class Cts:
 
         Notes
         -----
-        Only one of "frequency-order" or "item-order" may be specified in the options
-        parameter. If neither "frequency-order" nor "item-order" is specified, then the
-        default is "item-order".
-
-        Only one of "fragment-frequency" or "item-frequency" may be specified in the
-        options parameter. If neither "fragment-frequency" nor "item-frequency" is
-        specified, then the default is "fragment-frequency".
-
-        Only one of "ascending" or "descending" may be specified in the options
-        parameter. If neither "ascending" nor "descending" is specified, then the
-        default is "ascending" if "item-order" is specified, and "descending" if
-        "frequency-order" is specified.
-
-        Only one of "eager" or "lazy" may be specified in the options parameter. If
-        neither "eager" nor "lazy" is specified, then the default is "eager" if
-        "frequency-order" or "empties" is specified, otherwise "lazy".
-
-        Only one of "any", "document", "properties", or "locks" may be specified in the
-        options parameter. If none of "any", "document", "properties", or "locks" are
-        specified and there is a $query parameter, then the default is "document". If
-        there is no $query parameter then the default is "any".
-
-        Only one of the "score-logtfidf", "score-logtf", "score-simple", "score-random",
-        or "score-zero" options may be specified in the options parameter. If none of
-        "score-logtfidf", "score-logtf", "score-simple", "score-random", or "score-zero"
-        are specified, then the default is "score-logtfidf".
-
-        Only one of the "checked" or "unchecked" options may be specified in the options
-        parameter. If neither "checked" nor "unchecked" are specified, then the default
-        is "checked".
-
-        If "collation= URI " is not specified in the options parameter, then the default
-        collation is used. If a range index with that collation does not exist, an error
-        is thrown.
-
-        If "sample= N " is not specified in the options parameter, then ranges with all
-        included values may be returned. If a $query parameter is not present, then
-        "sample= N " has no effect.
-
-        If "truncate= N " is not specified in the options parameter, then values from
-        all fragments selected by the $query parameter are included. If a $query
-        parameter is not present, then "truncate= N " has no effect.
-
-        When multiple element and/or attribute QNames are specified, then all possible
-        element/attribute QName combinations are used to select the matching values.
-
-        To incrementally fetch a subset of the values returned by this function, use
-        fn:subsequence on the output, rather than the "skip" option. The "skip" option
-        is based on fragments matching the query parameter (if present), not on values.
-        A fragment matched by query might contain multiple values or no values. The
-        number of fragments skipped does not correspond to the number of values. Also,
-        the skip is applied to the relevance ordered query matches, not to the ordered
-        results list.
-
-        When using the "skip" option, use the "truncate" option rather than the "limit"
-        option to control the number of matching fragments from which to draw values.
-
         Native reference: https://docs.marklogic.com/cts:element-attribute-value-ranges
         """
         return _FunctionCall(
@@ -3442,15 +2671,15 @@ class Cts:
 
         Parameters
         ----------
-        element_names : xs:QName*
+        element_names : object
             One or more element QNames.
-        attribute_names : xs:QName*
+        attribute_names : object
             One or more attribute QNames.
-        start : xs:anyAtomicType?
+        start : object
             A starting value. The parameter type must match the lexicon type. If the
             parameter value is not in the lexicon, then the values are returned
             beginning with the next value.
-        options : xs:string*
+        options : object
             Options. The default is (). Options include: "ascending" Values should be
             returned in ascending order. "descending" Values should be returned in
             descending order. "any" Values from any fragment should be included.
@@ -3515,7 +2744,7 @@ class Cts:
             . Only applicable if the lexicon value type is point or long-lat-point .
             This value takes precedence over the precision implicit in the coordinate
             system name.
-        query : cts:query?
+        query : object
             Only include values in fragments selected by the cts:query , and compute
             frequencies from this set of included values. The values do not need to
             match the query, but they must occur in fragments selected by the query. The
@@ -3523,9 +2752,9 @@ class Cts:
             selected in the same manner as "unfiltered" cts:search operations. If a
             string is entered, the string is treated as a cts:word-query of the
             specified string.
-        quality_weight : xs:double?
+        quality_weight : object
             A document quality weight to use when computing scores. The default is 1.0.
-        forest_ids : xs:unsignedLong*
+        forest_ids : object
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
@@ -3537,63 +2766,6 @@ class Cts:
 
         Notes
         -----
-        Only one of "frequency-order" or "item-order" may be specified in the options
-        parameter. If neither "frequency-order" nor "item-order" is specified, then the
-        default is "item-order".
-
-        Only one of "fragment-frequency" or "item-frequency" may be specified in the
-        options parameter. If neither "fragment-frequency" nor "item-frequency" is
-        specified, then the default is "fragment-frequency".
-
-        Only one of "ascending" or "descending" may be specified in the options
-        parameter. If neither "ascending" nor "descending" is specified, then the
-        default is "ascending" if "item-order" is specified, and "descending" if
-        "frequency-order" is specified.
-
-        Only one of "eager" or "lazy" may be specified in the options parameter. If
-        neither "eager" nor "lazy" is specified, then the default is "lazy" if
-        "item-order" is specified, and "eager" if "frequency-order" is specified.
-
-        Only one of "any", "document", "properties", or "locks" may be specified in the
-        options parameter. If none of "any", "document", "properties", or "locks" are
-        specified and there is a $query parameter, then the default is "document". If
-        there is no $query parameter then the default is "any".
-
-        Only one of the "score-logtfidf", "score-logtf", "score-simple", "score-random",
-        or "score-zero" options may be specified in the options parameter. If none of
-        "score-logtfidf", "score-logtf", "score-simple", "score-random", or "score-zero"
-        are specified, then the default is "score-logtfidf".
-
-        Only one of the "checked" or "unchecked" options may be specified in the options
-        parameter. If neither "checked" nor "unchecked" are specified, then the default
-        is "checked".
-
-        If "collation= URI " is not specified in the options parameter, then the default
-        collation is used. If a range index with that collation does not exist, an error
-        is thrown.
-
-        If "sample= N " is not specified in the options parameter, then all included
-        values may be returned. If a $query parameter is not present, then "sample= N "
-        has no effect.
-
-        If "truncate= N " is not specified in the options parameter, then values from
-        all fragments selected by the $query parameter are included. If a $query
-        parameter is not present, then "truncate= N " has no effect.
-
-        When multiple element and/or attribute QNames are specified, then all possible
-        element/attribute QName combinations are used to select the matching values.
-
-        To incrementally fetch a subset of the values returned by this function, use
-        fn:subsequence on the output, rather than the "skip" option. The "skip" option
-        is based on fragments matching the query parameter (if present), not on values.
-        A fragment matched by query might contain multiple values or no values. The
-        number of fragments skipped does not correspond to the number of values. Also,
-        the skip is applied to the relevance ordered query matches, not to the ordered
-        values list.
-
-        When using the "skip" option, use the "truncate" option rather than the "limit"
-        option to control the number of matching fragments from which to draw values.
-
         Native reference: https://docs.marklogic.com/cts:element-attribute-values
         """
         return _FunctionCall(
@@ -3620,13 +2792,13 @@ class Cts:
 
         Parameters
         ----------
-        element_names : xs:QName*
+        element_names : object
             One or more element QNames.
-        attribute_names : xs:QName*
+        attribute_names : object
             One or more attribute QNames.
-        pattern : xs:string
+        pattern : object
             Wildcard pattern to match.
-        options : xs:string*
+        options : object
             Options. The default is (). Options include: "case-sensitive" A
             case-sensitive match. "case-insensitive" A case-insensitive match.
             "diacritic-sensitive" A diacritic-sensitive match. "diacritic-insensitive" A
@@ -3663,16 +2835,16 @@ class Cts:
             especially useful in cases where multiple lexicon calls occur in the same
             query (for example, resolving many facets in a single query). "map" Return
             results as a single map:map value instead of as an xs:string* sequence .
-        query : cts:query?
+        query : object
             Only include words in fragments selected by the cts:query . The words do not
             need to match the query, but the words must occur in fragments selected by
             the query. The fragments are not filtered to ensure they match the query,
             but instead selected in the same manner as "unfiltered" cts:search
             operations. If a string is entered, the string is treated as a
             cts:word-query of the specified string.
-        quality_weight : xs:double?
+        quality_weight : object
             A document quality weight to use when computing scores. The default is 1.0.
-        forest_ids : xs:unsignedLong*
+        forest_ids : object
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
@@ -3684,60 +2856,6 @@ class Cts:
 
         Notes
         -----
-        Only one of "ascending" or "descending" may be specified in the options
-        parameter. If neither "ascending" nor "descending" is specified, then the
-        default is "ascending".
-
-        Only one of "any", "document", "properties", or "locks" may be specified in the
-        options parameter. If none of "any", "document", "properties", or "locks" are
-        specified and there is a $query parameter, then the default is "document". If
-        there is no $query parameter then the default is "any".
-
-        Only one of the "score-logtfidf", "score-logtf", "score-simple", "score-random",
-        or "score-zero" options may be specified in the options parameter. If none of
-        "score-logtfidf", "score-logtf", "score-simple", "score-random", or "score-zero"
-        are specified, then the default is "score-logtfidf".
-
-        Only one of the "checked" or "unchecked" options may be specified in the options
-        parameter. If neither "checked" nor "unchecked" are specified, then the default
-        is "checked".
-
-        If "collation= URI " is not specified in the options parameter, then the default
-        collation is used. If a lexicon with that collation does not exist, an error is
-        thrown.
-
-        If "sample= N " is not specified in the options parameter, then all included
-        words may be returned. If a $query parameter is not present, then "sample= N "
-        has no effect.
-
-        If "truncate= N " is not specified in the options parameter, then words from all
-        fragments selected by the $query parameter are included. If a $query parameter
-        is not present, then "truncate= N " has no effect.
-
-        To incrementally fetch a subset of the values returned by this function, use
-        fn:subsequence on the output, rather than the "skip" option. The "skip" option
-        is based on fragments matching the query parameter (if present), not on values.
-        A fragment matched by query might contain multiple values or no values. The
-        number of fragments skipped does not correspond to the number of values. Also,
-        the skip is applied to the relevance ordered query matches, not to the ordered
-        values list.
-
-        When using the "skip" option, use the "truncate" option rather than the "limit"
-        option to control the number of matching fragments from which to draw values.
-
-        If neither "case-sensitive" nor "case-insensitive" is present, $pattern is used
-        to determine case sensitivity. If $pattern contains no uppercase, it specifies
-        "case-insensitive". If $pattern contains uppercase, it specifies
-        "case-sensitive".
-
-        If neither "diacritic-sensitive" nor "diacritic-insensitive" is present,
-        $pattern is used to determine diacritic sensitivity. If $pattern contains no
-        diacritics, it specifies "diacritic-insensitive". If $pattern contains
-        diacritics, it specifies "diacritic-sensitive".
-
-        When multiple element and/or attribute QNames are specified, then all possible
-        element/attribute QName combinations are used to select the matching values.
-
         Native reference: https://docs.marklogic.com/cts:element-attribute-word-match
         """
         return _FunctionCall(
@@ -3762,16 +2880,16 @@ class Cts:
 
         Parameters
         ----------
-        element_name : xs:QName*
+        element_name : object
             One or more element QNames to match. When multiple QNames are specified, the
             query matches if any QName matches.
-        attribute_name : xs:QName*
+        attribute_name : object
             One or more attribute QNames to match. When multiple QNames are specified,
             the query matches if any QName matches.
-        text : xs:string*
+        text : object
             Some words or phrases to match. When multiple strings are specified, the
             query matches if any string matches.
-        options : xs:string*
+        options : object
             Options to this query. The default is (). Options include: "case-sensitive"
             A case-sensitive query. "case-insensitive" A case-insensitive query.
             "diacritic-sensitive" A diacritic-sensitive query. "diacritic-insensitive" A
@@ -3820,7 +2938,7 @@ class Cts:
             "no-limit-check" Specifies that error will not be raised if the lexicon
             expansion exceeds the specified limit. The server will try to resolve the
             wildcard.
-        weight : xs:double?
+        weight : object
             A weight for this query. Higher weights move search results up in the
             relevance order. The default is 1.0. The weight should be between 64 and
             -16. Weights greater than 64 will have the same effect as a weight of 64.
@@ -3834,40 +2952,6 @@ class Cts:
 
         Notes
         -----
-        If neither "case-sensitive" nor "case-insensitive" is present, $text is used to
-        determine case sensitivity. If $text contains no uppercase, it specifies
-        "case-insensitive". If $text contains uppercase, it specifies "case-sensitive".
-
-        If neither "diacritic-sensitive" nor "diacritic-insensitive" is present, $text
-        is used to determine diacritic sensitivity. If $text contains no diacritics, it
-        specifies "diacritic-insensitive". If $text contains diacritics, it specifies
-        "diacritic-sensitive".
-
-        If neither "punctuation-sensitive" nor "punctuation-insensitive" is present,
-        $text is used to determine punctuation sensitivity. If $text contains no
-        punctuation, it specifies "punctuation-insensitive". If $text contains
-        punctuation, it specifies "punctuation-sensitive".
-
-        If neither "whitespace-sensitive" nor "whitespace-insensitive" is present, the
-        query is "whitespace-insensitive".
-
-        If neither "wildcarded" nor "unwildcarded" is present, the database
-        configuration and $text determine wildcarding. If the database has any wildcard
-        indexes enabled ("three character searches", "two character searches", "one
-        character searches", or "trailing wildcard searches") and if $text contains
-        either of the wildcard characters '?' or '*', it specifies "wildcarded".
-        Otherwise it specifies "unwildcarded".
-
-        If neither "stemmed" nor "unstemmed" is present, the database configuration
-        determines stemming. If the database has "stemmed searches" enabled, it
-        specifies "stemmed". Otherwise it specifies "unstemmed". If the query is a
-        wildcarded query and also a phrase query (contains two or more terms), the
-        wildcard terms in the query are unstemmed.
-
-        Negative "min-occurs" or "max-occurs" values will be treated as 0 and
-        non-integral values will be rounded down. An error will be raised if the
-        "min-occurs" value is greater than the "max-occurs" value.
-
         Native reference: https://docs.marklogic.com/cts:element-attribute-word-query
         """
         return _FunctionCall(
@@ -3893,15 +2977,15 @@ class Cts:
 
         Parameters
         ----------
-        element_names : xs:QName*
+        element_names : object
             One or more element QNames.
-        attribute_names : xs:QName*
+        attribute_names : object
             One or more attribute QNames.
-        start : xs:string?
+        start : object
             A starting word. Returns only this word and any following words from the
             lexicon. If the parameter is not in the lexicon, then it returns the words
             beginning with the next word.
-        options : xs:string*
+        options : object
             Options. The default is (). Options include: "ascending" Words should be
             returned in ascending order. "descending" Words should be returned in
             descending order. "any" Words from any fragment should be included.
@@ -3936,16 +3020,16 @@ class Cts:
             where multiple lexicon calls occur in the same query (for example, resolving
             many facets in a single query). "map" Return results as a single map:map
             value instead of as an xs:string* sequence .
-        query : cts:query?
+        query : object
             Only include words in fragments selected by the cts:query . The words do not
             need to match the query, but the words must occur in fragments selected by
             the query. The fragments are not filtered to ensure they match the query,
             but instead selected in the same manner as "unfiltered" cts:search
             operations. If a string is entered, the string is treated as a
             cts:word-query of the specified string.
-        quality_weight : xs:double?
+        quality_weight : object
             A document quality weight to use when computing scores. The default is 1.0.
-        forest_ids : xs:unsignedLong*
+        forest_ids : object
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
@@ -3957,57 +3041,6 @@ class Cts:
 
         Notes
         -----
-        Only one of "ascending" or "descending" may be specified in the options
-        parameter. If neither "ascending" nor "descending" is specified, then the
-        default is "ascending".
-
-        Only one of "any", "document", "properties", or "locks" may be specified in the
-        options parameter. If none of "any", "document", "properties", or "locks" are
-        specified and there is a $query parameter, then the default is "document". If
-        there is no $query parameter then the default is "any".
-
-        Only one of the "score-logtfidf", "score-logtf", "score-simple", "score-random",
-        or "score-zero" options may be specified in the options parameter. If none of
-        "score-logtfidf", "score-logtf", "score-simple", "score-random", or "score-zero"
-        are specified, then the default is "score-logtfidf".
-
-        Only one of the "checked" or "unchecked" options may be specified in the options
-        parameter. If neither "checked" nor "unchecked" are specified, then the default
-        is "checked".
-
-        If "collation= URI " is not specified in the options parameter, then the default
-        collation is used. If a lexicon with that collation does not exist, an error is
-        thrown.
-
-        If "sample= N " is not specified in the options parameter, then all included
-        words may be returned. If a $query parameter is not present, then "sample= N "
-        has no effect.
-
-        If "truncate= N " is not specified in the options parameter, then words from all
-        fragments selected by the $query parameter are included. If a $query parameter
-        is not present, then "truncate= N " has no effect.
-
-        When multiple element and/or attribute QNames are specified, then all possible
-        element/attribute QName combinations are used to select the matching values.
-
-        When run without a $query parameter and as a user with the admin role, the word
-        lexicon functions return results that might include words from deleted
-        fragments. However, when run as a user with the admin role and without a $query
-        parameter, the word lexicon functions run faster (because they do not need to
-        look up where each word comes from). It is therefore faster to run word lexicon
-        functions as an admin user without passing a $query parameter.
-
-        To incrementally fetch a subset of the values returned by this function, use
-        fn:subsequence on the output, rather than the "skip" option. The "skip" option
-        is based on fragments matching the query parameter (if present), not on values.
-        A fragment matched by query might contain multiple values or no values. The
-        number of fragments skipped does not correspond to the number of values. Also,
-        the skip is applied to the relevance ordered query matches, not to the ordered
-        values list.
-
-        When using the "skip" option, use the "truncate" option rather than the "limit"
-        option to control the number of matching fragments from which to draw values.
-
         Native reference: https://docs.marklogic.com/cts:element-attribute-words
         """
         return _FunctionCall(
@@ -4034,17 +3067,17 @@ class Cts:
 
         Parameters
         ----------
-        parent_element_names : xs:QName*
+        parent_element_names : object
             One or more element QNames.
-        child_element_names : xs:QName*
+        child_element_names : object
             One or more element QNames.
-        latitude_bounds : xs:double*
+        latitude_bounds : object
             A sequence of latitude bounds. The values must be in strictly ascending
             order, otherwise an exception is thrown.
-        longitude_bounds : xs:double*
+        longitude_bounds : object
             A sequence of longitude bounds. The values must be in strictly ascending
             order, otherwise an exception is thrown.
-        options : xs:string*
+        options : object
             Options. The default is (). Options include: "ascending" Boxes should be
             returned in ascending order. "descending" Boxes should be returned in
             descending order. "gridded" For each side that a bucket is bounded, return
@@ -4109,15 +3142,15 @@ class Cts:
             is especially useful in cases where multiple lexicon calls occur in the same
             query (for example, resolving many facets in a single query). "map" Return
             results as a single map:map value instead of as a cts:box* sequence .
-        query : cts:query?
+        query : object
             Only include points in fragments selected by this query, and compute
             frequencies from this set of included points. The points do not need to
             match the query, but they must occur in fragments selected by the query. The
             fragments are not filtered to ensure they match the query, but instead
             selected in the same manner as "unfiltered" cts:search operations.
-        quality_weight : xs:double?
+        quality_weight : object
             A document quality weight to use when computing scores. The default is 1.0.
-        forest_ids : xs:unsignedLong*
+        forest_ids : object
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
@@ -4129,65 +3162,6 @@ class Cts:
 
         Notes
         -----
-        Only one of "frequency-order" or "item-order" may be specified in the options
-        parameter. If neither "frequency-order" nor "item-order" is specified, then the
-        default is "item-order".
-
-        Only one of "fragment-frequency" or "item-frequency" may be specified in the
-        options parameter. If neither "fragment-frequency" nor "item-frequency" is
-        specified, then the default is "fragment-frequency".
-
-        Only one of "ascending" or "descending" may be specified in the options
-        parameter. If neither "ascending" nor "descending" is specified, then the
-        default is "ascending" if "item-order" is specified, and "descending" if
-        "frequency-order" is specified.
-
-        Only one of "eager" or "lazy" may be specified in the options parameter. If
-        neither "eager" nor "lazy" is specified, then the default is "eager" if
-        "frequency-order" or "empties" is specified, otherwise "lazy".
-
-        Only one of "any", "document", "properties", or "locks" may be specified in the
-        options parameter. If none of "any", "document", "properties", or "locks" are
-        specified and there is a $query parameter, then the default is "document". If
-        there is no $query parameter then the default is "any".
-
-        Only one of the "score-logtfidf", "score-logtf", "score-simple", "score-random",
-        or "score-zero" options may be specified in the options parameter. If none of
-        "score-logtfidf", "score-logtf", "score-simple", "score-random", or "score-zero"
-        are specified, then the default is "score-logtfidf".
-
-        Only one of the "checked" or "unchecked" options may be specified in the options
-        parameter. If neither "checked" nor "unchecked" are specified, then the default
-        is "checked".
-
-        If "coordinate-system= name " is not specified in the options parameter, then
-        the default coordinate system is used. If a lexicon with that coordinate system
-        does not exist, an error is thrown.
-
-        If "sample= N " is not specfied in the options parameter, then all boxes with
-        included points may be returned. If a $query parameter is not present, then
-        "sample= N " has no effect.
-
-        The value of the precision option takes precedence over that implied by the
-        governing coordinate system name, including the value of the coordinate-system
-        option. For example, if the governing coordinate system is "wgs84/double" and
-        the precision option is "float", then the query uses single precision.
-
-        If "truncate= N " is not specfied in the options parameter, then points from all
-        fragments selected by the $query parameter are included. If a $query parameter
-        is not present, then "truncate= N " has no effect.
-
-        To incrementally fetch a subset of the values returned by this function, use
-        fn:subsequence on the output, rather than the "skip" option. The "skip" option
-        is based on fragments matching the query parameter (if present), not on values.
-        A fragment matched by the query might produce multiple boxes or no boxes. The
-        number of fragments skipped does not correspond to the number of boxes. Also,
-        the skip is applied to the relevance ordered query matches, not to the ordered
-        box list.
-
-        When using the "skip" option, use the "truncate" option rather than the "limit"
-        option to control the number of matching fragments from which to draw values.
-
         Native reference: https://docs.marklogic.com/cts:element-child-geospatial-boxes
         """
         return _FunctionCall(
@@ -4221,18 +3195,18 @@ class Cts:
 
         Parameters
         ----------
-        parent_element_name : xs:QName*
+        parent_element_name : object
             One or more parent element QNames to match. When multiple QNames are
             specified, the query matches if any QName matches.
-        child_element_names : xs:QName*
+        child_element_names : object
             One or more child element QNames to match. When multiple QNames are
             specified, the query matches if any QName matches; however, only the first
             matching latitude child in any point instance will be checked. The element
             must specify both latitude and longitude coordinates.
-        regions : cts:region*
+        regions : object
             One or more geographic boxes, circles, polygons, or points. Where multiple
             regions are specified, the query matches if any region matches.
-        options : xs:string*
+        options : object
             Options to this query. The default is (). Options include:
             "coordinate-system= string " Use the given coordinate system. Valid values
             are: wgs84 The WGS84 coordinate system with degrees as the angular unit.
@@ -4278,7 +3252,7 @@ class Cts:
             result is that occurrences of more than one of the synonyms are scored as if
             there are more occurrence of the same term (as opposed to having a separate
             term that contributes to score).
-        weight : xs:double?
+        weight : object
             A weight for this query. The default is 1.0.
 
         Returns
@@ -4288,39 +3262,6 @@ class Cts:
 
         Notes
         -----
-        The point value is expressed in the content of the element as a child of
-        numbers, separated by whitespace and punctuation (excluding decimal points and
-        sign characters).
-
-        The value of the precision option takes precedence over that implied by the
-        governing coordinate system name, including the value of the coordinate-system
-        option. For example, if the governing coordinate system is "wgs84/double" and
-        the precision option is "float", then the query uses single precision.
-
-        Point values and boundary specifications of boxes are given in degrees relative
-        to the WGS84 coordinate system. Southern latitudes and Western longitudes take
-        negative values. Longitudes will be wrapped to the range (-180,+180) and
-        latitudes will be clipped to the range (-90,+90).
-
-        If the northern boundary of a box is south of the southern boundary, no points
-        will match. However, longitudes wrap around the globe, so that if the western
-        boundary is east of the eastern boundary, then the box crosses the
-        anti-meridian.
-
-        Special handling occurs at the poles, as all longitudes exist at latitudes +90
-        and -90.
-
-        If neither "cached" nor "uncached" is present, it specifies "cached".
-
-        "score-function=linear" means that values that are further away from the bounds
-        will score higher. "score-function=reciprocal" means that values that are closer
-        to the bounds will score higher. The functions are scaled appropriately for
-        different types, so that in general the default slope factor will provide useful
-        results. Using a slope factor greater than 1 gives distinct scores over a
-        smaller range of values, and produces generally higher scores. Using a slope
-        factor less than 1 gives distinct scores over a wider range of values, and
-        produces generally lower scores.
-
         Native reference: https://docs.marklogic.com/cts:element-child-geospatial-query
         """
         return _FunctionCall(
@@ -4347,13 +3288,13 @@ class Cts:
 
         Parameters
         ----------
-        element_names : xs:QName*
+        element_names : object
             One or more element QNames identifying the parent element(s).
-        child_names : xs:QName*
+        child_names : object
             One or more child element QNames.
-        pattern : xs:anyAtomicType
+        pattern : object
             A pattern to match. The parameter type must match the lexicon type.
-        options : xs:string*
+        options : object
             Options. The default is (). Options include: "ascending" Values should be
             returned in ascending order. "descending" Values should be returned in
             descending order. "any" Values from any fragment should be included.
@@ -4410,15 +3351,15 @@ class Cts:
             is especially useful in cases where multiple lexicon calls occur in the same
             query (for example, resolving many facets in a single query). "map" Return
             results as a single map:map value instead of as a cts:point* sequence .
-        query : cts:query?
+        query : object
             Only include values in fragments selected by this query, and compute
             frequencies from this set of included values. The values do not need to
             match the query, but they must occur in fragments selected by the query. The
             fragments are not filtered to ensure they match the query, but instead
             selected in the same manner as "unfiltered" cts:search operations.
-        quality_weight : xs:double?
+        quality_weight : object
             A document quality weight to use when computing scores. The default is 1.0.
-        forest_ids : xs:unsignedLong*
+        forest_ids : object
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
@@ -4430,69 +3371,7 @@ class Cts:
 
         Notes
         -----
-        Only one of "frequency-order" or "item-order" may be specified in the options
-        parameter. If neither "frequency-order" nor "item-order" is specified, then the
-        default is "item-order".
-
-        Only one of "fragment-frequency" or "item-frequency" may be specified in the
-        options parameter. If neither "fragment-frequency" nor "item-frequency" is
-        specified, then the default is "fragment-frequency".
-
-        Only one of "ascending" or "descending" may be specified in the options
-        parameter. If neither "ascending" nor "descending" is specified, then the
-        default is "ascending" if "item-order" is specified, and "descending" if
-        "frequency-order" is specified.
-
-        Only one of "eager" or "lazy" may be specified in the options parameter. If
-        neither "eager" nor "lazy" is specified, then the default is "lazy" if
-        "item-order" is specified, and "eager" if "frequency-order" is specified.
-
-        Only one of "any", "document", "properties", or "locks" may be specified in the
-        options parameter. If none of "any", "document", "properties", or "locks" are
-        specified and there is a $query parameter, then the default is "document". If
-        there is no $query parameter then the default is "any".
-
-        Only one of the "score-logtfidf", "score-logtf", "score-simple", "score-random",
-        or "score-zero" options may be specified in the options parameter. If none of
-        "score-logtfidf", "score-logtf", "score-simple", "score-random", or "score-zero"
-        are specified, then the default is "score-logtfidf".
-
-        Only one of the "checked" or "unchecked" options may be specified in the options
-        parameter. If neither "checked" nor "unchecked" are specified, then the default
-        is "checked".
-
-        If "coordinate-system= name " is not specified in the options parameter, then
-        the default coordinate system is used. If a lexicon with that coordinate system
-        does not exist, an error is thrown.
-
-        The value of the precision option takes precedence over that implied by the
-        governing coordinate system name, including the value of the coordinate-system
-        option. For example, if the governing coordinate system is "wgs84/double" and
-        the precision option is "float", then the query uses single precision.
-
-        If "sample= N " is not specfied in the options parameter, then all included
-        values may be returned. If a $query parameter is not present, then "sample= N "
-        has no effect.
-
-        If "truncate= N " is not specfied in the options parameter, then values from all
-        fragments selected by the $query parameter are included. If a $query parameter
-        is not present, then "truncate= N " has no effect.
-
-        To incrementally fetch a subset of the values returned by this function, use
-        fn:subsequence on the output, rather than the "skip" option. The "skip" option
-        is based on fragments matching the query parameter (if present), not on values.
-        A fragment matched by the query might produce multiple values or no values. The
-        number of fragments skipped does not correspond to the number of values. Also,
-        the skip is applied to the relevance ordered query matches, not to the ordered
-        value list.
-
-        When using the "skip" option, use the "truncate" option rather than the "limit"
-        option to control the number of matching fragments from which to draw values.
-
-        For finer control over the lexicon selection, use cts:value-match .
-
         Native reference:
-        https://docs.marklogic.com/cts:element-child-geospatial-value-match
         """
         return _FunctionCall(
             "cts:element-child-geospatial-value-match",
@@ -4518,14 +3397,14 @@ class Cts:
 
         Parameters
         ----------
-        element_names : xs:QName*
+        element_names : object
             One or more element QNames.
-        child_names : xs:QName*
+        child_names : object
             One or more child element QNames.
-        start : cts:point?
+        start : object
             A starting value. If the parameter value is not in the lexicon, then the
             values are returned beginning with the next value.
-        options : xs:string*
+        options : object
             Options. The default is (). Options include: "ascending" Values should be
             returned in ascending order. "descending" Values should be returned in
             descending order. "any" Values from any fragment should be included.
@@ -4583,15 +3462,15 @@ class Cts:
             where multiple lexicon calls occur in the same query (for example, resolving
             many facets in a single query). "map" Return results as a single map:map
             value instead of as a cts:point* sequence .
-        query : cts:query?
+        query : object
             Only include values in fragments selected by this query, and compute
             frequencies from this set of included values. The values do not need to
             match the query, but they must occur in fragments selected by the query. The
             fragments are not filtered to ensure they match the query, but instead
             selected in the same manner as "unfiltered" cts:search operations.
-        quality_weight : xs:double?
+        quality_weight : object
             A document quality weight to use when computing scores. The default is 1.0.
-        forest_ids : xs:unsignedLong*
+        forest_ids : object
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
@@ -4603,68 +3482,6 @@ class Cts:
 
         Notes
         -----
-        Only one of "frequency-order" or "item-order" may be specified in the options
-        parameter. If neither "frequency-order" nor "item-order" is specified, then the
-        default is "item-order".
-
-        Only one of "fragment-frequency" or "item-frequency" may be specified in the
-        options parameter. If neither "fragment-frequency" nor "item-frequency" is
-        specified, then the default is "fragment-frequency".
-
-        Only one of "ascending" or "descending" may be specified in the options
-        parameter. If neither "ascending" nor "descending" is specified, then the
-        default is "ascending" if "item-order" is specified, and "descending" if
-        "frequency-order" is specified.
-
-        Only one of "eager" or "lazy" may be specified in the options parameter. If
-        neither "eager" nor "lazy" is specified, then the default is "lazy" if
-        "item-order" is specified, and "eager" if "frequency-order" is specified.
-
-        Only one of "any", "document", "properties", or "locks" may be specified in the
-        options parameter. If none of "any", "document", "properties", or "locks" are
-        specified and there is a $query parameter, then the default is "document". If
-        there is no $query parameter then the default is "any".
-
-        Only one of the "score-logtfidf", "score-logtf", "score-simple", "score-random",
-        or "score-zero" options may be specified in the options parameter. If none of
-        "score-logtfidf", "score-logtf", "score-simple", "score-random", or "score-zero"
-        are specified, then the default is "score-logtfidf".
-
-        Only one of the "checked" or "unchecked" options may be specified in the options
-        parameter. If neither "checked" nor "unchecked" are specified, then the default
-        is "checked".
-
-        If "coordinate-system= name " is not specified in the options parameter, then
-        the default coordinate system is used. If a lexicon with that coordinate system
-        does not exist, an error is thrown.
-
-        The value of the precision option takes precedence over that implied by the
-        governing coordinate system name, including the value of the coordinate-system
-        option. For example, if the governing coordinate system is "wgs84/double" and
-        the precision option is "float", then the query uses single precision.
-
-        If "sample= N " is not specfied in the options parameter, then all included
-        values may be returned. If a $query parameter is not present, then "sample= N "
-        has no effect.
-
-        If "truncate= N " is not specfied in the options parameter, then values from all
-        fragments selected by the $query parameter are included. If a $query parameter
-        is not present, then "truncate= N " has no effect.
-
-        To incrementally fetch a subset of the values returned by this function, use
-        fn:subsequence on the output, rather than the "skip" option. The "skip" option
-        is based on fragments matching the query parameter (if present), not on values.
-        A fragment matched by the query might produce multiple values or no values. The
-        number of fragments skipped does not correspond to the number of values. Also,
-        the skip is applied to the relevance ordered query matches, not to the ordered
-        value list.
-
-        When using the "skip" option, use the "truncate" option rather than the "limit"
-        option to control the number of matching fragments from which to draw values.
-
-        When multiple element and/or child QNames are specified, then all possible
-        element/child QName combinations are used to select the matching values.
-
         Native reference: https://docs.marklogic.com/cts:element-child-geospatial-values
         """
         return _FunctionCall(
@@ -4690,15 +3507,15 @@ class Cts:
 
         Parameters
         ----------
-        element_names : xs:QName*
+        element_names : object
             One or more element QNames.
-        latitude_bounds : xs:double*
+        latitude_bounds : object
             A sequence of latitude bounds. The values must be in strictly ascending
             order, otherwise an exception is thrown.
-        longitude_bounds : xs:double*
+        longitude_bounds : object
             A sequence of longitude bounds. The values must be in strictly ascending
             order, otherwise an exception is thrown.
-        options : xs:string*
+        options : object
             Use the following options to customize your lexicon query: "ascending" Boxes
             should be returned in ascending order. "descending" Boxes should be returned
             in descending order. "gridded" For each side that a bucket is bounded,
@@ -4763,15 +3580,15 @@ class Cts:
             is especially useful in cases where multiple lexicon calls occur in the same
             query (for example, resolving many facets in a single query). "map" Return
             results as a single map:map value instead of as a cts:box* sequence .
-        query : cts:query?
+        query : object
             Only include points in fragments selected by this query, and compute
             frequencies from this set of included points. The points do not need to
             match the query, but they must occur in fragments selected by the query. The
             fragments are not filtered to ensure they match the query, but instead
             selected in the same manner as "unfiltered" cts:search operations.
-        quality_weight : xs:double?
+        quality_weight : object
             A document quality weight to use when computing scores. The default is 1.0.
-        forest_ids : xs:unsignedLong*
+        forest_ids : object
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
@@ -4783,65 +3600,6 @@ class Cts:
 
         Notes
         -----
-        Only one of "frequency-order" or "item-order" may be specified in the options
-        parameter. If neither "frequency-order" nor "item-order" is specified, then the
-        default is "item-order".
-
-        Only one of "fragment-frequency" or "item-frequency" may be specified in the
-        options parameter. If neither "fragment-frequency" nor "item-frequency" is
-        specified, then the default is "fragment-frequency".
-
-        Only one of "ascending" or "descending" may be specified in the options
-        parameter. If neither "ascending" nor "descending" is specified, then the
-        default is "ascending" if "item-order" is specified, and "descending" if
-        "frequency-order" is specified.
-
-        Only one of "eager" or "lazy" may be specified in the options parameter. If
-        neither "eager" nor "lazy" is specified, then the default is "eager" if
-        "frequency-order" or "empties" is specified, otherwise "lazy".
-
-        Only one of "any", "document", "properties", or "locks" may be specified in the
-        options parameter. If none of "any", "document", "properties", or "locks" are
-        specified and there is a $query parameter, then the default is "document". If
-        there is no $query parameter then the default is "any".
-
-        Only one of the "score-logtfidf", "score-logtf", "score-simple", "score-random",
-        or "score-zero" options may be specified in the options parameter. If none of
-        "score-logtfidf", "score-logtf", "score-simple", "score-random", or "score-zero"
-        are specified, then the default is "score-logtfidf".
-
-        Only one of the "checked" or "unchecked" options may be specified in the options
-        parameter. If neither "checked" nor "unchecked" are specified, then the default
-        is "checked".
-
-        If "coordinate-system= name " is not specified in the options parameter, then
-        the default coordinate system is used. If a lexicon with that coordinate system
-        does not exist, an error is thrown.
-
-        The value of the precision option takes precedence over that implied by the
-        governing coordinate system name, including the value of the coordinate-system
-        option. For example, if the governing coordinate system is "wgs84/double" and
-        the precision option is "float", then the query uses single precision.
-
-        If "sample= N " is not specfied in the options parameter, then all boxes with
-        included points may be returned. If a $query parameter is not present, then
-        "sample= N " has no effect.
-
-        If "truncate= N " is not specfied in the options parameter, then points from all
-        fragments selected by the $query parameter are included. If a $query parameter
-        is not present, then "truncate= N " has no effect.
-
-        To incrementally fetch a subset of the values returned by this function, use
-        fn:subsequence on the output, rather than the "skip" option. The "skip" option
-        is based on fragments matching the query parameter (if present), not on values.
-        A fragment matched by the query might produce multiple boxes or no boxes. The
-        number of fragments skipped does not correspond to the number of boxes. Also,
-        the skip is applied to the relevance ordered query matches, not to the ordered
-        box list.
-
-        When using the "skip" option, use the "truncate" option rather than the "limit"
-        option to control the number of matching fragments from which to draw values.
-
         Native reference: https://docs.marklogic.com/cts:element-geospatial-boxes
         """
         return _FunctionCall(
@@ -4873,13 +3631,13 @@ class Cts:
 
         Parameters
         ----------
-        element_name : xs:QName*
+        element_name : object
             One or more element QNames to match. When multiple QNames are specified, the
             query matches if any QName matches.
-        regions : cts:region*
+        regions : object
             One or more geographic boxes, circles, polygons, or points. Where multiple
             regions are specified, the query matches if any region matches.
-        options : xs:string*
+        options : object
             Options to this query. The default is (). Options include:
             "coordinate-system= string " Use the given coordinate system. Valid values
             are: wgs84 The WGS84 coordinate system with degrees as the angular unit.
@@ -4924,7 +3682,7 @@ class Cts:
             scoring purposes. The result is that occurrences of more than one of the
             synonyms are scored as if there are more occurrence of the same term (as
             opposed to having a separate term that contributes to score).
-        weight : xs:double?
+        weight : object
             A weight for this query. The default is 1.0.
 
         Returns
@@ -4934,41 +3692,6 @@ class Cts:
 
         Notes
         -----
-        The point value is expressed in the content of the element as a pair of numbers,
-        separated by whitespace and punctuation (excluding decimal points and sign
-        characters).
-
-        The value of the precision option takes precedence over that implied by the
-        governing coordinate system name, including the value of the coordinate-system
-        option. For example, if the governing coordinate system is "wgs84/double" and
-        the precision option is "float", then the query uses single precision.
-
-        Point and region coordinates are interpreted according to the governing
-        coordinate system of the query. When using a geographic coordinate system such
-        as wgs84 or wgs84/double the following also applies:
-
-        Southern latitudes and Western longitudes take negative values. Longitudes are
-        wrapped to the range (-180,+180). Latitudes are clipped to the range (-90,+90).
-
-        If the northern boundary of a box is south of the southern boundary, no points
-        will match. However, longitudes wrap around the globe, so that if the western
-        boundary is east of the eastern boundary, then the box crosses the
-        anti-meridian.
-
-        Special handling occurs at the poles, as all longitudes exist at latitudes +90
-        and -90.
-
-        If neither "cached" nor "uncached" is present, it specifies "cached".
-
-        "score-function=linear" means that values that are further away from the bounds
-        will score higher. "score-function=reciprocal" means that values that are closer
-        to the bounds will score higher. The functions are scaled appropriately for
-        different types, so that in general the default slope factor will provide useful
-        results. Using a slope factor greater than 1 gives distinct scores over a
-        smaller range of values, and produces generally higher scores. Using a slope
-        factor less than 1 gives distinct scores over a wider range of values, and
-        produces generally lower scores.
-
         Native reference: https://docs.marklogic.com/cts:element-geospatial-query
         """
         return _FunctionCall(
@@ -4994,11 +3717,11 @@ class Cts:
 
         Parameters
         ----------
-        element_names : xs:QName*
+        element_names : object
             One or more element QNames.
-        pattern : xs:anyAtomicType
+        pattern : object
             A pattern to match. The parameter type must match the lexicon type.
-        options : xs:string*
+        options : object
             Options. The default is (). Options include: "ascending" Values should be
             returned in ascending order. "descending" Values should be returned in
             descending order. "any" Values from any fragment should be included.
@@ -5055,15 +3778,15 @@ class Cts:
             is especially useful in cases where multiple lexicon calls occur in the same
             query (for example, resolving many facets in a single query). "map" Return
             results as a single map:map value instead of as a cts:point* sequence .
-        query : cts:query?
+        query : object
             Only include values in fragments selected by this query, and compute
             frequencies from this set of included values. The values do not need to
             match the query, but they must occur in fragments selected by the query. The
             fragments are not filtered to ensure they match the query, but instead
             selected in the same manner as "unfiltered" cts:search operations.
-        quality_weight : xs:double?
+        quality_weight : object
             A document quality weight to use when computing scores. The default is 1.0.
-        forest_ids : xs:unsignedLong*
+        forest_ids : object
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
@@ -5075,65 +3798,6 @@ class Cts:
 
         Notes
         -----
-        Only one of "frequency-order" or "item-order" may be specified in the options
-        parameter. If neither "frequency-order" nor "item-order" is specified, then the
-        default is "item-order".
-
-        Only one of "fragment-frequency" or "item-frequency" may be specified in the
-        options parameter. If neither "fragment-frequency" nor "item-frequency" is
-        specified, then the default is "fragment-frequency".
-
-        Only one of "ascending" or "descending" may be specified in the options
-        parameter. If neither "ascending" nor "descending" is specified, then the
-        default is "ascending" if "item-order" is specified, and "descending" if
-        "frequency-order" is specified.
-
-        Only one of "eager" or "lazy" may be specified in the options parameter. If
-        neither "eager" nor "lazy" is specified, then the default is "lazy" if
-        "item-order" is specified, and "eager" if "frequency-order" is specified.
-
-        Only one of "any", "document", "properties", or "locks" may be specified in the
-        options parameter. If none of "any", "document", "properties", or "locks" are
-        specified and there is a $query parameter, then the default is "document". If
-        there is no $query parameter then the default is "any".
-
-        Only one of the "score-logtfidf", "score-logtf", "score-simple", "score-random",
-        or "score-zero" options may be specified in the options parameter. If none of
-        "score-logtfidf", "score-logtf", "score-simple", "score-random", or "score-zero"
-        are specified, then the default is "score-logtfidf".
-
-        Only one of the "checked" or "unchecked" options may be specified in the options
-        parameter. If neither "checked" nor "unchecked" are specified, then the default
-        is "checked".
-
-        If "coordinate-system= name " is not specified in the options parameter, then
-        the default coordinate system is used. If a lexicon with that coordinate system
-        does not exist, an error is thrown.
-
-        The value of the precision option takes precedence over that implied by the
-        governing coordinate system name, including the value of the coordinate-system
-        option. For example, if the governing coordinate system is "wgs84/double" and
-        the precision option is "float", then the query uses single precision.
-
-        If "sample= N " is not specfied in the options parameter, then all included
-        values may be returned. If a $query parameter is not present, then "sample= N "
-        has no effect.
-
-        If "truncate= N " is not specfied in the options parameter, then values from all
-        fragments selected by the $query parameter are included. If a $query parameter
-        is not present, then "truncate= N " has no effect.
-
-        To incrementally fetch a subset of the values returned by this function, use
-        fn:subsequence on the output, rather than the "skip" option. The "skip" option
-        is based on fragments matching the query parameter (if present), not on values.
-        A fragment matched by the query might produce multiple values or no values. The
-        number of fragments skipped does not correspond to the number of values. Also,
-        the skip is applied to the relevance ordered query matches, not to the ordered
-        value list.
-
-        When using the "skip" option, use the "truncate" option rather than the "limit"
-        option to control the number of matching fragments from which to draw values.
-
         Native reference: https://docs.marklogic.com/cts:element-geospatial-value-match
         """
         return _FunctionCall(
@@ -5158,12 +3822,12 @@ class Cts:
 
         Parameters
         ----------
-        element_names : xs:QName*
+        element_names : object
             One or more element QNames.
-        start : cts:point?
+        start : object
             A starting value. If the parameter value is not in the lexicon, then the
             values are returned beginning with the next value.
-        options : xs:string*
+        options : object
             Options. The default is (). Options include: "ascending" Values should be
             returned in ascending order. "descending" Values should be returned in
             descending order. "any" Values from any fragment should be included.
@@ -5220,15 +3884,15 @@ class Cts:
             is especially useful in cases where multiple lexicon calls occur in the same
             query (for example, resolving many facets in a single query). "map" Return
             results as a single map:map value instead of as a cts:point* sequence .
-        query : cts:query?
+        query : object
             Only include values in fragments selected by this query, and compute
             frequencies from this set of included values. The values do not need to
             match the query, but they must occur in fragments selected by the query. The
             fragments are not filtered to ensure they match the query, but instead
             selected in the same manner as "unfiltered" cts:search operations.
-        quality_weight : xs:double?
+        quality_weight : object
             A document quality weight to use when computing scores. The default is 1.0.
-        forest_ids : xs:unsignedLong*
+        forest_ids : object
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
@@ -5240,65 +3904,6 @@ class Cts:
 
         Notes
         -----
-        Only one of "frequency-order" or "item-order" may be specified in the options
-        parameter. If neither "frequency-order" nor "item-order" is specified, then the
-        default is "item-order".
-
-        Only one of "fragment-frequency" or "item-frequency" may be specified in the
-        options parameter. If neither "fragment-frequency" nor "item-frequency" is
-        specified, then the default is "fragment-frequency".
-
-        Only one of "ascending" or "descending" may be specified in the options
-        parameter. If neither "ascending" nor "descending" is specified, then the
-        default is "ascending" if "item-order" is specified, and "descending" if
-        "frequency-order" is specified.
-
-        Only one of "eager" or "lazy" may be specified in the options parameter. If
-        neither "eager" nor "lazy" is specified, then the default is "lazy" if
-        "item-order" is specified, and "eager" if "frequency-order" is specified.
-
-        Only one of "any", "document", "properties", or "locks" may be specified in the
-        options parameter. If none of "any", "document", "properties", or "locks" are
-        specified and there is a $query parameter, then the default is "document". If
-        there is no $query parameter then the default is "any".
-
-        Only one of the "score-logtfidf", "score-logtf", "score-simple", "score-random",
-        or "score-zero" options may be specified in the options parameter. If none of
-        "score-logtfidf", "score-logtf", "score-simple", "score-random", or "score-zero"
-        are specified, then the default is "score-logtfidf".
-
-        Only one of the "checked" or "unchecked" options may be specified in the options
-        parameter. If neither "checked" nor "unchecked" are specified, then the default
-        is "checked".
-
-        If "coordinate-system= name " is not specified in the options parameter, then
-        the default coordinate system is used. If a lexicon with that coordinate system
-        does not exist, an error is thrown.
-
-        If "sample= N " is not specfied in the options parameter, then all included
-        values may be returned. If a $query parameter is not present, then "sample= N "
-        has no effect.
-
-        The value of the precision option takes precedence over that implied by the
-        governing coordinate system name, including the value of the coordinate-system
-        option. For example, if the governing coordinate system is "wgs84/double" and
-        the precision option is "float", then the query uses single precision.
-
-        If "truncate= N " is not specfied in the options parameter, then values from all
-        fragments selected by the $query parameter are included. If a $query parameter
-        is not present, then "truncate= N " has no effect.
-
-        To incrementally fetch a subset of the values returned by this function, use
-        fn:subsequence on the output, rather than the "skip" option. The "skip" option
-        is based on fragments matching the query parameter (if present), not on values.
-        A fragment matched by the query might produce multiple values or no values. The
-        number of fragments skipped does not correspond to the number of values. Also,
-        the skip is applied to the relevance ordered query matches, not to the ordered
-        value list.
-
-        When using the "skip" option, use the "truncate" option rather than the "limit"
-        option to control the number of matching fragments from which to draw values.
-
         Native reference: https://docs.marklogic.com/cts:element-geospatial-values
         """
         return _FunctionCall(
@@ -5326,19 +3931,19 @@ class Cts:
 
         Parameters
         ----------
-        parent_element_names : xs:QName*
+        parent_element_names : object
             One or more element QNames.
-        latitude_names : xs:QName*
+        latitude_names : object
             One or more element QNames.
-        longitude_names : xs:QName*
+        longitude_names : object
             One or more element QNames.
-        latitude_bounds : xs:double*
+        latitude_bounds : object
             A sequence of latitude bounds. The values must be in strictly ascending
             order, otherwise an exception is thrown.
-        longitude_bounds : xs:double*
+        longitude_bounds : object
             A sequence of longitude bounds. The values must be in strictly ascending
             order, otherwise an exception is thrown.
-        options : xs:string*
+        options : object
             Options. The default is (). Options include: "ascending" Boxes should be
             returned in ascending order. "descending" Boxes should be returned in
             descending order. "gridded" For each side that a bucket is bounded, return
@@ -5400,15 +4005,15 @@ class Cts:
             is especially useful in cases where multiple lexicon calls occur in the same
             query (for example, resolving many facets in a single query). "map" Return
             results as a single map:map value instead of as a cts:box* sequence .
-        query : cts:query?
+        query : object
             Only include points in fragments selected by this query, and compute
             frequencies from this set of included points. The points do not need to
             match the query, but they must occur in fragments selected by the query. The
             fragments are not filtered to ensure they match the query, but instead
             selected in the same manner as "unfiltered" cts:search operations.
-        quality_weight : xs:double?
+        quality_weight : object
             A document quality weight to use when computing scores. The default is 1.0.
-        forest_ids : xs:unsignedLong*
+        forest_ids : object
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
@@ -5420,65 +4025,6 @@ class Cts:
 
         Notes
         -----
-        Only one of "frequency-order" or "item-order" may be specified in the options
-        parameter. If neither "frequency-order" nor "item-order" is specified, then the
-        default is "item-order".
-
-        Only one of "fragment-frequency" or "item-frequency" may be specified in the
-        options parameter. If neither "fragment-frequency" nor "item-frequency" is
-        specified, then the default is "fragment-frequency".
-
-        Only one of "ascending" or "descending" may be specified in the options
-        parameter. If neither "ascending" nor "descending" is specified, then the
-        default is "ascending" if "item-order" is specified, and "descending" if
-        "frequency-order" is specified.
-
-        Only one of "eager" or "lazy" may be specified in the options parameter. If
-        neither "eager" nor "lazy" is specified, then the default is "eager" if
-        "frequency-order" or "empties" is specified, otherwise "lazy".
-
-        Only one of "any", "document", "properties", or "locks" may be specified in the
-        options parameter. If none of "any", "document", "properties", or "locks" are
-        specified and there is a $query parameter, then the default is "document". If
-        there is no $query parameter then the default is "any".
-
-        Only one of the "score-logtfidf", "score-logtf", "score-simple", "score-random",
-        or "score-zero" options may be specified in the options parameter. If none of
-        "score-logtfidf", "score-logtf", "score-simple", "score-random", or "score-zero"
-        are specified, then the default is "score-logtfidf".
-
-        Only one of the "checked" or "unchecked" options may be specified in the options
-        parameter. If neither "checked" nor "unchecked" are specified, then the default
-        is "checked".
-
-        If "coordinate-system= name " is not specified in the options parameter, then
-        the default coordinate system is used. If a lexicon with that coordinate system
-        does not exist, an error is thrown.
-
-        The value of the precision option takes precedence over that implied by the
-        governing coordinate system name, including the value of the coordinate-system
-        option. For example, if the governing coordinate system is "wgs84/double" and
-        the precision option is "float", then the query uses single precision.
-
-        If "sample= N " is not specfied in the options parameter, then all boxes with
-        included points may be returned. If a $query parameter is not present, then
-        "sample= N " has no effect.
-
-        If "truncate= N " is not specfied in the options parameter, then points from all
-        fragments selected by the $query parameter are included. If a $query parameter
-        is not present, then "truncate= N " has no effect.
-
-        To incrementally fetch a subset of the values returned by this function, use
-        fn:subsequence on the output, rather than the "skip" option. The "skip" option
-        is based on fragments matching the query parameter (if present), not on values.
-        A fragment matched by the query might produce multiple boxes or no boxes. The
-        number of fragments skipped does not correspond to the number of boxes. Also,
-        the skip is applied to the relevance ordered query matches, not to the ordered
-        box list.
-
-        When using the "skip" option, use the "truncate" option rather than the "limit"
-        option to control the number of matching fragments from which to draw values.
-
         Native reference: https://docs.marklogic.com/cts:element-pair-geospatial-boxes
         """
         return _FunctionCall(
@@ -5517,21 +4063,21 @@ class Cts:
 
         Parameters
         ----------
-        element_name : xs:QName*
+        element_name : object
             One or more parent element QNames to match. When multiple QNames are
             specified, the query matches if any QName matches.
-        latitude_element_names : xs:QName*
+        latitude_element_names : object
             One or more latitude element QNames to match. When multiple QNames are
             specified, the query matches if any QName matches; however, only the first
             matching latitude child in any point instance will be checked.
-        longitude_element_names : xs:QName*
+        longitude_element_names : object
             One or more longitude element QNames to match. When multiple QNames are
             specified, the query matches if any QName matches; however, only the first
             matching longitude child in any point instance will be checked.
-        regions : cts:region*
+        regions : object
             One or more geographic boxes, circles, polygons, or points. Where multiple
             regions are specified, the query matches if any region matches.
-        options : xs:string*
+        options : object
             Options to this query. The default is (). Options include:
             "coordinate-system= string " Use the given coordinate system. Valid values
             are: wgs84 The WGS84 coordinate system with degrees as the angular unit.
@@ -5573,7 +4119,7 @@ class Cts:
             scoring purposes. The result is that occurrences of more than one of the
             synonyms are scored as if there are more occurrence of the same term (as
             opposed to having a separate term that contributes to score).
-        weight : xs:double?
+        weight : object
             A weight for this query. The default is 1.0.
 
         Returns
@@ -5583,39 +4129,6 @@ class Cts:
 
         Notes
         -----
-        The point value is expressed in the content of the latitude and longitude
-        elements (the latitude value in the latitude element, and the longitude value in
-        the longitude element).
-
-        The value of the precision option takes precedence over that implied by the
-        governing coordinate system name, including the value of the coordinate-system
-        option. For example, if the governing coordinate system is "wgs84/double" and
-        the precision option is "float", then the query uses single precision.
-
-        Point values and boundary specifications of boxes are given in degrees relative
-        to the WGS84 coordinate system. Southern latitudes and Western longitudes take
-        negative values. Longitudes will be wrapped to the range (-180,+180) and
-        latitudes will be clipped to the range (-90,+90).
-
-        If the northern boundary of a box is south of the southern boundary, no points
-        will match. However, longitudes wrap around the globe, so that if the western
-        boundary is east of the eastern boundary, then the box crosses the
-        anti-meridian.
-
-        Special handling occurs at the poles, as all longitudes exist at latitudes +90
-        and -90.
-
-        If neither "cached" nor "uncached" is present, it specifies "cached".
-
-        "score-function=linear" means that values that are further away from the bounds
-        will score higher. "score-function=reciprocal" means that values that are closer
-        to the bounds will score higher. The functions are scaled appropriately for
-        different types, so that in general the default slope factor will provide useful
-        results. Using a slope factor greater than 1 gives distinct scores over a
-        smaller range of values, and produces generally higher scores. Using a slope
-        factor less than 1 gives distinct scores over a wider range of values, and
-        produces generally lower scores.
-
         Native reference: https://docs.marklogic.com/cts:element-pair-geospatial-query
         """
         return _FunctionCall(
@@ -5648,15 +4161,15 @@ class Cts:
 
         Parameters
         ----------
-        element_names : xs:QName*
+        element_names : object
             One or more element QNames.
-        latitude_names : xs:QName*
+        latitude_names : object
             One or more latitude element QNames.
-        longitude_names : xs:QName*
+        longitude_names : object
             One or more longitude element QNames.
-        pattern : xs:anyAtomicType
+        pattern : object
             A pattern to match. The parameter type must match the lexicon type.
-        options : xs:string*
+        options : object
             Options. The default is (). Options include: "ascending" Values should be
             returned in ascending order. "descending" Values should be returned in
             descending order. "any" Values from any fragment should be included.
@@ -5710,15 +4223,15 @@ class Cts:
             is especially useful in cases where multiple lexicon calls occur in the same
             query (for example, resolving many facets in a single query). "map" Return
             results as a single map:map value instead of as a cts:point* sequence .
-        query : cts:query?
+        query : object
             Only include values in fragments selected by this query, and compute
             frequencies from this set of included values. The values do not need to
             match the query, but they must occur in fragments selected by the query. The
             fragments are not filtered to ensure they match the query, but instead
             selected in the same manner as "unfiltered" cts:search operations.
-        quality_weight : xs:double?
+        quality_weight : object
             A document quality weight to use when computing scores. The default is 1.0.
-        forest_ids : xs:unsignedLong*
+        forest_ids : object
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
@@ -5730,69 +4243,7 @@ class Cts:
 
         Notes
         -----
-        Only one of "frequency-order" or "item-order" may be specified in the options
-        parameter. If neither "frequency-order" nor "item-order" is specified, then the
-        default is "item-order".
-
-        Only one of "fragment-frequency" or "item-frequency" may be specified in the
-        options parameter. If neither "fragment-frequency" nor "item-frequency" is
-        specified, then the default is "fragment-frequency".
-
-        Only one of "ascending" or "descending" may be specified in the options
-        parameter. If neither "ascending" nor "descending" is specified, then the
-        default is "ascending" if "item-order" is specified, and "descending" if
-        "frequency-order" is specified.
-
-        Only one of "eager" or "lazy" may be specified in the options parameter. If
-        neither "eager" nor "lazy" is specified, then the default is "lazy" if
-        "item-order" is specified, and "eager" if "frequency-order" is specified.
-
-        Only one of "any", "document", "properties", or "locks" may be specified in the
-        options parameter. If none of "any", "document", "properties", or "locks" are
-        specified and there is a $query parameter, then the default is "document". If
-        there is no $query parameter then the default is "any".
-
-        Only one of the "score-logtfidf", "score-logtf", "score-simple", "score-random",
-        or "score-zero" options may be specified in the options parameter. If none of
-        "score-logtfidf", "score-logtf", "score-simple", "score-random", or "score-zero"
-        are specified, then the default is "score-logtfidf".
-
-        Only one of the "checked" or "unchecked" options may be specified in the options
-        parameter. If neither "checked" nor "unchecked" are specified, then the default
-        is "checked".
-
-        If "coordinate-system= name " is not specified in the options parameter, then
-        the default coordinate system is used. If a lexicon with that coordinate system
-        does not exist, an error is thrown.
-
-        The value of the precision option takes precedence over that implied by the
-        governing coordinate system name, including the value of the coordinate-system
-        option. For example, if the governing coordinate system is "wgs84/double" and
-        the precision option is "float", then the query uses single precision.
-
-        If "sample= N " is not specfied in the options parameter, then all included
-        values may be returned. If a $query parameter is not present, then "sample= N "
-        has no effect.
-
-        If "truncate= N " is not specfied in the options parameter, then values from all
-        fragments selected by the $query parameter are included. If a $query parameter
-        is not present, then "truncate= N " has no effect.
-
-        To incrementally fetch a subset of the values returned by this function, use
-        fn:subsequence on the output, rather than the "skip" option. The "skip" option
-        is based on fragments matching the query parameter (if present), not on values.
-        A fragment matched by the query might produce multiple values or no values. The
-        number of fragments skipped does not correspond to the number of values. Also,
-        the skip is applied to the relevance ordered query matches, not to the ordered
-        value list.
-
-        When using the "skip" option, use the "truncate" option rather than the "limit"
-        option to control the number of matching fragments from which to draw values.
-
-        For finer control over the lexicons election, use cts:value-match .
-
         Native reference:
-        https://docs.marklogic.com/cts:element-pair-geospatial-value-match
         """
         return _FunctionCall(
             "cts:element-pair-geospatial-value-match",
@@ -5824,17 +4275,17 @@ class Cts:
 
         Parameters
         ----------
-        element_names : xs:QName*
+        element_names : object
             One or more element QNames identifying the parent element of the latitude
             and longitude elements.
-        latitude_names : xs:QName*
+        latitude_names : object
             One or more latitude element QNames.
-        longitude_names : xs:QName*
+        longitude_names : object
             One or more longitude element QNames.
-        start : cts:point?
+        start : object
             A starting value. If the parameter value is not in the lexicon, then the
             values are returned beginning with the next value.
-        options : xs:string*
+        options : object
             Options. The default is (). Options include: "ascending" Values should be
             returned in ascending order. "descending" Values should be returned in
             descending order. "any" Values from any fragment should be included.
@@ -5888,15 +4339,15 @@ class Cts:
             is especially useful in cases where multiple lexicon calls occur in the same
             query (for example, resolving many facets in a single query). "map" Return
             results as a single map:map value instead of as a cts:point* sequence .
-        query : cts:query?
+        query : object
             Only include values in fragments selected by this query, and compute
             frequencies from this set of included values. The values do not need to
             match the query, but they must occur in fragments selected by the query. The
             fragments are not filtered to ensure they match the query, but instead
             selected in the same manner as "unfiltered" cts:search operations.
-        quality_weight : xs:double?
+        quality_weight : object
             A document quality weight to use when computing scores. The default is 1.0.
-        forest_ids : xs:unsignedLong*
+        forest_ids : object
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
@@ -5908,71 +4359,6 @@ class Cts:
 
         Notes
         -----
-        Only one of "frequency-order" or "item-order" may be specified in the options
-        parameter. If neither "frequency-order" nor "item-order" is specified, then the
-        default is "item-order".
-
-        Only one of "fragment-frequency" or "item-frequency" may be specified in the
-        options parameter. If neither "fragment-frequency" nor "item-frequency" is
-        specified, then the default is "fragment-frequency".
-
-        Only one of "ascending" or "descending" may be specified in the options
-        parameter. If neither "ascending" nor "descending" is specified, then the
-        default is "ascending" if "item-order" is specified, and "descending" if
-        "frequency-order" is specified.
-
-        Only one of "eager" or "lazy" may be specified in the options parameter. If
-        neither "eager" nor "lazy" is specified, then the default is "lazy" if
-        "item-order" is specified, and "eager" if "frequency-order" is specified.
-
-        Only one of "any", "document", "properties", or "locks" may be specified in the
-        options parameter. If none of "any", "document", "properties", or "locks" are
-        specified and there is a $query parameter, then the default is "document". If
-        there is no $query parameter then the default is "any".
-
-        Only one of the "score-logtfidf", "score-logtf", "score-simple", "score-random",
-        or "score-zero" options may be specified in the options parameter. If none of
-        "score-logtfidf", "score-logtf", "score-simple", "score-random", or "score-zero"
-        are specified, then the default is "score-logtfidf".
-
-        Only one of the "checked" or "unchecked" options may be specified in the options
-        parameter. If neither "checked" nor "unchecked" are specified, then the default
-        is "checked".
-
-        If "coordinate-system= name " is not specified in the options parameter, then
-        the default coordinate system is used. If a lexicon with that coordinate system
-        does not exist, an error is thrown.
-
-        The value of the precision option takes precedence over that implied by the
-        governing coordinate system name, including the value of the coordinate-system
-        option. For example, if the governing coordinate system is "wgs84/double" and
-        the precision option is "float", then the query uses single precision.
-
-        If "sample= N " is not specfied in the options parameter, then all included
-        values may be returned. If a $query parameter is not present, then "sample= N "
-        has no effect.
-
-        If "truncate= N " is not specfied in the options parameter, then values from all
-        fragments selected by the $query parameter are included. If a $query parameter
-        is not present, then "truncate= N " has no effect.
-
-        To incrementally fetch a subset of the values returned by this function, use
-        fn:subsequence on the output, rather than the "skip" option. The "skip" option
-        is based on fragments matching the query parameter (if present), not on values.
-        A fragment matched by the query might produce multiple values or no values. The
-        number of fragments skipped does not correspond to the number of values. Also,
-        the skip is applied to the relevance ordered query matches, not to the ordered
-        value list.
-
-        When using the "skip" option, use the "truncate" option rather than the "limit"
-        option to control the number of matching fragments from which to draw values.
-
-        When multiple element and/or child QNames are specified, then all possible
-        element/child QName combinations are used to select the matching values. If an
-        index does not exist for any parent-lat-lon element combination, an exception is
-        thrown. For finer control over the expected index configuration, use cts:values
-        .
-
         Native reference: https://docs.marklogic.com/cts:element-pair-geospatial-values
         """
         return _FunctionCall(
@@ -5990,10 +4376,10 @@ class Cts:
 
         Parameters
         ----------
-        element_name : xs:QName*
+        element_name : object
             One or more element QNames to match. When multiple QNames are specified, the
             query matches if any QName matches.
-        query : cts:query
+        query : object
             A query for the element to match. If a string is entered, the string is
             treated as a cts:word-query of the specified string.
 
@@ -6004,20 +4390,6 @@ class Cts:
 
         Notes
         -----
-        Enabling both the word position and element position indexes ("word position"
-        and "element word position" in the database configuration screen of the Admin
-        Interface) will speed up query performance for many queries that use
-        cts:element-query . The position indexes enable MarkLogic Server to eliminate
-        many false-positive results, which can reduce disk I/O and processing, thereby
-        speeding the performance of many queries. The amount of benefit will vary
-        depending on your data.
-
-        You can query for the existence of an element by specifying an empty
-        cts:and-query as the second parameter. For example, the following will match any
-        instance of the specified element:
-
-        cts:element-query(xs:QName("my-element"), cts:and-query( () ))
-
         Native reference: https://docs.marklogic.com/cts:element-query
         """
         return _FunctionCall(
@@ -6041,19 +4413,19 @@ class Cts:
 
         Parameters
         ----------
-        element_name : xs:QName*
+        element_name : object
             One or more element QNames to match. When multiple QNames are specified, the
             query matches if any QName matches.
-        operator : xs:string
+        operator : object
             A comparison operator. Operators include: "<" Match range index values less
             than $value. "<=" Match range index values less than or equal to $value. ">"
             Match range index values greater than $value. ">=" Match range index values
             greater than or equal to $value. "=" Match range index values equal to
             $value. "!=" Match range index values not equal to $value.
-        value : xs:anyAtomicType*
+        value : object
             One or more element values to match. When multiple values are specified, the
             query matches if any value matches.
-        options : xs:string*
+        options : object
             Options to this query. The default is (). Options include: "collation= URI "
             Use the range index with the collation specified by URI . If not specified,
             then the default collation from the query is used. If a range index with the
@@ -6080,7 +4452,7 @@ class Cts:
             more than one of the synonyms are scored as if there are more occurrences of
             the same term (as opposed to having a separate term that contributes to
             score).
-        weight : xs:double?
+        weight : object
             A weight for this query. The default is 1.0.
 
         Returns
@@ -6090,44 +4462,6 @@ class Cts:
 
         Notes
         -----
-        To constrain on a range of values, combine multiple element range queries
-        together using cts:and-query or any of the composable query constructors, as in
-        the last part of the example below.
-
-        If neither "cached" nor "uncached" is present, it specifies "cached".
-
-        The "cached-incremental" option can improve performance if you repeatedly
-        perform range queries on date or dateTime values over a short range that does
-        not vary widely over short period of time. To benefit, the operator should
-        remain the same "direction" (<,<=, or >,>=) across calls, the bounding date or
-        dateTime changes slightly across calls, and the query runs very frequently
-        (multiple times per minute). Note that using this options creates significantly
-        more cached queries than the "cached" option.
-
-        The "cached-incremental" option has the following restrictions and interactions:
-        The "min-occurs" and "max-occurs" options will be ignored if you use
-        "cached-incremental" in unfiltered search. You can only use
-        "score-function=zero" with "cached-incremental". The "cached-incremental" option
-        behaves like "cached" if you are not querying date or dateTime values.
-
-        Negative "min-occurs" or "max-occurs" values will be treated as 0 and
-        non-integral values will be rounded down. An error will be raised if the
-        "min-occurs" value is greater than the "max-occurs" value.
-
-        "score-function=linear" means that values that are further away from the bounds
-        will score higher. "score-function=reciprocal" means that values that are closer
-        to the bounds will score higher. The functions are scaled appropriately for
-        different types, so that in general the default slope factor will provide useful
-        results. Using a slope factor greater than 1 gives distinct scores over a
-        smaller range of values, and produces generally higher scores. Using a slope
-        factor less than 1 gives distinct scores over a wider range of values, and
-        produces generally lower scores.
-
-        For queries against a dateTime index, when $value is an xs:dayTimeDuration or
-        xs:yearMonthDuration, the query is executed as an age query. $value is
-        subtracted from fn:current-dateTime() to create an xs:dateTime used in the
-        query. If there is more than one item in $value, they must all be the same type.
-
         Native reference: https://docs.marklogic.com/cts:element-range-query
         """
         return _FunctionCall(
@@ -6146,9 +4480,9 @@ class Cts:
 
         Parameters
         ----------
-        element : xs:QName
+        element : object
             An element QName.
-        options : xs:string*
+        options : object
             Options. The default is (). Options include: "type= type " Use the lexicon
             with the type specified by type (int, unsignedInt, long, unsignedLong,
             float, double, decimal, dateTime, time, date, gYearMonth, gYear, gMonth,
@@ -6200,11 +4534,11 @@ class Cts:
 
         Parameters
         ----------
-        element_name_1 : xs:QName
+        element_name_1 : object
             An element QName.
-        element_name_2 : xs:QName
+        element_name_2 : object
             An element QName.
-        options : xs:string*
+        options : object
             Options. The default is (). Options include: "ascending" Co-occurrences
             should be returned in ascending order. "descending" Co-occurrences should be
             returned in descending order. "any" Co-occurrences from any fragment should
@@ -6284,7 +4618,7 @@ class Cts:
             Only applicable if the lexicon value type is point or long-lat-point . This
             value takes precedence over the precision implicit in the coordinate system
             name.
-        query : cts:query?
+        query : object
             Only include co-occurrences in fragments selected by the cts:query , and
             compute frequencies from this set of included co-occurrences. The
             co-occurrences do not need to match the query, but they must occur in
@@ -6292,9 +4626,9 @@ class Cts:
             they match the query, but instead selected in the same manner as
             "unfiltered" cts:search operations. If a string is entered, the string is
             treated as a cts:word-query of the specified string.
-        quality_weight : xs:double?
+        quality_weight : object
             A document quality weight to use when computing scores. The default is 1.0.
-        forest_ids : xs:unsignedLong*
+        forest_ids : object
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
@@ -6306,60 +4640,6 @@ class Cts:
 
         Notes
         -----
-        Only one of "frequency-order" or "item-order" may be specified in the options
-        parameter. If neither "frequency-order" nor "item-order" is specified, then the
-        default is "item-order".
-
-        Only one of "fragment-frequency" or "item-frequency" may be specified in the
-        options parameter. If neither "fragment-frequency" nor "item-frequency" is
-        specified, then the default is "fragment-frequency".
-
-        Only one of "ascending" or "descending" may be specified in the options
-        parameter. If neither "ascending" nor "descending" is specified, then the
-        default is "ascending" if "item-order" is specified, and "descending" if
-        "frequency-order" is specified.
-
-        Only one of "eager" or "lazy" may be specified in the options parameter. If
-        neither "eager" nor "lazy" is specified, then the default is "eager" if
-        "frequency-order" or "map" is specified, otherwise "lazy".
-
-        Only one of "any", "document", "properties", or "locks" may be specified in the
-        options parameter. If none of "any", "document", "properties", or "locks" are
-        specified and there is a $query parameter, then the default is "document". If
-        there is no $query parameter then the default is "any".
-
-        Only one of the "score-logtfidf", "score-logtf", "score-simple", "score-random",
-        or "score-zero" options may be specified in the options parameter. If none of
-        "score-logtfidf", "score-logtf", "score-simple", "score-random", or "score-zero"
-        are specified, then the default is "score-logtfidf".
-
-        Only one of the "checked" or "unchecked" options may be specified in the options
-        parameter. If neither "checked" nor "unchecked" are specified, then the default
-        is "checked".
-
-        If "collation= URI " is not specified in the options parameter, then the default
-        collation is used. If a lexicon with that collation does not exist, an error is
-        thrown.
-
-        If "sample= N " is not specified in the options parameter, then all included
-        co-occurrences may be returned. If a $query parameter is not present, then
-        "sample= N " has no effect.
-
-        If "truncate= N " is not specified in the options parameter, then co-occurrences
-        from all fragments selected by the $query parameter are included. If a $query
-        parameter is not present, then "truncate= N " has no effect.
-
-        To incrementally fetch a subset of the co-occurrences returned by this function,
-        use fn:subsequence on the output, rather than the "skip" option. The "skip"
-        option is based on fragments matching the query parameter (if present), not on
-        values. A fragment matched by query might contain multiple occurrences or no
-        occurrences. The number of fragments skipped does not correspond to the number
-        of values. Also, the skip is applied to the relevance ordered query matches, not
-        to the ordered co-occurrences list.
-
-        When using the "skip" option, use the "truncate" option rather than the "limit"
-        option to control the number of matching fragments from which to draw values.
-
         Native reference: https://docs.marklogic.com/cts:element-value-co-occurrences
         """
         return _FunctionCall(
@@ -6387,31 +4667,31 @@ class Cts:
 
         Parameters
         ----------
-        element_name_1 : xs:QName
+        element_name_1 : object
             A QName identifying the first lexicon. If this is a geospatial lexicon, it
             can only be an element geospatial lexicon. You should usually use
             cts:geospatial-co-occurrences to find co-occurrences between two geospatial
             lexicons.
-        geo_element_name : xs:QName
+        geo_element_name : object
             A QName identifying the second lexicon. This must reference a geospatial
             lexicon. If it is an element child or JSON property child geospatial
             lexicon, pass the child QName in the coord-child-name-1 parameter. For an
             element, element attribute, or JSON property child pair geospatial lexicon,
             pass the child QNames in coord-child-name-1 and coord-child-name-2 .
-        coord_child_name_1 : xs:QName?
+        coord_child_name_1 : object
             An element, element attribute QName or JSON property name identifying the
             child of geo-element-name that holds either the lat and longitude
             coordinates (element child geospatial lexicon) or the latitude coordinate
             (element/attribute/JSON property child pair geospatial lexicon). Use an
             empty sequence if geo-element-name identifies an element or JSON property
             geospatial lexicon.
-        coord_child_name_2 : xs:QName?
+        coord_child_name_2 : object
             An element, element attribute QName or JSON property name identifying the
             child of geo-element-name that holds the longitude coordinate when working
             with an element/attribute/JSON property child pair geospatial lexicon. Use
             empty sequence for an element or JSON property geospatial lexicon or element
             or JSON property child geospatial lexicon.
-        options : xs:string*
+        options : object
             Options. The default is (). The following options are available:
             "geospatial-format= format " Use the kind of geospatial lexicon specified by
             format (element, element-child, element-pair, or element-attribute-pair). If
@@ -6488,16 +4768,16 @@ class Cts:
             query (for example, resolving many facets in a single query). "map" Return
             results as a single map:map value instead of as a
             element(cts:co-occurrence)* sequence .
-        query : cts:query?
+        query : object
             Only include co-occurrences in fragments selected by this query, and compute
             frequencies from this set of included co-occurrences. The co-occurrences do
             not need to match the query, but they must occur in fragments selected by
             the query. The fragments are not filtered to ensure they match the query,
             but instead selected in the same manner as "unfiltered" cts:search
             operations.
-        quality_weight : xs:double?
+        quality_weight : object
             A document quality weight to use when computing scores. The default is 1.0.
-        forest_ids : xs:unsignedLong*
+        forest_ids : object
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
@@ -6509,66 +4789,7 @@ class Cts:
 
         Notes
         -----
-        Only one of "frequency-order" or "item-order" may be specified in the options
-        parameter. If neither "frequency-order" nor "item-order" is specified, then the
-        default is "item-order".
-
-        Only one of "fragment-frequency" or "item-frequency" may be specified in the
-        options parameter. If neither "fragment-frequency" nor "item-frequency" is
-        specified, then the default is "fragment-frequency".
-
-        Only one of "ascending" or "descending" may be specified in the options
-        parameter. If neither "ascending" nor "descending" is specified, then the
-        default is "ascending" if "item-order" is specified, and "descending" if
-        "frequency-order" is specified.
-
-        Only one of "eager" or "lazy" may be specified in the options parameter. If
-        neither "eager" nor "lazy" is specified, then the default is "eager" if
-        "frequency-order" or "map" is specified, otherwise "lazy".
-
-        Only one of "any", "document", "properties", or "locks" may be specified in the
-        options parameter. If none of "any", "document", "properties", or "locks" are
-        specified and there is a $query parameter, then the default is "document". If
-        there is no $query parameter then the default is "any".
-
-        Only one of the "score-logtfidf", "score-logtf", "score-simple", "score-random",
-        or "score-zero" options may be specified in the options parameter. If none of
-        "score-logtfidf", "score-logtf", "score-simple", "score-random", or "score-zero"
-        are specified, then the default is "score-logtfidf".
-
-        Only one of the "checked" or "unchecked" options may be specified in the options
-        parameter. If neither "checked" nor "unchecked" are specified, then the default
-        is "checked".
-
-        If "collation= URI " is not specified in the options parameter, then the default
-        collation is used. If a lexicon with that collation does not exist, an error is
-        thrown.
-
-        If "coordinate-system= name " is not specified in the options parameter, then
-        the default coordinate system is used. If a lexicon with that coordinate system
-        does not exist, an error is thrown.
-
-        If "sample= N " is not specfied in the options parameter, then all included
-        co-occurrences may be returned. If a $query parameter is not present, then
-        "sample= N " has no effect.
-
-        If "truncate= N " is not specfied in the options parameter, then co-occurrences
-        from all fragments selected by the $query parameter are included. If a $query
-        parameter is not present, then "truncate= N " has no effect.
-
-        To incrementally fetch a subset of the values returned by this function, use
-        fn:subsequence on the output, rather than the "skip" option. The "skip" option
-        is based on fragments matching the query parameter (if present), not on values.
-        A fragment matched by the query might produce multiple values or no values. The
-        number of fragments skipped does not correspond to the number of values. Also,
-        the skip is applied to the relevance ordered query matches, not to the ordered
-        value list.
-
-        When using the "skip" option, use the "truncate" option rather than the "limit"
-        option to control the number of matching fragments from which to draw values.
-
         Native reference:
-        https://docs.marklogic.com/cts:element-value-geospatial-co-occurrences
         """
         return _FunctionCall(
             "cts:element-value-geospatial-co-occurrences",
@@ -6600,12 +4821,12 @@ class Cts:
 
         Parameters
         ----------
-        element_names : xs:QName*
+        element_names : object
             One or more element QNames.
-        pattern : xs:anyAtomicType
+        pattern : object
             A pattern to match. The parameter type must match the lexicon type. String
             parameters may include wildcard characters.
-        options : xs:string*
+        options : object
             Options. The default is (). Options include: "case-sensitive" A
             case-sensitive match. "case-insensitive" A case-insensitive match.
             "diacritic-sensitive" A diacritic-sensitive match. "diacritic-insensitive" A
@@ -6672,7 +4893,7 @@ class Cts:
             . Only applicable if the lexicon value type is point or long-lat-point .
             This value takes precedence over the precision implicit in the coordinate
             system name.
-        query : cts:query?
+        query : object
             Only include values in fragments selected by the cts:query , and compute
             frequencies from this set of included values. The values do not need to
             match the query, but they must occur in fragments selected by the query. The
@@ -6680,9 +4901,9 @@ class Cts:
             selected in the same manner as "unfiltered" cts:search operations. If a
             string is entered, the string is treated as a cts:word-query of the
             specified string.
-        quality_weight : xs:double?
+        quality_weight : object
             A document quality weight to use when computing scores. The default is 1.0.
-        forest_ids : xs:unsignedLong*
+        forest_ids : object
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
@@ -6694,70 +4915,6 @@ class Cts:
 
         Notes
         -----
-        Only one of "frequency-order" or "item-order" may be specified in the options
-        parameter. If neither "frequency-order" nor "item-order" is specified, then the
-        default is "item-order".
-
-        Only one of "fragment-frequency" or "item-frequency" may be specified in the
-        options parameter. If neither "fragment-frequency" nor "item-frequency" is
-        specified, then the default is "fragment-frequency".
-
-        Only one of "ascending" or "descending" may be specified in the options
-        parameter. If neither "ascending" nor "descending" is specified, then the
-        default is "ascending" if "item-order" is specified, and "descending" if
-        "frequency-order" is specified.
-
-        Only one of "eager" or "lazy" may be specified in the options parameter. If
-        neither "eager" nor "lazy" is specified, then the default is "lazy" if
-        "item-order" is specified, and "eager" if "frequency-order" is specified.
-
-        Only one of "any", "document", "properties", or "locks" may be specified in the
-        options parameter. If none of "any", "document", "properties", or "locks" are
-        specified and there is a $query parameter, then the default is "document". If
-        there is no $query parameter then the default is "any".
-
-        Only one of the "score-logtfidf", "score-logtf", "score-simple", "score-random",
-        or "score-zero" options may be specified in the options parameter. If none of
-        "score-logtfidf", "score-logtf", "score-simple", "score-random", or "score-zero"
-        are specified, then the default is "score-logtfidf".
-
-        Only one of the "checked" or "unchecked" options may be specified in the options
-        parameter. If neither "checked" nor "unchecked" are specified, then the default
-        is "checked".
-
-        If "collation= URI " is not specified in the options parameter, then the default
-        collation is used. If a range index with that collation does not exist, an error
-        is thrown.
-
-        If "sample= N " is not specified in the options parameter, then all included
-        values may be returned. If a $query parameter is not present, then "sample= N "
-        has no effect.
-
-        If "truncate= N " is not specified in the options parameter, then values from
-        all fragments selected by the $query parameter are included. If a $query
-        parameter is not present, then "truncate= N " has no effect.
-
-        To incrementally fetch a subset of the values returned by this function, use
-        fn:subsequence on the output, rather than the "skip" option. The "skip" option
-        is based on fragments matching the query parameter (if present), not on values.
-        A fragment matched by query might contain multiple values or no values. The
-        number of fragments skipped does not correspond to the number of values. Also,
-        the skip is applied to the relevance ordered query matches, not to the ordered
-        values list.
-
-        When using the "skip" option, use the "truncate" option rather than the "limit"
-        option to control the number of matching fragments from which to draw values.
-
-        If neither "case-sensitive" nor "case-insensitive" is present, $pattern is used
-        to determine case sensitivity. If $pattern contains no uppercase, it specifies
-        "case-insensitive". If $pattern contains uppercase, it specifies
-        "case-sensitive".
-
-        If neither "diacritic-sensitive" nor "diacritic-insensitive" is present,
-        $pattern is used to determine diacritic sensitivity. If $pattern contains no
-        diacritics, it specifies "diacritic-insensitive". If $pattern contains
-        diacritics, it specifies "diacritic-sensitive".
-
         Native reference: https://docs.marklogic.com/cts:element-value-match
         """
         return _FunctionCall(
@@ -6781,13 +4938,13 @@ class Cts:
 
         Parameters
         ----------
-        element_name : xs:QName*
+        element_name : object
             One or more element QNames to match. When multiple QNames are specified, the
             query matches if any QName matches.
-        text : xs:string*
+        text : object
             One or more element values to match. When multiple strings are specified,
             the query matches if any string matches.
-        options : xs:string*
+        options : object
             Options to this query. The default is (). Options include: "case-sensitive"
             A case-sensitive query. "case-insensitive" A case-insensitive query.
             "diacritic-sensitive" A diacritic-sensitive query. "diacritic-insensitive" A
@@ -6811,7 +4968,7 @@ class Cts:
             synonyms for scoring purposes. The result is that occurrences of more than
             one of the synonyms are scored as if there are more occurrences of the same
             term (as opposed to having a separate term that contributes to score).
-        weight : xs:double?
+        weight : object
             A weight for this query. Higher weights move search results up in the
             relevance order. The default is 1.0. The weight should be between 64 and
             -16. Weights greater than 64 will have the same effect as a weight of 64.
@@ -6825,61 +4982,6 @@ class Cts:
 
         Notes
         -----
-        If neither "case-sensitive" nor "case-insensitive" is present, $text is used to
-        determine case sensitivity. If $text contains no uppercase, it specifies
-        "case-insensitive". If $text contains uppercase, it specifies "case-sensitive".
-
-        If neither "diacritic-sensitive" nor "diacritic-insensitive" is present, $text
-        is used to determine diacritic sensitivity. If $text contains no diacritics, it
-        specifies "diacritic-insensitive". If $text contains diacritics, it specifies
-        "diacritic-sensitive".
-
-        If neither "punctuation-sensitive" nor "punctuation-insensitive" is present,
-        $text is used to determine punctuation sensitivity. If $text contains no
-        punctuation, it specifies "punctuation-insensitive". If $text contains
-        punctuation, it specifies "punctuation-sensitive".
-
-        If neither "whitespace-sensitive" nor "whitespace-insensitive" is present, the
-        query is "whitespace-insensitive".
-
-        If neither "wildcarded" nor "unwildcarded" is present, the database
-        configuration and $text determine wildcarding. If the database has any wildcard
-        indexes enabled ("three character searches", "two character searches", "one
-        character searches", or "trailing wildcard searches") and if $text contains
-        either of the wildcard characters '?' or '*', it specifies "wildcarded".
-        Otherwise it specifies "unwildcarded".
-
-        If neither "stemmed" nor "unstemmed" is present, the database configuration
-        determines stemming. If the database has "stemmed searches" enabled, it
-        specifies "stemmed". Otherwise it specifies "unstemmed". If the query is a
-        wildcarded query and also a phrase query (contains two or more terms), the
-        wildcard terms in the query are unstemmed.
-
-        When you use the "exact" option, you should also enable "fast case sensitive
-        searches" and "fast diacritic sensitive searches" in your database
-        configuration.
-
-        Negative "min-occurs" or "max-occurs" values will be treated as 0 and
-        non-integral values will be rounded down. An error will be raised if the
-        "min-occurs" value is greater than the "max-occurs" value.
-
-        Note that the text content for the value in a cts:element-value-query is treated
-        the same as a phrase in a cts:word-query , where the phrase is the element
-        value. Therefore, any wildcard and/or stemming rules are treated like a phrase.
-        For example, if you have an element value of "hello friend" with wildcarding
-        enabled for a query, a cts:element-value-query for "he*" will not match because
-        the wildcard matches do not span word boundaries, but a cts:element-value-query
-        for "hello *" will match. A search for "*" will match, because a "*" wildcard by
-        itself is defined to match the value. Similarly, stemming rules are applied to
-        each term, so a search for "hello friends" would match when stemming is enabled
-        for the query because "friends" matches "friend". For an example, see the fourth
-        example that follows.
-
-        Similarly, because a "*" wildcard by itself is defined to match the value, the
-        following query will match any element with the QName my-element , regardless of
-        the wildcard indexes enabled in the database configuration:
-        cts:element-value-query(xs:QName("my-element"), "*", "wildcarded")
-
         Native reference: https://docs.marklogic.com/cts:element-value-query
         """
         return _FunctionCall(
@@ -6904,13 +5006,13 @@ class Cts:
 
         Parameters
         ----------
-        element_names : xs:QName*
+        element_names : object
             One or more element QNames.
-        bounds : xs:anyAtomicType*
+        bounds : object
             A sequence of range bounds. The types must match the lexicon type. The
             values must be in strictly ascending order, otherwise an exception is
             thrown.
-        options : xs:string*
+        options : object
             Options. The default is (). Options include: "ascending" Ranges should be
             returned in ascending order. "descending" Ranges should be returned in
             descending order. "empties" Include fully-bounded ranges whose frequency is
@@ -6979,7 +5081,7 @@ class Cts:
             the specified precision. Allowed values: float and double . Only applicable
             if the lexicon value type is point or long-lat-point . This value takes
             precedence over the precision implicit in the coordinate system name.
-        query : cts:query?
+        query : object
             Only include values in fragments selected by the cts:query , and compute
             frequencies from this set of included values. The values do not need to
             match the query, but they must occur in fragments selected by the query. The
@@ -6987,9 +5089,9 @@ class Cts:
             selected in the same manner as "unfiltered" cts:search operations. If a
             string is entered, the string is treated as a cts:word-query of the
             specified string.
-        quality_weight : xs:double?
+        quality_weight : object
             A document quality weight to use when computing scores. The default is 1.0.
-        forest_ids : xs:unsignedLong*
+        forest_ids : object
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
@@ -7001,60 +5103,6 @@ class Cts:
 
         Notes
         -----
-        Only one of "frequency-order" or "item-order" may be specified in the options
-        parameter. If neither "frequency-order" nor "item-order" is specified, then the
-        default is "item-order".
-
-        Only one of "fragment-frequency" or "item-frequency" may be specified in the
-        options parameter. If neither "fragment-frequency" nor "item-frequency" is
-        specified, then the default is "fragment-frequency".
-
-        Only one of "ascending" or "descending" may be specified in the options
-        parameter. If neither "ascending" nor "descending" is specified, then the
-        default is "ascending" if "item-order" is specified, and "descending" if
-        "frequency-order" is specified.
-
-        Only one of "eager" or "lazy" may be specified in the options parameter. If
-        neither "eager" nor "lazy" is specified, then the default is "eager" if
-        "frequency-order" or "empties" is specified, otherwise "lazy".
-
-        Only one of "any", "document", "properties", or "locks" may be specified in the
-        options parameter. If none of "any", "document", "properties", or "locks" are
-        specified and there is a $query parameter, then the default is "document". If
-        there is no $query parameter then the default is "any".
-
-        Only one of the "score-logtfidf", "score-logtf", "score-simple", "score-random",
-        or "score-zero" options may be specified in the options parameter. If none of
-        "score-logtfidf", "score-logtf", "score-simple", "score-random", or "score-zero"
-        are specified, then the default is "score-logtfidf".
-
-        Only one of the "checked" or "unchecked" options may be specified in the options
-        parameter. If neither "checked" nor "unchecked" are specified, then the default
-        is "checked".
-
-        If "collation= URI " is not specified in the options parameter, then the default
-        collation is used. If a lexicon with that collation does not exist, an error is
-        thrown.
-
-        If "sample= N " is not specified in the options parameter, then ranges with all
-        included values may be returned. If a $query parameter is not present, then
-        "sample= N " has no effect.
-
-        If "truncate= N " is not specified in the options parameter, then values from
-        all fragments selected by the $query parameter are included. If a $query
-        parameter is not present, then "truncate= N " has no effect.
-
-        To incrementally fetch a subset of the values returned by this function, use
-        fn:subsequence on the output, rather than the "skip" option. The "skip" option
-        is based on fragments matching the query parameter (if present), not on values.
-        A fragment matched by query might contain multiple values or no values. The
-        number of fragments skipped does not correspond to the number of values. Also,
-        the skip is applied to the relevance ordered query matches, not to the ordered
-        results list.
-
-        When using the "skip" option, use the "truncate" option rather than the "limit"
-        option to control the number of matching fragments from which to draw values.
-
         Native reference: https://docs.marklogic.com/cts:element-value-ranges
         """
         return _FunctionCall(
@@ -7079,14 +5127,14 @@ class Cts:
 
         Parameters
         ----------
-        element_names : xs:QName*
+        element_names : object
             One or more element QNames. If you specify multiple lexicons, they must all
             be over the same value type (string, int, etc.).
-        start : xs:anyAtomicType?
+        start : object
             A starting value. The parameter type must match the lexicon type. If the
             parameter value is not in the lexicon, then the values are returned
             beginning with the next value.
-        options : xs:string*
+        options : object
             Options. The default is (). Options include: "ascending" Values should be
             returned in ascending order. "descending" Values should be returned in
             descending order. "any" Values from any fragment should be included.
@@ -7151,7 +5199,7 @@ class Cts:
             . Only applicable if the lexicon value type is point or long-lat-point .
             This value takes precedence over the precision implicit in the coordinate
             system name.
-        query : cts:query?
+        query : object
             Only include values in fragments selected by the cts:query , and compute
             frequencies from this set of included values. The values do not need to
             match the query, but they must occur in fragments selected by the query. The
@@ -7159,9 +5207,9 @@ class Cts:
             selected in the same manner as "unfiltered" cts:search operations. If a
             string is entered, the string is treated as a cts:word-query of the
             specified string.
-        quality_weight : xs:double?
+        quality_weight : object
             A document quality weight to use when computing scores. The default is 1.0.
-        forest_ids : xs:unsignedLong*
+        forest_ids : object
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
@@ -7173,60 +5221,6 @@ class Cts:
 
         Notes
         -----
-        Only one of "frequency-order" or "item-order" may be specified in the options
-        parameter. If neither "frequency-order" nor "item-order" is specified, then the
-        default is "item-order".
-
-        Only one of "fragment-frequency" or "item-frequency" may be specified in the
-        options parameter. If neither "fragment-frequency" nor "item-frequency" is
-        specified, then the default is "fragment-frequency".
-
-        Only one of "ascending" or "descending" may be specified in the options
-        parameter. If neither "ascending" nor "descending" is specified, then the
-        default is "ascending" if "item-order" is specified, and "descending" if
-        "frequency-order" is specified.
-
-        Only one of "eager" or "lazy" may be specified in the options parameter. If
-        neither "eager" nor "lazy" is specified, then the default is "lazy" if
-        "item-order" is specified, and "eager" if "frequency-order" is specified.
-
-        Only one of "any", "document", "properties", or "locks" may be specified in the
-        options parameter. If none of "any", "document", "properties", or "locks" are
-        specified and there is a $query parameter, then the default is "document". If
-        there is no $query parameter then the default is "any".
-
-        Only one of the "score-logtfidf", "score-logtf", "score-simple", "score-random",
-        or "score-zero" options may be specified in the options parameter. If none of
-        "score-logtfidf", "score-logtf", "score-simple", "score-random", or "score-zero"
-        are specified, then the default is "score-logtfidf".
-
-        Only one of the "checked" or "unchecked" options may be specified in the options
-        parameter. If neither "checked" nor "unchecked" are specified, then the default
-        is "checked".
-
-        If "collation= URI " is not specified in the options parameter, then the default
-        collation is used. If a lexicon with that collation does not exist, an error is
-        thrown.
-
-        If "sample= N " is not specified in the options parameter, then all included
-        values may be returned. If a $query parameter is not present, then "sample= N "
-        has no effect.
-
-        If "truncate= N " is not specified in the options parameter, then values from
-        all fragments selected by the query parameter are included. If a query parameter
-        is not present, then "truncate= N " has no effect.
-
-        To incrementally fetch a subset of the values returned by this function, use
-        fn:subsequence on the output, rather than the "skip" option. The "skip" option
-        is based on fragments matching the query parameter (if present), not on values.
-        A fragment matched by query might contain multiple values or no values. The
-        number of fragments skipped does not correspond to the number of values. Also,
-        the skip is applied to the relevance ordered query matches, not to the ordered
-        values list.
-
-        When using the "skip" option, use the "truncate" option rather than the "limit"
-        option to control the number of matching fragments from which to draw values.
-
         Native reference: https://docs.marklogic.com/cts:element-values
         """
         return _FunctionCall(
@@ -7244,12 +5238,12 @@ class Cts:
 
         Parameters
         ----------
-        node : node()
+        node : object
             A node to run the walk over. The node must be either a document node or an
             element node; it cannot be a text node.
-        element : xs:QName*
+        element : object
             The name of elements to replace.
-        expr : item()*
+        expr : object
             An expression with which to replace each match. You can use the variables
             $cts:node and $cts:action (described below) in the expression.
 
@@ -7260,15 +5254,6 @@ class Cts:
 
         Notes
         -----
-        There are two built-in variables to represent an element match. These variables
-        can be used inline in the expression parameter.
-
-        $cts:node as element() The matching element node. $cts:action as xs:string Use
-        xdmp:set on this to specify what should happen next "continue" (default) Walk
-        the next match. If there are no more matches, return all evaluation results.
-        "skip" Skip walking any more matches and return all evaluation results. "break"
-        Stop walking matches and return all evaluation results.
-
         Native reference: https://docs.marklogic.com/cts:element-walk
         """
         return _FunctionCall(
@@ -7293,11 +5278,11 @@ class Cts:
 
         Parameters
         ----------
-        element_names : xs:QName*
+        element_names : object
             One or more element QNames.
-        pattern : xs:string?
+        pattern : object
             Wildcard pattern to match.
-        options : xs:string*
+        options : object
             Options. The default is (). Options include: "case-sensitive" A
             case-sensitive match. "case-insensitive" A case-insensitive match.
             "diacritic-sensitive" A diacritic-sensitive match. "diacritic-insensitive" A
@@ -7334,16 +5319,16 @@ class Cts:
             especially useful in cases where multiple lexicon calls occur in the same
             query (for example, resolving many facets in a single query). "map" Return
             results as a single map:map value instead of as an xs:string* sequence .
-        query : cts:query?
+        query : object
             Only include words in fragments selected by the cts:query . The words do not
             need to match the query, but the words must occur in fragments selected by
             the query. The fragments are not filtered to ensure they match the query,
             but instead selected in the same manner as "unfiltered" cts:search
             operations. If a string is entered, the string is treated as a
             cts:word-query of the specified string.
-        quality_weight : xs:double?
+        quality_weight : object
             A document quality weight to use when computing scores. The default is 1.0.
-        forest_ids : xs:unsignedLong*
+        forest_ids : object
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
@@ -7355,62 +5340,6 @@ class Cts:
 
         Notes
         -----
-        Only one of "ascending" or "descending" may be specified in the options
-        parameter. If neither "ascending" nor "descending" is specified, then the
-        default is "ascending".
-
-        Only one of "any", "document", "properties", or "locks" may be specified in the
-        options parameter. If none of "any", "document", "properties", or "locks" are
-        specified and there is a $query parameter, then the default is "document". If
-        there is no $query parameter then the default is "any".
-
-        Only one of the "score-logtfidf", "score-logtf", "score-simple", "score-random",
-        or "score-zero" options may be specified in the options parameter. If none of
-        "score-logtfidf", "score-logtf", "score-simple", "score-random", or "score-zero"
-        are specified, then the default is "score-logtfidf".
-
-        Only one of the "checked" or "unchecked" options may be specified in the options
-        parameter. If neither "checked" nor "unchecked" are specified, then the default
-        is "checked".
-
-        If "collation= URI " is not specified in the options parameter, then the default
-        collation is used. If a lexicon with that collation does not exist, an error is
-        thrown.
-
-        If "sample= N " is not specified in the options parameter, then all included
-        words may be returned. If a $query parameter is not present, then "sample= N "
-        has no effect.
-
-        If "truncate= N " is not specified in the options parameter, then words from all
-        fragments selected by the $query parameter are included. If a $query parameter
-        is not present, then "truncate= N " has no effect.
-
-        To incrementally fetch a subset of the values returned by this function, use
-        fn:subsequence on the output, rather than the "skip" option. The "skip" option
-        is based on fragments matching the query parameter (if present), not on values.
-        A fragment matched by query might contain multiple values or no values. The
-        number of fragments skipped does not correspond to the number of values. Also,
-        the skip is applied to the relevance ordered query matches, not to the ordered
-        values list.
-
-        When using the "skip" option, use the "truncate" option rather than the "limit"
-        option to control the number of matching fragments from which to draw values.
-
-        If neither "case-sensitive" nor "case-insensitive" is present, $pattern is used
-        to determine case sensitivity. If $pattern contains no uppercase, it specifies
-        "case-insensitive". If $pattern contains uppercase, it specifies
-        "case-sensitive".
-
-        If neither "diacritic-sensitive" nor "diacritic-insensitive" is present,
-        $pattern is used to determine diacritic sensitivity. If $pattern contains no
-        diacritics, it specifies "diacritic-insensitive". If $pattern contains
-        diacritics, it specifies "diacritic-sensitive".
-
-        Only words that can be matched with element-word-query are included. That is,
-        only words present in immediate text node children of the specified element as
-        well as any text node children of child elements defined in the Admin Interface
-        as element-word-query-throughs or phrase-throughs.
-
         Native reference: https://docs.marklogic.com/cts:element-word-match
         """
         return _FunctionCall(
@@ -7434,13 +5363,13 @@ class Cts:
 
         Parameters
         ----------
-        element_name : xs:QName*
+        element_name : object
             One or more element QNames to match. When multiple QNames are specified, the
             query matches if any QName matches.
-        text : xs:string*
+        text : object
             Some words or phrases to match. When multiple strings are specified, the
             query matches if any string matches.
-        options : xs:string*
+        options : object
             Options to this query. The default is (). Options include: "case-sensitive"
             A case-sensitive query. "case-insensitive" A case-insensitive query.
             "diacritic-sensitive" A diacritic-sensitive query. "diacritic-insensitive" A
@@ -7499,7 +5428,7 @@ class Cts:
             expansion exceeds the specified limit. The server will try to resolve the
             wildcard. "no-limit-check" is default, if neither "limit-check" nor
             "no-limit-check" is explicitly specified.
-        weight : xs:double?
+        weight : object
             A weight for this query. Higher weights move search results up in the
             relevance order. The default is 1.0. The weight should be between 64 and
             -16. Weights greater than 64 will have the same effect as a weight of 64.
@@ -7513,48 +5442,6 @@ class Cts:
 
         Notes
         -----
-        If neither "case-sensitive" nor "case-insensitive" is present, $text is used to
-        determine case sensitivity. If $text contains no uppercase, it specifies
-        "case-insensitive". If $text contains uppercase, it specifies "case-sensitive".
-
-        If neither "diacritic-sensitive" nor "diacritic-insensitive" is present, $text
-        is used to determine diacritic sensitivity. If $text contains no diacritics, it
-        specifies "diacritic-insensitive". If $text contains diacritics, it specifies
-        "diacritic-sensitive".
-
-        If neither "punctuation-sensitive" nor "punctuation-insensitive" is present,
-        $text is used to determine punctuation sensitivity. If $text contains no
-        punctuation, it specifies "punctuation-insensitive". If $text contains
-        punctuation, it specifies "punctuation-sensitive".
-
-        If neither "whitespace-sensitive" nor "whitespace-insensitive" is present, the
-        query is "whitespace-insensitive".
-
-        If neither "wildcarded" nor "unwildcarded" is present, the database
-        configuration and $text determine wildcarding. If the database has any wildcard
-        indexes enabled ("three character searches", "two character searches", "one
-        character searches", or "trailing wildcard searches") and if $text contains
-        either of the wildcard characters '?' or '*', it specifies "wildcarded".
-        Otherwise it specifies "unwildcarded".
-
-        If neither "stemmed" nor "unstemmed" is present, the database configuration
-        determines stemming. If the database has "stemmed searches" enabled, it
-        specifies "stemmed". Otherwise it specifies "unstemmed". If the query is a
-        wildcarded query and also a phrase query (contains two or more terms), the
-        wildcard terms in the query are unstemmed.
-
-        Negative "min-occurs" or "max-occurs" values will be treated as 0 and
-        non-integral values will be rounded down. An error will be raised if the
-        "min-occurs" value is greater than the "max-occurs" value.
-
-        Relevance adjustment for the "distance-weight" option depends on the closest
-        proximity of any two matches of the query. For example,
-        cts:element-word-query(xs:QName("p"),("dog","cat"),("distance-weight=10")) will
-        adjust relevance based on the distance between the closest pair of matches of
-        either "dog" or "cat" within an element named "p" (the pair may consist only of
-        matches of "dog", only of matches of "cat", or a match of "dog" and a match of
-        "cat").
-
         Native reference: https://docs.marklogic.com/cts:element-word-query
         """
         return _FunctionCall(
@@ -7579,13 +5466,13 @@ class Cts:
 
         Parameters
         ----------
-        element_names : xs:QName*
+        element_names : object
             One or more element QNames.
-        start : xs:string?
+        start : object
             A starting word. Returns only this word and any following words from the
             lexicon. If the parameter is not in the lexicon, then it returns the words
             beginning with the next word.
-        options : xs:string*
+        options : object
             Options. The default is (). Options include: "ascending" Words should be
             returned in ascending order. "descending" Words should be returned in
             descending order. "any" Words from any fragment should be included.
@@ -7620,16 +5507,16 @@ class Cts:
             where multiple lexicon calls occur in the same query (for example, resolving
             many facets in a single query). "map" Return results as a single map:map
             value instead of as an xs:string* sequence .
-        query : cts:query?
+        query : object
             Only include words in fragments selected by the cts:query . The words do not
             need to match the query, but the words must occur in fragments selected by
             the query. The fragments are not filtered to ensure they match the query,
             but instead selected in the same manner as "unfiltered" cts:search
             operations. If a string is entered, the string is treated as a
             cts:word-query of the specified string.
-        quality_weight : xs:double?
+        quality_weight : object
             A document quality weight to use when computing scores. The default is 1.0.
-        forest_ids : xs:unsignedLong*
+        forest_ids : object
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
@@ -7641,59 +5528,6 @@ class Cts:
 
         Notes
         -----
-        Only one of "ascending" or "descending" may be specified in the options
-        parameter. If neither "ascending" nor "descending" is specified, then the
-        default is "ascending".
-
-        Only one of "any", "document", "properties", or "locks" may be specified in the
-        options parameter. If none of "any", "document", "properties", or "locks" are
-        specified and there is a $query parameter, then the default is "document". If
-        there is no $query parameter then the default is "any".
-
-        Only one of the "score-logtfidf", "score-logtf", "score-simple", "score-random",
-        or "score-zero" options may be specified in the options parameter. If none of
-        "score-logtfidf", "score-logtf", "score-simple", "score-random", or "score-zero"
-        are specified, then the default is "score-logtfidf".
-
-        Only one of the "checked" or "unchecked" options may be specified in the options
-        parameter. If neither "checked" nor "unchecked" are specified, then the default
-        is "checked".
-
-        If "collation= URI " is not specified in the options parameter, then the default
-        collation is used. If a lexicon with that collation does not exist, an error is
-        thrown.
-
-        If "sample= N " is not specified in the options parameter, then all included
-        words may be returned. If a $query parameter is not present, then "sample= N "
-        has no effect.
-
-        If "truncate= N " is not specified in the options parameter, then words from all
-        fragments selected by the $query parameter are included. If a $query parameter
-        is not present, then "truncate= N " has no effect.
-
-        Only words that can be matched with element-word-query are included. That is,
-        only words present in immediate text node children of the specified element as
-        well as any text node children of child elements defined in the Admin Interface
-        as element-word-query-throughs or phrase-throughs.
-
-        When run without a $query parameter and as a user with the admin role, the word
-        lexicon functions return results that might include words from deleted
-        fragments. However, when run as a user with the admin role and without a $query
-        parameter, the word lexicon functions run faster (because they do not need to
-        look up where each word comes from). It is therefore faster to run word lexicon
-        functions as an admin user without passing a $query parameter.
-
-        To incrementally fetch a subset of the values returned by this function, use
-        fn:subsequence on the output, rather than the "skip" option. The "skip" option
-        is based on fragments matching the query parameter (if present), not on values.
-        A fragment matched by query might contain multiple values or no values. The
-        number of fragments skipped does not correspond to the number of values. Also,
-        the skip is applied to the relevance ordered query matches, not to the ordered
-        values list.
-
-        When using the "skip" option, use the "truncate" option rather than the "limit"
-        option to control the number of matching fragments from which to draw values.
-
         Native reference: https://docs.marklogic.com/cts:element-words
         """
         return _FunctionCall(
@@ -7710,24 +5544,24 @@ class Cts:
 
         Parameters
         ----------
-        id : xs:string
+        id : object
             A unique ID for the entity. A unique entity may have multiple entries in the
             dictionary with different matching words: the unique ID ties them all
             together. For entities created from a SKOS ontology this could be the URI of
             the Concept . The variable $cts:entity-id in cts:entity-highlight and
             cts:entity-walk will be filled in with this ID for each matching entity.
-        normalized_text : xs:string
+        normalized_text : object
             The normalized form of the entity. For entities created from a SKOS ontology
             this could be the preferred label of the Concept . The variable
             $cts:normalized-text in cts:entity-highlight and cts:entity-walk will be
             filled in with this form for each matching entity.
-        text : xs:string
+        text : object
             The word (or phrase) to match during entity extraction. This will be an
             exact match, unless the dictionary was created with the "case-insensitive"
             option, in which case the string is matched with case folding. For entities
             created from a SKOS ontology this could be a label or alternative label for
             the Concept .
-        type : xs:string
+        type : object
             The type of the entity. For entities created from a SKOS ontology this could
             be the id of the top concept for the matching Concept , or its preferred
             label. The variable $cts:entity-type in cts:entity-highlight and
@@ -7755,9 +5589,9 @@ class Cts:
 
         Parameters
         ----------
-        entities : cts:entity*
+        entities : object
             The entities to put into the dictionary.
-        options : xs:string*
+        options : object
             Dictionary building options. The default is case-sensitive, allow-overlaps,
             and whole-words. Options include: "case-sensitive" Entity names are
             case-sensitive. "case-insensitive" Entity names are case-insensitive.
@@ -7773,13 +5607,6 @@ class Cts:
 
         Notes
         -----
-        Only one of "case-sensitive" and "case-insensitive", "whole-words" and
-        "partial-words", and "allow-overlaps" and "remove-overlaps" is permitted. It is
-        strongly recommended that the defaults be used.
-
-        Use this method when creating ad hoc entity dictionaries, or as a prelude to
-        saving the entity dictionary to the database.
-
         Native reference: https://docs.marklogic.com/cts:entity-dictionary
         """
         return _FunctionCall(
@@ -7796,7 +5623,7 @@ class Cts:
 
         Parameters
         ----------
-        uri : xs:string
+        uri : object
             URI of a previously saved entity dictionary.
 
         Returns
@@ -7806,8 +5633,6 @@ class Cts:
 
         Notes
         -----
-        XDMP-NOSUCHDICT
-
         Native reference: https://docs.marklogic.com/cts:entity-dictionary-get
         """
         return _FunctionCall(
@@ -7824,14 +5649,14 @@ class Cts:
 
         Parameters
         ----------
-        contents : xs:string*
+        contents : object
             The dictionary entries to parse. Each line (or string) must consist of four
             tab-delimited fields: The entity ID, the normalized form of the entity, the
             word or phrase to match during entity identification, and the entity type.
             For more details about the fields, see cts:entity . Multiple formatted
             strings can be passed in and they will be combined into a single dictionary
             object.
-        options : xs:string*
+        options : object
             Dictionary building options. The default is case-sensitive, allow-overlaps,
             and whole-words. Options include: "case-sensitive" Entity names are
             case-sensitive. "case-insensitive" Entity names are case-insensitive.
@@ -7864,14 +5689,14 @@ class Cts:
 
         Parameters
         ----------
-        node : node()
+        node : object
             A node to run entity highlight on. The node must be either a document node
             or an element node; it cannot be a text node.
-        expr : item()*
+        expr : object
             An expression with which to replace each match. You can use the variables
             $cts:text , $cts:node , $cts:entity-type and $cts:normalized-text ,
             $cts:start , and $cts:action (described below) in the expression.
-        dict : cts:entity-dictionary
+        dict : object
             The entity dictionary to use for matching entities in the text of the input
             node. If you omit this parameter, the default entity dictionary is used. (No
             default dictionaries currently exist.) See the Usage Notes for details.
@@ -7883,47 +5708,6 @@ class Cts:
 
         Notes
         -----
-        In addition to a valid Entity Enrichment license key, this function requires
-        that you have installed the Entity Enrichment package. For details on installing
-        the Entity Enrichment package, see the Installation Guide and the "Marking Up
-        Documents With Entity Enrichment" chapter of the Search Developer's Guide .
-
-        There are six built-in variables to represent an entity match. These variables
-        can be used inline in the expression parameter.
-
-        $cts:text as xs:string The matched text. $cts:node as text() The node containing
-        the matched text. $cts:start as xs:integer The string-length position of the
-        first character of $cts:text in $cts:node . Therefore, the following always
-        returns true: fn:substring($cts:node, $cts:start, fn:string-length($cts:text))
-        eq $cts:text $cts:action as xs:string Use xdmp:set on this to specify what
-        should happen next "continue" (default) Walk the next match. If there are no
-        more matches, return all evaluation results. "skip" Skip walking any more
-        matches and return all evaluation results. "break" Stop walking matches and
-        return all evaluation results. $cts:entity-type as xs:string The type of the
-        matching entity. $cts:normalized-text as xs:string The normalized entity text
-        (only applicable for some languages).
-
-        The following are the entity types returned from the $cts:entity-type built-in
-        variable (in alphabetical order):
-
-        FACILITY A place used as a facility. GPE Geo-political entity. Differs from
-        location because it has a person-made aspect to it (for example, California is a
-        GPE because its boundaries were defined by a government).
-        IDENTIFIER:CREDIT_CARD_NUM A number identifying a credit card number.
-        IDENTIFIER:DISTANCE A number identifying a distance. IDENTIFIER:EMAIL Identifies
-        an email address. IDENTIFIER:LATITUDE_LONGITUDE Latitude and longitude
-        coordinates. IDENTIFIER:MONEY Identifies currency (dollars, euros, and so on).
-        IDENTIFIER:NUMBER Identifies a number. IDENTIFIER:PERSONAL_ID_NUM A number
-        identifying a social security number or other ID number. IDENTIFIER:PHONE_NUMBER
-        A number identifying a telephone number. IDENTIFIER:URL Identifies a web site
-        address (URL). IDENTIFIER:UTM Identifies Universal Transverse Mercator
-        coordinates. LOCATION A geographic location (Mount Everest, for example).
-        NATIONALITY The nationality of someone or something (for example, American).
-        ORGANIZATION An organization. PERSON A person. RELIGION A religion.
-        TEMPORAL:DATE Date-related. TEMPORAL:TIME Time-related. TITLE Appellation or
-        honorific associated with a person. URL A URL on the world wide web. UTM A point
-        in the Universal Transverse Mercator (UTM) coordinate system.
-
         Native reference: https://docs.marklogic.com/cts:entity-highlight
         """
         return _FunctionCall(
@@ -7941,15 +5725,15 @@ class Cts:
 
         Parameters
         ----------
-        node : node()
+        node : object
             A node to walk. The node must be either an XML document node or an XML
             element node; it cannot be a text node.
-        expr : item()*
+        expr : object
             An expression to evaluate for each match. You can use the variables
             $cts:text , $cts:node , $cts:entity-type , $cts:normalized-text ,
             $cts:entity-id , $cts:start , and $cts:action in the expression. See the
             Usage Notes for details.
-        dict : cts:entity-dictionary
+        dict : object
             The entity dictionary to use for matching entities in the text of the input
             node. If you omit this parameter, the default entity dictionary is used. (No
             default dictionaries currently exist.) See the Usage Notes for details.
@@ -7961,25 +5745,6 @@ class Cts:
 
         Notes
         -----
-        The following variables are available for use inline in the expr parameter.
-        These variables make aspects of the matched entity available to your inline
-        code. $cts:node as text() The node containing the match. $cts:text as xs:string
-        The matched text. In the case of overlapping matches, this value may not
-        encompass the entirety of the entity match string. Rather, it contains only the
-        non-overlapping part of the text, in order to prevent introduction of duplicate
-        text in the final result. $cts:entity-type The type of the matched entity, as
-        defined by the type field of the matching entity dictionary entry.
-        $cts:entity-id The ID of the matched entity, as defined by the id field of the
-        matching entity dictionary entry. $cts:normalized-text as xs:string The
-        normalized entity text (only applicable to some languages). $cts:start as
-        xs:integer The offset (in codepoints) of the start of $cts:text in the matched
-        text node. $cts:action as xs:string The action to take. Use xdmp:set on this
-        variable in your inline code to specify what should happen next. Use xdmp:set to
-        set the value to one of the following: "continue" Walk the next match. If there
-        are no more matches, return all evaluation results. This is the default action.
-        "skip" Skip walking any more matches and return all evaluation results. "break"
-        Stop walking matches and return all evaluation results.
-
         Native reference: https://docs.marklogic.com/cts:entity-walk
         """
         return _FunctionCall(
@@ -8003,14 +5768,14 @@ class Cts:
 
         Parameters
         ----------
-        query : cts:query?
+        query : object
             Query to estimate. None supplies the required empty query slot.
-        options : (cts:order|xs:string)*
+        options : object
             Options to this search. The default is (). See cts.search for details on
             available options.
-        quality_weight : xs:double?
+        quality_weight : object
             A document quality weight to use when computing scores. The default is 1.0.
-        forest_ids : xs:unsignedLong*
+        forest_ids : object
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             (). In the XQuery version, you can use cts:search with this parameter and an
@@ -8018,7 +5783,7 @@ class Cts:
             third example below). If you use this to constrain an XPath to one or more
             forests, you should set the quality-weight to zero to keep the XPath
             document order.
-        maximum : xs:double?
+        maximum : object
             The maximum value to return. Stop selecting fragments if this number is
             reached.
 
@@ -8073,20 +5838,20 @@ class Cts:
 
         Parameters
         ----------
-        field_name : xs:string*
+        field_name : object
             One or more field names to match. When multiple field names are specified,
             the query matches if any field name matches.
-        operator : xs:string
+        operator : object
             A comparison operator. Operators include: "<" Match range index values less
             than $value. "<=" Match range index values less than or equal to $value. ">"
             Match range index values greater than $value. ">=" Match range index values
             greater than or equal to $value. "=" Match range index values equal to
             $value. "!=" Match range index values not equal to $value.
-        value : xs:anyAtomicType*
+        value : object
             One or more field values to match. When multiple values are specified, the
             query matches if any value matches. The value must be a type for which there
             is a range index defined.
-        options : xs:string*
+        options : object
             Options to this query. The default is (). Options include: "collation= URI "
             Use the range index with the collation specified by URI . If not specified,
             then the default collation from the query is used. If a range index with the
@@ -8113,7 +5878,7 @@ class Cts:
             more than one of the synonyms are scored as if there are more occurrences of
             the same term (as opposed to having a separate term that contributes to
             score).
-        weight : xs:double?
+        weight : object
             A weight for this query. The default is 1.0.
 
         Returns
@@ -8123,44 +5888,6 @@ class Cts:
 
         Notes
         -----
-        If you want to constrain on a range of values, you can combine multiple
-        cts:field-range-query constructors together with cts:and-query or any of the
-        other composable cts:query constructors.
-
-        If neither "cached" nor "uncached" is present, it specifies "cached".
-
-        The "cached-incremental" option can improve performance if you repeatedly
-        perform range queries on date or dateTime values over a short range that does
-        not vary widely over short period of time. To benefit, the operator should
-        remain the same "direction" (<,<=, or >,>=) across calls, the bounding date or
-        dateTime changes slightly across calls, and the query runs very frequently
-        (multiple times per minute). Note that using this options creates significantly
-        more cached queries than the "cached" option.
-
-        The "cached-incremental" option has the following restrictions and interactions:
-        The "min-occurs" and "max-occurs" options will be ignored if you use
-        "cached-incremental" in unfiltered search. You can only use
-        "score-function=zero" with "cached-incremental". The "cached-incremental" option
-        behaves like "cached" if you are not querying date or dateTime values.
-
-        Negative "min-occurs" or "max-occurs" values will be treated as 0 and
-        non-integral values will be rounded down. An error will be raised if the
-        "min-occurs" value is greater than the "max-occurs" value.
-
-        "score-function=linear" means that values that are further away from the bounds
-        will score higher. "score-function=reciprocal" means that values that are closer
-        to the bounds will score higher. The functions are scaled appropriately for
-        different types, so that in general the default slope factor will provide useful
-        results. Using a slope factor greater than 1 gives distinct scores over a
-        smaller range of values, and produces generally higher scores. Using a slope
-        factor less than 1 gives distinct scores over a wider range of values, and
-        produces generally lower scores.
-
-        For queries against a dateTime index, when $value is an xs:dayTimeDuration or
-        xs:yearMonthDuration, the query is executed as an age query. $value is
-        subtracted from fn:current-dateTime() to create an xs:dateTime used in the
-        query. If there is more than one item in $value, they must all be the same type.
-
         Native reference: https://docs.marklogic.com/cts:field-range-query
         """
         return _FunctionCall(
@@ -8178,9 +5905,9 @@ class Cts:
 
         Parameters
         ----------
-        field : xs:string
+        field : object
             A field name.
-        options : xs:string*
+        options : object
             Options. The default is (). Options include: "type= type " Use the lexicon
             with the type specified by type (int, unsignedInt, long, unsignedLong,
             float, double, decimal, dateTime, time, date, gYearMonth, gYear, gMonth,
@@ -8231,11 +5958,11 @@ class Cts:
 
         Parameters
         ----------
-        field_name_1 : xs:string
+        field_name_1 : object
             A string.
-        field_name_2 : xs:string
+        field_name_2 : object
             A string.
-        options : xs:string*
+        options : object
             Options. The default is (). Options include: "ascending" Co-occurrences
             should be returned in ascending order. "descending" Co-occurrences should be
             returned in descending order. "any" Co-occurrences from any fragment should
@@ -8317,7 +6044,7 @@ class Cts:
             float and double . Only applicable if the lexicon value type is point or
             long-lat-point . This value takes precedence over the precision implicit in
             the coordinate system name.
-        query : cts:query?
+        query : object
             Only include co-occurrences in fragments selected by the cts:query , and
             compute frequencies from this set of included co-occurrences. The
             co-occurrences do not need to match the query, but they must occur in
@@ -8325,9 +6052,9 @@ class Cts:
             they match the query, but instead selected in the same manner as
             "unfiltered" cts:search operations. If a string is entered, the string is
             treated as a cts:word-query of the specified string.
-        quality_weight : xs:double?
+        quality_weight : object
             A document quality weight to use when computing scores. The default is 1.0.
-        forest_ids : xs:unsignedLong*
+        forest_ids : object
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
@@ -8339,60 +6066,6 @@ class Cts:
 
         Notes
         -----
-        Only one of "frequency-order" or "item-order" may be specified in the options
-        parameter. If neither "frequency-order" nor "item-order" is specified, then the
-        default is "item-order".
-
-        Only one of "fragment-frequency" or "item-frequency" may be specified in the
-        options parameter. If neither "fragment-frequency" nor "item-frequency" is
-        specified, then the default is "fragment-frequency".
-
-        Only one of "ascending" or "descending" may be specified in the options
-        parameter. If neither "ascending" nor "descending" is specified, then the
-        default is "ascending" if "item-order" is specified, and "descending" if
-        "frequency-order" is specified.
-
-        Only one of "eager" or "lazy" may be specified in the options parameter. If
-        neither "eager" nor "lazy" is specified, then the default is "eager" if
-        "frequency-order" or "map" is specified, otherwise "lazy".
-
-        Only one of "any", "document", "properties", or "locks" may be specified in the
-        options parameter. If none of "any", "document", "properties", or "locks" are
-        specified and there is a $query parameter, then the default is "document". If
-        there is no $query parameter then the default is "any".
-
-        Only one of the "score-logtfidf", "score-logtf", "score-simple", "score-random",
-        or "score-zero" options may be specified in the options parameter. If none of
-        "score-logtfidf", "score-logtf", "score-simple", "score-random", or "score-zero"
-        are specified, then the default is "score-logtfidf".
-
-        Only one of the "checked" or "unchecked" options may be specified in the options
-        parameter. If neither "checked" nor "unchecked" are specified, then the default
-        is "checked".
-
-        If "collation= URI " is not specified in the options parameter, then the default
-        collation is used. If a lexicon with that collation does not exist, an error is
-        thrown.
-
-        If "sample= N " is not specified in the options parameter, then all included
-        co-occurrences may be returned. If a $query parameter is not present, then
-        "sample= N " has no effect.
-
-        If "truncate= N " is not specified in the options parameter, then co-occurrences
-        from all fragments selected by the $query parameter are included. If a $query
-        parameter is not present, then "truncate= N " has no effect.
-
-        To incrementally fetch a subset of the co-occurrences returned by this function,
-        use fn:subsequence on the output, rather than the "skip" option. The "skip"
-        option is based on fragments matching the query parameter (if present), not on
-        values. A fragment matched by query might contain multiple occurrences or no
-        occurrences. The number of fragments skipped does not correspond to the number
-        of values. Also, the skip is applied to the relevance ordered query matches, not
-        to the ordered co-occurrences list.
-
-        When using the "skip" option, use the "truncate" option rather than the "limit"
-        option to control the number of matching fragments from which to draw values.
-
         Native reference: https://docs.marklogic.com/cts:field-value-co-occurrences
         """
         return _FunctionCall(
@@ -8418,12 +6091,12 @@ class Cts:
 
         Parameters
         ----------
-        field_names : xs:string*
+        field_names : object
             One or more field names.
-        pattern : xs:anyAtomicType
+        pattern : object
             A pattern to match. The parameter type must match the lexicon type. String
             parameters may include wildcard characters.
-        options : xs:string*
+        options : object
             Options. The default is (). Options include: "case-sensitive" A
             case-sensitive match. "case-insensitive" A case-insensitive match.
             "diacritic-sensitive" A diacritic-sensitive match. "diacritic-insensitive" A
@@ -8490,7 +6163,7 @@ class Cts:
             . Only applicable if the lexicon value type is point or long-lat-point .
             This value takes precedence over the precision implicit in the coordinate
             system name.
-        query : cts:query?
+        query : object
             Only include values in fragments selected by the cts:query , and compute
             frequencies from this set of included values. The values do not need to
             match the query, but they must occur in fragments selected by the query. The
@@ -8498,9 +6171,9 @@ class Cts:
             selected in the same manner as "unfiltered" cts:search operations. If a
             string is entered, the string is treated as a cts:word-query of the
             specified string.
-        quality_weight : xs:double?
+        quality_weight : object
             A document quality weight to use when computing scores. The default is 1.0.
-        forest_ids : xs:unsignedLong*
+        forest_ids : object
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
@@ -8512,70 +6185,6 @@ class Cts:
 
         Notes
         -----
-        Only one of "frequency-order" or "item-order" may be specified in the options
-        parameter. If neither "frequency-order" nor "item-order" is specified, then the
-        default is "item-order".
-
-        Only one of "fragment-frequency" or "item-frequency" may be specified in the
-        options parameter. If neither "fragment-frequency" nor "item-frequency" is
-        specified, then the default is "fragment-frequency".
-
-        Only one of "ascending" or "descending" may be specified in the options
-        parameter. If neither "ascending" nor "descending" is specified, then the
-        default is "ascending" if "item-order" is specified, and "descending" if
-        "frequency-order" is specified.
-
-        Only one of "eager" or "lazy" may be specified in the options parameter. If
-        neither "eager" nor "lazy" is specified, then the default is "lazy" if
-        "item-order" is specified, and "eager" if "frequency-order" is specified.
-
-        Only one of "any", "document", "properties", or "locks" may be specified in the
-        options parameter. If none of "any", "document", "properties", or "locks" are
-        specified and there is a $query parameter, then the default is "document". If
-        there is no $query parameter then the default is "any".
-
-        Only one of the "score-logtfidf", "score-logtf", "score-simple", "score-random",
-        or "score-zero" options may be specified in the options parameter. If none of
-        "score-logtfidf", "score-logtf", "score-simple", "score-random", or "score-zero"
-        are specified, then the default is "score-logtfidf".
-
-        Only one of the "checked" or "unchecked" options may be specified in the options
-        parameter. If neither "checked" nor "unchecked" are specified, then the default
-        is "checked".
-
-        If "collation= URI " is not specified in the options parameter, then the default
-        collation is used. If a range index with that collation does not exist, an error
-        is thrown.
-
-        If "sample= N " is not specified in the options parameter, then all included
-        values may be returned. If a $query parameter is not present, then "sample= N "
-        has no effect.
-
-        If "truncate= N " is not specified in the options parameter, then values from
-        all fragments selected by the $query parameter are included. If a $query
-        parameter is not present, then "truncate= N " has no effect.
-
-        To incrementally fetch a subset of the values returned by this function, use
-        fn:subsequence on the output, rather than the "skip" option. The "skip" option
-        is based on fragments matching the query parameter (if present), not on values.
-        A fragment matched by query might contain multiple values or no values. The
-        number of fragments skipped does not correspond to the number of values. Also,
-        the skip is applied to the relevance ordered query matches, not to the ordered
-        values list.
-
-        When using the "skip" option, use the "truncate" option rather than the "limit"
-        option to control the number of matching fragments from which to draw values.
-
-        If neither "case-sensitive" nor "case-insensitive" is present, $pattern is used
-        to determine case sensitivity. If $pattern contains no uppercase, it specifies
-        "case-insensitive". If $pattern contains uppercase, it specifies
-        "case-sensitive".
-
-        If neither "diacritic-sensitive" nor "diacritic-insensitive" is present,
-        $pattern is used to determine diacritic sensitivity. If $pattern contains no
-        diacritics, it specifies "diacritic-insensitive". If $pattern contains
-        diacritics, it specifies "diacritic-sensitive".
-
         Native reference: https://docs.marklogic.com/cts:field-value-match
         """
         return _FunctionCall(
@@ -8599,17 +6208,17 @@ class Cts:
 
         Parameters
         ----------
-        field_name : xs:string*
+        field_name : object
             One or more field names to search over. If multiple field names are
             supplied, the match can be in any of the specified fields (or-query
             semantics).
-        text : xs:anyAtomicType*
+        text : object
             The values to match. If multiple values are specified, the query matches if
             any of the values match (or-query semantics). For XML and metadata, the
             values should be strings. For JSON, the values can be strings, numbers or
             booleans to match correspondingly typed nodes. To match null, pass in the
             empty sequence.
-        options : xs:string*
+        options : object
             Options to this query. The default is (). Options include: "case-sensitive"
             A case-sensitive query. "case-insensitive" A case-insensitive query.
             "diacritic-sensitive" A diacritic-sensitive query. "diacritic-insensitive" A
@@ -8650,7 +6259,7 @@ class Cts:
             limit. "no-limit-check" Specifies that error will not be raised if the
             lexicon expansion exceeds the specified limit. The server will try to
             resolve the wildcard.
-        weight : xs:double?
+        weight : object
             A weight for this query. Higher weights move search results up in the
             relevance order. The default is 1.0. The weight should be between 64 and
             -16. Weights greater than 64 will have the same effect as a weight of 64.
@@ -8664,57 +6273,6 @@ class Cts:
 
         Notes
         -----
-        If you use cts:near-query with cts:field-value-query , the distance supplied in
-        the near query applies to the whole document, not just to the field. For
-        example, if you specify a near query with a distance of 3, it will return
-        matches when the values are within 3 words in the whole document, For a code
-        example illustrating this, see the second example below.
-
-        Values are determined based on words (tokens)of values of elements that are
-        included in the field. Field values span all the included elements. They cannot
-        span excluded elements (this is because MarkLogic Server breaks out of the field
-        when it encounters the excluded element and start it again field when it
-        encounters the next included element). Field values will also span included
-        sibling elements.
-
-        If neither "case-sensitive" nor "case-insensitive" is present, $text is used to
-        determine case sensitivity. If $text contains no uppercase, it specifies
-        "case-insensitive". If $text contains uppercase, it specifies "case-sensitive".
-
-        If neither "diacritic-sensitive" nor "diacritic-insensitive" is present, $text
-        is used to determine diacritic sensitivity. If $text contains no diacritics, it
-        specifies "diacritic-insensitive". If $text contains diacritics, it specifies
-        "diacritic-sensitive".
-
-        If neither "punctuation-sensitive" nor "punctuation-insensitive" is present,
-        $text is used to determine punctuation sensitivity. If $text contains no
-        punctuation, it specifies "punctuation-insensitive". If $text contains
-        punctuation, it specifies "punctuation-sensitive".
-
-        If neither "whitespace-sensitive" nor "whitespace-insensitive" is present, the
-        query is "whitespace-insensitive".
-
-        If neither "wildcarded" nor "unwildcarded" is present, the database
-        configuration and $text determine wildcarding. If the database has any wildcard
-        indexes enabled ("three character searches", "two character searches", "one
-        character searches", or "trailing wildcard searches") and if $text contains
-        either of the wildcard characters '?' or '*', it specifies "wildcarded".
-        Otherwise it specifies "unwildcarded".
-
-        If neither "stemmed" nor "unstemmed" is present, the database configuration
-        determines stemming. If the database has "stemmed searches" enabled, it
-        specifies "stemmed". Otherwise it specifies "unstemmed". If the query is a
-        wildcarded query and also a phrase query (contains two or more terms), the
-        wildcard terms in the query are unstemmed.
-
-        When you use the "exact" option, you should also enable "fast case sensitive
-        searches" and "fast diacritic sensitive searches" in your database
-        configuration.
-
-        Negative "min-occurs" or "max-occurs" values will be treated as 0 and
-        non-integral values will be rounded down. An error will be raised if the
-        "min-occurs" value is greater than the "max-occurs" value.
-
         Native reference: https://docs.marklogic.com/cts:field-value-query
         """
         return _FunctionCall(
@@ -8739,13 +6297,13 @@ class Cts:
 
         Parameters
         ----------
-        field_names : xs:string*
+        field_names : object
             One or more element QNames.
-        bounds : xs:anyAtomicType*
+        bounds : object
             A sequence of range bounds. The types must match the lexicon type. The
             values must be in strictly ascending order, otherwise an exception is
             thrown.
-        options : xs:string*
+        options : object
             Options. The default is (). Options include: "ascending" Ranges should be
             returned in ascending order. "descending" Ranges should be returned in
             descending order. "empties" Include fully-bounded ranges whose frequency is
@@ -8814,7 +6372,7 @@ class Cts:
             the specified precision. Allowed values: float and double . Only applicable
             if the lexicon value type is point or long-lat-point . This value takes
             precedence over the precision implicit in the coordinate system name.
-        query : cts:query?
+        query : object
             Only include values in fragments selected by the cts:query , and compute
             frequencies from this set of included values. The values do not need to
             match the query, but they must occur in fragments selected by the query. The
@@ -8822,9 +6380,9 @@ class Cts:
             selected in the same manner as "unfiltered" cts:search operations. If a
             string is entered, the string is treated as a cts:word-query of the
             specified string.
-        quality_weight : xs:double?
+        quality_weight : object
             A document quality weight to use when computing scores. The default is 1.0.
-        forest_ids : xs:unsignedLong*
+        forest_ids : object
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
@@ -8836,60 +6394,6 @@ class Cts:
 
         Notes
         -----
-        Only one of "frequency-order" or "item-order" may be specified in the options
-        parameter. If neither "frequency-order" nor "item-order" is specified, then the
-        default is "item-order".
-
-        Only one of "fragment-frequency" or "item-frequency" may be specified in the
-        options parameter. If neither "fragment-frequency" nor "item-frequency" is
-        specified, then the default is "fragment-frequency".
-
-        Only one of "ascending" or "descending" may be specified in the options
-        parameter. If neither "ascending" nor "descending" is specified, then the
-        default is "ascending" if "item-order" is specified, and "descending" if
-        "frequency-order" is specified.
-
-        Only one of "eager" or "lazy" may be specified in the options parameter. If
-        neither "eager" nor "lazy" is specified, then the default is "eager" if
-        "frequency-order" or "empties" is specified, otherwise "lazy".
-
-        Only one of "any", "document", "properties", or "locks" may be specified in the
-        options parameter. If none of "any", "document", "properties", or "locks" are
-        specified and there is a $query parameter, then the default is "document". If
-        there is no $query parameter then the default is "any".
-
-        Only one of the "score-logtfidf", "score-logtf", "score-simple", "score-random",
-        or "score-zero" options may be specified in the options parameter. If none of
-        "score-logtfidf", "score-logtf", "score-simple", "score-random", or "score-zero"
-        are specified, then the default is "score-logtfidf".
-
-        Only one of the "checked" or "unchecked" options may be specified in the options
-        parameter. If neither "checked" nor "unchecked" are specified, then the default
-        is "checked".
-
-        If "collation= URI " is not specified in the options parameter, then the default
-        collation is used. If a lexicon with that collation does not exist, an error is
-        thrown.
-
-        If "sample= N " is not specified in the options parameter, then ranges with all
-        included values may be returned. If a $query parameter is not present, then
-        "sample= N " has no effect.
-
-        If "truncate= N " is not specified in the options parameter, then values from
-        all fragments selected by the $query parameter are included. If a $query
-        parameter is not present, then "truncate= N " has no effect.
-
-        To incrementally fetch a subset of the values returned by this function, use
-        fn:subsequence on the output, rather than the "skip" option. The "skip" option
-        is based on fragments matching the query parameter (if present), not on values.
-        A fragment matched by query might contain multiple values or no values. The
-        number of fragments skipped does not correspond to the number of values. Also,
-        the skip is applied to the relevance ordered query matches, not to the ordered
-        results list.
-
-        When using the "skip" option, use the "truncate" option rather than the "limit"
-        option to control the number of matching fragments from which to draw values.
-
         Native reference: https://docs.marklogic.com/cts:field-value-ranges
         """
         return _FunctionCall(
@@ -8914,13 +6418,13 @@ class Cts:
 
         Parameters
         ----------
-        field_names : xs:string*
+        field_names : object
             One or more field names.
-        start : xs:anyAtomicType?
+        start : object
             A starting value. The parameter type must match the lexicon type. If the
             parameter value is not in the lexicon, then the values are returned
             beginning with the next value.
-        options : xs:string*
+        options : object
             Options. The default is (). Options include: "ascending" Values should be
             returned in ascending order. "descending" Values should be returned in
             descending order. "any" Values from any fragment should be included.
@@ -8978,7 +6482,7 @@ class Cts:
             query (for example, resolving many facets in a single query). "map" Return
             results as a single map:map value instead of as an xs:anyAtomicType*
             sequence .
-        query : cts:query?
+        query : object
             Only include values in fragments selected by the cts:query , and compute
             frequencies from this set of included values. The values do not need to
             match the query, but they must occur in fragments selected by the query. The
@@ -8986,9 +6490,9 @@ class Cts:
             selected in the same manner as "unfiltered" cts:search operations. If a
             string is entered, the string is treated as a cts:word-query of the
             specified string.
-        quality_weight : xs:double?
+        quality_weight : object
             A document quality weight to use when computing scores. The default is 1.0.
-        forest_ids : xs:unsignedLong*
+        forest_ids : object
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
@@ -9000,60 +6504,6 @@ class Cts:
 
         Notes
         -----
-        Only one of "frequency-order" or "item-order" may be specified in the options
-        parameter. If neither "frequency-order" nor "item-order" is specified, then the
-        default is "item-order".
-
-        Only one of "fragment-frequency" or "item-frequency" may be specified in the
-        options parameter. If neither "fragment-frequency" nor "item-frequency" is
-        specified, then the default is "fragment-frequency".
-
-        Only one of "ascending" or "descending" may be specified in the options
-        parameter. If neither "ascending" nor "descending" is specified, then the
-        default is "ascending" if "item-order" is specified, and "descending" if
-        "frequency-order" is specified.
-
-        Only one of "eager" or "lazy" may be specified in the options parameter. If
-        neither "eager" nor "lazy" is specified, then the default is "lazy" if
-        "item-order" is specified, and "eager" if "frequency-order" is specified.
-
-        Only one of "any", "document", "properties", or "locks" may be specified in the
-        options parameter. If none of "any", "document", "properties", or "locks" are
-        specified and there is a $query parameter, then the default is "document". If
-        there is no $query parameter then the default is "any".
-
-        Only one of the "score-logtfidf", "score-logtf", "score-simple", "score-random",
-        or "score-zero" options may be specified in the options parameter. If none of
-        "score-logtfidf", "score-logtf", "score-simple", "score-random", or "score-zero"
-        are specified, then the default is "score-logtfidf".
-
-        Only one of the "checked" or "unchecked" options may be specified in the options
-        parameter. If neither "checked" nor "unchecked" are specified, then the default
-        is "checked".
-
-        If "collation= URI " is not specified in the options parameter, then the default
-        collation is used. If a lexicon with that collation does not exist, an error is
-        thrown.
-
-        If "sample= N " is not specified in the options parameter, then all included
-        values may be returned. If a $query parameter is not present, then "sample= N "
-        has no effect.
-
-        If "truncate= N " is not specified in the options parameter, then values from
-        all fragments selected by the $query parameter are included. If a $query
-        parameter is not present, then "truncate= N " has no effect.
-
-        To incrementally fetch a subset of the values returned by this function, use
-        fn:subsequence on the output, rather than the "skip" option. The "skip" option
-        is based on fragments matching the query parameter (if present), not on values.
-        A fragment matched by query might contain multiple values or no values. The
-        number of fragments skipped does not correspond to the number of values. Also,
-        the skip is applied to the relevance ordered query matches, not to the ordered
-        values list.
-
-        When using the "skip" option, use the "truncate" option rather than the "limit"
-        option to control the number of matching fragments from which to draw values.
-
         Native reference: https://docs.marklogic.com/cts:field-values
         """
         return _FunctionCall(
@@ -9079,11 +6529,11 @@ class Cts:
 
         Parameters
         ----------
-        field_names : xs:string*
+        field_names : object
             One or more field names.
-        pattern : xs:string
+        pattern : object
             Wildcard pattern to match.
-        options : xs:string*
+        options : object
             Options. The default is (). Options include: "case-sensitive" A
             case-sensitive match. "case-insensitive" A case-insensitive match.
             "diacritic-sensitive" A diacritic-sensitive match. "diacritic-insensitive" A
@@ -9120,16 +6570,16 @@ class Cts:
             especially useful in cases where multiple lexicon calls occur in the same
             query (for example, resolving many facets in a single query). "map" Return
             results as a single map:map value instead of as an xs:string* sequence .
-        query : cts:query?
+        query : object
             Only include words in fragments selected by the cts:query . The words do not
             need to match the query, but the words must occur in fragments selected by
             the query. The fragments are not filtered to ensure they match the query,
             but instead selected in the same manner as "unfiltered" cts:search
             operations. If a string is entered, the string is treated as a
             cts:word-query of the specified string.
-        quality_weight : xs:double?
+        quality_weight : object
             A document quality weight to use when computing scores. The default is 1.0.
-        forest_ids : xs:unsignedLong*
+        forest_ids : object
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
@@ -9141,62 +6591,6 @@ class Cts:
 
         Notes
         -----
-        Only one of "ascending" or "descending" may be specified in the options
-        parameter. If neither "ascending" nor "descending" is specified, then the
-        default is "ascending".
-
-        Only one of "any", "document", "properties", or "locks" may be specified in the
-        options parameter. If none of "any", "document", "properties", or "locks" are
-        specified and there is a $query parameter, then the default is "document". If
-        there is no $query parameter then the default is "any".
-
-        Only one of the "score-logtfidf", "score-logtf", "score-simple", "score-random",
-        or "score-zero" options may be specified in the options parameter. If none of
-        "score-logtfidf", "score-logtf", "score-simple", "score-random", or "score-zero"
-        are specified, then the default is "score-logtfidf".
-
-        Only one of the "checked" or "unchecked" options may be specified in the options
-        parameter. If neither "checked" nor "unchecked" are specified, then the default
-        is "checked".
-
-        If "collation= URI " is not specified in the options parameter, then the default
-        collation is used. If a lexicon with that collation does not exist, an error is
-        thrown.
-
-        If "sample= N " is not specified in the options parameter, then all included
-        words may be returned. If a $query parameter is not present, then "sample= N "
-        has no effect.
-
-        If "truncate= N " is not specified in the options parameter, then words from all
-        fragments selected by the $query parameter are included. If a $query parameter
-        is not present, then "truncate= N " has no effect.
-
-        To incrementally fetch a subset of the values returned by this function, use
-        fn:subsequence on the output, rather than the "skip" option. The "skip" option
-        is based on fragments matching the query parameter (if present), not on values.
-        A fragment matched by query might contain multiple values or no values. The
-        number of fragments skipped does not correspond to the number of values. Also,
-        the skip is applied to the relevance ordered query matches, not to the ordered
-        values list.
-
-        When using the "skip" option, use the "truncate" option rather than the "limit"
-        option to control the number of matching fragments from which to draw values.
-
-        If neither "case-sensitive" nor "case-insensitive" is present, $pattern is used
-        to determine case sensitivity. If $pattern contains no uppercase, it specifies
-        "case-insensitive". If $pattern contains uppercase, it specifies
-        "case-sensitive".
-
-        If neither "diacritic-sensitive" nor "diacritic-insensitive" is present,
-        $pattern is used to determine diacritic sensitivity. If $pattern contains no
-        diacritics, it specifies "diacritic-insensitive". If $pattern contains
-        diacritics, it specifies "diacritic-sensitive".
-
-        Only words that can be matched with field-word-query are included. That is, only
-        words present in immediate text node children of the specified field as well as
-        any text node children of child fields defined in the Admin Interface as
-        field-word-query-throughs or phrase-throughs.
-
         Native reference: https://docs.marklogic.com/cts:field-word-match
         """
         return _FunctionCall(
@@ -9220,14 +6614,14 @@ class Cts:
 
         Parameters
         ----------
-        field_name : xs:string*
+        field_name : object
             One or more field names to search over. If multiple field names are
             supplied, the match can be in any of the specified fields (or-query
             semantics).
-        text : xs:string*
+        text : object
             The word or phrase to match. If multiple strings are specified, the query
             matches if any of the words or phrases match (or-query semantics).
-        options : xs:string*
+        options : object
             Options to this query. The default is (). Options include: "case-sensitive"
             A case-sensitive query. "case-insensitive" A case-insensitive query.
             "diacritic-sensitive" A diacritic-sensitive query. "diacritic-insensitive" A
@@ -9285,7 +6679,7 @@ class Cts:
             "no-limit-check" Specifies that error will not be raised if the lexicon
             expansion exceeds the specified limit. The server will try to resolve the
             wildcard.
-        weight : xs:double?
+        weight : object
             A weight for this query. Higher weights move search results up in the
             relevance order. The default is 1.0. The weight should be between 64 and
             -16. Weights greater than 64 will have the same effect as a weight of 64.
@@ -9299,35 +6693,6 @@ class Cts:
 
         Notes
         -----
-        If you use cts:near-query with cts:field-word-query , the distance supplied in
-        the near query applies to the whole document, not just to the field. For
-        example, if you specify a near query with a distance of 3, it will return
-        matches when the words or phrases are within 3 words in the whole document, even
-        if some of those words are not in the specified field. For a code example
-        illustrating this, see the second example below.
-
-        Phrases are determined based on words being next to each other (word positions
-        with a distance of 1) and words being in the same instance of the field. Because
-        field word positions are determined based on the fragment, not on the field,
-        field phrases cannot span excluded elements (this is because MarkLogic Server
-        breaks out of the field when it encounters the excluded element and start a new
-        field when it encounters the next included element). Similarly, field phrases
-        will not span included sibling elements. The second code example below
-        illustrates this.
-
-        The phrase-through feature will be enabled once you include the path element in
-        the field setting. Field phrases will automatically phrase-through all child
-        elements of an included element, until it encounters an explicitly excluded
-        element. The third example below illustrates this. An example of when this
-        automatic phrase-through behavior might be convenient is if you create a field
-        that includes only the element ABSTRACT . Then all child elements of ABSTRACT
-        are included in the field, and phrases would span all of the child elements
-        (that is, phrases would "phrase-through" all the child elements).
-
-        Negative "min-occurs" or "max-occurs" values will be treated as 0 and
-        non-integral values will be rounded down. An error will be raised if the
-        "min-occurs" value is greater than the "max-occurs" value.
-
         Native reference: https://docs.marklogic.com/cts:field-word-query
         """
         return _FunctionCall(
@@ -9352,13 +6717,13 @@ class Cts:
 
         Parameters
         ----------
-        field_names : xs:string*
+        field_names : object
             One or more field names.
-        start : xs:string?
+        start : object
             A starting word. Returns only this word and any following words from the
             lexicon. If the parameter is not in the lexicon, then it returns the words
             beginning with the next word.
-        options : xs:string*
+        options : object
             Options. The default is (). Options include: "ascending" Words should be
             returned in ascending order. "descending" Words should be returned in
             descending order. "any" Words from any fragment should be included.
@@ -9393,16 +6758,16 @@ class Cts:
             where multiple lexicon calls occur in the same query (for example, resolving
             many facets in a single query). "map" Return results as a single map:map
             value instead of as an xs:string* sequence .
-        query : cts:query?
+        query : object
             Only include words in fragments selected by the cts:query . The words do not
             need to match the query, but the words must occur in fragments selected by
             the query. The fragments are not filtered to ensure they match the query,
             but instead selected in the same manner as "unfiltered" cts:search
             operations. If a string is entered, the string is treated as a
             cts:word-query of the specified string.
-        quality_weight : xs:double?
+        quality_weight : object
             A document quality weight to use when computing scores. The default is 1.0.
-        forest_ids : xs:unsignedLong*
+        forest_ids : object
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
@@ -9414,59 +6779,6 @@ class Cts:
 
         Notes
         -----
-        Only one of "ascending" or "descending" may be specified in the options
-        parameter. If neither "ascending" nor "descending" is specified, then the
-        default is "ascending".
-
-        Only one of "any", "document", "properties", or "locks" may be specified in the
-        options parameter. If none of "any", "document", "properties", or "locks" are
-        specified and there is a $query parameter, then the default is "document". If
-        there is no $query parameter then the default is "any".
-
-        Only one of the "score-logtfidf", "score-logtf", "score-simple", "score-random",
-        or "score-zero" options may be specified in the options parameter. If none of
-        "score-logtfidf", "score-logtf", "score-simple", "score-random", or "score-zero"
-        are specified, then the default is "score-logtfidf".
-
-        Only one of the "checked" or "unchecked" options may be specified in the options
-        parameter. If neither "checked" nor "unchecked" are specified, then the default
-        is "checked".
-
-        If "collation= URI " is not specified in the options parameter, then the default
-        collation is used. If a lexicon with that collation does not exist, an error is
-        thrown.
-
-        If "sample= N " is not specified in the options parameter, then all included
-        words may be returned. If a $query parameter is not present, then "sample= N "
-        has no effect.
-
-        If "truncate= N " is not specified in the options parameter, then words from all
-        fragments selected by the $query parameter are included. If a $query parameter
-        is not present, then "truncate= N " has no effect.
-
-        Only words that can be matched with field-word-query are included. That is, only
-        words present in immediate text node children of the specified field as well as
-        any text node children of child fields defined in the Admin Interface as
-        field-word-query-throughs or phrase-throughs.
-
-        When run without a $query parameter and as a user with the admin role, the word
-        lexicon functions return results that might include words from deleted
-        fragments. However, when run as a user with the admin role and without a $query
-        parameter, the word lexicon functions run faster (because they do not need to
-        look up where each word comes from). It is therefore faster to run word lexicon
-        functions as an admin user without passing a $query parameter.
-
-        To incrementally fetch a subset of the values returned by this function, use
-        fn:subsequence on the output, rather than the "skip" option. The "skip" option
-        is based on fragments matching the query parameter (if present), not on values.
-        A fragment matched by query might contain multiple values or no values. The
-        number of fragments skipped does not correspond to the number of values. Also,
-        the skip is applied to the relevance ordered query matches, not to the ordered
-        values list.
-
-        When using the "skip" option, use the "truncate" option rather than the "limit"
-        option to control the number of matching fragments from which to draw values.
-
         Native reference: https://docs.marklogic.com/cts:field-words
         """
         return _FunctionCall(
@@ -9484,7 +6796,7 @@ class Cts:
 
         Parameters
         ----------
-        node : node()
+        node : object
             A node. Typically this is an item in the result sequence of a cts:search
             operation.
 
@@ -9495,10 +6807,6 @@ class Cts:
 
         Notes
         -----
-        Fitness is similar to score, except that it is bounded. It is similar to
-        confidence, except that it is not influenced by term IDFs. It is an xs:float in
-        the range of 0.0 to 1.0. It does not include quality.
-
         Native reference: https://docs.marklogic.com/cts:fitness
         """
         return _FunctionCall(
@@ -9516,7 +6824,7 @@ class Cts:
 
         Parameters
         ----------
-        options : xs:string*
+        options : object
             Options. Options include: "descending" Return results in descending order of
             fitness. "ascending" Return results in ascending order of fitness.
 
@@ -9527,10 +6835,6 @@ class Cts:
 
         Notes
         -----
-        Only one of "ascending" or "descending" may be specified in the options
-        parameter. If neither "ascending" nor "descending" is specified, then the
-        default is "ascending".
-
         Native reference: https://docs.marklogic.com/cts:fitness-order
         """
         return _FunctionCall(
@@ -9548,7 +6852,7 @@ class Cts:
 
         Parameters
         ----------
-        value : item()
+        value : object
             A value from a lexicon lookup function. For example, a value returned by a
             function such as cts:values , cts:words , cts:field-values ,
             cts:field-word-match , or cts:geospatial-boxes .
@@ -9560,29 +6864,6 @@ class Cts:
 
         Notes
         -----
-        You must have a suitable index configured to use the lexicon APIs. For example
-        you must configure a range index to use value lexicon lookup functions such as
-        cts:element-values , cts:element-value-match , cts:element-attribute-values , or
-        cts:element-attribute-value-match .
-
-        If the value specified is not from a value lexicon lookup, this function returns
-        a frequency of 0.
-
-        When using the fragment-frequency lexicon option, this function returns the
-        number of fragments in which the lexicon value occurs. When using the
-        item-frequency lexicon option, this function returns the total number of times
-        in which the lexicon value occurs in each item.
-
-        The frequency returned this function is fragment-based by default (using the
-        default fragment-frequency option in the lexicon API). If there are multiple
-        occurrences of the value in any given fragment, the frequency is still one per
-        fragment when using fragment-frequency . For example, if this function returns a
-        value of 13, then the input value occurs in 13 fragments.
-
-        To get the total frequency rather than the fragment-based frequency, pass the
-        item-frequency option to the lexicon lookup function that generates the input
-        values for this function. See the second example, below.
-
         Native reference: https://docs.marklogic.com/cts:frequency
         """
         return _FunctionCall(
@@ -9606,13 +6887,13 @@ class Cts:
 
         Parameters
         ----------
-        element : xs:QName
+        element : object
             An element QName name.
-        lat : xs:QName
+        lat : object
             An attribute QName name.
-        long : xs:QName
+        long : object
             An attribute QName name.
-        options : xs:string*
+        options : object
             Options. The default is (). Options include: "type= type " Use the lexicon
             with the type specified by type (point or long-lat-point)
             "coordinate-system= string " Use the given coordinate system. Valid values
@@ -9636,14 +6917,7 @@ class Cts:
 
         Notes
         -----
-        precision
-
-        coordinate-system
-
-        precision
-
         Native reference:
-        https://docs.marklogic.com/cts:geospatial-attribute-pair-reference
         """
         return _FunctionCall(
             "cts:geospatial-attribute-pair-reference",
@@ -9668,15 +6942,15 @@ class Cts:
 
         Parameters
         ----------
-        geo_indexes : cts:reference*
+        geo_indexes : object
             A sequence of references to geospatial indexes.
-        latitude_bounds : xs:double*
+        latitude_bounds : object
             A sequence of latitude bounds. The values must be in strictly ascending
             order, otherwise an exception is thrown.
-        longitude_bounds : xs:double*
+        longitude_bounds : object
             A sequence of longitude bounds. The values must be in strictly ascending
             order, otherwise an exception is thrown.
-        options : xs:string*
+        options : object
             Options. The default is (). Options include: "ascending" Boxes should be
             returned in ascending order. "descending" Boxes should be returned in
             descending order. "gridded" For each side that a bucket is bounded, return
@@ -9741,15 +7015,15 @@ class Cts:
             is especially useful in cases where multiple lexicon calls occur in the same
             query (for example, resolving many facets in a single query). "map" Return
             results as a single map:map value instead of as a cts:box* sequence .
-        query : cts:query?
+        query : object
             Only include points in fragments selected by this query, and compute
             frequencies from this set of included points. The points do not need to
             match the query, but they must occur in fragments selected by the query. The
             fragments are not filtered to ensure they match the query, but instead
             selected in the same manner as "unfiltered" cts:search operations.
-        quality_weight : xs:double?
+        quality_weight : object
             A document quality weight to use when computing scores. The default is 1.0.
-        forest_ids : xs:unsignedLong*
+        forest_ids : object
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
@@ -9761,65 +7035,6 @@ class Cts:
 
         Notes
         -----
-        Only one of "frequency-order" or "item-order" may be specified in the options
-        parameter. If neither "frequency-order" nor "item-order" is specified, then the
-        default is "item-order".
-
-        Only one of "fragment-frequency" or "item-frequency" may be specified in the
-        options parameter. If neither "fragment-frequency" nor "item-frequency" is
-        specified, then the default is "fragment-frequency".
-
-        Only one of "ascending" or "descending" may be specified in the options
-        parameter. If neither "ascending" nor "descending" is specified, then the
-        default is "ascending" if "item-order" is specified, and "descending" if
-        "frequency-order" is specified.
-
-        Only one of "eager" or "lazy" may be specified in the options parameter. If
-        neither "eager" nor "lazy" is specified, then the default is "eager" if
-        "frequency-order" or "empties" is specified, otherwise "lazy".
-
-        Only one of "any", "document", "properties", or "locks" may be specified in the
-        options parameter. If none of "any", "document", "properties", or "locks" are
-        specified and there is a $query parameter, then the default is "document". If
-        there is no $query parameter then the default is "any".
-
-        Only one of the "score-logtfidf", "score-logtf", "score-simple", "score-random",
-        or "score-zero" options may be specified in the options parameter. If none of
-        "score-logtfidf", "score-logtf", "score-simple", "score-random", or "score-zero"
-        are specified, then the default is "score-logtfidf".
-
-        Only one of the "checked" or "unchecked" options may be specified in the options
-        parameter. If neither "checked" nor "unchecked" are specified, then the default
-        is "checked".
-
-        If "coordinate-system= name " is not specified in the options parameter, then
-        the default coordinate system is used. If a lexicon with that coordinate system
-        does not exist, an error is thrown.
-
-        The value of the precision option takes precedence over that implied by the
-        governing coordinate system name, including the value of the coordinate-system
-        option. For example, if the governing coordinate system is "wgs84/double" and
-        the precision option is "float", then the query uses single precision.
-
-        If "sample= N " is not specfied in the options parameter, then all boxes with
-        included points may be returned. If a $query parameter is not present, then
-        "sample= N " has no effect.
-
-        If "truncate= N " is not specfied in the options parameter, then points from all
-        fragments selected by the $query parameter are included. If a $query parameter
-        is not present, then "truncate= N " has no effect.
-
-        To incrementally fetch a subset of the values returned by this function, use
-        fn:subsequence on the output, rather than the "skip" option. The "skip" option
-        is based on fragments matching the query parameter (if present), not on values.
-        A fragment matched by the query might produce multiple boxes or no boxes. The
-        number of fragments skipped does not correspond to the number of boxes. Also,
-        the skip is applied to the relevance ordered query matches, not to the ordered
-        box list.
-
-        When using the "skip" option, use the "truncate" option rather than the "limit"
-        option to control the number of matching fragments from which to draw values.
-
         Native reference: https://docs.marklogic.com/cts:geospatial-boxes
         """
         return _FunctionCall(
@@ -9855,45 +7070,45 @@ class Cts:
 
         Parameters
         ----------
-        geo_element_name_1 : xs:QName
+        geo_element_name_1 : object
             A QName identifying the first lexicon. This must reference a geospatial
             lexicon. If it is an element child or JSON property child geospatial
             lexicon, pass the child QName in the child-1-name-1 parameter. For an
             element, element attribute, or JSON property child pair geospatial lexicon,
             pass the child QNames in child-1-name-1 and child-1-name-2 .
-        child_1_name_1 : xs:QName?
+        geo_element_name_2 : object
+            A QName identifying the first lexicon. This must reference a geospatial
+            lexicon. If it is an element child or JSON property child geospatial
+            lexicon, pass the child QName in the child-2-name-1 parameter. For an
+            element, element attribute, or JSON property child pair geospatial lexicon,
+            pass the child QNames in child-2-name-1 and child-2-name-2 .
+        child_1_name_1 : object
             An element, element attribute QName or JSON property name identifying the
             child of geo-element-name-1 that holds either the lat and longitude
             coordinates (element child geospatial lexicon) or the latitude coordinate
             (element/attribute/JSON property child pair geospatial lexicon). Use an
             empty sequence if geo-element-name-1 identifies an element or JSON property
             geospatial lexicon.
-        child_1_name_2 : xs:QName?
+        child_1_name_2 : object
             An element, element attribute QName or JSON property name identifying the
             child of geo-element-name-1 that holds the longitude coordinate when working
             with an element/attribute/JSON property child pair geospatial lexicon. Use
             empty sequence for an element or JSON property geospatial lexicon or element
             or JSON property child geospatial lexicon.
-        geo_element_name_2 : xs:QName
-            A QName identifying the first lexicon. This must reference a geospatial
-            lexicon. If it is an element child or JSON property child geospatial
-            lexicon, pass the child QName in the child-2-name-1 parameter. For an
-            element, element attribute, or JSON property child pair geospatial lexicon,
-            pass the child QNames in child-2-name-1 and child-2-name-2 .
-        child_2_name_1 : xs:QName?
+        child_2_name_1 : object
             An element, element attribute QName or JSON property name identifying the
             child of geo-element-name-2 that holds either the lat and longitude
             coordinates (element child geospatial lexicon) or the latitude coordinate
             (element/attribute/JSON property child pair geospatial lexicon). Use an
             empty sequence if geo-element-name-2 identifies an element or JSON property
             geospatial lexicon.
-        child_2_name_2 : xs:QName?
+        child_2_name_2 : object
             An element, element attribute QName or JSON property name identifying the
             child of geo-element-name-2 that holds the longitude coordinate when working
             with an element/attribute/JSON property child pair geospatial lexicon. Use
             empty sequence for an element or JSON property geospatial lexicon or element
             or JSON property child geospatial lexicon.
-        options : xs:string*
+        options : object
             Options. The default is (). The following options are available:
             "geospatial-format= format " For both geospatial lexicons, use the kind of
             geospatial lexicon specified by format (element, element-child,
@@ -9978,16 +7193,16 @@ class Cts:
             query (for example, resolving many facets in a single query). "map" Return
             results as a single map:map value instead of as a
             element(cts:co-occurrence)* sequence .
-        query : cts:query?
+        query : object
             Only include co-occurrences in fragments selected by this query, and compute
             frequencies from this set of included co-occurrences. The co-occurrences do
             not need to match the query, but they must occur in fragments selected by
             the query. The fragments are not filtered to ensure they match the query,
             but instead selected in the same manner as "unfiltered" cts:search
             operations.
-        quality_weight : xs:double?
+        quality_weight : object
             A document quality weight to use when computing scores. The default is 1.0.
-        forest_ids : xs:unsignedLong*
+        forest_ids : object
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
@@ -9999,60 +7214,6 @@ class Cts:
 
         Notes
         -----
-        Only one of "frequency-order" or "item-order" may be specified in the options
-        parameter. If neither "frequency-order" nor "item-order" is specified, then the
-        default is "item-order".
-
-        Only one of "fragment-frequency" or "item-frequency" may be specified in the
-        options parameter. If neither "fragment-frequency" nor "item-frequency" is
-        specified, then the default is "fragment-frequency".
-
-        Only one of "ascending" or "descending" may be specified in the options
-        parameter. If neither "ascending" nor "descending" is specified, then the
-        default is "ascending" if "item-order" is specified, and "descending" if
-        "frequency-order" is specified.
-
-        Only one of "eager" or "lazy" may be specified in the options parameter. If
-        neither "eager" nor "lazy" is specified, then the default is "eager" if
-        "frequency-order" or "map" is specified, otherwise "lazy".
-
-        Only one of "any", "document", "properties", or "locks" may be specified in the
-        options parameter. If none of "any", "document", "properties", or "locks" are
-        specified and there is a $query parameter, then the default is "document". If
-        there is no $query parameter then the default is "any".
-
-        Only one of the "score-logtfidf", "score-logtf", "score-simple", "score-random",
-        or "score-zero" options may be specified in the options parameter. If none of
-        "score-logtfidf", "score-logtf", "score-simple", "score-random", or "score-zero"
-        are specified, then the default is "score-logtfidf".
-
-        Only one of the "checked" or "unchecked" options may be specified in the options
-        parameter. If neither "checked" nor "unchecked" are specified, then the default
-        is "checked".
-
-        If "coordinate-system= name " is not specified in the options parameter, then
-        the default coordinate system is used. If a lexicon with that coordinate system
-        does not exist, an error is thrown.
-
-        If "sample= N " is not specfied in the options parameter, then all included
-        co-occurrences may be returned. If a $query parameter is not present, then
-        "sample= N " has no effect.
-
-        If "truncate= N " is not specfied in the options parameter, then co-occurrences
-        from all fragments selected by the $query parameter are included. If a $query
-        parameter is not present, then "truncate= N " has no effect.
-
-        To incrementally fetch a subset of the values returned by this function, use
-        fn:subsequence on the output, rather than the "skip" option. The "skip" option
-        is based on fragments matching the query parameter (if present), not on values.
-        A fragment matched by the query might produce multiple values or no values. The
-        number of fragments skipped does not correspond to the number of values. Also,
-        the skip is applied to the relevance ordered query matches, not to the ordered
-        value list.
-
-        When using the "skip" option, use the "truncate" option rather than the "limit"
-        option to control the number of matching fragments from which to draw values.
-
         Native reference: https://docs.marklogic.com/cts:geospatial-co-occurrences
         """
         return _FunctionCall(
@@ -10087,11 +7248,11 @@ class Cts:
 
         Parameters
         ----------
-        element : xs:QName
+        element : object
             An element QName name.
-        child : xs:QName
+        child : object
             An element QName name.
-        options : xs:string*
+        options : object
             Options. The default is (). Options include: "type= type " Use the lexicon
             with the type specified by type (point or long-lat-point)
             "coordinate-system= string " Use the given coordinate system. Valid values
@@ -10115,14 +7276,7 @@ class Cts:
 
         Notes
         -----
-        precision
-
-        coordinate-system
-
-        precision
-
         Native reference:
-        https://docs.marklogic.com/cts:geospatial-element-child-reference
         """
         return _FunctionCall(
             "cts:geospatial-element-child-reference",
@@ -10145,13 +7299,13 @@ class Cts:
 
         Parameters
         ----------
-        element : xs:QName
+        element : object
             An element QName name.
-        lat : xs:QName
+        lat : object
             An element QName name.
-        long : xs:QName
+        long : object
             An element QName name.
-        options : xs:string*
+        options : object
             Options. The default is (). Options include: "type= type " Use the lexicon
             with the type specified by type (point or long-lat-point)
             "coordinate-system= string " Use the given coordinate system. Valid values
@@ -10175,14 +7329,7 @@ class Cts:
 
         Notes
         -----
-        precision
-
-        coordinate-system
-
-        precision
-
         Native reference:
-        https://docs.marklogic.com/cts:geospatial-element-pair-reference
         """
         return _FunctionCall(
             "cts:geospatial-element-pair-reference",
@@ -10199,9 +7346,9 @@ class Cts:
 
         Parameters
         ----------
-        element : xs:QName
+        element : object
             An element name.
-        options : xs:string*
+        options : object
             Options. The default is (). Options include: "type= type " Use the lexicon
             with the type specified by type (point or long-lat-point)
             "coordinate-system= string " Use the given coordinate system. Valid values
@@ -10225,12 +7372,6 @@ class Cts:
 
         Notes
         -----
-        precision
-
-        coordinate-system
-
-        precision
-
         Native reference: https://docs.marklogic.com/cts:geospatial-element-reference
         """
         return _FunctionCall(
@@ -10253,11 +7394,11 @@ class Cts:
 
         Parameters
         ----------
-        property : xs:string
+        property : object
             A JSON property name.
-        child : xs:string
+        child : object
             A JSON property name.
-        options : xs:string*
+        options : object
             Options. The default is (). Options include: "type= type " Use the lexicon
             with the type specified by type (point or long-lat-point)
             "coordinate-system= string " Use the given coordinate system. Valid values
@@ -10281,14 +7422,7 @@ class Cts:
 
         Notes
         -----
-        precision
-
-        coordinate-system
-
-        precision
-
         Native reference:
-        https://docs.marklogic.com/cts:geospatial-json-property-child-reference
         """
         return _FunctionCall(
             "cts:geospatial-json-property-child-reference",
@@ -10311,13 +7445,13 @@ class Cts:
 
         Parameters
         ----------
-        property : xs:string
+        property : object
             A JSON property name.
-        lat : xs:string
+        lat : object
             A JSON property name.
-        long : xs:string
+        long : object
             A JSON property name.
-        options : xs:string*
+        options : object
             Options. The default is (). Options include: "type= type " Use the lexicon
             with the type specified by type (point or long-lat-point)
             "coordinate-system= name " Use the given coordinate system. Possible values
@@ -10335,14 +7469,7 @@ class Cts:
 
         Notes
         -----
-        precision
-
-        coordinate-system
-
-        precision
-
         Native reference:
-        https://docs.marklogic.com/cts:geospatial-json-property-pair-reference
         """
         return _FunctionCall(
             "cts:geospatial-json-property-pair-reference",
@@ -10359,9 +7486,9 @@ class Cts:
 
         Parameters
         ----------
-        property : xs:string
+        property : object
             A JSON property name.
-        options : xs:string*
+        options : object
             Options. The default is (). Options include: "type= type " Use the lexicon
             with the type specified by type (point or long-lat-point)
             "coordinate-system= string " Use the given coordinate system. Valid values
@@ -10385,14 +7512,7 @@ class Cts:
 
         Notes
         -----
-        precision
-
-        coordinate-system
-
-        precision
-
         Native reference:
-        https://docs.marklogic.com/cts:geospatial-json-property-reference
         """
         return _FunctionCall(
             "cts:geospatial-json-property-reference",
@@ -10414,9 +7534,9 @@ class Cts:
 
         Parameters
         ----------
-        path_expression : xs:string
+        path_expression : object
             A path expression.
-        options : xs:string*
+        options : object
             Options. The default is (). Options include: "type= type " Use the lexicon
             with the type specified by type (point or long-lat-point)
             "coordinate-system= string " Use the given coordinate system. Valid values
@@ -10432,7 +7552,7 @@ class Cts:
             values in tuples reported from cts:value-tuples when using this lexicon.
             "unchecked" Read the scalar type and coordinate-system info only from the
             input. Do not check the definition against the context database.
-        map : map:map
+        map : object
             A map of namespace bindings. The keys should be namespace prefixes and the
             values should be namespace URIs. These namespace bindings will be added to
             the in-scope namespace bindings in the interpretation of the path.
@@ -10444,18 +7564,12 @@ class Cts:
 
         Notes
         -----
-        precision
-
-        coordinate-system
-
-        precision
-
         Native reference: https://docs.marklogic.com/cts:geospatial-path-reference
         """
         bindings = namespace_map(map)
         return _FunctionCall(
             "cts:geospatial-path-reference",
-            (index_path(path_expression, bindings),),
+            (path_expression,),
             (options, bindings),
         )
 
@@ -10477,9 +7591,9 @@ class Cts:
 
         Parameters
         ----------
-        path_expression : xs:string
+        path_expression : object
             The XPath expression specified in the index configuration.
-        options : xs:string*
+        options : object
             Index configuration options. The default is (). These options should match
             the configuration used when creating the index. Available options:
             "coordinate-system= string " Use the given coordinate system. Valid values
@@ -10494,17 +7608,17 @@ class Cts:
             given precision. Allowed values: float (default) and double . "unchecked"
             Read the coordinate-system info only from the input. Do not check the
             definition against the context database.
-        namespaces : map:map
+        namespaces : object
             A map of namespace bindings. The keys should be namespace prefixes and the
             values should be namespace URIs. These namespace bindings will be added to
             the in-scope namespace bindings in the interpretation of the path.
-        geohash_precision : xs:integer?
+        geohash_precision : object
             The geohash precision specified in the index configuration. Values between 1
             and 12 inclusive are possible.
-        units : xs:string?
+        units : object
             The units specified in the index configuration. 'miles', 'km', 'feet', and
             'meters' are valid.
-        invalid_values : xs:string?
+        invalid_values : object
             The invalid values setting specified in the index configuration. 'reject'
             and 'ignore' are valid.
 
@@ -10515,19 +7629,12 @@ class Cts:
 
         Notes
         -----
-        precision
-
-        coordinate-system
-
-        precision
-
         Native reference:
-        https://docs.marklogic.com/cts:geospatial-region-path-reference
         """
         namespaces = namespace_map(namespaces)
         return _FunctionCall(
             "cts:geospatial-region-path-reference",
-            (index_path(path_expression, namespaces),),
+            (path_expression,),
             (options, namespaces, geohash_precision, units, invalid_values),
         )
 
@@ -10547,21 +7654,21 @@ class Cts:
 
         Parameters
         ----------
-        geospatial_region_reference : cts:reference*
+        geospatial_region_reference : object
             Zero or more geospatial path region index references that identify regions
             in your content. To create a reference, see
             cts:geospatial-region-path-reference .
-        operation : xs:string
+        operation : object
             The match operation to apply between the regions specified in the
             $geospatial-region-reference parameter and the regions in the $regions
             parameter. Allowed values: contains , covered-by , covers , disjoint ,
             intersects , overlaps , within , equals , touches , crosses . See the Usage
             Notes for details.
-        regions : cts:region*
+        regions : object
             Criteria regions to match against the regions specified in the
             $geospatial-region-reference parameter. These regions function as the right
             operand of $operation .
-        options : xs:string*
+        options : object
             Options to this query. The default is (). Available options: "units= value "
             Measure distances and the radii of circles using the given units. Allowed
             values: miles (default), km , feet , and meters . This option only affects
@@ -10584,7 +7691,7 @@ class Cts:
             considered equal. For the raw coordinate system, use the units of the
             coordinates. For geographic coordinate systems, use the units specified by
             the units option.
-        weight : xs:double?
+        weight : object
             A weight for this query. The default is 1.0.
 
         Returns
@@ -10594,47 +7701,6 @@ class Cts:
 
         Notes
         -----
-        This function matches regions in documents in the database satisfying the
-        relationship R1 op R2 , where R1 is a region in a database document, op is the
-        operator provided in the operation parameter, and R2 is any of the regions
-        provided in the regions parameter. The R1 regions under considerations are those
-        in the indexes provided in the geospatial-region-reference parameter.
-
-        The database configuration must include a geospatial path region index
-        corresponding to each R1 region. For details, see Geospatial Region Queries and
-        Indexes in the Search Developer's Guide .
-
-        The operations are defined by the Dimensionally Extended nine-Intersection Model
-        (DE-9IM) of spatial relations. They have the following semantics:
-
-        "contains" R1 contains R2 if every point of R2 is also a point of R1 , and their
-        interiors intersect. "covered-by" R1 is covered-by R2 if every point of R1 is
-        also a point of R2 . "covers" R1 covers R2 if every point of R2 is also a point
-        of R1 . "disjoint" R1 is disjoint from R2 if they have no points in common.
-        "intersects" R1 intersects R2 if the two regions have at least one point in
-        common. "overlaps" R1 overlaps R2 if the two regions partially intersect -- that
-        is, they have some but not all points in common -- and the intersection of R1
-        and R2 has the same dimension as R1 and R2 . "within" R1 is within R2 if every
-        point of R1 is also a point of R2 , and their interiors intersect. "equals" R1
-        equals R2 if every point of R1 is a point of R2 , and every point of R2 is a
-        point of R1 . That is, the regions are topologically equal. "touches" R1 touches
-        R2 if they have a boundary point in common but no interior points in common.
-        "crosses" R1 crosses R2 if their interiors intersect and the dimension of the
-        intersection is less than that of at least one of the regions.
-
-        Note: the operation covers differs from contains only in that covers does not
-        distinguish between points in the boundary and the interior of geometries. In
-        general, covers should be used in preference to contains . Similarly, covered-by
-        should generally be used in preference to within .
-
-        If either the geospatial-region-reference or regions parameter is an empty list,
-        the query will not match any documents.
-
-        The query uses the coordinate system and precision of the geospatial region
-        index reference supplied in the geospatial-region-reference parameter. If
-        multiple index references are specified and they have conflicting coordinate
-        systems, an XDMP-INCONSCOORD error is thrown.
-
         Native reference: https://docs.marklogic.com/cts:geospatial-region-query
         """
         return _FunctionCall(
@@ -10652,13 +7718,13 @@ class Cts:
 
         Parameters
         ----------
-        node : node()
+        node : object
             A node to highlight. The node must be either a document node or an element
             node; it cannot be a text node.
-        query : cts:query
+        query : object
             A query specifying the text to highlight. If a string is entered, the string
             is treated as a cts:word-query of the specified string.
-        expr : item()*
+        expr : object
             An expression with which to replace each match. You can use the variables
             $cts:text , $cts:node , $cts:queries , $cts:start , and $cts:action
             (described below) in the expression.
@@ -10670,36 +7736,6 @@ class Cts:
 
         Notes
         -----
-        There are five built-in variables to represent a query match. These variables
-        can be used inline in the expression parameter.
-
-        $cts:text as xs:string The matched text. $cts:node as text() The node containing
-        the matched text. $cts:queries as cts:query* The matching queries. $cts:start as
-        xs:integer The string-length position of the first character of $cts:text in
-        $cts:node . Therefore, the following always returns true:
-        fn:substring($cts:node, $cts:start, fn:string-length($cts:text)) eq $cts:text
-        $cts:action as xs:string Use xdmp:set on this to specify what should happen next
-        "continue" (default) Walk the next match. If there are no more matches, return
-        all evaluation results. "skip" Skip walking any more matches and return all
-        evaluation results. "break" Stop walking matches and return all evaluation
-        results.
-
-        You cannot use cts:highlight to highlight results matching cts:similar-query and
-        cts:element-attribute-*-query items. Using cts:highlight with these queries will
-        return the nodes without any highlighting.
-
-        You can also use cts:highlight as a general search and replace function. The
-        specified expression will replace any matching text. For example, you could
-        replace the word "hello" with "goodbye" in a query similar to the following:
-
-        cts:highlight($node, "hello", "goodbye")
-
-        Because the expressions can be any XQuery expression, they can be very simple
-        like the above example or they can be extremely complex.
-
-        Unfiltered queries, including registered queries, do not match in cts:walk or
-        cts:highlight .
-
         Native reference: https://docs.marklogic.com/cts:highlight
         """
         return _FunctionCall(
@@ -10716,9 +7752,9 @@ class Cts:
 
         Parameters
         ----------
-        index : cts:reference
+        index : object
             A reference to a range index.
-        options : xs:string*
+        options : object
             Options. The default is (). Options include: "descending" Results should be
             returned in descending order of index. "ascending" Results should be
             returned in ascending order of index.
@@ -10730,10 +7766,6 @@ class Cts:
 
         Notes
         -----
-        Only one of "ascending" or "descending" may be specified in the options
-        parameter. If neither "ascending" nor "descending" is specified, then the
-        default is "ascending".
-
         Native reference: https://docs.marklogic.com/cts:index-order
         """
         return _FunctionCall(
@@ -10756,9 +7788,6 @@ class Cts:
 
         Notes
         -----
-        Requires MarkLogic 11 or later. Availability is checked by the server
-        when the expression is evaluated, including in nested expressions.
-
         Native reference: https://docs.marklogic.com/cts:iri-reference
         """
         return _FunctionCall(
@@ -10784,18 +7813,18 @@ class Cts:
 
         Parameters
         ----------
-        parent_property_name : xs:string*
+        parent_property_name : object
             One or more parent property names to match. When multiple names are
             specified, the query matches if any name matches.
-        child_property_names : xs:string*
+        child_property_names : object
             One or more child property names to match. When multiple names are
             specified, the query matches if any name matches; however, only the first
             matching latitude child in any point instance will be checked. The property
             must specify both latitude and longitude coordinates.
-        regions : cts:region*
+        regions : object
             One or more geographic boxes, circles, polygons, or points. Where multiple
             regions are specified, the query matches if any region matches.
-        options : xs:string*
+        options : object
             Options to this query. The default is (). Options include:
             "coordinate-system= string " Use the given coordinate system. Valid values
             are: wgs84 The WGS84 coordinate system with degrees as the angular unit.
@@ -10841,7 +7870,7 @@ class Cts:
             result is that occurrences of more than one of the synonyms are scored as if
             there are more occurrence of the same term (as opposed to having a separate
             term that contributes to score).
-        weight : xs:double?
+        weight : object
             A weight for this query. The default is 1.0.
 
         Returns
@@ -10851,41 +7880,7 @@ class Cts:
 
         Notes
         -----
-        The point value is expressed in the content of the property as a child of
-        numbers, separated by whitespace and punctuation (excluding decimal points and
-        sign characters).
-
-        The value of the precision option takes precedence over that implied by the
-        governing coordinate system name, including the value of the coordinate-system
-        option. For example, if the governing coordinate system is "wgs84/double" and
-        the precision option is "float", then the query uses single precision.
-
-        Point values and boundary specifications of boxes are given in degrees relative
-        to the WGS84 coordinate system. Southern latitudes and Western longitudes take
-        negative values. Longitudes will be wrapped to the range (-180,+180) and
-        latitudes will be clipped to the range (-90,+90).
-
-        If the northern boundary of a box is south of the southern boundary, no points
-        will match. However, longitudes wrap around the globe, so that if the western
-        boundary is east of the eastern boundary, then the box crosses the
-        anti-meridian.
-
-        Special handling occurs at the poles, as all longitudes exist at latitudes +90
-        and -90.
-
-        If neither "cached" nor "uncached" is present, it specifies "cached".
-
-        "score-function=linear" means that values that are further away from the bounds
-        will score higher. "score-function=reciprocal" means that values that are closer
-        to the bounds will score higher. The functions are scaled appropriately for
-        different types, so that in general the default slope factor will provide useful
-        results. Using a slope factor greater than 1 gives distinct scores over a
-        smaller range of values, and produces generally higher scores. Using a slope
-        factor less than 1 gives distinct scores over a wider range of values, and
-        produces generally lower scores.
-
         Native reference:
-        https://docs.marklogic.com/cts:json-property-child-geospatial-query
         """
         return _FunctionCall(
             "cts:json-property-child-geospatial-query",
@@ -10909,13 +7904,13 @@ class Cts:
 
         Parameters
         ----------
-        property_name : xs:string*
+        property_name : object
             One or more json property names to match. When multiple names are specified,
             the query matches if any name matches.
-        regions : cts:region*
+        regions : object
             One or more geographic boxes, circles, polygons, or points. Where multiple
             regions are specified, the query matches if any region matches.
-        options : xs:string*
+        options : object
             Options to this query. The default is (). Options include:
             "coordinate-system= string " Use the given coordinate system. Valid values
             are: wgs84 The WGS84 coordinate system with degrees as the angular unit.
@@ -10961,7 +7956,7 @@ class Cts:
             result is that occurrences of more than one of the synonyms are scored as if
             there are more occurrence of the same term (as opposed to having a separate
             term that contributes to score).
-        weight : xs:double?
+        weight : object
             A weight for this query. The default is 1.0.
 
         Returns
@@ -10971,39 +7966,6 @@ class Cts:
 
         Notes
         -----
-        The point value is expressed in the content of the element as a pair of numbers,
-        separated by whitespace and punctuation (excluding decimal points and sign
-        characters).
-
-        The value of the precision option takes precedence over that implied by the
-        governing coordinate system name, including the value of the coordinate-system
-        option. For example, if the governing coordinate system is "wgs84/double" and
-        the precision option is "float", then the query uses single precision.
-
-        Point values and boundary specifications of boxes are given in degrees relative
-        to the WGS84 coordinate system. Southern latitudes and Western longitudes take
-        negative values. Longitudes will be wrapped to the range (-180,+180) and
-        latitudes will be clipped to the range (-90,+90).
-
-        If the northern boundary of a box is south of the southern boundary, no points
-        will match. However, longitudes wrap around the globe, so that if the western
-        boundary is east of the eastern boundary, then the box crosses the
-        anti-meridian.
-
-        Special handling occurs at the poles, as all longitudes exist at latitudes +90
-        and -90.
-
-        If neither "cached" nor "uncached" is present, it specifies "cached".
-
-        "score-function=linear" means that values that are further away from the bounds
-        will score higher. "score-function=reciprocal" means that values that are closer
-        to the bounds will score higher. The functions are scaled appropriately for
-        different types, so that in general the default slope factor will provide useful
-        results. Using a slope factor greater than 1 gives distinct scores over a
-        smaller range of values, and produces generally higher scores. Using a slope
-        factor less than 1 gives distinct scores over a wider range of values, and
-        produces generally lower scores.
-
         Native reference: https://docs.marklogic.com/cts:json-property-geospatial-query
         """
         return _FunctionCall(
@@ -11031,21 +7993,21 @@ class Cts:
 
         Parameters
         ----------
-        property_name : xs:string*
+        property_name : object
             One or more parent property names to match. When multiple names are
             specified, the query matches if any name matches.
-        latitude_property_names : xs:string*
+        latitude_property_names : object
             One or more latitude property names to match. When multiple names are
             specified, the query matches if any name matches; however, only the first
             matching latitude child in any point instance will be checked.
-        longitude_property_names : xs:string*
+        longitude_property_names : object
             One or more longitude property names to match. When multiple names are
             specified, the query matches if any name matches; however, only the first
             matching longitude child in any point instance will be checked.
-        regions : cts:region*
+        regions : object
             One or more geographic boxes, circles, polygons, or points. Where multiple
             regions are specified, the query matches if any region matches.
-        options : xs:string*
+        options : object
             Options to this query. The default is (). Options include:
             "coordinate-system= string " Use the given coordinate system. Valid values
             are: wgs84 The WGS84 coordinate system with degrees as the angular unit.
@@ -11087,7 +8049,7 @@ class Cts:
             scoring purposes. The result is that occurrences of more than one of the
             synonyms are scored as if there are more occurrence of the same term (as
             opposed to having a separate term that contributes to score).
-        weight : xs:double?
+        weight : object
             A weight for this query. The default is 1.0.
 
         Returns
@@ -11097,37 +8059,7 @@ class Cts:
 
         Notes
         -----
-        Point values and boundary specifications of boxes are given in degrees relative
-        to the WGS84 coordinate system. Southern latitudes and Western longitudes take
-        negative values. Longitudes will be wrapped to the range (-180,+180) and
-        latitudes will be clipped to the range (-90,+90).
-
-        The value of the precision option takes precedence over that implied by the
-        governing coordinate system name, including the value of the coordinate-system
-        option. For example, if the governing coordinate system is "wgs84/double" and
-        the precision option is "float", then the query uses single precision.
-
-        If the northern boundary of a box is south of the southern boundary, no points
-        will match. However, longitudes wrap around the globe, so that if the western
-        boundary is east of the eastern boundary, then the box crosses the
-        anti-meridian.
-
-        Special handling occurs at the poles, as all longitudes exist at latitudes +90
-        and -90.
-
-        If neither "cached" nor "uncached" is present, it specifies "cached".
-
-        "score-function=linear" means that values that are further away from the bounds
-        will score higher. "score-function=reciprocal" means that values that are closer
-        to the bounds will score higher. The functions are scaled appropriately for
-        different types, so that in general the default slope factor will provide useful
-        results. Using a slope factor greater than 1 gives distinct scores over a
-        smaller range of values, and produces generally higher scores. Using a slope
-        factor less than 1 gives distinct scores over a wider range of values, and
-        produces generally lower scores.
-
         Native reference:
-        https://docs.marklogic.com/cts:json-property-pair-geospatial-query
         """
         return _FunctionCall(
             "cts:json-property-pair-geospatial-query",
@@ -11151,20 +8083,20 @@ class Cts:
 
         Parameters
         ----------
-        property_name : xs:string*
+        property_name : object
             One or more property name to match. When multiple names are specified, the
             query matches if any name matches.
-        operator : xs:string
+        operator : object
             A comparison operator. Operators include: "<" Match range index values less
             than $value. "<=" Match range index values less than or equal to $value. ">"
             Match range index values greater than $value. ">=" Match range index values
             greater than or equal to $value. "=" Match range index values equal to
             $value. "!=" Match range index values not equal to $value.
-        value : xs:anyAtomicType*
+        value : object
             One or more property values to match. When multiple values are specified,
             the query matches if any value matches. The value must be a type for which
             there is a range index defined.
-        options : xs:string*
+        options : object
             Options to this query. The default is (). Options include: "collation= URI "
             Use the range index with the collation specified by URI . If not specified,
             then the default collation from the query is used. If a range index with the
@@ -11191,7 +8123,7 @@ class Cts:
             more than one of the synonyms are scored as if there are more occurrences of
             the same term (as opposed to having a separate term that contributes to
             score).
-        weight : xs:double?
+        weight : object
             A weight for this query. The default is 1.0.
 
         Returns
@@ -11201,44 +8133,6 @@ class Cts:
 
         Notes
         -----
-        If you want to constrain on a range of values, you can combine multiple
-        cts:json-property-range-query constructors together with cts:and-query or any of
-        the other composable cts:query constructors.
-
-        If neither "cached" nor "uncached" is present, it specifies "cached".
-
-        The "cached-incremental" option can improve performance if you repeatedly
-        perform range queries on date or dateTime values over a short range that does
-        not vary widely over short period of time. To benefit, the operator should
-        remain the same "direction" (<,<=, or >,>=) across calls, the bounding date or
-        dateTime changes slightly across calls, and the query runs very frequently
-        (multiple times per minute). Note that using this options creates significantly
-        more cached queries than the "cached" option.
-
-        The "cached-incremental" option has the following restrictions and interactions:
-        The "min-occurs" and "max-occurs" options will be ignored if you use
-        "cached-incremental" in unfiltered search. You can only use
-        "score-function=zero" with "cached-incremental". The "cached-incremental" option
-        behaves like "cached" if you are not querying date or dateTime values.
-
-        Negative "min-occurs" or "max-occurs" values will be treated as 0 and
-        non-integral values will be rounded down. An error will be raised if the
-        "min-occurs" value is greater than the "max-occurs" value.
-
-        "score-function=linear" means that values that are further away from the bounds
-        will score higher. "score-function=reciprocal" means that values that are closer
-        to the bounds will score higher. The functions are scaled appropriately for
-        different types, so that in general the default slope factor will provide useful
-        results. Using a slope factor greater than 1 gives distinct scores over a
-        smaller range of values, and produces generally higher scores. Using a slope
-        factor less than 1 gives distinct scores over a wider range of values, and
-        produces generally lower scores.
-
-        For queries against a dateTime index, when $value is an xs:dayTimeDuration or
-        xs:yearMonthDuration, the query is executed as an age query. $value is
-        subtracted from fn:current-dateTime() to create an xs:dateTime used in the
-        query. If there is more than one item in $value, they must all be the same type.
-
         Native reference: https://docs.marklogic.com/cts:json-property-range-query
         """
         return _FunctionCall(
@@ -11256,9 +8150,9 @@ class Cts:
 
         Parameters
         ----------
-        property : xs:string
+        property : object
             A property name.
-        options : xs:string*
+        options : object
             Options. The default is (). Options include: "type= type " Use the lexicon
             with the type specified by type (int, unsignedInt, long, unsignedLong,
             float, double, decimal, dateTime, time, date, gYearMonth, gYear, gMonth,
@@ -11301,10 +8195,10 @@ class Cts:
 
         Parameters
         ----------
-        property_name : xs:string*
+        property_name : object
             One or more property names to match. When multiple names are specified, the
             query matches if any name matches.
-        query : cts:query
+        query : object
             A query for the property to match. If a string is entered, the string is
             treated as a cts:word-query of the specified string.
 
@@ -11315,8 +8209,6 @@ class Cts:
 
         Notes
         -----
-        cts:json-property-scope-query
-
         Native reference: https://docs.marklogic.com/cts:json-property-scope-query
         """
         return _FunctionCall(
@@ -11339,15 +8231,15 @@ class Cts:
 
         Parameters
         ----------
-        property_name : xs:string*
+        property_name : object
             One or more property names to match. When multiple names are specified, the
             query matches if any name matches.
-        value : xs:anyAtomicType*
+        value : object
             One or more property values to match. When multiple values are specified,
             the query matches if any value matches. The values can be strings, numbers
             or booleans to match correspondingly typed nodes. If the value is the empty
             sequence, the query matches null.
-        options : xs:string*
+        options : object
             Options to this query. The default is (). Options include: "case-sensitive"
             A case-sensitive query. "case-insensitive" A case-insensitive query.
             "diacritic-sensitive" A diacritic-sensitive query. "diacritic-insensitive" A
@@ -11371,7 +8263,7 @@ class Cts:
             synonyms for scoring purposes. The result is that occurrences of more than
             one of the synonyms are scored as if there are more occurrences of the same
             term (as opposed to having a separate term that contributes to score).
-        weight : xs:double?
+        weight : object
             A weight for this query. Higher weights move search results up in the
             relevance order. The default is 1.0. The weight should be between 64 and
             -16. Weights greater than 64 will have the same effect as a weight of 64.
@@ -11385,61 +8277,6 @@ class Cts:
 
         Notes
         -----
-        If neither "case-sensitive" nor "case-insensitive" is present, $text is used to
-        determine case sensitivity. If $text contains no uppercase, it specifies
-        "case-insensitive". If $text contains uppercase, it specifies "case-sensitive".
-
-        If neither "diacritic-sensitive" nor "diacritic-insensitive" is present, $text
-        is used to determine diacritic sensitivity. If $text contains no diacritics, it
-        specifies "diacritic-insensitive". If $text contains diacritics, it specifies
-        "diacritic-sensitive".
-
-        If neither "punctuation-sensitive" nor "punctuation-insensitive" is present,
-        $text is used to determine punctuation sensitivity. If $text contains no
-        punctuation, it specifies "punctuation-insensitive". If $text contains
-        punctuation, it specifies "punctuation-sensitive".
-
-        If neither "whitespace-sensitive" nor "whitespace-insensitive" is present, the
-        query is "whitespace-insensitive".
-
-        If neither "wildcarded" nor "unwildcarded" is present, the database
-        configuration and $text determine wildcarding. If the database has any wildcard
-        indexes enabled ("three character searches", "two character searches", "one
-        character searches", or "trailing wildcard searches") and if $text contains
-        either of the wildcard characters '?' or '*', it specifies "wildcarded".
-        Otherwise it specifies "unwildcarded".
-
-        If neither "stemmed" nor "unstemmed" is present, the database configuration
-        determines stemming. If the database has "stemmed searches" enabled, it
-        specifies "stemmed". Otherwise it specifies "unstemmed". If the query is a
-        wildcarded query and also a phrase query (contains two or more terms), the
-        wildcard terms in the query are unstemmed.
-
-        When you use the "exact" option, you should also enable "fast case sensitive
-        searches" and "fast diacritic sensitive searches" in your database
-        configuration.
-
-        Negative "min-occurs" or "max-occurs" values will be treated as 0 and
-        non-integral values will be rounded down. An error will be raised if the
-        "min-occurs" value is greater than the "max-occurs" value.
-
-        Note that the text content for the value in a cts:json-property-value-query is
-        treated the same as a phrase in a cts:word-query , where the phrase is the
-        property value. Therefore, any wildcard and/or stemming rules are treated like a
-        phrase. For example, if you have an property value of "hello friend" with
-        wildcarding enabled for a query, a cts:json-property-value-query for "he*" will
-        not match because the wildcard matches do not span word boundaries, but a
-        cts:json-property-value-query for "hello *" will match. A search for "*" will
-        match, because a "*" wildcard by itself is defined to match the value.
-        Similarly, stemming rules are applied to each term, so a search for "hello
-        friends" would match when stemming is enabled for the query because "friends"
-        matches "friend". For an example, see the fourth example below.
-
-        Similarly, because a "*" wildcard by itself is defined to match the value, the
-        following query will match any property with the name my-property , regardless
-        of the wildcard indexes enabled in the database configuration:
-        cts:json-property-value-query("my-property", "*", "wildcarded")
-
         Native reference: https://docs.marklogic.com/cts:json-property-value-query
         """
         return _FunctionCall(
@@ -11465,11 +8302,11 @@ class Cts:
 
         Parameters
         ----------
-        property_names : xs:string*
+        property_names : object
             One or more property names.
-        pattern : xs:string?
+        pattern : object
             Wildcard pattern to match.
-        options : xs:string*
+        options : object
             Options. The default is (). Options include: "case-sensitive" A
             case-sensitive match. "case-insensitive" A case-insensitive match.
             "diacritic-sensitive" A diacritic-sensitive match. "diacritic-insensitive" A
@@ -11506,16 +8343,16 @@ class Cts:
             especially useful in cases where multiple lexicon calls occur in the same
             query (for example, resolving many facets in a single query). "map" Return
             results as a single map:map value instead of as an xs:string* sequence .
-        query : cts:query?
+        query : object
             Only include words in fragments selected by the cts:query . The words do not
             need to match the query, but the words must occur in fragments selected by
             the query. The fragments are not filtered to ensure they match the query,
             but instead selected in the same manner as "unfiltered" cts:search
             operations. If a string is entered, the string is treated as a
             cts:word-query of the specified string.
-        quality_weight : xs:double?
+        quality_weight : object
             A document quality weight to use when computing scores. The default is 1.0.
-        forest_ids : xs:unsignedLong*
+        forest_ids : object
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
@@ -11527,59 +8364,6 @@ class Cts:
 
         Notes
         -----
-        Only one of "ascending" or "descending" may be specified in the options
-        parameter. If neither "ascending" nor "descending" is specified, then the
-        default is "ascending".
-
-        Only one of "any", "document", "properties", or "locks" may be specified in the
-        options parameter. If none of "any", "document", "properties", or "locks" are
-        specified and there is a $query parameter, then the default is "document". If
-        there is no $query parameter then the default is "any".
-
-        Only one of the "score-logtfidf", "score-logtf", "score-simple", "score-random",
-        or "score-zero" options may be specified in the options parameter. If none of
-        "score-logtfidf", "score-logtf", "score-simple", "score-random", or "score-zero"
-        are specified, then the default is "score-logtfidf".
-
-        Only one of the "checked" or "unchecked" options may be specified in the options
-        parameter. If neither "checked" nor "unchecked" are specified, then the default
-        is "checked".
-
-        If "collation= URI " is not specified in the options parameter, then the default
-        collation is used. If a lexicon with that collation does not exist, an error is
-        thrown.
-
-        If "sample= N " is not specified in the options parameter, then all included
-        words may be returned. If a $query parameter is not present, then "sample= N "
-        has no effect.
-
-        If "truncate= N " is not specified in the options parameter, then words from all
-        fragments selected by the $query parameter are included. If a $query parameter
-        is not present, then "truncate= N " has no effect.
-
-        To incrementally fetch a subset of the values returned by this function, use
-        fn:subsequence on the output, rather than the "skip" option. The "skip" option
-        is based on fragments matching the query parameter (if present), not on values.
-        A fragment matched by query might contain multiple values or no values. The
-        number of fragments skipped does not correspond to the number of values. Also,
-        the skip is applied to the relevance ordered query matches, not to the ordered
-        values list.
-
-        When using the "skip" option, use the "truncate" option rather than the "limit"
-        option to control the number of matching fragments from which to draw values.
-
-        If neither "case-sensitive" nor "case-insensitive" is present, $pattern is used
-        to determine case sensitivity. If $pattern contains no uppercase, it specifies
-        "case-insensitive". If $pattern contains uppercase, it specifies
-        "case-sensitive".
-
-        If neither "diacritic-sensitive" nor "diacritic-insensitive" is present,
-        $pattern is used to determine diacritic sensitivity. If $pattern contains no
-        diacritics, it specifies "diacritic-insensitive". If $pattern contains
-        diacritics, it specifies "diacritic-sensitive".
-
-        Only words that can be matched with json-property-word-query are included.
-
         Native reference: https://docs.marklogic.com/cts:json-property-word-match
         """
         return _FunctionCall(
@@ -11603,13 +8387,13 @@ class Cts:
 
         Parameters
         ----------
-        property_name : xs:string*
+        property_name : object
             One or more JSON property names to match. When multiple names are specified,
             the query matches if any name matches.
-        text : xs:string*
+        text : object
             Some words or phrases to match. When multiple strings are specified, the
             query matches if any string matches.
-        options : xs:string*
+        options : object
             Options to this query. The default is (). Options include: "case-sensitive"
             A case-sensitive query. "case-insensitive" A case-insensitive query.
             "diacritic-sensitive" A diacritic-sensitive query. "diacritic-insensitive" A
@@ -11668,7 +8452,7 @@ class Cts:
             expansion exceeds the specified limit. The server will try to resolve the
             wildcard. "no-limit-check" is default, if neither "limit-check" nor
             "no-limit-check" is explicitly specified.
-        weight : xs:double?
+        weight : object
             A weight for this query. Higher weights move search results up in the
             relevance order. The default is 1.0. The weight should be between 64 and
             -16. Weights greater than 64 will have the same effect as a weight of 64.
@@ -11682,48 +8466,6 @@ class Cts:
 
         Notes
         -----
-        If neither "case-sensitive" nor "case-insensitive" is present, $text is used to
-        determine case sensitivity. If $text contains no uppercase, it specifies
-        "case-insensitive". If $text contains uppercase, it specifies "case-sensitive".
-
-        If neither "diacritic-sensitive" nor "diacritic-insensitive" is present, $text
-        is used to determine diacritic sensitivity. If $text contains no diacritics, it
-        specifies "diacritic-insensitive". If $text contains diacritics, it specifies
-        "diacritic-sensitive".
-
-        If neither "punctuation-sensitive" nor "punctuation-insensitive" is present,
-        $text is used to determine punctuation sensitivity. If $text contains no
-        punctuation, it specifies "punctuation-insensitive". If $text contains
-        punctuation, it specifies "punctuation-sensitive".
-
-        If neither "whitespace-sensitive" nor "whitespace-insensitive" is present, the
-        query is "whitespace-insensitive".
-
-        If neither "wildcarded" nor "unwildcarded" is present, the database
-        configuration and $text determine wildcarding. If the database has any wildcard
-        indexes enabled ("three character searches", "two character searches", "one
-        character searches", or "trailing wildcard searches") and if $text contains
-        either of the wildcard characters '?' or '*', it specifies "wildcarded".
-        Otherwise it specifies "unwildcarded".
-
-        If neither "stemmed" nor "unstemmed" is present, the database configuration
-        determines stemming. If the database has "stemmed searches" enabled, it
-        specifies "stemmed". Otherwise it specifies "unstemmed". If the query is a
-        wildcarded query and also a phrase query (contains two or more terms), the
-        wildcard terms in the query are unstemmed.
-
-        Negative "min-occurs" or "max-occurs" values will be treated as 0 and
-        non-integral values will be rounded down. An error will be raised if the
-        "min-occurs" value is greater than the "max-occurs" value.
-
-        Relevance adjustment for the "distance-weight" option depends on the closest
-        proximity of any two matches of the query. For example,
-        cts:json-property-word-query(xs:QName("p"),("dog","cat"),("distance-weight=10"))
-        will adjust relevance based on the distance between the closest pair of matches
-        of either "dog" or "cat" within a property named "p" (the pair may consist only
-        of matches of "dog", only of matches of "cat", or a match of "dog" and a match
-        of "cat").
-
         Native reference: https://docs.marklogic.com/cts:json-property-word-query
         """
         return _FunctionCall(
@@ -11748,13 +8490,13 @@ class Cts:
 
         Parameters
         ----------
-        property_names : xs:string*
+        property_names : object
             One or more property names.
-        start : xs:string?
+        start : object
             A starting word. Returns only this word and any following words from the
             lexicon. If the parameter is not in the lexicon, then it returns the words
             beginning with the next word.
-        options : xs:string*
+        options : object
             Options. The default is (). Options include: "ascending" Words should be
             returned in ascending order. "descending" Words should be returned in
             descending order. "any" Words from any fragment should be included.
@@ -11789,16 +8531,16 @@ class Cts:
             where multiple lexicon calls occur in the same query (for example, resolving
             many facets in a single query). "map" Return results as a single map:map
             value instead of as an xs:string* sequence .
-        query : cts:query?
+        query : object
             Only include words in fragments selected by the cts:query . The words do not
             need to match the query, but the words must occur in fragments selected by
             the query. The fragments are not filtered to ensure they match the query,
             but instead selected in the same manner as "unfiltered" cts:search
             operations. If a string is entered, the string is treated as a
             cts:word-query of the specified string.
-        quality_weight : xs:double?
+        quality_weight : object
             A document quality weight to use when computing scores. The default is 1.0.
-        forest_ids : xs:unsignedLong*
+        forest_ids : object
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
@@ -11810,56 +8552,6 @@ class Cts:
 
         Notes
         -----
-        Only one of "ascending" or "descending" may be specified in the options
-        parameter. If neither "ascending" nor "descending" is specified, then the
-        default is "ascending".
-
-        Only one of "any", "document", "properties", or "locks" may be specified in the
-        options parameter. If none of "any", "document", "properties", or "locks" are
-        specified and there is a $query parameter, then the default is "document". If
-        there is no $query parameter then the default is "any".
-
-        Only one of the "score-logtfidf", "score-logtf", "score-simple", "score-random",
-        or "score-zero" options may be specified in the options parameter. If none of
-        "score-logtfidf", "score-logtf", "score-simple", "score-random", or "score-zero"
-        are specified, then the default is "score-logtfidf".
-
-        Only one of the "checked" or "unchecked" options may be specified in the options
-        parameter. If neither "checked" nor "unchecked" are specified, then the default
-        is "checked".
-
-        If "collation= URI " is not specified in the options parameter, then the default
-        collation is used. If a lexicon with that collation does not exist, an error is
-        thrown.
-
-        If "sample= N " is not specified in the options parameter, then all included
-        words may be returned. If a $query parameter is not present, then "sample= N "
-        has no effect.
-
-        If "truncate= N " is not specified in the options parameter, then words from all
-        fragments selected by the $query parameter are included. If a $query parameter
-        is not present, then "truncate= N " has no effect.
-
-        Only words that can be matched with json-property-word-query are included.
-
-        When run without a $query parameter and as a user with the admin role, the word
-        lexicon functions return results that might include words from deleted
-        fragments. However, when run as a user with the admin role and without a $query
-        parameter, the word lexicon functions run faster (because they do not need to
-        look up where each word comes from). It is therefore faster to run word lexicon
-        functions as an admin user without passing a $query parameter.
-
-        To incrementally fetch a subset of the values returned by this function, use
-        fn:subsequence on the output, rather than the "skip" option. The "skip" option
-        is based on fragments matching the query parameter (if present), not on values.
-        A fragment matched by query might contain multiple values or no values. The
-        number of fragments skipped does not correspond to the number of values. Also,
-        the skip is applied to the relevance ordered query matches, not to the ordered
-        values list.
-
-        When using the "skip" option, use the "truncate" option rather than the "limit"
-        option to control the number of matching fragments from which to draw values.
-
         Native reference: https://docs.marklogic.com/cts:json-property-words
         """
         return _FunctionCall(
@@ -11882,15 +8574,15 @@ class Cts:
 
         Parameters
         ----------
-        values : cts:reference*
+        values : object
             References to two range indexes. The types of the range indexes must be
             numeric. If the size of this sequence is not 2, the function returns the
             empty sequence.
-        options : xs:string*
+        options : object
             Same as the "options" parameter in cts:aggregate .
-        query : cts:query?
+        query : object
             Same as the "query" parameter in cts:aggregate .
-        forest_ids : xs:unsignedLong*
+        forest_ids : object
             Same as the "forest-ids" parameter in cts:aggregate .
 
         Returns
@@ -11916,7 +8608,7 @@ class Cts:
 
         Parameters
         ----------
-        vertices : (cts:point*|xs:string)
+        vertices : object
             The waypoints of the linestring, given in order. Alternatively, the vertices
             may be provided as a string that follows the well-known text (WKT) scheme
             for a linestring.
@@ -11944,7 +8636,7 @@ class Cts:
 
         Parameters
         ----------
-        query : cts:query
+        query : object
             A query to be matched against the locks fragment.
 
         Returns
@@ -11976,13 +8668,13 @@ class Cts:
 
         Parameters
         ----------
-        temporal_collection : xs:string
+        temporal_collection : object
             The name of the temporal collection.
-        timestamp : xs:dateTime?
+        timestamp : object
             Return only temporal documents with a system start time less than or equal
             to this value. Default is temporal:get-lsqt($temporal-collection) .
             Timestamps larger than LSQT are rejected.
-        options : xs:string*
+        options : object
             Options to this query. The default is (). Options include: "cached" Cache
             the results of this query in the list cache. "uncached" Do not cache the
             results of this query in the list cache. "cached-incremental" Break down the
@@ -11996,7 +8688,7 @@ class Cts:
             this range query. zero This range query does not contribute to the score.
             This is the default. "slope-factor= number " Apply the given number as a
             scaling factor to the slope of the scoring function. The default is 1.0.
-        weight : xs:double?
+        weight : object
             A weight for this query. Higher weights move search results up in the
             relevance order. The default is 1.0. The weight should be between 64 and
             -16. Weights greater than 64 will have the same effect as a weight of 64.
@@ -12035,17 +8727,17 @@ class Cts:
 
         Parameters
         ----------
-        range_indexes : cts:reference*
+        range_indexes : object
             References to range indexes that store the string serialization of regions
             to match against.
-        operation : xs:string
+        operation : object
             The operation to test. Must be one of the following: contains , covered-by ,
             covers , crosses , disjoint , equals , intersects , overlaps , touches ,
             within . See the Usage Notes for details.
-        regions : cts:region*
+        regions : object
             One or more cts:region values to test against. A region matches if it
             matches against any of these regions.
-        options : xs:string*
+        options : object
             String options you can use to control the operation. The following options
             are supported: "coordinate-system= value " Use the given coordinate system.
             Valid values are wgs84 , wgs84/double , etrs89 , etrs89/double , raw and
@@ -12073,13 +8765,13 @@ class Cts:
             while the lexicon processing occurs. This is especially useful in cases
             where multiple lexicon calls occur in the same query (for example, resolving
             many facets in a single query).
-        query : cts:query?
+        query : object
             Limit the region comparison to documents that match this query. Also,
             compute frequencies from the set of included regions. The values do not need
             to match the query, but they must occur in fragments selected by the query.
             The fragments are not filtered to ensure they match the query. Instead, they
             are selected in the same manner as "unfiltered" cts:search operations.
-        forest_ids : xs:unsignedLong*
+        forest_ids : object
             A sequence of IDs of forests to which the search should be constrained. An
             empty sequence means search all forests in the database. The default is an
             empty sequence.
@@ -12091,69 +8783,6 @@ class Cts:
 
         Notes
         -----
-        This function matches regions in documents in the database satisfying the
-        relationship R1 op R2 , where R1 is a region in a database document, op is the
-        operator provided in the operation parameter, and R2 is any of the regions
-        provided in the regions parameter. The R1 regions under considerations are those
-        in the indexes provided in the range-indexes parameter. The R1 regions can be
-        further constrained to those in documents that match a query.
-
-        The operations are defined by the Dimensionally Extended nine-Intersection Model
-        (DE-9IM) of spatial relations. They have the following semantics:
-
-        "contains" R1 contains R2 if every point of R2 is also a point of R1 , and their
-        interiors intersect. "covered-by" R1 is covered-by R2 if every point of R1 is
-        also a point of R2 . "covers" R1 covers R2 if every point of R2 is also a point
-        of R1 . "crosses" R1 crosses R2 if their interiors intersect and the dimension
-        of the intersection is less than that of at least one of the regions. "disjoint"
-        R1 is disjoint from R2 if they have no points in common. "equals" R1 equals R2
-        if every point of R1 is a point of R2 , and every point of R2 is a point of R1 .
-        That is, the regions are topologically equal. "intersects" R1 intersects R2 if
-        the two regions have at least one point in common. "overlaps" R1 overlaps R2 if
-        the two regions partially intersect -- that is, they have some but not all
-        points in common -- and the intersection of R1 and R2 has the same dimension as
-        R1 and R2 . "touches" R1 touches R2 if they have a boundary point in common but
-        no interior points in common. "within" R1 is within R2 if every point of R1 is
-        also a point of R2 , and their interiors intersect.
-
-        Note: the operation covers differs from contains only in that covers does not
-        distinguish between points in the boundary and the interior of geometries. In
-        general, covers should be used in preference to contains . Similarly, covered-by
-        should generally be used in preference to within .
-
-        The return value is either a sequence of cts:region values or a sequence of
-        strings containing the serialized regions, depending on whether or not the
-        strings option is included.
-
-        If the range indexes provided through the range-indexes parameter contain any
-        string that cannot be parsed into a region, an error is thrown.
-
-        The value of the precision option takes precedence over that implied by the
-        governing coordinate system name, including the value of the coordinate-system
-        option. For example, if the governing coordinate system is "wgs84/double" and
-        the precision option is "float", then the query uses single precision.
-
-        Only one of "fragment-frequency" or "item-frequency" may be specified in the
-        options parameter. If neither "fragment-frequency" nor "item-frequency" is
-        specified, then the default is "fragment-frequency".
-
-        Only one of "any", "document", "properties", or "locks" may be specified in the
-        options parameter. If none of "any", "document", "properties", or "locks" are
-        specified and there is a $query parameter, then the default is "document". If
-        there is no $query parameter then the default is "any".
-
-        Only one of the "checked" or "unchecked" options may be specified in the options
-        parameter. If neither "checked" nor "unchecked" are specified, then the default
-        is "checked".
-
-        If "coordinate-system= name " is not specified in the options parameter, then
-        the governing coordinate system is used.
-
-        The value of the precision option takes precedence over that implied by the
-        governing coordinate system name, including the value of the coordinate-system
-        option. For example, if the governing coordinate system is "wgs84/double" and
-        the precision option is "float", then the operation uses single precision.
-
         Native reference: https://docs.marklogic.com/cts:match-regions
         """
         return _FunctionCall(
@@ -12170,13 +8799,13 @@ class Cts:
 
         Parameters
         ----------
-        range_index : cts:reference
+        range_index : object
             Reference to a range index.
-        options : xs:string*
+        options : object
             Same as the "options" parameter in cts:aggregate .
-        query : cts:query?
+        query : object
             Same as the "query" parameter in cts:aggregate .
-        forest_ids : xs:unsignedLong*
+        forest_ids : object
             Same as the "forest-ids" parameter in cts:aggregate .
 
         Returns
@@ -12202,7 +8831,7 @@ class Cts:
 
         Parameters
         ----------
-        arg : xs:double*
+        arg : object
             The sequence of values. The values should be the result of a lexicon lookup.
 
         Returns
@@ -12212,10 +8841,6 @@ class Cts:
 
         Notes
         -----
-        This function is designed to take a sequence of values returned by a lexicon
-        function (for example, cts:element-values ); if you input non-lexicon values,
-        the result will be the empty sequence.
-
         Native reference: https://docs.marklogic.com/cts:median
         """
         return _FunctionCall(
@@ -12231,13 +8856,13 @@ class Cts:
 
         Parameters
         ----------
-        range_index : cts:reference
+        range_index : object
             Reference to a range index.
-        options : xs:string*
+        options : object
             Same as the "options" parameter in cts:aggregate .
-        query : cts:query?
+        query : object
             Same as the "query" parameter in cts:aggregate .
-        forest_ids : xs:unsignedLong*
+        forest_ids : object
             Same as the "forest-ids" parameter in cts:aggregate .
 
         Returns
@@ -12270,16 +8895,16 @@ class Cts:
 
         Parameters
         ----------
-        queries : cts:query*
+        queries : object
             A sequence of queries to match.
-        distance : xs:double?
+        distance : object
             A distance, in number of words, between any two matching queries. The
             results match if two queries match and the distance between the two matches
             is equal to or less than the specified distance. A distance of 0 matches
             when the text is the exact same text or when there is overlapping text (see
             the third example below). A negative distance is treated as 0. The default
             value is 10.
-        options : xs:string*
+        options : object
             Options to this query. The default value is (). Options include: "ordered"
             Any near-query matches must occur in the order of the specified sub-queries.
             "unordered" Any near-query matches will satisfy the query, regardless of the
@@ -12288,7 +8913,7 @@ class Cts:
             minimum distance between the two matches is greater than or equal to the
             specified minimum distance. The default value is zero. A negative distance
             is treated as 0.
-        distance_weight : xs:double?
+        distance_weight : object
             A weight attributed to the distance for this query. Higher weights add to
             the importance of distance (as opposed to term matches) when the relevance
             order is calculated. The default value is 1.0. The weight should be between
@@ -12305,30 +8930,6 @@ class Cts:
 
         Notes
         -----
-        If the options parameter contains neither "ordered" nor "unordered", then the
-        default is "unordered".
-
-        The word positions index will speed the performance of queries that use
-        cts:near-query . The element word positions index will speed the performance of
-        element-queries that use cts:near-query .
-
-        If you use cts:near-query with a field, the distance specified is the distance
-        in the whole document, not the distance in the field. For example, if the
-        distance between two words is 20 in the document, but the distance is 10 if you
-        look at a view of the document that only includes the elements in a field, a
-        cts:near-query must have a distance of 20 or more to match; a distance of 10
-        would not match. The same applies to minimum distance as well.
-
-        If you use cts:near-query with cts:field-word-query , the distance supplied in
-        the near query applies to the whole document, not just to the field. This too
-        applies to the minimum distance as well. For details, see cts:field-word-query .
-
-        Expressions using the ordered option are more efficient than those using the
-        unordered option, especially if they specify many queries to match.
-
-        Minimum-distance and distances apply to each near-query match. Therefore, if
-        minimum-distance is greater than distance there can be no matches.
-
         Native reference: https://docs.marklogic.com/cts:near-query
         """
         return _FunctionCall(
@@ -12346,9 +8947,9 @@ class Cts:
 
         Parameters
         ----------
-        positive_query : cts:query
+        positive_query : object
             A positive query, specifying the search results filtered in.
-        negative_query : cts:query
+        negative_query : object
             A negative query, specifying the search results to filter out.
 
         Returns
@@ -12358,22 +8959,6 @@ class Cts:
 
         Notes
         -----
-        Positions are required to accurately resolve this query from the indexes. If you
-        do not enable position indexes appropriate to the type of the sub-queries, then
-        you may get surprising results in unfiltered searches. For example, if the sub
-        queries are cts:word-query , then you should enable word positions in the
-        database.
-
-        False positives can occur if there are no positions available, such as when
-        positions are not enabled. Filtered searches always have access to positions,
-        but unfiltered searches do not.
-
-        Some query types are intrinsically positionless, such as cts:collection-query or
-        cts:directory-query . Matches to such a query are considered to occur at every
-        position and causes the overall query to behave like cst:and-not-query . If no
-        position can be determined, such as when positions are not enabled, then every
-        match to $positive-query is a match for the whole query.
-
         Native reference: https://docs.marklogic.com/cts:not-in-query
         """
         return _FunctionCall(
@@ -12389,7 +8974,7 @@ class Cts:
 
         Parameters
         ----------
-        query : cts:query
+        query : object
             A negative query, specifying the search results to filter out.
 
         Returns
@@ -12399,20 +8984,6 @@ class Cts:
 
         Notes
         -----
-        cts:not-query
-
-        cts:not-query
-
-        $query
-
-        cts:not-query
-
-        cts:search
-
-        $query
-
-        cts:not-query
-
         Native reference: https://docs.marklogic.com/cts:not-query
         """
         return _FunctionCall(
@@ -12429,9 +9000,9 @@ class Cts:
 
         Parameters
         ----------
-        queries : cts:query*
+        queries : object
             A sequence of sub-queries.
-        options : xs:string*
+        options : object
             Options to this query. The default is () . Options include: "synonym"
             Specifies that all of the terms in the $queries parameter are considered
             synonyms for scoring purposes. The result is that occurrences of more than
@@ -12461,10 +9032,10 @@ class Cts:
 
         Parameters
         ----------
-        query : xs:string
+        query : object
             The query string. For details, see Creating a Query From Search Text With
             cts:parse in the Search Developer's Guide .
-        bindings : map:map?
+        bindings : object
             Bindings for mapping x:y parts of the query string. The map key can be
             either a simple string with no embedded spaces or punctuation or the empty
             string. The empty string defines the parsing of untagged words. For details,
@@ -12517,7 +9088,7 @@ class Cts:
 
         Parameters
         ----------
-        token : cts:token
+        token : object
             A token, as returned from cts:tokenize .
 
         Returns
@@ -12527,9 +9098,6 @@ class Cts:
 
         Notes
         -----
-        This function is useful for testing custom tokenizers. Built in tokenizers do
-        not use parts of speech and will return an empty string for the part of speech.
-
         Native reference: https://docs.marklogic.com/cts:part-of-speech
         """
         return _FunctionCall(
@@ -12553,13 +9121,13 @@ class Cts:
 
         Parameters
         ----------
-        path_expression : xs:string*
+        path_expression : object
             One or more path expressions to match. When multiple path expressions are
             specified, the query matches if any path expression matches.
-        regions : cts:region*
+        regions : object
             One or more geographic boxes, circles, polygons, or points. Where multiple
             regions are specified, the query matches if any region matches.
-        options : xs:string*
+        options : object
             Options to this query. The default is (). Options include:
             "coordinate-system= string " Use the given coordinate system. Valid values
             are: wgs84 The WGS84 coordinate system with degrees as the angular unit.
@@ -12604,7 +9172,7 @@ class Cts:
             scoring purposes. The result is that occurrences of more than one of the
             synonyms are scored as if there are more occurrence of the same term (as
             opposed to having a separate term that contributes to score).
-        weight : xs:double?
+        weight : object
             A weight for this query. The default is 1.0.
 
         Returns
@@ -12614,53 +9182,11 @@ class Cts:
 
         Notes
         -----
-        The point value is expressed in the content of an element that matches given
-        path expression as a pair of numbers, separated by whitespace and punctuation
-        (excluding decimal points and sign characters).
-
-        The value of the precision option takes precedence over that implied by the
-        governing coordinate system name, including the value of the coordinate-system
-        option. For example, if the governing coordinate system is "wgs84/double" and
-        the precision option is "float", then the query uses single precision.
-
-        Point values and boundary specifications of boxes are given in degrees relative
-        to the WGS84 coordinate system. Southern latitudes and Western longitudes take
-        negative values. Longitudes will be wrapped to the range (-180,+180) and
-        latitudes will be clipped to the range (-90,+90).
-
-        If the northern boundary of a box is south of the southern boundary, no points
-        will match. However, longitudes wrap around the globe, so that if the western
-        boundary is east of the eastern boundary, then the box crosses the
-        anti-meridian.
-
-        Special handling occurs at the poles, as all longitudes exist at latitudes +90
-        and -90.
-
-        If neither "cached" nor "uncached" is present, it specifies "cached".
-
-        "score-function=linear" means that values that are further away from the bounds
-        will score higher. "score-function=reciprocal" means that values that are closer
-        to the bounds will score higher. The functions are scaled appropriately for
-        different types, so that in general the default slope factor will provide useful
-        results. Using a slope factor greater than 1 gives distinct scores over a
-        smaller range of values, and produces generally higher scores. Using a slope
-        factor less than 1 gives distinct scores over a wider range of values, and
-        produces generally lower scores.
-
-        "score-function=linear" means that values that are further away from the bounds
-        will score higher. "score-function=reciprocal" means that values that are closer
-        to the bounds will score higher. The functions are scaled appropriately for
-        different types, so that in general the default slope factor will provide useful
-        results. Using a slope factor greater than 1 gives distinct scores over a
-        smaller range of values, and produces generally higher scores. Using a slope
-        factor less than 1 gives distinct scores over a wider range of values, and
-        produces generally lower scores.
-
         Native reference: https://docs.marklogic.com/cts:path-geospatial-query
         """
         return _FunctionCall(
             "cts:path-geospatial-query",
-            (index_path(path_expression), regions),
+            (path_expression, regions),
             (options, _double(weight)),
         )
 
@@ -12681,21 +9207,21 @@ class Cts:
 
         Parameters
         ----------
-        path_expression : xs:string*
+        path_expression : object
             One or more XPath expressions that identify the content to match. When
             multiple paths are specified, the query matches if any path matches.
-        operator : xs:string
+        operator : object
             A comparison operator. Operators include: "<" Match range index values less
             than $value. "<=" Match range index values less than or equal to $value. ">"
             Match range index values greater than $value. ">=" Match range index values
             greater than or equal to $value. "=" Match range index values equal to
             $value. "!=" Match range index values not equal to $value.
-        value : xs:anyAtomicType*
+        value : object
             One or more values to match. These values are compared to the value(s)
             addressed by the path-expression parameter. When multiple When multiple
             values are specified, the query matches if any value matches. The value must
             be a type for which there is a range index defined.
-        options : xs:string*
+        options : object
             Options to this query. The default is (). Options include: "collation= URI "
             Use the range index with the collation specified by URI . If not specified,
             then the default collation from the query is used. If a range index with the
@@ -12722,7 +9248,7 @@ class Cts:
             more than one of the synonyms are scored as if there are more occurrences of
             the same term (as opposed to having a separate term that contributes to
             score).
-        weight : xs:double?
+        weight : object
             A weight for this query. The default is 1.0.
 
         Returns
@@ -12732,49 +9258,11 @@ class Cts:
 
         Notes
         -----
-        If you want to constrain on a range of values, you can combine multiple
-        cts:path-range-query constructors together with cts:and-query or any of the
-        other composable cts:query constructors.
-
-        If neither "cached" nor "uncached" is present, it specifies "cached".
-
-        The "cached-incremental" option can improve performance if you repeatedly
-        perform range queries on date or dateTime values over a short range that does
-        not vary widely over short period of time. To benefit, the operator should
-        remain the same "direction" (<,<=, or >,>=) across calls, the bounding date or
-        dateTime changes slightly across calls, and the query runs very frequently
-        (multiple times per minute). Note that using this options creates significantly
-        more cached queries than the "cached" option.
-
-        The "cached-incremental" option has the following restrictions and interactions:
-        The "min-occurs" and "max-occurs" options will be ignored if you use
-        "cached-incremental" in unfiltered search. You can only use
-        "score-function=zero" with "cached-incremental". The "cached-incremental" option
-        behaves like "cached" if you are not querying date or dateTime values.
-
-        Negative "min-occurs" or "max-occurs" values will be treated as 0 and
-        non-integral values will be rounded down. An error will be raised if the
-        "min-occurs" value is greater than the "max-occurs" value.
-
-        "score-function=linear" means that values that are further away from the bounds
-        will score higher. "score-function=reciprocal" means that values that are closer
-        to the bounds will score higher. The functions are scaled appropriately for
-        different types, so that in general the default slope factor will provide useful
-        results. Using a slope factor greater than 1 gives distinct scores over a
-        smaller range of values, and produces generally higher scores. Using a slope
-        factor less than 1 gives distinct scores over a wider range of values, and
-        produces generally lower scores.
-
-        For queries against a dateTime index, when $value is an xs:dayTimeDuration or
-        xs:yearMonthDuration, the query is executed as an age query. $value is
-        subtracted from fn:current-dateTime() to create an xs:dateTime used in the
-        query. If there is more than one item in $value, they must all be the same type.
-
         Native reference: https://docs.marklogic.com/cts:path-range-query
         """
         return _FunctionCall(
             "cts:path-range-query",
-            (index_path(path_expression), _operator(operator), value),
+            (path_expression, _operator(operator), value),
             (options, _double(weight)),
         )
 
@@ -12792,9 +9280,9 @@ class Cts:
 
         Parameters
         ----------
-        path_expression : xs:string
+        path_expression : object
             A path range index expression.
-        options : xs:string*
+        options : object
             Options. The default is (). Options include: "type= type " Use the lexicon
             with the type specified by type (int, unsignedInt, long, unsignedLong,
             float, double, decimal, dateTime, time, date, gYearMonth, gYear, gMonth,
@@ -12812,7 +9300,7 @@ class Cts:
             Only applicable if the index/lexicon value type is point or long-lat-point .
             This value takes precedence over the precision implicit in the coordinate
             system name.
-        namespaces : map:map
+        namespaces : object
             A map of namespace bindings. The keys should be namespace prefixes and the
             values should be namespace URIs. These namespace bindings will be added to
             the in-scope namespace bindings in the interpretation of the path.
@@ -12829,7 +9317,7 @@ class Cts:
         namespaces = namespace_map(namespaces)
         return _FunctionCall(
             "cts:path-reference",
-            (index_path(path_expression, namespaces),),
+            (path_expression,),
             (options, namespaces),
         )
 
@@ -12842,11 +9330,11 @@ class Cts:
 
         Parameters
         ----------
-        arg : xs:anyAtomicType*
+        arg : object
             The sequence of values.
-        value : xs:anyAtomicType
+        value : object
             The value to be "ranked".
-        options : xs:string*
+        options : object
             Options. The default is (). Options include: "ascending"(default) Rank the
             value as if the sequence was sorted in ascending order. "descending" Rank
             the value as if the sequence was sorted in descending order. "collation= URI
@@ -12862,10 +9350,6 @@ class Cts:
 
         Notes
         -----
-        This function is designed to take a sequence of values returned by a lexicon
-        function (for example, cts:element-values ); if you input non-lexicon values,
-        the result will be the empty sequence.
-
         Native reference: https://docs.marklogic.com/cts:percent-rank
         """
         return _FunctionCall(
@@ -12882,9 +9366,9 @@ class Cts:
 
         Parameters
         ----------
-        arg : xs:double*
+        arg : object
             The sequence of values. The values should be the result of a lexicon lookup.
-        p : xs:double*
+        p : object
             The sequence of percentage(s).
 
         Returns
@@ -12894,10 +9378,6 @@ class Cts:
 
         Notes
         -----
-        This function is designed to take a sequence of values returned by a lexicon
-        function (for example, cts:element-values ); if you input non-lexicon values,
-        the result will be the empty sequence.
-
         Native reference: https://docs.marklogic.com/cts:percentile
         """
         return _FunctionCall(
@@ -12914,9 +9394,9 @@ class Cts:
 
         Parameters
         ----------
-        start : xs:dateTime
+        start : object
             The dateTime value indicating start of the period.
-        end : xs:dateTime
+        end : object
             The dateTime value indicating end of the period.
 
         Returns
@@ -12941,11 +9421,11 @@ class Cts:
 
         Parameters
         ----------
-        period_1 : cts:period
+        period_1 : object
             The first period to compare.
-        operator : xs:string
+        operator : object
             A comparison operator.
-        period_2 : cts:period
+        period_2 : object
             The second period to compare against the first.
 
         Returns
@@ -12977,9 +9457,9 @@ class Cts:
 
         Parameters
         ----------
-        axis_1 : xs:string
+        axis_1 : object
             Name of the first axis to compare
-        operator : xs:string
+        operator : object
             A comparison operator. Period is the two timestamps contained in the axis.
             Operators include: "aln_equals" Match documents whose period1 equals
             period2. "aln_contains" Match documents whose period1 contains period2. i.e.
@@ -13017,9 +9497,9 @@ class Cts:
             standard. i.e. period1 starts at period2 ends "iso_imm_precedes" Match
             documents whose period1 immediately precedes period2 in sql 2011 standard.
             i.e. period1 ends at period2 ends
-        axis_2 : xs:string
+        axis_2 : object
             Name of the second period to compare
-        options : xs:string*
+        options : object
             Options to this query. The default is (). Options include: "cached" Cache
             the results of this query in the list cache. "uncached" Do not cache the
             results of this query in the list cache.
@@ -13031,16 +9511,6 @@ class Cts:
 
         Notes
         -----
-        If you want to constrain on a range of period comparisons, you can combine
-        multiple cts: constructors together with cts:and-query or any of the other
-        composable cts:query constructors, as in the last part of the example below.
-
-        If neither "cached" nor "uncached" is present, it specifies "cached".
-
-        Negative "min-occurs" or "max-occurs" values will be treated as 0 and
-        non-integral values will be rounded down. An error will be raised if the
-        "min-occurs" value is greater than the "max-occurs" value.
-
         Native reference: https://docs.marklogic.com/cts:period-compare-query
         """
         return _FunctionCall(
@@ -13064,9 +9534,9 @@ class Cts:
 
         Parameters
         ----------
-        axis_name : xs:string*
+        axis_name : object
             One or more axis to match on.
-        operator : xs:string
+        operator : object
             A comparison operator. Operators include: "aln_equals" Match documents whose
             period1 equals value. "aln_contains" Match documents whose period1 contains
             value. i.e. period1 starts before value starts and ends before value ends.
@@ -13098,10 +9568,10 @@ class Cts:
             period1 immediately succeeds value in sql 2011 standard. i.e. period1 starts
             at value end "iso_imm_precedes" Match documents whose period1 immediately
             precedes value in sql 2011 standard. i.e. period1 ends at value end
-        period : cts:period*
+        period : object
             the cts:period to perform operations on. When multiple values are specified,
             the query matches if any value matches.
-        options : xs:string*
+        options : object
             Options to this query. The default is (). Options include: "cached" Cache
             the results of this query in the list cache. "uncached" Do not cache the
             results of this query in the list cache. "min-occurs= number " Specifies the
@@ -13126,26 +9596,6 @@ class Cts:
 
         Notes
         -----
-        If you want to constrain on a range of values, you can combine multiple
-        cts:period-range-query constructors together with cts:and-query or any of the
-        other composable cts:query constructors, as in the last part of the example
-        below.
-
-        If neither "cached" nor "uncached" is present, it specifies "cached".
-
-        Negative "min-occurs" or "max-occurs" values will be treated as 0 and
-        non-integral values will be rounded down. An error will be raised if the
-        "min-occurs" value is greater than the "max-occurs" value.
-
-        "score-function=linear" means that values that are further away from the bounds
-        will score higher. "score-function=reciprocal" means that values that are closer
-        to the bounds will score higher. The functions are scaled appropriately for
-        different types, so that in general the default slope factor will provide useful
-        results. Using a slope factor greater than 1 gives distinct scores over a
-        smaller range of values, and produces generally higher scores. Using a slope
-        factor less than 1 gives distinct scores over a wider range of values, and
-        produces generally lower scores.
-
         Native reference: https://docs.marklogic.com/cts:period-range-query
         """
         return _FunctionCall(
@@ -13162,10 +9612,10 @@ class Cts:
 
         Parameters
         ----------
-        latitude_or_wkt : (xs:float|xs:string)
+        latitude_or_wkt : object
             The latitude of the point. Alternatively, the vertex may be provided as a
             string that follows the well-known text (WKT) scheme for a point.
-        longitude : xs:float
+        longitude : object
             The longitude of the point. If you supply a WKT string as latitude , this
             parameter must not be supplied.
 
@@ -13192,7 +9642,7 @@ class Cts:
 
         Parameters
         ----------
-        vertices : (cts:point*|xs:string)
+        vertices : object
             The vertices of the polygon, given in order. No edge may cover more than 180
             degrees of either latitude or longitude. The polygon as a whole may not
             encompass both poles. These constraints are necessary to ensure an
@@ -13224,7 +9674,7 @@ class Cts:
 
         Parameters
         ----------
-        query : cts:query
+        query : object
             A query to be matched against the properties fragment.
 
         Returns
@@ -13250,7 +9700,7 @@ class Cts:
 
         Parameters
         ----------
-        node : node()
+        node : object
             A node. Typically this is an item in the result sequence of a cts:search
             operation.
 
@@ -13261,11 +9711,6 @@ class Cts:
 
         Notes
         -----
-        If you run cts:quality on a constructed node, it always returns 0; it is
-        primarily intended to run on nodes that are the retrieved from the database (an
-        item from a cts:search result or an item from the result of an XPath expression
-        that searches through the database).
-
         Native reference: https://docs.marklogic.com/cts:quality
         """
         return _FunctionCall(
@@ -13283,7 +9728,7 @@ class Cts:
 
         Parameters
         ----------
-        options : xs:string*
+        options : object
             Options. Options include: "descending" Results should be returned in
             descending order of quality. "ascending" Results should be returned in
             ascending order of quality.
@@ -13295,10 +9740,6 @@ class Cts:
 
         Notes
         -----
-        Only one of "ascending" or "descending" may be specified in the options
-        parameter. If neither "ascending" nor "descending" is specified, then the
-        default is "ascending".
-
         Native reference: https://docs.marklogic.com/cts:quality-order
         """
         return _FunctionCall(
@@ -13315,7 +9756,7 @@ class Cts:
 
         Parameters
         ----------
-        query : node()
+        query : object
             A query.
 
         Returns
@@ -13348,19 +9789,19 @@ class Cts:
 
         Parameters
         ----------
-        index : cts:reference*
+        index : object
             One or more range index references. When multiple indexes are specified, the
             query matches if any index matches.
-        operator : xs:string
+        operator : object
             A comparison operator. Operators include: "<" Match range index values less
             than $value. "<=" Match range index values less than or equal to $value. ">"
             Match range index values greater than $value. ">=" Match range index values
             greater than or equal to $value. "=" Match range index values equal to
             $value. "!=" Match range index values not equal to $value.
-        value : xs:anyAtomicType*
+        value : object
             One or more values to match. When multiple values are specified, the query
             matches if any value matches.
-        options : xs:string*
+        options : object
             Options to this query. The default is (). Options include: "cached" Cache
             the results of this query in the list cache. "uncached" Do not cache the
             results of this query in the list cache. "min-occurs= number " Specifies the
@@ -13381,7 +9822,7 @@ class Cts:
             The result is that occurrences of more than one of the synonyms are scored
             as if there are more occurrences of the same term (as opposed to having a
             separate term that contributes to score).
-        weight : xs:double?
+        weight : object
             A weight for this query. The default is 1.0.
 
         Returns
@@ -13391,25 +9832,6 @@ class Cts:
 
         Notes
         -----
-        If you want to constrain on a range of values, you can combine multiple
-        cts:range-query constructors together with cts:and-query or any of the other
-        composable cts:query constructors, as in the last part of the example below.
-
-        If neither "cached" nor "uncached" is present, it specifies "cached".
-
-        Negative "min-occurs" or "max-occurs" values will be treated as 0 and
-        non-integral values will be rounded down. An error will be raised if the
-        "min-occurs" value is greater than the "max-occurs" value.
-
-        "score-function=linear" means that values that are further away from the bounds
-        will score higher. "score-function=reciprocal" means that values that are closer
-        to the bounds will score higher. The functions are scaled appropriately for
-        different types, so that in general the default slope factor will provide useful
-        results. Using a slope factor greater than 1 gives distinct scores over a
-        smaller range of values, and produces generally higher scores. Using a slope
-        factor less than 1 gives distinct scores over a wider range of values, and
-        produces generally lower scores.
-
         Native reference: https://docs.marklogic.com/cts:range-query
         """
         return _FunctionCall(
@@ -13426,11 +9848,11 @@ class Cts:
 
         Parameters
         ----------
-        arg : xs:anyAtomicType*
+        arg : object
             The sequence of values.
-        value : xs:anyAtomicType
+        value : object
             The value to be "ranked".
-        options : xs:string*
+        options : object
             Options. The default is (). Options include: "ascending"(default) Rank the
             value as if the sequence was sorted in ascending order. "descending" Rank
             the value as if the sequence was sorted in descending order. "collation= URI
@@ -13446,10 +9868,6 @@ class Cts:
 
         Notes
         -----
-        This function is designed to take a sequence of values returned by a lexicon
-        function (for example, cts:element-values ); if you input non-lexicon values,
-        the result will be the empty sequence.
-
         Native reference: https://docs.marklogic.com/cts:rank
         """
         return _FunctionCall(
@@ -13467,7 +9885,7 @@ class Cts:
 
         Parameters
         ----------
-        reference : node()
+        reference : object
             A reference to a range index.
 
         Returns
@@ -13492,7 +9910,7 @@ class Cts:
 
         Parameters
         ----------
-        query : cts:query
+        query : object
             A query to register.
 
         Returns
@@ -13518,9 +9936,9 @@ class Cts:
 
         Parameters
         ----------
-        ids : xs:unsignedLong*
+        ids : object
             Some registered query identifiers.
-        options : xs:string*
+        options : object
             Options to this query. The default is (). Options include: "filtered" A
             filtered query (the default). Filtered queries eliminate any false-positive
             results and properly resolve cases where there are multiple candidate
@@ -13538,7 +9956,7 @@ class Cts:
             expressions or on XPath expressions that traverse below a fragment root can
             result in unexpected results. This option is required in the current
             release.
-        weight : xs:double?
+        weight : object
             A weight for this query. Higher weights move search results up in the
             relevance order. The default is 1.0. The weight should be between 64 and
             -16. Weights greater than 64 will have the same effect as a weight of 64.
@@ -13552,24 +9970,6 @@ class Cts:
 
         Notes
         -----
-        Searches that use registered queries will generate results with different scores
-        than the equivalent searches using non-registered queries. This is because
-        registered queries are treated as a single term in relevance calculations.
-
-        If the options parameter does not contain "unfiltered", then an error is
-        returned, as the "unfiltered" option is required.
-
-        Registered queries are persisted as a soft state only; they can become
-        unregistered through an explicit direction (using cts:deregister ), as a result
-        of the cache growing too large, or because of a server restart. Consequently,
-        either your XQuery code or your middleware layer should handle the case when an
-        XDMP-UNREGISTERED exception occurs (for example, you can wrap your
-        cts:registered-query code in a try/catch block or your Java or .NET code can
-        catch and handle the exception).
-
-        Unfiltered queries, including registered queries, do not match in cts:walk or
-        cts:highlight .
-
         Native reference: https://docs.marklogic.com/cts:registered-query
         """
         return _FunctionCall(
@@ -13586,10 +9986,10 @@ class Cts:
 
         Parameters
         ----------
-        node : node()
+        node : object
             A node. Typically this is an item in the result sequence of a cts:search
             operation. If this parameter is omitted, the context node is used.
-        output_kind : xs:string
+        output_kind : object
             The output kind. It can be either "element" or "object". With "element", the
             built-in returns an XML element. With "object", the built-in returns a
             map:map. The default is "element".
@@ -13601,21 +10001,6 @@ class Cts:
 
         Notes
         -----
-        This function returns an XML report that contains details about the score
-        computation only if the following conditions are met: The node parameter or
-        context node is the result of a cts:search call that included the
-        relevance-trace option; and the score is non-zero. For example, you will not get
-        a report if you use the score-zero option on your cts:search , if the search
-        returns no results, or if node is not the result of cts:search .
-
-        The score computation reflects the scoring method specified in the cts:search
-        expression, if any. The score-zero and score-random methods do not generate a
-        report.
-
-        Collecting score computation details with which to generate this report is
-        costly, so using the relevance-trace option will slow down your search
-        significantly.
-
         Native reference: https://docs.marklogic.com/cts:relevance-info
         """
         return _FunctionCall(
@@ -13633,7 +10018,7 @@ class Cts:
 
         Parameters
         ----------
-        node : node()
+        node : object
             A node. Typically this is an item in the result sequence of a cts:search
             operation. If you specify the first item from a cts:search expression, then
             cts:remainder will return an estimate of the number of fragments that match
@@ -13646,35 +10031,6 @@ class Cts:
 
         Notes
         -----
-        This function makes it efficient to estimate the size of a search result and
-        execute that search in the same query. If you only need an estimate of the size
-        of a search but do not need to run the search, then xdmp:estimate is more
-        efficient.
-
-        To return the estimated size of a search with cts:remainder , use the first item
-        of a cts:search result sequence as the parameter to cts:remainder . For example,
-        the following query returns the estimated number of fragments that contain the
-        word "dog":
-
-        cts:remainder(cts:search(collection(), "dog")[1])
-
-        When you put the position predicate on the cts:search result sequence, MarkLogic
-        Server will filter all of the false-positive results up to the specified
-        position, but not the false-positive results beyond the specified position.
-        Because of this, when you increase the position number in the parameter, the
-        result from cts:remainder might decrease by a larger number than the increase in
-        position number, or it might not decrease at all. For example, if the query
-        above returned 10, then the following query might return 9, it might return 10,
-        or it might return less than 9, depending on how the results are dispersed
-        throughout different fragments:
-
-        cts:remainder(cts:search(collection(), "dog")[2])
-
-        If you run cts:remainder on a constructed node, it always returns 0; it is
-        primarily intended to run on nodes that are the retrieved from the database (an
-        item from a search result or an item from the result of an XPath expression that
-        searches through the database).
-
         Native reference: https://docs.marklogic.com/cts:remainder
         """
         return _FunctionCall(
@@ -13692,10 +10048,10 @@ class Cts:
 
         Parameters
         ----------
-        nodes : node()*
+        nodes : object
             Model nodes that must be matchable by queries matched by this reverse query.
             See the Usage Notes for more details.
-        weight : xs:double?
+        weight : object
             A weight for this query. This parameter has no effect because a reverse
             query does not contribute to score. That is, the score is always 0.
 
@@ -13706,23 +10062,6 @@ class Cts:
 
         Notes
         -----
-        A reverse query matches serialized cts:query nodes. Construct a reverse query
-        from nodes that model what that serialized query should match, rather than
-        passing in the target query. For example, to match queries for the word "hello",
-        specify a node containing the word "hello" as the nodes parameter. See the
-        example, below. Reverse queries are useful for creating alerting applications.
-
-        When evaluating a cts:reverse-query on a set of nodes, the cts:similar-query or
-        cts:registered-query components of any stored query will match all nodes.
-
-        You can create a node or document containing a serialized cts:query in XQuery by
-        wrapping a cts:query constructor in an XML node. For example, the following
-        snippet creates an XML element (foo) that contains a serialized word query:
-        <foo>{cts:word-query("my search")}</foo>/element()
-
-        A reverse query can match both the XML and JSON representations of a serialized
-        query.
-
         Native reference: https://docs.marklogic.com/cts:reverse-query
         """
         return _FunctionCall(
@@ -13740,7 +10079,7 @@ class Cts:
 
         Parameters
         ----------
-        node : node()
+        node : object
             A node. Typically this is an item in the result sequence of a cts:search
             operation.
 
@@ -13751,14 +10090,6 @@ class Cts:
 
         Notes
         -----
-        Score is computed according to the scoring method specified in the cts:search
-        expression, if any.
-
-        If you run cts:score on a constructed node, it always returns 0; it is primarily
-        intended to run on nodes that are retrieved from the database (an item from a
-        search result or an item from the result of an XPath expression that searches
-        through the database).
-
         Native reference: https://docs.marklogic.com/cts:score
         """
         return _FunctionCall(
@@ -13776,7 +10107,7 @@ class Cts:
 
         Parameters
         ----------
-        options : xs:string*
+        options : object
             Options. Options include: "descending" Return results in descending order of
             score. "ascending" Return results in ascending order of score.
 
@@ -13787,10 +10118,6 @@ class Cts:
 
         Notes
         -----
-        Only one of "ascending" or "descending" may be specified in the options
-        parameter. If neither "ascending" nor "descending" is specified, then the
-        default is "ascending".
-
         Native reference: https://docs.marklogic.com/cts:score-order
         """
         return _FunctionCall(
@@ -13815,14 +10142,14 @@ class Cts:
 
         Parameters
         ----------
-        expression : node()*
+        expression : object
             An expression to be searched. This must be an inline fully searchable path
             expression. Python strings are wrapped internally and validated
             with the other literal paths in the expression before execution.
-        query : cts:query?
+        query : object
             A cts:query specifying the search to perform. If a string is entered, the
             string is treated as a cts:word-query of the specified string.
-        options : (cts:order|xs:string)*
+        options : object
             Options to this search. The default is (). Options include: "filtered" A
             filtered search (the default). Filtered searches eliminate any
             false-positive matches and properly resolve cases where there are multiple
@@ -13895,9 +10222,9 @@ class Cts:
             document length to average document length ratio while using the
             "score-BM25" option. Valid values are greater than 0.0 and less than or
             equal to 1.0. The default is 0.333.
-        quality_weight : xs:double?
+        quality_weight : object
             A document quality weight to use when computing scores. The default is 1.0.
-        forest_ids : xs:unsignedLong*
+        forest_ids : object
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             (). In the XQuery version, you can use cts:search with this parameter and an
@@ -13913,70 +10240,11 @@ class Cts:
 
         Notes
         -----
-        Queries that use cts:search require that the XPath expression searched is fully
-        searchable. A fully searchable path is one that has no steps that are
-        unsearchable and whose last step is searchable. You can use the
-        xdmp:query-trace() function to see if the path is fully searchable. If there are
-        no entries in the xdmp:query-trace() output indicating that a step is
-        unsearchable, and if the last step is searchable, then that path is fully
-        searchable. Queries that use cts:search on unsearchable XPath expressions will
-        fail with an error message. You can often make the path expressions fully
-        searchable by rewriting the query or adding new indexes.
-
-        Each node that cts:search returns has a score with which it is associated. To
-        access the score, use the cts:score function. The nodes are returned in
-        relevance order (most relevant to least relevant), where more relevant nodes
-        have a higher score.
-
-        Only one of the "filtered" or "unfiltered" options may be specified in the
-        options parameter. If neither "filtered" nor "unfiltered", is specified then the
-        default is "filtered".
-
-        Only one of the "score-logtfidf", "score-logtf", "score-simple", "score-random",
-        "score-zero", or "score-bm25" options may be specified in the options parameter.
-        If none of "score-logtfidf", "score-logtf", "score-simple", "score-random",
-        "score-zero", or "score-bm25" are specified, then the default is
-        "score-logtfidf".
-
-        Only one of the "checked" or "unchecked" options may be specified in the options
-        parameter. If the neither "checked" nor "unchecked" are specified, then the
-        default is "checked".
-
-        Only one of the "faceted" or "unfaceted" options may be specified in the options
-        parameter. If the neither "faceted" nor "unfaceted" are specified, then the
-        default is "unfaceted".
-
-        If the cts:query specified is the empty string (equivalent to cts:word-query("")
-        ), then the search returns the empty sequence.
-
-        With the cts:index-order parameter, results with no comparable index value are
-        always returned at the end of the ordered result sequence.
-
-        With an XQuery "order by" clause, results with no comparable value are normally
-        returned by MarkLogic at the end of the ordered result sequence. You can
-        override this behavior by specifying the "empty greatest" or "empty least"
-        modifier to the "order by" clause. See
-        https://www.w3.org/TR/2010/REC-xquery-20101214/#id-orderby-return for how to
-        specify "order by" clauses.
-
-        If "bm25-length-weight= NUMBER " is provided along with the "score-bm25" option,
-        the BM25 scoring method is used with the weight specified. If the "score-bm25"
-        option is provided but "bm25-length-weight= NUMBER " is not specified, the
-        default value is 0.333. If provided, the value must be greater than 0.0 and less
-        than or equal to 1.0. This value is used to calculate the BM25 score of each
-        search result, and determines how much of an effect the document length to
-        average document length ratio has on this score. Use lower values for
-        "bm25-length-weight= NUMBER " to push the scores in favor of log(term frequency)
-        and higher values to push the scores in favor of (document length / average
-        document length). The optimal value for "bm25-length-weight= NUMBER " depends on
-        your document collection. Experiment with this value to receive results that
-        best fit your application.
-
         Native reference: https://docs.marklogic.com/cts:search
         """
         return _FunctionCall(
             "cts:search",
-            (xpath("/") if expression is None else search_path(expression), query),
+            (_DatabaseRoot() if expression is None else search_path(expression), query),
             (options, _double(quality_weight), forest_ids),
         )
 
@@ -13988,15 +10256,15 @@ class Cts:
 
         Parameters
         ----------
-        nodes : node()*
+        nodes : object
             Some model nodes.
-        weight : xs:double?
+        weight : object
             A weight for this query. Higher weights move search results up in the
             relevance order. The default is 1.0. The weight should be between 64 and
             -16. Weights greater than 64 will have the same effect as a weight of 64.
             Weights less than the absolute value of 0.0625 (between -0.0625 and 0.0625)
             are rounded to 0, which means that they do not contribute to the score.
-        options : element()?
+        options : object
             An XML representation of the options for defining which terms to generate
             and how to evaluate them. The options node must be in the
             cts:distinctive-terms namespace. The following is a sample options node :
@@ -14014,8 +10282,6 @@ class Cts:
 
         Notes
         -----
-        cts:similar-query
-
         Native reference: https://docs.marklogic.com/cts:similar-query
         """
         return _FunctionCall(
@@ -14039,13 +10305,13 @@ class Cts:
 
         Parameters
         ----------
-        range_index : cts:reference
+        range_index : object
             Reference to a range index. The type of the range index must be numeric.
-        options : xs:string*
+        options : object
             Same as the "options" parameter in cts:aggregate .
-        query : cts:query?
+        query : object
             Same as the "query" parameter in cts:aggregate .
-        forest_ids : xs:unsignedLong*
+        forest_ids : object
             Same as the "forest-ids" parameter in cts:aggregate .
 
         Returns
@@ -14078,13 +10344,13 @@ class Cts:
 
         Parameters
         ----------
-        range_index : cts:reference
+        range_index : object
             Reference to a range index. The type of the range index must be numeric.
-        options : xs:string*
+        options : object
             Same as the "options" parameter in cts:aggregate .
-        query : cts:query?
+        query : object
             Same as the "query" parameter in cts:aggregate .
-        forest_ids : xs:unsignedLong*
+        forest_ids : object
             Same as the "forest-ids" parameter in cts:aggregate .
 
         Returns
@@ -14110,12 +10376,12 @@ class Cts:
 
         Parameters
         ----------
-        text : xs:string
+        text : object
             A word or phrase to stem.
-        language : xs:string?
+        language : object
             A language to use for stemming. If not supplied, it uses the database
             default language.
-        part_of_speech : xs:string?
+        part_of_speech : object
             A part of speech to use for stemming. The default is the unspecified part of
             speech. This parameter is for testing custom stemmers.
 
@@ -14126,13 +10392,6 @@ class Cts:
 
         Notes
         -----
-        In general, you should pass a word into cts:stem ; if you enter a phrase, it
-        will stem the phrase, which will normally stem to itself.
-
-        When you stem a word through cts:stem , it returns all of the stems for the
-        word, including decompounding and multiple stems, regardless of the database
-        stemming setting.
-
         Native reference: https://docs.marklogic.com/cts:stem
         """
         return _FunctionCall(
@@ -14155,13 +10414,13 @@ class Cts:
 
         Parameters
         ----------
-        range_index : cts:reference
+        range_index : object
             Reference to a range index.
-        options : xs:string*
+        options : object
             Same as the "options" parameter in cts:aggregate .
-        query : cts:query?
+        query : object
             Same as the "query" parameter in cts:aggregate .
-        forest_ids : xs:unsignedLong*
+        forest_ids : object
             Same as the "forest-ids" parameter in cts:aggregate .
 
         Returns
@@ -14194,13 +10453,13 @@ class Cts:
 
         Parameters
         ----------
-        computed_labels : element(cts:label)*
+        computed_labels : object
             A sequence of element nodes containing the labels from classification (the
             output from cts:classify ) for a set of documents.
-        known_labels : element(cts:label)*
+        known_labels : object
             A sequence of element nodes containing the known labels for the same set of
             documents.
-        recall_weight : xs:double?
+        recall_weight : object
             The factor to use in the calculation of the F measure. The number should be
             non-negative. A value of 0 means F is just precision and a value of +INF
             means F is just recall. The default is 1, which gives the harmonic mean
@@ -14213,28 +10472,6 @@ class Cts:
 
         Notes
         -----
-        You use the output of cts:thresholds to determine the best thresholds values for
-        your data, based on the first pass through the first part of your training data.
-        The output of cts:thresholds provides you with precision and recall measurements
-        at the calculated thresholds for each class. The following are the definitions
-        of the attributes of the thresholds element returned by cts:thresholds :
-
-        name The name of the class. threshold The threshold that is computed by the
-        classifier to give the best results. The threshold is used by cts:classify when
-        classifying documents, and is defined to be the positive or negative distance
-        from the hyperplane which represents the edge of the class. precision A number
-        which represents the fraction of nodes identified in a class that are actually
-        in that class. As this approaches 1, there is a higher probability that you
-        over-classified. recall A number which represents the fraction of nodes in a
-        class that were identified by the classifier as being in that class. As this
-        approaches 1, there is a higher probability that you under-classified. F (the
-        F-measure) A measure which represents if the classification at the given
-        threshold is closer to recall or closer to precision. A value of 1 indicates
-        that precision and recall have equal weight. A value of 0.5 indicates that
-        precision is weighted 2x recall. A value of 2 indicates that recall is weighted
-        2x precision. A value of 0 indicates that the weighting is precision only, and a
-        value of +INF ( xs:double('+INF')) indicates that weighting is recall only.
-
         Native reference: https://docs.marklogic.com/cts:thresholds
         """
         return _FunctionCall(
@@ -14251,12 +10488,12 @@ class Cts:
 
         Parameters
         ----------
-        text : xs:string
+        text : object
             A word or phrase to tokenize.
-        language : xs:string?
+        language : object
             A language to use for tokenization. If not supplied, it uses the database
             default language.
-        field : xs:string?
+        field : object
             A field to use for tokenization. If the field has custom tokenization rules,
             they will be used. If no field is supplied or the field has no custom
             tokenization rules, the default tokenization rules are used.
@@ -14268,23 +10505,6 @@ class Cts:
 
         Notes
         -----
-        When you tokenize a string with cts:tokenize , each word is represented by an
-        instance of cts:word , each punctuation character is represented by an instance
-        of cts:punctuation , each set of adjacent spaces is represented by an instance
-        of cts:space , and each set of adjacent line breaks is represented by an
-        instance of cts:space .
-
-        Unlike the standard XQuery function fn:tokenize , cts:tokenize returns words,
-        punctuation, and spaces as different types. You can therefore use a typeswitch
-        to handle each type differently. For example, you can use cts:tokenize to remove
-        all punctuation from a string, or create logic to test for the type and return
-        different things for different types, as shown in the first two examples below.
-
-        You can use xdmp:describe to show how a given string will be tokenized. When run
-        on the results of cts:tokenize , the xdmp:describe function returns the types
-        and the values for each token. For a sample of this pattern, see the third
-        example below.
-
         Native reference: https://docs.marklogic.com/cts:tokenize
         """
         return _FunctionCall(
@@ -14301,13 +10521,13 @@ class Cts:
 
         Parameters
         ----------
-        training_nodes : node()*
+        training_nodes : object
             The sequence of training nodes. These are nodes that represent members of
             the classes.
-        labels : element(cts:label)*
+        labels : object
             A sequence of labels for the training nodes, in the order corresponding to
             the training nodes.
-        options : (element()|map:map)?
+        options : object
             Options with which to customize this operation. You can specify options as
             either an XML element in the "cts:train" namespace, or as a map:map . The
             options names below are XML element localnames. When using a map, replace
@@ -14393,57 +10613,6 @@ class Cts:
 
         Notes
         -----
-        The elements in the label sequence should match one for one with the nodes in
-        the training node sequence. The first label element describes the first node in
-        the training node sequence, the second label element describes the second node
-        in the training node sequence, and so on. If there are more labels than training
-        nodes or more training nodes than labels, an error is raised.
-
-        The format of each label element is:
-
-        <cts:label name="Node1"> <cts:class name="Example1"/> <cts:class name="Example2"
-        val="-1"/> : : </cts:label>
-
-        Each class listed indicates whether the corresponding node in the training
-        sequence is in the given class. Examples are taken to be positive examples
-        unless specified otherwise (with a val attribute of -1). The document is assumed
-        to be a negative example of any classes that are not explicitly listed. The name
-        attribute on the label element is an optional name for the labelled node. It is
-        purely for human consumption to help in tuning the classification parameters.
-
-        Output Formats
-
-        A linear classifier is defined by a weight vector w on terms, and an offset
-        value b. The <weights/> node encodes the weight vector directly. Its children
-        are the classes, and each class includes a list of terms. The term node uses an
-        internal id to identify the term and a term weight:
-
-        <weights> <class name="Example1" offset="2.04"> <term id="43587329645324245"
-        val="0.3423432"/> <term id="47893427895432534" val="-0.12345556"/> : : </class>
-        : </weights>
-
-        The weight vector w is a linear combination of the documents themselves, and it
-        may be more convenient to express the classifier in this way. For instance, if
-        the number of terms is not limited, the <weights/> node will be extremely large.
-        The weight vector form may not be used if the classifier kernel is non-linear,
-        that is, with the Gaussian or geodesic kernel.
-
-        The support vector representation of the classifier includes a supports node
-        that has <class/> children for each class. Here the class elements contain a
-        list of doc elements which identify the specific training nodes using an
-        internal key. This internal key is valid across queries only for nodes in the
-        database. It is strongly recommended that the training set for supports
-        classifiers consist of whole documents only. Each doc element has an attribute
-        encoding the weight of that document and an error attribute which shows how well
-        the document fit the classifier. Large positive or negative errors (greater than
-        about 1.5) are potentially mis-classified documents.
-
-        <supports> <class name="Example1" offset="2.04"> <doc id="155584958759"
-        name="Node102" val="-0.00334163" err="1.4"/> <doc id="594064848864"
-        name="Node57" val="0.025341234" err="-2.3"/> : : </class> : </supports>
-
-        Each class is identified by a unique name.
-
         Native reference: https://docs.marklogic.com/cts:train
         """
         return _FunctionCall(
@@ -14469,23 +10638,23 @@ class Cts:
 
         Parameters
         ----------
-        subject : xs:anyAtomicType*
+        subject : object
             The subjects to look up. When multiple values are specified, the query
             matches if any value matches. When the empty sequence is specified, then
             triples with any subject are matched.
-        predicate : xs:anyAtomicType*
+        predicate : object
             The predicates to look up. When multiple values are specified, the query
             matches if any value matches. When the empty sequence is specified, then
             triples with any predicate are matched.
-        object : xs:anyAtomicType*
+        object : object
             The objects to look up. When multiple values are specified, the query
             matches if any value matches. When the empty sequence is specified, then
             triples with any object are matched.
-        operator : xs:string*
+        operator : object
             One object operator or three subject/predicate/object operators.
             Includes sameTerm; empty sequences use the native default.
             MarkLogic validates these operators when the query is evaluated.
-        options : xs:string*
+        options : object
             Options to this query. The default is (). Options include: "cached" Cache
             the results of this query in the list cache. "uncached" Do not cache the
             results of this query in the list cache. "score-function= function " Use the
@@ -14497,7 +10666,7 @@ class Cts:
             this range query. zero This range query does not contribute to the score.
             This is the default. "slope-factor= number " Apply the given number as a
             scaling factor to the slope of the scoring function. The default is 1.0.
-        weight : xs:double?
+        weight : object
             A weight for this query. The default is 1.0.
 
         Returns
@@ -14507,21 +10676,6 @@ class Cts:
 
         Notes
         -----
-        If you want to constrain on a range of values, you can combine multiple
-        cts:triple-range-query constructors together with cts:and-query or any of the
-        other composable cts:query constructors.
-
-        If neither "cached" nor "uncached" is present, it specifies "cached".
-
-        "score-function=linear" means that values that are further away from the bounds
-        will score higher. "score-function=reciprocal" means that values that are closer
-        to the bounds will score higher. The functions are scaled appropriately for
-        different types, so that in general the default slope factor will provide useful
-        results. Using a slope factor greater than 1 gives distinct scores over a
-        smaller range of values, and produces generally higher scores. Using a slope
-        factor less than 1 gives distinct scores over a wider range of values, and
-        produces generally lower scores.
-
         Native reference: https://docs.marklogic.com/cts:triple-range-query
         """
         return _FunctionCall(
@@ -14542,9 +10696,9 @@ class Cts:
 
         Parameters
         ----------
-        values : xs:anyAtomicType*
+        values : object
             The values to look up.
-        forest_ids : xs:unsignedLong*
+        forest_ids : object
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
@@ -14581,19 +10735,19 @@ class Cts:
 
         Parameters
         ----------
-        subject : xs:anyAtomicType*
+        subject : object
             The subjects to look up. When multiple values are specified, the query
             matches if any value matches. When the empty sequence is specified, then
             triples with any subject are matched.
-        predicate : xs:anyAtomicType*
+        predicate : object
             The predicates to look up. When multiple values are specified, the query
             matches if any value matches. When the empty sequence is specified, then
             triples with any subject are matched.
-        object : xs:anyAtomicType*
+        object : object
             The objects to look up. When multiple values are specified, the query
             matches if any value matches. When the empty sequence is specified, then
             triples with any subject are matched.
-        operator : xs:string*
+        operator : object
             If a single string is provided it is treated as the operator for the $object
             values. If a sequence of three strings are provided, they give the operators
             for $subject, $predicate and $object in turn. The default operator is "=".
@@ -14605,7 +10759,7 @@ class Cts:
             $value. ">=" Match range index values greater than or equal to $value. "="
             Match range index values equal to $value. "!=" Match range index values not
             equal to $value.
-        options : xs:string*
+        options : object
             Options. The default is (). Options include: "order-pso" Return results
             ordered by predicate, then subject, then object. "order-sop" Return results
             ordered by subject, then object, then predicate. "order-ops" Return results
@@ -14635,7 +10789,7 @@ class Cts:
             occurs. This is especially useful in cases where multiple lexicon calls
             occur in the same query (for example, resolving many facets in a single
             query).
-        query : cts:query?
+        query : object
             Only include values in fragments selected by the cts:query , and compute
             frequencies from this set of included values. The values do not need to
             match the query, but they must occur in fragments selected by the query. The
@@ -14643,7 +10797,7 @@ class Cts:
             selected in the same manner as "unfiltered" cts:search operations. If a
             string is entered, the string is treated as a cts:word-query of the
             specified string.
-        forest_ids : xs:unsignedLong*
+        forest_ids : object
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
@@ -14655,22 +10809,6 @@ class Cts:
 
         Notes
         -----
-        Only one of "eager" or "lazy" may be specified in the options parameter. If
-        neither "eager" nor "lazy" is specified, then the default is "lazy".
-
-        Only one of "any", "document", "properties", or "locks" may be specified in the
-        options parameter. If none of "any", "document", "properties", or "locks" are
-        specified and there is a $query parameter, then the default is "document". If
-        there is no $query parameter then the default is "any".
-
-        Only one of the "order-pso", "order-sop", or "order-ops" options may be
-        specified in the options parameter. If none is specified, then the default is
-        chosen to most efficiently retrieve the required values.
-
-        Only one of the "checked" or "unchecked" options may be specified in the options
-        parameter. If neither "checked" nor "unchecked" are specified, then the default
-        is "checked".
-
         Native reference: https://docs.marklogic.com/cts:triples
         """
         return _FunctionCall(
@@ -14735,9 +10873,9 @@ class Cts:
 
         Parameters
         ----------
-        pattern : xs:string
+        pattern : object
             Wildcard pattern to match.
-        options : xs:string*
+        options : object
             Options. The default is (). Options include: "case-sensitive" A
             case-sensitive match. "case-insensitive" A case-insensitive match.
             "diacritic-sensitive" A diacritic-sensitive match. "diacritic-insensitive" A
@@ -14786,15 +10924,15 @@ class Cts:
             is especially useful in cases where multiple lexicon calls occur in the same
             query (for example, resolving many facets in a single query). "map" Return
             results as a single map:map value instead of as an xs:string* sequence .
-        query : cts:query?
+        query : object
             Only include URIs from fragments selected by the cts:query , and compute
             frequencies from this set of included URIs. The fragments are not filtered
             to ensure they match the query, but instead selected in the same manner as
             "unfiltered" cts:search operations. If a string is entered, the string is
             treated as a cts:word-query of the specified string.
-        quality_weight : xs:double?
+        quality_weight : object
             A document quality weight to use when computing scores. The default is 1.0.
-        forest_ids : xs:unsignedLong*
+        forest_ids : object
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
@@ -14806,58 +10944,6 @@ class Cts:
 
         Notes
         -----
-        Only one of "frequency-order" or "item-order" may be specified in the options
-        parameter. If neither "frequency-order" nor "item-order" is specified, then the
-        default is "item-order".
-
-        Only one of "ascending" or "descending" may be specified in the options
-        parameter. If neither "ascending" nor "descending" is specified, then the
-        default is "ascending" if "item-order" is specified, and "descending" if
-        "frequency-order" is specified.
-
-        Only one of "eager" or "lazy" may be specified in the options parameter. If
-        neither "eager" nor "lazy" is specified, then the default is "lazy" if
-        "item-order" is specified, and "eager" if "frequency-order" is specified.
-
-        Only one of "any", "document", "properties", or "locks" may be specified in the
-        options parameter. If none of "any", "document", "properties", or "locks" are
-        specified and there is a $query parameter, then the default is "document". If
-        there is no $query parameter then the default is "any".
-
-        Only one of the "score-logtfidf", "score-logtf", "score-simple", "score-random",
-        or "score-zero" options may be specified in the options parameter. If none of
-        "score-logtfidf", "score-logtf", "score-simple", "score-random", or "score-zero"
-        are specified, then the default is "score-logtfidf".
-
-        Only one of the "checked" or "unchecked" options may be specified in the options
-        parameter. If neither "checked" nor "unchecked" are specified, then the default
-        is "checked".
-
-        If "sample= N " is not specified in the options parameter, then all included
-        URIs may be returned. If a $query parameter is not present, then "sample= N "
-        has no effect.
-
-        If "truncate= N " is not specified in the options parameter, then URIs from all
-        fragments selected by the $query parameter are included. If a $query parameter
-        is not present, then "truncate= N " has no effect.
-
-        To incrementally fetch a subset of the values returned by this function, use
-        fn:subsequence on the output, rather than the "skip" option as the skip is
-        applied to the relevance ordered query matches, not to the ordered values list.
-
-        When using the "skip" option, use the "truncate" option rather than the "limit"
-        option to control the number of matching fragments from which to draw values.
-
-        If neither "case-sensitive" nor "case-insensitive" is present, $pattern is used
-        to determine case sensitivity. If $pattern contains no uppercase, it specifies
-        "case-insensitive". If $pattern contains uppercase, it specifies
-        "case-sensitive".
-
-        If neither "diacritic-sensitive" nor "diacritic-insensitive" is present,
-        $pattern is used to determine diacritic sensitivity. If $pattern contains no
-        diacritics, it specifies "diacritic-insensitive". If $pattern contains
-        diacritics, it specifies "diacritic-sensitive".
-
         Native reference: https://docs.marklogic.com/cts:uri-match
         """
         return _FunctionCall(
@@ -14902,11 +10988,11 @@ class Cts:
 
         Parameters
         ----------
-        start : xs:string?
+        start : object
             A starting value. Return only this value and following values. If the empty
             string, return all values. If the parameter is not in the lexicon, then it
             returns the values beginning with the next value.
-        options : xs:string*
+        options : object
             Options. The default is (). Options include: "ascending" URIs should be
             returned in ascending order. "descending" URIs should be returned in
             descending order. "any" URIs from any fragment should be included.
@@ -14952,15 +11038,15 @@ class Cts:
             is especially useful in cases where multiple lexicon calls occur in the same
             query (for example, resolving many facets in a single query). "map" Return
             results as a single map:map value instead of as an xs:string* sequence .
-        query : cts:query?
+        query : object
             Only include URIs from fragments selected by the cts:query , and compute
             frequencies from this set of included URIs. The fragments are not filtered
             to ensure they match the query, but instead selected in the same manner as
             "unfiltered" cts:search operations. If a string is entered, the string is
             treated as a cts:word-query of the specified string.
-        quality_weight : xs:double?
+        quality_weight : object
             A document quality weight to use when computing scores. The default is 1.0.
-        forest_ids : xs:unsignedLong*
+        forest_ids : object
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
@@ -14972,48 +11058,6 @@ class Cts:
 
         Notes
         -----
-        Only one of "frequency-order" or "item-order" may be specified in the options
-        parameter. If neither "frequency-order" nor "item-order" is specified, then the
-        default is "item-order".
-
-        Only one of "ascending" or "descending" may be specified in the options
-        parameter. If neither "ascending" nor "descending" is specified, then the
-        default is "ascending" if "item-order" is specified, and "descending" if
-        "frequency-order" is specified.
-
-        Only one of "eager" or "lazy" may be specified in the options parameter. If
-        neither "eager" nor "lazy" is specified, then the default is "lazy" if
-        "item-order" is specified, and "eager" if "frequency-order" is specified.
-
-        Only one of "any", "document", "properties", or "locks" may be specified in the
-        options parameter. If none of "any", "document", "properties", or "locks" are
-        specified and there is a $query parameter, then the default is "document". If
-        there is no $query parameter then the default is "any".
-
-        Only one of the "score-logtfidf", "score-logtf", "score-simple", "score-random",
-        or "score-zero" options may be specified in the options parameter. If none of
-        "score-logtfidf", "score-logtf", "score-simple", "score-random", or "score-zero"
-        are specified, then the default is "score-logtfidf".
-
-        Only one of the "checked" or "unchecked" options may be specified in the options
-        parameter. If neither "checked" nor "unchecked" are specified, then the default
-        is "checked".
-
-        If "sample= N " is not specified in the options parameter, then all included
-        URIs may be returned. If a $query parameter is not present, then "sample= N "
-        has no effect.
-
-        If "truncate= N " is not specified in the options parameter, then URIs from all
-        fragments selected by the $query parameter are included. If a $query parameter
-        is not present, then "truncate= N " has no effect.
-
-        To incrementally fetch a subset of the values returned by this function, use
-        fn:subsequence on the output, rather than the "skip" option as the skip is
-        applied to the relevance ordered query matches, not to the ordered values list.
-
-        When using the "skip" option, use the "truncate" option rather than the "limit"
-        option to control the number of matching fragments from which to draw values.
-
         Native reference: https://docs.marklogic.com/cts:uris
         """
         return _FunctionCall(
@@ -15031,9 +11075,9 @@ class Cts:
 
         Parameters
         ----------
-        string : xs:string
+        string : object
             The path to be tested as a string.
-        map : map:map?
+        map : object
             A map of namespace bindings. The keys should be namespace prefixes and the
             values should be namespace URIs. These namespace bindings will be added to
             the in-scope namespace bindings in the evaluation of the path.
@@ -15062,9 +11106,9 @@ class Cts:
 
         Parameters
         ----------
-        string : xs:string
+        string : object
             The path to be tested as a string.
-        map : map:map?
+        map : object
             A map of namespace bindings. The keys should be namespace prefixes and the
             values should be namespace URIs. These namespace bindings will be added to
             the in-scope namespace bindings in the evaluation of the path.
@@ -15093,9 +11137,9 @@ class Cts:
 
         Parameters
         ----------
-        string : xs:string
+        string : object
             The path to be tested as a string.
-        ignorens : xs:boolean
+        ignorens : object
             Ignore namespace prefix binding errors.
 
         Returns
@@ -15121,9 +11165,9 @@ class Cts:
 
         Parameters
         ----------
-        string : xs:string
+        string : object
             The path to be tested as a string.
-        map : map:map?
+        map : object
             A map of namespace bindings. The keys should be namespace prefixes and the
             values should be namespace URIs. These namespace bindings will be added to
             the in-scope namespace bindings in the evaluation of the path.
@@ -15152,9 +11196,9 @@ class Cts:
 
         Parameters
         ----------
-        string : xs:string
+        string : object
             The path to be tested as a string.
-        map : map:map?
+        map : object
             A map of namespace bindings. The keys should be namespace prefixes and the
             values should be namespace URIs. These namespace bindings will be added to
             the in-scope namespace bindings in the evaluation of the path.
@@ -15191,11 +11235,11 @@ class Cts:
 
         Parameters
         ----------
-        range_index_1 : cts:reference
+        range_index_1 : object
             A reference to a range index.
-        range_index_2 : cts:reference
+        range_index_2 : object
             A reference to a range index.
-        options : xs:string*
+        options : object
             Options. The default is (). Options include: "ascending" Co-occurrences
             should be returned in ascending order. "descending" Co-occurrences should be
             returned in descending order. "any" Co-occurrences from any fragment should
@@ -15257,7 +11301,7 @@ class Cts:
             query (for example, resolving many facets in a single query). "map" Return
             results as a single map:map value instead of as an
             element(cts:co-occurrence)* sequence .
-        query : cts:query?
+        query : object
             Only include co-occurrences in fragments selected by the cts:query , and
             compute frequencies from this set of included co-occurrences. The
             co-occurrences do not need to match the query, but they must occur in
@@ -15265,9 +11309,9 @@ class Cts:
             they match the query, but instead selected in the same manner as
             "unfiltered" cts:search operations. If a string is entered, the string is
             treated as a cts:word-query of the specified string.
-        quality_weight : xs:double?
+        quality_weight : object
             A document quality weight to use when computing scores. The default is 1.0.
-        forest_ids : xs:unsignedLong*
+        forest_ids : object
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
@@ -15279,60 +11323,6 @@ class Cts:
 
         Notes
         -----
-        Only one of "frequency-order" or "item-order" may be specified in the options
-        parameter. If neither "frequency-order" nor "item-order" is specified, then the
-        default is "item-order".
-
-        Only one of "fragment-frequency" or "item-frequency" may be specified in the
-        options parameter. If neither "fragment-frequency" nor "item-frequency" is
-        specified, then the default is "fragment-frequency".
-
-        Only one of "ascending" or "descending" may be specified in the options
-        parameter. If neither "ascending" nor "descending" is specified, then the
-        default is "ascending" if "item-order" is specified, and "descending" if
-        "frequency-order" is specified.
-
-        Only one of "eager" or "lazy" may be specified in the options parameter. If
-        neither "eager" nor "lazy" is specified, then the default is "eager" if
-        "frequency-order" or "map" is specified, otherwise "lazy".
-
-        Only one of "any", "document", "properties", or "locks" may be specified in the
-        options parameter. If none of "any", "document", "properties", or "locks" are
-        specified and there is a $query parameter, then the default is "document". If
-        there is no $query parameter then the default is "any".
-
-        Only one of the "score-logtfidf", "score-logtf", "score-simple", "score-random",
-        or "score-zero" options may be specified in the options parameter. If none of
-        "score-logtfidf", "score-logtf", "score-simple", "score-random", or "score-zero"
-        are specified, then the default is "score-logtfidf".
-
-        Only one of the "checked" or "unchecked" options may be specified in the options
-        parameter. If neither "checked" nor "unchecked" are specified, then the default
-        is "checked".
-
-        If "collation= URI " is not specified in the options parameter, then the default
-        collation is used. If a lexicon with that collation does not exist, an error is
-        thrown.
-
-        If "sample= N " is not specified in the options parameter, then all included
-        co-occurrences may be returned. If a $query parameter is not present, then
-        "sample= N " has no effect.
-
-        If "truncate= N " is not specified in the options parameter, then co-occurrences
-        from all fragments selected by the $query parameter are included. If a $query
-        parameter is not present, then "truncate= N " has no effect.
-
-        To incrementally fetch a subset of the co-occurrences returned by this function,
-        use fn:subsequence on the output, rather than the "skip" option. The "skip"
-        option is based on fragments matching the query parameter (if present), not on
-        occurrences. A fragment matched by query might contain multiple occurrences or
-        no occurrences. The number of fragments skipped does not correspond to the
-        number of values. Also, the skip is applied to the relevance ordered query
-        matches, not to the ordered co-occurrences list.
-
-        When using the "skip" option, use the "truncate" option rather than the "limit"
-        option to control the number of matching fragments from which to draw values.
-
         Native reference: https://docs.marklogic.com/cts:value-co-occurrences
         """
         return _FunctionCall(
@@ -15358,12 +11348,12 @@ class Cts:
 
         Parameters
         ----------
-        range_indexes : cts:reference*
+        range_indexes : object
             A sequence of references to range indexes.
-        pattern : xs:anyAtomicType
+        pattern : object
             A pattern to match. The parameter type must match the lexicon type. String
             parameters may include wildcard characters.
-        options : xs:string*
+        options : object
             Options. The default is (). Options include: "case-sensitive" A
             case-sensitive match. "case-insensitive" A case-insensitive match.
             "diacritic-sensitive" A diacritic-sensitive match. "diacritic-insensitive" A
@@ -15419,7 +11409,7 @@ class Cts:
             query (for example, resolving many facets in a single query). "map" Return
             results as a single map:map value instead of as an xs:anyAtomicType*
             sequence .
-        query : cts:query?
+        query : object
             Only include values in fragments selected by the cts:query , and compute
             frequencies from this set of included values. The values do not need to
             match the query, but they must occur in fragments selected by the query. The
@@ -15427,9 +11417,9 @@ class Cts:
             selected in the same manner as "unfiltered" cts:search operations. If a
             string is entered, the string is treated as a cts:word-query of the
             specified string.
-        quality_weight : xs:double?
+        quality_weight : object
             A document quality weight to use when computing scores. The default is 1.0.
-        forest_ids : xs:unsignedLong*
+        forest_ids : object
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
@@ -15441,66 +11431,6 @@ class Cts:
 
         Notes
         -----
-        Only one of "frequency-order" or "item-order" may be specified in the options
-        parameter. If neither "frequency-order" nor "item-order" is specified, then the
-        default is "item-order".
-
-        Only one of "fragment-frequency" or "item-frequency" may be specified in the
-        options parameter. If neither "fragment-frequency" nor "item-frequency" is
-        specified, then the default is "fragment-frequency".
-
-        Only one of "ascending" or "descending" may be specified in the options
-        parameter. If neither "ascending" nor "descending" is specified, then the
-        default is "ascending" if "item-order" is specified, and "descending" if
-        "frequency-order" is specified.
-
-        Only one of "any", "document", "properties", or "locks" may be specified in the
-        options parameter. If none of "any", "document", "properties", or "locks" are
-        specified and there is a $query parameter, then the default is "document". If
-        there is no $query parameter then the default is "any".
-
-        Only one of the "score-logtfidf", "score-logtf", "score-simple", "score-random",
-        or "score-zero" options may be specified in the options parameter. If none of
-        "score-logtfidf", "score-logtf", "score-simple", "score-random", or "score-zero"
-        are specified, then the default is "score-logtfidf".
-
-        Only one of the "checked" or "unchecked" options may be specified in the options
-        parameter. If neither "checked" nor "unchecked" are specified, then the default
-        is "checked".
-
-        If "collation= URI " is not specified in the options parameter, then the default
-        collation is used. If a range index with that collation does not exist, an error
-        is thrown.
-
-        If "sample= N " is not specified in the options parameter, then all included
-        values may be returned. If a $query parameter is not present, then "sample= N "
-        has no effect.
-
-        If "truncate= N " is not specified in the options parameter, then values from
-        all fragments selected by the $query parameter are included. If a $query
-        parameter is not present, then "truncate= N " has no effect.
-
-        To incrementally fetch a subset of the values returned by this function, use
-        fn:subsequence on the output, rather than the "skip" option. The "skip" option
-        is based on fragments matching the query parameter (if present), not on values.
-        A fragment matched by query might contain multiple values or no values. The
-        number of fragments skipped does not correspond to the number of values. Also,
-        the skip is applied to the relevance ordered query matches, not to the ordered
-        values list.
-
-        When using the "skip" option, use the "truncate" option rather than the "limit"
-        option to control the number of matching fragments from which to draw values.
-
-        If neither "case-sensitive" nor "case-insensitive" is present, $pattern is used
-        to determine case sensitivity. If $pattern contains no uppercase, it specifies
-        "case-insensitive". If $pattern contains uppercase, it specifies
-        "case-sensitive".
-
-        If neither "diacritic-sensitive" nor "diacritic-insensitive" is present,
-        $pattern is used to determine diacritic sensitivity. If $pattern contains no
-        diacritics, it specifies "diacritic-insensitive". If $pattern contains
-        diacritics, it specifies "diacritic-sensitive".
-
         Native reference: https://docs.marklogic.com/cts:value-match
         """
         return _FunctionCall(
@@ -15525,13 +11455,13 @@ class Cts:
 
         Parameters
         ----------
-        range_indexes : cts:reference*
+        range_indexes : object
             A sequence of references to range indexes.
-        bounds : xs:anyAtomicType*
+        bounds : object
             A sequence of range bounds. The types must match the lexicon type. The
             values must be in strictly ascending order, otherwise an exception is
             thrown.
-        options : xs:string*
+        options : object
             Options. The default is (). Options include: "ascending" Ranges should be
             returned in ascending order. "descending" Ranges should be returned in
             descending order. "empties" Include fully-bounded ranges whose frequency is
@@ -15589,7 +11519,7 @@ class Cts:
             to continue performing other work while the lexicon processing occurs. This
             is especially useful in cases where multiple lexicon calls occur in the same
             query (for example, resolving many facets in a single query).
-        query : cts:query?
+        query : object
             Only include values in fragments selected by the cts:query , and compute
             frequencies from this set of included values. The values do not need to
             match the query, but they must occur in fragments selected by the query. The
@@ -15597,9 +11527,9 @@ class Cts:
             selected in the same manner as "unfiltered" cts:search operations. If a
             string is entered, the string is treated as a cts:word-query of the
             specified string.
-        quality_weight : xs:double?
+        quality_weight : object
             A document quality weight to use when computing scores. The default is 1.0.
-        forest_ids : xs:unsignedLong*
+        forest_ids : object
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
@@ -15611,60 +11541,6 @@ class Cts:
 
         Notes
         -----
-        Only one of "frequency-order" or "item-order" may be specified in the options
-        parameter. If neither "frequency-order" nor "item-order" is specified, then the
-        default is "item-order".
-
-        Only one of "fragment-frequency" or "item-frequency" may be specified in the
-        options parameter. If neither "fragment-frequency" nor "item-frequency" is
-        specified, then the default is "fragment-frequency".
-
-        Only one of "ascending" or "descending" may be specified in the options
-        parameter. If neither "ascending" nor "descending" is specified, then the
-        default is "ascending" if "item-order" is specified, and "descending" if
-        "frequency-order" is specified.
-
-        Only one of "eager" or "lazy" may be specified in the options parameter. If
-        neither "eager" nor "lazy" is specified, then the default is "eager" if
-        "frequency-order" or "empties" is specified, otherwise "lazy".
-
-        Only one of "any", "document", "properties", or "locks" may be specified in the
-        options parameter. If none of "any", "document", "properties", or "locks" are
-        specified and there is a $query parameter, then the default is "document". If
-        there is no $query parameter then the default is "any".
-
-        Only one of the "score-logtfidf", "score-logtf", "score-simple", "score-random",
-        or "score-zero" options may be specified in the options parameter. If none of
-        "score-logtfidf", "score-logtf", "score-simple", "score-random", or "score-zero"
-        are specified, then the default is "score-logtfidf".
-
-        Only one of the "checked" or "unchecked" options may be specified in the options
-        parameter. If neither "checked" nor "unchecked" are specified, then the default
-        is "checked".
-
-        If "collation= URI " is not specified in the options parameter, then the default
-        collation is used. If a lexicon with that collation does not exist, an error is
-        thrown.
-
-        If "sample= N " is not specified in the options parameter, then ranges with all
-        included values may be returned. If a $query parameter is not present, then
-        "sample= N " has no effect.
-
-        If "truncate= N " is not specified in the options parameter, then values from
-        all fragments selected by the $query parameter are included. If a $query
-        parameter is not present, then "truncate= N " has no effect.
-
-        To incrementally fetch a subset of the values returned by this function, use
-        fn:subsequence on the output, rather than the "skip" option. The "skip" option
-        is based on fragments matching the query parameter (if present), not on values.
-        A fragment matched by query might contain multiple values or no values. The
-        number of fragments skipped does not correspond to the number of values. Also,
-        the skip is applied to the relevance ordered query matches, not to the ordered
-        results list.
-
-        When using the "skip" option, use the "truncate" option rather than the "limit"
-        option to control the number of matching fragments from which to draw values.
-
         Native reference: https://docs.marklogic.com/cts:value-ranges
         """
         return _FunctionCall(
@@ -15689,9 +11565,9 @@ class Cts:
 
         Parameters
         ----------
-        range_indexes : cts:reference*
+        range_indexes : object
             A sequence of references to range indexes.
-        options : xs:string*
+        options : object
             Options. The default is (). Options include: "ascending" Co-occurrences
             should be returned in ascending order. "descending" Co-occurrences should be
             returned in descending order. "any" Co-occurrences from any fragment should
@@ -15749,7 +11625,7 @@ class Cts:
             to continue performing other work while the lexicon processing occurs. This
             is especially useful in cases where multiple lexicon calls occur in the same
             query (for example, resolving many facets in a single query).
-        query : cts:query?
+        query : object
             Only include co-occurrences in fragments selected by the cts:query , and
             compute frequencies from this set of included co-occurrences. The
             co-occurrences do not need to match the query, but they must occur in
@@ -15757,9 +11633,9 @@ class Cts:
             they match the query, but instead selected in the same manner as
             "unfiltered" cts:search operations. If a string is entered, the string is
             treated as a cts:word-query of the specified string.
-        quality_weight : xs:double?
+        quality_weight : object
             A document quality weight to use when computing scores. The default is 1.0.
-        forest_ids : xs:unsignedLong*
+        forest_ids : object
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
@@ -15771,56 +11647,6 @@ class Cts:
 
         Notes
         -----
-        Only one of "frequency-order" or "item-order" may be specified in the options
-        parameter. If neither "frequency-order" nor "item-order" is specified, then the
-        default is "item-order".
-
-        Only one of "fragment-frequency" or "item-frequency" may be specified in the
-        options parameter. If neither "fragment-frequency" nor "item-frequency" is
-        specified, then the default is "fragment-frequency".
-
-        Only one of "ascending" or "descending" may be specified in the options
-        parameter. If neither "ascending" nor "descending" is specified, then the
-        default is "ascending" if "item-order" is specified, and "descending" if
-        "frequency-order" is specified.
-
-        Only one of "eager" or "lazy" may be specified in the options parameter. If
-        neither "eager" nor "lazy" is specified, then the default is "lazy" if
-        "item-order" is specified, and "eager" if "frequency-order" is specified.
-
-        Only one of "any", "document", "properties", or "locks" may be specified in the
-        options parameter. If none of "any", "document", "properties", or "locks" are
-        specified and there is a $query parameter, then the default is "document". If
-        there is no $query parameter then the default is "any".
-
-        Only one of the "score-logtfidf", "score-logtf", "score-simple", "score-random",
-        or "score-zero" options may be specified in the options parameter. If none of
-        "score-logtfidf", "score-logtf", "score-simple", "score-random", or "score-zero"
-        are specified, then the default is "score-logtfidf".
-
-        Only one of the "checked" or "unchecked" options may be specified in the options
-        parameter. If neither "checked" nor "unchecked" are specified, then the default
-        is "checked".
-
-        If "sample= N " is not specified in the options parameter, then all included
-        co-occurrences may be returned. If a $query parameter is not present, then
-        "sample= N " has no effect.
-
-        If "truncate= N " is not specified in the options parameter, then co-occurrences
-        from all fragments selected by the $query parameter are included. If a $query
-        parameter is not present, then "truncate= N " has no effect.
-
-        To incrementally fetch a subset of the tuples returned by this function, use
-        fn:subsequence on the output, rather than the "skip" option. The "skip" option
-        is based on fragments matching the query parameter (if present), not on values.
-        A fragment matched by query might contain multiple occurrences or no
-        occurrences. The number of fragments skipped does not correspond to the number
-        of tuples. Also, the skip is applied to the relevance ordered query matches, not
-        to the ordered tuples list.
-
-        When using the "skip" option, use the "truncate" option rather than the "limit"
-        option to control the number of matching fragments from which to draw values.
-
         Native reference: https://docs.marklogic.com/cts:value-tuples
         """
         return _FunctionCall(
@@ -15845,13 +11671,13 @@ class Cts:
 
         Parameters
         ----------
-        range_indexes : cts:reference*
+        range_indexes : object
             A sequence of references to range indexes.
-        start : xs:anyAtomicType?
+        start : object
             A starting value. The parameter type must match the lexicon type. If the
             parameter value is not in the lexicon, then the values are returned
             beginning with the next value.
-        options : xs:string*
+        options : object
             Options. The default is (). Options include: "ascending" Values should be
             returned in ascending order. "descending" Values should be returned in
             descending order. "any" Values from any fragment should be included.
@@ -15905,7 +11731,7 @@ class Cts:
             query (for example, resolving many facets in a single query). "map" Return
             results as a single map:map value instead of as an xs:anyAtomicType*
             sequence .
-        query : cts:query?
+        query : object
             Only include values in fragments selected by the cts:query , and compute
             frequencies from this set of included values. The values do not need to
             match the query, but they must occur in fragments selected by the query. The
@@ -15913,9 +11739,9 @@ class Cts:
             selected in the same manner as "unfiltered" cts:search operations. If a
             string is entered, the string is treated as a cts:word-query of the
             specified string.
-        quality_weight : xs:double?
+        quality_weight : object
             A document quality weight to use when computing scores. The default is 1.0.
-        forest_ids : xs:unsignedLong*
+        forest_ids : object
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
@@ -15927,56 +11753,6 @@ class Cts:
 
         Notes
         -----
-        Only one of "frequency-order" or "item-order" may be specified in the options
-        parameter. If neither "frequency-order" nor "item-order" is specified, then the
-        default is "item-order".
-
-        Only one of "fragment-frequency" or "item-frequency" may be specified in the
-        options parameter. If neither "fragment-frequency" nor "item-frequency" is
-        specified, then the default is "fragment-frequency".
-
-        Only one of "ascending" or "descending" may be specified in the options
-        parameter. If neither "ascending" nor "descending" is specified, then the
-        default is "ascending" if "item-order" is specified, and "descending" if
-        "frequency-order" is specified.
-
-        Only one of "any", "document", "properties", or "locks" may be specified in the
-        options parameter. If none of "any", "document", "properties", or "locks" are
-        specified and there is a $query parameter, then the default is "document". If
-        there is no $query parameter then the default is "any".
-
-        Only one of the "score-logtfidf", "score-logtf", "score-simple", "score-random",
-        or "score-zero" options may be specified in the options parameter. If none of
-        "score-logtfidf", "score-logtf", "score-simple", "score-random", or "score-zero"
-        are specified, then the default is "score-logtfidf".
-
-        Only one of the "checked" or "unchecked" options may be specified in the options
-        parameter. If neither "checked" nor "unchecked" are specified, then the default
-        is "checked".
-
-        If "collation= URI " is not specified in the options parameter, then the default
-        collation is used. If a lexicon with that collation does not exist, an error is
-        thrown.
-
-        If "sample= N " is not specified in the options parameter, then all included
-        values may be returned. If a $query parameter is not present, then "sample= N "
-        has no effect.
-
-        If "truncate= N " is not specified in the options parameter, then values from
-        all fragments selected by the $query parameter are included. If a $query
-        parameter is not present, then "truncate= N " has no effect.
-
-        To incrementally fetch a subset of the values returned by this function, use
-        fn:subsequence on the output, rather than the "skip" option. The "skip" option
-        is based on fragments matching the query parameter (if present), not on values.
-        A fragment matched by query might contain multiple values or no values. The
-        number of fragments skipped does not correspond to the number of values. Also,
-        the skip is applied to the relevance ordered query matches, not to the ordered
-        values list.
-
-        When using the "skip" option, use the "truncate" option rather than the "limit"
-        option to control the number of matching fragments from which to draw values.
-
         Native reference: https://docs.marklogic.com/cts:values
         """
         return _FunctionCall(
@@ -15999,13 +11775,13 @@ class Cts:
 
         Parameters
         ----------
-        range_index : cts:reference
+        range_index : object
             Reference to a range index. The type of the range index must be numeric.
-        options : xs:string*
+        options : object
             Same as the "options" parameter in cts:aggregate .
-        query : cts:query?
+        query : object
             Same as the "query" parameter in cts:aggregate .
-        forest_ids : xs:unsignedLong*
+        forest_ids : object
             Same as the "forest-ids" parameter in cts:aggregate .
 
         Returns
@@ -16038,13 +11814,13 @@ class Cts:
 
         Parameters
         ----------
-        range_index : cts:reference
+        range_index : object
             Reference to a range index. The type of the range index must be numeric.
-        options : xs:string*
+        options : object
             Same as the "options" parameter in cts:aggregate .
-        query : cts:query?
+        query : object
             Same as the "query" parameter in cts:aggregate .
-        forest_ids : xs:unsignedLong*
+        forest_ids : object
             Same as the "forest-ids" parameter in cts:aggregate .
 
         Returns
@@ -16070,14 +11846,14 @@ class Cts:
 
         Parameters
         ----------
-        node : node()
+        node : object
             A node to walk. The node must be either a document node or an element node;
             it cannot be a text node.
-        query : cts:query
+        query : object
             A query specifying the text on which to evaluate the expression. If a string
             is entered, the string is treated as a cts:word-query of the specified
             string.
-        expr : item()*
+        expr : object
             An expression to evaluate with matching text. You can use the variables
             $cts:text , $cts:node , $cts:queries , $cts:start , and $cts:action
             (described below) in the expression.
@@ -16089,29 +11865,6 @@ class Cts:
 
         Notes
         -----
-        There are five built-in variables to represent a query match. These variables
-        can be used inline in the expression parameter.
-
-        $cts:text as xs:string The matched text. $cts:node as text() The node containing
-        the matched text. $cts:queries as cts:query* The matching queries. $cts:start as
-        xs:integer The string-length position of the first character of $cts:text in
-        $cts:node . Therefore, the following always returns true:
-        fn:substring($cts:node, $cts:start, fn:string-length($cts:text)) eq $cts:text
-        $cts:action as xs:string Use xdmp:set on this to specify what should happen next
-        "continue" (default) Walk the next match. If there are no more matches, return
-        all evaluation results. "skip" Skip walking any more matches and return all
-        evaluation results. "break" Stop walking matches and return all evaluation
-        results.
-
-        You cannot use cts:walk to walk results matching cts:similar-query and
-        cts:element-attribute-*-query items.
-
-        Because the expressions can be any XQuery expression, they can be very simple
-        like the above example or they can be extremely complex.
-
-        Unfiltered queries, including registered queries, do not match in cts:walk or
-        cts:highlight .
-
         Native reference: https://docs.marklogic.com/cts:walk
         """
         return _FunctionCall(
@@ -16134,9 +11887,9 @@ class Cts:
 
         Parameters
         ----------
-        pattern : xs:string
+        pattern : object
             A wildcard pattern to match.
-        options : xs:string*
+        options : object
             Options. The default is (). Options include: "case-sensitive" A
             case-sensitive match. "case-insensitive" A case-insensitive match.
             "diacritic-sensitive" A diacritic-sensitive match. "diacritic-insensitive" A
@@ -16173,16 +11926,16 @@ class Cts:
             especially useful in cases where multiple lexicon calls occur in the same
             query (for example, resolving many facets in a single query). "map" Return
             results as a single map:map value instead of as an xs:string* sequence .
-        query : cts:query?
+        query : object
             Only include words in fragments selected by the cts:query . The words do not
             need to match the query, but the words must occur in fragments selected by
             the query. The fragments are not filtered to ensure they match the query,
             but instead selected in the same manner as "unfiltered" cts:search
             operations. If a string is entered, the string is treated as a
             cts:word-query of the specified string.
-        quality_weight : xs:double?
+        quality_weight : object
             A document quality weight to use when computing scores. The default is 1.0.
-        forest_ids : xs:unsignedLong*
+        forest_ids : object
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
@@ -16194,57 +11947,6 @@ class Cts:
 
         Notes
         -----
-        Only one of "ascending" or "descending" may be specified in the options
-        parameter. If neither "ascending" nor "descending" is specified, then the
-        default is "ascending".
-
-        Only one of "any", "document", "properties", or "locks" may be specified in the
-        options parameter. If none of "any", "document", "properties", or "locks" are
-        specified and there is a $query parameter, then the default is "document". If
-        there is no $query parameter then the default is "any".
-
-        Only one of the "score-logtfidf", "score-logtf", "score-simple", "score-random",
-        or "score-zero" options may be specified in the options parameter. If none of
-        "score-logtfidf", "score-logtf", "score-simple", "score-random", or "score-zero"
-        are specified, then the default is "score-logtfidf".
-
-        Only one of the "checked" or "unchecked" options may be specified in the options
-        parameter. If neither "checked" nor "unchecked" are specified, then the default
-        is "checked".
-
-        If "collation= URI " is not specified in the options parameter, then the default
-        collation is used. If a lexicon with that collation does not exist, an error is
-        thrown.
-
-        If "sample= N " is not specified in the options parameter, then all included
-        words may be returned. If a $query parameter is not present, then "sample= N "
-        has no effect.
-
-        If "truncate= N " is not specified in the options parameter, then words from all
-        fragments selected by the $query parameter are included. If a $query parameter
-        is not present, then "truncate= N " has no effect.
-
-        To incrementally fetch a subset of the values returned by this function, use
-        fn:subsequence on the output, rather than the "skip" option. The "skip" option
-        is based on fragments matching the query parameter (if present), not on values.
-        A fragment matched by query might contain multiple values or no values. The
-        number of fragments skipped does not correspond to the number of values. Also,
-        the skip is applied to the relevance ordered query matches, not to the ordered
-        values list.
-
-        When using the "skip" option, use the "truncate" option rather than the "limit"
-        option to control the number of matching fragments from which to draw values.
-
-        If neither "case-sensitive" nor "case-insensitive" is present, $pattern is used
-        to determine case sensitivity. If $pattern contains no uppercase, it specifies
-        "case-insensitive". If $pattern contains uppercase, it specifies
-        "case-sensitive".
-
-        If neither "diacritic-sensitive" nor "diacritic-insensitive" is present,
-        $pattern is used to determine diacritic sensitivity. If $pattern contains no
-        diacritics, it specifies "diacritic-insensitive". If $pattern contains
-        diacritics, it specifies "diacritic-sensitive".
-
         Native reference: https://docs.marklogic.com/cts:word-match
         """
         return _FunctionCall(
@@ -16261,10 +11963,10 @@ class Cts:
 
         Parameters
         ----------
-        text : xs:string*
+        text : object
             Some words or phrases to match. When multiple strings are specified, the
             query matches if any string matches.
-        options : xs:string*
+        options : object
             Options to this query. The default is (). Options include: "case-sensitive"
             A case-sensitive query. "case-insensitive" A case-insensitive query.
             "diacritic-sensitive" A diacritic-sensitive query. "diacritic-insensitive" A
@@ -16323,7 +12025,7 @@ class Cts:
             expansion exceeds the specified limit. The server will try to resolve the
             wildcard. "no-limit-check" is default, if neither "limit-check" nor
             "no-limit-check" is explicitly specified.
-        weight : xs:double?
+        weight : object
             A weight for this query. Higher weights move search results up in the
             relevance order. The default is 1.0. The weight should be between 64 and
             -16. Weights greater than 64 will have the same effect as a weight of 64.
@@ -16337,47 +12039,6 @@ class Cts:
 
         Notes
         -----
-        If neither "case-sensitive" nor "case-insensitive" is present, $text is used to
-        determine case sensitivity. If $text contains no uppercase, it specifies
-        "case-insensitive". If $text contains uppercase, it specifies "case-sensitive".
-
-        If neither "diacritic-sensitive" nor "diacritic-insensitive" is present, $text
-        is used to determine diacritic sensitivity. If $text contains no diacritics, it
-        specifies "diacritic-insensitive". If $text contains diacritics, it specifies
-        "diacritic-sensitive".
-
-        If neither "punctuation-sensitive" nor "punctuation-insensitive" is present,
-        $text is used to determine punctuation sensitivity. If $text contains no
-        punctuation, it specifies "punctuation-insensitive". If $text contains
-        punctuation, it specifies "punctuation-sensitive".
-
-        If neither "whitespace-sensitive" nor "whitespace-insensitive" is present, the
-        query is "whitespace-insensitive".
-
-        If neither "wildcarded" nor "unwildcarded" is present, the database
-        configuration and $text determine wildcarding. If the database has any wildcard
-        indexes enabled ("three character searches", "two character searches", "one
-        character searches", or "trailing wildcard searches") and if $text contains
-        either of the wildcard characters '?' or '*', it specifies "wildcarded".
-        Otherwise it specifies "unwildcarded".
-
-        If neither "stemmed" nor "unstemmed" is present, the database configuration
-        determines stemming. If the database has "stemmed searches" enabled, it
-        specifies "stemmed". Otherwise it specifies "unstemmed". If the query is a
-        wildcarded query and also a phrase query (contains two or more terms), the
-        wildcard terms in the query are unstemmed.
-
-        Negative "min-occurs" or "max-occurs" values will be treated as 0 and
-        non-integral values will be rounded down. An error will be raised if the
-        "min-occurs" value is greater than the "max-occurs" value.
-
-        Relevance adjustment for the "distance-weight" option depends on the closest
-        proximity of any two matches of the query. For example,
-        cts:word-query(("dog","cat"),("distance-weight=10")) will adjust relevance based
-        on the distance between the closest pair of matches of either "dog" or "cat"
-        (the pair may consist only of matches of "dog", only of matches of "cat", or a
-        match of "dog" and a match of "cat").
-
         Native reference: https://docs.marklogic.com/cts:word-query
         """
         return _FunctionCall(
@@ -16401,11 +12062,11 @@ class Cts:
 
         Parameters
         ----------
-        start : xs:string?
+        start : object
             A starting word. Returns only this word and any following words from the
             lexicon. If the parameter is not in the lexicon, then it returns the words
             beginning with the next word.
-        options : xs:string*
+        options : object
             Options. The default is (). Options include: "ascending" Words should be
             returned in ascending order. "descending" Words should be returned in
             descending order. "any" Words from any fragment should be included.
@@ -16440,16 +12101,16 @@ class Cts:
             where multiple lexicon calls occur in the same query (for example, resolving
             many facets in a single query). "map" Return results as a single map:map
             value instead of as an xs:string* sequence .
-        query : cts:query?
+        query : object
             Only include words in fragments selected by the cts:query . The words do not
             need to match the query, but the words must occur in fragments selected by
             the query. The fragments are not filtered to ensure they match the query,
             but instead selected in the same manner as "unfiltered" cts:search
             operations. If a string is entered, the string is treated as a
             cts:word-query of the specified string.
-        quality_weight : xs:double?
+        quality_weight : object
             A document quality weight to use when computing scores. The default is 1.0.
-        forest_ids : xs:unsignedLong*
+        forest_ids : object
             A sequence of IDs of forests to which the search will be constrained. An
             empty sequence means to search all forests in the database. The default is
             ().
@@ -16461,47 +12122,6 @@ class Cts:
 
         Notes
         -----
-        Only one of "ascending" or "descending" may be specified in the options
-        parameter. If neither "ascending" nor "descending" is specified, then the
-        default is "ascending".
-
-        Only one of "any", "document", "properties", or "locks" may be specified in the
-        options parameter. If none of "any", "document", "properties", or "locks" are
-        specified and there is a $query parameter, then the default is "document". If
-        there is no $query parameter then the default is "any".
-
-        Only one of the "score-logtfidf", "score-logtf", "score-simple", "score-random",
-        or "score-zero" options may be specified in the options parameter. If none of
-        "score-logtfidf", "score-logtf", "score-simple", "score-random", or "score-zero"
-        are specified, then the default is "score-logtfidf".
-
-        Only one of the "checked" or "unchecked" options may be specified in the options
-        parameter. If neither "checked" nor "unchecked" are specified, then the default
-        is "checked".
-
-        If "collation= URI " is not specified in the options parameter, then the default
-        collation is used. If a lexicon with that collation does not exist, an error is
-        thrown.
-
-        If "sample= N " is not specified in the options parameter, then all included
-        words may be returned. If a $query parameter is not present, then "sample= N "
-        has no effect.
-
-        If "truncate= N " is not specified in the options parameter, then words from all
-        fragments selected by the $query parameter are included. If a $query parameter
-        is not present, then "truncate= N " has no effect.
-
-        To incrementally fetch a subset of the values returned by this function, use
-        fn:subsequence on the output, rather than the "skip" option. The "skip" option
-        is based on fragments matching the query parameter (if present), not on values.
-        A fragment matched by query might contain multiple values or no values. The
-        number of fragments skipped does not correspond to the number of values. Also,
-        the skip is applied to the relevance ordered query matches, not to the ordered
-        values list.
-
-        When using the "skip" option, use the "truncate" option rather than the "limit"
-        option to control the number of matching fragments from which to draw values.
-
         Native reference: https://docs.marklogic.com/cts:words
         """
         return _FunctionCall(

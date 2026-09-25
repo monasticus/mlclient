@@ -37,10 +37,13 @@ def logs(ml) -> LogsService:
 
 @respx.mock
 def test_get_logs_preserves_bodyless_http_failure(logs):
-    route = respx.get(
-        "http://localhost:8002/manage/v2/logs",
-        params={"format": "json", "filename": "ErrorLog.txt"},
-    ).respond(403)
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8002/manage/v2/logs")
+    ml_mocker.with_request_param("format", "json")
+    ml_mocker.with_request_param("filename", "ErrorLog.txt")
+    ml_mocker.with_response_code(403)
+    ml_mocker.with_empty_response_body()
+    route = ml_mocker.mock_get()
 
     with pytest.raises(httpx.HTTPStatusError) as raised:
         logs.get()

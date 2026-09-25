@@ -10,6 +10,7 @@ from mlclient.functions.xqy._fn import Fn
 from mlclient.functions.xqy._xdmp import Xdmp
 from mlclient.functions.xqy._xs import Xs
 from mlclient.functions.xqy.expressions import (
+    ModuleFunctionCall,
     XqyCompilationContext,
     XqyExpression,
     namespace_bindings,
@@ -26,6 +27,7 @@ __experimental__ = EXPERIMENTAL_NOTICE
 __all__ = [
     "Cts",
     "Fn",
+    "ModuleFunctionCall",
     "Xdmp",
     "XqyCompilationContext",
     "XqyExpression",

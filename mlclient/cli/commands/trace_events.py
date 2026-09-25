@@ -18,7 +18,7 @@ from cleo.io.inputs.option import Option
 from mlclient._manager import MLClientManager
 from mlclient.cli.connection import get_client
 from mlclient.exceptions import MarkLogicError, WrongParametersError
-from mlclient.services.trace_events import TraceEvents, TraceEventsService
+from mlclient.services.diagnostics.trace_events import TraceEvents, TraceEventsService
 
 _TRUE_TOKENS = frozenset({"true", "on", "1", "yes"})
 _FALSE_TOKENS = frozenset({"false", "off", "0", "no"})

@@ -27,7 +27,14 @@ class MultipartPart:
     def text(self) -> str:
         """Decode content to string using the charset from Content-Type."""
         charset = "utf-8"
-        content_type = self.headers.get("Content-Type", "")
+        content_type = next(
+            (
+                value
+                for name, value in self.headers.items()
+                if name.lower() == "content-type"
+            ),
+            "",
+        )
         for raw in content_type.split(";"):
             param = raw.strip()
             if param.lower().startswith("charset="):
@@ -88,6 +95,8 @@ def decode_multipart_mixed(
         The parsed parts
     """
     boundary = _extract_boundary(content_type)
+    if content.strip() == f"--{boundary}--".encode():
+        return []
     delimiter = f"\r\n--{boundary}".encode()
     pieces = content.split(delimiter)
     first = f"--{boundary}\r\n".encode()

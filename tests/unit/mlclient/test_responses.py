@@ -1,6 +1,7 @@
 import xml.etree.ElementTree as ElemTree
 import zlib
 from datetime import date, datetime
+from decimal import Decimal
 
 import httpx
 import pytest
@@ -8,6 +9,7 @@ import pytest
 from mlclient import MLClient
 from mlclient.exceptions import MarkLogicError
 from mlclient.models import DocumentsBodyPart
+from mlclient.multipart import MultipartPart, encode_multipart_mixed
 from mlclient.responses import MLResponseParser
 from tests.utils import resources as resources_utils
 from tests.utils.ml_mockers import MLRespXMocker
@@ -15,6 +17,39 @@ from tests.utils.ml_mockers import MLRespXMocker
 RESOURCES = resources_utils.get_test_resources(__file__)
 ml_mocker = MLRespXMocker(router_base_url="http://localhost:8000")
 ml_mock = ml_mocker.router
+
+
+@pytest.mark.parametrize(
+    ("mime", "primitive", "payload", "expected"),
+    [
+        ("text/plain", "text()", b"b", "b"),
+        ("text/plain", "attribute()", b"abc", "abc"),
+        ("text/plain", "comment()", b"<!--abc-->", "<!--abc-->"),
+        ("text/plain", "processing-instruction()", b"<?p abc?>", "<?p abc?>"),
+        ("application/json", "object-node()", b'{"a":"b"}', {"a": "b"}),
+        ("application/json", "array-node()", b"[1,2]", [1, 2]),
+        ("application/json", "number-node()", b"123", 123),
+        ("application/json", "boolean-node()", b"false", False),
+        ("application/json", "null-node()", b"null", None),
+        ("text/plain", "text()", b"", ""),
+        ("application/x-unknown-content-type", "binary()", b"\x00\xff", b"\x00\xff"),
+        ("text/plain", "binary()", b"\x00\xff", b"\x00\xff"),
+        ("text/plain; charset=iso-8859-1", "text()", b"caf\xe9", "café"),
+    ],
+)
+def test_parse_supports_native_node_kinds(
+    mime,
+    primitive,
+    payload,
+    expected,
+):
+    part = MultipartPart({"content-type": mime, "x-primitive": primitive}, payload)
+    body, content_type = encode_multipart_mixed([part])
+    response = httpx.Response(200, content=body, headers={"Content-Type": content_type})
+    result = MLResponseParser.parse(response)
+    assert result == expected
+    assert type(result) is type(expected)
+    assert part.content is payload
 
 
 @pytest.fixture(scope="module")
@@ -1330,8 +1365,8 @@ def test_parse_single_plain_text_decimal_response(ml):
     resp = ml.rest.eval.post(xquery="1.1")
     parsed_resp = MLResponseParser.parse(resp)
 
-    assert isinstance(parsed_resp, float)
-    assert parsed_resp == 1.1
+    assert isinstance(parsed_resp, Decimal)
+    assert parsed_resp == Decimal("1.1")
 
 
 @ml_mock
@@ -1357,8 +1392,8 @@ def test_parse_with_headers_single_plain_text_decimal_response(ml):
     resp = ml.rest.eval.post(xquery="1.1")
     headers, parsed_resp = MLResponseParser.parse_with_headers(resp)
 
-    assert isinstance(parsed_resp, float)
-    assert parsed_resp == 1.1
+    assert isinstance(parsed_resp, Decimal)
+    assert parsed_resp == Decimal("1.1")
     assert headers == {
         "Content-Type": "text/plain",
         "X-Primitive": "decimal",

@@ -10,7 +10,8 @@ from __future__ import annotations
 import json
 import logging
 import xml.etree.ElementTree as ElemTree
-from datetime import datetime
+from datetime import date, datetime
+from decimal import Decimal
 from typing import ClassVar
 
 from httpx import Headers, Response
@@ -56,19 +57,33 @@ class MLResponseParser:
     """
 
     _PLAIN_TEXT_PARSERS: ClassVar[dict] = {
-        const.HEADER_PRIMITIVE_STRING: lambda data: data,
-        const.HEADER_PRIMITIVE_INTEGER: int,
-        const.HEADER_PRIMITIVE_DECIMAL: float,
-        const.HEADER_PRIMITIVE_BOOLEAN: lambda data: data.lower() == "true",
-        const.HEADER_PRIMITIVE_DATE: lambda data: datetime.strptime(
-            data,
-            "%Y-%m-%d%z",
-        ).date(),
-        const.HEADER_PRIMITIVE_DATE_TIME: lambda data: datetime.strptime(
-            data,
-            "%Y-%m-%dT%H:%M:%S.%f%z",
-        ),
         None: lambda data: data,
+        const.HEADER_PRIMITIVE_STRING: lambda data: data,
+        const.HEADER_PRIMITIVE_TEXT: str,
+        const.HEADER_PRIMITIVE_ATTRIBUTE: str,
+        const.HEADER_PRIMITIVE_COMMENT: str,
+        const.HEADER_PRIMITIVE_PROCESSING_INSTRUCTION: str,
+        const.HEADER_PRIMITIVE_BOOLEAN: lambda data: data in ("true", "1"),
+        const.HEADER_PRIMITIVE_INTEGER: int,
+        const.HEADER_PRIMITIVE_BYTE: int,
+        const.HEADER_PRIMITIVE_SHORT: int,
+        const.HEADER_PRIMITIVE_INT: int,
+        const.HEADER_PRIMITIVE_LONG: int,
+        const.HEADER_PRIMITIVE_NON_POSITIVE_INTEGER: int,
+        const.HEADER_PRIMITIVE_NEGATIVE_INTEGER: int,
+        const.HEADER_PRIMITIVE_NON_NEGATIVE_INTEGER: int,
+        const.HEADER_PRIMITIVE_POSITIVE_INTEGER: int,
+        const.HEADER_PRIMITIVE_UNSIGNED_BYTE: int,
+        const.HEADER_PRIMITIVE_UNSIGNED_SHORT: int,
+        const.HEADER_PRIMITIVE_UNSIGNED_INT: int,
+        const.HEADER_PRIMITIVE_UNSIGNED_LONG: int,
+        const.HEADER_PRIMITIVE_DECIMAL: Decimal,
+        const.HEADER_PRIMITIVE_DOUBLE: float,
+        const.HEADER_PRIMITIVE_FLOAT: float,
+        const.HEADER_PRIMITIVE_DATE: lambda data: date.fromisoformat(data[:10]),
+        const.HEADER_PRIMITIVE_DATE_TIME: lambda data: datetime.fromisoformat(
+            data.replace("Z", "+00:00"),
+        ),
     }
 
     @classmethod
@@ -81,6 +96,7 @@ class MLResponseParser:
         | str
         | int
         | float
+        | Decimal
         | bool
         | dict
         | ElemTree.ElementTree
@@ -98,13 +114,15 @@ class MLResponseParser:
 
         Returns
         -------
-        bytes | str | int | float | bool | dict |
+        bytes | str | int | float | Decimal | bool | dict |
         ElemTree.ElementTree | ElemTree.Element |
         list
-            A parsed response body
+            A parsed response body. xs:decimal retains precision as Decimal;
+            xs:float and xs:double become float. Empty results return [],
+            singletons return their item, and multiple items return a list.
         """
         logger.debug("Attempt to parse a response")
-        if response.is_success and int(response.headers.get("Content-Length", -1)) == 0:
+        if response.is_success and not response.content:
             logger.fine("No content to parse")
             return []
 
@@ -136,7 +154,7 @@ class MLResponseParser:
             A parsed response body with headers
         """
         logger.debug("Attempt to parse a response")
-        if response.is_success and int(response.headers.get("Content-Length", -1)) == 0:
+        if response.is_success and not response.content:
             logger.fine("No content to parse")
             return response.headers, []
 
@@ -203,6 +221,7 @@ class MLResponseParser:
         | str
         | int
         | float
+        | Decimal
         | bool
         | dict
         | ElemTree.ElementTree
@@ -219,10 +238,12 @@ class MLResponseParser:
 
         Returns
         -------
-        bytes | str | int | float | bool | dict |
+        bytes | str | int | float | Decimal | bool | dict |
         ElemTree.ElementTree | ElemTree.Element |
         list | tuple
-            A parsed response body
+            A parsed response body. xs:decimal retains precision as Decimal;
+            xs:float and xs:double become float. Empty results return [],
+            singletons return their item, and multiple items return a list.
         """
         content_type = response.headers.get(const.HEADER_NAME_CONTENT_TYPE, "")
         if not response.is_success:
@@ -419,6 +440,7 @@ class MLResponseParser:
         | str
         | int
         | float
+        | Decimal
         | bool
         | dict
         | ElemTree.ElementTree
@@ -426,7 +448,7 @@ class MLResponseParser:
         | list
         | tuple
     ):
-        """Parse MarkLogic HTTP Response part.
+        """Parse one result part without collapsing its content as a sequence.
 
         Parameters
         ----------
@@ -434,21 +456,34 @@ class MLResponseParser:
             An HTTP response body or body part taken from MarkLogic instance
         output_type : type | None , default None
             An output type (supported: str, bytes)
+        with_headers : bool, default False
+            Return a (headers, parsed_content) tuple when enabled.
 
         Returns
         -------
-        bytes | str | int | float | bool | dict |
+        bytes | str | int | float | Decimal | bool | dict |
         ElemTree.ElementTree | ElemTree.Element |
         list | tuple
-            A parsed response body or body part
+            Parsed content. The input's original content bytes are not changed.
+
+        Raises
+        ------
+        ValueError
+            If a recognized scalar or JSON payload cannot be parsed.
+        ParseError
+            If XML content is malformed.
         """
         headers = body_part.headers
         if isinstance(body_part, MultipartPart):
             headers = Headers(body_part.headers)
-        content_type = headers.get(const.HEADER_NAME_CONTENT_TYPE)
+        content_type = headers.get(const.HEADER_NAME_CONTENT_TYPE, "")
         doc_type = Mimetypes.get_doc_type(content_type)
 
-        if output_type is bytes or doc_type is DocumentType.BINARY:
+        if (
+            output_type is bytes
+            or doc_type is DocumentType.BINARY
+            or headers.get(const.HEADER_NAME_PRIMITIVE) == const.HEADER_PRIMITIVE_BINARY
+        ):
             parsed = body_part.content
             logger.fine("Returning binary response part value")
         elif output_type is str:
@@ -472,6 +507,7 @@ class MLResponseParser:
         | str
         | int
         | float
+        | Decimal
         | bool
         | dict
         | ElemTree.ElementTree
@@ -490,16 +526,17 @@ class MLResponseParser:
 
         Returns
         -------
-        bytes | str | int | float | bool | dict |
+        bytes | str | int | float | Decimal | bool | dict |
         ElemTree.ElementTree | ElemTree.Element |
         list | tuple
             A parsed response body or body part
         """
-        content_type = headers.get(const.HEADER_NAME_CONTENT_TYPE)
+        content_type = headers.get(const.HEADER_NAME_CONTENT_TYPE, "")
         primitive_type = headers.get(const.HEADER_NAME_PRIMITIVE)
         doc_type = Mimetypes.get_doc_type(content_type)
-        if doc_type == DocumentType.TEXT and primitive_type in cls._PLAIN_TEXT_PARSERS:
-            return cls._PLAIN_TEXT_PARSERS[primitive_type](body_part.text)
+        parsers = cls._PLAIN_TEXT_PARSERS
+        if doc_type == DocumentType.TEXT and primitive_type in parsers:
+            return parsers[primitive_type](body_part.text)
         if doc_type == DocumentType.JSON:
             return json.loads(body_part.text)
         if doc_type == DocumentType.XML:

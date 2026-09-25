@@ -8,6 +8,18 @@ from pathlib import Path
 
 import pytest
 
+
+def test_module_entrypoint_works_outside_checkout(tmp_path):
+    result = subprocess.run(
+        [sys.executable, "-m", "mlclient", "--help"],
+        cwd=tmp_path,
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    assert "Usage:" in result.stdout
+
+
 EXPECTED_EXPORTS = {
     "mlclient": ["MLClient", "AsyncMLClient", "MLClientManager", "__version__"],
     "mlclient.clients": [
@@ -53,6 +65,9 @@ EXPECTED_EXPORTS = {
     ],
     "mlclient.logging": ["setup_logger"],
     "mlclient.models": [
+        "ResultContent",
+        "SearchHit",
+        "ValueHit",
         "BinaryDocument",
         "Document",
         "DocumentType",
@@ -153,19 +168,38 @@ EXPECTED_EXPORTS = {
         "UsersPostCall",
     ],
     "mlclient.services": [
+        "AsyncCtsService",
         "AsyncDocumentsService",
         "AsyncEvalService",
-        "AsyncLogsService",
         "AsyncTransactionService",
+        "CtsService",
         "DocumentsService",
         "EvalService",
+        "TransactionService",
+        "async_open_transaction",
+        "open_transaction",
+    ],
+    "mlclient.services.diagnostics": [
+        "AsyncLogsService",
         "LogLevelService",
         "LogsService",
         "TraceEvents",
         "TraceEventsService",
-        "TransactionService",
-        "async_open_transaction",
-        "open_transaction",
+    ],
+    "mlclient.functions": [],
+    "mlclient.functions.xqy": [
+        "XqyCompilationContext",
+        "Cts",
+        "XqyExpression",
+        "Fn",
+        "Xdmp",
+        "Xs",
+        "cts",
+        "fn",
+        "namespace_bindings",
+        "xdmp",
+        "xpath",
+        "xs",
     ],
     "mlclient.io": ["DocumentsLoader", "DocumentsWriter"],
     "mlclient.jobs": [
@@ -206,9 +240,22 @@ def test_canonical_exports(namespace, names):
 def test_imports_in_a_fresh_interpreter():
     imports = "\n".join(
         f"from {namespace} import {', '.join(names)}"
+        if names
+        else f"import {namespace}"
         for namespace, names in reversed(EXPECTED_EXPORTS.items())
     )
     subprocess.run([sys.executable, "-c", imports], check=True)
+
+
+def test_services_use_only_public_xquery_imports():
+    root = Path(__file__).resolve().parents[3] / "mlclient" / "services"
+    for source in root.glob("*.py"):
+        for node in ast.walk(ast.parse(source.read_text())):
+            if isinstance(node, ast.ImportFrom) and (node.module or "").startswith(
+                "mlclient.functions",
+            ):
+                assert not any(part.startswith("_") for part in node.module.split("."))
+                assert not any(alias.name.startswith("_") for alias in node.names)
 
 
 def test_low_level_modules_do_not_depend_on_composition():

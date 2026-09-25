@@ -16,7 +16,7 @@ from cleo.io.inputs.option import Option
 from mlclient._manager import MLClientManager
 from mlclient.cli.connection import get_client
 from mlclient.exceptions import MarkLogicError, WrongParametersError
-from mlclient.services.log_level import LogLevelService
+from mlclient.services.diagnostics.log_level import LogLevelService
 
 # Cool-to-warm severity ramp; within each hue pair the more severe level takes
 # the light variant. The fine/debug/info/warning/error/critical colours match

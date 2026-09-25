@@ -17,6 +17,7 @@ if TYPE_CHECKING:
     from mlclient.api.rest import AsyncRestApi, RestApi
 
 from mlclient.exceptions import UnsupportedFileExtensionError, WrongParametersError
+from mlclient.functions.xqy import XqyExpression
 from mlclient.responses import MLResponseParser
 
 _LOCAL_NS = "http://www.w3.org/2005/xquery-local-functions"
@@ -34,7 +35,79 @@ class EvalService:
     """Higher-level service for /v1/eval endpoint."""
 
     def __init__(self, rest: RestApi):
+        """Create an evaluator using the provided REST transport.
+
+        Parameters
+        ----------
+        rest : RestApi | AsyncRestApi
+            REST transport used by this evaluator.
+        """
         self._rest = rest
+
+    def expression(
+        self,
+        expr: XqyExpression,
+        *,
+        namespaces: dict[str, str] | None = None,
+        database: str | None = None,
+        txid: str | None = None,
+        output_type: type | None = None,
+        timeout=UNSET,
+    ) -> object:
+        """Compile and execute an expression as the root of one eval request.
+
+        Parameters
+        ----------
+        expr : XqyExpression
+            A builder expression, including nested calls or a positional range.
+        namespaces : dict[str, str] | None
+            Prefix-to-URI bindings for this invocation only.
+            They become XQuery namespace declarations,
+            shared by validation and execution. The empty prefix sets the default
+            element namespace.
+        database : str | None, default None
+            Content database name or id.
+        txid : str | None, default None
+            Existing multi-statement transaction identifier.
+        output_type : type | None, default None
+            Per-item raw conversion (``str`` or ``bytes``), or typed conversion.
+        timeout : httpx.Timeout | float | None, default unset
+            Per-request HTTP timeout; unset inherits the client configuration.
+
+        Returns
+        -------
+        object | list
+            Empty sequences return []; a singleton returns its item; multiple
+            items return a list. Decimal results retain precision. A singleton
+            JSON array returns that array without an extra outer list.
+
+        Raises
+        ------
+        TypeError
+            If the root is not an expression or an unknown keyword is supplied.
+        ValueError
+            If output_type is not None, str or bytes.
+        MarkLogicError
+            If the server rejects the expression, including unavailable functions.
+        httpx.HTTPStatusError
+            If an HTTP failure has no recognized MarkLogic error payload.
+        """
+        if not isinstance(expr, XqyExpression):
+            message = "expression requires an XqyExpression"
+            raise TypeError(message)
+        if output_type not in (None, str, bytes):
+            message = "output_type must be None, str or bytes"
+            raise ValueError(message)
+        code, variables = expr.compile(namespaces=namespaces)
+        response = self._rest.eval.post(
+            xquery=code,
+            variables=variables,
+            database=database,
+            txid=txid,
+            timeout=timeout,
+        )
+        MLResponseParser.raise_for_status(response)
+        return MLResponseParser.parse(response, output_type)
 
     def xquery(
         self,
@@ -548,7 +621,79 @@ class AsyncEvalService:
     """Async higher-level service for /v1/eval endpoint."""
 
     def __init__(self, rest: AsyncRestApi):
+        """Create an evaluator using the provided REST transport.
+
+        Parameters
+        ----------
+        rest : RestApi | AsyncRestApi
+            REST transport used by this evaluator.
+        """
         self._rest = rest
+
+    async def expression(
+        self,
+        expr: XqyExpression,
+        *,
+        namespaces: dict[str, str] | None = None,
+        database: str | None = None,
+        txid: str | None = None,
+        output_type: type | None = None,
+        timeout=UNSET,
+    ) -> object:
+        """Compile and execute an expression as the root of one eval request.
+
+        Parameters
+        ----------
+        expr : XqyExpression
+            A builder expression, including nested calls or a positional range.
+        namespaces : dict[str, str] | None
+            Prefix-to-URI bindings for this invocation only.
+            They become XQuery namespace declarations,
+            shared by validation and execution. The empty prefix sets the default
+            element namespace.
+        database : str | None, default None
+            Content database name or id.
+        txid : str | None, default None
+            Existing multi-statement transaction identifier.
+        output_type : type | None, default None
+            Per-item raw conversion (``str`` or ``bytes``), or typed conversion.
+        timeout : httpx.Timeout | float | None, default unset
+            Per-request HTTP timeout; unset inherits the client configuration.
+
+        Returns
+        -------
+        object | list
+            Empty sequences return []; a singleton returns its item; multiple
+            items return a list. Decimal results retain precision. A singleton
+            JSON array returns that array without an extra outer list.
+
+        Raises
+        ------
+        TypeError
+            If the root is not an expression or an unknown keyword is supplied.
+        ValueError
+            If output_type is not None, str or bytes.
+        MarkLogicError
+            If the server rejects the expression, including unavailable functions.
+        httpx.HTTPStatusError
+            If an HTTP failure has no recognized MarkLogic error payload.
+        """
+        if not isinstance(expr, XqyExpression):
+            message = "expression requires an XqyExpression"
+            raise TypeError(message)
+        if output_type not in (None, str, bytes):
+            message = "output_type must be None, str or bytes"
+            raise ValueError(message)
+        code, variables = expr.compile(namespaces=namespaces)
+        response = await self._rest.eval.post(
+            xquery=code,
+            variables=variables,
+            database=database,
+            txid=txid,
+            timeout=timeout,
+        )
+        MLResponseParser.raise_for_status(response)
+        return MLResponseParser.parse(response, output_type)
 
     async def xquery(
         self,

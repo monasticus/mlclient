@@ -25,9 +25,7 @@ async def test_call(xquery):
     ml_mocker.with_request_content_type("application/x-www-form-urlencoded")
     ml_mocker.with_request_body(
         {
-            "xquery": "xquery version '1.0-ml';"
-            " declare variable $element() external;"
-            " <new-parent>{$element/child::element()}</new-parent>",
+            "xquery": xquery,
             "vars": '{"element": "<parent><child/></parent>"}',
         },
     )

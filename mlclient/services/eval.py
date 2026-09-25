@@ -17,7 +17,7 @@ if TYPE_CHECKING:
     from mlclient.api.rest import AsyncRestApi, RestApi
 
 from mlclient.exceptions import UnsupportedFileExtensionError, WrongParametersError
-from mlclient.functions.xqy import Expression
+from mlclient.functions.xqy import XqyExpression
 from mlclient.responses import MLResponseParser
 
 _LOCAL_NS = "http://www.w3.org/2005/xquery-local-functions"
@@ -46,7 +46,7 @@ class EvalService:
 
     def expression(
         self,
-        expr: Expression,
+        expr: XqyExpression,
         *,
         namespaces: dict[str, str] | None = None,
         database: str | None = None,
@@ -58,7 +58,7 @@ class EvalService:
 
         Parameters
         ----------
-        expr : Expression
+        expr : XqyExpression
             A builder expression, including nested calls or a positional range.
         namespaces : dict[str, str] | None
             Prefix-to-URI bindings for this invocation only.
@@ -92,8 +92,8 @@ class EvalService:
         httpx.HTTPStatusError
             If an HTTP failure has no recognized MarkLogic error payload.
         """
-        if not isinstance(expr, Expression):
-            message = "expression requires an Expression"
+        if not isinstance(expr, XqyExpression):
+            message = "expression requires an XqyExpression"
             raise TypeError(message)
         if output_type not in (None, str, bytes):
             message = "output_type must be None, str or bytes"
@@ -632,7 +632,7 @@ class AsyncEvalService:
 
     async def expression(
         self,
-        expr: Expression,
+        expr: XqyExpression,
         *,
         namespaces: dict[str, str] | None = None,
         database: str | None = None,
@@ -644,7 +644,7 @@ class AsyncEvalService:
 
         Parameters
         ----------
-        expr : Expression
+        expr : XqyExpression
             A builder expression, including nested calls or a positional range.
         namespaces : dict[str, str] | None
             Prefix-to-URI bindings for this invocation only.
@@ -678,8 +678,8 @@ class AsyncEvalService:
         httpx.HTTPStatusError
             If an HTTP failure has no recognized MarkLogic error payload.
         """
-        if not isinstance(expr, Expression):
-            message = "expression requires an Expression"
+        if not isinstance(expr, XqyExpression):
+            message = "expression requires an XqyExpression"
             raise TypeError(message)
         if output_type not in (None, str, bytes):
             message = "output_type must be None, str or bytes"

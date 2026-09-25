@@ -8,6 +8,18 @@ from pathlib import Path
 
 import pytest
 
+
+def test_module_entrypoint_works_outside_checkout(tmp_path):
+    result = subprocess.run(
+        [sys.executable, "-m", "mlclient", "--help"],
+        cwd=tmp_path,
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    assert "Usage:" in result.stdout
+
+
 EXPECTED_EXPORTS = {
     "mlclient": ["MLClient", "AsyncMLClient", "MLClientManager", "__version__"],
     "mlclient.clients": [
@@ -53,6 +65,9 @@ EXPECTED_EXPORTS = {
     ],
     "mlclient.logging": ["setup_logger"],
     "mlclient.models": [
+        "ResultContent",
+        "SearchHit",
+        "ValueHit",
         "BinaryDocument",
         "Document",
         "DocumentType",
@@ -156,24 +171,26 @@ EXPECTED_EXPORTS = {
         "AsyncCtsService",
         "AsyncDocumentsService",
         "AsyncEvalService",
-        "AsyncLogsService",
         "AsyncTransactionService",
         "CtsService",
         "DocumentsService",
         "EvalService",
-        "LogLevelService",
-        "LogsService",
-        "TraceEvents",
-        "TraceEventsService",
         "TransactionService",
         "async_open_transaction",
         "open_transaction",
     ],
+    "mlclient.services.diagnostics": [
+        "AsyncLogsService",
+        "LogLevelService",
+        "LogsService",
+        "TraceEvents",
+        "TraceEventsService",
+    ],
     "mlclient.functions": [],
     "mlclient.functions.xqy": [
-        "CompilationContext",
+        "XqyCompilationContext",
         "Cts",
-        "Expression",
+        "XqyExpression",
         "Fn",
         "Xdmp",
         "Xs",

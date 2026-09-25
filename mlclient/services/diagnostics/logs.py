@@ -1,4 +1,4 @@
-"""Higher-level Logs service (LogsService / AsyncLogsService).
+"""Diagnostic Logs service (LogsService / AsyncLogsService).
 
 Provides parsed log retrieval from MarkLogic.
 """

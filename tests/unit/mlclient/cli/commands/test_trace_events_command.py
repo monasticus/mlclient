@@ -15,7 +15,7 @@ from mlclient.cli import MLCLIentApplication
 from mlclient.cli.commands.trace_events import _ACTIVATION_TOGGLE
 from mlclient.env import MLEnvironment
 from mlclient.exceptions import MarkLogicError
-from mlclient.services import TraceEvents, TraceEventsService
+from mlclient.services.diagnostics import TraceEvents, TraceEventsService
 from tests.utils.ml_mockers import MLRespXMocker
 
 EVAL_URL = "http://localhost:8002/v1/eval"

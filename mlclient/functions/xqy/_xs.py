@@ -7,7 +7,7 @@ convert scalar values or composed expressions to the requested XQuery type.
 from __future__ import annotations
 
 from mlclient._experimental import experimental
-from mlclient.functions.xqy.expressions import Expression, as_expr
+from mlclient.functions.xqy.expressions import XqyExpression, as_expr
 
 
 @experimental()
@@ -24,18 +24,18 @@ class Xs:
     """
 
     @staticmethod
-    def qname(lexical: str | Expression) -> Expression:
+    def qname(lexical: str | XqyExpression) -> XqyExpression:
         """Construct an xs:QName using the expression's namespace declarations.
 
         Parameters
         ----------
-        lexical : str | Expression
+        lexical : str | XqyExpression
             Lexical QName, optionally prefixed. The prefix must be declared
             through the expression's namespaces argument.
 
         Returns
         -------
-        Expression
+        XqyExpression
             Native xs:QName constructor. Use fn.qname for an explicit URI.
 
         Notes
@@ -45,7 +45,7 @@ class Xs:
         return as_expr(lexical, cast="xs:QName")
 
     @staticmethod
-    def integer(value) -> Expression:
+    def integer(value) -> XqyExpression:
         """Build an ``xs:integer`` value.
 
         Parameters
@@ -56,7 +56,7 @@ class Xs:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Immutable expression; no request is sent until it is evaluated.
 
         Notes
@@ -67,7 +67,7 @@ class Xs:
         return as_expr(value, cast="xs:integer")
 
     @staticmethod
-    def double(value) -> Expression:
+    def double(value) -> XqyExpression:
         """Build an ``xs:double`` value.
 
         Parameters
@@ -78,7 +78,7 @@ class Xs:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Immutable expression; no request is sent until it is evaluated.
 
         Notes
@@ -89,7 +89,7 @@ class Xs:
         return as_expr(value, cast="xs:double")
 
     @staticmethod
-    def decimal(value) -> Expression:
+    def decimal(value) -> XqyExpression:
         """Build an ``xs:decimal`` value.
 
         Parameters
@@ -100,7 +100,7 @@ class Xs:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Immutable expression; no request is sent until it is evaluated.
 
         Notes
@@ -111,7 +111,7 @@ class Xs:
         return as_expr(value, cast="xs:decimal")
 
     @staticmethod
-    def date_time(value) -> Expression:
+    def date_time(value) -> XqyExpression:
         """Build an ``xs:dateTime`` value.
 
         Parameters
@@ -122,7 +122,7 @@ class Xs:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Immutable expression; no request is sent until it is evaluated.
 
         Notes
@@ -133,7 +133,7 @@ class Xs:
         return as_expr(value, cast="xs:dateTime")
 
     @staticmethod
-    def date(value) -> Expression:
+    def date(value) -> XqyExpression:
         """Build an ``xs:date`` value.
 
         Parameters
@@ -144,7 +144,7 @@ class Xs:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Immutable expression; no request is sent until it is evaluated.
 
         Notes
@@ -155,7 +155,7 @@ class Xs:
         return as_expr(value, cast="xs:date")
 
     @staticmethod
-    def string(value) -> Expression:
+    def string(value) -> XqyExpression:
         """Build an ``xs:string`` value.
 
         Parameters
@@ -166,7 +166,7 @@ class Xs:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Immutable expression; no request is sent until it is evaluated.
 
         Notes

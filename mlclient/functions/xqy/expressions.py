@@ -9,8 +9,8 @@ import datetime
 import decimal
 import math
 import re
-from collections.abc import Mapping
 from abc import ABC, abstractmethod
+from collections.abc import Mapping
 from dataclasses import dataclass
 
 from mlclient._experimental import experimental
@@ -27,11 +27,11 @@ _NCNAME = re.compile(
 )
 
 
-class CompilationContext:
+class XqyCompilationContext:
     """Bindings and path validation for one XQuery expression compilation.
 
-    Custom Expression.render implementations use this context to bind runtime
-    values. Expression.compile creates a fresh context for every invocation.
+    Custom XqyExpression.render implementations use this context to bind runtime
+    values. XqyExpression.compile creates a fresh context for every invocation.
     """
 
     def __init__(self):
@@ -160,7 +160,7 @@ def _namespace_declarations(namespaces: dict[str, str]) -> str:
     return "".join(declarations)
 
 
-def _namespace_code(namespaces, ctx: CompilationContext) -> str:
+def _namespace_code(namespaces, ctx: XqyCompilationContext) -> str:
     """Render a namespace map with data bindings, never interpolated URIs."""
     entries = [
         f"map:entry({ctx.bind(prefix)}, {ctx.bind(uri)})"
@@ -170,16 +170,16 @@ def _namespace_code(namespaces, ctx: CompilationContext) -> str:
 
 
 @experimental()
-class Expression(ABC):
+class XqyExpression(ABC):
     """An XQuery expression, reusable in builders or ``eval.expression``."""
 
     @abstractmethod
-    def render(self, ctx: CompilationContext) -> str:
+    def render(self, ctx: XqyCompilationContext) -> str:
         """Render this expression using the shared compilation context.
 
         Parameters
         ----------
-        ctx : CompilationContext
+        ctx : XqyCompilationContext
             Context for binding runtime values and registering path validation.
 
         Returns
@@ -202,7 +202,7 @@ class Expression(ABC):
             XQuery 1.0-ml source and independent JSON-compatible bindings.
             Invalid paths raise MLCLIENT-INVALID-PATH when evaluated.
         """
-        ctx = CompilationContext()
+        ctx = XqyCompilationContext()
         bindings = namespace_bindings(namespaces)
         body = ctx.guard(self.render(ctx))
         variables = ctx.variables
@@ -211,40 +211,44 @@ class Expression(ABC):
         prolog += ctx.declarations
         return prolog + body, variables
 
-    def range(self, start: int | Expression, end: int | Expression) -> Expression:
+    def range(
+        self,
+        start: int | XqyExpression,
+        end: int | XqyExpression,
+    ) -> XqyExpression:
         """Select inclusive, one-based positions ``start`` through ``end``.
 
         Parameters
         ----------
-        start : int | Expression
+        start : int | XqyExpression
             Positive integer or fn.last(). Booleans are not positions.
-        end : int | Expression
+        end : int | XqyExpression
             Positive integer or fn.last(); literal bounds must be ordered.
 
         Returns
         -------
-        Expression
+        XqyExpression
             A composable positional predicate, evaluated by MarkLogic.
         """
         return _Range(self, start, end)
 
-    def index(self, position: int | Expression) -> Expression:
+    def index(self, position: int | XqyExpression) -> XqyExpression:
         """Select one item by its one-based position.
 
         Parameters
         ----------
-        position : int | Expression
+        position : int | XqyExpression
             Positive integer or fn.last(), evaluated inside the predicate.
 
         Returns
         -------
-        Expression
+        XqyExpression
             Selected item, or an empty sequence if the position does not exist.
         """
         _validate_position(position)
         return _Index(self, position)
 
-    def project(self, path: str) -> Expression:
+    def project(self, path: str) -> XqyExpression:
         """Extract a restricted XPath from each result item in sequence order.
 
         Parameters
@@ -255,7 +259,7 @@ class Expression(ABC):
 
         Returns
         -------
-        Expression
+        XqyExpression
             A simple-map expression. Apply index/range before this method to
             select hits rather than projected items.
 
@@ -275,29 +279,29 @@ class Expression(ABC):
 
 
 @dataclass(frozen=True)
-class _AtomicValue(Expression):
+class _AtomicValue(XqyExpression):
     """An immutable scalar represented by a JSON-safe lexical value."""
 
     value: str | bool
     cast: str | None = None
 
-    def render(self, ctx: CompilationContext) -> str:
+    def render(self, ctx: XqyCompilationContext) -> str:
         """Bind the scalar and restore its XQuery type."""
         return ctx.bind(self.value, self.cast or "xs:string")
 
 
 @dataclass(frozen=True)
-class _Raw(Expression):
+class _Raw(XqyExpression):
     """Trusted source; never constructed implicitly from a runtime value."""
 
     source: str
 
-    def render(self, _ctx: CompilationContext) -> str:
+    def render(self, _ctx: XqyCompilationContext) -> str:
         """Return trusted source unchanged."""
         return self.source
 
 
-def _validate_position(value: int | Expression) -> None:
+def _validate_position(value: int | XqyExpression) -> None:
     """Require a positive integer or the native zero-argument fn:last call."""
     if type(value) is int:
         if value < 1:
@@ -314,25 +318,25 @@ def _validate_position(value: int | Expression) -> None:
 
 
 @dataclass(frozen=True)
-class _Index(Expression):
+class _Index(XqyExpression):
     """A single positional predicate."""
 
-    inner: Expression
-    position: int | Expression
+    inner: XqyExpression
+    position: int | XqyExpression
 
-    def render(self, ctx: CompilationContext) -> str:
+    def render(self, ctx: XqyCompilationContext) -> str:
         """Keep fn:last inside the selected sequence's predicate context."""
         position = as_expr(self.position).render(ctx)
         return f"({self.inner.render(ctx)})[{position}]"
 
 
 @dataclass(frozen=True)
-class _Range(Expression):
+class _Range(XqyExpression):
     """A lazy, inclusive positional predicate."""
 
-    inner: Expression
-    start: int | Expression
-    end: int | Expression
+    inner: XqyExpression
+    start: int | XqyExpression
+    end: int | XqyExpression
 
     def __post_init__(self):
         _validate_position(self.start)
@@ -341,7 +345,7 @@ class _Range(Expression):
             message = "range bounds must satisfy 1 <= start <= end"
             raise ValueError(message)
 
-    def render(self, ctx: CompilationContext) -> str:
+    def render(self, ctx: XqyCompilationContext) -> str:
         """Render bounds inside the predicate to preserve their context."""
         inner = self.inner.render(ctx)
         start = as_expr(self.start).render(ctx)
@@ -350,10 +354,10 @@ class _Range(Expression):
 
 
 @dataclass(frozen=True)
-class _Projection(Expression):
+class _Projection(XqyExpression):
     """Apply a validated extraction path to each selected search hit in order."""
 
-    inner: Expression
+    inner: XqyExpression
     source: str
 
     def __post_init__(self):
@@ -373,12 +377,12 @@ class _Projection(Expression):
             message = "xpath must not be empty"
             raise ValueError(message)
 
-    def render(self, ctx: CompilationContext) -> str:
+    def render(self, ctx: XqyCompilationContext) -> str:
         """Map the guarded path over hits without imposing document order.
 
         Parameters
         ----------
-        ctx : CompilationContext
+        ctx : XqyCompilationContext
             Shared bindings and native path validation for this evaluation.
 
         Returns
@@ -390,18 +394,18 @@ class _Projection(Expression):
 
 
 @dataclass(frozen=True)
-class _Sequence(Expression):
+class _Sequence(XqyExpression):
     """A snapshot of an XQuery sequence's child expressions."""
 
-    items: tuple[Expression, ...]
+    items: tuple[XqyExpression, ...]
 
-    def render(self, ctx: CompilationContext) -> str:
+    def render(self, ctx: XqyCompilationContext) -> str:
         """Render a sequence, including the empty sequence."""
         return "(" + ", ".join(item.render(ctx) for item in self.items) + ")"
 
 
 @dataclass(frozen=True)
-class _FunctionCall(Expression):
+class _FunctionCall(XqyExpression):
     """A function call; ``None`` optional slots mean omitted arguments."""
 
     fn: str
@@ -416,7 +420,7 @@ class _FunctionCall(Expression):
             tuple(None if arg is None else as_expr(arg) for arg in self.optionals),
         )
 
-    def render(self, ctx: CompilationContext) -> str:
+    def render(self, ctx: XqyCompilationContext) -> str:
         """Trim omitted trailing slots; retain empty interior slots."""
         optionals = list(self.optionals)
         while optionals and optionals[-1] is None:
@@ -426,7 +430,7 @@ class _FunctionCall(Expression):
         return f"{self.fn}({', '.join(parts)})"
 
 
-def xpath(source: str) -> Expression:
+def xpath(source: str) -> XqyExpression:
     """Embed trusted XPath/XQuery source, without parsing or sanitizing it.
 
     Parameters
@@ -438,7 +442,7 @@ def xpath(source: str) -> Expression:
 
     Returns
     -------
-    Expression
+    XqyExpression
         A parenthesized source expression, suitable for ``cts.search`` and
         ``xdmp.exists`` as well as general expression composition.
     """
@@ -452,26 +456,26 @@ def xpath(source: str) -> Expression:
 
 
 @dataclass(frozen=True)
-class _Path(Expression):
+class _Path(XqyExpression):
     """A path string validated natively before any expression is executed."""
 
     source: str
     kind: str = "search"
-    namespaces: Expression | None = None
+    namespaces: XqyExpression | None = None
 
-    def render(self, ctx: CompilationContext) -> str:
+    def render(self, ctx: XqyCompilationContext) -> str:
         """Register validation and return an inline placeholder or a string binding."""
         bindings = None if self.namespaces is None else self.namespaces.render(ctx)
         return ctx.path(self.source, self.kind, bindings)
 
 
 @dataclass(frozen=True)
-class _NamespaceMap(Expression):
+class _NamespaceMap(XqyExpression):
     """Immutable namespace bindings for native path-reference arguments."""
 
     bindings: tuple[tuple[str, str], ...]
 
-    def render(self, ctx: CompilationContext) -> str:
+    def render(self, ctx: XqyCompilationContext) -> str:
         """Build a native map without exposing data as executable source."""
         return _namespace_code(dict(self.bindings), ctx)
 
@@ -483,7 +487,7 @@ def namespace_map(value):
     return value
 
 
-def index_path(value, namespaces=None) -> Expression:
+def index_path(value, namespaces=None) -> XqyExpression:
     """Register literal index paths, including every member of a path sequence."""
     if isinstance(value, str):
         return _Path(value, "index", namespaces)
@@ -492,21 +496,21 @@ def index_path(value, namespaces=None) -> Expression:
     return as_expr(value)
 
 
-def search_path(expression: str | Expression) -> Expression:
+def search_path(expression: str | XqyExpression) -> XqyExpression:
     """Wrap path strings internally; existing composed expressions stay composable."""
     if isinstance(expression, str):
         return _Path(expression)
     if isinstance(expression, _Raw):
         return _Path(expression.source[1:-1])
-    if not isinstance(expression, Expression):
-        message = "searchable expressions require a path string or Expression"
+    if not isinstance(expression, XqyExpression):
+        message = "searchable expressions require a path string or XqyExpression"
         raise TypeError(message)
     return expression
 
 
-def as_expr(value, *, cast: str | None = None) -> Expression:
+def as_expr(value, *, cast: str | None = None) -> XqyExpression:
     """Snapshot supported values as expressions; lists/tuples are sequences."""
-    if isinstance(value, Expression):
+    if isinstance(value, XqyExpression):
         expr = value
     elif value is None:
         expr = _Sequence(())

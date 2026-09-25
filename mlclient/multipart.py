@@ -26,13 +26,25 @@ class MultipartPart:
     @property
     def text(self) -> str:
         """Decode content to string using the charset from Content-Type."""
+        return self.content.decode(self.encoding)
+
+    @property
+    def encoding(self) -> str:
+        """Return Content-Type's charset, defaulting to UTF-8 without decoding."""
         charset = "utf-8"
-        content_type = self.headers.get("Content-Type", "")
+        content_type = next(
+            (
+                value
+                for name, value in self.headers.items()
+                if name.lower() == "content-type"
+            ),
+            "",
+        )
         for raw in content_type.split(";"):
             param = raw.strip()
             if param.lower().startswith("charset="):
                 charset = param.split("=", 1)[1].strip().strip('"')
-        return self.content.decode(charset)
+        return charset
 
 
 def encode_multipart_mixed(

@@ -60,6 +60,10 @@ class MLResponseParser:
         const.HEADER_PRIMITIVE_STRING: lambda data: data,
         const.HEADER_PRIMITIVE_INTEGER: int,
         None: lambda data: data,
+        "text()": str,
+        "attribute()": str,
+        "comment()": str,
+        "processing-instruction()": str,
         const.HEADER_PRIMITIVE_BYTE: int,
         const.HEADER_PRIMITIVE_SHORT: int,
         const.HEADER_PRIMITIVE_INT: int,
@@ -264,7 +268,7 @@ class MLResponseParser:
             body_parts = [response]
 
         parsed_parts = [
-            cls._parse_part(body_part, None, with_headers) for body_part in body_parts
+            cls.parse_part(body_part, None, with_headers) for body_part in body_parts
         ]
         if len(parsed_parts) == 1:
             return parsed_parts[0]
@@ -313,7 +317,7 @@ class MLResponseParser:
             body_parts = [response]
 
         parsed_parts = [
-            cls._parse_part(body_part, str, with_headers) for body_part in body_parts
+            cls.parse_part(body_part, str, with_headers) for body_part in body_parts
         ]
         if len(parsed_parts) == 1:
             return parsed_parts[0]
@@ -362,7 +366,7 @@ class MLResponseParser:
             body_parts = [response]
 
         parsed_parts = [
-            cls._parse_part(body_part, bytes, with_headers) for body_part in body_parts
+            cls.parse_part(body_part, bytes, with_headers) for body_part in body_parts
         ]
         if len(parsed_parts) == 1:
             return parsed_parts[0]
@@ -426,7 +430,7 @@ class MLResponseParser:
         return "\n".join(term.text for term in terms)
 
     @classmethod
-    def _parse_part(
+    def parse_part(
         cls,
         body_part: MultipartPart | Response,
         output_type: type | None = None,
@@ -444,7 +448,7 @@ class MLResponseParser:
         | list
         | tuple
     ):
-        """Parse MarkLogic HTTP Response part.
+        """Parse one result part without collapsing its content as a sequence.
 
         Parameters
         ----------
@@ -452,21 +456,34 @@ class MLResponseParser:
             An HTTP response body or body part taken from MarkLogic instance
         output_type : type | None , default None
             An output type (supported: str, bytes)
+        with_headers : bool, default False
+            Return a (headers, parsed_content) tuple when enabled.
 
         Returns
         -------
         bytes | str | int | float | Decimal | bool | dict |
         ElemTree.ElementTree | ElemTree.Element |
         list | tuple
-            A parsed response body or body part
+            Parsed content. The input's original content bytes are not changed.
+
+        Raises
+        ------
+        ValueError
+            If a recognized scalar or JSON payload cannot be parsed.
+        ParseError
+            If XML content is malformed.
         """
         headers = body_part.headers
         if isinstance(body_part, MultipartPart):
             headers = Headers(body_part.headers)
-        content_type = headers.get(const.HEADER_NAME_CONTENT_TYPE)
+        content_type = headers.get(const.HEADER_NAME_CONTENT_TYPE, "")
         doc_type = Mimetypes.get_doc_type(content_type)
 
-        if output_type is bytes or doc_type is DocumentType.BINARY:
+        if (
+            output_type is bytes
+            or doc_type is DocumentType.BINARY
+            or headers.get(const.HEADER_NAME_PRIMITIVE) == "binary()"
+        ):
             parsed = body_part.content
             logger.fine("Returning binary response part value")
         elif output_type is str:
@@ -514,7 +531,7 @@ class MLResponseParser:
         list | tuple
             A parsed response body or body part
         """
-        content_type = headers.get(const.HEADER_NAME_CONTENT_TYPE)
+        content_type = headers.get(const.HEADER_NAME_CONTENT_TYPE, "")
         primitive_type = headers.get(const.HEADER_NAME_PRIMITIVE)
         doc_type = Mimetypes.get_doc_type(content_type)
         parsers = cls._PLAIN_TEXT_PARSERS

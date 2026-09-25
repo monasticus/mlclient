@@ -12,14 +12,14 @@ and execute searches through one `cts` object.
     This API is experimental while its design is validated in real applications.
 
 The public expression type is
-`from mlclient.functions.xqy import Expression`. It belongs to XQuery, not the
+`from mlclient.functions.xqy import XqyExpression`. It belongs to XQuery, not the
 language-neutral `mlclient.functions`: it compiles XQuery source and bindings,
 with XQuery namespaces, paths and positional semantics. A future SJS expression
 type need not share that implementation or inheritance hierarchy.
 
 `Cts`, `Fn`, `Xs` and `Xdmp` are public namespace-builder classes; their lowercase
 instances are the usual entry points. Custom expressions can subclass
-`Expression` and implement `render(ctx: CompilationContext) -> str`, importing
+`XqyExpression` and implement `render(ctx: XqyCompilationContext) -> str`, importing
 both types from `mlclient.functions.xqy`. Use `ctx.bind(value, atomic_type)`
 for runtime data and `compile()` to obtain source plus bindings. Internal tree
 nodes are implementation details, not required imports. For validated
@@ -45,8 +45,64 @@ Use `CtsService` when CTS search is the operation you want to execute. Its query
 builders mirror their XQuery counterparts: if you already use MarkLogic, you
 can combine familiar collection, word, element, property and range queries.
 
-The `search`, `uris`, `values` and `estimate` methods execute their expressions.
-Other inherited methods build queries or expressions without sending requests.
+Result-producing methods execute immediately: search, lexicon lookups (including
+`field_values`), matches, tuples/co-occurrences, aggregates and scalar utilities.
+Query, reference, ordering, geometry and entity-dictionary constructors remain
+composable expressions. Use `Cts.method(...)` when nesting a result-producing
+operation inside another expression.
+
+### Parsed results and original bytes
+
+`search` returns [SearchHit][mlclient.models.SearchHit]. Individual lexicon values
+from `values`, `uris`, `field_values` and word/collection/geospatial lookups return
+[ValueHit][mlclient.models.ValueHit]. Empty results are `[]`, one result is one
+object (also with `index=1`), and multiple results form a list. Tuples,
+co-occurrences, ranges and scalar aggregates retain their native parsed structure.
+
+```python
+from mlclient import MLClient
+from mlclient.functions.xqy import Cts
+from mlclient.services import CtsService
+
+with MLClient() as ml:
+    cts = CtsService(ml.rest)
+    hit = cts.search(query=cts.collection_query("products"), index=1)
+    if hit != []:
+        content = hit.content         # already parsed by MLResponseParser
+        original = hit.content_bytes  # exact bytes, not reserialized content
+        score = hit.score
+        uri, path = hit.source_uri, hit.source_path
+
+    value = cts.field_values("price", index=1)
+    if value != []:
+        price, frequency = value.content, value.frequency
+
+    # Native eval does not inject score/frequency parts.
+    plain = ml.eval.expression(Cts.search(), output_type=bytes)
+```
+
+XML documents expose ElementTree, XML elements expose Element; JSON exposes
+dict/list/scalars, text exposes str, and binary exposes unchanged bytes. A JSON
+property received as text/plain + text() is a string, not JSON to parse. The
+common response parser performs conversion once; models do not implement a
+second parser or accept HTTP headers. Malformed XML/JSON fails during the call.
+
+`content_string` decodes the original text snapshot; binary returns None.
+`content_bytes` remains the original snapshot even after a caller mutates the
+parsed dict/XML tree. There is no implicit reserialization or invalidate method.
+
+The service captures score/frequency inside the same eval request and decodes
+paired parts internally. No extra round-trip or manual pairing is needed.
+Frequency follows native item/fragment-frequency options, not an assumed document
+count. Lexicon `map` output is not a value sequence: use
+`ml.eval.expression(Cts.values(..., options="map"))` for that native shape;
+frequency-bearing service methods report MLCLIENT-LEXICON-MAP.
+
+`source_uri` and `source_path` describe server provenance, not document metadata
+or write targets. Missing X-Path becomes `/` independently of node type.
+`hit.xpath(".//p:title", p="urn:products")` performs local ElementTree.findall
+on already parsed XML, without another request. JSON, text and binary do not
+support local xpath.
 
 ### Python argument conventions
 
@@ -160,6 +216,12 @@ nodes into document order. A hit may produce zero or many results, so the final
 result count need not equal the range size. The usual empty/singleton/list
 return convention applies to the extracted sequence.
 
+Each projected node retains its original hit's score. `hit.source_path` describes
+the returned node; it is separate from both the supplied server path and the
+local `hit.xpath(...)` method. Native search returns nodes, including text and
+JSON scalar nodes, not arbitrary atomic expressions: `/fn:string()` is invalid.
+Do not infer content type solely from whether expression/xpath was supplied.
+
 The path uses the same namespace declarations and native restricted-XPath
 validation as `expression`. A relative path starts at each hit; a leading `/`
 starts at that hit's document root. For `expression="/p:product"`, use
@@ -221,7 +283,7 @@ Validation uses MarkLogic's restricted XPath syntax, including supported
 functions in predicates. Variables inside these path strings are not accepted;
 pass dynamic search values through query builders. Explicit `xpath(...)` used
 for arbitrary expressions is trusted XQuery code, not a sandbox. When used as
-the searchable path argument, its source is validated too. Computed `Expression`
+the searchable path argument, its source is validated too. Computed `XqyExpression`
 arguments to native string-path parameters remain expressions and are checked
 by the receiving native function when evaluated; they are not included in the
 literal-path preflight.

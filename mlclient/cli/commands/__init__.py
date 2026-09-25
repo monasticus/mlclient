@@ -25,6 +25,8 @@ It contains all CLI commands modules:
         The Log Level Command module.
     * version
         The Version Command module.
+    * url
+        The URL Command module.
 
 It exports the following commands:
     * EvalCommand
@@ -51,6 +53,8 @@ It exports the following commands:
         Shows or sets a MarkLogic file/system log level.
     * VersionCommand
         Reports the MarkLogic version of an environment.
+    * UrlCommand
+        Prints MarkLogic browser URLs for an environment.
 """
 
 from mlclient.cli.commands.env_compare import EnvCompareCommand
@@ -64,6 +68,7 @@ from mlclient.cli.commands.health import HealthCommand
 from mlclient.cli.commands.http import HttpCommand
 from mlclient.cli.commands.log_level import LogLevelCommand
 from mlclient.cli.commands.logs import LogsCommand
+from mlclient.cli.commands.url import UrlCommand
 from mlclient.cli.commands.version import VersionCommand
 
 __all__ = [
@@ -78,5 +83,6 @@ __all__ = [
     "HttpCommand",
     "LogLevelCommand",
     "LogsCommand",
+    "UrlCommand",
     "VersionCommand",
 ]

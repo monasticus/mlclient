@@ -171,13 +171,15 @@ EXPECTED_EXPORTS = {
     ],
     "mlclient.functions": [],
     "mlclient.functions.xqy": [
+        "CompilationContext",
         "Cts",
-        "Expr",
+        "Expression",
         "Fn",
         "Xdmp",
         "Xs",
         "cts",
         "fn",
+        "namespace_bindings",
         "xdmp",
         "xpath",
         "xs",
@@ -226,6 +228,17 @@ def test_imports_in_a_fresh_interpreter():
         for namespace, names in reversed(EXPECTED_EXPORTS.items())
     )
     subprocess.run([sys.executable, "-c", imports], check=True)
+
+
+def test_services_use_only_public_xquery_imports():
+    root = Path(__file__).resolve().parents[3] / "mlclient" / "services"
+    for source in root.glob("*.py"):
+        for node in ast.walk(ast.parse(source.read_text())):
+            if isinstance(node, ast.ImportFrom) and (node.module or "").startswith(
+                "mlclient.functions",
+            ):
+                assert not any(part.startswith("_") for part in node.module.split("."))
+                assert not any(alias.name.startswith("_") for alias in node.names)
 
 
 def test_low_level_modules_do_not_depend_on_composition():

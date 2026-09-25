@@ -5,7 +5,7 @@ import inspect
 import pytest
 
 from mlclient.functions.xqy import fn
-from mlclient.functions.xqy._expr import _CompileContext
+from mlclient.functions.xqy.expressions import CompilationContext
 
 # Native MarkLogic 12 reference catalog, including legacy/context-only entries.
 CATALOG = [
@@ -186,7 +186,7 @@ def test_fn_calls_preserve_native_names_and_argument_order(native, python):
         else:
             positional.append(value)
     expression = method(*positional, **keywords)
-    context = _CompileContext()
+    context = CompilationContext()
     code = expression.render(context)
     assert (
         code

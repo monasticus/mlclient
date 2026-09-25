@@ -94,6 +94,59 @@ def expression_database():
             ml.manage.databases.delete(name, forest_delete="data").raise_for_status()
 
 
+def test_search_projection_preserves_order_and_selects_hits_first(expression_database):
+    ml, database, _ = expression_database
+    service = CtsService(ml.rest, namespaces={"p": "urn:cts-test"})
+    options = cts.index_order(
+        cts.element_reference(fn.qname("urn:cts-test", "price")),
+        options="descending",
+    )
+    parameters = {"expression": "/p:item", "options": options, "database": database}
+    labels = service.search(**parameters, xpath="p:label")
+    assert [label.text for label in labels] == ["beta", "alpha"]
+    assert service.search(**parameters, index=2, xpath="p:label").text == "alpha"
+    assert service.search(**parameters, range=[2, 2], xpath="p:label").text == "alpha"
+    children = service.search(**parameters, index=1, xpath="*")
+    assert [child.text for child in children] == ["2.50", "2026-01-02", "beta"]
+    assert service.search(**parameters, index=100, xpath="p:label") == []
+    assert service.search(**parameters, xpath="p:absent") == []
+    assert service.search(**parameters, index=1, xpath="/p:item/p:label").text == "beta"
+    assert (
+        service.search(
+            options=options,
+            database=database,
+            index=1,
+            xpath="p:item/p:label",
+        ).text
+        == "beta"
+    )
+    with pytest.raises(MarkLogicError, match="MLCLIENT-INVALID-PATH"):
+        service.search(**parameters, xpath="p:label), fn:error() (: ")
+
+
+@pytest.mark.asyncio
+async def test_async_search_projection_preserves_order_and_selects_hits_first(
+    expression_database,
+):
+    _, database, port = expression_database
+    async with AsyncMLClient(port=port) as ml:
+        service = AsyncCtsService(ml.rest, namespaces={"p": "urn:cts-test"})
+        options = cts.index_order(
+            cts.element_reference(fn.qname("urn:cts-test", "price")),
+            options="descending",
+        )
+        parameters = {"expression": "/p:item", "options": options, "database": database}
+        labels = await service.search(**parameters, xpath="p:label")
+        assert [label.text for label in labels] == ["beta", "alpha"]
+        label = await service.search(**parameters, index=2, xpath="p:label")
+        assert label.text == "alpha"
+        label = await service.search(**parameters, range=[2, 2], xpath="p:label")
+        assert label.text == "alpha"
+        assert await service.search(**parameters, xpath="p:absent") == []
+        with pytest.raises(MarkLogicError, match="MLCLIENT-INVALID-PATH"):
+            await service.search(**parameters, xpath="p:label), fn:error() (: ")
+
+
 def test_scalar_roundtrips_and_sequence_composition(expression_database):
     ml, database, _ = expression_database
 
@@ -154,25 +207,28 @@ def test_search_lexicons_ranges_and_namespace_composition(expression_database):
         service.search(query=query, range=1, database=database).getroot().tag
         == "{urn:cts-test}item"
     )
-    assert service.uris(query, database=database) == [
+    assert service.uris(query=query, database=database) == [
         "/cts-test/a.xml",
         "/cts-test/b.xml",
     ]
     assert (
-        service.uris(query, start="/cts-test/b.xml", database=database)
+        service.uris(query=query, start="/cts-test/b.xml", database=database)
         == "/cts-test/b.xml"
     )
     ref = cts.element_reference(fn.qname("urn:cts-test", "price"))
     values = cts.values(ref)
     assert ml.eval.expression(fn.count(values), database=database) == 2
     assert ml.eval.expression(fn.exists(values), database=database) is True
-    assert service.values(ref, query, database=database) == [
+    assert service.values(ref, query=query, database=database) == [
         Decimal("1.25"),
         Decimal("2.50"),
     ]
-    assert service.values(ref, query, start=Decimal(2), database=database) == Decimal(
-        "2.50",
-    )
+    assert service.values(
+        ref,
+        query=query,
+        start=Decimal(2),
+        database=database,
+    ) == Decimal("2.50")
     assert service.estimate(query, database=database) == 2
     assert service.estimate(query, maximum=1, database=database) == 1
     assert service.estimate(database=database) == 3
@@ -194,7 +250,7 @@ def test_search_lexicons_ranges_and_namespace_composition(expression_database):
     )
     forests = xpath("xdmp:database-forests(xdmp:database())")
     assert service.uris(
-        query,
+        query=query,
         quality_weight=0,
         forest_ids=forests,
         database=database,
@@ -204,7 +260,7 @@ def test_search_lexicons_ranges_and_namespace_composition(expression_database):
         "/p:item/p:price",
         namespaces=xpath('map:map() => map:with("p", "urn:cts-test")'),
     )
-    assert service.values(path_ref, query, database=database) == [
+    assert service.values(path_ref, query=query, database=database) == [
         Decimal("1.25"),
         Decimal("2.50"),
     ]
@@ -314,10 +370,12 @@ def test_extended_cts_catalog_executes_through_the_common_evaluator(
         database=database,
     ) == ["/cts-test/a.xml", "/cts-test/b.xml"]
     assert ml.eval.expression(
-        cts.min(price, query=query), database=database,
+        cts.min(price, query=query),
+        database=database,
     ) == Decimal("1.25")
     assert ml.eval.expression(
-        cts.max(price, query=query), database=database,
+        cts.max(price, query=query),
+        database=database,
     ) == Decimal("2.50")
     assert (
         ml.eval.expression(
@@ -349,9 +407,16 @@ async def test_async_execution_uses_the_same_composable_expressions(
     async with AsyncMLClient(port=port) as ml:
         query = cts.collection_query("cts-test")
         service = AsyncCtsService(ml.rest)
-        uris = await service.uris(query, database=database)
-        assert await service.uris(query, index=fn.last(), database=database) == uris[-1]
-        assert await service.uris(query, index=100, database=database) == []
+        uris = await service.uris(query=query, database=database)
+        assert (
+            await service.uris(
+                query=query,
+                index=fn.last(),
+                database=database,
+            )
+            == uris[-1]
+        )
+        assert await service.uris(query=query, index=100, database=database) == []
         assert (
             await ml.eval.expression(
                 fn.count(cts.search(query=query)),
@@ -365,7 +430,7 @@ async def test_async_execution_uses_the_same_composable_expressions(
         ) == date(2026, 1, 2)
         assert (
             await AsyncCtsService(ml.rest).uris(
-                query,
+                query=query,
                 range=1,
                 database=database,
             )
@@ -379,51 +444,96 @@ def test_all_paths_are_guarded_with_shared_and_local_namespaces(expression_datab
     service = CtsService(ml.rest, namespaces=bindings)
     bindings["p"] = "urn:mutated"
     assert len(service.search("/p:item", database=database)) == 2
-    assert service.search(
-        "/p:item", namespaces={"p": "urn:absent"}, database=database,
-    ) == []
+    assert (
+        service.search(
+            "/p:item",
+            namespaces={"p": "urn:absent"},
+            database=database,
+        )
+        == []
+    )
     assert len(service.search("/p:item", database=database)) == 2
-    assert len(service.search(
-        "/item", namespaces={"": "urn:cts-test"}, database=database,
-    )) == 2
+    assert (
+        len(
+            service.search(
+                "/item",
+                namespaces={"": "urn:cts-test"},
+                database=database,
+            ),
+        )
+        == 2
+    )
     paths = [cts.search("/p:item"), cts.search("/other:item")]
-    assert ml.eval.expression(
-        fn.count(paths), namespaces={"p": "urn:cts-test", "other": "urn:absent"},
-        database=database,
-    ) == 2
-    assert ml.eval.expression(
-        cts.valid_extract_path("/p:item"),
-        namespaces={"p": "urn:cts-test"}, database=database,
-    ) is True
-    assert ml.eval.expression(
-        cts.valid_index_path("/p:item/p:price", False),
-        namespaces={"p": "urn:cts-test"}, database=database,
-    ) is True
+    assert (
+        ml.eval.expression(
+            fn.count(paths),
+            namespaces={"p": "urn:cts-test", "other": "urn:absent"},
+            database=database,
+        )
+        == 2
+    )
+    assert (
+        ml.eval.expression(
+            cts.valid_extract_path("/p:item"),
+            namespaces={"p": "urn:cts-test"},
+            database=database,
+        )
+        is True
+    )
+    assert (
+        ml.eval.expression(
+            cts.valid_index_path("/p:item/p:price", False),
+            namespaces={"p": "urn:cts-test"},
+            database=database,
+        )
+        is True
+    )
     default_service = CtsService(ml.rest, namespaces={"": "urn:cts-test"})
     assert len(default_service.search("/item", database=database)) == 2
-    assert default_service.search(
-        "/item", namespaces={"": ""}, database=database,
-    ) == []
+    assert (
+        default_service.search(
+            "/item",
+            namespaces={"": ""},
+            database=database,
+        )
+        == []
+    )
     uri = 'urn:test"; fn:error(xs:QName("INJECTED")); (: &'
-    assert ml.eval.expression(
-        xpath('fn:namespace-uri-from-QName(xs:QName("p:x"))'),
-        namespaces={"p": uri}, output_type=str, database=database,
-    ) == uri
+    assert (
+        ml.eval.expression(
+            xpath('fn:namespace-uri-from-QName(xs:QName("p:x"))'),
+            namespaces={"p": uri},
+            output_type=str,
+            database=database,
+        )
+        == uri
+    )
     reference_bindings = {"p": "urn:cts-test"}
     reference = cts.path_reference("/p:item/p:price", namespaces=reference_bindings)
     reference_bindings["p"] = "urn:mutated"
     assert service.values(
-        reference, namespaces={"p": "urn:absent"}, database=database,
-    ) == [Decimal("1.25"), Decimal("2.50")]
-    assert service.estimate(
-        cts.path_range_query(["/p:item/p:price", "/p:item/p:price"], ">", 1),
+        reference,
+        namespaces={"p": "urn:absent"},
         database=database,
-    ) == 2
-    assert ml.eval.expression(
-        fn.count(cts.search(
-            '/*[fn:node-name(.) => fn:string() => fn:contains("item")]',
-        )), database=database,
-    ) == 2
+    ) == [Decimal("1.25"), Decimal("2.50")]
+    assert (
+        service.estimate(
+            cts.path_range_query(["/p:item/p:price", "/p:item/p:price"], ">", 1),
+            database=database,
+        )
+        == 2
+    )
+    assert (
+        ml.eval.expression(
+            fn.count(
+                cts.search(
+                    '/*[fn:node-name(.) => fn:string() => fn:contains("item")]',
+                ),
+            ),
+            database=database,
+        )
+        == 2
+    )
 
 
 def test_all_invalid_paths_reported_before_executing_tree(expression_database):
@@ -434,15 +544,19 @@ def test_all_invalid_paths_reported_before_executing_tree(expression_database):
         "/unknown:price",
         '/p:item/p:price[xdmp:version() = "10"]',
     ]
-    expression = fn.count([
-        cts.search(bad_paths[0]),
-        cts.search(bad_paths[1]),
-        cts.uris(cts.path_range_query(bad_paths[2:], "=", 1)),
-        xpath('fn:error(xs:QName("SHOULD-NOT-RUN"))'),
-    ])
+    expression = fn.count(
+        [
+            cts.search(bad_paths[0]),
+            cts.search(bad_paths[1]),
+            cts.uris(query=cts.path_range_query(bad_paths[2:], "=", 1)),
+            xpath('fn:error(xs:QName("SHOULD-NOT-RUN"))'),
+        ],
+    )
     with pytest.raises(MarkLogicError, match="MLCLIENT-INVALID-PATH") as error:
         ml.eval.expression(
-            expression, namespaces={"p": "urn:cts-test"}, database=database,
+            expression,
+            namespaces={"p": "urn:cts-test"},
+            database=database,
         )
     for path in bad_paths:
         assert path in str(error.value)
@@ -455,13 +569,22 @@ async def test_async_namespace_defaults_overrides_and_guard(expression_database)
     async with AsyncMLClient(port=port) as ml:
         service = AsyncCtsService(ml.rest, namespaces={"p": "urn:cts-test"})
         assert len(await service.search("/p:item", database=database)) == 2
-        assert await service.search(
-            "/p:item", namespaces={"p": "urn:missing"}, database=database,
-        ) == []
-        assert await ml.eval.expression(
-            fn.count(cts.search("/p:item")), namespaces={"p": "urn:cts-test"},
-            database=database,
-        ) == 2
+        assert (
+            await service.search(
+                "/p:item",
+                namespaces={"p": "urn:missing"},
+                database=database,
+            )
+            == []
+        )
+        assert (
+            await ml.eval.expression(
+                fn.count(cts.search("/p:item")),
+                namespaces={"p": "urn:cts-test"},
+                database=database,
+            )
+            == 2
+        )
         with pytest.raises(MarkLogicError, match="MLCLIENT-INVALID-PATH"):
             await service.search("/absent:item", database=database)
 
@@ -488,29 +611,41 @@ def test_decimal_parsing_and_qname_constructors(expression_database):
     assert ml.eval.xquery('xs:decimal("0.1234567890123456789")') == expected
     assert ml.eval.expression(xs.decimal(expected)) == expected
     names = {"p": "urn:cts-test"}
-    assert ml.eval.expression(
-        xs.string(xs.qname("p:item")), namespaces=names,
-    ) == "p:item"
+    assert (
+        ml.eval.expression(
+            xs.string(xs.qname("p:item")),
+            namespaces=names,
+        )
+        == "p:item"
+    )
     assert ml.eval.expression(xs.string(fn.qname("urn:cts-test", "p:item"))) == "p:item"
-    assert ml.eval.expression(
-        fn.count(cts.search(
-            query=cts.element_query(xs.qname("item"), cts.true_query()),
-        )),
-        namespaces={"": "urn:cts-test"}, database=database,
-    ) == 2
+    assert (
+        ml.eval.expression(
+            fn.count(
+                cts.search(
+                    query=cts.element_query(xs.qname("item"), cts.true_query()),
+                ),
+            ),
+            namespaces={"": "urn:cts-test"},
+            database=database,
+        )
+        == 2
+    )
 
 
 def test_invalid_paths_cover_all_native_path_argument_families(expression_database):
     ml, database, _ = expression_database
     paths = [f"/unknown:path{number}" for number in range(5)]
-    expression = fn.count([
-        cts.geospatial_path_reference(paths[0]),
-        cts.geospatial_region_path_reference(paths[1]),
-        cts.path_geospatial_query(paths[2], cts.point(10, 20)),
-        cts.path_range_query(paths[3], "=", 1),
-        cts.path_reference(paths[4]),
-        xpath('fn:error(fn:QName("", "SHOULD-NOT-RUN"))'),
-    ])
+    expression = fn.count(
+        [
+            cts.geospatial_path_reference(paths[0]),
+            cts.geospatial_region_path_reference(paths[1]),
+            cts.path_geospatial_query(paths[2], cts.point(10, 20)),
+            cts.path_range_query(paths[3], "=", 1),
+            cts.path_reference(paths[4]),
+            xpath('fn:error(fn:QName("", "SHOULD-NOT-RUN"))'),
+        ],
+    )
     with pytest.raises(MarkLogicError, match="MLCLIENT-INVALID-PATH") as error:
         ml.eval.expression(expression, database=database)
     for path in paths:
@@ -532,20 +667,41 @@ def test_fn_catalog_representative_native_execution(expression_database):
     assert ml.eval.expression(fn.count(fn.collection()), database=database) == 3
     assert ml.eval.expression(fn.collection(None), database=database) == []
     upper = fn.function_lookup(
-        fn.qname("http://www.w3.org/2005/xpath-functions", "upper-case"), 1,
+        fn.qname("http://www.w3.org/2005/xpath-functions", "upper-case"),
+        1,
     )
     assert ml.eval.expression(fn.function_arity(upper)) == 1
     assert ml.eval.expression(fn.map(upper, ["a", "b"])) == ["A", "B"]
-    assert ml.eval.expression(fn.filter(
-        xpath("function($x) { $x gt 1 }"), [1, 2, 3],
-    )) == [2, 3]
-    assert ml.eval.expression(fn.fold_left(
-        xpath("function($sum, $x) { $sum + $x }"), 0, [1, 2, 3],
-    )) == 6
-    assert ml.eval.expression(fn.adjust_date_to_timezone(
-        xpath('xs:date("2026-01-02+02:00")'), timezone=None,
-    ), output_type=str) == "2026-01-02"
+    assert ml.eval.expression(
+        fn.filter(
+            xpath("function($x) { $x gt 1 }"),
+            [1, 2, 3],
+        ),
+    ) == [2, 3]
+    assert (
+        ml.eval.expression(
+            fn.fold_left(
+                xpath("function($sum, $x) { $sum + $x }"),
+                0,
+                [1, 2, 3],
+            ),
+        )
+        == 6
+    )
+    assert (
+        ml.eval.expression(
+            fn.adjust_date_to_timezone(
+                xpath('xs:date("2026-01-02+02:00")'),
+                timezone=None,
+            ),
+            output_type=str,
+        )
+        == "2026-01-02"
+    )
     with pytest.raises(MarkLogicError, match="FN-TEST"):
-        ml.eval.expression(fn.error(
-            fn.qname("", "FN-TEST"), description="expected test error",
-        ))
+        ml.eval.expression(
+            fn.error(
+                fn.qname("", "FN-TEST"),
+                description="expected test error",
+            ),
+        )

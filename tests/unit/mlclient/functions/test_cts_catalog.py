@@ -661,7 +661,7 @@ CTS_SIGNATURES = {
     "uris": (
         "cts:uris",
         (),
-        ("query", "start", "options", "quality_weight", "forest_ids"),
+        ("start", "options", "query", "quality_weight", "forest_ids"),
     ),
     "valid_document_patch_path": (
         "cts:valid-document-patch-path",
@@ -695,7 +695,7 @@ CTS_SIGNATURES = {
     "values": (
         "cts:values",
         ("range_indexes",),
-        ("query", "start", "options", "quality_weight", "forest_ids"),
+        ("start", "options", "query", "quality_weight", "forest_ids"),
     ),
     "variance": ("cts:variance", ("range_index",), ("options", "query", "forest_ids")),
     "variance_p": (
@@ -730,15 +730,6 @@ def test_catalog_preserves_native_argument_order_and_every_optional_slot():
         order = required + optional
         if method_name == "geospatial_co_occurrences":
             order = (required[0], *optional[:2], required[1], *optional[2:])
-        elif method_name in {"uris", "values"}:
-            order = (
-                *required,
-                "start",
-                "options",
-                "query",
-                "quality_weight",
-                "forest_ids",
-            )
 
         # Distinct expressions make swaps, lost arguments and wrong arity visible.
         markers = {name: xpath(f"$arg_{name}") for name in order}

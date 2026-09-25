@@ -11,6 +11,20 @@ and execute searches through one `cts` object.
 !!! note "Experimental API"
     This API is experimental while its design is validated in real applications.
 
+The public expression type is
+`from mlclient.functions.xqy import Expression`. It belongs to XQuery, not the
+language-neutral `mlclient.functions`: it compiles XQuery source and bindings,
+with XQuery namespaces, paths and positional semantics. A future SJS expression
+type need not share that implementation or inheritance hierarchy.
+
+`Cts`, `Fn`, `Xs` and `Xdmp` are public namespace-builder classes; their lowercase
+instances are the usual entry points. Custom expressions can subclass
+`Expression` and implement `render(ctx: CompilationContext) -> str`, importing
+both types from `mlclient.functions.xqy`. Use `ctx.bind(value, atomic_type)`
+for runtime data and `compile()` to obtain source plus bindings. Internal tree
+nodes are implementation details, not required imports. For validated
+projection compose `.project("p:title")` after `.index(...)` or `.range(...)`.
+
 ## Search with CtsService
 
 ```python
@@ -34,6 +48,28 @@ can combine familiar collection, word, element, property and range queries.
 The `search`, `uris`, `values` and `estimate` methods execute their expressions.
 Other inherited methods build queries or expressions without sending requests.
 
+### Python argument conventions
+
+Native required arguments keep their order and may be positional. Native
+optional arguments are keyword-only, in their native order: for example,
+`uris(*, start=None, options=None, query=None, ...)` and
+`values(range_indexes, *, start=None, options=None, query=None, ...)`.
+This avoids ambiguous positional placeholders; generated XQuery still uses
+the exact native argument slots. Use `query=` consistently in search examples.
+
+When required and optional arguments are interleaved natively, Python groups
+required arguments first. The catalog's example is
+`geospatial_co_occurrences(geo_element_name_1, geo_element_name_2, *,
+child_1_name_1=None, ...)`: native child slots precede the second lexicon name.
+The builder restores those slots when compiling, including empty placeholders.
+This is a required/optional grouping rule, not a query-first convention.
+
+`search(expression=None, query=None, ...)` additionally allows omitting the
+native required slots: `expression=None` selects `/`, and `query=None` passes
+the empty sequence. `estimate` likewise permits omitting its query. These are
+explicit convenience defaults, not reordered arguments. Services keep the
+builder contracts and add keyword-only execution options and range/index.
+
 ## Select a range of URIs
 
 ```python
@@ -43,7 +79,7 @@ from mlclient.services import CtsService
 with MLClient() as ml:
     cts = CtsService(ml.rest)
     uris = cts.uris(
-        cts.and_query([
+        query=cts.and_query([
             cts.collection_query("products"),
             cts.json_property_value_query("active", True),
         ]),
@@ -66,9 +102,9 @@ from mlclient.services import CtsService
 with MLClient() as ml:
     cts = CtsService(ml.rest)
     first = cts.search(query=cts.collection_query("products"), index=1)
-    last_uri = cts.uris(cts.collection_query("products"), index=fn.last())
+    last_uri = cts.uris(query=cts.collection_query("products"), index=fn.last())
     remaining = cts.uris(
-        cts.collection_query("products"), range=[2, fn.last()],
+        query=cts.collection_query("products"), range=[2, fn.last()],
     )
 ```
 
@@ -113,6 +149,26 @@ source. For example, user-provided search text can be passed directly to
 `cts.word_query(text)`.
 
 ## Paths and namespaces
+
+### Extract part of each search hit
+
+`search(..., xpath="p:product/p:title", range=[1, 10])` first searches, then
+selects the first ten hits, then extracts titles from each selected hit.
+It executes the equivalent of `(cts:search(...)[...]) ! (p:product/p:title)`:
+the simple-map operator preserves hit order rather than sorting all extracted
+nodes into document order. A hit may produce zero or many results, so the final
+result count need not equal the range size. The usual empty/singleton/list
+return convention applies to the extracted sequence.
+
+The path uses the same namespace declarations and native restricted-XPath
+validation as `expression`. A relative path starts at each hit; a leading `/`
+starts at that hit's document root. For `expression="/p:product"`, use
+`xpath="p:title"`; for the default document-node expression, use
+`xpath="p:product/p:title"`. Empty strings are rejected. This is not arbitrary
+XQuery: constructs such as `.` or `./title` are not accepted by the native
+extraction-path validator. `xpath=None` leaves search hits unchanged.
+
+### Select the searchable expression
 
 Pass a searchable XPath directly as a string. The library validates paths with
 MarkLogic's native validators before executing the composed expression.
@@ -165,7 +221,7 @@ Validation uses MarkLogic's restricted XPath syntax, including supported
 functions in predicates. Variables inside these path strings are not accepted;
 pass dynamic search values through query builders. Explicit `xpath(...)` used
 for arbitrary expressions is trusted XQuery code, not a sandbox. When used as
-the searchable path argument, its source is validated too. Computed `Expr`
+the searchable path argument, its source is validated too. Computed `Expression`
 arguments to native string-path parameters remain expressions and are checked
 by the receiving native function when evaluated; they are not included in the
 literal-path preflight.

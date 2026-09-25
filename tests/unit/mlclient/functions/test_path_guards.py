@@ -3,15 +3,18 @@ from __future__ import annotations
 import pytest
 
 from mlclient.functions.xqy import cts, fn
-from mlclient.functions.xqy._expr import index_path, namespace_bindings
+from mlclient.functions.xqy.expressions import index_path, namespace_bindings
 
 
 def test_all_nested_path_literals_are_bound_and_guarded():
     paths = ["/p:one", '/two[fn:contains(., "quote"&")]', "/a", "/b"]
-    expr = fn.count([
-        cts.search(paths[0]), cts.search(paths[1]),
-        cts.uris(cts.path_range_query(paths[2:], "=", 3)),
-    ])
+    expr = fn.count(
+        [
+            cts.search(paths[0]),
+            cts.search(paths[1]),
+            cts.uris(query=cts.path_range_query(paths[2:], "=", 3)),
+        ],
+    )
     source, variables = expr.compile(namespaces={"p": "urn:one"})
     assert all(path in variables.values() for path in paths)
     assert all(path not in source for path in paths)

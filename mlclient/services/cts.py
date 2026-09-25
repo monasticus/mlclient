@@ -8,18 +8,19 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from mlclient._experimental import experimental
-from mlclient.functions.xqy._cts import Cts
-from mlclient.functions.xqy._expr import Expr, namespace_bindings
+from mlclient.functions.xqy import Cts, Expression, namespace_bindings
 from mlclient.services.eval import AsyncEvalService, EvalService
 
 if TYPE_CHECKING:
     from mlclient.api.rest import AsyncRestApi, RestApi
 
-Range = int | list[int | Expr] | tuple[int | Expr, int | Expr]
+Range = int | list[int | Expression] | tuple[int | Expression, int | Expression]
 _RANGE_BOUND_COUNT = 2
 
 
-def _ranged(expr: Expr, value: Range | None, index: int | Expr | None) -> Expr:
+def _ranged(
+    expr: Expression, value: Range | None, index: int | Expression | None,
+) -> Expression:
     """Apply mutually exclusive server-side index or inclusive range."""
     if index is not None:
         if value is not None:
@@ -89,37 +90,43 @@ class CtsService(Cts):
 
     def search(
         self,
-        expression: str | Expr | None = None,
-        query: Expr | None = None,
+        expression: str | Expression | None = None,
+        query: Expression | None = None,
         *,
         options=None,
         quality_weight=None,
         forest_ids=None,
         range: Range | None = None,
-        index: int | Expr | None = None,
+        index: int | Expression | None = None,
+        xpath: str | None = None,
         **kwargs,
     ) -> object:
         """Run ``cts:search`` and return the parsed nodes.
 
         Parameters
         ----------
-        expression : str | Expr | None
+        expression : str | Expression | None
             Searchable path string or composed expression; None uses /.
             Literal paths are validated before execution.
-        query : Expr | str | None
+        query : Expression | str | None
             Native query expression; None supplies an empty query slot.
-        options : str | Expr | list | tuple | None
+        options : str | Expression | list | tuple | None
             Native options. None omits the slot; an empty list passes ().
-        quality_weight : int | float | Expr | None
+        quality_weight : int | float | Expression | None
             Document quality scoring weight, cast to xs:double.
-        forest_ids : int | Expr | list | tuple | None
+        forest_ids : int | Expression | list | tuple | None
             Native forest IDs; empty or omitted means all forests in the
             database.
         range : int | list | tuple | None
             Inclusive [start, end]; bounds accept positive integers or fn.last().
             N means [1, N]. Cannot be combined with index.
-        index : int | Expr | None
+        index : int | Expression | None
             One-based positive position or fn.last(). Returns item or [].
+        xpath : str | None
+            Restricted extraction XPath applied to each hit after index/range.
+            Relative paths start at the hit; absolute paths start at its root.
+            Uses the same namespaces as expression and preserves hit order.
+            None returns hits unchanged; one hit may yield zero or many nodes.
         kwargs : dict
             Execution options: database, txid, output_type, timeout and namespaces.
             Unknown names fail.
@@ -150,41 +157,44 @@ class CtsService(Cts):
             range,
             index,
         )
+        if xpath is not None:
+            expr = expr.project(xpath)
         return self._eval.expression(
-            expr, **_execution_options(self._namespaces, kwargs),
+            expr,
+            **_execution_options(self._namespaces, kwargs),
         )
 
     def uris(
         self,
-        query: Expr | None = None,
         *,
         start=None,
         options=None,
+        query: Expression | None = None,
         quality_weight=None,
         forest_ids=None,
         range: Range | None = None,
-        index: int | Expr | None = None,
+        index: int | Expression | None = None,
         **kwargs,
     ) -> object:
         """Run ``cts:uris`` and return the matching URIs; ``range`` slices lazily.
 
         Parameters
         ----------
-        query : Expr | str | None
+        query : Expression | str | None
             Native query expression; None supplies an empty query slot.
         start : object
             Optional starting lexicon value. Its type must match the lexicon.
-        options : str | Expr | list | tuple | None
+        options : str | Expression | list | tuple | None
             Native options. None omits the slot; an empty list passes ().
-        quality_weight : int | float | Expr | None
+        quality_weight : int | float | Expression | None
             Document quality scoring weight, cast to xs:double.
-        forest_ids : int | Expr | list | tuple | None
+        forest_ids : int | Expression | list | tuple | None
             Native forest IDs; empty or omitted means all forests in the
             database.
         range : int | list | tuple | None
             Inclusive [start, end]; bounds accept positive integers or fn.last().
             N means [1, N]. Cannot be combined with index.
-        index : int | Expr | None
+        index : int | Expression | None
             One-based positive position or fn.last(). Returns item or [].
         kwargs : dict
             Execution options: database, txid, output_type, timeout and namespaces.
@@ -207,7 +217,7 @@ class CtsService(Cts):
         """
         expr = _ranged(
             Cts.uris(
-                query,
+                query=query,
                 start=start,
                 options=options,
                 quality_weight=quality_weight,
@@ -217,43 +227,44 @@ class CtsService(Cts):
             index,
         )
         return self._eval.expression(
-            expr, **_execution_options(self._namespaces, kwargs),
+            expr,
+            **_execution_options(self._namespaces, kwargs),
         )
 
     def values(
         self,
         references,
-        query: Expr | None = None,
         *,
         start=None,
         options=None,
+        query: Expression | None = None,
         quality_weight=None,
         forest_ids=None,
         range: Range | None = None,
-        index: int | Expr | None = None,
+        index: int | Expression | None = None,
         **kwargs,
     ) -> object:
         """Run ``cts:values`` and return the lexicon values.
 
         Parameters
         ----------
-        references : Expr | list | tuple
+        references : Expression | list | tuple
             One or more native range-index reference expressions.
-        query : Expr | str | None
+        query : Expression | str | None
             Native query expression; None supplies an empty query slot.
         start : object
             Optional starting lexicon value. Its type must match the lexicon.
-        options : str | Expr | list | tuple | None
+        options : str | Expression | list | tuple | None
             Native options. None omits the slot; an empty list passes ().
-        quality_weight : int | float | Expr | None
+        quality_weight : int | float | Expression | None
             Document quality scoring weight, cast to xs:double.
-        forest_ids : int | Expr | list | tuple | None
+        forest_ids : int | Expression | list | tuple | None
             Native forest IDs; empty or omitted means all forests in the
             database.
         range : int | list | tuple | None
             Inclusive [start, end]; bounds accept positive integers or fn.last().
             N means [1, N]. Cannot be combined with index.
-        index : int | Expr | None
+        index : int | Expression | None
             One-based positive position or fn.last(). Returns item or [].
         kwargs : dict
             Execution options: database, txid, output_type, timeout and namespaces.
@@ -277,7 +288,7 @@ class CtsService(Cts):
         expr = _ranged(
             Cts.values(
                 references,
-                query,
+                query=query,
                 start=start,
                 options=options,
                 quality_weight=quality_weight,
@@ -287,12 +298,13 @@ class CtsService(Cts):
             index,
         )
         return self._eval.expression(
-            expr, **_execution_options(self._namespaces, kwargs),
+            expr,
+            **_execution_options(self._namespaces, kwargs),
         )
 
     def estimate(
         self,
-        query: Expr | None = None,
+        query: Expression | None = None,
         *,
         options=None,
         quality_weight=None,
@@ -304,16 +316,16 @@ class CtsService(Cts):
 
         Parameters
         ----------
-        query : Expr | str | None
+        query : Expression | str | None
             Native query expression; None supplies an empty query slot.
-        options : str | Expr | list | tuple | None
+        options : str | Expression | list | tuple | None
             Native options. None omits the slot; an empty list passes ().
-        quality_weight : int | float | Expr | None
+        quality_weight : int | float | Expression | None
             Document quality scoring weight, cast to xs:double.
-        forest_ids : int | Expr | list | tuple | None
+        forest_ids : int | Expression | list | tuple | None
             Native forest IDs; empty or omitted means all forests in the
             database.
-        maximum : int | float | Expr | None
+        maximum : int | float | Expression | None
             Native maximum count; None leaves the count uncapped.
         kwargs : dict
             Execution options: database, txid, output_type, timeout and namespaces.
@@ -366,37 +378,43 @@ class AsyncCtsService(Cts):
 
     async def search(
         self,
-        expression: str | Expr | None = None,
-        query: Expr | None = None,
+        expression: str | Expression | None = None,
+        query: Expression | None = None,
         *,
         options=None,
         quality_weight=None,
         forest_ids=None,
         range: Range | None = None,
-        index: int | Expr | None = None,
+        index: int | Expression | None = None,
+        xpath: str | None = None,
         **kwargs,
     ) -> object:
         """Run ``cts:search`` and return the parsed nodes.
 
         Parameters
         ----------
-        expression : str | Expr | None
+        expression : str | Expression | None
             Searchable path string or composed expression; None uses /.
             Literal paths are validated before execution.
-        query : Expr | str | None
+        query : Expression | str | None
             Native query expression; None supplies an empty query slot.
-        options : str | Expr | list | tuple | None
+        options : str | Expression | list | tuple | None
             Native options. None omits the slot; an empty list passes ().
-        quality_weight : int | float | Expr | None
+        quality_weight : int | float | Expression | None
             Document quality scoring weight, cast to xs:double.
-        forest_ids : int | Expr | list | tuple | None
+        forest_ids : int | Expression | list | tuple | None
             Native forest IDs; empty or omitted means all forests in the
             database.
         range : int | list | tuple | None
             Inclusive [start, end]; bounds accept positive integers or fn.last().
             N means [1, N]. Cannot be combined with index.
-        index : int | Expr | None
+        index : int | Expression | None
             One-based positive position or fn.last(). Returns item or [].
+        xpath : str | None
+            Restricted extraction XPath applied to each hit after index/range.
+            Relative paths start at the hit; absolute paths start at its root.
+            Uses the same namespaces as expression and preserves hit order.
+            None returns hits unchanged; one hit may yield zero or many nodes.
         kwargs : dict
             Execution options: database, txid, output_type, timeout and namespaces.
             Unknown names fail.
@@ -427,41 +445,44 @@ class AsyncCtsService(Cts):
             range,
             index,
         )
+        if xpath is not None:
+            expr = expr.project(xpath)
         return await self._eval.expression(
-            expr, **_execution_options(self._namespaces, kwargs),
+            expr,
+            **_execution_options(self._namespaces, kwargs),
         )
 
     async def uris(
         self,
-        query: Expr | None = None,
         *,
         start=None,
         options=None,
+        query: Expression | None = None,
         quality_weight=None,
         forest_ids=None,
         range: Range | None = None,
-        index: int | Expr | None = None,
+        index: int | Expression | None = None,
         **kwargs,
     ) -> object:
         """Run ``cts:uris`` and return the matching URIs; ``range`` slices lazily.
 
         Parameters
         ----------
-        query : Expr | str | None
+        query : Expression | str | None
             Native query expression; None supplies an empty query slot.
         start : object
             Optional starting lexicon value. Its type must match the lexicon.
-        options : str | Expr | list | tuple | None
+        options : str | Expression | list | tuple | None
             Native options. None omits the slot; an empty list passes ().
-        quality_weight : int | float | Expr | None
+        quality_weight : int | float | Expression | None
             Document quality scoring weight, cast to xs:double.
-        forest_ids : int | Expr | list | tuple | None
+        forest_ids : int | Expression | list | tuple | None
             Native forest IDs; empty or omitted means all forests in the
             database.
         range : int | list | tuple | None
             Inclusive [start, end]; bounds accept positive integers or fn.last().
             N means [1, N]. Cannot be combined with index.
-        index : int | Expr | None
+        index : int | Expression | None
             One-based positive position or fn.last(). Returns item or [].
         kwargs : dict
             Execution options: database, txid, output_type, timeout and namespaces.
@@ -484,7 +505,7 @@ class AsyncCtsService(Cts):
         """
         expr = _ranged(
             Cts.uris(
-                query,
+                query=query,
                 start=start,
                 options=options,
                 quality_weight=quality_weight,
@@ -494,43 +515,44 @@ class AsyncCtsService(Cts):
             index,
         )
         return await self._eval.expression(
-            expr, **_execution_options(self._namespaces, kwargs),
+            expr,
+            **_execution_options(self._namespaces, kwargs),
         )
 
     async def values(
         self,
         references,
-        query: Expr | None = None,
         *,
         start=None,
         options=None,
+        query: Expression | None = None,
         quality_weight=None,
         forest_ids=None,
         range: Range | None = None,
-        index: int | Expr | None = None,
+        index: int | Expression | None = None,
         **kwargs,
     ) -> object:
         """Run ``cts:values`` and return the lexicon values.
 
         Parameters
         ----------
-        references : Expr | list | tuple
+        references : Expression | list | tuple
             One or more native range-index reference expressions.
-        query : Expr | str | None
+        query : Expression | str | None
             Native query expression; None supplies an empty query slot.
         start : object
             Optional starting lexicon value. Its type must match the lexicon.
-        options : str | Expr | list | tuple | None
+        options : str | Expression | list | tuple | None
             Native options. None omits the slot; an empty list passes ().
-        quality_weight : int | float | Expr | None
+        quality_weight : int | float | Expression | None
             Document quality scoring weight, cast to xs:double.
-        forest_ids : int | Expr | list | tuple | None
+        forest_ids : int | Expression | list | tuple | None
             Native forest IDs; empty or omitted means all forests in the
             database.
         range : int | list | tuple | None
             Inclusive [start, end]; bounds accept positive integers or fn.last().
             N means [1, N]. Cannot be combined with index.
-        index : int | Expr | None
+        index : int | Expression | None
             One-based positive position or fn.last(). Returns item or [].
         kwargs : dict
             Execution options: database, txid, output_type, timeout and namespaces.
@@ -554,7 +576,7 @@ class AsyncCtsService(Cts):
         expr = _ranged(
             Cts.values(
                 references,
-                query,
+                query=query,
                 start=start,
                 options=options,
                 quality_weight=quality_weight,
@@ -564,12 +586,13 @@ class AsyncCtsService(Cts):
             index,
         )
         return await self._eval.expression(
-            expr, **_execution_options(self._namespaces, kwargs),
+            expr,
+            **_execution_options(self._namespaces, kwargs),
         )
 
     async def estimate(
         self,
-        query: Expr | None = None,
+        query: Expression | None = None,
         *,
         options=None,
         quality_weight=None,
@@ -581,16 +604,16 @@ class AsyncCtsService(Cts):
 
         Parameters
         ----------
-        query : Expr | str | None
+        query : Expression | str | None
             Native query expression; None supplies an empty query slot.
-        options : str | Expr | list | tuple | None
+        options : str | Expression | list | tuple | None
             Native options. None omits the slot; an empty list passes ().
-        quality_weight : int | float | Expr | None
+        quality_weight : int | float | Expression | None
             Document quality scoring weight, cast to xs:double.
-        forest_ids : int | Expr | list | tuple | None
+        forest_ids : int | Expression | list | tuple | None
             Native forest IDs; empty or omitted means all forests in the
             database.
-        maximum : int | float | Expr | None
+        maximum : int | float | Expression | None
             Native maximum count; None leaves the count uncapped.
         kwargs : dict
             Execution options: database, txid, output_type, timeout and namespaces.

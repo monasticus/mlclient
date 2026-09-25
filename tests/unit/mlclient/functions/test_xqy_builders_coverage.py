@@ -3,7 +3,7 @@ from __future__ import annotations
 import pytest
 
 from mlclient.functions.xqy import cts, fn, xpath, xs
-from mlclient.functions.xqy._expr import _CompileContext
+from mlclient.functions.xqy.expressions import CompilationContext
 
 
 @pytest.mark.parametrize(
@@ -82,7 +82,7 @@ from mlclient.functions.xqy._expr import _CompileContext
     ],
 )
 def test_existing_builders_preserve_native_arguments(expr, native, bindings):
-    context = _CompileContext()
+    context = CompilationContext()
     code = expr.render(context)
     variables = context.variables
     assert native + "(" in code
@@ -97,7 +97,7 @@ def test_late_arguments_keep_native_position():
         "cts:near-query((), (), (), $v0)",
     )
     assert cts.path_reference("/x", namespaces=xpath("map:map()")).render(
-        _CompileContext(),
+        CompilationContext(),
     ).endswith(
         "cts:path-reference($v0, (), (map:map()))",
     )

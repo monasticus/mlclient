@@ -1,4 +1,7 @@
-"""Immutable XQuery expressions with externally bound runtime values."""
+"""XQuery expressions, compilation context and namespace validation.
+
+Public types are specific to XQuery; no shared SJS compilation contract is implied.
+"""
 
 from __future__ import annotations
 
@@ -24,10 +27,15 @@ _NCNAME = re.compile(
 )
 
 
-class _CompileContext:
-    """Allocate external variables for one compilation."""
+class CompilationContext:
+    """Bindings and path validation for one XQuery expression compilation.
+
+    Custom Expression.render implementations use this context to bind runtime
+    values. Expression.compile creates a fresh context for every invocation.
+    """
 
     def __init__(self):
+        """Create an empty context for one compilation."""
         self._variables: dict[str, str | bool] = {}
         self._paths: list[tuple[str, str, str | None]] = []
         self._types: dict[str, str] = {}
@@ -56,7 +64,7 @@ class _CompileContext:
         """Register a path binding for validation before executing the whole tree."""
         ref = self.bind(source)
         self._paths.append((ref, kind, namespaces))
-        return f"\0{ref}\0" if kind == "search" else ref
+        return ref if kind == "index" else f"\0{ref}\0"
 
     def guard(self, body: str) -> str:
         """Validate every registered path before compiling the execution branch."""
@@ -81,7 +89,8 @@ class _CompileContext:
             for position, part in enumerate(parts)
         ]
         source = (
-            fragments[0] if len(fragments) == 1
+            fragments[0]
+            if len(fragments) == 1
             else "fn:concat(" + ", ".join(fragments) + ")"
         )
         invalid = ", ".join(checks)
@@ -90,7 +99,7 @@ class _CompileContext:
             "return if (fn:exists($_mlclient_invalid)) then\n"
             'fn:error(fn:QName("", "MLCLIENT-INVALID-PATH"), '
             'fn:concat("Invalid XPath(s): ", fn:string-join('
-            'for $p in $_mlclient_invalid return fn:concat('
+            "for $p in $_mlclient_invalid return fn:concat("
             '"[", fn:string($p/@kind), ":", fn:string($p/@binding), "] ", '
             'fn:string($p)), "; ")), $_mlclient_invalid)\n'
             f"else xdmp:value({source})"
@@ -151,7 +160,7 @@ def _namespace_declarations(namespaces: dict[str, str]) -> str:
     return "".join(declarations)
 
 
-def _namespace_code(namespaces, ctx: _CompileContext) -> str:
+def _namespace_code(namespaces, ctx: CompilationContext) -> str:
     """Render a namespace map with data bindings, never interpolated URIs."""
     entries = [
         f"map:entry({ctx.bind(prefix)}, {ctx.bind(uri)})"
@@ -161,12 +170,23 @@ def _namespace_code(namespaces, ctx: _CompileContext) -> str:
 
 
 @experimental()
-class Expr(ABC):
+class Expression(ABC):
     """An XQuery expression, reusable in builders or ``eval.expression``."""
 
     @abstractmethod
-    def render(self, ctx: _CompileContext) -> str:
-        """Render this node, binding values through the compilation context."""
+    def render(self, ctx: CompilationContext) -> str:
+        """Render this expression using the shared compilation context.
+
+        Parameters
+        ----------
+        ctx : CompilationContext
+            Context for binding runtime values and registering path validation.
+
+        Returns
+        -------
+        str
+            XQuery body fragment. Runtime data must be bound, not interpolated.
+        """
 
     def compile(self, *, namespaces=None) -> tuple[str, dict]:
         """Return guarded XQuery source and external bindings.
@@ -182,7 +202,7 @@ class Expr(ABC):
             XQuery 1.0-ml source and independent JSON-compatible bindings.
             Invalid paths raise MLCLIENT-INVALID-PATH when evaluated.
         """
-        ctx = _CompileContext()
+        ctx = CompilationContext()
         bindings = namespace_bindings(namespaces)
         body = ctx.guard(self.render(ctx))
         variables = ctx.variables
@@ -191,67 +211,93 @@ class Expr(ABC):
         prolog += ctx.declarations
         return prolog + body, variables
 
-    def range(self, start: int | Expr, end: int | Expr) -> Expr:
+    def range(self, start: int | Expression, end: int | Expression) -> Expression:
         """Select inclusive, one-based positions ``start`` through ``end``.
 
         Parameters
         ----------
-        start : int | Expr
+        start : int | Expression
             Positive integer or fn.last(). Booleans are not positions.
-        end : int | Expr
+        end : int | Expression
             Positive integer or fn.last(); literal bounds must be ordered.
 
         Returns
         -------
-        Expr
+        Expression
             A composable positional predicate, evaluated by MarkLogic.
         """
         return _Range(self, start, end)
 
-    def index(self, position: int | Expr) -> Expr:
+    def index(self, position: int | Expression) -> Expression:
         """Select one item by its one-based position.
 
         Parameters
         ----------
-        position : int | Expr
+        position : int | Expression
             Positive integer or fn.last(), evaluated inside the predicate.
 
         Returns
         -------
-        Expr
+        Expression
             Selected item, or an empty sequence if the position does not exist.
         """
         _validate_position(position)
         return _Index(self, position)
 
+    def project(self, path: str) -> Expression:
+        """Extract a restricted XPath from each result item in sequence order.
+
+        Parameters
+        ----------
+        path : str
+            Non-empty native extraction path. Relative paths start at each item;
+            absolute paths start at its root. Uses compilation namespaces.
+
+        Returns
+        -------
+        Expression
+            A simple-map expression. Apply index/range before this method to
+            select hits rather than projected items.
+
+        Raises
+        ------
+        TypeError
+            If path is not a string.
+        ValueError
+            If path is empty or whitespace-only. Native syntax validation occurs
+            during evaluation, before executing the composed expression.
+        """
+        return _Projection(self, path)
+
     def __str__(self) -> str:
+        """Return compiled XQuery source without the external bindings."""
         return self.compile()[0]
 
 
 @dataclass(frozen=True)
-class Atom(Expr):
+class _AtomicValue(Expression):
     """An immutable scalar represented by a JSON-safe lexical value."""
 
     value: str | bool
     cast: str | None = None
 
-    def render(self, ctx: _CompileContext) -> str:
+    def render(self, ctx: CompilationContext) -> str:
         """Bind the scalar and restore its XQuery type."""
         return ctx.bind(self.value, self.cast or "xs:string")
 
 
 @dataclass(frozen=True)
-class _Raw(Expr):
+class _Raw(Expression):
     """Trusted source; never constructed implicitly from a runtime value."""
 
     source: str
 
-    def render(self, _ctx: _CompileContext) -> str:
+    def render(self, _ctx: CompilationContext) -> str:
         """Return trusted source unchanged."""
         return self.source
 
 
-def _validate_position(value: int | Expr) -> None:
+def _validate_position(value: int | Expression) -> None:
     """Require a positive integer or the native zero-argument fn:last call."""
     if type(value) is int:
         if value < 1:
@@ -268,38 +314,34 @@ def _validate_position(value: int | Expr) -> None:
 
 
 @dataclass(frozen=True)
-class _Index(Expr):
+class _Index(Expression):
     """A single positional predicate."""
 
-    inner: Expr
-    position: int | Expr
+    inner: Expression
+    position: int | Expression
 
-    def render(self, ctx: _CompileContext) -> str:
+    def render(self, ctx: CompilationContext) -> str:
         """Keep fn:last inside the selected sequence's predicate context."""
         position = as_expr(self.position).render(ctx)
         return f"({self.inner.render(ctx)})[{position}]"
 
 
 @dataclass(frozen=True)
-class _Range(Expr):
+class _Range(Expression):
     """A lazy, inclusive positional predicate."""
 
-    inner: Expr
-    start: int | Expr
-    end: int | Expr
+    inner: Expression
+    start: int | Expression
+    end: int | Expression
 
     def __post_init__(self):
         _validate_position(self.start)
         _validate_position(self.end)
-        if (
-            type(self.start) is int
-            and type(self.end) is int
-            and self.end < self.start
-        ):
+        if type(self.start) is int and type(self.end) is int and self.end < self.start:
             message = "range bounds must satisfy 1 <= start <= end"
             raise ValueError(message)
 
-    def render(self, ctx: _CompileContext) -> str:
+    def render(self, ctx: CompilationContext) -> str:
         """Render bounds inside the predicate to preserve their context."""
         inner = self.inner.render(ctx)
         start = as_expr(self.start).render(ctx)
@@ -308,18 +350,58 @@ class _Range(Expr):
 
 
 @dataclass(frozen=True)
-class _Sequence(Expr):
+class _Projection(Expression):
+    """Apply a validated extraction path to each selected search hit in order."""
+
+    inner: Expression
+    source: str
+
+    def __post_init__(self):
+        """Validate projection input before sending a request.
+
+        Raises
+        ------
+        TypeError
+            If source is not a string.
+        ValueError
+            If source is empty or whitespace-only.
+        """
+        if not isinstance(self.source, str):
+            message = "xpath must be a string"
+            raise TypeError(message)
+        if not self.source.strip():
+            message = "xpath must not be empty"
+            raise ValueError(message)
+
+    def render(self, ctx: CompilationContext) -> str:
+        """Map the guarded path over hits without imposing document order.
+
+        Parameters
+        ----------
+        ctx : CompilationContext
+            Shared bindings and native path validation for this evaluation.
+
+        Returns
+        -------
+        str
+            Simple-map expression preserving the inner sequence's hit order.
+        """
+        return f"({self.inner.render(ctx)}) ! ({ctx.path(self.source, 'projection')})"
+
+
+@dataclass(frozen=True)
+class _Sequence(Expression):
     """A snapshot of an XQuery sequence's child expressions."""
 
-    items: tuple[Expr, ...]
+    items: tuple[Expression, ...]
 
-    def render(self, ctx: _CompileContext) -> str:
+    def render(self, ctx: CompilationContext) -> str:
         """Render a sequence, including the empty sequence."""
         return "(" + ", ".join(item.render(ctx) for item in self.items) + ")"
 
 
 @dataclass(frozen=True)
-class _FunctionCall(Expr):
+class _FunctionCall(Expression):
     """A function call; ``None`` optional slots mean omitted arguments."""
 
     fn: str
@@ -334,7 +416,7 @@ class _FunctionCall(Expr):
             tuple(None if arg is None else as_expr(arg) for arg in self.optionals),
         )
 
-    def render(self, ctx: _CompileContext) -> str:
+    def render(self, ctx: CompilationContext) -> str:
         """Trim omitted trailing slots; retain empty interior slots."""
         optionals = list(self.optionals)
         while optionals and optionals[-1] is None:
@@ -344,7 +426,7 @@ class _FunctionCall(Expr):
         return f"{self.fn}({', '.join(parts)})"
 
 
-def xpath(source: str) -> Expr:
+def xpath(source: str) -> Expression:
     """Embed trusted XPath/XQuery source, without parsing or sanitizing it.
 
     Parameters
@@ -356,7 +438,7 @@ def xpath(source: str) -> Expr:
 
     Returns
     -------
-    Expr
+    Expression
         A parenthesized source expression, suitable for ``cts.search`` and
         ``xdmp.exists`` as well as general expression composition.
     """
@@ -370,26 +452,26 @@ def xpath(source: str) -> Expr:
 
 
 @dataclass(frozen=True)
-class _Path(Expr):
+class _Path(Expression):
     """A path string validated natively before any expression is executed."""
 
     source: str
     kind: str = "search"
-    namespaces: Expr | None = None
+    namespaces: Expression | None = None
 
-    def render(self, ctx: _CompileContext) -> str:
+    def render(self, ctx: CompilationContext) -> str:
         """Register validation and return an inline placeholder or a string binding."""
         bindings = None if self.namespaces is None else self.namespaces.render(ctx)
         return ctx.path(self.source, self.kind, bindings)
 
 
 @dataclass(frozen=True)
-class _NamespaceMap(Expr):
+class _NamespaceMap(Expression):
     """Immutable namespace bindings for native path-reference arguments."""
 
     bindings: tuple[tuple[str, str], ...]
 
-    def render(self, ctx: _CompileContext) -> str:
+    def render(self, ctx: CompilationContext) -> str:
         """Build a native map without exposing data as executable source."""
         return _namespace_code(dict(self.bindings), ctx)
 
@@ -401,7 +483,7 @@ def namespace_map(value):
     return value
 
 
-def index_path(value, namespaces=None) -> Expr:
+def index_path(value, namespaces=None) -> Expression:
     """Register literal index paths, including every member of a path sequence."""
     if isinstance(value, str):
         return _Path(value, "index", namespaces)
@@ -410,21 +492,21 @@ def index_path(value, namespaces=None) -> Expr:
     return as_expr(value)
 
 
-def search_path(expression: str | Expr) -> Expr:
+def search_path(expression: str | Expression) -> Expression:
     """Wrap path strings internally; existing composed expressions stay composable."""
     if isinstance(expression, str):
         return _Path(expression)
     if isinstance(expression, _Raw):
         return _Path(expression.source[1:-1])
-    if not isinstance(expression, Expr):
-        message = "searchable expressions require a path string or Expr"
+    if not isinstance(expression, Expression):
+        message = "searchable expressions require a path string or Expression"
         raise TypeError(message)
     return expression
 
 
-def as_expr(value, *, cast: str | None = None) -> Expr:
+def as_expr(value, *, cast: str | None = None) -> Expression:
     """Snapshot supported values as expressions; lists/tuples are sequences."""
-    if isinstance(value, Expr):
+    if isinstance(value, Expression):
         expr = value
     elif value is None:
         expr = _Sequence(())
@@ -432,37 +514,37 @@ def as_expr(value, *, cast: str | None = None) -> Expr:
         expr = _Sequence(tuple(as_expr(item) for item in value))
     else:
         expr = _scalar(value)
-    if isinstance(expr, Atom) and expr.cast == cast:
+    if isinstance(expr, _AtomicValue) and expr.cast == cast:
         return expr
     if isinstance(expr, _FunctionCall) and expr.fn == cast:
         return expr
     return _FunctionCall(cast, (expr,)) if cast else expr
 
 
-def _scalar(value) -> Atom:
+def _scalar(value) -> _AtomicValue:
     """Encode scalars without losing precision in the JSON transport."""
     if isinstance(value, bool):
-        atom = Atom(value, "xs:boolean")
+        atom = _AtomicValue(value, "xs:boolean")
     elif isinstance(value, int):
-        atom = Atom(str(value), "xs:integer")
+        atom = _AtomicValue(str(value), "xs:integer")
     elif isinstance(value, float):
         lexical = (
             ("NaN" if math.isnan(value) else "INF" if value > 0 else "-INF")
             if not math.isfinite(value)
             else repr(value)
         )
-        atom = Atom(lexical, "xs:double")
+        atom = _AtomicValue(lexical, "xs:double")
     elif isinstance(value, decimal.Decimal):
         if not value.is_finite():
             message = "xs:decimal requires a finite Decimal"
             raise ValueError(message)
-        atom = Atom(format(value, "f"), "xs:decimal")
+        atom = _AtomicValue(format(value, "f"), "xs:decimal")
     elif isinstance(value, datetime.datetime):
-        atom = Atom(value.isoformat(), "xs:dateTime")
+        atom = _AtomicValue(value.isoformat(), "xs:dateTime")
     elif isinstance(value, datetime.date):
-        atom = Atom(value.isoformat(), "xs:date")
+        atom = _AtomicValue(value.isoformat(), "xs:date")
     elif isinstance(value, str):
-        atom = Atom(value)
+        atom = _AtomicValue(value)
     else:
         message = f"unsupported XQuery value type: {type(value).__name__}"
         raise TypeError(message)

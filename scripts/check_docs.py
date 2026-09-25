@@ -64,6 +64,9 @@ for info in pkgutil.iter_modules(mlclient.__path__, "mlclient."):
 
 # Language-specific function namespaces own their public builder exports.
 documented["mlclient.functions.xqy"] = importlib.import_module("mlclient.functions.xqy")
+documented["mlclient.services.diagnostics"] = importlib.import_module(
+    "mlclient.services.diagnostics",
+)
 
 # Root exports must be reachable from the rendered navigation, not merely built.
 home = pages[site / "index.html"]

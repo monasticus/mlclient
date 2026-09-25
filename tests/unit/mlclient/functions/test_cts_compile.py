@@ -9,11 +9,11 @@ import pytest
 
 from mlclient.calls import EvalCall
 from mlclient.functions.xqy import cts, fn, xpath, xs
-from mlclient.functions.xqy.expressions import CompilationContext
+from mlclient.functions.xqy.expressions import XqyCompilationContext
 
 
 def test_compiler_bindings_are_read_only_snapshots():
-    context = CompilationContext()
+    context = XqyCompilationContext()
     assert context.bind("original") == "$v0"
     snapshot = context.variables
     snapshot["v0"] = "changed"
@@ -95,9 +95,7 @@ def test_sequence_snapshot_and_nested_casts():
     values[1].append(3)
     values.append("last")
     assert expr.compile() == original
-    assert (
-        "xs:string(fn:count(($v0, ($v1, $v2))))" in original[0]
-    )
+    assert "xs:string(fn:count(($v0, ($v1, $v2))))" in original[0]
     with pytest.raises(FrozenInstanceError):
         expr.fn = "fn:empty"
     original[1]["v0"] = "changed"
@@ -147,8 +145,7 @@ def test_double_sequences_are_not_cast_as_singletons():
     code, variables = cts.percentile([1, 2], [0.25, 0.75]).compile()
 
     assert code.endswith(
-        "cts:percentile(($v0, $v1), "
-        "($v2, $v3))",
+        "cts:percentile(($v0, $v1), ($v2, $v3))",
     )
     assert list(variables.values()) == ["1", "2", "0.25", "0.75"]
 
@@ -167,7 +164,12 @@ def test_optional_operator_none_preserves_native_argument_slots():
     assert explicit.compile() == omitted.compile()
     assert str(explicit).endswith("cts:column-range-query($v0, $v1, $v2, $v3)")
     code, variables = cts.column_range_query(
-        "s", "v", "c", 1, operator=None, options="cached",
+        "s",
+        "v",
+        "c",
+        1,
+        operator=None,
+        options="cached",
     ).compile()
     assert code.endswith("cts:column-range-query($v0, $v1, $v2, $v3, (), $v4)")
     assert variables["v4"] == "cached"

@@ -6,7 +6,7 @@ Builders compose expressions; services execute through the common evaluator.
 from __future__ import annotations
 
 from mlclient._experimental import experimental
-from mlclient.functions.xqy.expressions import Expression, _FunctionCall, search_path
+from mlclient.functions.xqy.expressions import XqyExpression, _FunctionCall, search_path
 
 
 @experimental()
@@ -14,19 +14,19 @@ class Xdmp:
     """Pure ``xdmp:`` builders returning expression trees."""
 
     @staticmethod
-    def exists(searchable) -> Expression:
+    def exists(searchable) -> XqyExpression:
         """Return true if any fragment is selected; false if none are selected.
 
         Parameters
         ----------
-        searchable : str | Expression
+        searchable : str | XqyExpression
             The expression to check. This must be a partially searchable XPath
             expression or a cts:search expression. Path strings are wrapped
             internally and validated by MarkLogic before evaluation.
 
         Returns
         -------
-        Expression
+        XqyExpression
             Immutable expression; no request is sent until it is evaluated.
 
         Notes

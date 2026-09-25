@@ -4,14 +4,15 @@
 The namespace mirrors query constructors, supporting value constructors and
 operations that execute searches, lexicon lookups, analytics or text processing.
 Accessors that decompose opaque CTS values and deprecated functions are omitted.
-Every method is pure and returns an :class:`Expression` for later composition or eval.
+Every method returns an :class:`XqyExpression` for later composition or evaluation.
 """
 
 from __future__ import annotations
 
 from mlclient._experimental import experimental
+from mlclient.functions.xqy._xs import Xs
 from mlclient.functions.xqy.expressions import (
-    Expression,
+    XqyExpression,
     _FunctionCall,
     as_expr,
     index_path,
@@ -19,7 +20,6 @@ from mlclient.functions.xqy.expressions import (
     search_path,
     xpath,
 )
-from mlclient.functions.xqy._xs import Xs
 
 xs = Xs()
 
@@ -27,31 +27,31 @@ _RANGE_OPERATORS = frozenset({"<", "<=", ">", ">=", "=", "!="})
 _DIRECTORY_DEPTHS = frozenset({"1", "infinity"})
 
 
-def _double(value) -> Expression | None:
+def _double(value) -> XqyExpression | None:
     """Cast an optional numeric value to the native double type."""
     return xs.double(value) if value is not None else None
 
 
-def _qname(value) -> Expression:
+def _qname(value) -> XqyExpression:
     """Convert local-name strings, QName expressions or their sequences."""
     if isinstance(value, (list, tuple)):
         return as_expr(tuple(_qname(item) for item in value))
-    return value if isinstance(value, Expression) else xs.qname(value)
+    return value if isinstance(value, XqyExpression) else xs.qname(value)
 
 
-def _operator(value, *, required: bool = True) -> Expression | None:
+def _operator(value, *, required: bool = True) -> XqyExpression | None:
     """Validate a range comparison operator, preserving expression composition.
 
     Parameters
     ----------
-    value : str | Expression | None
+    value : str | XqyExpression | None
         Literal comparison operator or an expression evaluated by MarkLogic.
     required : bool, default True
         Whether None is invalid. False preserves None as an omitted argument.
 
     Returns
     -------
-    Expression | None
+    XqyExpression | None
         Validated operator expression, or None for an omitted optional operator.
 
     Raises
@@ -61,7 +61,7 @@ def _operator(value, *, required: bool = True) -> Expression | None:
     """
     if value is None and not required:
         return None
-    if isinstance(value, Expression):
+    if isinstance(value, XqyExpression):
         return value
     if value not in _RANGE_OPERATORS:
         message = f"unsupported range operator: {value!r}"
@@ -69,9 +69,9 @@ def _operator(value, *, required: bool = True) -> Expression | None:
     return as_expr(value, cast="xs:string")
 
 
-def _depth(value) -> Expression:
+def _depth(value) -> XqyExpression:
     """Validate a literal directory depth; expressions stay composable."""
-    if isinstance(value, Expression):
+    if isinstance(value, XqyExpression):
         return value
     if value not in _DIRECTORY_DEPTHS:
         message = f"directory depth must be '1' or 'infinity': {value!r}"
@@ -84,7 +84,7 @@ class Cts:
     """Pure builders for supported non-deprecated ``cts:`` functions."""
 
     @staticmethod
-    def after_query(timestamp) -> Expression:
+    def after_query(timestamp) -> XqyExpression:
         """Build a composable ``cts:after-query`` call.
 
         Returns a query matching fragments committed after a specified
@@ -98,7 +98,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:after-query``.
 
         Notes
@@ -125,7 +125,7 @@ class Cts:
         options=None,
         query=None,
         forest_ids=None,
-    ) -> Expression:
+    ) -> XqyExpression:
         """Build a composable ``cts:aggregate`` call.
 
         Executes a user-defined extension aggregate function against a value
@@ -184,7 +184,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:aggregate``.
 
         Notes
@@ -214,7 +214,7 @@ class Cts:
         )
 
     @staticmethod
-    def and_not_query(positive_query, negative_query) -> Expression:
+    def and_not_query(positive_query, negative_query) -> XqyExpression:
         """Build a composable ``cts:and-not-query`` call.
 
         Returns a query specifying the set difference of the matches specified
@@ -229,7 +229,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:and-not-query``.
 
         Notes
@@ -250,7 +250,7 @@ class Cts:
         )
 
     @staticmethod
-    def and_query(queries, *, options=None) -> Expression:
+    def and_query(queries, *, options=None) -> XqyExpression:
         """Build a composable ``cts:and-query`` call.
 
         Returns a query specifying the intersection of the matches specified by
@@ -271,7 +271,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:and-query``.
 
         Notes
@@ -303,7 +303,7 @@ class Cts:
         options=None,
         query=None,
         forest_ids=None,
-    ) -> Expression:
+    ) -> XqyExpression:
         """Build a composable ``cts:avg-aggregate`` call.
 
         Returns the average of the values given a value lexicon.
@@ -321,7 +321,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:avg-aggregate``.
 
         Notes
@@ -335,7 +335,7 @@ class Cts:
         )
 
     @staticmethod
-    def before_query(timestamp) -> Expression:
+    def before_query(timestamp) -> XqyExpression:
         """Build a composable ``cts:before-query`` call.
 
         Returns a query matching fragments committed before or at a specified
@@ -349,7 +349,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:before-query``.
 
         Notes
@@ -367,7 +367,7 @@ class Cts:
         )
 
     @staticmethod
-    def boost_query(matching_query, boosting_query) -> Expression:
+    def boost_query(matching_query, boosting_query) -> XqyExpression:
         """Build a composable ``cts:boost-query`` call.
 
         Returns a query specifying that matches to $matching-query should have
@@ -383,7 +383,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:boost-query``.
 
         Notes
@@ -403,7 +403,7 @@ class Cts:
         )
 
     @staticmethod
-    def box(south, west, north, east) -> Expression:
+    def box(south, west, north, east) -> XqyExpression:
         """Build a composable ``cts:box`` call.
 
         Returns a geospatial box value.
@@ -421,7 +421,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:box``.
 
         Notes
@@ -439,7 +439,7 @@ class Cts:
         )
 
     @staticmethod
-    def circle(radius, center) -> Expression:
+    def circle(radius, center) -> XqyExpression:
         """Build a composable ``cts:circle`` call.
 
         Returns a geospatial circle value.
@@ -454,7 +454,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:circle``.
 
         Notes
@@ -468,8 +468,12 @@ class Cts:
 
     @staticmethod
     def classify(
-        data_nodes, classifier, *, options=None, training_nodes=None,
-    ) -> Expression:
+        data_nodes,
+        classifier,
+        *,
+        options=None,
+        training_nodes=None,
+    ) -> XqyExpression:
         """Build a composable ``cts:classify`` call.
 
         Classifies a sequence of nodes based on training data.
@@ -502,7 +506,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:classify``.
 
         Notes
@@ -542,7 +546,7 @@ class Cts:
         )
 
     @staticmethod
-    def cluster(nodes, *, options=None) -> Expression:
+    def cluster(nodes, *, options=None) -> XqyExpression:
         """Build a composable ``cts:cluster`` call.
 
         Produces a set of clusters from a sequence of nodes.
@@ -607,7 +611,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:cluster``.
 
         Notes
@@ -628,7 +632,7 @@ class Cts:
         query=None,
         quality_weight=None,
         forest_ids=None,
-    ) -> Expression:
+    ) -> XqyExpression:
         """Build a composable ``cts:collection-match`` call.
 
         Returns values from the collection lexicon that match the specified
@@ -702,7 +706,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:collection-match``.
 
         Notes
@@ -772,7 +776,7 @@ class Cts:
         )
 
     @staticmethod
-    def collection_query(uris) -> Expression:
+    def collection_query(uris) -> XqyExpression:
         """Build a composable ``cts:collection-query`` call.
 
         Match documents in at least one of the specified collections.
@@ -785,7 +789,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:collection-query``.
 
         Notes
@@ -798,7 +802,7 @@ class Cts:
         )
 
     @staticmethod
-    def collection_reference(*, options=None) -> Expression:
+    def collection_reference(*, options=None) -> XqyExpression:
         """Build a composable ``cts:collection-reference`` call.
 
         Creates a reference to the collection lexicon, for use as a parameter to
@@ -813,7 +817,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:collection-reference``.
 
         Notes
@@ -834,7 +838,7 @@ class Cts:
         query=None,
         quality_weight=None,
         forest_ids=None,
-    ) -> Expression:
+    ) -> XqyExpression:
         """Build a composable ``cts:collections`` call.
 
         Returns values from the collection lexicon.
@@ -906,7 +910,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:collections``.
 
         Notes
@@ -975,7 +979,7 @@ class Cts:
         operator=None,
         options=None,
         weight=None,
-    ) -> Expression:
+    ) -> XqyExpression:
         """Build a composable ``cts:column-range-query`` call.
 
         Returns a cts:query matching documents matching a TDE-view column equals
@@ -1015,7 +1019,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:column-range-query``.
 
         Notes
@@ -1043,7 +1047,7 @@ class Cts:
         )
 
     @staticmethod
-    def complex_polygon(outer, inner) -> Expression:
+    def complex_polygon(outer, inner) -> XqyExpression:
         """Build a composable ``cts:complex-polygon`` call.
 
         Returns a geospatial complex polygon value.
@@ -1057,7 +1061,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:complex-polygon``.
 
         Notes
@@ -1070,7 +1074,7 @@ class Cts:
         )
 
     @staticmethod
-    def confidence(*, node=None) -> Expression:
+    def confidence(*, node=None) -> XqyExpression:
         """Build a composable ``cts:confidence`` call.
 
         Returns the confidence of a node, or of the context node if no node is
@@ -1084,7 +1088,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:confidence``.
 
         Notes
@@ -1106,7 +1110,7 @@ class Cts:
         )
 
     @staticmethod
-    def confidence_order(*, options=None) -> Expression:
+    def confidence_order(*, options=None) -> XqyExpression:
         """Build a composable ``cts:confidence-order`` call.
 
         Creates a confidence-based ordering clause, for use as an option to
@@ -1121,7 +1125,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:confidence-order``.
 
         Notes
@@ -1139,7 +1143,7 @@ class Cts:
         )
 
     @staticmethod
-    def contains(nodes, query) -> Expression:
+    def contains(nodes, query) -> XqyExpression:
         """Build a composable ``cts:contains`` call.
 
         Returns true if any of a sequence of values matches a query.
@@ -1156,7 +1160,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:contains``.
 
         Notes
@@ -1176,7 +1180,7 @@ class Cts:
         options=None,
         query=None,
         forest_ids=None,
-    ) -> Expression:
+    ) -> XqyExpression:
         """Build a composable ``cts:correlation`` call.
 
         Returns the frequency-weighted correlation given a 2-way co-occurrence.
@@ -1196,7 +1200,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:correlation``.
 
         Notes
@@ -1216,7 +1220,7 @@ class Cts:
         options=None,
         query=None,
         forest_ids=None,
-    ) -> Expression:
+    ) -> XqyExpression:
         """Build a composable ``cts:count-aggregate`` call.
 
         Returns the count of a value lexicon.
@@ -1234,7 +1238,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:count-aggregate``.
 
         Notes
@@ -1255,7 +1259,7 @@ class Cts:
         options=None,
         query=None,
         forest_ids=None,
-    ) -> Expression:
+    ) -> XqyExpression:
         """Build a composable ``cts:covariance`` call.
 
         Returns the frequency-weighted sample covariance given a 2-way co-
@@ -1276,7 +1280,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:covariance``.
 
         Notes
@@ -1297,7 +1301,7 @@ class Cts:
         options=None,
         query=None,
         forest_ids=None,
-    ) -> Expression:
+    ) -> XqyExpression:
         """Build a composable ``cts:covariance-p`` call.
 
         Returns the frequency-weighted covariance of the population given a
@@ -1318,7 +1322,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:covariance-p``.
 
         Notes
@@ -1332,7 +1336,7 @@ class Cts:
         )
 
     @staticmethod
-    def deregister(id) -> Expression:
+    def deregister(id) -> XqyExpression:
         """Build a composable ``cts:deregister`` call.
 
         Deregister a registered query, explicitly releasing the associated
@@ -1345,7 +1349,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:deregister``.
 
         Notes
@@ -1358,7 +1362,7 @@ class Cts:
         )
 
     @staticmethod
-    def directory_query(uris, depth="1") -> Expression:
+    def directory_query(uris, depth="1") -> XqyExpression:
         """Build a composable ``cts:directory-query`` call.
 
         Returns a query matching documents in the directories with the given
@@ -1374,7 +1378,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:directory-query``.
 
         Notes
@@ -1390,7 +1394,7 @@ class Cts:
         )
 
     @staticmethod
-    def distinctive_terms(nodes, *, options=None) -> Expression:
+    def distinctive_terms(nodes, *, options=None) -> XqyExpression:
         """Build a composable ``cts:distinctive-terms`` call.
 
         Return the most "relevant" terms in the model nodes (that is, the terms
@@ -1479,7 +1483,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:distinctive-terms``.
 
         Notes
@@ -1507,7 +1511,7 @@ class Cts:
         )
 
     @staticmethod
-    def document_format_query(format) -> Expression:
+    def document_format_query(format) -> XqyExpression:
         """Build a composable ``cts:document-format-query`` call.
 
         Returns a query matching documents of a given format.
@@ -1520,7 +1524,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:document-format-query``.
 
         Notes
@@ -1536,7 +1540,7 @@ class Cts:
         )
 
     @staticmethod
-    def document_fragment_query(query) -> Expression:
+    def document_fragment_query(query) -> XqyExpression:
         """Build a composable ``cts:document-fragment-query`` call.
 
         Returns a query that matches all documents where $query matches any
@@ -1549,7 +1553,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:document-fragment-query``.
 
         Notes
@@ -1565,7 +1569,7 @@ class Cts:
         )
 
     @staticmethod
-    def document_order(*, options=None) -> Expression:
+    def document_order(*, options=None) -> XqyExpression:
         """Build a composable ``cts:document-order`` call.
 
         Creates a document-based ordering clause, for use as an option to
@@ -1580,7 +1584,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:document-order``.
 
         Notes
@@ -1598,7 +1602,7 @@ class Cts:
         )
 
     @staticmethod
-    def document_permission_query(role, capability) -> Expression:
+    def document_permission_query(role, capability) -> XqyExpression:
         """Build a composable ``cts:document-permission-query`` call.
 
         Returns a query matching documents with a given permission.
@@ -1613,7 +1617,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:document-permission-query``.
 
         Notes
@@ -1629,7 +1633,7 @@ class Cts:
         )
 
     @staticmethod
-    def document_query(uris) -> Expression:
+    def document_query(uris) -> XqyExpression:
         """Build a composable ``cts:document-query`` call.
 
         Returns a query matching documents with the given URIs.
@@ -1641,7 +1645,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:document-query``.
 
         Notes
@@ -1654,7 +1658,7 @@ class Cts:
         )
 
     @staticmethod
-    def document_root_query(root) -> Expression:
+    def document_root_query(root) -> XqyExpression:
         """Build a composable ``cts:document-root-query`` call.
 
         Returns a query matching documents with a given root element.
@@ -1666,7 +1670,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:document-root-query``.
 
         Notes
@@ -1693,7 +1697,7 @@ class Cts:
         query=None,
         quality_weight=None,
         forest_ids=None,
-    ) -> Expression:
+    ) -> XqyExpression:
         """Build a composable ``cts:element-attribute-pair-geospatial-boxes`` call.
 
         Returns boxes derived from the specified element point lexicon(s).
@@ -1789,7 +1793,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:element-attribute-pair-geospatial-boxes``.
 
         Notes
@@ -1882,7 +1886,7 @@ class Cts:
         *,
         options=None,
         weight=None,
-    ) -> Expression:
+    ) -> XqyExpression:
         """Build a composable ``cts:element-attribute-pair-geospatial-query`` call.
 
         Returns a query matching elements by name which has specific attributes
@@ -1953,7 +1957,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:element-attribute-pair-geospatial-query``.
 
         Notes
@@ -2015,7 +2019,7 @@ class Cts:
         query=None,
         quality_weight=None,
         forest_ids=None,
-    ) -> Expression:
+    ) -> XqyExpression:
         """Build an ``element-attribute-pair-geospatial-value-match`` call.
 
         Returns values from the specified element attribute pair geospatial
@@ -2100,7 +2104,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:element-attribute-pair-geospatial-value-match``.
 
         Notes
@@ -2191,7 +2195,7 @@ class Cts:
         query=None,
         quality_weight=None,
         forest_ids=None,
-    ) -> Expression:
+    ) -> XqyExpression:
         """Build a composable ``cts:element-attribute-pair-geospatial-values`` call.
 
         Returns values from the specified element-attribute-pair geospatial
@@ -2277,7 +2281,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:element-attribute-pair-geospatial-values``.
 
         Notes
@@ -2363,7 +2367,7 @@ class Cts:
         *,
         options=None,
         weight=None,
-    ) -> Expression:
+    ) -> XqyExpression:
         """Build a composable ``cts:element-attribute-range-query`` call.
 
         Constructs a query that matches element-attributes by name with a range-
@@ -2418,7 +2422,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:element-attribute-range-query``.
 
         Notes
@@ -2469,7 +2473,12 @@ class Cts:
         )
 
     @staticmethod
-    def element_attribute_reference(element, attribute, *, options=None) -> Expression:
+    def element_attribute_reference(
+        element,
+        attribute,
+        *,
+        options=None,
+    ) -> XqyExpression:
         """Build a composable ``cts:element-attribute-reference`` call.
 
         Creates a reference to an element attribute value lexicon, for use as a
@@ -2502,7 +2511,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:element-attribute-reference``.
 
         Notes
@@ -2526,7 +2535,7 @@ class Cts:
         query=None,
         quality_weight=None,
         forest_ids=None,
-    ) -> Expression:
+    ) -> XqyExpression:
         """Build a composable ``cts:element-attribute-value-co-occurrences`` call.
 
         Returns value co-occurrences from the specified element or element-
@@ -2641,7 +2650,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:element-attribute-value-co-occurrences``.
 
         Notes
@@ -2726,7 +2735,7 @@ class Cts:
         query=None,
         quality_weight=None,
         forest_ids=None,
-    ) -> Expression:
+    ) -> XqyExpression:
         """Build an ``element-attribute-value-geospatial-co-occurrences`` call.
 
         Returns value co-occurrences from the specified element-attribute value
@@ -2849,7 +2858,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable ``cts:element-attribute-value-geospatial-co-occurrences``
             call.
 
@@ -2943,7 +2952,7 @@ class Cts:
         query=None,
         quality_weight=None,
         forest_ids=None,
-    ) -> Expression:
+    ) -> XqyExpression:
         """Build a composable ``cts:element-attribute-value-match`` call.
 
         Returns values from the specified element-attribute value lexicon(s)
@@ -3043,7 +3052,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:element-attribute-value-match``.
 
         Notes
@@ -3131,7 +3140,7 @@ class Cts:
         *,
         options=None,
         weight=None,
-    ) -> Expression:
+    ) -> XqyExpression:
         """Build a composable ``cts:element-attribute-value-query`` call.
 
         Returns a query matching elements by name with attributes by name with
@@ -3181,7 +3190,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:element-attribute-value-query``.
 
         Notes
@@ -3245,7 +3254,7 @@ class Cts:
         query=None,
         quality_weight=None,
         forest_ids=None,
-    ) -> Expression:
+    ) -> XqyExpression:
         """Build a composable ``cts:element-attribute-value-ranges`` call.
 
         Returns value ranges from the specified element-attribute value
@@ -3346,7 +3355,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:element-attribute-value-ranges``.
 
         Notes
@@ -3426,7 +3435,7 @@ class Cts:
         query=None,
         quality_weight=None,
         forest_ids=None,
-    ) -> Expression:
+    ) -> XqyExpression:
         """Build a composable ``cts:element-attribute-values`` call.
 
         Returns values from the specified element-attribute value lexicon(s).
@@ -3523,7 +3532,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:element-attribute-values``.
 
         Notes
@@ -3603,7 +3612,7 @@ class Cts:
         query=None,
         quality_weight=None,
         forest_ids=None,
-    ) -> Expression:
+    ) -> XqyExpression:
         """Build a composable ``cts:element-attribute-word-match`` call.
 
         Returns words from the specified element-attribute word lexicon(s) that
@@ -3670,7 +3679,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:element-attribute-word-match``.
 
         Notes
@@ -3745,7 +3754,7 @@ class Cts:
         *,
         options=None,
         weight=None,
-    ) -> Expression:
+    ) -> XqyExpression:
         """Build a composable ``cts:element-attribute-word-query`` call.
 
         Returns a query matching elements by name with attributes by name with
@@ -3820,7 +3829,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:element-attribute-word-query``.
 
         Notes
@@ -3877,7 +3886,7 @@ class Cts:
         query=None,
         quality_weight=None,
         forest_ids=None,
-    ) -> Expression:
+    ) -> XqyExpression:
         """Build a composable ``cts:element-attribute-words`` call.
 
         Returns words from the specified element-attribute word lexicon(s).
@@ -3943,7 +3952,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:element-attribute-words``.
 
         Notes
@@ -4018,7 +4027,7 @@ class Cts:
         query=None,
         quality_weight=None,
         forest_ids=None,
-    ) -> Expression:
+    ) -> XqyExpression:
         """Build a composable ``cts:element-child-geospatial-boxes`` call.
 
         Returns boxes derived from the specified element point lexicon(s).
@@ -4115,7 +4124,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:element-child-geospatial-boxes``.
 
         Notes
@@ -4202,7 +4211,7 @@ class Cts:
         *,
         options=None,
         weight=None,
-    ) -> Expression:
+    ) -> XqyExpression:
         """Build a composable ``cts:element-child-geospatial-query`` call.
 
         Returns a query matching elements by name which has specific element
@@ -4274,7 +4283,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:element-child-geospatial-query``.
 
         Notes
@@ -4330,7 +4339,7 @@ class Cts:
         query=None,
         quality_weight=None,
         forest_ids=None,
-    ) -> Expression:
+    ) -> XqyExpression:
         """Build a composable ``cts:element-child-geospatial-value-match`` call.
 
         Returns values from the specified element child geospatial value
@@ -4416,7 +4425,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:element-child-geospatial-value-match``.
 
         Notes
@@ -4501,7 +4510,7 @@ class Cts:
         query=None,
         quality_weight=None,
         forest_ids=None,
-    ) -> Expression:
+    ) -> XqyExpression:
         """Build a composable ``cts:element-child-geospatial-values`` call.
 
         Returns values from the specified element-child geospatial value
@@ -4589,7 +4598,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:element-child-geospatial-values``.
 
         Notes
@@ -4674,7 +4683,7 @@ class Cts:
         query=None,
         quality_weight=None,
         forest_ids=None,
-    ) -> Expression:
+    ) -> XqyExpression:
         """Build a composable ``cts:element-geospatial-boxes`` call.
 
         Returns boxes derived from the specified element point lexicon(s).
@@ -4769,7 +4778,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:element-geospatial-boxes``.
 
         Notes
@@ -4855,7 +4864,7 @@ class Cts:
         *,
         options=None,
         weight=None,
-    ) -> Expression:
+    ) -> XqyExpression:
         """Build a composable ``cts:element-geospatial-query`` call.
 
         Returns a query matching elements by name whose content represents a
@@ -4920,7 +4929,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:element-geospatial-query``.
 
         Notes
@@ -4977,7 +4986,7 @@ class Cts:
         query=None,
         quality_weight=None,
         forest_ids=None,
-    ) -> Expression:
+    ) -> XqyExpression:
         """Build a composable ``cts:element-geospatial-value-match`` call.
 
         Returns values from the specified element geospatial value lexicon(s)
@@ -5061,7 +5070,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:element-geospatial-value-match``.
 
         Notes
@@ -5142,7 +5151,7 @@ class Cts:
         query=None,
         quality_weight=None,
         forest_ids=None,
-    ) -> Expression:
+    ) -> XqyExpression:
         """Build a composable ``cts:element-geospatial-values`` call.
 
         Returns values from the specified element geospatial value lexicon(s).
@@ -5226,7 +5235,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:element-geospatial-values``.
 
         Notes
@@ -5310,7 +5319,7 @@ class Cts:
         query=None,
         quality_weight=None,
         forest_ids=None,
-    ) -> Expression:
+    ) -> XqyExpression:
         """Build a composable ``cts:element-pair-geospatial-boxes`` call.
 
         Returns boxes derived from the specified element point lexicon(s).
@@ -5406,7 +5415,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:element-pair-geospatial-boxes``.
 
         Notes
@@ -5498,7 +5507,7 @@ class Cts:
         *,
         options=None,
         weight=None,
-    ) -> Expression:
+    ) -> XqyExpression:
         """Build a composable ``cts:element-pair-geospatial-query`` call.
 
         Returns a query matching elements by name which has specific element
@@ -5569,7 +5578,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:element-pair-geospatial-query``.
 
         Notes
@@ -5631,7 +5640,7 @@ class Cts:
         query=None,
         quality_weight=None,
         forest_ids=None,
-    ) -> Expression:
+    ) -> XqyExpression:
         """Build a composable ``cts:element-pair-geospatial-value-match`` call.
 
         Returns values from the specified element pair geospatial value
@@ -5716,7 +5725,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:element-pair-geospatial-value-match``.
 
         Notes
@@ -5807,7 +5816,7 @@ class Cts:
         query=None,
         quality_weight=None,
         forest_ids=None,
-    ) -> Expression:
+    ) -> XqyExpression:
         """Build a composable ``cts:element-pair-geospatial-values`` call.
 
         Returns values from the specified element-pair geospatial value
@@ -5894,7 +5903,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:element-pair-geospatial-values``.
 
         Notes
@@ -5973,7 +5982,7 @@ class Cts:
         )
 
     @staticmethod
-    def element_query(element_name, query) -> Expression:
+    def element_query(element_name, query) -> XqyExpression:
         """Build a composable ``cts:element-query`` call.
 
         Constructs a query that matches elements by name with the content
@@ -5990,7 +5999,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:element-query``.
 
         Notes
@@ -6024,7 +6033,7 @@ class Cts:
         *,
         options=None,
         weight=None,
-    ) -> Expression:
+    ) -> XqyExpression:
         """Build a composable ``cts:element-range-query`` call.
 
         Constructs a query that matches elements by name with range index entry
@@ -6076,7 +6085,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:element-range-query``.
 
         Notes
@@ -6128,7 +6137,7 @@ class Cts:
         )
 
     @staticmethod
-    def element_reference(element, *, options=None) -> Expression:
+    def element_reference(element, *, options=None) -> XqyExpression:
         """Build a composable ``cts:element-reference`` call.
 
         Creates a reference to an element value lexicon, for use as a parameter
@@ -6160,7 +6169,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:element-reference``.
 
         Notes
@@ -6182,7 +6191,7 @@ class Cts:
         query=None,
         quality_weight=None,
         forest_ids=None,
-    ) -> Expression:
+    ) -> XqyExpression:
         """Build a composable ``cts:element-value-co-occurrences`` call.
 
         Returns value co-occurrences (that is, pairs of values, both of which
@@ -6292,7 +6301,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:element-value-co-occurrences``.
 
         Notes
@@ -6370,7 +6379,7 @@ class Cts:
         query=None,
         quality_weight=None,
         forest_ids=None,
-    ) -> Expression:
+    ) -> XqyExpression:
         """Build a composable ``cts:element-value-geospatial-co-occurrences`` call.
 
         Returns value co-occurrences from the specified element value lexicon
@@ -6495,7 +6504,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:element-value-geospatial-co-occurrences``.
 
         Notes
@@ -6583,7 +6592,7 @@ class Cts:
         query=None,
         quality_weight=None,
         forest_ids=None,
-    ) -> Expression:
+    ) -> XqyExpression:
         """Build a composable ``cts:element-value-match`` call.
 
         Returns values from the specified element value lexicon(s) that match
@@ -6680,7 +6689,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:element-value-match``.
 
         Notes
@@ -6764,7 +6773,7 @@ class Cts:
         *,
         options=None,
         weight=None,
-    ) -> Expression:
+    ) -> XqyExpression:
         """Build a composable ``cts:element-value-query`` call.
 
         Returns a query matching elements by name with text content equal a
@@ -6811,7 +6820,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:element-value-query``.
 
         Notes
@@ -6888,7 +6897,7 @@ class Cts:
         query=None,
         quality_weight=None,
         forest_ids=None,
-    ) -> Expression:
+    ) -> XqyExpression:
         """Build a composable ``cts:element-value-ranges`` call.
 
         Returns value ranges from the specified element value lexicon(s).
@@ -6987,7 +6996,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:element-value-ranges``.
 
         Notes
@@ -7063,7 +7072,7 @@ class Cts:
         query=None,
         quality_weight=None,
         forest_ids=None,
-    ) -> Expression:
+    ) -> XqyExpression:
         """Build a composable ``cts:element-values`` call.
 
         Returns values from the specified element value lexicon(s).
@@ -7159,7 +7168,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:element-values``.
 
         Notes
@@ -7227,7 +7236,7 @@ class Cts:
         )
 
     @staticmethod
-    def element_walk(node, element, expr) -> Expression:
+    def element_walk(node, element, expr) -> XqyExpression:
         """Build a composable ``cts:element-walk`` call.
 
         Returns a copy of the node, replacing any elements found with the
@@ -7246,7 +7255,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:element-walk``.
 
         Notes
@@ -7276,7 +7285,7 @@ class Cts:
         query=None,
         quality_weight=None,
         forest_ids=None,
-    ) -> Expression:
+    ) -> XqyExpression:
         """Build a composable ``cts:element-word-match`` call.
 
         Returns words from the specified element word lexicon(s) that match a
@@ -7341,7 +7350,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:element-word-match``.
 
         Notes
@@ -7412,8 +7421,12 @@ class Cts:
 
     @staticmethod
     def element_word_query(
-        element_name, text, *, options=None, weight=None,
-    ) -> Expression:
+        element_name,
+        text,
+        *,
+        options=None,
+        weight=None,
+    ) -> XqyExpression:
         """Build a composable ``cts:element-word-query`` call.
 
         Returns a query matching elements by name with text content containing a
@@ -7495,7 +7508,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:element-word-query``.
 
         Notes
@@ -7559,7 +7572,7 @@ class Cts:
         query=None,
         quality_weight=None,
         forest_ids=None,
-    ) -> Expression:
+    ) -> XqyExpression:
         """Build a composable ``cts:element-words`` call.
 
         Returns words from the specified element word lexicon.
@@ -7623,7 +7636,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:element-words``.
 
         Notes
@@ -7690,7 +7703,7 @@ class Cts:
         )
 
     @staticmethod
-    def entity(id, normalized_text, text, type) -> Expression:
+    def entity(id, normalized_text, text, type) -> XqyExpression:
         """Build a composable ``cts:entity`` call.
 
         Returns a cts:entity object.
@@ -7722,7 +7735,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:entity``.
 
         Notes
@@ -7735,7 +7748,7 @@ class Cts:
         )
 
     @staticmethod
-    def entity_dictionary(entities, *, options=None) -> Expression:
+    def entity_dictionary(entities, *, options=None) -> XqyExpression:
         """Build a composable ``cts:entity-dictionary`` call.
 
         Returns a cts:entity-dictionary object.
@@ -7755,7 +7768,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:entity-dictionary``.
 
         Notes
@@ -7776,7 +7789,7 @@ class Cts:
         )
 
     @staticmethod
-    def entity_dictionary_get(uri) -> Expression:
+    def entity_dictionary_get(uri) -> XqyExpression:
         """Build a composable ``cts:entity-dictionary-get`` call.
 
         Retrieve an entity dictionary previously cached in the database.
@@ -7788,7 +7801,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:entity-dictionary-get``.
 
         Notes
@@ -7803,7 +7816,7 @@ class Cts:
         )
 
     @staticmethod
-    def entity_dictionary_parse(contents, *, options=None) -> Expression:
+    def entity_dictionary_parse(contents, *, options=None) -> XqyExpression:
         """Build a composable ``cts:entity-dictionary-parse`` call.
 
         Construct a cts:entity-dictionary object by parsing it from a formatted
@@ -7829,7 +7842,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:entity-dictionary-parse``.
 
         Notes
@@ -7843,7 +7856,7 @@ class Cts:
         )
 
     @staticmethod
-    def entity_highlight(node, expr, *, dict=None) -> Expression:
+    def entity_highlight(node, expr, *, dict=None) -> XqyExpression:
         """Build a composable ``cts:entity-highlight`` call.
 
         Returns a copy of the node, replacing any entities found with the
@@ -7865,7 +7878,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:entity-highlight``.
 
         Notes
@@ -7920,7 +7933,7 @@ class Cts:
         )
 
     @staticmethod
-    def entity_walk(node, expr, *, dict=None) -> Expression:
+    def entity_walk(node, expr, *, dict=None) -> XqyExpression:
         """Build a composable ``cts:entity-walk`` call.
 
         Walk an XML document or element node, evaluating an expression against
@@ -7943,7 +7956,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:entity-walk``.
 
         Notes
@@ -7983,7 +7996,7 @@ class Cts:
         quality_weight=None,
         forest_ids=None,
         maximum=None,
-    ) -> Expression:
+    ) -> XqyExpression:
         """Build a composable ``cts:estimate`` call.
 
         Returns the number of fragments selected by a search.
@@ -8011,7 +8024,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:estimate``.
 
         Notes
@@ -8025,14 +8038,14 @@ class Cts:
         )
 
     @staticmethod
-    def false_query() -> Expression:
+    def false_query() -> XqyExpression:
         """Build a composable ``cts:false-query`` call.
 
         Returns a query that matches no fragments.
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:false-query``.
 
         Notes
@@ -8052,7 +8065,7 @@ class Cts:
         *,
         options=None,
         weight=None,
-    ) -> Expression:
+    ) -> XqyExpression:
         """Build a composable ``cts:field-range-query`` call.
 
         Returns a cts:query matching fields by name with a range-index entry
@@ -8105,7 +8118,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:field-range-query``.
 
         Notes
@@ -8157,7 +8170,7 @@ class Cts:
         )
 
     @staticmethod
-    def field_reference(field, *, options=None) -> Expression:
+    def field_reference(field, *, options=None) -> XqyExpression:
         """Build a composable ``cts:field-reference`` call.
 
         Creates a reference to a field value lexicon, for use as a parameter to
@@ -8188,7 +8201,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:field-reference``.
 
         Notes
@@ -8210,7 +8223,7 @@ class Cts:
         query=None,
         quality_weight=None,
         forest_ids=None,
-    ) -> Expression:
+    ) -> XqyExpression:
         """Build a composable ``cts:field-value-co-occurrences`` call.
 
         Returns value co-occurrences (that is, pairs of values, both of which
@@ -8321,7 +8334,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:field-value-co-occurrences``.
 
         Notes
@@ -8397,7 +8410,7 @@ class Cts:
         query=None,
         quality_weight=None,
         forest_ids=None,
-    ) -> Expression:
+    ) -> XqyExpression:
         """Build a composable ``cts:field-value-match`` call.
 
         Returns values from the specified field value lexicon(s) that match the
@@ -8494,7 +8507,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:field-value-match``.
 
         Notes
@@ -8572,7 +8585,13 @@ class Cts:
         )
 
     @staticmethod
-    def field_value_query(field_name, text, *, options=None, weight=None) -> Expression:
+    def field_value_query(
+        field_name,
+        text,
+        *,
+        options=None,
+        weight=None,
+    ) -> XqyExpression:
         """Build a composable ``cts:field-value-query`` call.
 
         Returns a query matching text content containing a given value in the
@@ -8640,7 +8659,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:field-value-query``.
 
         Notes
@@ -8713,7 +8732,7 @@ class Cts:
         query=None,
         quality_weight=None,
         forest_ids=None,
-    ) -> Expression:
+    ) -> XqyExpression:
         """Build a composable ``cts:field-value-ranges`` call.
 
         Returns value ranges from the specified field value lexicon(s).
@@ -8812,7 +8831,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:field-value-ranges``.
 
         Notes
@@ -8888,7 +8907,7 @@ class Cts:
         query=None,
         quality_weight=None,
         forest_ids=None,
-    ) -> Expression:
+    ) -> XqyExpression:
         """Build a composable ``cts:field-values`` call.
 
         Returns values from the specified field value lexicon(s).
@@ -8976,7 +8995,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:field-values``.
 
         Notes
@@ -9052,7 +9071,7 @@ class Cts:
         query=None,
         quality_weight=None,
         forest_ids=None,
-    ) -> Expression:
+    ) -> XqyExpression:
         """Build a composable ``cts:field-word-match`` call.
 
         Returns words from the specified field word lexicon(s) that match a
@@ -9117,7 +9136,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:field-word-match``.
 
         Notes
@@ -9187,7 +9206,13 @@ class Cts:
         )
 
     @staticmethod
-    def field_word_query(field_name, text, *, options=None, weight=None) -> Expression:
+    def field_word_query(
+        field_name,
+        text,
+        *,
+        options=None,
+        weight=None,
+    ) -> XqyExpression:
         """Build a composable ``cts:field-word-query`` call.
 
         Returns a query matching fields with text content containing a given
@@ -9269,7 +9294,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:field-word-query``.
 
         Notes
@@ -9320,7 +9345,7 @@ class Cts:
         query=None,
         quality_weight=None,
         forest_ids=None,
-    ) -> Expression:
+    ) -> XqyExpression:
         """Build a composable ``cts:field-words`` call.
 
         Returns words from the specified field word lexicon.
@@ -9384,7 +9409,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:field-words``.
 
         Notes
@@ -9451,7 +9476,7 @@ class Cts:
         )
 
     @staticmethod
-    def fitness(*, node=None) -> Expression:
+    def fitness(*, node=None) -> XqyExpression:
         """Build a composable ``cts:fitness`` call.
 
         Returns the fitness of a node, or of the context node if no node is
@@ -9465,7 +9490,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:fitness``.
 
         Notes
@@ -9483,7 +9508,7 @@ class Cts:
         )
 
     @staticmethod
-    def fitness_order(*, options=None) -> Expression:
+    def fitness_order(*, options=None) -> XqyExpression:
         """Build a composable ``cts:fitness-order`` call.
 
         Creates a fitness-based ordering clause, for use as an option to
@@ -9497,7 +9522,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:fitness-order``.
 
         Notes
@@ -9515,7 +9540,7 @@ class Cts:
         )
 
     @staticmethod
-    def frequency(value) -> Expression:
+    def frequency(value) -> XqyExpression:
         """Build a composable ``cts:frequency`` call.
 
         Returns an integer representing the number of times in which a
@@ -9530,7 +9555,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:frequency``.
 
         Notes
@@ -9572,7 +9597,7 @@ class Cts:
         long,
         *,
         options=None,
-    ) -> Expression:
+    ) -> XqyExpression:
         """Build a composable ``cts:geospatial-attribute-pair-reference`` call.
 
         Creates a reference to a geospatial attribute pair range index, for use
@@ -9606,7 +9631,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:geospatial-attribute-pair-reference``.
 
         Notes
@@ -9636,7 +9661,7 @@ class Cts:
         query=None,
         quality_weight=None,
         forest_ids=None,
-    ) -> Expression:
+    ) -> XqyExpression:
         """Build a composable ``cts:geospatial-boxes`` call.
 
         Returns boxes derived from the specified point lexicon(s).
@@ -9731,7 +9756,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:geospatial-boxes``.
 
         Notes
@@ -9823,7 +9848,7 @@ class Cts:
         query=None,
         quality_weight=None,
         forest_ids=None,
-    ) -> Expression:
+    ) -> XqyExpression:
         """Build a composable ``cts:geospatial-co-occurrences`` call.
 
         Find value co-occurrences from two geospatial lexicons.
@@ -9969,7 +9994,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:geospatial-co-occurrences``.
 
         Notes
@@ -10050,8 +10075,11 @@ class Cts:
 
     @staticmethod
     def geospatial_element_child_reference(
-        element, child, *, options=None,
-    ) -> Expression:
+        element,
+        child,
+        *,
+        options=None,
+    ) -> XqyExpression:
         """Build a composable ``cts:geospatial-element-child-reference`` call.
 
         Creates a reference to a geospatial element child range index, for use
@@ -10082,7 +10110,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:geospatial-element-child-reference``.
 
         Notes
@@ -10104,8 +10132,12 @@ class Cts:
 
     @staticmethod
     def geospatial_element_pair_reference(
-        element, lat, long, *, options=None,
-    ) -> Expression:
+        element,
+        lat,
+        long,
+        *,
+        options=None,
+    ) -> XqyExpression:
         """Build a composable ``cts:geospatial-element-pair-reference`` call.
 
         Creates a reference to a geospatial element pair range index, for use as
@@ -10138,7 +10170,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:geospatial-element-pair-reference``.
 
         Notes
@@ -10159,7 +10191,7 @@ class Cts:
         )
 
     @staticmethod
-    def geospatial_element_reference(element, *, options=None) -> Expression:
+    def geospatial_element_reference(element, *, options=None) -> XqyExpression:
         """Build a composable ``cts:geospatial-element-reference`` call.
 
         Creates a reference to a geospatial element range index, for use as a
@@ -10188,7 +10220,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:geospatial-element-reference``.
 
         Notes
@@ -10213,7 +10245,7 @@ class Cts:
         child,
         *,
         options=None,
-    ) -> Expression:
+    ) -> XqyExpression:
         """Build a composable ``cts:geospatial-json-property-child-reference`` call.
 
         Creates a reference to a geospatial json property child range index, for
@@ -10244,7 +10276,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:geospatial-json-property-child-reference``.
 
         Notes
@@ -10271,7 +10303,7 @@ class Cts:
         long,
         *,
         options=None,
-    ) -> Expression:
+    ) -> XqyExpression:
         """Build a composable ``cts:geospatial-json-property-pair-reference`` call.
 
         Creates a reference to a geospatial JSON property pair range index, for
@@ -10298,7 +10330,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:geospatial-json-property-pair-reference``.
 
         Notes
@@ -10319,7 +10351,7 @@ class Cts:
         )
 
     @staticmethod
-    def geospatial_json_property_reference(property, *, options=None) -> Expression:
+    def geospatial_json_property_reference(property, *, options=None) -> XqyExpression:
         """Build a composable ``cts:geospatial-json-property-reference`` call.
 
         Creates a reference to a geospatial json property range index, for use
@@ -10348,7 +10380,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:geospatial-json-property-reference``.
 
         Notes
@@ -10370,8 +10402,11 @@ class Cts:
 
     @staticmethod
     def geospatial_path_reference(
-        path_expression, *, options=None, map=None,
-    ) -> Expression:
+        path_expression,
+        *,
+        options=None,
+        map=None,
+    ) -> XqyExpression:
         """Build a composable ``cts:geospatial-path-reference`` call.
 
         Creates a reference to a geospatial path range index, for use as a
@@ -10404,7 +10439,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:geospatial-path-reference``.
 
         Notes
@@ -10433,7 +10468,7 @@ class Cts:
         geohash_precision=None,
         units=None,
         invalid_values=None,
-    ) -> Expression:
+    ) -> XqyExpression:
         """Build a composable ``cts:geospatial-region-path-reference`` call.
 
         Create a reference to a geospatial region path index, for use as a
@@ -10475,7 +10510,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:geospatial-region-path-reference``.
 
         Notes
@@ -10504,7 +10539,7 @@ class Cts:
         *,
         options=None,
         weight=None,
-    ) -> Expression:
+    ) -> XqyExpression:
         """Build a composable ``cts:geospatial-region-query`` call.
 
         Construct a query to match regions in documents that satisfy a specified
@@ -10554,7 +10589,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:geospatial-region-query``.
 
         Notes
@@ -10609,7 +10644,7 @@ class Cts:
         )
 
     @staticmethod
-    def highlight(node, query, expr) -> Expression:
+    def highlight(node, query, expr) -> XqyExpression:
         """Build a composable ``cts:highlight`` call.
 
         Returns a copy of the node, replacing any text matching the query with
@@ -10630,7 +10665,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:highlight``.
 
         Notes
@@ -10673,7 +10708,7 @@ class Cts:
         )
 
     @staticmethod
-    def index_order(index, *, options=None) -> Expression:
+    def index_order(index, *, options=None) -> XqyExpression:
         """Build a composable ``cts:index-order`` call.
 
         Creates a index-based ordering clause, for use as an option to
@@ -10690,7 +10725,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:index-order``.
 
         Notes
@@ -10708,7 +10743,7 @@ class Cts:
         )
 
     @staticmethod
-    def iri_reference() -> Expression:
+    def iri_reference() -> XqyExpression:
         """Build a composable ``cts:iri-reference`` call.
 
         Creates a reference to the URI lexicon, for use as a parameter to
@@ -10716,7 +10751,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:iri-reference``.
 
         Notes
@@ -10739,7 +10774,7 @@ class Cts:
         *,
         options=None,
         weight=None,
-    ) -> Expression:
+    ) -> XqyExpression:
         """Build a composable ``cts:json-property-child-geospatial-query`` call.
 
         Returns a query matching json properties by name which has specific
@@ -10811,7 +10846,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:json-property-child-geospatial-query``.
 
         Notes
@@ -10865,7 +10900,7 @@ class Cts:
         *,
         options=None,
         weight=None,
-    ) -> Expression:
+    ) -> XqyExpression:
         """Build a composable ``cts:json-property-geospatial-query`` call.
 
         Returns a query matching json properties by name whose content
@@ -10931,7 +10966,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:json-property-geospatial-query``.
 
         Notes
@@ -10986,7 +11021,7 @@ class Cts:
         *,
         options=None,
         weight=None,
-    ) -> Expression:
+    ) -> XqyExpression:
         """Build a composable ``cts:json-property-pair-geospatial-query`` call.
 
         Returns a query matching json properties by name which has specific
@@ -11057,7 +11092,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:json-property-pair-geospatial-query``.
 
         Notes
@@ -11108,7 +11143,7 @@ class Cts:
         *,
         options=None,
         weight=None,
-    ) -> Expression:
+    ) -> XqyExpression:
         """Build a composable ``cts:json-property-range-query`` call.
 
         Returns a cts:query matching JSON properties by name with a range-index
@@ -11161,7 +11196,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:json-property-range-query``.
 
         Notes
@@ -11213,7 +11248,7 @@ class Cts:
         )
 
     @staticmethod
-    def json_property_reference(property, *, options=None) -> Expression:
+    def json_property_reference(property, *, options=None) -> XqyExpression:
         """Build a composable ``cts:json-property-reference`` call.
 
         Creates a reference to a JSON property value lexicon, for use as a
@@ -11244,7 +11279,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:json-property-reference``.
 
         Notes
@@ -11258,7 +11293,7 @@ class Cts:
         )
 
     @staticmethod
-    def json_property_scope_query(property_name, query) -> Expression:
+    def json_property_scope_query(property_name, query) -> XqyExpression:
         """Build a composable ``cts:json-property-scope-query`` call.
 
         Returns a cts:query matching JSON properties by name with the content
@@ -11275,7 +11310,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:json-property-scope-query``.
 
         Notes
@@ -11296,7 +11331,7 @@ class Cts:
         *,
         options=None,
         weight=None,
-    ) -> Expression:
+    ) -> XqyExpression:
         """Build a composable ``cts:json-property-value-query`` call.
 
         Returns a query matching JSON properties by name with value equal the
@@ -11345,7 +11380,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:json-property-value-query``.
 
         Notes
@@ -11422,7 +11457,7 @@ class Cts:
         query=None,
         quality_weight=None,
         forest_ids=None,
-    ) -> Expression:
+    ) -> XqyExpression:
         """Build a composable ``cts:json-property-word-match`` call.
 
         Returns words from the specified JSON property word lexicon(s) that
@@ -11487,7 +11522,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:json-property-word-match``.
 
         Notes
@@ -11560,7 +11595,7 @@ class Cts:
         *,
         options=None,
         weight=None,
-    ) -> Expression:
+    ) -> XqyExpression:
         """Build a composable ``cts:json-property-word-query`` call.
 
         Returns a query matching JSON properties by name with text content
@@ -11642,7 +11677,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:json-property-word-query``.
 
         Notes
@@ -11706,7 +11741,7 @@ class Cts:
         query=None,
         quality_weight=None,
         forest_ids=None,
-    ) -> Expression:
+    ) -> XqyExpression:
         """Build a composable ``cts:json-property-words`` call.
 
         Returns words from the specified JSON property word lexicon.
@@ -11770,7 +11805,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:json-property-words``.
 
         Notes
@@ -11835,8 +11870,12 @@ class Cts:
 
     @staticmethod
     def linear_model(
-        values, *, options=None, query=None, forest_ids=None,
-    ) -> Expression:
+        values,
+        *,
+        options=None,
+        query=None,
+        forest_ids=None,
+    ) -> XqyExpression:
         """Build a composable ``cts:linear-model`` call.
 
         Returns a linear model that fits the frequency-weighted data set.
@@ -11856,7 +11895,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:linear-model``.
 
         Notes
@@ -11870,7 +11909,7 @@ class Cts:
         )
 
     @staticmethod
-    def linestring(vertices) -> Expression:
+    def linestring(vertices) -> XqyExpression:
         """Build a composable ``cts:linestring`` call.
 
         Returns a geospatial linestring value.
@@ -11884,7 +11923,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:linestring``.
 
         Notes
@@ -11897,7 +11936,7 @@ class Cts:
         )
 
     @staticmethod
-    def locks_fragment_query(query) -> Expression:
+    def locks_fragment_query(query) -> XqyExpression:
         """Build a composable ``cts:locks-fragment-query`` call.
 
         Returns a query that matches all documents where $query matches
@@ -11910,7 +11949,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:locks-fragment-query``.
 
         Notes
@@ -11929,7 +11968,7 @@ class Cts:
         timestamp=None,
         options=None,
         weight=None,
-    ) -> Expression:
+    ) -> XqyExpression:
         """Build a composable ``cts:lsqt-query`` call.
 
         Returns only documents before LSQT or a timestamp before LSQT for stable
@@ -11966,7 +12005,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:lsqt-query``.
 
         Notes
@@ -11988,7 +12027,7 @@ class Cts:
         options=None,
         query=None,
         forest_ids=None,
-    ) -> Expression:
+    ) -> XqyExpression:
         """Build a composable ``cts:match-regions`` call.
 
         Find regions in documents that have a spatial relationship to one or
@@ -12047,7 +12086,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:match-regions``.
 
         Notes
@@ -12124,7 +12163,7 @@ class Cts:
         )
 
     @staticmethod
-    def max(range_index, *, options=None, query=None, forest_ids=None) -> Expression:
+    def max(range_index, *, options=None, query=None, forest_ids=None) -> XqyExpression:
         """Build a composable ``cts:max`` call.
 
         Returns the maximal value given a value lexicon.
@@ -12142,7 +12181,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:max``.
 
         Notes
@@ -12156,7 +12195,7 @@ class Cts:
         )
 
     @staticmethod
-    def median(arg) -> Expression:
+    def median(arg) -> XqyExpression:
         """Build a composable ``cts:median`` call.
 
         Returns a frequency-weighted median of a sequence.
@@ -12168,7 +12207,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:median``.
 
         Notes
@@ -12185,7 +12224,7 @@ class Cts:
         )
 
     @staticmethod
-    def min(range_index, *, options=None, query=None, forest_ids=None) -> Expression:
+    def min(range_index, *, options=None, query=None, forest_ids=None) -> XqyExpression:
         """Build a composable ``cts:min`` call.
 
         Returns the minimal value given a value lexicon.
@@ -12203,7 +12242,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:min``.
 
         Notes
@@ -12223,7 +12262,7 @@ class Cts:
         distance=None,
         options=None,
         distance_weight=None,
-    ) -> Expression:
+    ) -> XqyExpression:
         """Build a composable ``cts:near-query`` call.
 
         Returns a query matching all of the specified queries, where the matches
@@ -12261,7 +12300,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:near-query``.
 
         Notes
@@ -12299,7 +12338,7 @@ class Cts:
         )
 
     @staticmethod
-    def not_in_query(positive_query, negative_query) -> Expression:
+    def not_in_query(positive_query, negative_query) -> XqyExpression:
         """Build a composable ``cts:not-in-query`` call.
 
         Returns a query matching the first sub-query, where those matches do not
@@ -12314,7 +12353,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:not-in-query``.
 
         Notes
@@ -12343,7 +12382,7 @@ class Cts:
         )
 
     @staticmethod
-    def not_query(query) -> Expression:
+    def not_query(query) -> XqyExpression:
         """Build a composable ``cts:not-query`` call.
 
         Returns a query specifying the matches not specified by its sub-query.
@@ -12355,7 +12394,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:not-query``.
 
         Notes
@@ -12382,7 +12421,7 @@ class Cts:
         )
 
     @staticmethod
-    def or_query(queries, *, options=None) -> Expression:
+    def or_query(queries, *, options=None) -> XqyExpression:
         """Build a composable ``cts:or-query`` call.
 
         Returns a query specifying the union of the matches specified by the
@@ -12401,7 +12440,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:or-query``.
 
         Notes
@@ -12415,7 +12454,7 @@ class Cts:
         )
 
     @staticmethod
-    def parse(query, *, bindings=None) -> Expression:
+    def parse(query, *, bindings=None) -> XqyExpression:
         """Build a composable ``cts:parse`` call.
 
         Parses a query string
@@ -12457,7 +12496,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:parse``.
 
         Notes
@@ -12471,7 +12510,7 @@ class Cts:
         )
 
     @staticmethod
-    def part_of_speech(token) -> Expression:
+    def part_of_speech(token) -> XqyExpression:
         """Build a composable ``cts:part-of-speech`` call.
 
         Returns the part of speech for a cts:token, if any.
@@ -12483,7 +12522,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:part-of-speech``.
 
         Notes
@@ -12505,7 +12544,7 @@ class Cts:
         *,
         options=None,
         weight=None,
-    ) -> Expression:
+    ) -> XqyExpression:
         """Build a composable ``cts:path-geospatial-query`` call.
 
         Returns a query matching path expressions whose content represents a
@@ -12570,7 +12609,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:path-geospatial-query``.
 
         Notes
@@ -12633,7 +12672,7 @@ class Cts:
         *,
         options=None,
         weight=None,
-    ) -> Expression:
+    ) -> XqyExpression:
         """Build a composable ``cts:path-range-query`` call.
 
         Returns a cts:query matching documents where the content addressed by an
@@ -12688,7 +12727,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:path-range-query``.
 
         Notes
@@ -12740,7 +12779,12 @@ class Cts:
         )
 
     @staticmethod
-    def path_reference(path_expression, *, options=None, namespaces=None) -> Expression:
+    def path_reference(
+        path_expression,
+        *,
+        options=None,
+        namespaces=None,
+    ) -> XqyExpression:
         """Build a composable ``cts:path-reference`` call.
 
         Creates a reference to a path value lexicon, for use as a parameter to
@@ -12775,7 +12819,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:path-reference``.
 
         Notes
@@ -12790,7 +12834,7 @@ class Cts:
         )
 
     @staticmethod
-    def percent_rank(arg, value, *, options=None) -> Expression:
+    def percent_rank(arg, value, *, options=None) -> XqyExpression:
         """Build a composable ``cts:percent-rank`` call.
 
         Returns the rank of a value in a data set as a percentage of the data
@@ -12813,7 +12857,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:percent-rank``.
 
         Notes
@@ -12831,7 +12875,7 @@ class Cts:
         )
 
     @staticmethod
-    def percentile(arg, p) -> Expression:
+    def percentile(arg, p) -> XqyExpression:
         """Build a composable ``cts:percentile`` call.
 
         Returns a sequence of percentile(s) given a sequence of percentage(s).
@@ -12845,7 +12889,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:percentile``.
 
         Notes
@@ -12862,7 +12906,7 @@ class Cts:
         )
 
     @staticmethod
-    def period(start, end) -> Expression:
+    def period(start, end) -> XqyExpression:
         """Build a composable ``cts:period`` call.
 
         Creates a period value, for use as a parameter to cts:period-range-query
@@ -12877,7 +12921,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:period``.
 
         Notes
@@ -12890,7 +12934,7 @@ class Cts:
         )
 
     @staticmethod
-    def period_compare(period_1, operator, period_2) -> Expression:
+    def period_compare(period_1, operator, period_2) -> XqyExpression:
         """Build a composable ``cts:period-compare`` call.
 
         Compares two periods using the specified comparison operator.
@@ -12906,7 +12950,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:period-compare``.
 
         Notes
@@ -12919,7 +12963,13 @@ class Cts:
         )
 
     @staticmethod
-    def period_compare_query(axis_1, operator, axis_2, *, options=None) -> Expression:
+    def period_compare_query(
+        axis_1,
+        operator,
+        axis_2,
+        *,
+        options=None,
+    ) -> XqyExpression:
         """Build a composable ``cts:period-compare-query`` call.
 
         Returns a cts:query matching documents that have relevant pair of period
@@ -12976,7 +13026,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:period-compare-query``.
 
         Notes
@@ -13001,8 +13051,12 @@ class Cts:
 
     @staticmethod
     def period_range_query(
-        axis_name, operator, *, period=None, options=None,
-    ) -> Expression:
+        axis_name,
+        operator,
+        *,
+        period=None,
+        options=None,
+    ) -> XqyExpression:
         """Build a composable ``cts:period-range-query`` call.
 
         Returns a cts:query matching axis by name with a period value with an
@@ -13067,7 +13121,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:period-range-query``.
 
         Notes
@@ -13101,7 +13155,7 @@ class Cts:
         )
 
     @staticmethod
-    def point(latitude_or_wkt, longitude=None) -> Expression:
+    def point(latitude_or_wkt, longitude=None) -> XqyExpression:
         """Build a composable ``cts:point`` call.
 
         Returns a point value.
@@ -13117,7 +13171,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:point``.
 
         Notes
@@ -13131,7 +13185,7 @@ class Cts:
         )
 
     @staticmethod
-    def polygon(vertices) -> Expression:
+    def polygon(vertices) -> XqyExpression:
         """Build a composable ``cts:polygon`` call.
 
         Returns a geospatial polygon value.
@@ -13149,7 +13203,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:polygon``.
 
         Notes
@@ -13162,7 +13216,7 @@ class Cts:
         )
 
     @staticmethod
-    def properties_fragment_query(query) -> Expression:
+    def properties_fragment_query(query) -> XqyExpression:
         """Build a composable ``cts:properties-fragment-query`` call.
 
         Returns a query that matches all documents where $query matches
@@ -13175,7 +13229,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:properties-fragment-query``.
 
         Notes
@@ -13188,7 +13242,7 @@ class Cts:
         )
 
     @staticmethod
-    def quality(*, node=None) -> Expression:
+    def quality(*, node=None) -> XqyExpression:
         """Build a composable ``cts:quality`` call.
 
         Returns the quality of a node, or of the context node if no node is
@@ -13202,7 +13256,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:quality``.
 
         Notes
@@ -13221,7 +13275,7 @@ class Cts:
         )
 
     @staticmethod
-    def quality_order(*, options=None) -> Expression:
+    def quality_order(*, options=None) -> XqyExpression:
         """Build a composable ``cts:quality-order`` call.
 
         Creates a quality-based ordering clause, for use as an option to
@@ -13236,7 +13290,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:quality-order``.
 
         Notes
@@ -13254,7 +13308,7 @@ class Cts:
         )
 
     @staticmethod
-    def query(query) -> Expression:
+    def query(query) -> XqyExpression:
         """Build a composable ``cts:query`` call.
 
         Creates a query.
@@ -13266,7 +13320,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:query``.
 
         Notes
@@ -13279,7 +13333,14 @@ class Cts:
         )
 
     @staticmethod
-    def range_query(index, operator, value, *, options=None, weight=None) -> Expression:
+    def range_query(
+        index,
+        operator,
+        value,
+        *,
+        options=None,
+        weight=None,
+    ) -> XqyExpression:
         """Build a composable ``cts:range-query`` call.
 
         Returns a cts:query matching specified nodes with a range-index entry
@@ -13325,7 +13386,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:range-query``.
 
         Notes
@@ -13358,7 +13419,7 @@ class Cts:
         )
 
     @staticmethod
-    def rank(arg, value, *, options=None) -> Expression:
+    def rank(arg, value, *, options=None) -> XqyExpression:
         """Build a composable ``cts:rank`` call.
 
         Returns the rank of a value in a data set.
@@ -13380,7 +13441,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:rank``.
 
         Notes
@@ -13398,7 +13459,7 @@ class Cts:
         )
 
     @staticmethod
-    def reference_parse(reference) -> Expression:
+    def reference_parse(reference) -> XqyExpression:
         """Build a composable ``cts:reference-parse`` call.
 
         Creates a reference to a value lexicon by parsing its XML or JSON
@@ -13411,7 +13472,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:reference-parse``.
 
         Notes
@@ -13424,7 +13485,7 @@ class Cts:
         )
 
     @staticmethod
-    def register(query) -> Expression:
+    def register(query) -> XqyExpression:
         """Build a composable ``cts:register`` call.
 
         Register a query for later use.
@@ -13436,7 +13497,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:register``.
 
         Notes
@@ -13449,7 +13510,7 @@ class Cts:
         )
 
     @staticmethod
-    def registered_query(ids, *, options=None, weight=None) -> Expression:
+    def registered_query(ids, *, options=None, weight=None) -> XqyExpression:
         """Build a composable ``cts:registered-query`` call.
 
         Returns a query matching fragments specified by previously registered
@@ -13486,7 +13547,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:registered-query``.
 
         Notes
@@ -13518,7 +13579,7 @@ class Cts:
         )
 
     @staticmethod
-    def relevance_info(*, node=None, output_kind=None) -> Expression:
+    def relevance_info(*, node=None, output_kind=None) -> XqyExpression:
         """Build a composable ``cts:relevance-info`` call.
 
         Return the relevance score computation report for a node.
@@ -13535,7 +13596,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:relevance-info``.
 
         Notes
@@ -13564,7 +13625,7 @@ class Cts:
         )
 
     @staticmethod
-    def remainder(*, node=None) -> Expression:
+    def remainder(*, node=None) -> XqyExpression:
         """Build a composable ``cts:remainder`` call.
 
         Returns an estimated search result size for a node, or of the context
@@ -13580,7 +13641,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:remainder``.
 
         Notes
@@ -13623,7 +13684,7 @@ class Cts:
         )
 
     @staticmethod
-    def reverse_query(nodes, *, weight=None) -> Expression:
+    def reverse_query(nodes, *, weight=None) -> XqyExpression:
         """Build a composable ``cts:reverse-query`` call.
 
         Construct a query that matches serialized cts queries, based on a set of
@@ -13640,7 +13701,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:reverse-query``.
 
         Notes
@@ -13671,7 +13732,7 @@ class Cts:
         )
 
     @staticmethod
-    def score(*, node=None) -> Expression:
+    def score(*, node=None) -> XqyExpression:
         """Build a composable ``cts:score`` call.
 
         Returns the score of a node, or of the context node if no node is
@@ -13685,7 +13746,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:score``.
 
         Notes
@@ -13707,7 +13768,7 @@ class Cts:
         )
 
     @staticmethod
-    def score_order(*, options=None) -> Expression:
+    def score_order(*, options=None) -> XqyExpression:
         """Build a composable ``cts:score-order`` call.
 
         Creates a score-based ordering clause, for use as an option to
@@ -13721,7 +13782,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:score-order``.
 
         Notes
@@ -13746,7 +13807,7 @@ class Cts:
         options=None,
         quality_weight=None,
         forest_ids=None,
-    ) -> Expression:
+    ) -> XqyExpression:
         """Build a composable ``cts:search`` call.
 
         Returns a relevance-ordered sequence of nodes specified by a given
@@ -13847,7 +13908,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:search``.
 
         Notes
@@ -13920,7 +13981,7 @@ class Cts:
         )
 
     @staticmethod
-    def similar_query(nodes, *, weight=None, options=None) -> Expression:
+    def similar_query(nodes, *, weight=None, options=None) -> XqyExpression:
         """Build a composable ``cts:similar-query`` call.
 
         Returns a query matching nodes similar to the model nodes.
@@ -13948,7 +14009,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:similar-query``.
 
         Notes
@@ -13964,7 +14025,13 @@ class Cts:
         )
 
     @staticmethod
-    def stddev(range_index, *, options=None, query=None, forest_ids=None) -> Expression:
+    def stddev(
+        range_index,
+        *,
+        options=None,
+        query=None,
+        forest_ids=None,
+    ) -> XqyExpression:
         """Build a composable ``cts:stddev`` call.
 
         Returns a frequency-weighted sample standard deviation given a value
@@ -13983,7 +14050,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:stddev``.
 
         Notes
@@ -13998,8 +14065,12 @@ class Cts:
 
     @staticmethod
     def stddev_p(
-        range_index, *, options=None, query=None, forest_ids=None,
-    ) -> Expression:
+        range_index,
+        *,
+        options=None,
+        query=None,
+        forest_ids=None,
+    ) -> XqyExpression:
         """Build a composable ``cts:stddev-p`` call.
 
         Returns a frequency-weighted standard deviation of the population given
@@ -14018,7 +14089,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:stddev-p``.
 
         Notes
@@ -14032,7 +14103,7 @@ class Cts:
         )
 
     @staticmethod
-    def stem(text, *, language=None, part_of_speech=None) -> Expression:
+    def stem(text, *, language=None, part_of_speech=None) -> XqyExpression:
         """Build a composable ``cts:stem`` call.
 
         Returns the stem(s) for a word.
@@ -14050,7 +14121,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:stem``.
 
         Notes
@@ -14077,7 +14148,7 @@ class Cts:
         options=None,
         query=None,
         forest_ids=None,
-    ) -> Expression:
+    ) -> XqyExpression:
         """Build a composable ``cts:sum-aggregate`` call.
 
         Returns the sum of the values given a value lexicon.
@@ -14095,7 +14166,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:sum-aggregate``.
 
         Notes
@@ -14109,7 +14180,12 @@ class Cts:
         )
 
     @staticmethod
-    def thresholds(computed_labels, known_labels, *, recall_weight=None) -> Expression:
+    def thresholds(
+        computed_labels,
+        known_labels,
+        *,
+        recall_weight=None,
+    ) -> XqyExpression:
         """Build a composable ``cts:thresholds`` call.
 
         Compute precision, recall, the F measure, and thresholds for the classes
@@ -14132,7 +14208,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:thresholds``.
 
         Notes
@@ -14168,7 +14244,7 @@ class Cts:
         )
 
     @staticmethod
-    def tokenize(text, *, language=None, field=None) -> Expression:
+    def tokenize(text, *, language=None, field=None) -> XqyExpression:
         """Build a composable ``cts:tokenize`` call.
 
         Tokenizes text into words, punctuation, and spaces.
@@ -14187,7 +14263,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:tokenize``.
 
         Notes
@@ -14218,7 +14294,7 @@ class Cts:
         )
 
     @staticmethod
-    def train(training_nodes, labels, *, options=None) -> Expression:
+    def train(training_nodes, labels, *, options=None) -> XqyExpression:
         """Build a composable ``cts:train`` call.
 
         Produces a set of classifiers from a list of labeled training documents.
@@ -14312,7 +14388,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:train``.
 
         Notes
@@ -14385,7 +14461,7 @@ class Cts:
         operator=None,
         options=None,
         weight=None,
-    ) -> Expression:
+    ) -> XqyExpression:
         """Build a composable ``cts:triple-range-query`` call.
 
         Returns a cts:query matching triples with a triple index entry equal to
@@ -14426,7 +14502,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:triple-range-query``.
 
         Notes
@@ -14459,7 +14535,7 @@ class Cts:
         )
 
     @staticmethod
-    def triple_value_statistics(*, values=None, forest_ids=None) -> Expression:
+    def triple_value_statistics(*, values=None, forest_ids=None) -> XqyExpression:
         """Build a composable ``cts:triple-value-statistics`` call.
 
         Returns statistics from the triple index for the values given.
@@ -14475,7 +14551,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:triple-value-statistics``.
 
         Notes
@@ -14498,7 +14574,7 @@ class Cts:
         options=None,
         query=None,
         forest_ids=None,
-    ) -> Expression:
+    ) -> XqyExpression:
         """Build a composable ``cts:triples`` call.
 
         Returns values from the triple index.
@@ -14574,7 +14650,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:triples``.
 
         Notes
@@ -14604,14 +14680,14 @@ class Cts:
         )
 
     @staticmethod
-    def true_query() -> Expression:
+    def true_query() -> XqyExpression:
         """Build a composable ``cts:true-query`` call.
 
         Returns a query that matches all fragments.
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:true-query``.
 
         Notes
@@ -14624,14 +14700,14 @@ class Cts:
         )
 
     @staticmethod
-    def unordered() -> Expression:
+    def unordered() -> XqyExpression:
         """Build a composable ``cts:unordered`` call.
 
         Specifies that results should be unordered, for use with cts:search.
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:unordered``.
 
         Notes
@@ -14651,7 +14727,7 @@ class Cts:
         query=None,
         quality_weight=None,
         forest_ids=None,
-    ) -> Expression:
+    ) -> XqyExpression:
         """Build a composable ``cts:uri-match`` call.
 
         Returns values from the URI lexicon that match the specified wildcard
@@ -14725,7 +14801,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:uri-match``.
 
         Notes
@@ -14791,7 +14867,7 @@ class Cts:
         )
 
     @staticmethod
-    def uri_reference() -> Expression:
+    def uri_reference() -> XqyExpression:
         """Build a composable ``cts:uri-reference`` call.
 
         Creates a reference to the URI lexicon, for use as a parameter to
@@ -14799,7 +14875,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:uri-reference``.
 
         Notes
@@ -14819,7 +14895,7 @@ class Cts:
         query=None,
         quality_weight=None,
         forest_ids=None,
-    ) -> Expression:
+    ) -> XqyExpression:
         """Build a composable ``cts:uris`` call.
 
         Returns values from the URI lexicon.
@@ -14891,7 +14967,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:uris``.
 
         Notes
@@ -14947,7 +15023,7 @@ class Cts:
         )
 
     @staticmethod
-    def valid_document_patch_path(string, *, map=None) -> Expression:
+    def valid_document_patch_path(string, *, map=None) -> XqyExpression:
         """Build a composable ``cts:valid-document-patch-path`` call.
 
         Parses path expressions and resolves namespaces using the $map
@@ -14964,7 +15040,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:valid-document-patch-path``.
 
         Notes
@@ -14978,7 +15054,7 @@ class Cts:
         )
 
     @staticmethod
-    def valid_extract_path(string, *, map=None) -> Expression:
+    def valid_extract_path(string, *, map=None) -> XqyExpression:
         """Build a composable ``cts:valid-extract-path`` call.
 
         Parses path expressions and resolves namespaces using the $map
@@ -14995,7 +15071,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:valid-extract-path``.
 
         Notes
@@ -15009,7 +15085,7 @@ class Cts:
         )
 
     @staticmethod
-    def valid_index_path(string, ignorens) -> Expression:
+    def valid_index_path(string, ignorens) -> XqyExpression:
         """Build a composable ``cts:valid-index-path`` call.
 
         Parses path expressions and resolves namespaces based on the server run-
@@ -15024,7 +15100,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:valid-index-path``.
 
         Notes
@@ -15037,7 +15113,7 @@ class Cts:
         )
 
     @staticmethod
-    def valid_optic_path(string, *, map=None) -> Expression:
+    def valid_optic_path(string, *, map=None) -> XqyExpression:
         """Build a composable ``cts:valid-optic-path`` call.
 
         Parses path expressions and resolves namespaces using the $map
@@ -15054,7 +15130,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:valid-optic-path``.
 
         Notes
@@ -15068,7 +15144,7 @@ class Cts:
         )
 
     @staticmethod
-    def valid_tde_context(string, *, map=None) -> Expression:
+    def valid_tde_context(string, *, map=None) -> XqyExpression:
         """Build a composable ``cts:valid-tde-context`` call.
 
         Parses path expressions and resolves namespaces using the $map
@@ -15085,7 +15161,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:valid-tde-context``.
 
         Notes
@@ -15107,7 +15183,7 @@ class Cts:
         query=None,
         quality_weight=None,
         forest_ids=None,
-    ) -> Expression:
+    ) -> XqyExpression:
         """Build a composable ``cts:value-co-occurrences`` call.
 
         Returns value co-occurrences (that is, pairs of values, both of which
@@ -15198,7 +15274,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:value-co-occurrences``.
 
         Notes
@@ -15274,7 +15350,7 @@ class Cts:
         query=None,
         quality_weight=None,
         forest_ids=None,
-    ) -> Expression:
+    ) -> XqyExpression:
         """Build a composable ``cts:value-match`` call.
 
         Returns values from the specified value lexicon(s) that match the
@@ -15360,7 +15436,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:value-match``.
 
         Notes
@@ -15442,7 +15518,7 @@ class Cts:
         query=None,
         quality_weight=None,
         forest_ids=None,
-    ) -> Expression:
+    ) -> XqyExpression:
         """Build a composable ``cts:value-ranges`` call.
 
         Returns value ranges from the specified value lexicon(s).
@@ -15530,7 +15606,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:value-ranges``.
 
         Notes
@@ -15605,7 +15681,7 @@ class Cts:
         query=None,
         quality_weight=None,
         forest_ids=None,
-    ) -> Expression:
+    ) -> XqyExpression:
         """Build a composable ``cts:value-tuples`` call.
 
         Returns value co-occurrence tuples (that is, tuples of values, each of
@@ -15690,7 +15766,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:value-tuples``.
 
         Notes
@@ -15762,7 +15838,7 @@ class Cts:
         query=None,
         quality_weight=None,
         forest_ids=None,
-    ) -> Expression:
+    ) -> XqyExpression:
         """Build a composable ``cts:values`` call.
 
         Returns values from the specified value lexicon(s).
@@ -15846,7 +15922,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:values``.
 
         Notes
@@ -15911,8 +15987,12 @@ class Cts:
 
     @staticmethod
     def variance(
-        range_index, *, options=None, query=None, forest_ids=None,
-    ) -> Expression:
+        range_index,
+        *,
+        options=None,
+        query=None,
+        forest_ids=None,
+    ) -> XqyExpression:
         """Build a composable ``cts:variance`` call.
 
         Returns a frequency-weighted sample variance given a value lexicon.
@@ -15930,7 +16010,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:variance``.
 
         Notes
@@ -15945,8 +16025,12 @@ class Cts:
 
     @staticmethod
     def variance_p(
-        range_index, *, options=None, query=None, forest_ids=None,
-    ) -> Expression:
+        range_index,
+        *,
+        options=None,
+        query=None,
+        forest_ids=None,
+    ) -> XqyExpression:
         """Build a composable ``cts:variance-p`` call.
 
         Returns a frequency-weighted variance of the population given a value
@@ -15965,7 +16049,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:variance-p``.
 
         Notes
@@ -15979,7 +16063,7 @@ class Cts:
         )
 
     @staticmethod
-    def walk(node, query, expr) -> Expression:
+    def walk(node, query, expr) -> XqyExpression:
         """Build a composable ``cts:walk`` call.
 
         Walks a node, evaluating an expression with any text matching a query.
@@ -16000,7 +16084,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:walk``.
 
         Notes
@@ -16043,7 +16127,7 @@ class Cts:
         query=None,
         quality_weight=None,
         forest_ids=None,
-    ) -> Expression:
+    ) -> XqyExpression:
         """Build a composable ``cts:word-match`` call.
 
         Returns words from the word lexicon that match the wildcard pattern.
@@ -16105,7 +16189,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:word-match``.
 
         Notes
@@ -16170,7 +16254,7 @@ class Cts:
         )
 
     @staticmethod
-    def word_query(text, *, options=None, weight=None) -> Expression:
+    def word_query(text, *, options=None, weight=None) -> XqyExpression:
         """Build a composable ``cts:word-query`` call.
 
         Returns a query matching text content containing a given phrase.
@@ -16248,7 +16332,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:word-query``.
 
         Notes
@@ -16310,7 +16394,7 @@ class Cts:
         query=None,
         quality_weight=None,
         forest_ids=None,
-    ) -> Expression:
+    ) -> XqyExpression:
         """Build a composable ``cts:words`` call.
 
         Returns words from the word lexicon.
@@ -16372,7 +16456,7 @@ class Cts:
 
         Returns
         -------
-        Expression
+        XqyExpression
             Composable call to ``cts:words``.
 
         Notes

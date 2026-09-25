@@ -6,15 +6,15 @@ expressions with ml.eval.expression.
 
 from mlclient._experimental import EXPERIMENTAL_NOTICE
 from mlclient.functions.xqy._cts import Cts
-from mlclient.functions.xqy.expressions import (
-    CompilationContext,
-    Expression,
-    namespace_bindings,
-    xpath,
-)
 from mlclient.functions.xqy._fn import Fn
 from mlclient.functions.xqy._xdmp import Xdmp
 from mlclient.functions.xqy._xs import Xs
+from mlclient.functions.xqy.expressions import (
+    XqyCompilationContext,
+    XqyExpression,
+    namespace_bindings,
+    xpath,
+)
 
 cts = Cts()
 fn = Fn()
@@ -24,11 +24,11 @@ xs = Xs()
 __experimental__ = EXPERIMENTAL_NOTICE
 
 __all__ = [
-    "CompilationContext",
     "Cts",
-    "Expression",
     "Fn",
     "Xdmp",
+    "XqyCompilationContext",
+    "XqyExpression",
     "Xs",
     "cts",
     "fn",

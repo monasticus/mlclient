@@ -4,7 +4,7 @@ import pytest
 from httpx_retries import Retry
 
 from mlclient import MLClient
-from mlclient.services import LogLevelService
+from mlclient.services.diagnostics import LogLevelService
 
 
 @pytest.fixture(scope="class")

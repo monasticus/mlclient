@@ -8,7 +8,7 @@ import respx
 from mlclient import AsyncMLClient
 from mlclient.exceptions import MarkLogicError
 from mlclient.models.types import LogType
-from mlclient.services import AsyncLogsService
+from mlclient.services.diagnostics import AsyncLogsService
 from tests.utils import resources as resources_utils
 from tests.utils.ml_mockers import MLRespXMocker
 

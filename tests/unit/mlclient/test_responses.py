@@ -9,6 +9,7 @@ import pytest
 from mlclient import MLClient
 from mlclient.exceptions import MarkLogicError
 from mlclient.models import DocumentsBodyPart
+from mlclient.multipart import MultipartPart
 from mlclient.responses import MLResponseParser
 from tests.utils import resources as resources_utils
 from tests.utils.ml_mockers import MLRespXMocker
@@ -16,6 +17,37 @@ from tests.utils.ml_mockers import MLRespXMocker
 RESOURCES = resources_utils.get_test_resources(__file__)
 ml_mocker = MLRespXMocker(router_base_url="http://localhost:8000")
 ml_mock = ml_mocker.router
+
+
+@pytest.mark.parametrize(
+    ("mime", "primitive", "payload", "expected"),
+    [
+        ("text/plain", "text()", b"b", "b"),
+        ("text/plain", "attribute()", b"abc", "abc"),
+        ("text/plain", "comment()", b"<!--abc-->", "<!--abc-->"),
+        ("text/plain", "processing-instruction()", b"<?p abc?>", "<?p abc?>"),
+        ("application/json", "object-node()", b'{"a":"b"}', {"a": "b"}),
+        ("application/json", "array-node()", b"[1,2]", [1, 2]),
+        ("application/json", "number-node()", b"123", 123),
+        ("application/json", "boolean-node()", b"false", False),
+        ("application/json", "null-node()", b"null", None),
+        ("text/plain", "text()", b"", ""),
+        ("application/x-unknown-content-type", "binary()", b"\x00\xff", b"\x00\xff"),
+        ("text/plain", "binary()", b"\x00\xff", b"\x00\xff"),
+        ("text/plain; charset=iso-8859-1", "text()", b"caf\xe9", "café"),
+    ],
+)
+def test_parse_part_supports_native_node_kinds_without_changing_bytes(
+    mime,
+    primitive,
+    payload,
+    expected,
+):
+    part = MultipartPart({"content-type": mime, "x-primitive": primitive}, payload)
+    result = MLResponseParser.parse_part(part)
+    assert result == expected
+    assert type(result) is type(expected)
+    assert part.content is payload
 
 
 @pytest.fixture(scope="module")

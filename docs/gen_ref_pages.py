@@ -21,6 +21,7 @@ namespaces = (
     "mlclient.functions",
     "mlclient.functions.xqy",
     "mlclient.services",
+    "mlclient.services.diagnostics",
     "mlclient.responses",
     "mlclient.multipart",
     "mlclient.io",

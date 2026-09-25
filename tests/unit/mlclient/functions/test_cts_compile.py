@@ -9,11 +9,11 @@ import pytest
 
 from mlclient.calls import EvalCall
 from mlclient.functions.xqy import cts, fn, xpath, xs
-from mlclient.functions.xqy._expr import _CompileContext
+from mlclient.functions.xqy.expressions import CompilationContext
 
 
 def test_compiler_bindings_are_read_only_snapshots():
-    context = _CompileContext()
+    context = CompilationContext()
     assert context.bind("original") == "$v0"
     snapshot = context.variables
     snapshot["v0"] = "changed"

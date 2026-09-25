@@ -11,7 +11,7 @@ import respx
 
 from mlclient import AsyncMLClient, MLClient
 from mlclient.exceptions import MarkLogicError
-from mlclient.functions.xqy import Expr, cts, fn, xdmp, xpath, xs
+from mlclient.functions.xqy import Expression, cts, fn, xdmp, xpath, xs
 from mlclient.multipart import MultipartPart, encode_multipart_mixed
 from mlclient.responses import MLResponseParser
 from mlclient.services import (
@@ -128,7 +128,7 @@ def test_xml_json_and_nonmultipart_results():
         assert ml.eval.expression(fn.count([])) == []
 
 
-class _CountedExpr(Expr):
+class _CountedExpr(Expression):
     def __init__(self):
         self.renders = 0
 
@@ -145,7 +145,10 @@ def test_wire_parameters_timeout_and_single_compilation():
     expr = _CountedExpr()
     with MLClient() as ml:
         assert ml.eval.expression(
-            expr, database="test", txid="123", timeout=2,
+            expr,
+            database="test",
+            txid="123",
+            timeout=2,
         ) == Decimal("1.234567890123456789")
     request = route.calls.last.request
     body = parse_qs(request.content.decode())
@@ -225,12 +228,12 @@ async def test_invalid_execution_arguments_fail_before_io_sync_and_async():
                 ml.eval.expression(xs.string("original"), **kwargs)
             with pytest.raises(TypeError):
                 CtsService(ml.rest).search(**kwargs)
-        with pytest.raises(TypeError, match="Expr"):
+        with pytest.raises(TypeError, match="Expression"):
             ml.eval.expression("1")
         with pytest.raises(ValueError, match="output_type"):
             ml.eval.expression(fn.count([]), output_type=int)
     async with AsyncMLClient() as ml:
-        with pytest.raises(TypeError, match="Expr"):
+        with pytest.raises(TypeError, match="Expression"):
             await ml.eval.expression("1")
         with pytest.raises(ValueError, match="output_type"):
             await ml.eval.expression(fn.count([]), output_type=int)
@@ -269,23 +272,35 @@ async def test_eval_namespaces_belong_only_to_the_expression_invocation():
     )
     with MLClient() as ml:
         ml.eval.expression(fn.count([1]), namespaces={"p": "urn:test"})
-        assert 'declare namespace p = "urn:test";' in parse_qs(
-            route.calls.last.request.content.decode(),
-        )["xquery"][0]
+        assert (
+            'declare namespace p = "urn:test";'
+            in parse_qs(
+                route.calls.last.request.content.decode(),
+            )["xquery"][0]
+        )
         ml.eval.expression(fn.count([1]))
-        assert "declare namespace p" not in parse_qs(
-            route.calls.last.request.content.decode(),
-        )["xquery"][0]
+        assert (
+            "declare namespace p"
+            not in parse_qs(
+                route.calls.last.request.content.decode(),
+            )["xquery"][0]
+        )
         with pytest.raises(TypeError, match="namespaces"):
             type(ml.eval)(ml.rest, namespaces={"p": "urn:test"})
     async with AsyncMLClient() as ml:
         await ml.eval.expression(fn.count([1]), namespaces={"p": "urn:test"})
-        assert 'declare namespace p = "urn:test";' in parse_qs(
-            route.calls.last.request.content.decode(),
-        )["xquery"][0]
+        assert (
+            'declare namespace p = "urn:test";'
+            in parse_qs(
+                route.calls.last.request.content.decode(),
+            )["xquery"][0]
+        )
         await ml.eval.expression(fn.count([1]))
-        assert "declare namespace p" not in parse_qs(
-            route.calls.last.request.content.decode(),
-        )["xquery"][0]
+        assert (
+            "declare namespace p"
+            not in parse_qs(
+                route.calls.last.request.content.decode(),
+            )["xquery"][0]
+        )
         with pytest.raises(TypeError, match="namespaces"):
             type(ml.eval)(ml.rest, namespaces={"p": "urn:test"})

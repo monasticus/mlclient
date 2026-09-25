@@ -11,9 +11,25 @@ from mlclient.exceptions import (
     UnsupportedFileExtensionError,
     WrongParametersError,
 )
+from mlclient.functions.xqy import fn
 from mlclient.services.eval import _LOCAL_NS
 from tests.utils import resources as resources_utils
 from tests.utils.ml_mockers import MLRespXMocker
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("body", [b"", b"<html>Unavailable</html>"])
+@respx.mock
+async def test_expression_preserves_unrecognized_http_errors(svc, body):
+    route = respx.post("http://localhost:8000/v1/eval").mock(
+        return_value=httpx.Response(503, content=body),
+    )
+    with pytest.raises(httpx.HTTPStatusError) as raised:
+        await svc.expression(fn.count([]))
+    assert raised.value.response.status_code == 503
+    assert raised.value.response.content == body
+    assert raised.value.request.url == route.calls.last.request.url
+    assert raised.value.request.content == route.calls.last.request.content
 
 
 @pytest_asyncio.fixture

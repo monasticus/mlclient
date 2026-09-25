@@ -17,7 +17,7 @@ if TYPE_CHECKING:
     from mlclient.api.rest import AsyncRestApi, RestApi
 
 from mlclient.exceptions import UnsupportedFileExtensionError, WrongParametersError
-from mlclient.functions.xqy._expr import Expr
+from mlclient.functions.xqy import Expression
 from mlclient.responses import MLResponseParser
 
 _LOCAL_NS = "http://www.w3.org/2005/xquery-local-functions"
@@ -46,7 +46,7 @@ class EvalService:
 
     def expression(
         self,
-        expr: Expr,
+        expr: Expression,
         *,
         namespaces: dict[str, str] | None = None,
         database: str | None = None,
@@ -58,7 +58,7 @@ class EvalService:
 
         Parameters
         ----------
-        expr : Expr
+        expr : Expression
             A builder expression, including nested calls or a positional range.
         namespaces : dict[str, str] | None
             Prefix-to-URI bindings for this invocation only.
@@ -89,9 +89,11 @@ class EvalService:
             If output_type is not None, str or bytes.
         MarkLogicError
             If the server rejects the expression, including unavailable functions.
+        httpx.HTTPStatusError
+            If an HTTP failure has no recognized MarkLogic error payload.
         """
-        if not isinstance(expr, Expr):
-            message = "expression requires an Expr"
+        if not isinstance(expr, Expression):
+            message = "expression requires an Expression"
             raise TypeError(message)
         if output_type not in (None, str, bytes):
             message = "output_type must be None, str or bytes"
@@ -104,8 +106,7 @@ class EvalService:
             txid=txid,
             timeout=timeout,
         )
-        if not response.is_success:
-            raise MarkLogicError(MLResponseParser.parse(response))
+        MLResponseParser.raise_for_status(response)
         return MLResponseParser.parse(response, output_type)
 
     def xquery(
@@ -631,7 +632,7 @@ class AsyncEvalService:
 
     async def expression(
         self,
-        expr: Expr,
+        expr: Expression,
         *,
         namespaces: dict[str, str] | None = None,
         database: str | None = None,
@@ -643,7 +644,7 @@ class AsyncEvalService:
 
         Parameters
         ----------
-        expr : Expr
+        expr : Expression
             A builder expression, including nested calls or a positional range.
         namespaces : dict[str, str] | None
             Prefix-to-URI bindings for this invocation only.
@@ -674,9 +675,11 @@ class AsyncEvalService:
             If output_type is not None, str or bytes.
         MarkLogicError
             If the server rejects the expression, including unavailable functions.
+        httpx.HTTPStatusError
+            If an HTTP failure has no recognized MarkLogic error payload.
         """
-        if not isinstance(expr, Expr):
-            message = "expression requires an Expr"
+        if not isinstance(expr, Expression):
+            message = "expression requires an Expression"
             raise TypeError(message)
         if output_type not in (None, str, bytes):
             message = "output_type must be None, str or bytes"
@@ -689,8 +692,7 @@ class AsyncEvalService:
             txid=txid,
             timeout=timeout,
         )
-        if not response.is_success:
-            raise MarkLogicError(MLResponseParser.parse(response))
+        MLResponseParser.raise_for_status(response)
         return MLResponseParser.parse(response, output_type)
 
     async def xquery(

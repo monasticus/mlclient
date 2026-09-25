@@ -7,9 +7,7 @@ It exports an implementation for 'env show' command:
 
 from __future__ import annotations
 
-import os
 import subprocess
-import sys
 
 from cleo.commands.command import Command
 from cleo.formatters.formatter import Formatter
@@ -18,6 +16,7 @@ from cleo.io.inputs.argument import Argument
 from cleo.io.inputs.option import Option
 from cleo.ui.table import Table
 
+from mlclient.cli.clipboard import copy_to_clipboard
 from mlclient.cli.commands._env_common import (
     APP_SERVERS_KEY,
     FILE_PREFIX,
@@ -220,7 +219,7 @@ class EnvShowCommand(Command):
             )
             return
         try:
-            _copy_to_clipboard(display_value(setting, value, reveal=True))
+            copy_to_clipboard(display_value(setting, value, reveal=True))
         except (OSError, subprocess.SubprocessError):
             self.line_error(
                 "Could not copy to clipboard. Check that a clipboard "
@@ -264,28 +263,6 @@ class EnvShowCommand(Command):
                 ],
             )
         table.render()
-
-
-def _copy_to_clipboard(text: str) -> None:
-    """Send text through stdin to the platform's clipboard tool."""
-    encoding = "utf-8"
-    if sys.platform == "win32":
-        command = ["clip"]
-        encoding = "utf-16"
-    elif sys.platform == "darwin":
-        command = ["pbcopy"]
-    elif os.environ.get("WAYLAND_DISPLAY"):
-        command = ["wl-copy"]
-    else:
-        command = ["xclip", "-selection", "clipboard"]
-    subprocess.run(
-        command,
-        input=text.encode(encoding),
-        check=True,
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
-        timeout=5,
-    )
 
 
 def _find_server(

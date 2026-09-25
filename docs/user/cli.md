@@ -47,6 +47,7 @@ ml eval -x '"Hello World!"'
 ml http get /v1/documents uri=/example.json
 ml logs -s 8002
 ml log-level
+ml url qc
 ml health
 ml version
 ```
@@ -66,6 +67,7 @@ command page.
 | Read server logs | [`ml logs`](cli/logs.md) |
 | Inspect or change a log level | [`ml log-level`](cli/log-level.md) |
 | Inspect or change diagnostic trace events | [`ml trace-events`](cli/trace-events.md) |
+| Print, copy or open a browser URL | [`ml url`](cli/url.md) |
 | Check server health, once or continuously | [`ml health`](cli/health.md) |
 | Read the MarkLogic version | [`ml version`](cli/version.md) |
 

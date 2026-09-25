@@ -109,6 +109,7 @@ nav:
       - trace-events: user/cli/trace-events.md
       - health: user/cli/health.md
       - version: user/cli/version.md
+      - url: user/cli/url.md
   - API reference: reference/
   - Community:
       - Background: about.md

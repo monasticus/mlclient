@@ -26,9 +26,9 @@ def _work_dir(
 
 @pytest.fixture
 def clipboard_process(mocker: MockerFixture, monkeypatch: pytest.MonkeyPatch) -> Mock:
-    monkeypatch.setattr("mlclient.cli.commands.env_show.sys.platform", "linux")
+    monkeypatch.setattr("mlclient.cli.clipboard.sys.platform", "linux")
     monkeypatch.delenv("WAYLAND_DISPLAY", raising=False)
-    return mocker.patch("mlclient.cli.commands.env_show.subprocess.run")
+    return mocker.patch("mlclient.cli.clipboard.subprocess.run")
 
 
 def _get_tester() -> CommandTester:
@@ -545,7 +545,7 @@ def test_setting_uses_platform_clipboard(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     platform, wayland = session
-    monkeypatch.setattr("mlclient.cli.commands.env_show.sys.platform", platform)
+    monkeypatch.setattr("mlclient.cli.clipboard.sys.platform", platform)
     if wayland:
         monkeypatch.setenv("WAYLAND_DISPLAY", "wayland-0")
     _write_env("dev", {"password": "żółć"})
@@ -822,7 +822,7 @@ def test_preserves_literal_markup(decorated):
 
 def test_show_copies_original_markup_without_escape_characters(mocker):
     _write_env("dev", {"host": "<info>literal</info>"})
-    copy = mocker.patch("mlclient.cli.commands.env_show._copy_to_clipboard")
+    copy = mocker.patch("mlclient.cli.commands.env_show.copy_to_clipboard")
 
     tester = _get_tester()
     tester.execute("dev host --copy")

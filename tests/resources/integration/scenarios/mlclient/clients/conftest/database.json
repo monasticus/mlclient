@@ -1,0 +1,66 @@
+{
+  "uri-lexicon": true,
+  "collection-lexicon": true,
+  "geospatial-element-index": [
+    {
+      "namespace-uri": "https://monasticus.com/mlclient/examples/cts-test",
+      "localname": "origin",
+      "coordinate-system": "wgs84",
+      "point-format": "point",
+      "range-value-positions": false,
+      "invalid-values": "reject"
+    },
+    {
+      "namespace-uri": "https://monasticus.com/mlclient/examples/cts-test",
+      "localname": "destination",
+      "coordinate-system": "wgs84",
+      "point-format": "point",
+      "range-value-positions": false,
+      "invalid-values": "reject"
+    }
+  ],
+  "path-namespace": [
+    {
+      "prefix": "t",
+      "namespace-uri": "https://monasticus.com/mlclient/examples/cts-test"
+    }
+  ],
+  "field": [
+    {
+      "field-name": "price",
+      "field-path": [{"path": "/t:item/t:price", "weight": 1.0}]
+    }
+  ],
+  "range-field-index": [
+    {
+      "scalar-type": "decimal",
+      "field-name": "price",
+      "range-value-positions": false,
+      "invalid-values": "reject"
+    }
+  ],
+  "range-path-index": [
+    {
+      "scalar-type": "decimal",
+      "path-expression": "/t:item/t:price",
+      "range-value-positions": false,
+      "invalid-values": "reject"
+    }
+  ],
+  "range-element-index": [
+    {
+      "scalar-type": "decimal",
+      "namespace-uri": "https://monasticus.com/mlclient/examples/cts-test",
+      "localname": "price",
+      "range-value-positions": false,
+      "invalid-values": "reject"
+    },
+    {
+      "scalar-type": "date",
+      "namespace-uri": "https://monasticus.com/mlclient/examples/cts-test",
+      "localname": "day",
+      "range-value-positions": false,
+      "invalid-values": "reject"
+    }
+  ]
+}

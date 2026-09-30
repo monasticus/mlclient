@@ -235,7 +235,7 @@ version restrictions still apply; unavailable functions raise `MarkLogicError`.
 | `cts.document_permission_query` | MarkLogic 11+ |
 | `cts.iri_reference` | MarkLogic 11+ |
 
-Consult the [CTS reference][mlclient.functions.xqy.Cts] and the
+Consult the [`cts` reference][mlclient.functions.xqy.cts] and the
 [native reference](https://docs.marklogic.com/cts) for individual requirements.
 
 ## FN: compose standard functions

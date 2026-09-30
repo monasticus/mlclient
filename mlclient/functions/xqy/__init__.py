@@ -25,13 +25,9 @@ xs = Xs()
 __experimental__ = EXPERIMENTAL_NOTICE
 
 __all__ = [
-    "Cts",
-    "Fn",
     "ModuleFunctionCall",
-    "Xdmp",
     "XqyCompilationContext",
     "XqyExpression",
-    "Xs",
     "cts",
     "fn",
     "namespace_bindings",

@@ -11,7 +11,7 @@ import respx
 
 from mlclient import AsyncMLClient
 from mlclient.exceptions import MarkLogicError
-from mlclient.functions.xqy import Cts, fn, xs
+from mlclient.functions.xqy import fn, xs
 from mlclient.models import SearchHit, ValueHit
 from mlclient.multipart import MultipartPart, encode_multipart_mixed
 from mlclient.services import AsyncCtsService
@@ -126,11 +126,13 @@ from tests.utils.ml_mockers import MLRespXMocker
 @respx.mock
 async def test_result_operations_propagate_http_failure(name):
     # HTTP authorization fails before XQuery evaluation; no result type is faked.
-    native = getattr(Cts, name)
+    native = getattr(AsyncCtsService, name)
     required = {
         parameter: xs.string(parameter)
         for (parameter, item) in inspect.signature(native).parameters.items()
-        if item.default is inspect.Parameter.empty
+        if item.kind is not inspect.Parameter.VAR_KEYWORD
+        and parameter != "self"
+        and item.default is inspect.Parameter.empty
     }
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url("http://localhost:8000/v1/eval")
@@ -421,7 +423,7 @@ async def test_async_lexicon_queries_require_explicit_keywords():
                 "contains",
                 {
                     "nodes": StaticExpression("<p>coffee</p>"),
-                    "query": Cts.word_query("coffee"),
+                    "query": lambda cts: cts.word_query("coffee"),
                 },
             ),
             "cts:contains((<p>coffee</p>), cts:word-query($v0))",
@@ -444,28 +446,34 @@ async def test_async_lexicon_queries_require_explicit_keywords():
             True,
         ),
         (
-            ("sum_aggregate", {"range_index": Cts.field_reference("price")}),
+            (
+                "sum_aggregate",
+                {"range_index": lambda cts: cts.field_reference("price")},
+            ),
             "cts:sum-aggregate(cts:field-reference($v0))",
             {"v0": "price"},
             ("decimal", "3.75"),
             Decimal("3.75"),
         ),
         (
-            ("count_aggregate", {"range_index": Cts.field_reference("price")}),
+            (
+                "count_aggregate",
+                {"range_index": lambda cts: cts.field_reference("price")},
+            ),
             "cts:count-aggregate(cts:field-reference($v0))",
             {"v0": "price"},
             ("unsignedLong", "2"),
             2,
         ),
         (
-            ("min", {"range_index": Cts.field_reference("price")}),
+            ("min", {"range_index": lambda cts: cts.field_reference("price")}),
             "cts:min(cts:field-reference($v0))",
             {"v0": "price"},
             ("decimal", "1.25"),
             Decimal("1.25"),
         ),
         (
-            ("max", {"range_index": Cts.field_reference("price")}),
+            ("max", {"range_index": lambda cts: cts.field_reference("price")}),
             "cts:max(cts:field-reference($v0))",
             {"v0": "price"},
             ("decimal", "2.50"),
@@ -501,7 +509,12 @@ async def test_plain_result_operations(
     ml_mocker.with_response_body_part(primitive, payload, "text/plain")
     route = ml_mocker.mock_post()
     async with AsyncMLClient() as ml:
-        result = await getattr(AsyncCtsService(ml.rest), method)(**arguments)
+        cts = AsyncCtsService(ml.rest)
+        arguments = {
+            name: value(cts) if callable(value) else value
+            for name, value in arguments.items()
+        }
+        result = await getattr(cts, method)(**arguments)
     assert result == [expected]
     assert type(result[0]) is type(expected)
     assert route.call_count == 1
@@ -543,7 +556,7 @@ async def test_estimate_rejects_invalid_output_type_before_io():
     ("operation", "native", "variables", "response", "value"),
     [
         (
-            ("values", {"range_indexes": Cts.field_reference("price")}),
+            ("values", {"range_indexes": lambda cts: cts.field_reference("price")}),
             "cts:values(cts:field-reference($v0))",
             {"v0": "price"},
             ("decimal", "1.25"),
@@ -611,7 +624,12 @@ async def test_lexicon_values_include_frequency(
     ml_mocker.with_response_body_part("integer", "3", "text/plain")
     route = ml_mocker.mock_post()
     async with AsyncMLClient() as ml:
-        result = await getattr(AsyncCtsService(ml.rest), method)(**arguments)
+        cts = AsyncCtsService(ml.rest)
+        arguments = {
+            name: value(cts) if callable(value) else value
+            for name, value in arguments.items()
+        }
+        result = await getattr(cts, method)(**arguments)
     assert result == [ValueHit(value, frequency=3)]
     assert type(result[0].value) is type(value)
     assert route.call_count == 1
@@ -621,7 +639,7 @@ async def test_lexicon_values_include_frequency(
 @pytest.mark.parametrize(
     ("method", "arguments"),
     [
-        ("values", {"range_indexes": Cts.uri_reference()}),
+        ("values", {"range_indexes": lambda cts: cts.uri_reference()}),
         ("field_values", {"field_names": "price"}),
         ("collections", {}),
         ("words", {}),
@@ -634,8 +652,13 @@ async def test_lexicon_values_include_frequency(
 @respx.mock
 async def test_lexicon_map_options_are_rejected_before_io(method, arguments, options):
     async with AsyncMLClient() as ml:
+        cts = AsyncCtsService(ml.rest)
+        arguments = {
+            name: value(cts) if callable(value) else value
+            for name, value in arguments.items()
+        }
         with pytest.raises(ValueError, match="Map output"):
-            await getattr(AsyncCtsService(ml.rest), method)(
+            await getattr(cts, method)(
                 **arguments,
                 options=options,
             )
@@ -651,8 +674,9 @@ async def test_dynamic_lexicon_options_keep_server_map_validation():
     ml_mocker.with_response_body_part("integer", "1", "text/plain")
     route = ml_mocker.mock_post()
     async with AsyncMLClient() as ml:
-        result = await AsyncCtsService(ml.rest).values(
-            Cts.uri_reference(),
+        cts = AsyncCtsService(ml.rest)
+        result = await cts.values(
+            cts.uri_reference(),
             options=[xs.string("item-frequency")],
         )
 
@@ -683,9 +707,8 @@ async def test_search_pairs_results_without_a_redundant_inner_loop():
     ml_mocker.with_empty_response_body()
     route = ml_mocker.mock_post()
     async with AsyncMLClient() as ml:
-        assert (
-            await AsyncCtsService(ml.rest).search(query=Cts.word_query("coffee")) == []
-        )
+        cts = AsyncCtsService(ml.rest)
+        assert await cts.search(query=cts.word_query("coffee")) == []
     assert route.call_count == 1
 
 
@@ -693,10 +716,11 @@ async def test_search_pairs_results_without_a_redundant_inner_loop():
 @pytest.mark.asyncio
 @respx.mock
 async def test_index_and_range_are_mutually_exclusive(method):
-    arguments = {"range_indexes": Cts.uri_reference()} if method == "values" else {}
     async with AsyncMLClient() as ml:
+        cts = AsyncCtsService(ml.rest)
+        arguments = {"range_indexes": cts.uri_reference()} if method == "values" else {}
         with pytest.raises(ValueError, match="mutually exclusive"):
-            await getattr(AsyncCtsService(ml.rest), method)(
+            await getattr(cts, method)(
                 **arguments,
                 index=1,
                 range=[1, 2],
@@ -715,7 +739,8 @@ async def test_values_selection_returns_a_single_item_list(selection):
     ml_mocker.with_response_body_part("integer", "1", "text/plain")
     route = ml_mocker.mock_post()
     async with AsyncMLClient() as ml:
-        result = await AsyncCtsService(ml.rest).values(Cts.uri_reference(), **selection)
+        cts = AsyncCtsService(ml.rest)
+        result = await cts.values(cts.uri_reference(), **selection)
     assert result == [ValueHit("/a.xml", frequency=1)]
     body = parse_qs(route.calls.last.request.content.decode())
     assert "cts:values(cts:uri-reference())" in body["xquery"][0]

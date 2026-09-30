@@ -10,7 +10,7 @@ import pytest
 
 from docs.examples.custom_expression import label
 from mlclient.exceptions import MarkLogicError
-from mlclient.functions.xqy import Cts, ModuleFunctionCall, cts, fn, xpath, xs
+from mlclient.functions.xqy import ModuleFunctionCall, cts, fn, xpath, xs
 from mlclient.models import TextDocument
 from tests.utils.expressions import StaticExpression
 
@@ -240,8 +240,8 @@ class TestEvalService:
     def test_native_version_support_is_reported_by_server(self, indexed_database):
         ml, database, _ = indexed_database
         major = int(ml.eval.xquery("xdmp:version()").split(".")[0])
-        expr = Cts.search(
-            query=Cts.document_root_query(
+        expr = cts.search(
+            query=cts.document_root_query(
                 fn.qname("https://monasticus.com/mlclient/examples/cts-test", "item"),
             ),
         )
@@ -251,9 +251,9 @@ class TestEvalService:
         else:
             assert len(ml.eval.expression(expr, database=database)) == 2
         for native in (
-            Cts.document_format_query("xml"),
-            Cts.document_permission_query("admin", "read"),
-            Cts.iri_reference(),
+            cts.document_format_query("xml"),
+            cts.document_permission_query("admin", "read"),
+            cts.iri_reference(),
         ):
             if major < 11:
                 with pytest.raises(MarkLogicError, match="XDMP-UNDFUN"):
@@ -263,7 +263,7 @@ class TestEvalService:
 
     def test_geospatial_and_triple_native_contracts(self, indexed_database):
         ml, database, _ = indexed_database
-        pairs = Cts.geospatial_co_occurrences(
+        pairs = cts.geospatial_co_occurrences(
             fn.qname("https://monasticus.com/mlclient/examples/cts-test", "origin"),
             fn.qname(
                 "https://monasticus.com/mlclient/examples/cts-test",
@@ -274,30 +274,30 @@ class TestEvalService:
         assert result.tag == "{http://marklogic.com/cts}co-occurrence"
         assert ml.eval.expression(fn.count(pairs), database=database) == 1
         for operator in ("sameTerm", ["=", "=", "<"], []):
-            query = Cts.triple_range_query([], [], 1, operator=operator)
+            query = cts.triple_range_query([], [], 1, operator=operator)
             assert ml.eval.expression(fn.count(query), database=database) == 1
 
     def test_text_callbacks_and_native_maps(self, indexed_database):
         ml, database, _ = indexed_database
         node = StaticExpression("<p>alpha beta</p>")
-        query = Cts.parse("alpha")
+        query = cts.parse("alpha")
         result = ml.eval.expression(
-            Cts.highlight(node, query, StaticExpression("<b>{$cts:text}</b>")),
+            cts.highlight(node, query, StaticExpression("<b>{$cts:text}</b>")),
             database=database,
         )
         assert result.find("b").text == "alpha"
         assert (
             ml.eval.expression(
-                Cts.walk(node, query, StaticExpression("$cts:text")),
+                cts.walk(node, query, StaticExpression("$cts:text")),
                 database=database,
             )
             == "alpha"
         )
         assert (
             ml.eval.expression(
-                Cts.contains(
+                cts.contains(
                     node,
-                    Cts.parse("alpha", bindings=StaticExpression("map:map()")),
+                    cts.parse("alpha", bindings=StaticExpression("map:map()")),
                 ),
                 database=database,
             )
@@ -309,58 +309,58 @@ class TestEvalService:
         indexed_database,
     ):
         ml, database, _ = indexed_database
-        query = Cts.collection_query("cts-test")
-        price = Cts.element_reference(
+        query = cts.collection_query("cts-test")
+        price = cts.element_reference(
             fn.qname("https://monasticus.com/mlclient/examples/cts-test", "price"),
         )
 
         assert (
-            ml.eval.expression(Cts.contains(StaticExpression("<p>alpha</p>"), query))
+            ml.eval.expression(cts.contains(StaticExpression("<p>alpha</p>"), query))
             is False
         )
         assert (
-            ml.eval.expression(Cts.collections(query=query), database=database)
+            ml.eval.expression(cts.collections(query=query), database=database)
             == "cts-test"
         )
         assert (
             ml.eval.expression(
-                Cts.collection_match("cts-*", query=query),
+                cts.collection_match("cts-*", query=query),
                 database=database,
             )
             == "cts-test"
         )
         assert ml.eval.expression(
-            Cts.uri_match("/cts-test/*.xml", query=query),
+            cts.uri_match("/cts-test/*.xml", query=query),
             database=database,
         ) == ["/cts-test/a.xml", "/cts-test/b.xml"]
         assert ml.eval.expression(
-            Cts.min(price, query=query),
+            cts.min(price, query=query),
             database=database,
         ) == Decimal("1.25")
         assert ml.eval.expression(
-            Cts.max(price, query=query),
+            cts.max(price, query=query),
             database=database,
         ) == Decimal("2.50")
         assert (
             ml.eval.expression(
-                Cts.count_aggregate(price, query=query),
+                cts.count_aggregate(price, query=query),
                 database=database,
             )
             == 2
         )
 
-        query_id = ml.eval.expression(Cts.register(query), database=database)
+        query_id = ml.eval.expression(cts.register(query), database=database)
         try:
             assert isinstance(query_id, int)
             assert (
                 ml.eval.expression(
-                    Cts.estimate(Cts.registered_query(query_id)),
+                    cts.estimate(cts.registered_query(query_id)),
                     database=database,
                 )
                 == 3
             )
         finally:
-            ml.eval.expression(Cts.deregister(query_id), database=database)
+            ml.eval.expression(cts.deregister(query_id), database=database)
 
     def test_all_invalid_paths_reported_before_executing_tree(self, indexed_database):
         ml, database, _ = indexed_database
@@ -372,8 +372,8 @@ class TestEvalService:
         ]
         expression = fn.count(
             [
-                Cts.search(bad_paths[0]),
-                Cts.search(bad_paths[1]),
+                cts.search(bad_paths[0]),
+                cts.search(bad_paths[1]),
                 fn.count(xpath(bad_paths[2])),
                 xpath(bad_paths[3]),
                 StaticExpression('fn:error(xs:QName("SHOULD-NOT-RUN"))'),
@@ -416,8 +416,8 @@ class TestEvalService:
         assert (
             ml.eval.expression(
                 fn.count(
-                    Cts.search(
-                        query=Cts.element_query(xs.qname("item"), Cts.true_query()),
+                    cts.search(
+                        query=cts.element_query(xs.qname("item"), cts.true_query()),
                     ),
                 ),
                 namespaces={"": "https://monasticus.com/mlclient/examples/cts-test"},
@@ -429,11 +429,11 @@ class TestEvalService:
     @pytest.mark.parametrize(
         "expression",
         [
-            Cts.geospatial_path_reference("/unknown:path"),
-            Cts.geospatial_region_path_reference("/unknown:path"),
-            Cts.path_geospatial_query("/unknown:path", Cts.point(10, 20)),
-            Cts.path_range_query("/unknown:path", "=", 1),
-            Cts.path_reference("/unknown:path"),
+            cts.geospatial_path_reference("/unknown:path"),
+            cts.geospatial_region_path_reference("/unknown:path"),
+            cts.path_geospatial_query("/unknown:path", cts.point(10, 20)),
+            cts.path_range_query("/unknown:path", "=", 1),
+            cts.path_reference("/unknown:path"),
         ],
     )
     def test_string_path_arguments_are_validated_by_the_native_function(

@@ -11,7 +11,7 @@ import respx
 
 from mlclient import MLClient
 from mlclient.exceptions import MarkLogicError
-from mlclient.functions.xqy import Cts, fn, xs
+from mlclient.functions.xqy import fn, xs
 from mlclient.models import SearchHit, ValueHit
 from mlclient.multipart import MultipartPart, encode_multipart_mixed
 from mlclient.responses import MLResponseParser
@@ -126,11 +126,13 @@ from tests.utils.ml_mockers import MLRespXMocker
 @respx.mock
 def test_result_operations_propagate_http_failure(name):
     # HTTP authorization fails before XQuery evaluation; no result type is faked.
-    native = getattr(Cts, name)
+    native = getattr(CtsService, name)
     required = {
         parameter: xs.string(parameter)
         for (parameter, item) in inspect.signature(native).parameters.items()
-        if item.default is inspect.Parameter.empty
+        if item.kind is not inspect.Parameter.VAR_KEYWORD
+        and parameter != "self"
+        and item.default is inspect.Parameter.empty
     }
     ml_mocker = MLRespXMocker(use_router=False)
     ml_mocker.with_url("http://localhost:8000/v1/eval")
@@ -237,18 +239,21 @@ def test_result_services_reject_raw_output_before_io():
 
 
 def test_every_catalog_function_has_an_explicit_execution_policy():
-    names = {name for name, method in inspect.getmembers(Cts, inspect.isfunction)}
+    builder_type = CtsService.__mro__[1]
+    names = {
+        name for name, method in inspect.getmembers(builder_type, inspect.isfunction)
+    }
     assert names == BUILDERS | VALUE_OPERATIONS | PLAIN_OPERATIONS | {"search"}
     assert not BUILDERS & (VALUE_OPERATIONS | PLAIN_OPERATIONS)
     assert not VALUE_OPERATIONS & PLAIN_OPERATIONS
     for name in BUILDERS:
-        assert getattr(CtsService, name) is getattr(Cts, name)
-        assert getattr(AsyncCtsService, name) is getattr(Cts, name)
+        assert getattr(CtsService, name) is getattr(builder_type, name)
+        assert getattr(AsyncCtsService, name) is getattr(builder_type, name)
     for name in VALUE_OPERATIONS | PLAIN_OPERATIONS | {"search"}:
         assert name in CtsService.__dict__
         assert name in AsyncCtsService.__dict__
         assert inspect.iscoroutinefunction(getattr(AsyncCtsService, name))
-        native_parameters = inspect.signature(getattr(Cts, name)).parameters
+        native_parameters = inspect.signature(getattr(builder_type, name)).parameters
         for cls in (CtsService, AsyncCtsService):
             parameters = inspect.signature(getattr(cls, name)).parameters
             assert [key for key in parameters if key in native_parameters] == list(
@@ -690,7 +695,7 @@ def test_service_range_validation_happens_before_io(value):
                 "contains",
                 {
                     "nodes": StaticExpression("<p>coffee</p>"),
-                    "query": Cts.word_query("coffee"),
+                    "query": lambda cts: cts.word_query("coffee"),
                 },
             ),
             "cts:contains((<p>coffee</p>), cts:word-query($v0))",
@@ -713,28 +718,34 @@ def test_service_range_validation_happens_before_io(value):
             True,
         ),
         (
-            ("sum_aggregate", {"range_index": Cts.field_reference("price")}),
+            (
+                "sum_aggregate",
+                {"range_index": lambda cts: cts.field_reference("price")},
+            ),
             "cts:sum-aggregate(cts:field-reference($v0))",
             {"v0": "price"},
             ("decimal", "3.75"),
             Decimal("3.75"),
         ),
         (
-            ("count_aggregate", {"range_index": Cts.field_reference("price")}),
+            (
+                "count_aggregate",
+                {"range_index": lambda cts: cts.field_reference("price")},
+            ),
             "cts:count-aggregate(cts:field-reference($v0))",
             {"v0": "price"},
             ("unsignedLong", "2"),
             2,
         ),
         (
-            ("min", {"range_index": Cts.field_reference("price")}),
+            ("min", {"range_index": lambda cts: cts.field_reference("price")}),
             "cts:min(cts:field-reference($v0))",
             {"v0": "price"},
             ("decimal", "1.25"),
             Decimal("1.25"),
         ),
         (
-            ("max", {"range_index": Cts.field_reference("price")}),
+            ("max", {"range_index": lambda cts: cts.field_reference("price")}),
             "cts:max(cts:field-reference($v0))",
             {"v0": "price"},
             ("decimal", "2.50"),
@@ -763,7 +774,12 @@ def test_plain_result_operations(operation, native, variables, response, expecte
     ml_mocker.with_response_body_part(primitive, payload, "text/plain")
     route = ml_mocker.mock_post()
     with MLClient() as ml:
-        result = getattr(CtsService(ml.rest), method)(**arguments)
+        cts = CtsService(ml.rest)
+        arguments = {
+            name: value(cts) if callable(value) else value
+            for name, value in arguments.items()
+        }
+        result = getattr(cts, method)(**arguments)
     assert result == [expected]
     assert type(result[0]) is type(expected)
     assert route.call_count == 1
@@ -802,7 +818,7 @@ def test_estimate_rejects_invalid_output_type_before_io():
     ("operation", "native", "variables", "response", "value"),
     [
         (
-            ("values", {"range_indexes": Cts.field_reference("price")}),
+            ("values", {"range_indexes": lambda cts: cts.field_reference("price")}),
             "cts:values(cts:field-reference($v0))",
             {"v0": "price"},
             ("decimal", "1.25"),
@@ -869,7 +885,12 @@ def test_lexicon_values_include_frequency(
     ml_mocker.with_response_body_part("integer", "3", "text/plain")
     route = ml_mocker.mock_post()
     with MLClient() as ml:
-        result = getattr(CtsService(ml.rest), method)(**arguments)
+        cts = CtsService(ml.rest)
+        arguments = {
+            name: value(cts) if callable(value) else value
+            for name, value in arguments.items()
+        }
+        result = getattr(cts, method)(**arguments)
     assert result == [ValueHit(value, frequency=3)]
     assert type(result[0].value) is type(value)
     assert route.call_count == 1
@@ -878,7 +899,7 @@ def test_lexicon_values_include_frequency(
 @pytest.mark.parametrize(
     ("method", "arguments"),
     [
-        ("values", {"range_indexes": Cts.uri_reference()}),
+        ("values", {"range_indexes": lambda cts: cts.uri_reference()}),
         ("field_values", {"field_names": "price"}),
         ("collections", {}),
         ("words", {}),
@@ -890,8 +911,14 @@ def test_lexicon_values_include_frequency(
 )
 @respx.mock
 def test_lexicon_map_options_are_rejected_before_io(method, arguments, options):
-    with MLClient() as ml, pytest.raises(ValueError, match="Map output"):
-        getattr(CtsService(ml.rest), method)(**arguments, options=options)
+    with MLClient() as ml:
+        cts = CtsService(ml.rest)
+        arguments = {
+            name: value(cts) if callable(value) else value
+            for name, value in arguments.items()
+        }
+        with pytest.raises(ValueError, match="Map output"):
+            getattr(cts, method)(**arguments, options=options)
 
 
 @respx.mock
@@ -903,8 +930,9 @@ def test_dynamic_lexicon_options_keep_server_map_validation():
     ml_mocker.with_response_body_part("integer", "1", "text/plain")
     route = ml_mocker.mock_post()
     with MLClient() as ml:
-        result = CtsService(ml.rest).values(
-            Cts.uri_reference(),
+        cts = CtsService(ml.rest)
+        result = cts.values(
+            cts.uri_reference(),
             options=[xs.string("item-frequency")],
         )
 
@@ -934,16 +962,19 @@ def test_search_pairs_results_without_a_redundant_inner_loop():
     ml_mocker.with_empty_response_body()
     route = ml_mocker.mock_post()
     with MLClient() as ml:
-        assert CtsService(ml.rest).search(query=Cts.word_query("coffee")) == []
+        cts = CtsService(ml.rest)
+        assert cts.search(query=cts.word_query("coffee")) == []
     assert route.call_count == 1
 
 
 @pytest.mark.parametrize("method", ["search", "values", "uris"])
 @respx.mock
 def test_index_and_range_are_mutually_exclusive(method):
-    arguments = {"range_indexes": Cts.uri_reference()} if method == "values" else {}
-    with MLClient() as ml, pytest.raises(ValueError, match="mutually exclusive"):
-        getattr(CtsService(ml.rest), method)(**arguments, index=1, range=[1, 2])
+    with MLClient() as ml:
+        cts = CtsService(ml.rest)
+        arguments = {"range_indexes": cts.uri_reference()} if method == "values" else {}
+        with pytest.raises(ValueError, match="mutually exclusive"):
+            getattr(cts, method)(**arguments, index=1, range=[1, 2])
     assert not respx.calls
 
 
@@ -957,7 +988,8 @@ def test_values_selection_returns_a_single_item_list(selection):
     ml_mocker.with_response_body_part("integer", "1", "text/plain")
     route = ml_mocker.mock_post()
     with MLClient() as ml:
-        result = CtsService(ml.rest).values(Cts.uri_reference(), **selection)
+        cts = CtsService(ml.rest)
+        result = cts.values(cts.uri_reference(), **selection)
     assert result == [ValueHit("/a.xml", frequency=1)]
     body = parse_qs(route.calls.last.request.content.decode())
     assert "cts:values(cts:uri-reference())" in body["xquery"][0]

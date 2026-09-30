@@ -7,7 +7,7 @@ import pytest
 
 from mlclient import AsyncMLClient
 from mlclient.exceptions import MarkLogicError
-from mlclient.functions.xqy import Cts, fn, xs
+from mlclient.functions.xqy import fn, xs
 from mlclient.models import BinaryDocument, JSONDocument, TextDocument
 from mlclient.services import AsyncCtsService
 
@@ -17,14 +17,15 @@ pytestmark = pytest.mark.ml_access
 class TestAsyncCtsService:
     @pytest.mark.asyncio
     async def test_value_tuples_keep_single_json_array_inside_result_list(
-        self, indexed_database,
+        self,
+        indexed_database,
     ):
         _, database, port = indexed_database
         async with AsyncMLClient(port=port) as ml:
             cts = AsyncCtsService(ml.rest)
             assert await cts.value_tuples(
-                Cts.uri_reference(),
-                query=Cts.document_query("/cts-test/a.xml"),
+                cts.uri_reference(),
+                query=cts.document_query("/cts-test/a.xml"),
                 database=database,
             ) == [["/cts-test/a.xml"]]
 
@@ -48,16 +49,16 @@ class TestAsyncCtsService:
                 ],
                 database=database,
             )
-            query = Cts.document_query([*uris, "/cts-test/a.xml"])
             async with AsyncMLClient(port=port) as async_ml:
                 cts = AsyncCtsService(async_ml.rest)
+                query = cts.document_query([*uris, "/cts-test/a.xml"])
                 hits = await cts.search(query=query, database=database)
                 by_uri = {hit.source_uri: hit for hit in hits}
                 assert by_uri[uris[0]].content == "abcd"
                 assert by_uri[uris[1]].content == binary
                 assert by_uri[uris[2]].content["z"] is None
                 [text_hit] = await cts.search(
-                    query=Cts.document_query(uris[2]),
+                    query=cts.document_query(uris[2]),
                     xpath='text("a")',
                     database=database,
                 )
@@ -74,7 +75,7 @@ class TestAsyncCtsService:
             assert value.value == Decimal("2.50")
             assert value.frequency == 1
             assert await cts.sum_aggregate(
-                Cts.field_reference("price"),
+                cts.field_reference("price"),
                 database=database,
             ) == [Decimal("3.75")]
 
@@ -89,8 +90,8 @@ class TestAsyncCtsService:
                 ml.rest,
                 namespaces={"p": "https://monasticus.com/mlclient/examples/cts-test"},
             )
-            options = Cts.index_order(
-                Cts.element_reference(
+            options = cts.index_order(
+                cts.element_reference(
                     fn.qname(
                         "https://monasticus.com/mlclient/examples/cts-test",
                         "price",
@@ -120,8 +121,8 @@ class TestAsyncCtsService:
     ):
         _, database, port = indexed_database
         async with AsyncMLClient(port=port) as ml:
-            query = Cts.collection_query("cts-test")
             cts = AsyncCtsService(ml.rest)
+            query = cts.collection_query("cts-test")
             uris = await cts.uris(query=query, database=database)
             assert (
                 await cts.uris(
@@ -133,7 +134,7 @@ class TestAsyncCtsService:
             assert await cts.uris(query=query, index=100, database=database) == []
             assert (
                 await ml.eval.expression(
-                    fn.count(Cts.search(query=query)),
+                    fn.count(cts.search(query=query)),
                     database=database,
                 )
                 == 3
@@ -171,7 +172,7 @@ class TestAsyncCtsService:
             )
             assert (
                 await ml.eval.expression(
-                    fn.count(Cts.search("/p:item")),
+                    fn.count(cts.search("/p:item")),
                     namespaces={
                         "p": "https://monasticus.com/mlclient/examples/cts-test",
                     },

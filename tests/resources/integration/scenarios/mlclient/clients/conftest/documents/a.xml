@@ -1,0 +1,7 @@
+<item xmlns="https://monasticus.com/mlclient/examples/cts-test">
+  <price>1.25</price>
+  <day>2026-01-01</day>
+  <label>alpha</label>
+  <origin>10,20</origin>
+  <destination>30,40</destination>
+</item>

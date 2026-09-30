@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pytest
 
-from mlclient.functions.xqy import Cts, XqyCompilationContext, cts, fn, xs
+from mlclient.functions.xqy import XqyCompilationContext, cts, fn, xs
 from tests.utils.expressions import StaticExpression
 
 
@@ -285,13 +285,13 @@ def test_late_arguments_keep_native_position():
     ("expression", "body", "variables"),
     [
         pytest.param(
-            Cts.after_query(timestamp=xs.string("timestamp")),
+            cts.after_query(timestamp=xs.string("timestamp")),
             "cts:after-query(xs:string($v0))",
             {"v0": "timestamp"},
             id="after_query",
         ),
         pytest.param(
-            Cts.aggregate(
+            cts.aggregate(
                 native_plugin=xs.string("native_plugin"),
                 aggregate_name=xs.string("aggregate_name"),
                 range_indexes=xs.string("range_indexes"),
@@ -316,7 +316,7 @@ def test_late_arguments_keep_native_position():
             id="aggregate",
         ),
         pytest.param(
-            Cts.and_not_query(
+            cts.and_not_query(
                 positive_query=xs.string("positive_query"),
                 negative_query=xs.string("negative_query"),
             ),
@@ -325,13 +325,13 @@ def test_late_arguments_keep_native_position():
             id="and_not_query",
         ),
         pytest.param(
-            Cts.and_query(queries=xs.string("queries"), options=xs.string("options")),
+            cts.and_query(queries=xs.string("queries"), options=xs.string("options")),
             "cts:and-query(xs:string($v0), xs:string($v1))",
             {"v0": "queries", "v1": "options"},
             id="and_query",
         ),
         pytest.param(
-            Cts.avg_aggregate(
+            cts.avg_aggregate(
                 range_index=xs.string("range_index"),
                 options=xs.string("options"),
                 query=xs.string("query"),
@@ -345,13 +345,13 @@ def test_late_arguments_keep_native_position():
             id="avg_aggregate",
         ),
         pytest.param(
-            Cts.before_query(timestamp=xs.string("timestamp")),
+            cts.before_query(timestamp=xs.string("timestamp")),
             "cts:before-query(xs:string($v0))",
             {"v0": "timestamp"},
             id="before_query",
         ),
         pytest.param(
-            Cts.boost_query(
+            cts.boost_query(
                 matching_query=xs.string("matching_query"),
                 boosting_query=xs.string("boosting_query"),
             ),
@@ -360,7 +360,7 @@ def test_late_arguments_keep_native_position():
             id="boost_query",
         ),
         pytest.param(
-            Cts.box(
+            cts.box(
                 south=xs.string("south"),
                 west=xs.string("west"),
                 north=xs.string("north"),
@@ -374,13 +374,13 @@ def test_late_arguments_keep_native_position():
             id="box",
         ),
         pytest.param(
-            Cts.circle(radius=xs.string("radius"), center=xs.string("center")),
+            cts.circle(radius=xs.string("radius"), center=xs.string("center")),
             "cts:circle(xs:double(xs:string($v0)), xs:string($v1))",
             {"v0": "radius", "v1": "center"},
             id="circle",
         ),
         pytest.param(
-            Cts.classify(
+            cts.classify(
                 data_nodes=xs.string("data_nodes"),
                 classifier=xs.string("classifier"),
                 options=xs.string("options"),
@@ -399,13 +399,13 @@ def test_late_arguments_keep_native_position():
             id="classify",
         ),
         pytest.param(
-            Cts.cluster(nodes=xs.string("nodes"), options=xs.string("options")),
+            cts.cluster(nodes=xs.string("nodes"), options=xs.string("options")),
             "cts:cluster(xs:string($v0), xs:string($v1))",
             {"v0": "nodes", "v1": "options"},
             id="cluster",
         ),
         pytest.param(
-            Cts.collection_match(
+            cts.collection_match(
                 pattern=xs.string("pattern"),
                 options=xs.string("options"),
                 query=xs.string("query"),
@@ -426,19 +426,19 @@ def test_late_arguments_keep_native_position():
             id="collection_match",
         ),
         pytest.param(
-            Cts.collection_query(uris=xs.string("uris")),
+            cts.collection_query(uris=xs.string("uris")),
             "cts:collection-query(xs:string($v0))",
             {"v0": "uris"},
             id="collection_query",
         ),
         pytest.param(
-            Cts.collection_reference(options=xs.string("options")),
+            cts.collection_reference(options=xs.string("options")),
             "cts:collection-reference(xs:string($v0))",
             {"v0": "options"},
             id="collection_reference",
         ),
         pytest.param(
-            Cts.collections(
+            cts.collections(
                 start=xs.string("start"),
                 options=xs.string("options"),
                 query=xs.string("query"),
@@ -459,7 +459,7 @@ def test_late_arguments_keep_native_position():
             id="collections",
         ),
         pytest.param(
-            Cts.column_range_query(
+            cts.column_range_query(
                 schema=xs.string("schema"),
                 view=xs.string("view"),
                 column=xs.string("column"),
@@ -485,31 +485,31 @@ def test_late_arguments_keep_native_position():
             id="column_range_query",
         ),
         pytest.param(
-            Cts.complex_polygon(outer=xs.string("outer"), inner=xs.string("inner")),
+            cts.complex_polygon(outer=xs.string("outer"), inner=xs.string("inner")),
             "cts:complex-polygon(xs:string($v0), xs:string($v1))",
             {"v0": "outer", "v1": "inner"},
             id="complex_polygon",
         ),
         pytest.param(
-            Cts.confidence(node=xs.string("node")),
+            cts.confidence(node=xs.string("node")),
             "cts:confidence(xs:string($v0))",
             {"v0": "node"},
             id="confidence",
         ),
         pytest.param(
-            Cts.confidence_order(options=xs.string("options")),
+            cts.confidence_order(options=xs.string("options")),
             "cts:confidence-order(xs:string($v0))",
             {"v0": "options"},
             id="confidence_order",
         ),
         pytest.param(
-            Cts.contains(nodes=xs.string("nodes"), query=xs.string("query")),
+            cts.contains(nodes=xs.string("nodes"), query=xs.string("query")),
             "cts:contains(xs:string($v0), xs:string($v1))",
             {"v0": "nodes", "v1": "query"},
             id="contains",
         ),
         pytest.param(
-            Cts.correlation(
+            cts.correlation(
                 value1=xs.string("value1"),
                 value2=xs.string("value2"),
                 options=xs.string("options"),
@@ -530,7 +530,7 @@ def test_late_arguments_keep_native_position():
             id="correlation",
         ),
         pytest.param(
-            Cts.count_aggregate(
+            cts.count_aggregate(
                 range_index=xs.string("range_index"),
                 options=xs.string("options"),
                 query=xs.string("query"),
@@ -544,7 +544,7 @@ def test_late_arguments_keep_native_position():
             id="count_aggregate",
         ),
         pytest.param(
-            Cts.covariance(
+            cts.covariance(
                 value1=xs.string("value1"),
                 value2=xs.string("value2"),
                 options=xs.string("options"),
@@ -565,7 +565,7 @@ def test_late_arguments_keep_native_position():
             id="covariance",
         ),
         pytest.param(
-            Cts.covariance_p(
+            cts.covariance_p(
                 value1=xs.string("value1"),
                 value2=xs.string("value2"),
                 options=xs.string("options"),
@@ -586,19 +586,19 @@ def test_late_arguments_keep_native_position():
             id="covariance_p",
         ),
         pytest.param(
-            Cts.deregister(id=xs.string("id")),
+            cts.deregister(id=xs.string("id")),
             "cts:deregister(xs:string($v0))",
             {"v0": "id"},
             id="deregister",
         ),
         pytest.param(
-            Cts.directory_query(uris=xs.string("uris"), depth=xs.string("depth")),
+            cts.directory_query(uris=xs.string("uris"), depth=xs.string("depth")),
             "cts:directory-query(xs:string($v0), xs:string($v1))",
             {"v0": "uris", "v1": "depth"},
             id="directory_query",
         ),
         pytest.param(
-            Cts.distinctive_terms(
+            cts.distinctive_terms(
                 nodes=xs.string("nodes"),
                 options=xs.string("options"),
             ),
@@ -607,25 +607,25 @@ def test_late_arguments_keep_native_position():
             id="distinctive_terms",
         ),
         pytest.param(
-            Cts.document_format_query(format=xs.string("format")),
+            cts.document_format_query(format=xs.string("format")),
             "cts:document-format-query(xs:string($v0))",
             {"v0": "format"},
             id="document_format_query",
         ),
         pytest.param(
-            Cts.document_fragment_query(query=xs.string("query")),
+            cts.document_fragment_query(query=xs.string("query")),
             "cts:document-fragment-query(xs:string($v0))",
             {"v0": "query"},
             id="document_fragment_query",
         ),
         pytest.param(
-            Cts.document_order(options=xs.string("options")),
+            cts.document_order(options=xs.string("options")),
             "cts:document-order(xs:string($v0))",
             {"v0": "options"},
             id="document_order",
         ),
         pytest.param(
-            Cts.document_permission_query(
+            cts.document_permission_query(
                 role=xs.string("role"),
                 capability=xs.string("capability"),
             ),
@@ -634,19 +634,19 @@ def test_late_arguments_keep_native_position():
             id="document_permission_query",
         ),
         pytest.param(
-            Cts.document_query(uris=xs.string("uris")),
+            cts.document_query(uris=xs.string("uris")),
             "cts:document-query(xs:string($v0))",
             {"v0": "uris"},
             id="document_query",
         ),
         pytest.param(
-            Cts.document_root_query(root=xs.string("root")),
+            cts.document_root_query(root=xs.string("root")),
             "cts:document-root-query(xs:string($v0))",
             {"v0": "root"},
             id="document_root_query",
         ),
         pytest.param(
-            Cts.element_attribute_pair_geospatial_boxes(
+            cts.element_attribute_pair_geospatial_boxes(
                 parent_element_names=xs.string("parent_element_names"),
                 latitude_names=xs.string("latitude_names"),
                 longitude_names=xs.string("longitude_names"),
@@ -677,7 +677,7 @@ def test_late_arguments_keep_native_position():
             id="element_attribute_pair_geospatial_boxes",
         ),
         pytest.param(
-            Cts.element_attribute_pair_geospatial_query(
+            cts.element_attribute_pair_geospatial_query(
                 element_name=xs.string("element_name"),
                 latitude_attribute_names=xs.string("latitude_attribute_names"),
                 longitude_attribute_names=xs.string("longitude_attribute_names"),
@@ -701,7 +701,7 @@ def test_late_arguments_keep_native_position():
             id="element_attribute_pair_geospatial_query",
         ),
         pytest.param(
-            Cts.element_attribute_pair_geospatial_value_match(
+            cts.element_attribute_pair_geospatial_value_match(
                 element_names=xs.string("element_names"),
                 latitude_names=xs.string("latitude_names"),
                 longitude_names=xs.string("longitude_names"),
@@ -729,7 +729,7 @@ def test_late_arguments_keep_native_position():
             id="element_attribute_pair_geospatial_value_match",
         ),
         pytest.param(
-            Cts.element_attribute_pair_geospatial_values(
+            cts.element_attribute_pair_geospatial_values(
                 element_names=xs.string("element_names"),
                 latitude_names=xs.string("latitude_names"),
                 longitude_names=xs.string("longitude_names"),
@@ -757,7 +757,7 @@ def test_late_arguments_keep_native_position():
             id="element_attribute_pair_geospatial_values",
         ),
         pytest.param(
-            Cts.element_attribute_range_query(
+            cts.element_attribute_range_query(
                 element_name=xs.string("element_name"),
                 attribute_name=xs.string("attribute_name"),
                 operator=xs.string("operator"),
@@ -781,7 +781,7 @@ def test_late_arguments_keep_native_position():
             id="element_attribute_range_query",
         ),
         pytest.param(
-            Cts.element_attribute_reference(
+            cts.element_attribute_reference(
                 element=xs.string("element"),
                 attribute=xs.string("attribute"),
                 options=xs.string("options"),
@@ -794,7 +794,7 @@ def test_late_arguments_keep_native_position():
             id="element_attribute_reference",
         ),
         pytest.param(
-            Cts.element_attribute_value_co_occurrences(
+            cts.element_attribute_value_co_occurrences(
                 element_name_1=xs.string("element_name_1"),
                 attribute_name_1=xs.string("attribute_name_1"),
                 element_name_2=xs.string("element_name_2"),
@@ -822,7 +822,7 @@ def test_late_arguments_keep_native_position():
             id="element_attribute_value_co_occurrences",
         ),
         pytest.param(
-            Cts.element_attribute_value_geospatial_co_occurrences(
+            cts.element_attribute_value_geospatial_co_occurrences(
                 element_name_1=xs.string("element_name_1"),
                 attribute_name_1=xs.string("attribute_name_1"),
                 geo_element_name=xs.string("geo_element_name"),
@@ -853,7 +853,7 @@ def test_late_arguments_keep_native_position():
             id="element_attribute_value_geospatial_co_occurrences",
         ),
         pytest.param(
-            Cts.element_attribute_value_match(
+            cts.element_attribute_value_match(
                 element_names=xs.string("element_names"),
                 attribute_names=xs.string("attribute_names"),
                 pattern=xs.string("pattern"),
@@ -879,7 +879,7 @@ def test_late_arguments_keep_native_position():
             id="element_attribute_value_match",
         ),
         pytest.param(
-            Cts.element_attribute_value_query(
+            cts.element_attribute_value_query(
                 element_name=xs.string("element_name"),
                 attribute_name=xs.string("attribute_name"),
                 text=xs.string("text"),
@@ -900,7 +900,7 @@ def test_late_arguments_keep_native_position():
             id="element_attribute_value_query",
         ),
         pytest.param(
-            Cts.element_attribute_value_ranges(
+            cts.element_attribute_value_ranges(
                 element_names=xs.string("element_names"),
                 attribute_names=xs.string("attribute_names"),
                 bounds=xs.string("bounds"),
@@ -926,7 +926,7 @@ def test_late_arguments_keep_native_position():
             id="element_attribute_value_ranges",
         ),
         pytest.param(
-            Cts.element_attribute_values(
+            cts.element_attribute_values(
                 element_names=xs.string("element_names"),
                 attribute_names=xs.string("attribute_names"),
                 start=xs.string("start"),
@@ -952,7 +952,7 @@ def test_late_arguments_keep_native_position():
             id="element_attribute_values",
         ),
         pytest.param(
-            Cts.element_attribute_word_match(
+            cts.element_attribute_word_match(
                 element_names=xs.string("element_names"),
                 attribute_names=xs.string("attribute_names"),
                 pattern=xs.string("pattern"),
@@ -978,7 +978,7 @@ def test_late_arguments_keep_native_position():
             id="element_attribute_word_match",
         ),
         pytest.param(
-            Cts.element_attribute_word_query(
+            cts.element_attribute_word_query(
                 element_name=xs.string("element_name"),
                 attribute_name=xs.string("attribute_name"),
                 text=xs.string("text"),
@@ -999,7 +999,7 @@ def test_late_arguments_keep_native_position():
             id="element_attribute_word_query",
         ),
         pytest.param(
-            Cts.element_attribute_words(
+            cts.element_attribute_words(
                 element_names=xs.string("element_names"),
                 attribute_names=xs.string("attribute_names"),
                 start=xs.string("start"),
@@ -1025,7 +1025,7 @@ def test_late_arguments_keep_native_position():
             id="element_attribute_words",
         ),
         pytest.param(
-            Cts.element_child_geospatial_boxes(
+            cts.element_child_geospatial_boxes(
                 parent_element_names=xs.string("parent_element_names"),
                 child_element_names=xs.string("child_element_names"),
                 latitude_bounds=xs.string("latitude_bounds"),
@@ -1053,7 +1053,7 @@ def test_late_arguments_keep_native_position():
             id="element_child_geospatial_boxes",
         ),
         pytest.param(
-            Cts.element_child_geospatial_query(
+            cts.element_child_geospatial_query(
                 parent_element_name=xs.string("parent_element_name"),
                 child_element_names=xs.string("child_element_names"),
                 regions=xs.string("regions"),
@@ -1074,7 +1074,7 @@ def test_late_arguments_keep_native_position():
             id="element_child_geospatial_query",
         ),
         pytest.param(
-            Cts.element_child_geospatial_value_match(
+            cts.element_child_geospatial_value_match(
                 element_names=xs.string("element_names"),
                 child_names=xs.string("child_names"),
                 pattern=xs.string("pattern"),
@@ -1100,7 +1100,7 @@ def test_late_arguments_keep_native_position():
             id="element_child_geospatial_value_match",
         ),
         pytest.param(
-            Cts.element_child_geospatial_values(
+            cts.element_child_geospatial_values(
                 element_names=xs.string("element_names"),
                 child_names=xs.string("child_names"),
                 start=xs.string("start"),
@@ -1126,7 +1126,7 @@ def test_late_arguments_keep_native_position():
             id="element_child_geospatial_values",
         ),
         pytest.param(
-            Cts.element_geospatial_boxes(
+            cts.element_geospatial_boxes(
                 element_names=xs.string("element_names"),
                 latitude_bounds=xs.string("latitude_bounds"),
                 longitude_bounds=xs.string("longitude_bounds"),
@@ -1152,7 +1152,7 @@ def test_late_arguments_keep_native_position():
             id="element_geospatial_boxes",
         ),
         pytest.param(
-            Cts.element_geospatial_query(
+            cts.element_geospatial_query(
                 element_name=xs.string("element_name"),
                 regions=xs.string("regions"),
                 options=xs.string("options"),
@@ -1166,7 +1166,7 @@ def test_late_arguments_keep_native_position():
             id="element_geospatial_query",
         ),
         pytest.param(
-            Cts.element_geospatial_value_match(
+            cts.element_geospatial_value_match(
                 element_names=xs.string("element_names"),
                 pattern=xs.string("pattern"),
                 options=xs.string("options"),
@@ -1190,7 +1190,7 @@ def test_late_arguments_keep_native_position():
             id="element_geospatial_value_match",
         ),
         pytest.param(
-            Cts.element_geospatial_values(
+            cts.element_geospatial_values(
                 element_names=xs.string("element_names"),
                 start=xs.string("start"),
                 options=xs.string("options"),
@@ -1214,7 +1214,7 @@ def test_late_arguments_keep_native_position():
             id="element_geospatial_values",
         ),
         pytest.param(
-            Cts.element_pair_geospatial_boxes(
+            cts.element_pair_geospatial_boxes(
                 parent_element_names=xs.string("parent_element_names"),
                 latitude_names=xs.string("latitude_names"),
                 longitude_names=xs.string("longitude_names"),
@@ -1244,7 +1244,7 @@ def test_late_arguments_keep_native_position():
             id="element_pair_geospatial_boxes",
         ),
         pytest.param(
-            Cts.element_pair_geospatial_query(
+            cts.element_pair_geospatial_query(
                 element_name=xs.string("element_name"),
                 latitude_element_names=xs.string("latitude_element_names"),
                 longitude_element_names=xs.string("longitude_element_names"),
@@ -1268,7 +1268,7 @@ def test_late_arguments_keep_native_position():
             id="element_pair_geospatial_query",
         ),
         pytest.param(
-            Cts.element_pair_geospatial_value_match(
+            cts.element_pair_geospatial_value_match(
                 element_names=xs.string("element_names"),
                 latitude_names=xs.string("latitude_names"),
                 longitude_names=xs.string("longitude_names"),
@@ -1296,7 +1296,7 @@ def test_late_arguments_keep_native_position():
             id="element_pair_geospatial_value_match",
         ),
         pytest.param(
-            Cts.element_pair_geospatial_values(
+            cts.element_pair_geospatial_values(
                 element_names=xs.string("element_names"),
                 latitude_names=xs.string("latitude_names"),
                 longitude_names=xs.string("longitude_names"),
@@ -1324,7 +1324,7 @@ def test_late_arguments_keep_native_position():
             id="element_pair_geospatial_values",
         ),
         pytest.param(
-            Cts.element_query(
+            cts.element_query(
                 element_name=xs.string("element_name"),
                 query=xs.string("query"),
             ),
@@ -1333,7 +1333,7 @@ def test_late_arguments_keep_native_position():
             id="element_query",
         ),
         pytest.param(
-            Cts.element_range_query(
+            cts.element_range_query(
                 element_name=xs.string("element_name"),
                 operator=xs.string("operator"),
                 value=xs.string("value"),
@@ -1354,7 +1354,7 @@ def test_late_arguments_keep_native_position():
             id="element_range_query",
         ),
         pytest.param(
-            Cts.element_reference(
+            cts.element_reference(
                 element=xs.string("element"),
                 options=xs.string("options"),
             ),
@@ -1363,7 +1363,7 @@ def test_late_arguments_keep_native_position():
             id="element_reference",
         ),
         pytest.param(
-            Cts.element_value_co_occurrences(
+            cts.element_value_co_occurrences(
                 element_name_1=xs.string("element_name_1"),
                 element_name_2=xs.string("element_name_2"),
                 options=xs.string("options"),
@@ -1387,7 +1387,7 @@ def test_late_arguments_keep_native_position():
             id="element_value_co_occurrences",
         ),
         pytest.param(
-            Cts.element_value_geospatial_co_occurrences(
+            cts.element_value_geospatial_co_occurrences(
                 element_name_1=xs.string("element_name_1"),
                 geo_element_name=xs.string("geo_element_name"),
                 coord_child_name_1=xs.string("coord_child_name_1"),
@@ -1415,7 +1415,7 @@ def test_late_arguments_keep_native_position():
             id="element_value_geospatial_co_occurrences",
         ),
         pytest.param(
-            Cts.element_value_match(
+            cts.element_value_match(
                 element_names=xs.string("element_names"),
                 pattern=xs.string("pattern"),
                 options=xs.string("options"),
@@ -1439,7 +1439,7 @@ def test_late_arguments_keep_native_position():
             id="element_value_match",
         ),
         pytest.param(
-            Cts.element_value_query(
+            cts.element_value_query(
                 element_name=xs.string("element_name"),
                 text=xs.string("text"),
                 options=xs.string("options"),
@@ -1453,7 +1453,7 @@ def test_late_arguments_keep_native_position():
             id="element_value_query",
         ),
         pytest.param(
-            Cts.element_value_ranges(
+            cts.element_value_ranges(
                 element_names=xs.string("element_names"),
                 bounds=xs.string("bounds"),
                 options=xs.string("options"),
@@ -1477,7 +1477,7 @@ def test_late_arguments_keep_native_position():
             id="element_value_ranges",
         ),
         pytest.param(
-            Cts.element_values(
+            cts.element_values(
                 element_names=xs.string("element_names"),
                 start=xs.string("start"),
                 options=xs.string("options"),
@@ -1500,7 +1500,7 @@ def test_late_arguments_keep_native_position():
             id="element_values",
         ),
         pytest.param(
-            Cts.element_walk(
+            cts.element_walk(
                 node=xs.string("node"),
                 element=xs.string("element"),
                 expr=xs.string("expr"),
@@ -1510,7 +1510,7 @@ def test_late_arguments_keep_native_position():
             id="element_walk",
         ),
         pytest.param(
-            Cts.element_word_match(
+            cts.element_word_match(
                 element_names=xs.string("element_names"),
                 pattern=xs.string("pattern"),
                 options=xs.string("options"),
@@ -1534,7 +1534,7 @@ def test_late_arguments_keep_native_position():
             id="element_word_match",
         ),
         pytest.param(
-            Cts.element_word_query(
+            cts.element_word_query(
                 element_name=xs.string("element_name"),
                 text=xs.string("text"),
                 options=xs.string("options"),
@@ -1548,7 +1548,7 @@ def test_late_arguments_keep_native_position():
             id="element_word_query",
         ),
         pytest.param(
-            Cts.element_words(
+            cts.element_words(
                 element_names=xs.string("element_names"),
                 start=xs.string("start"),
                 options=xs.string("options"),
@@ -1571,7 +1571,7 @@ def test_late_arguments_keep_native_position():
             id="element_words",
         ),
         pytest.param(
-            Cts.entity(
+            cts.entity(
                 id=xs.string("id"),
                 normalized_text=xs.string("normalized_text"),
                 text=xs.string("text"),
@@ -1585,7 +1585,7 @@ def test_late_arguments_keep_native_position():
             id="entity",
         ),
         pytest.param(
-            Cts.entity_dictionary(
+            cts.entity_dictionary(
                 entities=xs.string("entities"),
                 options=xs.string("options"),
             ),
@@ -1594,13 +1594,13 @@ def test_late_arguments_keep_native_position():
             id="entity_dictionary",
         ),
         pytest.param(
-            Cts.entity_dictionary_get(uri=xs.string("uri")),
+            cts.entity_dictionary_get(uri=xs.string("uri")),
             "cts:entity-dictionary-get(xs:string($v0))",
             {"v0": "uri"},
             id="entity_dictionary_get",
         ),
         pytest.param(
-            Cts.entity_dictionary_parse(
+            cts.entity_dictionary_parse(
                 contents=xs.string("contents"),
                 options=xs.string("options"),
             ),
@@ -1609,7 +1609,7 @@ def test_late_arguments_keep_native_position():
             id="entity_dictionary_parse",
         ),
         pytest.param(
-            Cts.entity_highlight(
+            cts.entity_highlight(
                 node=xs.string("node"),
                 expr=xs.string("expr"),
                 dict=xs.string("dict"),
@@ -1619,7 +1619,7 @@ def test_late_arguments_keep_native_position():
             id="entity_highlight",
         ),
         pytest.param(
-            Cts.entity_walk(
+            cts.entity_walk(
                 node=xs.string("node"),
                 expr=xs.string("expr"),
                 dict=xs.string("dict"),
@@ -1629,7 +1629,7 @@ def test_late_arguments_keep_native_position():
             id="entity_walk",
         ),
         pytest.param(
-            Cts.estimate(
+            cts.estimate(
                 query=xs.string("query"),
                 options=xs.string("options"),
                 quality_weight=xs.string("quality_weight"),
@@ -1650,9 +1650,9 @@ def test_late_arguments_keep_native_position():
             },
             id="estimate",
         ),
-        pytest.param(Cts.false_query(), "cts:false-query()", {}, id="false_query"),
+        pytest.param(cts.false_query(), "cts:false-query()", {}, id="false_query"),
         pytest.param(
-            Cts.field_range_query(
+            cts.field_range_query(
                 field_name=xs.string("field_name"),
                 operator=xs.string("operator"),
                 value=xs.string("value"),
@@ -1673,13 +1673,13 @@ def test_late_arguments_keep_native_position():
             id="field_range_query",
         ),
         pytest.param(
-            Cts.field_reference(field=xs.string("field"), options=xs.string("options")),
+            cts.field_reference(field=xs.string("field"), options=xs.string("options")),
             "cts:field-reference(xs:string($v0), xs:string($v1))",
             {"v0": "field", "v1": "options"},
             id="field_reference",
         ),
         pytest.param(
-            Cts.field_value_co_occurrences(
+            cts.field_value_co_occurrences(
                 field_name_1=xs.string("field_name_1"),
                 field_name_2=xs.string("field_name_2"),
                 options=xs.string("options"),
@@ -1703,7 +1703,7 @@ def test_late_arguments_keep_native_position():
             id="field_value_co_occurrences",
         ),
         pytest.param(
-            Cts.field_value_match(
+            cts.field_value_match(
                 field_names=xs.string("field_names"),
                 pattern=xs.string("pattern"),
                 options=xs.string("options"),
@@ -1727,7 +1727,7 @@ def test_late_arguments_keep_native_position():
             id="field_value_match",
         ),
         pytest.param(
-            Cts.field_value_query(
+            cts.field_value_query(
                 field_name=xs.string("field_name"),
                 text=xs.string("text"),
                 options=xs.string("options"),
@@ -1741,7 +1741,7 @@ def test_late_arguments_keep_native_position():
             id="field_value_query",
         ),
         pytest.param(
-            Cts.field_value_ranges(
+            cts.field_value_ranges(
                 field_names=xs.string("field_names"),
                 bounds=xs.string("bounds"),
                 options=xs.string("options"),
@@ -1765,7 +1765,7 @@ def test_late_arguments_keep_native_position():
             id="field_value_ranges",
         ),
         pytest.param(
-            Cts.field_values(
+            cts.field_values(
                 field_names=xs.string("field_names"),
                 start=xs.string("start"),
                 options=xs.string("options"),
@@ -1788,7 +1788,7 @@ def test_late_arguments_keep_native_position():
             id="field_values",
         ),
         pytest.param(
-            Cts.field_word_match(
+            cts.field_word_match(
                 field_names=xs.string("field_names"),
                 pattern=xs.string("pattern"),
                 options=xs.string("options"),
@@ -1811,7 +1811,7 @@ def test_late_arguments_keep_native_position():
             id="field_word_match",
         ),
         pytest.param(
-            Cts.field_word_query(
+            cts.field_word_query(
                 field_name=xs.string("field_name"),
                 text=xs.string("text"),
                 options=xs.string("options"),
@@ -1825,7 +1825,7 @@ def test_late_arguments_keep_native_position():
             id="field_word_query",
         ),
         pytest.param(
-            Cts.field_words(
+            cts.field_words(
                 field_names=xs.string("field_names"),
                 start=xs.string("start"),
                 options=xs.string("options"),
@@ -1848,25 +1848,25 @@ def test_late_arguments_keep_native_position():
             id="field_words",
         ),
         pytest.param(
-            Cts.fitness(node=xs.string("node")),
+            cts.fitness(node=xs.string("node")),
             "cts:fitness(xs:string($v0))",
             {"v0": "node"},
             id="fitness",
         ),
         pytest.param(
-            Cts.fitness_order(options=xs.string("options")),
+            cts.fitness_order(options=xs.string("options")),
             "cts:fitness-order(xs:string($v0))",
             {"v0": "options"},
             id="fitness_order",
         ),
         pytest.param(
-            Cts.frequency(value=xs.string("value")),
+            cts.frequency(value=xs.string("value")),
             "cts:frequency(xs:string($v0))",
             {"v0": "value"},
             id="frequency",
         ),
         pytest.param(
-            Cts.geospatial_attribute_pair_reference(
+            cts.geospatial_attribute_pair_reference(
                 element=xs.string("element"),
                 lat=xs.string("lat"),
                 long=xs.string("long"),
@@ -1880,7 +1880,7 @@ def test_late_arguments_keep_native_position():
             id="geospatial_attribute_pair_reference",
         ),
         pytest.param(
-            Cts.geospatial_boxes(
+            cts.geospatial_boxes(
                 geo_indexes=xs.string("geo_indexes"),
                 latitude_bounds=xs.string("latitude_bounds"),
                 longitude_bounds=xs.string("longitude_bounds"),
@@ -1906,7 +1906,7 @@ def test_late_arguments_keep_native_position():
             id="geospatial_boxes",
         ),
         pytest.param(
-            Cts.geospatial_co_occurrences(
+            cts.geospatial_co_occurrences(
                 geo_element_name_1=xs.string("geo_element_name_1"),
                 geo_element_name_2=xs.string("geo_element_name_2"),
                 child_1_name_1=xs.string("child_1_name_1"),
@@ -1939,7 +1939,7 @@ def test_late_arguments_keep_native_position():
             id="geospatial_co_occurrences",
         ),
         pytest.param(
-            Cts.geospatial_element_child_reference(
+            cts.geospatial_element_child_reference(
                 element=xs.string("element"),
                 child=xs.string("child"),
                 options=xs.string("options"),
@@ -1952,7 +1952,7 @@ def test_late_arguments_keep_native_position():
             id="geospatial_element_child_reference",
         ),
         pytest.param(
-            Cts.geospatial_element_pair_reference(
+            cts.geospatial_element_pair_reference(
                 element=xs.string("element"),
                 lat=xs.string("lat"),
                 long=xs.string("long"),
@@ -1966,7 +1966,7 @@ def test_late_arguments_keep_native_position():
             id="geospatial_element_pair_reference",
         ),
         pytest.param(
-            Cts.geospatial_element_reference(
+            cts.geospatial_element_reference(
                 element=xs.string("element"),
                 options=xs.string("options"),
             ),
@@ -1975,7 +1975,7 @@ def test_late_arguments_keep_native_position():
             id="geospatial_element_reference",
         ),
         pytest.param(
-            Cts.geospatial_json_property_child_reference(
+            cts.geospatial_json_property_child_reference(
                 property=xs.string("property"),
                 child=xs.string("child"),
                 options=xs.string("options"),
@@ -1988,7 +1988,7 @@ def test_late_arguments_keep_native_position():
             id="geospatial_json_property_child_reference",
         ),
         pytest.param(
-            Cts.geospatial_json_property_pair_reference(
+            cts.geospatial_json_property_pair_reference(
                 property=xs.string("property"),
                 lat=xs.string("lat"),
                 long=xs.string("long"),
@@ -2002,7 +2002,7 @@ def test_late_arguments_keep_native_position():
             id="geospatial_json_property_pair_reference",
         ),
         pytest.param(
-            Cts.geospatial_json_property_reference(
+            cts.geospatial_json_property_reference(
                 property=xs.string("property"),
                 options=xs.string("options"),
             ),
@@ -2011,7 +2011,7 @@ def test_late_arguments_keep_native_position():
             id="geospatial_json_property_reference",
         ),
         pytest.param(
-            Cts.geospatial_path_reference(
+            cts.geospatial_path_reference(
                 path_expression=xs.string("path_expression"),
                 options=xs.string("options"),
                 map=xs.string("map"),
@@ -2024,7 +2024,7 @@ def test_late_arguments_keep_native_position():
             id="geospatial_path_reference",
         ),
         pytest.param(
-            Cts.geospatial_region_path_reference(
+            cts.geospatial_region_path_reference(
                 path_expression=xs.string("path_expression"),
                 options=xs.string("options"),
                 namespaces=xs.string("namespaces"),
@@ -2047,7 +2047,7 @@ def test_late_arguments_keep_native_position():
             id="geospatial_region_path_reference",
         ),
         pytest.param(
-            Cts.geospatial_region_query(
+            cts.geospatial_region_query(
                 geospatial_region_reference=xs.string("geospatial_region_reference"),
                 operation=xs.string("operation"),
                 regions=xs.string("regions"),
@@ -2068,7 +2068,7 @@ def test_late_arguments_keep_native_position():
             id="geospatial_region_query",
         ),
         pytest.param(
-            Cts.highlight(
+            cts.highlight(
                 node=xs.string("node"),
                 query=xs.string("query"),
                 expr=xs.string("expr"),
@@ -2078,19 +2078,19 @@ def test_late_arguments_keep_native_position():
             id="highlight",
         ),
         pytest.param(
-            Cts.index_order(index=xs.string("index"), options=xs.string("options")),
+            cts.index_order(index=xs.string("index"), options=xs.string("options")),
             "cts:index-order(xs:string($v0), xs:string($v1))",
             {"v0": "index", "v1": "options"},
             id="index_order",
         ),
         pytest.param(
-            Cts.iri_reference(),
+            cts.iri_reference(),
             "cts:iri-reference()",
             {},
             id="iri_reference",
         ),
         pytest.param(
-            Cts.json_property_child_geospatial_query(
+            cts.json_property_child_geospatial_query(
                 parent_property_name=xs.string("parent_property_name"),
                 child_property_names=xs.string("child_property_names"),
                 regions=xs.string("regions"),
@@ -2112,7 +2112,7 @@ def test_late_arguments_keep_native_position():
             id="json_property_child_geospatial_query",
         ),
         pytest.param(
-            Cts.json_property_geospatial_query(
+            cts.json_property_geospatial_query(
                 property_name=xs.string("property_name"),
                 regions=xs.string("regions"),
                 options=xs.string("options"),
@@ -2126,7 +2126,7 @@ def test_late_arguments_keep_native_position():
             id="json_property_geospatial_query",
         ),
         pytest.param(
-            Cts.json_property_pair_geospatial_query(
+            cts.json_property_pair_geospatial_query(
                 property_name=xs.string("property_name"),
                 latitude_property_names=xs.string("latitude_property_names"),
                 longitude_property_names=xs.string("longitude_property_names"),
@@ -2150,7 +2150,7 @@ def test_late_arguments_keep_native_position():
             id="json_property_pair_geospatial_query",
         ),
         pytest.param(
-            Cts.json_property_range_query(
+            cts.json_property_range_query(
                 property_name=xs.string("property_name"),
                 operator=xs.string("operator"),
                 value=xs.string("value"),
@@ -2171,7 +2171,7 @@ def test_late_arguments_keep_native_position():
             id="json_property_range_query",
         ),
         pytest.param(
-            Cts.json_property_reference(
+            cts.json_property_reference(
                 property=xs.string("property"),
                 options=xs.string("options"),
             ),
@@ -2180,7 +2180,7 @@ def test_late_arguments_keep_native_position():
             id="json_property_reference",
         ),
         pytest.param(
-            Cts.json_property_scope_query(
+            cts.json_property_scope_query(
                 property_name=xs.string("property_name"),
                 query=xs.string("query"),
             ),
@@ -2189,7 +2189,7 @@ def test_late_arguments_keep_native_position():
             id="json_property_scope_query",
         ),
         pytest.param(
-            Cts.json_property_value_query(
+            cts.json_property_value_query(
                 property_name=xs.string("property_name"),
                 value=xs.string("value"),
                 options=xs.string("options"),
@@ -2203,7 +2203,7 @@ def test_late_arguments_keep_native_position():
             id="json_property_value_query",
         ),
         pytest.param(
-            Cts.json_property_word_match(
+            cts.json_property_word_match(
                 property_names=xs.string("property_names"),
                 pattern=xs.string("pattern"),
                 options=xs.string("options"),
@@ -2227,7 +2227,7 @@ def test_late_arguments_keep_native_position():
             id="json_property_word_match",
         ),
         pytest.param(
-            Cts.json_property_word_query(
+            cts.json_property_word_query(
                 property_name=xs.string("property_name"),
                 text=xs.string("text"),
                 options=xs.string("options"),
@@ -2241,7 +2241,7 @@ def test_late_arguments_keep_native_position():
             id="json_property_word_query",
         ),
         pytest.param(
-            Cts.json_property_words(
+            cts.json_property_words(
                 property_names=xs.string("property_names"),
                 start=xs.string("start"),
                 options=xs.string("options"),
@@ -2265,7 +2265,7 @@ def test_late_arguments_keep_native_position():
             id="json_property_words",
         ),
         pytest.param(
-            Cts.linear_model(
+            cts.linear_model(
                 values=xs.string("values"),
                 options=xs.string("options"),
                 query=xs.string("query"),
@@ -2279,19 +2279,19 @@ def test_late_arguments_keep_native_position():
             id="linear_model",
         ),
         pytest.param(
-            Cts.linestring(vertices=xs.string("vertices")),
+            cts.linestring(vertices=xs.string("vertices")),
             "cts:linestring(xs:string($v0))",
             {"v0": "vertices"},
             id="linestring",
         ),
         pytest.param(
-            Cts.locks_fragment_query(query=xs.string("query")),
+            cts.locks_fragment_query(query=xs.string("query")),
             "cts:locks-fragment-query(xs:string($v0))",
             {"v0": "query"},
             id="locks_fragment_query",
         ),
         pytest.param(
-            Cts.lsqt_query(
+            cts.lsqt_query(
                 temporal_collection=xs.string("temporal_collection"),
                 timestamp=xs.string("timestamp"),
                 options=xs.string("options"),
@@ -2310,7 +2310,7 @@ def test_late_arguments_keep_native_position():
             id="lsqt_query",
         ),
         pytest.param(
-            Cts.match_regions(
+            cts.match_regions(
                 range_indexes=xs.string("range_indexes"),
                 operation=xs.string("operation"),
                 regions=xs.string("regions"),
@@ -2333,7 +2333,7 @@ def test_late_arguments_keep_native_position():
             id="match_regions",
         ),
         pytest.param(
-            Cts.max(
+            cts.max(
                 range_index=xs.string("range_index"),
                 options=xs.string("options"),
                 query=xs.string("query"),
@@ -2344,13 +2344,13 @@ def test_late_arguments_keep_native_position():
             id="max",
         ),
         pytest.param(
-            Cts.median(arg=xs.string("arg")),
+            cts.median(arg=xs.string("arg")),
             "cts:median(xs:string($v0))",
             {"v0": "arg"},
             id="median",
         ),
         pytest.param(
-            Cts.min(
+            cts.min(
                 range_index=xs.string("range_index"),
                 options=xs.string("options"),
                 query=xs.string("query"),
@@ -2361,7 +2361,7 @@ def test_late_arguments_keep_native_position():
             id="min",
         ),
         pytest.param(
-            Cts.near_query(
+            cts.near_query(
                 queries=xs.string("queries"),
                 distance=xs.string("distance"),
                 options=xs.string("options"),
@@ -2380,7 +2380,7 @@ def test_late_arguments_keep_native_position():
             id="near_query",
         ),
         pytest.param(
-            Cts.not_in_query(
+            cts.not_in_query(
                 positive_query=xs.string("positive_query"),
                 negative_query=xs.string("negative_query"),
             ),
@@ -2389,31 +2389,31 @@ def test_late_arguments_keep_native_position():
             id="not_in_query",
         ),
         pytest.param(
-            Cts.not_query(query=xs.string("query")),
+            cts.not_query(query=xs.string("query")),
             "cts:not-query(xs:string($v0))",
             {"v0": "query"},
             id="not_query",
         ),
         pytest.param(
-            Cts.or_query(queries=xs.string("queries"), options=xs.string("options")),
+            cts.or_query(queries=xs.string("queries"), options=xs.string("options")),
             "cts:or-query(xs:string($v0), xs:string($v1))",
             {"v0": "queries", "v1": "options"},
             id="or_query",
         ),
         pytest.param(
-            Cts.parse(query=xs.string("query"), bindings=xs.string("bindings")),
+            cts.parse(query=xs.string("query"), bindings=xs.string("bindings")),
             "cts:parse(xs:string($v0), xs:string($v1))",
             {"v0": "query", "v1": "bindings"},
             id="parse",
         ),
         pytest.param(
-            Cts.part_of_speech(token=xs.string("token")),
+            cts.part_of_speech(token=xs.string("token")),
             "cts:part-of-speech(xs:string($v0))",
             {"v0": "token"},
             id="part_of_speech",
         ),
         pytest.param(
-            Cts.path_geospatial_query(
+            cts.path_geospatial_query(
                 path_expression=xs.string("path_expression"),
                 regions=xs.string("regions"),
                 options=xs.string("options"),
@@ -2427,7 +2427,7 @@ def test_late_arguments_keep_native_position():
             id="path_geospatial_query",
         ),
         pytest.param(
-            Cts.path_range_query(
+            cts.path_range_query(
                 path_expression=xs.string("path_expression"),
                 operator=xs.string("operator"),
                 value=xs.string("value"),
@@ -2448,7 +2448,7 @@ def test_late_arguments_keep_native_position():
             id="path_range_query",
         ),
         pytest.param(
-            Cts.path_reference(
+            cts.path_reference(
                 path_expression=xs.string("path_expression"),
                 options=xs.string("options"),
                 namespaces=xs.string("namespaces"),
@@ -2458,7 +2458,7 @@ def test_late_arguments_keep_native_position():
             id="path_reference",
         ),
         pytest.param(
-            Cts.percent_rank(
+            cts.percent_rank(
                 arg=xs.string("arg"),
                 value=xs.string("value"),
                 options=xs.string("options"),
@@ -2468,19 +2468,19 @@ def test_late_arguments_keep_native_position():
             id="percent_rank",
         ),
         pytest.param(
-            Cts.percentile(arg=xs.string("arg"), p=xs.string("p")),
+            cts.percentile(arg=xs.string("arg"), p=xs.string("p")),
             "cts:percentile(xs:string($v0), xs:string($v1))",
             {"v0": "arg", "v1": "p"},
             id="percentile",
         ),
         pytest.param(
-            Cts.period(start=xs.string("start"), end=xs.string("end")),
+            cts.period(start=xs.string("start"), end=xs.string("end")),
             "cts:period(xs:string($v0), xs:string($v1))",
             {"v0": "start", "v1": "end"},
             id="period",
         ),
         pytest.param(
-            Cts.period_compare(
+            cts.period_compare(
                 period_1=xs.string("period_1"),
                 operator=xs.string("operator"),
                 period_2=xs.string("period_2"),
@@ -2490,7 +2490,7 @@ def test_late_arguments_keep_native_position():
             id="period_compare",
         ),
         pytest.param(
-            Cts.period_compare_query(
+            cts.period_compare_query(
                 axis_1=xs.string("axis_1"),
                 operator=xs.string("operator"),
                 axis_2=xs.string("axis_2"),
@@ -2504,7 +2504,7 @@ def test_late_arguments_keep_native_position():
             id="period_compare_query",
         ),
         pytest.param(
-            Cts.period_range_query(
+            cts.period_range_query(
                 axis_name=xs.string("axis_name"),
                 operator=xs.string("operator"),
                 period=xs.string("period"),
@@ -2518,7 +2518,7 @@ def test_late_arguments_keep_native_position():
             id="period_range_query",
         ),
         pytest.param(
-            Cts.point(
+            cts.point(
                 latitude_or_wkt=xs.string("latitude_or_wkt"),
                 longitude=xs.string("longitude"),
             ),
@@ -2527,37 +2527,37 @@ def test_late_arguments_keep_native_position():
             id="point",
         ),
         pytest.param(
-            Cts.polygon(vertices=xs.string("vertices")),
+            cts.polygon(vertices=xs.string("vertices")),
             "cts:polygon(xs:string($v0))",
             {"v0": "vertices"},
             id="polygon",
         ),
         pytest.param(
-            Cts.properties_fragment_query(query=xs.string("query")),
+            cts.properties_fragment_query(query=xs.string("query")),
             "cts:properties-fragment-query(xs:string($v0))",
             {"v0": "query"},
             id="properties_fragment_query",
         ),
         pytest.param(
-            Cts.quality(node=xs.string("node")),
+            cts.quality(node=xs.string("node")),
             "cts:quality(xs:string($v0))",
             {"v0": "node"},
             id="quality",
         ),
         pytest.param(
-            Cts.quality_order(options=xs.string("options")),
+            cts.quality_order(options=xs.string("options")),
             "cts:quality-order(xs:string($v0))",
             {"v0": "options"},
             id="quality_order",
         ),
         pytest.param(
-            Cts.query(query=xs.string("query")),
+            cts.query(query=xs.string("query")),
             "cts:query(xs:string($v0))",
             {"v0": "query"},
             id="query",
         ),
         pytest.param(
-            Cts.range_query(
+            cts.range_query(
                 index=xs.string("index"),
                 operator=xs.string("operator"),
                 value=xs.string("value"),
@@ -2578,7 +2578,7 @@ def test_late_arguments_keep_native_position():
             id="range_query",
         ),
         pytest.param(
-            Cts.rank(
+            cts.rank(
                 arg=xs.string("arg"),
                 value=xs.string("value"),
                 options=xs.string("options"),
@@ -2588,19 +2588,19 @@ def test_late_arguments_keep_native_position():
             id="rank",
         ),
         pytest.param(
-            Cts.reference_parse(reference=xs.string("reference")),
+            cts.reference_parse(reference=xs.string("reference")),
             "cts:reference-parse(xs:string($v0))",
             {"v0": "reference"},
             id="reference_parse",
         ),
         pytest.param(
-            Cts.register(query=xs.string("query")),
+            cts.register(query=xs.string("query")),
             "cts:register(xs:string($v0))",
             {"v0": "query"},
             id="register",
         ),
         pytest.param(
-            Cts.registered_query(
+            cts.registered_query(
                 ids=xs.string("ids"),
                 options=xs.string("options"),
                 weight=xs.string("weight"),
@@ -2613,7 +2613,7 @@ def test_late_arguments_keep_native_position():
             id="registered_query",
         ),
         pytest.param(
-            Cts.relevance_info(
+            cts.relevance_info(
                 node=xs.string("node"),
                 output_kind=xs.string("output_kind"),
             ),
@@ -2622,31 +2622,31 @@ def test_late_arguments_keep_native_position():
             id="relevance_info",
         ),
         pytest.param(
-            Cts.remainder(node=xs.string("node")),
+            cts.remainder(node=xs.string("node")),
             "cts:remainder(xs:string($v0))",
             {"v0": "node"},
             id="remainder",
         ),
         pytest.param(
-            Cts.reverse_query(nodes=xs.string("nodes"), weight=xs.string("weight")),
+            cts.reverse_query(nodes=xs.string("nodes"), weight=xs.string("weight")),
             "cts:reverse-query(xs:string($v0), xs:double(xs:string($v1)))",
             {"v0": "nodes", "v1": "weight"},
             id="reverse_query",
         ),
         pytest.param(
-            Cts.score(node=xs.string("node")),
+            cts.score(node=xs.string("node")),
             "cts:score(xs:string($v0))",
             {"v0": "node"},
             id="score",
         ),
         pytest.param(
-            Cts.score_order(options=xs.string("options")),
+            cts.score_order(options=xs.string("options")),
             "cts:score-order(xs:string($v0))",
             {"v0": "options"},
             id="score_order",
         ),
         pytest.param(
-            Cts.search(
+            cts.search(
                 expression=xs.string("expression"),
                 query=xs.string("query"),
                 options=xs.string("options"),
@@ -2667,7 +2667,7 @@ def test_late_arguments_keep_native_position():
             id="search",
         ),
         pytest.param(
-            Cts.similar_query(
+            cts.similar_query(
                 nodes=xs.string("nodes"),
                 weight=xs.string("weight"),
                 options=xs.string("options"),
@@ -2680,7 +2680,7 @@ def test_late_arguments_keep_native_position():
             id="similar_query",
         ),
         pytest.param(
-            Cts.stddev(
+            cts.stddev(
                 range_index=xs.string("range_index"),
                 options=xs.string("options"),
                 query=xs.string("query"),
@@ -2694,7 +2694,7 @@ def test_late_arguments_keep_native_position():
             id="stddev",
         ),
         pytest.param(
-            Cts.stddev_p(
+            cts.stddev_p(
                 range_index=xs.string("range_index"),
                 options=xs.string("options"),
                 query=xs.string("query"),
@@ -2708,7 +2708,7 @@ def test_late_arguments_keep_native_position():
             id="stddev_p",
         ),
         pytest.param(
-            Cts.stem(
+            cts.stem(
                 text=xs.string("text"),
                 language=xs.string("language"),
                 part_of_speech=xs.string("part_of_speech"),
@@ -2718,7 +2718,7 @@ def test_late_arguments_keep_native_position():
             id="stem",
         ),
         pytest.param(
-            Cts.sum_aggregate(
+            cts.sum_aggregate(
                 range_index=xs.string("range_index"),
                 options=xs.string("options"),
                 query=xs.string("query"),
@@ -2732,7 +2732,7 @@ def test_late_arguments_keep_native_position():
             id="sum_aggregate",
         ),
         pytest.param(
-            Cts.thresholds(
+            cts.thresholds(
                 computed_labels=xs.string("computed_labels"),
                 known_labels=xs.string("known_labels"),
                 recall_weight=xs.string("recall_weight"),
@@ -2742,7 +2742,7 @@ def test_late_arguments_keep_native_position():
             id="thresholds",
         ),
         pytest.param(
-            Cts.tokenize(
+            cts.tokenize(
                 text=xs.string("text"),
                 language=xs.string("language"),
                 field=xs.string("field"),
@@ -2752,7 +2752,7 @@ def test_late_arguments_keep_native_position():
             id="tokenize",
         ),
         pytest.param(
-            Cts.train(
+            cts.train(
                 training_nodes=xs.string("training_nodes"),
                 labels=xs.string("labels"),
                 options=xs.string("options"),
@@ -2762,7 +2762,7 @@ def test_late_arguments_keep_native_position():
             id="train",
         ),
         pytest.param(
-            Cts.triple_range_query(
+            cts.triple_range_query(
                 subject=xs.string("subject"),
                 predicate=xs.string("predicate"),
                 object=xs.string("object"),
@@ -2786,7 +2786,7 @@ def test_late_arguments_keep_native_position():
             id="triple_range_query",
         ),
         pytest.param(
-            Cts.triple_value_statistics(
+            cts.triple_value_statistics(
                 values=xs.string("values"),
                 forest_ids=xs.string("forest_ids"),
             ),
@@ -2795,7 +2795,7 @@ def test_late_arguments_keep_native_position():
             id="triple_value_statistics",
         ),
         pytest.param(
-            Cts.triples(
+            cts.triples(
                 subject=xs.string("subject"),
                 predicate=xs.string("predicate"),
                 object=xs.string("object"),
@@ -2819,10 +2819,10 @@ def test_late_arguments_keep_native_position():
             },
             id="triples",
         ),
-        pytest.param(Cts.true_query(), "cts:true-query()", {}, id="true_query"),
-        pytest.param(Cts.unordered(), "cts:unordered()", {}, id="unordered"),
+        pytest.param(cts.true_query(), "cts:true-query()", {}, id="true_query"),
+        pytest.param(cts.unordered(), "cts:unordered()", {}, id="unordered"),
         pytest.param(
-            Cts.uri_match(
+            cts.uri_match(
                 pattern=xs.string("pattern"),
                 options=xs.string("options"),
                 query=xs.string("query"),
@@ -2843,13 +2843,13 @@ def test_late_arguments_keep_native_position():
             id="uri_match",
         ),
         pytest.param(
-            Cts.uri_reference(),
+            cts.uri_reference(),
             "cts:uri-reference()",
             {},
             id="uri_reference",
         ),
         pytest.param(
-            Cts.uris(
+            cts.uris(
                 start=xs.string("start"),
                 options=xs.string("options"),
                 query=xs.string("query"),
@@ -2870,7 +2870,7 @@ def test_late_arguments_keep_native_position():
             id="uris",
         ),
         pytest.param(
-            Cts.valid_document_patch_path(
+            cts.valid_document_patch_path(
                 string=xs.string("string"),
                 map=xs.string("map"),
             ),
@@ -2879,13 +2879,13 @@ def test_late_arguments_keep_native_position():
             id="valid_document_patch_path",
         ),
         pytest.param(
-            Cts.valid_extract_path(string=xs.string("string"), map=xs.string("map")),
+            cts.valid_extract_path(string=xs.string("string"), map=xs.string("map")),
             "cts:valid-extract-path(xs:string($v0), xs:string($v1))",
             {"v0": "string", "v1": "map"},
             id="valid_extract_path",
         ),
         pytest.param(
-            Cts.valid_index_path(
+            cts.valid_index_path(
                 string=xs.string("string"),
                 ignorens=xs.string("ignorens"),
             ),
@@ -2894,19 +2894,19 @@ def test_late_arguments_keep_native_position():
             id="valid_index_path",
         ),
         pytest.param(
-            Cts.valid_optic_path(string=xs.string("string"), map=xs.string("map")),
+            cts.valid_optic_path(string=xs.string("string"), map=xs.string("map")),
             "cts:valid-optic-path(xs:string($v0), xs:string($v1))",
             {"v0": "string", "v1": "map"},
             id="valid_optic_path",
         ),
         pytest.param(
-            Cts.valid_tde_context(string=xs.string("string"), map=xs.string("map")),
+            cts.valid_tde_context(string=xs.string("string"), map=xs.string("map")),
             "cts:valid-tde-context(xs:string($v0), xs:string($v1))",
             {"v0": "string", "v1": "map"},
             id="valid_tde_context",
         ),
         pytest.param(
-            Cts.value_co_occurrences(
+            cts.value_co_occurrences(
                 range_index_1=xs.string("range_index_1"),
                 range_index_2=xs.string("range_index_2"),
                 options=xs.string("options"),
@@ -2930,7 +2930,7 @@ def test_late_arguments_keep_native_position():
             id="value_co_occurrences",
         ),
         pytest.param(
-            Cts.value_match(
+            cts.value_match(
                 range_indexes=xs.string("range_indexes"),
                 pattern=xs.string("pattern"),
                 options=xs.string("options"),
@@ -2953,7 +2953,7 @@ def test_late_arguments_keep_native_position():
             id="value_match",
         ),
         pytest.param(
-            Cts.value_ranges(
+            cts.value_ranges(
                 range_indexes=xs.string("range_indexes"),
                 bounds=xs.string("bounds"),
                 options=xs.string("options"),
@@ -2976,7 +2976,7 @@ def test_late_arguments_keep_native_position():
             id="value_ranges",
         ),
         pytest.param(
-            Cts.value_tuples(
+            cts.value_tuples(
                 range_indexes=xs.string("range_indexes"),
                 options=xs.string("options"),
                 query=xs.string("query"),
@@ -2997,7 +2997,7 @@ def test_late_arguments_keep_native_position():
             id="value_tuples",
         ),
         pytest.param(
-            Cts.values(
+            cts.values(
                 range_indexes=xs.string("range_indexes"),
                 start=xs.string("start"),
                 options=xs.string("options"),
@@ -3020,7 +3020,7 @@ def test_late_arguments_keep_native_position():
             id="values",
         ),
         pytest.param(
-            Cts.variance(
+            cts.variance(
                 range_index=xs.string("range_index"),
                 options=xs.string("options"),
                 query=xs.string("query"),
@@ -3034,7 +3034,7 @@ def test_late_arguments_keep_native_position():
             id="variance",
         ),
         pytest.param(
-            Cts.variance_p(
+            cts.variance_p(
                 range_index=xs.string("range_index"),
                 options=xs.string("options"),
                 query=xs.string("query"),
@@ -3048,7 +3048,7 @@ def test_late_arguments_keep_native_position():
             id="variance_p",
         ),
         pytest.param(
-            Cts.walk(
+            cts.walk(
                 node=xs.string("node"),
                 query=xs.string("query"),
                 expr=xs.string("expr"),
@@ -3058,7 +3058,7 @@ def test_late_arguments_keep_native_position():
             id="walk",
         ),
         pytest.param(
-            Cts.word_match(
+            cts.word_match(
                 pattern=xs.string("pattern"),
                 options=xs.string("options"),
                 query=xs.string("query"),
@@ -3079,7 +3079,7 @@ def test_late_arguments_keep_native_position():
             id="word_match",
         ),
         pytest.param(
-            Cts.word_query(
+            cts.word_query(
                 text=xs.string("text"),
                 options=xs.string("options"),
                 weight=xs.string("weight"),
@@ -3089,7 +3089,7 @@ def test_late_arguments_keep_native_position():
             id="word_query",
         ),
         pytest.param(
-            Cts.words(
+            cts.words(
                 start=xs.string("start"),
                 options=xs.string("options"),
                 query=xs.string("query"),
@@ -3125,7 +3125,7 @@ def test_compile_native_call(expression, body, variables):
     ("expression", "body", "variables"),
     [
         pytest.param(
-            Cts.aggregate(
+            cts.aggregate(
                 native_plugin=xs.string("native_plugin"),
                 aggregate_name=xs.string("aggregate_name"),
                 range_indexes=xs.string("range_indexes"),
@@ -3135,19 +3135,19 @@ def test_compile_native_call(expression, body, variables):
             id="aggregate",
         ),
         pytest.param(
-            Cts.and_query(queries=xs.string("queries")),
+            cts.and_query(queries=xs.string("queries")),
             "cts:and-query(xs:string($v0))",
             {"v0": "queries"},
             id="and_query",
         ),
         pytest.param(
-            Cts.avg_aggregate(range_index=xs.string("range_index")),
+            cts.avg_aggregate(range_index=xs.string("range_index")),
             "cts:avg-aggregate(xs:string($v0))",
             {"v0": "range_index"},
             id="avg_aggregate",
         ),
         pytest.param(
-            Cts.classify(
+            cts.classify(
                 data_nodes=xs.string("data_nodes"),
                 classifier=xs.string("classifier"),
             ),
@@ -3156,26 +3156,26 @@ def test_compile_native_call(expression, body, variables):
             id="classify",
         ),
         pytest.param(
-            Cts.cluster(nodes=xs.string("nodes")),
+            cts.cluster(nodes=xs.string("nodes")),
             "cts:cluster(xs:string($v0))",
             {"v0": "nodes"},
             id="cluster",
         ),
         pytest.param(
-            Cts.collection_match(pattern=xs.string("pattern")),
+            cts.collection_match(pattern=xs.string("pattern")),
             "cts:collection-match(xs:string($v0))",
             {"v0": "pattern"},
             id="collection_match",
         ),
         pytest.param(
-            Cts.collection_reference(),
+            cts.collection_reference(),
             "cts:collection-reference()",
             {},
             id="collection_reference",
         ),
-        pytest.param(Cts.collections(), "cts:collections()", {}, id="collections"),
+        pytest.param(cts.collections(), "cts:collections()", {}, id="collections"),
         pytest.param(
-            Cts.column_range_query(
+            cts.column_range_query(
                 schema=xs.string("schema"),
                 view=xs.string("view"),
                 column=xs.string("column"),
@@ -3188,57 +3188,57 @@ def test_compile_native_call(expression, body, variables):
             {"v0": "schema", "v1": "view", "v2": "column", "v3": "value"},
             id="column_range_query",
         ),
-        pytest.param(Cts.confidence(), "cts:confidence()", {}, id="confidence"),
+        pytest.param(cts.confidence(), "cts:confidence()", {}, id="confidence"),
         pytest.param(
-            Cts.confidence_order(),
+            cts.confidence_order(),
             "cts:confidence-order()",
             {},
             id="confidence_order",
         ),
         pytest.param(
-            Cts.correlation(value1=xs.string("value1"), value2=xs.string("value2")),
+            cts.correlation(value1=xs.string("value1"), value2=xs.string("value2")),
             "cts:correlation(xs:string($v0), xs:string($v1))",
             {"v0": "value1", "v1": "value2"},
             id="correlation",
         ),
         pytest.param(
-            Cts.count_aggregate(range_index=xs.string("range_index")),
+            cts.count_aggregate(range_index=xs.string("range_index")),
             "cts:count-aggregate(xs:string($v0))",
             {"v0": "range_index"},
             id="count_aggregate",
         ),
         pytest.param(
-            Cts.covariance(value1=xs.string("value1"), value2=xs.string("value2")),
+            cts.covariance(value1=xs.string("value1"), value2=xs.string("value2")),
             "cts:covariance(xs:string($v0), xs:string($v1))",
             {"v0": "value1", "v1": "value2"},
             id="covariance",
         ),
         pytest.param(
-            Cts.covariance_p(value1=xs.string("value1"), value2=xs.string("value2")),
+            cts.covariance_p(value1=xs.string("value1"), value2=xs.string("value2")),
             "cts:covariance-p(xs:string($v0), xs:string($v1))",
             {"v0": "value1", "v1": "value2"},
             id="covariance_p",
         ),
         pytest.param(
-            Cts.directory_query(uris=xs.string("uris")),
+            cts.directory_query(uris=xs.string("uris")),
             "cts:directory-query(xs:string($v0), xs:string($v1))",
             {"v0": "uris", "v1": "1"},
             id="directory_query",
         ),
         pytest.param(
-            Cts.distinctive_terms(nodes=xs.string("nodes")),
+            cts.distinctive_terms(nodes=xs.string("nodes")),
             "cts:distinctive-terms(xs:string($v0))",
             {"v0": "nodes"},
             id="distinctive_terms",
         ),
         pytest.param(
-            Cts.document_order(),
+            cts.document_order(),
             "cts:document-order()",
             {},
             id="document_order",
         ),
         pytest.param(
-            Cts.element_attribute_pair_geospatial_boxes(
+            cts.element_attribute_pair_geospatial_boxes(
                 parent_element_names=xs.string("parent_element_names"),
                 latitude_names=xs.string("latitude_names"),
                 longitude_names=xs.string("longitude_names"),
@@ -3255,7 +3255,7 @@ def test_compile_native_call(expression, body, variables):
             id="element_attribute_pair_geospatial_boxes",
         ),
         pytest.param(
-            Cts.element_attribute_pair_geospatial_query(
+            cts.element_attribute_pair_geospatial_query(
                 element_name=xs.string("element_name"),
                 latitude_attribute_names=xs.string("latitude_attribute_names"),
                 longitude_attribute_names=xs.string("longitude_attribute_names"),
@@ -3274,7 +3274,7 @@ def test_compile_native_call(expression, body, variables):
             id="element_attribute_pair_geospatial_query",
         ),
         pytest.param(
-            Cts.element_attribute_pair_geospatial_value_match(
+            cts.element_attribute_pair_geospatial_value_match(
                 element_names=xs.string("element_names"),
                 latitude_names=xs.string("latitude_names"),
                 longitude_names=xs.string("longitude_names"),
@@ -3293,7 +3293,7 @@ def test_compile_native_call(expression, body, variables):
             id="element_attribute_pair_geospatial_value_match",
         ),
         pytest.param(
-            Cts.element_attribute_pair_geospatial_values(
+            cts.element_attribute_pair_geospatial_values(
                 element_names=xs.string("element_names"),
                 latitude_names=xs.string("latitude_names"),
                 longitude_names=xs.string("longitude_names"),
@@ -3306,7 +3306,7 @@ def test_compile_native_call(expression, body, variables):
             id="element_attribute_pair_geospatial_values",
         ),
         pytest.param(
-            Cts.element_attribute_range_query(
+            cts.element_attribute_range_query(
                 element_name=xs.string("element_name"),
                 attribute_name=xs.string("attribute_name"),
                 operator=xs.string("operator"),
@@ -3325,7 +3325,7 @@ def test_compile_native_call(expression, body, variables):
             id="element_attribute_range_query",
         ),
         pytest.param(
-            Cts.element_attribute_reference(
+            cts.element_attribute_reference(
                 element=xs.string("element"),
                 attribute=xs.string("attribute"),
             ),
@@ -3334,7 +3334,7 @@ def test_compile_native_call(expression, body, variables):
             id="element_attribute_reference",
         ),
         pytest.param(
-            Cts.element_attribute_value_co_occurrences(
+            cts.element_attribute_value_co_occurrences(
                 element_name_1=xs.string("element_name_1"),
                 attribute_name_1=xs.string("attribute_name_1"),
                 element_name_2=xs.string("element_name_2"),
@@ -3353,7 +3353,7 @@ def test_compile_native_call(expression, body, variables):
             id="element_attribute_value_co_occurrences",
         ),
         pytest.param(
-            Cts.element_attribute_value_geospatial_co_occurrences(
+            cts.element_attribute_value_geospatial_co_occurrences(
                 element_name_1=xs.string("element_name_1"),
                 attribute_name_1=xs.string("attribute_name_1"),
                 geo_element_name=xs.string("geo_element_name"),
@@ -3370,7 +3370,7 @@ def test_compile_native_call(expression, body, variables):
             id="element_attribute_value_geospatial_co_occurrences",
         ),
         pytest.param(
-            Cts.element_attribute_value_match(
+            cts.element_attribute_value_match(
                 element_names=xs.string("element_names"),
                 attribute_names=xs.string("attribute_names"),
                 pattern=xs.string("pattern"),
@@ -3383,7 +3383,7 @@ def test_compile_native_call(expression, body, variables):
             id="element_attribute_value_match",
         ),
         pytest.param(
-            Cts.element_attribute_value_query(
+            cts.element_attribute_value_query(
                 element_name=xs.string("element_name"),
                 attribute_name=xs.string("attribute_name"),
                 text=xs.string("text"),
@@ -3396,7 +3396,7 @@ def test_compile_native_call(expression, body, variables):
             id="element_attribute_value_query",
         ),
         pytest.param(
-            Cts.element_attribute_value_ranges(
+            cts.element_attribute_value_ranges(
                 element_names=xs.string("element_names"),
                 attribute_names=xs.string("attribute_names"),
             ),
@@ -3405,7 +3405,7 @@ def test_compile_native_call(expression, body, variables):
             id="element_attribute_value_ranges",
         ),
         pytest.param(
-            Cts.element_attribute_values(
+            cts.element_attribute_values(
                 element_names=xs.string("element_names"),
                 attribute_names=xs.string("attribute_names"),
             ),
@@ -3414,7 +3414,7 @@ def test_compile_native_call(expression, body, variables):
             id="element_attribute_values",
         ),
         pytest.param(
-            Cts.element_attribute_word_match(
+            cts.element_attribute_word_match(
                 element_names=xs.string("element_names"),
                 attribute_names=xs.string("attribute_names"),
                 pattern=xs.string("pattern"),
@@ -3427,7 +3427,7 @@ def test_compile_native_call(expression, body, variables):
             id="element_attribute_word_match",
         ),
         pytest.param(
-            Cts.element_attribute_word_query(
+            cts.element_attribute_word_query(
                 element_name=xs.string("element_name"),
                 attribute_name=xs.string("attribute_name"),
                 text=xs.string("text"),
@@ -3440,7 +3440,7 @@ def test_compile_native_call(expression, body, variables):
             id="element_attribute_word_query",
         ),
         pytest.param(
-            Cts.element_attribute_words(
+            cts.element_attribute_words(
                 element_names=xs.string("element_names"),
                 attribute_names=xs.string("attribute_names"),
             ),
@@ -3449,7 +3449,7 @@ def test_compile_native_call(expression, body, variables):
             id="element_attribute_words",
         ),
         pytest.param(
-            Cts.element_child_geospatial_boxes(
+            cts.element_child_geospatial_boxes(
                 parent_element_names=xs.string("parent_element_names"),
                 child_element_names=xs.string("child_element_names"),
             ),
@@ -3458,7 +3458,7 @@ def test_compile_native_call(expression, body, variables):
             id="element_child_geospatial_boxes",
         ),
         pytest.param(
-            Cts.element_child_geospatial_query(
+            cts.element_child_geospatial_query(
                 parent_element_name=xs.string("parent_element_name"),
                 child_element_names=xs.string("child_element_names"),
                 regions=xs.string("regions"),
@@ -3471,7 +3471,7 @@ def test_compile_native_call(expression, body, variables):
             id="element_child_geospatial_query",
         ),
         pytest.param(
-            Cts.element_child_geospatial_value_match(
+            cts.element_child_geospatial_value_match(
                 element_names=xs.string("element_names"),
                 child_names=xs.string("child_names"),
                 pattern=xs.string("pattern"),
@@ -3484,7 +3484,7 @@ def test_compile_native_call(expression, body, variables):
             id="element_child_geospatial_value_match",
         ),
         pytest.param(
-            Cts.element_child_geospatial_values(
+            cts.element_child_geospatial_values(
                 element_names=xs.string("element_names"),
                 child_names=xs.string("child_names"),
             ),
@@ -3493,13 +3493,13 @@ def test_compile_native_call(expression, body, variables):
             id="element_child_geospatial_values",
         ),
         pytest.param(
-            Cts.element_geospatial_boxes(element_names=xs.string("element_names")),
+            cts.element_geospatial_boxes(element_names=xs.string("element_names")),
             "cts:element-geospatial-boxes(xs:string($v0))",
             {"v0": "element_names"},
             id="element_geospatial_boxes",
         ),
         pytest.param(
-            Cts.element_geospatial_query(
+            cts.element_geospatial_query(
                 element_name=xs.string("element_name"),
                 regions=xs.string("regions"),
             ),
@@ -3508,7 +3508,7 @@ def test_compile_native_call(expression, body, variables):
             id="element_geospatial_query",
         ),
         pytest.param(
-            Cts.element_geospatial_value_match(
+            cts.element_geospatial_value_match(
                 element_names=xs.string("element_names"),
                 pattern=xs.string("pattern"),
             ),
@@ -3517,13 +3517,13 @@ def test_compile_native_call(expression, body, variables):
             id="element_geospatial_value_match",
         ),
         pytest.param(
-            Cts.element_geospatial_values(element_names=xs.string("element_names")),
+            cts.element_geospatial_values(element_names=xs.string("element_names")),
             "cts:element-geospatial-values(xs:string($v0))",
             {"v0": "element_names"},
             id="element_geospatial_values",
         ),
         pytest.param(
-            Cts.element_pair_geospatial_boxes(
+            cts.element_pair_geospatial_boxes(
                 parent_element_names=xs.string("parent_element_names"),
                 latitude_names=xs.string("latitude_names"),
                 longitude_names=xs.string("longitude_names"),
@@ -3540,7 +3540,7 @@ def test_compile_native_call(expression, body, variables):
             id="element_pair_geospatial_boxes",
         ),
         pytest.param(
-            Cts.element_pair_geospatial_query(
+            cts.element_pair_geospatial_query(
                 element_name=xs.string("element_name"),
                 latitude_element_names=xs.string("latitude_element_names"),
                 longitude_element_names=xs.string("longitude_element_names"),
@@ -3559,7 +3559,7 @@ def test_compile_native_call(expression, body, variables):
             id="element_pair_geospatial_query",
         ),
         pytest.param(
-            Cts.element_pair_geospatial_value_match(
+            cts.element_pair_geospatial_value_match(
                 element_names=xs.string("element_names"),
                 latitude_names=xs.string("latitude_names"),
                 longitude_names=xs.string("longitude_names"),
@@ -3578,7 +3578,7 @@ def test_compile_native_call(expression, body, variables):
             id="element_pair_geospatial_value_match",
         ),
         pytest.param(
-            Cts.element_pair_geospatial_values(
+            cts.element_pair_geospatial_values(
                 element_names=xs.string("element_names"),
                 latitude_names=xs.string("latitude_names"),
                 longitude_names=xs.string("longitude_names"),
@@ -3591,7 +3591,7 @@ def test_compile_native_call(expression, body, variables):
             id="element_pair_geospatial_values",
         ),
         pytest.param(
-            Cts.element_range_query(
+            cts.element_range_query(
                 element_name=xs.string("element_name"),
                 operator=xs.string("operator"),
                 value=xs.string("value"),
@@ -3601,13 +3601,13 @@ def test_compile_native_call(expression, body, variables):
             id="element_range_query",
         ),
         pytest.param(
-            Cts.element_reference(element=xs.string("element")),
+            cts.element_reference(element=xs.string("element")),
             "cts:element-reference(xs:string($v0))",
             {"v0": "element"},
             id="element_reference",
         ),
         pytest.param(
-            Cts.element_value_co_occurrences(
+            cts.element_value_co_occurrences(
                 element_name_1=xs.string("element_name_1"),
                 element_name_2=xs.string("element_name_2"),
             ),
@@ -3616,7 +3616,7 @@ def test_compile_native_call(expression, body, variables):
             id="element_value_co_occurrences",
         ),
         pytest.param(
-            Cts.element_value_geospatial_co_occurrences(
+            cts.element_value_geospatial_co_occurrences(
                 element_name_1=xs.string("element_name_1"),
                 geo_element_name=xs.string("geo_element_name"),
             ),
@@ -3628,7 +3628,7 @@ def test_compile_native_call(expression, body, variables):
             id="element_value_geospatial_co_occurrences",
         ),
         pytest.param(
-            Cts.element_value_match(
+            cts.element_value_match(
                 element_names=xs.string("element_names"),
                 pattern=xs.string("pattern"),
             ),
@@ -3637,25 +3637,25 @@ def test_compile_native_call(expression, body, variables):
             id="element_value_match",
         ),
         pytest.param(
-            Cts.element_value_query(element_name=xs.string("element_name")),
+            cts.element_value_query(element_name=xs.string("element_name")),
             "cts:element-value-query(xs:string($v0))",
             {"v0": "element_name"},
             id="element_value_query",
         ),
         pytest.param(
-            Cts.element_value_ranges(element_names=xs.string("element_names")),
+            cts.element_value_ranges(element_names=xs.string("element_names")),
             "cts:element-value-ranges(xs:string($v0))",
             {"v0": "element_names"},
             id="element_value_ranges",
         ),
         pytest.param(
-            Cts.element_values(element_names=xs.string("element_names")),
+            cts.element_values(element_names=xs.string("element_names")),
             "cts:element-values(xs:string($v0))",
             {"v0": "element_names"},
             id="element_values",
         ),
         pytest.param(
-            Cts.element_word_match(
+            cts.element_word_match(
                 element_names=xs.string("element_names"),
                 pattern=xs.string("pattern"),
             ),
@@ -3664,7 +3664,7 @@ def test_compile_native_call(expression, body, variables):
             id="element_word_match",
         ),
         pytest.param(
-            Cts.element_word_query(
+            cts.element_word_query(
                 element_name=xs.string("element_name"),
                 text=xs.string("text"),
             ),
@@ -3673,38 +3673,38 @@ def test_compile_native_call(expression, body, variables):
             id="element_word_query",
         ),
         pytest.param(
-            Cts.element_words(element_names=xs.string("element_names")),
+            cts.element_words(element_names=xs.string("element_names")),
             "cts:element-words(xs:string($v0))",
             {"v0": "element_names"},
             id="element_words",
         ),
         pytest.param(
-            Cts.entity_dictionary(entities=xs.string("entities")),
+            cts.entity_dictionary(entities=xs.string("entities")),
             "cts:entity-dictionary(xs:string($v0))",
             {"v0": "entities"},
             id="entity_dictionary",
         ),
         pytest.param(
-            Cts.entity_dictionary_parse(contents=xs.string("contents")),
+            cts.entity_dictionary_parse(contents=xs.string("contents")),
             "cts:entity-dictionary-parse(xs:string($v0))",
             {"v0": "contents"},
             id="entity_dictionary_parse",
         ),
         pytest.param(
-            Cts.entity_highlight(node=xs.string("node"), expr=xs.string("expr")),
+            cts.entity_highlight(node=xs.string("node"), expr=xs.string("expr")),
             "cts:entity-highlight(xs:string($v0), xs:string($v1))",
             {"v0": "node", "v1": "expr"},
             id="entity_highlight",
         ),
         pytest.param(
-            Cts.entity_walk(node=xs.string("node"), expr=xs.string("expr")),
+            cts.entity_walk(node=xs.string("node"), expr=xs.string("expr")),
             "cts:entity-walk(xs:string($v0), xs:string($v1))",
             {"v0": "node", "v1": "expr"},
             id="entity_walk",
         ),
-        pytest.param(Cts.estimate(), "cts:estimate(())", {}, id="estimate"),
+        pytest.param(cts.estimate(), "cts:estimate(())", {}, id="estimate"),
         pytest.param(
-            Cts.field_range_query(
+            cts.field_range_query(
                 field_name=xs.string("field_name"),
                 operator=xs.string("operator"),
                 value=xs.string("value"),
@@ -3714,13 +3714,13 @@ def test_compile_native_call(expression, body, variables):
             id="field_range_query",
         ),
         pytest.param(
-            Cts.field_reference(field=xs.string("field")),
+            cts.field_reference(field=xs.string("field")),
             "cts:field-reference(xs:string($v0))",
             {"v0": "field"},
             id="field_reference",
         ),
         pytest.param(
-            Cts.field_value_co_occurrences(
+            cts.field_value_co_occurrences(
                 field_name_1=xs.string("field_name_1"),
                 field_name_2=xs.string("field_name_2"),
             ),
@@ -3729,7 +3729,7 @@ def test_compile_native_call(expression, body, variables):
             id="field_value_co_occurrences",
         ),
         pytest.param(
-            Cts.field_value_match(
+            cts.field_value_match(
                 field_names=xs.string("field_names"),
                 pattern=xs.string("pattern"),
             ),
@@ -3738,7 +3738,7 @@ def test_compile_native_call(expression, body, variables):
             id="field_value_match",
         ),
         pytest.param(
-            Cts.field_value_query(
+            cts.field_value_query(
                 field_name=xs.string("field_name"),
                 text=xs.string("text"),
             ),
@@ -3747,19 +3747,19 @@ def test_compile_native_call(expression, body, variables):
             id="field_value_query",
         ),
         pytest.param(
-            Cts.field_value_ranges(field_names=xs.string("field_names")),
+            cts.field_value_ranges(field_names=xs.string("field_names")),
             "cts:field-value-ranges(xs:string($v0))",
             {"v0": "field_names"},
             id="field_value_ranges",
         ),
         pytest.param(
-            Cts.field_values(field_names=xs.string("field_names")),
+            cts.field_values(field_names=xs.string("field_names")),
             "cts:field-values(xs:string($v0))",
             {"v0": "field_names"},
             id="field_values",
         ),
         pytest.param(
-            Cts.field_word_match(
+            cts.field_word_match(
                 field_names=xs.string("field_names"),
                 pattern=xs.string("pattern"),
             ),
@@ -3768,7 +3768,7 @@ def test_compile_native_call(expression, body, variables):
             id="field_word_match",
         ),
         pytest.param(
-            Cts.field_word_query(
+            cts.field_word_query(
                 field_name=xs.string("field_name"),
                 text=xs.string("text"),
             ),
@@ -3777,20 +3777,20 @@ def test_compile_native_call(expression, body, variables):
             id="field_word_query",
         ),
         pytest.param(
-            Cts.field_words(field_names=xs.string("field_names")),
+            cts.field_words(field_names=xs.string("field_names")),
             "cts:field-words(xs:string($v0))",
             {"v0": "field_names"},
             id="field_words",
         ),
-        pytest.param(Cts.fitness(), "cts:fitness()", {}, id="fitness"),
+        pytest.param(cts.fitness(), "cts:fitness()", {}, id="fitness"),
         pytest.param(
-            Cts.fitness_order(),
+            cts.fitness_order(),
             "cts:fitness-order()",
             {},
             id="fitness_order",
         ),
         pytest.param(
-            Cts.geospatial_attribute_pair_reference(
+            cts.geospatial_attribute_pair_reference(
                 element=xs.string("element"),
                 lat=xs.string("lat"),
                 long=xs.string("long"),
@@ -3803,13 +3803,13 @@ def test_compile_native_call(expression, body, variables):
             id="geospatial_attribute_pair_reference",
         ),
         pytest.param(
-            Cts.geospatial_boxes(geo_indexes=xs.string("geo_indexes")),
+            cts.geospatial_boxes(geo_indexes=xs.string("geo_indexes")),
             "cts:geospatial-boxes(xs:string($v0))",
             {"v0": "geo_indexes"},
             id="geospatial_boxes",
         ),
         pytest.param(
-            Cts.geospatial_co_occurrences(
+            cts.geospatial_co_occurrences(
                 geo_element_name_1=xs.string("geo_element_name_1"),
                 geo_element_name_2=xs.string("geo_element_name_2"),
             ),
@@ -3821,7 +3821,7 @@ def test_compile_native_call(expression, body, variables):
             id="geospatial_co_occurrences",
         ),
         pytest.param(
-            Cts.geospatial_element_child_reference(
+            cts.geospatial_element_child_reference(
                 element=xs.string("element"),
                 child=xs.string("child"),
             ),
@@ -3830,7 +3830,7 @@ def test_compile_native_call(expression, body, variables):
             id="geospatial_element_child_reference",
         ),
         pytest.param(
-            Cts.geospatial_element_pair_reference(
+            cts.geospatial_element_pair_reference(
                 element=xs.string("element"),
                 lat=xs.string("lat"),
                 long=xs.string("long"),
@@ -3843,13 +3843,13 @@ def test_compile_native_call(expression, body, variables):
             id="geospatial_element_pair_reference",
         ),
         pytest.param(
-            Cts.geospatial_element_reference(element=xs.string("element")),
+            cts.geospatial_element_reference(element=xs.string("element")),
             "cts:geospatial-element-reference(xs:string($v0))",
             {"v0": "element"},
             id="geospatial_element_reference",
         ),
         pytest.param(
-            Cts.geospatial_json_property_child_reference(
+            cts.geospatial_json_property_child_reference(
                 property=xs.string("property"),
                 child=xs.string("child"),
             ),
@@ -3861,7 +3861,7 @@ def test_compile_native_call(expression, body, variables):
             id="geospatial_json_property_child_reference",
         ),
         pytest.param(
-            Cts.geospatial_json_property_pair_reference(
+            cts.geospatial_json_property_pair_reference(
                 property=xs.string("property"),
                 lat=xs.string("lat"),
                 long=xs.string("long"),
@@ -3874,19 +3874,19 @@ def test_compile_native_call(expression, body, variables):
             id="geospatial_json_property_pair_reference",
         ),
         pytest.param(
-            Cts.geospatial_json_property_reference(property=xs.string("property")),
+            cts.geospatial_json_property_reference(property=xs.string("property")),
             "cts:geospatial-json-property-reference(xs:string($v0))",
             {"v0": "property"},
             id="geospatial_json_property_reference",
         ),
         pytest.param(
-            Cts.geospatial_path_reference(path_expression=xs.string("path_expression")),
+            cts.geospatial_path_reference(path_expression=xs.string("path_expression")),
             "cts:geospatial-path-reference(xs:string($v0))",
             {"v0": "path_expression"},
             id="geospatial_path_reference",
         ),
         pytest.param(
-            Cts.geospatial_region_path_reference(
+            cts.geospatial_region_path_reference(
                 path_expression=xs.string("path_expression"),
             ),
             "cts:geospatial-region-path-reference(xs:string($v0))",
@@ -3894,7 +3894,7 @@ def test_compile_native_call(expression, body, variables):
             id="geospatial_region_path_reference",
         ),
         pytest.param(
-            Cts.geospatial_region_query(
+            cts.geospatial_region_query(
                 geospatial_region_reference=xs.string("geospatial_region_reference"),
                 operation=xs.string("operation"),
                 regions=xs.string("regions"),
@@ -3907,13 +3907,13 @@ def test_compile_native_call(expression, body, variables):
             id="geospatial_region_query",
         ),
         pytest.param(
-            Cts.index_order(index=xs.string("index")),
+            cts.index_order(index=xs.string("index")),
             "cts:index-order(xs:string($v0))",
             {"v0": "index"},
             id="index_order",
         ),
         pytest.param(
-            Cts.json_property_child_geospatial_query(
+            cts.json_property_child_geospatial_query(
                 parent_property_name=xs.string("parent_property_name"),
                 child_property_names=xs.string("child_property_names"),
                 regions=xs.string("regions"),
@@ -3930,7 +3930,7 @@ def test_compile_native_call(expression, body, variables):
             id="json_property_child_geospatial_query",
         ),
         pytest.param(
-            Cts.json_property_geospatial_query(
+            cts.json_property_geospatial_query(
                 property_name=xs.string("property_name"),
                 regions=xs.string("regions"),
             ),
@@ -3939,7 +3939,7 @@ def test_compile_native_call(expression, body, variables):
             id="json_property_geospatial_query",
         ),
         pytest.param(
-            Cts.json_property_pair_geospatial_query(
+            cts.json_property_pair_geospatial_query(
                 property_name=xs.string("property_name"),
                 latitude_property_names=xs.string("latitude_property_names"),
                 longitude_property_names=xs.string("longitude_property_names"),
@@ -3958,7 +3958,7 @@ def test_compile_native_call(expression, body, variables):
             id="json_property_pair_geospatial_query",
         ),
         pytest.param(
-            Cts.json_property_range_query(
+            cts.json_property_range_query(
                 property_name=xs.string("property_name"),
                 operator=xs.string("operator"),
                 value=xs.string("value"),
@@ -3971,13 +3971,13 @@ def test_compile_native_call(expression, body, variables):
             id="json_property_range_query",
         ),
         pytest.param(
-            Cts.json_property_reference(property=xs.string("property")),
+            cts.json_property_reference(property=xs.string("property")),
             "cts:json-property-reference(xs:string($v0))",
             {"v0": "property"},
             id="json_property_reference",
         ),
         pytest.param(
-            Cts.json_property_value_query(
+            cts.json_property_value_query(
                 property_name=xs.string("property_name"),
                 value=xs.string("value"),
             ),
@@ -3986,7 +3986,7 @@ def test_compile_native_call(expression, body, variables):
             id="json_property_value_query",
         ),
         pytest.param(
-            Cts.json_property_word_match(
+            cts.json_property_word_match(
                 property_names=xs.string("property_names"),
                 pattern=xs.string("pattern"),
             ),
@@ -3995,7 +3995,7 @@ def test_compile_native_call(expression, body, variables):
             id="json_property_word_match",
         ),
         pytest.param(
-            Cts.json_property_word_query(
+            cts.json_property_word_query(
                 property_name=xs.string("property_name"),
                 text=xs.string("text"),
             ),
@@ -4004,25 +4004,25 @@ def test_compile_native_call(expression, body, variables):
             id="json_property_word_query",
         ),
         pytest.param(
-            Cts.json_property_words(property_names=xs.string("property_names")),
+            cts.json_property_words(property_names=xs.string("property_names")),
             "cts:json-property-words(xs:string($v0))",
             {"v0": "property_names"},
             id="json_property_words",
         ),
         pytest.param(
-            Cts.linear_model(values=xs.string("values")),
+            cts.linear_model(values=xs.string("values")),
             "cts:linear-model(xs:string($v0))",
             {"v0": "values"},
             id="linear_model",
         ),
         pytest.param(
-            Cts.lsqt_query(temporal_collection=xs.string("temporal_collection")),
+            cts.lsqt_query(temporal_collection=xs.string("temporal_collection")),
             "cts:lsqt-query(xs:string($v0))",
             {"v0": "temporal_collection"},
             id="lsqt_query",
         ),
         pytest.param(
-            Cts.match_regions(
+            cts.match_regions(
                 range_indexes=xs.string("range_indexes"),
                 operation=xs.string("operation"),
                 regions=xs.string("regions"),
@@ -4032,37 +4032,37 @@ def test_compile_native_call(expression, body, variables):
             id="match_regions",
         ),
         pytest.param(
-            Cts.max(range_index=xs.string("range_index")),
+            cts.max(range_index=xs.string("range_index")),
             "cts:max(xs:string($v0))",
             {"v0": "range_index"},
             id="max",
         ),
         pytest.param(
-            Cts.min(range_index=xs.string("range_index")),
+            cts.min(range_index=xs.string("range_index")),
             "cts:min(xs:string($v0))",
             {"v0": "range_index"},
             id="min",
         ),
         pytest.param(
-            Cts.near_query(queries=xs.string("queries")),
+            cts.near_query(queries=xs.string("queries")),
             "cts:near-query(xs:string($v0))",
             {"v0": "queries"},
             id="near_query",
         ),
         pytest.param(
-            Cts.or_query(queries=xs.string("queries")),
+            cts.or_query(queries=xs.string("queries")),
             "cts:or-query(xs:string($v0))",
             {"v0": "queries"},
             id="or_query",
         ),
         pytest.param(
-            Cts.parse(query=xs.string("query")),
+            cts.parse(query=xs.string("query")),
             "cts:parse(xs:string($v0))",
             {"v0": "query"},
             id="parse",
         ),
         pytest.param(
-            Cts.path_geospatial_query(
+            cts.path_geospatial_query(
                 path_expression=xs.string("path_expression"),
                 regions=xs.string("regions"),
             ),
@@ -4071,7 +4071,7 @@ def test_compile_native_call(expression, body, variables):
             id="path_geospatial_query",
         ),
         pytest.param(
-            Cts.path_range_query(
+            cts.path_range_query(
                 path_expression=xs.string("path_expression"),
                 operator=xs.string("operator"),
                 value=xs.string("value"),
@@ -4081,19 +4081,19 @@ def test_compile_native_call(expression, body, variables):
             id="path_range_query",
         ),
         pytest.param(
-            Cts.path_reference(path_expression=xs.string("path_expression")),
+            cts.path_reference(path_expression=xs.string("path_expression")),
             "cts:path-reference(xs:string($v0))",
             {"v0": "path_expression"},
             id="path_reference",
         ),
         pytest.param(
-            Cts.percent_rank(arg=xs.string("arg"), value=xs.string("value")),
+            cts.percent_rank(arg=xs.string("arg"), value=xs.string("value")),
             "cts:percent-rank(xs:string($v0), xs:string($v1))",
             {"v0": "arg", "v1": "value"},
             id="percent_rank",
         ),
         pytest.param(
-            Cts.period_compare_query(
+            cts.period_compare_query(
                 axis_1=xs.string("axis_1"),
                 operator=xs.string("operator"),
                 axis_2=xs.string("axis_2"),
@@ -4103,7 +4103,7 @@ def test_compile_native_call(expression, body, variables):
             id="period_compare_query",
         ),
         pytest.param(
-            Cts.period_range_query(
+            cts.period_range_query(
                 axis_name=xs.string("axis_name"),
                 operator=xs.string("operator"),
             ),
@@ -4112,20 +4112,20 @@ def test_compile_native_call(expression, body, variables):
             id="period_range_query",
         ),
         pytest.param(
-            Cts.point(latitude_or_wkt=xs.string("latitude_or_wkt")),
+            cts.point(latitude_or_wkt=xs.string("latitude_or_wkt")),
             "cts:point(xs:string($v0))",
             {"v0": "latitude_or_wkt"},
             id="point",
         ),
-        pytest.param(Cts.quality(), "cts:quality()", {}, id="quality"),
+        pytest.param(cts.quality(), "cts:quality()", {}, id="quality"),
         pytest.param(
-            Cts.quality_order(),
+            cts.quality_order(),
             "cts:quality-order()",
             {},
             id="quality_order",
         ),
         pytest.param(
-            Cts.range_query(
+            cts.range_query(
                 index=xs.string("index"),
                 operator=xs.string("operator"),
                 value=xs.string("value"),
@@ -4135,65 +4135,65 @@ def test_compile_native_call(expression, body, variables):
             id="range_query",
         ),
         pytest.param(
-            Cts.rank(arg=xs.string("arg"), value=xs.string("value")),
+            cts.rank(arg=xs.string("arg"), value=xs.string("value")),
             "cts:rank(xs:string($v0), xs:string($v1))",
             {"v0": "arg", "v1": "value"},
             id="rank",
         ),
         pytest.param(
-            Cts.registered_query(ids=xs.string("ids")),
+            cts.registered_query(ids=xs.string("ids")),
             "cts:registered-query(xs:string($v0))",
             {"v0": "ids"},
             id="registered_query",
         ),
         pytest.param(
-            Cts.relevance_info(),
+            cts.relevance_info(),
             "cts:relevance-info()",
             {},
             id="relevance_info",
         ),
-        pytest.param(Cts.remainder(), "cts:remainder()", {}, id="remainder"),
+        pytest.param(cts.remainder(), "cts:remainder()", {}, id="remainder"),
         pytest.param(
-            Cts.reverse_query(nodes=xs.string("nodes")),
+            cts.reverse_query(nodes=xs.string("nodes")),
             "cts:reverse-query(xs:string($v0))",
             {"v0": "nodes"},
             id="reverse_query",
         ),
-        pytest.param(Cts.score(), "cts:score()", {}, id="score"),
-        pytest.param(Cts.score_order(), "cts:score-order()", {}, id="score_order"),
-        pytest.param(Cts.search(), "cts:search(/, ())", {}, id="search"),
+        pytest.param(cts.score(), "cts:score()", {}, id="score"),
+        pytest.param(cts.score_order(), "cts:score-order()", {}, id="score_order"),
+        pytest.param(cts.search(), "cts:search(/, ())", {}, id="search"),
         pytest.param(
-            Cts.similar_query(nodes=xs.string("nodes")),
+            cts.similar_query(nodes=xs.string("nodes")),
             "cts:similar-query(xs:string($v0))",
             {"v0": "nodes"},
             id="similar_query",
         ),
         pytest.param(
-            Cts.stddev(range_index=xs.string("range_index")),
+            cts.stddev(range_index=xs.string("range_index")),
             "cts:stddev(xs:string($v0))",
             {"v0": "range_index"},
             id="stddev",
         ),
         pytest.param(
-            Cts.stddev_p(range_index=xs.string("range_index")),
+            cts.stddev_p(range_index=xs.string("range_index")),
             "cts:stddev-p(xs:string($v0))",
             {"v0": "range_index"},
             id="stddev_p",
         ),
         pytest.param(
-            Cts.stem(text=xs.string("text")),
+            cts.stem(text=xs.string("text")),
             "cts:stem(xs:string($v0))",
             {"v0": "text"},
             id="stem",
         ),
         pytest.param(
-            Cts.sum_aggregate(range_index=xs.string("range_index")),
+            cts.sum_aggregate(range_index=xs.string("range_index")),
             "cts:sum-aggregate(xs:string($v0))",
             {"v0": "range_index"},
             id="sum_aggregate",
         ),
         pytest.param(
-            Cts.thresholds(
+            cts.thresholds(
                 computed_labels=xs.string("computed_labels"),
                 known_labels=xs.string("known_labels"),
             ),
@@ -4202,13 +4202,13 @@ def test_compile_native_call(expression, body, variables):
             id="thresholds",
         ),
         pytest.param(
-            Cts.tokenize(text=xs.string("text")),
+            cts.tokenize(text=xs.string("text")),
             "cts:tokenize(xs:string($v0))",
             {"v0": "text"},
             id="tokenize",
         ),
         pytest.param(
-            Cts.train(
+            cts.train(
                 training_nodes=xs.string("training_nodes"),
                 labels=xs.string("labels"),
             ),
@@ -4217,7 +4217,7 @@ def test_compile_native_call(expression, body, variables):
             id="train",
         ),
         pytest.param(
-            Cts.triple_range_query(
+            cts.triple_range_query(
                 subject=xs.string("subject"),
                 predicate=xs.string("predicate"),
                 object=xs.string("object"),
@@ -4227,45 +4227,45 @@ def test_compile_native_call(expression, body, variables):
             id="triple_range_query",
         ),
         pytest.param(
-            Cts.triple_value_statistics(),
+            cts.triple_value_statistics(),
             "cts:triple-value-statistics()",
             {},
             id="triple_value_statistics",
         ),
-        pytest.param(Cts.triples(), "cts:triples()", {}, id="triples"),
+        pytest.param(cts.triples(), "cts:triples()", {}, id="triples"),
         pytest.param(
-            Cts.uri_match(pattern=xs.string("pattern")),
+            cts.uri_match(pattern=xs.string("pattern")),
             "cts:uri-match(xs:string($v0))",
             {"v0": "pattern"},
             id="uri_match",
         ),
-        pytest.param(Cts.uris(), "cts:uris()", {}, id="uris"),
+        pytest.param(cts.uris(), "cts:uris()", {}, id="uris"),
         pytest.param(
-            Cts.valid_document_patch_path(string=xs.string("string")),
+            cts.valid_document_patch_path(string=xs.string("string")),
             "cts:valid-document-patch-path(xs:string($v0))",
             {"v0": "string"},
             id="valid_document_patch_path",
         ),
         pytest.param(
-            Cts.valid_extract_path(string=xs.string("string")),
+            cts.valid_extract_path(string=xs.string("string")),
             "cts:valid-extract-path(xs:string($v0))",
             {"v0": "string"},
             id="valid_extract_path",
         ),
         pytest.param(
-            Cts.valid_optic_path(string=xs.string("string")),
+            cts.valid_optic_path(string=xs.string("string")),
             "cts:valid-optic-path(xs:string($v0))",
             {"v0": "string"},
             id="valid_optic_path",
         ),
         pytest.param(
-            Cts.valid_tde_context(string=xs.string("string")),
+            cts.valid_tde_context(string=xs.string("string")),
             "cts:valid-tde-context(xs:string($v0))",
             {"v0": "string"},
             id="valid_tde_context",
         ),
         pytest.param(
-            Cts.value_co_occurrences(
+            cts.value_co_occurrences(
                 range_index_1=xs.string("range_index_1"),
                 range_index_2=xs.string("range_index_2"),
             ),
@@ -4274,7 +4274,7 @@ def test_compile_native_call(expression, body, variables):
             id="value_co_occurrences",
         ),
         pytest.param(
-            Cts.value_match(
+            cts.value_match(
                 range_indexes=xs.string("range_indexes"),
                 pattern=xs.string("pattern"),
             ),
@@ -4283,48 +4283,48 @@ def test_compile_native_call(expression, body, variables):
             id="value_match",
         ),
         pytest.param(
-            Cts.value_ranges(range_indexes=xs.string("range_indexes")),
+            cts.value_ranges(range_indexes=xs.string("range_indexes")),
             "cts:value-ranges(xs:string($v0))",
             {"v0": "range_indexes"},
             id="value_ranges",
         ),
         pytest.param(
-            Cts.value_tuples(range_indexes=xs.string("range_indexes")),
+            cts.value_tuples(range_indexes=xs.string("range_indexes")),
             "cts:value-tuples(xs:string($v0))",
             {"v0": "range_indexes"},
             id="value_tuples",
         ),
         pytest.param(
-            Cts.values(range_indexes=xs.string("range_indexes")),
+            cts.values(range_indexes=xs.string("range_indexes")),
             "cts:values(xs:string($v0))",
             {"v0": "range_indexes"},
             id="values",
         ),
         pytest.param(
-            Cts.variance(range_index=xs.string("range_index")),
+            cts.variance(range_index=xs.string("range_index")),
             "cts:variance(xs:string($v0))",
             {"v0": "range_index"},
             id="variance",
         ),
         pytest.param(
-            Cts.variance_p(range_index=xs.string("range_index")),
+            cts.variance_p(range_index=xs.string("range_index")),
             "cts:variance-p(xs:string($v0))",
             {"v0": "range_index"},
             id="variance_p",
         ),
         pytest.param(
-            Cts.word_match(pattern=xs.string("pattern")),
+            cts.word_match(pattern=xs.string("pattern")),
             "cts:word-match(xs:string($v0))",
             {"v0": "pattern"},
             id="word_match",
         ),
         pytest.param(
-            Cts.word_query(text=xs.string("text")),
+            cts.word_query(text=xs.string("text")),
             "cts:word-query(xs:string($v0))",
             {"v0": "text"},
             id="word_query",
         ),
-        pytest.param(Cts.words(), "cts:words()", {}, id="words"),
+        pytest.param(cts.words(), "cts:words()", {}, id="words"),
     ],
 )
 def test_compile_default_arguments(expression, body, variables):

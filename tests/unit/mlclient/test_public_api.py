@@ -189,11 +189,7 @@ EXPECTED_EXPORTS = {
     "mlclient.functions.xqy": [
         "ModuleFunctionCall",
         "XqyCompilationContext",
-        "Cts",
         "XqyExpression",
-        "Fn",
-        "Xdmp",
-        "Xs",
         "cts",
         "fn",
         "namespace_bindings",

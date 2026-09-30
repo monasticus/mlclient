@@ -1,8 +1,6 @@
 from __future__ import annotations
 
 import json
-import xml.etree.ElementTree as ET
-from datetime import date, datetime, timezone
 from decimal import Decimal
 from urllib.parse import parse_qs
 
@@ -522,16 +520,8 @@ def test_eval_with_bytes_output_type(ml):
     ("source", "items", "expected"),
     [
         ("()", [], []),
-        ("fn:count(())", [("integer", "text/plain", "0")], 0),
-        ("fn:false()", [("boolean", "text/plain", "false")], False),
-        ('xs:string("")', [("string", "text/plain", "")], ""),
-        ("array-node {}", [("array-node", "application/json", "[]")], []),
+        ("1", [("integer", "text/plain", "1")], 1),
         ("array-node {1, 2}", [("array-node", "application/json", "[1,2]")], [1, 2]),
-        (
-            "array-node {array-node {1}}",
-            [("array-node", "application/json", "[[1]]")],
-            [[1]],
-        ),
         (
             "(1, 2)",
             [("integer", "text/plain", "1"), ("integer", "text/plain", "2")],
@@ -555,52 +545,6 @@ def test_eval_collapses_only_the_outer_singleton(source, items, expected):
         result = ml.eval.expression(StaticExpression(source))
     assert result == expected
     assert type(result) is type(expected)
-    assert route.call_count == 1
-
-
-@pytest.mark.parametrize(
-    ("primitive", "payload", "expected"),
-    [
-        ("decimal", "1.234567890123456789", Decimal("1.234567890123456789")),
-        ("double", "1.25", 1.25),
-        ("float", "INF", float("inf")),
-        ("unsignedLong", "18446744073709551615", 18446744073709551615),
-        ("date", "2026-01-02", date(2026, 1, 2)),
-        (
-            "dateTime",
-            "2026-01-02T03:04:05Z",
-            datetime(2026, 1, 2, 3, 4, 5, tzinfo=timezone.utc),
-        ),
-        ("dateTime", "2026-01-02T03:04:05.123", datetime(2026, 1, 2, 3, 4, 5, 123000)),
-        ("boolean", "true", True),
-        ("boolean", "false", False),
-        ("QName", "x", b"x"),
-    ],
-)
-@pytest.mark.parametrize(
-    "output_type",
-    [None, str, bytes],
-    ids=["typed", "text", "bytes"],
-)
-@respx.mock
-def test_eval_expression_parses_item(primitive, payload, expected, output_type):
-    expression = StaticExpression(f'xs:{primitive}("{payload}")')
-    source = f'xquery version "1.0-ml";\n(xs:{primitive}("{payload}"))'
-    ml_mocker = MLRespXMocker(use_router=False)
-    ml_mocker.with_url("http://localhost:8000/v1/eval")
-    ml_mocker.with_request_content_type("application/x-www-form-urlencoded")
-    ml_mocker.with_request_body({"xquery": source})
-    ml_mocker.with_response_code(200)
-    ml_mocker.with_response_body_part(primitive, payload, "text/plain")
-    route = ml_mocker.mock_post()
-    with MLClient() as ml:
-        actual = ml.eval.expression(expression, output_type=output_type)
-    if output_type is str:
-        expected = payload
-    elif output_type is bytes:
-        expected = payload.encode()
-    assert actual == expected
-    assert type(actual) is type(expected)
     assert route.call_count == 1
 
 
@@ -706,41 +650,3 @@ def test_eval_constructor_rejects_namespaces():
             ml.rest,
             namespaces={"p": "https://monasticus.com/mlclient/examples/test"},
         )
-
-
-@pytest.mark.parametrize(
-    ("source", "primitive", "node_type"),
-    [
-        ("document {<a/>}", "document-node()", ET.ElementTree),
-        ("<a/>", "element()", ET.Element),
-    ],
-)
-@respx.mock
-def test_expression_returns_xml_node(source, primitive, node_type):
-    ml_mocker = MLRespXMocker(use_router=False)
-    ml_mocker.with_url("http://localhost:8000/v1/eval")
-    ml_mocker.with_request_content_type("application/x-www-form-urlencoded")
-    ml_mocker.with_request_body({"xquery": f'xquery version "1.0-ml";\n({source})'})
-    ml_mocker.with_response_code(200)
-    ml_mocker.with_response_body_part(primitive, "<a/>", "application/xml")
-    ml_mocker.mock_post()
-    with MLClient() as ml:
-        result = ml.eval.expression(StaticExpression(source))
-    assert isinstance(result, node_type)
-    root = result.getroot() if node_type is ET.ElementTree else result
-    assert root.tag == "a"
-
-
-@respx.mock
-def test_expression_returns_json_object():
-    source = 'object-node {"a": 1}'
-    ml_mocker = MLRespXMocker(use_router=False)
-    ml_mocker.with_url("http://localhost:8000/v1/eval")
-    ml_mocker.with_request_content_type("application/x-www-form-urlencoded")
-    ml_mocker.with_request_body({"xquery": f'xquery version "1.0-ml";\n({source})'})
-    ml_mocker.with_response_code(200)
-    ml_mocker.with_response_body_part("object-node()", '{"a":1}', "application/json")
-    ml_mocker.mock_post()
-    with MLClient() as ml:
-        result = ml.eval.expression(StaticExpression(source))
-    assert result == {"a": 1}

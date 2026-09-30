@@ -123,7 +123,7 @@ appropriate module access and eval privileges.
 --8<-- "examples/labels.xqy"
 ```
 
-Expose the module as a family of builders, just like `Fn` or `Cts`. Save this
+Expose the module as a family of builders, just like `fn` or `cts`. Save this
 Python block as `custom_expression.py`:
 
 ```python

@@ -14,12 +14,12 @@ class Xdmp:
     """Pure ``xdmp:`` builders returning expression trees."""
 
     @staticmethod
-    def exists(searchable) -> XqyExpression:
+    def exists(searchable: str | XqyExpression) -> XqyExpression:
         """Return true if any fragment is selected; false if none are selected.
 
         Parameters
         ----------
-        searchable : object
+        searchable : str | XqyExpression
             The expression to check. This must be a partially searchable XPath
             expression or a cts:search expression. Path strings are wrapped
             internally and validated by MarkLogic before evaluation.

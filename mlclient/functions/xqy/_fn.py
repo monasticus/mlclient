@@ -7,6 +7,8 @@ XSLT-only and legacy functions retain their native context/dialect restrictions.
 
 from __future__ import annotations
 
+import datetime
+
 from mlclient._experimental import experimental
 from mlclient._options import UNSET
 from mlclient.functions.xqy.expressions import XqyExpression, _FunctionCall
@@ -19,7 +21,7 @@ def _optional_call(name: str, *arguments) -> XqyExpression:
     ----------
     name : str
         Native function name.
-    arguments : object
+    arguments : str | int | float | bool | XqyExpression | None
         Native positional arguments; UNSET marks an omitted optional slot.
 
     Returns
@@ -41,14 +43,14 @@ class Fn:
     """Pure fn: builders; native context and dialect requirements still apply."""
 
     @staticmethod
-    def abs(arg) -> XqyExpression:
+    def abs(arg: float | XqyExpression | None) -> XqyExpression:
         """Build a native XQuery expression.
 
         Returns the absolute value of $arg.
 
         Parameters
         ----------
-        arg : object
+        arg : float | XqyExpression | None
             A numeric value.
 
         Returns
@@ -63,16 +65,20 @@ class Fn:
         return _FunctionCall("fn:abs", (arg,))
 
     @staticmethod
-    def adjust_date_to_timezone(arg, *, timezone=UNSET) -> XqyExpression:
+    def adjust_date_to_timezone(
+        arg: datetime.date | XqyExpression | None,
+        *,
+        timezone: str | XqyExpression | None = UNSET,
+    ) -> XqyExpression:
         """Build a native XQuery expression.
 
         Adjusts an xs:date value to a specific timezone, or to no timezone at all.
 
         Parameters
         ----------
-        arg : object
+        arg : datetime.date | XqyExpression | None
             The date to adjust to the new timezone.
-        timezone : object
+        timezone : str | XqyExpression | None
             The new timezone for the date.
             Omit to use the native default; None explicitly passes ().
 
@@ -88,16 +94,20 @@ class Fn:
         return _optional_call("fn:adjust-date-to-timezone", arg, timezone)
 
     @staticmethod
-    def adjust_date_time_to_timezone(arg, *, timezone=UNSET) -> XqyExpression:
+    def adjust_date_time_to_timezone(
+        arg: datetime.datetime | XqyExpression | None,
+        *,
+        timezone: str | XqyExpression | None = UNSET,
+    ) -> XqyExpression:
         """Build a native XQuery expression.
 
         Adjusts an xs:dateTime value to a specific timezone, or to no timezone at all.
 
         Parameters
         ----------
-        arg : object
+        arg : datetime.datetime | XqyExpression | None
             The dateTime to adjust to the new timezone.
-        timezone : object
+        timezone : str | XqyExpression | None
             The new timezone for the dateTime.
             Omit to use the native default; None explicitly passes ().
 
@@ -113,16 +123,20 @@ class Fn:
         return _optional_call("fn:adjust-dateTime-to-timezone", arg, timezone)
 
     @staticmethod
-    def adjust_time_to_timezone(arg, *, timezone=UNSET) -> XqyExpression:
+    def adjust_time_to_timezone(
+        arg: datetime.time | XqyExpression | None,
+        *,
+        timezone: str | XqyExpression | None = UNSET,
+    ) -> XqyExpression:
         """Build a native XQuery expression.
 
         Adjusts an xs:time value to a specific timezone, or to no timezone at all.
 
         Parameters
         ----------
-        arg : object
+        arg : datetime.time | XqyExpression | None
             The time to adjust to the new timezone.
-        timezone : object
+        timezone : str | XqyExpression | None
             The new timezone for the date.
             Omit to use the native default; None explicitly passes ().
 
@@ -138,7 +152,12 @@ class Fn:
         return _optional_call("fn:adjust-time-to-timezone", arg, timezone)
 
     @staticmethod
-    def analyze_string(in_, regex, *, flags=UNSET) -> XqyExpression:
+    def analyze_string(
+        in_: str | XqyExpression | None,
+        regex: str | XqyExpression,
+        *,
+        flags: str | XqyExpression | None = UNSET,
+    ) -> XqyExpression:
         """Build a native XQuery expression.
 
         The result of the function is a new element node whose string value is the
@@ -147,11 +166,11 @@ class Fn:
 
         Parameters
         ----------
-        in_ : object
+        in_ : str | XqyExpression | None
             The string to start with.
-        regex : object
+        regex : str | XqyExpression
             The regular expression pattern to match.
-        flags : object
+        flags : str | XqyExpression | None
             The flag representing how to interpret the regular expression. One of "s",
             "m", "i", or "x", as defined in http://www.w3.org/TR/xpath-functions/#flags
             .
@@ -169,7 +188,16 @@ class Fn:
         return _optional_call("fn:analyze-string", in_, regex, flags)
 
     @staticmethod
-    def avg(arg) -> XqyExpression:
+    def avg(
+        arg: str
+        | int
+        | float
+        | bool
+        | list[str | int | float | bool]
+        | XqyExpression
+        | list[XqyExpression]
+        | None,
+    ) -> XqyExpression:
         """Build a native XQuery expression.
 
         Returns the average of the values in the input sequence $arg, that is, the sum
@@ -177,7 +205,7 @@ class Fn:
 
         Parameters
         ----------
-        arg : object
+        arg : str | int | float | bool | list[str | int | float | bool] | XqyExpression | list[XqyExpression] | None
             The sequence of values to average.
 
         Returns
@@ -192,14 +220,14 @@ class Fn:
         return _FunctionCall("fn:avg", (arg,))
 
     @staticmethod
-    def base_uri(arg=UNSET) -> XqyExpression:
+    def base_uri(arg: XqyExpression | None = UNSET) -> XqyExpression:
         """Build a native XQuery expression.
 
         Returns the value of the base-uri property for the specified node.
 
         Parameters
         ----------
-        arg : object
+        arg : XqyExpression | None
             The node whose base-uri is to be returned.
             Omit to use the native default; None explicitly passes ().
 
@@ -215,16 +243,20 @@ class Fn:
         return _optional_call("fn:base-uri", arg)
 
     @staticmethod
-    def boolean(arg, *, collation=UNSET) -> XqyExpression:
+    def boolean(
+        arg: XqyExpression | list[XqyExpression] | None,
+        *,
+        collation: str | XqyExpression | None = UNSET,
+    ) -> XqyExpression:
         """Build a native XQuery expression.
 
         Computes the effective boolean value of the sequence $arg.
 
         Parameters
         ----------
-        arg : object
+        arg : XqyExpression | list[XqyExpression] | None
             A sequence of items.
-        collation : object
+        collation : str | XqyExpression | None
             The optional name of a valid collation URI. For information on the collation
             URI syntax, see the Search Developer's Guide .
             Omit to use the native default; None explicitly passes ().
@@ -241,7 +273,7 @@ class Fn:
         return _optional_call("fn:boolean", arg, collation)
 
     @staticmethod
-    def ceiling(arg) -> XqyExpression:
+    def ceiling(arg: float | XqyExpression | None) -> XqyExpression:
         """Build a native XQuery expression.
 
         Returns the smallest (closest to negative infinity) number with no fractional
@@ -249,7 +281,7 @@ class Fn:
 
         Parameters
         ----------
-        arg : object
+        arg : float | XqyExpression | None
             A numeric value.
 
         Returns
@@ -264,7 +296,9 @@ class Fn:
         return _FunctionCall("fn:ceiling", (arg,))
 
     @staticmethod
-    def codepoint_equal(comparand1, comparand2) -> XqyExpression:
+    def codepoint_equal(
+        comparand1: str | XqyExpression | None, comparand2: str | XqyExpression | None,
+    ) -> XqyExpression:
         """Build a native XQuery expression.
 
         Returns true if the specified parameters are the same Unicode code point,
@@ -272,9 +306,9 @@ class Fn:
 
         Parameters
         ----------
-        comparand1 : object
+        comparand1 : str | XqyExpression | None
             A string to be compared.
-        comparand2 : object
+        comparand2 : str | XqyExpression | None
             A string to be compared.
 
         Returns
@@ -289,14 +323,16 @@ class Fn:
         return _FunctionCall("fn:codepoint-equal", (comparand1, comparand2))
 
     @staticmethod
-    def codepoints_to_string(arg) -> XqyExpression:
+    def codepoints_to_string(
+        arg: int | list[int] | XqyExpression | list[XqyExpression] | None,
+    ) -> XqyExpression:
         """Build a native XQuery expression.
 
         Creates an xs:string from a sequence of Unicode code points.
 
         Parameters
         ----------
-        arg : object
+        arg : int | list[int] | XqyExpression | list[XqyExpression] | None
             A sequence of Unicode code points.
 
         Returns
@@ -311,14 +347,16 @@ class Fn:
         return _FunctionCall("fn:codepoints-to-string", (arg,))
 
     @staticmethod
-    def collection(uri=UNSET) -> XqyExpression:
+    def collection(
+        uri: str | list[str] | XqyExpression | list[XqyExpression] | None = UNSET,
+    ) -> XqyExpression:
         """Build a native XQuery expression.
 
         Returns all of the documents that belong to the specified collection(s).
 
         Parameters
         ----------
-        uri : object
+        uri : str | list[str] | XqyExpression | list[XqyExpression] | None
             The URI of the collection to retrieve. If you omit this parameter, returns
             all of the documents in the database. If you specify a list of URIs, returns
             all of the documents in all of the collections at the URIs specified in the
@@ -337,7 +375,12 @@ class Fn:
         return _optional_call("fn:collection", uri)
 
     @staticmethod
-    def compare(comparand1, comparand2, *, collation=UNSET) -> XqyExpression:
+    def compare(
+        comparand1: str | XqyExpression | None,
+        comparand2: str | XqyExpression | None,
+        *,
+        collation: str | XqyExpression | None = UNSET,
+    ) -> XqyExpression:
         """Build a native XQuery expression.
 
         Returns -1, 0, or 1, depending on whether the value of the $comparand1 is
@@ -346,11 +389,11 @@ class Fn:
 
         Parameters
         ----------
-        comparand1 : object
+        comparand1 : str | XqyExpression | None
             A string to be compared.
-        comparand2 : object
+        comparand2 : str | XqyExpression | None
             A string to be compared.
-        collation : object
+        collation : str | XqyExpression | None
             The optional name of a valid collation URI. For information on the collation
             URI syntax, see the Search Developer's Guide .
             Omit to use the native default; None explicitly passes ().
@@ -367,7 +410,10 @@ class Fn:
         return _optional_call("fn:compare", comparand1, comparand2, collation)
 
     @staticmethod
-    def concat(parameter1, *parameters) -> XqyExpression:
+    def concat(
+        parameter1: str | int | float | bool | XqyExpression | None,
+        *parameters: str | int | float | bool | XqyExpression,
+    ) -> XqyExpression:
         """Build a native XQuery expression.
 
         Returns the xs:string that is the concatenation of the values of the specified
@@ -375,9 +421,9 @@ class Fn:
 
         Parameters
         ----------
-        parameter1 : object
+        parameter1 : str | int | float | bool | XqyExpression | None
             A value.
-        parameters : tuple
+        parameters : str | int | float | bool | XqyExpression
             A value.
 
         Returns
@@ -392,7 +438,12 @@ class Fn:
         return _FunctionCall("fn:concat", (parameter1, *parameters))
 
     @staticmethod
-    def contains(parameter1, parameter2, *, collation=UNSET) -> XqyExpression:
+    def contains(
+        parameter1: str | XqyExpression | None,
+        parameter2: str | XqyExpression | None,
+        *,
+        collation: str | XqyExpression | None = UNSET,
+    ) -> XqyExpression:
         """Build a native XQuery expression.
 
         Returns true if the first parameter contains the string from the second
@@ -400,11 +451,11 @@ class Fn:
 
         Parameters
         ----------
-        parameter1 : object
+        parameter1 : str | XqyExpression | None
             The string from which to test.
-        parameter2 : object
+        parameter2 : str | XqyExpression | None
             The string to test for existence in the first parameter.
-        collation : object
+        collation : str | XqyExpression | None
             The optional name of a valid collation URI. For information on the collation
             URI syntax, see the Search Developer's Guide .
             Omit to use the native default; None explicitly passes ().
@@ -421,16 +472,20 @@ class Fn:
         return _optional_call("fn:contains", parameter1, parameter2, collation)
 
     @staticmethod
-    def count(sequence, *, maximum=UNSET) -> XqyExpression:
+    def count(
+        sequence: XqyExpression | list[XqyExpression] | None,
+        *,
+        maximum: float | XqyExpression | None = UNSET,
+    ) -> XqyExpression:
         """Build a native XQuery expression.
 
         Returns the number of items in the value of $arg.
 
         Parameters
         ----------
-        sequence : object
+        sequence : XqyExpression | list[XqyExpression] | None
             The sequence of items to count.
-        maximum : object
+        maximum : float | XqyExpression | None
             The maximum value of the count to return. MarkLogic Server will stop count
             when the $maximum value is reached and return the $maximum value. This is an
             extension to the W3C standard fn:count function.
@@ -551,14 +606,14 @@ class Fn:
         return _FunctionCall("fn:current-time")
 
     @staticmethod
-    def data(arg) -> XqyExpression:
+    def data(arg: XqyExpression | list[XqyExpression] | None) -> XqyExpression:
         """Build a native XQuery expression.
 
         Takes a sequence of items and returns a sequence of atomic values.
 
         Parameters
         ----------
-        arg : object
+        arg : XqyExpression | list[XqyExpression] | None
             The items whose typed values are to be returned.
 
         Returns
@@ -573,16 +628,18 @@ class Fn:
         return _FunctionCall("fn:data", (arg,))
 
     @staticmethod
-    def date_time(arg1, arg2) -> XqyExpression:
+    def date_time(
+        arg1: datetime.date | XqyExpression, arg2: datetime.time | XqyExpression,
+    ) -> XqyExpression:
         """Build a native XQuery expression.
 
         Returns an xs:dateTime value created by combining an xs:date and an xs:time.
 
         Parameters
         ----------
-        arg1 : object
+        arg1 : datetime.date | XqyExpression
             The date to be combined with the time argument.
-        arg2 : object
+        arg2 : datetime.time | XqyExpression
             The time to be combined with the date argument.
 
         Returns
@@ -597,7 +654,7 @@ class Fn:
         return _FunctionCall("fn:dateTime", (arg1, arg2))
 
     @staticmethod
-    def day_from_date(arg) -> XqyExpression:
+    def day_from_date(arg: datetime.date | XqyExpression | None) -> XqyExpression:
         """Build a native XQuery expression.
 
         Returns an xs:integer between 1 and 31, both inclusive, representing the day
@@ -605,7 +662,7 @@ class Fn:
 
         Parameters
         ----------
-        arg : object
+        arg : datetime.date | XqyExpression | None
             The date whose day component will be returned.
 
         Returns
@@ -620,7 +677,9 @@ class Fn:
         return _FunctionCall("fn:day-from-date", (arg,))
 
     @staticmethod
-    def day_from_date_time(arg) -> XqyExpression:
+    def day_from_date_time(
+        arg: datetime.datetime | XqyExpression | None,
+    ) -> XqyExpression:
         """Build a native XQuery expression.
 
         Returns an xs:integer between 1 and 31, both inclusive, representing the day
@@ -628,7 +687,7 @@ class Fn:
 
         Parameters
         ----------
-        arg : object
+        arg : datetime.datetime | XqyExpression | None
             The dateTime whose day component will be returned.
 
         Returns
@@ -643,7 +702,7 @@ class Fn:
         return _FunctionCall("fn:day-from-dateTime", (arg,))
 
     @staticmethod
-    def days_from_duration(arg) -> XqyExpression:
+    def days_from_duration(arg: str | XqyExpression | None) -> XqyExpression:
         """Build a native XQuery expression.
 
         Returns an xs:integer representing the days component in the canonical lexical
@@ -651,7 +710,7 @@ class Fn:
 
         Parameters
         ----------
-        arg : object
+        arg : str | XqyExpression | None
             The duration whose day component will be returned.
 
         Returns
@@ -666,19 +725,24 @@ class Fn:
         return _FunctionCall("fn:days-from-duration", (arg,))
 
     @staticmethod
-    def deep_equal(parameter1, parameter2, *, collation=UNSET) -> XqyExpression:
+    def deep_equal(
+        parameter1: XqyExpression | list[XqyExpression] | None,
+        parameter2: XqyExpression | list[XqyExpression] | None,
+        *,
+        collation: str | XqyExpression | None = UNSET,
+    ) -> XqyExpression:
         """Build a native XQuery expression.
 
         This function assesses whether two sequences are deep-equal to each other.
 
         Parameters
         ----------
-        parameter1 : object
+        parameter1 : XqyExpression | list[XqyExpression] | None
             The first sequence of items, each item should be an atomic value or node.
-        parameter2 : object
+        parameter2 : XqyExpression | list[XqyExpression] | None
             The sequence of items to compare to the first sequence of items, again each
             item should be an atomic value or node.
-        collation : object
+        collation : str | XqyExpression | None
             The optional name of a valid collation URI. For information on the collation
             URI syntax, see the Search Developer's Guide .
             Omit to use the native default; None explicitly passes ().
@@ -712,7 +776,9 @@ class Fn:
         return _FunctionCall("fn:default-collation")
 
     @staticmethod
-    def distinct_nodes(nodes) -> XqyExpression:
+    def distinct_nodes(
+        nodes: XqyExpression | list[XqyExpression] | None,
+    ) -> XqyExpression:
         """Build a native XQuery expression.
 
         [0.9-ml only] Returns the sequence resulting from removing from the input
@@ -721,7 +787,7 @@ class Fn:
 
         Parameters
         ----------
-        nodes : object
+        nodes : XqyExpression | list[XqyExpression] | None
             A sequence of nodes from which to eliminate duplicate nodes (nodes with the
             same identity) so that only one node of each identity remains.
 
@@ -737,7 +803,11 @@ class Fn:
         return _FunctionCall("fn:distinct-nodes", (nodes,))
 
     @staticmethod
-    def distinct_values(arg, *, collation=UNSET) -> XqyExpression:
+    def distinct_values(
+        arg: XqyExpression | list[XqyExpression] | None,
+        *,
+        collation: str | XqyExpression | None = UNSET,
+    ) -> XqyExpression:
         """Build a native XQuery expression.
 
         Returns the sequence that results from removing from $arg all but one of a set
@@ -745,9 +815,9 @@ class Fn:
 
         Parameters
         ----------
-        arg : object
+        arg : XqyExpression | list[XqyExpression] | None
             A sequence of items.
-        collation : object
+        collation : str | XqyExpression | None
             The optional name of a valid collation URI. For information on the collation
             URI syntax, see the Search Developer's Guide .
             Omit to use the native default; None explicitly passes ().
@@ -764,14 +834,16 @@ class Fn:
         return _optional_call("fn:distinct-values", arg, collation)
 
     @staticmethod
-    def doc(uri=UNSET) -> XqyExpression:
+    def doc(
+        uri: str | list[str] | XqyExpression | list[XqyExpression] | None = UNSET,
+    ) -> XqyExpression:
         """Build a native XQuery expression.
 
         Returns the document(s) stored in the database at the specified URI(s).
 
         Parameters
         ----------
-        uri : object
+        uri : str | list[str] | XqyExpression | list[XqyExpression] | None
             The URI of the document to retrieve. If you omit this parameter, returns all
             of the documents in the database - this is only allowed if you're not using
             xquery version 1.0 strict. If you specify a list of URIs, returns all of the
@@ -790,14 +862,14 @@ class Fn:
         return _optional_call("fn:doc", uri)
 
     @staticmethod
-    def doc_available(uri) -> XqyExpression:
+    def doc_available(uri: str | XqyExpression | None) -> XqyExpression:
         """Build a native XQuery expression.
 
         If fn:doc($uri) returns a document node, this function returns true.
 
         Parameters
         ----------
-        uri : object
+        uri : str | XqyExpression | None
             The URI of the document to check.
 
         Returns
@@ -812,14 +884,18 @@ class Fn:
         return _FunctionCall("fn:doc-available", (uri,))
 
     @staticmethod
-    def document(uris, *, base_node=UNSET) -> XqyExpression:
+    def document(
+        uris: XqyExpression | list[XqyExpression] | None,
+        *,
+        base_node: XqyExpression | None = UNSET,
+    ) -> XqyExpression:
         """Build a native XQuery expression.
 
         Returns the document(s) stored in the database at the specified URI(s).
 
         Parameters
         ----------
-        uris : object
+        uris : XqyExpression | list[XqyExpression] | None
             The $uris is a sequence of the URI(s) of the document(s) to be retrieved.
             This parameter is mandatory. However you may pass a singleton sequence with
             an empty string in it. In that case it will return the stylesheet that
@@ -828,7 +904,7 @@ class Fn:
             you are not using version 1.0 strict. If any URI in this sequence is an
             absolute URI, then it is used as is. If it is a relative URI, it is resolved
             against a base URI specified in the second argument.
-        base_node : object
+        base_node : XqyExpression | None
             If $base-node is supplied, its base URI is used to resolve relative URIs in
             uri-sequence. If it is not supplied, the base URI of the node that contained
             the fn:document() call is used.
@@ -846,14 +922,14 @@ class Fn:
         return _optional_call("fn:document", uris, base_node)
 
     @staticmethod
-    def document_uri(arg) -> XqyExpression:
+    def document_uri(arg: XqyExpression | None) -> XqyExpression:
         """Build a native XQuery expression.
 
         Returns the value of the document-uri property for the specified node.
 
         Parameters
         ----------
-        arg : object
+        arg : XqyExpression | None
             The node whose document-uri is to be returned.
 
         Returns
@@ -868,14 +944,14 @@ class Fn:
         return _FunctionCall("fn:document-uri", (arg,))
 
     @staticmethod
-    def element_available(element_name) -> XqyExpression:
+    def element_available(element_name: str | XqyExpression) -> XqyExpression:
         """Build a native XQuery expression.
 
         Returns true if and only if the name of an XSLT instruction is passed in.
 
         Parameters
         ----------
-        element_name : object
+        element_name : str | XqyExpression
             The name of the element to test.
 
         Returns
@@ -890,7 +966,7 @@ class Fn:
         return _FunctionCall("fn:element-available", (element_name,))
 
     @staticmethod
-    def empty(sequence) -> XqyExpression:
+    def empty(sequence: XqyExpression | list[XqyExpression] | None) -> XqyExpression:
         """Build a native XQuery expression.
 
         If the value of $arg is the empty sequence, the function returns true;
@@ -898,7 +974,7 @@ class Fn:
 
         Parameters
         ----------
-        sequence : object
+        sequence : XqyExpression | list[XqyExpression] | None
             A sequence to test.
 
         Returns
@@ -913,7 +989,7 @@ class Fn:
         return _FunctionCall("fn:empty", (sequence,))
 
     @staticmethod
-    def encode_for_uri(uri_part) -> XqyExpression:
+    def encode_for_uri(uri_part: str | XqyExpression) -> XqyExpression:
         """Build a native XQuery expression.
 
         Invertible function that escapes characters required to be escaped inside path
@@ -921,7 +997,7 @@ class Fn:
 
         Parameters
         ----------
-        uri_part : object
+        uri_part : str | XqyExpression
             A string representing an unescaped URI.
 
         Returns
@@ -936,7 +1012,12 @@ class Fn:
         return _FunctionCall("fn:encode-for-uri", (uri_part,))
 
     @staticmethod
-    def ends_with(parameter1, parameter2, *, collation=UNSET) -> XqyExpression:
+    def ends_with(
+        parameter1: str | XqyExpression | None,
+        parameter2: str | XqyExpression | None,
+        *,
+        collation: str | XqyExpression | None = UNSET,
+    ) -> XqyExpression:
         """Build a native XQuery expression.
 
         Returns true if the first parameter ends with the string from the second
@@ -944,11 +1025,11 @@ class Fn:
 
         Parameters
         ----------
-        parameter1 : object
+        parameter1 : str | XqyExpression | None
             The parameter from which to test.
-        parameter2 : object
+        parameter2 : str | XqyExpression | None
             The string to test whether it is at the end of the first parameter.
-        collation : object
+        collation : str | XqyExpression | None
             The optional name of a valid collation URI. For information on the collation
             URI syntax, see the Search Developer's Guide .
             Omit to use the native default; None explicitly passes ().
@@ -965,21 +1046,25 @@ class Fn:
         return _optional_call("fn:ends-with", parameter1, parameter2, collation)
 
     @staticmethod
-    def error(error=UNSET, description=UNSET, data=UNSET) -> XqyExpression:
+    def error(
+        error: XqyExpression | None = UNSET,
+        description: str | XqyExpression | None = UNSET,
+        data: XqyExpression | list[XqyExpression] | None = UNSET,
+    ) -> XqyExpression:
         """Build a native XQuery expression.
 
         [1.0 and 1.0-ml only, 0.9-ml has a different signature] Throw the given error.
 
         Parameters
         ----------
-        error : object
+        error : XqyExpression | None
             Error code, as an xs:QName . Note that this parameter does not exist in
             0.9-ml.
             Omit to use the native default; None explicitly passes ().
-        description : object
+        description : str | XqyExpression | None
             String description to be printed with the error.
             Omit to use the native default; None explicitly passes ().
-        data : object
+        data : XqyExpression | list[XqyExpression] | None
             Parameters to the error message.
             Omit to use the native default; None explicitly passes ().
 
@@ -995,14 +1080,14 @@ class Fn:
         return _optional_call("fn:error", error, description, data)
 
     @staticmethod
-    def escape_html_uri(uri_part) -> XqyExpression:
+    def escape_html_uri(uri_part: str | XqyExpression) -> XqyExpression:
         """Build a native XQuery expression.
 
         %-escapes everything except printable ASCII characters.
 
         Parameters
         ----------
-        uri_part : object
+        uri_part : str | XqyExpression
             A string representing an unescaped URI.
 
         Returns
@@ -1017,7 +1102,9 @@ class Fn:
         return _FunctionCall("fn:escape-html-uri", (uri_part,))
 
     @staticmethod
-    def escape_uri(uri_part, escape_reserved) -> XqyExpression:
+    def escape_uri(
+        uri_part: str | XqyExpression, escape_reserved: bool | XqyExpression,
+    ) -> XqyExpression:
         """Build a native XQuery expression.
 
         This is a May 2003 function, and is only available in compatibility mode (XQuery
@@ -1026,9 +1113,9 @@ class Fn:
 
         Parameters
         ----------
-        uri_part : object
+        uri_part : str | XqyExpression
             A string representing an unescaped URI.
-        escape_reserved : object
+        escape_reserved : bool | XqyExpression
             Specify a boolean value of true to return an escaped URI or a boolean value
             of false to return an unescaped URI.
 
@@ -1044,14 +1131,14 @@ class Fn:
         return _FunctionCall("fn:escape-uri", (uri_part, escape_reserved))
 
     @staticmethod
-    def exactly_one(arg) -> XqyExpression:
+    def exactly_one(arg: XqyExpression | list[XqyExpression] | None) -> XqyExpression:
         """Build a native XQuery expression.
 
         Returns $arg if it contains exactly one item.
 
         Parameters
         ----------
-        arg : object
+        arg : XqyExpression | list[XqyExpression] | None
             The sequence of items.
 
         Returns
@@ -1066,7 +1153,7 @@ class Fn:
         return _FunctionCall("fn:exactly-one", (arg,))
 
     @staticmethod
-    def exists(sequence) -> XqyExpression:
+    def exists(sequence: XqyExpression | list[XqyExpression] | None) -> XqyExpression:
         """Build a native XQuery expression.
 
         If the value of $arg is not the empty sequence, the function returns true;
@@ -1074,7 +1161,7 @@ class Fn:
 
         Parameters
         ----------
-        sequence : object
+        sequence : XqyExpression | list[XqyExpression] | None
             A sequence to test.
 
         Returns
@@ -1089,7 +1176,9 @@ class Fn:
         return _FunctionCall("fn:exists", (sequence,))
 
     @staticmethod
-    def expanded_qname(param_uri, param_local) -> XqyExpression:
+    def expanded_qname(
+        param_uri: str | XqyExpression | None, param_local: str | XqyExpression,
+    ) -> XqyExpression:
         """Build a native XQuery expression.
 
         [0.9-ml only, use fn:QName instead] Returns an xs:QName with the namespace URI
@@ -1097,9 +1186,9 @@ class Fn:
 
         Parameters
         ----------
-        param_uri : object
+        param_uri : str | XqyExpression | None
             A namespace URI, as a string.
-        param_local : object
+        param_local : str | XqyExpression
             A localname, as a string.
 
         Returns
@@ -1131,7 +1220,9 @@ class Fn:
         return _FunctionCall("fn:false")
 
     @staticmethod
-    def filter(function, seq) -> XqyExpression:
+    def filter(
+        function: XqyExpression, seq: XqyExpression | list[XqyExpression] | None,
+    ) -> XqyExpression:
         """Build a native XQuery expression.
 
         Returns those items from the sequence $seq for which the supplied function
@@ -1139,9 +1230,9 @@ class Fn:
 
         Parameters
         ----------
-        function : object
+        function : XqyExpression
             The function value.
-        seq : object
+        seq : XqyExpression | list[XqyExpression] | None
             The function value.
 
         Returns
@@ -1156,7 +1247,7 @@ class Fn:
         return _FunctionCall("fn:filter", (function, seq))
 
     @staticmethod
-    def floor(arg) -> XqyExpression:
+    def floor(arg: float | XqyExpression | None) -> XqyExpression:
         """Build a native XQuery expression.
 
         Returns the largest (closest to positive infinity) number with no fractional
@@ -1164,7 +1255,7 @@ class Fn:
 
         Parameters
         ----------
-        arg : object
+        arg : float | XqyExpression | None
             A numeric value.
 
         Returns
@@ -1179,7 +1270,11 @@ class Fn:
         return _FunctionCall("fn:floor", (arg,))
 
     @staticmethod
-    def fold_left(function, zero, seq) -> XqyExpression:
+    def fold_left(
+        function: XqyExpression | list[XqyExpression] | None,
+        zero: XqyExpression | list[XqyExpression] | None,
+        seq: XqyExpression | list[XqyExpression] | None,
+    ) -> XqyExpression:
         """Build a native XQuery expression.
 
         Processes the supplied sequence from left to right, applying the supplied
@@ -1188,11 +1283,11 @@ class Fn:
 
         Parameters
         ----------
-        function : object
+        function : XqyExpression | list[XqyExpression] | None
             The fold function value.
-        zero : object
+        zero : XqyExpression | list[XqyExpression] | None
             The zero argument.
-        seq : object
+        seq : XqyExpression | list[XqyExpression] | None
             The sequence to fold
 
         Returns
@@ -1207,7 +1302,11 @@ class Fn:
         return _FunctionCall("fn:fold-left", (function, zero, seq))
 
     @staticmethod
-    def fold_right(function, zero, seq) -> XqyExpression:
+    def fold_right(
+        function: XqyExpression | list[XqyExpression] | None,
+        zero: XqyExpression | list[XqyExpression] | None,
+        seq: XqyExpression | list[XqyExpression] | None,
+    ) -> XqyExpression:
         """Build a native XQuery expression.
 
         Processes the supplied sequence from right to left, applying the supplied
@@ -1216,11 +1315,11 @@ class Fn:
 
         Parameters
         ----------
-        function : object
+        function : XqyExpression | list[XqyExpression] | None
             The fold function value.
-        zero : object
+        zero : XqyExpression | list[XqyExpression] | None
             The zero argument.
-        seq : object
+        seq : XqyExpression | list[XqyExpression] | None
             The sequence to fold
 
         Returns
@@ -1236,12 +1335,12 @@ class Fn:
 
     @staticmethod
     def format_date(
-        value,
-        picture,
+        value: datetime.date | XqyExpression,
+        picture: str | XqyExpression,
         *,
-        language=UNSET,
-        calendar=UNSET,
-        country=UNSET,
+        language: str | XqyExpression | None = UNSET,
+        calendar: str | XqyExpression | None = UNSET,
+        country: str | XqyExpression | None = UNSET,
     ) -> XqyExpression:
         """Build a native XQuery expression.
 
@@ -1249,22 +1348,22 @@ class Fn:
 
         Parameters
         ----------
-        value : object
+        value : datetime.date | XqyExpression
             The given date $value that needs to be formatted.
-        picture : object
+        picture : str | XqyExpression
             The desired string representation of the given date $value . The picture
             string is a sequence of characters, in which the characters represent
             variables such as, decimal-separator-sign, grouping-sign, zero-digit-sign,
             digit-sign, pattern-separator, percent sign and per-mille-sign. For details
             on the picture string, see http://www.w3.org/TR/xslt20/#date-picture-string
             .
-        language : object
+        language : str | XqyExpression | None
             The desired language for string representation of the date $value .
             Omit to use the native default; None explicitly passes ().
-        calendar : object
+        calendar : str | XqyExpression | None
             The only calendar supported at this point is "Gregorian" or "AD".
             Omit to use the native default; None explicitly passes ().
-        country : object
+        country : str | XqyExpression | None
             $country is used the specification to take into account country specific
             string representation.
             Omit to use the native default; None explicitly passes ().
@@ -1289,12 +1388,12 @@ class Fn:
 
     @staticmethod
     def format_date_time(
-        value,
-        picture,
+        value: datetime.datetime | XqyExpression,
+        picture: str | XqyExpression,
         *,
-        language=UNSET,
-        calendar=UNSET,
-        country=UNSET,
+        language: str | XqyExpression | None = UNSET,
+        calendar: str | XqyExpression | None = UNSET,
+        country: str | XqyExpression | None = UNSET,
     ) -> XqyExpression:
         """Build a native XQuery expression.
 
@@ -1302,22 +1401,22 @@ class Fn:
 
         Parameters
         ----------
-        value : object
+        value : datetime.datetime | XqyExpression
             The given dateTime $value that needs to be formatted.
-        picture : object
+        picture : str | XqyExpression
             The desired string representation of the given dateTime $value . The picture
             string is a sequence of characters, in which the characters represent
             variables such as, decimal-separator-sign, grouping-sign, zero-digit-sign,
             digit-sign, pattern-separator, percent sign and per-mille-sign. For details
             on the picture string, see http://www.w3.org/TR/xslt20/#date-picture-string
             .
-        language : object
+        language : str | XqyExpression | None
             The desired language for string representation of the dateTime $value .
             Omit to use the native default; None explicitly passes ().
-        calendar : object
+        calendar : str | XqyExpression | None
             The only calendar supported at this point is "Gregorian" or "AD".
             Omit to use the native default; None explicitly passes ().
-        country : object
+        country : str | XqyExpression | None
             $country is used the specification to take into account country specific
             string representation.
             Omit to use the native default; None explicitly passes ().
@@ -1341,7 +1440,12 @@ class Fn:
         )
 
     @staticmethod
-    def format_number(value, picture, *, decimal_format_name=UNSET) -> XqyExpression:
+    def format_number(
+        value: float | XqyExpression,
+        picture: str | XqyExpression,
+        *,
+        decimal_format_name: str | XqyExpression | None = UNSET,
+    ) -> XqyExpression:
         """Build a native XQuery expression.
 
         Returns a formatted string representation of value argument based on the
@@ -1349,16 +1453,16 @@ class Fn:
 
         Parameters
         ----------
-        value : object
+        value : float | XqyExpression
             The given numeric $value that needs to be formatted.
-        picture : object
+        picture : str | XqyExpression
             The desired string representation of the given number $value . The picture
             string is a sequence of characters, in which the characters represent
             variables such as, decimal-separator-sign, grouping-sign, zero-digit-sign,
             digit-sign, pattern-separator, percent sign and per-mille-sign. For details
             on the format-number picture string, see
             http://www.w3.org/TR/xslt20/#function-format-number .
-        decimal_format_name : object
+        decimal_format_name : str | XqyExpression | None
             Represents a named <xsl:decimal-format> instruction. It is used to assign
             values to the variables mentioned above based on the picture string.
             Omit to use the native default; None explicitly passes ().
@@ -1376,12 +1480,12 @@ class Fn:
 
     @staticmethod
     def format_time(
-        value,
-        picture,
+        value: datetime.time | XqyExpression,
+        picture: str | XqyExpression,
         *,
-        language=UNSET,
-        calendar=UNSET,
-        country=UNSET,
+        language: str | XqyExpression | None = UNSET,
+        calendar: str | XqyExpression | None = UNSET,
+        country: str | XqyExpression | None = UNSET,
     ) -> XqyExpression:
         """Build a native XQuery expression.
 
@@ -1389,22 +1493,22 @@ class Fn:
 
         Parameters
         ----------
-        value : object
+        value : datetime.time | XqyExpression
             The given time $value that needs to be formatted.
-        picture : object
+        picture : str | XqyExpression
             The desired string representation of the given time $value . The picture
             string is a sequence of characters, in which the characters represent
             variables such as, decimal-separator-sign, grouping-sign, zero-digit-sign,
             digit-sign, pattern-separator, percent sign and per-mille-sign. For details
             on the picture string, see http://www.w3.org/TR/xslt20/#date-picture-string
             .
-        language : object
+        language : str | XqyExpression | None
             The desired language for string representation of the time $value .
             Omit to use the native default; None explicitly passes ().
-        calendar : object
+        calendar : str | XqyExpression | None
             The only calendar supported at this point is "Gregorian" or "AD".
             Omit to use the native default; None explicitly passes ().
-        country : object
+        country : str | XqyExpression | None
             $country is used the specification to take into account country specific
             string representation.
             Omit to use the native default; None explicitly passes ().
@@ -1428,14 +1532,14 @@ class Fn:
         )
 
     @staticmethod
-    def function_arity(function) -> XqyExpression:
+    def function_arity(function: XqyExpression) -> XqyExpression:
         """Build a native XQuery expression.
 
         Returns the arity of the function(s) that the argument refers to.
 
         Parameters
         ----------
-        function : object
+        function : XqyExpression
             The function value.
 
         Returns
@@ -1450,7 +1554,9 @@ class Fn:
         return _FunctionCall("fn:function-arity", (function,))
 
     @staticmethod
-    def function_available(function_name, *, arity=UNSET) -> XqyExpression:
+    def function_available(
+        function_name: str | XqyExpression, *, arity: int | XqyExpression | None = UNSET,
+    ) -> XqyExpression:
         """Build a native XQuery expression.
 
         Returns true if and only if there is an XQuery or XSLT function whose name and
@@ -1459,14 +1565,14 @@ class Fn:
 
         Parameters
         ----------
-        function_name : object
+        function_name : str | XqyExpression
             The $function-name is a string containing a lexical QName. It may be a name
             of a builtin-type, type imported using xsl:import-schema, or an extension
             type. This parameter is mandatory. The lexical QName is expanded using the
             namespace declarations in scope for the expression. If the lexical QName is
             unprefixed, then the standard function namespace is used in the expanded
             QName.
-        arity : object
+        arity : int | XqyExpression | None
             If $arity parameter is present, then the function returns true if and only
             if the function specified by the first argument has a signature that takes
             $arity number of arguments.
@@ -1484,7 +1590,9 @@ class Fn:
         return _optional_call("fn:function-available", function_name, arity)
 
     @staticmethod
-    def function_lookup(name, arity) -> XqyExpression:
+    def function_lookup(
+        name: XqyExpression, arity: int | XqyExpression,
+    ) -> XqyExpression:
         """Build a native XQuery expression.
 
         Returns a function with the given name and arity, or the empty sequence if none
@@ -1492,9 +1600,9 @@ class Fn:
 
         Parameters
         ----------
-        name : object
+        name : XqyExpression
             The QName of the function.
-        arity : object
+        arity : int | XqyExpression
             The number of arguments the function takes.
 
         Returns
@@ -1509,14 +1617,14 @@ class Fn:
         return _FunctionCall("fn:function-lookup", (name, arity))
 
     @staticmethod
-    def function_name(function) -> XqyExpression:
+    def function_name(function: XqyExpression) -> XqyExpression:
         """Build a native XQuery expression.
 
         Returns the QName of the function(s) that the argument refers to.
 
         Parameters
         ----------
-        function : object
+        function : XqyExpression
             The function value.
             ---
 
@@ -1532,14 +1640,14 @@ class Fn:
         return _FunctionCall("fn:function-name", (function,))
 
     @staticmethod
-    def generate_id(node=UNSET) -> XqyExpression:
+    def generate_id(node: XqyExpression | None = UNSET) -> XqyExpression:
         """Build a native XQuery expression.
 
         Returns a string that uniquely identifies a given node.
 
         Parameters
         ----------
-        node : object
+        node : XqyExpression | None
             The node whose ID will be generated.
             Omit to use the native default; None explicitly passes ().
 
@@ -1555,14 +1663,14 @@ class Fn:
         return _optional_call("fn:generate-id", node)
 
     @staticmethod
-    def head(seq) -> XqyExpression:
+    def head(seq: XqyExpression | list[XqyExpression] | None) -> XqyExpression:
         """Build a native XQuery expression.
 
         Returns the first item in a sequence.
 
         Parameters
         ----------
-        seq : object
+        seq : XqyExpression | list[XqyExpression] | None
             A sequence of items.
 
         Returns
@@ -1577,7 +1685,9 @@ class Fn:
         return _FunctionCall("fn:head", (seq,))
 
     @staticmethod
-    def hours_from_date_time(arg) -> XqyExpression:
+    def hours_from_date_time(
+        arg: datetime.datetime | XqyExpression | None,
+    ) -> XqyExpression:
         """Build a native XQuery expression.
 
         Returns an xs:integer between 0 and 23, both inclusive, representing the hours
@@ -1585,7 +1695,7 @@ class Fn:
 
         Parameters
         ----------
-        arg : object
+        arg : datetime.datetime | XqyExpression | None
             The dateTime whose hours component will be returned.
 
         Returns
@@ -1600,7 +1710,7 @@ class Fn:
         return _FunctionCall("fn:hours-from-dateTime", (arg,))
 
     @staticmethod
-    def hours_from_duration(arg) -> XqyExpression:
+    def hours_from_duration(arg: str | XqyExpression | None) -> XqyExpression:
         """Build a native XQuery expression.
 
         Returns an xs:integer representing the hours component in the canonical lexical
@@ -1608,7 +1718,7 @@ class Fn:
 
         Parameters
         ----------
-        arg : object
+        arg : str | XqyExpression | None
             The duration whose hour component will be returned.
 
         Returns
@@ -1623,7 +1733,7 @@ class Fn:
         return _FunctionCall("fn:hours-from-duration", (arg,))
 
     @staticmethod
-    def hours_from_time(arg) -> XqyExpression:
+    def hours_from_time(arg: datetime.time | XqyExpression | None) -> XqyExpression:
         """Build a native XQuery expression.
 
         Returns an xs:integer between 0 and 23, both inclusive, representing the value
@@ -1631,7 +1741,7 @@ class Fn:
 
         Parameters
         ----------
-        arg : object
+        arg : datetime.time | XqyExpression | None
             The time whose hours component will be returned.
 
         Returns
@@ -1646,7 +1756,11 @@ class Fn:
         return _FunctionCall("fn:hours-from-time", (arg,))
 
     @staticmethod
-    def id(arg, *, node=UNSET) -> XqyExpression:
+    def id(
+        arg: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        *,
+        node: XqyExpression | None = UNSET,
+    ) -> XqyExpression:
         """Build a native XQuery expression.
 
         Returns the sequence of element nodes that have an ID value matching the value
@@ -1654,9 +1768,9 @@ class Fn:
 
         Parameters
         ----------
-        arg : object
+        arg : str | list[str] | XqyExpression | list[XqyExpression] | None
             The IDs of the elements to return.
-        node : object
+        node : XqyExpression | None
             The target node.
             Omit to use the native default; None explicitly passes ().
 
@@ -1672,7 +1786,11 @@ class Fn:
         return _optional_call("fn:id", arg, node)
 
     @staticmethod
-    def idref(arg, *, node=UNSET) -> XqyExpression:
+    def idref(
+        arg: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        *,
+        node: XqyExpression | None = UNSET,
+    ) -> XqyExpression:
         """Build a native XQuery expression.
 
         Returns the sequence of element or attribute nodes that have an IDREF value
@@ -1680,9 +1798,9 @@ class Fn:
 
         Parameters
         ----------
-        arg : object
+        arg : str | list[str] | XqyExpression | list[XqyExpression] | None
             The IDREFs of the elements and attributes to return.
-        node : object
+        node : XqyExpression | None
             The target node.
             Omit to use the native default; None explicitly passes ().
 
@@ -1715,14 +1833,14 @@ class Fn:
         return _FunctionCall("fn:implicit-timezone")
 
     @staticmethod
-    def in_scope_prefixes(element) -> XqyExpression:
+    def in_scope_prefixes(element: XqyExpression) -> XqyExpression:
         """Build a native XQuery expression.
 
         Returns the prefixes of the in-scope namespaces for $element.
 
         Parameters
         ----------
-        element : object
+        element : XqyExpression
             The element whose in-scope prefixes will be returned.
 
         Returns
@@ -1737,7 +1855,19 @@ class Fn:
         return _FunctionCall("fn:in-scope-prefixes", (element,))
 
     @staticmethod
-    def index_of(seq_param, srch_param, *, collation_literal=UNSET) -> XqyExpression:
+    def index_of(
+        seq_param: str
+        | int
+        | float
+        | bool
+        | list[str | int | float | bool]
+        | XqyExpression
+        | list[XqyExpression]
+        | None,
+        srch_param: str | int | float | bool | XqyExpression,
+        *,
+        collation_literal: str | XqyExpression | None = UNSET,
+    ) -> XqyExpression:
         """Build a native XQuery expression.
 
         Returns a sequence of positive integers giving the positions within the sequence
@@ -1745,11 +1875,11 @@ class Fn:
 
         Parameters
         ----------
-        seq_param : object
+        seq_param : str | int | float | bool | list[str | int | float | bool] | XqyExpression | list[XqyExpression] | None
             A sequence of values.
-        srch_param : object
+        srch_param : str | int | float | bool | XqyExpression
             A value to find on the list.
-        collation_literal : object
+        collation_literal : str | XqyExpression | None
             A collation identifier.
             Omit to use the native default; None explicitly passes ().
 
@@ -1765,7 +1895,11 @@ class Fn:
         return _optional_call("fn:index-of", seq_param, srch_param, collation_literal)
 
     @staticmethod
-    def insert_before(target, position, inserts) -> XqyExpression:
+    def insert_before(
+        target: XqyExpression | list[XqyExpression] | None,
+        position: int | XqyExpression,
+        inserts: XqyExpression | list[XqyExpression] | None,
+    ) -> XqyExpression:
         """Build a native XQuery expression.
 
         Returns a new sequence constructed from the value of $target with the value of
@@ -1773,11 +1907,11 @@ class Fn:
 
         Parameters
         ----------
-        target : object
+        target : XqyExpression | list[XqyExpression] | None
             The sequence of items into which new items will be inserted.
-        position : object
+        position : int | XqyExpression
             The position in the target sequence at which the new items will be added.
-        inserts : object
+        inserts : XqyExpression | list[XqyExpression] | None
             The items to insert into the target sequence.
 
         Returns
@@ -1792,14 +1926,14 @@ class Fn:
         return _FunctionCall("fn:insert-before", (target, position, inserts))
 
     @staticmethod
-    def iri_to_uri(uri_part) -> XqyExpression:
+    def iri_to_uri(uri_part: str | XqyExpression) -> XqyExpression:
         """Build a native XQuery expression.
 
         Idempotent function that escapes non-URI characters.
 
         Parameters
         ----------
-        uri_part : object
+        uri_part : str | XqyExpression
             A string representing an unescaped URI.
 
         Returns
@@ -1814,18 +1948,23 @@ class Fn:
         return _FunctionCall("fn:iri-to-uri", (uri_part,))
 
     @staticmethod
-    def key(key_name, key_value, *, top=UNSET) -> XqyExpression:
+    def key(
+        key_name: str | XqyExpression,
+        key_value: str | XqyExpression,
+        *,
+        top: XqyExpression | None = UNSET,
+    ) -> XqyExpression:
         """Build a native XQuery expression.
 
         The key function does for keys what the id function does for IDs.
 
         Parameters
         ----------
-        key_name : object
+        key_name : str | XqyExpression
             The name of the key.
-        key_value : object
+        key_value : str | XqyExpression
             The value of the key.
-        top : object
+        top : XqyExpression | None
             The subtree to limit the results to.
             ---
             Omit to use the native default; None explicitly passes ().
@@ -1842,7 +1981,9 @@ class Fn:
         return _optional_call("fn:key", key_name, key_value, top)
 
     @staticmethod
-    def lang(testlang, *, node=UNSET) -> XqyExpression:
+    def lang(
+        testlang: str | XqyExpression | None, *, node: XqyExpression | None = UNSET,
+    ) -> XqyExpression:
         """Build a native XQuery expression.
 
         This function tests whether the language of $node, or the context node if the
@@ -1851,9 +1992,9 @@ class Fn:
 
         Parameters
         ----------
-        testlang : object
+        testlang : str | XqyExpression | None
             The language against which to test the node.
-        node : object
+        node : XqyExpression | None
             The node to test.
             ---
             Omit to use the native default; None explicitly passes ().
@@ -1887,7 +2028,7 @@ class Fn:
         return _FunctionCall("fn:last")
 
     @staticmethod
-    def local_name(arg=UNSET) -> XqyExpression:
+    def local_name(arg: XqyExpression | None = UNSET) -> XqyExpression:
         """Build a native XQuery expression.
 
         Returns the local part of the name of $arg as an xs:string that will either be
@@ -1895,7 +2036,7 @@ class Fn:
 
         Parameters
         ----------
-        arg : object
+        arg : XqyExpression | None
             The node whose local name is to be returned.
             Omit to use the native default; None explicitly passes ().
 
@@ -1911,14 +2052,14 @@ class Fn:
         return _optional_call("fn:local-name", arg)
 
     @staticmethod
-    def local_name_from_qname(arg) -> XqyExpression:
+    def local_name_from_qname(arg: XqyExpression | None) -> XqyExpression:
         """Build a native XQuery expression.
 
         Returns an xs:NCName representing the local part of $arg.
 
         Parameters
         ----------
-        arg : object
+        arg : XqyExpression | None
             A qualified name.
 
         Returns
@@ -1933,7 +2074,7 @@ class Fn:
         return _FunctionCall("fn:local-name-from-QName", (arg,))
 
     @staticmethod
-    def lower_case(string) -> XqyExpression:
+    def lower_case(string: str | XqyExpression | None) -> XqyExpression:
         """Build a native XQuery expression.
 
         Returns the specified string converting all of the characters to lower-case
@@ -1941,7 +2082,7 @@ class Fn:
 
         Parameters
         ----------
-        string : object
+        string : str | XqyExpression | None
             The string to convert.
 
         Returns
@@ -1956,7 +2097,10 @@ class Fn:
         return _FunctionCall("fn:lower-case", (string,))
 
     @staticmethod
-    def map(function, seq) -> XqyExpression:
+    def map(
+        function: XqyExpression | list[XqyExpression] | None,
+        seq: XqyExpression | list[XqyExpression] | None,
+    ) -> XqyExpression:
         """Build a native XQuery expression.
 
         Applies the function item $function to every item from the sequence $seq in
@@ -1964,9 +2108,9 @@ class Fn:
 
         Parameters
         ----------
-        function : object
+        function : XqyExpression | list[XqyExpression] | None
             The function value.
-        seq : object
+        seq : XqyExpression | list[XqyExpression] | None
             The function value.
 
         Returns
@@ -1981,7 +2125,11 @@ class Fn:
         return _FunctionCall("fn:map", (function, seq))
 
     @staticmethod
-    def map_pairs(function, seq1, seq2) -> XqyExpression:
+    def map_pairs(
+        function: XqyExpression | list[XqyExpression] | None,
+        seq1: XqyExpression | list[XqyExpression] | None,
+        seq2: XqyExpression | list[XqyExpression] | None,
+    ) -> XqyExpression:
         """Build a native XQuery expression.
 
         Applies the function item $function to successive pairs of items taken one from
@@ -1990,11 +2138,11 @@ class Fn:
 
         Parameters
         ----------
-        function : object
+        function : XqyExpression | list[XqyExpression] | None
             The map function value.
-        seq1 : object
+        seq1 : XqyExpression | list[XqyExpression] | None
             The first sequence argument.
-        seq2 : object
+        seq2 : XqyExpression | list[XqyExpression] | None
             The second sequence argument.
 
         Returns
@@ -2009,7 +2157,12 @@ class Fn:
         return _FunctionCall("fn:map-pairs", (function, seq1, seq2))
 
     @staticmethod
-    def matches(input, pattern, *, flags=UNSET) -> XqyExpression:
+    def matches(
+        input: str | XqyExpression | None,
+        pattern: str | XqyExpression,
+        *,
+        flags: str | XqyExpression | None = UNSET,
+    ) -> XqyExpression:
         """Build a native XQuery expression.
 
         Returns true if the specified $input matches the specified $pattern, otherwise
@@ -2017,11 +2170,11 @@ class Fn:
 
         Parameters
         ----------
-        input : object
+        input : str | XqyExpression | None
             The input from which to match.
-        pattern : object
+        pattern : str | XqyExpression
             The regular expression to match.
-        flags : object
+        flags : str | XqyExpression | None
             The flag representing how to interpret the regular expression. One of "s",
             "m", "i", or "x", as defined in http://www.w3.org/TR/xpath-functions/#flags
             .
@@ -2039,7 +2192,18 @@ class Fn:
         return _optional_call("fn:matches", input, pattern, flags)
 
     @staticmethod
-    def max(arg, *, collation=UNSET) -> XqyExpression:
+    def max(
+        arg: str
+        | int
+        | float
+        | bool
+        | list[str | int | float | bool]
+        | XqyExpression
+        | list[XqyExpression]
+        | None,
+        *,
+        collation: str | XqyExpression | None = UNSET,
+    ) -> XqyExpression:
         """Build a native XQuery expression.
 
         Selects an item from the input sequence $arg whose value is greater than or
@@ -2047,9 +2211,9 @@ class Fn:
 
         Parameters
         ----------
-        arg : object
+        arg : str | int | float | bool | list[str | int | float | bool] | XqyExpression | list[XqyExpression] | None
             The sequence of values whose maximum will be returned.
-        collation : object
+        collation : str | XqyExpression | None
             The optional name of a valid collation URI. For information on the collation
             URI syntax, see the Search Developer's Guide .
             Omit to use the native default; None explicitly passes ().
@@ -2066,7 +2230,18 @@ class Fn:
         return _optional_call("fn:max", arg, collation)
 
     @staticmethod
-    def min(arg, *, collation=UNSET) -> XqyExpression:
+    def min(
+        arg: str
+        | int
+        | float
+        | bool
+        | list[str | int | float | bool]
+        | XqyExpression
+        | list[XqyExpression]
+        | None,
+        *,
+        collation: str | XqyExpression | None = UNSET,
+    ) -> XqyExpression:
         """Build a native XQuery expression.
 
         Selects an item from the input sequence $arg whose value is less than or equal
@@ -2074,9 +2249,9 @@ class Fn:
 
         Parameters
         ----------
-        arg : object
+        arg : str | int | float | bool | list[str | int | float | bool] | XqyExpression | list[XqyExpression] | None
             The sequence of values whose minimum will be returned.
-        collation : object
+        collation : str | XqyExpression | None
             The optional name of a valid collation URI. For information on the collation
             URI syntax, see the Search Developer's Guide .
             Omit to use the native default; None explicitly passes ().
@@ -2093,7 +2268,9 @@ class Fn:
         return _optional_call("fn:min", arg, collation)
 
     @staticmethod
-    def minutes_from_date_time(arg) -> XqyExpression:
+    def minutes_from_date_time(
+        arg: datetime.datetime | XqyExpression | None,
+    ) -> XqyExpression:
         """Build a native XQuery expression.
 
         Returns an xs:integer value between 0 and 59, both inclusive, representing the
@@ -2101,7 +2278,7 @@ class Fn:
 
         Parameters
         ----------
-        arg : object
+        arg : datetime.datetime | XqyExpression | None
             The dateTime whose minutes component will be returned.
 
         Returns
@@ -2116,7 +2293,7 @@ class Fn:
         return _FunctionCall("fn:minutes-from-dateTime", (arg,))
 
     @staticmethod
-    def minutes_from_duration(arg) -> XqyExpression:
+    def minutes_from_duration(arg: str | XqyExpression | None) -> XqyExpression:
         """Build a native XQuery expression.
 
         Returns an xs:integer representing the minutes component in the canonical
@@ -2124,7 +2301,7 @@ class Fn:
 
         Parameters
         ----------
-        arg : object
+        arg : str | XqyExpression | None
             The duration whose minute component will be returned.
 
         Returns
@@ -2139,7 +2316,7 @@ class Fn:
         return _FunctionCall("fn:minutes-from-duration", (arg,))
 
     @staticmethod
-    def minutes_from_time(arg) -> XqyExpression:
+    def minutes_from_time(arg: datetime.time | XqyExpression | None) -> XqyExpression:
         """Build a native XQuery expression.
 
         Returns an xs:integer value between 0 to 59, both inclusive, representing the
@@ -2147,7 +2324,7 @@ class Fn:
 
         Parameters
         ----------
-        arg : object
+        arg : datetime.time | XqyExpression | None
             The time whose minutes component will be returned.
 
         Returns
@@ -2162,7 +2339,7 @@ class Fn:
         return _FunctionCall("fn:minutes-from-time", (arg,))
 
     @staticmethod
-    def month_from_date(arg) -> XqyExpression:
+    def month_from_date(arg: datetime.date | XqyExpression | None) -> XqyExpression:
         """Build a native XQuery expression.
 
         Returns an xs:integer between 1 and 12, both inclusive, representing the month
@@ -2170,7 +2347,7 @@ class Fn:
 
         Parameters
         ----------
-        arg : object
+        arg : datetime.date | XqyExpression | None
             The date whose month component will be returned.
 
         Returns
@@ -2185,7 +2362,9 @@ class Fn:
         return _FunctionCall("fn:month-from-date", (arg,))
 
     @staticmethod
-    def month_from_date_time(arg) -> XqyExpression:
+    def month_from_date_time(
+        arg: datetime.datetime | XqyExpression | None,
+    ) -> XqyExpression:
         """Build a native XQuery expression.
 
         Returns an xs:integer between 1 and 12, both inclusive, representing the month
@@ -2193,7 +2372,7 @@ class Fn:
 
         Parameters
         ----------
-        arg : object
+        arg : datetime.datetime | XqyExpression | None
             The dateTime whose month component will be returned.
 
         Returns
@@ -2208,7 +2387,7 @@ class Fn:
         return _FunctionCall("fn:month-from-dateTime", (arg,))
 
     @staticmethod
-    def months_from_duration(arg) -> XqyExpression:
+    def months_from_duration(arg: str | XqyExpression | None) -> XqyExpression:
         """Build a native XQuery expression.
 
         Returns an xs:integer representing the months component in the canonical lexical
@@ -2216,7 +2395,7 @@ class Fn:
 
         Parameters
         ----------
-        arg : object
+        arg : str | XqyExpression | None
             The duration whose month component will be returned.
 
         Returns
@@ -2231,7 +2410,7 @@ class Fn:
         return _FunctionCall("fn:months-from-duration", (arg,))
 
     @staticmethod
-    def name(arg=UNSET) -> XqyExpression:
+    def name(arg: XqyExpression | None = UNSET) -> XqyExpression:
         """Build a native XQuery expression.
 
         Returns the name of a node, as an xs:string that is either the zero-length
@@ -2239,7 +2418,7 @@ class Fn:
 
         Parameters
         ----------
-        arg : object
+        arg : XqyExpression | None
             The node whose name is to be returned.
             Omit to use the native default; None explicitly passes ().
 
@@ -2255,14 +2434,14 @@ class Fn:
         return _optional_call("fn:name", arg)
 
     @staticmethod
-    def namespace_uri(arg=UNSET) -> XqyExpression:
+    def namespace_uri(arg: XqyExpression | None = UNSET) -> XqyExpression:
         """Build a native XQuery expression.
 
         Returns the namespace URI of the xs:QName of the node specified by $arg.
 
         Parameters
         ----------
-        arg : object
+        arg : XqyExpression | None
             The node whose namespace URI is to be returned.
             Omit to use the native default; None explicitly passes ().
 
@@ -2278,7 +2457,9 @@ class Fn:
         return _optional_call("fn:namespace-uri", arg)
 
     @staticmethod
-    def namespace_uri_for_prefix(prefix, element) -> XqyExpression:
+    def namespace_uri_for_prefix(
+        prefix: str | XqyExpression | None, element: XqyExpression,
+    ) -> XqyExpression:
         """Build a native XQuery expression.
 
         Returns the namespace URI of one of the in-scope namespaces for $element,
@@ -2286,9 +2467,9 @@ class Fn:
 
         Parameters
         ----------
-        prefix : object
+        prefix : str | XqyExpression | None
             A namespace prefix to look up.
-        element : object
+        element : XqyExpression
             An element node providing namespace context.
 
         Returns
@@ -2303,14 +2484,14 @@ class Fn:
         return _FunctionCall("fn:namespace-uri-for-prefix", (prefix, element))
 
     @staticmethod
-    def namespace_uri_from_qname(arg) -> XqyExpression:
+    def namespace_uri_from_qname(arg: XqyExpression | None) -> XqyExpression:
         """Build a native XQuery expression.
 
         Returns the namespace URI for $arg as an xs:string.
 
         Parameters
         ----------
-        arg : object
+        arg : XqyExpression | None
             A qualified name.
 
         Returns
@@ -2325,14 +2506,14 @@ class Fn:
         return _FunctionCall("fn:namespace-uri-from-QName", (arg,))
 
     @staticmethod
-    def nilled(arg) -> XqyExpression:
+    def nilled(arg: XqyExpression | None) -> XqyExpression:
         """Build a native XQuery expression.
 
         Summary: Returns an xs:boolean indicating whether the argument node is "nilled".
 
         Parameters
         ----------
-        arg : object
+        arg : XqyExpression | None
             The node to test for nilled status.
 
         Returns
@@ -2347,7 +2528,7 @@ class Fn:
         return _FunctionCall("fn:nilled", (arg,))
 
     @staticmethod
-    def node_kind(node) -> XqyExpression:
+    def node_kind(node: XqyExpression | None) -> XqyExpression:
         """Build a native XQuery expression.
 
         [0.9-ml only, use xdmp:node-kind in 1.0 and 1.0-ml] Returns an xs:string
@@ -2356,7 +2537,7 @@ class Fn:
 
         Parameters
         ----------
-        node : object
+        node : XqyExpression | None
             The node whose kind is to be returned.
 
         Returns
@@ -2371,14 +2552,14 @@ class Fn:
         return _FunctionCall("fn:node-kind", (node,))
 
     @staticmethod
-    def node_name(arg) -> XqyExpression:
+    def node_name(arg: XqyExpression | None) -> XqyExpression:
         """Build a native XQuery expression.
 
         Returns an expanded-QName for node kinds that can have names.
 
         Parameters
         ----------
-        arg : object
+        arg : XqyExpression | None
             The node whose name is to be returned.
 
         Returns
@@ -2393,7 +2574,7 @@ class Fn:
         return _FunctionCall("fn:node-name", (arg,))
 
     @staticmethod
-    def normalize_space(input=UNSET) -> XqyExpression:
+    def normalize_space(input: str | XqyExpression | None = UNSET) -> XqyExpression:
         """Build a native XQuery expression.
 
         Returns the specified string with normalized whitespace, which strips off any
@@ -2402,7 +2583,7 @@ class Fn:
 
         Parameters
         ----------
-        input : object
+        input : str | XqyExpression | None
             The string from which to normalize whitespace.
             Omit to use the native default; None explicitly passes ().
 
@@ -2418,7 +2599,11 @@ class Fn:
         return _optional_call("fn:normalize-space", input)
 
     @staticmethod
-    def normalize_unicode(arg, *, normalization_form=UNSET) -> XqyExpression:
+    def normalize_unicode(
+        arg: str | XqyExpression | None,
+        *,
+        normalization_form: str | XqyExpression | None = UNSET,
+    ) -> XqyExpression:
         """Build a native XQuery expression.
 
         Return the argument normalized according to the normalization criteria for a
@@ -2426,9 +2611,9 @@ class Fn:
 
         Parameters
         ----------
-        arg : object
+        arg : str | XqyExpression | None
             The string to normalize.
-        normalization_form : object
+        normalization_form : str | XqyExpression | None
             The form under which to normalize the specified string: NFC, NFD, NFKC, or
             NFKD.
             Omit to use the native default; None explicitly passes ().
@@ -2445,7 +2630,7 @@ class Fn:
         return _optional_call("fn:normalize-unicode", arg, normalization_form)
 
     @staticmethod
-    def not_(arg) -> XqyExpression:
+    def not_(arg: XqyExpression | list[XqyExpression] | None) -> XqyExpression:
         """Build a native XQuery expression.
 
         Returns true if the effective boolean value is false, and false if the effective
@@ -2453,7 +2638,7 @@ class Fn:
 
         Parameters
         ----------
-        arg : object
+        arg : XqyExpression | list[XqyExpression] | None
             The expression to negate.
 
         Returns
@@ -2468,7 +2653,9 @@ class Fn:
         return _FunctionCall("fn:not", (arg,))
 
     @staticmethod
-    def number(arg=UNSET) -> XqyExpression:
+    def number(
+        arg: str | int | float | bool | XqyExpression | None = UNSET,
+    ) -> XqyExpression:
         """Build a native XQuery expression.
 
         Returns the value indicated by $arg or, if $arg is not specified, the context
@@ -2476,7 +2663,7 @@ class Fn:
 
         Parameters
         ----------
-        arg : object
+        arg : str | int | float | bool | XqyExpression | None
             The value to be returned as an xs:double value.
             Omit to use the native default; None explicitly passes ().
 
@@ -2492,14 +2679,14 @@ class Fn:
         return _optional_call("fn:number", arg)
 
     @staticmethod
-    def one_or_more(arg) -> XqyExpression:
+    def one_or_more(arg: XqyExpression | list[XqyExpression] | None) -> XqyExpression:
         """Build a native XQuery expression.
 
         Returns $arg if it contains one or more items.
 
         Parameters
         ----------
-        arg : object
+        arg : XqyExpression | list[XqyExpression] | None
             The sequence of items.
 
         Returns
@@ -2531,14 +2718,14 @@ class Fn:
         return _FunctionCall("fn:position")
 
     @staticmethod
-    def prefix_from_qname(arg) -> XqyExpression:
+    def prefix_from_qname(arg: XqyExpression | None) -> XqyExpression:
         """Build a native XQuery expression.
 
         Returns an xs:NCName representing the prefix of $arg.
 
         Parameters
         ----------
-        arg : object
+        arg : XqyExpression | None
             A qualified name.
 
         Returns
@@ -2553,16 +2740,18 @@ class Fn:
         return _FunctionCall("fn:prefix-from-QName", (arg,))
 
     @staticmethod
-    def qname(uri, lexical) -> XqyExpression:
+    def qname(
+        uri: str | XqyExpression | None, lexical: str | XqyExpression,
+    ) -> XqyExpression:
         """Build a native XQuery expression.
 
         Returns an xs:QName with the namespace URI given in $paramURI.
 
         Parameters
         ----------
-        uri : object
+        uri : str | XqyExpression | None
             A namespace URI, as a string.
-        lexical : object
+        lexical : str | XqyExpression
             A lexical qualified name (xs:QName), a string of the form "prefix:localname"
             or "localname".
 
@@ -2578,7 +2767,7 @@ class Fn:
         return _FunctionCall("fn:QName", (uri, lexical))
 
     @staticmethod
-    def regex_group(group_number) -> XqyExpression:
+    def regex_group(group_number: int | XqyExpression) -> XqyExpression:
         """Build a native XQuery expression.
 
         While the xsl:matching-substring instruction is active, a set of current
@@ -2587,7 +2776,7 @@ class Fn:
 
         Parameters
         ----------
-        group_number : object
+        group_number : int | XqyExpression
             The group number to return.
 
         Returns
@@ -2602,7 +2791,10 @@ class Fn:
         return _FunctionCall("fn:regex-group", (group_number,))
 
     @staticmethod
-    def remove(target, position) -> XqyExpression:
+    def remove(
+        target: XqyExpression | list[XqyExpression] | None,
+        position: int | XqyExpression,
+    ) -> XqyExpression:
         """Build a native XQuery expression.
 
         Returns a new sequence constructed from the value of $target with the item at
@@ -2610,9 +2802,9 @@ class Fn:
 
         Parameters
         ----------
-        target : object
+        target : XqyExpression | list[XqyExpression] | None
             The sequence of items from which items will be removed.
-        position : object
+        position : int | XqyExpression
             The position in the target sequence from which the items will be removed.
 
         Returns
@@ -2627,7 +2819,13 @@ class Fn:
         return _FunctionCall("fn:remove", (target, position))
 
     @staticmethod
-    def replace(input, pattern, replacement, *, flags=UNSET) -> XqyExpression:
+    def replace(
+        input: str | XqyExpression | None,
+        pattern: str | XqyExpression,
+        replacement: str | XqyExpression,
+        *,
+        flags: str | XqyExpression | None = UNSET,
+    ) -> XqyExpression:
         """Build a native XQuery expression.
 
         Returns a string constructed by replacing the specified $pattern on the $input
@@ -2635,16 +2833,16 @@ class Fn:
 
         Parameters
         ----------
-        input : object
+        input : str | XqyExpression | None
             The string to start with.
-        pattern : object
+        pattern : str | XqyExpression
             The regular expression pattern to match. If the pattern does not match the
             $input string, the function will return the $input string unchanged.
-        replacement : object
+        replacement : str | XqyExpression
             The regular expression pattern to replace the $pattern with. It can also be
             a capture expression (for more details, see http://www.w3.org/TR/xpath-
             functions/#func-replace ).
-        flags : object
+        flags : str | XqyExpression | None
             The flag representing how to interpret the regular expression. One of "s",
             "m", "i", or "x", as defined in http://www.w3.org/TR/xpath-functions/#flags
             .
@@ -2662,7 +2860,9 @@ class Fn:
         return _optional_call("fn:replace", input, pattern, replacement, flags)
 
     @staticmethod
-    def resolve_qname(qname, element) -> XqyExpression:
+    def resolve_qname(
+        qname: str | XqyExpression | None, element: XqyExpression,
+    ) -> XqyExpression:
         """Build a native XQuery expression.
 
         Returns an xs:QName value (that is, an expanded QName) by taking an xs:string
@@ -2672,9 +2872,9 @@ class Fn:
 
         Parameters
         ----------
-        qname : object
+        qname : str | XqyExpression | None
             A string of the form "prefix:local-name".
-        element : object
+        element : XqyExpression
             An element providing the in-scope namespaces to use to resolve the qualified
             name.
 
@@ -2690,16 +2890,20 @@ class Fn:
         return _FunctionCall("fn:resolve-QName", (qname, element))
 
     @staticmethod
-    def resolve_uri(relative, *, base=UNSET) -> XqyExpression:
+    def resolve_uri(
+        relative: str | XqyExpression | None,
+        *,
+        base: str | XqyExpression | None = UNSET,
+    ) -> XqyExpression:
         """Build a native XQuery expression.
 
         Resolves a relative URI against an absolute URI.
 
         Parameters
         ----------
-        relative : object
+        relative : str | XqyExpression | None
             A URI reference to resolve against the base.
-        base : object
+        base : str | XqyExpression | None
             An absolute URI to use as the base of the resolution.
             Omit to use the native default; None explicitly passes ().
 
@@ -2715,14 +2919,14 @@ class Fn:
         return _optional_call("fn:resolve-uri", relative, base)
 
     @staticmethod
-    def reverse(target) -> XqyExpression:
+    def reverse(target: XqyExpression | list[XqyExpression] | None) -> XqyExpression:
         """Build a native XQuery expression.
 
         Reverses the order of items in a sequence.
 
         Parameters
         ----------
-        target : object
+        target : XqyExpression | list[XqyExpression] | None
             The sequence of items to be reversed.
 
         Returns
@@ -2737,14 +2941,14 @@ class Fn:
         return _FunctionCall("fn:reverse", (target,))
 
     @staticmethod
-    def root(arg=UNSET) -> XqyExpression:
+    def root(arg: XqyExpression | None = UNSET) -> XqyExpression:
         """Build a native XQuery expression.
 
         Returns the root of the tree to which $arg belongs.
 
         Parameters
         ----------
-        arg : object
+        arg : XqyExpression | None
             The node whose root node will be returned.
             Omit to use the native default; None explicitly passes ().
 
@@ -2760,14 +2964,14 @@ class Fn:
         return _optional_call("fn:root", arg)
 
     @staticmethod
-    def round(arg) -> XqyExpression:
+    def round(arg: float | XqyExpression | None) -> XqyExpression:
         """Build a native XQuery expression.
 
         Returns the number with no fractional part that is closest to the argument.
 
         Parameters
         ----------
-        arg : object
+        arg : float | XqyExpression | None
             A numeric value to round.
 
         Returns
@@ -2782,7 +2986,11 @@ class Fn:
         return _FunctionCall("fn:round", (arg,))
 
     @staticmethod
-    def round_half_to_even(arg, *, precision=UNSET) -> XqyExpression:
+    def round_half_to_even(
+        arg: float | XqyExpression | None,
+        *,
+        precision: int | XqyExpression | None = UNSET,
+    ) -> XqyExpression:
         """Build a native XQuery expression.
 
         The value returned is the nearest (that is, numerically closest) numeric to $arg
@@ -2790,9 +2998,9 @@ class Fn:
 
         Parameters
         ----------
-        arg : object
+        arg : float | XqyExpression | None
             A numeric value to round.
-        precision : object
+        precision : int | XqyExpression | None
             The precision to which to round the value.
             Omit to use the native default; None explicitly passes ().
 
@@ -2808,7 +3016,9 @@ class Fn:
         return _optional_call("fn:round-half-to-even", arg, precision)
 
     @staticmethod
-    def seconds_from_date_time(arg) -> XqyExpression:
+    def seconds_from_date_time(
+        arg: datetime.datetime | XqyExpression | None,
+    ) -> XqyExpression:
         """Build a native XQuery expression.
 
         Returns an xs:decimal value between 0 and 60.999..., both inclusive representing
@@ -2816,7 +3026,7 @@ class Fn:
 
         Parameters
         ----------
-        arg : object
+        arg : datetime.datetime | XqyExpression | None
             The dateTime whose seconds component will be returned.
 
         Returns
@@ -2831,7 +3041,7 @@ class Fn:
         return _FunctionCall("fn:seconds-from-dateTime", (arg,))
 
     @staticmethod
-    def seconds_from_duration(arg) -> XqyExpression:
+    def seconds_from_duration(arg: str | XqyExpression | None) -> XqyExpression:
         """Build a native XQuery expression.
 
         Returns an xs:decimal representing the seconds component in the canonical
@@ -2839,7 +3049,7 @@ class Fn:
 
         Parameters
         ----------
-        arg : object
+        arg : str | XqyExpression | None
             The duration whose minute component will be returned.
 
         Returns
@@ -2854,7 +3064,7 @@ class Fn:
         return _FunctionCall("fn:seconds-from-duration", (arg,))
 
     @staticmethod
-    def seconds_from_time(arg) -> XqyExpression:
+    def seconds_from_time(arg: datetime.time | XqyExpression | None) -> XqyExpression:
         """Build a native XQuery expression.
 
         Returns an xs:decimal value between 0 and 60.999..., both inclusive,
@@ -2862,7 +3072,7 @@ class Fn:
 
         Parameters
         ----------
-        arg : object
+        arg : datetime.time | XqyExpression | None
             The time whose seconds component will be returned.
 
         Returns
@@ -2877,7 +3087,12 @@ class Fn:
         return _FunctionCall("fn:seconds-from-time", (arg,))
 
     @staticmethod
-    def starts_with(parameter1, parameter2, *, collation=UNSET) -> XqyExpression:
+    def starts_with(
+        parameter1: str | XqyExpression | None,
+        parameter2: str | XqyExpression | None,
+        *,
+        collation: str | XqyExpression | None = UNSET,
+    ) -> XqyExpression:
         """Build a native XQuery expression.
 
         Returns true if the first parameter starts with the string from the second
@@ -2885,11 +3100,11 @@ class Fn:
 
         Parameters
         ----------
-        parameter1 : object
+        parameter1 : str | XqyExpression | None
             The string from which to test.
-        parameter2 : object
+        parameter2 : str | XqyExpression | None
             The string to test whether it is at the beginning of the first parameter.
-        collation : object
+        collation : str | XqyExpression | None
             The optional name of a valid collation URI. For information on the collation
             URI syntax, see the Search Developer's Guide .
             Omit to use the native default; None explicitly passes ().
@@ -2923,14 +3138,14 @@ class Fn:
         return _FunctionCall("fn:static-base-uri")
 
     @staticmethod
-    def string(arg=UNSET) -> XqyExpression:
+    def string(arg: XqyExpression | None = UNSET) -> XqyExpression:
         """Build a native XQuery expression.
 
         Returns the value of $arg represented as an xs:string.
 
         Parameters
         ----------
-        arg : object
+        arg : XqyExpression | None
             The item to be rendered as a string.
             Omit to use the native default; None explicitly passes ().
 
@@ -2946,7 +3161,10 @@ class Fn:
         return _optional_call("fn:string", arg)
 
     @staticmethod
-    def string_join(parameter1, parameter2) -> XqyExpression:
+    def string_join(
+        parameter1: str | list[str] | XqyExpression | list[XqyExpression] | None,
+        parameter2: str | XqyExpression,
+    ) -> XqyExpression:
         """Build a native XQuery expression.
 
         Returns an xs:string created by concatenating the members of the $parameter1
@@ -2954,9 +3172,9 @@ class Fn:
 
         Parameters
         ----------
-        parameter1 : object
+        parameter1 : str | list[str] | XqyExpression | list[XqyExpression] | None
             A sequence of strings.
-        parameter2 : object
+        parameter2 : str | XqyExpression
             A separator string to concatenate between the items in $parameter1.
 
         Returns
@@ -2971,14 +3189,16 @@ class Fn:
         return _FunctionCall("fn:string-join", (parameter1, parameter2))
 
     @staticmethod
-    def string_length(source_string=UNSET) -> XqyExpression:
+    def string_length(
+        source_string: str | XqyExpression | None = UNSET,
+    ) -> XqyExpression:
         """Build a native XQuery expression.
 
         Returns an integer representing the length of the specified string.
 
         Parameters
         ----------
-        source_string : object
+        source_string : str | XqyExpression | None
             The string to calculate the length.
             Omit to use the native default; None explicitly passes ().
 
@@ -2994,7 +3214,9 @@ class Fn:
         return _optional_call("fn:string-length", source_string)
 
     @staticmethod
-    def string_pad(pad_string, pad_count) -> XqyExpression:
+    def string_pad(
+        pad_string: str | XqyExpression | None, pad_count: int | XqyExpression,
+    ) -> XqyExpression:
         """Build a native XQuery expression.
 
         [0.9-ml only] Returns a string representing the $padString concatenated with
@@ -3002,9 +3224,9 @@ class Fn:
 
         Parameters
         ----------
-        pad_string : object
+        pad_string : str | XqyExpression | None
             The string to pad.
-        pad_count : object
+        pad_count : int | XqyExpression
             The number of times to pad the string.
 
         Returns
@@ -3019,14 +3241,14 @@ class Fn:
         return _FunctionCall("fn:string-pad", (pad_string, pad_count))
 
     @staticmethod
-    def string_to_codepoints(arg) -> XqyExpression:
+    def string_to_codepoints(arg: str | XqyExpression) -> XqyExpression:
         """Build a native XQuery expression.
 
         Returns the sequence of Unicode code points that constitute an xs:string.
 
         Parameters
         ----------
-        arg : object
+        arg : str | XqyExpression
             A string.
 
         Returns
@@ -3041,7 +3263,12 @@ class Fn:
         return _FunctionCall("fn:string-to-codepoints", (arg,))
 
     @staticmethod
-    def subsequence(source_seq, starting_loc, *, length=UNSET) -> XqyExpression:
+    def subsequence(
+        source_seq: XqyExpression | list[XqyExpression] | None,
+        starting_loc: float | XqyExpression,
+        *,
+        length: float | XqyExpression | None = UNSET,
+    ) -> XqyExpression:
         """Build a native XQuery expression.
 
         Returns the contiguous sequence of items in the value of $sourceSeq beginning at
@@ -3050,11 +3277,11 @@ class Fn:
 
         Parameters
         ----------
-        source_seq : object
+        source_seq : XqyExpression | list[XqyExpression] | None
             The sequence of items from which a subsequence will be selected.
-        starting_loc : object
+        starting_loc : float | XqyExpression
             The starting position of the start of the subsequence.
-        length : object
+        length : float | XqyExpression | None
             The length of the subsequence.
             Omit to use the native default; None explicitly passes ().
 
@@ -3070,7 +3297,12 @@ class Fn:
         return _optional_call("fn:subsequence", source_seq, starting_loc, length)
 
     @staticmethod
-    def substring(source_string, starting_loc, *, length=UNSET) -> XqyExpression:
+    def substring(
+        source_string: str | XqyExpression | None,
+        starting_loc: float | XqyExpression,
+        *,
+        length: float | XqyExpression | None = UNSET,
+    ) -> XqyExpression:
         """Build a native XQuery expression.
 
         Returns a substring starting from the $startingLoc and continuing for $length
@@ -3078,11 +3310,11 @@ class Fn:
 
         Parameters
         ----------
-        source_string : object
+        source_string : str | XqyExpression | None
             The string from which to create a substring.
-        starting_loc : object
+        starting_loc : float | XqyExpression
             The number of characters from the start of the $sourceString.
-        length : object
+        length : float | XqyExpression | None
             The number of characters beyond the $startingLoc.
             Omit to use the native default; None explicitly passes ().
 
@@ -3098,7 +3330,12 @@ class Fn:
         return _optional_call("fn:substring", source_string, starting_loc, length)
 
     @staticmethod
-    def substring_after(input, after, *, collation=UNSET) -> XqyExpression:
+    def substring_after(
+        input: str | XqyExpression | None,
+        after: str | XqyExpression | None,
+        *,
+        collation: str | XqyExpression | None = UNSET,
+    ) -> XqyExpression:
         """Build a native XQuery expression.
 
         Returns the substring created by taking all of the input characters that occur
@@ -3106,11 +3343,11 @@ class Fn:
 
         Parameters
         ----------
-        input : object
+        input : str | XqyExpression | None
             The string from which to create the substring.
-        after : object
+        after : str | XqyExpression | None
             The string after which the substring is created.
-        collation : object
+        collation : str | XqyExpression | None
             The optional name of a valid collation URI. For information on the collation
             URI syntax, see the Search Developer's Guide .
             Omit to use the native default; None explicitly passes ().
@@ -3127,7 +3364,12 @@ class Fn:
         return _optional_call("fn:substring-after", input, after, collation)
 
     @staticmethod
-    def substring_before(input, before, *, collation=UNSET) -> XqyExpression:
+    def substring_before(
+        input: str | XqyExpression | None,
+        before: str | XqyExpression | None,
+        *,
+        collation: str | XqyExpression | None = UNSET,
+    ) -> XqyExpression:
         """Build a native XQuery expression.
 
         Returns the substring created by taking all of the input characters that occur
@@ -3135,11 +3377,11 @@ class Fn:
 
         Parameters
         ----------
-        input : object
+        input : str | XqyExpression | None
             The string from which to create the substring.
-        before : object
+        before : str | XqyExpression | None
             The string before which the substring is created.
-        collation : object
+        collation : str | XqyExpression | None
             The optional name of a valid collation URI. For information on the collation
             URI syntax, see the Search Developer's Guide .
             Omit to use the native default; None explicitly passes ().
@@ -3157,8 +3399,8 @@ class Fn:
 
     @staticmethod
     def subtract_date_times_yielding_day_time_duration(
-        srcval1,
-        srcval2,
+        srcval1: datetime.datetime | XqyExpression,
+        srcval2: datetime.datetime | XqyExpression,
     ) -> XqyExpression:
         """Build a native XQuery expression.
 
@@ -3168,9 +3410,9 @@ class Fn:
 
         Parameters
         ----------
-        srcval1 : object
+        srcval1 : datetime.datetime | XqyExpression
             The second xs:dateTime value.
-        srcval2 : object
+        srcval2 : datetime.datetime | XqyExpression
             The second xs:dateTime value.
 
         Returns
@@ -3189,8 +3431,8 @@ class Fn:
 
     @staticmethod
     def subtract_date_times_yielding_year_month_duration(
-        srcval1,
-        srcval2,
+        srcval1: datetime.datetime | XqyExpression,
+        srcval2: datetime.datetime | XqyExpression,
     ) -> XqyExpression:
         """Build a native XQuery expression.
 
@@ -3200,9 +3442,9 @@ class Fn:
 
         Parameters
         ----------
-        srcval1 : object
+        srcval1 : datetime.datetime | XqyExpression
             The second xs:dateTime value.
-        srcval2 : object
+        srcval2 : datetime.datetime | XqyExpression
             The second xs:dateTime value.
 
         Returns
@@ -3220,16 +3462,27 @@ class Fn:
         )
 
     @staticmethod
-    def sum(arg, *, zero=UNSET) -> XqyExpression:
+    def sum(
+        arg: str
+        | int
+        | float
+        | bool
+        | list[str | int | float | bool]
+        | XqyExpression
+        | list[XqyExpression]
+        | None,
+        *,
+        zero: str | int | float | bool | XqyExpression | None = UNSET,
+    ) -> XqyExpression:
         """Build a native XQuery expression.
 
         Returns a value obtained by adding together the values in $arg.
 
         Parameters
         ----------
-        arg : object
+        arg : str | int | float | bool | list[str | int | float | bool] | XqyExpression | list[XqyExpression] | None
             The sequence of values to be summed.
-        zero : object
+        zero : str | int | float | bool | XqyExpression | None
             The value to return as zero if the input sequence is the empty sequence.
             This parameter is not available in the 0.9-ml XQuery dialect.
             Omit to use the native default; None explicitly passes ().
@@ -3246,7 +3499,7 @@ class Fn:
         return _optional_call("fn:sum", arg, zero)
 
     @staticmethod
-    def system_property(property_name) -> XqyExpression:
+    def system_property(property_name: str | XqyExpression) -> XqyExpression:
         """Build a native XQuery expression.
 
         Returns a string representing the value of the system property identified by the
@@ -3254,7 +3507,7 @@ class Fn:
 
         Parameters
         ----------
-        property_name : object
+        property_name : str | XqyExpression
             The name of the property whose value is to be returned. Valid names are:
             xsl:version xsl:vendor xsl:vendor-url xsl:product-name xsl:product-version
             xsl:is-schema-aware xsl:supports-serialization xsl:supports-backwards-
@@ -3272,14 +3525,14 @@ class Fn:
         return _FunctionCall("fn:system-property", (property_name,))
 
     @staticmethod
-    def tail(seq) -> XqyExpression:
+    def tail(seq: XqyExpression | list[XqyExpression] | None) -> XqyExpression:
         """Build a native XQuery expression.
 
         Returns all but the first item in a sequence.
 
         Parameters
         ----------
-        seq : object
+        seq : XqyExpression | list[XqyExpression] | None
             The function value.
 
         Returns
@@ -3294,14 +3547,14 @@ class Fn:
         return _FunctionCall("fn:tail", (seq,))
 
     @staticmethod
-    def timezone_from_date(arg) -> XqyExpression:
+    def timezone_from_date(arg: datetime.date | XqyExpression | None) -> XqyExpression:
         """Build a native XQuery expression.
 
         Returns the timezone component of $arg if any.
 
         Parameters
         ----------
-        arg : object
+        arg : datetime.date | XqyExpression | None
             The date whose timezone component will be returned.
 
         Returns
@@ -3316,14 +3569,16 @@ class Fn:
         return _FunctionCall("fn:timezone-from-date", (arg,))
 
     @staticmethod
-    def timezone_from_date_time(arg) -> XqyExpression:
+    def timezone_from_date_time(
+        arg: datetime.datetime | XqyExpression | None,
+    ) -> XqyExpression:
         """Build a native XQuery expression.
 
         Returns the timezone component of $arg if any.
 
         Parameters
         ----------
-        arg : object
+        arg : datetime.datetime | XqyExpression | None
             The dateTime whose timezone component will be returned.
 
         Returns
@@ -3338,14 +3593,14 @@ class Fn:
         return _FunctionCall("fn:timezone-from-dateTime", (arg,))
 
     @staticmethod
-    def timezone_from_time(arg) -> XqyExpression:
+    def timezone_from_time(arg: datetime.time | XqyExpression | None) -> XqyExpression:
         """Build a native XQuery expression.
 
         Returns the timezone component of $arg if any.
 
         Parameters
         ----------
-        arg : object
+        arg : datetime.time | XqyExpression | None
             The time whose timezone component will be returned.
 
         Returns
@@ -3360,7 +3615,12 @@ class Fn:
         return _FunctionCall("fn:timezone-from-time", (arg,))
 
     @staticmethod
-    def tokenize(input, pattern, *, flags=UNSET) -> XqyExpression:
+    def tokenize(
+        input: str | XqyExpression | None,
+        pattern: str | XqyExpression,
+        *,
+        flags: str | XqyExpression | None = UNSET,
+    ) -> XqyExpression:
         """Build a native XQuery expression.
 
         Returns a sequence of strings constructed by breaking the specified input into
@@ -3368,11 +3628,11 @@ class Fn:
 
         Parameters
         ----------
-        input : object
+        input : str | XqyExpression | None
             The string to tokenize.
-        pattern : object
+        pattern : str | XqyExpression
             The regular expression pattern from which to separate the tokens.
-        flags : object
+        flags : str | XqyExpression | None
             The flag representing how to interpret the regular expression. One of "s",
             "m", "i", or "x", as defined in http://www.w3.org/TR/xpath-functions/#flags
             .
@@ -3390,7 +3650,9 @@ class Fn:
         return _optional_call("fn:tokenize", input, pattern, flags)
 
     @staticmethod
-    def trace(value, label) -> XqyExpression:
+    def trace(
+        value: XqyExpression | list[XqyExpression] | None, label: str | XqyExpression,
+    ) -> XqyExpression:
         """Build a native XQuery expression.
 
         Return the input $value unchanged and, if $label is the name of an enabled
@@ -3401,9 +3663,9 @@ class Fn:
 
         Parameters
         ----------
-        value : object
+        value : XqyExpression | list[XqyExpression] | None
             The values to trace.
-        label : object
+        label : str | XqyExpression
             A string label for the trace output.
 
         Returns
@@ -3418,7 +3680,11 @@ class Fn:
         return _FunctionCall("fn:trace", (value, label))
 
     @staticmethod
-    def translate(src, map_string, trans_string) -> XqyExpression:
+    def translate(
+        src: str | XqyExpression | None,
+        map_string: str | XqyExpression | None,
+        trans_string: str | XqyExpression | None,
+    ) -> XqyExpression:
         """Build a native XQuery expression.
 
         Returns a string where every character in $src that occurs in some position in
@@ -3427,11 +3693,11 @@ class Fn:
 
         Parameters
         ----------
-        src : object
+        src : str | XqyExpression | None
             The string to translate characters.
-        map_string : object
+        map_string : str | XqyExpression | None
             The string representing characters to be translated.
-        trans_string : object
+        trans_string : str | XqyExpression | None
             The string representing the characters to which the $mapString characters
             are translated.
 
@@ -3464,7 +3730,7 @@ class Fn:
         return _FunctionCall("fn:true")
 
     @staticmethod
-    def type_available(type_name) -> XqyExpression:
+    def type_available(type_name: str | XqyExpression) -> XqyExpression:
         """Build a native XQuery expression.
 
         Returns true if and only if there is a type whose name matches the value of the
@@ -3472,7 +3738,7 @@ class Fn:
 
         Parameters
         ----------
-        type_name : object
+        type_name : str | XqyExpression
             The $type-name is a string containing a lexical QName. It may be a name of a
             builtin-type, type imported using xsl:import-schema, or an extension type.
             This parameter is mandatory. The lexical QName is expanded using the
@@ -3491,14 +3757,16 @@ class Fn:
         return _FunctionCall("fn:type-available", (type_name,))
 
     @staticmethod
-    def unordered(source_seq) -> XqyExpression:
+    def unordered(
+        source_seq: XqyExpression | list[XqyExpression] | None,
+    ) -> XqyExpression:
         """Build a native XQuery expression.
 
         Returns the items of $sourceSeq in an implementation dependent order.
 
         Parameters
         ----------
-        source_seq : object
+        source_seq : XqyExpression | list[XqyExpression] | None
             The sequence of items.
 
         Returns
@@ -3513,7 +3781,7 @@ class Fn:
         return _FunctionCall("fn:unordered", (source_seq,))
 
     @staticmethod
-    def unparsed_entity_public_id(entity_name) -> XqyExpression:
+    def unparsed_entity_public_id(entity_name: str | XqyExpression) -> XqyExpression:
         """Build a native XQuery expression.
 
         Returns the public identifier of the unparsed entity specified by the $entity-
@@ -3521,7 +3789,7 @@ class Fn:
 
         Parameters
         ----------
-        entity_name : object
+        entity_name : str | XqyExpression
             The entity name.
             ---
 
@@ -3537,14 +3805,14 @@ class Fn:
         return _FunctionCall("fn:unparsed-entity-public-id", (entity_name,))
 
     @staticmethod
-    def unparsed_entity_uri(entity_name) -> XqyExpression:
+    def unparsed_entity_uri(entity_name: str | XqyExpression) -> XqyExpression:
         """Build a native XQuery expression.
 
         Always returns the zero length string.
 
         Parameters
         ----------
-        entity_name : object
+        entity_name : str | XqyExpression
             The entity name.
             ---
 
@@ -3560,7 +3828,9 @@ class Fn:
         return _FunctionCall("fn:unparsed-entity-uri", (entity_name,))
 
     @staticmethod
-    def unparsed_text(href, *, encoding=UNSET) -> XqyExpression:
+    def unparsed_text(
+        href: str | XqyExpression, *, encoding: str | XqyExpression | None = UNSET,
+    ) -> XqyExpression:
         """Build a native XQuery expression.
 
         Reads a file stored in the database as either text or binary file and returns
@@ -3568,11 +3838,11 @@ class Fn:
 
         Parameters
         ----------
-        href : object
+        href : str | XqyExpression
             The $href is a string containing a URI reference. It must identify a
             resource that can be read as text. If the URI is a relative URI then it is
             resolved relative to the base URI from the static context.
-        encoding : object
+        encoding : str | XqyExpression | None
             If $encoding parameter is present and the URI points to a "text" file, the
             encoding is ignored since all the files are in UTF-8 in the database.
             However, if the URI points to a binary file, then an attempt is made to
@@ -3596,18 +3866,20 @@ class Fn:
         return _optional_call("fn:unparsed-text", href, encoding)
 
     @staticmethod
-    def unparsed_text_available(href, *, encoding=UNSET) -> XqyExpression:
+    def unparsed_text_available(
+        href: str | XqyExpression, *, encoding: str | XqyExpression | None = UNSET,
+    ) -> XqyExpression:
         """Build a native XQuery expression.
 
         Returns true if a call to unparsed-text would succeed with identical arguments.
 
         Parameters
         ----------
-        href : object
+        href : str | XqyExpression
             The $href is a string containing a URI reference. It must identify a
             resource that can be read as text. If the URI is a relative URI then it is
             resolved relative to the base URI from the static context.
-        encoding : object
+        encoding : str | XqyExpression | None
             If $encoding parameter is present and the URI points to a "text" file, the
             encoding is ignored since all the files are in UTF-8 in the database.
             However, if the URI points to a binary file, then an attempt will be made to
@@ -3629,7 +3901,7 @@ class Fn:
         return _optional_call("fn:unparsed-text-available", href, encoding)
 
     @staticmethod
-    def upper_case(string) -> XqyExpression:
+    def upper_case(string: str | XqyExpression | None) -> XqyExpression:
         """Build a native XQuery expression.
 
         Returns the specified string converting all of the characters to upper-case
@@ -3637,7 +3909,7 @@ class Fn:
 
         Parameters
         ----------
-        string : object
+        string : str | XqyExpression | None
             The string to upper-case.
 
         Returns
@@ -3652,7 +3924,7 @@ class Fn:
         return _FunctionCall("fn:upper-case", (string,))
 
     @staticmethod
-    def year_from_date(arg) -> XqyExpression:
+    def year_from_date(arg: datetime.date | XqyExpression | None) -> XqyExpression:
         """Build a native XQuery expression.
 
         Returns an xs:integer representing the year component in the localized value of
@@ -3660,7 +3932,7 @@ class Fn:
 
         Parameters
         ----------
-        arg : object
+        arg : datetime.date | XqyExpression | None
             The date whose year component will be returned.
 
         Returns
@@ -3675,7 +3947,9 @@ class Fn:
         return _FunctionCall("fn:year-from-date", (arg,))
 
     @staticmethod
-    def year_from_date_time(arg) -> XqyExpression:
+    def year_from_date_time(
+        arg: datetime.datetime | XqyExpression | None,
+    ) -> XqyExpression:
         """Build a native XQuery expression.
 
         Returns an xs:integer representing the year component in the localized value of
@@ -3683,7 +3957,7 @@ class Fn:
 
         Parameters
         ----------
-        arg : object
+        arg : datetime.datetime | XqyExpression | None
             The dateTime whose year component will be returned.
 
         Returns
@@ -3698,7 +3972,7 @@ class Fn:
         return _FunctionCall("fn:year-from-dateTime", (arg,))
 
     @staticmethod
-    def years_from_duration(arg) -> XqyExpression:
+    def years_from_duration(arg: str | XqyExpression | None) -> XqyExpression:
         """Build a native XQuery expression.
 
         Returns an xs:integer representing the years component in the canonical lexical
@@ -3706,7 +3980,7 @@ class Fn:
 
         Parameters
         ----------
-        arg : object
+        arg : str | XqyExpression | None
             The duration whose year component will be returned.
 
         Returns
@@ -3721,14 +3995,14 @@ class Fn:
         return _FunctionCall("fn:years-from-duration", (arg,))
 
     @staticmethod
-    def zero_or_one(arg) -> XqyExpression:
+    def zero_or_one(arg: XqyExpression | list[XqyExpression] | None) -> XqyExpression:
         """Build a native XQuery expression.
 
         Returns $arg if it contains zero or one items.
 
         Parameters
         ----------
-        arg : object
+        arg : XqyExpression | list[XqyExpression] | None
             The sequence of items.
 
         Returns

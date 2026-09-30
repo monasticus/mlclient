@@ -8,6 +8,7 @@ from decimal import Decimal
 import pytest
 
 from mlclient.functions.xqy import (
+    Index,
     ModuleFunctionCall,
     XqyCompilationContext,
     XqyExpression,
@@ -382,7 +383,7 @@ def test_range_composes_inside_count_and_root_defaults_to_database():
 @pytest.mark.parametrize("position", [True, 1.5, "1", fn.count([])])
 def test_index_rejects_non_positions(position):
     with pytest.raises(TypeError, match="positions"):
-        cts.uris().index(position)
+        Index(cts.uris(), position)
 
 
 def test_last_stays_inside_position_predicates():
@@ -461,7 +462,7 @@ def test_invalid_namespace_prefix_cannot_enter_prolog(prefix):
 
 
 def test_namespace_declarations_escape_literals_and_allow_default_and_unicode():
-    uri = 'https://monasticus.com/mlclient/examples/"; fn:error(); (: &quoted;\r\n'
+    uri = 'https://monasticus.com/mlclient/examples/"; fn:error(); (: &quoted;\t\r\n'
     source, _ = fn.count([]).compile(
         namespaces={
             "p": uri,
@@ -471,7 +472,7 @@ def test_namespace_declarations_escape_literals_and_allow_default_and_unicode():
     )
     expected = (
         'declare namespace p = "https://monasticus.com/mlclient/examples/""; '
-        'fn:error(); (: &amp;quoted;&#13;&#10;";'
+        'fn:error(); (: &amp;quoted;&#9;&#13;&#10;";'
     )
     assert expected in source
     assert (

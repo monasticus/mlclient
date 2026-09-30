@@ -13,7 +13,8 @@ from tests.utils import resources
 
 def _create_database(ml: MLClient, name: str) -> None:
     spec = resources.get_test_resource_json(__file__, "database.json")
-    ml.manage.databases.create({**spec, "database-name": name}).raise_for_status()
+    ml.manage.databases.create({"database-name": name}).raise_for_status()
+    ml.manage.databases.put_properties(name, spec).raise_for_status()
 
 
 def _create_forest(ml: MLClient, name: str) -> None:

@@ -15,11 +15,11 @@ from mlclient._experimental import experimental
 from mlclient.functions.xqy._xs import Xs
 from mlclient.functions.xqy.expressions import (
     XqyExpression,
-    _DatabaseRoot,
-    _FunctionCall,
+    DatabaseRoot,
+    FunctionCall,
     as_expr,
     namespace_map,
-    search_path,
+    as_searchable_expression,
 )
 
 xs = Xs()
@@ -85,7 +85,7 @@ class Cts:
     """Pure builders for supported non-deprecated ``cts:`` functions."""
 
     @staticmethod
-    def after_query(timestamp: int | XqyExpression) -> XqyExpression:
+    def after_query(timestamp: int | XqyExpression) -> FunctionCall:
         """Build a composable ``cts:after-query`` call.
 
         Returns a query matching fragments committed after a specified
@@ -99,14 +99,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:after-query``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:after-query
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:after-query",
             (timestamp,),
         )
@@ -121,7 +121,7 @@ class Cts:
         options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
         query: str | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:aggregate`` call.
 
         Executes a user-defined extension aggregate function against a value
@@ -180,14 +180,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:aggregate``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:aggregate
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:aggregate",
             (native_plugin, aggregate_name, range_indexes),
             (argument, options, query, forest_ids),
@@ -195,8 +195,9 @@ class Cts:
 
     @staticmethod
     def and_not_query(
-        positive_query: str | XqyExpression, negative_query: str | XqyExpression,
-    ) -> XqyExpression:
+        positive_query: str | XqyExpression,
+        negative_query: str | XqyExpression,
+    ) -> FunctionCall:
         """Build a composable ``cts:and-not-query`` call.
 
         Returns a query specifying the set difference of the matches specified
@@ -211,14 +212,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:and-not-query``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:and-not-query
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:and-not-query",
             (positive_query, negative_query),
         )
@@ -228,7 +229,7 @@ class Cts:
         queries: str | list[str] | XqyExpression | list[XqyExpression] | None,
         *,
         options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:and-query`` call.
 
         Returns a query specifying the intersection of the matches specified by
@@ -249,14 +250,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:and-query``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:and-query
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:and-query",
             (queries,),
             (options,),
@@ -269,7 +270,7 @@ class Cts:
         options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
         query: str | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:avg-aggregate`` call.
 
         Returns the average of the values given a value lexicon.
@@ -287,21 +288,21 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:avg-aggregate``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:avg-aggregate
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:avg-aggregate",
             (range_index,),
             (options, query, forest_ids),
         )
 
     @staticmethod
-    def before_query(timestamp: int | XqyExpression) -> XqyExpression:
+    def before_query(timestamp: int | XqyExpression) -> FunctionCall:
         """Build a composable ``cts:before-query`` call.
 
         Returns a query matching fragments committed before or at a specified
@@ -315,22 +316,23 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:before-query``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:before-query
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:before-query",
             (timestamp,),
         )
 
     @staticmethod
     def boost_query(
-        matching_query: str | XqyExpression, boosting_query: str | XqyExpression,
-    ) -> XqyExpression:
+        matching_query: str | XqyExpression,
+        boosting_query: str | XqyExpression,
+    ) -> FunctionCall:
         """Build a composable ``cts:boost-query`` call.
 
         Returns a query specifying that matches to $matching-query should have
@@ -346,14 +348,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:boost-query``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:boost-query
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:boost-query",
             (matching_query, boosting_query),
         )
@@ -364,7 +366,7 @@ class Cts:
         west: float | XqyExpression,
         north: float | XqyExpression,
         east: float | XqyExpression,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:box`` call.
 
         Returns a geospatial box value.
@@ -382,14 +384,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:box``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:box
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:box",
             (
                 as_expr(south, cast="xs:float"),
@@ -400,7 +402,7 @@ class Cts:
         )
 
     @staticmethod
-    def circle(radius: float | XqyExpression, center: XqyExpression) -> XqyExpression:
+    def circle(radius: float | XqyExpression, center: XqyExpression) -> FunctionCall:
         """Build a composable ``cts:circle`` call.
 
         Returns a geospatial circle value.
@@ -415,14 +417,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:circle``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:circle
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:circle",
             (_double(radius), center),
         )
@@ -434,7 +436,7 @@ class Cts:
         *,
         options: XqyExpression | None = None,
         training_nodes: XqyExpression | list[XqyExpression] | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:classify`` call.
 
         Classifies a sequence of nodes based on training data.
@@ -467,14 +469,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:classify``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:classify
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:classify",
             (data_nodes, classifier),
             (options, training_nodes),
@@ -485,7 +487,7 @@ class Cts:
         nodes: XqyExpression | list[XqyExpression] | None,
         *,
         options: XqyExpression | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:cluster`` call.
 
         Produces a set of clusters from a sequence of nodes.
@@ -550,14 +552,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:cluster``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:cluster
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:cluster",
             (nodes,),
             (options,),
@@ -571,7 +573,7 @@ class Cts:
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:collection-match`` call.
 
         Returns values from the collection lexicon that match the specified
@@ -645,14 +647,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:collection-match``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:collection-match
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:collection-match",
             (pattern,),
             (options, query, _double(quality_weight), forest_ids),
@@ -661,7 +663,7 @@ class Cts:
     @staticmethod
     def collection_query(
         uris: str | list[str] | XqyExpression | list[XqyExpression] | None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:collection-query`` call.
 
         Match documents in at least one of the specified collections.
@@ -674,22 +676,23 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:collection-query``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:collection-query
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:collection-query",
             (uris,),
         )
 
     @staticmethod
     def collection_reference(
-        *, options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
-    ) -> XqyExpression:
+        *,
+        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+    ) -> FunctionCall:
         """Build a composable ``cts:collection-reference`` call.
 
         Creates a reference to the collection lexicon, for use as a parameter to
@@ -704,14 +707,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:collection-reference``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:collection-reference
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:collection-reference",
             (),
             (options,),
@@ -725,7 +728,7 @@ class Cts:
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:collections`` call.
 
         Returns values from the collection lexicon.
@@ -797,14 +800,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:collections``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:collections
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:collections",
             (),
             (start, options, query, _double(quality_weight), forest_ids),
@@ -827,7 +830,7 @@ class Cts:
         operator: str | XqyExpression | None = None,
         options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
         weight: float | XqyExpression | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:column-range-query`` call.
 
         Returns a cts:query matching documents matching a TDE-view column equals
@@ -867,14 +870,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:column-range-query``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:column-range-query
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:column-range-query",
             (schema, view, column, value),
             (
@@ -886,8 +889,9 @@ class Cts:
 
     @staticmethod
     def complex_polygon(
-        outer: XqyExpression, inner: XqyExpression | list[XqyExpression] | None,
-    ) -> XqyExpression:
+        outer: XqyExpression,
+        inner: XqyExpression | list[XqyExpression] | None,
+    ) -> FunctionCall:
         """Build a composable ``cts:complex-polygon`` call.
 
         Returns a geospatial complex polygon value.
@@ -901,20 +905,20 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:complex-polygon``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:complex-polygon
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:complex-polygon",
             (outer, inner),
         )
 
     @staticmethod
-    def confidence(*, node: XqyExpression | None = None) -> XqyExpression:
+    def confidence(*, node: XqyExpression | None = None) -> FunctionCall:
         """Build a composable ``cts:confidence`` call.
 
         Returns the confidence of a node, or of the context node if no node is
@@ -928,14 +932,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:confidence``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:confidence
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:confidence",
             (),
             (node,),
@@ -943,8 +947,9 @@ class Cts:
 
     @staticmethod
     def confidence_order(
-        *, options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
-    ) -> XqyExpression:
+        *,
+        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+    ) -> FunctionCall:
         """Build a composable ``cts:confidence-order`` call.
 
         Creates a confidence-based ordering clause, for use as an option to
@@ -959,14 +964,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:confidence-order``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:confidence-order
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:confidence-order",
             (),
             (options,),
@@ -974,8 +979,9 @@ class Cts:
 
     @staticmethod
     def contains(
-        nodes: XqyExpression | list[XqyExpression] | None, query: str | XqyExpression,
-    ) -> XqyExpression:
+        nodes: XqyExpression | list[XqyExpression] | None,
+        query: str | XqyExpression,
+    ) -> FunctionCall:
         """Build a composable ``cts:contains`` call.
 
         Returns true if any of a sequence of values matches a query.
@@ -992,14 +998,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:contains``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:contains
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:contains",
             (nodes, query),
         )
@@ -1012,7 +1018,7 @@ class Cts:
         options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
         query: str | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:correlation`` call.
 
         Returns the frequency-weighted correlation given a 2-way co-occurrence.
@@ -1032,14 +1038,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:correlation``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:correlation
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:correlation",
             (value1, value2),
             (options, query, forest_ids),
@@ -1052,7 +1058,7 @@ class Cts:
         options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
         query: str | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:count-aggregate`` call.
 
         Returns the count of a value lexicon.
@@ -1070,14 +1076,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:count-aggregate``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:count-aggregate
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:count-aggregate",
             (range_index,),
             (options, query, forest_ids),
@@ -1091,7 +1097,7 @@ class Cts:
         options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
         query: str | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:covariance`` call.
 
         Returns the frequency-weighted sample covariance given a 2-way co-
@@ -1112,14 +1118,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:covariance``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:covariance
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:covariance",
             (value1, value2),
             (options, query, forest_ids),
@@ -1133,7 +1139,7 @@ class Cts:
         options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
         query: str | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:covariance-p`` call.
 
         Returns the frequency-weighted covariance of the population given a
@@ -1154,21 +1160,21 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:covariance-p``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:covariance-p
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:covariance-p",
             (value1, value2),
             (options, query, forest_ids),
         )
 
     @staticmethod
-    def deregister(id: int | XqyExpression) -> XqyExpression:
+    def deregister(id: int | XqyExpression) -> FunctionCall:
         """Build a composable ``cts:deregister`` call.
 
         Deregister a registered query, explicitly releasing the associated
@@ -1181,14 +1187,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:deregister``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:deregister
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:deregister",
             (id,),
         )
@@ -1197,7 +1203,7 @@ class Cts:
     def directory_query(
         uris: str | list[str] | XqyExpression | list[XqyExpression] | None,
         depth: str | XqyExpression | None = "1",
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:directory-query`` call.
 
         Returns a query matching documents in the directories with the given
@@ -1213,14 +1219,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:directory-query``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:directory-query
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:directory-query",
             (uris,),
             (_depth(depth),),
@@ -1231,7 +1237,7 @@ class Cts:
         nodes: XqyExpression | list[XqyExpression] | None,
         *,
         options: XqyExpression | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:distinctive-terms`` call.
 
         Return the most "relevant" terms in the model nodes (that is, the terms
@@ -1320,21 +1326,21 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:distinctive-terms``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:distinctive-terms
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:distinctive-terms",
             (nodes,),
             (options,),
         )
 
     @staticmethod
-    def document_format_query(format: str | XqyExpression) -> XqyExpression:
+    def document_format_query(format: str | XqyExpression) -> FunctionCall:
         """Build a composable ``cts:document-format-query`` call.
 
         Returns a query matching documents of a given format.
@@ -1347,20 +1353,20 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:document-format-query``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:document-format-query
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:document-format-query",
             (format,),
         )
 
     @staticmethod
-    def document_fragment_query(query: str | XqyExpression) -> XqyExpression:
+    def document_fragment_query(query: str | XqyExpression) -> FunctionCall:
         """Build a composable ``cts:document-fragment-query`` call.
 
         Returns a query that matches all documents where $query matches any
@@ -1373,22 +1379,23 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:document-fragment-query``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:document-fragment-query
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:document-fragment-query",
             (query,),
         )
 
     @staticmethod
     def document_order(
-        *, options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
-    ) -> XqyExpression:
+        *,
+        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+    ) -> FunctionCall:
         """Build a composable ``cts:document-order`` call.
 
         Creates a document-based ordering clause, for use as an option to
@@ -1403,14 +1410,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:document-order``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:document-order
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:document-order",
             (),
             (options,),
@@ -1418,8 +1425,9 @@ class Cts:
 
     @staticmethod
     def document_permission_query(
-        role: str | XqyExpression, capability: str | XqyExpression,
-    ) -> XqyExpression:
+        role: str | XqyExpression,
+        capability: str | XqyExpression,
+    ) -> FunctionCall:
         """Build a composable ``cts:document-permission-query`` call.
 
         Returns a query matching documents with a given permission.
@@ -1434,14 +1442,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:document-permission-query``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:document-permission-query
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:document-permission-query",
             (role, capability),
         )
@@ -1449,7 +1457,7 @@ class Cts:
     @staticmethod
     def document_query(
         uris: str | list[str] | XqyExpression | list[XqyExpression] | None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:document-query`` call.
 
         Returns a query matching documents with the given URIs.
@@ -1461,20 +1469,20 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:document-query``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:document-query
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:document-query",
             (uris,),
         )
 
     @staticmethod
-    def document_root_query(root: str | XqyExpression) -> XqyExpression:
+    def document_root_query(root: str | XqyExpression) -> FunctionCall:
         """Build a composable ``cts:document-root-query`` call.
 
         Returns a query matching documents with a given root element.
@@ -1486,14 +1494,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:document-root-query``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:document-root-query
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:document-root-query",
             (_qname(root),),
         )
@@ -1522,7 +1530,7 @@ class Cts:
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:element-attribute-pair-geospatial-boxes`` call.
 
         Returns boxes derived from the specified element point lexicon(s).
@@ -1618,14 +1626,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:element-attribute-pair-geospatial-boxes``.
 
         Notes
         -----
         Native reference:
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:element-attribute-pair-geospatial-boxes",
             (
                 _qname(parent_element_names),
@@ -1659,7 +1667,7 @@ class Cts:
         *,
         options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
         weight: float | XqyExpression | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:element-attribute-pair-geospatial-query`` call.
 
         Returns a query matching elements by name which has specific attributes
@@ -1730,14 +1738,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:element-attribute-pair-geospatial-query``.
 
         Notes
         -----
         Native reference:
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:element-attribute-pair-geospatial-query",
             (
                 _qname(element_name),
@@ -1759,7 +1767,7 @@ class Cts:
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build an ``element-attribute-pair-geospatial-value-match`` call.
 
         Returns values from the specified element attribute pair geospatial
@@ -1844,14 +1852,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:element-attribute-pair-geospatial-value-match``.
 
         Notes
         -----
         Native reference:
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:element-attribute-pair-geospatial-value-match",
             (
                 _qname(element_names),
@@ -1873,7 +1881,7 @@ class Cts:
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:element-attribute-pair-geospatial-values`` call.
 
         Returns values from the specified element-attribute-pair geospatial
@@ -1959,14 +1967,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:element-attribute-pair-geospatial-values``.
 
         Notes
         -----
         Native reference:
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:element-attribute-pair-geospatial-values",
             (_qname(element_names), _qname(latitude_names), _qname(longitude_names)),
             (start, options, query, _double(quality_weight), forest_ids),
@@ -1988,7 +1996,7 @@ class Cts:
         *,
         options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
         weight: float | XqyExpression | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:element-attribute-range-query`` call.
 
         Constructs a query that matches element-attributes by name with a range-
@@ -2043,14 +2051,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:element-attribute-range-query``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:element-attribute-range-query
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:element-attribute-range-query",
             (_qname(element_name), _qname(attribute_name), _operator(operator), value),
             (options, _double(weight)),
@@ -2062,7 +2070,7 @@ class Cts:
         attribute: str | XqyExpression,
         *,
         options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:element-attribute-reference`` call.
 
         Creates a reference to an element attribute value lexicon, for use as a
@@ -2095,14 +2103,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:element-attribute-reference``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:element-attribute-reference
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:element-attribute-reference",
             (_qname(element), _qname(attribute)),
             (options,),
@@ -2119,7 +2127,7 @@ class Cts:
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:element-attribute-value-co-occurrences`` call.
 
         Returns value co-occurrences from the specified element or element-
@@ -2234,14 +2242,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:element-attribute-value-co-occurrences``.
 
         Notes
         -----
         Native reference:
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:element-attribute-value-co-occurrences",
             (
                 _qname(element_name_1),
@@ -2264,7 +2272,7 @@ class Cts:
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build an ``element-attribute-value-geospatial-co-occurrences`` call.
 
         Returns value co-occurrences from the specified element-attribute value
@@ -2387,7 +2395,7 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable ``cts:element-attribute-value-geospatial-co-occurrences``
             call.
 
@@ -2395,7 +2403,7 @@ class Cts:
         -----
         Native reference:
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:element-attribute-value-geospatial-co-occurrences",
             (
                 _qname(element_name_1),
@@ -2422,7 +2430,7 @@ class Cts:
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:element-attribute-value-match`` call.
 
         Returns values from the specified element-attribute value lexicon(s)
@@ -2522,14 +2530,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:element-attribute-value-match``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:element-attribute-value-match
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:element-attribute-value-match",
             (_qname(element_names), _qname(attribute_names), pattern),
             (options, query, _double(quality_weight), forest_ids),
@@ -2543,7 +2551,7 @@ class Cts:
         *,
         options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
         weight: float | XqyExpression | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:element-attribute-value-query`` call.
 
         Returns a query matching elements by name with attributes by name with
@@ -2593,14 +2601,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:element-attribute-value-query``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:element-attribute-value-query
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:element-attribute-value-query",
             (_qname(element_name), _qname(attribute_name), text),
             (options, _double(weight)),
@@ -2623,7 +2631,7 @@ class Cts:
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:element-attribute-value-ranges`` call.
 
         Returns value ranges from the specified element-attribute value
@@ -2724,14 +2732,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:element-attribute-value-ranges``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:element-attribute-value-ranges
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:element-attribute-value-ranges",
             (_qname(element_names), _qname(attribute_names)),
             (bounds, options, query, _double(quality_weight), forest_ids),
@@ -2747,7 +2755,7 @@ class Cts:
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:element-attribute-values`` call.
 
         Returns values from the specified element-attribute value lexicon(s).
@@ -2844,14 +2852,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:element-attribute-values``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:element-attribute-values
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:element-attribute-values",
             (_qname(element_names), _qname(attribute_names)),
             (start, options, query, _double(quality_weight), forest_ids),
@@ -2867,7 +2875,7 @@ class Cts:
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:element-attribute-word-match`` call.
 
         Returns words from the specified element-attribute word lexicon(s) that
@@ -2934,14 +2942,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:element-attribute-word-match``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:element-attribute-word-match
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:element-attribute-word-match",
             (_qname(element_names), _qname(attribute_names), pattern),
             (options, query, _double(quality_weight), forest_ids),
@@ -2955,7 +2963,7 @@ class Cts:
         *,
         options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
         weight: float | XqyExpression | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:element-attribute-word-query`` call.
 
         Returns a query matching elements by name with attributes by name with
@@ -3030,14 +3038,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:element-attribute-word-query``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:element-attribute-word-query
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:element-attribute-word-query",
             (_qname(element_name), _qname(attribute_name), text),
             (options, _double(weight)),
@@ -3053,7 +3061,7 @@ class Cts:
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:element-attribute-words`` call.
 
         Returns words from the specified element-attribute word lexicon(s).
@@ -3119,14 +3127,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:element-attribute-words``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:element-attribute-words
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:element-attribute-words",
             (_qname(element_names), _qname(attribute_names)),
             (start, options, query, _double(quality_weight), forest_ids),
@@ -3159,7 +3167,7 @@ class Cts:
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:element-child-geospatial-boxes`` call.
 
         Returns boxes derived from the specified element point lexicon(s).
@@ -3256,14 +3264,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:element-child-geospatial-boxes``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:element-child-geospatial-boxes
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:element-child-geospatial-boxes",
             (_qname(parent_element_names), _qname(child_element_names)),
             (
@@ -3292,7 +3300,7 @@ class Cts:
         *,
         options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
         weight: float | XqyExpression | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:element-child-geospatial-query`` call.
 
         Returns a query matching elements by name which has specific element
@@ -3364,14 +3372,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:element-child-geospatial-query``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:element-child-geospatial-query
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:element-child-geospatial-query",
             (_qname(parent_element_name), _qname(child_element_names), regions),
             (options, _double(weight)),
@@ -3387,7 +3395,7 @@ class Cts:
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:element-child-geospatial-value-match`` call.
 
         Returns values from the specified element child geospatial value
@@ -3473,14 +3481,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:element-child-geospatial-value-match``.
 
         Notes
         -----
         Native reference:
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:element-child-geospatial-value-match",
             (_qname(element_names), _qname(child_names), pattern),
             (options, query, _double(quality_weight), forest_ids),
@@ -3496,7 +3504,7 @@ class Cts:
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:element-child-geospatial-values`` call.
 
         Returns values from the specified element-child geospatial value
@@ -3584,14 +3592,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:element-child-geospatial-values``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:element-child-geospatial-values
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:element-child-geospatial-values",
             (_qname(element_names), _qname(child_names)),
             (start, options, query, _double(quality_weight), forest_ids),
@@ -3615,7 +3623,7 @@ class Cts:
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:element-geospatial-boxes`` call.
 
         Returns boxes derived from the specified element point lexicon(s).
@@ -3710,14 +3718,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:element-geospatial-boxes``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:element-geospatial-boxes
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:element-geospatial-boxes",
             (_qname(element_names),),
             (
@@ -3737,7 +3745,7 @@ class Cts:
         *,
         options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
         weight: float | XqyExpression | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:element-geospatial-query`` call.
 
         Returns a query matching elements by name whose content represents a
@@ -3802,14 +3810,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:element-geospatial-query``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:element-geospatial-query
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:element-geospatial-query",
             (_qname(element_name), regions),
             (options, _double(weight)),
@@ -3824,7 +3832,7 @@ class Cts:
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:element-geospatial-value-match`` call.
 
         Returns values from the specified element geospatial value lexicon(s)
@@ -3908,14 +3916,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:element-geospatial-value-match``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:element-geospatial-value-match
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:element-geospatial-value-match",
             (_qname(element_names), pattern),
             (options, query, _double(quality_weight), forest_ids),
@@ -3930,7 +3938,7 @@ class Cts:
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:element-geospatial-values`` call.
 
         Returns values from the specified element geospatial value lexicon(s).
@@ -4014,14 +4022,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:element-geospatial-values``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:element-geospatial-values
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:element-geospatial-values",
             (_qname(element_names),),
             (start, options, query, _double(quality_weight), forest_ids),
@@ -4051,7 +4059,7 @@ class Cts:
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:element-pair-geospatial-boxes`` call.
 
         Returns boxes derived from the specified element point lexicon(s).
@@ -4147,14 +4155,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:element-pair-geospatial-boxes``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:element-pair-geospatial-boxes
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:element-pair-geospatial-boxes",
             (
                 _qname(parent_element_names),
@@ -4188,7 +4196,7 @@ class Cts:
         *,
         options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
         weight: float | XqyExpression | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:element-pair-geospatial-query`` call.
 
         Returns a query matching elements by name which has specific element
@@ -4259,14 +4267,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:element-pair-geospatial-query``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:element-pair-geospatial-query
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:element-pair-geospatial-query",
             (
                 _qname(element_name),
@@ -4288,7 +4296,7 @@ class Cts:
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:element-pair-geospatial-value-match`` call.
 
         Returns values from the specified element pair geospatial value
@@ -4373,14 +4381,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:element-pair-geospatial-value-match``.
 
         Notes
         -----
         Native reference:
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:element-pair-geospatial-value-match",
             (
                 _qname(element_names),
@@ -4402,7 +4410,7 @@ class Cts:
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:element-pair-geospatial-values`` call.
 
         Returns values from the specified element-pair geospatial value
@@ -4489,14 +4497,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:element-pair-geospatial-values``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:element-pair-geospatial-values
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:element-pair-geospatial-values",
             (_qname(element_names), _qname(latitude_names), _qname(longitude_names)),
             (start, options, query, _double(quality_weight), forest_ids),
@@ -4506,7 +4514,7 @@ class Cts:
     def element_query(
         element_name: str | list[str] | XqyExpression | list[XqyExpression] | None,
         query: str | XqyExpression,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:element-query`` call.
 
         Constructs a query that matches elements by name with the content
@@ -4523,14 +4531,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:element-query``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:element-query
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:element-query",
             (_qname(element_name), query),
         )
@@ -4550,7 +4558,7 @@ class Cts:
         *,
         options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
         weight: float | XqyExpression | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:element-range-query`` call.
 
         Constructs a query that matches elements by name with range index entry
@@ -4602,14 +4610,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:element-range-query``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:element-range-query
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:element-range-query",
             (_qname(element_name), _operator(operator), value),
             (options, _double(weight)),
@@ -4620,7 +4628,7 @@ class Cts:
         element: str | XqyExpression,
         *,
         options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:element-reference`` call.
 
         Creates a reference to an element value lexicon, for use as a parameter
@@ -4652,14 +4660,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:element-reference``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:element-reference
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:element-reference",
             (_qname(element),),
             (options,),
@@ -4674,7 +4682,7 @@ class Cts:
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:element-value-co-occurrences`` call.
 
         Returns value co-occurrences (that is, pairs of values, both of which
@@ -4784,14 +4792,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:element-value-co-occurrences``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:element-value-co-occurrences
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:element-value-co-occurrences",
             (_qname(element_name_1), _qname(element_name_2)),
             (options, query, _double(quality_weight), forest_ids),
@@ -4808,7 +4816,7 @@ class Cts:
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:element-value-geospatial-co-occurrences`` call.
 
         Returns value co-occurrences from the specified element value lexicon
@@ -4933,14 +4941,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:element-value-geospatial-co-occurrences``.
 
         Notes
         -----
         Native reference:
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:element-value-geospatial-co-occurrences",
             (_qname(element_name_1), _qname(geo_element_name)),
             (
@@ -4962,7 +4970,7 @@ class Cts:
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:element-value-match`` call.
 
         Returns values from the specified element value lexicon(s) that match
@@ -5059,14 +5067,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:element-value-match``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:element-value-match
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:element-value-match",
             (_qname(element_names), pattern),
             (options, query, _double(quality_weight), forest_ids),
@@ -5079,7 +5087,7 @@ class Cts:
         *,
         options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
         weight: float | XqyExpression | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:element-value-query`` call.
 
         Returns a query matching elements by name with text content equal a
@@ -5126,14 +5134,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:element-value-query``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:element-value-query
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:element-value-query",
             (_qname(element_name),),
             (text, options, _double(weight)),
@@ -5155,7 +5163,7 @@ class Cts:
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:element-value-ranges`` call.
 
         Returns value ranges from the specified element value lexicon(s).
@@ -5254,14 +5262,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:element-value-ranges``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:element-value-ranges
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:element-value-ranges",
             (_qname(element_names),),
             (bounds, options, query, _double(quality_weight), forest_ids),
@@ -5276,7 +5284,7 @@ class Cts:
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:element-values`` call.
 
         Returns values from the specified element value lexicon(s).
@@ -5372,14 +5380,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:element-values``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:element-values
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:element-values",
             (_qname(element_names),),
             (start, options, query, _double(quality_weight), forest_ids),
@@ -5390,7 +5398,7 @@ class Cts:
         node: XqyExpression,
         element: str | list[str] | XqyExpression | list[XqyExpression] | None,
         expr: XqyExpression | list[XqyExpression] | None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:element-walk`` call.
 
         Returns a copy of the node, replacing any elements found with the
@@ -5409,14 +5417,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:element-walk``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:element-walk
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:element-walk",
             (node, _qname(element), expr),
         )
@@ -5430,7 +5438,7 @@ class Cts:
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:element-word-match`` call.
 
         Returns words from the specified element word lexicon(s) that match a
@@ -5495,14 +5503,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:element-word-match``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:element-word-match
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:element-word-match",
             (_qname(element_names), pattern),
             (options, query, _double(quality_weight), forest_ids),
@@ -5515,7 +5523,7 @@ class Cts:
         *,
         options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
         weight: float | XqyExpression | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:element-word-query`` call.
 
         Returns a query matching elements by name with text content containing a
@@ -5597,14 +5605,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:element-word-query``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:element-word-query
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:element-word-query",
             (_qname(element_name), text),
             (options, _double(weight)),
@@ -5619,7 +5627,7 @@ class Cts:
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:element-words`` call.
 
         Returns words from the specified element word lexicon.
@@ -5683,14 +5691,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:element-words``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:element-words
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:element-words",
             (_qname(element_names),),
             (start, options, query, _double(quality_weight), forest_ids),
@@ -5702,7 +5710,7 @@ class Cts:
         normalized_text: str | XqyExpression,
         text: str | XqyExpression,
         type: str | XqyExpression,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:entity`` call.
 
         Returns a cts:entity object.
@@ -5734,14 +5742,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:entity``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:entity
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:entity",
             (id, normalized_text, text, type),
         )
@@ -5751,7 +5759,7 @@ class Cts:
         entities: XqyExpression | list[XqyExpression] | None,
         *,
         options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:entity-dictionary`` call.
 
         Returns a cts:entity-dictionary object.
@@ -5771,21 +5779,21 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:entity-dictionary``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:entity-dictionary
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:entity-dictionary",
             (entities,),
             (options,),
         )
 
     @staticmethod
-    def entity_dictionary_get(uri: str | XqyExpression) -> XqyExpression:
+    def entity_dictionary_get(uri: str | XqyExpression) -> FunctionCall:
         """Build a composable ``cts:entity-dictionary-get`` call.
 
         Retrieve an entity dictionary previously cached in the database.
@@ -5797,14 +5805,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:entity-dictionary-get``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:entity-dictionary-get
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:entity-dictionary-get",
             (uri,),
         )
@@ -5814,7 +5822,7 @@ class Cts:
         contents: str | list[str] | XqyExpression | list[XqyExpression] | None,
         *,
         options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:entity-dictionary-parse`` call.
 
         Construct a cts:entity-dictionary object by parsing it from a formatted
@@ -5840,14 +5848,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:entity-dictionary-parse``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:entity-dictionary-parse
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:entity-dictionary-parse",
             (contents,),
             (options,),
@@ -5859,7 +5867,7 @@ class Cts:
         expr: XqyExpression | list[XqyExpression] | None,
         *,
         dict: XqyExpression | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:entity-highlight`` call.
 
         Returns a copy of the node, replacing any entities found with the
@@ -5881,14 +5889,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:entity-highlight``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:entity-highlight
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:entity-highlight",
             (node, expr),
             (dict,),
@@ -5900,7 +5908,7 @@ class Cts:
         expr: XqyExpression | list[XqyExpression] | None,
         *,
         dict: XqyExpression | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:entity-walk`` call.
 
         Walk an XML document or element node, evaluating an expression against
@@ -5923,14 +5931,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:entity-walk``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:entity-walk
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:entity-walk",
             (node, expr),
             (dict,),
@@ -5944,7 +5952,7 @@ class Cts:
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
         maximum: float | XqyExpression | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:estimate`` call.
 
         Returns the number of fragments selected by a search.
@@ -5972,35 +5980,35 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:estimate``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:estimate
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:estimate",
             (query,),
             (options, _double(quality_weight), forest_ids, _double(maximum)),
         )
 
     @staticmethod
-    def false_query() -> XqyExpression:
+    def false_query() -> FunctionCall:
         """Build a composable ``cts:false-query`` call.
 
         Returns a query that matches no fragments.
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:false-query``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:false-query
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:false-query",
             (),
         )
@@ -6020,7 +6028,7 @@ class Cts:
         *,
         options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
         weight: float | XqyExpression | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:field-range-query`` call.
 
         Returns a cts:query matching fields by name with a range-index entry
@@ -6073,14 +6081,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:field-range-query``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:field-range-query
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:field-range-query",
             (field_name, _operator(operator), value),
             (options, _double(weight)),
@@ -6091,7 +6099,7 @@ class Cts:
         field: str | XqyExpression,
         *,
         options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:field-reference`` call.
 
         Creates a reference to a field value lexicon, for use as a parameter to
@@ -6122,14 +6130,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:field-reference``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:field-reference
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:field-reference",
             (field,),
             (options,),
@@ -6144,7 +6152,7 @@ class Cts:
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:field-value-co-occurrences`` call.
 
         Returns value co-occurrences (that is, pairs of values, both of which
@@ -6255,14 +6263,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:field-value-co-occurrences``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:field-value-co-occurrences
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:field-value-co-occurrences",
             (field_name_1, field_name_2),
             (options, query, _double(quality_weight), forest_ids),
@@ -6277,7 +6285,7 @@ class Cts:
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:field-value-match`` call.
 
         Returns values from the specified field value lexicon(s) that match the
@@ -6374,14 +6382,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:field-value-match``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:field-value-match
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:field-value-match",
             (field_names, pattern),
             (options, query, _double(quality_weight), forest_ids),
@@ -6401,7 +6409,7 @@ class Cts:
         *,
         options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
         weight: float | XqyExpression | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:field-value-query`` call.
 
         Returns a query matching text content containing a given value in the
@@ -6469,14 +6477,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:field-value-query``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:field-value-query
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:field-value-query",
             (field_name, text),
             (options, _double(weight)),
@@ -6498,7 +6506,7 @@ class Cts:
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:field-value-ranges`` call.
 
         Returns value ranges from the specified field value lexicon(s).
@@ -6597,14 +6605,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:field-value-ranges``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:field-value-ranges
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:field-value-ranges",
             (field_names,),
             (bounds, options, query, _double(quality_weight), forest_ids),
@@ -6619,7 +6627,7 @@ class Cts:
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:field-values`` call.
 
         Returns values from the specified field value lexicon(s).
@@ -6707,14 +6715,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:field-values``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:field-values
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:field-values",
             (field_names,),
             (start, options, query, _double(quality_weight), forest_ids),
@@ -6729,7 +6737,7 @@ class Cts:
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:field-word-match`` call.
 
         Returns words from the specified field word lexicon(s) that match a
@@ -6794,14 +6802,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:field-word-match``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:field-word-match
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:field-word-match",
             (field_names, pattern),
             (options, query, _double(quality_weight), forest_ids),
@@ -6814,7 +6822,7 @@ class Cts:
         *,
         options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
         weight: float | XqyExpression | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:field-word-query`` call.
 
         Returns a query matching fields with text content containing a given
@@ -6896,14 +6904,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:field-word-query``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:field-word-query
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:field-word-query",
             (field_name, text),
             (options, _double(weight)),
@@ -6918,7 +6926,7 @@ class Cts:
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:field-words`` call.
 
         Returns words from the specified field word lexicon.
@@ -6982,21 +6990,21 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:field-words``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:field-words
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:field-words",
             (field_names,),
             (start, options, query, _double(quality_weight), forest_ids),
         )
 
     @staticmethod
-    def fitness(*, node: XqyExpression | None = None) -> XqyExpression:
+    def fitness(*, node: XqyExpression | None = None) -> FunctionCall:
         """Build a composable ``cts:fitness`` call.
 
         Returns the fitness of a node, or of the context node if no node is
@@ -7010,14 +7018,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:fitness``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:fitness
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:fitness",
             (),
             (node,),
@@ -7025,8 +7033,9 @@ class Cts:
 
     @staticmethod
     def fitness_order(
-        *, options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
-    ) -> XqyExpression:
+        *,
+        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+    ) -> FunctionCall:
         """Build a composable ``cts:fitness-order`` call.
 
         Creates a fitness-based ordering clause, for use as an option to
@@ -7040,21 +7049,21 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:fitness-order``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:fitness-order
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:fitness-order",
             (),
             (options,),
         )
 
     @staticmethod
-    def frequency(value: XqyExpression) -> XqyExpression:
+    def frequency(value: XqyExpression) -> FunctionCall:
         """Build a composable ``cts:frequency`` call.
 
         Returns an integer representing the number of times in which a
@@ -7069,14 +7078,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:frequency``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:frequency
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:frequency",
             (value,),
         )
@@ -7088,7 +7097,7 @@ class Cts:
         long: str | XqyExpression,
         *,
         options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:geospatial-attribute-pair-reference`` call.
 
         Creates a reference to a geospatial attribute pair range index, for use
@@ -7122,14 +7131,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:geospatial-attribute-pair-reference``.
 
         Notes
         -----
         Native reference:
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:geospatial-attribute-pair-reference",
             (_qname(element), _qname(lat), _qname(long)),
             (options,),
@@ -7153,7 +7162,7 @@ class Cts:
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:geospatial-boxes`` call.
 
         Returns boxes derived from the specified point lexicon(s).
@@ -7248,14 +7257,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:geospatial-boxes``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:geospatial-boxes
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:geospatial-boxes",
             (geo_indexes,),
             (
@@ -7281,7 +7290,7 @@ class Cts:
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:geospatial-co-occurrences`` call.
 
         Find value co-occurrences from two geospatial lexicons.
@@ -7427,14 +7436,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:geospatial-co-occurrences``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:geospatial-co-occurrences
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:geospatial-co-occurrences",
             (
                 _qname(geo_element_name_1),
@@ -7458,7 +7467,7 @@ class Cts:
         child: str | XqyExpression,
         *,
         options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:geospatial-element-child-reference`` call.
 
         Creates a reference to a geospatial element child range index, for use
@@ -7489,14 +7498,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:geospatial-element-child-reference``.
 
         Notes
         -----
         Native reference:
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:geospatial-element-child-reference",
             (_qname(element), _qname(child)),
             (options,),
@@ -7509,7 +7518,7 @@ class Cts:
         long: str | XqyExpression,
         *,
         options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:geospatial-element-pair-reference`` call.
 
         Creates a reference to a geospatial element pair range index, for use as
@@ -7542,14 +7551,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:geospatial-element-pair-reference``.
 
         Notes
         -----
         Native reference:
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:geospatial-element-pair-reference",
             (_qname(element), _qname(lat), _qname(long)),
             (options,),
@@ -7560,7 +7569,7 @@ class Cts:
         element: str | XqyExpression,
         *,
         options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:geospatial-element-reference`` call.
 
         Creates a reference to a geospatial element range index, for use as a
@@ -7589,14 +7598,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:geospatial-element-reference``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:geospatial-element-reference
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:geospatial-element-reference",
             (_qname(element),),
             (options,),
@@ -7608,7 +7617,7 @@ class Cts:
         child: str | XqyExpression,
         *,
         options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:geospatial-json-property-child-reference`` call.
 
         Creates a reference to a geospatial json property child range index, for
@@ -7639,14 +7648,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:geospatial-json-property-child-reference``.
 
         Notes
         -----
         Native reference:
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:geospatial-json-property-child-reference",
             (property, child),
             (options,),
@@ -7659,7 +7668,7 @@ class Cts:
         long: str | XqyExpression,
         *,
         options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:geospatial-json-property-pair-reference`` call.
 
         Creates a reference to a geospatial JSON property pair range index, for
@@ -7686,14 +7695,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:geospatial-json-property-pair-reference``.
 
         Notes
         -----
         Native reference:
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:geospatial-json-property-pair-reference",
             (property, lat, long),
             (options,),
@@ -7704,7 +7713,7 @@ class Cts:
         property: str | XqyExpression,
         *,
         options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:geospatial-json-property-reference`` call.
 
         Creates a reference to a geospatial json property range index, for use
@@ -7733,14 +7742,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:geospatial-json-property-reference``.
 
         Notes
         -----
         Native reference:
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:geospatial-json-property-reference",
             (property,),
             (options,),
@@ -7752,7 +7761,7 @@ class Cts:
         *,
         options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
         map: XqyExpression | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:geospatial-path-reference`` call.
 
         Creates a reference to a geospatial path range index, for use as a
@@ -7785,7 +7794,7 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:geospatial-path-reference``.
 
         Notes
@@ -7793,7 +7802,7 @@ class Cts:
         Native reference: https://docs.marklogic.com/cts:geospatial-path-reference
         """
         bindings = namespace_map(map)
-        return _FunctionCall(
+        return FunctionCall(
             "cts:geospatial-path-reference",
             (path_expression,),
             (options, bindings),
@@ -7808,7 +7817,7 @@ class Cts:
         geohash_precision: int | XqyExpression | None = None,
         units: str | XqyExpression | None = None,
         invalid_values: str | XqyExpression | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:geospatial-region-path-reference`` call.
 
         Create a reference to a geospatial region path index, for use as a
@@ -7850,7 +7859,7 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:geospatial-region-path-reference``.
 
         Notes
@@ -7858,7 +7867,7 @@ class Cts:
         Native reference:
         """
         namespaces = namespace_map(namespaces)
-        return _FunctionCall(
+        return FunctionCall(
             "cts:geospatial-region-path-reference",
             (path_expression,),
             (options, namespaces, geohash_precision, units, invalid_values),
@@ -7872,7 +7881,7 @@ class Cts:
         *,
         options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
         weight: float | XqyExpression | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:geospatial-region-query`` call.
 
         Construct a query to match regions in documents that satisfy a specified
@@ -7922,14 +7931,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:geospatial-region-query``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:geospatial-region-query
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:geospatial-region-query",
             (geospatial_region_reference, operation, regions),
             (options, _double(weight)),
@@ -7940,7 +7949,7 @@ class Cts:
         node: XqyExpression,
         query: str | XqyExpression,
         expr: XqyExpression | list[XqyExpression] | None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:highlight`` call.
 
         Returns a copy of the node, replacing any text matching the query with
@@ -7961,14 +7970,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:highlight``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:highlight
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:highlight",
             (node, query, expr),
         )
@@ -7978,7 +7987,7 @@ class Cts:
         index: XqyExpression,
         *,
         options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:index-order`` call.
 
         Creates a index-based ordering clause, for use as an option to
@@ -7995,21 +8004,21 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:index-order``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:index-order
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:index-order",
             (index,),
             (options,),
         )
 
     @staticmethod
-    def iri_reference() -> XqyExpression:
+    def iri_reference() -> FunctionCall:
         """Build a composable ``cts:iri-reference`` call.
 
         Creates a reference to the URI lexicon, for use as a parameter to
@@ -8017,14 +8026,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:iri-reference``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:iri-reference
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:iri-reference",
             (),
         )
@@ -8045,7 +8054,7 @@ class Cts:
         *,
         options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
         weight: float | XqyExpression | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:json-property-child-geospatial-query`` call.
 
         Returns a query matching json properties by name which has specific
@@ -8117,14 +8126,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:json-property-child-geospatial-query``.
 
         Notes
         -----
         Native reference:
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:json-property-child-geospatial-query",
             (parent_property_name, child_property_names, regions),
             (options, _double(weight)),
@@ -8137,7 +8146,7 @@ class Cts:
         *,
         options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
         weight: float | XqyExpression | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:json-property-geospatial-query`` call.
 
         Returns a query matching json properties by name whose content
@@ -8203,14 +8212,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:json-property-geospatial-query``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:json-property-geospatial-query
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:json-property-geospatial-query",
             (property_name, regions),
             (options, _double(weight)),
@@ -8233,7 +8242,7 @@ class Cts:
         *,
         options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
         weight: float | XqyExpression | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:json-property-pair-geospatial-query`` call.
 
         Returns a query matching json properties by name which has specific
@@ -8304,14 +8313,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:json-property-pair-geospatial-query``.
 
         Notes
         -----
         Native reference:
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:json-property-pair-geospatial-query",
             (property_name, latitude_property_names, longitude_property_names, regions),
             (options, _double(weight)),
@@ -8332,7 +8341,7 @@ class Cts:
         *,
         options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
         weight: float | XqyExpression | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:json-property-range-query`` call.
 
         Returns a cts:query matching JSON properties by name with a range-index
@@ -8385,14 +8394,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:json-property-range-query``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:json-property-range-query
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:json-property-range-query",
             (property_name, _operator(operator), value),
             (options, _double(weight)),
@@ -8403,7 +8412,7 @@ class Cts:
         property: str | XqyExpression,
         *,
         options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:json-property-reference`` call.
 
         Creates a reference to a JSON property value lexicon, for use as a
@@ -8434,14 +8443,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:json-property-reference``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:json-property-reference
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:json-property-reference",
             (property,),
             (options,),
@@ -8451,7 +8460,7 @@ class Cts:
     def json_property_scope_query(
         property_name: str | list[str] | XqyExpression | list[XqyExpression] | None,
         query: str | XqyExpression,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:json-property-scope-query`` call.
 
         Returns a cts:query matching JSON properties by name with the content
@@ -8468,14 +8477,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:json-property-scope-query``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:json-property-scope-query
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:json-property-scope-query",
             (property_name, query),
         )
@@ -8494,7 +8503,7 @@ class Cts:
         *,
         options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
         weight: float | XqyExpression | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:json-property-value-query`` call.
 
         Returns a query matching JSON properties by name with value equal the
@@ -8543,14 +8552,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:json-property-value-query``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:json-property-value-query
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:json-property-value-query",
             (property_name, value),
             (options, _double(weight)),
@@ -8565,7 +8574,7 @@ class Cts:
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:json-property-word-match`` call.
 
         Returns words from the specified JSON property word lexicon(s) that
@@ -8630,14 +8639,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:json-property-word-match``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:json-property-word-match
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:json-property-word-match",
             (property_names, pattern),
             (options, query, _double(quality_weight), forest_ids),
@@ -8650,7 +8659,7 @@ class Cts:
         *,
         options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
         weight: float | XqyExpression | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:json-property-word-query`` call.
 
         Returns a query matching JSON properties by name with text content
@@ -8732,14 +8741,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:json-property-word-query``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:json-property-word-query
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:json-property-word-query",
             (property_name, text),
             (options, _double(weight)),
@@ -8754,7 +8763,7 @@ class Cts:
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:json-property-words`` call.
 
         Returns words from the specified JSON property word lexicon.
@@ -8818,14 +8827,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:json-property-words``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:json-property-words
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:json-property-words",
             (property_names,),
             (start, options, query, _double(quality_weight), forest_ids),
@@ -8838,7 +8847,7 @@ class Cts:
         options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
         query: str | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:linear-model`` call.
 
         Returns a linear model that fits the frequency-weighted data set.
@@ -8858,21 +8867,21 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:linear-model``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:linear-model
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:linear-model",
             (values,),
             (options, query, forest_ids),
         )
 
     @staticmethod
-    def linestring(vertices: str | XqyExpression) -> XqyExpression:
+    def linestring(vertices: str | XqyExpression) -> FunctionCall:
         """Build a composable ``cts:linestring`` call.
 
         Returns a geospatial linestring value.
@@ -8886,20 +8895,20 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:linestring``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:linestring
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:linestring",
             (vertices,),
         )
 
     @staticmethod
-    def locks_fragment_query(query: str | XqyExpression) -> XqyExpression:
+    def locks_fragment_query(query: str | XqyExpression) -> FunctionCall:
         """Build a composable ``cts:locks-fragment-query`` call.
 
         Returns a query that matches all documents where $query matches
@@ -8912,14 +8921,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:locks-fragment-query``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:locks-fragment-query
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:locks-fragment-query",
             (query,),
         )
@@ -8931,7 +8940,7 @@ class Cts:
         timestamp: datetime.datetime | XqyExpression | None = None,
         options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
         weight: float | XqyExpression | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:lsqt-query`` call.
 
         Returns only documents before LSQT or a timestamp before LSQT for stable
@@ -8968,14 +8977,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:lsqt-query``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:lsqt-query
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:lsqt-query",
             (temporal_collection,),
             (timestamp, options, _double(weight)),
@@ -8990,7 +8999,7 @@ class Cts:
         options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
         query: str | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:match-regions`` call.
 
         Find regions in documents that have a spatial relationship to one or
@@ -9049,14 +9058,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:match-regions``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:match-regions
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:match-regions",
             (range_indexes, operation, regions),
             (options, query, forest_ids),
@@ -9069,7 +9078,7 @@ class Cts:
         options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
         query: str | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:max`` call.
 
         Returns the maximal value given a value lexicon.
@@ -9087,14 +9096,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:max``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:max
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:max",
             (range_index,),
             (options, query, forest_ids),
@@ -9103,7 +9112,7 @@ class Cts:
     @staticmethod
     def median(
         arg: float | list[float] | XqyExpression | list[XqyExpression] | None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:median`` call.
 
         Returns a frequency-weighted median of a sequence.
@@ -9115,14 +9124,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:median``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:median
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:median",
             (arg,),
         )
@@ -9134,7 +9143,7 @@ class Cts:
         options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
         query: str | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:min`` call.
 
         Returns the minimal value given a value lexicon.
@@ -9152,14 +9161,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:min``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:min
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:min",
             (range_index,),
             (options, query, forest_ids),
@@ -9172,7 +9181,7 @@ class Cts:
         distance: float | XqyExpression | None = None,
         options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
         distance_weight: float | XqyExpression | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:near-query`` call.
 
         Returns a query matching all of the specified queries, where the matches
@@ -9210,14 +9219,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:near-query``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:near-query
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:near-query",
             (queries,),
             (_double(distance), options, _double(distance_weight)),
@@ -9225,8 +9234,9 @@ class Cts:
 
     @staticmethod
     def not_in_query(
-        positive_query: str | XqyExpression, negative_query: str | XqyExpression,
-    ) -> XqyExpression:
+        positive_query: str | XqyExpression,
+        negative_query: str | XqyExpression,
+    ) -> FunctionCall:
         """Build a composable ``cts:not-in-query`` call.
 
         Returns a query matching the first sub-query, where those matches do not
@@ -9241,20 +9251,20 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:not-in-query``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:not-in-query
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:not-in-query",
             (positive_query, negative_query),
         )
 
     @staticmethod
-    def not_query(query: str | XqyExpression) -> XqyExpression:
+    def not_query(query: str | XqyExpression) -> FunctionCall:
         """Build a composable ``cts:not-query`` call.
 
         Returns a query specifying the matches not specified by its sub-query.
@@ -9266,14 +9276,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:not-query``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:not-query
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:not-query",
             (query,),
         )
@@ -9283,7 +9293,7 @@ class Cts:
         queries: str | list[str] | XqyExpression | list[XqyExpression] | None,
         *,
         options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:or-query`` call.
 
         Returns a query specifying the union of the matches specified by the
@@ -9302,14 +9312,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:or-query``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:or-query
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:or-query",
             (queries,),
             (options,),
@@ -9317,8 +9327,10 @@ class Cts:
 
     @staticmethod
     def parse(
-        query: str | XqyExpression, *, bindings: XqyExpression | None = None,
-    ) -> XqyExpression:
+        query: str | XqyExpression,
+        *,
+        bindings: XqyExpression | None = None,
+    ) -> FunctionCall:
         """Build a composable ``cts:parse`` call.
 
         Parses a query string
@@ -9360,21 +9372,21 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:parse``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:parse
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:parse",
             (query,),
             (bindings,),
         )
 
     @staticmethod
-    def part_of_speech(token: XqyExpression) -> XqyExpression:
+    def part_of_speech(token: XqyExpression) -> FunctionCall:
         """Build a composable ``cts:part-of-speech`` call.
 
         Returns the part of speech for a cts:token, if any.
@@ -9386,14 +9398,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:part-of-speech``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:part-of-speech
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:part-of-speech",
             (token,),
         )
@@ -9405,7 +9417,7 @@ class Cts:
         *,
         options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
         weight: float | XqyExpression | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:path-geospatial-query`` call.
 
         Returns a query matching path expressions whose content represents a
@@ -9470,14 +9482,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:path-geospatial-query``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:path-geospatial-query
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:path-geospatial-query",
             (path_expression, regions),
             (options, _double(weight)),
@@ -9498,7 +9510,7 @@ class Cts:
         *,
         options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
         weight: float | XqyExpression | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:path-range-query`` call.
 
         Returns a cts:query matching documents where the content addressed by an
@@ -9553,14 +9565,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:path-range-query``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:path-range-query
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:path-range-query",
             (path_expression, _operator(operator), value),
             (options, _double(weight)),
@@ -9572,7 +9584,7 @@ class Cts:
         *,
         options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
         namespaces: XqyExpression | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:path-reference`` call.
 
         Creates a reference to a path value lexicon, for use as a parameter to
@@ -9607,7 +9619,7 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:path-reference``.
 
         Notes
@@ -9615,7 +9627,7 @@ class Cts:
         Native reference: https://docs.marklogic.com/cts:path-reference
         """
         namespaces = namespace_map(namespaces)
-        return _FunctionCall(
+        return FunctionCall(
             "cts:path-reference",
             (path_expression,),
             (options, namespaces),
@@ -9634,7 +9646,7 @@ class Cts:
         value: str | int | float | bool | XqyExpression,
         *,
         options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:percent-rank`` call.
 
         Returns the rank of a value in a data set as a percentage of the data
@@ -9657,14 +9669,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:percent-rank``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:percent-rank
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:percent-rank",
             (arg, value),
             (options,),
@@ -9674,7 +9686,7 @@ class Cts:
     def percentile(
         arg: float | list[float] | XqyExpression | list[XqyExpression] | None,
         p: float | list[float] | XqyExpression | list[XqyExpression] | None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:percentile`` call.
 
         Returns a sequence of percentile(s) given a sequence of percentage(s).
@@ -9688,22 +9700,23 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:percentile``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:percentile
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:percentile",
             (arg, p),
         )
 
     @staticmethod
     def period(
-        start: datetime.datetime | XqyExpression, end: datetime.datetime | XqyExpression,
-    ) -> XqyExpression:
+        start: datetime.datetime | XqyExpression,
+        end: datetime.datetime | XqyExpression,
+    ) -> FunctionCall:
         """Build a composable ``cts:period`` call.
 
         Creates a period value, for use as a parameter to cts:period-range-query
@@ -9718,22 +9731,24 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:period``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:period
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:period",
             (start, end),
         )
 
     @staticmethod
     def period_compare(
-        period_1: XqyExpression, operator: str | XqyExpression, period_2: XqyExpression,
-    ) -> XqyExpression:
+        period_1: XqyExpression,
+        operator: str | XqyExpression,
+        period_2: XqyExpression,
+    ) -> FunctionCall:
         """Build a composable ``cts:period-compare`` call.
 
         Compares two periods using the specified comparison operator.
@@ -9749,14 +9764,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:period-compare``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:period-compare
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:period-compare",
             (period_1, operator, period_2),
         )
@@ -9768,7 +9783,7 @@ class Cts:
         axis_2: str | XqyExpression,
         *,
         options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:period-compare-query`` call.
 
         Returns a cts:query matching documents that have relevant pair of period
@@ -9825,14 +9840,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:period-compare-query``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:period-compare-query
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:period-compare-query",
             (axis_1, operator, axis_2),
             (options,),
@@ -9845,7 +9860,7 @@ class Cts:
         *,
         period: XqyExpression | list[XqyExpression] | None = None,
         options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:period-range-query`` call.
 
         Returns a cts:query matching axis by name with a period value with an
@@ -9910,14 +9925,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:period-range-query``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:period-range-query
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:period-range-query",
             (axis_name, operator),
             (period, options),
@@ -9927,7 +9942,7 @@ class Cts:
     def point(
         latitude_or_wkt: float | str | XqyExpression,
         longitude: float | XqyExpression | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:point`` call.
 
         Returns a point value.
@@ -9943,21 +9958,21 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:point``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:point
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:point",
             (latitude_or_wkt,),
             (longitude,),
         )
 
     @staticmethod
-    def polygon(vertices: str | XqyExpression) -> XqyExpression:
+    def polygon(vertices: str | XqyExpression) -> FunctionCall:
         """Build a composable ``cts:polygon`` call.
 
         Returns a geospatial polygon value.
@@ -9975,20 +9990,20 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:polygon``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:polygon
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:polygon",
             (vertices,),
         )
 
     @staticmethod
-    def properties_fragment_query(query: str | XqyExpression) -> XqyExpression:
+    def properties_fragment_query(query: str | XqyExpression) -> FunctionCall:
         """Build a composable ``cts:properties-fragment-query`` call.
 
         Returns a query that matches all documents where $query matches
@@ -10001,20 +10016,20 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:properties-fragment-query``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:properties-fragment-query
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:properties-fragment-query",
             (query,),
         )
 
     @staticmethod
-    def quality(*, node: XqyExpression | None = None) -> XqyExpression:
+    def quality(*, node: XqyExpression | None = None) -> FunctionCall:
         """Build a composable ``cts:quality`` call.
 
         Returns the quality of a node, or of the context node if no node is
@@ -10028,14 +10043,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:quality``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:quality
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:quality",
             (),
             (node,),
@@ -10043,8 +10058,9 @@ class Cts:
 
     @staticmethod
     def quality_order(
-        *, options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
-    ) -> XqyExpression:
+        *,
+        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+    ) -> FunctionCall:
         """Build a composable ``cts:quality-order`` call.
 
         Creates a quality-based ordering clause, for use as an option to
@@ -10059,21 +10075,21 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:quality-order``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:quality-order
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:quality-order",
             (),
             (options,),
         )
 
     @staticmethod
-    def query(query: XqyExpression) -> XqyExpression:
+    def query(query: XqyExpression) -> FunctionCall:
         """Build a composable ``cts:query`` call.
 
         Creates a query.
@@ -10085,14 +10101,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:query``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:query
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:query",
             (query,),
         )
@@ -10112,7 +10128,7 @@ class Cts:
         *,
         options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
         weight: float | XqyExpression | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:range-query`` call.
 
         Returns a cts:query matching specified nodes with a range-index entry
@@ -10158,14 +10174,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:range-query``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:range-query
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:range-query",
             (index, _operator(operator), value),
             (options, _double(weight)),
@@ -10184,7 +10200,7 @@ class Cts:
         value: str | int | float | bool | XqyExpression,
         *,
         options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:rank`` call.
 
         Returns the rank of a value in a data set.
@@ -10206,21 +10222,21 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:rank``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:rank
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:rank",
             (arg, value),
             (options,),
         )
 
     @staticmethod
-    def reference_parse(reference: XqyExpression) -> XqyExpression:
+    def reference_parse(reference: XqyExpression) -> FunctionCall:
         """Build a composable ``cts:reference-parse`` call.
 
         Creates a reference to a value lexicon by parsing its XML or JSON
@@ -10233,20 +10249,20 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:reference-parse``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:reference-parse
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:reference-parse",
             (reference,),
         )
 
     @staticmethod
-    def register(query: str | XqyExpression) -> XqyExpression:
+    def register(query: str | XqyExpression) -> FunctionCall:
         """Build a composable ``cts:register`` call.
 
         Register a query for later use.
@@ -10258,14 +10274,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:register``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:register
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:register",
             (query,),
         )
@@ -10276,7 +10292,7 @@ class Cts:
         *,
         options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
         weight: float | XqyExpression | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:registered-query`` call.
 
         Returns a query matching fragments specified by previously registered
@@ -10313,14 +10329,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:registered-query``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:registered-query
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:registered-query",
             (ids,),
             (options, _double(weight)),
@@ -10331,7 +10347,7 @@ class Cts:
         *,
         node: XqyExpression | None = None,
         output_kind: str | XqyExpression | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:relevance-info`` call.
 
         Return the relevance score computation report for a node.
@@ -10348,21 +10364,21 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:relevance-info``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:relevance-info
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:relevance-info",
             (),
             (node, output_kind),
         )
 
     @staticmethod
-    def remainder(*, node: XqyExpression | None = None) -> XqyExpression:
+    def remainder(*, node: XqyExpression | None = None) -> FunctionCall:
         """Build a composable ``cts:remainder`` call.
 
         Returns an estimated search result size for a node, or of the context
@@ -10378,14 +10394,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:remainder``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:remainder
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:remainder",
             (),
             (node,),
@@ -10396,7 +10412,7 @@ class Cts:
         nodes: XqyExpression | list[XqyExpression] | None,
         *,
         weight: float | XqyExpression | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:reverse-query`` call.
 
         Construct a query that matches serialized cts queries, based on a set of
@@ -10413,21 +10429,21 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:reverse-query``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:reverse-query
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:reverse-query",
             (nodes,),
             (_double(weight),),
         )
 
     @staticmethod
-    def score(*, node: XqyExpression | None = None) -> XqyExpression:
+    def score(*, node: XqyExpression | None = None) -> FunctionCall:
         """Build a composable ``cts:score`` call.
 
         Returns the score of a node, or of the context node if no node is
@@ -10441,14 +10457,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:score``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:score
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:score",
             (),
             (node,),
@@ -10456,8 +10472,9 @@ class Cts:
 
     @staticmethod
     def score_order(
-        *, options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
-    ) -> XqyExpression:
+        *,
+        options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
+    ) -> FunctionCall:
         """Build a composable ``cts:score-order`` call.
 
         Creates a score-based ordering clause, for use as an option to
@@ -10471,14 +10488,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:score-order``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:score-order
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:score-order",
             (),
             (options,),
@@ -10492,7 +10509,7 @@ class Cts:
         options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:search`` call.
 
         Returns a relevance-ordered sequence of nodes specified by a given
@@ -10593,16 +10610,21 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:search``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:search
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:search",
-            (_DatabaseRoot() if expression is None else search_path(expression), query),
+            (
+                DatabaseRoot()
+                if expression is None
+                else as_searchable_expression(expression),
+                query,
+            ),
             (options, _double(quality_weight), forest_ids),
         )
 
@@ -10612,7 +10634,7 @@ class Cts:
         *,
         weight: float | XqyExpression | None = None,
         options: XqyExpression | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:similar-query`` call.
 
         Returns a query matching nodes similar to the model nodes.
@@ -10640,14 +10662,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:similar-query``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:similar-query
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:similar-query",
             (nodes,),
             (_double(weight), options),
@@ -10660,7 +10682,7 @@ class Cts:
         options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
         query: str | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:stddev`` call.
 
         Returns a frequency-weighted sample standard deviation given a value
@@ -10679,14 +10701,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:stddev``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:stddev
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:stddev",
             (range_index,),
             (options, query, forest_ids),
@@ -10699,7 +10721,7 @@ class Cts:
         options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
         query: str | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:stddev-p`` call.
 
         Returns a frequency-weighted standard deviation of the population given
@@ -10718,14 +10740,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:stddev-p``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:stddev-p
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:stddev-p",
             (range_index,),
             (options, query, forest_ids),
@@ -10737,7 +10759,7 @@ class Cts:
         *,
         language: str | XqyExpression | None = None,
         part_of_speech: str | XqyExpression | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:stem`` call.
 
         Returns the stem(s) for a word.
@@ -10755,14 +10777,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:stem``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:stem
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:stem",
             (text,),
             (language, part_of_speech),
@@ -10775,7 +10797,7 @@ class Cts:
         options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
         query: str | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:sum-aggregate`` call.
 
         Returns the sum of the values given a value lexicon.
@@ -10793,14 +10815,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:sum-aggregate``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:sum-aggregate
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:sum-aggregate",
             (range_index,),
             (options, query, forest_ids),
@@ -10812,7 +10834,7 @@ class Cts:
         known_labels: XqyExpression | list[XqyExpression] | None,
         *,
         recall_weight: float | XqyExpression | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:thresholds`` call.
 
         Compute precision, recall, the F measure, and thresholds for the classes
@@ -10835,14 +10857,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:thresholds``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:thresholds
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:thresholds",
             (computed_labels, known_labels),
             (_double(recall_weight),),
@@ -10854,7 +10876,7 @@ class Cts:
         *,
         language: str | XqyExpression | None = None,
         field: str | XqyExpression | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:tokenize`` call.
 
         Tokenizes text into words, punctuation, and spaces.
@@ -10873,14 +10895,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:tokenize``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:tokenize
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:tokenize",
             (text,),
             (language, field),
@@ -10892,7 +10914,7 @@ class Cts:
         labels: XqyExpression | list[XqyExpression] | None,
         *,
         options: XqyExpression | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:train`` call.
 
         Produces a set of classifiers from a list of labeled training documents.
@@ -10986,14 +11008,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:train``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:train
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:train",
             (training_nodes, labels),
             (options,),
@@ -11029,7 +11051,7 @@ class Cts:
         operator: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
         options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
         weight: float | XqyExpression | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:triple-range-query`` call.
 
         Returns a cts:query matching triples with a triple index entry equal to
@@ -11070,14 +11092,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:triple-range-query``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:triple-range-query
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:triple-range-query",
             (subject, predicate, object),
             (
@@ -11099,7 +11121,7 @@ class Cts:
         | list[XqyExpression]
         | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:triple-value-statistics`` call.
 
         Returns statistics from the triple index for the values given.
@@ -11115,14 +11137,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:triple-value-statistics``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:triple-value-statistics
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:triple-value-statistics",
             (),
             (values, forest_ids),
@@ -11159,7 +11181,7 @@ class Cts:
         options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
         query: str | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:triples`` call.
 
         Returns values from the triple index.
@@ -11235,55 +11257,55 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:triples``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:triples
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:triples",
             (),
             (subject, predicate, object, operator, options, query, forest_ids),
         )
 
     @staticmethod
-    def true_query() -> XqyExpression:
+    def true_query() -> FunctionCall:
         """Build a composable ``cts:true-query`` call.
 
         Returns a query that matches all fragments.
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:true-query``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:true-query
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:true-query",
             (),
         )
 
     @staticmethod
-    def unordered() -> XqyExpression:
+    def unordered() -> FunctionCall:
         """Build a composable ``cts:unordered`` call.
 
         Specifies that results should be unordered, for use with cts:search.
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:unordered``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:unordered
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:unordered",
             (),
         )
@@ -11296,7 +11318,7 @@ class Cts:
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:uri-match`` call.
 
         Returns values from the URI lexicon that match the specified wildcard
@@ -11370,21 +11392,21 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:uri-match``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:uri-match
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:uri-match",
             (pattern,),
             (options, query, _double(quality_weight), forest_ids),
         )
 
     @staticmethod
-    def uri_reference() -> XqyExpression:
+    def uri_reference() -> FunctionCall:
         """Build a composable ``cts:uri-reference`` call.
 
         Creates a reference to the URI lexicon, for use as a parameter to
@@ -11392,14 +11414,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:uri-reference``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:uri-reference
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:uri-reference",
             (),
         )
@@ -11412,7 +11434,7 @@ class Cts:
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:uris`` call.
 
         Returns values from the URI lexicon.
@@ -11484,14 +11506,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:uris``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:uris
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:uris",
             (),
             (start, options, query, _double(quality_weight), forest_ids),
@@ -11499,8 +11521,10 @@ class Cts:
 
     @staticmethod
     def valid_document_patch_path(
-        string: str | XqyExpression, *, map: XqyExpression | None = None,
-    ) -> XqyExpression:
+        string: str | XqyExpression,
+        *,
+        map: XqyExpression | None = None,
+    ) -> FunctionCall:
         """Build a composable ``cts:valid-document-patch-path`` call.
 
         Parses path expressions and resolves namespaces using the $map
@@ -11517,14 +11541,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:valid-document-patch-path``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:valid-document-patch-path
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:valid-document-patch-path",
             (string,),
             (map,),
@@ -11532,8 +11556,10 @@ class Cts:
 
     @staticmethod
     def valid_extract_path(
-        string: str | XqyExpression, *, map: XqyExpression | None = None,
-    ) -> XqyExpression:
+        string: str | XqyExpression,
+        *,
+        map: XqyExpression | None = None,
+    ) -> FunctionCall:
         """Build a composable ``cts:valid-extract-path`` call.
 
         Parses path expressions and resolves namespaces using the $map
@@ -11550,14 +11576,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:valid-extract-path``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:valid-extract-path
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:valid-extract-path",
             (string,),
             (map,),
@@ -11565,8 +11591,9 @@ class Cts:
 
     @staticmethod
     def valid_index_path(
-        string: str | XqyExpression, ignorens: bool | XqyExpression,
-    ) -> XqyExpression:
+        string: str | XqyExpression,
+        ignorens: bool | XqyExpression,
+    ) -> FunctionCall:
         """Build a composable ``cts:valid-index-path`` call.
 
         Parses path expressions and resolves namespaces based on the server run-
@@ -11581,22 +11608,24 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:valid-index-path``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:valid-index-path
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:valid-index-path",
             (string, ignorens),
         )
 
     @staticmethod
     def valid_optic_path(
-        string: str | XqyExpression, *, map: XqyExpression | None = None,
-    ) -> XqyExpression:
+        string: str | XqyExpression,
+        *,
+        map: XqyExpression | None = None,
+    ) -> FunctionCall:
         """Build a composable ``cts:valid-optic-path`` call.
 
         Parses path expressions and resolves namespaces using the $map
@@ -11613,14 +11642,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:valid-optic-path``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:valid-optic-path
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:valid-optic-path",
             (string,),
             (map,),
@@ -11628,8 +11657,10 @@ class Cts:
 
     @staticmethod
     def valid_tde_context(
-        string: str | XqyExpression, *, map: XqyExpression | None = None,
-    ) -> XqyExpression:
+        string: str | XqyExpression,
+        *,
+        map: XqyExpression | None = None,
+    ) -> FunctionCall:
         """Build a composable ``cts:valid-tde-context`` call.
 
         Parses path expressions and resolves namespaces using the $map
@@ -11646,14 +11677,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:valid-tde-context``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:valid-tde-context
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:valid-tde-context",
             (string,),
             (map,),
@@ -11668,7 +11699,7 @@ class Cts:
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:value-co-occurrences`` call.
 
         Returns value co-occurrences (that is, pairs of values, both of which
@@ -11759,14 +11790,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:value-co-occurrences``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:value-co-occurrences
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:value-co-occurrences",
             (range_index_1, range_index_2),
             (options, query, _double(quality_weight), forest_ids),
@@ -11781,7 +11812,7 @@ class Cts:
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:value-match`` call.
 
         Returns values from the specified value lexicon(s) that match the
@@ -11867,14 +11898,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:value-match``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:value-match
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:value-match",
             (range_indexes, pattern),
             (options, query, _double(quality_weight), forest_ids),
@@ -11896,7 +11927,7 @@ class Cts:
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:value-ranges`` call.
 
         Returns value ranges from the specified value lexicon(s).
@@ -11984,14 +12015,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:value-ranges``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:value-ranges
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:value-ranges",
             (range_indexes,),
             (bounds, options, query, _double(quality_weight), forest_ids),
@@ -12005,7 +12036,7 @@ class Cts:
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:value-tuples`` call.
 
         Returns value co-occurrence tuples (that is, tuples of values, each of
@@ -12090,14 +12121,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:value-tuples``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:value-tuples
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:value-tuples",
             (range_indexes,),
             (options, query, _double(quality_weight), forest_ids),
@@ -12112,7 +12143,7 @@ class Cts:
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:values`` call.
 
         Returns values from the specified value lexicon(s).
@@ -12196,14 +12227,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:values``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:values
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:values",
             (range_indexes,),
             (start, options, query, _double(quality_weight), forest_ids),
@@ -12216,7 +12247,7 @@ class Cts:
         options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
         query: str | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:variance`` call.
 
         Returns a frequency-weighted sample variance given a value lexicon.
@@ -12234,14 +12265,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:variance``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:variance
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:variance",
             (range_index,),
             (options, query, forest_ids),
@@ -12254,7 +12285,7 @@ class Cts:
         options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
         query: str | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:variance-p`` call.
 
         Returns a frequency-weighted variance of the population given a value
@@ -12273,14 +12304,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:variance-p``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:variance-p
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:variance-p",
             (range_index,),
             (options, query, forest_ids),
@@ -12291,7 +12322,7 @@ class Cts:
         node: XqyExpression,
         query: str | XqyExpression,
         expr: XqyExpression | list[XqyExpression] | None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:walk`` call.
 
         Walks a node, evaluating an expression with any text matching a query.
@@ -12312,14 +12343,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:walk``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:walk
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:walk",
             (node, query, expr),
         )
@@ -12332,7 +12363,7 @@ class Cts:
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:word-match`` call.
 
         Returns words from the word lexicon that match the wildcard pattern.
@@ -12394,14 +12425,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:word-match``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:word-match
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:word-match",
             (pattern,),
             (options, query, _double(quality_weight), forest_ids),
@@ -12413,7 +12444,7 @@ class Cts:
         *,
         options: str | list[str] | XqyExpression | list[XqyExpression] | None = None,
         weight: float | XqyExpression | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:word-query`` call.
 
         Returns a query matching text content containing a given phrase.
@@ -12491,14 +12522,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:word-query``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:word-query
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:word-query",
             (text,),
             (options, _double(weight)),
@@ -12512,7 +12543,7 @@ class Cts:
         query: str | XqyExpression | None = None,
         quality_weight: float | XqyExpression | None = None,
         forest_ids: int | list[int] | XqyExpression | list[XqyExpression] | None = None,
-    ) -> XqyExpression:
+    ) -> FunctionCall:
         """Build a composable ``cts:words`` call.
 
         Returns words from the word lexicon.
@@ -12574,14 +12605,14 @@ class Cts:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Composable call to ``cts:words``.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/cts:words
         """
-        return _FunctionCall(
+        return FunctionCall(
             "cts:words",
             (),
             (start, options, query, _double(quality_weight), forest_ids),

@@ -6,7 +6,7 @@ from decimal import Decimal
 import pytest
 
 from mlclient.exceptions import MarkLogicError
-from mlclient.functions.xqy import fn, xdmp, xpath, xs
+from mlclient.functions.xqy import cts, fn, xdmp, xpath, xs
 from mlclient.models import BinaryDocument, JSONDocument, TextDocument
 from mlclient.services import CtsService
 from tests.utils.expressions import StaticExpression
@@ -20,8 +20,8 @@ class TestCtsService:
         indexed_database,
     ):
         ml, database, _ = indexed_database
-        cts = CtsService(ml.rest)
-        assert cts.value_tuples(
+        service = CtsService(ml.rest)
+        assert service.value_tuples(
             cts.uri_reference(),
             query=cts.document_query("/cts-test/a.xml"),
             database=database,
@@ -39,12 +39,12 @@ class TestCtsService:
                 "</catalog>)",
                 database=database,
             )
-            cts = CtsService(
+            service = CtsService(
                 ml.rest,
                 namespaces={"p": "https://monasticus.com/mlclient/examples/products"},
             )
             query = cts.word_query("coffee")
-            [whole] = cts.search(query=query, database=database)
+            [whole] = service.search(query=query, database=database)
             assert (
                 len(
                     whole.xpath(
@@ -55,7 +55,7 @@ class TestCtsService:
                 == 2
             )
 
-            [product] = cts.search(
+            [product] = service.search(
                 expression="/p:catalog/p:product",
                 query=query,
                 database=database,
@@ -76,7 +76,7 @@ class TestCtsService:
             )
             assert len(product.content) == 2
 
-            [title] = cts.search(
+            [title] = service.search(
                 expression="/p:catalog/p:product",
                 query=query,
                 xpath="p:title",
@@ -113,9 +113,9 @@ class TestCtsService:
                 ],
                 database=database,
             )
-            cts = CtsService(ml.rest)
+            service = CtsService(ml.rest)
             query = cts.document_query([*uris, "/cts-test/a.xml"])
-            hits = cts.search(query=query, database=database)
+            hits = service.search(query=query, database=database)
             by_uri = {hit.source_uri: hit for hit in hits}
             assert all(isinstance(hit.score, int) for hit in hits)
             assert by_uri[uris[0]].content == "abcd"
@@ -133,7 +133,7 @@ class TestCtsService:
                 ('null-node("z")', None),
                 ('array-node("arr")', [1, 2]),
             ]:
-                [hit] = cts.search(
+                [hit] = service.search(
                     query=cts.document_query(uris[2]),
                     xpath=node_path,
                     database=database,
@@ -148,27 +148,28 @@ class TestCtsService:
 
     def test_field_values_aggregates_and_map_boundary(self, indexed_database):
         (ml, database, _) = indexed_database
-        cts = CtsService(ml.rest)
-        collection = cts.collections(database=database)
+        service = CtsService(ml.rest)
+        collection = service.collections(database=database)
         assert collection[0].value == "cts-test"
         assert collection[0].frequency == 3
-        assert cts.collection_match("cts-*", database=database) == collection
-        assert cts.uri_match("/cts-test/*.xml", database=database) == [
+        assert service.collection_match("cts-*", database=database) == collection
+        assert service.uri_match("/cts-test/*.xml", database=database) == [
             "/cts-test/a.xml",
             "/cts-test/b.xml",
         ]
-        values = cts.field_values("price", database=database)
+        values = service.field_values("price", database=database)
         assert [value.value for value in values] == [Decimal("1.25"), Decimal("2.50")]
         assert [value.frequency for value in values] == [1, 1]
-        assert cts.field_values("price", index=1, database=database)[
+        assert service.field_values("price", index=1, database=database)[
             0
         ].value == Decimal(
             "1.25",
         )
         assert (
-            cts.field_values("price", query=cts.false_query(), database=database) == []
+            service.field_values("price", query=cts.false_query(), database=database)
+            == []
         )
-        assert cts.sum_aggregate(
+        assert service.sum_aggregate(
             cts.field_reference("price"),
             database=database,
         ) == [Decimal("3.75")]
@@ -177,19 +178,23 @@ class TestCtsService:
             Decimal("2.50"),
         ]
         with pytest.raises(ValueError, match="Map output"):
-            cts.values(cts.uri_reference(), options="map", database=database)
+            service.values(cts.uri_reference(), options="map", database=database)
         with pytest.raises(MarkLogicError, match="MLCLIENT-LEXICON-MAP"):
-            cts.values(cts.uri_reference(), options=xs.string("map"), database=database)
+            service.values(
+                cts.uri_reference(),
+                options=xs.string("map"),
+                database=database,
+            )
 
     def test_xpath_retains_original_positive_score(self, indexed_database):
         ml, database, _ = indexed_database
-        cts = CtsService(
+        service = CtsService(
             ml.rest,
             namespaces={"p": "https://monasticus.com/mlclient/examples/cts-test"},
         )
         query = cts.word_query("alpha")
-        [original] = cts.search(query=query, index=1, database=database)
-        [selected] = cts.search(
+        [original] = service.search(query=query, index=1, database=database)
+        [selected] = service.search(
             query=query,
             index=1,
             xpath="p:item/p:label",
@@ -206,14 +211,14 @@ class TestCtsService:
         indexed_database,
     ):
         ml, database, _ = indexed_database
-        cts = CtsService(
+        service = CtsService(
             ml.rest,
             namespaces={"p": "https://monasticus.com/mlclient/examples/cts-test"},
         )
         query = cts.word_query("alpha")
-        [original] = cts.search(query=query, index=1, database=database)
+        [original] = service.search(query=query, index=1, database=database)
 
-        selected = cts.search(
+        selected = service.search(
             query=query,
             index=1,
             xpath="p:item/*",
@@ -236,7 +241,7 @@ class TestCtsService:
         indexed_database,
     ):
         ml, database, _ = indexed_database
-        cts = CtsService(
+        service = CtsService(
             ml.rest,
             namespaces={"p": "https://monasticus.com/mlclient/examples/cts-test"},
         )
@@ -247,30 +252,32 @@ class TestCtsService:
             options="descending",
         )
         parameters = {"expression": "/p:item", "options": options, "database": database}
-        labels = cts.search(**parameters, xpath="p:label")
+        labels = service.search(**parameters, xpath="p:label")
         assert [label.content.text for label in labels] == ["beta", "alpha"]
         assert (
-            cts.search(**parameters, index=2, xpath="p:label")[0].content.text
+            service.search(**parameters, index=2, xpath="p:label")[0].content.text
             == "alpha"
         )
         assert (
-            cts.search(**parameters, range=[2, 2], xpath="p:label")[0].content.text
+            service.search(**parameters, range=[2, 2], xpath="p:label")[0].content.text
             == "alpha"
         )
-        children = cts.search(**parameters, index=1, xpath="*")
+        children = service.search(**parameters, index=1, xpath="*")
         assert [child.content.text for child in children] == [
             "2.50",
             "2026-01-02",
             "beta",
         ]
-        assert cts.search(**parameters, index=100, xpath="p:label") == []
-        assert cts.search(**parameters, xpath="p:absent") == []
+        assert service.search(**parameters, index=100, xpath="p:label") == []
+        assert service.search(**parameters, xpath="p:absent") == []
         assert (
-            cts.search(**parameters, index=1, xpath="/p:item/p:label")[0].content.text
+            service.search(**parameters, index=1, xpath="/p:item/p:label")[
+                0
+            ].content.text
             == "beta"
         )
         assert (
-            cts.search(
+            service.search(
                 options=options,
                 database=database,
                 index=1,
@@ -279,11 +286,11 @@ class TestCtsService:
             == "beta"
         )
         with pytest.raises(MarkLogicError, match="MLCLIENT-INVALID-PATH"):
-            cts.search(**parameters, xpath="p:label), fn:error() (: ")
+            service.search(**parameters, xpath="p:label), fn:error() (: ")
 
     def test_search_lexicons_ranges_and_namespace_composition(self, indexed_database):
         ml, database, _ = indexed_database
-        cts = CtsService(ml.rest)
+        service = CtsService(ml.rest)
         query = cts.and_query(
             [
                 cts.collection_query("cts-test"),
@@ -324,16 +331,22 @@ class TestCtsService:
             )
             is False
         )
-        assert cts.search(query=cts.false_query(), database=database) == []
+        assert service.search(query=cts.false_query(), database=database) == []
         assert (
-            cts.search(query=query, range=1, database=database)[0].content.getroot().tag
+            service.search(query=query, range=1, database=database)[0]
+            .content.getroot()
+            .tag
             == "{https://monasticus.com/mlclient/examples/cts-test}item"
         )
-        assert cts.uris(query=query, database=database) == [
+        assert service.uris(query=query, database=database) == [
             "/cts-test/a.xml",
             "/cts-test/b.xml",
         ]
-        assert cts.uris(query=query, start="/cts-test/b.xml", database=database) == [
+        assert service.uris(
+            query=query,
+            start="/cts-test/b.xml",
+            database=database,
+        ) == [
             "/cts-test/b.xml",
         ]
         ref = cts.element_reference(
@@ -343,22 +356,22 @@ class TestCtsService:
         assert ml.eval.expression(fn.count(values), database=database) == 2
         assert ml.eval.expression(fn.exists(values), database=database) is True
         assert [
-            hit.value for hit in cts.values(ref, query=query, database=database)
+            hit.value for hit in service.values(ref, query=query, database=database)
         ] == [
             Decimal("1.25"),
             Decimal("2.50"),
         ]
-        assert cts.values(
+        assert service.values(
             ref,
             query=query,
             start=Decimal(2),
             database=database,
         )[0].value == Decimal("2.50")
-        assert cts.estimate(query, database=database) == [2]
-        assert cts.estimate(query, maximum=1, database=database) == [1]
-        assert cts.estimate(database=database) == [3]
+        assert service.estimate(query, database=database) == [2]
+        assert service.estimate(query, maximum=1, database=database) == [1]
+        assert service.estimate(database=database) == [3]
         assert ml.eval.expression(cts.estimate(), database=database) == 3
-        assert cts.search(
+        assert service.search(
             query=cts.json_property_value_query("active", True),
             database=database,
         )[0].content == {"active": True}
@@ -374,7 +387,7 @@ class TestCtsService:
             database=database,
         )
         forests = StaticExpression("xdmp:database-forests(xdmp:database())")
-        assert cts.uris(
+        assert service.uris(
             query=query,
             quality_weight=0,
             forest_ids=forests,
@@ -388,12 +401,13 @@ class TestCtsService:
             ),
         )
         assert [
-            hit.value for hit in cts.values(path_ref, query=query, database=database)
+            hit.value
+            for hit in service.values(path_ref, query=query, database=database)
         ] == [
             Decimal("1.25"),
             Decimal("2.50"),
         ]
-        assert cts.estimate(
+        assert service.estimate(
             cts.path_range_query(
                 "/Q{https://monasticus.com/mlclient/examples/cts-test}item/Q{https://monasticus.com/mlclient/examples/cts-test}price",
                 ">",
@@ -402,7 +416,7 @@ class TestCtsService:
             database=database,
         ) == [1]
         assert (
-            cts.search(
+            service.search(
                 query=cts.word_query(
                     "(: (( :) /), cts:false-query()), 424242, (( (: )) :)",
                 ),
@@ -420,21 +434,21 @@ class TestCtsService:
             "p": "https://monasticus.com/mlclient/examples/cts-test",
             "other": "https://monasticus.com/mlclient/examples/absent",
         }
-        cts = CtsService(ml.rest, namespaces=bindings)
+        service = CtsService(ml.rest, namespaces=bindings)
         bindings["p"] = "https://monasticus.com/mlclient/examples/mutated"
-        assert len(cts.search("/p:item", database=database)) == 2
+        assert len(service.search("/p:item", database=database)) == 2
         assert (
-            cts.search(
+            service.search(
                 "/p:item",
                 namespaces={"p": "https://monasticus.com/mlclient/examples/absent"},
                 database=database,
             )
             == []
         )
-        assert len(cts.search("/p:item", database=database)) == 2
+        assert len(service.search("/p:item", database=database)) == 2
         assert (
             len(
-                cts.search(
+                service.search(
                     "/item",
                     namespaces={
                         "": "https://monasticus.com/mlclient/examples/cts-test",
@@ -503,13 +517,13 @@ class TestCtsService:
         reference_bindings["p"] = "https://monasticus.com/mlclient/examples/mutated"
         assert [
             hit.value
-            for hit in cts.values(
+            for hit in service.values(
                 reference,
                 namespaces={"p": "https://monasticus.com/mlclient/examples/absent"},
                 database=database,
             )
         ] == [Decimal("1.25"), Decimal("2.50")]
-        assert cts.estimate(
+        assert service.estimate(
             cts.path_range_query(["/p:item/p:price", "/p:item/p:price"], ">", 1),
             database=database,
         ) == [2]
@@ -533,9 +547,9 @@ class TestCtsService:
         assert ml.eval.expression(expression.range(2, fn.last())) == [20, 30]
         assert ml.eval.expression(expression.range(fn.last(), fn.last())) == 30
         assert ml.eval.expression(expression.range(4, fn.last())) == []
-        cts = CtsService(ml.rest)
-        uris = cts.uris(database=database)
-        assert cts.uris(index=1, database=database) == [uris[0]]
-        assert cts.uris(index=fn.last(), database=database) == [uris[-1]]
-        assert cts.uris(index=100, database=database) == []
-        assert cts.uris(range=[2, fn.last()], database=database) == uris[1:]
+        service = CtsService(ml.rest)
+        uris = service.uris(database=database)
+        assert service.uris(index=1, database=database) == [uris[0]]
+        assert service.uris(index=fn.last(), database=database) == [uris[-1]]
+        assert service.uris(index=100, database=database) == []
+        assert service.uris(range=[2, fn.last()], database=database) == uris[1:]

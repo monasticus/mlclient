@@ -10,9 +10,19 @@ from mlclient.functions.xqy._fn import Fn
 from mlclient.functions.xqy._xdmp import Xdmp
 from mlclient.functions.xqy._xs import Xs
 from mlclient.functions.xqy.expressions import (
+    AtomicValue,
+    DatabaseRoot,
+    FunctionCall,
+    Index,
     ModuleFunctionCall,
+    NamespaceMap,
+    Path,
+    Range,
+    ResultXPath,
     XqyCompilationContext,
     XqyExpression,
+    XqySequence,
+    as_searchable_expression,
     namespace_bindings,
     xpath,
 )
@@ -25,9 +35,19 @@ xs = Xs()
 __experimental__ = EXPERIMENTAL_NOTICE
 
 __all__ = [
+    "AtomicValue",
+    "DatabaseRoot",
+    "FunctionCall",
+    "Index",
     "ModuleFunctionCall",
+    "NamespaceMap",
+    "Path",
+    "Range",
+    "ResultXPath",
     "XqyCompilationContext",
     "XqyExpression",
+    "XqySequence",
+    "as_searchable_expression",
     "cts",
     "fn",
     "namespace_bindings",

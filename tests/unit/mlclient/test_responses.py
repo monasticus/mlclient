@@ -1369,6 +1369,21 @@ def test_parse_single_plain_text_decimal_response(ml):
     assert parsed_resp == Decimal("1.1")
 
 
+@pytest.mark.parametrize("primitive", ["float", "double"])
+def test_parse_single_plain_text_floating_point_response(primitive):
+    part = MultipartPart(
+        {"content-type": "text/plain", "x-primitive": primitive},
+        b"1.1",
+    )
+    body, content_type = encode_multipart_mixed([part])
+    response = httpx.Response(200, content=body, headers={"Content-Type": content_type})
+
+    parsed_resp = MLResponseParser.parse(response)
+
+    assert isinstance(parsed_resp, float)
+    assert parsed_resp == 1.1
+
+
 @ml_mock
 def test_parse_text_single_plain_text_decimal_response(ml):
     resp = ml.rest.eval.post(xquery="1.1")

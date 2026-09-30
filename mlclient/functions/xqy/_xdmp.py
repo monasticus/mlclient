@@ -6,7 +6,11 @@ Builders compose expressions; services execute through the common evaluator.
 from __future__ import annotations
 
 from mlclient._experimental import experimental
-from mlclient.functions.xqy.expressions import XqyExpression, _FunctionCall, search_path
+from mlclient.functions.xqy.expressions import (
+    XqyExpression,
+    FunctionCall,
+    as_searchable_expression,
+)
 
 
 @experimental()
@@ -14,7 +18,7 @@ class Xdmp:
     """Pure ``xdmp:`` builders returning expression trees."""
 
     @staticmethod
-    def exists(searchable: str | XqyExpression) -> XqyExpression:
+    def exists(searchable: str | XqyExpression) -> FunctionCall:
         """Return true if any fragment is selected; false if none are selected.
 
         Parameters
@@ -26,11 +30,11 @@ class Xdmp:
 
         Returns
         -------
-        XqyExpression
+        FunctionCall
             Immutable expression; no request is sent until it is evaluated.
 
         Notes
         -----
         Native reference: https://docs.marklogic.com/xdmp:exists
         """
-        return _FunctionCall("xdmp:exists", (search_path(searchable),))
+        return FunctionCall("xdmp:exists", (as_searchable_expression(searchable),))

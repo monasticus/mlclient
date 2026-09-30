@@ -12,6 +12,7 @@ import re
 from abc import ABC, abstractmethod
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
+from typing import overload
 
 from mlclient._experimental import experimental
 
@@ -144,8 +145,13 @@ def _namespace_declarations(namespaces: dict[str, str]) -> str:
     """Serialize declarations, escaping URI literals without changing their content."""
     declarations = []
     for prefix, uri in namespaces.items():
-        literal = uri.replace("&", "&amp;").replace('"', '""')
-        literal = literal.replace("\r", "&#13;").replace("\n", "&#10;")
+        literal = (
+            uri.replace("&", "&amp;")
+            .replace('"', '""')
+            .replace("\t", "&#9;")
+            .replace("\r", "&#13;")
+            .replace("\n", "&#10;")
+        )
         name = f"namespace {prefix}" if prefix else "default element namespace"
         separator = " = " if prefix else " "
         declarations.append(f'declare {name}{separator}"{literal}";\n')
@@ -209,7 +215,7 @@ class XqyExpression(ABC):
         self,
         start: int | XqyExpression,
         end: int | XqyExpression,
-    ) -> XqyExpression:
+    ) -> Range:
         """Select inclusive, one-based positions ``start`` through ``end``.
 
         Parameters
@@ -221,12 +227,12 @@ class XqyExpression(ABC):
 
         Returns
         -------
-        XqyExpression
+        Range
             A composable positional predicate, evaluated by MarkLogic.
         """
-        return _Range(self, start, end)
+        return Range(self, start, end)
 
-    def index(self, position: int | XqyExpression) -> XqyExpression:
+    def index(self, position: int | XqyExpression) -> Index:
         """Select one item by its one-based position.
 
         Parameters
@@ -236,13 +242,12 @@ class XqyExpression(ABC):
 
         Returns
         -------
-        XqyExpression
+        Index
             Selected item, or an empty sequence if the position does not exist.
         """
-        _validate_position(position)
-        return _Index(self, position)
+        return Index(self, position)
 
-    def xpath(self, path: str) -> XqyExpression:
+    def xpath(self, path: str) -> ResultXPath:
         """Extract a restricted XPath from each result item in sequence order.
 
         Parameters
@@ -253,7 +258,7 @@ class XqyExpression(ABC):
 
         Returns
         -------
-        XqyExpression
+        ResultXPath
             A simple-map expression. Apply index/range before this method to
             select hits before applying this XPath.
 
@@ -265,7 +270,7 @@ class XqyExpression(ABC):
             If path is empty or whitespace-only. Native syntax validation occurs
             during evaluation, before executing the composed expression.
         """
-        return _ResultXPath(self, path)
+        return ResultXPath(self, path)
 
     def __str__(self) -> str:
         """Return compiled XQuery source without the external bindings."""
@@ -273,7 +278,7 @@ class XqyExpression(ABC):
 
 
 @dataclass(frozen=True)
-class _AtomicValue(XqyExpression):
+class AtomicValue(XqyExpression):
     """An immutable scalar represented by a JSON-safe lexical value."""
 
     value: str | bool
@@ -284,7 +289,7 @@ class _AtomicValue(XqyExpression):
         return ctx.bind(self.value, self.cast or "xs:string")
 
 
-class _DatabaseRoot(XqyExpression):
+class DatabaseRoot(XqyExpression):
     """The fixed document-node path used by default searches."""
 
     def render(self, _ctx: XqyCompilationContext) -> str:
@@ -299,7 +304,7 @@ def _validate_position(value: int | XqyExpression) -> None:
             message = "index/range positions must be positive"
             raise ValueError(message)
     elif not (
-        isinstance(value, _FunctionCall)
+        isinstance(value, FunctionCall)
         and value.fn == "fn:last"
         and not value.args
         and not value.optionals
@@ -309,11 +314,15 @@ def _validate_position(value: int | XqyExpression) -> None:
 
 
 @dataclass(frozen=True)
-class _Index(XqyExpression):
+class Index(XqyExpression):
     """A single positional predicate."""
 
     inner: XqyExpression
     position: int | XqyExpression
+
+    def __post_init__(self):
+        """Validate the position when the predicate expression is created."""
+        _validate_position(self.position)
 
     def render(self, ctx: XqyCompilationContext) -> str:
         """Keep fn:last inside the selected sequence's predicate context."""
@@ -321,14 +330,14 @@ class _Index(XqyExpression):
         inner = self.inner.render(ctx)
         if not isinstance(
             self.inner,
-            (_FunctionCall, ModuleFunctionCall, _Index, _Range),
+            (FunctionCall, ModuleFunctionCall, Index, Range),
         ):
             inner = f"({inner})"
         return f"{inner}[{position}]"
 
 
 @dataclass(frozen=True)
-class _Range(XqyExpression):
+class Range(XqyExpression):
     """A lazy, inclusive positional predicate."""
 
     inner: XqyExpression
@@ -336,6 +345,7 @@ class _Range(XqyExpression):
     end: int | XqyExpression
 
     def __post_init__(self):
+        """Validate both bounds and their literal order."""
         _validate_position(self.start)
         _validate_position(self.end)
         if type(self.start) is int and type(self.end) is int and self.end < self.start:
@@ -347,7 +357,7 @@ class _Range(XqyExpression):
         inner = self.inner.render(ctx)
         if not isinstance(
             self.inner,
-            (_FunctionCall, ModuleFunctionCall, _Index, _Range),
+            (FunctionCall, ModuleFunctionCall, Index, Range),
         ):
             inner = f"({inner})"
         start = as_expr(self.start).render(ctx)
@@ -356,7 +366,7 @@ class _Range(XqyExpression):
 
 
 @dataclass(frozen=True)
-class _ResultXPath(XqyExpression):
+class ResultXPath(XqyExpression):
     """Apply a validated extraction path to each selected search hit in order."""
 
     inner: XqyExpression
@@ -393,13 +403,13 @@ class _ResultXPath(XqyExpression):
             Simple-map expression preserving the inner sequence's hit order.
         """
         inner = self.inner.render(ctx)
-        if not isinstance(self.inner, (_FunctionCall, _Index, _Range)):
+        if not isinstance(self.inner, (FunctionCall, Index, Range)):
             inner = f"({inner})"
         return f"{inner} ! {ctx.path(self.source, 'xpath')}"
 
 
 @dataclass(frozen=True)
-class _Sequence(XqyExpression):
+class XqySequence(XqyExpression):
     """A snapshot of an XQuery sequence's child expressions."""
 
     items: tuple[XqyExpression, ...]
@@ -410,7 +420,7 @@ class _Sequence(XqyExpression):
 
 
 @dataclass(frozen=True)
-class _FunctionCall(XqyExpression):
+class FunctionCall(XqyExpression):
     """A function call; ``None`` optional slots mean omitted arguments."""
 
     fn: str
@@ -418,6 +428,7 @@ class _FunctionCall(XqyExpression):
     optionals: tuple = ()
 
     def __post_init__(self):
+        """Snapshot arguments as expression objects."""
         object.__setattr__(self, "args", tuple(as_expr(arg) for arg in self.args))
         object.__setattr__(
             self,
@@ -502,11 +513,11 @@ class ModuleFunctionCall(XqyExpression):
         if _NCNAME.fullmatch(name) is None:
             message = "function name must be an XML NCName without a prefix"
             raise ValueError(message)
-        function = _FunctionCall(
+        function = FunctionCall(
             "xdmp:function",
-            (_FunctionCall("fn:QName", (namespace, name)), module_path),
+            (FunctionCall("fn:QName", (namespace, name)), module_path),
         )
-        self._call = _FunctionCall("xdmp:apply", (function, *args), optionals)
+        self._call = FunctionCall("xdmp:apply", (function, *args), optionals)
 
     def render(self, ctx: XqyCompilationContext) -> str:
         """Render native module invocation in the shared compilation context.
@@ -524,7 +535,7 @@ class ModuleFunctionCall(XqyExpression):
         return self._call.render(ctx)
 
 
-def xpath(source: str) -> XqyExpression:
+def xpath(source: str) -> Path:
     """Build a path validated before execution, including inside nested functions.
 
     Parameters
@@ -536,7 +547,7 @@ def xpath(source: str) -> XqyExpression:
 
     Returns
     -------
-    XqyExpression
+    Path
         A path expression, validated by cts:valid-extract-path before evaluation.
         Ordinary strings passed to builders remain externally bound values.
 
@@ -547,11 +558,11 @@ def xpath(source: str) -> XqyExpression:
     ValueError
         If source is empty or whitespace-only.
     """
-    return _Path(source)
+    return Path(source)
 
 
 @dataclass(frozen=True)
-class _Path(XqyExpression):
+class Path(XqyExpression):
     """A path string validated natively before any expression is executed."""
 
     source: str
@@ -580,7 +591,7 @@ class _Path(XqyExpression):
 
 
 @dataclass(frozen=True)
-class _NamespaceMap(XqyExpression):
+class NamespaceMap(XqyExpression):
     """Immutable namespace bindings for native path-reference arguments."""
 
     bindings: tuple[tuple[str, str], ...]
@@ -593,14 +604,22 @@ class _NamespaceMap(XqyExpression):
 def namespace_map(value):
     """Convert Python namespace mappings while preserving native map expressions."""
     if isinstance(value, Mapping):
-        return _NamespaceMap(tuple(namespace_bindings(value).items()))
+        return NamespaceMap(tuple(namespace_bindings(value).items()))
     return value
 
 
-def search_path(expression: str | XqyExpression) -> XqyExpression:
-    """Wrap path strings internally; existing composed expressions stay composable."""
+@overload
+def as_searchable_expression(expression: str) -> Path: ...
+
+
+@overload
+def as_searchable_expression(expression: XqyExpression) -> XqyExpression: ...
+
+
+def as_searchable_expression(expression: str | XqyExpression) -> XqyExpression:
+    """Convert a path string or retain an existing searchable expression."""
     if isinstance(expression, str):
-        return _Path(expression, "search")
+        return Path(expression, "search")
     if not isinstance(expression, XqyExpression):
         message = "searchable expressions require a path string or XqyExpression"
         raise TypeError(message)
@@ -612,42 +631,42 @@ def as_expr(value, *, cast: str | None = None) -> XqyExpression:
     if isinstance(value, XqyExpression):
         expr = value
     elif value is None:
-        expr = _Sequence(())
+        expr = XqySequence(())
     elif isinstance(value, (list, tuple)):
-        expr = _Sequence(tuple(as_expr(item) for item in value))
+        expr = XqySequence(tuple(as_expr(item) for item in value))
     else:
         expr = _scalar(value)
-    if isinstance(expr, _AtomicValue) and expr.cast == cast:
+    if isinstance(expr, AtomicValue) and expr.cast == cast:
         return expr
-    if isinstance(expr, _FunctionCall) and expr.fn == cast:
+    if isinstance(expr, FunctionCall) and expr.fn == cast:
         return expr
-    return _FunctionCall(cast, (expr,)) if cast else expr
+    return FunctionCall(cast, (expr,)) if cast else expr
 
 
-def _scalar(value) -> _AtomicValue:
+def _scalar(value) -> AtomicValue:
     """Encode scalars without losing precision in the JSON transport."""
     if isinstance(value, bool):
-        atom = _AtomicValue(value, "xs:boolean")
+        atom = AtomicValue(value, "xs:boolean")
     elif isinstance(value, int):
-        atom = _AtomicValue(str(value), "xs:integer")
+        atom = AtomicValue(str(value), "xs:integer")
     elif isinstance(value, float):
         lexical = (
             ("NaN" if math.isnan(value) else "INF" if value > 0 else "-INF")
             if not math.isfinite(value)
             else repr(value)
         )
-        atom = _AtomicValue(lexical, "xs:double")
+        atom = AtomicValue(lexical, "xs:double")
     elif isinstance(value, decimal.Decimal):
         if not value.is_finite():
             message = "xs:decimal requires a finite Decimal"
             raise ValueError(message)
-        atom = _AtomicValue(format(value, "f"), "xs:decimal")
+        atom = AtomicValue(format(value, "f"), "xs:decimal")
     elif isinstance(value, datetime.datetime):
-        atom = _AtomicValue(value.isoformat(), "xs:dateTime")
+        atom = AtomicValue(value.isoformat(), "xs:dateTime")
     elif isinstance(value, datetime.date):
-        atom = _AtomicValue(value.isoformat(), "xs:date")
+        atom = AtomicValue(value.isoformat(), "xs:date")
     elif isinstance(value, str):
-        atom = _AtomicValue(value)
+        atom = AtomicValue(value)
     else:
         message = f"unsupported XQuery value type: {type(value).__name__}"
         raise TypeError(message)

@@ -7,7 +7,7 @@ import pytest
 
 from mlclient import AsyncMLClient
 from mlclient.exceptions import MarkLogicError
-from mlclient.functions.xqy import fn, xs
+from mlclient.functions.xqy import cts, fn, xs
 from mlclient.models import BinaryDocument, JSONDocument, TextDocument
 from mlclient.services import AsyncCtsService
 
@@ -22,8 +22,8 @@ class TestAsyncCtsService:
     ):
         _, database, port = indexed_database
         async with AsyncMLClient(port=port) as ml:
-            cts = AsyncCtsService(ml.rest)
-            assert await cts.value_tuples(
+            service = AsyncCtsService(ml.rest)
+            assert await service.value_tuples(
                 cts.uri_reference(),
                 query=cts.document_query("/cts-test/a.xml"),
                 database=database,
@@ -50,14 +50,14 @@ class TestAsyncCtsService:
                 database=database,
             )
             async with AsyncMLClient(port=port) as async_ml:
-                cts = AsyncCtsService(async_ml.rest)
+                service = AsyncCtsService(async_ml.rest)
                 query = cts.document_query([*uris, "/cts-test/a.xml"])
-                hits = await cts.search(query=query, database=database)
+                hits = await service.search(query=query, database=database)
                 by_uri = {hit.source_uri: hit for hit in hits}
                 assert by_uri[uris[0]].content == "abcd"
                 assert by_uri[uris[1]].content == binary
                 assert by_uri[uris[2]].content["z"] is None
-                [text_hit] = await cts.search(
+                [text_hit] = await service.search(
                     query=cts.document_query(uris[2]),
                     xpath='text("a")',
                     database=database,
@@ -70,11 +70,11 @@ class TestAsyncCtsService:
     async def test_field_values_aggregates_and_map_boundary(self, indexed_database):
         (_, database, port) = indexed_database
         async with AsyncMLClient(port=port) as async_ml:
-            cts = AsyncCtsService(async_ml.rest)
-            [value] = await cts.field_values("price", index=2, database=database)
+            service = AsyncCtsService(async_ml.rest)
+            [value] = await service.field_values("price", index=2, database=database)
             assert value.value == Decimal("2.50")
             assert value.frequency == 1
-            assert await cts.sum_aggregate(
+            assert await service.sum_aggregate(
                 cts.field_reference("price"),
                 database=database,
             ) == [Decimal("3.75")]
@@ -86,7 +86,7 @@ class TestAsyncCtsService:
     ):
         _, database, port = indexed_database
         async with AsyncMLClient(port=port) as ml:
-            cts = AsyncCtsService(
+            service = AsyncCtsService(
                 ml.rest,
                 namespaces={"p": "https://monasticus.com/mlclient/examples/cts-test"},
             )
@@ -104,15 +104,15 @@ class TestAsyncCtsService:
                 "options": options,
                 "database": database,
             }
-            labels = await cts.search(**parameters, xpath="p:label")
+            labels = await service.search(**parameters, xpath="p:label")
             assert [label.content.text for label in labels] == ["beta", "alpha"]
-            [label] = await cts.search(**parameters, index=2, xpath="p:label")
+            [label] = await service.search(**parameters, index=2, xpath="p:label")
             assert label.content.text == "alpha"
-            [label] = await cts.search(**parameters, range=[2, 2], xpath="p:label")
+            [label] = await service.search(**parameters, range=[2, 2], xpath="p:label")
             assert label.content.text == "alpha"
-            assert await cts.search(**parameters, xpath="p:absent") == []
+            assert await service.search(**parameters, xpath="p:absent") == []
             with pytest.raises(MarkLogicError, match="MLCLIENT-INVALID-PATH"):
-                await cts.search(**parameters, xpath="p:label), fn:error() (: ")
+                await service.search(**parameters, xpath="p:label), fn:error() (: ")
 
     @pytest.mark.asyncio
     async def test_async_execution_uses_the_same_composable_expressions(
@@ -121,17 +121,17 @@ class TestAsyncCtsService:
     ):
         _, database, port = indexed_database
         async with AsyncMLClient(port=port) as ml:
-            cts = AsyncCtsService(ml.rest)
+            service = AsyncCtsService(ml.rest)
             query = cts.collection_query("cts-test")
-            uris = await cts.uris(query=query, database=database)
+            uris = await service.uris(query=query, database=database)
             assert (
-                await cts.uris(
+                await service.uris(
                     query=query,
                     index=fn.last(),
                     database=database,
                 )
             ) == [uris[-1]]
-            assert await cts.uris(query=query, index=100, database=database) == []
+            assert await service.uris(query=query, index=100, database=database) == []
             assert (
                 await ml.eval.expression(
                     fn.count(cts.search(query=query)),
@@ -144,7 +144,7 @@ class TestAsyncCtsService:
                 database=database,
             ) == date(2026, 1, 2)
             assert (
-                await AsyncCtsService(ml.rest).uris(
+                await service.uris(
                     query=query,
                     range=1,
                     database=database,
@@ -155,13 +155,13 @@ class TestAsyncCtsService:
     async def test_async_namespace_defaults_overrides_and_guard(self, indexed_database):
         _, database, port = indexed_database
         async with AsyncMLClient(port=port) as ml:
-            cts = AsyncCtsService(
+            service = AsyncCtsService(
                 ml.rest,
                 namespaces={"p": "https://monasticus.com/mlclient/examples/cts-test"},
             )
-            assert len(await cts.search("/p:item", database=database)) == 2
+            assert len(await service.search("/p:item", database=database)) == 2
             assert (
-                await cts.search(
+                await service.search(
                     "/p:item",
                     namespaces={
                         "p": "https://monasticus.com/mlclient/examples/missing",
@@ -181,4 +181,4 @@ class TestAsyncCtsService:
                 == 2
             )
             with pytest.raises(MarkLogicError, match="MLCLIENT-INVALID-PATH"):
-                await cts.search("/absent:item", database=database)
+                await service.search("/absent:item", database=database)

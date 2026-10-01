@@ -16,7 +16,7 @@
         <link rel="prev" href="../exceptions/WrongParametersError/">
       
       
-        <link rel="next" href="setup_logger/">
+        <link rel="next" href="MLLogHandler/">
       
       
         
@@ -340,6 +340,8 @@
       
         
       
+        
+      
     
     
     
@@ -535,6 +537,34 @@
     
   
     Async support
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../user/python/logging/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Logging to MarkLogic
   
 
     
@@ -6818,6 +6848,10 @@
       
         
       
+        
+      
+        
+      
     
     
     
@@ -6865,6 +6899,34 @@
   
   
     <li class="md-nav__item">
+      <a href="MLLogHandler/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    MLLogHandler
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="setup_logger/" class="md-nav__link">
         
   
@@ -6873,6 +6935,34 @@
     
   
     setup_logger
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="setup_ml_logger/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    setup_ml_logger
   
 
     
@@ -7446,7 +7536,15 @@
 
     <div class="doc doc-contents first">
 
-        <p>Opt-in logging configuration for MLClient applications.</p>
+        <p>Opt-in logging configuration and MarkLogic log forwarding for applications.</p>
+<p><code>setup_logger</code> configures MLClient's own diagnostic logging. <code>MLLogHandler</code>
+and <code>setup_ml_logger</code> let an application send its ordinary log records to a
+MarkLogic server's error log alongside its usual handlers.</p>
+<p>Which loggers reach the server is ordinary logging configuration: attach the
+handler to the loggers whose records should be forwarded (the root logger to
+forward everything, including third-party libraries, or named loggers to narrow
+it). The handler only suppresses the records its own MarkLogic client emits while
+forwarding, so attaching it to the root logger does not cause a feedback loop.</p>
 
 
 

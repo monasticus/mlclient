@@ -13,10 +13,10 @@
         <link rel="canonical" href="https://monasticus.github.io/mlclient/dev/reference/mlclient/logging/setup_logger/">
       
       
-        <link rel="prev" href="../">
+        <link rel="prev" href="../MLLogHandler/">
       
       
-        <link rel="next" href="../../jobs/">
+        <link rel="next" href="../setup_ml_logger/">
       
       
         
@@ -340,6 +340,8 @@
       
         
       
+        
+      
     
     
     
@@ -535,6 +537,34 @@
     
   
     Async support
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../user/python/logging/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Logging to MarkLogic
   
 
     
@@ -6818,6 +6848,10 @@
       
         
       
+        
+      
+        
+      
     
     
     
@@ -6857,6 +6891,34 @@
 
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../MLLogHandler/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    MLLogHandler
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
             
               
                 
@@ -6935,6 +6997,34 @@
   
 </nav>
       
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../setup_ml_logger/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    setup_ml_logger
+  
+
+    
+  </span>
+  
+  
+
+      </a>
     </li>
   
 
@@ -7507,15 +7597,15 @@
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>mlclient/logging.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-12">12</a></span>
-<span class="normal"><a href="#__codelineno-0-13">13</a></span>
-<span class="normal"><a href="#__codelineno-0-14">14</a></span>
-<span class="normal"><a href="#__codelineno-0-15">15</a></span>
-<span class="normal"><a href="#__codelineno-0-16">16</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-12" name="__codelineno-0-12"></a><span class="k">def</span><span class="w"> </span><span class="nf">setup_logger</span><span class="p">():</span>
-<a id="__codelineno-0-13" name="__codelineno-0-13"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Set up MLClient logging configuration.&quot;&quot;&quot;</span>
-<a id="__codelineno-0-14" name="__codelineno-0-14"></a>    <span class="k">with</span> <span class="n">utils</span><span class="o">.</span><span class="n">get_resource</span><span class="p">(</span><span class="s2">&quot;logging.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">config_file</span><span class="p">:</span>
-<a id="__codelineno-0-15" name="__codelineno-0-15"></a>        <span class="n">config</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="n">config_file</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
-<a id="__codelineno-0-16" name="__codelineno-0-16"></a>        <span class="n">logging</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">dictConfig</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-32">32</a></span>
+<span class="normal"><a href="#__codelineno-0-33">33</a></span>
+<span class="normal"><a href="#__codelineno-0-34">34</a></span>
+<span class="normal"><a href="#__codelineno-0-35">35</a></span>
+<span class="normal"><a href="#__codelineno-0-36">36</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-32" name="__codelineno-0-32"></a><span class="k">def</span><span class="w"> </span><span class="nf">setup_logger</span><span class="p">():</span>
+<a id="__codelineno-0-33" name="__codelineno-0-33"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Set up MLClient logging configuration.&quot;&quot;&quot;</span>
+<a id="__codelineno-0-34" name="__codelineno-0-34"></a>    <span class="k">with</span> <span class="n">utils</span><span class="o">.</span><span class="n">get_resource</span><span class="p">(</span><span class="s2">&quot;logging.yaml&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">config_file</span><span class="p">:</span>
+<a id="__codelineno-0-35" name="__codelineno-0-35"></a>        <span class="n">config</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="n">config_file</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+<a id="__codelineno-0-36" name="__codelineno-0-36"></a>        <span class="n">logging</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">dictConfig</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>

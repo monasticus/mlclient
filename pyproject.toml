@@ -45,6 +45,7 @@ dependencies = [
 
 [project.optional-dependencies]
 kerberos = ["pyspnego[kerberos]>=0.12.1,<0.13.0"]
+mcp = ["mcp>=1.26.0,<2.0.0"]
 
 [project.urls]
 Repository = "https://github.com/monasticus/mlclient"

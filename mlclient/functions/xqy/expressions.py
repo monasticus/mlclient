@@ -62,13 +62,50 @@ class XqyCompilationContext:
         )
 
     def path(self, source: str, kind: str) -> str:
-        """Bind a code path and register its role for validation diagnostics."""
+        """Register an executable path and return its guarded-body placeholder.
+
+        The returned external-variable reference is delimited with NUL characters.
+        Renderers must preserve that marker unchanged in the body passed to
+        :meth:`guard`. It distinguishes executable path source from ordinary bound
+        string values; ``guard`` consumes the marker before producing XQuery.
+
+        Parameters
+        ----------
+        source : str
+            Path source to validate and later insert into the guarded expression.
+        kind : str
+            Diagnostic role reported if native path validation fails.
+
+        Returns
+        -------
+        str
+            NUL-delimited reference to the external binding containing ``source``.
+        """
         ref = self.bind(source)
         self._paths.append((ref, kind))
         return f"\0{ref}\0"
 
     def guard(self, body: str) -> str:
-        """Validate code paths before compiling the complete execution source."""
+        """Consume path placeholders and build their validation boundary.
+
+        ``body`` must contain every placeholder returned by :meth:`path` unchanged.
+        Each marked reference is replaced with its registered path source, then the
+        complete body is bound as data and evaluated with ``xdmp:value`` only after
+        all registered paths pass native validation. With no registered paths, the
+        body is returned unchanged.
+
+        Parameters
+        ----------
+        body : str
+            Rendered expression containing zero or more NUL-delimited path
+            placeholders from this compilation context.
+
+        Returns
+        -------
+        str
+            Original body when no paths were registered; otherwise guarded XQuery
+            that validates paths before evaluating the reconstructed body.
+        """
         if not self._paths:
             return body
         paths = ",\n    ".join(

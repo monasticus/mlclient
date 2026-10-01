@@ -51,7 +51,7 @@ EXPECTED_EXPORTS = {
         "encode_multipart_mixed",
         "decode_multipart_mixed",
     ],
-    "mlclient.logging": ["setup_logger"],
+    "mlclient.logging": ["MLLogHandler", "setup_logger", "setup_ml_logger"],
     "mlclient.models": [
         "BinaryDocument",
         "Document",

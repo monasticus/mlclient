@@ -162,6 +162,9 @@ max-complexity = 10
     "PLR0913" # allow many arguments as they depend on ML REST resource
 ]
 "mlclient/_client.py" = ["PLR0913"]
+"mlclient/logging.py" = [
+    "PLR0913", # the handler mirrors the connection params it accepts
+]
 "mlclient/clients/*" = [
     "PLR0913", # allow many arguments as they depend on ML REST resource
 ]

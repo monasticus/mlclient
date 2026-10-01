@@ -8,7 +8,9 @@ from docs.examples.cluster_hosts import eval_on_each_host
 from docs.examples.collections import replace_collection
 from docs.examples.custom_api import AppClient, AsyncAppClient
 from docs.examples.database_counts import count_documents
+from docs.examples.ml_logging import build_logger
 from mlclient import MLClient, MLClientManager
+from mlclient.logging import MLLogHandler
 from tests.utils.ml_mockers import MLRespXMocker
 
 
@@ -134,6 +136,30 @@ async def test_cluster_hosts_recipe_routes_query_to_each_host():
         "node-1.example": "node-1.example",
         "node-2.example": "node-2.example",
     }
+
+
+@respx.mock
+def test_ml_logging_recipe_forwards_records_to_marklogic():
+    ml_mocker = MLRespXMocker(use_router=False)
+    ml_mocker.with_url("http://localhost:8000/v1/eval")
+    ml_mocker.with_request_content_type("application/x-www-form-urlencoded")
+    ml_mocker.with_response_code(200)
+    ml_mocker.with_response_body_part("string", "")
+    route = ml_mocker.mock_post()
+
+    logger = build_logger()
+    marklogic = next(h for h in logger.handlers if isinstance(h, MLLogHandler))
+    try:
+        logger.info("deploy finished")
+    finally:
+        marklogic.close()
+        logger.removeHandler(marklogic)
+
+    assert route.called
+    body = route.calls.last.request.content
+    assert b"xdmp%3Alog" in body
+    assert b"deploy+finished" in body
+    assert b"%22level%22%3A+%22info%22" in body
 
 
 @respx.mock

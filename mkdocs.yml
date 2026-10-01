@@ -80,6 +80,7 @@ nav:
       - Evaluate code: user/python/eval.md
       - Transactions: user/python/transactions.md
       - Async support: user/python/async.md
+      - Logging to MarkLogic: user/python/logging.md
       - Health and administration: user/python/health-and-administration.md
       - Recipes: recipes.md
   - Advanced:

@@ -14,6 +14,8 @@ def build_logger() -> logging.Logger:
     """
     logger = logging.getLogger("my_app")
     logger.setLevel(logging.INFO)
+    if logger.handlers:
+        return logger
 
     console = logging.StreamHandler()
     console.setFormatter(

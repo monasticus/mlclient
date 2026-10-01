@@ -16,13 +16,15 @@ from __future__ import annotations
 import logging.config
 import queue
 import threading
+from contextlib import ExitStack
 from copy import deepcopy
 from pathlib import Path
 
 import yaml
 
-from mlclient import MLClient, MLClientManager
 from mlclient import _utils as utils
+from mlclient._client import MLClient
+from mlclient._manager import MLClientManager
 from mlclient.connection import SSLConfig
 from mlclient.exceptions import WrongParametersError
 
@@ -164,7 +166,7 @@ class MLLogHandler(logging.Handler):
         """
         if self._worker is not None:
             self._queue.put(_SHUTDOWN)
-            self._worker.join(timeout=5)
+            self._worker.join()
         super().close()
 
     def _ensure_worker(self):
@@ -180,8 +182,15 @@ class MLLogHandler(logging.Handler):
 
     def _forward_records(self):
         """Own one client and forward queued records until shutdown."""
-        with self._create_client() as client:
+        with ExitStack() as stack:
+            client = None
             for record, message, level in iter(self._queue.get, _SHUTDOWN):
+                if client is None:
+                    try:
+                        client = stack.enter_context(self._create_client())
+                    except Exception:
+                        self.handleError(record)
+                        continue
                 self._send(client, record, message, level)
 
     def _send(

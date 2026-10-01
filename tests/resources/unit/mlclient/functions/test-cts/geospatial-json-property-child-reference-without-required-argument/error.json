@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "Cts.geospatial_json_property_child_reference() missing 2 required positional arguments: 'property' and 'child'"
+}

@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "Fn.timezone_from_date() missing 1 required positional argument: 'arg'"
+}

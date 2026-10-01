@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "Fn.day_from_date_time() missing 1 required positional argument: 'arg'"
+}

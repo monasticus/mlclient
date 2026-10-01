@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "Fn.function_available() missing 1 required positional argument: 'function_name'"
+}

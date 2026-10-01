@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "Fn.years_from_duration() missing 1 required positional argument: 'arg'"
+}

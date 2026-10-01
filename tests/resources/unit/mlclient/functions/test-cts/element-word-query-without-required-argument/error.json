@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "Cts.element_word_query() missing 2 required positional arguments: 'element_name' and 'text'"
+}

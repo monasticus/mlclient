@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "Fn.resolve_uri() missing 1 required positional argument: 'relative'"
+}

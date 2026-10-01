@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "Fn.zero_or_one() missing 1 required positional argument: 'arg'"
+}

@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "Cts.median() missing 1 required positional argument: 'arg'"
+}

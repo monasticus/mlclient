@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "Fn.doc_available() missing 1 required positional argument: 'uri'"
+}

@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "Fn.resolve_qname() missing 2 required positional arguments: 'qname' and 'element'"
+}

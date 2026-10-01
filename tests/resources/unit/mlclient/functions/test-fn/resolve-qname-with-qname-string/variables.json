@@ -1,0 +1,5 @@
+{
+  "v0": "p:item",
+  "v1": "/p:item",
+  "v2": "fn:resolve-QName($v0, /p:item)"
+}

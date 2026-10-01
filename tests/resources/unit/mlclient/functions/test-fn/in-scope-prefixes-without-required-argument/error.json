@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "Fn.in_scope_prefixes() missing 1 required positional argument: 'element'"
+}

@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "Fn.string_pad() missing 2 required positional arguments: 'pad_string' and 'pad_count'"
+}

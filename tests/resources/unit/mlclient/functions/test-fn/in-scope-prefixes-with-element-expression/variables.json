@@ -1,0 +1,4 @@
+{
+  "v0": "/p:item",
+  "v1": "fn:in-scope-prefixes(/p:item)"
+}

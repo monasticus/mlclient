@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "Cts.box() missing 4 required positional arguments: 'south', 'west', 'north', and 'east'"
+}

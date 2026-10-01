@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "Cts.count_aggregate() missing 1 required positional argument: 'range_index'"
+}

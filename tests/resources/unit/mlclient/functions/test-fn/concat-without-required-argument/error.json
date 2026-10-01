@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "Fn.concat() missing 1 required positional argument: 'parameter1'"
+}

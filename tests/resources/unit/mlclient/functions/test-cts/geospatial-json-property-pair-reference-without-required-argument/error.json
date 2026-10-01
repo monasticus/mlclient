@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "Cts.geospatial_json_property_pair_reference() missing 3 required positional arguments: 'property', 'lat', and 'long'"
+}

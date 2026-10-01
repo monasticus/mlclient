@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "Cts.highlight() missing 3 required positional arguments: 'node', 'query', and 'expr'"
+}

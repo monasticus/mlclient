@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "Cts.valid_document_patch_path() missing 1 required positional argument: 'string'"
+}

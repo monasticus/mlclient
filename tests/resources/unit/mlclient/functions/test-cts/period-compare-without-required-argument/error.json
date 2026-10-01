@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "Cts.period_compare() missing 3 required positional arguments: 'period_1', 'operator', and 'period_2'"
+}

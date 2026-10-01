@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "Fn.encode_for_uri() missing 1 required positional argument: 'uri_part'"
+}

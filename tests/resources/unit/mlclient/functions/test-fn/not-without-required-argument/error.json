@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "Fn.not_() missing 1 required positional argument: 'arg'"
+}

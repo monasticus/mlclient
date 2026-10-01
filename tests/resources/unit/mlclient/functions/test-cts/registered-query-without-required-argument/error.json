@@ -1,0 +1,4 @@
+{
+  "type": "TypeError",
+  "message": "Cts.registered_query() missing 1 required positional argument: 'ids'"
+}

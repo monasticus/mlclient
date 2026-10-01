@@ -102,6 +102,7 @@ markers = [
 ]
 
 [tool.coverage.report]
+precision = 2
 show_missing = true
 skip_covered = true
 exclude_lines = [

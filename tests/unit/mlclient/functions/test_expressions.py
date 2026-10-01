@@ -268,6 +268,7 @@ def test_xpath_rejects_invalid_source_inputs(source, error):
 def test_sequence_snapshot_and_nested_casts():
     values = ["first", [1, 2]]
     expr = xs.string(fn.count(values))
+    assert xs.string(expr) is expr
     original = expr.compile()
     values[1].append(3)
     values.append("last")
